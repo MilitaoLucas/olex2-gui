@@ -6,70 +6,90 @@
 <tr align = 'center' name=EDIT_CIF width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='34%'>
-$spy.MakeHoverButton('three-EditCifInfo','spy.ExtractCifInfo(True,True)>>spy.EditCifInfo()>>html.Update')
-  </td>
-  <td name=MERGE_CIF_INFO align='left' VALIGN='right' width='32%'>
-$spy.MakeHoverButton('three-Merge_Cif','spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update')
-  </td>
-  <td width='14%' align='right'>
-    HKL/RES
-  </td>
-  <td width='20%' align='right'>
-  <input type="combo"
-    name="SET_CIF_FINALISE"
-    label=""
-    width="94%"
-    items="Include [IUcr]<-Include;Exclude<-Exclude;Leave as is<-Ignore"
-    value="spy.GetParam('user.cif.finalise')"
-    height="GetVar('HtmlComboHeight')"
-    bgcolor="GetVar('HtmlTableBgColour')"
-    onchange="spy.SetParam('user.cif.finalise',html.GetValue('~name~'))"
-    readonly="true"
-  >
-  </td>
+$+
+  html.Snippet(
+    GetVar(default_link),
+    "value=Edit CIF Info",
+    "onclick=spy.ExtractCifInfo(True,True)>>spy.EditCifInfo()>>html.Update",
+    "td1=<td width='33%'>"
+  )
+$-
+$+
+  html.Snippet(
+    GetVar(default_link),
+    "value=Merge CIF",
+    "onclick=spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update",
+    "td1=<td width='33%'>"
+  )
+$-
+
+<td width='12%' align='right'>
+  HKL/RES
+</td>
+
+<td width='25%' align='right'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SET_CIF_FINALISE",
+    "items=Include [IUcr]<-Include;Exclude<-Exclude;Leave as is<-Ignore",
+    "value=spy.GetParam('user.cif.finalise')",
+    "readonly=True",
+    "onchange=spy.SetParam('user.cif.finalise',html.GetValue('~name~'))"
+    )
+  $-
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr align = 'center' name=EDIT_CIF width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-2;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td name=GET_CHECKCIF_REPORT align='left' VALIGN='center' width='34%'>
-$spy.MakeHoverButton('three-Checkcif_Report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
-  </td>
 
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='12%'>
-   <input
-      type='combo'
-      width="100%"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="GetVar('HtmlTableBgColour')"
-      name='SET_CHECKCIF_FORMAT'
-      value="spy.GetParam('user.cif.checkcif.format')"
-      items='html;pdf'
-      valign='center'
-      onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
-      readonly
-    >
-  </td>
+$+
+  html.Snippet(
+    GetVar(default_link),
+    "value=IUCr CheckCIf",
+    "onclick=spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))",
+    "td1=<td width='33%'>"
+  )
+$-
 
-  <td width='15%' align='right'>
-  Send FCF
-  </td>
 
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='5%'>
-    <input
-      type='checkbox'
-      bgcolor="GetVar('HtmlTableBgColour')"
-      name='SET_CHECKCIF_FCF'
-      checked='false'
-      right='false'
-    >
-  </td>
+<td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='12%'>
+$+
+  html.Snippet(
+    "gui/snippets/input-combo",
+    "name=SET_CHECKCIF_FORMAT",
+    "items=html;pdf",
+    "value=spy.GetParam('user.cif.checkcif.format')",
+    "readonly=True",
+    "onchange=spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
+  )
+$-
+</td>
 
-  <td name=REQUEST_CCDC_NUMBER align='right' width = '34%'>
-$spy.MakeHoverButton('three-CCDC_Number','spy.ccdc_submit()')
-  </td>
+<td width='15%' align='right'>
+Send FCF
+</td>
+
+<td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='5%'>
+$+
+  html.Snippet(
+    "gui/snippets/input-checkbox",
+    "name=SET_CHECKCIF_FCF",
+    "checked=False",
+  )
+$-
+</td>
+
+$+
+  html.Snippet(
+    GetVar(default_link),
+    "value=Request CCDC Number",
+    "onclick=spy.ccdc_submit()",
+    "td1=<td width='30%'>"
+  )
+$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 

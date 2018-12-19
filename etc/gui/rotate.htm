@@ -3,7 +3,7 @@
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ROTATE';help_ext=rotate;1 -->
   <td name=LABEL_ROTATE width='15%'>
-    <b>%Rotate%:</b>
+    <b>%Rotate%&thinsp;</b>
   </td>
   <td name=SPIN_ROTATION_X align='left'>
     $spy.MakeHoverButton('tiny-:x','rota 1 math.eval(html.GetValue(rx)*-1)')
@@ -57,50 +57,47 @@
 <!-- SECOND ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='AUTO_ROTATION';help_ext=Auto-Rotation;1 -->
   <td name=LABEL_AUTO_ROTATION width='15%'>
-    <b>%Auto%:</b>
+    <b>%Animate%&thinsp;</b>
   </td>
   <td name=CHECK_X>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="checkbox"
-      name = "x"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="x"
-      data = "0"
-      oncheck = "html.setdata(x, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(x, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-    >
-    </font>
+   $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=x",
+     "value=x",
+     "data=0",
+     "oncheck=html.setdata(x, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     "onuncheck=html.setdata(x, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     )
+    $-
   </td>
+
   <td name=CHECK_Y>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="checkbox"
-      name = "y"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="y"
-      data = "0"
-      oncheck = "html.setdata(y, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(y, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-    >
-    </font>
+   $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=y",
+     "value=y",
+     "data=0",
+     "oncheck=html.setdata(y, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     "onuncheck=html.setdata(y, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     )
+    $-
   </td>
   <td name=CHECK_Z>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="checkbox"
-      name = "z"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="z"
-      data = "0"
-      oncheck = "html.setdata(z, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(z, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
-    >
-    </font>
+   $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=z",
+     "value=z",
+     "data=0",
+     "oncheck=html.setdata(z, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     "onuncheck=html.setdata(z, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)",
+     )
+    $-
   </td>
+
+  <td name=LABEL_AUTO_ROTATION_SPEED width='15%'>
+    <b>Speed&thinsp;</b>
+  </td>
+
   <td name=SLIDER_SPEED align='center'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
