@@ -10,6 +10,7 @@
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
 #onuncheck="html.SetData(~name~,' ')"
+#custom=GetVar(custom_button)
 #td1=<td>
 #td2=</td>
 
@@ -33,6 +34,7 @@
             right="#right"
             manage="#manage"
             disabled="#disabled"
+            custom="#custom"
           >
         </font>
       <td align='left'>

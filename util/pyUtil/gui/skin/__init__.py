@@ -211,6 +211,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
   OV.SetVar('gui.watermark', OV.GetParam('gui.watermark').hexadecimal)
   OV.SetVar('gui.grey', OV.GetParam('gui.grey').hexadecimal)
+  OV.SetVar('gui.blue', OV.GetParam('gui.blue').hexadecimal)
   OV.SetVar('gui.green', OV.GetParam('gui.green').hexadecimal)
   OV.SetVar('gui.dark_green', OV.GetParam('gui.dark_green').hexadecimal)
   OV.SetVar('gui.green_text', OV.GetParam('gui.green_text').hexadecimal)
@@ -495,7 +496,7 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(scope="", colour=""):
+def change_bond_colour(scope="", colour="", display_style=""):
   if not colour:
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
@@ -534,7 +535,7 @@ def change_bond_colour(scope="", colour=""):
 
   olex.m("sel -u")
   olex.m("sel bonds where xbond.b.bai.z == -1")
-#  olx.Sel("-u")
+  olx.Sel("-u")
   olx.ShowH("b", True)
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
 

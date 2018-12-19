@@ -22,14 +22,23 @@ Legend
     </font>
 </td>
 
+$+
+  html.Snippet(GetVar(default_link),
+    "value=Default",
+    "onclick=default",
+    "td1=<td width='15%'>"
+  )
+$-
 
-  <td name=IMG_DEFAULT width=15% align='right'>
-$spy.MakeHoverButton('small-Default','default')
-&nbsp;
-$spy.MakeHoverButton('small-Light',"load style basedir()\etc\styles\light.glds'>>mask bonds 48>> spy.SetParam(user.bonds.mask,48)>>spy.SetParam(user.bonds.thickness,0.6)>>brad 0.6>>telp")
-</td>
+$+
+  html.Snippet(GetVar(default_link),
+    "value=Light",
+    "onclick=load style basedir()\etc\styles\uranus.glds",
+    "td1=<td width='15%'>"
+  )
+$-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 
 
 <!-- #include snippet-quick-atom-properties gui\snippets\snippet-quick-atom-properties.htm;scope=quick;1; -->

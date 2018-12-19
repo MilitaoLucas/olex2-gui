@@ -43,7 +43,7 @@ gui
     .type = colour
   green_text = #307125
     .type = colour
-  blue = #0033ff
+  blue = #0080ff
     .type = colour
   light_blue = #0080ff
     .type = colour
@@ -181,7 +181,7 @@ gui
     highlight_colour = #ff8800
       .type = colour
 
-    input_bg_colour = #eeeeee
+    input_bg_colour = #eeffff
       .type = colour
 
     input_height = 20
@@ -580,7 +580,7 @@ gui
         .type = int
       height = 19
         .type = int
-      width_adjust = 10
+      width_adjust = 8
         .type = int
       base_colour = #aaaaaa
         .type = colour

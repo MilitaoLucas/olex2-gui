@@ -3,7 +3,7 @@
 <!-- FIRST ROW -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PS_ROW_1; help_ext=ps_row_1;1; -->
-  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='22%' align='left'>
+  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='18%' align='left'>
     %Coloured Atoms%
   </td>
   <td name=IMAGE_PS_COLOUR_LINE width='5%' align='left'>
@@ -20,7 +20,7 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='22%' align='right'>
+  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='18%' align='right'>
     %Coloured Bonds%
   </td>
   <td name=IMAGE_PS_COLOUR_BOND width='5%' align='left'>
@@ -37,7 +37,7 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='22%' align='right'>
+  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='18%' align='right'>
     %Filled Atoms%
   </td>
   <td name=IMAGE_PS_COLOUR_FILL width='5%' align='left'>
@@ -57,7 +57,7 @@
   <td name=IMAGE_PS_PERSPECTIVE_LABEL width='10%' align='right'>
     %Pers%
   </td>
-  <td name=IMAGE_PS_PERSPECTIVE width='15%' align='left'>
+  <td name=IMAGE_PS_PERSPECTIVE width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -71,9 +71,16 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_BUTTON align='right'>
-$spy.MakeHoverButton('small-GO@ps','spy.gui.images.MakePostScriptImage()')
-  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Go!",
+    "name=PS_IMAGE_GO",
+    "bgcolor=GetVar(gui.blue)",
+    "fgcolor=#ffffff",
+    "td1=<td width='10%'>",
+    "onclick=spy.gui.images.MakePostScriptImage()",
+    )
+  $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW -->

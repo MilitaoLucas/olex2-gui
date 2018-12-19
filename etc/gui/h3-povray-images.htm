@@ -4,7 +4,17 @@
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PR_ROW_1; help_ext=pr_row_1;1; -->
-  <td name=IMAGE_PR_BUTTON align='right'>
-$spy.MakeHoverButton('small-Go@povray','spy.gui.images.MakePovRayImage()')
+  <td width='25%' align='right'>
+     Make POVRAY Image
   </td>
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Go!",
+    "name=POVRAY_IMAGE_GO",
+    "bgcolor=GetVar(gui.blue)",
+    "fgcolor=#ffffff",
+    "onclick=spy.gui.images.MakePovRayImage()",
+    )
+  $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

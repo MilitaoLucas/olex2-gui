@@ -9,8 +9,9 @@
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
 #onuncheck="html.SetData(~name~,' ')"
+#custom=$GetVar(custom_button)
 #target=
-
+#data=
 
 <font size="$GetVar('HtmlFontSizeControls')">
   <input
@@ -21,6 +22,7 @@
     name="#name"
     width="#width"
     value="#value"
+    data="#data"
     checked="#checked"
     onclick="#onclick"
     oncheck="#oncheck"
@@ -29,5 +31,7 @@
     manage="#manage"
     disabled="#disabled"
     target="#target"
+    custom="#custom"
+
   >
 </font>

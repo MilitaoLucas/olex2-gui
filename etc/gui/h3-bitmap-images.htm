@@ -40,10 +40,19 @@
     </font>
   </td>
 
-
-  <td width='10%' align='right'>
-$spy.MakeHoverButton('small-Go!@bitmap','spy.gui.images.MakeBitmapImage()')
+  <td width='24%' align='right'>
+     Make Image
   </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Go!",
+    "name=BM_IMAGE_GO",
+    "onclick=spy.gui.images.MakeBitmapImage()",
+    "bgcolor=GetVar(gui.blue)",
+    "fgcolor=#ffffff",
+    )
+  $-
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

@@ -8,9 +8,10 @@
 #onchangealways=false
 #setdefault=false
 #disabled=false
-#bgcolor='GetVar(HtmlInputBgColour)'
-#fgcolor='GetVar(HtmlFontColour)'
+#bgcolor=GetVar(HtmlInputBgColour)
+#fgcolor=GetVar(HtmlFontColour)
 #width='100%'
+#custom=GetVar(custom_button);arrow_width: 20
 #td1=<td>
 #td2=</td>
 
@@ -37,6 +38,7 @@
       manage="#manage"
       onreturn="#onreturn"
       onenter="#onenter"
+      custom="#custom"
     >
   </font>
 #td2

@@ -1,12 +1,14 @@
 #value=
-#width=100%
+#width='100%'
+#height=GetVar(HtmlComboHeight)
 #readonly=true
 #manage=false
 #onchangealways=false
 #setdefault=false
 #disabled=false
-#bgcolor=GetVar('HtmlInputBgColour')
-#fgcolor=GetVar('HtmlFontColour')
+#bgcolor=GetVar(HtmlInputBgColour)
+#fgcolor=GetVar(HtmlFontColour)
+#custom=GetVar(custom_button);arrow_width: 20
 #td1=<td>
 #td2=</td>
 
@@ -14,9 +16,9 @@
   <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="GetVar('HtmlComboHeight')"
+      height="#height"
       bgcolor="#bgcolor"
-      fgcolor="GetVar(HtmlFontColour)"
+      fgcolor="#fgcolor"
       valign="center"
       name="#name"
       width="#width"
@@ -31,6 +33,7 @@
       manage="#manage"
       onreturn="#onreturn"
       onenter="#onenter"
+      custom="#custom"
     >
   </font>
 #td2
