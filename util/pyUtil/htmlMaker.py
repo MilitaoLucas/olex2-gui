@@ -135,7 +135,7 @@ class GeneratedGuiMaker(object):
                'width':'33%'
                },
        'box2':{'varName':'_exptl_crystal_colour_modifier',
-               'items':"'?;.;light;dark;whiteish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'",
+               'items':"'?;.;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'",
                'width':'34%'
                },
        'box3':{'varName':'_exptl_crystal_colour_primary',
@@ -184,14 +184,14 @@ class GeneratedGuiMaker(object):
 
   def collectionMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
-    onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
+    onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.gui.report.publication.OnAddNameToAuthorList('~name~')'''
     subop = ["SUBMITTER", "OPERATOR"]
     list = []
 
     list.append(
       {
       'varName':'snum.report.submission_original_sample_id',
-       'itemName':'%Sample ID%',
+       'itemName':'%Sample ID% ',
       }
     )
 
