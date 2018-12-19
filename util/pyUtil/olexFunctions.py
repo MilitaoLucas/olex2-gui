@@ -295,10 +295,15 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def SetMaxPeaks(self, max_peaks):
+    auto_peaks = OV.GetVar('auto_q',None)
     try:
-      int(max_peaks)
+      max_peaks = int(max_peaks)
     except:
       return
+    
+    if auto_peaks != max_peaks:
+      OV.SetVar('manual_q_peak_override',max_peaks)
+      
     try:
       import programSettings
       old_value = self.GetParam('snum.refinement.max_peaks')

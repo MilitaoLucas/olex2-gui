@@ -48,6 +48,10 @@ routines requiring structure refinement
     .type = int
   }
 
+  experimental{
+      
+  }
+
 
   metadata{
     resolved_conflict_items = ""
@@ -317,6 +321,8 @@ routines requiring structure refinement
       .short_caption = Autotidy
       {
       max_peaks = False
+        .type = bool
+      set_q_peaks = True
         .type = bool
       assignQ = 2.0
         .type = float(value_min=0.0)
