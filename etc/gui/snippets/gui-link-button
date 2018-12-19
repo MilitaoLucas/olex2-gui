@@ -14,7 +14,7 @@
 #td2=</td>
 
 #td1
-  <font size="$GetVar('HtmlFontSizeControls')">
+  <font size="$GetVar('HtmlFontSizeControls')"><b>
     <input
       type="button"
       name="#name"
@@ -30,5 +30,5 @@
       disabled="#disabled"
       custom="GetVar(custom_button)"
     >
-  </font>
+  </b></font>
 #td2
