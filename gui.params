@@ -49,6 +49,8 @@ gui
     .type = colour
   grey = #555555
     .type = colour
+  action_colour = #0080ff
+    .type = colour
   light_grey = #dedede
     .type = colour
   watermark = #ababab
