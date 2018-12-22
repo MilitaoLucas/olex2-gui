@@ -210,6 +210,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
   OV.SetVar('gui.watermark', OV.GetParam('gui.watermark').hexadecimal)
+  OV.SetVar('gui.action_colour', OV.GetParam('gui.action_colour').hexadecimal)
   OV.SetVar('gui.grey', OV.GetParam('gui.grey').hexadecimal)
   OV.SetVar('gui.blue', OV.GetParam('gui.blue').hexadecimal)
   OV.SetVar('gui.green', OV.GetParam('gui.green').hexadecimal)
