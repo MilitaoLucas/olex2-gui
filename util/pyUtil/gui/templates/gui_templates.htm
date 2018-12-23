@@ -25,8 +25,8 @@ t:part_0_and_n{
   value="0 | %(part)s"
   width="100%%"
   onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
-  bgcolor="$GetVar('linkButton.bgcolor')"
-  fgcolor="$GetVar('linkButton.fgcolor')"
+  bgcolor="GetVar('linkButton.bgcolor')"
+  fgcolor="GetVar('linkButton.fgcolor')"
   custom="#custom"
 ></b>
 </font>
@@ -131,7 +131,8 @@ t:disorder_quicktool{
     items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
     bgcolor="$GetVar('HtmlInputBgColour')"
     onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
-    readonly='readonly'
+    readonly="True"
+    custom="GetVar(custom_button);arrow_width: 20"
   >
   </font>
   </td>
