@@ -99,6 +99,8 @@ class MultipleDataset:
       else:
         action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(index)
         highlight = olx.GetVar('linkButton.bgcolor')
+      name = name.replace("(", "_").replace(")", "_")
+      display = display.replace("(", "_").replace(")", "_")
       html += '''
     $+
       html.Snippet(GetVar(default_link),
