@@ -1025,6 +1025,8 @@ OV.registerFunction(sel_part,False,'gui.tools')
 
 def make_disorder_quicktools(scope='main', show_options=True):
   import olexex
+  if 'scope' in scope:
+    scope = scope.split('scope=')[1]
   parts = set(olexex.OlexRefinementModel().disorder_parts())
   select = OV.GetParam('user.parts.select')
   parts_display = ""
@@ -1039,6 +1041,7 @@ def make_disorder_quicktools(scope='main', show_options=True):
     else:
       d['part'] = item
     d['parts'] = item
+    d['scope'] = scope
     if select:
       sel = ">>sel part %s" %item
 
@@ -1260,7 +1263,6 @@ def GetRInfo(txt="",format='html'):
       R1 = OV.GetParam('snum.refinement.last_R1')
       wR2 = OV.GetParam('snum.refinement.last_wR2')
       if not R1:
-        tree = History.tree
         if tree.active_node is not None:
           R1 = tree.active_node.R1
         else:
