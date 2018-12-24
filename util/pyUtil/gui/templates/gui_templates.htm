@@ -21,7 +21,7 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="0 | %(part)s#scope"
+  name="0 | %(part)s@%(scope)s""
   value="0 | %(part)s"
   width="100%%"
   onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
@@ -45,7 +45,7 @@ t:disorder_quicktool_no_options{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="ALL#scope"
+  name="ALL@%(scope)s"
   value="All"
   width="100%%"
   onclick="showP>>focus"
@@ -68,7 +68,7 @@ t:disorder_quicktool{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="ALL#scope"
+  name="ALL@%(scope)s"
   value="All"
   width="100%%"
   onclick="showP>>focus"
