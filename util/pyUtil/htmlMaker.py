@@ -135,7 +135,7 @@ class GeneratedGuiMaker(object):
                'width':'33%'
                },
        'box2':{'varName':'_exptl_crystal_colour_modifier',
-               'items':"'?;.;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'",
+               'items':"'?;.;light;dark;whiteish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'",
                'width':'34%'
                },
        'box3':{'varName':'_exptl_crystal_colour_primary',
