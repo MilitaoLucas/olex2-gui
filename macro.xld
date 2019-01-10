@@ -150,6 +150,15 @@
   >
 >
 
+<zsgh help="Starts the Zurich Space Group Helper if installed on your machine"
+   <body
+     <args>
+     <cmd
+       <cmd1 "spy.zsgh.run(False)">
+     >
+   >
+ >
+
 <sgd help="Determine the Space Group"
   <body
     <args
