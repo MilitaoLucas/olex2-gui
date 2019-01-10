@@ -21,6 +21,7 @@ if olx.HasGUI().lower() == "true":
   scripts += ['Olex2CCDC',
               'Tutorials',
               'XPlain',
+              'ZSGH'
               ]
 
 
