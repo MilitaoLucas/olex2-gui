@@ -102,7 +102,7 @@ class Leverage(object):
   def calculate(self, threshold=0.01, max_reflections=5):
     from refinement import FullMatrixRefine
     dmb = FullMatrixRefine().run(build_only=True)
-    calculate(dmb, float(threshold), None, max_reflections=max_reflections)
+    calculate(dmb, float(threshold), None, max_reflections=max_reflections, output_to=None)
 
   def calculate_for(self, params, max_reflections=5, output_to=None):
     from refinement import FullMatrixRefine
@@ -172,11 +172,12 @@ def calculate(self, threshold, params, max_reflections, output_to):
   #self.weights = scla.block_diag([math.sqrt(x) for x in result.weights()])
   Z_mat = ds_mat #self.weights*ds_mat
   Zi_mat = scla.inv(Z_mat.T.dot(Z_mat))
-  Pp_mat = Z_mat.dot(Zi_mat).dot(Z_mat.T)
+  #https://stackoverflow.com/questions/14758283/is-there-a-numpy-scipy-dot-product-calculating-only-the-diagonal-entries-of-the
+  Pp_mat_d = (Z_mat.dot(Zi_mat) * Z_mat).sum(-1)
   t_mat = Z_mat.dot(Zi_mat)
   t_mat = t_mat**2
   for i in xrange(0, t_mat.shape[0]):
-    t_mat[i,:] /= (1+Pp_mat[i][i])
+    t_mat[i,:] /= (1+Pp_mat_d[i])
   if threshold is not None:
     maxT = np.amax(t_mat)
   else:
