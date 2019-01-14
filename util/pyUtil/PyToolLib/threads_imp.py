@@ -1,6 +1,7 @@
 import olex
 import olx
 import os
+import sys
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
@@ -53,11 +54,10 @@ class NewsImageRetrivalThread(ThreadEx):
         tag = OV.GetTag().split('-')[0]
         if self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
-          if not url.startswith("http"):
-            url = "http://" + url
           olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
+      sys.stdout.formatExceptionInfo()
       pass
     finally:
       NewsImageRetrivalThread.instance = None
@@ -86,8 +86,10 @@ class NewsImageRetrivalThread(ThreadEx):
             res_idx = idx
             break
 
-      while res_idx+1 < len(img_list):
+      for idx in xrange(0, len(img_list)):
         res_idx += 1
+        if res_idx >= len(img_list):
+          res_idx = -1
         res = img_list[res_idx]
         if "," in res:
           _ = res.split(',')
@@ -99,11 +101,13 @@ class NewsImageRetrivalThread(ThreadEx):
         else:
           img_url = res
           url = "www.olex2.org"
-  
+
         if tag:
           if tag.strip() != olx.olex2_tag:
             img_url = None
             continue
+          else:
+            break
         else:
           break
     else:
@@ -123,6 +127,8 @@ class NewsImageRetrivalThread(ThreadEx):
           if tag.strip() != olx.olex2_tag:
             img_url = None
             continue
+          else:
+            break
         else:
           break
 
