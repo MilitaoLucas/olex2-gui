@@ -708,7 +708,7 @@ def refineDataMaker():
 <tr><td>Refs(total)</td><td>6417</td><td>Refs(uni)</td><td>2803</td></tr>
 <tr><td>Refs(Fo > 4sig(Fo))</td><td>2366</td><td>R(int)</td><td>0.061</td></tr>
 <tr><td>R(sigma)</td><td>0.055</td><td>F000</td><td>364</td></tr>
-<tr><td>&rho;/g*mm<sup>-3</sup></td><td>1.574</td><td>&mu;/mm<sup>-1</sup></td><td>0.140</td></tr>
+<tr><td>&rho;/g*cm<sup>-3</sup></td><td>1.574</td><td>&mu;/mm<sup>-1</sup></td><td>0.140</td></tr>
 """
   OV.write_to_olex("refinedata.htm", txt)
   OV.UpdateHtml()
