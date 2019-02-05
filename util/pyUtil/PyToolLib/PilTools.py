@@ -359,18 +359,18 @@ class MatrixMaker(ImageTools):
       bgcolor = OV.GetParam('gui.html.highlight_colour').rgb
     if state == "off":
       bgcolor = '#dedede'
-    width = 100
+    width = int(round(((IT.skin_width) / 4),0)) - 14
     height = 55
     size = (width, height)
     font_name = "Arial"
-    font_size = 13
+    font_size = 11
     font = IT.registerFontInstance(font_name, font_size)
-    line_heigth = font_size -2
+    line_heigth = font_size + 2
     im = Image.new('RGBA', size, bgcolor)
     draw = ImageDraw.Draw(im)
     m = []
     i = 0
-    max_width = 0
+    max_width = int(round(width/3)) - 7
     for item in matrix:
       if i == 9: break
       try:
@@ -388,7 +388,6 @@ class MatrixMaker(ImageTools):
       if w > max_width:
         max_width = w
       i += 1
-    #if max_width < 15: max_width = 15
     i = 0
     for item in matrix:
       if i == 9: break
@@ -434,6 +433,8 @@ class MatrixMaker(ImageTools):
     line_heigth = font_size -2
     font_name = "Arial"
     font = IT.registerFontInstance(font_name, font_size)
+    w = 0
+
     for i in xrange(len(text_def)):
       item = text_def[i].get('txt',"")
       colour = text_def[i].get('font_colour',"")
