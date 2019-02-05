@@ -79,7 +79,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     l = 0
     self.twin_law_gui_txt = ""
     r_list=[]
-    self.run_backup_shelx()
+    self.filename = olx.FileName()
     
     model = self.xray_structure()
     threshold=0
@@ -171,12 +171,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.UpdateHtml()
     twin_laws_d = self.twin_laws_d
 #    self.make_gui()
-
-  def run_backup_shelx(self):
-    self.filename = olx.FileName()
-    olx.DelIns("TWIN")
-    olx.DelIns("BASF")
-    olx.File("%s/notwin.ins" %olx.FilePath())
 
   def run_twin_ref_shelx(self, law, basf):
     law_ins = ' '.join(str(i) for i in law[:9])
@@ -635,3 +629,50 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     
     
 OV.registerFunction(OlexCctbxTwinLaws)
+
+
+def on_twin_image_click(run_number):
+  global twin_laws_d
+  file_data = twin_laws_d[int(run_number)].get("ins_file")
+  wFile = open(olx.FileFull(), 'w')
+  wFile.writelines(file_data)
+  wFile.close()
+  olx.Atreap(olx.FileFull())
+  twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
+  twin_law_rnd = numpy.rint(twin_law)
+  if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
+    print "Using twin law: ", twin_law
+    # non integral twin law, need hklf5
+    OV.DelIns("TWIN")
+    OV.DelIns("HKLF")
+    OV.AddIns("HKLF 5")
+    hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
+    OV.HKLSrc(hklname)
+  OV.UpdateHtml()
+OV.registerFunction(on_twin_image_click)
+
+def reset_twin_law_img():
+  global twin_laws_d
+  olex_refinement_model = OV.GetRefinementModel(False)
+  if olex_refinement_model.has_key('twin'):
+    c = olex_refinement_model['twin']['matrix']
+    curr_law = []
+    for row in c:
+      for el in row:
+        curr_law.append(el)
+    for i in xrange(3):
+      curr_law.append(0.0)
+    curr_law = tuple(curr_law)
+
+  else:
+    curr_law = (1, 0, 0, 0, 1, 0, 0, 0, 1)
+  for law in twin_laws_d:
+    name = twin_laws_d[law]['name']
+    matrix = twin_laws_d[law]['law']
+    if curr_law == matrix:
+      OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
+    else:
+      OV.CopyVFSFile("%soff.png" %name, "%s.png" %name,2)
+  OV.UpdateHtml()
+OV.registerFunction(reset_twin_law_img)
+
