@@ -233,6 +233,7 @@ class OlexCctbxAdapter(object):
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
+        olx.current_reflections.hklf_code != self.hklf_code or
         (olx.current_reflections is not None and
           (hklf_matrix != olx.current_reflections.hklf_matrix
             or self.space_group != olx.current_space_group))):
@@ -867,51 +868,6 @@ def charge_flipping_loop(solving, verbose=True):
 
   if timing:
     print "Total Time: %.2f s" %(time.time() - t0)
-
-def on_twin_image_click(run_number):
-  global twin_laws_d
-  file_data = twin_laws_d[int(run_number)].get("ins_file")
-  wFile = open(olx.FileFull(), 'w')
-  wFile.writelines(file_data)
-  wFile.close()
-  olx.Atreap(olx.FileFull())
-  twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
-  twin_law_rnd = numpy.rint(twin_law)
-  if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
-    print "Using twin law: ", twin_law
-    # non integral twin law, need hklf5
-    OV.DelIns("TWIN")
-    OV.DelIns("HKLF")
-    OV.AddIns("HKLF 5")
-    hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
-    OV.HKLSrc(hklname)
-  OV.UpdateHtml()
-OV.registerFunction(on_twin_image_click)
-
-def reset_twin_law_img():
-  global twin_laws_d
-  olex_refinement_model = OV.GetRefinementModel(False)
-  if olex_refinement_model.has_key('twin'):
-    c = olex_refinement_model['twin']['matrix']
-    curr_law = []
-    for row in c:
-      for el in row:
-        curr_law.append(el)
-    for i in xrange(3):
-      curr_law.append(0.0)
-    curr_law = tuple(curr_law)
-
-  else:
-    curr_law = (1, 0, 0, 0, 1, 0, 0, 0, 1)
-  for law in twin_laws_d:
-    name = twin_laws_d[law]['name']
-    matrix = twin_laws_d[law]['law']
-    if curr_law == matrix:
-      OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
-    else:
-      OV.CopyVFSFile("%soff.png" %name, "%s.png" %name,2)
-  OV.UpdateHtml()
-OV.registerFunction(reset_twin_law_img)
 
 
 def write_grid_to_olex(grid):
