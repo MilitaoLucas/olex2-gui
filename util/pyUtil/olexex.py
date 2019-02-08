@@ -1502,42 +1502,47 @@ def getReportImageData(size='w400', imageName=None):
     return ""
   if "Dir()" in imagePath: # data/base/str
     imagePath = olex.f(imagePath)
-  if not os.path.exists(imagePath):
-    OV.SetParam(imageName, None)
-    return
-  IM = Image.open(imagePath)
-  oSize = IM.size
-  if size_type == "w":
-    if oSize[1] != size:
-      nHeight = int(oSize[1]*(size/oSize[0]))
-      nWidth = size
-      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
-  elif size_type == "h":
-    if oSize[0] != size:
-      nHeight = size
-      nWidth = int(oSize[0]*(size/oSize[1]))
-      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+    
+  if type(imagePath) != list:
+    imagePath_l = [imagePath]
+  else:
+    imagePath_l = imagePath
+    
+  html = ""
+  for imagePath in imagePath_l:
 
-  if make_border:
-    from ImageTools import ImageTools
-    IT = ImageTools()
-    draw = ImageDraw.Draw(IM)
-    fill = '#ababab'
-    width, height = IM.size
-    for i in xrange(make_border):
-      draw.line((0,0,width-1,0), fill = fill)
-      draw.line((0,height -1,width-1,height -1), fill = fill)
-      draw.line((0,0,0,height - 1), fill = fill)
-      draw.line((width -1,0,width-1,height -1), fill = fill)
-
-  out = StringIO.StringIO()
-  IM.save(out, "PNG")
-  data = base64.b64encode(out.getvalue())
-  html = '''
-<!--[if IE]><img width=%s src='%s'><![endif]-->
-<![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
-  '''%(int(size/2), os.path.split(imagePath)[1], int(size/2), data)
-
+    IM = Image.open(imagePath)
+    oSize = IM.size
+    if size_type == "w":
+      if oSize[1] != size:
+        nHeight = int(oSize[1]*(size/oSize[0]))
+        nWidth = size
+        IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+    elif size_type == "h":
+      if oSize[0] != size:
+        nHeight = size
+        nWidth = int(oSize[0]*(size/oSize[1]))
+        IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+  
+    if make_border:
+      from ImageTools import ImageTools
+      IT = ImageTools()
+      draw = ImageDraw.Draw(IM)
+      fill = '#ababab'
+      width, height = IM.size
+      for i in xrange(make_border):
+        draw.line((0,0,width-1,0), fill = fill)
+        draw.line((0,height -1,width-1,height -1), fill = fill)
+        draw.line((0,0,0,height - 1), fill = fill)
+        draw.line((width -1,0,width-1,height -1), fill = fill)
+  
+    out = StringIO.StringIO()
+    IM.save(out, "PNG")
+    data = base64.b64encode(out.getvalue())
+    html +='''
+  <!--[if IE]><img width=%s src='%s'><![endif]-->
+  <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
+    '''%(int(size/2), os.path.split(imagePath)[1], int(size/2), data)
   return html
 OV.registerFunction(getReportImageData)
 
@@ -1614,21 +1619,22 @@ def isPro():
 OV.registerFunction(isPro)
 
 def revert_to_original():
-  extensions = ['res','ins','cif']
-  for extension in extensions:
-    path = os.path.join(olx.StrDir(), 'originals', "%s.%s" %(OV.FileName(), extension))
-    if os.path.exists(path):
-      rFile = open(path,'rb')
-      txt = rFile.read()
-      rFile.close()
-      outpath = OV.file_ChangeExt(OV.FileFull(),'ins')
-      wFile = open(outpath,'wb')
-      wFile.write(txt)
-      wFile.close()
-      OV.AtReap(outpath)
-      print("Reverted to the original file %s" %path)
-      return
-  print("Could not revert to any original file!")
+  History.hist.revert_to_original()
+  #extensions = ['res','ins','cif']
+  #for extension in extensions:
+    #path = os.path.join(olx.StrDir(), 'originals', "%s.%s" %(OV.FileName(), extension))
+    #if os.path.exists(path):
+      #rFile = open(path,'rb')
+      #txt = rFile.read()
+      #rFile.close()
+      #outpath = OV.file_ChangeExt(OV.FileFull(),'ins')
+      #wFile = open(outpath,'wb')
+      #wFile.write(txt)
+      #wFile.close()
+      #OV.AtReap(outpath)
+      #print("Reverted to the original file %s" %path)
+  #return
+  #print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
 
 def fade_in(speed=0):
