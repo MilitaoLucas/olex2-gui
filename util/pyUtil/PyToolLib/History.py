@@ -89,32 +89,42 @@ class History(ArgumentParser):
     assert node is not None
     node.label = label
     self._make_history_bars()
+    
+  def revert_to_original(self):
+    node = tree._full_index.get(OV.FileName())
+    self.revert_history(node.children[0].name)
 
   def revert_history(self, node_index):
     node = tree._full_index.get(node_index)
     assert node is not None
-    if node.is_root:
-      return
+    #if node.is_root:
+      #return
     tree.active_node = node
     node.set_params()
     filepath = OV.FilePath()
     filename = OV.FileName()
-    resFile = "%s/%s.res" %(filepath, filename)
-    lstFile = "%s/%s.lst" %(filepath, filename)
+    resFile = os.sep.join([filepath, filename + ".res"])
+
     resFileData = decompressFile(node.res)
-    wFile = open(resFile, 'wb')
-    wFile.write(resFileData)
-    wFile.close()
+    with open(resFile, 'wb') as wFile:
+      wFile.write(resFileData)
+
+    hklFile = os.sep.join([filepath, filename + ".hkl"])
+    hklFileData = decompressFile(tree._full_index.get(filename).hklFiles.get(node.hkl))
+    with open(hklFile, 'wb') as wFile:
+      wFile.write(hklFileData)
+
+    lstFile = os.sep.join([filepath, filename + ".lst"])
     if node.lst is not None:
       lstFileData = decompressFile(node.lst)
-      wFile = open(lstFile, 'wb')
-      wFile.write(lstFileData)
-      wFile.close()
+      with open(lstFile, 'wb') as wFile:
+        wFile.write(lstFileData)
     else:
       ## remove lst file if no lst file was saved in history
       if os.path.exists(lstFile):
         os.remove(lstFile)
-    destination = "%s/%s.res" %(filepath, filename)
+
+    destination = resFile
     destination = "%s" %destination.strip('"').strip("'")
     sg = olex.f("sg()")
     olx.Atreap("%s" %destination)
