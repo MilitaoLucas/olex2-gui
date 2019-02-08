@@ -482,7 +482,7 @@ class RunRefinementPrg(RunPrg):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
     if self.params.snum.refinement.auto.assignQ:  
-      olexex.get_auto_q_peaks()
+      self.params.snum.refinement.max_peaks = olexex.get_auto_q_peaks()
     if olx.LSM().upper() == "CGLS" and olx.Ins("ACTA") != "n/a":
       olx.DelIns("ACTA")
 
