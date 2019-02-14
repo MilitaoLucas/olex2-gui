@@ -110,6 +110,7 @@ external_files = {
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'help.zip': ('olex-update', 'action:extract', 'action:delete'),
   'sample_data.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'FragmentDB.zip':('olex-update', 'action:extract', 'action:delete'), #HP 13/02/18
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   'splash.jpg': ('olex-install', 'olex-update'),
   #'splash.png': ('olex-install', 'olex-update'),
@@ -149,7 +150,8 @@ set(  ['olex2_fonts.zip',
        'textures.zip',
        'ac3.zip',
        'help.zip',
-       'sample_data.zip'
+       'sample_data.zip',
+       'FragmentDB.zip' #HP 13/02/18
       ]
    )
 win32_sse2_zip_files = \
