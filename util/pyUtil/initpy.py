@@ -212,7 +212,12 @@ def set_plugins_paths():
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
   from PluginTools import PluginTools
-  import AC4
+  try:
+    import AC4
+  except:
+    pass
+  import FragmentDB
+
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
