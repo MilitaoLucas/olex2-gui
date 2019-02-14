@@ -46,10 +46,6 @@ gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
 
-grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
-grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
-grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
-grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
 
 import subprocess
 
@@ -897,8 +893,6 @@ def refine_extinction():
   retVal = ""
   _ = olx.xf.rm.Exti()
 
-
-
   if "n/a" not in _.lower() and _ != '0':
     if "(" in _:
       _ = _.split('(')
@@ -964,7 +958,6 @@ def refine_extinction():
   #return retVal
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
-
 
 def hasDisorder():
   olx_atoms = olexex.OlexRefinementModel()
@@ -1210,6 +1203,11 @@ TemplateProvider = Templates()
 
 
 def get_diagnostics_colour(scope, item, val):
+  grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
+  grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
+  grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
+  grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
+
   try:
     val = float(val)
     if "shift" in item:
@@ -1248,103 +1246,88 @@ def get_diagnostics_colour(scope, item, val):
 
   return retVal
 
-
-def GetRInfo(txt="",format='html'):
+def GetRInfo(txt="",d_format='html'):
   if not OV.HasGUI():
     return
-
   t = "ERROR!"
-  use_history_for_R1_display = True
-  if use_history_for_R1_display:
-    if olx.IsFileType('cif') == "true":
-      R1 = olx.Cif('_refine_ls_R_factor_gt')
-      wR2 = olx.Cif('_refine_ls_wR_factor_ref')
-    else:
-      R1 = OV.GetParam('snum.refinement.last_R1')
-      wR2 = OV.GetParam('snum.refinement.last_wR2')
-      if not R1:
-        if tree.active_node is not None:
-          R1 = tree.active_node.R1
-        else:
-          R1 = 'n/a'
-    if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None):
-      return cache.get('GetRInfo', 'XXX')
 
-    cache['R1'] = R1
-    cache['wR2'] = wR2
-    font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
-    font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
-    if 'html' in format:
-      try:
-        R1 = float(R1)
-        col_R1 = gui.tools.get_diagnostics_colour('refinement','R1', R1)
-        R1 = "%.2f" %(R1*100)
-
-        wR2 = float(wR2)
-        col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
-        wR2 = "%.2f" %(wR2*100)
-
-
-        if 'report' in format:
-          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_wR2, R2)
-          t += r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_R1, R1)
-        else:
-          d = {
-            'R1':R1,
-            'wR2':wR2,
-            'font_size_R1':font_size_R1,
-            'font_size_wR2':font_size_wR2,
-            'font_size_label':str(int(font_size_wR2) - 1),
-            'font_colour_R1':col_R1,
-            'font_colour_wR2':col_wR2,
-            'grey':gui_grey
-          }
-          t =gett('R_factor_display')%d
-      except:
-        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
-      finally:
-        retVal = t
-
-    elif format == 'float':
-      try:
-        t = float(R1)
-      except:
-        t = 0
-      finally:
-        retVal = t
+  if olx.IsFileType('cif') == "true":
+    R1 = olx.Cif('_refine_ls_R_factor_gt')
+    wR2 = olx.Cif('_refine_ls_wR_factor_ref')
 
   else:
-    if txt:
-      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %txt
-    else:
-      try:
-        look = olex.f('IsVar(snum_refinement_last_R1)')
-        if look == "true":
-          R1 = olex.f('GetVar(snum_refinement_last_R1)')
-        else:
-          if olx.IsFileType('cif') == "true":
-            R1 = olx.Cif('_refine_ls_R_factor_gt')
+    R1 = OV.GetParam('snum.refinement.last_R1')
+    wR2 = OV.GetParam('snum.refinement.last_wR2')
+    if not R1 or R1 == 'n/a' or not wR2 or wR2 == 'n/a':
+      import History
+      _ = History.tree.active_node
+      if _ is not None:
+        R1 = _.R1
+        wR2 = _.wR2
+      else:
+        try:
+          look = olex.f('IsVar(snum_refinement_last_R1)')
+          if look == "true":
+            R1 = olex.f('GetVar(snum_refinement_last_R1)')
           else:
-            R1 = olex.f('Lst(R1)')
-      except:
-        R1 = 0
-      try:
-        R1 = float(R1)
-        col = GetRcolour(R1)
-        R1 = "%.2f" %(R1*100)
-        t = r"""
-<td colspan='1' align='center' rowspan='2'>
-  <font size='%s' color='%s'>
-    <b>%s%%</b>
-  </font>
-</td>
-""" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
-      except:
-        t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
-    retVal = t
+            if olx.IsFileType('cif') == "true":
+              R1 = olx.Cif('_refine_ls_R_factor_gt')
+            else:
+              R1 = olex.f('Lst(R1)')
+        except:
+          R1 = 'n/s'
+          return R1
+          
+  if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None) and cache.has_key('GetRInfo'):
+    if d_format == 'html':
+      return cache.get('GetRInfo', 'XXX')
+  return FormatRInfo(R1, wR2, d_format)
+OV.registerFunction(GetRInfo)
+  
+def FormatRInfo(R1, wR2,d_format):
+  cache['R1'] = R1
+  cache['wR2'] = wR2
+  font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
+  font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
+  if 'html' in d_format:
+    try:
+      R1 = float(R1)
+      col_R1 = gui.tools.get_diagnostics_colour('refinement','R1', R1)
+      R1 = "%.2f" %(R1*100)
+
+      wR2 = float(wR2)
+      col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
+      wR2 = "%.2f" %(wR2*100)
+
+      d = {
+        'R1':R1,
+        'wR2':wR2,
+        'font_size_R1':font_size_R1,
+        'font_size_wR2':font_size_wR2,
+        'font_size_label':str(int(font_size_wR2) - 1),
+        'font_colour_R1':col_R1,
+        'font_colour_wR2':col_wR2,
+        'grey':gui_grey
+      }
+
+      if 'report' in d_format:
+        t =gett('R_factor_display_report')%d
+      else:
+        t =gett('R_factor_display')%d
+    except:
+      t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
+    finally:
+      retVal = t
+
+  elif d_format == 'float':
+    try:
+      t = float(R1)
+    except:
+      t = 0
+    finally:
+      retVal = t
   cache['GetRInfo'] = retVal
   return retVal
-OV.registerFunction(GetRInfo)
 
 
 def launchWithoutConsole(command, args):
