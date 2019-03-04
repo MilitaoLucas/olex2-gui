@@ -28,6 +28,7 @@ except Exception, err:
 
 class GetHelp(object):
   def __init__(self):
+    import gui
     self.git_url = OV.GetParam('gui.help.git_url')
     language = olx.CurrentLanguage()
     self.language = "EN"
@@ -36,7 +37,8 @@ class GetHelp(object):
 
     olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
-    
+    p = os.sep.join([OV.BaseDir(),"util","pyUtil","gui","help", "help.zip"])
+    gui.zipToOlexVFS(p)
     ws = olx.GetWindowSize('gl')
     ws = ws.split(',')
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
@@ -68,11 +70,14 @@ class GetHelp(object):
   def get_help(self, quick=True):
     builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui'])
     all_help = os.sep.join([builtin_help_location, 'HELP_EN.htm'])
-    if os.path.exists(all_help):
-      rFile = open(all_help, 'rb').read()
-    else:
-      print "No help file installed"
-      return
+    base = os.sep.join(["util", "pyUtil", "gui", "help"])
+    rFile = gui.file_open(path=all_help, base=base)    
+    #if os.path.exists(all_help):
+      #rFile = gui.file_open(all_help).read()
+      ##rFile = open(all_help, 'rb').read()
+    #else:
+      #print "No help file installed"
+      #return
 #    OV.SetVar('All-Inline-Help', rFile)
     help_l = rFile.split("<h1>")
     for help in help_l:
