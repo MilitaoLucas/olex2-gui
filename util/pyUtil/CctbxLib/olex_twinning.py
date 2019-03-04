@@ -71,8 +71,15 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       OV.write_to_olex('twinning-result.htm', html, False)
       OV.UpdateHtml()
       return
+    print "Searching for Twin laws..."
+    olx.Cursor("Searching for Twin laws...")
+    self.run()
+    olx.Cursor()
+  
+  def run(self): 
     from PilTools import MatrixMaker
     global twin_laws_d
+    use_image = ""
     a = MatrixMaker()
     self.twin_laws_d = {}
     law_txt = ""
@@ -162,6 +169,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       html += '''
 <a href='%s' target='Apply this twin law'><zimg name='%s' border="0" src="%s"></a>&nbsp;
     ''' %(href, control, img_src)
+    if not use_image:
+      return
     html += "</td></tr>"
     OV.write_to_olex('twinning-result.htm', html, False)
     OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
