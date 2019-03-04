@@ -72,7 +72,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       OV.UpdateHtml()
       return
     print "Searching for Twin laws..."
-    olx.Cursor("Searching for Twin laws...")
+    olx.Cursor("busy", "Searching for Twin laws...")
     self.run()
     olx.Cursor()
   
