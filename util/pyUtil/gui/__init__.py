@@ -360,4 +360,48 @@ def escape_for_html(s):
   s = s.replace(")", "&#41;")
   return s
 olex.registerFunction(escape_for_html, False, "gui")
+
+def zipToOlexVFS(zip_path, base=None):
+  import OlexVFS
+  import zipfile
+  zf = zipfile.ZipFile(zip_path)
+  files = []
+  for item in zf.filelist:
+    filename = item.filename
+    ext = filename.split('.')[-1:][0]
+    fc = zf.open(filename,'r').read()
+    base_full = filename.split("/")[-1:][0]
+    base = base_full.split('.')[0]
+    #templates[base] = fc
+    OlexVFS.write_to_olex(filename, fc)
+olex.registerFunction(zipToOlexVFS, False, "tools")
+
+def file_open(path, base="", mode='r', readlines=False):
+  ''' Open a file, either from a real file, or, if that is not found, from the OlexVFS.
+      -- path: the FULL path to the file
+      -- base: the everything up to where the directory lives
+  '''
   
+  import OlexVFS
+  retVal = None  
+  if os.path.exists(path):
+    if readlines:
+      retVal = open(path, mode).readlines()
+    else:
+      retVal = open(path, mode).read()
+  else:
+    if base:
+      base = os.sep.join([OV.BaseDir(), base])
+    paths = [path, base]
+    common_prefix = os.path.commonprefix(paths)
+    if common_prefix in paths:
+      path = [os.path.relpath(path, common_prefix) for path in paths]
+      path = path[0].replace("\\","/")
+    try:
+      path = path.replace("\\","/")
+      retVal = OlexVFS.read_from_olex(path)
+    except:
+      print "Troll"
+  return retVal
+
+olex.registerFunction(file_open, False, "tools")
