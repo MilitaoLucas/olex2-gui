@@ -1150,36 +1150,55 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=debug, path=None, mask="*.*", marker='{-}'):
+  def get_template(self, name=None, force=debug, path=None, mask="*.*", marker='{-}', base=None, template_file=None):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
     -- if path is provided, then this location will also be searched.
     '''
+    if not name:
+      self.get_all_templates(path=path, mask=mask, marker=marker, template_file=template_file)
+      return
 
     retVal = self.templates.get(name, None)
     if not retVal or force:
-      self.get_all_templates(path=path, mask=mask, marker=marker)
+      self.get_all_templates(path=path, mask=mask, marker=marker, template_file=template_file)
       retVal = self.templates.get(name, None)
+    #if not retVal:
+      #import OlexVFS
+      #path = os.sep.join([path, name])
+      #path = path.replace("\\","/")
+      #retVal = OlexVFS.read_from_olex(path)
     if not retVal:
       return "Template <b>%s</b> has not been found."%name
     else:
       return retVal
 
-  def get_all_templates(self, path=None, mask="*.*", marker='{-}'):
+  def get_all_templates(self, template_file=None, path=None, mask="*.*", marker='{-}'):
     '''
     Parses the path for template files.
     '''
-    if not path:
-      path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
-    if path[-4:-3] != ".": #i.e. a specific template file has been provided
-      g = glob.glob("%s%s%s" %(path,os.sep,mask))
+
+    if template_file:
+      g = []
+      p = os.sep.join([path, template_file])
+      g.append(p)
+
     else:
-      g = [path]
-    _ = os.sep.join([OV.DataDir(), 'custom_templates.html'])
-    if os.path.exists(_): g.append(_)
+      if not path:
+        path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
+      if path[-4:-3] != ".": #i.e. a specific template file has been provided
+        g = glob.glob("%s%s%s" %(path,os.sep,mask))
+      else:
+        g = [path]
+      _ = os.sep.join([OV.DataDir(), 'custom_templates.html'])
+      if os.path.exists(_): g.append(_)
+    
+    
     for f_path in g:
-      fc = open(f_path, 'r').read()
+      fc = gui.file_open(f_path, mode='r', base=path)
+      if not fc:
+        continue
       if not self._extract_templates_from_text(fc,marker=marker):
         name = os.path.basename(os.path.normpath(f_path))
         self.templates[name] = fc
