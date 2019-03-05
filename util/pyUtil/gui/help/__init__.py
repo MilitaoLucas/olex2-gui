@@ -70,7 +70,7 @@ class GetHelp(object):
   def get_help(self, quick=True):
     builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui'])
     all_help = os.sep.join([builtin_help_location, 'HELP_EN.htm'])
-    base = os.sep.join(["util", "pyUtil", "gui", "help"])
+    base = os.sep.join([OV.BaseDir(), "util", "pyUtil", "gui", "help"])
     rFile = gui.file_open(path=all_help, base=base)    
     #if os.path.exists(all_help):
       #rFile = gui.file_open(all_help).read()
@@ -228,7 +228,9 @@ class GetHelp(object):
               pass
 
         if debug and help_type == 'help':
-          edit_help = gui.tools.TemplateProvider.get_template('edit_help')%md_path
+          p = p_path
+          gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', path=p, mask="*.html")
+          edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p)%md_path
           compile_help = gui.tools.TemplateProvider.get_template('compile_help')%md_path
           help = edit_help + compile_help + help
         OV.SetVar(var, help)
