@@ -190,3 +190,101 @@ t:R_factor_display{
   </tr>
 </table>
 }
+
+t:conflicts_top_section{
+<table cellpadding='1' collspacing='1' width='100%%'>
+  <tr>
+    <td>
+    <font size='4' color='%(gui_red)s'><b>There is conflicting information!</b></font></td>
+  </tr>
+  <tr>
+    <td>
+     <font size='2'><b>Some of your files contain conflicting information regarding
+     information that should go into your cif file. Please select the correct values by clicking on
+     the links below.</b></font>
+    </td>
+  </tr>
+<table>
+}
+
+t:conflicts_header_row_start{
+<table>
+  <tr>
+    <td width='30%%'><font color='white'><b></b></font>
+    </td>
+}
+
+
+t:conflicts_header_row_files{
+    <td bgcolor='%(head_colour)s'>
+      <table>
+        <tr>
+          <td width=75%%>
+            <font color='white'><b>%(basename)s</b></font>
+          </td>
+            $+
+    html.Snippet(GetVar(default_link),
+    "value=Use All",
+    "width=55",
+    "name=CONFLICT_%(no_of_file)s",
+    "bgcolor=GetVar(gui.action_colour)",
+    "fgcolor=#ffffff",
+    "onclick=spy.gui.metadata.resolve_all(%(no_of_file)s)",
+    "td1=<td align='right'>",
+    )
+            $-
+        </tr>      
+      </table>
+    </td>
+}
+
+
+t:conflicts_user_value_header{
+<td width='%(col_w)s%%' bgcolor='%(head_colour)s'><font color='white'><b>New User Value</b></font></td>
+}
+
+t:conflicts_conflict{
+    <td width='30%%' bgcolor='%(head_colour)s'><font color='white'><b>%(conflict)s
+    <br><a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%(conflict)s", ".")'>Unapplicable (.)</a>
+    &nbsp;<a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%(conflict)s", "?")'> Unknown (?)</a>
+    </b></font></td>
+}
+
+t:conflicts_display_1{
+          <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%(conflict)s", "%(val)s")'>
+          <font color='%(colour)s'>%(val)s</font></a>
+}
+
+t:conflicts_conflict_value{
+<td width='%(col_w)s%%' bgcolor='%(bg)s'>%(display)s </td>
+}
+
+t:conflicts_display_2{
+<table width="100%%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td width='80%%'>
+
+  $+
+    html.Snippet(
+    "gui/snippets/input-text",
+    "width='90%%'",
+    "name=%(conflict)s_edit",
+    "value=?",
+    )
+  $-    
+    </td>
+   
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Use",
+    "width=50",
+    "name=Conflict_%(conflict)s",
+    "bgcolor=GetVar(gui.action_colour)",
+    "fgcolor=#ffffff",
+    "onclick=spy.gui.metadata.add_resolved_conflict_item_to_phil('%(conflict)s', html.GetValue('~popup_name~.%(conflict)s_edit'))",
+    )
+  $-    
+  </tr>
+</table>
+}
+

@@ -7,6 +7,9 @@
 #disabled=false
 #onchange=
 #onleave=
+#password=False
+#bgcolor=GetVar(HtmlInputBgColour)
+#fgcolor=GetVar(HtmlFontColour)
 #td1=<td>
 #td2=</td>
 
@@ -15,8 +18,8 @@
 <input
   type="text"
   height="#height"
-  bgcolor="GetVar('HtmlInputBgColour')"
-  fgcolor="GetVar(HtmlFontColour)"
+  bgcolor="#bgcolor"
+  fgcolor="#fgcolor"
   valign="center"
   name="#name"
   width="#width"

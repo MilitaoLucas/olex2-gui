@@ -5,6 +5,8 @@ import os
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+import gui.tools
+gett = gui.tools.TemplateProvider.get_template
 
 def sources():
   import htmlTools
@@ -147,6 +149,13 @@ def conflicts(popout='auto', d=None):
   col_odd = "#dedede"
   conflict_count = 0
 
+  gui_dd = {'head_colour':head_colour,
+        'col_even':col_even,
+        'col_odd':"#dedede",
+        'action_colour':OV.GetParam('gui.action_colour').hexadecimal,
+        'gui_red':OV.GetParam('gui.red').hexadecimal,
+        }
+
   try:
     try:
       if not d:
@@ -172,49 +181,42 @@ def conflicts(popout='auto', d=None):
       number_of_files = len(d['sources'])
       txt = "<table width='100%'><tr><td>" #START: encase everything in a table
       colspan = number_of_files + 1
-      txt += '''
-<table cellpadding='1' collspacing='1' width='100%%'>
-  <tr>
-    <td colspan='%s'><font size='4' color='red'><b>There is conflicting information!</b></font></td>
-  </tr>
-  <tr>
-    <td colspan='%s'><font size='2'><b>Some of your files contain conflicting information regarding
-     information that should go into your cif file. Please select the correct values by clicking on
-     the links below.</b></font>
-    </td>
-  </tr>
-      ''' %(colspan,colspan)#TOP section
+      
+      ## CONFLICTS TOP SECTION ###########################
+      gui_d = {'colspan':colspan}
+      gui_d.update(gui_dd)
+      txt += gett('conflicts_top_section')%gui_d
+      ## END TOP SECTION #################################
 
-      txt += '''
+      txt += gett('conflicts_header_row_start')
 
-  <tr>
-    <td width='30%%'><font color='white'><b></b></font>
-    </td>''' #TR for Header Row
       col_w = int(70/(number_of_files+1))
       for i in xrange(number_of_files+1):
         if i == number_of_files:
-          txt += '''<td width='%i%%' bgcolor='%s'><font color='white'><b>User value</b></font></td>''' %(
-            col_w, head_colour)
+          txt += gett('conflicts_user_value_header')%gui_d
           break
         f = os.path.basename(d['sources'][i])
-        txt += '''
-    <td width='%i%%' bgcolor='%s'>
-      <font color='white'><b>%s</b></font><input type='button' value="Use all" onclick='spy.gui.metadata.resolve_all(%s)'>
-    </td>''' %(col_w, head_colour, f, i)
+
+        ## HEADER ROW FILES ##################################
+        gui_d = {'col_w':col_w, 'no_of_file':i, 'basename': f}
+        gui_d.update(gui_dd)
+        txt += gett('conflicts_header_row_files')%gui_d
+        ######################################################
+        
+        #%(col_w, head_colour, f, i, i)
       txt += '</tr>' #Close TR for Header Row
 
       for conflict in d:
-        txt += '''
-  <tr>'''#CONFLICT TR OPEN
+        ######################################
+        gui_d = {'conflict':conflict}
+        gui_d.update(gui_dd)
+        txt += "<tr>" #CONFLICT TR OPEN
         if not conflict.startswith("_"): continue
         if conflict in resolved: continue
         conflict_count += 1
         cif = str(OV.get_cif_item(conflict)).strip("'")
-        txt += '''
-    <td width='30%%' bgcolor='%s'><font color='white'><b>%s
-    <br><a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", ".")'>Unapplicable (.)</a>
-    &nbsp;<a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "?")'> Unknown (?)</a>
-    </b></font></td>''' %(head_colour, conflict, conflict, conflict)
+        txt += gett('conflicts_conflict')%gui_d
+
         for s, source in enumerate(d['sources']):
           if (s%2) == 0:
             bg = col_even
@@ -224,26 +226,33 @@ def conflicts(popout='auto', d=None):
           val = d[conflict].get(source,'n/a')
           if not val:
             display = "--"
-          elif cif == val:
-            display = '''
-            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "%s")'>
-            <font color='green'>%s</font></a>''' %(conflict, val, val)
-          else:
-            display = '''
-            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "%s")'>
-            <font color='red'>%s</font></a>''' %(conflict, val, val)
-          #TD conflict value
-          txt += '''<td width='%i%%' bgcolor='%s'>%s </td>''' %(col_w, bg, display)
-        # user resolved value
-        display = '''
-<table width="100%%" cellpadding="0" cellspacing="0"><tr><td>
-  <input type="text" name="%s_edit" value="?" width="100%%"></td></tr><tr><td>
-  <input type="button" value="Use" width="100%%"
-   onclick="spy.gui.metadata.add_resolved_conflict_item_to_phil('%s', html.GetValue('~popup_name~.%s_edit'))">
-</td></tr></table>
-''' %(conflict, conflict, conflict)
-        txt += '''<td width='%i%%' bgcolor='%s'>%s </td>''' %(col_w, bg, display)
 
+            
+          elif cif == val:
+            colour = OV.GetParam('gui.green').hexadecimal
+          else:
+            colour = OV.GetParam('gui.red').hexadecimal
+
+          ###########################################
+          gui_d = {'conflict':conflict,'val':val, 'colour':colour, 'bg':bg, 'col_w':col_w}
+          gui_d.update(gui_dd)
+          
+          display = gett('conflicts_display_1')%gui_d
+          ############################################
+          gui_d['display'] = display
+            
+          #TD conflict value
+          txt += gett('conflicts_conflict_value')%gui_d
+        # user resolved value
+        
+        
+        ################################################################
+        gui_d = {'conflict':conflict,'val':val, 'colour':colour, 'bg':bg, 'col_w':col_w}
+        gui_d.update(gui_dd)
+        display = gett('conflicts_display_2')%gui_d
+        ##################################################################
+        gui_d['display'] = display
+        txt += gett('conflicts_conflict_value')%gui_d
         txt += '''</tr>''' #CONFLICT TR CLOSE
       txt += '''</td></tr></table>'''
 
