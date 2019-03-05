@@ -391,8 +391,7 @@ def file_open(path, base="", mode='r', readlines=False):
       retVal = open(path, mode).read()
   else:
     if base:
-      base = os.sep.join([OV.BaseDir(), base])
-    paths = [path, base]
+      paths = [path, base]
     common_prefix = os.path.commonprefix(paths)
     if common_prefix in paths:
       path = [os.path.relpath(path, common_prefix) for path in paths]
