@@ -988,12 +988,12 @@ class ExtractCifInfo(CifTools):
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length',
-                    '_audit',
+                    '_audit', # This is only here because of STOE files
                     '_cell_angle',
                     '_cell_volume',
                     '_cell_formula',
                     '_cell_oxdiff',
-                    '_symmetry',
+                    # '_symmetry', For some reason, we can't remove loops in del cif_block[item] below.
                     '_exptl_absorpt_coefficient_mu',
                     '_audit_creation',
                     '_diffrn_reflns_',
