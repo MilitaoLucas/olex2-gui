@@ -710,28 +710,18 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading pcf file %s" %p
 
-    # Oxford Diffraction data collection CIF
-    p,pp  = self.sort_out_path(path, "cif_od")
-    sidefile = False
-    if p:
-      try:
-        if sidefile:
-          ##Adding as sidefile
-          ciflist = OV.GetCifMergeFilesList()
-          if p not in ciflist and os.path.exists(p):
-            ## Add this file to list of merged files
-            import gui
-            gui.report.publication.add_cif_to_merge_list.im_func(p)
-
-        else:
-          ##Previously this was added to the metacif
+    manu_cifs = ['cif_od', 'crystal_clear', 'cfx', 'cfx_LANA']
+    for manu_cif in manu_cifs:
+      p,pp  = self.sort_out_path(path, manu_cif)
+      if p:
+        try:
           with open(p, 'rb') as f:
-            cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-            self.exclude_cif_items(cif_od)
-          self.update_cif_block(cif_od, force=False)
-          all_sources_d[p] = cif_od
-      except:
-        print "Error reading Oxford Diffraction CIF %s" %p
+            cif_s = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            self.exclude_cif_items(cif_s)
+            self.update_cif_block(cif_s, force=False)
+            all_sources_d[p] = cif_s
+        except:
+          print "Error reading %s CIF %s" %(manu_cif, p)
 
 
     # Rigaku data collection CIF
@@ -998,6 +988,7 @@ class ExtractCifInfo(CifTools):
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length',
+                    '_audit',
                     '_cell_angle',
                     '_cell_volume',
                     '_cell_formula',
@@ -1143,6 +1134,12 @@ If more than one file is present, the path of the most recent file is returned b
     elif tool == "cif_od":
       name = OV.FileName()
       extension = ".cif_od"
+    elif tool == "cfx":
+      name = OV.FileName()
+      extension = ".cfx"
+    elif tool == "cfx_LANA":
+      name = OV.FileName()
+      extension = ".cfx_LANA"
     elif tool == "crystal_clear":
       name = "CrystalClear"
       extension = ".cif"
