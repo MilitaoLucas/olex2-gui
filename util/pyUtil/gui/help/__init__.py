@@ -5,8 +5,8 @@ import glob
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam("olex2.debug", False))
-
-
+have_help = True
+ 
 import cPickle as pickle
 
 import olex
@@ -38,7 +38,8 @@ class GetHelp(object):
     olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
     p = os.sep.join([OV.BaseDir(),"util","pyUtil","gui","help", "help.zip"])
-    gui.zipToOlexVFS(p)
+    if os.path.exists(p):
+      gui.zipToOlexVFS(p)
     ws = olx.GetWindowSize('gl')
     ws = ws.split(',')
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
@@ -71,7 +72,9 @@ class GetHelp(object):
     builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui'])
     all_help = os.sep.join([builtin_help_location, 'HELP_EN.htm'])
     base = os.sep.join([OV.BaseDir(), "util", "pyUtil", "gui", "help"])
-    rFile = gui.file_open(path=all_help, base=base)    
+    rFile = gui.file_open(path=all_help, base=base)
+    if not rFile:
+      return
     #if os.path.exists(all_help):
       #rFile = gui.file_open(all_help).read()
       ##rFile = open(all_help, 'rb').read()
@@ -240,8 +243,8 @@ class GetHelp(object):
     #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
 
 
-
-gh = GetHelp()
+if have_help:
+  gh = GetHelp()
 
 from htmlTools import *
 def make_help_box(args):
@@ -592,5 +595,6 @@ class AutoDemoTemp(AutoDemo):
     rFile.close()
     self.items = self.items + gui.tools.TemplateProvider.get_template('all_tutorials_end').split("\n")
 
-AutoDemoTemp_instance = AutoDemoTemp()
+if have_help:
+  AutoDemoTemp_instance = AutoDemoTemp()
 
