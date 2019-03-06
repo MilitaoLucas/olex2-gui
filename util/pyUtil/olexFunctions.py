@@ -781,6 +781,12 @@ class OlexFunctions(inheritFunctions):
       val = "'%s'" %val
       olex.m('storeparam %s %s %s' %(var, val, save))
 
+  def isInterruptSet(self):
+    if OV.GetVar('stop_current_process'):
+      OV.SetVar('stop_current_process', False)
+      return True
+    return False
+
   def GetCompilationInfo(self):
     return olx.GetCompilationInfo()
 

@@ -308,6 +308,9 @@ class olex2_normal_eqns(get_parent()):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     olx.xf.EndUpdate()
+    olx.Refresh()
+    if OV.isInterruptSet():
+      raise RuntimeError('external_interrupt')
 
 
 class FullMatrixRefine(OlexCctbxAdapter):
@@ -466,21 +469,33 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.print_table_header()
       self.print_table_header(self.log)
 
-      if(method=='Levenberg-Marquardt'):
-        self.cycles = iterations(self.normal_eqns,
-                               n_max_iterations=self.max_cycles,
-                               track_all=True,
-                               gradient_threshold=1e-8,
-                               step_threshold=1e-8)
-      else:
-        self.cycles = iterations(self.normal_eqns,
-                               n_max_iterations=self.max_cycles,
-                               track_all=True,
-                               damping_value=damping[0],
-                               max_shift_over_esd=damping[1],
-                               convergence_as_shift_over_esd=1e-3,
-                               gradient_threshold=1e-8,
-                               step_threshold=1e-8)
+      class refinementWrapper(iterations):
+        def __init__(self, parent, *args, **kwds):
+          parent.cycles = self
+          super(iterations, self).__init__(*args, **kwds)
+
+      try:
+        if(method=='Levenberg-Marquardt'):
+          refinementWrapper(self, self.normal_eqns,
+              n_max_iterations=self.max_cycles,
+              track_all=True,
+              gradient_threshold=1e-8,
+              step_threshold=1e-8)
+        else:
+          refinementWrapper(self, self.normal_eqns,
+              n_max_iterations=self.max_cycles,
+              track_all=True,
+              damping_value=damping[0],
+              max_shift_over_esd=damping[1],
+              convergence_as_shift_over_esd=1e-5,
+              gradient_threshold=1e-8,
+              step_threshold=1e-8)
+
+      except RuntimeError, e:
+        if str(e) == 'external_interrupt':
+          print "Refinement interrupted"
+        else:
+          raise e
 
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
