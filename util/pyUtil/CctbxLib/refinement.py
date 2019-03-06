@@ -449,7 +449,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
       log=self.log,
-      #may_parallelise=True
+      may_parallelise=True
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -567,7 +567,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print >> f, cif
         f.close()
         if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
-          OV.CifMerge(None, True, False)
+          olx.CifMerge(f=True, u=True)
 
       self.output_fcf()
       new_weighting = weighting.optimise_parameters(
