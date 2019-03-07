@@ -329,8 +329,7 @@ OV.registerFunction(checkErrLogFile,True,'gui.tools')
 
 def checkPlaton():
   retVal = '''
-  <a href='platon' target='Open Platon'>
-  <zimg border='0' src='toolbar-platon.png'></a>
+  $spy.MakeHoverButton('toolbar-platon', "platon")
   '''
   try:
     if olx.GetVar("HavePlaton") == "True":
