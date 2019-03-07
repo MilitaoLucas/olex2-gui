@@ -90,7 +90,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print "Available threads: %s" %ext.build_normal_equations.available_threads
     ext.build_normal_equations.available_threads = 20
     print "Available threads: %s" %ext.build_normal_equations.available_threads
-
+    OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
