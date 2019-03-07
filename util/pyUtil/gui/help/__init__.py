@@ -590,9 +590,9 @@ class AutoDemoTemp(AutoDemo):
     self.current_tutorial_file = _
     if debug:
       print "opening %s" %self.current_tutorial_file
-    rFile = open(_,'r')
-    self.items = self.items + rFile.readlines()
-    rFile.close()
+    rFile = gui.file_open(_,mode='r',base=p_path)
+    l = rFile.split("\n")
+    self.items = self.items + l
     self.items = self.items + gui.tools.TemplateProvider.get_template('all_tutorials_end').split("\n")
 
 if have_help:
