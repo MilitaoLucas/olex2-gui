@@ -432,7 +432,8 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
 
     control = "IMG_%s" %name.upper()
     if debug:
-      print "  EB1(%s): %.5f" %(control,(time.time() - t1))
+      pass
+      #print "  EB1(%s): %.5f" %(control,(time.time() - t1))
     if olx.fs.Exists("%s.png" %img_name) != "true":
       TI.make_element_buttons(symbol)
 
@@ -1196,6 +1197,11 @@ class Templates():
     
     
     for f_path in g:
+      include = ["txt", "html", "htm"]
+      ext = f_path.split(".")[-1:][0]
+      if ext:
+        if ext not in include:
+          continue
       fc = gui.file_open(f_path, mode='r', base=path)
       if not fc:
         continue
@@ -1372,9 +1378,36 @@ OV.registerFunction(resize_pdf,False,'gui.tools')
 gett = TemplateProvider.get_template
 
 
+
 def scrub(cmd):
   log = gui.tools.LogListen()
   olex.m(cmd)
   return log.endListen()
 
 from GetMaskInfo import get_mask_info
+
+
+def hklf_5_to_4(filename):
+  '''
+  Creates a hklf4 file corresponding to the first component of the structure
+  
+  This function will only retrieve component 1.
+  
+  Need to seperate double-lines based on basf which is harder - making seperate function (Laura Midgely)
+  '''
+  
+  hklf4name="%s_hklf4.hkl"%filename
+  hklf4=open(hklf4name,"w")
+  #put in a thing to note 'you seem to have positive numbers which correlate to things not in the first component - maybe try with basfs'.
+  base_file=open("%s.hkl"%filename,"r")
+  for line in base_file:
+    line=line.rstrip()
+    right=line[-2:]
+    if (right==" 1" or right=="-1"):
+      hklf4.write(line[:-2]+"\n")
+  base_file.close()
+  hklf4.close()
+  print "done. HKLF4 base file at %s"%hklf4name
+  return
+
+OV.registerFunction(hklf_5_to_4, False, 'tools')
