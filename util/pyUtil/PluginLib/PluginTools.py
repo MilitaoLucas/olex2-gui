@@ -22,7 +22,7 @@ class PluginTools(object):
     p = os.sep.join([self.p_path, self.p_htm + ".htm"])
     if OV.HasGUI():
       try:
-        t = gui.file_open(p, 'r').read()
+        t = gui.file_open(p, 'r')
         OlexVFS.write_to_olex(p, t)
         olx.html.Update()
       except:
