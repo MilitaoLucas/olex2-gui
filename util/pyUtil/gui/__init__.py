@@ -399,7 +399,10 @@ def file_open(path, base="", mode='r', readlines=False):
       path = path.replace("\\","/")
       retVal = OlexVFS.read_from_olex(path)
     except:
-      print "Troll"
+      print "gui.file_open malfunctioned with getting %s" %path
+      
+    if readlines:
+      retVal = retVal.split("\n")
   return retVal
 
 olex.registerFunction(file_open, False, "tools")
