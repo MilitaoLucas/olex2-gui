@@ -19,11 +19,14 @@ class PluginTools(object):
       olx.InstalledPlugins.add(self)
 
   def endKickstarter(self):
-    _ = '%s/%s.htm' %(self.p_path, self.p_htm)
-    t = open(_, 'r').read()
-    OlexVFS.write_to_olex(_, t)
+    p = os.sep.join([self.p_path, self.p_htm + ".htm"])
     if OV.HasGUI():
-      olx.html.Update()
+      try:
+        t = gui.file_open(p, 'r').read()
+        OlexVFS.write_to_olex(p, t)
+        olx.html.Update()
+      except:
+        print("No GUI available")
 
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
