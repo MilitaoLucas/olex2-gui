@@ -248,7 +248,6 @@ class reflections(object):
     return rv
 
 
-
 class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):

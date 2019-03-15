@@ -992,3 +992,19 @@ def calcsolv(solvent_radius=None, grid_step=None):
 
 OV.registerFunction(calcsolv)
 
+def generete_sf_table():
+  class SF_TableGenerator(OlexCctbxAdapter):
+    def __init__(self):
+      OlexCctbxAdapter.__init__(self)
+      self.generate()
+
+    def generate(self):
+      from smtbx.structure_factors import direct
+      table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
+      direct.generate_isc_table_file(table_file_name,
+                                     self.xray_structure(),
+                                     self.observations.indices)
+  SF_TableGenerator()
+
+OV.registerFunction(generete_sf_table, False, "test")
+

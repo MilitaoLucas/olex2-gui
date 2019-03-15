@@ -3,6 +3,7 @@ import sys
 
 from scitbx.array_family import flex
 from smtbx.refinement import least_squares
+from smtbx.structure_factors import direct
 from cctbx import adptbx
 
 from olexFunctions import OlexFunctions
@@ -12,19 +13,18 @@ import olx
 import olex
 import olex_core
 
-
-def get_parent():
-  try:
-    return least_squares.crystallographic_ls_class()
-  except:
-    return least_squares.crystallographic_ls
-
-class normal_eqns(get_parent()):
+class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
 
-  def __init__(self, observations, reparametrisation, olx_atoms, **kwds):
+  def __init__(self, observations, reparametrisation, olx_atoms,
+               table_file_name=None, **kwds):
     super(normal_eqns, self).__init__(
-      observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
+      observations, reparametrisation, initial_scale_factor=OV.GetOSF(),
+       **kwds)
+    if table_file_name:
+      self.one_h_linearisation = direct.f_calc_modulus_squared(
+        self.xray_structure, table_file_name=table_file_name)
+
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 

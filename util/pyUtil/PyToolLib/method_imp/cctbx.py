@@ -23,21 +23,29 @@ class Method_cctbx_refinement(Method_refinement):
 
   def do_run(self, RunPrgObject):
     import time
+    import os
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
 
     timer = debug = bool(OV.GetParam('olex2.debug',False))
     self.failure = True
     print '\n+++ STARTING olex2.refine +++++ %s' %self.version
+    table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
+    if not os.path.exists(table_file_name):
+      table_file_name = None
+    else:
+      table_file_name = table_file_name.encode("utf-8")
+      print("Warning: using tabulated atomic form factors")
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
-      verbose=verbose, on_completion=self.writeRefinementInfoForGui)
+      verbose=verbose,
+      on_completion=self.writeRefinementInfoForGui)
     try:
       if timer:
         t1 = time.time()
-      cctbx.run()
+      cctbx.run(table_file_name=table_file_name)
       if timer:
         print "-- do_run(): %.3f" %(time.time() - t1)
       if timer:
