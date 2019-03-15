@@ -152,7 +152,7 @@ set(  ['olex2_fonts.zip',
        'ac3.zip',
        'help.zip',
        'sample_data.zip',
-       'FragmentDB.zip' #HP 13/02/19
+       'FragmentDB.zip', #HP 13/02/19
        'RPAC.zip' #HP 08/03/19
       ]
    )
