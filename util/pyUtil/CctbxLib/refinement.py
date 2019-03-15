@@ -83,13 +83,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
 
   def run(self, build_only=False,
-    normal_equations_class=olex2_normal_equations.normal_eqns):
+          table_file_name = None,
+          normal_equations_class=olex2_normal_equations.normal_eqns):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
-    print "Available threads: %s" %ext.build_normal_equations.available_threads
-    ext.build_normal_equations.available_threads = 20
-    print "Available threads: %s" %ext.build_normal_equations.available_threads
+    print("Using %s for the refinement" %ext.build_normal_equations.available_threads)
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
@@ -197,6 +196,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.observations,
       self.reparametrisation,
       self.olx_atoms,
+      table_file_name=table_file_name,
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
@@ -1172,7 +1172,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
 
     bad_refs = []
-    for i in range(result.fo_sq.size()):
+    for i in xrange(result.fo_sq.size()):
       sig = math.fabs(
         result.fo_sq.data()[i]-result.fc_sq.data()[i])/result.delta_f_sq_over_sigma[i]
       bad_refs.append((
