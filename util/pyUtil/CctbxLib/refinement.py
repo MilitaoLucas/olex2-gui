@@ -88,7 +88,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
-    print("Using %s for the refinement" %ext.build_normal_equations.available_threads)
+    print("Using %s threads" %ext.build_normal_equations.available_threads)
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
