@@ -992,7 +992,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
 
 OV.registerFunction(calcsolv)
 
-def generete_sf_table():
+def generate_sf_table():
   class SF_TableGenerator(OlexCctbxAdapter):
     def __init__(self):
       OlexCctbxAdapter.__init__(self)
@@ -1006,5 +1006,5 @@ def generete_sf_table():
                                      self.observations.indices)
   SF_TableGenerator()
 
-OV.registerFunction(generete_sf_table, False, "test")
+OV.registerFunction(generate_sf_table, False, "test")
 
