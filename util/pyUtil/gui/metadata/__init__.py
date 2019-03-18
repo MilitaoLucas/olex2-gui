@@ -268,10 +268,10 @@ def conflicts(popout='auto', d=None):
     OV.write_to_olex(wFilePath, "<html><body link='yellow'>%s</body></html>" %txt)
     screen_height = int(olx.GetWindowSize('gl').split(',')[3])
     screen_width = int(olx.GetWindowSize('gl').split(',')[2])
-    box_x = int(screen_width*0.1)
-    box_y = int(screen_height*0.1)
-    box_width = screen_width - 2*box_x
-    box_height = screen_height - 2*box_y
+    box_x = int(screen_width*0.01)
+    box_y = int(screen_height*0.08)
+    box_width = screen_width - box_x
+    box_height = screen_height - box_y
     main_spacer = box_height - 300
     if olx.html.IsPopup('conflicts') == "false":
       olx.Popup('conflicts', '%s' %wFilePath,
