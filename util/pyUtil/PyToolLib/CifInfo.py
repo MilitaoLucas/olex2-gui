@@ -717,6 +717,7 @@ class ExtractCifInfo(CifTools):
         try:
           with open(p, 'rb') as f:
             cif_s = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            cif_s.show()
             self.exclude_cif_items(cif_s)
             self.update_cif_block(cif_s, force=False)
             all_sources_d[p] = cif_s
