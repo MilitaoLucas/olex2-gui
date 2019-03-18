@@ -33,13 +33,13 @@ build_def = {
     (('~/cctbx-build/cctbx_build/', '~/cctbx-build/cctbx_sources/',
       '~/tmp/cctbx/', 'cctbx-linux32.zip', '-j4'),),
   'linux2-64bit':
-    (('/mnt/hgfs/cctbx/cctbx_lastest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_lastest/modules/cctbx_project/',
+    (('/mnt/hgfs/cctbx/cctbx_latest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_latest/modules/cctbx_project/',
       '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
   'darwin-32bit':
     (('~/cctbx-build/cctbx_build/', '~/cctbx-build/cctbx_sources/',
       '~/tmp/cctbx/', 'cctbx-mac32.zip', '-j2'),),
   'darwin-64bit':
-    (('~/build/svn/cctbx/build_max64/', '~/build/svn/cctbx/modules/cctbx_project/',
+    (('~/build/svn/cctbx/build_mac64/', '~/build/svn/cctbx/modules/cctbx_project/',
       '/tmp/cctbx/', 'cctbx-mac64.zip', '-j4'),),
 
   'win32-32bit':
