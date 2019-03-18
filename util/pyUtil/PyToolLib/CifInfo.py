@@ -710,7 +710,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading pcf file %s" %p
 
-    manu_cifs = ['cif_od', 'crystal_clear', 'cfx', 'cfx_LANA']
+    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA']
     for manu_cif in manu_cifs:
       p,pp  = self.sort_out_path(path, manu_cif)
       if p:
@@ -720,8 +720,8 @@ class ExtractCifInfo(CifTools):
             self.exclude_cif_items(cif_s)
             self.update_cif_block(cif_s, force=False)
             all_sources_d[p] = cif_s
-        except:
-          print "Error reading %s CIF %s" %(manu_cif, p)
+        except Exception, e:
+          print "Error reading %s CIF %s. The error was %s" %(manu_cif, p, e)
 
 
     # Rigaku data collection CIF
@@ -993,9 +993,8 @@ class ExtractCifInfo(CifTools):
                     '_cell_volume',
                     '_cell_formula',
                     '_cell_oxdiff',
-                    # '_symmetry', For some reason, we can't remove loops in del cif_block[item] below.
+                    '_symmetry',
                     '_exptl_absorpt_coefficient_mu',
-                    '_audit_creation',
                     '_diffrn_reflns_',
                     '_publ_author',
                     '_atom_type',
@@ -1005,7 +1004,10 @@ class ExtractCifInfo(CifTools):
     for item in cif_block:
       for exclude in exclude_list:
         if item.startswith(exclude):
-          del cif_block[item]
+          try:
+            del cif_block[item]
+          except:
+            print "Can't delete CIF item %s" %item
 
   #def prepare_exptl_absorpt_process_details(self, dictionary, version, p):
     #parameter_ratio = dictionary["parameter_ratio"]
