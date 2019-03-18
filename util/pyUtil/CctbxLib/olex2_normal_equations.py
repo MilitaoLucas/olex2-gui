@@ -26,7 +26,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         self.xray_structure, table_file_name=table_file_name)
     else:
       self.one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, indices=self.observations.indices)
+        self.xray_structure, reflections=self.observations)
 
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
