@@ -154,7 +154,7 @@ def getModule(name, email=None):
       olex.writeImage(info_file_name, txt, 0)
 
     else:
-      _ = os.sep.join([m_dir, "%s.update" %name])
+      _ = os.path.join(m_dir, "%s.update" %name)
       with open(_,'wb') as wFile:
         wFile.write(f)
 
@@ -197,11 +197,11 @@ def update_or_install(d, rollback=False):
 
   m_dir = getModulesDir()
   if rollback:
-    update_zip = os.sep.join([m_dir, "%s.rollback.zip" %d])
+    update_zip = os.path.join(m_dir, "%s.rollback.zip" %d)
   elif ".update" not in d:
-    update_zip = os.sep.join([m_dir, "%s.update" %d])
+    update_zip = os.path.join(m_dir, "%s.update" %d)
   else:
-    update_zip = os.sep.join([m_dir, d])
+    update_zip = os.path.join(m_dir, d)
 
   if os.path.exists(update_zip):
     #try to clean up the folder if already exists
@@ -210,7 +210,7 @@ def update_or_install(d, rollback=False):
       if ".update" not in pdir:
         try:
           if not rollback:
-            rollback_zip = os.sep.join(["%s.rollback" %pdir])
+            rollback_zip = os.path.join("%s.rollback" %pdir)
             shutil.make_archive(rollback_zip, 'zip', pdir)
             print "The original module %s has been backed up." %d
           shutil.rmtree(pdir)
@@ -222,7 +222,7 @@ def update_or_install(d, rollback=False):
       zp = ZipFile(update_zip)
       path = m_dir
       if rollback:
-        path = os.sep.join([m_dir, d])
+        path = os.path.join(m_dir, d)
       zp.extractall(path=path)
       zp.close()
       print "Module %s has been installed/updated" %d
@@ -351,16 +351,8 @@ def expired_pop(m):
   d['token'] = getAuthenticationToken()
   d['tag'] = OV.GetTag()
 
-  _ = None
-  try:
-    import threads_imp
-    _ = threads_imp.get_news_image_from_server("expired_pop.htm")
-  except Exception, err:
-    print err
-
-  if not _:
-    _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
-    t = open(_,'r').read()%d
+  _ = os.path.join(OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html")
+  t = open(_,'r').read()%d
 
   pop_name = "sorry-%s"%name
   htm = "sorry-%s.htm"%name

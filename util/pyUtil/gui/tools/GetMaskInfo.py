@@ -32,9 +32,9 @@ def get_mask_info():
   global mask_info_has_updated
   import gui
   get_template = gui.tools.TemplateProvider.get_template
-  template_path = os.sep.join([OV.DataDir(), 'mask_output.htm'])
+  template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
   if not os.path.exists(template_path):
-    template_path = os.sep.join([p_path, 'mask_output.htm'])
+    template_path = os.path.join(p_path, 'mask_output.htm')
     
   
 #  print ".. %s .." %template_path
@@ -304,11 +304,11 @@ OV.registerFunction(get_mask_info, False, 'gui.tools')
 
 def get_moieties_from_list():
   moieties = {}
-  _ = os.sep.join([OV.DataDir(),'moieties.cvs'])
+  _ = os.path.join(OV.DataDir(),'moieties.cvs')
   if os.path.exists(_):
     pass
   else:
-    _ = os.sep.join([p_path,'moieties.csv'])
+    _ = os.path.join(p_path,'moieties.csv')
   rFile = open(_,'r').readlines()
   for line in rFile:
     nick,formula = line.split(",")
@@ -381,7 +381,7 @@ def split_entity(entry):
     #Parses the path for template files.
     #'''
     #if not path:
-      #path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
+      #path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates')
     #if path[-4:-3] != ".": #i.e. a specific template file has been provided
       #g = glob.glob("%s%s%s" %(path,os.sep,mask))
     #else:

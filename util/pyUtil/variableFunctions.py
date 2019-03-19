@@ -312,7 +312,7 @@ def SaveStructureParams():
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
     auto_save_view = OV.GetParam('user.auto_save_view', False)
     if auto_save_view and olx.IsFileType('oxm') != 'true':
-      oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
+      oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
       olex.m("save gview '%s'" %oxvf)
 OV.registerFunction(SaveStructureParams)
 
@@ -321,7 +321,7 @@ def OnStructureLoaded(previous):
     return
   auto_save_view = OV.GetParam('user.auto_save_view', False)
   if auto_save_view and olx.IsFileType('oxm') != 'true':
-    oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
+    oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
     if os.path.exists(oxvf):
       olex.m("load gview '%s'" %oxvf)
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())

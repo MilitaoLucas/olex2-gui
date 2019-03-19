@@ -87,7 +87,7 @@ olex.registerFunction(SwitchTool, False, "gui")
 def PopTool(name=None):
   #e.g h2-tools-images
   pop_name = name
-  wFilePath = os.sep.join([OV.BaseDir(), "etc", name])
+  wFilePath = os.path.join(OV.BaseDir(), "etc", name)
   title = name
   olx.Popup(pop_name, wFilePath,
     b="tcr", t=title)
