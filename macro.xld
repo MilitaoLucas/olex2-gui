@@ -386,7 +386,6 @@
   <body
     <cmd
       <cmd "mask bonds 48">
-      <cmd "spy.gui.skin.change_bond_colour()">
       <cmd "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
   >
@@ -429,7 +428,6 @@
   <body
     <cmd
       <cmd "mask bonds 48">
-      <cmd "spy.gui.skin.change_bond_colour()">
       <cmd "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
   >
@@ -529,7 +527,6 @@
     >
     <cmd
       <cmd "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd "spy.gui.skin.change_bond_colour()">
       <cmd "brad %1">
     >
   >
