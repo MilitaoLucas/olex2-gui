@@ -26,7 +26,7 @@ except:
   from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
-l = open(os.sep.join([p_path, 'def.txt'])).readlines()
+l = open(os.path.join(p_path, 'def.txt')).readlines()
 d = {}
 for line in l:
   line = line.strip()
@@ -84,26 +84,26 @@ class HARp(PT):
 
     self.exe = None
     if sys.platform[:3] == 'win':
-      mpiloc = os.sep.join([self.p_path, "mpiexec.exe"])
+      mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
         self.mpiexec = olx.file.Which("mpiexec.exe")
         
-      _ = os.sep.join([self.p_path, "hart_mpi.exe"])
+      _ = os.path.join(self.p_path, "hart_mpi.exe")
       if os.path.exists(_):
         self.mpi_har = _
       else:
         self.mpi_har = olx.file.Which("hart_mpi.exe")
         
-      _ = os.sep.join([self.p_path, "hart.exe"])
+      _ = os.path.join(self.p_path, "hart.exe")
       if os.path.exists(_):
         self.exe = _
       else:
         self.exe = olx.file.Which("hart.exe")       
         
     else:
-      mpiloc = os.sep.join([self.p_path, "mpiexec"])
+      mpiloc = os.path.join(self.p_path, "mpiexec")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
@@ -120,13 +120,13 @@ class HARp(PT):
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
         
-      _ = os.sep.join([self.p_path, "hart_mpi"])
+      _ = os.path.join(self.p_path, "hart_mpi")
       if os.path.exists(_):
         self.mpi_har = _
       else:
         self.mpi_har = olx.file.Which("hart_mpi")
         
-      _ = os.sep.join([self.p_path, "hart"])
+      _ = os.path.join(self.p_path, "hart")
       if os.path.exists(_):
         self.exe = _
       else:
@@ -204,9 +204,9 @@ class HARp(PT):
     rv = get_template('table_header', path=p_path)
 
 #    status_running = "<font color='%s'><b>Running</b></font>" %OV.GetParam('gui.orange')
-    d['processing_gif_src'] = os.sep.join([self.p_path, OV.GetParam('harp.processing_gif')])
+    d['processing_gif_src'] = os.path.join(self.p_path, OV.GetParam('harp.processing_gif'))
     status_running = get_template('processing_gif')%d
-    d['back_picture_src'] = os.sep.join([self.p_path, OV.GetParam('harp.back_arrow')])
+    d['back_picture_src'] = os.path.join(self.p_path, OV.GetParam('harp.back_arrow'))
     load_input = "<table cellspacing='1' cellpadding='0' width='100%%'><tr><td align='center'><img src='%(back_picture_src)s', width='45%%'></td></tr></table>"%d
 
     status_completed = "<font color='%s'><b>Finished</b></font>" %OV.GetParam('gui.green')
@@ -310,7 +310,7 @@ class HARp(PT):
 
 
       else:
-        d['processing_gif_src'] = os.sep.join([self.p_path, OV.GetParam('harp.processing_gif')])
+        d['processing_gif_src'] = os.path.join(self.p_path, OV.GetParam('harp.processing_gif'))
         d['link'] = get_template('processing_gif')%d
         d['link'] = get_template('processing_started')%d
 

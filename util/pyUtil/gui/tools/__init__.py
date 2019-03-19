@@ -722,7 +722,7 @@ def make_cell_dimensions_display():
       help_txt = "Help from File does not exist. Apologies."
       help = '''
 $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-90 -popout='False' -helpTxt='%s'")''' %(x, help_txt)
-      _ = os.sep.join([OV.BaseDir(), "etc", "gui", "help", "cell_angle_not_quite_90.htm"])
+      _ = os.path.join(OV.BaseDir(), "etc", "gui", "help", "cell_angle_not_quite_90.htm")
       if os.path.exists(_):
         help_txt = open(_,'r').read()
       href = "spy.make_help_box -name=cell-angle-not-quite-90 -popout=False -helpTxt='%s'" %help_txt
@@ -1166,7 +1166,7 @@ class Templates():
       retVal = self.templates.get(name, None)
     #if not retVal:
       #import OlexVFS
-      #path = os.sep.join([path, name])
+      #path = os.path.join(path, name)
       #path = path.replace("\\","/")
       #retVal = OlexVFS.read_from_olex(path)
     if not retVal:
@@ -1181,17 +1181,17 @@ class Templates():
 
     if template_file:
       g = []
-      p = os.sep.join([path, template_file])
+      p = os.path.join(path, template_file)
       g.append(p)
 
     else:
       if not path:
-        path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
+        path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates')
       if path[-4:-3] != ".": #i.e. a specific template file has been provided
         g = glob.glob("%s%s%s" %(path,os.sep,mask))
       else:
         g = [path]
-      _ = os.sep.join([OV.DataDir(), 'custom_templates.html'])
+      _ = os.path.join(OV.DataDir(), 'custom_templates.html')
       if os.path.exists(_): g.append(_)
     
     

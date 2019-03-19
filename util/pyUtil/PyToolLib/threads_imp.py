@@ -43,11 +43,11 @@ class NewsImageRetrivalThread(ThreadEx):
           if img:
             img_data = img.read()
             if self.name == "splash":
-              with open(os.sep.join([olx.app.SharedDir(), 'splash.jpg']),'wb') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.jpg'),'wb') as wFile:
                 wFile.write(img_data)
-              with open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.url'),'w') as wFile:
                 wFile.write(url)
-              with open(os.sep.join([olx.app.SharedDir(), 'splash.id']),'w') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.id'),'w') as wFile:
                 wFile.write(img_url)
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
@@ -73,7 +73,7 @@ class NewsImageRetrivalThread(ThreadEx):
     if self.name == 'splash':
       if "-ac" in olx.olex2_tag:
         return None,None
-      _ = os.sep.join([olx.app.SharedDir(), 'splash.id'])
+      _ = os.path.join(olx.app.SharedDir(), 'splash.id')
       if not os.path.exists(_):
         with open(_,'w') as wFile:
           img_id = "splash.jpg"
@@ -144,6 +144,10 @@ class NewsImageRetrivalThread(ThreadEx):
       url = 'http://www.olex2.org/adverts/olex2adverts.txt'
     elif list_name == "splash":
       url = 'http://www.olex2.org/adverts/splash.txt'
+    elif list_name == "expired_pop":
+      url = 'http://www.olex2.org/adverts/expired_pop.html'
+    else:
+      return
     l = self.make_call(url).readlines()
     _ = []
     for line in l:

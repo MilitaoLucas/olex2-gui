@@ -103,18 +103,18 @@ class History(ArgumentParser):
     node.set_params()
     filepath = OV.FilePath()
     filename = OV.FileName()
-    resFile = os.sep.join([filepath, filename + ".res"])
+    resFile = os.path.join(filepath, filename + ".res")
 
     resFileData = decompressFile(node.res)
     with open(resFile, 'wb') as wFile:
       wFile.write(resFileData)
 
-    hklFile = os.sep.join([filepath, filename + ".hkl"])
+    hklFile = os.path.join(filepath, filename + ".hkl")
     hklFileData = decompressFile(tree._full_index.get(filename).hklFiles.get(node.hkl))
     with open(hklFile, 'wb') as wFile:
       wFile.write(hklFileData)
 
-    lstFile = os.sep.join([filepath, filename + ".lst"])
+    lstFile = os.path.join(filepath, filename + ".lst")
     if node.lst is not None:
       lstFileData = decompressFile(node.lst)
       with open(lstFile, 'wb') as wFile:
