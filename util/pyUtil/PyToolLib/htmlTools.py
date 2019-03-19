@@ -155,6 +155,7 @@ def makeHtmlInputBox(inputDictionary):
   dictionary.update(inputDictionary)
 
   htmlInputBoxText = '''
+
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
 type="%(type)s"
@@ -461,7 +462,7 @@ def make_help_box(args):
   if md_box:
     d = {'title':titleTxt.replace("_", " "), 'body':helpTxt, 'font_size_base':OV.GetParam('gui.help.base_font_size','3')}
     template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
-    p = OV.GetParam('gui.help.src', os.sep.join([OV.BaseDir(), 'etc', 'help', 'gui']))
+    p = OV.GetParam('gui.help.src', os.path.join(OV.BaseDir(), 'etc', 'help', 'gui'))
     txt = get_template(template, base_path=p)%d
 
   else:
@@ -958,7 +959,7 @@ def make_input_button(d):
   return html
 
 def format_help(txt):
-  regex_source = os.sep.join([OV.BaseDir(), "etc", "regex", "regex_format_help.txt"])
+  regex_source = os.path.join(OV.BaseDir(), "etc", "regex", "regex_format_help.txt")
   if os.path.exists(regex_source):
     txt = gui.tools.run_regular_expressions(txt, regex_source)
 
@@ -1258,7 +1259,7 @@ def getPopBoxPosition():
 
 def get_template(name, base_path=None):
   if not base_path:
-    base_path = os.sep.join([OV.BaseDir(), 'etc', 'gui', 'blocks', 'templates'])
+    base_path = os.path.join(OV.BaseDir(), 'etc', 'gui', 'blocks', 'templates')
   template = r"%s%s%s.htm" %(base_path, os.sep, name)
   if os.path.exists(template):
     rFile = open(template, 'r')

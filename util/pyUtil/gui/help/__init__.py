@@ -22,8 +22,8 @@ try:
     print "markdown2 imported!"
 except Exception, err:
   print err
-  with open(os.sep.join([p_path, 'markdown2.pyo']), 'r') as f:
-    markdown2 = imp.load_compiled('markdown2', os.sep.join([p_path, 'markdown2.pyo']))
+  with open(os.path.join(p_path, 'markdown2.pyo'), 'r') as f:
+    markdown2 = imp.load_compiled('markdown2', os.path.join(p_path, 'markdown2.pyo'))
   print "markdown2 imported through imp."
 
 class GetHelp(object):
@@ -37,7 +37,7 @@ class GetHelp(object):
 
     olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
-    p = os.sep.join([OV.BaseDir(),"util","pyUtil","gui","help", "help.zip"])
+    p = os.path.join(OV.BaseDir(),"util","pyUtil","gui","help", "help.zip")
     if os.path.exists(p):
       gui.zipToOlexVFS(p)
     ws = olx.GetWindowSize('gl')
@@ -58,10 +58,10 @@ class GetHelp(object):
   def format_html(self, txt):
     while "\n" in txt:
       txt = txt.replace("\n", "")
-    regex_source = os.sep.join([self.p_path, "regex_format_help.txt"])
+    regex_source = os.path.join(self.p_path, "regex_format_help.txt")
     if os.path.exists(regex_source):
       txt = gui.tools.run_regular_expressions(txt, regex_source)
-    #gui_link = os.sep.join([p_path, 'gui-link'])
+    #gui_link = os.path.join(p_path, 'gui-link')
     txt = txt.replace("GetVar(gui_link)","GetVar(gui.skin.link_type")
     return txt
 
@@ -69,9 +69,9 @@ class GetHelp(object):
     gui.tools.TemplateProvider.get_all_templates(path=self.p_path, mask="*.html")
 
   def get_help(self, quick=True):
-    builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui'])
-    all_help = os.sep.join([builtin_help_location, 'HELP_EN.htm'])
-    base = os.sep.join([OV.BaseDir(), "util", "pyUtil", "gui", "help"])
+    builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui')
+    all_help = os.path.join(builtin_help_location, 'HELP_EN.htm')
+    base = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
     rFile = gui.file_open(path=all_help, base=base)
     if not rFile:
       return
@@ -98,11 +98,11 @@ class GetHelp(object):
   def format_html(self, txt):
     while "\n" in txt:
       txt = txt.replace("\n", "")
-    #regex_source = os.sep.join([self.source_dir, "regex_format_help.txt"])
-    regex_source = os.sep.join([self.p_path, "regex_format_help.txt"])
+    #regex_source = os.path.join(self.source_dir, "regex_format_help.txt")
+    regex_source = os.path.join(self.p_path, "regex_format_help.txt")
     if os.path.exists(regex_source):
       txt = gui.tools.run_regular_expressions(txt, regex_source)
-    gui_link = os.sep.join([p_path, 'gui-link'])
+    gui_link = os.path.join(p_path, 'gui-link')
     txt = txt.replace("GetVar(gui_link)",gui_link)
     return txt
 
@@ -111,16 +111,16 @@ class GetHelp(object):
       self.source_dir = specific
       all_help = ""
     else:
-      builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help'])
-      all_help = os.sep.join([builtin_help_location, 'gui', 'HELP_EN.htm'])
+      builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
+      all_help = os.path.join(builtin_help_location, 'gui', 'HELP_EN.htm')
       if not hasattr(self, 'source_dir'):
         self.source_dir = specific
 
       try:
         copy_files = ("githelp_templates.html", "tutorials_templates.html")
         for cp_file in copy_files:
-          copy_from = os.sep.join([self.p_path, cp_file])
-          copy_to = os.sep.join([builtin_help_location, cp_file])
+          copy_from = os.path.join(self.p_path, cp_file)
+          copy_to = os.path.join(builtin_help_location, cp_file)
           copyfile(copy_from, copy_to)
       except:
         print "Can not copy files; most probably Olex2 was not started in Admin Mode"
@@ -192,8 +192,8 @@ class GetHelp(object):
           html = markdown2.markdown(val, extras=["wiki-tables"])
           if "img" in html:
             #src = os.sep.join(md_path.split("\\")[:-1])
-            #img_src = os.sep.join([builtin_help_location, 'images'])
-            img_src = os.sep.join(['BaseDir()', 'util', 'pyUtil', 'gui', 'help'])
+            #img_src = os.path.join(builtin_help_location, 'images')
+            img_src = os.path.join('BaseDir()', 'util', 'pyUtil', 'gui', 'help')
 
             #html = html.replace(r'<img src="', r'<zimg width="%s" src="%s%s'%(self.box_width, src , os.sep))
 
@@ -355,7 +355,7 @@ def make_help_box(args):
   if md_box:
     d = {'title':titleTxt.replace("_", " "), 'body':helpTxt, 'font_size_base':OV.GetParam('gui.help.base_font_size','3')}
     template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
-    p = OV.GetParam('gui.help.src', os.sep.join([OV.BaseDir(), 'etc', 'help', 'gui']))
+    p = OV.GetParam('gui.help.src', os.path.join(OV.BaseDir(), 'etc', 'help', 'gui'))
     txt = get_template(template)%d
 
   else:
@@ -464,7 +464,7 @@ class AutoDemoTemp(AutoDemo):
   def __init__(self, name='default_auto_tutorial', reading_speed=2):
     super(AutoDemoTemp, self).__init__(name='default_auto_tutorial', reading_speed=2)
     self.source_base = p_path
-    self.source_dir = os.sep.join([self.source_base, 'tutorials', 'EN'])
+    self.source_dir = os.path.join(self.source_base, 'tutorials', 'EN')
     self.p_path = gh.p_path
     gui.tools.TemplateProvider.get_all_templates(path=self.p_path, mask="*.html")
     self.make_tutorial_gui_html()
@@ -586,7 +586,7 @@ class AutoDemoTemp(AutoDemo):
     self.items = gui.tools.TemplateProvider.get_template('all_tutorials_preamble').split("\n")
 
     ## Then read in the actual tutorial
-    _ = os.sep.join([self.source_dir, self.name + ".txt"])
+    _ = os.path.join(self.source_dir, self.name + ".txt")
     self.current_tutorial_file = _
     if debug:
       print "opening %s" %self.current_tutorial_file

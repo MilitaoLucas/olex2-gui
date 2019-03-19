@@ -19,7 +19,7 @@ class PluginTools(object):
       olx.InstalledPlugins.add(self)
 
   def endKickstarter(self):
-    p = os.sep.join([self.p_path, self.p_htm + ".htm"])
+    p = os.path.join(self.p_path, self.p_htm + ".htm")
     if OV.HasGUI():
       try:
         t = gui.file_open(p, 'r')
@@ -144,7 +144,7 @@ def make_new_plugin(name,overwrite=False):
        'name_lower':name.lower(),
        'plugin_base':plugin_base,
        }
-  template_src = os.sep.join([os.path.dirname(os.path.abspath(__file__)), 'plugin_skeleton.txt'])
+  template_src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plugin_skeleton.txt')
   py = gui.tools.TemplateProvider.get_template('plugin_skeleton_py', marker='@-@', path=template_src, force=debug)%d
 
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name)s.py"%d,'w')

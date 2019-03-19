@@ -88,7 +88,7 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   if not filefull:
     return
   if output_folder:
-    _ = os.sep.join([output_folder, "%s.%s" %(filename, fileext)])
+    _ = os.path.join(output_folder, "%s.%s" %(filename, fileext))
     filefull = _
   if not filefull:
     return

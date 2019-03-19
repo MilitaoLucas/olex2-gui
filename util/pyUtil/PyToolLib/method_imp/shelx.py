@@ -214,7 +214,7 @@ class Method_shelxt(Method_shelx_solution):
       return
     import gui.tools
     debug = bool(OV.GetParam('olex2.debug',False))
-    f = os.sep.join([OV.StrDir(), "temp", OV.FileName() + '.lxt'])
+    f = os.path.join(OV.StrDir(), "temp", OV.FileName() + '.lxt')
     if os.path.exists(f):
       f = open(f, 'r').readlines()
     else:
@@ -244,7 +244,7 @@ class Method_shelxt(Method_shelx_solution):
     }
     s = s_blank%d
 
-    g = glob.glob(os.sep.join([OV.StrDir(), "temp", "*.res"]))
+    g = glob.glob(os.path.join(OV.StrDir(), "temp", "*.res"))
     i = 0
     for item in g:
       short_p = ntpath.basename(item)
