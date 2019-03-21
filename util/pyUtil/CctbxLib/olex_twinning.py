@@ -63,14 +63,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
     #super(OlexCctbxTwinLaws, self).__init__()    
-    OlexCctbxAdapter.__init__(self)
-    if OV.GetParam('snum.refinement.use_solvent_mask'):
-      txt = "Sorry, using solvent masking and twinning is not supported yet."
-      print(txt)
-      html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
-      OV.write_to_olex('twinning-result.htm', html, False)
-      OV.UpdateHtml()
-      return
+    OV.registerFunction(self.run,True,'twin')
+    OV.registerFunction(self.run_from_gui,True,'twin')
+
+  def run_from_gui(self):
     print "Searching for Twin laws..."
     olx.Cursor("busy", "Searching for Twin laws...")
     self.run()
@@ -79,8 +75,18 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def run(self): 
     from PilTools import MatrixMaker
     global twin_laws_d
+
+    OlexCctbxAdapter.__init__(self)
+    if OV.GetParam('snum.refinement.use_solvent_mask'):
+      txt = "Sorry, using solvent masking and twinning is not supported yet."
+      print(txt)
+      html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
+      OV.write_to_olex('twinning-result.htm', html, False)
+      OV.UpdateHtml()
+      return
+
     use_image = ""
-    a = MatrixMaker()
+    MM = MatrixMaker()
     self.twin_laws_d = {}
     law_txt = ""
     l = 0
@@ -133,7 +139,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
               'font_colour':font_color_basf}]
       states = ['on', 'off']
       for state in states:
-        image_name, img  = a.make_3x3_matrix_image(name, twin_law.hkl_rotation.flatten(), txt, state)
+        image_name, img  = MM.make_3x3_matrix_image(name, twin_law.hkl_rotation.flatten(), txt, state)
 
       #law_txt += "<zimg src=%s>" %image_name
 
@@ -172,13 +178,22 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     if not use_image:
       return
     html += "</td></tr>"
-    OV.write_to_olex('twinning-result.htm', html, True)
+    p = os.path.join(OV.StrDir(), 'twinning-result.htm')
+    with open(p, 'w') as wFile:
+      wFile.write(html)
     OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
     #OV.Refresh()
     #if OV.IsControl(control):
     #  OV.SetImage(control,use_image)
     OV.UpdateHtml()
     twin_laws_d = self.twin_laws_d
+    import cPickle as pickle
+    p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+    with open( p, "wb" ) as out:
+      pickle.dump( twin_laws_d, out )
+    
+    
+    
 #    self.make_gui()
 
   def run_twin_ref_shelx(self, law, basf):
@@ -400,6 +415,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
+      
+      olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+      olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
       olx.Refresh()
     return twin_laws
@@ -680,30 +698,53 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     hklf.write("%4d%4d%4d\n"%(0,0,0))
     hklf.close()
     
-    
-OV.registerFunction(OlexCctbxTwinLaws)
-
 
 def on_twin_image_click(run_number):
   global twin_laws_d
-  file_data = twin_laws_d[int(run_number)].get("ins_file")
-  wFile = open(olx.FileFull(), 'w')
-  wFile.writelines(file_data)
-  wFile.close()
-  olx.Atreap(olx.FileFull())
+  if not twin_laws_d:
+    import cPickle as pickle
+    p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+    with open (p, "rb") as infile:
+      twin_laws_d = pickle.load(infile)
+    for number in twin_laws_d:
+      law = twin_laws_d[number]
+      im = law.get('law_image')
+      OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
+    
   twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
   twin_law_rnd = numpy.rint(twin_law)
   basf=float(twin_laws_d[int(run_number)]['BASF'])
+  
+  twin_str_l = []
+  for row in twin_law:
+    for ele in row:
+      ele = str(ele)
+      if ele == "0.0":
+        ele = "0"
+      elif ele == "-1.0":
+        ele = "-1"
+      elif ele == "1.0":
+        ele = "1"
+      twin_str_l.append("%s" %ele)
+  twin_str = " ".join(twin_str_l)
+
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
-    print "Using twin law: ", twin_law
+    print "Using twin law: ", twin_str
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
-    OV.DelIns("HKLF")
+    olx.HKLF(2)
     OV.DelIns("BASF")
-    OV.AddIns("HKLF 5")
-    OV.AddIns("BASF %f"%basf) #CHANGED - ADDED ADD/REMOVE BASF HERE
+    OV.AddIns("BASF %f"%basf)
+    OV.AddIns("'REM TWIN %s'"%twin_str)
     hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
     OV.HKLSrc(hklname)
+  else:
+    OV.DelIns("TWIN")
+    olx.HKLF(0)
+    OV.DelIns("BASF")
+    OV.AddIns("BASF %f"%basf)
+    OV.AddIns("TWIN %s"%twin_str)
+    
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 
@@ -732,3 +773,4 @@ def reset_twin_law_img():
   OV.UpdateHtml()
 OV.registerFunction(reset_twin_law_img)
 
+OlexCctbxTwinLaws_instance = OlexCctbxTwinLaws()
