@@ -112,7 +112,7 @@ class OlexFunctions(inheritFunctions):
           _ = getattr(OV, base[0])
           path = _()
           if os.path.exists(path):
-            retVal = os.path.join(path, base[1])
+            retVal = os.path.join(path, base[1][1:])
         except:
           pass
 
