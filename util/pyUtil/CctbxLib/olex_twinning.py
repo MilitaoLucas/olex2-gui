@@ -23,7 +23,7 @@ import olex_core
 
 import time
 import cctbx_controller as cctbx_controller
-from cctbx import maptbx, miller, uctbx
+from cctbx import maptbx, miller, uctbx, crystal
 from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
@@ -172,7 +172,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     if not use_image:
       return
     html += "</td></tr>"
-    OV.write_to_olex('twinning-result.htm', html, False)
+    OV.write_to_olex('twinning-result.htm', html, True)
     OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
     #OV.Refresh()
     #if OV.IsControl(control):
@@ -182,27 +182,27 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 #    self.make_gui()
 
   def run_twin_ref_shelx(self, law, basf):
-    law_ins = ' '.join(str(i) for i in law[:9])
-    print "Testing: %s" %law_ins
-    file_path = olx.FilePath()
-    olx.Atreap("%s/notwin.ins" %file_path, b=True)
-    OV.AddIns("TWIN " + law_ins+" 2")
-    OV.AddIns("BASF %f"%basf)
+    #law_ins = ' '.join(str(i) for i in law[:9])
+    #print "Testing: %s" %law_ins
+    #file_path = olx.FilePath()
+    #olx.Atreap("%s/notwin.ins" %file_path, b=True)
+    #OV.AddIns("TWIN " + law_ins+" 2")
+    #OV.AddIns("BASF %f"%basf)
 
-    curr_prg = OV.GetParam('snum.refinement.program')
-    curr_method = OV.GetParam('snum.refinement.method')
-    curr_cycles = OV.GetParam('snum.refinement.max_cycles')
-    OV.SetMaxCycles(5)
-    if curr_prg != 'olex2.refine':
-      OV.set_refinement_program(curr_prg, 'CGLS')
-    OV.File("%s.ins" %self.filename)
+    #curr_prg = OV.GetParam('snum.refinement.program')
+    #curr_method = OV.GetParam('snum.refinement.method')
+    #curr_cycles = OV.GetParam('snum.refinement.max_cycles')
+    #OV.SetMaxCycles(5)
+    #if curr_prg != 'olex2.refine':
+    #  OV.set_refinement_program(curr_prg, 'CGLS')
+    #OV.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
     rFile.close()
-    OV.SetParam('snum.init.skip_routine','True')
+    #OV.SetParam('snum.init.skip_routine','True')
 
-    OV.SetParam('snum.refinement.program','olex2.refine')
-    OV.SetParam('snum.refinement.method','Gauss-Newton')
+    #OV.SetParam('snum.refinement.program','olex2.refine')
+    #OV.SetParam('snum.refinement.method','Gauss-Newton')
 
 #    try:
 #      from RunPrg import RunRefinementPrg
@@ -217,12 +217,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 #      OV.SetParam('snum.init.skip_routine','False')
 
 
-    r = olx.Lst("R1")
-    olex_refinement_model = OV.GetRefinementModel(False)
-    if olex_refinement_model.has_key('twin'):
-      basf = olex_refinement_model['twin']['basf'][0]
-    else:
-      basf = "n/a"
+    #r = olx.Lst("R1")
+    #olex_refinement_model = OV.GetRefinementModel(False)
+    #if olex_refinement_model.has_key('twin'):
+    #  basf = olex_refinement_model['twin']['basf'][0]
+    #else:
+    #  basf = "n/a"
 
     return None, None, f_data, None
 
@@ -340,6 +340,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
     always_basf=True
+    do_long=False
+    do_very_long=False
     number_laws=4
     twin_laws=[]
     cctbx_twin_laws = cctbx_controller.twin_laws(self.reflections)
@@ -368,34 +370,38 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     threshold=0.002
 
     twin_laws+=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
-    if twin_laws:
-      if always_basf:
-        for twin_law in twin_laws:
-          rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
-          twin_law.rbasf=rbasf
-      return twin_laws
+    #if twin_laws:
+    #  if always_basf:
+    #    for twin_law in twin_laws:
+    #      rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
+    #      twin_law.rbasf=rbasf
+    #  return twin_laws
+    if not twin_laws:
+      print ("No Highly likely twofold axes, rotation fraction increased")
+      olx.Refresh()
+      rotation_fraction=24
+      twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
 
-    print ("No Highly likely twofold axes, rotation fraction increased")
-    rotation_fraction=24
+    if (not twin_laws) and do_long:
+      print ("No Highly likely low-index axes, indexes and threshold increased")
+      olx.Refresh()
+      size=12
+      threshold=0.01
+      twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
 
-    twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
+    if (not twin_laws) and do_very_long:
+      print ("No Likely axes, threshold increased. Note these twin laws are unlikely to provide improvement")
+      olx.Refresh()
+      threshold=1
+      twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
+    
+    if twin_laws and always_basf:
+      for twin_law in twin_laws:
+        rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
+        twin_law.rbasf=rbasf
     if twin_laws:
-      return twin_laws
-
-    return twin_laws #skipping slow ones
-    print ("No Highly likely low-index axes, indexes and threshold increased")
-    size=12
-    threshold=0.01
-    twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
-    if twin_laws:
-      return twin_laws
-
-    return twin_laws #skipping the reeeeeally slow final iteration
-    print ("No Likely axes, threshold increased. Note these twin laws are unlikely to provide improvement")
-    threshold=1
-    twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
-    if twin_laws:
-      return twin_laws
+      print ("Twin Laws Found - See the Twinning Tab")
+      olx.Refresh()
     return twin_laws
 
   def basf_estimate(self,twin_law,hkl,Fc_sq,Fo_sq):
@@ -406,15 +412,53 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     hkl_new=numpy.dot(twin_law, hkl.T).T
     num_data=numpy.shape(hkl)[0]
     twin_component=numpy.zeros(num_data)
+    
+    #the below is an ugly hash at what it should be
+    #crystal_symmetry=crystal.symmetry
+    fo2,fc = self.get_fo_sq_fc()
+    obs=self.observations.detwin(
+      fo2.crystal_symmetry().space_group(),
+      fo2.anomalous_flag(),
+      fc.indices(),
+      fc.as_intensity_array().data())
+    
+    #data_set=self.reflections.f_sq_obs.unique_under_symmetry() #this is a silly attempt just to get the crystal symmetry
+    
     for i, hkl_new_i in enumerate(hkl_new): #no real way to bypass this for non-integer hkl due to needing to ignore non-integral hkl
       if(numpy.any(numpy.abs(numpy.rint(hkl_new_i)-hkl_new_i)>0.1)):
         # skip non-integers
         continue
-      diff = numpy.sum(numpy.abs(hkl_new[i,:] - hkl),axis=1)
-      loc = numpy.argmin(diff)
-      if(diff[loc]<0.1):
+      hkl_new_i=numpy.rint(hkl_new_i)
+      loc=numpy.where((hkl[:,0]==hkl_new_i[0]) & (hkl[:,1]==hkl_new_i[1]) & (hkl[:,2]==hkl_new_i[2]))[0]
+      #diff = numpy.sum(numpy.abs(hkl_new_i - hkl),axis=1) #diff = numpy.sum(numpy.abs(hkl_new[i,:] - hkl),axis=1)
+      #loc = numpy.argmin(diff)
+      #if(diff[loc]<0.1):
         # adding contribution from overlap
+        #twin_component[loc]=Fc_sq[i]
+      if loc:
         twin_component[loc]=Fc_sq[i]
+      else:
+        index=flex.miller_index()
+        index.append(hkl_new_i.astype(int))
+        
+        #this is a botch to get the symmetry/anomaly correct as I don't understand them
+        miller_set=miller.set(crystal_symmetry=fo2.crystal_symmetry(),
+              indices=index,
+              anomalous_flag=fo2.anomalous_flag())        
+        #new_thing=miller.set(crystal_symmetry, index)
+        miller_set=miller_set.map_to_asu()
+        
+        index=miller_set.indices()
+        hkl_symmetric=numpy.array(index)[0]
+        loc=numpy.where((hkl[:,0]==hkl_symmetric[0]) & (hkl[:,1]==hkl_symmetric[1]) & (hkl[:,2]==hkl_symmetric[2]))[0]
+        if loc:
+          twin_component[loc]=Fc_sq[i]
+        else:
+          bad_hkl=hkl_symmetric
+        
+    
+    if numpy.max(twin_component)==0:
+      return [0,0.5,0.5]
         
     basf_r=self.find_basf_r(Fo_sq,Fc_sq,twin_component)
     
@@ -649,12 +693,15 @@ def on_twin_image_click(run_number):
   olx.Atreap(olx.FileFull())
   twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
   twin_law_rnd = numpy.rint(twin_law)
+  basf=float(twin_laws_d[int(run_number)]['BASF'])
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
     print "Using twin law: ", twin_law
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
     OV.DelIns("HKLF")
+    OV.DelIns("BASF")
     OV.AddIns("HKLF 5")
+    OV.AddIns("BASF %f"%basf) #CHANGED - ADDED ADD/REMOVE BASF HERE
     hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
     OV.HKLSrc(hklname)
   OV.UpdateHtml()
