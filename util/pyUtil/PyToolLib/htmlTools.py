@@ -1188,7 +1188,7 @@ def path_from_phil(p):
 
 def getStylesList():
   styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
-  if not styles_path:
+  if not styles_path or not os.path.exists(styles_path):
     styles_path = "%s/etc/CIF/styles" %OV.BaseDir()
     OV.SetParam('user.report.styles_base_path', styles_path)
   styles = os.listdir("%s" %styles_path)

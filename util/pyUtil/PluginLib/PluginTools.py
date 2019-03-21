@@ -69,7 +69,7 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
 
   def setup_gui(self):
-    
+
     if not hasattr(self, 'p_onclick'):
         self.p_onclick = ""
     if olx.HasGUI() != 'true':
@@ -90,7 +90,9 @@ class PluginTools(object):
         location = self.params.gui.location
         before = self.params.gui.before
       try:
-        add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=location, before=before, filetype='', image=image, onclick=self.p_onclick)
+        add_tool_to_index(scope=self.p_name, link=self.p_htm,
+                          path=self.p_path, location=location,
+                          before=before, filetype='', image=image, onclick=self.p_onclick)
       except:
         pass
     gui.help.gh.git_help(quick=False, specific=self.p_path)
