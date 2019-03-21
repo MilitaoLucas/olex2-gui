@@ -1660,8 +1660,7 @@ class ImageTools(FontInstances):
         print("No such image")
         return
 
-    if not trimcolour:
-
+    if not trimcolour and OV.HasGUI():
       import struct
       trimcolour = "#%s" %self.dec2hex(int(olx.gl.lm.ClearColor()))
       _ = struct.unpack("4B",struct.pack(">I",int(olx.gl.lm.ClearColor())))
