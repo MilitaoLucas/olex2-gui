@@ -63,6 +63,8 @@ class NewsImageRetrivalThread(ThreadEx):
       NewsImageRetrivalThread.instance = None
 
   def get_image_from_list(self):
+    from olexFunctions import OlexFunctions
+    OV = OlexFunctions()
     img_url = None
     img_list = NewsImageRetrivalThread.active_image_list.get(self.name,None)
     if not img_list:
@@ -71,7 +73,7 @@ class NewsImageRetrivalThread(ThreadEx):
     tag = None
     res_idx = -1
     if self.name == 'splash':
-      if "-ac" in olx.olex2_tag:
+      if "-ac" in OV.GetTag():
         return None,None
       _ = os.path.join(olx.app.SharedDir(), 'splash.id')
       if not os.path.exists(_):
