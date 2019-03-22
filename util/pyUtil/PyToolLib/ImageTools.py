@@ -1150,12 +1150,12 @@ class ImageTools(FontInstances):
     system_top_adjust = OV.GetParam('gui.font_top_system_adjust', 0)
     if not font_name: font_name = self.font_name
     if not font_size: font_size = self.font_size
+    self.top_adjust = 0
+    self.rel_adjust = 0
     try:
       font = self.fonts[font_name]["fontInstance"].get(font_size, None)
       if not font:
         font = self.registerFontInstance(font_name, font_size)
-      self.top_adjust = 0
-      self.rel_adjust = 0
       if self.font_peculiarities.get(font_name):
         self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust', 0) + system_top_adjust
         self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust', 0) + system_top_adjust
