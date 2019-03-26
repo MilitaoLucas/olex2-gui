@@ -444,7 +444,7 @@ class RunSolutionPrg(RunPrg):
 
 
 class RunRefinementPrg(RunPrg):
-  running = False
+  running = None
   def __init__(self):
     RunPrg.__init__(self)
     self.bitmap = 'refine'
