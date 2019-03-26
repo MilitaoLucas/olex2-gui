@@ -51,8 +51,6 @@
   >
   <skip_merge
     <_diffrn_radiation_wavelength>
-    <_diffrn_radiation_type>
-    <_diffrn_radiation_xray_symbol>
     <_refine_ls_*>
     <_refine_diff_*>
     <_diffrn_reflns_*>
