@@ -64,6 +64,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
     OlexCctbxAdapter.__init__(self)
+    self.interrupted = False
     self.max_cycles = max_cycles
     self.max_peaks = max_peaks
     self.verbose = verbose
@@ -246,6 +247,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       except RuntimeError, e:
         if str(e) == 'external_interrupt':
           print "Refinement interrupted"
+          self.interrupted = True
         else:
           raise e
 

@@ -268,5 +268,13 @@ def stopShelx():
     file.close()
   except AttributeError:
     pass
+  
+  try:
+    import RunPrg
+    if RunPrg.RunPrg.running:
+      RunPrg.RunPrg.running.interrupted = True
+  except:
+    pass
+
   return
 OV.registerFunction(stopShelx)

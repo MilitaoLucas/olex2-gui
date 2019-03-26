@@ -51,13 +51,14 @@ class ListenerManager(object):
 LM = ListenerManager()
 
 class RunPrg(ArgumentParser):
-  running = False
+  running = None
 
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.terminate = False
+    self.interrupted = False
     self.tidy = False
     self.method = None
     self.Ralpha = 0
@@ -69,7 +70,6 @@ class RunPrg(ArgumentParser):
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
     self.please_run_auto_vss = False
-
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
 
@@ -106,7 +106,7 @@ class RunPrg(ArgumentParser):
     if RunPrg.running:
       print("Already running. Please wait...")
       return
-    RunPrg.running = True
+    RunPrg.running = self
     caught_exception = None
     try:
       token = TimeWatch.start("Running %s" %self.program.name)
@@ -126,6 +126,7 @@ class RunPrg(ArgumentParser):
       if timer:
         t1 = time.time()
     except Exception, e:
+      sys.stdout.formatExceptionInfo()
       caught_exception = e
     finally:
       self.endRun()
@@ -192,7 +193,8 @@ class RunPrg(ArgumentParser):
           if copy_from.lower() != copy_to.lower():
             shutil.copyfile(copy_from, copy_to)
         if timer:
-          print "---- copying %s: %.3f" %(copy_from, time.time() -t)
+          pass
+          #print "---- copying %s: %.3f" %(copy_from, time.time() -t)
     finally:
       OV.deleteFileLock(file_lock)
 
@@ -455,7 +457,7 @@ class RunRefinementPrg(RunPrg):
     if RunRefinementPrg.running:
       print("Already running. Please wait...")
       return False
-    RunRefinementPrg.running = True
+    RunRefinementPrg.running = self
     try:
       self.startRun()
       try:
@@ -475,7 +477,7 @@ class RunRefinementPrg(RunPrg):
         self.method.observe(self)
       RunPrg.run(self)
     finally:
-      RunRefinementPrg.running = False
+      RunRefinementPrg.running = None
 
 
   def setupRefine(self):
