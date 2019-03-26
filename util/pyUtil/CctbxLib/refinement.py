@@ -256,17 +256,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
         jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
           self.reparametrisation.mapping_to_grad_fc_independent_scalars))
-      _ = olx.Ins('ACTA')
-      if _ == "n/a":
-        acta_stuff = False
-      else:
-        acta_stuff = True
-      _ = olx.Ins('MORE')
-      if "-" in _:
-        fcf_stuff = True
-      else:
-        fcf_stuff = False
-      if acta_stuff == "n/a": acta_stuff = ""
+      fcf_stuff = '-' in olx.Ins('MORE')
       if fcf_stuff:
         self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
@@ -313,15 +303,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
-      if acta_stuff:
-        block_name = OV.FileName().replace(' ', '')
-        cif = iotbx.cif.model.cif()
-        cif[block_name] = self.as_cif_block()
-        f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
-        print >> f, cif
-        f.close()
+      block_name = OV.FileName().replace(' ', '')
+      cif = iotbx.cif.model.cif()
+      cif[block_name] = self.as_cif_block()
+      acta = olx.Ins("ACTA").strip()
+      if acta != "n/a":
+        with open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w') as f:
+          print >> f, cif
+        inc_hkl = acta and "NOHKL" != acta.split()[-1].upper()
         if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
-          olx.CifMerge(f=True, u=True)
+          olx.CifMerge(f=inc_hkl, u=True)
 
       self.output_fcf()
       new_weighting = weighting.optimise_parameters(
@@ -331,7 +322,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.reparametrisation.n_independents)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
-      if self.on_completion and acta_stuff:
+      if self.on_completion and acta != "n/a":
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
@@ -480,106 +471,111 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # cell parameters and errors
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
-    from scitbx import matrix
-    cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
-    xs = self.xray_structure()
+    acta_stuff = olx.Ins('ACTA') != "n/a"
+    if not acta_stuff:
+      from iotbx.cif import model
+      cif_block = model.block()
+    else:
+      from scitbx import matrix
+      cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
+      xs = self.xray_structure()
+      cif_block = xs.as_cif_block(
+        format="coreCIF",
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
 
-    cif_block = xs.as_cif_block(
-      format="coreCIF",
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-      cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
 
-
-    for i in range(3):
-      for j in range(i+1,3):
-        if (cell_params[i] == cell_params[j] and
-            cell_errors[i] == cell_errors[j] and
-            cell_params[i+3] == 90 and
-            cell_errors[i+3] == 0 and
-            cell_params[j+3] == 90 and
-            cell_errors[j+3] == 0):
-          cell_vcv[i,j] = math.pow(cell_errors[i],2)
-          cell_vcv[j,i] = math.pow(cell_errors[i],2)
-    # geometry loops
-    cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
-    connectivity_full = self.reparametrisation.connectivity_table
-    bond_h = '$H' in olx.Ins('bond').upper()
-    distances = iotbx.cif.geometry.distances_as_cif_loop(
-      connectivity_full.pair_asu_table,
-      site_labels=xs.scatterers().extract_labels(),
-      sites_frac=xs.sites_frac(),
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-      cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map(),
-      include_bonds_to_hydrogen=bond_h,
-      fixed_distances=self.reparametrisation.fixed_distances)
-    angles = iotbx.cif.geometry.angles_as_cif_loop(
-      connectivity_full.pair_asu_table,
-      site_labels=xs.scatterers().extract_labels(),
-      sites_frac=xs.sites_frac(),
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-      cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map(),
-      include_bonds_to_hydrogen=bond_h,
-      fixed_angles=self.reparametrisation.fixed_angles,
-      conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
-    cif_block.add_loop(distances.loop)
-    cif_block.add_loop(angles.loop)
-    htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
-    equivs = self.olx_atoms.model['equivalents']
-    hbonds = []
-    for htab in htabs:
-      atoms = htab['atoms']
-      rt_mx = None
-      if atoms[1][1] > -1:
-        rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
-      hbonds.append(
-        iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
-    if len(hbonds):
-      max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 2.9))
-      min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle', 120))
-      hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
-        hbonds,
+      for i in range(3):
+        for j in range(i+1,3):
+          if (cell_params[i] == cell_params[j] and
+              cell_errors[i] == cell_errors[j] and
+              cell_params[i+3] == 90 and
+              cell_errors[i+3] == 0 and
+              cell_params[j+3] == 90 and
+              cell_errors[j+3] == 0):
+            cell_vcv[i,j] = math.pow(cell_errors[i],2)
+            cell_vcv[j,i] = math.pow(cell_errors[i],2)
+      # geometry loops
+      cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
+      connectivity_full = self.reparametrisation.connectivity_table
+      bond_h = '$H' in olx.Ins('bond').upper()
+      distances = iotbx.cif.geometry.distances_as_cif_loop(
         connectivity_full.pair_asu_table,
         site_labels=xs.scatterers().extract_labels(),
         sites_frac=xs.sites_frac(),
-        min_dha_angle=min_dha_angle,
-        max_da_distance=max_da_distance,
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv,
         parameter_map=xs.parameter_map(),
-        fixed_distances=self.reparametrisation.fixed_distances,
-        fixed_angles=self.reparametrisation.fixed_angles)
-      cif_block.add_loop(hbonds_loop.loop)
-    self.restraints_manager().add_to_cif_block(cif_block, xs)
-    # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
-    cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
-    cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
-    cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
-    cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
-    cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
-    cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
-    cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
-    fmt = "%.4f"
-    cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
-    cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
-    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
-    cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
-    cif_block['_exptl_crystal_F_000'] \
-             = "%.4f" %xs.f_000(include_inelastic_part=True)
-
-    if olx.Ins('ACTA') != 'n/a' and OV.GetParam('user.cif.finalise') != 'Exclude':
-      fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
-      import StringIO
-      f = StringIO.StringIO()
-      fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
-      cif_block['_iucr_refine_fcf_details'] = f.getvalue()
+        include_bonds_to_hydrogen=bond_h,
+        fixed_distances=self.reparametrisation.fixed_distances)
+      angles = iotbx.cif.geometry.angles_as_cif_loop(
+        connectivity_full.pair_asu_table,
+        site_labels=xs.scatterers().extract_labels(),
+        sites_frac=xs.sites_frac(),
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv,
+        parameter_map=xs.parameter_map(),
+        include_bonds_to_hydrogen=bond_h,
+        fixed_angles=self.reparametrisation.fixed_angles,
+        conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
+      cif_block.add_loop(distances.loop)
+      cif_block.add_loop(angles.loop)
+      htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
+      equivs = self.olx_atoms.model['equivalents']
+      hbonds = []
+      for htab in htabs:
+        atoms = htab['atoms']
+        rt_mx = None
+        if atoms[1][1] > -1:
+          rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
+        hbonds.append(
+          iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
+      if len(hbonds):
+        max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 2.9))
+        min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle', 120))
+        hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
+          hbonds,
+          connectivity_full.pair_asu_table,
+          site_labels=xs.scatterers().extract_labels(),
+          sites_frac=xs.sites_frac(),
+          min_dha_angle=min_dha_angle,
+          max_da_distance=max_da_distance,
+          covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+          cell_covariance_matrix=cell_vcv,
+          parameter_map=xs.parameter_map(),
+          fixed_distances=self.reparametrisation.fixed_distances,
+          fixed_angles=self.reparametrisation.fixed_angles)
+        cif_block.add_loop(hbonds_loop.loop)
+      self.restraints_manager().add_to_cif_block(cif_block, xs)
+      # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+      cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
+      cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
+      cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
+      cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
+      cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
+      cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
+      cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
+      cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
+      cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
+      cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
+      cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
+      cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
+      cif_block['_exptl_crystal_F_000'] \
+               = "%.4f" %xs.f_000(include_inelastic_part=True)
+      acta = olx.Ins("ACTA").strip()
+      if OV.GetParam('user.cif.finalise') != 'Exclude' and\
+         acta and "NOHKL" != acta.split()[-1].upper():
+        fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+        import StringIO
+        f = StringIO.StringIO()
+        fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
+        cif_block['_iucr_refine_fcf_details'] = f.getvalue()
 
     fo2 = self.reflections.f_sq_obs
     merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
+    fmt = "%.4f"
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
