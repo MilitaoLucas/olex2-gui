@@ -67,6 +67,7 @@ class Method_cctbx_refinement(Method_refinement):
     finally:
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       OV.DeleteBitmap('refine')
+      self.interrupted = cctbx.interrupted
 
   def getFlack(self):
     return self.flack
