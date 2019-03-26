@@ -500,6 +500,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
 def add_mask_content(i,which):
   global mask_info_has_updated
+  global current_sNum
   current_sNum = OV.ModelSrc()
   if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
     base = "platon_squeeze"
@@ -511,7 +512,6 @@ def add_mask_content(i,which):
     i_l = [str(i)]
   else:
     i_l = i.split(":")
-  global current_sNum
   current_sNum = OV.ModelSrc()
   contents = olx.cif_model[current_sNum].get('_%s_void_%s' %(base, which))
   if not contents:
