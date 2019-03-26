@@ -450,7 +450,12 @@ class OlexFunctions(inheritFunctions):
       elif finalise == 'Exclude':
         finalise_value = False
       elif olex2_refine:
-        finalise_value = True
+        acta = olx.Ins("ACTA").strip()
+        if acta and "NOHKL" == acta.split()[-1].upper():
+          finalise_value = False
+        else:
+          finalise_value = True
+
       if update_atoms_loop is None:
         update_atoms_loop = olex2_refine
       if type(filepath) == list:

@@ -74,27 +74,25 @@ class Method_cctbx_refinement(Method_refinement):
 
   def post_refinement(self, RunPrgObject):
     OV.SetParam('snum.refinement.max_cycles',self.cycles)
-    acta_stuff = olx.Ins('ACTA') != "n/a"
-    if acta_stuff:
-      self.writeRefinementInfoIntoRes(self.cif)
-      txt = '''
-      R1_all=%(_refine_ls_R_factor_all)s;
-      R1_gt = %(_refine_ls_R_factor_gt)s;
-      wR_ref = %(_refine_ls_wR_factor_ref)s;
-      GOOF = %(_refine_ls_goodness_of_fit_ref)s;
-      Shift_max = %(_refine_ls_shift/su_max)s;
-      Shift_mean = %(_refine_ls_shift/su_mean)s;
-      Reflections_all = %(_reflns_number_total)s;
-      Reflections_gt = %(_reflns_number_gt)s;
-      Parameters = %(_refine_ls_number_parameters)s;
-      Hole = %(_refine_diff_density_min)s;
-      Peak = %(_refine_diff_density_max)s;
-      Flack = %(_refine_ls_abs_structure_Flack)s;
-      ''' %self.cif
-      try:
-        olx.xf.RefinementInfo(txt)
-      except:
-        pass
+    self.writeRefinementInfoIntoRes(self.cif)
+    txt = '''
+    R1_all=%(_refine_ls_R_factor_all)s;
+    R1_gt = %(_refine_ls_R_factor_gt)s;
+    wR_ref = %(_refine_ls_wR_factor_ref)s;
+    GOOF = %(_refine_ls_goodness_of_fit_ref)s;
+    Shift_max = %(_refine_ls_shift/su_max)s;
+    Shift_mean = %(_refine_ls_shift/su_mean)s;
+    Reflections_all = %(_reflns_number_total)s;
+    Reflections_gt = %(_reflns_number_gt)s;
+    Parameters = %(_refine_ls_number_parameters)s;
+    Hole = %(_refine_diff_density_min)s;
+    Peak = %(_refine_diff_density_max)s;
+    Flack = %(_refine_ls_abs_structure_Flack)s;
+    ''' %self.cif
+    try:
+      olx.xf.RefinementInfo(txt)
+    except:
+      pass
 
   def writeRefinementInfoForGui(self, cif):
     for key, value in cif.iteritems():
