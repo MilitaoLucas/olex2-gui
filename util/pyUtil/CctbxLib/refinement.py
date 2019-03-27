@@ -322,7 +322,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.reparametrisation.n_independents)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
-      if self.on_completion and acta != "n/a":
+      if self.on_completion:
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
@@ -547,29 +547,30 @@ class FullMatrixRefine(OlexCctbxAdapter):
           fixed_angles=self.reparametrisation.fixed_angles)
         cif_block.add_loop(hbonds_loop.loop)
       self.restraints_manager().add_to_cif_block(cif_block, xs)
-      # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
-      cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
-      cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
-      cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
-      cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
-      cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
-      cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
-      cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
-      cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-      cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
-      cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
-      cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
-      cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
-      cif_block['_exptl_crystal_F_000'] \
-               = "%.4f" %xs.f_000(include_inelastic_part=True)
-      acta = olx.Ins("ACTA").strip()
-      if OV.GetParam('user.cif.finalise') != 'Exclude' and\
-         acta and "NOHKL" != acta.split()[-1].upper():
-        fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
-        import StringIO
-        f = StringIO.StringIO()
-        fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
-        cif_block['_iucr_refine_fcf_details'] = f.getvalue()
+
+    # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+    cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
+    cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
+    cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
+    cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
+    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
+    cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
+    cif_block['_exptl_crystal_F_000'] \
+             = "%.4f" %xs.f_000(include_inelastic_part=True)
+    acta = olx.Ins("ACTA").strip()
+    if OV.GetParam('user.cif.finalise') != 'Exclude' and\
+       acta and "NOHKL" != acta.split()[-1].upper():
+      fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+      import StringIO
+      f = StringIO.StringIO()
+      fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
+      cif_block['_iucr_refine_fcf_details'] = f.getvalue()
 
     fo2 = self.reflections.f_sq_obs
     merging = self.reflections.merging
