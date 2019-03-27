@@ -81,7 +81,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if print_tabular:
       print >>log, "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.2f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
         self.n_current_cycle,
-        self.r1_factor()[0]*100,
+        self.r1_factor(cutoff_factor=2)[0]*100,
         self.wR2()*100,
         self.goof(),
         max_shift_esd,
