@@ -632,7 +632,8 @@ OV.registerFunction(get_mask_info_old, False, 'gui.tools')
 
 def makeFormulaForsNumInfo():
   global current_sNum
-  t1 = time.time()
+  if timer:
+    t1 = time.time()
 
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
@@ -659,7 +660,7 @@ def makeFormulaForsNumInfo():
     colour = OV.GetParam('gui.html.formula_colour').hexadecimal
   font_size = OV.GetParam('gui.html.formula_size')
   panelwidth = int(olx.html.ClientWidth('self'))
-  q = len(txt_formula)/(panelwidth - (0.65*panelwidth))
+  q = len(txt_formula)/(panelwidth - (0.60*panelwidth))
   if q > 0.26:
     font_size -= 4
   elif q > 0.23:
@@ -679,7 +680,7 @@ def makeFormulaForsNumInfo():
     OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
     formula = present
 
-  html_formula = olx.xf.GetFormula('html',1)
+  html_formula = olx.xf.GetFormula('html',1).replace("</sub>", " </sub>")
   formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
 
   d = {}
