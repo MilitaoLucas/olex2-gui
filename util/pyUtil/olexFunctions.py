@@ -675,11 +675,10 @@ class OlexFunctions(inheritFunctions):
     return olx.Lst(string)
 
   def standardizePath(self, path):
-    path = path.replace('\\','/')
-    if path.startswith("/") and "//" not in path:
-      path = "/" + path
     if os.sep != '/':
       path = path.replace('/', os.sep)
+    elif os.sep != '\\':
+      path = path.replace('\\', os.sep)
     return path
 
   def standardizeListOfPaths(self, list_of_paths):
