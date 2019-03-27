@@ -389,6 +389,7 @@ def file_open(path, base="", mode='r', readlines=False):
     else:
       retVal = open(path, mode).read()
   else:
+    paths = []
     if base:
       paths = [path, base]
     common_prefix = os.path.commonprefix(paths)
