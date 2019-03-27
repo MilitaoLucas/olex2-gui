@@ -472,13 +472,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
     acta_stuff = olx.Ins('ACTA') != "n/a"
+    xs = self.xray_structure()
     if not acta_stuff:
       from iotbx.cif import model
       cif_block = model.block()
     else:
       from scitbx import matrix
       cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
-      xs = self.xray_structure()
       cif_block = xs.as_cif_block(
         format="coreCIF",
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
