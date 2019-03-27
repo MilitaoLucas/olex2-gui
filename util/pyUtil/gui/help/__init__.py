@@ -101,7 +101,7 @@ class GetHelp(object):
     #regex_source = os.path.join(self.source_dir, "regex_format_help.txt")
     regex_source = os.path.join(self.p_path, "regex_format_help.txt")
     if os.path.exists(regex_source):
-      txt = gui.tools.run_regular_expressions(txt, regex_source)
+      txt = gui.tools.run_regular_expressions(txt, regex_source, base=self.p_path)
     gui_link = os.path.join(p_path, 'gui-link')
     txt = txt.replace("GetVar(gui_link)",gui_link)
     return txt
