@@ -232,7 +232,7 @@ class GetHelp(object):
 
         if debug and help_type == 'help':
           p = p_path
-          gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', path=p, mask="*.html")
+          gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', base=p, path=p, mask="*.html")
           edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p)%md_path
           compile_help = gui.tools.TemplateProvider.get_template('compile_help')%md_path
           help = edit_help + compile_help + help
