@@ -659,7 +659,7 @@ def makeFormulaForsNumInfo():
     colour = OV.GetParam('gui.html.formula_colour').hexadecimal
   font_size = OV.GetParam('gui.html.formula_size')
   panelwidth = int(olx.html.ClientWidth('self'))
-  q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
+  q = len(txt_formula)/(panelwidth - (0.65*panelwidth))
   if q > 0.26:
     font_size -= 4
   elif q > 0.23:
@@ -1078,14 +1078,20 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
-def get_regex_l(src_file):
+def get_regex_l(src_file, base=None):
   global regex_l
   if not src_file:
     return False
 
   #if not src_file in regex_l:
   re_l = []
-  l = open(src_file, 'r').readlines()
+  l = None
+  try:
+    l = gui.file_open(src_file, base=base, readlines=True)
+  except:
+    l = open(src_file, 'r').readlines()
+  if not l:
+    return None
   for item in l:
     item = item.strip()
     if item.startswith('#') or not item:
@@ -1097,11 +1103,11 @@ def get_regex_l(src_file):
   regex_l.setdefault('%s'%src_file,re_l)
   return regex_l[src_file]
 
-def run_regular_expressions(txt, src_file=None, re_l=None, specific=""):
+def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=None):
   try:
     global regex_l
     if not re_l:
-      re_l = get_regex_l(src_file)
+      re_l = get_regex_l(src_file, base=base)
 
     if timer:
       t_timer=time.time()
