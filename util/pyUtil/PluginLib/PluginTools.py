@@ -18,9 +18,9 @@ class PluginTools(object):
       deal_with_gui_phil('load')
       olx.InstalledPlugins.add(self)
 
-  def endKickstarter(self):
+  def endKickstarter(self,make_gui=True):
     p = os.path.join(self.p_path, self.p_htm + ".htm")
-    if OV.HasGUI():
+    if OV.HasGUI() and make_gui:
       try:
         t = gui.file_open(p, 'r')
         OlexVFS.write_to_olex(p, t)
@@ -35,9 +35,11 @@ class PluginTools(object):
     print "Loading %s (Version %s)\n" %(self.p_name, self.get_plugin_date()),
 
   def deal_with_phil(self, operation='read', which='user_local'):
-    user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)
-    phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_scope)
-    gui_phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name.lower())
+    ### define paths
+    user_phil_file = os.path.join(OV.DataDir(), "%s.phil"%self.p_scope)
+    phil_file_p = os.path.join(self.p_path, "%s.phil" %self.p_scope)
+    gui_phil_file_p = os.path.join(self.p_path, "%s.phil" %self.p_name.lower())
+    ###
     if operation == "read":
       phil_file = open(phil_file_p, 'r')
       phil = phil_file.read()
