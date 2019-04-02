@@ -69,9 +69,12 @@ class PluginTools(object):
         file_name=user_phil_file, scope_name='%s' %self.p_scope, diff_only=False)
       #olx.phil_handler.save_param_file(
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
+        
+  def load_ressources(self):
+    pass
 
-  def setup_gui(self):
-
+  def setup_gui(self, force=False):
+    self.load_ressources()  
     if not hasattr(self, 'p_onclick'):
         self.p_onclick = ""
     if olx.HasGUI() != 'true':
@@ -80,7 +83,7 @@ class PluginTools(object):
     from gui.tools import add_tool_to_index
     import gui.help
     for image, img_type in self.p_img:
-      make_single_gui_image(image, img_type=img_type)
+      make_single_gui_image(image, img_type=img_type, force=force)
     olx.FlushFS()
 
     if self.p_htm:
