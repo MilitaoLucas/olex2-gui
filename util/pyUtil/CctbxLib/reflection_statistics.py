@@ -406,6 +406,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     r.amplitudes_array = self.amplitudes_array
     r.xLegend = "Expected deviations"
     r.yLegend = "Observed deviations"
+    r.R = self.correlation
     return r
 
 
@@ -440,6 +441,7 @@ class bijvoet_differences_NPP:
     r.fit_y_intercept = self.plot.fit.y_intercept()
     r.xLegend = "Expected deviations"
     r.yLegend = "Observed deviations"
+    r.R = self.plot.correlation.coefficient()
     return r
 
 
@@ -490,6 +492,8 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
     r.xLegend = "delta Fc2"
     r.yLegend = "delta Fo2"
     r.sigmas = self.delta_fo2.sigmas()
+    correlation = flex.linear_correlation(r.x, r.y)
+    r.R = correlation.coefficient()
     return r
 
 def wilson_statistics(model, cctbx_adaptor, n_bins=10):
