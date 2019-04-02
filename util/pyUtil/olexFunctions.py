@@ -677,7 +677,7 @@ class OlexFunctions(inheritFunctions):
   def standardizePath(self, path):
     if os.sep != '/':
       path = path.replace('/', os.sep)
-    elif os.sep != '\\':
+    else:
       path = path.replace('\\', os.sep)
     return path
 
