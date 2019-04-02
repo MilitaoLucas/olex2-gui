@@ -260,7 +260,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     olx.xf.EndUpdate()
-    olx.Refresh()
+    if OV.HasGUI():
+      olx.Refresh()
     if OV.isInterruptSet():
       raise RuntimeError('external_interrupt')
 
