@@ -194,7 +194,7 @@ def flash_gui_control(control, wait=300):
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
-def make_single_gui_image(img_txt="", img_type='h2'):
+def make_single_gui_image(img_txt="", img_type='h2', force=False):
   import PilTools
   import OlexVFS
   TI = PilTools.TI
@@ -206,7 +206,7 @@ def make_single_gui_image(img_txt="", img_type='h2'):
     elif img_type == "h1":
       alias = img_type
       img_type = "h2"
-    image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
+    image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False, force=force)
     name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
@@ -680,7 +680,7 @@ def makeFormulaForsNumInfo():
     OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
     formula = present
 
-  html_formula = olx.xf.GetFormula('html',1).replace("</sub>", " </sub>")
+  html_formula = olx.xf.GetFormula('html',1).replace("</sub>", "<font size='2'></font></sub>")
   formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
 
   d = {}

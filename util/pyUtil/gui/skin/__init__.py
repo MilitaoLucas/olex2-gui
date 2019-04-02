@@ -357,9 +357,9 @@ class Skin():
     try:
       for plugin in olx.InstalledPlugins:
         try:
-          plugin.setup_gui()
-        except:
-          print "Could not update images for plugin '%s'" %plugin
+          plugin.setup_gui(force=True)
+        except Exception, err:
+          print "Could not update images for plugin '%s': %s" %(plugin, err)
     except:
       pass
 
