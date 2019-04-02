@@ -445,6 +445,7 @@ class ImageTools(FontInstances):
       print("======================================================")
 
   def resize_image(self, image, size, name=None):
+    #cache_name = "%s_%s_%s" %(name, width)
     if not self.dpi_scale:
       self.get_available_width()
     s = self.dpi_scale
@@ -455,20 +456,20 @@ class ImageTools(FontInstances):
       width = int(size[0])
       height = int(size[1])
 
-    if name:
-      cache_name = "%s_%s" %(name, width)
-      _ = self.im_cache.get(cache_name,None)
-      if _:
-        if repr(width) in cache_name:
-          if debug:
-            print "--- Return %s from Cache!" %name
-          return _
+    #if name:
+      #cache_name = "%s_%s" %(name, width)
+      #_ = self.im_cache.get(cache_name,None)
+      #if _:
+        #if repr(width) in cache_name:
+          #if debug:
+            #print "--- Return %s from Cache!" %name
+          #return _
 
     image = image.resize((width,height), Image.ANTIALIAS)
     if debug:
       print "+++ Resize %s (%s)!" %(name, s)
-    if name:
-      self.im_cache[cache_name] = image
+    #if name:
+      #self.im_cache[cache_name] = image
     return image
 
   def resize_skin_logo(self, width):

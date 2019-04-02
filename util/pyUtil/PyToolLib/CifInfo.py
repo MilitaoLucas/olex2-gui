@@ -834,12 +834,11 @@ class ExtractCifInfo(CifTools):
           self.cif_block['_diffrn_ambient_temperature'] = t
         self.cif_block['_diffrn_ambient_temperature'] = t
 
-    ## I have uncommented these lines below on 18/7/11 - I can't see what they were
-    ## doing other than making the wrong temperature make a comeback...
-    #if '_diffrn_ambient_temperature' in self.cif_block:
-      #self.update_cif_block({
-        #'_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
-      #})
+    if '_diffrn_ambient_temperature' in self.cif_block and\
+       '_cell_measurement_temperature' not in self.cif_block:
+      self.update_cif_block({
+        '_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
+      })
 
     self.update_manageable()
     # merge references

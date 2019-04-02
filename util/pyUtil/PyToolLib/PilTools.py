@@ -2514,7 +2514,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.params.image_font_name:
       font_name = self.params.image_font_name
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None,outside_name=None):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None,outside_name=None, force=False):
 
     self.params = OV.GuiParams()
     if not self.width:
@@ -2737,7 +2737,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp#
 
-    if 'tinybutton' not in type_key:
+    if 'tinybutton' not in type_key and not force:
       if timage_blanks[self.params.skin.name].has_key(type_key):
         if timage_blanks[self.params.skin.name][type_key].has_key(state):
           image = timage_blanks[self.params.skin.name][type_key][state]

@@ -382,7 +382,8 @@ class Graph(ArgumentParser):
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
       i += 1
 
-  def draw_fit_line(self, slope, y_intercept, write_equation=True, x_intercept=None, write_text=False):
+  def draw_fit_line(self, slope, y_intercept, write_equation=True,
+                    x_intercept=None, write_text=False, R=None):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
     if not x_intercept:
@@ -480,6 +481,11 @@ class Graph(ArgumentParser):
       top_left = (x,y)
       IT.write_text_to_draw(
         self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+      if R is not None:
+        txt = "R = %.3f" %float(R)
+        top_left = (top_left[0], top_left[1] + wY*1.2)
+        IT.write_text_to_draw(
+          self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
     if write_text:
       txt = write_text
@@ -664,7 +670,7 @@ class Graph(ArgumentParser):
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
-        self.draw_fit_line(slope, y_intercept)
+        self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
         marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt)
@@ -2234,6 +2240,7 @@ class bijvoet_differences_scatter_plot(Analysis):
     metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata.setdefault("R", xy_plot.R)
     metadata.setdefault("name", 'Bijvoet Differences')
     self.metadata = metadata
 
@@ -2273,6 +2280,7 @@ class bijvoet_differences_NPP(Analysis):
     metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata.setdefault("R", xy_plot.R)
     self.metadata = metadata
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
@@ -2308,6 +2316,7 @@ class Normal_probability_plot(Analysis):
     metadata = {}
     metadata.setdefault("fit_slope", xy_plot.fit_slope)
     metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    metadata.setdefault("R", xy_plot.R)
     amplitudes = [elem[1] for elem in list(xy_plot.amplitudes_array)]
     metadata['amplitudes'] = amplitudes
     data = Dataset(
