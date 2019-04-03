@@ -26,8 +26,16 @@ except Exception, err:
     markdown2 = imp.load_compiled('markdown2', os.path.join(p_path, 'markdown2.pyo'))
   print "markdown2 imported through imp."
 
-class GetHelp(object):
+from PluginTools import VFSDependent
+class GetHelp(VFSDependent):
+
+  def load_ressources(self):
+    p = os.path.join(OV.BaseDir(),"util","pyUtil","gui","help", "help.zip")
+    if os.path.exists(p):
+      gui.zipToOlexVFS(p)
+
   def __init__(self):
+    super(GetHelp, self).__init__()
     import gui
     self.git_url = OV.GetParam('gui.help.git_url')
     language = olx.CurrentLanguage()
@@ -37,9 +45,7 @@ class GetHelp(object):
 
     olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
-    p = os.path.join(OV.BaseDir(),"util","pyUtil","gui","help", "help.zip")
-    if os.path.exists(p):
-      gui.zipToOlexVFS(p)
+    self.load_ressources()
     ws = olx.GetWindowSize('gl')
     ws = ws.split(',')
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
