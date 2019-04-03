@@ -794,15 +794,6 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
 OV.registerFunction(OlexCctbxMasks)
 
-class OlexCctbxTwinLaws(object):
-  def __init__(self):
-    from olex_twinning import OlexCctbxTwinLaws
-    OlexCctbxTwinLaws()
-
-    
-OV.registerFunction(OlexCctbxTwinLaws)
-
-
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   plot = None
@@ -1007,4 +998,3 @@ def generate_sf_table():
   SF_TableGenerator()
 
 OV.registerFunction(generate_sf_table, False, "test")
-
