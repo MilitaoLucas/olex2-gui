@@ -355,6 +355,16 @@ class Skin():
     olex.m("spy.make_HOS()")
 
     try:
+      for item in olx.VFSDependent:
+        try:
+          item.load_ressources()
+        except Exception, err:
+          print "Could not load ressources for '%s': %s" %(item, err)
+    except:
+      pass
+
+
+    try:
       for plugin in olx.InstalledPlugins:
         try:
           plugin.setup_gui(force=True)
