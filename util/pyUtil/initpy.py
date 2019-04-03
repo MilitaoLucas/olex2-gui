@@ -206,21 +206,16 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
   sys.path.append("%s/util/pyUtil/HAR" %basedir)
+  sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
+  olx.VFSDependent = set()
 
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
-  sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
-  from PluginTools import PluginTools
-  try:
-    import AC4
-  except:
-    pass
-  try:
-    import FragmentDB
-  except Exception, err:
-    print("Failed to import FragmentDB: %s" %err)
   
+  from PluginTools import PluginTools
+  import AC4
+  import FragmentDB
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
@@ -313,6 +308,7 @@ if timer:
   t = time.time()
 
 from gui.tools import *
+from gui.skin import *
 if OV.HasGUI():
   import htmlMaker
   from gui.home import *
@@ -321,7 +317,6 @@ if OV.HasGUI():
   from gui.metadata import *
   from gui.maps import *
   from gui.images import *
-#  from gui.skin import *
   from gui.db import *
   from gui.help import *
   #import Tutorials
@@ -329,7 +324,7 @@ if OV.HasGUI():
   #export_parameters()
   from Analysis import Analysis
 
-from gui.skin import *
+#from gui.skin import *
 
 if timer:
   tt.append("%.3f s == GUI Imports" %(time.time() - t))
