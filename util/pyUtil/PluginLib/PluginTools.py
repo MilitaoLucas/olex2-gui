@@ -11,8 +11,17 @@ import gui
 debug = bool(OV.GetParam("olex2.debug", False))
 import HttpTools
 
-class PluginTools(object):
+class VFSDependent(object):
   def __init__(self):
+    olx.VFSDependent.add(self)
+
+  def load_ressources(self):
+    pass
+
+class PluginTools(VFSDependent):
+  def __init__(self):
+    super(PluginTools, self).__init__()
+    self.headless = False
     if olx.HasGUI() == 'true':
       from gui.tools import deal_with_gui_phil
       deal_with_gui_phil('load')
@@ -70,18 +79,14 @@ class PluginTools(object):
       #olx.phil_handler.save_param_file(
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
         
-  def load_ressources(self):
-    pass
-
   def setup_gui(self, force=False):
-    self.load_ressources()  
     if not hasattr(self, 'p_onclick'):
         self.p_onclick = ""
-    if olx.HasGUI() != 'true':
+    if olx.HasGUI() != 'true' or self.headless:
       return
+    import gui.help
     from gui.tools import make_single_gui_image
     from gui.tools import add_tool_to_index
-    import gui.help
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type, force=force)
     olx.FlushFS()
@@ -92,8 +97,8 @@ class PluginTools(object):
         location = self.p_location
         before = self.p_before
       except:
-        location = self.params.gui.location
-        before = self.params.gui.before
+        location = OV.GetParam("%s.gui.location" %(self.p_scope))
+        before = OV.GetParam("%s.gui.before" %(self.p_scope))
       try:
         add_tool_to_index(scope=self.p_name, link=self.p_htm,
                           path=self.p_path, location=location,
