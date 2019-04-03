@@ -216,8 +216,11 @@ def set_plugins_paths():
     import AC4
   except:
     pass
-  import FragmentDB
-
+  try:
+    import FragmentDB
+  except Exception, err:
+    print("Failed to import FragmentDB: %s" %err)
+  
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
@@ -246,6 +249,7 @@ def setup_cctbx():
   import my_refine_util
   import cctbx_olex_adapter
   import cctbx_controller
+  import olex_twinning
 
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
