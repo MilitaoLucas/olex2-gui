@@ -1,6 +1,6 @@
 # initpy.py
-import olex
 import sys
+import olex
 import os
 import time
 timer = True
@@ -252,7 +252,14 @@ sys.stderr = StreamRedirection(sys.stderr, stderr_redirection)
 
 
 t = time.time()
-import olx
+try:
+  import olx
+except Exception, e:
+  x = os.getcwdu()
+  os.chdir(datadir)
+  import olx
+  os.chdir(x)
+
 if timer:
   tt.append("%.3f s == import olx" %(time.time() - t))
   t = time.time()
