@@ -66,13 +66,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.registerFunction(self.run,True,'twin')
     OV.registerFunction(self.run_from_gui,True,'twin')
 
-  def run_from_gui(self):
+  def run_from_gui(self, personal=False):
     print "Searching for Twin laws..."
     olx.Cursor("busy", "Searching for Twin laws...")
-    self.run()
+    self.run(personal) #personal
     olx.Cursor()
   
-  def run(self): 
+  def run(self, personal=False):
     from PilTools import MatrixMaker
     global twin_laws_d
 
@@ -101,8 +101,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     
     rank=numpy.argsort(leastSquare)[::-1]
     hkl_sel = numpy.copy(hkl[rank[:hkl_sel_num],:])
-
-    twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
+    #twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
+    if not personal:
+      twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
+    else:
+      twin_laws=self.find_personal_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     top_twins=ordered_twins[:10]
     lawcount=0
@@ -192,9 +195,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     with open( p, "wb" ) as out:
       pickle.dump( twin_laws_d, out )
     
-    
-    
-#    self.make_gui()
 
   def run_twin_ref_shelx(self, law, basf):
     #law_ins = ' '.join(str(i) for i in law[:9])
@@ -353,13 +353,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     g[2,1] = gl[5]
     return g
 
-  def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
-    always_basf=True
-    do_long=False
-    do_very_long=False
-    number_laws=4
+  def get_integral_twin_laws(self,hkl_all,f_calc,f_obs):
     twin_laws=[]
-    cctbx_twin_laws = cctbx_controller.twin_laws(self.reflections)
+    with HiddenPrints():
+      cctbx_twin_laws = cctbx_controller.twin_laws(self.reflections)
 
     for twin_law in cctbx_twin_laws:
       law = twin_law.as_double_array()[0:9]
@@ -368,8 +365,17 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       [basf, r,r_diff]=self.basf_quicker_integral(law, hkl_all, f_calc, f_obs)
       if(basf<0.1):
         continue
-      twin_laws+=[twin_rules("Integral",[],law,0,0,[basf,r,r_diff])]
+      twin_laws+=[twin_rules("Integral",[],law,0,0,[basf,r,r_diff])]   
+      
+    return twin_laws
 
+  def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
+    always_basf=True
+    do_very_long=False
+    number_laws=4
+    twin_laws=[]
+    twin_laws+=self.get_integral_twin_laws(hkl_all, f_calc, f_obs)
+    
       
     if twin_laws:
       print ("Found Integral Twins")
@@ -385,19 +391,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     threshold=0.002
 
     twin_laws+=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
-    #if twin_laws:
-    #  if always_basf:
-    #    for twin_law in twin_laws:
-    #      rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
-    #      twin_law.rbasf=rbasf
-    #  return twin_laws
+
     if not twin_laws:
       print ("No Highly likely twofold axes, rotation fraction increased")
       olx.Refresh()
       rotation_fraction=24
       twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
 
-    if (not twin_laws) and do_long:
+    if (not twin_laws) and OV.GetParam('user.twinning.olex2.do_long'):
       print ("No Highly likely low-index axes, indexes and threshold increased")
       olx.Refresh()
       size=12
@@ -415,12 +416,46 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
-      
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
       olx.Refresh()
+    else:
+      if not OV.GetParam('user.twinning.olex2.do_long'):
+        print ("No Twin Laws found. If you think there is likely twinning, try the 'extended' version or input your own parameters.")
+      else:
+        print ("No Twin Laws found. If you think there is likely twinning, try inputting your own parameters.")
     return twin_laws
+
+  def find_personal_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
+    #Find the twin laws based only on the user's input parameters
+    
+    always_basf=True
+    number_laws=4
+    twin_laws=[]
+    twin_laws+=self.get_integral_twin_laws(hkl_all, f_calc, f_obs)
+    
+    rotation_fraction=OV.GetParam('user.twinning.olex2.rotation_fraction')
+    size=OV.GetParam('user.twinning.olex2.max_index')
+    threshold=OV.GetParam('user.twinning.olex2.threshold')
+    print ("Using personal values: \n Max Index: %d, \n Rotation Fractions: %d, \n Cutoff Threshold %.4f"%(size,rotation_fraction,threshold))
+    olx.Refresh()
+    
+    twin_laws+=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
+ 
+    if twin_laws and always_basf:
+      for twin_law in twin_laws:
+        rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
+        twin_law.rbasf=rbasf
+    if twin_laws:
+      olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+      olex.m("html.ItemState h2-tools-twinning 1")
+      print ("Twin Laws Found - See the Twinning Tab")
+      olx.Refresh()
+    else:
+      print ("No Twin Laws found. If you think there is likely twinning, try increased index, rotation fraction or threshold.")
+ 
+    return twin_laws    
 
   def basf_estimate(self,twin_law,hkl,Fc_sq,Fo_sq):
     basf_lower=0
@@ -774,3 +809,13 @@ def reset_twin_law_img():
 OV.registerFunction(reset_twin_law_img)
 
 OlexCctbxTwinLaws_instance = OlexCctbxTwinLaws()
+
+#taken from stackoverflow 8391411
+class HiddenPrints:
+  def __enter__(self):
+    self._original_stdout = sys.stdout
+    sys.stdout = open(os.devnull, 'w')
+
+  def __exit__(self, exc_type, exc_val, exc_tb):
+    sys.stdout.close()
+    sys.stdout = self._original_stdout
