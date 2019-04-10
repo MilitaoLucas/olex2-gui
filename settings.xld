@@ -9,6 +9,7 @@
   <shortcut key="Ctrl+U" macro="sel -u">
   <shortcut key="Ctrl+I" macro="sel -i">
   <shortcut key="Ctrl+Shift+G" macro="group sel">
+  <shortcut key="Ctrl+Shift+Z" macro="lookAt">
   <shortcut key="del" macro="kill sel">
   <shortcut key="Alt+back" macro="selback">
   <shortcut key="Ctrl+back" macro="kill sel">

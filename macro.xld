@@ -1395,8 +1395,17 @@
 <getID help="Get the machine ID and copy it to the clipboard."
   <body
     <cmd
-      <cmd1 '@py "import Loader\nimport olx\nolx.Echo(Loader.getAuthenticationToken(), c=True)"'>
-      <cmd1 'echo "The machine ID has been copied to your clipboard."'>
+      <cmd '@py "import Loader\nimport olx\nolx.Echo(Loader.getAuthenticationToken(), c=True)"'>
+      <cmd 'echo "The machine ID has been copied to your clipboard."'>
+    >
+  >
+>
+
+<lookAt help="Centres and zooms on the selection."
+  <body
+    <cmd
+      <cmd 'center'>
+      <cmd 'gl.Zoom -a gl.CalcZoom(true)'>
     >
   >
 >
