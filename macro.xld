@@ -1404,8 +1404,8 @@
 <lookAt help="Centres and zooms on the selection."
   <body
     <cmd
-      <cmd 'center'>
       <cmd 'gl.Zoom -a gl.CalcZoom(true)'>
+      <cmd 'center'>
     >
   >
 >
