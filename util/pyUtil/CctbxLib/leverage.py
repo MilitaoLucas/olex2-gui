@@ -229,7 +229,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
           val, self.observations.data[Ts_[i][0]]/scale_factor, result.observables()[Ts_[i][0]]))
   finally:
     if olx.HasGUI() == 'true':
-    olx.Freeze(False)
+      olx.Freeze(False)
   if False:
     self.f_calc = self.observations.fo_sq.array(
       data=result.f_calc(), sigmas=None)
