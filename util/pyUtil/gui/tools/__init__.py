@@ -1291,7 +1291,11 @@ def GetRInfo(txt="",d_format='html'):
     wR2 = OV.GetParam('snum.refinement.last_wR2')
     if not R1 or R1 == 'n/a' or not wR2 or wR2 == 'n/a':
       import History
-      _ = History.tree.active_node
+      try:
+        _ = History.tree.active_node
+      except:
+        R1 = wR2 = 'n/a'
+        return
       if _ is not None:
         R1 = _.R1
         wR2 = _.wR2
