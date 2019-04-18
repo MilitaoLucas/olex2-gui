@@ -22,9 +22,16 @@ import olx
 
 class leverage_normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
-  def __init__(self, observations, reparametrisation, olx_atoms, **kwds):
+  def __init__(self, observations, reparametrisation, olx_atoms, table_file_name=None, **kwds):
     super(leverage_normal_eqns, self).__init__(
       observations, reparametrisation, initial_scale_factor=float(olx.xf.rm.OSF()), **kwds)
+    if table_file_name:
+      self.one_h_linearisation = direct.f_calc_modulus_squared(
+        self.xray_structure, table_file_name=table_file_name)
+    else:
+      self.one_h_linearisation = direct.f_calc_modulus_squared(
+        self.xray_structure, reflections=self.observations)
+
 
 class Leverage(object):
   def __init__(self):
@@ -136,6 +143,7 @@ def parameter_labels(self, n_params):
   return labels
 
 def calculate(self, threshold, params, max_reflections, output_to):
+  max_reflections = int(max_reflections)
   import numpy as np
   import scipy.linalg as scla
 
@@ -201,21 +209,27 @@ def calculate(self, threshold, params, max_reflections, output_to):
     if Ts_[0][1] > maxT:
       maxT = Ts_[0][1] 
     Ts.append((j, Ts_[:min(max_reflections, len(Ts_))]))
-
   fm_header = "#%3s%4s%4s%8s%10s%10s\n"
-  if not output_to:
-    output_to = sys.stdout
-    fm_hkl = "%4i%4i%4i%8.2f%10.3f%10.3f\n"
-  else:
-    fm_hkl = "%i %i %i %.2f %.3f %.3f\n"
-  output_to.write(fm_header %("H", "K", "L", "V", "Fo_sq", "Fc_sq"))
-  for j, Ts_ in Ts:
-    output_to.write("#%s\n" %(labels[j]))
-    for i in xrange(0, len(Ts_)):
-      idx = self.observations.indices[Ts_[i][0]]
-      val = Ts_[i][1]*100/maxT
-      output_to.write(fm_hkl %(idx[0], idx[1], idx[2],\
-        val, self.observations.data[Ts_[i][0]]/scale_factor, result.observables()[Ts_[i][0]]))
+
+  try:  
+    if olx.HasGUI() == 'true':
+      olx.Freeze(True)
+    if not output_to:
+      output_to = sys.stdout
+      fm_hkl = "%4i%4i%4i%8.2f%10.3f%10.3f\n"
+    else:
+      fm_hkl = "%i %i %i %.2f %.3f %.3f\n"
+    output_to.write(fm_header %("H", "K", "L", "V", "Fo_sq", "Fc_sq"))
+    for j, Ts_ in Ts:
+      output_to.write("#%s\n" %(labels[j]))
+      for i in xrange(0, len(Ts_)):
+        idx = self.observations.indices[Ts_[i][0]]
+        val = Ts_[i][1]*100/maxT
+        output_to.write(fm_hkl %(idx[0], idx[1], idx[2],\
+          val, self.observations.data[Ts_[i][0]]/scale_factor, result.observables()[Ts_[i][0]]))
+  finally:
+    if olx.HasGUI() == 'true':
+      olx.Freeze(False)
   if False:
     self.f_calc = self.observations.fo_sq.array(
       data=result.f_calc(), sigmas=None)
@@ -245,6 +259,6 @@ def calculate(self, threshold, params, max_reflections, output_to):
         self.reparametrisation.asu_scatterer_parameters)
 
 leverage_obj = Leverage()
-olex.registerFunction(leverage_obj.calculate, False, "leverage")
-olex.registerFunction(leverage_obj.calculate_for, False, "leverage")
+olex.registerMacro(leverage_obj.calculate, "max_reflections", False, "leverage")
+olex.registerMacro(leverage_obj.calculate_for, "max_reflections", False, "leverage")
 olex.registerFunction(leverage_obj.for_flack, False, "leverage")
