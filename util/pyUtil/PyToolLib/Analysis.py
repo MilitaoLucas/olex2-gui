@@ -457,7 +457,7 @@ class Graph(ArgumentParser):
     if slope == 0.0:
       width = 2
     else:
-      width = 3
+      width = 2
 
     adj_x = 2
     adj_y = 0
@@ -3036,84 +3036,94 @@ class HealthOfStructure():
     if timing:
       print "HOS took %.4f seconds" %(time.time() - t1)
 
+  def get_info_from_hkl_stats(self):
+    try:
+      self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
+      if self.resolution_type == "full":
+        if olx.IsFileType("ires") == 'true':
+          try:
+            acta = float(olx.Ins("ACTA"))/2
+            if acta < self.theta_full:
+              self.theta_full = acta/2
+          except:
+            pass
+        # adjust to the dataset theta max if needed
+        theta_full1 = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
+        if theta_full1 < self.theta_full:
+          self.theta_full = theta_full1
+      self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(self.theta_full*2))
+      self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(self.theta_full*2,True))
+      self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(self.theta_full*2,False))
+    except Exception, err:
+      print("Could not get info from hkl_stats: %s" %err)
+
+  def get_info_from_cif(self):
+    from cctbx import uctbx
+    try:
+      wl = float(olx.Cif('_diffrn_radiation_wavelength'))
+      _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %self.resolution_type)
+      if _ != "n/a":
+        self.hkl_stats['Completeness'] = float(_)
+        self.hkl_stats['Completeness_laue'] = self.hkl_stats.get('Completeness_laue',float(_))
+        self.hkl_stats['Completeness_point'] = self.hkl_stats.get('Completeness_point',0)
+        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
+        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+      else:
+        self.hkl_stats['MinD'] = 0
+        self.hkl_stats['Completeness'] = 0
+
+      ##The following items can have alternate/deprecated identifiers
+      l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
+      self.hkl_stats[''] = 0
+      for item in l:
+        _ = olx.Cif(item)
+        if _ != "n/a":
+          self.hkl_stats['MeanIOverSigma'] = 1/float(_)
+          break
+        else:
+          self.hkl_stats['MeanIOverSigma'] = 0
+          break
+
+      l = ['_diffrn_reflns_av_R_equivalents',]
+      self.hkl_stats['Rint'] = 0
+      for item in l:
+        _ = olx.Cif(item)
+        if _ != "n/a":
+          self.hkl_stats['Rint'] = float(_)
+        else:
+          self.hkl_stats['Rint'] = 1
+    
+    except Exception, err:
+      print "Could not get info from CIF: %s" %err
+    
+
   def initialise_HOS(self, force=False):
     """ Returns (bool, bool) the first boolean specifies if the initialisation
     was successful, and the second - if the HOS has to be reset
     """
-    from cctbx import uctbx
     if olx.IsFileLoaded() != 'true':
       return (False, True)
     self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
       self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
-      radiation = float(olx.xf.exptl.Radiation())
-      theta_full = math.asin(radiation*0.6)*180/math.pi
+      self.radiation = float(olx.xf.exptl.Radiation())
+      self.theta_full = math.asin(self.radiation*0.6)*180/math.pi
       self.hkl_stats = olex_core.GetHklStat()
       if self.hkl_stats['DataCount'] == 0:
         self.hkl_stats = {}
-      resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
-      if self.hkl_stats:
-        self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
-        if resolution_type == "full":
-          if olx.IsFileType("ires") == 'true':
-            try:
-              acta = float(olx.Ins("ACTA"))/2
-              if acta < theta_full:
-                theta_full = acta/2
-            except:
-              pass
-          # adjust to the dataset theta max if needed
-          theta_full1 = math.asin(radiation/(2*self.hkl_stats['MinD']))*180/math.pi
-          if theta_full1 < theta_full:
-            theta_full = theta_full1
-        self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
-        self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
-        self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
+      self.resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
 
-      if not self.hkl_stats and self.is_CIF:
-        try:
-          wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-          _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)
-          if _ != "n/a":
-            self.hkl_stats['Completeness'] = float(_)
-            self.hkl_stats['Completeness_laue'] = self.hkl_stats.get('Completeness_laue',float(_))
-            self.hkl_stats['Completeness_point'] = self.hkl_stats.get('Completeness_point',0)
-            twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_%s' %resolution_type)))
-            self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
-          else:
-            self.hkl_stats['MinD'] = 0
-            self.hkl_stats['Completeness'] = 0
+      if self.is_CIF:
+        self.get_info_from_cif()
 
-          ##The following items can have alternate/deprecated identifiers
-          l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
-          self.hkl_stats[''] = 0
-          for item in l:
-            _ = olx.Cif(item)
-            if _ != "n/a":
-              self.hkl_stats['MeanIOverSigma'] = 1/float(_)
-              break
-            else:
-              self.hkl_stats['MeanIOverSigma'] = 0
-              break
-
-          l = ['_diffrn_reflns_av_R_equivalents',]
-          self.hkl_stats['Rint'] = 0
-          for item in l:
-            _ = olx.Cif(item)
-            if _ != "n/a":
-              self.hkl_stats['Rint'] = float(_)
-            else:
-              self.hkl_stats['Rint'] = 1
-
-        except Exception, err:
-          print "Something could not be evaluated [Analysis.py]: %s" %err
+      else:
+        self.get_info_from_hkl_stats()
 
       l = ["- Point Group Completeness: %.2f" %self.hkl_stats['Completeness_point'],
            "Laue Group Completeness: %.2f" %self.hkl_stats['Completeness_laue'],
            ]
       target = "&#013;- ".join(l)
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
-
 
     except Exception, err:
       print err
