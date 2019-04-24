@@ -125,6 +125,9 @@ class NewsImageRetrivalThread(ThreadEx):
         else:
           img_url = res
           url = "www.olex2.org"
+        if "-ac" in OV.GetTag():
+          if not tag or "-ac" not in tag:
+            continue
         if tag:
           if tag.strip() != olx.olex2_tag:
             img_url = None
