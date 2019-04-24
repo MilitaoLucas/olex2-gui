@@ -37,12 +37,15 @@ def getModulesDir():
   base = olex.f(OV.GetParam('user.modules.location'))
   return "%s%smodules" %(base, os.sep)
 
-def getAuthenticationToken():
+def getAuthenticationToken(force=False):
   global at
-  if at:
+  force = force in [True, 'True', 'true']
+  if force:
+    at = None
+  elif at:
     return at
   tfn = os.path.join(olx.app.SharedDir(), "ext1.token")
-  if os.path.exists(tfn):
+  if not force and os.path.exists(tfn):
     import time
     fst = os.stat(tfn)
     tdiff = long(time.time()) - fst.st_ctime
