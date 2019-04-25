@@ -1395,7 +1395,7 @@
 <getID help="Get the machine ID and copy it to the clipboard."
   <body
     <cmd
-      <cmd '@py "import Loader\nimport olx\nolx.Echo(Loader.getAuthenticationToken(), c=True)"'>
+      <cmd '@py "import Loader\nimport olx\nolx.Echo(Loader.getAuthenticationToken(force=True), c=True)"'>
       <cmd 'echo "The machine ID has been copied to your clipboard."'>
     >
   >
