@@ -496,6 +496,8 @@ class ImageTools(FontInstances):
       do_cache_image = False
       name = name[:-4]
       s = OlexVFS.read_from_olex(name)
+      if s is None:
+        return
       olex.writeImage(name, "")
       name = name[:-4]
       sio = StringIO(s)
