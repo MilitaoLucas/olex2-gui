@@ -80,7 +80,7 @@ class MetacifFiles:
     self.list_abs = None
 
 class ValidateCif(object):
-  def __init__(self, filepath=None, cif_dic='cif_core.dic', show_warning=True):
+  def __init__(self, filepath=None, cif_dic='cif_core.dic', show_warnings=True):
     if not filepath:
       filepath = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.isfile(filepath):
