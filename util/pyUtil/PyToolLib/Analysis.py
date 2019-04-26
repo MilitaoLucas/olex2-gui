@@ -3241,8 +3241,12 @@ class HealthOfStructure():
       if self.scope == "hkl":
         if self.supplied_cif and item == "Rint":
           value = self.supplied_cif.get('_diffrn_reflns_av_R_equivalents',0)
+          try:
+            value = float(value)
+          except:
+            pass
         else:
-          value = self.hkl_stats[item]
+          value = float(self.hkl_stats[item])
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]
