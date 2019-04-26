@@ -487,10 +487,10 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('logo1_txt.htm', txt, 2)
     return "Done"
 
-  def resize_to_panelwidth(self, args, width_adjust=0, width=None):
+  def resize_to_panelwidth(self, i, colourize=False, width_adjust=0, width=None):
     import olex
     do_cache_image = True
-    name = args['i']
+    name = i
     im = None
     if name.endswith("@vfs"):  # name_tmp@vfs
       do_cache_image = False
@@ -509,7 +509,6 @@ class ImageTools(FontInstances):
       if os.path.exists(path):
         im = Image.open(path)
         name = name[:-4]
-    colourize = args.get('c', False)
     if not width:
       #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
       width = int(self.skin_width*0.97)

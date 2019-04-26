@@ -80,14 +80,11 @@ class MetacifFiles:
     self.list_abs = None
 
 class ValidateCif(object):
-  def __init__(self, args):
-    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'cif'))
-    cif_dic = args.get('cif_dic', 'cif_core.dic')
-    show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
+  def __init__(self, filepath=OV.file_ChangeExt(OV.FileFull(), 'cif'),
+      cif_dic='cif_core.dic', show_warning=True):
     if os.path.isfile(filepath):
-      f = open(filepath, 'rb')
-      cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
-      f.close()
+      with open(filepath, 'rb') as f:
+        cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       print "Validating %s" %filepath
       cif_dic = validation.smart_load_dictionary(cif_dic)
       error_handler = cif_model.validate(cif_dic, show_warnings)

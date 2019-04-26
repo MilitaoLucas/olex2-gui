@@ -253,14 +253,9 @@ if have_help:
   gh = GetHelp()
 
 from htmlTools import *
-def make_help_box(args):
+def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
   global tutorial_box_initialised
-  d = {}
-  name = args.get('name', None)
-  d = args.get('d', {})
   name = getGenericSwitchName(name).lstrip("h3-")
-  helpTxt = args.get('helpTxt', None)
-
   _= ""
   md_box = True
   if helpTxt == '#helpTxt':
@@ -284,8 +279,6 @@ def make_help_box(args):
 
   helpTxt = _
 
-  popout = args.get('popout', False)
-  box_type =args.get('type', 'help')
   if popout == 'false':
     popout = False
   else:
