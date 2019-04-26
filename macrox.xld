@@ -34,7 +34,6 @@
 >
 
 
-
 <onstartup help="Executes on program start"
   <body
     <args
@@ -72,21 +71,19 @@
       >
     <cmd
       <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
-      <cmd2  XXX="spy.pickleVVD(structure)">
-      <cmd3  cmd1="clear">
+      <cmd2  "spy.SaveStructureParams()">
       <cmd4  "@reap %1">
-      <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
-
-  <cmd7  "SetVar(snum_refinement_sg,sg(%n))">
-  <cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
-  <cmd9  "spy.SetParam(snum.refinement_max_cycles,Ins(LS))">
-  <cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
-  <cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
-  <cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
+      <cmd4  "echo 'loading'">
+      <cmd9  "spy.OnStructureLoaded(%4)">
+      <cmd4  "echo 'loaded'">
+      <cmd7  "SetVar(snum_refinement_sg,sg(%n))">
+      <cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
+      <cmd9  "spy.SetParam(snum.refinement_max_cycles,Ins(LS))">
+      <cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
+      <cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
+      <cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
+    >
   >
-<onabort
->
->
 >
 
 
@@ -293,5 +290,25 @@
     >
   >
 >
+
+<onexit help="Executes on program exit"
+  <body
+  <cmd
+    <cmd "stop logging">
+    <cmd "flush history">
+    <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
+          spy.SaveCifInfo()>>mode off'">
+    <cmd "spy.SaveUserParams()">
+    <cmd "spy.SaveOlex2Params()">
+    <cmd "storeparam startup file.relativePath(filefull())">
+    <cmd "storeparam last_version GetVar(last_version, '')">
+    <cmd "spy.threading.joinAll()">
+    <cmd "user_onexit">
+    <cmd "spy.onexit()">
+    <cmd "echo Good Bye">
+  >
+ >
+>
+
 
 <#include "custom.xld">
