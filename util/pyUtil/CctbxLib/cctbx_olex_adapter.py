@@ -873,8 +873,10 @@ def write_grid_to_olex(grid):
 
 
 class as_pdb_file(OlexCctbxAdapter):
-  def __init__(self, filepath=OV.file_ChangeExt(OV.FileFull(), 'pdb'),
+  def __init__(self, filepath=None,
       remark=None, remarks=[], fractional_coordinates=False, resname=None):
+    if not filepath:
+      filepath = OV.file_ChangeExt(OV.FileFull(), 'pdb')
     OlexCctbxAdapter.__init__(self)
     fractional_coordinates = fractional_coordinates in (True, 'True', 'true')
     with open(filepath, 'w') as f:
