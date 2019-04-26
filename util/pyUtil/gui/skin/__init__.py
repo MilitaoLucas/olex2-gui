@@ -8,9 +8,6 @@ import os
 from ImageTools import IT
 import gui
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
 import OlexVFS
 
 import time
@@ -398,7 +395,7 @@ class Skin():
     self.sNumTitle_instance = PilTools.sNumTitle()
     self.adjust_font_size_for_ppi()
 
-  def run_skin(self, f, args=None):
+  def run_skin(self, f):
     new_width = OV.GetParam('gui.htmlpanelwidth')
     if new_width < 350:
       OV.SetParam('gui.skin.extension', 'small')
@@ -452,7 +449,7 @@ class Skin():
       OV.SetVar('gui_html_font_size',html_font_size +2)
 
 Skin_instance = Skin()
-OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
+OV.registerMacro(Skin_instance.run_skin, '')
 
 OV.registerFunction(load_user_gui_phil)
 
