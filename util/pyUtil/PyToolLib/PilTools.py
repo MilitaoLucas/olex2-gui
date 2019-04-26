@@ -960,7 +960,7 @@ class timage(ArgumentParser):
     name = 'news/news-%s' % tag
     if vfs: name += '_tmp@vfs'
     else: name += '.png'
-    IT.resize_to_panelwidth({'i':name}, width=width, width_adjust=width_adjust)
+    IT.resize_to_panelwidth(i=name, width=width, width_adjust=width_adjust)
 #  OV.registerFunction(resize_news_image, False, 'it')
 
 

@@ -50,7 +50,7 @@ import fractions
 def rt_mx_from_olx(olx_input):
   from libtbx.utils import flat_list
   return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
-  
+
 class twin_domains:
   def __init__(self, twin_axis, space, twin_law, twin_fraction, angle, fom, hklf5):
     self.space = space
@@ -60,8 +60,8 @@ class twin_domains:
     self.angle = angle
     self.fom = fom
     self.hklf5 = hklf5
-    
-    
+
+
 class OlexCctbxAdapter(object):
   def __init__(self):
     import olexex
@@ -873,18 +873,16 @@ def write_grid_to_olex(grid):
 
 
 class as_pdb_file(OlexCctbxAdapter):
-  def __init__(self, args):
+  def __init__(self, filepath=OV.file_ChangeExt(OV.FileFull(), 'pdb'),
+      remark=None, remarks=[], fractional_coordinates=False, resname=None):
     OlexCctbxAdapter.__init__(self)
-    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'pdb'))
-    f = open(filepath, 'w')
-    fractional_coordinates = \
-                           args.get('fractional_coordinates')in (True, 'True', 'true')
-    print >> f, self.xray_structure().as_pdb_file(
-      remark=args.get('remark'),
-      remarks=args.get('remarks', []),
-      fractional_coordinates=fractional_coordinates,
-      resname=args.get('resname'))
-    f.close()
+    fractional_coordinates = fractional_coordinates in (True, 'True', 'true')
+    with open(filepath, 'w') as f:
+      print >> f, self.xray_structure().as_pdb_file(
+        remark=remark,
+        remarks=remarks,
+        fractional_coordinates=fractional_coordinates,
+        resname=resname)
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
