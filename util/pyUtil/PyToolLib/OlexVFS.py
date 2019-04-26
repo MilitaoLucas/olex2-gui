@@ -39,9 +39,10 @@ def write_to_olex(filename, data, isPersistent=0):
   olex.writeImage(filename, data, isPersistent)
 
 def read_from_olex(filename):
-  if not olex_fs.Exists(filename):
+  try:
+    return olex.readImage(filename)
+  except:
     return None
-  return olex.readImage(filename)
 
 def exists(filename):
   return olex_fs.Exists(filename)
