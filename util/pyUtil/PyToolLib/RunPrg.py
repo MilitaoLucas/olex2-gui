@@ -326,13 +326,11 @@ class RunPrg(ArgumentParser):
     try:
       program = prgDict.programs[prg]
     except KeyError:
-      print "Please choose a valid %s program" %prgType
-      return None, None
+      raise Exception("Please choose a valid %s program" %prgType)
     try:
       prgMethod = program.methods[method]
     except KeyError:
-      print "Please choose a valid method for the %s program %s" %(prgType, prg)
-      return None, None
+      raise Exception("Please choose a valid method for the %s program %s" %(prgType, prg))
     return program, prgMethod
 
   def startRun(self):

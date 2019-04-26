@@ -1387,7 +1387,7 @@ class Analysis(Graph):
     self.item = None
     guiParams = OV.GuiParams()
 
-  def run_Analysis(self, f, args):
+  def run_Analysis(self, f, n_bins=0, method='olex'):
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -1396,8 +1396,8 @@ class Analysis(Graph):
     self.data = {}
 
     fun = f
-    self.n_bins = abs(int(args.get('n_bins',0))) #Number of bins for Histograms
-    self.method = args.get('method','olex')      #Method by which graphs are generated
+    self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
+    self.method = method           #Method by which graphs are generated
     if fun == "AutoChem":
       self.item = "AutoChem"
       self.graphInfo["imSize"] = (512, 256)
@@ -3241,8 +3241,12 @@ class HealthOfStructure():
       if self.scope == "hkl":
         if self.supplied_cif and item == "Rint":
           value = self.supplied_cif.get('_diffrn_reflns_av_R_equivalents',0)
+          try:
+            value = float(value)
+          except:
+            pass
         else:
-          value = self.hkl_stats[item]
+          value = float(self.hkl_stats[item])
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]

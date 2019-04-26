@@ -13,10 +13,9 @@ class SetupWizard(object):
   def __init__(self):
     self.shown_once = False
 
-  def tbxs(self, f):
+  def tbxs(self, n=0):
     total_number = 6
-    name = f.get('n','0')
-    current = int(name)
+    name = current = int(n)
     retVal = ""
     if current >= total_number:
       self.previous = str(current -1)
@@ -101,8 +100,7 @@ class ConfigSkin(object):
       self.generate_config_box_text()
       self.create_config_box()
 
-  def config_changed_luminosity(self, var, args):
-    adjust = args['adjust']
+  def config_changed_luminosity(self, var, adjust):
     val = OV.FindValue("L_%s" %var)
     val += adjust
     OV.SetVar(var,val)
@@ -215,11 +213,11 @@ class ConfigSkin(object):
     else:
       olx.html.Load(wFilePath)
 
-  def config_box(self, args):
+  def config_box(self, name=None, popout=False, config=False):
     self.str = ""
-    self.name = args.get('name', None)
-    self.popout = args.get('popout', False)
-    self.cfgFileName = args.get('config', False)
+    self.name = name
+    self.popout = popout
+    self.cfgFileName = config
     if not self.cfgFileName: return
     if self.popout == 'false':
       self.popout = False

@@ -1,4 +1,5 @@
 import olex
+import olex_fs
 
 class ImageWriter:
   def init(self):
@@ -38,6 +39,12 @@ def write_to_olex(filename, data, isPersistent=0):
   olex.writeImage(filename, data, isPersistent)
 
 def read_from_olex(filename):
-  return olex.readImage(filename)
+  try:
+    return olex.readImage(filename)
+  except:
+    return None
+
+def exists(filename):
+  return olex_fs.Exists(filename)
 
 olex.registerFunction(read_from_olex, False, "vfs")
