@@ -3062,10 +3062,14 @@ class HealthOfStructure():
     try:
       wl = float(olx.Cif('_diffrn_radiation_wavelength'))
       _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %self.resolution_type)
+      
       if _ != "n/a":
         self.hkl_stats['Completeness'] = float(_)
-        self.hkl_stats['Completeness_laue'] = self.hkl_stats.get('Completeness_laue',float(_))
-        self.hkl_stats['Completeness_point'] = self.hkl_stats.get('Completeness_point',0)
+        
+        self.hkl_stats['Completeness_laue'] = float(olx.Cif('_diffrn_reflns_Laue_measured_fraction_%s' %self.resolution_type))
+        
+        self.hkl_stats['Completeness_point'] = float(olx.Cif('_diffrn_reflns_point_group_measured_fraction_%s' %self.resolution_type))
+        
         twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
       else:
@@ -3331,7 +3335,7 @@ class HealthOfStructure():
 
 
       if not bg_colour:
-        bg_colour = self.get_bg_colour(item, value)
+        bg_colour = self.get_bg_colour(item, raw_val)
 
       if type(value) == tuple:
         if len(value) > 0:
