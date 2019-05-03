@@ -95,6 +95,7 @@ def defineExternalPrograms():
   cgls = Method_shelx_refinement(get_CGLS_phil())
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
+  NSFF = Method_cctbx_refinement(NSFF_phil)
 
   # define solution programs
 
@@ -337,6 +338,7 @@ Palatinus et al., 2012""",
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference=smtbx_solve.reference,
     brief_reference=smtbx_solve.brief_reference,
+    phil_entry_name="cctbx"
   )
   tonto_refine = Program(
     name='Tonto',
@@ -355,6 +357,7 @@ Palatinus et al., 2012""",
 
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
+  smtbx_refine.addMethod(NSFF)
   RPD.addProgram(smtbx_refine)
 
   tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))

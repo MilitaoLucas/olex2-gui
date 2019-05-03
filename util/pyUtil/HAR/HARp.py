@@ -69,11 +69,11 @@ class HARp(PT):
       "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
       "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
       "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
-      "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),
       "settings.tonto.HAR.dispersion": ("false",),
       "settings.tonto.HAR.autorefine": ("true",),
       "settings.tonto.HAR.autogrow": ("true",),
       "settings.tonto.HAR.cluster-grow": ("true",),
+      "settings.tonto.HAR.sfc-file": ("false",),
     }
     self.options = options
 
@@ -82,25 +82,48 @@ class HARp(PT):
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
 
+    self.setup_har_executables()
+        
+    if os.path.exists(self.exe):
+      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
+      if os.path.exists(self.basis_dir):
+        basis_list = os.listdir(self.basis_dir)
+        basis_list.sort()
+        self.basis_list_str = ';'.join(basis_list)
+      else:
+        self.basis_list_str = None
+    else:
+      self.basis_list_str = None
+      self.basis_dir = None
+
+    self.set_defaults()
+
+
+  def setup_har_executables(self):
     self.exe = None
+    exe_pre = "hart"
+    if OV.GetVar('settings.tonto.HAR.sfc-file') == True:
+      exe_pre = "HA_sfs"
+    
     if sys.platform[:3] == 'win':
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
         self.mpiexec = olx.file.Which("mpiexec.exe")
-        
-      _ = os.path.join(self.p_path, "hart_mpi.exe")
+
+      
+      _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
-        self.mpi_har = olx.file.Which("hart_mpi.exe")
+        self.mpi_har = olx.file.Which("%s_mpi.exe" %exe_pre)
         
-      _ = os.path.join(self.p_path, "hart.exe")
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart.exe")       
+        self.exe = olx.file.Which("%s.exe" %exe_pre)
         
     else:
       mpiloc = os.path.join(self.p_path, "mpiexec")
@@ -120,30 +143,18 @@ class HARp(PT):
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
         
-      _ = os.path.join(self.p_path, "hart_mpi")
+      _ = os.path.join(self.p_path, "%s_mpi" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
-        self.mpi_har = olx.file.Which("hart_mpi")
+        self.mpi_har = olx.file.Which("%s_mpi" %exe_pre)
         
-      _ = os.path.join(self.p_path, "hart")
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart")   
-        
-        
-    if os.path.exists(self.exe):
-      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
-      if os.path.exists(self.basis_dir):
-        basis_list = os.listdir(self.basis_dir)
-        basis_list.sort()
-        self.basis_list_str = ';'.join(basis_list)
-      else:
-        self.basis_list_str = None
-    else:
-      self.basis_list_str = None
-      self.basis_dir = None
+        self.exe = olx.file.Which("%s" %exe_pre)   
+
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
       import multiprocessing
@@ -159,7 +170,7 @@ class HARp(PT):
       No MPI implementation found in PATH!"""
       self.cpu_list_str = '1'
 
-    self.set_defaults()
+    
 
   def set_defaults(self):
     for k,v in self.options.iteritems():
@@ -169,6 +180,7 @@ class HARp(PT):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
+    self.setup_har_executables()
     job = Job(self, olx.FileName())
     job.launch()
     olx.html.Update()
@@ -775,6 +787,9 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     if clustergrow == 'false':
       args.append("-complete-mol")
       args.append("f")
+    
+    #if olx.GetVar("settings.tonto.HAR.sfc-file") == "true":
+      #args.append("-disk-sfs")
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
@@ -831,7 +846,80 @@ def sample_folder(input_name):
   load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
   olex.m(load_input_cif)
 
+def combine_sfs():
+  import glob
+  import math
 
+  sfc_dir = OV.GetParam('snum.refinement.cctbx.sfc.dir')
+  sfc_name = OV.GetParam('snum.refinement.cctbx.sfc.name')
+  p = os.path.join(sfc_dir, "*,ascii")
+  g = glob.glob(p)
+  d = {}
+  if not g:
+    return False
+  
+  for file_p in g:
+    if "SFs_key,ascii" in file_p:
+      sfs_fp = file_p
+      continue
+    name = os.path.basename(file_p).split("_")[0]
+    d.setdefault(name,{})
+    values = open(file_p,'r').read().splitlines()
+    sfc_l = []
+    modular = True
+    for line in values:
+      if modular:
+        _ = line.split()
+        a = float(_[0])
+        b = float(_[1])
+        v = math.sqrt(a*a + b*b)
+        sfc_l.append("%.6f" %v)
+      else:
+        sfc_l.append(",".join(line.split()))
+
+    d[name].setdefault('sfc', sfc_l)
+    d[name].setdefault('name', name)
+  
+  #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
+  hkl_fn = "SFs_key,ascii"
+  hkl = open(sfs_fp, 'r').read().splitlines()
+  hkl_l = []  
+  for line in hkl:
+    hkl_l.append(" ".join(line.split()[0:3]))
+  d.setdefault('hkl', hkl_l)
+    
+  t = ""
+  _d = {'anomalous':'false',
+        'title': OV.FileName(),
+        }
+  header = '''TITLE: %(title)s
+AD accounted: %(anomalous)s
+Scatterers: ''' %_d
+
+  t += header
+  l = []
+  l.append(d['hkl'])
+  for item in d:
+    if item == "hkl":
+      continue
+    t += "%s " %d[item]['name']
+    l.append(d[item]['sfc'])
+    
+  t += "\n"
+  ll = zip(*l)
+  for line in ll:
+    t += " ".join(line)
+    t += "\n"
+
+  tsc_fn = os.path.join(sfc_dir, sfc_name + ".tsc")
+  with open(tsc_fn, 'w') as wFile:
+    wFile.write(t)
+  from shutil import copyfile
+  tsc_dst = os.path.join(OV.FilePath(), sfc_name + ".tsc")
+  copyfile(tsc_fn, tsc_dst)
+  return True
+
+OV.registerFunction(combine_sfs,True,'har')
 
 HARp_instance = HARp()
 OV.registerFunction(HARp_instance.available, False, "tonto.HAR")

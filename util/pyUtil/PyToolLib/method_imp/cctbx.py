@@ -15,27 +15,56 @@ class Method_cctbx_refinement(Method_refinement):
     _ = os.environ.get('OLEX2_CCTBX_DIR')
     if _ is not None:
       self.version = _
-
+      
+  def run_HA_sfs(self):
+    import os
+    OV.SetVar('settings.tonto.HAR.sfc-file', True)
+    from HARp import HARp_instance
+    OV.SetVar('settings.tonto.HAR.sfc-file', True)
+    HARp_instance.launch()
+    OV.SetParam('snum.refinement.cctbx.sfc.dir',os.getenv("hart_dir", ""))
+    OV.SetParam('snum.refinement.cctbx.sfc.name',os.getenv("hart_file", ""))
+    
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
+    
+    
+    #if OV.GetVar('settings_TONTO') == True:
+      #print "TONTO!!!"
+      
+    if OV.GetParam('snum.refinement.method') == "NSFF":
+      if OV.GetVar('settings_nsff_update') == True or OV.GetVar('settings_nsff_update') == "True":
+        self.run_HA_sfs()
+      else:
+        from HARp import combine_sfs
+        if not combine_sfs():
+          print("No new tsc file")
+          return
+        
+      OV.SetParam('snum.refinement.method', 'Gauss-Newton')
+    
     Method_refinement.pre_refinement(self, RunPrgObject)
-
+    
+    
   def do_run(self, RunPrgObject):
     import time
     import os
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
+    import gui
 
     timer = debug = bool(OV.GetParam('olex2.debug',False))
     self.failure = True
     print '\n+++ STARTING olex2.refine +++++ %s' %self.version
-    table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
-    if not os.path.exists(table_file_name):
+#    table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
+    table_file_name = OV.GetVar('settings_use_nsff_tsc')
+    if not os.path.exists(table_file_name) or not OV.GetVar('settings_USE_NSFF'):
       table_file_name = None
     else:
       table_file_name = table_file_name.encode("utf-8")
       print("Warning: using tabulated atomic form factors")
+      gui.set_notification("Using tabulated form factors")
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
@@ -182,12 +211,51 @@ instructions {
 """)
 
 
+nsff_phil_string = '''
+USE_NSFF
+  .optional=True
+{
+  values {
+    tsc="$spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc')"
+      .type=choice
+  }
+  default=True
+    .type=bool
+}
+'''
+
 gauss_newton_phil = phil_interface.parse("""
 name = 'Gauss-Newton'
   .type=str
-""")
+instructions {
+  %s
+}
+""" %nsff_phil_string)
+
+
 
 levenberg_marquardt_phil = phil_interface.parse("""
 name = 'Levenberg-Marquardt'
   .type=str
+""")
+
+NSFF_phil = phil_interface.parse("""
+name = 'NSFF'
+  .type=str
+instructions {
+NSFF
+  .optional=False
+{
+  values {
+    update=True
+      .type=bool
+    f_sig=0
+      .type=int
+    initial_iam=False
+      .type=bool
+  }
+  default=True
+    .type=bool
+}
+}
 """)
