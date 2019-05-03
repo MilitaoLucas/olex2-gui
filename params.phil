@@ -257,7 +257,7 @@ routines requiring structure refinement
       Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' HAR Unknown
+      'Full Matrix' NSFF Unknown
       .type = choice
     sg_list = None
       .type = str
@@ -295,6 +295,15 @@ routines requiring structure refinement
       .type = bool
     cifmerge_after_refinement = True
       .type = bool
+    
+    cctbx{
+      sfc{
+        dir = ""   
+          .type = str
+        name = ""   
+          .type = str
+      }
+    }  
 
     ShelXL
       .short_caption = 'Program specific command line'
