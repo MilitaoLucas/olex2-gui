@@ -297,10 +297,14 @@ routines requiring structure refinement
       .type = bool
     
     cctbx{
-      sfc{
-        dir = ""   
+      nsff{
+        dir = ""
           .type = str
-        name = ""   
+        name = ""
+          .type = str
+        cmd = ""
+          .type = str
+        tsc_file = ""
           .type = str
       }
     }  

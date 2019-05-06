@@ -58,7 +58,8 @@ except Exception, e:
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
-    'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
+    'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
+    'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
   solvers_default_method = 'Gauss-Newton'
 
