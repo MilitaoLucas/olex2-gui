@@ -18,4 +18,8 @@ harp{
     .type = str
   sfc_file = True
     .type = bool
+  NSFF{
+    modulus = False
+      .type = bool
+    }
 }
