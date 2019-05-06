@@ -70,7 +70,7 @@ class HARp(PT):
       "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
       "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
       "settings.tonto.HAR.dispersion": ("false",),
-      "settings.tonto.HAR.autorefine": ("true",),
+      "settings.tonto.HAR.autorefine": ("false",),
       "settings.tonto.HAR.autogrow": ("true",),
       "settings.tonto.HAR.cluster-grow": ("true",),
       "settings.tonto.HAR.sfc-file": ("false",),
@@ -83,6 +83,8 @@ class HARp(PT):
       os.mkdir(self.jobs_dir)
 
     self.setup_har_executables()
+
+    self.options['settings.tonto.HAR.ncpus'] = (self.max_cpu,)
         
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
@@ -98,13 +100,29 @@ class HARp(PT):
 
     self.set_defaults()
 
+  def pop_for_HA(self):
+    ks = ["settings.tonto.HAR.hydrogens",
+          "settings.tonto.HAR.convergence.value",
+          "settings.tonto.HAR.sfc-file",
+          "settings.tonto.HAR.basis.name",
+          "settings.tonto.HAR.method",
+          ]
+    for k in ks:
+      if self.options.has_key(k):
+        self.options.pop(k)
 
   def setup_har_executables(self):
     self.exe = None
     exe_pre = "hart"
-    if OV.GetVar('settings.tonto.HAR.sfc-file') == True:
+    _ = OV.GetVar('settings.tonto.HAR.sfc-file')
+    if _== True or _.lower() == 'true':
       exe_pre = "HA_sfs"
-    
+      self.exe_pre = exe_pre
+      OV.SetParam('snum.refinement.cctbx.nsff.dir',os.getenv("hart_dir", ""))
+      OV.SetParam('snum.refinement.cctbx.nsff.name',os.getenv("hart_file", ""))
+      import multiprocessing
+      max_cpu = multiprocessing.cpu_count()
+
     if sys.platform[:3] == 'win':
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
@@ -159,6 +177,7 @@ class HARp(PT):
       self.parallel = True
       import multiprocessing
       max_cpu = multiprocessing.cpu_count()
+      self.max_cpu = max_cpu
       print """
       Number of CPUs Detected for parallel calculations: """ + str(max_cpu)
       cpu_list = ['1',]
@@ -728,9 +747,13 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
     self.save()
 
-    args = [self.name+".cif",
-            "-basis-dir", self.parent.basis_dir,
-             "-shelx-f2", self.name+".hkl"]
+    if HARp_instance.exe_pre == "HA_sfs":
+      args = [self.name+".cif"]
+    
+    else:
+      args = [self.name+".cif",
+              "-basis-dir", self.parent.basis_dir,
+               "-shelx-f2", self.name+".hkl"]
     
     if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
       args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
@@ -758,6 +781,19 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
+
+    _ = OV.GetParam('snum.refinement.cctbx.nsff.tsc_file')
+    if ".fchk" in _.lower():
+      ks = ['settings.tonto.HAR.hydrogens', "-fchk", "settings.tonto.HAR.convergence.value"]
+      for k in ks:
+        if HARp_instance.options.has_key(k):
+          HARp_instance.options.pop(k)
+      HARp_instance.options["-fchk"] = _
+      args.append("-fchk")
+      args.append(_)
+      
+    if HARp_instance.exe_pre == "HA_sfs":
+      HARp_instance.pop_for_HA()
 
     for k,v in HARp_instance.options.iteritems():
       val = olx.GetVar(k, None)
@@ -790,7 +826,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     
     #if olx.GetVar("settings.tonto.HAR.sfc-file") == "true":
       #args.append("-disk-sfs")
-
+ 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
     self.out_fn = os.path.join(self.full_dir, self.name) + ".out"
@@ -799,6 +835,11 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     os.environ['hart_cmd'] = '+&-'.join(args)
     os.environ['hart_file'] = self.name
     os.environ['hart_dir'] = self.full_dir
+    
+    OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
+    OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
+    OV.SetParam('snum.refinement.cctbx.nsff.cmd','-- \n'.join(args))
+    
     from subprocess import Popen
     pyl = OV.getPYLPath()
     if not pyl:
@@ -850,8 +891,23 @@ def combine_sfs():
   import glob
   import math
 
-  sfc_dir = OV.GetParam('snum.refinement.cctbx.sfc.dir')
-  sfc_name = OV.GetParam('snum.refinement.cctbx.sfc.name')
+  use_modulus = OV.GetParam('harp.NSFF.modulus')
+  sfc_dir = OV.GetParam('snum.refinement.cctbx.nsff.dir')
+  sfc_name = OV.GetParam('snum.refinement.cctbx.nsff.name')
+  mod = ""
+  if use_modulus:
+    mod="_mod"
+  tsc_dst = os.path.join(OV.FilePath(), sfc_name + mod + ".tsc")
+  tsc_fn = os.path.join(sfc_dir, sfc_name + mod + ".tsc")
+  
+  if os.path.exists(tsc_fn) and os.path.exists(tsc_fn):
+    if "%.0f" %os.path.getctime(tsc_fn) != "%.0f" %os.path.getctime(tsc_dst):
+      print ("There is a newer file. Upating!")
+    else:
+      return
+
+  #if OV.SetParam('snum.refinement.cctbx.nsff.tsc_file').lower() != "check for new":
+
   p = os.path.join(sfc_dir, "*,ascii")
   g = glob.glob(p)
   d = {}
@@ -862,13 +918,15 @@ def combine_sfs():
     if "SFs_key,ascii" in file_p:
       sfs_fp = file_p
       continue
+    elif "Symops,ascii" in file_p:
+      symops_fp = file_p
+      continue
     name = os.path.basename(file_p).split("_")[0]
     d.setdefault(name,{})
     values = open(file_p,'r').read().splitlines()
     sfc_l = []
-    modular = True
     for line in values:
-      if modular:
+      if use_modulus:
         _ = line.split()
         a = float(_[0])
         b = float(_[1])
@@ -911,11 +969,9 @@ Scatterers: ''' %_d
     t += " ".join(line)
     t += "\n"
 
-  tsc_fn = os.path.join(sfc_dir, sfc_name + ".tsc")
   with open(tsc_fn, 'w') as wFile:
     wFile.write(t)
   from shutil import copyfile
-  tsc_dst = os.path.join(OV.FilePath(), sfc_name + ".tsc")
   copyfile(tsc_fn, tsc_dst)
   return True
 

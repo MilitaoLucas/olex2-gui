@@ -377,6 +377,9 @@ olex.registerFunction(zipToOlexVFS, False, "tools")
 
 def set_notification(string):
   OV.SetVar('GuiNotification', string)
+  olx.Freeze(True)
+  OV.htmlUpdate()
+  olx.Freeze(False)
 
 def get_notification():
   _ = OV.GetVar('GuiNotification',None)
