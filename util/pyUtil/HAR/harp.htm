@@ -112,12 +112,23 @@
     $-
   </td>
 
-  <td width="30%" align="right"> f/sig threshold </td>
+  <td width="15%" align="right"> f/sig</td>
   <td width="8%">$+
     html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
      "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>
+
+  <td width="15%" align="right"> sfc file </td>
+  <td width="8%">
+  $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=tonto_har_sfc_file",
+      "checked=GetVar('settings.tonto.HAR.sfc-file')",
+      "onclick=SetVar('settings.tonto.HAR.sfc-file', html.GetState('~name~'))")
+   $-
+</td>
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -160,7 +171,7 @@
       every
      </td>
 
-     <td width="8%" align='center'>
+     <td width="5%" align='center'>
      $+
        html.Snippet("gui/snippets/input-text",
        "name=checking_interval",
@@ -169,13 +180,13 @@
        )
       $-
      </td>
-     <td width="10%" align='left'>
-       seconds
+     <td width="5%" align='left'>
+       s
      </td>
      <td width="9%" align='right'>
        CPUs:
      </td>
-     <td width="8%" align='center'>
+     <td width="10%" align='center'>
      $+
          html.Snippet("gui/snippets/input-combo",
          "name=har_cpus",
@@ -189,7 +200,7 @@
         html.Snippet(GetVar(default_link),
         "name=tonto_har_run",
         "value=Start HAR",
-        "onclick=spy.tonto.HAR.launch()"
+        "onclick=spy.tonto.HAR.launch('HARt')"
         )
      $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
