@@ -304,8 +304,14 @@ routines requiring structure refinement
           .type = str
         cmd = ""
           .type = str
-        tsc_file = ""
-          .type = str
+        tsc{
+          file = ""
+            .type = str
+          source = ""
+            .type = str
+          modular = True
+            .type = bool
+        }  
       }
     }  
 
