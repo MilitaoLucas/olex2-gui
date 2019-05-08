@@ -70,7 +70,7 @@ class HARp(PT):
       "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
       "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
       "settings.tonto.HAR.dispersion": ("false",),
-      "settings.tonto.HAR.autorefine": ("false",),
+      "settings.tonto.HAR.autorefine": ("true",),
       "settings.tonto.HAR.autogrow": ("true",),
       "settings.tonto.HAR.cluster-grow": ("true",),
       "settings.tonto.HAR.sfc-file": ("false",),
@@ -83,8 +83,6 @@ class HARp(PT):
       os.mkdir(self.jobs_dir)
 
     self.setup_har_executables()
-
-    self.options['settings.tonto.HAR.ncpus'] = (self.max_cpu,)
         
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
@@ -100,36 +98,54 @@ class HARp(PT):
 
     self.set_defaults()
 
-  def pop_for_HA(self):
-    ks = ["settings.tonto.HAR.hydrogens",
+  def sort_out_HA_options(self):
+    # We are asking to just get form factors to disk
+    self.options["settings.tonto.HAR.ncpus"] = (self.max_cpu,)
+    self.options["settings.tonto.HAR.autorefine"] = (False,)
+    self.options["settings.tonto.HAR.autogrow"] = (False,)
+    self.options["settings.tonto.HAR.cluster-grow"] = (False,)
+    olx.SetVar("settings.tonto.HAR.autorefine", False) 
+    olx.SetVar("settings.tonto.HAR.ncpus", self.max_cpu) 
+    tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    
+    if tsc_source == "TONTO":
+      # We want these from a wavefunction calculation using TONTO """
+
+      delete_ks = ["settings.tonto.HAR.basis.name", 
+          "settings.tonto.HAR.hydrogens",
+          "settings.tonto.HAR.extinction.refine",
           "settings.tonto.HAR.convergence.value",
+          "settings.tonto.HAR.cluster.radius",
+          "settings.tonto.HAR.dispersion",
           "settings.tonto.HAR.sfc-file",
-          "settings.tonto.HAR.basis.name",
-          "settings.tonto.HAR.method",
           ]
-    for k in ks:
+    elif tsc_source.lower().endswith(".fchk"):
+      # We want these from supplied fchk file """
+
+      delete_ks = ["settings.tonto.HAR.basis.name", 
+          "settings.tonto.HAR.method",
+          "settings.tonto.HAR.hydrogens",
+          "settings.tonto.HAR.extinction.refine",
+          "settings.tonto.HAR.convergence.value",
+          "settings.tonto.HAR.cluster.radius",
+          "settings.tonto.HAR.dispersion",
+          "settings.tonto.HAR.sfc-file",
+          ]
+    for k in delete_ks:
       if self.options.has_key(k):
         self.options.pop(k)
 
   def setup_har_executables(self):
     self.exe = None
-    exe_pre = "hart"
-    _ = OV.GetVar('settings.tonto.HAR.sfc-file')
-    if _== True or _.lower() == 'true':
-      exe_pre = "HA_sfs"
-      self.exe_pre = exe_pre
-      OV.SetParam('snum.refinement.cctbx.nsff.dir',os.getenv("hart_dir", ""))
-      OV.SetParam('snum.refinement.cctbx.nsff.name',os.getenv("hart_file", ""))
-      import multiprocessing
-      max_cpu = multiprocessing.cpu_count()
-
+    exe_pre = "HA_sfs"
+    self.exe_pre = exe_pre
+    
     if sys.platform[:3] == 'win':
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
         self.mpiexec = olx.file.Which("mpiexec.exe")
-
       
       _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
       if os.path.exists(_):
@@ -195,11 +211,17 @@ class HARp(PT):
     for k,v in self.options.iteritems():
       olx.SetVar(k, v[0])
 
-  def launch(self):
+  def launch(self, job_type):
+    self.job_type = job_type
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
+    
     self.setup_har_executables()
+    
+    if self.job_type.lower() == "nsff":
+      self.sort_out_HA_options()
+   
     job = Job(self, olx.FileName())
     job.launch()
     olx.html.Update()
@@ -596,6 +618,7 @@ class Job(object):
       self.name = self.name[:-6]
     full_dir = os.path.join(parent.jobs_dir, self.name)
     self.full_dir = full_dir
+    
     if not os.path.exists(full_dir):
       return
     self.date = os.path.getctime(full_dir)
@@ -747,13 +770,29 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
     self.save()
 
-    if HARp_instance.exe_pre == "HA_sfs":
-      args = [self.name+".cif"]
-    
-    else:
+    if HARp_instance.job_type.lower() == "hart":
       args = [self.name+".cif",
               "-basis-dir", self.parent.basis_dir,
-               "-shelx-f2", self.name+".hkl"]
+              "-shelx-f2", self.name+".hkl",
+              "-hart", "t"
+              ]
+
+    else:
+      # We are asking to just get form factors to disk
+      tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+      if tsc_source == "TONTO":
+        # We want these from a wavefunction calculation using TONTO """
+  
+        args = [self.name+".cif",
+                "-basis-dir", self.parent.basis_dir,
+                "-shelx-f2", self.name+".hkl"
+                ]
+  
+      elif tsc_source.lower().endswith(".fchk"):
+        # We want these from supplied fchk file """
+        args = [self.name+".cif",
+                "-shelx-f2", self.name+".hkl "
+                "-fchk", tsc_source]    
     
     if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
       args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
@@ -781,19 +820,6 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
-
-    _ = OV.GetParam('snum.refinement.cctbx.nsff.tsc_file')
-    if ".fchk" in _.lower():
-      ks = ['settings.tonto.HAR.hydrogens', "-fchk", "settings.tonto.HAR.convergence.value"]
-      for k in ks:
-        if HARp_instance.options.has_key(k):
-          HARp_instance.options.pop(k)
-      HARp_instance.options["-fchk"] = _
-      args.append("-fchk")
-      args.append(_)
-      
-    if HARp_instance.exe_pre == "HA_sfs":
-      HARp_instance.pop_for_HA()
 
     for k,v in HARp_instance.options.iteritems():
       val = olx.GetVar(k, None)
@@ -826,7 +852,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     
     #if olx.GetVar("settings.tonto.HAR.sfc-file") == "true":
       #args.append("-disk-sfs")
- 
+
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
     self.out_fn = os.path.join(self.full_dir, self.name) + ".out"
@@ -835,10 +861,9 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     os.environ['hart_cmd'] = '+&-'.join(args)
     os.environ['hart_file'] = self.name
     os.environ['hart_dir'] = self.full_dir
-    
-    OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
-    OV.SetParam('snum.refinement.cctbx.nsff.cmd','-- \n'.join(args))
+    OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
+    OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
     
     from subprocess import Popen
     pyl = OV.getPYLPath()
@@ -891,29 +916,34 @@ def combine_sfs():
   import glob
   import math
 
-  use_modulus = OV.GetParam('harp.NSFF.modulus')
+  if debug:
+    t_beg = time.time()
   sfc_dir = OV.GetParam('snum.refinement.cctbx.nsff.dir')
   sfc_name = OV.GetParam('snum.refinement.cctbx.nsff.name')
-  mod = ""
-  if use_modulus:
-    mod="_mod"
-  tsc_dst = os.path.join(OV.FilePath(), sfc_name + mod + ".tsc")
-  tsc_fn = os.path.join(sfc_dir, sfc_name + mod + ".tsc")
-  
-  if os.path.exists(tsc_fn) and os.path.exists(tsc_fn):
-    if "%.0f" %os.path.getctime(tsc_fn) != "%.0f" %os.path.getctime(tsc_dst):
-      print ("There is a newer file. Upating!")
-    else:
+  tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
+  if not sfc_dir:
+    return
+  _mod = ""
+  if tsc_modular:
+    _mod = "_mod"
+  tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + ".tsc")
+  tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + ".tsc")
+  if os.path.exists(tsc_fn) and os.path.exists(tsc_dst):
+    if "%0.f" %os.path.getctime(tsc_fn) == "%0.f" %os.path.getctime(tsc_dst):
+      print ("No new .tsc files")
+      olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE',  os.path.basename(tsc_dst))
       return
-
-  #if OV.SetParam('snum.refinement.cctbx.nsff.tsc_file').lower() != "check for new":
+    else:
+      print ("Creating newer .tsc file")
 
   p = os.path.join(sfc_dir, "*,ascii")
   g = glob.glob(p)
   d = {}
   if not g:
     return False
-  
+
+  if debug:
+    t1 = time.time()
   for file_p in g:
     if "SFs_key,ascii" in file_p:
       sfs_fp = file_p
@@ -926,17 +956,35 @@ def combine_sfs():
     values = open(file_p,'r').read().splitlines()
     sfc_l = []
     for line in values:
-      if use_modulus:
+      if tsc_modular:
         _ = line.split()
         a = float(_[0])
         b = float(_[1])
         v = math.sqrt(a*a + b*b)
         sfc_l.append("%.6f" %v)
       else:
-        sfc_l.append(",".join(line.split()))
+        _ = line.split()
+        a = float(_[0])
+        b = float(_[1])
+        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
 
     d[name].setdefault('sfc', sfc_l)
     d[name].setdefault('name', name)
+    
+  sym = open(symops_fp,'r').read().splitlines()
+  sym_l = []
+  ll = []
+  for line in sym:
+    if line:
+      li = line.split()
+      for val in li:
+        ll.append(str(int(float((val)))))
+    else:
+      sym_l.append(" ".join(ll))
+      ll = []
+    
+  if debug:
+    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
   
   #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
   hkl_fn = "SFs_key,ascii"
@@ -949,9 +997,11 @@ def combine_sfs():
   t = ""
   _d = {'anomalous':'false',
         'title': OV.FileName(),
+        'symmops': ";".join(sym_l),
         }
   header = '''TITLE: %(title)s
 AD accounted: %(anomalous)s
+Symm: %(symmops)s
 Scatterers: ''' %_d
 
   t += header
@@ -963,16 +1013,43 @@ Scatterers: ''' %_d
     t += "%s " %d[item]['name']
     l.append(d[item]['sfc'])
     
+  if debug:
+    t1 = time.time()  
   t += "\n"
   ll = zip(*l)
+
+  ol = []
   for line in ll:
-    t += " ".join(line)
-    t += "\n"
+    ol.append(" ".join(line))
+  t += "\n".join(ol)
 
   with open(tsc_fn, 'w') as wFile:
     wFile.write(t)
+
+  if debug:
+    print("Time for creating text for tsc file: %.3f" %(time.time() - t1))
+
+  #if debug:
+    #t1 = time.time()  
+  #with open(tsc_fn, 'w') as wFile:
+    #wFile.write(t + "\n")
+    #ll = zip(*l)
+    #for line in ll:
+      #wFile.write(" ".join(line))
+      #wFile.write("\n")
+  #if debug:
+    #print("Time for creating text for tsc file (file): %.3f" %(time.time() - t1))
+
+
   from shutil import copyfile
   copyfile(tsc_fn, tsc_dst)
+  try:
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
+    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
+  except:
+    pass
+  if debug:
+    print("Total time: %.2f"%(time.time() - t_beg))
   return True
 
 OV.registerFunction(combine_sfs,True,'har')
