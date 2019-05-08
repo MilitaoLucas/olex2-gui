@@ -44,13 +44,13 @@ class Method_cctbx_refinement(Method_refinement):
     if RunPrgObject.params.snum.refinement.method == "NSFF":
       #self.method = self.RPD.programs[self.program.name].methods['Levenberg-Marquardt']
 
-      table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc_file')
+      table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
       if not os.path.exists(table_file_name):
         table_file_name = None
       else:
         table_file_name = table_file_name.encode("utf-8")
         print("Warning: using tabulated atomic form factors")
-        gui.set_notification("Using <b>tabulated</b> form factors from <b>%s</b>" %os.path.basename(table_file_name))
+        gui.set_notification("Using <font color='red'><b>tabulated</b></font> form factors from <b>%s</b>" %os.path.basename(table_file_name))
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
