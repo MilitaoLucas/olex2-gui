@@ -119,16 +119,6 @@
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>
 
-  <td width="15%" align="right"> sfc file </td>
-  <td width="8%">
-  $+
-      html.Snippet("gui/snippets/input-checkbox",
-      "name=tonto_har_sfc_file",
-      "checked=GetVar('settings.tonto.HAR.sfc-file')",
-      "onclick=SetVar('settings.tonto.HAR.sfc-file', html.GetState('~name~'))")
-   $-
-</td>
-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

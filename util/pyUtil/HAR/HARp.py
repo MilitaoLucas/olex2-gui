@@ -193,13 +193,13 @@ class HARp(PT):
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
         
-      _ = os.path.join(self.p_path, "%s_mpi" %exe_pre)
+      _ = os.path.join(self.p_path[:-16], "%s_mpi" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
         self.mpi_har = olx.file.Which("%s_mpi" %exe_pre)
         
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      _ = os.path.join(self.p_path[:-16], "%s" %exe_pre)
       if os.path.exists(_):
         self.exe = _
       else:
@@ -809,11 +809,11 @@ class wfn_Job(object):
       cpu = "%nproc=" + olx.GetVar("settings.tonto.HAR.ncpus", None)
     else:
       cpu = "%nproc=1"
-    mem = "%mem=" + olx.GetVar("settings.tonto.HAR.mem", None) + "GB"
+    mem = "%mem=" + OV.GetParam('snum.refinement.cctbx.nsff.mem') + "GB"
     if olx.GetVar("settings.tonto.HAR.method", None) == "rhf":
-      control = "# rhf/gen 6D 10F IOp(3/32=2) formcheck"
+      control = "# rhf/gen NoSymm 6D 10F IOp(3/32=2) formcheck"
     else:
-      control = "# b3lyp/gen 6D 10F IOp(3/32=2) formcheck"
+      control = "# b3lyp/gen NoSymm 6D 10F IOp(3/32=2) formcheck"
     com.write(cpu + '\n')
     com.write(mem + '\n')
     com.write(control + '\n')
@@ -968,28 +968,20 @@ class wfn_Job(object):
       args.append(self.name + ".log")
       if os.path.exists(self.name + ".gbw"):
         os.remove(self.name + ".gbw")
-#    os.environ['fchk_cmd'] = '+&-'.join(args)
-#    os.environ['fchk_file'] = self.name
-#    os.environ['fchk_dir'] = self.full_dir
+    os.environ['fchk_cmd'] = '+&-'.join(args)
+    os.environ['fchk_file'] = self.name
+    os.environ['fchk_dir'] = self.full_dir
     
     import subprocess
     import time
-#    pyl = OV.getPYLPath()
-#    if not pyl:
-#      print("A problem with pyl is encountered, aborting.")
-#      return
-#    p = subprocess.Popen([pyl,
-#           os.path.join(p_path, "fchk-launch.py")])
-    os.chdir(self.full_dir)
-    p = None
-    if "orca" in args[0]:
-      log = open(self.name + '.log', 'w')
-      p = subprocess.Popen(args, stdout=log)
-    else:
-      p = subprocess.Popen(args)
+    pyl = OV.getPYLPath()
+    if not pyl:
+      print("A problem with pyl is encountered, aborting.")
+      return
+    p = subprocess.Popen([pyl,
+           os.path.join(p_path, "fchk-launch.py")])
     while p.poll() is None:
-      time.sleep(1)
-    log.close()
+      time.sleep(3)
            
     import shutil
     if("g03" in args[0]):
