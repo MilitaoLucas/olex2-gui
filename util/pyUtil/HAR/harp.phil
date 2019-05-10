@@ -16,6 +16,5 @@ harp{
     .type = str
   har_job_path = DataDir()/har_jobs
     .type = str
-  sfc_file = True
-    .type = bool
+    
 }
