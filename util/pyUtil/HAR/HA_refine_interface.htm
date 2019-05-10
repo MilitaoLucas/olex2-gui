@@ -5,7 +5,7 @@
 <td width='12%'>
 <b>FF Table</b>
 </td>
-<td width='35%'>
+<td width='30%'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
@@ -16,36 +16,8 @@
     )
   $-
 </td>
-<td width="9%" align='right'>
-  CPUs:
-</td>
-<td width="10%" align='center'>
-$+
-    html.Snippet("gui/snippets/input-combo",
-    "name=har_cpus",
-    "items=spy.tonto.HAR.getCPUListStr()",
-    "value=GetVar('settings.tonto.HAR.ncpus')",
-    "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
-   $-
-</td>
-<td>
-  $+
-    html.Snippet(GetVar(default_link),
-    "value=Print Settings",
-    "name=SNUM_REFINEMENT_NSFF_PRINT_SETTINGS",
-    "onclick=echo(spy.GetParam('snum.refinement.cctbx.nsff.cmd'))",
-    "td1=<td width='20%'>"
-    )
-  $-
-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NSFF;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
-<td width='15%'>
-<b>SCF-Code</b> 
+<td width='17%' align='right'>
+<b>Wfn Source</b> 
 </td>
 <td width='20%'>
   $+
@@ -59,40 +31,16 @@ $+
   $-
 </td>
 
-<td width="9%" align='right'>
-    <b>Basis </b>
-</td>
-<td width="21%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=tonto_har_basis",
-    "items=spy.tonto.HAR.getBasisListStr()",
-    "value=GetVar('settings.tonto.HAR.basis.name')",
-    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
-   $-
- </td>
-<td width="10%" align='right'>
-  <b>Method </b>
-</td>
-<td width="12%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=tonto_method",
-    "items='RHF<-rhf;RKS<-rks'",
-    "value=GetVar('settings.tonto.HAR.method')",
-    "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
-   $-
-</td>
-
-
+<td width="10%" align="left">
   $+
     html.Snippet(GetVar(default_link),
     "value=Start",
     "name=SNUM_REFINEMENT_COMPUTE_NSFF",
-    "onclick=SetVar(settings.tonto.HAR.sfc-file,True)>>spy.tonto.HAR.launch(NSFF)",
-    "td1=<td width='20%'>"
+    "onclick=spy.tonto.HAR.launch(NSFF)",
+    "td1=<td width='100%'>"
     )
   $-
+  </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

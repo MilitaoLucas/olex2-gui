@@ -1,0 +1,77 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="100%" align="center"> <b> Advanced settings </b> </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="10%" align='left'>
+  Method
+</td>
+<td width="15%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=tonto_method",
+    "items='RHF<-rhf;RKS<-rks'",
+    "value=GetVar('settings.tonto.HAR.method')",
+    "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
+   $-
+</td>
+<td width="15%" align='right'>
+    Basis Set
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=tonto_har_basis",
+    "items=spy.tonto.HAR.getBasisListStr()",
+    "value=GetVar('settings.tonto.HAR.basis.name')",
+    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
+   $-
+ </td>
+ 
+ <td width="25%" align='right'>
+  CPUs
+</td>
+<td width="10%" align='center'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=har_cpus",
+    "items=spy.tonto.HAR.getCPUListStr()",
+    "value=GetVar('settings.tonto.HAR.ncpus')",
+    "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
+   $-
+</td>
+ 
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="100%" align="center"> <b> Analysis of results </b> </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
+
+$spy.gui.maps.SetXgridView()
+<!-- #include xgrid gui\snippets\snippet-xgrid.htm;suffix=maps;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'))
+<tr bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include xgrid gui\snippets\snippet-3D-xgrid.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')))
+<tr bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include xgrid gui\snippets\snippet-2D-xgrid.htm;1; -->
+#ignoreif -->
+
+<!-- #include h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="";2; -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
