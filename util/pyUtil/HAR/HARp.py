@@ -58,11 +58,14 @@ class HARp(PT):
     self.print_version_date()
     self.jobs = []
     self.parallel = False
+    self.softwares = ""
+    self.wfn_2_fchk = ""
+   
     if not from_outside:
       self.setup_gui()
     # END Generated =======================================
     options = {
-      "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
+      "settings.tonto.HAR.basis.name": ("x2c-SVPall", "basis"),
       "settings.tonto.HAR.ncpus": ("1",),
       "settings.tonto.HAR.method": ("rhf", "scf"),
       "settings.tonto.HAR.hydrogens": ("anisotropic",),
@@ -73,7 +76,6 @@ class HARp(PT):
       "settings.tonto.HAR.autorefine": ("true",),
       "settings.tonto.HAR.autogrow": ("true",),
       "settings.tonto.HAR.cluster-grow": ("true",),
-      "settings.tonto.HAR.sfc-file": ("false",),
     }
     self.options = options
 
@@ -83,6 +85,11 @@ class HARp(PT):
       os.mkdir(self.jobs_dir)
 
     self.setup_har_executables()
+    self.setup_g03_executables()
+    self.setup_g09_executables()
+    self.setup_g16_executables()
+    self.setup_orca_executables()
+    self.setup_wfn_2_fchk()
         
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
@@ -100,15 +107,15 @@ class HARp(PT):
 
   def sort_out_HA_options(self):
     # We are asking to just get form factors to disk
-    self.options["settings.tonto.HAR.ncpus"] = (self.max_cpu,)
+    #self.options["settings.tonto.HAR.ncpus"] = (self.max_cpu,)
     self.options["settings.tonto.HAR.autorefine"] = (False,)
     self.options["settings.tonto.HAR.autogrow"] = (False,)
     self.options["settings.tonto.HAR.cluster-grow"] = (False,)
     olx.SetVar("settings.tonto.HAR.autorefine", False) 
-    olx.SetVar("settings.tonto.HAR.ncpus", self.max_cpu) 
+    #olx.SetVar("settings.tonto.HAR.ncpus", self.max_cpu) 
     tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     
-    if tsc_source == "TONTO":
+    if tsc_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
 
       delete_ks = ["settings.tonto.HAR.basis.name", 
@@ -117,7 +124,6 @@ class HARp(PT):
           "settings.tonto.HAR.convergence.value",
           "settings.tonto.HAR.cluster.radius",
           "settings.tonto.HAR.dispersion",
-          "settings.tonto.HAR.sfc-file",
           ]
     elif tsc_source.lower().endswith(".fchk"):
       # We want these from supplied fchk file """
@@ -129,7 +135,17 @@ class HARp(PT):
           "settings.tonto.HAR.convergence.value",
           "settings.tonto.HAR.cluster.radius",
           "settings.tonto.HAR.dispersion",
-          "settings.tonto.HAR.sfc-file",
+          ]
+    else:
+      # We want to calculate a wavefunction on our own using the supllied code """
+      
+      delete_ks = ["settings.tonto.HAR.basis.name", 
+          "settings.tonto.HAR.method",
+          "settings.tonto.HAR.hydrogens",
+          "settings.tonto.HAR.extinction.refine",
+          "settings.tonto.HAR.convergence.value",
+          "settings.tonto.HAR.cluster.radius",
+          "settings.tonto.HAR.dispersion",
           ]
     for k in delete_ks:
       if self.options.has_key(k):
@@ -158,7 +174,7 @@ class HARp(PT):
         self.exe = _
       else:
         self.exe = olx.file.Which("%s.exe" %exe_pre)
-        
+
     else:
       mpiloc = os.path.join(self.p_path, "mpiexec")
       if os.path.exists(mpiloc):
@@ -191,6 +207,8 @@ class HARp(PT):
 
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
+      if "Tonto" not in self.softwares:
+        self.softwares = self.softwares + ";Tonto"
       import multiprocessing
       max_cpu = multiprocessing.cpu_count()
       self.max_cpu = max_cpu
@@ -201,11 +219,12 @@ class HARp(PT):
         cpu_list.append(str(n+1))
         self.cpu_list_str = ';'.join(cpu_list)
     else:
+      if "Tonto" not in self.softwares:
+        self.softwares = self.softwares + ";Tonto"
       print """
       No MPI implementation found in PATH!"""
       self.cpu_list_str = '1'
 
-    
 
   def set_defaults(self):
     for k,v in self.options.iteritems():
@@ -219,18 +238,156 @@ class HARp(PT):
     
     self.setup_har_executables()
     
-    if self.job_type.lower() == "nsff":
-      self.sort_out_HA_options()
-   
     job = Job(self, olx.FileName())
+    
+    if self.job_type.lower() == "nsff":
+      job.wait = "true"
+      wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+      if wfn_code.lower().endswith(".fchk"):
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+      elif wfn_code == "Tonto":
+        pass
+      else:
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+        self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
+      self.sort_out_HA_options()
+    
     job.launch()
     olx.html.Update()
+    if self.job_type.lower() == "nsff":
+      combine_sfs()
+      olex.m("refine")
+	
+  def wfn(self):
+    if not self.basis_list_str:
+      print("Could not locate usable HARt executable")
+      return
+	  
+	  
+    wfn_object = wfn_Job(self,olx.FileName())
+    software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    if software == "ORCA":
+      wfn_object.write_orca_input()
+    elif software == "Gaussian03":
+      wfn_object.write_gX_input()
+    elif software == "Gaussian09":
+      wfn_object.write_gX_input()
+    elif software == "Gaussian16":
+      wfn_object.write_gX_input()
+      
+    wfn_object.run()
+    
+  def setup_wfn_2_fchk(self):
+    exe_pre ="Wfn_2_Fchk"
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.wfn_2_fchk = _
+      else:
+        self.wfn_2_fchk = olx.file.Which("%s.exe" %exe_pre)
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.wfn_2_fchk = _
+      else:
+        self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
+    
+  def setup_g09_executables(self):
+    self.g09_exe = ""
+    exe_pre = "g09"
+    self.g09_exe_pre = exe_pre
+    
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.g09_exe = _
+      else:
+        self.g09_exe = olx.file.Which("%s.exe" %exe_pre)
+        
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.g09_exe = _
+      else:
+        self.g09_exe = olx.file.Which("%s" %exe_pre)   
+    if os.path.exists(self.g09_exe):
+      if "Gaussian09" not in self.softwares:
+        self.softwares = self.softwares + ";Gaussian09"
 
+  def setup_g03_executables(self):
+    self.g03_exe = ""
+    exe_pre = "g03"
+    self.g03_exe_pre = exe_pre
+    
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.g03_exe = _
+      else:
+        self.g03_exe = olx.file.Which("%s.exe" %exe_pre)
+        
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.g03_exe = _
+      else:
+        self.g03_exe = olx.file.Which("%s" %exe_pre) 
+    if os.path.exists(self.g03_exe):
+      if "Gaussian03" not in self.softwares:
+        self.softwares = self.softwares + ";Gaussian03"
+      
+  def setup_g16_executables(self):
+    self.g16_exe = ""
+    exe_pre = "g16"
+    self.g16_exe_pre = exe_pre
+    
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.g16_exe = _
+      else:
+        self.g16_exe = olx.file.Which("%s.exe" %exe_pre)
+        
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.g16_exe = _
+      else:
+        self.g16_exe = olx.file.Which("%s" %exe_pre) 
+    if os.path.exists(self.g16_exe):
+      if "Gaussian16" not in self.softwares:
+        self.softwares = self.softwares + ";Gaussian16"
+      
+  def setup_orca_executables(self):
+    self.orca_exe = ""
+    exe_pre = "orca"
+    self.orca_exe_pre = exe_pre
+    
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.orca_exe = _
+      else:
+        self.orca_exe = olx.file.Which("%s.exe" %exe_pre)
+        
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.orca_exe = _
+      else:
+        self.orca_exe = olx.file.Which("%s" %exe_pre) 
+    if os.path.exists(self.orca_exe):
+      if "ORCA" not in self.softwares:
+        self.softwares = self.softwares + ";ORCA"
+  
   def getBasisListStr(self):
     return self.basis_list_str
   
   def getCPUListStr(self):
     return self.cpu_list_str
+  
+  def getwfn_softwares(self):
+    return self.softwares + ";"
 
   def list_jobs(self):
     import shutil
@@ -438,8 +595,6 @@ class HARp(PT):
 
     makePlotlyGraph(d)
 
-
-
   def makePlotlyGraph(d):
 
     try:
@@ -488,9 +643,6 @@ class HARp(PT):
 
     fig = go.Figure(data=data, layout=layout)
     plot_url = plotly.offline.plot(fig, filename='basic-line')
-
-
-
 
 def getAnalysisPlotData(input_f):
   f = open(input_f, 'r').read()
@@ -544,8 +696,6 @@ def getAnalysisPlotData(input_f):
 
   makePlotlyGraph(d)
 
-
-
 def makePlotlyGraph(d):
 
   try:
@@ -595,6 +745,279 @@ def makePlotlyGraph(d):
   fig = go.Figure(data=data, layout=layout)
   plot_url = plotly.offline.plot(fig, filename='basic-line')
 
+class wfn_Job(object):
+  origin_folder = " "
+  is_copied_back = False
+  date = None
+  input_fn = None
+  log_fn = None
+  fchk_fn = None
+  completed = None
+  full_dir = None
+  exe_fn = None
+
+  def __init__(self, parent, name):
+    self.parent = parent
+    self.status = 0
+    self.name = name
+    self.parallel = parent.parallel
+    if self.name.endswith('_HAR'):
+      self.name = self.name[:-4]
+    elif self.name.endswith('_input'):
+      self.name = self.name[:-6]
+    full_dir = olx.FilePath()
+    self.full_dir = full_dir
+    
+    if not os.path.exists(full_dir):
+      return
+    self.date = os.path.getctime(full_dir)
+    self.log_fn = os.path.join(full_dir, name) + ".log"
+    self.fchk_fn = os.path.join(full_dir, name) + ".fchk"
+    self.completed = os.path.exists(self.fchk_fn)
+    initialised = False
+	
+    import shutil
+    try:
+      os.mkdir(self.full_dir)
+    except:
+      pass
+    tries = 0
+    while not os.path.exists(self.full_dir) and tries < 5:
+      try:
+        os.mkdir(self.full_dir)
+        break
+      except:
+        time.sleep(0.1)
+        tries += 1
+        pass
+
+    time.sleep(0.1)
+    self.origin_folder = OV.FilePath()
+  
+  def write_gX_input(self):
+    coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    olx.Kill("$Q")
+    olx.File(coordinates_fn)
+    xyz = open(coordinates_fn,"r")
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
+    com = open(self.input_fn,"w")
+    basis_name = olx.GetVar("settings.tonto.HAR.basis.name")
+    basis_set_fn = os.path.join(self.parent.basis_dir,olx.GetVar("settings.tonto.HAR.basis.name"))
+    basis = open(basis_set_fn,"r")
+    chk_destination = "%chk=" + self.name + ".chk"
+    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
+      cpu = "%nproc=" + olx.GetVar("settings.tonto.HAR.ncpus", None)
+    else:
+      cpu = "%nproc=1"
+    mem = "%mem=" + olx.GetVar("settings.tonto.HAR.mem", None) + "GB"
+    if olx.GetVar("settings.tonto.HAR.method", None) == "rhf":
+      control = "# rhf/gen 6D 10F IOp(3/32=2) formcheck"
+    else:
+      control = "# b3lyp/gen 6D 10F IOp(3/32=2) formcheck"
+    com.write(cpu + '\n')
+    com.write(mem + '\n')
+    com.write(control + '\n')
+    com.write(" \n")
+    title = "Wavefunction calculation for " + self.name + " on a level of theory of " + olx.GetVar("settings.tonto.HAR.method", None) + "/" + olx.GetVar("settings.tonto.HAR.basis.name")
+    com.write(title + '\n')
+    com.write(" " + '\n')
+    com.write("0 1" + '\n')
+    atom_list = []
+    i = 0
+    for line in xyz:
+      i = i+1
+      if i > 2:
+        atom = line.split()
+    	com.write(line)
+        if not atom[0] in atom_list:
+          atom_list.append(atom[0])
+    xyz.close()
+    com.write(" \n")
+    for i in range(0,len(atom_list)):
+      atom_type = atom_list[i] + " 0\n"
+      com.write(atom_type)
+      temp_atom = atom_list[i].lower() + ":" + basis_name.lower()
+      basis.seek(0,0)
+      while True:
+        line = basis.readline()
+        if line[0] == "!":
+          continue
+        if "keys=" in line:
+          key_line = line.split(" ")
+          type = key_line[key_line.index("keys=")+2]
+        if temp_atom in line.lower():
+          break
+      line_run = basis.readline()
+      if "{"  in line_run:
+        line_run = basis.readline()
+      while (not "}" in line_run):
+        shell_line = line_run.split()
+        if type == "turbomole=":
+          n_primitives = shell_line[0]
+          shell_type = shell_line[1]
+        elif type == "gamess-us=":
+          n_primitives = shell_line[1]
+          shell_type = shell_line[0]
+        shell_gaussian = "   " + shell_type.upper() + " " + n_primitives + " 1.0\n"
+        com.write(shell_gaussian)
+        for n in range(0,int(n_primitives)):
+          if type == "turbomole=":
+            com.write(basis.readline())   
+          else:
+            temp_line = basis.readline()
+            temp = temp_line.split()
+            com.write(temp[1] + " " + temp[2] + '\n')
+        line_run = basis.readline()
+      com.write("****\n")
+    basis.close()
+    com.write(" ")
+    com.close()
+    
+  def write_orca_input(self):
+    coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    olx.Kill("$Q")
+    olx.File(coordinates_fn)
+    xyz = open(coordinates_fn,"r")
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
+    inp = open(self.input_fn,"w")
+    basis_name = olx.GetVar("settings.tonto.HAR.basis.name")
+    basis_set_fn = os.path.join(self.parent.basis_dir,olx.GetVar("settings.tonto.HAR.basis.name"))
+    basis = open(basis_set_fn,"r")
+    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
+      cpu = "nprocs " + olx.GetVar("settings.tonto.HAR.ncpus", None)
+    else:
+      cpu = "nprocs 1"
+    mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
+    mem_value = int(mem) / int(olx.GetVar("settings.tonto.HAR.ncpus", None)) * 1000
+    mem = "%maxcore " + str(mem_value)
+    if olx.GetVar("settings.tonto.HAR.method", None) == "rhf":
+      control = "!rhf 3-21G TightSCF Grid4 AIM"
+    else:
+      control = "!B3LYP 3-21G TightSCF Grid4 AIM"
+    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge 0\n        mult 1\n        units angs\n        coords\n")
+    atom_list = []
+    i = 0
+    for line in xyz:
+      i = i+1
+      if i > 2:
+        atom = line.split()
+    	inp.write(line)
+        if not atom[0] in atom_list:
+          atom_list.append(atom[0])
+    xyz.close()
+    inp.write("   end\nend\n%basis\n")
+    for i in range(0,len(atom_list)):
+      atom_type = "newgto " +atom_list[i] + '\n'
+      inp.write(atom_type)
+      temp_atom = atom_list[i].lower() + ":" + basis_name.lower()
+      basis.seek(0,0)
+      while True:
+        line = basis.readline()
+        if line[0] == "!":
+          continue
+        if "keys=" in line:
+          key_line = line.split(" ")
+          type = key_line[key_line.index("keys=")+2]
+        if temp_atom in line.lower():
+          break
+      line_run = basis.readline()
+      if "{"  in line_run:
+        line_run = basis.readline()
+      while (not "}" in line_run):
+        shell_line = line_run.split()
+        if type == "turbomole=":
+          n_primitives = shell_line[0]
+          shell_type = shell_line[1]
+        elif type == "gamess-us=":
+          n_primitives = shell_line[1]
+          shell_type = shell_line[0]
+        shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
+        inp.write(shell_gaussian)
+        for n in range(0,int(n_primitives)):
+          if type == "turbomole=":
+            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))   
+          else:
+            inp.write(basis.readline().replace("D","E"))   
+        line_run = basis.readline()
+      inp.write("end\n")
+    basis.close()
+    inp.write("end\n")
+    inp.close()
+	
+  def run(self):
+    args = []
+    basis_name = olx.GetVar("settings.tonto.HAR.basis.name")
+    software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    fchk_exe = ""
+    if software == "ORCA":
+      fchk_exe = self.parent.orca_exe
+      input_fn = self.name + ".inp"
+    elif software == "Gaussian03":
+      fchk_exe = self.parent.g03_exe
+      input_fn = self.name + ".com"
+    elif software == "Gaussian09":
+      fchk_exe = self.parent.g09_exe
+      input_fn = self.name + ".com"
+    elif software == "Gaussian16":
+      fchk_exe = self.parent.g16_exe
+      input_fn = self.name + ".com"
+    args.append(fchk_exe)
+    args.append(input_fn)
+    if software == "ORCA":
+      args.append(">")
+      args.append(self.name + ".log")
+      if os.path.exists(self.name + ".gbw"):
+        os.remove(self.name + ".gbw")
+#    os.environ['fchk_cmd'] = '+&-'.join(args)
+#    os.environ['fchk_file'] = self.name
+#    os.environ['fchk_dir'] = self.full_dir
+    
+    import subprocess
+    import time
+#    pyl = OV.getPYLPath()
+#    if not pyl:
+#      print("A problem with pyl is encountered, aborting.")
+#      return
+#    p = subprocess.Popen([pyl,
+#           os.path.join(p_path, "fchk-launch.py")])
+    os.chdir(self.full_dir)
+    p = None
+    if "orca" in args[0]:
+      log = open(self.name + '.log', 'w')
+      p = subprocess.Popen(args, stdout=log)
+    else:
+      p = subprocess.Popen(args)
+    while p.poll() is None:
+      time.sleep(1)
+    log.close()
+           
+    import shutil
+    if("g03" in args[0]):
+      shutil.move("Test.FChk",self.name+".fchk")
+    if("g09" in args[0]):
+      shutil.move("Test.FChk",self.name+".fchk")
+    if("g16" in args[0]):
+      shutil.move("Test.FChk",self.name+".fchk")
+    if("orca" in args[0]):
+      move_args = []
+      basis_dir = self.parent.basis_dir
+      move_args.append(self.parent.wfn_2_fchk)
+      move_args.append("-wfn")
+      move_args.append(self.name+".wfn")
+      move_args.append("-b")
+      move_args.append(basis_name)
+      move_args.append("-d")
+      if sys.platform[:3] == 'win':
+        move_args.append(basis_dir.replace("/","\\"))
+      else:
+        move_args.append(basis_dir)
+      log = open('Wfn_2_Fchk.log','w')
+      os.chdir(self.full_dir)
+      m = subprocess.Popen(move_args, stdout=log)
+      while m.poll() is None:
+        time.sleep(1)
+      log.close()
+    
 
 class Job(object):
   origin_folder = " "
@@ -606,6 +1029,7 @@ class Job(object):
   analysis_fn = None
   completed = None
   full_dir = None
+  wait = "false"
 
   def __init__(self, parent, name):
     self.parent = parent
@@ -779,8 +1203,8 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
 
     else:
       # We are asking to just get form factors to disk
-      tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-      if tsc_source == "TONTO":
+      fchk_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+      if fchk_source == "Tonto":
         # We want these from a wavefunction calculation using TONTO """
   
         args = [self.name+".cif",
@@ -788,11 +1212,13 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
                 "-shelx-f2", self.name+".hkl"
                 ]
   
-      elif tsc_source.lower().endswith(".fchk"):
+      else:
         # We want these from supplied fchk file """
+        fchk_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.fchk_file')
+        shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
         args = [self.name+".cif",
-                "-shelx-f2", self.name+".hkl "
-                "-fchk", tsc_source]    
+                "-shelx-f2", self.name+".hkl ",
+                "-fchk", fchk_file]    
     
     if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
       args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
@@ -823,6 +1249,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
 
     for k,v in HARp_instance.options.iteritems():
       val = olx.GetVar(k, None)
+                      
       if len(v) == 2:
         if val is not None:
           args.append('-' + v[1])
@@ -849,9 +1276,6 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     if clustergrow == 'false':
       args.append("-complete-mol")
       args.append("f")
-    
-    #if olx.GetVar("settings.tonto.HAR.sfc-file") == "true":
-      #args.append("-disk-sfs")
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
@@ -865,13 +1289,15 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
     
-    from subprocess import Popen
+    import subprocess
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    Popen([pyl,
+    p = subprocess.Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
+    if self.wait == "true":
+      p_status = p.wait()
     
 def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''
@@ -1059,8 +1485,10 @@ OV.registerFunction(HARp_instance.available, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.list_jobs, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.view_all, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.launch, False, "tonto.HAR")
+OV.registerFunction(HARp_instance.wfn, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.getBasisListStr, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.getCPUListStr, False, "tonto.HAR")
+OV.registerFunction(HARp_instance.getwfn_softwares, False, "tonto.HAR")
 OV.registerFunction(getAnalysisPlotData, False, "tonto.HAR")
 OV.registerFunction(makePlotlyGraph, False, "tonto.HAR")
 OV.registerFunction(del_dir, False, "tonto.HAR")

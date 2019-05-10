@@ -119,16 +119,6 @@
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>
 
-  <td width="15%" align="right"> sfc file </td>
-  <td width="8%">
-  $+
-      html.Snippet("gui/snippets/input-checkbox",
-      "name=tonto_har_sfc_file",
-      "checked=GetVar('settings.tonto.HAR.sfc-file')",
-      "onclick=SetVar('settings.tonto.HAR.sfc-file', html.GetState('~name~'))")
-   $-
-</td>
-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -201,6 +191,25 @@
         "name=tonto_har_run",
         "value=Start HAR",
         "onclick=spy.tonto.HAR.launch('HARt')"
+        )
+     $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_HEADER';help_ext=Running_HAR_Jobs;1; -->
+
+      $+
+         html.Snippet("gui/snippets/input-combo",
+         "name=wfn_code",
+         "items=spy.tonto.HAR.getwfn_softwares()",
+         "value=GetVar('settings.tonto.HAR.wfn_code')",
+         "onchange=SetVar('settings.tonto.HAR.wfn_code', html.GetValue('~name~'))")
+        $-
+	 
+      $+
+        html.Snippet(GetVar(default_link),
+        "name=write_input_gaussian",
+        "value=Calc WFN",
+        "onclick=spy.tonto.HAR.wfn()"
         )
      $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
