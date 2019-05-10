@@ -1,0 +1,103 @@
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width='12%'>
+<b>FF Table</b>
+</td>
+<td width='35%'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
+    "items=strcat('Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.file')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.har.combine_sfs()",
+    "onchangealways=True"
+    )
+  $-
+</td>
+<td width="9%" align='right'>
+  CPUs:
+</td>
+<td width="10%" align='center'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=har_cpus",
+    "items=spy.tonto.HAR.getCPUListStr()",
+    "value=GetVar('settings.tonto.HAR.ncpus')",
+    "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
+   $-
+</td>
+<td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Print Settings",
+    "name=SNUM_REFINEMENT_NSFF_PRINT_SETTINGS",
+    "onclick=echo(spy.GetParam('snum.refinement.cctbx.nsff.cmd'))",
+    "td1=<td width='20%'>"
+    )
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NSFF;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width='15%'>
+<b>SCF-Code</b> 
+</td>
+<td width='20%'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SNUM_REFINEMENT_NSFF_SOURCE",
+    "items=strcat(spy.tonto.HAR.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'fchk'))",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.source')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.source',html.GetValue('~name~'))>>html.Update()",
+    "onchangealways=True"
+    )
+  $-
+</td>
+
+<td width="9%" align='right'>
+    <b>Basis </b>
+</td>
+<td width="21%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=tonto_har_basis",
+    "items=spy.tonto.HAR.getBasisListStr()",
+    "value=GetVar('settings.tonto.HAR.basis.name')",
+    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
+   $-
+ </td>
+<td width="10%" align='right'>
+  <b>Method </b>
+</td>
+<td width="12%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=tonto_method",
+    "items='RHF<-rhf;RKS<-rks'",
+    "value=GetVar('settings.tonto.HAR.method')",
+    "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
+   $-
+</td>
+
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Start",
+    "name=SNUM_REFINEMENT_COMPUTE_NSFF",
+    "onclick=SetVar(settings.tonto.HAR.sfc-file,True)>>spy.tonto.HAR.launch(NSFF)",
+    "td1=<td width='20%'>"
+    )
+  $-
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr ALIGN='left' NAME='MASK_INFO'>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
