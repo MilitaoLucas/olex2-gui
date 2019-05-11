@@ -313,8 +313,12 @@ routines requiring structure refinement
             .type = str
           modular = True
             .type = bool
+          charge = 0
+            .type = str
         }
-        mem = "2"
+        mem = 2
+          .type = str
+        ncpus = 1
           .type = str
       }
     }  
