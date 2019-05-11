@@ -66,7 +66,6 @@ class HARp(PT):
     # END Generated =======================================
     options = {
       "settings.tonto.HAR.basis.name": ("x2c-SVPall", "basis"),
-      "settings.tonto.HAR.ncpus": ("1",),
       "settings.tonto.HAR.method": ("rhf", "scf"),
       "settings.tonto.HAR.hydrogens": ("anisotropic",),
       "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
@@ -805,8 +804,8 @@ class wfn_Job(object):
     basis_set_fn = os.path.join(self.parent.basis_dir,olx.GetVar("settings.tonto.HAR.basis.name"))
     basis = open(basis_set_fn,"r")
     chk_destination = "%chk=" + self.name + ".chk"
-    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
-      cpu = "%nproc=" + olx.GetVar("settings.tonto.HAR.ncpus", None)
+    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
+      cpu = "%nproc=" + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     else:
       cpu = "%nproc=1"
     mem = "%mem=" + OV.GetParam('snum.refinement.cctbx.nsff.mem') + "GB"
@@ -883,12 +882,12 @@ class wfn_Job(object):
     basis_name = olx.GetVar("settings.tonto.HAR.basis.name")
     basis_set_fn = os.path.join(self.parent.basis_dir,olx.GetVar("settings.tonto.HAR.basis.name"))
     basis = open(basis_set_fn,"r")
-    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
-      cpu = "nprocs " + olx.GetVar("settings.tonto.HAR.ncpus", None)
+    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
+      cpu = "nprocs " + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     else:
       cpu = "nprocs 1"
     mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
-    mem_value = int(mem) / int(olx.GetVar("settings.tonto.HAR.ncpus", None)) * 1000
+    mem_value = int(mem) / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) * 1000
     mem = "%maxcore " + str(mem_value)
     if olx.GetVar("settings.tonto.HAR.method", None) == "rhf":
       control = "!rhf 3-21G TightSCF Grid4 AIM"
@@ -1212,11 +1211,14 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
                 "-shelx-f2", self.name+".hkl ",
                 "-fchk", fchk_file]    
     
-    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
-      args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
+    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
+      args = [self.parent.mpiexec, "-np", OV.GetParam('snum.refinement.cctbx.nsff.ncpus'), self.parent.mpi_har] + args
     else:
       args = [self.parent.exe] + args
-
+    
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge') != '0':
+      args.append("-charge")
+      args.append(OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'))
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
       import olexex
@@ -1281,15 +1283,13 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
     
-    import subprocess
+    from subprocess import Popen
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
+    Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
-    if self.wait == "true":
-      p_status = p.wait()
     
 def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''
