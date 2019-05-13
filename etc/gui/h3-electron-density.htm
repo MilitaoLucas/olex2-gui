@@ -8,7 +8,7 @@
     $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_MAP_TYPE",
-      "items=diff;fcalc;2Fo-Fc<-tomc;fobs",
+      "items=diff;fcalc;2Fo-Fc<-tomc;fobs;fcfmc",
       "value=spy.GetParam('snum.map.type')",
       "onchange=spy.SetParam('snum.map.type',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')",
       "onchangealways=True",
@@ -20,9 +20,9 @@
     $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_MAP_SOURCE",
-      "items=olex;fcf;",
+      "items=fcf;olex;",
       "value=spy.GetParam('snum.map.source')",
-      "onchange=spy.SetParam('snum.map.source',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')",
+      "onchange=spy.SetParam('snum.map.source',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
       "onchangealways=True",
       )
     $-
