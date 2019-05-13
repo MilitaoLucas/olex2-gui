@@ -753,7 +753,7 @@ routines requiring structure refinement
   map {
     source = *olex fcf
       .type = choice
-    type = *diff fcalc tomc fobs
+    type = *diff fcalc tomc fobs fcfmc
       .type = choice
     mask = True
       .type = bool
