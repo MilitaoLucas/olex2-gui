@@ -31,5 +31,5 @@ with open(err_fn, "rU") as stderr:
   print stderr.read()
 
 print "Finished"
-if "-hart" not in args:
+if "-hart" in args:
   os.system("pause")

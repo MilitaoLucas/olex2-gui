@@ -309,10 +309,10 @@ routines requiring structure refinement
             .type = str
           fchk_file = ""
             .type = str
-          source = ""
+          source = "Tonto"
             .type = str
-          modular = True
-            .type = bool
+          modular = "direct"
+            .type = str
           charge = 0
             .type = str
         }

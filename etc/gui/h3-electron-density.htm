@@ -32,8 +32,9 @@
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_MAP_RESOLUTION",
-      "value=spy.GetParam(snum.map.resolution)",
-      "onenter=spy.SetParam(snum.map.resolution,html.GetValue(~name~))>>spy.gui.maps.MapView(off)",
+      "value=spy.GetParam('snum.map.resolution')",
+      "onchange=spy.SetParam('snum.map.resolution',html.GetValue(~name~))>>spy.gui.maps.MapView(off)",
+      "onchangealways=True",
       )
     $-
   </td>
