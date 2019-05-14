@@ -15,7 +15,7 @@
 <td width="15%">
   $+
     html.Snippet("gui/snippets/input-combo",
-    "name=tonto_method",
+    "name=tonto_method@refine",
     "items='RHF<-rhf;RKS<-rks'",
     "value=GetVar('settings.tonto.HAR.method')",
     "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
@@ -27,7 +27,7 @@
 <td width="25%">
   $+
     html.Snippet("gui/snippets/input-combo",
-    "name=tonto_har_basis",
+    "name=tonto_har_basis@refine",
     "items=spy.tonto.HAR.getBasisListStr()",
     "value=GetVar('settings.tonto.HAR.basis.name')",
     "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
@@ -43,7 +43,7 @@
 <td width="15%" align='center'>
 $+
     html.Snippet("gui/snippets/input-combo",
-    "name=har_cpus",
+    "name=har_cpus@refine",
     "items=spy.tonto.HAR.getCPUListStr()",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")

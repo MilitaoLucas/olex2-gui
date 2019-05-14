@@ -181,8 +181,8 @@
          html.Snippet("gui/snippets/input-combo",
          "name=har_cpus",
          "items=spy.tonto.HAR.getCPUListStr()",
-         "value=GetVar('settings.tonto.HAR.ncpus')",
-         "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
+         "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
+         "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
         $-
      </td>
 
