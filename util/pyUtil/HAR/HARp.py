@@ -152,7 +152,7 @@ class HARp(PT):
 
   def setup_har_executables(self):
     self.exe = None
-    exe_pre = "HA_sfs"
+    exe_pre = "hart"
     self.exe_pre = exe_pre
     
     if sys.platform[:3] == 'win':
@@ -376,6 +376,7 @@ class HARp(PT):
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre) 
     if os.path.exists(self.orca_exe):
+      OV.SetParam('snum.refinement.cctbx.nsff.ncpus',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
   
@@ -820,7 +821,8 @@ class wfn_Job(object):
     title = "Wavefunction calculation for " + self.name + " on a level of theory of " + olx.GetVar("settings.tonto.HAR.method", None) + "/" + olx.GetVar("settings.tonto.HAR.basis.name")
     com.write(title + '\n')
     com.write(" " + '\n')
-    com.write("0 1" + '\n')
+    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+    com.write(charge + " 1" + '\n')
     atom_list = []
     i = 0
     for line in xyz:
@@ -893,7 +895,8 @@ class wfn_Job(object):
       control = "!rhf 3-21G TightSCF Grid4 AIM"
     else:
       control = "!B3LYP 3-21G TightSCF Grid4 AIM"
-    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge 0\n        mult 1\n        units angs\n        coords\n")
+    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult 1\n        units angs\n        coords\n")
     atom_list = []
     i = 0
     for line in xyz:
@@ -1138,21 +1141,22 @@ class Job(object):
 #      olex.m('addins ACTA')
 #      olex.m('refine')
     autogrow = olx.GetVar("settings.tonto.HAR.autogrow", None)
-    if olx.xf.latt.IsGrown() == 'true':
-      if olx.Alert("Please confirm",\
+    if HARp_instance.job_type.lower() == "hart":
+      if olx.xf.latt.IsGrown() == 'true':
+        if olx.Alert("Please confirm",\
 """This is a grown structure. If you have created a cluster of molecules, make sure
 that the structure you see on the screen obeys the crystallographic symmetry.
 If this is not the case, the HAR will not work properly.
 Make sure the cluster/moelcule is neutral and fully completed.
 
 Continue?""", "YN", False) == 'N':
-        return
-    elif olx.xf.au.GetZprime() != '1' and autogrow == 'true':
-      olex.m("kill $q")
-      olx.Grow()
-      olex.m("grow -w")
-    elif olx.xf.au.GetZprime() < '1' and autogrow == 'false':
-      if olx.Alert("Attention!",\
+          return
+      elif olx.xf.au.GetZprime() != '1' and autogrow == 'true':
+        olex.m("kill $q")
+        olx.Grow()
+        olex.m("grow -w")
+      elif olx.xf.au.GetZprime() < '1' and autogrow == 'false':
+        if olx.Alert("Attention!",\
 """This appears to be a z' < 1 structure.
 Autogrow is disabled and the structure is not grown.
 
@@ -1162,10 +1166,10 @@ Please complete the molecule in a way it forms a full chemical entity.
 Benzene would need to contain one complete 6-membered ring to work,
 otherwise the wavefunction can not be calculated properly!
 Are you sure you want to continue with this structure?""", "YN", False) == 'N':
-        return
-    autorefine = olx.GetVar("settings.tonto.HAR.autorefine", None)
-    if autorefine == 'true':
-      olex.m("refine")
+          return
+      autorefine = olx.GetVar("settings.tonto.HAR.autorefine", None)
+      if autorefine == 'true':
+        olex.m("refine")
     model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
     olx.Kill("$Q")
     olx.File(model_file_name)
@@ -1283,13 +1287,15 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
     
-    from subprocess import Popen
+    import subprocess
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    Popen([pyl,
+    p = subprocess.Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
+    while p.poll() is None:
+      time.sleep(3)
     
 def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''
@@ -1374,13 +1380,18 @@ def combine_sfs():
     values = open(file_p,'r').read().splitlines()
     sfc_l = []
     for line in values:
-      if tsc_modular:
+      if tsc_modular == "modulus":
         _ = line.split()
         a = float(_[0])
         b = float(_[1])
         v = math.sqrt(a*a + b*b)
         sfc_l.append("%.6f" %v)
-      else:
+      elif tsc_modular == "absolute":
+        _ = line.split()
+        a = abs(float(_[0]))
+        b = abs(float(_[1]))
+        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
+      elif tsc_modular == "direct":
         _ = line.split()
         a = float(_[0])
         b = float(_[1])
