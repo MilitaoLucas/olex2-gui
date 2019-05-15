@@ -1,5 +1,6 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -12,32 +13,16 @@
 <td width="15%" align='right'>
   Method
 </td>
-<td width="15%">
+<td width="25%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=tonto_method@refine",
-    "items='RHF<-rhf;RKS<-rks'",
+    "items='HF<-rhf;B3LYP<-rks'",
     "value=GetVar('settings.tonto.HAR.method')",
     "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
    $-
 </td>
 <td width="25%" align='right'>
-    Basis Set
-</td>
-<td width="25%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=tonto_har_basis@refine",
-    "items=spy.tonto.HAR.getBasisListStr()",
-    "value=GetVar('settings.tonto.HAR.basis.name')",
-    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
-   $-
- </td><td width="10%"> </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
- <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
- <td width="15%" align='right'>
   CPUs
 </td>
 <td width="15%" align='center'>
@@ -49,10 +34,27 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
    $-
 </td>
+<td width="10%"> </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+ <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="15%" align='right'>
+    Basis Set
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=tonto_har_basis@refine",
+    "items=spy.tonto.HAR.getBasisListStr()",
+    "value=GetVar('settings.tonto.HAR.basis.name')",
+    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
+   $-
+  </td>
  <td width="25%" align='right'>
   Total Memory (GB)
 </td>
-<td width="25%" align='center'>
+<td width="15%" align='center'>
 $+
     html.Snippet("gui/snippets/input-text",
     "name=nsff_mem",
@@ -69,19 +71,78 @@ $+
 <td width="15%" align='right'>
   Charge
 </td>
-<td width='20%'>
+<td width='25%'>
   $+
-    html.Snippet("gui/snippets/input-combo",
+    html.Snippet("gui/snippets/input-text",
     "name=Charge",
-    "items='2;1;0;-1;2'",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.charge')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge',html.GetValue('~name~'))>>html.Update()",
-    "onchangealways=True"
     )
   $-
 </td>
-<td width="10%"> </td>
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="25%" align="right">
+  Cluster radius  
+</td>
+<td width="15%">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=tonto_har_cluster_radius@refine",
+    "value=GetVar('settings.tonto.HAR.cluster.radius')",
+    "onchange=SetVar('settings.tonto.HAR.cluster.radius', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="10%"> 
+</td>
+#ignoreif -->
+
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="50%"> </td>
+#ignoreif -->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="15%" align='right'>
+  H Aniso
+</td>
+<td width='25%'align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=H_Aniso",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))>>html.Update()",
+    )
+  $-
+</td>
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="25%" align="right"> 
+  Complete Cluster 
+</td>
+<td width="5%" align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=tonto_har_cluster_grow@refine",
+    "checked=GetVar('settings.tonto.HAR.cluster-grow')",
+    "onclick=SetVar('settings.tonto.HAR.cluster-grow', html.GetState('~name~'))")
+  $-
+</td>
+<td width="10%"> 
+</td>
+#ignoreif -->
+  
+<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="50%"> </td>
+#ignoreif -->
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
