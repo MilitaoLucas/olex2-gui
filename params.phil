@@ -305,6 +305,10 @@ routines requiring structure refinement
         cmd = ""
           .type = str
         tsc{
+          Calculate = True
+            .type = bool
+          h_aniso = True
+            .type = bool
           file = ""
             .type = str
           fchk_file = ""
