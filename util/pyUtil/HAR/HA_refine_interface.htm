@@ -1,20 +1,29 @@
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.file'),Calculate)
-
-
 <td width='12%'>
-<b>FF Table</b>
+<b>New Table</b>
 </td>
-<td width='45%'>
+<td width="5%" align="left">
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=calcualte_new@refine",
+      "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')",
+      "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate', html.GetState('~name~'))>>html.Update()")
+    $-
+  </td>
+
+<!-- #ignoreif spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+<td width='10%' align ='right'>
+<b>tsc file</b>
+</td>
+<td width='40%'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
-    "items=strcat('Calculate;Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
+    "items=strcat('Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.file')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.har.combine_sfs()",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.har.combine_sfs()>>html.Update()",
     "onchangealways=True"
     )
   $-
@@ -25,7 +34,7 @@
 #ignoreif -->
 
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.file'),Calculate)
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 
 <td width='12%' align='left'>
 <b>Wfn Src</b> 
