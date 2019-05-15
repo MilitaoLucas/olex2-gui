@@ -311,7 +311,7 @@ def get_moieties_from_list():
     _ = os.path.join(p_path,'moieties.csv')
   rFile = open(_,'r').readlines()
   for line in rFile:
-    nick,formula = line.split(",")
+    nick,formula = line.split(";")
     nick = nick.strip()
     formula = formula.strip()
     if nick and formula:
