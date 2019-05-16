@@ -89,7 +89,7 @@ class History(ArgumentParser):
     assert node is not None
     node.label = label
     self._make_history_bars()
-    
+
   def revert_to_original(self):
     node = tree._full_index.get(OV.FileName())
     self.revert_history(node.children[0].name)
@@ -97,8 +97,8 @@ class History(ArgumentParser):
   def revert_history(self, node_index):
     node = tree._full_index.get(node_index)
     assert node is not None
-    #if node.is_root:
-      #return
+    if node.is_root:
+      return
     tree.active_node = node
     node.set_params()
     filepath = OV.FilePath()
