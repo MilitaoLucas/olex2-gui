@@ -253,7 +253,7 @@ class HARp(PT):
       combine_sfs()
       if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
         olex.m("anis -h")
-      spy.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
+      OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
       olx.html.Update()
       olex.m("refine")
 	
@@ -1371,7 +1371,7 @@ def combine_sfs():
         olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE',  os.path.basename(tsc_dst))
         return
       else:
-          print ("Creating newer %s file" %tsc_dst)
+        print ("Creating newer %s file" %tsc_dst)
 
       t =  time.ctime(os.path.getmtime(tsc_dst))
       OV.write_to_olex("%s_tsc_file_info"%OV.FileName() , t)

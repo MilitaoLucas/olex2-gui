@@ -298,6 +298,8 @@ routines requiring structure refinement
     
     cctbx{
       nsff{
+        hide = True
+          .type = bool
         dir = ""
           .type = str
         name = ""
