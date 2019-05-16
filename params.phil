@@ -298,8 +298,6 @@ routines requiring structure refinement
     
     cctbx{
       nsff{
-        hide = True
-          .type = bool
         dir = ""
           .type = str
         name = ""
@@ -1007,6 +1005,8 @@ user
   }
 
   refinement{
+    hide_nsff = True
+      .type = bool
     default_program = ""
       .type = str
     default_method = ""
