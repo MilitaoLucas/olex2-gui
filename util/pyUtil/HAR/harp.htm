@@ -114,7 +114,8 @@
 
   <td width="15%" align="right"> f/sig</td>
   <td width="8%">$+
-    html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
+    html.Snippet("gui/snippets/input-text", 
+     "name=tonto_i_threshold",
      "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>

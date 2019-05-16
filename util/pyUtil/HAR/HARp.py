@@ -71,6 +71,7 @@ class HARp(PT):
       "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
       "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
       "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
+      "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),
       "settings.tonto.HAR.dispersion": ("false",),
       "settings.tonto.HAR.autorefine": ("true",),
       "settings.tonto.HAR.autogrow": ("true",),
@@ -120,6 +121,7 @@ class HARp(PT):
       delete_ks = ["settings.tonto.HAR.hydrogens",
           "settings.tonto.HAR.extinction.refine",
           "settings.tonto.HAR.convergence.value",
+          "settings.tonto.HAR.intensity_threshold.value",
           ]
     elif tsc_source.lower().endswith(".fchk"):
       # We want these from supplied fchk file """
@@ -131,6 +133,7 @@ class HARp(PT):
           "settings.tonto.HAR.convergence.value",
           "settings.tonto.HAR.cluster.radius",
           "settings.tonto.HAR.dispersion",
+          "settings.tonto.HAR.intensity_threshold.value",
           ]
     else:
       # We want to calculate a wavefunction on our own using the supllied code """
@@ -142,6 +145,7 @@ class HARp(PT):
           "settings.tonto.HAR.convergence.value",
           "settings.tonto.HAR.cluster.radius",
           "settings.tonto.HAR.dispersion",
+          "settings.tonto.HAR.intensity_threshold.value",
           ]
     for k in delete_ks:
       if self.options.has_key(k):
@@ -463,7 +467,7 @@ class HARp(PT):
       arrow = """<a target='Open input .cif file: %s' href='reap "%s"'>%s</a>""" %(input_structure, input_structure, load_input)
 
       analysis = "--"
-      if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
+      if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout._Delta_F_vs_stl")):
         try:
           analysis = "<a target='Open analysis file' href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
             self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
@@ -481,8 +485,23 @@ class HARp(PT):
                 shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fco"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fco"))
                 shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".out"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.out"))
                 self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
-                shutil.copy(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis"), os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis"))
+#                shutil.copy(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis"), os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis"))
                 self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
+                har_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+                if not os.path.exists(har_cif):
+                  print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+                  return
+                iam_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name.rstrip("_HAR") + ".cif") 
+                if not os.path.exists(iam_cif):
+                  print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+                  return
+                
+                hkl_stats = olex.core.GetHklStat()
+                OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
+                OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
+                OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
+                olex.m("cifmerge")
+                olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
                 self.jobs[i].is_copied_back = True
               except:
                 print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
@@ -1292,15 +1311,22 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
     
-    import subprocess
+    
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
-           os.path.join(p_path, "HARt-launch.py")])
-    while p.poll() is None:
-      time.sleep(3)
+    if not HARp_instance.job_type.lower() == "hart":
+      import subprocess
+      p = subprocess.Popen([pyl,
+             os.path.join(p_path, "HARt-launch.py")])
+      while p.poll() is None:
+        time.sleep(3)
+    else:
+      from subprocess import Popen
+      Popen([pyl,
+        os.path.join(p_path, "HARt-launch.py")])
+      
     
 def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''

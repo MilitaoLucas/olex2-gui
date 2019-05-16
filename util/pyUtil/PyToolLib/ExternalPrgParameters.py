@@ -96,7 +96,7 @@ def defineExternalPrograms():
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
   NSFF = None
-  nsff_bool = OV.GetParam("snum.refinement.cctbx.nsff.hide")
+  nsff_bool = OV.GetParam("user.refinement.hide_nsff")
   if nsff_bool == False:
     NSFF = Method_cctbx_refinement(NSFF_phil)
 
@@ -349,7 +349,7 @@ Palatinus et al., 2012""",
     author="D. Jayatilaka and D. J. Grimwood",
     reference="D. Jayatilaka and D. J. Grimwood (2003). Computational Science - ICCS, 4, 142-151",
     brief_reference="Jayatilaka & Grimwood, 2003",
-    execs=["tonto.exe", "tonto"],
+    execs=["hart.exe", "hart"],
   )
 
   RPD = ExternalProgramDictionary()
