@@ -448,9 +448,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     try: two_theta_full = float(two_theta_full)
     except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
       uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
-    completeness_full = refinement_refs.resolution_filter(
-      d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
+    ref_subset = refinement_refs.resolution_filter(
+      d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True))
+    completeness_full = ref_subset.completeness()
     completeness_theta_max = refinement_refs.completeness()
+    if refinement_refs.anomalous_flag():
+      completeness_full_a = ref_subset.anomalous_completeness()
+      completeness_theta_max_a = refinement_refs.anomalous_completeness()
+    else:
+    # not sure why we need to duplicate these in the CIF but for now some
+    # things rely on to it!
+      completeness_full_a, completeness_theta_max_a = completeness_full, completeness_theta_max
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
@@ -578,8 +586,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     fmt = "%.4f"
+    # following two should go as we print the same info for up to 3 times!!
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
+    cif_block['_diffrn_reflns_Laue_measured_fraction_full'] = fmt % completeness_full
+    cif_block['_diffrn_reflns_Laue_measured_fraction_max'] = fmt % completeness_theta_max
+    if completeness_full_a is not None:
+      cif_block['_diffrn_reflns_point_group_measured_fraction_full'] = fmt % completeness_full_a
+      cif_block['_diffrn_reflns_point_group_measured_fraction_max'] = fmt % completeness_theta_max_a
+
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
