@@ -566,6 +566,7 @@ class RunRefinementPrg(RunPrg):
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception, e:
         print "Could not determine whether structure inversion is needed: %s" %e
+    OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
     if timer:
