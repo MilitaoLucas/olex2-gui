@@ -54,6 +54,7 @@
       <cmd0  "xgrid.Visible(false)">
       <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  "spy.SaveStructureParams()">
+	  <cmd3  "spy.gui.set_notification('')">
       <cmd3  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd4  "if IsFileLoaded() then clear">
       <cmd5  "freeze true">
