@@ -432,7 +432,7 @@ def file_open(path, base="", mode='r', readlines=False):
       print "gui.file_open malfunctioned with getting %s" %path
       
     if readlines:
-      retVal = retVal.split("\n")
+      retVal = retVal.splitlines()
   return retVal
 
 olex.registerFunction(file_open, False, "tools")
