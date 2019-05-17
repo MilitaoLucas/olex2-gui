@@ -95,10 +95,6 @@ def defineExternalPrograms():
   cgls = Method_shelx_refinement(get_CGLS_phil())
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
-  NSFF = None
-  nsff_bool = OV.GetParam("user.refinement.hide_nsff")
-  if nsff_bool == False:
-    NSFF = Method_cctbx_refinement(NSFF_phil)
 
   # define solution programs
 
@@ -360,8 +356,6 @@ Palatinus et al., 2012""",
 
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
-  if nsff_bool == False:
-    smtbx_refine.addMethod(NSFF)
   RPD.addProgram(smtbx_refine)
 
   tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))

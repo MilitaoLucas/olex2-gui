@@ -6,7 +6,6 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td width="100%" align="center"> <b> Advanced settings </b> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -59,7 +58,7 @@ $+
     html.Snippet("gui/snippets/input-text",
     "name=nsff_mem",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.mem')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.mem', html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.mem', html.GetValue('~name~'))")
    $-
 </td>
  <td width="10%"> </td>
@@ -76,7 +75,7 @@ $+
     html.Snippet("gui/snippets/input-text",
     "name=Charge",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.charge')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge',html.GetValue('~name~'))>>html.Update()",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge',html.GetValue('~name~'))",
     )
   $-
 </td>
@@ -114,7 +113,7 @@ $+
     html.Snippet("gui/snippets/input-checkbox",
     "name=H_Aniso",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))>>html.Update()",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))",
     )
   $-
 </td>
@@ -142,7 +141,6 @@ $+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -166,6 +164,5 @@ $spy.gui.maps.SetXgridView()
 #ignoreif -->
 
 <!-- #include h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="";2; -->
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

@@ -83,7 +83,7 @@ $-
 
   <td width='12%'><b>Weight</b></td>
 
-  <td width='5%'>
+  <td width='9%' align='left'>
    $+
      html.Snippet("gui/snippets/input-checkbox",
      "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
@@ -95,9 +95,9 @@ $-
     $-
   </td>
 
-  <td width='31%'>$spy.gui.tools.weightGuiDisplay()</td>
+  <td width='26%' align='center'>$spy.gui.tools.weightGuiDisplay()</td>
 
-  <td width='6%'><b>EXTI</b></td>
+  <td width='6%' align='right'><b>EXTI</b></td>
 
   <td width='5%'>
    $+
@@ -130,9 +130,11 @@ $-
   </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.method'),NSFF)
-<!-- #include HA_refine_interface ..\util\pyUtil\HAR\HA_refine_interface.htm;help_ext=HAR Refinement;1; -->
-#ignoreif -->
+
+<tr ALIGN='left' NAME='MASK_INFO'>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
@@ -222,8 +224,32 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 #ignoreif -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.method'),NSFF)
+
+<!-- #ignoreif spy.GetParam('user.refinement.hide_nsff')
+<tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='12%'>
+<b>Use aspher.</b>
+</td>
+<td width="5%" align="left">
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=use_aspherical@refine",
+      "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
+      "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
+    $-
+  </td>
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+<!-- #include HA_refine_interface ..\util\pyUtil\HAR\HA_refine_interface.htm;help_ext=HAR Refinement;1; -->
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif spy.GetParam('user.refinement.hide_nsff')
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
 <!-- #include h3-harp-extras GetVar(HARp_plugin_path)\h3-refine_HAR-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-HAR_Extras;onclick=;colspan=1;2; -->
+#ignoreif -->
 #ignoreif -->
 
 

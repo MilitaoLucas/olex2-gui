@@ -60,9 +60,11 @@ class HARp(PT):
     self.parallel = False
     self.softwares = ""
     self.wfn_2_fchk = ""
+    
    
     if not from_outside:
       self.setup_gui()
+    
     # END Generated =======================================
     options = {
       "settings.tonto.HAR.basis.name": ("x2c-SVPall", "basis"),
@@ -231,7 +233,11 @@ class HARp(PT):
       olx.SetVar(k, v[0])
 
   def launch(self, job_type):
+    
     self.job_type = job_type
+    if not OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate'):
+      if self.job_type.lower() == "nsff":
+        return
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
@@ -254,12 +260,11 @@ class HARp(PT):
     job.launch()
     olx.html.Update()
     if self.job_type.lower() == "nsff":
-      combine_sfs()
+      combine_sfs(force=True)
       if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
         olex.m("anis -h")
       OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
       olx.html.Update()
-      olex.m("refine")
 	
   def wfn(self):
     if not self.basis_list_str:
@@ -1367,7 +1372,7 @@ def sample_folder(input_name):
   load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
   olex.m(load_input_cif)
 
-def combine_sfs():
+def combine_sfs(force=False):
   import glob
   import math
 
@@ -1378,14 +1383,15 @@ def combine_sfs():
   tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
   tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
   tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
-  if tsc_file == "Calculate":
-    olx.html.Update()
-    return
+  
+  if not force:
+    if tsc_file.endswith(".tsc"):
+      return
   
   if not sfc_dir:
     return
   _mod = ""
-  if tsc_modular:
+  if not tsc_modular == "direct":
     _mod = "_%s"%tsc_modular
   tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + ".tsc")
   tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + ".tsc")
@@ -1519,8 +1525,6 @@ def combine_sfs():
   with open(tsc_fn, 'w') as wFile:
     wFile.write(t)
 
-
-
   from shutil import copyfile
   copyfile(tsc_fn, tsc_dst)
   try:
@@ -1528,6 +1532,7 @@ def combine_sfs():
     olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
+  olx.html.Update()
   if debug:
     print("Total time: %.2f"%(time.time() - t_beg))
   return True
