@@ -15,15 +15,11 @@ class Method_cctbx_refinement(Method_refinement):
     _ = os.environ.get('OLEX2_CCTBX_DIR')
     if _ is not None:
       self.version = _
-    self.original_method = None
     
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
 
-    if RunPrgObject.params.snum.refinement.method == "NSFF":
-      OV.SetParam('snum.refinement.method', 'Gauss-Newton')
-      self.original_method = "NSFF"
 
     Method_refinement.pre_refinement(self, RunPrgObject)
     
@@ -41,8 +37,12 @@ class Method_cctbx_refinement(Method_refinement):
 
     gui.set_notification("Using <b>spherical</b> form factors")
     table_file_name = None
-    if RunPrgObject.params.snum.refinement.method == "NSFF":
-      #self.method = self.RPD.programs[self.program.name].methods['Levenberg-Marquardt']
+    use_aspherical = False
+    hide_nsff = OV.GetParam('user.refinement.hide_nsff')
+    if not hide_nsff:
+      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    if use_aspherical == True:
+      self.method = OV.GetParam('snum.refinement.method')
 
       table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
       if not os.path.exists(table_file_name):
@@ -108,8 +108,6 @@ class Method_cctbx_refinement(Method_refinement):
       olx.xf.RefinementInfo(txt)
     except:
       pass
-    if self.original_method == "NSFF":
-      OV.SetParam('snum.refinement.method', 'NSFF')
 
   def writeRefinementInfoForGui(self, cif):
     for key, value in cif.iteritems():

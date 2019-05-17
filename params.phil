@@ -257,7 +257,7 @@ routines requiring structure refinement
       Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' NSFF Unknown
+      'Full Matrix' Unknown
       .type = choice
     sg_list = None
       .type = str
@@ -298,6 +298,8 @@ routines requiring structure refinement
     
     cctbx{
       nsff{
+        use_aspherical = False
+          .type = bool
         dir = ""
           .type = str
         name = ""
