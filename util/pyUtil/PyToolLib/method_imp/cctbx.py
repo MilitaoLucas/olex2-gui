@@ -50,7 +50,7 @@ class Method_cctbx_refinement(Method_refinement):
       else:
         table_file_name = table_file_name.encode("utf-8")
         print("Warning: using tabulated atomic form factors")
-        gui.set_notification("Using <font color='red'><b>tabulated</b></font> form factors from <b>%s</b>" %os.path.basename(table_file_name))
+        gui.set_notification("Using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(table_file_name))
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
