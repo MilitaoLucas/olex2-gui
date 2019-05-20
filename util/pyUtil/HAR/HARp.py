@@ -235,7 +235,8 @@ class HARp(PT):
   def launch(self, job_type):
     
     self.job_type = job_type
-    if not OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate'):
+    calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+    if not calculate:
       if self.job_type.lower() == "nsff":
         return
     if not self.basis_list_str:
@@ -1276,7 +1277,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
 
     for k,v in HARp_instance.options.iteritems():
       val = olx.GetVar(k, None)
-                      
+
       if len(v) == 2:
         if val is not None:
           args.append('-' + v[1])

@@ -457,6 +457,9 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     try:
+      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+      if use_aspherical:
+        olex.m('spy.tonto.HAR.launch(NSFF)')
       self.startRun()
       try:
         self.setupRefine()
