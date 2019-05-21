@@ -800,6 +800,12 @@ routines requiring structure refinement
       .type = bool
     update_cif = False
       .type = bool
+    based_on = *ASU FU
+      .type = choice
+    user_sum_formula = ""
+      .type = str
+    user_moiety_formula = ""
+      .type = str
   }
 
   cif {

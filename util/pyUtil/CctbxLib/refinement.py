@@ -565,17 +565,35 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
-    cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
-    cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
+    if not self.f_mask:
+      cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
+      cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
+    else:
+      _ = OV.GetParam('snum.masks.user_sum_formula')
+      if _:
+        olx.xf.SetFormula(_)
+        cif_block['_chemical_formula_sum'] = _
+
+      _ = OV.GetParam('snum.masks.user_sum_formula')
+      if _:
+        cif_block['_chemical_formula_moiety'] = _
+      
+    cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
-    cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
+    cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
     cif_block['_exptl_crystal_F_000'] \
-             = "%.4f" %xs.f_000(include_inelastic_part=True)
+             = olx.xf.GetF000()
+
+    write_fcf = False
     acta = olx.Ins("ACTA").strip()
-    if OV.GetParam('user.cif.finalise') != 'Exclude' and\
-       acta and "NOHKL" != acta.split()[-1].upper():
+    if OV.GetParam('user.cif.finalise') != 'Exclude':
+      if not acta:
+        write_fcf = True
+      elif acta.upper() != "n/a" and "NOHKL" not in acta.upper():
+        write_fcf = True
+    if write_fcf:    
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+      
       import StringIO
       f = StringIO.StringIO()
       fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
