@@ -16,7 +16,7 @@ t:mask_output_table_header_rp{
        <b>V/at.</b>
     </td>
     <td align='center' width='36%%'>
-       <b>Content</b>
+       <b>Content  / <a href="spy.editparams(snum.masks.based_on)>>html.update()">%(based_on)s</a></b>
     </td>
     <td align='center' width='10%%'>
        <b>e<sup>-</sup></b>
@@ -66,7 +66,7 @@ t:mask_output_end_rp{
       value="Add to Formula"
       bgcolor="GetVar('linkButton.bgcolor')"
       fgcolor="GetVar('linkButton.fgcolor')"
-      onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>html.Update()"
+      onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>spy.SetParam(snum.masks.user_sum_formula, '%(suggested_sum)s')>>html.Update()"
       custom="#custom"
     >
   </td>
@@ -88,7 +88,7 @@ t:mask_output_end_rp{
       bgcolor="GetVar('linkButton.bgcolor')"
       fgcolor="GetVar('linkButton.fgcolor')"
       value="Add to Moiety"
-      onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>html.Update()"
+      onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update()"
       custom="#custom"
     >
   </td>
