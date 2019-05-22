@@ -40,11 +40,15 @@
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_SOURCE",
-    "items=strcat(spy.tonto.HAR.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'fchk'))",
+    "items=strcat(spy.NoSphera2.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'fchk'))",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.source')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.source',html.GetValue('~name~'))>>html.Update()",
     "onchangealways=True"
     )
   $-
 </td>
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSphera2_Extras;onclick=;colspan=1;2; -->
 #ignoreif -->
