@@ -295,39 +295,6 @@ routines requiring structure refinement
       .type = bool
     cifmerge_after_refinement = True
       .type = bool
-    
-    cctbx{
-      nsff{
-        use_aspherical = False
-          .type = bool
-        dir = ""
-          .type = str
-        name = ""
-          .type = str
-        cmd = ""
-          .type = str
-        tsc{
-          Calculate = True
-            .type = bool
-          h_aniso = True
-            .type = bool
-          file = ""
-            .type = str
-          fchk_file = ""
-            .type = str
-          source = "Tonto"
-            .type = str
-          modular = "direct"
-            .type = str
-          charge = 0
-            .type = str
-        }
-        mem = 2
-          .type = str
-        ncpus = 1
-          .type = str
-      }
-    }  
 
     ShelXL
       .short_caption = 'Program specific command line'
@@ -1013,8 +980,6 @@ user
   }
 
   refinement{
-    hide_nsff = True
-      .type = bool
     default_program = ""
       .type = str
     default_method = ""

@@ -15,10 +15,10 @@
 <td width="25%">
   $+
     html.Snippet("gui/snippets/input-combo",
-    "name=tonto_method@refine",
+    "name=NoSpherA2_method@refine",
     "items='HF<-rhf;B3LYP<-rks'",
-    "value=GetVar('settings.tonto.HAR.method')",
-    "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.method')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.method', html.GetValue('~name~'))")
    $-
 </td>
 <td width="25%" align='right'>
@@ -27,8 +27,8 @@
 <td width="15%" align='center'>
 $+
     html.Snippet("gui/snippets/input-combo",
-    "name=har_cpus@refine",
-    "items=spy.tonto.HAR.getCPUListStr()",
+    "name=NoSpherA2_cpus@refine",
+    "items=spy.NoSpherA2.getCPUListStr()",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
    $-
@@ -44,10 +44,10 @@ $+
 <td width="25%">
   $+
     html.Snippet("gui/snippets/input-combo",
-    "name=tonto_har_basis@refine",
-    "items=spy.tonto.HAR.getBasisListStr()",
-    "value=GetVar('settings.tonto.HAR.basis.name')",
-    "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
+    "name=NoSpherA2_basis@refine",
+    "items=spy.NoSpherA2.getBasisListStr()",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name', html.GetValue('~name~'))")
    $-
   </td>
  <td width="25%" align='right'>
@@ -56,7 +56,7 @@ $+
 <td width="15%" align='center'>
 $+
     html.Snippet("gui/snippets/input-text",
-    "name=nsff_mem",
+    "name=NoSpherA2_mem",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.mem')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.mem', html.GetValue('~name~'))")
    $-
@@ -73,7 +73,7 @@ $+
 <td width='25%'>
   $+
     html.Snippet("gui/snippets/input-text",
-    "name=Charge",
+    "name=NoSpherA2_Charge",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.charge')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge',html.GetValue('~name~'))",
     )
@@ -86,9 +86,9 @@ $+
 <td width="15%">
   $+
     html.Snippet("gui/snippets/input-text",
-    "name=tonto_har_cluster_radius@refine",
-    "value=GetVar('settings.tonto.HAR.cluster.radius')",
-    "onchange=SetVar('settings.tonto.HAR.cluster.radius', html.GetValue('~name~'))")
+    "name=NoSpherA2_cluster_radius@refine",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
   $-
 </td>
 <td width="10%"> 
@@ -124,9 +124,9 @@ $+
 <td width="5%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox",
-    "name=tonto_har_cluster_grow@refine",
-    "checked=GetVar('settings.tonto.HAR.cluster-grow')",
-    "onclick=SetVar('settings.tonto.HAR.cluster-grow', html.GetState('~name~'))")
+    "name=NoSpherA2_cluster_grow@refine",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
+    "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')', html.GetState('~name~'))")
   $-
 </td>
 <td width="10%"> 
