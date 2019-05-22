@@ -206,6 +206,7 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
   sys.path.append("%s/util/pyUtil/HAR" %basedir)
+  sys.path.append("%s/util/pyUtil/NoSpherA2" %basedir)
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.VFSDependent = set()
 
@@ -438,3 +439,4 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
 from HAR import HARp
+from NoSpherA2 import NoSpherA2

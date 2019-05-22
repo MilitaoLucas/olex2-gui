@@ -182,8 +182,8 @@
          html.Snippet("gui/snippets/input-combo",
          "name=har_cpus",
          "items=spy.tonto.HAR.getCPUListStr()",
-         "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
-         "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
+         "value=GetVar('settings.tonto.HAR.ncpus')",
+         "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))>>html.Update()")
         $-
      </td>
 
@@ -191,7 +191,7 @@
         html.Snippet(GetVar(default_link),
         "name=tonto_har_run",
         "value=Start HAR",
-        "onclick=spy.tonto.HAR.launch('HARt')"
+        "onclick=spy.tonto.HAR.launch()"
         )
      $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

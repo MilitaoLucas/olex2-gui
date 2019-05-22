@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from subprocess import Popen
+import subprocess
 
 fchk_dir = os.getenv("fchk_dir", "")
 fchk_file = os.getenv("fchk_file", "")
@@ -14,7 +14,7 @@ print("Running: '" + ' '.join(args) + "'")
 log = None
 if "orca" in args[0]:
   log = open(fchk_file + '.log', 'w')
-p = Popen(args, stdout=log)
+p = subprocess.Popen(args, stdout=log)
 err_fn = fchk_file + ".log"
 out_fn = fchk_file + ".log"
 tries = 0

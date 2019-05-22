@@ -1,0 +1,55 @@
+snum{
+  refinement{
+    cctbx{
+      nsff{
+        use_aspherical = False
+          .type = bool
+        dir = ""
+          .type = str
+        name = ""
+          .type = str
+        cmd = ""
+          .type = str
+        tsc{
+          basis_name = "x2c-SVPall"
+            .type = str
+          Calculate = True
+            .type = bool
+          charge = 0
+            .type = str
+          cluster_radius = 0
+            .type = int
+          cluster_grow = True
+            .type = bool
+          h_aniso = True
+            .type = bool
+          fchk_file = ""
+            .type = str
+          file = ""
+            .type = str
+          method = "rhf"
+            .type = str
+          modular = "direct"
+            .type = str
+          source = "Tonto"
+            .type = str
+        }
+        mem = 2
+          .type = str
+        ncpus = 1
+          .type = str
+      }
+    }
+  }
+}
+
+user{
+  refinement{
+    hide_nsff = True
+      .type = bool
+  }
+}
+
+NoSpherA2{
+
+}
