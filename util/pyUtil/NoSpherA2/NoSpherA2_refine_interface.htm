@@ -1,23 +1,19 @@
-<td width='12%'>
-<b>Update Table</b>
-</td>
-<td width="5%" align="left">
     $+
-      html.Snippet("gui/snippets/input-checkbox",
+      html.Snippet("gui/snippets/input-checkbox-td",
       "name=calcualte_new@refine",
+      "label=Update Table",
+      "bgcolor=GetVar(HtmlTableRowBgColour)",
+      "td1=<td align='left' width="22%">",
       "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')",
       "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate', html.GetState('~name~'))>>html.Update()")
     $-
-  </td>
 
 <!-- #ignoreif spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
-<td width='10%' align ='right'>
-<b>tsc file</b>
-</td>
-<td width='40%'>
+<td width='45%' align='right'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
+    "height=300",
     "items=strcat('Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.file')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.har.combine_sfs()",
@@ -25,17 +21,17 @@
     )
   $-
 </td>
-<td>
-<!-- #includeif fs.Exists(strcat(FileName(),_tsc_file_info)) tsc_file_info strcat(FileName(),_tsc_file_info);1; -->
+
+<td width='12%' align='right' >
+<b>TSC File</b>
 </td>
+
+
 #ignoreif -->
 
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 
-<td width='12%' align='left'>
-<b>Wfn Src</b> 
-</td>
 <td width='25%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
@@ -47,6 +43,11 @@
     )
   $-
 </td>
+
+<td width='22%' align='right'>
+<b>Source of Wavefunction</b> 
+</td>
+
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
