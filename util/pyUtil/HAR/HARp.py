@@ -297,7 +297,7 @@ class HARp(PT):
                   print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
                   return
                 
-                hkl_stats = olex.core.GetHklStat()
+                hkl_stats = olex_core.GetHklStat()
                 OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
                 OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
                 OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
@@ -813,6 +813,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       
     
 def deal_with_har_cif():
+  import math
   ''' Tries to complete what it can from the existing IAM cif'''
   har_cif = os.path.join(OV.FilePath(), OV.FileName() + ".cif")
   if not os.path.exists(har_cif):
@@ -822,13 +823,30 @@ def deal_with_har_cif():
   if not os.path.exists(iam_cif):
     print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
     return
+
+  hkl_stats = olex_core.GetHklStat()
+  radiation = float(olx.xf.exptl.Radiation())
+  theta_full = math.asin(radiation*0.6)*180/math.pi
+  theta_max = math.asin(radiation/(2*hkl_stats['MinD']))*180/math.pi
+  if theta_max < theta_full:
+    theta_full = theta_max
+  hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+  hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
+  hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
   
-  hkl_stats = olex.core.GetHklStat()
   OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
-  OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
+  OV.set_cif_item('_diffrn_reflns_point_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_point'))
+  OV.set_cif_item('_diffrn_reflns_laue_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_laue'))
+  OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %(1/hkl_stats.get('MeanIOverSigma')))
   OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
-  olex.m("cifmerge")
-  olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif))
+  OV.set_cif_item('_diffrn_reflns_theta_max', "%.3f" %theta_max)
+
+  
+  from CifInfo import SaveCifInfo
+  SaveCifInfo()
+  metacif = os.path.join(OV.StrDir(), OV.FileName().replace("_HAR", "") + ".metacif&force=True")
+  olx.CifMerge(metacif, iam_cif)
+  olx.html.Update()
   
 OV.registerFunction(deal_with_har_cif)
   

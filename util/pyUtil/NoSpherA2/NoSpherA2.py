@@ -60,8 +60,8 @@ class NoSpherA2(PT):
     self.parallel = False
     self.softwares = ""
     self.wfn_2_fchk = ""
-    
-   
+
+
     if not from_outside:
       self.setup_gui()
 
@@ -71,7 +71,7 @@ class NoSpherA2(PT):
     self.setup_g16_executables()
     self.setup_orca_executables()
     self.setup_wfn_2_fchk()
-        
+
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):
@@ -88,20 +88,20 @@ class NoSpherA2(PT):
     self.exe = None
     exe_pre = "hart"
     self.exe_pre = exe_pre
-    
+
     if sys.platform[:3] == 'win':
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
         self.mpiexec = olx.file.Which("mpiexec.exe")
-      
+
       _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
         self.mpi_har = olx.file.Which("%s_mpi.exe" %exe_pre)
-        
+
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.exe = _
@@ -125,13 +125,13 @@ class NoSpherA2(PT):
           os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi' + os.environ['LD_RUN_PATH']
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
-        
+
       _ = os.path.join(self.p_path[:-16], "%s_mpi" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
         self.mpi_har = olx.file.Which("%s_mpi" %exe_pre)
-        
+
       _ = os.path.join(self.p_path[:-16], "%s" %exe_pre)
       if os.path.exists(_):
         self.exe = _
@@ -157,22 +157,22 @@ class NoSpherA2(PT):
       self.cpu_list_str = '1'
 
   def launch(self):
-    
+
     self.jobs_dir = os.path.join(olx.FilePath(),"olex2","Wfn_job")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
-      
+
     calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
     if not calculate:
       return
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-    
+
     self.setup_har_executables()
-    
+
     job = Job(self, olx.FileName())
-    
+
     wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if wfn_code.lower().endswith(".fchk"):
       OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
@@ -181,7 +181,7 @@ class NoSpherA2(PT):
     else:
       OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
       self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
-    
+
     job.launch()
     olx.html.Update()
     combine_sfs(force=True)
@@ -189,13 +189,13 @@ class NoSpherA2(PT):
       olex.m("anis -h")
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     olx.html.Update()
-	
+
   def wfn(self):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-	  
-	  
+
+
     wfn_object = wfn_Job(self,olx.FileName())
     software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if software == "ORCA":
@@ -206,9 +206,9 @@ class NoSpherA2(PT):
       wfn_object.write_gX_input()
     elif software == "Gaussian16":
       wfn_object.write_gX_input()
-      
+
     wfn_object.run()
-    
+
   def setup_wfn_2_fchk(self):
     exe_pre ="Wfn_2_Fchk"
     if sys.platform[:3] == 'win':
@@ -223,19 +223,19 @@ class NoSpherA2(PT):
         self.wfn_2_fchk = _
       else:
         self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
-    
+
   def setup_g09_executables(self):
     self.g09_exe = ""
     exe_pre = "g09"
     self.g09_exe_pre = exe_pre
-    
+
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.g09_exe = _
       else:
         self.g09_exe = olx.file.Which("%s.exe" %exe_pre)
-        
+
     else:
       _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
@@ -250,14 +250,14 @@ class NoSpherA2(PT):
     self.g03_exe = ""
     exe_pre = "g03"
     self.g03_exe_pre = exe_pre
-    
+
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.g03_exe = _
       else:
         self.g03_exe = olx.file.Which("%s.exe" %exe_pre)
-        
+
     else:
       _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
@@ -267,19 +267,19 @@ class NoSpherA2(PT):
     if os.path.exists(self.g03_exe):
       if "Gaussian03" not in self.softwares:
         self.softwares = self.softwares + ";Gaussian03"
-      
+
   def setup_g16_executables(self):
     self.g16_exe = ""
     exe_pre = "g16"
     self.g16_exe_pre = exe_pre
-    
+
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.g16_exe = _
       else:
         self.g16_exe = olx.file.Which("%s.exe" %exe_pre)
-        
+
     else:
       _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
@@ -289,19 +289,19 @@ class NoSpherA2(PT):
     if os.path.exists(self.g16_exe):
       if "Gaussian16" not in self.softwares:
         self.softwares = self.softwares + ";Gaussian16"
-      
+
   def setup_orca_executables(self):
     self.orca_exe = ""
     exe_pre = "orca"
     self.orca_exe_pre = exe_pre
-    
+
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.orca_exe = _
       else:
         self.orca_exe = olx.file.Which("%s.exe" %exe_pre)
-        
+
     else:
       _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
@@ -312,13 +312,13 @@ class NoSpherA2(PT):
       OV.SetParam('snum.refinement.cctbx.nsff.ncpus',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
-  
+
   def getBasisListStr(self):
     return self.basis_list_str
-  
+
   def getCPUListStr(self):
     return self.cpu_list_str
-  
+
   def getwfn_softwares(self):
     return self.softwares + ";"
 
@@ -347,7 +347,7 @@ class wfn_Job(object):
       self.name = self.name[:-6]
     full_dir = olx.FilePath()
     self.full_dir = full_dir
-    
+
     if not os.path.exists(full_dir):
       return
     self.date = os.path.getctime(full_dir)
@@ -355,7 +355,7 @@ class wfn_Job(object):
     self.fchk_fn = os.path.join(full_dir, name) + ".fchk"
     self.completed = os.path.exists(self.fchk_fn)
     initialised = False
-	
+
     import shutil
     try:
       os.mkdir(self.full_dir)
@@ -373,7 +373,7 @@ class wfn_Job(object):
 
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
-  
+
   def write_gX_input(self):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
@@ -409,7 +409,7 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
-    	com.write(line)
+        com.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     xyz.close()
@@ -453,7 +453,7 @@ class wfn_Job(object):
     basis.close()
     com.write(" ")
     com.close()
-    
+
   def write_orca_input(self):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
@@ -485,7 +485,7 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
-    	inp.write(line)
+        inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     xyz.close()
@@ -527,7 +527,7 @@ class wfn_Job(object):
     basis.close()
     inp.write("end\n")
     inp.close()
-	
+
   def run(self):
     args = []
     basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
@@ -555,7 +555,7 @@ class wfn_Job(object):
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
     os.environ['fchk_dir'] = self.full_dir
-    
+
     import subprocess
     import time
     pyl = OV.getPYLPath()
@@ -563,10 +563,10 @@ class wfn_Job(object):
       print("A problem with pyl is encountered, aborting.")
       return
     p = subprocess.Popen([pyl,
-           os.path.join(p_path, "fchk-launch.py")])
+                          os.path.join(p_path, "fchk-launch.py")])
     while p.poll() is None:
       time.sleep(3)
-           
+
     import shutil
     if("g03" in args[0]):
       shutil.move("Test.FChk",self.name+".fchk")
@@ -598,7 +598,7 @@ class wfn_Job(object):
       while m.poll() is None:
         time.sleep(1)
       log.close()
-    
+
 
 class Job(object):
   origin_folder = " "
@@ -623,7 +623,7 @@ class Job(object):
       self.name = self.name[:-6]
     full_dir = parent.jobs_dir
     self.full_dir = full_dir
-    
+
     if not os.path.exists(full_dir):
       return
     self.date = os.path.getctime(full_dir)
@@ -694,19 +694,19 @@ class Job(object):
     fchk_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
-  
+
       args = [self.name+".cif",
               "-basis-dir", self.parent.basis_dir,
               "-shelx-f2", self.name+".hkl"
               ,"-scf", OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
               ,"-basis", OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
               ,"-cluster-radius", str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'))
-        ]
+              ]
       clustergrow = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')
       if clustergrow == False:
         args.append("-complete-mol")
         args.append("f")
-  
+
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.fchk_file')
@@ -714,12 +714,12 @@ class Job(object):
       args = [self.name+".cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]    
-    
+
     if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
       args = [self.parent.mpiexec, "-np", OV.GetParam('snum.refinement.cctbx.nsff.ncpus'), self.parent.mpi_har] + args
     else:
       args = [self.parent.exe] + args
-    
+
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge') != '0':
       args.append("-charge")
       args.append(OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'))
@@ -756,15 +756,15 @@ class Job(object):
     OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
-    
-    
+
+
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
     import subprocess
     p = subprocess.Popen([pyl,
-           os.path.join(p_path, "HARt-launch.py")])
+                          os.path.join(p_path, "HARt-launch.py")])
     while p.poll() is None:
       time.sleep(3)
 
@@ -779,11 +779,11 @@ def combine_sfs(force=False):
   tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
   tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
   tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
-  
+
   if not force:
     if tsc_file.endswith(".tsc"):
       return
-  
+
   if not sfc_dir:
     return
   _mod = ""
@@ -803,7 +803,7 @@ def combine_sfs(force=False):
 
       t =  time.ctime(os.path.getmtime(tsc_dst))
       OV.write_to_olex("%s_tsc_file_info"%OV.FileName() , t)
-  
+
   if os.path.exists(tsc_dst):
     backup = os.path.join(OV.FilePath(), "tsc_backup")
     if not os.path.exists(backup):
@@ -816,7 +816,7 @@ def combine_sfs(force=False):
       move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
     except:
       pass
-  
+
   p = os.path.join(sfc_dir, "*,ascii")
   g = glob.glob(p)
   d = {}
@@ -856,7 +856,7 @@ def combine_sfs(force=False):
 
     d[name].setdefault('sfc', sfc_l)
     d[name].setdefault('name', name)
-    
+
   sym = open(symops_fp,'r').read().splitlines()
   sym_l = []
   ll = []
@@ -868,10 +868,10 @@ def combine_sfs(force=False):
     else:
       sym_l.append(" ".join(ll))
       ll = []
-    
+
   if debug:
     print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
-  
+
   #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
   hkl_fn = "SFs_key,ascii"
   hkl = open(sfs_fp, 'r').read().splitlines()
@@ -911,7 +911,7 @@ def combine_sfs(force=False):
   ol.append('   BASIS SET: %s'%basis_set)
   ol.append('   CHARGE:    %s'%charge)
   ol.append('   DATE:      %s'%date)
-  
+
   ol.append("data:")
 
   for line in tsc_l:
