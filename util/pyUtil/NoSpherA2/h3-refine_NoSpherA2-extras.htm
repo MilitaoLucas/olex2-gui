@@ -80,7 +80,8 @@ $+
     "label=H Aniso ",
     "td1=<td width='20%' align='right'>",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','True')",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','False')"
     )
   $-
 
@@ -91,7 +92,9 @@ $+
     "label=Complete Cluster",
     "td1=<td width='30%' align='right'>",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
-    "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')', html.GetState('~name~'))")
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','True')",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','False')"
+    )
   $-
 <td width="22%" align="right">
   <b>Cluster radius  </b>
@@ -113,7 +116,7 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="100%" align="center"> <b> ============== M A P S ============== </b> </td>
+<td width="100%" align="center"> <font color='$GetVar(gui.grey)'><b> ============== M A P S ============== </b></font> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
