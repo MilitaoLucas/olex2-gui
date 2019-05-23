@@ -3388,8 +3388,8 @@ class HealthOfStructure():
         if raw_val == 1:
           have_null = True
 
-      if item == 'Rint':
-        if raw_val == '0':
+      if item == 'max_shift_over_esd':
+        if raw_val == '0' or raw_val == 0:
           have_null = False
     
       if have_null:
