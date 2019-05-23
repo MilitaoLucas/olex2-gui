@@ -43,14 +43,6 @@ snum{
   }
 }
 
-user{
-  refinement{
-    hide_nsff = False
-      .expert_level = 2
-      .type = bool
-  }
-}
-
 NoSpherA2{
 
 }
