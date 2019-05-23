@@ -457,6 +457,9 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     try:
+      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+      if use_aspherical == True:
+        olex.m('spy.NoSpherA2.launch()')
       self.startRun()
       try:
         self.setupRefine()
@@ -566,6 +569,7 @@ class RunRefinementPrg(RunPrg):
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception, e:
         print "Could not determine whether structure inversion is needed: %s" %e
+    OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
     if timer:

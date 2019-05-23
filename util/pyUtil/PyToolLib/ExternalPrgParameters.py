@@ -337,6 +337,7 @@ Palatinus et al., 2012""",
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference=smtbx_solve.reference,
     brief_reference=smtbx_solve.brief_reference,
+    phil_entry_name="cctbx"
   )
   tonto_refine = Program(
     name='Tonto',
@@ -344,7 +345,7 @@ Palatinus et al., 2012""",
     author="D. Jayatilaka and D. J. Grimwood",
     reference="D. Jayatilaka and D. J. Grimwood (2003). Computational Science - ICCS, 4, 142-151",
     brief_reference="Jayatilaka & Grimwood, 2003",
-    execs=["tonto.exe", "tonto"],
+    execs=["hart.exe", "hart"],
   )
 
   RPD = ExternalProgramDictionary()

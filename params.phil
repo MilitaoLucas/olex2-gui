@@ -257,7 +257,7 @@ routines requiring structure refinement
       Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' HAR Unknown
+      'Full Matrix' Unknown
       .type = choice
     sg_list = None
       .type = str
@@ -726,7 +726,7 @@ routines requiring structure refinement
   map {
     source = *olex fcf
       .type = choice
-    type = *diff fcalc tomc fobs
+    type = *diff fcalc tomc fobs fcfmc
       .type = choice
     mask = True
       .type = bool
@@ -767,6 +767,12 @@ routines requiring structure refinement
       .type = bool
     update_cif = False
       .type = bool
+    based_on = *ASU FU
+      .type = choice
+    user_sum_formula = ""
+      .type = str
+    user_moiety_formula = ""
+      .type = str
   }
 
   cif {
@@ -978,6 +984,9 @@ user
       .type = str
     default_method = ""
       .type = str
+    hide_nsff = True
+      .type = bool
+      .expert_level = 2
   }
   
   twinning{

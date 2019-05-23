@@ -58,7 +58,8 @@ except Exception, e:
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
-    'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
+    'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
+    'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
   solvers_default_method = 'Gauss-Newton'
 
@@ -447,9 +448,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     try: two_theta_full = float(two_theta_full)
     except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
       uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
-    completeness_full = refinement_refs.resolution_filter(
-      d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
+    ref_subset = refinement_refs.resolution_filter(
+      d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True))
+    completeness_full = ref_subset.completeness()
     completeness_theta_max = refinement_refs.completeness()
+    if refinement_refs.anomalous_flag():
+      completeness_full_a = ref_subset.anomalous_completeness()
+      completeness_theta_max_a = refinement_refs.anomalous_completeness()
+    else:
+    # not sure why we need to duplicate these in the CIF but for now some
+    # things rely on to it!
+      completeness_full_a, completeness_theta_max_a = completeness_full, completeness_theta_max
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
@@ -556,17 +565,35 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
-    cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
-    cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
+    if not self.f_mask:
+      cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
+      cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
+    else:
+      _ = OV.GetParam('snum.masks.user_sum_formula')
+      if _:
+        olx.xf.SetFormula(_)
+        cif_block['_chemical_formula_sum'] = _
+
+      _ = OV.GetParam('snum.masks.user_sum_formula')
+      if _:
+        cif_block['_chemical_formula_moiety'] = _
+      
+    cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
-    cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
+    cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
     cif_block['_exptl_crystal_F_000'] \
-             = "%.4f" %xs.f_000(include_inelastic_part=True)
+             = olx.xf.GetF000()
+
+    write_fcf = False
     acta = olx.Ins("ACTA").strip()
-    if OV.GetParam('user.cif.finalise') != 'Exclude' and\
-       acta and "NOHKL" != acta.split()[-1].upper():
+    if OV.GetParam('user.cif.finalise') != 'Exclude':
+      if not acta:
+        write_fcf = True
+      elif acta.upper() != "n/a" and "NOHKL" not in acta.upper():
+        write_fcf = True
+    if write_fcf:    
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+      
       import StringIO
       f = StringIO.StringIO()
       fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
@@ -577,8 +604,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     fmt = "%.4f"
+    # following two should go as we print the same info for up to 3 times!!
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
+    cif_block['_diffrn_reflns_Laue_measured_fraction_full'] = fmt % completeness_full
+    cif_block['_diffrn_reflns_Laue_measured_fraction_max'] = fmt % completeness_theta_max
+    if completeness_full_a is not None:
+      cif_block['_diffrn_reflns_point_group_measured_fraction_full'] = fmt % completeness_full_a
+      cif_block['_diffrn_reflns_point_group_measured_fraction_max'] = fmt % completeness_theta_max_a
+
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()

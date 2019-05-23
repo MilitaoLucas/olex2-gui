@@ -3061,16 +3061,24 @@ class HealthOfStructure():
     from cctbx import uctbx
     try:
       wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-      _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %self.resolution_type)
-      if _ != "n/a":
-        self.hkl_stats['Completeness'] = float(_)
-        self.hkl_stats['Completeness_laue'] = self.hkl_stats.get('Completeness_laue',float(_))
-        self.hkl_stats['Completeness_point'] = self.hkl_stats.get('Completeness_point',0)
+      
+      l = (('Completeness','_diffrn_measured_fraction_theta_%s'),
+           ('Completeness_laue','_diffrn_reflns_laue_measured_fraction_%s'),
+           ('Completeness_point','_diffrn_reflns_point_measured_fraction_%s'),
+          )
+      
+      for alias,cif_item in l:
+        _ = olx.Cif(cif_item%self.resolution_type)
+        if _ == "n/a":
+          self.hkl_stats[alias] = 0
+        else:
+          self.hkl_stats[alias] = float(_)
+        
+      if olx.Cif('_diffrn_reflns_theta_max') != "n/a": 
         twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
       else:
         self.hkl_stats['MinD'] = 0
-        self.hkl_stats['Completeness'] = 0
 
       ##The following items can have alternate/deprecated identifiers
       l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
@@ -3118,9 +3126,13 @@ class HealthOfStructure():
 
       else:
         self.get_info_from_hkl_stats()
+      point_c = self.hkl_stats.get('Completeness_point','unknown')
+      if point_c is int: point_c = "%.2f" %point_c
+      laue_c = self.hkl_stats.get('Completeness_laue','unknown')
+      if point_c is int: laue_c = "%.2f" %laue_c
 
-      l = ["- Point Group Completeness: %.2f" %self.hkl_stats['Completeness_point'],
-           "Laue Group Completeness: %.2f" %self.hkl_stats['Completeness_laue'],
+      l = ["- Point Group Completeness: %s" %point_c,
+           "- Laue Group Completeness: %s" %laue_c
            ]
       target = "&#013;- ".join(l)
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
@@ -3331,7 +3343,7 @@ class HealthOfStructure():
 
 
       if not bg_colour:
-        bg_colour = self.get_bg_colour(item, value)
+        bg_colour = self.get_bg_colour(item, raw_val)
 
       if type(value) == tuple:
         if len(value) > 0:
@@ -3365,6 +3377,26 @@ class HealthOfStructure():
             value = value_format %value
           except:
             pass
+
+      ## Check for NULL values    
+      have_null = False
+      null_values = [0, "0.0", "0.00", "n/a"]
+      if raw_val in null_values:
+        have_null = True
+        
+      if item == 'Rint':
+        if raw_val == 1:
+          have_null = True
+
+      if item == 'max_shift_over_esd':
+        if raw_val == '0' or raw_val == 0:
+          have_null = False
+    
+      if have_null:
+        bg_colour = "#555555"
+        value = "n/a"
+      ##========================  
+
       use_image = True
       if use_image:
         if timing:
@@ -3447,10 +3479,13 @@ class HealthOfStructure():
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
-    try:
-      value_raw = float(value_raw)
-    except:
-      value_raw = 0
+    
+    if value_raw != "n/a":
+      try:
+        value_raw = float(value_raw)
+      except:
+        value_raw = 0
+
     op = OV.GetParam('user.diagnostics.hkl.%s.op' %item)
     curr_x = 0
     limit_width = 0
@@ -3501,11 +3536,15 @@ class HealthOfStructure():
 
 
     if item == "Completeness":
+  
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
         if od_2theta:
           od_2theta = float(od_2theta) * 2
+
+      laue = float(self.hkl_stats['Completeness_laue'])
+      laue_col = self.get_bg_colour('Completeness', laue)
 
       ## Point Group value!
       _ = int(boxWidth * (1-self.hkl_stats['Completeness_point']))
@@ -3514,10 +3553,9 @@ class HealthOfStructure():
       if _ != 0:
         x = boxWidth - _
         box = (x,0,boxWidth,boxHeight)
-        fill = OV.GetParam('gui.red').hexadecimal
+        fill = laue_col
         draw.rectangle(box, fill=fill)
 
-      laue = float(self.hkl_stats['Completeness_laue'])
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
@@ -3567,7 +3605,7 @@ class HealthOfStructure():
     draw.text((x, y_s), "%s" %display, font=font_s, fill=fill)
 
     ## ADD THE ACTUAL VALUE
-
+    
     y += 0
     if value_display_extra:
       dxs,dxy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
