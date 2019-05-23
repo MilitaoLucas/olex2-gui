@@ -119,38 +119,27 @@ $+
 #ignoreif -->
 
 
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="100%" align="center"> <font color='$GetVar(gui.grey)'><b> ============== M A P S ============== </b></font> </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 <!-- #ignoreif not spy.NoSpherA2.check_fcf()
 <tr ALIGN='left' NAME='defden_buttons' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="20%" align="right"> <b>Residual Density</b></td>
-<td align="center" width="10%">
-    $+
-      html.Snippet(gui/snippets/input-button,
-      "name=MAKE_Residual_MAP",
-      "value=Show",
-      "onclick=spy.SetParam('snum.map.type','diff')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
-      )
-    $-
-</td>
-<td width="20%" align="right"> <b>Deformation Density</b></td>
-<td align="center" width="10%">
-    $+
-      html.Snippet(gui/snippets/input-button,
-      "name=MAKE_Defden_MAP",
-      "value=Show",
-      "onclick=spy.SetParam('snum.map.type','fcfmc')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
-      )
-    $-
-</td>
-<td width="20%" align="right"> <b>%Res%/&Aring</b></td>
-<td width="10%">
+
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Show Residual Density",
+    "onclick=spy.SetParam('snum.map.type','diff')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
+   )
+  $-
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Show Deformation Density",
+    "onclick=spy.SetParam('snum.map.type','fcfmc')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
+    )
+  $-
+
+<td width="10%" align="right"> <b>%Res%/&Aring</b></td>
+<td width="10%" align='right'>
   <font size="$GetVar('HtmlFontSizeControls')">
   $+
     html.Snippet("gui/snippets/input-text",
@@ -161,7 +150,6 @@ $+
     )
   $-
 </td>
-<td width="10%"> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
