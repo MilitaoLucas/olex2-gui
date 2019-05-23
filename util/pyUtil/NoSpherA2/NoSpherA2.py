@@ -933,7 +933,23 @@ def combine_sfs(force=False):
     print("Total time: %.2f"%(time.time() - t_beg))
   return True
 
-OV.registerFunction(combine_sfs,True,'har')
+OV.registerFunction(combine_sfs,True,'NoSpherA2')
+
+def check_fcf():
+  dir = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
+  name = OV.GetParam('snum.refinement.cctbx.nsff.name')
+  fcf = os.path.join(dir,name + '.fcf')
+  res = os.path.join(dir,name + '.res')
+  if os.path.exists(fcf) and os.path.exists(fcf):
+    if "%0.f" %os.path.getmtime(fcf) == "%0.f" %os.path.getmtime(res):
+      return True
+    else:
+      print ("Fcf seems to be older than results!")
+      return False
+  else: 
+    return False
+
+OV.registerFunction(check_fcf,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
