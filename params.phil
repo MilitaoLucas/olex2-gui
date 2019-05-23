@@ -985,8 +985,8 @@ user
     default_method = ""
       .type = str
     hide_nsff = True
-	.type = bool
-	.expert_level = 2
+      .type = bool
+      .expert_level = 2
   }
   
   twinning{

@@ -7,9 +7,9 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
 <td width="13%" align='left'>
-    <b>Basis Set </b>
+    <b>Basis Set</b>
 </td>
-<td width="22%">
+<td width="21%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_basis@refine",
@@ -19,10 +19,10 @@
    $-
   </td>
 
-<td width="12%" align='right'>
-  <b>Method </b>
+<td width="11%" align='right'>
+  <b>Method</b>
 </td>
-<td width="22%">
+<td width="21%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_method@refine",
@@ -32,10 +32,10 @@
    $-
 </td>
 
-<td width="10%" align='right'>
+<td width="8%" align='right'>
   <b>CPUs</b>
 </td>
-<td width="10%" align='center'>
+<td width="9%" align='center'>
 $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_cpus@refine",
@@ -45,8 +45,8 @@ $+
    $-
 </td>
 
- <td width="6%" align='right'>
-  <b>Gb </b>
+ <td width="8%" align='right'>
+  <b>Memory (GB)</b>
 </td>
 <td width="3%" align='center'>
 $+
@@ -61,7 +61,7 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="13%" align='left'>
+<td width="12%" align='left'>
   <b>Charge </b>
 </td>
 <td width='5%'>
@@ -86,6 +86,17 @@ $+
   $-
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="26%" align="right">
+  <b>Cluster radius  </b>
+</td>
+<td width="5%">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_cluster_radius@refine",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
+  $-
+  </td>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=NoSpherA2_cluster_grow@refine",
@@ -96,16 +107,11 @@ $+
     "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','False')"
     )
   $-
-<td width="22%" align="right">
-  <b>Cluster radius  </b>
-</td>
-<td width="5%">
-  $+
-    html.Snippet("gui/snippets/input-text",
-    "name=NoSpherA2_cluster_radius@refine",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
-  $-
+
+#ignoreif -->
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<td width="35%"> </td>
 #ignoreif -->
 
 
@@ -118,6 +124,55 @@ $+
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td width="100%" align="center"> <font color='$GetVar(gui.grey)'><b> ============== M A P S ============== </b></font> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif not spy.NoSpherA2.check_fcf()
+<tr ALIGN='left' NAME='defden_buttons' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align="right"> <b>Residual Density</b></td>
+<td align="center" width="10%">
+    $+
+      html.Snippet(gui/snippets/input-button,
+      "name=MAKE_Residual_MAP",
+      "value=Show",
+      "onclick=spy.SetParam('snum.map.type','diff')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
+      )
+    $-
+</td>
+<td width="20%" align="right"> <b>Deformation Density</b></td>
+<td align="center" width="10%">
+    $+
+      html.Snippet(gui/snippets/input-button,
+      "name=MAKE_Defden_MAP",
+      "value=Show",
+      "onclick=spy.SetParam('snum.map.type','fcfmc')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
+      )
+    $-
+</td>
+<td width="20%" align="right"> <b>%Res%/&Aring</b></td>
+<td width="10%">
+  <font size="$GetVar('HtmlFontSizeControls')">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=SET_SNUM_MAP_RESOLUTION_NoSpherA2",
+    "value=spy.GetParam('snum.map.resolution')",
+    "onchange=spy.SetParam('snum.map.resolution',html.GetValue(~name~))>>spy.gui.maps.MapView('off')",
+    "onchangealways=True",
+    )
+  $-
+</td>
+<td width="10%"> </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif spy.NoSpherA2.check_fcf()
+<tr ALIGN='left' NAME='defden_buttons' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align="center"><b>No proper fcf found!</b> (include List 3 or 6 in .ins maybe?)</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
 
@@ -134,8 +189,6 @@ $spy.gui.maps.SetXgridView()
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include xgrid gui\snippets\snippet-2D-xgrid.htm;1; -->
 #ignoreif -->
-
-<!-- #include h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="";2; -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

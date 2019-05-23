@@ -197,6 +197,7 @@ class HARp(PT):
 
   def list_jobs(self):
     import shutil
+    import math
     d = {}
     self.jobs = []
 
@@ -233,10 +234,14 @@ class HARp(PT):
     is_anything_running = False
     for i in range(len(self.jobs)):
       OUT_file = self.jobs[i].out_fn
-      if os.path.exists(os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")):
-        self.jobs[i].is_copied_back = True
-      else:
-        self.jobs[i].is_copied_back = False
+      job_cif = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.cif")
+      output_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+      if os.path.exists(job_cif) and os.path.exists(output_cif):
+        if "%0.f" %os.path.getctime(job_cif) == "%0.f" %os.path.getctime(output_cif):
+          print "%s is up to date" %self.jobs[i].name
+          self.jobs[i].is_copied_back = True
+        else:
+          self.jobs[i].is_copied_back = False
 
       try:
         if not os.path.exists(OUT_file):
@@ -303,7 +308,6 @@ class HARp(PT):
                 OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
                 olex.m("cifmerge")
                 olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
-                self.jobs[i].is_copied_back = True
               except:
                 print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
                 continue
@@ -349,6 +353,42 @@ class HARp(PT):
       self.auto_reload()
 
     return rv
+
+  def deal_with_har_cif(har_cif):
+    import math
+#    ''' Tries to complete what it can from the existing IAM cif'''
+    if not os.path.exists(har_cif):
+      print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+      return
+    iam_cif = os.path.join(har_cif.rstrip("_HAR.cif") + ".cif")
+    print(iam_cif)
+    if not os.path.exists(iam_cif):
+      print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+      return
+  
+    hkl_stats = olex_core.GetHklStat()
+    radiation = float(olx.xf.exptl.Radiation())
+    theta_full = math.asin(radiation*0.6)*180/math.pi
+    theta_max = math.asin(radiation/(2*hkl_stats['MinD']))*180/math.pi
+    if theta_max < theta_full:
+      theta_full = theta_max
+    hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+    hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
+    hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
+    
+    OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
+    OV.set_cif_item('_diffrn_reflns_point_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_point'))
+    OV.set_cif_item('_diffrn_reflns_laue_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_laue'))
+    OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %(1/hkl_stats.get('MeanIOverSigma')))
+    OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
+    OV.set_cif_item('_diffrn_reflns_theta_max', "%.3f" %theta_max)
+  
+    
+    from CifInfo import SaveCifInfo
+    SaveCifInfo()
+    metacif = os.path.join(OV.StrDir(), OV.FileName().replace("_HAR", "") + ".metacif&force=True")
+    olx.CifMerge(metacif, iam_cif)
+    olx.html.Update()
 
   def auto_reload(self):
     interval = OV.GetParam('harp.check_output_interval',0)
@@ -811,7 +851,6 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
       
-    
 def deal_with_har_cif():
   import math
   ''' Tries to complete what it can from the existing IAM cif'''
