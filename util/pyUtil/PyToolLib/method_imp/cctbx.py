@@ -39,19 +39,21 @@ class Method_cctbx_refinement(Method_refinement):
     use_aspherical = False
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
-      gui.set_notification("Using <font color=$GetVar(gui.blue)><b>spherical</b></font> form factors")
+      gui.set_notification("Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors")
       use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
     else:
-      pass
+      table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
+      if not os.path.exists(table_file_name):
+        table_file_name = None
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
       table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+      gui.set_notification("Using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(table_file_name))
       if not os.path.exists(table_file_name):
         table_file_name = None
-      else:
-        table_file_name = table_file_name.encode("utf-8")
-        print("Warning: using tabulated atomic form factors")
-        gui.set_notification("Using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(table_file_name))
+    if table_file_name:
+      table_file_name = table_file_name.encode("utf-8")
+      print("Using tabulated atomic form factors")
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
