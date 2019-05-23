@@ -15,27 +15,45 @@ class Method_cctbx_refinement(Method_refinement):
     _ = os.environ.get('OLEX2_CCTBX_DIR')
     if _ is not None:
       self.version = _
-
+    
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
-    Method_refinement.pre_refinement(self, RunPrgObject)
 
+
+    Method_refinement.pre_refinement(self, RunPrgObject)
+    
+    
   def do_run(self, RunPrgObject):
     import time
     import os
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
+    import gui
 
     timer = debug = bool(OV.GetParam('olex2.debug',False))
     self.failure = True
     print '\n+++ STARTING olex2.refine +++++ %s' %self.version
-    table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
-    if not os.path.exists(table_file_name):
-      table_file_name = None
+
+    table_file_name = None
+    use_aspherical = False
+    hide_nsff = OV.GetParam('user.refinement.hide_nsff')
+    if not hide_nsff:
+      gui.set_notification("Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors")
+      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
     else:
+      table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
+      if not os.path.exists(table_file_name):
+        table_file_name = None
+    if use_aspherical == True:
+      self.method = OV.GetParam('snum.refinement.method')
+      table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+      gui.set_notification("Using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(table_file_name))
+      if not os.path.exists(table_file_name):
+        table_file_name = None
+    if table_file_name:
       table_file_name = table_file_name.encode("utf-8")
-      print("Warning: using tabulated atomic form factors")
+      print("Using tabulated atomic form factors")
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
@@ -187,7 +205,13 @@ name = 'Gauss-Newton'
   .type=str
 """)
 
+
 levenberg_marquardt_phil = phil_interface.parse("""
 name = 'Levenberg-Marquardt'
+  .type=str
+""")
+
+NSFF_phil = phil_interface.parse("""
+name = 'NSFF'
   .type=str
 """)

@@ -915,7 +915,7 @@ def makeHtmlBottomPop(txt=None, name='test', replace=None, modequalifiers=None,
   metric = getPopBoxPosition()
   if not txt:
     txt = get_template(name)
-    txt = txt.replace(r"<MODENAME>",replace_str.upper())
+    txt = txt.replace(r"<MODENAME>",replace.upper())
     txt = txt.replace(r"<MODEQUALIFIERS>",modequalifiers.upper())
   txt = "$run(focus)\n" + txt
   pop_html = name
@@ -1025,7 +1025,7 @@ def OnModeChange(*args):
   else:
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
     OV.SetParam('olex2.full_mode',mode)
-    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode', 'modequalifiers':modequalifiers}, pb_height=50)
+    makeHtmlBottomPop(replace='mode_disp', name='pop_mode', modequalifiers=modequalifiers, pb_height=50)
     if active_mode:
       control = "IMG_%s" %active_mode.upper()
       if OV.IsControl(control):

@@ -77,15 +77,13 @@ $-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-
 <tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td width='12%'><b>Weight</b></td>
 
-  <td width='5%'>
+  <td width='9%' align='left'>
    $+
      html.Snippet("gui/snippets/input-checkbox",
      "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
@@ -97,9 +95,9 @@ $-
     $-
   </td>
 
-  <td width='31%'>$spy.gui.tools.weightGuiDisplay()</td>
+  <td width='26%' align='center'>$spy.gui.tools.weightGuiDisplay()</td>
 
-  <td width='6%'><b>EXTI</b></td>
+  <td width='6%' align='right'><b>EXTI</b></td>
 
   <td width='5%'>
    $+
@@ -131,7 +129,11 @@ $-
     $-
   </td>
 
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<tr ALIGN='left' NAME='MASK_INFO'>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
@@ -221,12 +223,32 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 </td>
 #ignoreif -->
 
-
-
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #ignoreif spy.GetParam('user.refinement.hide_nsff')
+<tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+    $+
+      html.Snippet("gui/snippets/input-checkbox-td",
+      "name=USE_ASPHERICAL@refine",
+      "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
+      "label=NoSpherA2 ",
+      "height=0",
+      "bgcolor=GetVar(HtmlTableRowBgColour)",
+      "td1=<td align='left' width="22%">",
+      "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
+    $-
+
+<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+<!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
+#ignoreif -->
+<!-- #ignoreif spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+#ignoreif -->
 
 
 </table>

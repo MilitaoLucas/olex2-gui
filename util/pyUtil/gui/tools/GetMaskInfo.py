@@ -36,6 +36,7 @@ def get_mask_info():
   if not os.path.exists(template_path):
     template_path = os.path.join(p_path, 'mask_output.htm')
     
+  based_on = OV.GetParam('snum.masks.based_on')
   
 #  print ".. %s .." %template_path
   global current_sNum
@@ -48,6 +49,7 @@ def get_mask_info():
   d = {}
 #  d['table_bg'] =  OV.GetParam('gui.html.table_firstcol_colour')
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
+  d['based_on'] =  based_on
   
   is_CIF = (olx.IsFileType('cif') == 'true')
 
@@ -136,7 +138,6 @@ def get_mask_info():
     if not moiety:
       moiety = olx.xf.latt.GetMoiety()
 
-
     d['number'] = number
     electron = float(electron) * multiplicity
     volume = float(volume) * multiplicity
@@ -145,6 +146,7 @@ def get_mask_info():
     d['multiplicity'] = format_number(multiplicity)
     d['formula'] = get_rounded_formula(as_string_sep=" ")
     d['moiety'] = moiety
+    d['based_on'] = based_on
     
     total_void_electrons += electron
     total_void_volume += volume
@@ -156,14 +158,15 @@ def get_mask_info():
     #if multiplicity == 1:
       #multiplicity = Z
 
-    factor = number_of_symm_op
+    number_of_symm_op
 
     _ = content.split(",")
 
     electrons_accounted_for = 0
     non_h_accounted_for = 0
+    
     for entry in _:
-      sum_content.append((factor, entry))
+      sum_content.append((number_of_symm_op, entry))
       entity, multi = split_entity(entry)
       multi = float(multi)
       ent = moieties.get(entity.lower(), entity)
@@ -171,10 +174,14 @@ def get_mask_info():
 
       try:
         Z, N = get_sum_electrons_from_formula(ent)
-        electrons_accounted_for += Z * multi * factor
-        non_h_accounted_for += N * multi * factor
+        electrons_accounted_for += Z * multi * number_of_symm_op
+        non_h_accounted_for += N * multi * number_of_symm_op
       except:
         electrons_accounted_for += 0
+
+    if based_on == "FU":
+      electrons_accounted_for *= Zprime
+      non_h_accounted_for *= Zprime
 
     if volume == "n/a":
       return
@@ -249,17 +256,20 @@ def get_mask_info():
     ent = formula_cleaner(unicode(ent))
 
     try:
-      total_electrons_accounted_for += get_sum_electrons_from_formula(ent) * multi * factor * Z
+      total_electrons_accounted_for += get_sum_electrons_from_formula(ent) * multi * number_of_symm_op * Z
     except:
       total_electrons_accounted_for += 0
-
+      
     factor = round(float(multi)/Zprime,3)
+    if based_on == "FU":
+      factor *= Zprime
+
+    if str(factor).endswith(".0"):
+      factor = int(factor)
 
     total_formula = _add_formula(total_formula, ent, factor)
     add_to_formula = _add_formula(add_to_formula, ent, factor)
     
-    if str(factor).endswith(".0"):
-      factor = int(factor)
     add_to_moiety += "%s[%s], " %(factor, ent_disp)
 
   add_to_moiety = add_to_moiety.rstrip(", ")
@@ -271,8 +281,8 @@ def get_mask_info():
 
   d['suggested_moiety'] = suggested_moiety
   d['add_to_moiety'] = add_to_moiety
-  d['suggested_sum']= total_formula
-  d['add_to_formula']= add_to_formula
+  d['suggested_sum']= total_formula.replace(".0 ", " ")
+  d['add_to_formula']= add_to_formula.replace(".0 ", " ")
   d['base']= base
   d['current_sNum']= current_sNum
 
@@ -311,7 +321,7 @@ def get_moieties_from_list():
     _ = os.path.join(p_path,'moieties.csv')
   rFile = open(_,'r').readlines()
   for line in rFile:
-    nick,formula = line.split(",")
+    nick,formula = line.split(";")
     nick = nick.strip()
     formula = formula.strip()
     if nick and formula:

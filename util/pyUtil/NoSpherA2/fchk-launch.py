@@ -1,19 +1,22 @@
 import os
 import sys
 import time
-from subprocess import Popen
+import subprocess
 
-hart_dir = os.getenv("hart_dir", "")
-hart_file = os.getenv("hart_file", "")
-if not os.path.exists(hart_dir):
+fchk_dir = os.getenv("fchk_dir", "")
+fchk_file = os.getenv("fchk_file", "")
+if not os.path.exists(fchk_dir):
   print("Incorrect launching directory!")
   exit(1)
-os.chdir(hart_dir)
-args = os.getenv("hart_cmd", "").split('+&-')
+os.chdir(fchk_dir)
+args = os.getenv("fchk_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'")
-p = Popen(args)
-err_fn = hart_file + ".out"
-out_fn = hart_file + ".out"
+log = None
+if "orca" in args[0]:
+  log = open(fchk_file + '.log', 'w')
+p = subprocess.Popen(args, stdout=log)
+err_fn = fchk_file + ".log"
+out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
@@ -29,7 +32,5 @@ with open(out_fn, "rU") as stdout:
     time.sleep(3)
 with open(err_fn, "rU") as stderr:
   print stderr.read()
-
+  
 print "Finished"
-if "-hart" in args:
-  os.system("pause")

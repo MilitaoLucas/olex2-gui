@@ -58,8 +58,13 @@ class HARp(PT):
     self.print_version_date()
     self.jobs = []
     self.parallel = False
+    self.softwares = ""
+    self.wfn_2_fchk = ""
+    
+   
     if not from_outside:
       self.setup_gui()
+    
     # END Generated =======================================
     options = {
       "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
@@ -82,26 +87,45 @@ class HARp(PT):
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
 
+    self.setup_har_executables()      
+    if os.path.exists(self.exe):
+      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
+      if os.path.exists(self.basis_dir):
+        basis_list = os.listdir(self.basis_dir)
+        basis_list.sort()
+        self.basis_list_str = ';'.join(basis_list)
+      else:
+        self.basis_list_str = None
+    else:
+      self.basis_list_str = None
+      self.basis_dir = None
+
+    self.set_defaults()
+
+  def setup_har_executables(self):
     self.exe = None
+    exe_pre = "hart"
+    self.exe_pre = exe_pre
+    
     if sys.platform[:3] == 'win':
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
         self.mpiexec = olx.file.Which("mpiexec.exe")
-        
-      _ = os.path.join(self.p_path, "hart_mpi.exe")
+      
+      _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
-        self.mpi_har = olx.file.Which("hart_mpi.exe")
+        self.mpi_har = olx.file.Which("%s_mpi.exe" %exe_pre)
         
-      _ = os.path.join(self.p_path, "hart.exe")
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart.exe")       
-        
+        self.exe = olx.file.Which("%s.exe" %exe_pre)
+
     else:
       mpiloc = os.path.join(self.p_path, "mpiexec")
       if os.path.exists(mpiloc):
@@ -120,34 +144,25 @@ class HARp(PT):
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
         
-      _ = os.path.join(self.p_path, "hart_mpi")
+      _ = os.path.join(self.p_path[:-16], "%s_mpi" %exe_pre)
       if os.path.exists(_):
         self.mpi_har = _
       else:
-        self.mpi_har = olx.file.Which("hart_mpi")
+        self.mpi_har = olx.file.Which("%s_mpi" %exe_pre)
         
-      _ = os.path.join(self.p_path, "hart")
+      _ = os.path.join(self.p_path[:-16], "%s" %exe_pre)
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart")   
-        
-        
-    if os.path.exists(self.exe):
-      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
-      if os.path.exists(self.basis_dir):
-        basis_list = os.listdir(self.basis_dir)
-        basis_list.sort()
-        self.basis_list_str = ';'.join(basis_list)
-      else:
-        self.basis_list_str = None
-    else:
-      self.basis_list_str = None
-      self.basis_dir = None
+        self.exe = olx.file.Which("%s" %exe_pre)   
+
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
+      if "Tonto" not in self.softwares:
+        self.softwares = self.softwares + ";Tonto"
       import multiprocessing
       max_cpu = multiprocessing.cpu_count()
+      self.max_cpu = max_cpu
       print """
       Number of CPUs Detected for parallel calculations: """ + str(max_cpu)
       cpu_list = ['1',]
@@ -155,11 +170,12 @@ class HARp(PT):
         cpu_list.append(str(n+1))
         self.cpu_list_str = ';'.join(cpu_list)
     else:
+      if "Tonto" not in self.softwares:
+        self.softwares = self.softwares + ";Tonto"
       print """
       No MPI implementation found in PATH!"""
       self.cpu_list_str = '1'
 
-    self.set_defaults()
 
   def set_defaults(self):
     for k,v in self.options.iteritems():
@@ -181,6 +197,7 @@ class HARp(PT):
 
   def list_jobs(self):
     import shutil
+    import math
     d = {}
     self.jobs = []
 
@@ -217,10 +234,14 @@ class HARp(PT):
     is_anything_running = False
     for i in range(len(self.jobs)):
       OUT_file = self.jobs[i].out_fn
-      if os.path.exists(os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")):
-        self.jobs[i].is_copied_back = True
-      else:
-        self.jobs[i].is_copied_back = False
+      job_cif = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.cif")
+      output_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+      if os.path.exists(job_cif) and os.path.exists(output_cif):
+        if "%0.f" %os.path.getctime(job_cif) == "%0.f" %os.path.getctime(output_cif):
+          print "%s is up to date" %self.jobs[i].name
+          self.jobs[i].is_copied_back = True
+        else:
+          self.jobs[i].is_copied_back = False
 
       try:
         if not os.path.exists(OUT_file):
@@ -253,7 +274,7 @@ class HARp(PT):
       arrow = """<a target='Open input .cif file: %s' href='reap "%s"'>%s</a>""" %(input_structure, input_structure, load_input)
 
       analysis = "--"
-      if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
+      if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout._Delta_F_vs_stl")):
         try:
           analysis = "<a target='Open analysis file' href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
             self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
@@ -271,9 +292,22 @@ class HARp(PT):
                 shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fco"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fco"))
                 shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".out"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.out"))
                 self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
-                shutil.copy(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis"), os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis"))
                 self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
-                self.jobs[i].is_copied_back = True
+                har_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+                if not os.path.exists(har_cif):
+                  print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+                  return
+                iam_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name.rstrip("_HAR") + ".cif") 
+                if not os.path.exists(iam_cif):
+                  print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+                  return
+                
+                hkl_stats = olex_core.GetHklStat()
+                OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
+                OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
+                OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
+                olex.m("cifmerge")
+                olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
               except:
                 print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
                 continue
@@ -306,8 +340,6 @@ class HARp(PT):
   width="100%%"
   onclick="reap '%(job_result_filename)s'"
 >''' %d
-        #  onclick="reap '%(job_result_filename)s'>>calcFourier -diff -fcf -r=0.05 -m"
-
 
       else:
         d['processing_gif_src'] = os.path.join(self.p_path, OV.GetParam('harp.processing_gif'))
@@ -321,6 +353,42 @@ class HARp(PT):
       self.auto_reload()
 
     return rv
+
+  def deal_with_har_cif(har_cif):
+    import math
+#    ''' Tries to complete what it can from the existing IAM cif'''
+    if not os.path.exists(har_cif):
+      print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+      return
+    iam_cif = os.path.join(har_cif.rstrip("_HAR.cif") + ".cif")
+    print(iam_cif)
+    if not os.path.exists(iam_cif):
+      print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+      return
+  
+    hkl_stats = olex_core.GetHklStat()
+    radiation = float(olx.xf.exptl.Radiation())
+    theta_full = math.asin(radiation*0.6)*180/math.pi
+    theta_max = math.asin(radiation/(2*hkl_stats['MinD']))*180/math.pi
+    if theta_max < theta_full:
+      theta_full = theta_max
+    hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+    hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
+    hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
+    
+    OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
+    OV.set_cif_item('_diffrn_reflns_point_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_point'))
+    OV.set_cif_item('_diffrn_reflns_laue_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_laue'))
+    OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %(1/hkl_stats.get('MeanIOverSigma')))
+    OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
+    OV.set_cif_item('_diffrn_reflns_theta_max', "%.3f" %theta_max)
+  
+    
+    from CifInfo import SaveCifInfo
+    SaveCifInfo()
+    metacif = os.path.join(OV.StrDir(), OV.FileName().replace("_HAR", "") + ".metacif&force=True")
+    olx.CifMerge(metacif, iam_cif)
+    olx.html.Update()
 
   def auto_reload(self):
     interval = OV.GetParam('harp.check_output_interval',0)
@@ -385,8 +453,6 @@ class HARp(PT):
 
     makePlotlyGraph(d)
 
-
-
   def makePlotlyGraph(d):
 
     try:
@@ -435,9 +501,6 @@ class HARp(PT):
 
     fig = go.Figure(data=data, layout=layout)
     plot_url = plotly.offline.plot(fig, filename='basic-line')
-
-
-
 
 def getAnalysisPlotData(input_f):
   f = open(input_f, 'r').read()
@@ -491,8 +554,6 @@ def getAnalysisPlotData(input_f):
 
   makePlotlyGraph(d)
 
-
-
 def makePlotlyGraph(d):
 
   try:
@@ -542,7 +603,6 @@ def makePlotlyGraph(d):
   fig = go.Figure(data=data, layout=layout)
   plot_url = plotly.offline.plot(fig, filename='basic-line')
 
-
 class Job(object):
   origin_folder = " "
   is_copied_back = False
@@ -565,6 +625,7 @@ class Job(object):
       self.name = self.name[:-6]
     full_dir = os.path.join(parent.jobs_dir, self.name)
     self.full_dir = full_dir
+    
     if not os.path.exists(full_dir):
       return
     self.date = os.path.getctime(full_dir)
@@ -665,9 +726,6 @@ class Job(object):
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
 
-#    if not olx.Ins('ACTA'):
-#      olex.m('addins ACTA')
-#      olex.m('refine')
     autogrow = olx.GetVar("settings.tonto.HAR.autogrow", None)
     if olx.xf.latt.IsGrown() == 'true':
       if olx.Alert("Please confirm",\
@@ -718,13 +776,14 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
 
     args = [self.name+".cif",
             "-basis-dir", self.parent.basis_dir,
-             "-shelx-f2", self.name+".hkl"]
-    
-    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
+            "-shelx-f2", self.name+".hkl",
+            "-hart", "t"
+              ]
+    if olx.GetVar("settings.tonto.HAR.ncpus", None) != '1':
       args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
     else:
       args = [self.parent.exe] + args
-
+      
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
       import olexex
@@ -746,7 +805,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
-
+      
     for k,v in HARp_instance.options.iteritems():
       val = olx.GetVar(k, None)
       if len(v) == 2:
@@ -791,24 +850,42 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       return
     Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
-    
+      
 def deal_with_har_cif():
+  import math
   ''' Tries to complete what it can from the existing IAM cif'''
   har_cif = os.path.join(OV.FilePath(), OV.FileName() + ".cif")
   if not os.path.exists(har_cif):
     print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
     return
-  iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif") 
+  iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif")
   if not os.path.exists(iam_cif):
     print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
     return
+
+  hkl_stats = olex_core.GetHklStat()
+  radiation = float(olx.xf.exptl.Radiation())
+  theta_full = math.asin(radiation*0.6)*180/math.pi
+  theta_max = math.asin(radiation/(2*hkl_stats['MinD']))*180/math.pi
+  if theta_max < theta_full:
+    theta_full = theta_max
+  hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+  hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
+  hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
   
-  hkl_stats = olex.core.GetHklStat()
   OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
-  OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
+  OV.set_cif_item('_diffrn_reflns_point_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_point'))
+  OV.set_cif_item('_diffrn_reflns_laue_measured_fraction_full', "%.3f" %hkl_stats.get('Completeness_laue'))
+  OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %(1/hkl_stats.get('MeanIOverSigma')))
   OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
-  olex.m("cifmerge")
-  olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
+  OV.set_cif_item('_diffrn_reflns_theta_max', "%.3f" %theta_max)
+
+  
+  from CifInfo import SaveCifInfo
+  SaveCifInfo()
+  metacif = os.path.join(OV.StrDir(), OV.FileName().replace("_HAR", "") + ".metacif&force=True")
+  olx.CifMerge(metacif, iam_cif)
+  olx.html.Update()
   
 OV.registerFunction(deal_with_har_cif)
   
@@ -830,7 +907,6 @@ def sample_folder(input_name):
   shutil.copy(sample_file, job_folder)
   load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
   olex.m(load_input_cif)
-
 
 
 HARp_instance = HARp()

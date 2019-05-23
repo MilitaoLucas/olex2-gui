@@ -375,6 +375,35 @@ def zipToOlexVFS(zip_path, base=None):
     OlexVFS.write_to_olex(filename, fc)
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
+def set_notification(string):
+  OV.SetVar('GuiNotification', string)
+  olx.Freeze(True)
+  OV.htmlUpdate()
+  olx.Freeze(False)
+
+def get_notification():
+  _ = OV.GetVar('GuiNotification',None)
+  if not _:
+    return
+  col = '#F5B041'
+  txt = _
+  if ";" in _:
+    txt = _.split(";")[0]
+    col = _.split(";")[1]
+  notification = '''
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<tr>
+<td bgcolor='%s'>
+%s
+</td>
+</tr>
+</table>''' %(col, txt)
+  return notification
+
+olex.registerFunction(set_notification, False, "gui")
+olex.registerFunction(get_notification, False, "gui")
+
+
 def file_open(path, base="", mode='r', readlines=False):
   ''' Open a file, either from a real file, or, if that is not found, from the OlexVFS.
       -- path: the FULL path to the file
@@ -403,7 +432,7 @@ def file_open(path, base="", mode='r', readlines=False):
       print "gui.file_open malfunctioned with getting %s" %path
       
     if readlines:
-      retVal = retVal.split("\n")
+      retVal = retVal.splitlines()
   return retVal
 
 olex.registerFunction(file_open, False, "tools")

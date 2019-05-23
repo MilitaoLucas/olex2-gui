@@ -112,12 +112,14 @@
     $-
   </td>
 
-  <td width="30%" align="right"> f/sig threshold </td>
+  <td width="15%" align="right"> f/sig</td>
   <td width="8%">$+
-    html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
+    html.Snippet("gui/snippets/input-text", 
+     "name=tonto_i_threshold",
      "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -160,7 +162,7 @@
       every
      </td>
 
-     <td width="8%" align='center'>
+     <td width="5%" align='center'>
      $+
        html.Snippet("gui/snippets/input-text",
        "name=checking_interval",
@@ -169,19 +171,19 @@
        )
       $-
      </td>
-     <td width="10%" align='left'>
-       seconds
+     <td width="5%" align='left'>
+       s
      </td>
      <td width="9%" align='right'>
        CPUs:
      </td>
-     <td width="8%" align='center'>
+     <td width="10%" align='center'>
      $+
          html.Snippet("gui/snippets/input-combo",
          "name=har_cpus",
          "items=spy.tonto.HAR.getCPUListStr()",
          "value=GetVar('settings.tonto.HAR.ncpus')",
-         "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
+         "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))>>html.Update()")
         $-
      </td>
 
