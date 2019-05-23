@@ -35,15 +35,16 @@ class Method_cctbx_refinement(Method_refinement):
     self.failure = True
     print '\n+++ STARTING olex2.refine +++++ %s' %self.version
 
-    gui.set_notification("Using <b>spherical</b> form factors")
     table_file_name = None
     use_aspherical = False
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
+      gui.set_notification("Using <font color=$GetVar(gui.blue)><b>spherical</b></font> form factors")
       use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    else:
+      pass
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
-
       table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
       if not os.path.exists(table_file_name):
         table_file_name = None

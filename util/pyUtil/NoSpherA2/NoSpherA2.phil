@@ -45,7 +45,8 @@ snum{
 
 user{
   refinement{
-    hide_nsff = True
+    hide_nsff = False
+      .expert_level = 2
       .type = bool
   }
 }
