@@ -3387,6 +3387,10 @@ class HealthOfStructure():
       if item == 'Rint':
         if raw_val == 1:
           have_null = True
+
+      if item == 'Rint':
+        if raw_val == '0':
+          have_null = False
     
       if have_null:
         bg_colour = "#555555"
@@ -3539,6 +3543,9 @@ class HealthOfStructure():
         if od_2theta:
           od_2theta = float(od_2theta) * 2
 
+      laue = float(self.hkl_stats['Completeness_laue'])
+      laue_col = self.get_bg_colour('Completeness', laue)
+
       ## Point Group value!
       _ = int(boxWidth * (1-self.hkl_stats['Completeness_point']))
       if _ == 0 and theoretical_val < 0.95:
@@ -3546,10 +3553,9 @@ class HealthOfStructure():
       if _ != 0:
         x = boxWidth - _
         box = (x,0,boxWidth,boxHeight)
-        fill = OV.GetParam('gui.red').hexadecimal
+        fill = laue_col
         draw.rectangle(box, fill=fill)
 
-      laue = float(self.hkl_stats['Completeness_laue'])
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
