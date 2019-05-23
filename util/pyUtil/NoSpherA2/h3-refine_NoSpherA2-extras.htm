@@ -1,47 +1,15 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="100%" align="center"> <b> Advanced settings </b> </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="15%" align='right'>
-  Method
+
+<td width="13%" align='left'>
+    <b>Basis Set </b>
 </td>
-<td width="25%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=NoSpherA2_method@refine",
-    "items='HF<-rhf;B3LYP<-rks'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.method')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.method', html.GetValue('~name~'))")
-   $-
-</td>
-<td width="25%" align='right'>
-  CPUs
-</td>
-<td width="15%" align='center'>
-$+
-    html.Snippet("gui/snippets/input-combo",
-    "name=NoSpherA2_cpus@refine",
-    "items=spy.NoSpherA2.getCPUListStr()",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
-   $-
-</td>
-<td width="10%"> </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
- <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="15%" align='right'>
-    Basis Set
-</td>
-<td width="25%">
+<td width="22%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_basis@refine",
@@ -50,10 +18,37 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name', html.GetValue('~name~'))")
    $-
   </td>
- <td width="25%" align='right'>
-  Total Memory (GB)
+
+<td width="12%" align='right'>
+  <b>Method </b>
 </td>
-<td width="15%" align='center'>
+<td width="22%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_method@refine",
+    "items='Hartree-Fock<-rhf;B3LYP<-rks'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.method')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.method', html.GetValue('~name~'))")
+   $-
+</td>
+
+<td width="10%" align='right'>
+  <b>CPUs</b>
+</td>
+<td width="10%" align='center'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_cpus@refine",
+    "items=spy.NoSpherA2.getCPUListStr()",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
+   $-
+</td>
+
+ <td width="6%" align='right'>
+  <b>Gb </b>
+</td>
+<td width="3%" align='center'>
 $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_mem",
@@ -61,16 +56,15 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.mem', html.GetValue('~name~'))")
    $-
 </td>
- <td width="10%"> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="15%" align='right'>
-  Charge
+<td width="13%" align='left'>
+  <b>Charge </b>
 </td>
-<td width='25%'>
+<td width='5%'>
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_Charge",
@@ -79,72 +73,47 @@ $+
     )
   $-
 </td>
+
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Aniso",
+    "label=H Aniso ",
+    "td1=<td width='20%' align='right'>",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))",
+    )
+  $-
+
 <!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="25%" align="right">
-  Cluster radius  
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=NoSpherA2_cluster_grow@refine",
+    "label=Complete Cluster",
+    "td1=<td width='30%' align='right'>",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
+    "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')', html.GetState('~name~'))")
+  $-
+<td width="22%" align="right">
+  <b>Cluster radius  </b>
 </td>
-<td width="15%">
+<td width="5%">
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_cluster_radius@refine",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
   $-
-</td>
-<td width="10%"> 
-</td>
-#ignoreif -->
-
-
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="50%"> </td>
-#ignoreif -->
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="15%" align='right'>
-  H Aniso
-</td>
-<td width='25%'align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=H_Aniso",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso',html.GetValue('~name~'))",
-    )
-  $-
-</td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="25%" align="right"> 
-  Complete Cluster 
-</td>
-<td width="5%" align="left">
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=NoSpherA2_cluster_grow@refine",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
-    "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')', html.GetState('~name~'))")
-  $-
-</td>
-<td width="10%"> 
-</td>
-#ignoreif -->
-  
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="50%"> </td>
 #ignoreif -->
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="100%" align="center"> <b> Analysis of results </b> </td>
+<td width="100%" align="center"> <b> ============== M A P S ============== </b> </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
@@ -164,5 +133,6 @@ $spy.gui.maps.SetXgridView()
 #ignoreif -->
 
 <!-- #include h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="";2; -->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
