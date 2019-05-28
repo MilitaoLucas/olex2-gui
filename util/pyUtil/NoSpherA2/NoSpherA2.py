@@ -391,9 +391,9 @@ class wfn_Job(object):
       cpu = "%nproc=1"
     mem = "%mem=" + OV.GetParam('snum.refinement.cctbx.nsff.mem') + "GB"
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "# rhf/gen NoSymm 6D 10F IOp(3/32=2) formcheck"
+      control = "# rhf/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
     else:
-      control = "# b3lyp/gen NoSymm 6D 10F IOp(3/32=2) formcheck"
+      control = "# b3lyp/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
     com.write(cpu + '\n')
     com.write(mem + '\n')
     com.write(control + '\n')
@@ -451,7 +451,7 @@ class wfn_Job(object):
         line_run = basis.readline()
       com.write("****\n")
     basis.close()
-    com.write(" ")
+    com.write(" \n./%s.wfn\n\n" %self.name)
     com.close()
 
   def write_orca_input(self):
@@ -779,6 +779,9 @@ def combine_sfs(force=False):
   tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
   tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
   tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+  
+  if tsc_source.lower().endswith("fchk"):
+    tsc_source = os.path.basename(tsc_source)
 
   if not force:
     if tsc_file.endswith(".tsc"):
