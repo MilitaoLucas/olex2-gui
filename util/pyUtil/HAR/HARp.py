@@ -293,21 +293,6 @@ class HARp(PT):
                 shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".out"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.out"))
                 self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
                 self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
-                har_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
-                if not os.path.exists(har_cif):
-                  print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
-                  return
-                iam_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name.rstrip("_HAR") + ".cif") 
-                if not os.path.exists(iam_cif):
-                  print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
-                  return
-                
-                hkl_stats = olex_core.GetHklStat()
-                OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
-                OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
-                OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
-                olex.m("cifmerge")
-                olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
               except:
                 print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
                 continue

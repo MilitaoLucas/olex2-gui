@@ -2,6 +2,7 @@ import olex
 import olx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import os
 
 debug = bool(OV.GetParam("olex2.debug", False))
 
@@ -62,11 +63,11 @@ class MapUtil:
 
     self.void_html = ""
     voidfile = '%s/voids.txt' %OV.DataDir()
-    olex.m(cmd)
     self.map_type = 'void'
     self.SetXgridView(True)
     self.deal_with_controls()
     OV.SetVar('olex2.map_type', 'void')
+    olex.m(cmd)
 
   def void_observer(self, msg):
     try:
@@ -81,13 +82,10 @@ class MapUtil:
     if self.deal_with_map_buttons(onoff, img_bases, 'mask'):
       return
     self.SetXgridView(False)
-    olex.m('spy.OlexCctbxMasks(True, True)')
     self.map_type = 'mask'
     OV.SetVar('olex2.map_type', 'mask')
     self.deal_with_controls()
-    #map_source =  OV.GetParam("snum.map.source")
-    #map_resolution = OV.GetParam("snum.map.resolution")
-    #mask = OV.GetParam("snum.map.mask")
+    olex.m('spy.OlexCctbxMasks(True, True)')
 
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
@@ -114,13 +112,14 @@ class MapUtil:
     else:
       mask_val = ""
 
+    self.map_type = 'eden'
+    self.SetXgridView(update_controls)
+    OV.SetVar('olex2.map_type', 'eden')
+
     if map_source == "olex":
       olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-    self.map_type = 'eden'
-    self.SetXgridView(update_controls)
-    OV.SetVar('olex2.map_type', 'eden')
 
   def SetXgridView(self, update_controls=False):
     update_controls = bool(update_controls)
@@ -274,8 +273,19 @@ class MapUtil:
     olx.SetVar('snum.xgrid.scale', _)
     olx.SetVar('map_value', olx.xgrid.Scale())
 
-
-
+def have_matching_fcf():
+  fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
+  res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
+  if os.path.exists(fcf) and os.path.exists(fcf):
+    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
+      OV.SetVar('have_matching_fcf', True)
+      return True
+    else:
+      print (".fcf seems to be out of date.")
+      OV.SetVar('have_matching_fcf', False)
+      return False
+  else: 
+    return False
 
 if OV.HasGUI():
   mu = MapUtil()
@@ -287,3 +297,4 @@ if OV.HasGUI():
   OV.registerFunction(mu.get_best_contour_maps, False, "gui.maps")
   OV.registerFunction(mu.get_map_scale, False, "gui.maps")
   OV.registerFunction(mu.getActionString, False, "gui.maps")
+  OV.registerFunction(have_matching_fcf, False, "gui.maps")
