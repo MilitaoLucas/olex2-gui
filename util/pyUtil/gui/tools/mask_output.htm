@@ -1,22 +1,26 @@
+t:mask_output_table_begin{
+<table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
+}
+
 t:mask_output_table_header_rp{
 <tr width='100%%'  bgcolor='%(table_bg)s'>
     <td align='center' width='5%%'>
        <b>&#35;</b>
     </td>
     <td align='center' width='10%%'>
-       <b>V (A<sup>3</sup>)</b>
+       <b>V(A^3) </b>
     </td>
     <td align='center' width='10%%'>
-       <b>e<sup>-</sup></b>
+       <b>e- </b>
     </td>
     <td align='center' width='10%%'>
-       <b>e/V</b>
+       <b>V/e- </b>
     </td>
     <td align='center' width='10%%'>
-       <b>V/at.</b>
+       <b>V/at. </b>
     </td>
     <td align='center' width='36%%'>
-       <b>Content  / <a href="spy.editparams(snum.masks.based_on)>>html.update()">%(based_on)s</a></b>
+       <b>Content  / <a href="spy.editparams(user.masks.based_on)>>html.update()">%(based_on_display)s </a></b>
     </td>
     <td align='center' width='10%%'>
        <b>e<sup>-</sup></b>
@@ -30,13 +34,13 @@ t:mask_output_table_header_rp{
 t:mask_output_table_row_rp{
 <tr width='100%%' bgcolor='%(table_bg)s'>
     <td align='center'>
-       <b>%(number)s
+       <b>%(number)s </b>
     </td>
     <td align='center'>
-       %(volume)s
+       %(volume_disp).0f
     </td>
-    <td align='center'>
-       %(electron)s
+    <td align='center' bgcolor='%(electron_bg)s'>
+       %(electrons_disp).0f
     </td>
     <td align='center'>
        %(v_over_e)s
@@ -48,12 +52,73 @@ t:mask_output_table_row_rp{
        %(content)s
     </td>
     <td align='center'>
-       %(e_accounted_for)s
+       <font color='%(electron_bg)s'><b>%(e_accounted_for_display)s</b></font>
     </td>
     <td align='center'>
-       %(multiplicity)s
+       %(multiplicity)s 
     </td>
 </tr>}
+
+t:mask_output_based_on{
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="#ababab">
+  <tr align='right'>
+    <td>
+      All values above are calculated based on the <b>%(based_on_display)s </b>
+    </td>
+    <!--<td width='30%%' align='right'>-->
+      <!--<b>-->
+
+     <!--$spy.MakeHoverButton('small-C','spy.SetParam('user.masks.based_on',Cell)>>html.Update()')-->
+     <!--$spy.MakeHoverButton('tiny-A','spy.SetParam('user.masks.based_on',ASU)>>html.Update()')-->
+     <!--$spy.MakeHoverButton('tiny-F','spy.SetParam('user.masks.based_on',FU)>>html.Update()')-->
+
+    <!--</b>-->
+    <!--</td>-->
+
+
+  <td width=8%%>
+    <input
+      type="button"
+      width="100%%"
+      name="BASE_ON_CELL"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      value="Cell"
+      onclick="spy.SetParam('user.masks.based_on',Cell)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetParam(gui.green))>>html.SetBG(BASE_ON_FU,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_ASU, GetVar('linkButton.bgcolor')))"
+      custom="#custom"
+    >
+  </td>
+
+  <td width=8%%>
+    <input
+      type="button"
+      width="100%%"
+      name="BASE_ON_FU"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      value="FU"
+      onclick="spy.SetParam('user.masks.based_on',FU)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_FU,GetParam(gui.green))>>html.SetBG(BASE_ON_ASU, GetVar('linkButton.bgcolor')))"
+      custom="#custom"
+    >
+  </td>
+
+  <td width=8%%>
+    <input
+      type="button"
+      width="100%%"
+      name="BASE_ON_ASU"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      value="ASU"
+      onclick="spy.SetParam('user.masks.based_on',ASU)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_FU,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_ASU, GetParam(gui.green)))"
+      custom="#custom"
+    >
+  </td>
+
+
+  </tr>
+</table>
+}
 
 t:mask_output_end_rp{
   <table>
@@ -153,9 +218,9 @@ t:mask_special_details{
   </table>}
   
 t:mask_special_detail_default{"A solvent mask was calculated and %(total_void_electrons).0f electrons were 
-found in a volume of %(total_void_volume).0f\%%A^3 in %(total_void_no)s void%(total_void_no_plural)s. 
+found in a volume of %(total_void_volume).0f\%%A^3 in %(total_void_no)s void%(total_void_no_plural)s per UNIT CELL.
 This is consistent with the presence of 
-%(add_to_moiety)s per formula unit 
-which account for %(total_void_accounted_for_electrons).1f electrons."
+%(add_to_moiety)s per %(based_on)s  
+which account for %(total_void_accounted_for_electrons).0f electrons."
 }
 

@@ -28,3 +28,5 @@ thf;C4 H8 O
 isopropanol;C3 H8 O
 dioxane;C4 H8 O2
 1,4-dioxane;C4 H8 O2
+# Anions
+triflate;C F3 O3 S 
