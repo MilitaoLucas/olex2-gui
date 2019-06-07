@@ -767,8 +767,6 @@ routines requiring structure refinement
       .type = bool
     update_cif = False
       .type = bool
-    based_on = *ASU FU
-      .type = choice
     user_sum_formula = ""
       .type = str
     user_moiety_formula = ""
@@ -987,6 +985,17 @@ user
     hide_nsff = True
       .type = bool
       .expert_level = 2
+  }
+
+  masks{
+    based_on = *ASU FU Cell
+      .type = choice
+    v_over_e{
+      upper = 8
+        .type=float
+      lower = 2
+        .type = float
+      }
   }
   
   twinning{
