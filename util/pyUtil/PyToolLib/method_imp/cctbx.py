@@ -4,38 +4,23 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olx
 import olex
+import os
 
 class Method_cctbx_refinement(Method_refinement):
   flack = None
   version = "(default)"
 
   def __init__(self, phil_object):
-    import os
     super(Method_cctbx_refinement, self).__init__(phil_object)
     _ = os.environ.get('OLEX2_CCTBX_DIR')
     if _ is not None:
       self.version = _
     
   def pre_refinement(self, RunPrgObject):
+    import gui
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
-
-
-    Method_refinement.pre_refinement(self, RunPrgObject)
-    
-    
-  def do_run(self, RunPrgObject):
-    import time
-    import os
-    from refinement import FullMatrixRefine
-    from smtbx.refinement.constraints import InvalidConstraint
-    import gui
-
-    timer = debug = bool(OV.GetParam('olex2.debug',False))
-    self.failure = True
-    print '\n+++ STARTING olex2.refine +++++ %s' %self.version
-
-    table_file_name = None
+    self.table_file_name = None
     use_aspherical = False
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
@@ -52,8 +37,23 @@ class Method_cctbx_refinement(Method_refinement):
       if not os.path.exists(table_file_name):
         table_file_name = None
     if table_file_name:
-      table_file_name = table_file_name.encode("utf-8")
+      self.table_file_name = table_file_name.encode("utf-8")
+      OV.SetParam('snum.auto_hydrogen_naming', False)
       print("Using tabulated atomic form factors")
+
+    Method_refinement.pre_refinement(self, RunPrgObject)
+    
+    
+  def do_run(self, RunPrgObject):
+    import time
+    from refinement import FullMatrixRefine
+    from smtbx.refinement.constraints import InvalidConstraint
+    import gui
+
+    timer = debug = bool(OV.GetParam('olex2.debug',False))
+    self.failure = True
+    print '\n+++ STARTING olex2.refine +++++ %s' %self.version
+
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
@@ -63,7 +63,7 @@ class Method_cctbx_refinement(Method_refinement):
     try:
       if timer:
         t1 = time.time()
-      cctbx.run(table_file_name=table_file_name)
+      cctbx.run(table_file_name=self.table_file_name)
       if timer:
         print "-- do_run(): %.3f" %(time.time() - t1)
       if timer:
