@@ -60,7 +60,7 @@ t:mask_output_table_row_rp{
 </tr>}
 
 t:mask_output_based_on{
-<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="#ababab">
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1">
   <tr align='right'>
     <td>
       All values above are calculated based on the <b>%(based_on_display)s </b>
@@ -81,10 +81,10 @@ t:mask_output_based_on{
       type="button"
       width="100%%"
       name="BASE_ON_CELL"
-      bgcolor="GetVar('linkButton.bgcolor')"
+      bgcolor="spy.status_bg('user.masks.based_on','Cell')"
       fgcolor="GetVar('linkButton.fgcolor')"
       value="Cell"
-      onclick="spy.SetParam('user.masks.based_on',Cell)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetParam(gui.green))>>html.SetBG(BASE_ON_FU,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_ASU, GetVar('linkButton.bgcolor')))"
+      onclick="spy.SetParam('user.masks.based_on',Cell)>>html.Update()"
       custom="#custom"
     >
   </td>
@@ -94,10 +94,10 @@ t:mask_output_based_on{
       type="button"
       width="100%%"
       name="BASE_ON_FU"
-      bgcolor="GetVar('linkButton.bgcolor')"
+      bgcolor="spy.status_bg('user.masks.based_on','FU')"
       fgcolor="GetVar('linkButton.fgcolor')"
       value="FU"
-      onclick="spy.SetParam('user.masks.based_on',FU)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_FU,GetParam(gui.green))>>html.SetBG(BASE_ON_ASU, GetVar('linkButton.bgcolor')))"
+      onclick="spy.SetParam('user.masks.based_on',FU)>>html.Update()"
       custom="#custom"
     >
   </td>
@@ -107,10 +107,10 @@ t:mask_output_based_on{
       type="button"
       width="100%%"
       name="BASE_ON_ASU"
-      bgcolor="GetVar('linkButton.bgcolor')"
+      bgcolor="spy.status_bg('user.masks.based_on','ASU')"
       fgcolor="GetVar('linkButton.fgcolor')"
       value="ASU"
-      onclick="spy.SetParam('user.masks.based_on',ASU)>>html.Update()>>html.SetBG(BASE_ON_CELL,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_FU,GetVar('linkButton.bgcolor'))>>html.SetBG(BASE_ON_ASU, GetParam(gui.green)))"
+      onclick="spy.SetParam('user.masks.based_on',ASU)>>html.Update()"
       custom="#custom"
     >
   </td>
@@ -157,12 +157,20 @@ t:mask_output_end_rp{
       custom="#custom"
     >
   </td>
-  <td width=30%%>
+  <td width=20%%>
       <b>%(add_to_moiety)s</b>
   </td>
 
-  <td width=50%%>
-      <b>%(moiety)s</b>
+  <td width=60%%>
+    <input
+      type="button"
+      name="MASK_MOIETY_EDIT"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      value="%(moiety)s"
+      onclick="spy.EditCifInfo()"
+      width="100%%"
+      custom="#custom"
+    >
   </td>
 
 
