@@ -19,15 +19,16 @@ debug = bool(OV.GetParam("olex2.debug", False))
 global mask_info_has_updated
 mask_info_has_updated = False
 
-gui_green = OV.GetParam('gui.green')
-gui_orange = OV.GetParam('gui.orange')
-gui_red = OV.GetParam('gui.red')
-gui_grey = OV.GetParam('gui.grey')
+gui_green = OV.GetParam('gui.green').hexadecimal
+gui_orange = OV.GetParam('gui.orange').hexadecimal
+gui_red = OV.GetParam('gui.red').hexadecimal
+gui_grey = OV.GetParam('gui.grey').hexadecimal
+gui_light_grey = OV.GetParam('gui.light_grey').hexadecimal
+gui_highlight = OV.GetParam('gui.html.highlight_colour').hexadecimal
 
 from PeriodicTable import PeriodicTable
 PT = PeriodicTable()
 pt = PT.PeriodicTable()
-
 
 def get_mask_info():
   global mask_info_has_updated
@@ -164,7 +165,6 @@ def get_mask_info():
     #volume *= f
     #electron *= f
 
-    #change_based_on_button_states()
 
     d['number'] = number
     d['electron'] = "%.0f" %float(electron)
@@ -268,20 +268,20 @@ def get_mask_info():
     if "?" in entity:
       continue
     entity, multi = split_entity(entity)
-    multi = float(multi)
+    multi = float(multi) 
     ent = moieties.get(entity.lower(), entity)
     ent_disp = ent.replace(" ", "")
     ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
     ent = formula_cleaner(unicode(ent))
 
     try:
-      total_electrons_accounted_for += get_sum_electrons_from_formula(ent) * user_number * number_of_symm_op * Z
+      total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
     except:
       total_electrons_accounted_for += 0
     f = number_of_symm_op * Zprime  
     total_formula = _add_formula(total_formula, ent, 1)
-    add_to_formula = _add_formula(add_to_formula, ent, user_number / f * multiplicity)
-    add_to_moiety += "%s[%s], " %(format_number(user_number  / f * multiplicity), ent_disp)
+    add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
+    add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
   add_to_moiety = add_to_moiety.rstrip(", ")
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
@@ -321,6 +321,8 @@ def get_mask_info():
   if add_to_formula:
     t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
+    
+  #change_based_on_button_states()
   return t
 OV.registerFunction(get_mask_info, False, 'gui.tools')
 
@@ -510,7 +512,7 @@ def edit_mask_special_details(txt,base,sNum):
     update_sqf_file(current_sNum, '_%s_special_details' %base)
     #update_metacif(sNum, get_sqf_name())
     olx.html.Update()
-    change_based_on_button_states()
+#    change_based_on_button_states()
 
 OV.registerFunction(edit_mask_special_details)
 
@@ -624,7 +626,7 @@ def add_mask_content(i,which):
   update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
   mask_info_has_updated = True
   olx.html.Update()
-  change_based_on_button_states()
+#  change_based_on_button_states()
 
 def get_adjust_for_base_factor():
   Z =float(olx.xf.au.GetZ())
@@ -685,6 +687,12 @@ def _add_formula(curr, new, multi = 1):
   return retVal
   
 
+def status_bg(var, val, status='on'):
+  var = OV.GetParam(var)
+  if var.lower() == val.lower():
+    return gui_highlight
+OV.registerFunction(status_bg)
+
 def change_based_on_button_states():
   l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
   based_on = OV.GetParam('user.masks.based_on')
@@ -701,10 +709,11 @@ def change_based_on_button_states():
       state = "false"
     
     if state == "true":
-      olx.html.SetBG(btn,OV.GetParam('gui.green'))
-    else:
-      olx.html.SetBG(btn,OV.GetParam('gui.grey'))
-
-
+      olx.html.SetBG(btn,'gui_green')
+      l.remove(btn)
+      for btn in l:
+        olx.html.SetBG(btn,'gui_light_grey')
+      break
+OV.registerFunction(change_based_on_button_states)
 OV.registerFunction(add_mask_content)
 OV.registerFunction(formula_cleaner)
