@@ -73,7 +73,6 @@
     <_chemical_name_*>
     <_exptl_crystal_*>
     <_*_details>
-    <_iucr_refine_fcf_details skip="true">
     <_diffrn_measurement_*>
     <_diffrn_absorpt_*>
     <_diffrn_crystal_*>
@@ -90,6 +89,8 @@
     <_reflns_special_details skip="true">
     <_olex2_refinement_description skip="true">
     <_iucr_refine_instructions_details skip="true">
+    <_iucr_refine_reflections_details skip="true">
+    <_iucr_refine_fcf_details skip="true">
     <_smtbx_masks_void>
     <_platon_squeeze_void>
     <_platon_squeeze_*>
