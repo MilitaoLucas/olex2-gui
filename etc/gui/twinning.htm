@@ -13,8 +13,8 @@
     html.Snippet("gui/snippets/input-checkbox",
     "name=TWIN_DO_LONG",
     "items=2;12;24",
-    "checked=spy.GetParam(user.twinning.olex2.do_long)",
-    "onclick=spy.SetParam(user.twinning.olex2.do_long, html.GetState(~name~))",
+    "checked=spy.GetParam(snum.twinning.olex2.do_long)",
+    "onclick=spy.SetParam(snum.twinning.olex2.do_long, html.GetState(~name~))",
     )
   $-
   </td>
@@ -32,8 +32,8 @@
     "name=TWIN_MAX_INDEX",
     "items=1;2;5;12",
     "lable=Max Index",
-    "value=spy.GetParam(user.twinning.olex2.max_index)",
-    "onchange=spy.SetParam(user.twinning.olex2.max_index, html.GetValue(~name~))",
+    "value=spy.GetParam(snum.twinning.olex2.max_index)",
+    "onchange=spy.SetParam(snum.twinning.olex2.max_index, html.GetValue(~name~))",
     "readonly=false",
     )
   $-
@@ -46,8 +46,8 @@
     html.Snippet("gui/snippets/input-combo",
     "name=TWIN_ROTATION_FRACTION",
     "items=2;12;24",
-    "value=spy.GetParam(user.twinning.olex2.rotation_fraction)",
-    "onchange=spy.SetParam(user.twinning.olex2.rotation_fraction, html.GetValue(~name~))",
+    "value=spy.GetParam(snum.twinning.olex2.rotation_fraction)",
+    "onchange=spy.SetParam(snum.twinning.olex2.rotation_fraction, html.GetValue(~name~))",
     "readonly=false",
     )
   $-
@@ -62,8 +62,8 @@
     "name=TWIN_THRESHOLD",
     "items=0.001;0.002;0.01",
     "lable=Max Index",
-    "value=spy.GetParam(user.twinning.olex2.threshold)",
-    "onchange=spy.SetParam(user.twinning.olex2.threshold, html.GetValue(~name~))",
+    "value=spy.GetParam(snum.twinning.olex2.threshold)",
+    "onchange=spy.SetParam(snum.twinning.olex2.threshold, html.GetValue(~name~))",
     "readonly=false",
     )
   $-

@@ -351,6 +351,20 @@ routines requiring structure refinement
       }
   }
 
+  twinning{
+    olex2{
+      do_long = False
+        .type = bool 
+      max_index = 5
+        .type = int 
+      rotation_fraction = 12
+        .type = int 
+      threshold = 0.002
+        .type = float
+    }    
+  }
+
+
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
@@ -996,19 +1010,6 @@ user
       lower = 2
         .type = float
       }
-  }
-  
-  twinning{
-    olex2{
-      do_long = False
-        .type = bool 
-      max_index = 5
-        .type = int 
-      rotation_fraction = 12
-        .type = int 
-      threshold = 0.001
-        .type = float
-    }    
   }
 
   graphs
