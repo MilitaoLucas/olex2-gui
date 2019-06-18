@@ -360,54 +360,73 @@ class MatrixMaker(ImageTools):
     if state == "off":
       bgcolor = '#dedede'
     width = int(round(((IT.skin_width) / 4),0)) - 14
-    height = 55
+    height = 62
     size = (width, height)
     font_name = "Arial"
     font_size = 11
     font = IT.registerFontInstance(font_name, font_size)
+    font_small = IT.registerFontInstance(font_name, 10)
     line_heigth = font_size + 2
     im = Image.new('RGBA', size, bgcolor)
     draw = ImageDraw.Draw(im)
     m = []
     i = 0
-    max_width = int(round(width/3)) - 7
+    max_width = int(round(width/3))
     for item in matrix:
+      use_font = font
       if i == 9: break
       try:
         item = round(item,3)
       except:
-        item = item
+        m.append(item)
+        continue
+      sign = ""
+      if abs(item) != item:
+        sign = "-"
       if str(item) == "0.0":
         item = "0"
-      if str(item) == "1.0":
+      elif str(item) == "1.0":
         item = "1"
-      if str(item) == "-1.0":
+      elif str(item) == "-1.0":
         item = "-1"
-      txt_size = draw.textsize(str(item), font=font)
+      elif 0.97 < abs(item) < 1.03:
+        item = sign+"1"
+      elif 0 < abs(item) < 0.03:
+        item = "0"
+      elif 0.23 < abs(item) < 0.27:
+        item = sign+"1/4"
+      elif 0.73 < abs(item) < 0.77:
+        item = sign+"3/4"
+      elif 0.47 < abs(item) < 0.53:
+        item = sign+"1/2"
+      elif 0.31 < abs(item) < 0.35:
+        item = sign+"1/3"
+      elif 0.64 < abs(item) < 0.69:
+        item = sign+"2/3"
+      elif 0.11 < abs(item) < 0.14:
+        item = sign+"1/8"
+      elif 0.36 < abs(item) < 0.39:
+        item = sign+"3/8"
+      elif 0.61 < abs(item) < 0.64:
+        item = sign+"5/8"
+      elif 0.86 < abs(item) < 0.89:
+        item = sign+"7/8"
+      elif 0.95 < abs(item) < 1.05:
+        item = sign+"1"
+        
+      txt_size = draw.textsize(str(item), font=use_font)
       w = txt_size[0]
       if w > max_width:
         max_width = w
-      i += 1
-    i = 0
-    for item in matrix:
-      if i == 9: break
-      try:
-        item = round(item,3)
-      except:
-        item = item
-      if str(item) == "0.0":
-        item = "0"
-      if str(item) == "1.0":
-        item = "1"
-      if str(item) == "-1.0":
-        item = "-1"
       m.append(item)
       i += 1
+    i = 0
 
     i = 0
     j = 0
     k = 0
     for item in m:
+      use_font = font
       if i < 3:
         j = i
       elif i == 3:
@@ -420,26 +439,33 @@ class MatrixMaker(ImageTools):
         k = 2
       else:
         j = (i-6)
+        
       txt_size = draw.textsize(str(item), font=font)
-      begin = ((j * max_width) + ((max_width - txt_size[0])), k * line_heigth)
+      if "." in str(item):
+        use_font = font_small
+        txt_size = draw.textsize(str(item), font=use_font)
+      beg_adjust = 0
+      if j == 0:
+        beg_adjust = 2
+      begin = (beg_adjust + ((j * max_width) + ((max_width - txt_size[0])/2)), k * line_heigth)
       if item == -1:
         colour = (255, 0, 0)
       else:
-        colour = (100, 100, 100)
-      draw.text(begin, "%s" %item, font=font, fill=colour)
+        colour = (50, 50, 50)
+      draw.text(begin, "%s" %item, font=use_font, fill=colour)
       i += 1
 
     font_size = 10
-    line_heigth = font_size -2
+    line_heigth = font_size -1
     font_name = "Arial"
-    font = IT.registerFontInstance(font_name, font_size)
+    font = font_small
     w = 0
 
     for i in xrange(len(text_def)):
       item = text_def[i].get('txt',"")
       colour = text_def[i].get('font_colour',"")
       w = draw.textsize(str(item), font=font)[0]
-      draw.text(((width-w)/2, 35 + line_heigth * i), "%s" %item, font=font, fill=(colour))
+      draw.text(((width-w)/2, 40 + line_heigth * i), "%s" %item, font=font, fill=(colour))
     namestate = r"%s%s.png" %(name, state)
     name = r"%s" %(name)
     OlexVFS.save_image_to_olex(im, namestate)
