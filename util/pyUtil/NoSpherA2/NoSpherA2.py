@@ -180,9 +180,15 @@ class NoSpherA2(PT):
       pass
     else:
       OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-      self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
+      try:
+        self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
+      except NameError as error:
+        print "Aborted due to: ",error
+        raise NameError(error)
 
     job.launch()
+    if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+      raise NameError('Error during structure factor calculation!')
     olx.html.Update()
     combine_sfs(force=True)
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
@@ -207,7 +213,11 @@ class NoSpherA2(PT):
     elif software == "Gaussian16":
       wfn_object.write_gX_input()
 
-    wfn_object.run()
+    try:
+      wfn_object.run()
+    except NameError as error:
+      print "The follwing error occured druing QM Calculation: ",error
+      raise NameError('Unsuccesfull Wavefunction Calculation!')
 
   def setup_wfn_2_fchk(self):
     exe_pre ="Wfn_2_Fchk"
@@ -567,6 +577,17 @@ class wfn_Job(object):
     while p.poll() is None:
       time.sleep(3)
 
+    if software == "ORCA":
+      if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+".log")).read():
+        pass
+      else:
+        raise NameError('Orca did not terminate normally!')
+    else:
+      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
+        pass
+      else:
+        raise NameError('Gaussian did not terminate normally!')
+      
     import shutil
     if("g03" in args[0]):
       shutil.move("Test.FChk",self.name+".fchk")
