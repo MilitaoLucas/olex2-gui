@@ -25,6 +25,7 @@ gui_red = OV.GetParam('gui.red').hexadecimal
 gui_grey = OV.GetParam('gui.grey').hexadecimal
 gui_light_grey = OV.GetParam('gui.light_grey').hexadecimal
 gui_highlight = OV.GetParam('gui.html.highlight_colour').hexadecimal
+gui_width = OV.GetParam('gui.htmlpanelwidth')
 
 from PeriodicTable import PeriodicTable
 PT = PeriodicTable()
@@ -38,9 +39,9 @@ def get_mask_info():
   template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
   if not os.path.exists(template_path):
     template_path = os.path.join(p_path, 'mask_output.htm')
-    
+   
   based_on = OV.GetParam('user.masks.based_on')
-  based_on_display = "Asymmetric unit"
+  based_on_display = "Asymmetric Unit"
   if based_on == "FU":
     based_on_display = "Formula Unit"
   elif based_on == "Cell":
@@ -78,6 +79,7 @@ def get_mask_info():
       else:
         return "No mask information"
 
+  mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
     volumes = olx.Cif('_%s_void_volume' %base).split(",")
     electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
@@ -243,8 +245,9 @@ def get_mask_info():
         else:
           v_over_n_html = "<font color='%s'><b>%.1f </b></font>" %(gui_green,v_over_n)
     d['v_over_n'] = v_over_n_html
-
-    content = '%s <a target="Please enter the contents that are present in this void." href="spy.add_mask_content(%s,content)">(Edit) </a>' %(content_disp, ":".join(multi_idx))
+    d['content_disp'] = content_disp
+    d['multi_idx'] = ":".join(multi_idx)
+    content = get_template('mask_content_with_edit', path=template_path, force=debug) %d
     details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' %":".join(multi_idx)
     d['content'] = content
     d['details'] = details
@@ -317,13 +320,19 @@ def get_mask_info():
     update_sqf_file(current_sNum, '_%s_special_details' %base)
 
   d['mask_special_details']= mask_special_details
+  d['mask_special_details_vn']= mask_special_details_vn
+  OV.SetVar(mask_special_details_vn, mask_special_details)
 
   if add_to_formula:
     t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
-    
-  #change_based_on_button_states()
-  return t
+
+  import OlexVFS
+  fn = '%s_masking_info.htm'%OV.ModelSrc()
+  OlexVFS.write_to_olex(fn, t)
+  #return t
+  return fn
+
 OV.registerFunction(get_mask_info, False, 'gui.tools')
 
 def get_moieties_from_list():
@@ -510,9 +519,7 @@ def edit_mask_special_details(txt,base,sNum):
     olx.cif_model[current_sNum]['_%s_special_details' %base] = user_value
     model_src = OV.ModelSrc()
     update_sqf_file(current_sNum, '_%s_special_details' %base)
-    #update_metacif(sNum, get_sqf_name())
     olx.html.Update()
-#    change_based_on_button_states()
 
 OV.registerFunction(edit_mask_special_details)
 
