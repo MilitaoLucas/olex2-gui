@@ -459,7 +459,12 @@ class RunRefinementPrg(RunPrg):
     try:
       use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
       if use_aspherical == True:
-        olex.m('spy.NoSpherA2.launch()')
+        try:
+          olex.m('spy.NoSpherA2.launch()')
+        except NameError as error:
+          print "Error during NoSpherA2: ",error
+          RunRefinementPrg.running = None
+          return False
       self.startRun()
       try:
         self.setupRefine()
