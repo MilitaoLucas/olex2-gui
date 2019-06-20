@@ -60,8 +60,9 @@ def get_mask_info():
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
   d['based_on'] =  based_on
   d['based_on_display'] = based_on_display
-  
-  
+  d['row_begin'] = get_template('row_begin', path=template_path, force=debug)%d
+  d['row_end'] = get_template('row_end', path=template_path, force=debug)%d
+    
   is_CIF = (olx.IsFileType('cif') == 'true')
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
@@ -257,7 +258,6 @@ def get_mask_info():
     d['volume_disp'] = volume / f
     d['e_accounted_for_raw'] = electrons_accounted_for
     t += get_template('mask_output_table_row_rp', path=template_path, force=debug) %d
-  t += "</table>"
   t += get_template('mask_output_based_on', path=template_path, force=debug) %d
 
   #-- FINAL BLOCK ###############
@@ -326,6 +326,8 @@ def get_mask_info():
   if add_to_formula:
     t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
+  t += get_template('mask_output_table_end', path=template_path, force=debug)%d
+  
 
   import OlexVFS
   fn = '%s_masking_info.htm'%OV.ModelSrc()

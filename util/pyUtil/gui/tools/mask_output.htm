@@ -1,244 +1,250 @@
 t:mask_output_table_begin{
 <body link="$GetVar(HtmlLinkColour)" bgcolor="%(table_bg)s">
-<font color="$GetVar(HtmlFontColour)" size="$GetVar(HtmlGuiFontSize)" face="$GetVar(HtmlFontName)">
-<table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
+  <font color="$GetVar(HtmlFontColour)" size="$GetVar(HtmlGuiFontSize)" face="$GetVar(HtmlFontName)">
+  <table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
 }
 
+t:mask_output_table_end{
+  </table>
+</body>
+}
+
+
 t:mask_output_table_header_rp{
-<tr width='100%%'  bgcolor='%(table_bg)s'>
-    <td align='center' width='5%%'>
-       <b>&#35;</b>
-    </td>
-    <td align='center' valign='middle' width='10%%'>
-       <b>V(A<sup>3 </sup>) </b>
-    </td>
-    <td align='center' valign='middle' width='10%%'>
-       <b>e<sup>-</sup> </b>
-    </td>
-    <td align='center' valign='middle' width='10%%'>
-       <b>V/e<sup>-</sup> </b>
-    </td>
-    <td align='center' width='10%%'>
-       <b>V/at. <sup>&nbsp;</sup></b>
-    </td>
-    <td align='center' width='36%%'>
-       <b><sup>&nbsp;</sup>Content/%(based_on_display)s<sup>&nbsp;</sup></b>
-    </td>
-    <td align='center' width='10%%'>
-       <b>e<sup>-</sup></b>
-    </td>
-    <td align='center' width='7%%'>
-       <b>m<sup>&nbsp;</sup></b>
-    </td>
-</tr>}
+    <tr width='100%%' bgcolor='%(table_bg)s'>
+      <td align='center' width='5%%'>
+         <b>&#35;</b>
+      </td>
+      <td align='center' valign='middle' width='10%%'>
+         <b>V(A<sup>3 </sup>) </b>
+      </td>
+      <td align='center' valign='middle' width='10%%'>
+         <b>e<sup>-</sup> </b>
+      </td>
+      <td align='center' valign='middle' width='10%%'>
+         <b>V/e<sup>-</sup> </b>
+      </td>
+      <td align='center' width='10%%'>
+         <b>V/at. <sup>&nbsp;</sup></b>
+      </td>
+      <td align='center' width='36%%'>
+         <b><sup>&nbsp;</sup>Content/%(based_on_display)s<sup>&nbsp;</sup></b>
+      </td>
+      <td align='center' width='10%%'>
+         <b>e<sup>-</sup></b>
+      </td>
+      <td align='center' width='7%%'>
+         <b>m<sup>&nbsp;</sup></b>
+      </td>
+    </tr>
+}
 
 
 t:mask_output_table_row_rp{
-<tr width='100%%' bgcolor='%(table_bg)s'>
-    <td align='center'>
-       <b>%(number)s </b>
-    </td>
-    <td align='center'>
-       %(volume_disp).0f
-    </td>
-    <td align='center' bgcolor='%(electron_bg)s'>
-       %(electrons_disp).0f
-    </td>
-    <td align='center'>
-       %(v_over_e)s
-    </td>
-    <td align='center'>
-       %(v_over_n)s
-    </td>
-    <td align='center'>
-       %(content)s
-    </td>
-    <td align='center'>
-       <font color='%(electron_bg)s'><b>%(e_accounted_for_display)s</b></font>
-    </td>
-    <td align='center'>
-       %(multiplicity)s 
-    </td>
-</tr>}
+    <tr width='100%%' bgcolor='%(table_bg)s'>
+      <td align='center'>
+         <b>%(number)s </b>
+      </td>
+      <td align='center'>
+         %(volume_disp).0f
+      </td>
+      <td align='center' bgcolor='%(electron_bg)s'>
+         %(electrons_disp).0f
+      </td>
+      <td align='center'>
+         %(v_over_e)s
+      </td>
+      <td align='center'>
+         %(v_over_n)s
+      </td>
+      <td align='center'>
+         %(content)s
+      </td>
+      <td align='center'>
+         <font color='%(electron_bg)s'><b>%(e_accounted_for_display)s</b></font>
+      </td>
+      <td align='center'>
+         %(multiplicity)s 
+      </td>
+    </tr>
+}
+
+
+t:row_begin{
+<tr bgcolor='%(table_bg)s'><td colspan='8'>
+}
+
+t:row_end{
+</td></tr>
+}
 
 t:mask_output_based_on{
+%(row_begin)s
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1">
   <tr align='right'>
     <td>
       All values above are calculated based on the <b>%(based_on_display)s </b>
     </td>
-
-
-  <td width=8%%>
-    <input
-      type="button"
-      width="100%%"
-      name="BASE_ON_CELL"
-      bgcolor="spy.status_bg('user.masks.based_on','Cell')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      value="Cell"
-      onclick="spy.SetParam('user.masks.based_on',Cell)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
-      custom="#custom"
-    >
-  </td>
-
-  <td width=8%%>
-    <input
-      type="button"
-      width="100%%"
-      name="BASE_ON_FU"
-      bgcolor="spy.status_bg('user.masks.based_on','FU')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      value="FU"
-      onclick="spy.SetParam('user.masks.based_on',FU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
-      custom="#custom"
-    >
-  </td>
-
-  <td width=8%%>
-    <input
-      type="button"
-      width="100%%"
-      name="BASE_ON_ASU"
-      bgcolor="spy.status_bg('user.masks.based_on','ASU')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      value="ASU"
-      onclick="spy.SetParam('user.masks.based_on',ASU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
-      custom="#custom"
-    >
-  </td>
-
-
+    <td width=8%%>
+      <input
+        type="button"
+        width="100%%"
+        name="BASE_ON_CELL"
+        bgcolor="spy.status_bg('user.masks.based_on','Cell')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        value="Cell"
+        onclick="spy.SetParam('user.masks.based_on',Cell)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        custom="#custom"
+      >
+    </td>
+    <td width=8%%>
+      <input
+        type="button"
+        width="100%%"
+        name="BASE_ON_FU"
+        bgcolor="spy.status_bg('user.masks.based_on','FU')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        value="FU"
+        onclick="spy.SetParam('user.masks.based_on',FU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        custom="#custom"
+      >
+    </td>
+    <td width=8%%>
+      <input
+        type="button"
+        width="100%%"
+        name="BASE_ON_ASU"
+        bgcolor="spy.status_bg('user.masks.based_on','ASU')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        value="ASU"
+        onclick="spy.SetParam('user.masks.based_on',ASU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        custom="#custom"
+      >
+    </td>
   </tr>
 </table>
+%(row_end)s
 }
 
 t:mask_output_end_rp{
-  <table>
+%(row_begin)s
+<table>
   <tr>
-
-  <td width=20%% align='left'>
-    <input
-      type="button"
-      name="ADD_TO_MASK_FORMULA"
-      value="Add to Formula"
-      bgcolor="GetVar('linkButton.bgcolor')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>spy.SetParam(snum.masks.user_sum_formula, '%(suggested_sum)s')>>html.Update()"
-      custom="#custom"
-    >
-  </td>
-  <td width=30%%>
-      <b>%(add_to_formula)s</b>
-  </td>
-
-  <td width=50%%>
-      <b>%(formula)s </b>
-  </td>
-
-
+    <td width='10%%' align='left'>
+      <input
+        type="button"
+        name="ADD_TO_MASK_FORMULA"
+        value="Formula +"
+        bgcolor="GetVar('linkButton.bgcolor')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>spy.SetParam(snum.masks.user_sum_formula, '%(suggested_sum)s')>>html.Update()"
+        custom="#custom"
+      >
+    </td>
+    <td width=45%%>
+        <b>%(add_to_formula)s</b>
+    </td>
+    <td width=45%%>
+        <b>%(formula)s </b>
+    </td>
+  </tr>
   <tr>
-
-  <td width=20%%>
-    <input
-      type="button"
-      name="ADD_TO_MASK_MOIETY"
-      bgcolor="GetVar('linkButton.bgcolor')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      value="Add to Moiety"
-      onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update('mask_info')"
-      custom="#custom"
-    >
-  </td>
-  <td width=20%%>
-      <b>%(add_to_moiety)s</b>
-  </td>
-
-  <td width=60%%>
-    <input
-      type="button"
-      name="MASK_MOIETY_EDIT"
-      bgcolor="GetVar('linkButton.bgcolor')"
-      value="%(moiety)s"
-      onclick="spy.EditCifInfo()"
-      width="100%%"
-      custom="#custom"
-    >
-  </td>
-
-
-</tr>
-  </table>
+    <td width=10%%>
+      <input
+        type="button"
+        name="ADD_TO_MASK_MOIETY"
+        bgcolor="GetVar('linkButton.bgcolor')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        value="Moiety +"
+        onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update('mask_info')"
+        custom="#custom"
+      >
+    </td>
+    <td width=45%%>
+        <b>%(add_to_moiety)s</b>
+    </td>
+    <td width=45%%>
+      <input
+        type="button"
+        name="MASK_MOIETY_EDIT"
+        bgcolor="GetVar('linkButton.bgcolor')"
+        value="Manually Edit"
+        onclick="spy.EditCifInfo()"
+        width="100%%"
+        custom="#custom"
+      >
+    </td>
+  </tr>
+</table>
+%(row_end)s
 }
 
 
 t:_mask_output_end_rp{
-  <table>
+%(row_begin)s
+<table>
   <tr>
-
-  <td width=20%%>
-   <b>Sum Formula</b>
-  </td>
-
-  <td width=80%%>
+    <td width=20%%>
+      <b>Sum Formula</b>
+    </td>
+    <td width=80%%>
       <b>%(formula)s </b>
-  </td>
-
-
-  <tr>
-  <td width=20%%>
-   <b>Moiety</b>
-  </td>
-  
-  <td width=80%%>
+    </td>
+    <td width=20%%>
+     <b>Moiety</b>
+    </td>
+    <td width=80%%>
       <b>%(moiety)s</b>
-  </td>
-
-</tr>
-  </table>
-</body>  
+    </td>
+  </tr>
+</table>
+%(row_end)s
 }
 
 t:mask_content_with_edit{
-<table cellpadding='0' cellspacing='0' >
-<tr>
-
-<td width='20%%'>
-    <input
-      type="button"
-      height="math.eval(GetVar('HtmlComboHeight')*0.8)"
-      name="EDIT_CONTENTS"
-      width="100%%"
-      value="Edit"
-      onclick="spy.add_mask_content(%(multi_idx)s,content)"
-      custom="#custom"
-    >
-
-<td width='80%%' align='center'>
-%(content_disp)s 
-<!--<a href="spy.add_mask_content(%(multi_idx)s,content)"><zimg border="0" src="toolbar-edit.png"></a>-->
-</td></tr></table>
+<table cellpadding='0' cellspacing='0' width='100%%'>
+  <tr>
+    <td width='15%%'>
+      <input
+        type="button"
+        height="math.eval(GetVar('HtmlComboHeight')*0.8)"
+        name="EDIT_CONTENTS"
+        width="100%%"
+        value="Edit"
+        onclick="spy.add_mask_content(%(multi_idx)s,content)"
+        custom="#custom"
+      >
+    </td> 
+    <td width='85%%' align='center'>
+      %(content_disp)s 
+    </td>
+  </tr>
+</table>
 }
 
 t:mask_special_details{
-  <table width=100%%>
+%(row_begin)s
+<table width=100%%>
   <tr>
-  <td width=8%%>
-    <input
-      type="button"
-      height="math.eval(GetVar('HtmlComboHeight')*2)"
-      name="EDIT_MASK_SPECIAL_DETAILS"
-      value="Edit"
-      bgcolor="GetVar('linkButton.bgcolor')"
-      fgcolor="GetVar('linkButton.fgcolor')"
-      onclick="spy.edit_mask_special_details('$GetVar(%(mask_special_details_vn)s)',%(base)s,%(current_sNum)s)"
-      custom="#custom"
-    >
-  </td>
-  <td width=92%%>
-      %(mask_special_details)s
-  </td></tr>
-  </table>}
+    <td width=8%%>
+      <input
+        type="button"
+        height="math.eval(GetVar('HtmlComboHeight')*2)"
+        name="EDIT_MASK_SPECIAL_DETAILS"
+        value="Edit"
+        bgcolor="GetVar('linkButton.bgcolor')"
+        fgcolor="GetVar('linkButton.fgcolor')"
+        onclick="spy.edit_mask_special_details('$GetVar(%(mask_special_details_vn)s)',%(base)s,%(current_sNum)s)"
+        custom="#custom"
+      >
+    </td>
+    <td width=92%%>
+        %(mask_special_details)s
+    </td>
+  </tr>
+</table>
+%(row_end)s
+}
   
 t:mask_special_detail_default{
 "A solvent mask was calculated and %(total_void_electrons).0f electrons were
