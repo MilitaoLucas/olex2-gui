@@ -736,19 +736,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     hklf.write("REM TWIN %s"%format_twin_string_from_law(twin_law))
     hklf.close()
     
-def format_twin_string_from_law(twin_law):
-  twin_str_l = []
-  for row in twin_law:
-    for ele in row:
-      ele = str(ele)
-      if ele == "0.0":
-        ele = "0"
-      elif ele == "-1.0":
-        ele = "-1"
-      elif ele == "1.0":
-        ele = "1"
-      twin_str_l.append("%s" %ele)
-  return " ".join(twin_str_l)
 
   def do_rounding(self,twin_laws):
     for twin_law in twin_laws:
@@ -801,7 +788,22 @@ def format_twin_string_from_law(twin_law):
     return non_duplicate_twin_laws
     
     
-        
+      
+    
+def format_twin_string_from_law(twin_law):
+  twin_str_l = []
+  for row in twin_law:
+    for ele in row:
+      ele = str(ele)
+      if ele == "0.0":
+        ele = "0"
+      elif ele == "-1.0":
+        ele = "-1"
+      elif ele == "1.0":
+        ele = "1"
+      twin_str_l.append("%s" %ele)
+  return " ".join(twin_str_l)
+
 
 def on_twin_image_click(run_number):
   global twin_laws_d
