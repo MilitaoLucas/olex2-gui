@@ -101,12 +101,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     
     rank=numpy.argsort(leastSquare)[::-1]
     hkl_sel = numpy.copy(hkl[rank[:hkl_sel_num],:])
-    #twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
     if not personal:
       twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
     else:
       twin_laws=self.find_personal_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
+    ordered_twins=self.purge_duplicates(ordered_twins)
     top_twins=ordered_twins[:10]
     lawcount=0
     for i, twin_law in enumerate(top_twins):
@@ -416,6 +416,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
+      twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
@@ -448,6 +449,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
+      twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
@@ -747,6 +749,59 @@ def format_twin_string_from_law(twin_law):
         ele = "1"
       twin_str_l.append("%s" %ele)
   return " ".join(twin_str_l)
+
+  def do_rounding(self,twin_laws):
+    for twin_law in twin_laws:
+      matrix=twin_law.hkl_rotation
+      for i in numpy.arange(0,3):
+        for j in numpy.arange(0,3):
+          item=matrix[i,j]
+          if (abs(1.0-item)<0.01):
+            matrix[i,j]=1.0
+          elif (abs(-1.0-item)<0.01):
+            matrix[i,j]=-1.0
+          elif (abs(0.0-item)<0.01):
+            matrix[i,j]=0.0
+          elif (abs(0.5-item)<0.01):
+            matrix[i,j]=0.5
+      twin_law.hkl_rotation=matrix
+    return twin_laws
+  
+  def purge_duplicates(self, twin_laws):
+    non_duplicate_twin_laws=[]
+    law_amount=len(twin_laws)
+    fo2 = self.reflections.f_sq_obs_filtered
+    symmetry_ops=fo2.crystal_symmetry().space_group().all_ops()#list of symmetries to be retrieved with .as_double_array() and mapped to actual 3x3 matrices. 
+    #However, they have 3 more numbers than expected - the last 3 are the +- for translations I think. Sadly, due to inversion symmetry, there are twice as many matrices as actual symmetry equivalents we need to care about.
+    symmetry_matrices=[]
+    for matrix in symmetry_ops:
+      symmetry_matrices+=[numpy.reshape(matrix.as_double_array()[0:9], (3,3))]
+    #assumption - only the first half are unique, the rest represent inversion symmetries, which are inherantly discarded by only taking positive axes. 
+    #additionally, the first is the identity, so is also discarded 
+    num_matrix=len(symmetry_matrices)
+    symmetry_matrices=symmetry_matrices[1:int(num_matrix/2)]
+    for i, twin_law in enumerate(twin_laws):
+      if i==0:
+        non_duplicate_twin_laws+=[twin_law]
+        continue
+      duplicate=False
+      for matrix in symmetry_matrices:
+        rotated_twin=numpy.dot(matrix,twin_law.hkl_rotation)
+        for j in range(0,i):
+          if numpy.allclose(rotated_twin, twin_laws[j].hkl_rotation):
+            duplicate=True
+          if duplicate:
+            break;
+        if duplicate:
+          break;  
+      if not duplicate:
+        non_duplicate_twin_laws+=[twin_law]
+          
+        
+    return non_duplicate_twin_laws
+    
+    
+        
 
 def on_twin_image_click(run_number):
   global twin_laws_d
