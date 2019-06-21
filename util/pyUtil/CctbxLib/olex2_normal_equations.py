@@ -66,6 +66,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     shifts = self.get_shifts()
     max_shift_esd = 0
     max_shift_esd_item = "n/a"
+    self.max_shift_esd = None
+    self.max_shift_esd_item = None
     try:
       max_shift_idx = 0
       for i, s in enumerate(shifts):
@@ -73,6 +75,9 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           max_shift_idx = i
       max_shift_esd = shifts[max_shift_idx]
       max_shift_esd_item = self.reparametrisation.component_annotations[max_shift_idx]
+      self.max_shift_esd = max_shift_esd
+      self.max_shift_esd_item = max_shift_esd_item
+      
     except Exception as s:
       print s
 
@@ -117,6 +122,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def max_shift_u(self):
     return self.iter_shifts_u(max_items=1).next()
+
+  def max_shift_esd(self):
+    self.get_shifts()
+    
+    return self.iter_shifts_u(max_items=1).next()
+
 
   def iter_shifts_sites(self, max_items=None):
     scatterers = self.xray_structure.scatterers()
