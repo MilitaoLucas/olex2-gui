@@ -704,7 +704,7 @@ class RunRefinementPrg(RunPrg):
     if OV.HKLSrc():
       fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
     method = "smbtx"
-    if "_sq" in fab_path:
+    if "_sqeeze" in fab_path:
       method="SQUEEZE"
     f_mask, f_model = None, None
     # backward compatibility - just in case
@@ -787,7 +787,6 @@ def AnalyseRefinementSource():
       print('HKL file is not in the CIF')
       return False
   return True
-
 
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)

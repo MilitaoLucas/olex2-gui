@@ -355,7 +355,7 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
 
   if debug:
-    print "--- Making Element Formulae"
+    #print "--- Making Element Formulae"
     t1 = time.time()
 
   from PilTools import TI
@@ -699,12 +699,14 @@ def makeFormulaForsNumInfo():
   >''' %d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
-  OV.write_to_olex('snumformula.htm', update)
+  fn = "%s_snumformula.htm" %OV.ModelSrc()
+  OV.write_to_olex(fn, update)
   if debug:
     pass
     #print "Formula sNum (2): %.5f" %(time.time() - t1)
+  return "<!-- #include snumformula %s;1 -->" %fn
+  #return fn
 
-  return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
 
 
