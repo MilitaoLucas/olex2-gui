@@ -121,9 +121,9 @@ def get_mask_info():
   total_void_electrons = 0
   total_void_accounted_for_electrons = 0
   total_void_no = 0
-  multi_idx = []
   f = get_adjust_for_base_factor()
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
+    multi_idx = []
     electrons_accounted_for = 0
     non_h_accounted_for = 0
     volume = float(volume)
