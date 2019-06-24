@@ -1,4 +1,18 @@
 t:mask_output_table_begin{
+<!-- #include header gui\blocks\tool-table-header.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_PROGRAMS';help_ext=Solvent-Masking-info;1 -->
+<td>
+  <table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
+}
+
+t:mask_output_table_end{
+  </table>
+</td>
+</tr>
+</table>
+}
+
+t:mask_output_html_table_begin{
 <body link="$GetVar(HtmlLinkColour)" bgcolor="%(table_bg)s">
   <font color="$GetVar(HtmlFontColour)" size="$GetVar(HtmlGuiFontSize)" face="$GetVar(HtmlFontName)">
 
@@ -8,7 +22,7 @@ t:mask_output_table_begin{
   <table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
 }
 
-t:mask_output_table_end{
+t:mask_output_html_table_end{
   </table>
 </td>
 </tr>
@@ -101,7 +115,7 @@ t:mask_output_based_on{
         bgcolor="spy.status_bg('user.masks.based_on','Cell')"
         fgcolor="GetVar('linkButton.fgcolor')"
         value="Cell"
-        onclick="spy.SetParam('user.masks.based_on',Cell)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        onclick="spy.SetParam('user.masks.based_on',Cell)>>spy.gui.tools.get_mask_info()>>html.Update()"
         custom="#custom"
       >
     </td>
@@ -113,7 +127,7 @@ t:mask_output_based_on{
         bgcolor="spy.status_bg('user.masks.based_on','FU')"
         fgcolor="GetVar('linkButton.fgcolor')"
         value="FU"
-        onclick="spy.SetParam('user.masks.based_on',FU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        onclick="spy.SetParam('user.masks.based_on',FU)>>spy.gui.tools.get_mask_info()>>html.Update()"
         custom="#custom"
       >
     </td>
@@ -125,7 +139,7 @@ t:mask_output_based_on{
         bgcolor="spy.status_bg('user.masks.based_on','ASU')"
         fgcolor="GetVar('linkButton.fgcolor')"
         value="ASU"
-        onclick="spy.SetParam('user.masks.based_on',ASU)>>spy.gui.tools.get_mask_info()>>html.Update('mask_info')"
+        onclick="spy.SetParam('user.masks.based_on',ASU)>>spy.gui.tools.get_mask_info()>>html.Update()"
         custom="#custom"
       >
     </td>
