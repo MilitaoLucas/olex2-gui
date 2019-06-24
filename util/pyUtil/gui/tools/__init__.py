@@ -1390,6 +1390,20 @@ OV.registerFunction(resize_pdf,False,'gui.tools')
 gett = TemplateProvider.get_template
 
 
+def make_input_html_tool(scope, tool):
+  fn = "%s_%s_tool.htm" %(scope, tool)
+  if OlexVFS.exists(fn) and not debug:
+    return fn
+  name = "%s_%s" %(scope.upper(), tool.upper())
+  d = {'scope':scope,
+       'tool':tool,
+       'image': tool,
+       'name': name,
+       'onclick':"",}
+  OlexVFS.write_to_olex(fn, gett('input_html_tool')%d)
+  return fn
+OV.registerFunction(make_input_html_tool,False,'gui.tools')
+
 
 def scrub(cmd):
   log = gui.tools.LogListen()
