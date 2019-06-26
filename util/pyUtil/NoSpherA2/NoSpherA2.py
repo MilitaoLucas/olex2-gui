@@ -958,9 +958,10 @@ def combine_sfs(force=False):
 
 OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
-def export_parts_as_xyx():
-  import olexex
-  parts = set(olexex.OlexRefinementModel().disorder_parts())
+def deal_with_parts():
+  parts = OV.ListParts()
+  if not parts:
+    return
   for part in parts:
     if part == 0:
       continue
@@ -968,7 +969,7 @@ def export_parts_as_xyx():
     fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
     olx.File(fn)
   olex.m("showp")
-OV.registerFunction(export_parts_as_xyx,True,'NoSpherA2')
+OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
 def check_for_matching_fcf():
   dir = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
