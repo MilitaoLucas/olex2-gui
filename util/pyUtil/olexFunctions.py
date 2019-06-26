@@ -778,6 +778,14 @@ class OlexFunctions(inheritFunctions):
 
   def HasGUI(self):
     return HasGUI
+  
+  def ListParts(self):
+    import olexex
+    parts = set(olexex.OlexRefinementModel().disorder_parts())
+    if len(parts) == 1:
+      return None
+    else:
+      return parts
 
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)
