@@ -83,6 +83,7 @@ class NoSpherA2(PT):
     else:
       self.basis_list_str = None
       self.basis_dir = None
+    OV.SetVar('have_valid_nosphera2_fcf', False)
 
   def setup_har_executables(self):
     self.exe = None
@@ -157,7 +158,6 @@ class NoSpherA2(PT):
       self.cpu_list_str = '1'
 
   def launch(self):
-
     self.jobs_dir = os.path.join(olx.FilePath(),"olex2","Wfn_job")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
@@ -200,7 +200,6 @@ class NoSpherA2(PT):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-
 
     wfn_object = wfn_Job(self,olx.FileName())
     software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
@@ -959,21 +958,35 @@ def combine_sfs(force=False):
 
 OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
-def check_fcf():
+def export_parts_as_xyx():
+  import olexex
+  parts = set(olexex.OlexRefinementModel().disorder_parts())
+  for part in parts:
+    if part == 0:
+      continue
+    olex.m("showp 0 %s" %part)
+    fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
+    olx.File(fn)
+  olex.m("showp")
+OV.registerFunction(export_parts_as_xyx,True,'NoSpherA2')
+
+def check_for_matching_fcf():
   dir = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
   name = OV.GetParam('snum.refinement.cctbx.nsff.name')
   fcf = os.path.join(dir,name + '.fcf')
   res = os.path.join(dir,name + '.res')
   if os.path.exists(fcf) and os.path.exists(fcf):
-    if "%0.f" %os.path.getmtime(fcf) == "%0.f" %os.path.getmtime(res):
+    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
+      OV.SetVar('have_valid_nosphera2_fcf', True)
       return True
     else:
       print ("Fcf seems to be older than results!")
+      OV.SetVar('have_valid_nosphera2_fcf', False)
       return False
   else: 
     return False
 
-OV.registerFunction(check_fcf,True,'NoSpherA2')
+OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
