@@ -3,6 +3,8 @@ import re
 from fractions import Fraction
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import OlexVFS
+
 try:
   from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +36,8 @@ pt = PT.PeriodicTable()
 def get_mask_info():
   global mask_info_has_updated
   import gui
+  
+  output_fn = '%s_masking_info.htm'%OV.ModelSrc()
 
   get_template = gui.tools.TemplateProvider.get_template
   template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
@@ -56,19 +60,25 @@ def get_mask_info():
     base = "smtbx_masks"
   
   d = {}
-#  d['table_bg'] =  OV.GetParam('gui.html.table_firstcol_colour')
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
   d['based_on'] =  based_on
   d['based_on_display'] = based_on_display
   d['row_begin'] = get_template('row_begin', path=template_path, force=debug)%d
   d['row_end'] = get_template('row_end', path=template_path, force=debug)%d
+  d['table_begin'] = get_template('table_begin', path=template_path, force=debug)%d
+  d["note"] = "No Masking Information"
+  d["note_bg"] = OV.GetVar('HtmlHighlightCOlour')
+
     
   is_CIF = (olx.IsFileType('cif') == 'true')
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
   if numbers == [u'n/a']:
-    return "no mask info"
+    d["note_details"] = ": No Voids Found"
+    t = get_template('masking_note', path=template_path, force=debug)%d
+    OlexVFS.write_to_olex(output_fn, t)
+    return output_fn
 
   if not numbers:
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
@@ -76,9 +86,15 @@ def get_mask_info():
       if is_CIF:
         numbers = olx.Cif('_%s_void_nr' %base).split(",")
         if not numbers:
-          return "No mask information"
+          d["note_details"] = ": No Voids in CIF"
+          t = get_template('masking_note', path=template_path, force=debug)%d
+          OlexVFS.write_to_olex(output_fn, t)
+          return output_fn
       else:
-        return "No mask information"
+        d["note_details"] = "!"
+        t = get_template('masking_note', path=template_path, force=debug)%d
+        OlexVFS.write_to_olex(output_fn, t)
+        return output_fn
 
   mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
@@ -189,7 +205,9 @@ def get_mask_info():
     content_disp_l = []
     
     for entry in _:
-      sum_content.append((number_of_symm_op, entry))
+      if not entry or entry == "?":
+        continue
+      sum_content.append((multiplicity, entry))
       entity, user_number = split_entity(entry)
       user_number = float(user_number)
       ent = moieties.get(entity.lower(), entity)
@@ -217,6 +235,7 @@ def get_mask_info():
     eaf = electrons_accounted_for
     eafd= "%.0f" %(electrons_accounted_for / f)
     electron_bg = gui_red
+    electron_fg = "#eeeeee"
     if eaf - (0.1 * eaf) < float(electron) < eaf + (0.1 * eaf):
       electron_bg = gui_green
     elif eaf - (0.2 * eaf) < float(electron) < eaf + (0.2 * eaf):
@@ -254,6 +273,7 @@ def get_mask_info():
     d['details'] = details
     d['e_accounted_for_display'] = e_accounted_for_display
     d['electron_bg'] = electron_bg
+    d['electron_fg'] = electron_fg
     d['electrons_disp'] = electron / f
     d['volume_disp'] = volume / f
     d['e_accounted_for_raw'] = electrons_accounted_for
@@ -270,6 +290,7 @@ def get_mask_info():
     entity = entry[1]
     if "?" in entity:
       continue
+    multiplicity = float(entry[0])
     entity, multi = split_entity(entity)
     multi = float(multi) 
     ent = moieties.get(entity.lower(), entity)
@@ -282,8 +303,8 @@ def get_mask_info():
     except:
       total_electrons_accounted_for += 0
     f = number_of_symm_op * Zprime  
-    total_formula = _add_formula(total_formula, ent, 1)
     add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
+    total_formula = _add_formula(total_formula, add_to_formula, 1)
     add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
   add_to_moiety = add_to_moiety.rstrip(", ")
@@ -327,13 +348,8 @@ def get_mask_info():
     t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
   t += get_template('mask_output_table_end', path=template_path, force=debug)%d
-  
-
-  import OlexVFS
-  fn = '%s_masking_info.htm'%OV.ModelSrc()
-  OlexVFS.write_to_olex(fn, t)
-  #return t
-  return fn
+  OlexVFS.write_to_olex(output_fn, t)
+  return output_fn
 
 OV.registerFunction(get_mask_info, False, 'gui.tools')
 

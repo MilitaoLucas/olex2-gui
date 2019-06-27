@@ -102,7 +102,10 @@ class RunPrg(ArgumentParser):
 
   def run(self):
     import time
-
+    import gui
+      
+    gui.set_notification(OV.GetVar('gui_notification'))
+    OV.SetVar('gui_notification', "")
     if RunPrg.running:
       print("Already running. Please wait...")
       return
@@ -556,6 +559,8 @@ class RunRefinementPrg(RunPrg):
     if timer:
       print "-- self.method.post_refinement(self): %.3f" %(time.time()-t)
 
+    delete_stale_fcf()
+
     if timer:
       t = time.time()
     self.post_prg_html()
@@ -792,3 +797,16 @@ OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)
 
+def delete_stale_fcf():
+  fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
+  res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
+  if os.path.exists(fcf) and os.path.exists(fcf):
+    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
+      return True
+    else:
+      print ("Deleting stale fcf: %s" %fcf)
+      os.remove(fcf)
+      if OV.HasGUI():
+        import gui
+        gui.set_notification("Stale<font color=$GetVar(gui.red)><b>fcf file</b></font>has been deleted.")
+      

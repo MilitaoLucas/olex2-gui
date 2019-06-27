@@ -285,6 +285,12 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Program %s could not be set" %(program)
       sys.stderr.formatExceptionInfo()
 
+  def have_nsff(self):
+    retVal = False
+    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
+      retVal = True
+    return retVal
+
   def SetMaxCycles(self, max_cycles):
     try:
       import programSettings

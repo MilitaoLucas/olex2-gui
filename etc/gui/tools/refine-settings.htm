@@ -3,9 +3,18 @@ run("SetVar(refinement_output, strcat(FileName(),_refinement_output.html))")
 $-
 <!-- #includeif fs.Exists(GetVar(refinement_output)) refinement_output GetVar(refinement_output);1; -->
 
+<!-- #ignoreif IsFileType('ires')
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+$spy.gui.cif.check_for_embedded_hkl()
+</table>
+#ignoreif -->
 
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_PROGRAMS';help_ext=Refinement-Program;1 -->
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
     <td width='12%'>
       <b>Program </b>
     </td>
@@ -51,7 +60,9 @@ $-
       $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_REFLECTIONS';help_ext=Set-Reflection-File;1 -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
     <td ALIGN='left' width='12%'>
       <b>hkl file </b>
     </td>
@@ -67,7 +78,10 @@ $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_EXTINCTION_AND_ACTA';help_ext=Weights,_Extinction_and_ACTA;1 -->
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
     <td width='12%'>
       <b>Weight </b>
@@ -119,14 +133,11 @@ $-
       $-
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</td></tr></table>
-
- 
-<br>
 
 <!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_MASKS';help_ext=refinement-masks;1 -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
     
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
@@ -188,11 +199,8 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</td></tr></table>
 
-<!--<input type='html' width='100%' height='10' value='spy.gui.tools.get_mask_info()' vscroll='False', hscroll='True' name='mask_info' />-->
-
-<!-- #include mask_info spy.gui.tools.get_mask_info() ;1; -->
+<!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
 
 #ignoreif -->
 
@@ -207,13 +215,13 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
-<br>
+
 
 <!-- ========================================== NOSPHERA2 INTERFACE BEGIN == -->
-<!-- #ignoreif spy.GetParam('user.refinement.hide_nsff')
-
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_MASKS';help_ext=NoSpherA2;1 -->
+<!-- #ignoreif not spy.tools.show_nsff()
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=USE_ASPHERICAL@refine",
@@ -232,17 +240,10 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 </td></tr></table>
 #ignoreif -->
 <!-- ========================================== NOSPHERA2 INTERFACE END ==== -->
-
-<br>
-
-<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=4;onclick=;onclick=;2; -->
-<!-- #includeif fs.Exists('refinement_image.htm') refinement_image refinement_image.htm;1; -->
 </table>
 
-
-<!-- #ignoreif IsFileType('ires')
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-$spy.gui.cif.check_for_embedded_hkl()
+<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;onclick=;2; -->
 </table>
-#ignoreif -->
+
+
