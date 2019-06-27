@@ -1,13 +1,22 @@
 t:mask_output_table_begin{
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINEMENT_PROGRAMS';help_ext=Solvent-Masking-info;1 -->
-<td>
+
+<tr ALIGN='left' width='100%%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; --><td>
   <table bgcolor='#ababab' border='0' cellspacing='1' cellpadding='2' width='100%%'>
 }
 
 t:mask_output_table_end{
   </table>
 </td>
+</tr>
+</table>
+}
+
+t:masking_note{
+%(table_begin)s
+<tr bgcolor="%(note_bg)s">
+  <td>%(note)s%(note_details)s</td>
 </tr>
 </table>
 }
@@ -71,7 +80,9 @@ t:mask_output_table_row_rp{
          %(volume_disp).0f
       </td>
       <td align='center' bgcolor='%(electron_bg)s'>
+        <font color='%(electron_fg)s'><b>
          %(electrons_disp).0f
+        </b></font>
       </td>
       <td align='center'>
          %(v_over_e)s
@@ -98,6 +109,10 @@ t:row_begin{
 
 t:row_end{
 </td></tr>
+}
+
+t:table_begin{
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1">
 }
 
 t:mask_output_based_on{
@@ -150,9 +165,9 @@ t:mask_output_based_on{
 
 t:mask_output_end_rp{
 %(row_begin)s
-<table>
-  <tr>
-    <td width='10%%' align='left'>
+%(table_begin)s
+  <tr >
+    <td width="10%%" align='left'>
       <input
         type="button"
         name="ADD_TO_MASK_FORMULA"
@@ -163,36 +178,36 @@ t:mask_output_end_rp{
         custom="#custom"
       >
     </td>
-    <td width=45%%>
+    <td width="35%%">
         <b>%(add_to_formula)s</b>
     </td>
-    <td width=45%%>
+    <td>
         <b>%(formula)s </b>
     </td>
   </tr>
-  <tr>
-    <td width=10%%>
+  <tr >
+    <td  align='left'>
       <input
         type="button"
         name="ADD_TO_MASK_MOIETY"
         bgcolor="GetVar('linkButton.bgcolor')"
         fgcolor="GetVar('linkButton.fgcolor')"
         value="Moiety +"
-        onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update('mask_info')"
+        onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update()"
         custom="#custom"
       >
     </td>
-    <td width=45%%>
+    <td>
         <b>%(add_to_moiety)s</b>
     </td>
-    <td width=45%%>
+    <td>
       <input
         type="button"
         name="MASK_MOIETY_EDIT"
         bgcolor="GetVar('linkButton.bgcolor')"
+        width="100%%"
         value="Manually Edit"
         onclick="spy.EditCifInfo()"
-        width="100%%"
         custom="#custom"
       >
     </td>
@@ -246,7 +261,7 @@ t:mask_content_with_edit{
 
 t:mask_special_details{
 %(row_begin)s
-<table width=100%%>
+%(table_begin)s
   <tr>
     <td width=8%%>
       <input
