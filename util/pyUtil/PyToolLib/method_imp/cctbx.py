@@ -24,7 +24,8 @@ class Method_cctbx_refinement(Method_refinement):
     use_aspherical = False
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
-      gui.set_notification("Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors")
+      html = "Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors"
+      OV.SetVar('gui_notification', html)
       use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
     else:
       self.table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
@@ -33,7 +34,8 @@ class Method_cctbx_refinement(Method_refinement):
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
       self.table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
-      gui.set_notification("Using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(self.table_file_name))
+      html = "smtbx.refine using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(self.table_file_name)
+      OV.SetVar('gui_notification', html)
       if not os.path.exists(self.table_file_name):
         self.table_file_name = None
     if self.table_file_name:
@@ -199,15 +201,13 @@ instructions {
   }
 """)
 
-
 gauss_newton_phil = phil_interface.parse("""
-name = 'Gauss-Newton'
+name = 'G-N'
   .type=str
 """)
 
-
 levenberg_marquardt_phil = phil_interface.parse("""
-name = 'Levenberg-Marquardt'
+name = 'L-M'
   .type=str
 """)
 

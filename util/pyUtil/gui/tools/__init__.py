@@ -699,7 +699,8 @@ def makeFormulaForsNumInfo():
   >''' %d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
-  fn = "%s_snumformula.htm" %OV.ModelSrc()
+  #fn = "%s_snumformula.htm" %OV.ModelSrc()
+  fn = "snumformula.htm"
   OV.write_to_olex(fn, update)
   if debug:
     pass
@@ -1435,5 +1436,14 @@ def hklf_5_to_4(filename):
   hklf4.close()
   print "done. HKLF4 base file at %s"%hklf4name
   return
-
 OV.registerFunction(hklf_5_to_4, False, 'tools')
+
+def show_nsff():
+  retVal = False
+  if OV.have_nsff():
+    retVal = True
+  return retVal
+OV.registerFunction(show_nsff, False, 'tools')
+    
+    
+

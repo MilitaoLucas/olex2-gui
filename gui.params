@@ -582,7 +582,7 @@ gui
         .type = int
       height = 19
         .type = int
-      width_adjust = 8
+      width_adjust = 7
         .type = int
       base_colour = #aaaaaa
         .type = colour
