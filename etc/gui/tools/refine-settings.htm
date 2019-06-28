@@ -5,11 +5,23 @@ $-
 
 <!-- #ignoreif IsFileType('ires')
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extract;1 -->
+<td width='12%'>
+  <b>Extract</b>
+</td>
+<td>
 $spy.gui.cif.check_for_embedded_hkl()
-</table>
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+
+<!-- ================================== -->
+<!-- HEADER_ABOVE ---- LEAVE UNTOUCHED! -->
+<!-- ================================== -->
+
 
 <tr ALIGN='left' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1 -->
@@ -146,7 +158,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
-        "bgcolor=GetVar(HtmlTableBgColour)",
+        "bgcolor=GetVar(HtmlTableRowBgColour)",
         )
       $-
 
@@ -216,7 +228,6 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
 
-
 <!-- ========================================== NOSPHERA2 INTERFACE BEGIN == -->
 <!-- #ignoreif not spy.tools.show_nsff()
 <tr ALIGN='left' width='100%'>
@@ -228,7 +239,7 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
         "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
         "label=NoSpherA2 ",
         "height=0",
-        "bgcolor=GetVar(HtmlTableBgColour)",
+        "bgcolor=GetVar(HtmlTableRowBgColour)",
         "td1=<td align='left' width="22%">",
         "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
       $-
@@ -237,9 +248,17 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 <!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</td></tr></table>
+
 #ignoreif -->
 <!-- ========================================== NOSPHERA2 INTERFACE END ==== -->
+
+
+
+
+<!-- ================================== -->
+<!-- FOOTER BELOE      LEAVE UNTOUCHED! -->
+<!-- ================================== -->
+
 </table>
 
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
