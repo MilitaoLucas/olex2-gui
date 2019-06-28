@@ -57,6 +57,8 @@ gui
     .type = colour
   orange = #ff8f00
     .type = colour
+  dark_yellow = #f5b041
+    .type = colour
   image_highlight = None
     .type = str
   GuiImages {

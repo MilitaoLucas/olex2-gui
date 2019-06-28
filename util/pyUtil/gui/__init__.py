@@ -388,8 +388,7 @@ def get_notification():
   d = {}
   if not _:
     return
-  col = '#F5B041'
-  col = OV.GetVar('HtmlHighlightCOlour')
+  col = OV.GetVar('gui.dark_yellow')
   txt = _
   if ";" in _:
     txt = _.split(";")[0]
