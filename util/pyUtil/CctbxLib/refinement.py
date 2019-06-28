@@ -61,7 +61,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
     'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
-  solvers_default_method = 'Gauss-Newton'
+  solvers_default_method = 'Levenberg-Marquardt'
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
     OlexCctbxAdapter.__init__(self)
