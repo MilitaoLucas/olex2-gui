@@ -964,7 +964,8 @@ def get_refinement_methods(prg, scope='snum'):
   p = [x.name for x in RPD.programs[prg]]
   p.sort()
   for item in p:
-    retval += "%s;" %item
+    display = RPD.programs[prg].methods[item].display
+    retval += "%s<-%s;" %(display,item)
   if scope != 'snum':
     retval = 'Auto;' + retval
   return retval

@@ -15,6 +15,10 @@ class Method(object):
     self.phil_index = phil_interface.phil_handler(phil_object)
     params = self.phil_index.params
     self.name = params.name
+    try:
+      self.display = params.display
+    except:
+      self.display = params.name
     #self.options = params.options
     self.help = '%s-help' %(self.name.lower().replace(' ', '-'))
     self.info = '%s-info' %(self.name.lower().replace(' ', '-'))
