@@ -193,6 +193,8 @@ class NoSpherA2(PT):
     combine_sfs(force=True)
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
+    olex.m('delins list')
+    olex.m('addins LIST 3')
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     olx.html.Update()
 
@@ -972,21 +974,15 @@ def deal_with_parts():
 OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
 def check_for_matching_fcf():
-  dir = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
+  p = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
   name = OV.GetParam('snum.refinement.cctbx.nsff.name')
-  fcf = os.path.join(dir,name + '.fcf')
-  res = os.path.join(dir,name + '.res')
+  fcf = os.path.join(p,name + '.fcf')
   if os.path.exists(fcf) and os.path.exists(fcf):
-    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
-      OV.SetVar('have_valid_nosphera2_fcf', True)
-      return True
-    else:
-      print ("Fcf seems to be older than results!")
-      OV.SetVar('have_valid_nosphera2_fcf', False)
-      return False
-  else: 
+    OV.SetVar('have_valid_nosphera2_fcf', True)
+    return True
+  else:
+    OV.SetVar('have_valid_nosphera2_fcf', False)
     return False
-
 OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
