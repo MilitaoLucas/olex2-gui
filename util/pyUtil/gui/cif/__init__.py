@@ -155,11 +155,12 @@ def check_for_embedded_hkl():
     return ""
   hklfile = os.path.join(olx.FilePath(), "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".hkl"))
   if os.path.exists(hklfile):
-    return ""
+    return "hkl file already exists"
   res = True
   res1 = olx.Cif('_shelx_hkl_file')
   res2 = olx.Cif('_iucr_refine_reflections_details')
-  if res1 == 'n/a' and res2 == 'n/a':
+  res3 = olx.Cif('_refln_index_h')
+  if res1 == 'n/a' and res2 == 'n/a' and res3 == 'n/a':
     res = olx.Cif('_refln', 0)
     res = False
   if res:
