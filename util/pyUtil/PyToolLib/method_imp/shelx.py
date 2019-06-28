@@ -289,7 +289,7 @@ class Method_shelxt(Method_shelx_solution):
     olex.m('addins list 4')
 
 class Method_shelx_direct_methods(Method_shelx_solution):
-
+  
   def post_solution(self, RunPrgObject):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     self.get_XS_TREF_solution_indicators(RunPrgObject)
@@ -455,6 +455,8 @@ command_line
 direct_methods_phil = phil_interface.parse("""
 name = 'Direct Methods'
   .type=str
+display = 'Direct'
+  .type=str
 atom_sites_solution=direct
   .type=str
 instructions {
@@ -519,6 +521,8 @@ instructions {
 shelxt_phil_str = phil_interface.parse("""
 name = 'Intrinsic Phasing'
   .type=str
+display = 'Intrinsic Phasing'
+  .type=str
 atom_sites_solution=dual
   .type=str
 instructions {
@@ -539,6 +543,8 @@ instructions {
 
 patterson_phil = phil_interface.parse("""
 name = 'Patterson Method'
+  .type=str
+display = 'Patterson'
   .type=str
 atom_sites_solution=heavy
   .type=str
@@ -582,6 +588,8 @@ instructions {
 #TEXP na [#] nH [0] Ek [1.5]
 texp_phil = phil_interface.parse("""
 name = 'Structure Expansion'
+  .type=str
+display = 'Structure Expansion'
   .type=str
 atom_sites_solution=heavy
   .type=str
@@ -649,7 +657,9 @@ instructions {
 """, process_includes=True)
 
 dual_space_phil = phil_interface.parse("""
-name='Dual Space'
+name = 'Dual Space'
+  .type=str
+display = 'Dual Space'
   .type=str
 atom_sites_solution=dual
   .type=str
@@ -796,6 +806,8 @@ def get_LS_phil():
   return phil_interface.parse("""
   name = 'Least Squares'
     .type=str
+  display = "L.S."
+    .type=str
   instructions {
     ls
       .caption = 'L.S.'
@@ -831,6 +843,8 @@ def get_LS_phil():
 def get_CGLS_phil():
   return phil_interface.parse("""
     name = CGLS
+      .type=str
+    display = CGLS
       .type=str
     instructions {
       cgls {

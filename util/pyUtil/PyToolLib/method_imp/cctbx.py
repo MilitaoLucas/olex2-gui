@@ -175,6 +175,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
   .type=str
+display = 'Charge Flipping'
+  .type=str
 atom_sites_solution=iterative
   .type=str
 flipping_interval=60
@@ -202,16 +204,23 @@ instructions {
 """)
 
 gauss_newton_phil = phil_interface.parse("""
-name = 'G-N'
+name = 'Gauss-Newton'
+  .type=str
+display = 'G-N'
   .type=str
 """)
 
 levenberg_marquardt_phil = phil_interface.parse("""
-name = 'L-M'
+name = 'Levenberg-Marquardt'
   .type=str
+display = 'L-M'
+  .type=str
+
 """)
 
 NSFF_phil = phil_interface.parse("""
 name = 'NSFF'
+  .type=str
+display = 'NSFF'
   .type=str
 """)
