@@ -214,6 +214,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('gui.dark_green', OV.GetParam('gui.dark_green').hexadecimal)
   OV.SetVar('gui.green_text', OV.GetParam('gui.green_text').hexadecimal)
   OV.SetVar('gui.orange', OV.GetParam('gui.orange').hexadecimal)
+  OV.SetVar('gui.dark_yellow', OV.GetParam('gui.dark_yellow').hexadecimal)
   OV.SetVar('gui.red', OV.GetParam('gui.red').hexadecimal)
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
   OV.SetVar('HtmlCheckboxWidth', OV.GetParam('gui.html.checkbox_width'))

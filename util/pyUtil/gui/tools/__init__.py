@@ -695,7 +695,7 @@ def makeFormulaForsNumInfo():
     image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
     hint="%(target)s"
     onclick="%(cmds)s"
-    bgcolor=%(bgcolor)s
+    bgcolor="%(bgcolor)s"
   >''' %d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)

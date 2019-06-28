@@ -33,16 +33,23 @@ from PeriodicTable import PeriodicTable
 PT = PeriodicTable()
 pt = PT.PeriodicTable()
 
+import gui
+template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
+if not os.path.exists(template_path):
+  template_path = os.path.join(p_path, 'mask_output.htm')
+
+
 def get_mask_info():
   global mask_info_has_updated
   import gui
   
   output_fn = '%s_masking_info.htm'%OV.ModelSrc()
-
   get_template = gui.tools.TemplateProvider.get_template
-  template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
-  if not os.path.exists(template_path):
-    template_path = os.path.join(p_path, 'mask_output.htm')
+
+  if olx.IsFileLoaded() != 'true':
+    return return_note("")
+  if (olx.IsFileType('cif') == 'true'):
+    return return_note("")
    
   based_on = OV.GetParam('user.masks.based_on')
   based_on_display = "Asymmetric Unit"
@@ -75,10 +82,7 @@ def get_mask_info():
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
   if numbers == [u'n/a']:
-    d["note_details"] = ": No Voids Found"
-    t = get_template('masking_note', path=template_path, force=debug)%d
-    OlexVFS.write_to_olex(output_fn, t)
-    return output_fn
+    return return_note("No Voids Found", gui_green)
 
   if not numbers:
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
@@ -86,15 +90,9 @@ def get_mask_info():
       if is_CIF:
         numbers = olx.Cif('_%s_void_nr' %base).split(",")
         if not numbers:
-          d["note_details"] = ": No Voids in CIF"
-          t = get_template('masking_note', path=template_path, force=debug)%d
-          OlexVFS.write_to_olex(output_fn, t)
-          return output_fn
+          return return_note("No Voids in CIF", gui_green)
       else:
-        d["note_details"] = "!"
-        t = get_template('masking_note', path=template_path, force=debug)%d
-        OlexVFS.write_to_olex(output_fn, t)
-        return output_fn
+        return return_note("!", gui_green)
 
   mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
@@ -717,6 +715,15 @@ def status_bg(var, val, status='on'):
   if var.lower() == val.lower():
     return gui_highlight
 OV.registerFunction(status_bg)
+
+def return_note(note,note_details="", col=OV.GetVar('HtmlHighlightCOlour')):
+  output_fn = '%s_masking_info.htm'%OV.ModelSrc()
+  d = {"note":note,
+       "note_details":note_details,
+       "note_bg":col}
+  t = gui.tools.TemplateProvider.get_template('masking_note', path=template_path, force=debug)%d
+  OlexVFS.write_to_olex(output_fn, t)
+  return output_fn
 
 def change_based_on_button_states():
   l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
