@@ -115,12 +115,13 @@ class MapUtil:
     self.map_type = 'eden'
     OV.SetVar('olex2.map_type', 'eden')
 
+    self.SetXgridView(update_controls)
+
     if map_source == "olex":
       olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
-    self.SetXgridView(update_controls)
 
 
   def SetXgridView(self, update_controls=False):
@@ -275,20 +276,6 @@ class MapUtil:
     olx.SetVar('snum.xgrid.scale', _)
     olx.SetVar('map_value', olx.xgrid.Scale())
 
-def have_matching_fcf():
-  fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
-  res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
-  if os.path.exists(fcf) and os.path.exists(fcf):
-    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
-      OV.SetVar('have_matching_fcf', True)
-      return True
-    else:
-      print (".fcf seems to be out of date.")
-      OV.SetVar('have_matching_fcf', False)
-      return False
-  else: 
-    return False
-
 if OV.HasGUI():
   mu = MapUtil()
   OV.registerFunction(mu.VoidView, False, "gui.maps")
@@ -299,4 +286,3 @@ if OV.HasGUI():
   OV.registerFunction(mu.get_best_contour_maps, False, "gui.maps")
   OV.registerFunction(mu.get_map_scale, False, "gui.maps")
   OV.registerFunction(mu.getActionString, False, "gui.maps")
-  OV.registerFunction(have_matching_fcf, False, "gui.maps")
