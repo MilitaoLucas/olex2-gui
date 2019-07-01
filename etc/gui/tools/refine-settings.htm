@@ -212,19 +212,23 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
 
+<tr ALIGN='left' width='100%%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Masking-Info;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td>
+<!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
 <td>
-<!-- #ignoreif fs.Exists(mask_notification.htm)
+<!-- #ignoreif fs.Exists strcat(FileName(),_mask_notification.htm)
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 #ignoreif -->
-#ignoreif -->
-
-<!-- #includeif fs.Exists(mask_notification.htm) mask_note mask_notification.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
 
@@ -259,7 +263,6 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 <!-- FOOTER BELOE      LEAVE UNTOUCHED! -->
 <!-- ================================== -->
 
-</tr>
 </table>
 
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
