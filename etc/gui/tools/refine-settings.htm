@@ -1,156 +1,166 @@
-<!-- #ignoreif not(IsFileType('ires'))
-
 $+
 run("SetVar(refinement_output, strcat(FileName(),_refinement_output.html))")
 $-
 <!-- #includeif fs.Exists(GetVar(refinement_output)) refinement_output GetVar(refinement_output);1; -->
 
+<!-- #ignoreif IsFileType('ires')
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extract;1 -->
+<td width='12%'>
+  <b>Extract</b>
+</td>
+<td>
+$spy.gui.cif.check_for_embedded_hkl()
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
 
-<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1; -->
+<!-- ================================== -->
+<!-- HEADER_ABOVE ---- LEAVE UNTOUCHED! -->
+<!-- ================================== -->
+
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='12%'>
-    <b>Program</b>
-  </td>
 
-  <td width='45%'>
-    <table cellpadding="0" cellspacing="0"><tr>
-      <td width='49%'>
+    <td width='12%'>
+      <b>Program </b>
+    </td>
+
+    <td width='45%'>
+      <table cellpadding="0" cellspacing="0">
+        <tr>
+          <td width='49%'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;width='20%';1; -->
-      </td>
-      <td width='2%'>
-      </td>
-      <td width='49%'>
-<!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;width='20%';1; --></td>
-    </tr></table>
-  </td>
+          </td>
+          <td width='2%'>
+          </td>
+          <td width='49%'>
+<!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;width='20%';1; -->
+          </td>
+        </tr>
+      </table>
+    </td>
 
-  <td align='right' width='11%'>
-  <b>Cycles</b>
-  </td>
-
-  $+
-    html.Snippet("gui/snippets/input-spin-td",
-    "value=spy.GetParam('snum.refinement.max_cycles')",
-    "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
-    "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
-    "min=0",
-    "max=200",
-    )
-  $-
-
-  <td align='right' width='12%'>
-  <b>Peaks</b>
-  </td>
-
-  $+
-    html.Snippet("gui/snippets/input-spin-td",
-    "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
-    "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
-    "min=0",
-    "max=99",
-    "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
-    )
-  $-
-
+    <td align='right' width='11%'>
+      <b>Cycles </b>
+    </td>
+      $+
+        html.Snippet("gui/snippets/input-spin-td",
+        "value=spy.GetParam('snum.refinement.max_cycles')",
+        "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
+        "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
+        "min=0",
+        "max=200",
+        )
+      $-
+    <td align='right' width='12%'>
+      <b>Peaks </b>
+    </td>
+      $+
+        html.Snippet("gui/snippets/input-spin-td",
+        "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
+        "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
+        "min=0",
+        "max=99",
+        "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
+        )
+      $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr NAME='SET_REFLECTIONS' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td ALIGN='left' width='12%'>
-    <b>hkl file</b>
-  </td>
+    <td ALIGN='left' width='12%'>
+      <b>hkl file </b>
+    </td>
 
-  <td ALIGN='left' width='45%'>
+    <td ALIGN='left' width='45%'>
 <!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
-  </td>
+    </td>
 
-
-
-  <td ALIGN='center' width='39%'>
-<b>hkl</b>:
+    <td ALIGN='center' width='39%'>
+      <b>hkl </b>:
 <!-- #include reflection-date reflection-date.htm;1; -->
-  </td>
-
+    </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
+
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td width='12%'><b>Weight</b></td>
+    <td width='12%'>
+      <b>Weight </b>
+    </td>
+    <td width='4%' align='left'>
+      $+
+        html.Snippet("gui/snippets/input-checkbox",
+        "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
+        "checked=spy.GetParam('snum.refinement.update_weight')",
+        "bgcolor=GetVar(HtmlTableBgColour)",
+        "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))",
+        )
+       $-
+    </td>
+    <td width='31%' align='left'>
+      $spy.gui.tools.weightGuiDisplay()
+    </td>
+    <td width='6%' align='right'>
+      <b>EXTI </b>
+    </td>
 
-  <td width='9%' align='left'>
-   $+
-     html.Snippet("gui/snippets/input-checkbox",
-     "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
-     "checked=spy.GetParam('snum.refinement.update_weight')",
-     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-     "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))",
-     "bgcolor=GetVar(HtmlTableRowBgColour)",
-     )
-    $-
-  </td>
+    <td width='5%'>
+      $+
+        html.Snippet("gui/snippets/input-checkbox",
+        "name=SNUM_REFINEMENT_EXTI",
+        "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
+        "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
+        "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
+        "bgcolor=GetVar(HtmlTableBgColour)",
+        )
+       $-
+    </td>
 
-  <td width='26%' align='center'>$spy.gui.tools.weightGuiDisplay()</td>
+    <td width='17%'>
+      $spy.gui.tools.refine_extinction()
+    </td>
 
-  <td width='6%' align='right'><b>EXTI</b></td>
-
-  <td width='5%'>
-   $+
-     html.Snippet("gui/snippets/input-checkbox",
-     "name=SNUM_REFINEMENT_EXTI",
-     "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
-     "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
-     "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-     "bgcolor=GetVar(HtmlTableRowBgColour)",
-     )
-    $-
-  </td>
-
-  <td width='17%'>
-    $spy.gui.tools.refine_extinction()
-  </td>
-
-  <td width='22%'>
-    $+
-      html.Snippet("gui/snippets/input-combo",
-      "name=REFINEMENT_ACTA",
-      "items=No ACTA;ACTA NOHKL;ACTA",
-      "value=Ins('acta')",
-      "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
-      "readonly=False",
-      "onchangealways=True",
-      "bgcolor=spy.refinement_acta_bg_colour()",
-      )
-    $-
-  </td>
-
+    <td width='22%'>
+      $+
+        html.Snippet("gui/snippets/input-combo",
+        "name=REFINEMENT_ACTA",
+        "items=No ACTA;ACTA NOHKL;ACTA",
+        "value=Ins('acta')",
+        "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
+        "readonly=False",
+        "onchangealways=True",
+        "bgcolor=spy.refinement_acta_bg_colour()",
+        )
+      $-
+    </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr ALIGN='left' NAME='MASK_INFO'>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
+<!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
-  $+
-    html.Snippet("gui/snippets/input-checkbox-td",
-    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
-    "label=Use Solvent Mask",
-    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
-    "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
-    "onclick=spy.SetMasking(html.GetState(~name~))",
-    "bgcolor=GetVar(HtmlTableRowBgColour)",
-
-    )
-  $-
+    
+      $+
+        html.Snippet("gui/snippets/input-checkbox-td",
+        "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
+        "label=Use Solvent Mask ",
+        "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
+        "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
+        "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
+        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        )
+      $-
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
 
@@ -164,7 +174,7 @@ $-
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
 html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     "onuncheck=spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')",
-    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "bgcolor=GetVar(HtmlTableBgColour)",
     )
   $-
 
@@ -203,64 +213,60 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr ALIGN='left' NAME='MASK_INFO'>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
+<tr ALIGN='left' width='100%%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Masking-Info;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-$spy.gui.tools.get_mask_info()
+<td>
+<!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
-
-
-
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
 <td>
-
-<!-- #ignoreif fs.Exists(mask_notification.htm)
+<!-- #ignoreif fs.Exists strcat(FileName(),_mask_notification.htm)
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 #ignoreif -->
-<!-- #includeif fs.Exists(mask_notification.htm) mask_note mask_notification.htm;1; -->
-
-</td>
-#ignoreif -->
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+<!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
-<!-- #ignoreif spy.GetParam('user.refinement.hide_nsff')
-<tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
+
+<!-- ========================================== NOSPHERA2 INTERFACE BEGIN == -->
+<!-- #ignoreif not spy.tools.show_nsff()
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
-    $+
-      html.Snippet("gui/snippets/input-checkbox-td",
-      "name=USE_ASPHERICAL@refine",
-      "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
-      "label=NoSpherA2 ",
-      "height=0",
-      "bgcolor=GetVar(HtmlTableRowBgColour)",
-      "td1=<td align='left' width="22%">",
-      "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
-    $-
+      $+
+        html.Snippet("gui/snippets/input-checkbox-td",
+        "name=USE_ASPHERICAL@refine",
+        "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
+        "label=NoSpherA2 ",
+        "height=0",
+        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        "td1=<td align='left' width="22%">",
+        "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
+      $-
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
 <!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
 #ignoreif -->
-<!-- #ignoreif spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
 
 #ignoreif -->
+<!-- ========================================== NOSPHERA2 INTERFACE END ==== -->
 
+
+
+
+<!-- ================================== -->
+<!-- FOOTER BELOE      LEAVE UNTOUCHED! -->
+<!-- ================================== -->
 
 </table>
 
-<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=4;onclick=;onclick=;2; -->
-<!-- #includeif fs.Exists('refinement_image.htm') refinement_image refinement_image.htm;1; -->
-</table>
-#ignoreif -->
-
-<!-- #ignoreif IsFileType('ires')
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-$spy.gui.cif.check_for_embedded_hkl()
+
+<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;onclick=;2; -->
+
 </table>
-#ignoreif -->

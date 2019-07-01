@@ -355,7 +355,7 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
 
   if debug:
-    print "--- Making Element Formulae"
+    #print "--- Making Element Formulae"
     t1 = time.time()
 
   from PilTools import TI
@@ -695,16 +695,19 @@ def makeFormulaForsNumInfo():
     image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
     hint="%(target)s"
     onclick="%(cmds)s"
-    bgcolor=%(bgcolor)s
+    bgcolor="%(bgcolor)s"
   >''' %d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
-  OV.write_to_olex('snumformula.htm', update)
+  #fn = "%s_snumformula.htm" %OV.ModelSrc()
+  fn = "snumformula.htm"
+  OV.write_to_olex(fn, update)
   if debug:
     pass
     #print "Formula sNum (2): %.5f" %(time.time() - t1)
+  return "<!-- #include snumformula %s;1 -->" %fn
+  #return fn
 
-  return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
 
 
@@ -1388,6 +1391,20 @@ OV.registerFunction(resize_pdf,False,'gui.tools')
 gett = TemplateProvider.get_template
 
 
+def make_input_html_tool(scope, tool):
+  fn = "%s_%s_tool.htm" %(scope, tool)
+  if OlexVFS.exists(fn) and not debug:
+    return fn
+  name = "%s_%s" %(scope.upper(), tool.upper())
+  d = {'scope':scope,
+       'tool':tool,
+       'image': tool,
+       'name': name,
+       'onclick':"",}
+  OlexVFS.write_to_olex(fn, gett('input_html_tool')%d)
+  return fn
+OV.registerFunction(make_input_html_tool,False,'gui.tools')
+
 
 def scrub(cmd):
   log = gui.tools.LogListen()
@@ -1419,5 +1436,14 @@ def hklf_5_to_4(filename):
   hklf4.close()
   print "done. HKLF4 base file at %s"%hklf4name
   return
-
 OV.registerFunction(hklf_5_to_4, False, 'tools')
+
+def show_nsff():
+  retVal = False
+  if OV.have_nsff():
+    retVal = True
+  return retVal
+OV.registerFunction(show_nsff, False, 'tools')
+    
+    
+

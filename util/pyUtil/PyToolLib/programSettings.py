@@ -44,9 +44,8 @@ def makeProgramSettingsGUI(program, method, prgtype):
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
 
-  txt = r"""
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;1; -->
-    <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableBgColour')">
+  txt = r"""<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+  <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableBgColour')">
 """
   if program.name.lower().startswith("superflip"):
     txt += file(os.path.normpath("%s/etc/gui/tools/superflip.htm" %olx.BaseDir()), "r").read()

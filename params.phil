@@ -256,7 +256,7 @@ routines requiring structure refinement
     program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' \
       Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
       .type = choice
-    method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
+    method = 'Least Squares' CGLS 'Gauss-Newton' '*Levenberg-Marquardt' \
       'Full Matrix' Unknown
       .type = choice
     sg_list = None
@@ -350,6 +350,20 @@ routines requiring structure refinement
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
       }
   }
+
+  twinning{
+    olex2{
+      do_long = False
+        .type = bool 
+      max_index = 5
+        .type = int 
+      rotation_fraction = 12
+        .type = int 
+      threshold = 0.002
+        .type = float
+    }    
+  }
+
 
   display_quality = 2
     .type = int(value_min=1, value_max=3)
@@ -767,8 +781,6 @@ routines requiring structure refinement
       .type = bool
     update_cif = False
       .type = bool
-    based_on = *ASU FU
-      .type = choice
     user_sum_formula = ""
       .type = str
     user_moiety_formula = ""
@@ -988,18 +1000,16 @@ user
       .type = bool
       .expert_level = 2
   }
-  
-  twinning{
-    olex2{
-      do_long = False
-        .type = bool 
-      max_index = 5
-        .type = int 
-      rotation_fraction = 12
-        .type = int 
-      threshold = 0.001
+
+  masks{
+    based_on = *ASU FU Cell
+      .type = choice
+    v_over_e{
+      upper = 8
+        .type=float
+      lower = 2
         .type = float
-    }    
+      }
   }
 
   graphs

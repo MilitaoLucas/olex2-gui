@@ -3205,7 +3205,9 @@ class HealthOfStructure():
 
     if olx.HKLSrc():
       t =  time.ctime(os.path.getmtime(olx.HKLSrc()))
-      OV.write_to_olex("reflection-date.htm" , t)
+    else:
+      t = "No Reflections"
+    OV.write_to_olex("reflection-date.htm" , t)
 
     return d
 

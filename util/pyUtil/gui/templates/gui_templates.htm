@@ -1,13 +1,13 @@
 t:cif_export_gui{
 <font size='+0'>
 <a href='export>>html.update'>
-    Extract <b>res/hkl</b></a>
+    Extract <b>res/hkl </b></a>
 &nbsp;
 <a href='export>>html.update>>dire'>
-    Extract and <b>open directory</b></a>
+    Extract and <b>open directory </b></a>
 &nbsp;
 <a href='export>>reap %(reapfile)s'>
-    Extract and <b>open</b>
+    Extract and <b>open </b>
 </a>
 </font>
 }
@@ -356,4 +356,52 @@ t:compile_help{
 <a href="spy.githelp.git_help(False '%s')">Recompile</a><p>
 }
 
+t:input_html_tool{
+<html>
+<body>
+<font color="$GetVar(HtmlFontColour)" size="$GetVar(HtmlGuiFontSize)" face="$GetVar(HtmlFontName)">
+&nbsp;
+<!-- #include %(name)s gui/%(tool)s.htm;gui/blocks/tool-off.htm;image=%(tool)s;onclick=%(onclick)s;1; -->
+</font>
+</body>
+</html>
+}
 
+t:pop_mode{
+$run(Focus)
+<html>
+  <body link='$GetVar(HtmlLinkColour)' bgcolor='$GetVar(HtmlHighlightColour)'>
+    <table border="0" style="border-collapse: collapse" width="100%%" id="#tool" cellpadding="1" cellspacing="1" >
+      <tr>
+        <td>
+        </td>
+        <td>
+          <font size='4'>
+            You are in <b><i>mode</i></b>
+          </font>
+          <font size='4'>
+            <b>%(mode_name)s</b>%(mode_qualifiers)s <br>
+          </font>
+          <font size='3'>
+             Press the <b><a href='mode off'>ESC</a></b> key to exit.
+          </font>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
+<!--
+<zimg border="0" src="pop_background.png">
+-->
+}
+
+t:gui_notification{
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+  <tr>
+    <td bgcolor='%(col)s'>
+      %(txt)s
+    </td>
+  </tr>
+</table>
+}

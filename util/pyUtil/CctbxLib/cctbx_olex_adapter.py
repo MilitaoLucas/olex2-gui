@@ -562,7 +562,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     map_type = self.params.type
     filepath = OV.StrDir()
     pickle_path = '%s/%s-%s.pickle' %(filepath, OV.FileName(), map_type)
-    if os.path.exists(pickle_path):
+    if os.path.exists(pickle_path) and not recompute:
       data = easy_pickle.load(pickle_path)
       crystal_gridding = maptbx.crystal_gridding(
         unit_cell=self.xray_structure().unit_cell(),
