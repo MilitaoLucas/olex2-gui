@@ -975,7 +975,7 @@ OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
 def check_for_matching_fcf():
   p = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
-  name = OV.GetParam('snum.refinement.cctbx.nsff.name')
+  name = OV.ModelSrc()
   fcf = os.path.join(p,name + '.fcf')
   if os.path.exists(fcf) and os.path.exists(fcf):
     OV.SetVar('have_valid_nosphera2_fcf', True)
