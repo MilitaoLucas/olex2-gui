@@ -115,13 +115,12 @@ class MapUtil:
     self.map_type = 'eden'
     OV.SetVar('olex2.map_type', 'eden')
 
-    self.SetXgridView(update_controls)
-
     if map_source == "olex":
       olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
+    self.SetXgridView(update_controls)
 
 
   def SetXgridView(self, update_controls=False):
