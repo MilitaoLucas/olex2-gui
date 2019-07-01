@@ -82,7 +82,7 @@ def get_mask_info():
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
   if numbers == [u'n/a']:
-    return return_note("No Voids Found", gui_green)
+    return return_note(note = "No Voids Found", col = gui_green)
 
   if not numbers:
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
@@ -90,9 +90,9 @@ def get_mask_info():
       if is_CIF:
         numbers = olx.Cif('_%s_void_nr' %base).split(",")
         if not numbers:
-          return return_note("No Voids in CIF", gui_green)
+          return return_note(note = "No Voids in CIF", col = gui_green)
       else:
-        return return_note("!", gui_green)
+        return return_note(note = "No Voids in this structure", col=gui_green)
 
   mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
