@@ -285,6 +285,12 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Program %s could not be set" %(program)
       sys.stderr.formatExceptionInfo()
 
+  def have_nsff(self):
+    retVal = False
+    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
+      retVal = True
+    return retVal
+
   def SetMaxCycles(self, max_cycles):
     try:
       import programSettings
@@ -778,6 +784,14 @@ class OlexFunctions(inheritFunctions):
 
   def HasGUI(self):
     return HasGUI
+  
+  def ListParts(self):
+    import olexex
+    parts = set(olexex.OlexRefinementModel().disorder_parts())
+    if len(parts) == 1:
+      return None
+    else:
+      return parts
 
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)

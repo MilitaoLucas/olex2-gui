@@ -376,6 +376,8 @@ def zipToOlexVFS(zip_path, base=None):
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
 def set_notification(string):
+  if string is None:
+    string = ""
   OV.SetVar('GuiNotification', string)
   olx.Freeze(True)
   OV.htmlUpdate()
@@ -383,21 +385,19 @@ def set_notification(string):
 
 def get_notification():
   _ = OV.GetVar('GuiNotification',None)
+  d = {}
   if not _:
     return
-  col = '#F5B041'
+  col = OV.GetVar('gui.dark_yellow')
   txt = _
   if ";" in _:
     txt = _.split(";")[0]
     col = _.split(";")[1]
-  notification = '''
-<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
-<tr>
-<td bgcolor='%s'>
-%s
-</td>
-</tr>
-</table>''' %(col, txt)
+
+  d = {'col':col,
+       'txt':txt}
+  import gui
+  notification = gui.tools.TemplateProvider.get_template('gui_notification')%d
   return notification
 
 olex.registerFunction(set_notification, False, "gui")

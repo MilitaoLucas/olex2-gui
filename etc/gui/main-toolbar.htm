@@ -1,42 +1,57 @@
 <table border="0" VALIGN='center' width="100%" cellpadding="0" cellspacing="1">
-<tr VALIGN='center'>
-<td align='left'>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td>
-  $spy.MakeHoverButton('btn-solve','solve')
-</td><td>
+  <tr VALIGN='center'>
+    <td align='left'>
+      <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td>
+            $spy.MakeHoverButton('btn-solve','solve')
+          </td>
+          <td>
 <!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;ondown=;1; -->
-</td></tr></table>
-</td>
-
-<td align='center'>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td>
-  $spy.MakeHoverButton('btn-refine','refine')
-</td><td>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align='center'>
+      <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td>
+            $spy.MakeHoverButton('btn-refine','refine')
+          </td>
+          <td>
 <!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;ondown=;1; -->
-</td></tr></table>
-</td>
-
-<td align='center'>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td>
-  $spy.MakeHoverButton('btn-draw','draw')
-</td><td>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align='center'>
+      <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td>
+            $spy.MakeHoverButton('btn-draw','draw')
+          </td>
+          <td>
 <!-- #include cbtn-draw gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=draw;ondown=;1; -->
-</td></tr></table>
-</td>
-
-<td align='right'>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td>
-  $spy.MakeHoverButton('btn-report','report')
-</td><td>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td align='right'>
+      <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td>
+            $spy.MakeHoverButton('btn-report','report')
+          </td>
+          <td>
 <!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;ondown=spy.ExtractCifInfo(True,True);1; -->
-
-</td></tr></table>
-</td>
-
-</tr>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
-<!-- #include solve-settings gui\tools\solve-settings.htm;0; -->
-<!-- #include refine-settings gui\tools\refine-settings.htm;0; -->
+<!-- #includeif IsFileType('ires') solve-settings gui\tools\solve-settings.htm;0; -->
+<!-- #includeif IsFileType('ires') refine-settings gui\tools\refine-settings.htm;0; -->
 <!-- #include draw-settings gui\tools\draw-settings.htm;0; -->
 <!-- #include report-settings gui\tools\report-settings.htm;0; -->

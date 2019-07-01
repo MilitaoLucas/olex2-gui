@@ -19,6 +19,10 @@ def BGColorForValue(value):
 
 
 class MultipleDataset:
+  def __init__(self):
+    self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
+    self.CURR_CIF_FILE_LIST = CURR_CIF_FILE_LIST
+  
   def check(self):
     if CURR_CIF_FILE_NAME:
       self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
@@ -111,8 +115,8 @@ class MultipleDataset:
       )
     $-''' %(display, name, action, highlight)
 
-    html + "</tr></table>"
-    name = 'multicif.htm'
+    html += "</tr></table>"
+    name = "%s_%s" %(CURR_CIF_FILE_NAME, 'multicif.htm')
     OlexVFS.write_to_olex(name, html)
     return "<!-- #include multicif %s;1; -->" %name
 

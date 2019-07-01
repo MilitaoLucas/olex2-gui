@@ -83,6 +83,7 @@ class NoSpherA2(PT):
     else:
       self.basis_list_str = None
       self.basis_dir = None
+    OV.SetVar('have_valid_nosphera2_fcf', False)
 
   def setup_har_executables(self):
     self.exe = None
@@ -157,7 +158,6 @@ class NoSpherA2(PT):
       self.cpu_list_str = '1'
 
   def launch(self):
-
     self.jobs_dir = os.path.join(olx.FilePath(),"olex2","Wfn_job")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
@@ -180,13 +180,21 @@ class NoSpherA2(PT):
       pass
     else:
       OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-      self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
+      try:
+        self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
+      except NameError as error:
+        print "Aborted due to: ",error
+        raise NameError(error)
 
     job.launch()
+    if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+      raise NameError('Error during structure factor calculation!')
     olx.html.Update()
     combine_sfs(force=True)
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
+    olex.m('delins list')
+    olex.m('addins LIST 3')
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     olx.html.Update()
 
@@ -194,7 +202,6 @@ class NoSpherA2(PT):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-
 
     wfn_object = wfn_Job(self,olx.FileName())
     software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
@@ -207,7 +214,11 @@ class NoSpherA2(PT):
     elif software == "Gaussian16":
       wfn_object.write_gX_input()
 
-    wfn_object.run()
+    try:
+      wfn_object.run()
+    except NameError as error:
+      print "The follwing error occured druing QM Calculation: ",error
+      raise NameError('Unsuccesfull Wavefunction Calculation!')
 
   def setup_wfn_2_fchk(self):
     exe_pre ="Wfn_2_Fchk"
@@ -567,6 +578,17 @@ class wfn_Job(object):
     while p.poll() is None:
       time.sleep(3)
 
+    if software == "ORCA":
+      if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+".log")).read():
+        pass
+      else:
+        raise NameError('Orca did not terminate normally!')
+    else:
+      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
+        pass
+      else:
+        raise NameError('Gaussian did not terminate normally!')
+      
     import shutil
     if("g03" in args[0]):
       shutil.move("Test.FChk",self.name+".fchk")
@@ -938,21 +960,30 @@ def combine_sfs(force=False):
 
 OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
-def check_fcf():
-  dir = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
-  name = OV.GetParam('snum.refinement.cctbx.nsff.name')
-  fcf = os.path.join(dir,name + '.fcf')
-  res = os.path.join(dir,name + '.res')
-  if os.path.exists(fcf) and os.path.exists(fcf):
-    if "%0.f" %os.path.getmtime(fcf) == "%0.f" %os.path.getmtime(res):
-      return True
-    else:
-      print ("Fcf seems to be older than results!")
-      return False
-  else: 
-    return False
+def deal_with_parts():
+  parts = OV.ListParts()
+  if not parts:
+    return
+  for part in parts:
+    if part == 0:
+      continue
+    olex.m("showp 0 %s" %part)
+    fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
+    olx.File(fn)
+  olex.m("showp")
+OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
-OV.registerFunction(check_fcf,True,'NoSpherA2')
+def check_for_matching_fcf():
+  p = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
+  name = OV.ModelSrc()
+  fcf = os.path.join(p,name + '.fcf')
+  if os.path.exists(fcf) and os.path.exists(fcf):
+    OV.SetVar('have_valid_nosphera2_fcf', True)
+    return True
+  else:
+    OV.SetVar('have_valid_nosphera2_fcf', False)
+    return False
+OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

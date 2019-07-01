@@ -1,7 +1,10 @@
 import os
 import re
+from fractions import Fraction
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import OlexVFS
+
 try:
   from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
@@ -18,25 +21,42 @@ debug = bool(OV.GetParam("olex2.debug", False))
 global mask_info_has_updated
 mask_info_has_updated = False
 
-gui_green = OV.GetParam('gui.green')
-gui_orange = OV.GetParam('gui.orange')
-gui_red = OV.GetParam('gui.red')
-gui_grey = OV.GetParam('gui.grey')
+gui_green = OV.GetParam('gui.green').hexadecimal
+gui_orange = OV.GetParam('gui.orange').hexadecimal
+gui_red = OV.GetParam('gui.red').hexadecimal
+gui_grey = OV.GetParam('gui.grey').hexadecimal
+gui_light_grey = OV.GetParam('gui.light_grey').hexadecimal
+gui_highlight = OV.GetParam('gui.html.highlight_colour').hexadecimal
+gui_width = OV.GetParam('gui.htmlpanelwidth')
 
 from PeriodicTable import PeriodicTable
 PT = PeriodicTable()
 pt = PT.PeriodicTable()
 
+import gui
+template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
+if not os.path.exists(template_path):
+  template_path = os.path.join(p_path, 'mask_output.htm')
+
 
 def get_mask_info():
   global mask_info_has_updated
   import gui
+  
+  output_fn = '%s_masking_info.htm'%OV.ModelSrc()
   get_template = gui.tools.TemplateProvider.get_template
-  template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
-  if not os.path.exists(template_path):
-    template_path = os.path.join(p_path, 'mask_output.htm')
-    
-  based_on = OV.GetParam('snum.masks.based_on')
+
+  if olx.IsFileLoaded() != 'true':
+    return return_note("")
+  if (olx.IsFileType('cif') == 'true'):
+    return return_note("")
+   
+  based_on = OV.GetParam('user.masks.based_on')
+  based_on_display = "Asymmetric Unit"
+  if based_on == "FU":
+    based_on_display = "Formula Unit"
+  elif based_on == "Cell":
+    based_on_display = "Unit Cell"
   
 #  print ".. %s .." %template_path
   global current_sNum
@@ -47,16 +67,22 @@ def get_mask_info():
     base = "smtbx_masks"
   
   d = {}
-#  d['table_bg'] =  OV.GetParam('gui.html.table_firstcol_colour')
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
   d['based_on'] =  based_on
-  
+  d['based_on_display'] = based_on_display
+  d['row_begin'] = get_template('row_begin', path=template_path, force=debug)%d
+  d['row_end'] = get_template('row_end', path=template_path, force=debug)%d
+  d['table_begin'] = get_template('table_begin', path=template_path, force=debug)%d
+  d["note"] = "No Masking Information"
+  d["note_bg"] = OV.GetVar('HtmlHighlightCOlour')
+
+    
   is_CIF = (olx.IsFileType('cif') == 'true')
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
   if numbers == [u'n/a']:
-    return "no mask info"
+    return return_note(note = "No Voids Found", col = gui_green)
 
   if not numbers:
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
@@ -64,10 +90,11 @@ def get_mask_info():
       if is_CIF:
         numbers = olx.Cif('_%s_void_nr' %base).split(",")
         if not numbers:
-          return "No mask information"
+          return return_note(note = "No Voids in CIF", col = gui_green)
       else:
-        return "No mask information"
+        return return_note(note = "No Voids in this structure", col=gui_green)
 
+  mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
     volumes = olx.Cif('_%s_void_volume' %base).split(",")
     electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
@@ -90,7 +117,7 @@ def get_mask_info():
   Z = round(Z)
   Zprime = Z/number_of_symm_op
 
-  t = "<table bgcolor='%s' border='0' cellspacing='1' cellpadding='2' width='100%%'>" %"#ababab"
+  t = get_template('mask_output_table_begin', path=template_path, force=debug)%d
   t += get_template('mask_output_table_header_rp', path=template_path, force=debug)%d
 
   ident_l = []
@@ -108,10 +135,15 @@ def get_mask_info():
   total_void_electrons = 0
   total_void_accounted_for_electrons = 0
   total_void_no = 0
-  
+  f = get_adjust_for_base_factor()
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
-    volume = "%.0f" %round(float(volume),0)
-    electron = "%.0f" %round(float(electron),0)
+    multi_idx = []
+    electrons_accounted_for = 0
+    non_h_accounted_for = 0
+    volume = float(volume)
+    electron = float(electron)
+    volume = "%.0f" %round(volume,0)
+    electron = "%.0f" %round(electron,0)
     _ = (volume,electron)
 
     got_it = False
@@ -122,15 +154,16 @@ def get_mask_info():
       continue
 
     multiplicity = 0
-    multi_idx = []
     i = 1
+    _idx = []
     for occ in ident_l:
 #      if _ == occ:
       if volume == occ[0]:
         multiplicity += 1
-        multi_idx.append(str(i))
-
+        _idx.append(str(i))
       i += 1
+    for bit in _idx:
+      multi_idx.append("%s|%s" %(bit, multiplicity))
     accounted_for.setdefault(volume, [])
     accounted_for[volume].append(_[0])
 
@@ -138,74 +171,83 @@ def get_mask_info():
     if not moiety:
       moiety = olx.xf.latt.GetMoiety()
 
-    d['number'] = number
+
     electron = float(electron) * multiplicity
     volume = float(volume) * multiplicity
+
+    if float(volume) < 15:
+      continue
+
+    #f = get_adjust_for_base_factor()
+    #volume *= f
+    #electron *= f
+
+
+    d['number'] = number
     d['electron'] = "%.0f" %float(electron)
     d['volume'] = "%.0f" %float(volume)
     d['multiplicity'] = format_number(multiplicity)
     d['formula'] = get_rounded_formula(as_string_sep=" ")
     d['moiety'] = moiety
     d['based_on'] = based_on
+    d['based_on_display'] = based_on_display
     
     total_void_electrons += electron
     total_void_volume += volume
     total_void_no += 1
 
-    
     content = content.strip("'")
 
-    #if multiplicity == 1:
-      #multiplicity = Z
-
-    number_of_symm_op
-
-    _ = content.split(",")
-
-    electrons_accounted_for = 0
-    non_h_accounted_for = 0
+    _ = content.split(";")
+    
+    content_disp_l = []
     
     for entry in _:
-      sum_content.append((number_of_symm_op, entry))
-      entity, multi = split_entity(entry)
-      multi = float(multi)
+      if not entry or entry == "?":
+        continue
+      sum_content.append((multiplicity, entry))
+      entity, user_number = split_entity(entry)
+      user_number = float(user_number)
       ent = moieties.get(entity.lower(), entity)
       ent = formula_cleaner(unicode(ent))
 
       try:
         Z, N = get_sum_electrons_from_formula(ent)
-        electrons_accounted_for += Z * multi * number_of_symm_op
-        non_h_accounted_for += N * multi * number_of_symm_op
+        electrons_accounted_for += Z * user_number
+        non_h_accounted_for += N * user_number
       except:
         electrons_accounted_for += 0
+      if entity != "?":
+        content_disp_l.append("%s %s" %(format_number(multiplicity * user_number/f), entity))
+      else:
+        content_disp_l.append(entity)
+    content_disp = ";".join(content_disp_l)
 
-    if based_on == "FU":
-      electrons_accounted_for *= Zprime
-      non_h_accounted_for *= Zprime
+    electrons_accounted_for = electrons_accounted_for * multiplicity
+    non_h_accounted_for = non_h_accounted_for * multiplicity
 
     if volume == "n/a":
       return
 
-    if float(volume) < 15:
-      continue
-
     total_void_accounted_for_electrons += electrons_accounted_for
-
-    if electrons_accounted_for - (0.1 * electrons_accounted_for) < float(electron) < electrons_accounted_for + (0.1 * electrons_accounted_for):
-      electrons_accounted_for_display = "<font color='%s'><b>%.0f</b></font>" %(gui_green,electrons_accounted_for)
-    elif electrons_accounted_for - (0.2 * electrons_accounted_for) < float(electron) < electrons_accounted_for + (0.2 * electrons_accounted_for):
-      electrons_accounted_for_display = "<font color='%s'><b>%.0f</b></font>" %(gui_orange, electrons_accounted_for)
-    else:
-      electrons_accounted_for_display = "<font color='%s'><b>%.0f</b></font>" %(gui_red,electrons_accounted_for)
+    eaf = electrons_accounted_for
+    eafd= "%.0f" %(electrons_accounted_for / f)
+    electron_bg = gui_red
+    electron_fg = "#eeeeee"
+    if eaf - (0.1 * eaf) < float(electron) < eaf + (0.1 * eaf):
+      electron_bg = gui_green
+    elif eaf - (0.2 * eaf) < float(electron) < eaf + (0.2 * eaf):
+      electron_bg = gui_orange
+    e_accounted_for_display = eafd
 
     if float(electron) != 0:
       v_over_e  = float(volume)/float(electron)
-      if v_over_e < 3:
-        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_e)
-      elif v_over_e > 7:
-        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_e)
+      if v_over_e < OV.GetParam('user.masks.v_over_e.lower'):
+        v_over_e_html = "<font color='%s'><b>%.1f </b></font>" %(gui_red,v_over_e)
+      elif v_over_e > OV.GetParam('user.masks.v_over_e.upper'):
+        v_over_e_html = "<font color='%s'><b>%.1f </b></font>" %(gui_red,v_over_e)
       else:
-        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_e)
+        v_over_e_html = "<font color='%s'><b>%.1f </b></font>" %(gui_green,v_over_e)
     else: v_over_e_html = "n/a"
     d['v_over_e'] = v_over_e_html
 
@@ -215,22 +257,26 @@ def get_mask_info():
       if non_h_accounted_for != 0:
         v_over_n  = float(volume)/non_h_accounted_for
         if v_over_n < 20:
-          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+          v_over_n_html = "<font color='%s'><b>%.1f </b></font>" %(gui_red,v_over_n)
         elif v_over_n > 50:
-          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+          v_over_n_html = "<font color='%s'><b>%.1f </b></font>" %(gui_red,v_over_n)
         else:
-          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_n)
+          v_over_n_html = "<font color='%s'><b>%.1f </b></font>" %(gui_green,v_over_n)
     d['v_over_n'] = v_over_n_html
-
-
-    content = '%s <a target="Please enter the contents that are present in this void." href="spy.add_mask_content(%s,content)">(Edit)</a>' %(content, ":".join(multi_idx))
+    d['content_disp'] = content_disp
+    d['multi_idx'] = ":".join(multi_idx)
+    content = get_template('mask_content_with_edit', path=template_path, force=debug) %d
     details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' %":".join(multi_idx)
     d['content'] = content
     d['details'] = details
-    d['e_accounted_for'] = electrons_accounted_for_display
+    d['e_accounted_for_display'] = e_accounted_for_display
+    d['electron_bg'] = electron_bg
+    d['electron_fg'] = electron_fg
+    d['electrons_disp'] = electron / f
+    d['volume_disp'] = volume / f
     d['e_accounted_for_raw'] = electrons_accounted_for
     t += get_template('mask_output_table_row_rp', path=template_path, force=debug) %d
-  t += "</table>"
+  t += get_template('mask_output_based_on', path=template_path, force=debug) %d
 
   #-- FINAL BLOCK ###############
   
@@ -242,39 +288,27 @@ def get_mask_info():
     entity = entry[1]
     if "?" in entity:
       continue
+    multiplicity = float(entry[0])
     entity, multi = split_entity(entity)
-    multi = float(multi)
-    #head = entity.lstrip('0123456789./')
-    #multi = entity[:(len(entity)-len(head))]
-    #if not multi: multi = 1
-    #multi = float(multi)
-    #multiplicity = entry[0]
-    #entity = head.strip()
+    multi = float(multi) 
     ent = moieties.get(entity.lower(), entity)
     ent_disp = ent.replace(" ", "")
     ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
     ent = formula_cleaner(unicode(ent))
 
     try:
-      total_electrons_accounted_for += get_sum_electrons_from_formula(ent) * multi * number_of_symm_op * Z
+      total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
     except:
       total_electrons_accounted_for += 0
-      
-    factor = round(float(multi)/Zprime,3)
-    if based_on == "FU":
-      factor *= Zprime
-
-    if str(factor).endswith(".0"):
-      factor = int(factor)
-
-    total_formula = _add_formula(total_formula, ent, factor)
-    add_to_formula = _add_formula(add_to_formula, ent, factor)
-    
-    add_to_moiety += "%s[%s], " %(factor, ent_disp)
+    f = number_of_symm_op * Zprime  
+    add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
+    total_formula = _add_formula(total_formula, add_to_formula, 1)
+    add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
   add_to_moiety = add_to_moiety.rstrip(", ")
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
 
+  
   total_void_no_plural = ""
   if total_void_no > 1:
     total_void_no_plural = "s"
@@ -305,11 +339,16 @@ def get_mask_info():
     update_sqf_file(current_sNum, '_%s_special_details' %base)
 
   d['mask_special_details']= mask_special_details
+  d['mask_special_details_vn']= mask_special_details_vn
+  OV.SetVar(mask_special_details_vn, mask_special_details)
 
   if add_to_formula:
     t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
-  return t
+  t += get_template('mask_output_table_end', path=template_path, force=debug)%d
+  OlexVFS.write_to_olex(output_fn, t)
+  return output_fn
+
 OV.registerFunction(get_mask_info, False, 'gui.tools')
 
 def get_moieties_from_list():
@@ -321,6 +360,8 @@ def get_moieties_from_list():
     _ = os.path.join(p_path,'moieties.csv')
   rFile = open(_,'r').readlines()
   for line in rFile:
+    if line.startswith("#"):
+      continue
     nick,formula = line.split(";")
     nick = nick.strip()
     formula = formula.strip()
@@ -342,8 +383,20 @@ def get_rounded_formula(rnd=2, as_string_sep=""):
     formula = as_string_sep.join(formula).replace(":","")
   return formula
 
+#def format_number(num):
+  #return round(num,3)
+
 def format_number(num):
-  return round(num,3)
+  s = str(num)
+  if s.endswith(".0"):
+    retVal = int(num)
+  elif s.endswith(".5"):
+    retVal = round(num,1)
+  elif s.endswith(".25") or s.endswith(".25"):
+    retVal = round(num,2)
+  else:
+    retVal = round(num,3)
+  return retVal
 
 def get_sum_electrons_from_formula(f):
   Z = 0
@@ -371,7 +424,8 @@ def split_entity(entry):
       multi = 1
     else:
       if "/" in multi:
-        multi = float(multi.split("/")[0])/float(multi.split("/")[1])
+        #multi = float(multi.split("/")[0])/float(multi.split("/")[1])
+        multi = Fraction(int(multi.split("/")[0]),int(multi.split("/")[1]))
     entity = entity.strip().rstrip("(")
   except:
     entity = ""
@@ -481,7 +535,6 @@ def edit_mask_special_details(txt,base,sNum):
     olx.cif_model[current_sNum]['_%s_special_details' %base] = user_value
     model_src = OV.ModelSrc()
     update_sqf_file(current_sNum, '_%s_special_details' %base)
-    #update_metacif(sNum, get_sqf_name())
     olx.html.Update()
 
 OV.registerFunction(edit_mask_special_details)
@@ -531,19 +584,64 @@ def add_mask_content(i,which):
     disp = ",".join(i_l)
   except:
     disp = "fix me!"
-  c = contents[int(i_l[0])-1]
+    
+  based_on = OV.GetParam('user.masks.based_on')
+  based_on_display = "Asymmetric unit"
+  if based_on == "FU":
+    based_on_display = "Formula Unit"
+  elif based_on == "Cell":
+    based_on_display = "Unit Cell"
+  
+  f = get_adjust_for_base_factor()
+  c = contents[int(i_l[0].split("|")[0])-1]
+  multiplicity = int(i_l[0].split("|")[1])
+  
   if c == "?":
     c = ""
   c = c.lstrip("'").rstrip("'")
-  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s"%(which, disp), c)).strip()
+
+  c_l = c.split(";")
+  c_new_l = []
+  for c in c_l:
+    n = 1
+    m = c
+    if " " in c:
+      n,m = c.split()
+      n = format_number(multiplicity * float(n) / f)
+  
+    if m != "?" and m !="":
+      c = "%s %s" %(n, m)
+    else:
+      c = m
+    c_new_l.append(c)
+  c = "; ".join(c_new_l)
+  
+  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s based on %s"%(which, disp, based_on_display), c)).strip()
   if user_value == "None":
     return
   if not user_value:
     user_value = "?"
-
+ 
+  user_value_l = user_value.split(";")
+  user_value_new_l = []
+  for string in user_value_l:
+    if " " in string:
+      val, entity = string.split()
+    else:
+      entity = string
+      val = "1"
+    if "/" in val:
+      _ = val.split("/")
+      val = Fraction(int(_[0]),int(_[1]))
+    
+    user_value_new_l.append("%s %s" %(format_number(float(val) * f / multiplicity), entity))
+#    user_value_new_l.append("%s %s" %(format_number(float(val) * f), entity))
+#    user_value_new_l.append("%s %s" %(float(val) / f, entity))
+  user_value = ";".join(user_value_new_l)
+  
   _ = list(contents)
   for idx in i_l:
-    idx = int(idx) - 1
+    idx = int(idx.split("|")[0]) - 1
     _[idx] = user_value
     
   mask = OV.get_cif_item('_%s_void' %base)
@@ -551,8 +649,21 @@ def add_mask_content(i,which):
   update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
   mask_info_has_updated = True
   olx.html.Update()
-  
-  
+#  change_based_on_button_states()
+
+def get_adjust_for_base_factor():
+  Z =float(olx.xf.au.GetZ())
+  Zprime = float(olx.xf.au.GetZprime())
+  number_of_symm_op = round(Z/Zprime)
+  based_on = OV.GetParam('user.masks.based_on')
+  if based_on == "ASU":
+    f = number_of_symm_op
+  elif based_on == "FU":
+    f = number_of_symm_op * Zprime
+  elif based_on == "Cell":
+    f = 1
+  return round(f)
+
 def _add_formula(curr, new, multi = 1):
   if "," in curr:
     curr_l = curr.split(",")
@@ -599,5 +710,42 @@ def _add_formula(curr, new, multi = 1):
   return retVal
   
 
+def status_bg(var, val, status='on'):
+  var = OV.GetParam(var)
+  if var.lower() == val.lower():
+    return gui_highlight
+OV.registerFunction(status_bg)
+
+def return_note(note,note_details="", col=OV.GetVar('HtmlHighlightCOlour')):
+  output_fn = '%s_masking_info.htm'%OV.ModelSrc()
+  d = {"note":note,
+       "note_details":note_details,
+       "note_bg":col}
+  t = gui.tools.TemplateProvider.get_template('masking_note', path=template_path, force=debug)%d
+  OlexVFS.write_to_olex(output_fn, t)
+  return output_fn
+
+def change_based_on_button_states():
+  l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
+  based_on = OV.GetParam('user.masks.based_on')
+  for btn in l:
+    if not OV.IsControl(btn):
+      return
+    if btn == "BASE_ON_CELL" and based_on == 'Cell':
+      state = "true"
+    elif btn == "BASE_ON_FU" and based_on == 'FU':
+      state = "true"
+    elif btn == "BASE_ON_ASU" and based_on == 'ASU':
+      state = "true"
+    else:
+      state = "false"
+    
+    if state == "true":
+      olx.html.SetBG(btn,'gui_green')
+      l.remove(btn)
+      for btn in l:
+        olx.html.SetBG(btn,'gui_light_grey')
+      break
+OV.registerFunction(change_based_on_button_states)
 OV.registerFunction(add_mask_content)
 OV.registerFunction(formula_cleaner)

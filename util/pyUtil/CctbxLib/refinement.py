@@ -61,7 +61,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
     'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
-  solvers_default_method = 'Gauss-Newton'
+  solvers_default_method = 'Levenberg-Marquardt'
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
     OlexCctbxAdapter.__init__(self)
@@ -233,8 +233,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
           refinementWrapper(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
               track_all=True,
-              gradient_threshold=1e-8,
-              step_threshold=1e-8)
+              gradient_threshold=None,
+              step_threshold=None)
+          #gradient_threshold=1e-12,
+          #step_threshold=1e-12)
         else:
           refinementWrapper(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
@@ -459,8 +461,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # not sure why we need to duplicate these in the CIF but for now some
     # things rely on to it!
       completeness_full_a, completeness_theta_max_a = completeness_full, completeness_theta_max
-    OV.SetParam("snum.refinement.max_shift_over_esd", None)
-    OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
+    #OV.SetParam("snum.refinement.max_shift_over_esd", None)
+    #OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
     shifts = self.normal_eqns.get_shifts()
     try:
@@ -471,10 +473,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #print("Largest shift/esd is %.4f for %s" %(
             #shifts[max_shift_idx],
             #self.covariance_matrix_and_annotations.annotations[max_shift_idx]))
-      OV.SetParam("snum.refinement.max_shift_over_esd",
-        shifts[max_shift_idx])
-      OV.SetParam("snum.refinement.max_shift_over_esd_atom",
-        self.covariance_matrix_and_annotations.annotations[max_shift_idx].split('.')[0])
+      #OV.SetParam("snum.refinement.max_shift_over_esd",
+        #shifts[max_shift_idx])
+      #OV.SetParam("snum.refinement.max_shift_over_esd_atom",
+        #self.covariance_matrix_and_annotations.annotations[max_shift_idx].split('.')[0])
     except:
       pass
     # cell parameters and errors
@@ -1178,17 +1180,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if(self.cycles.n_iterations>0):
       max_shift_site = self.normal_eqns.max_shift_site()
       max_shift_u = self.normal_eqns.max_shift_u()
-      print >> log, "  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s" %(
+      max_shift_esd = self.normal_eqns.max_shift_esd
+      max_shift_esd_item = self.normal_eqns.max_shift_esd_item
+      print >> log, "  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
       max_shift_site[0],
       max_shift_site[1].label,
       max_shift_u[0],
-      max_shift_u[1].label
+      max_shift_u[1].label,
+      max_shift_esd,
+      max_shift_esd_item
       )
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
 
+
+    OV.SetParam("snum.refinement.max_shift_over_esd",
+      max_shift_esd)
 
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())

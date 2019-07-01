@@ -3,43 +3,45 @@
   <title>Welcome to OLEX2</title>
 </head>
 <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
-
 <font color="$GetVar(HtmlFontColour)" size="$GetVar(HtmlGuiFontSize)" face="$GetVar(HtmlFontName)">
 
-<table cellpadding="0" cellspacing="0" width="$math.eval(html.ClientWidth(self)- math.eval(2*html.GetBorders()))"><tr><td>
-<table name="LOGO" border="0" width="100%" cellpadding="0" cellspacing="1">
+<table cellpadding="0" cellspacing="0" width="$math.eval(html.ClientWidth(self)- math.eval(2*html.GetBorders()))">
   <tr>
-    <td align="right">
+    <td>
+      <table name="LOGO" border="0" width="100%" cellpadding="0" cellspacing="1">
+        <tr>
+          <td align="right">
 <!-- #include logo gui\blocks\logo.htm;1; -->
 <!-- #include logo1 gui\blocks\logo1.htm;0; -->
-    </td>
-  </tr>
-</table>
-<table name="SNUM_INFO" border="0" width="100%" cellpadding="0" cellspacing="1">
-  <tr>
-    <td align='center'>
+          </td>
+        </tr>
+      </table>
+      <table name="SNUM_INFO" border="0" width="100%" cellpadding="0" cellspacing="1">
+        <tr>
+          <td align='center'>
 <!-- #include info-title gui\blocks\snum-info.htm;0; -->
-    </td>
-  </tr>
-</table>
-
-
-<table name=TABS border="0" style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
-  <tr align='center' width='100%'>
-    <td align='left' width='20%'>
+         </td>
+       </tr>
+      </table>
+      <table name=TABS border="0" style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
+        <tr align='center' width='100%'>
+         <td align='left' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-home gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=home;2; -->
-    </td>
-    <td align='center' width='20%'>
+         </td>
+         <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-work gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=work;2; -->
-    </td>
-    <td align='center' width='20%'>
+         </td>
+         <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-view gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=view;2; -->
-    </td>
-    <td align='center' width='20%'>
+         </td>
+         <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-tools gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=tools;2; -->
-    </td>
-    <td align='right' width='20%'>
+         </td>
+         <td align='right' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-info gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=info;2; -->
+         </td>
+       </tr>
+      </table>
     </td>
   </tr>
 </table>
@@ -52,7 +54,7 @@
 
 <!--ANCHOR-->
 
-</td></tr></table>
+
 </font>
 </body>
 </html>

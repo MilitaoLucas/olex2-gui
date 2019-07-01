@@ -101,12 +101,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     
     rank=numpy.argsort(leastSquare)[::-1]
     hkl_sel = numpy.copy(hkl[rank[:hkl_sel_num],:])
-    #twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
     if not personal:
       twin_laws=self.find_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)    
     else:
       twin_laws=self.find_personal_twin_laws(hkl,f_calc,f_obs,hkl_sel,model)
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
+    ordered_twins=self.purge_duplicates(ordered_twins)
     top_twins=ordered_twins[:10]
     lawcount=0
     for i, twin_law in enumerate(top_twins):
@@ -166,7 +166,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     for r, run, basf in r_list:
       i += 1
       image_name = self.twin_laws_d[run].get('law_image_name', "XX")
-      use_image = "%son.png" %image_name
+      use_image = "%soff.png" %image_name
       img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
       #href = 'spy.on_twin_image_click(%s)'
@@ -362,8 +362,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       law = twin_law.as_double_array()[0:9]
       law=numpy.around(numpy.reshape(numpy.array(law),(3,3)),decimals=3)
       #basf1, r1 = self.basf_estimate(law, hkl_all, f_calc, f_obs)
-      [basf, r,r_diff]=self.basf_quicker_integral(law, hkl_all, f_calc, f_obs)
-      if(basf<0.1):
+      [basf, r,r_diff]=self.basf_estimate(law, hkl_all, f_calc, f_obs)
+      if(basf<0.02):
         continue
       twin_laws+=[twin_rules("Integral",[],law,0,0,[basf,r,r_diff])]   
       
@@ -398,7 +398,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       rotation_fraction=24
       twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
 
-    if (not twin_laws) and OV.GetParam('user.twinning.olex2.do_long'):
+    if (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
       print ("No Highly likely low-index axes, indexes and threshold increased")
       olx.Refresh()
       size=12
@@ -416,12 +416,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
+      twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
       olx.Refresh()
     else:
-      if not OV.GetParam('user.twinning.olex2.do_long'):
+      if not OV.GetParam('snum.twinning.olex2.do_long'):
         print ("No Twin Laws found. If you think there is likely twinning, try the 'extended' version or input your own parameters.")
       else:
         print ("No Twin Laws found. If you think there is likely twinning, try inputting your own parameters.")
@@ -435,9 +436,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     twin_laws=[]
     twin_laws+=self.get_integral_twin_laws(hkl_all, f_calc, f_obs)
     
-    rotation_fraction=OV.GetParam('user.twinning.olex2.rotation_fraction')
-    size=OV.GetParam('user.twinning.olex2.max_index')
-    threshold=OV.GetParam('user.twinning.olex2.threshold')
+    rotation_fraction=OV.GetParam('snum.twinning.olex2.rotation_fraction')
+    size=OV.GetParam('snum.twinning.olex2.max_index')
+    threshold=OV.GetParam('snum.twinning.olex2.threshold')
     print ("Using personal values: \n Max Index: %d, \n Rotation Fractions: %d, \n Cutoff Threshold %.4f"%(size,rotation_fraction,threshold))
     olx.Refresh()
     
@@ -448,6 +449,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
         twin_law.rbasf=rbasf
     if twin_laws:
+      twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
       print ("Twin Laws Found - See the Twinning Tab")
@@ -731,8 +733,77 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i]*scale, sigmas[i]*scale, 1))
       
     hklf.write("%4d%4d%4d\n"%(0,0,0))
+    hklf.write("REM TWIN %s"%format_twin_string_from_law(twin_law))
     hklf.close()
     
+
+  def do_rounding(self,twin_laws):
+    for twin_law in twin_laws:
+      matrix=twin_law.hkl_rotation
+      for i in numpy.arange(0,3):
+        for j in numpy.arange(0,3):
+          item=matrix[i,j]
+          if (abs(1.0-item)<0.01):
+            matrix[i,j]=1.0
+          elif (abs(-1.0-item)<0.01):
+            matrix[i,j]=-1.0
+          elif (abs(0.0-item)<0.01):
+            matrix[i,j]=0.0
+          elif (abs(0.5-item)<0.01):
+            matrix[i,j]=0.5
+      twin_law.hkl_rotation=matrix
+    return twin_laws
+  
+  def purge_duplicates(self, twin_laws):
+    non_duplicate_twin_laws=[]
+    law_amount=len(twin_laws)
+    fo2 = self.reflections.f_sq_obs_filtered
+    symmetry_ops=fo2.crystal_symmetry().space_group().all_ops()#list of symmetries to be retrieved with .as_double_array() and mapped to actual 3x3 matrices. 
+    #However, they have 3 more numbers than expected - the last 3 are the +- for translations I think. Sadly, due to inversion symmetry, there are twice as many matrices as actual symmetry equivalents we need to care about.
+    symmetry_matrices=[]
+    for matrix in symmetry_ops:
+      symmetry_matrices+=[numpy.reshape(matrix.as_double_array()[0:9], (3,3))]
+    #assumption - only the first half are unique, the rest represent inversion symmetries, which are inherantly discarded by only taking positive axes. 
+    #additionally, the first is the identity, so is also discarded 
+    num_matrix=len(symmetry_matrices)
+    symmetry_matrices=symmetry_matrices[1:int(num_matrix/2)]
+    for i, twin_law in enumerate(twin_laws):
+      if i==0:
+        non_duplicate_twin_laws+=[twin_law]
+        continue
+      duplicate=False
+      for matrix in symmetry_matrices:
+        rotated_twin=numpy.dot(matrix,twin_law.hkl_rotation)
+        for j in range(0,i):
+          if numpy.allclose(rotated_twin, twin_laws[j].hkl_rotation):
+            duplicate=True
+          if duplicate:
+            break;
+        if duplicate:
+          break;  
+      if not duplicate:
+        non_duplicate_twin_laws+=[twin_law]
+          
+        
+    return non_duplicate_twin_laws
+    
+    
+      
+    
+def format_twin_string_from_law(twin_law):
+  twin_str_l = []
+  for row in twin_law:
+    for ele in row:
+      ele = str(ele)
+      if ele == "0.0":
+        ele = "0"
+      elif ele == "-1.0":
+        ele = "-1"
+      elif ele == "1.0":
+        ele = "1"
+      twin_str_l.append("%s" %ele)
+  return " ".join(twin_str_l)
+
 
 def on_twin_image_click(run_number):
   global twin_laws_d
@@ -747,39 +818,28 @@ def on_twin_image_click(run_number):
       OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
     
   twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
+  twin_law_disp = format_twin_string_from_law(twin_law)
   twin_law_rnd = numpy.rint(twin_law)
   basf=float(twin_laws_d[int(run_number)]['BASF'])
   
-  twin_str_l = []
-  for row in twin_law:
-    for ele in row:
-      ele = str(ele)
-      if ele == "0.0":
-        ele = "0"
-      elif ele == "-1.0":
-        ele = "-1"
-      elif ele == "1.0":
-        ele = "1"
-      twin_str_l.append("%s" %ele)
-  twin_str = " ".join(twin_str_l)
-
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
-    print "Using twin law: ", twin_str
+    print ("Using twin law: %s" %twin_law_disp)
+    print ("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
     olx.HKLF(2)
     OV.DelIns("BASF")
     OV.AddIns("BASF %f"%basf)
-    OV.AddIns("'REM TWIN %s'"%twin_str)
     hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
     OV.HKLSrc(hklname)
   else:
+    print ("Using twin law: %s" %twin_law_disp)
+    print ("This is an integral twin law, and twinning will be handled by the refinement program.")
     OV.DelIns("TWIN")
     olx.HKLF(0)
     OV.DelIns("BASF")
     OV.AddIns("BASF %f"%basf)
-    OV.AddIns("TWIN %s"%twin_str)
-    
+    OV.AddIns("TWIN %s"%twin_law_disp)
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 
