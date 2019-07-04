@@ -18,9 +18,12 @@ $spy.MakeElementButtonsFromFormula('mode')
   </font>
 </td>
 
-<td width='10%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
-$spy.MakeHoverButton('small-Add_H','showH a true>>HADD>>autorefine')
-</td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Add H",
+    "onclick=showH a true>>HADD>>autorefine",
+    )$-
+
 <td width='10%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
   $spy.MakeHoverButton('toolbar-anis',"anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine")
 </td>
