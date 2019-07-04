@@ -832,6 +832,19 @@ class OlexFunctions(inheritFunctions):
     res = olx.Info()
     return res
 
+  def GetProgramVersionByName(self, name):
+    version = "n/a"
+    name = name.lower()
+    if "shelx" in name.lower():
+      version = olx.Lst('version')
+    elif "olex2" in name.lower():
+      version=self.GetTag()
+    elif "cctbx" in name.lower():
+      version=self.GetTag() + "(ccbtx)"
+    elif "smtbx" in name.lower():
+      version=self.GetTag() + "(smtbx)"
+    return version
+
   def GetTag(self):
     if olx.olex2_tag:
       return olx.olex2_tag
