@@ -514,8 +514,11 @@ def getAvailableModules_():
             m.action = 3 #reinstall
         elif d < m.release_date:
           m.action = 2
+      elif os.path.exists(md + ".rollback.zip"):
+        m.action = 5
       else:
         m.action = 1
+        
   except Exception, e:
     if debug:
       sys.stdout.formatExceptionInfo()
@@ -564,6 +567,8 @@ def getModuleCaption(m):
     return "%s - Re-install" %(m.name)
   elif m.action == 4:
     return "%s - Restart Olex2" %(m.name)
+  elif m.action == 5:
+    return "%s - Roll-back" %(m.name)
   else:
     return "%s - Up-to-date" %(m.name)
 
@@ -651,16 +656,40 @@ def getAction():
     action = "Re-install"
   elif current_module.action == 4:
     action = "Restart Olex2"
+  elif current_module.action == 5:
+    action = "Enable"
   else:
-    action = 'Nothing to do'
+    action = 'Disable'
   return action
 
 def doAct():
   global current_module
-  if current_module is None or current_module.action == 0:
+  global avaialbaleModulesRetrieved
+  if current_module is None:
     return
   elif current_module.action == 4:
     olx.Restart()
+  elif current_module.action == 5:
+    rollback(current_module.folder_name)
+    avaialbaleModulesRetrieved = False
+    getAvailableModules_()
+    olx.html.Update()
+
+  elif current_module.action == 0:
+    pdir = os.path.join(OV.DataDir(), "modules", current_module.folder_name)
+    if not os.path.exists(pdir):
+      print("The module folder %s does not exist" %pdir)
+      return
+    rollback_zip = os.path.join("%s.rollback" %pdir)
+    shutil.make_archive(rollback_zip, 'zip', pdir)
+    avaialbaleModulesRetrieved = False
+    
+    print "The original module %s has been backed up and deleted." %current_module.name
+    shutil.rmtree(pdir)
+    avaialbaleModulesRetrieved = False
+    getAvailableModules_()
+    olx.html.Update()
+    
   else:
     getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
     #current_module = None

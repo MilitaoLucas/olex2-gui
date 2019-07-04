@@ -12,7 +12,7 @@ contact you in the case of new releases or features update.
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row.htm;name='MODULES_EMAIL';1 -->
-  <td width='10%'><b>e-mail</b></td>
+  <td width='13%'><b>e-mail</b></td>
   <td width="40%" align="right">$+
      html.Snippet("gui/snippets/input-text", "name=modules_email",
       "width=100%",
@@ -31,8 +31,9 @@ contact you in the case of new releases or features update.
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_ACTION;1; -->
-  <td width='15%'><b>Modules</b></td>
-  <td width="50%" align="right">$+
+  <td width='13%'><b>Modules</b></td>
+  <td width="40%" align="right">
+    $+
      html.Snippet("gui/snippets/input-combo", "name=available_modules",
       "width=100%",
       "items=spy.plugins.gui.getModuleList()",
@@ -40,7 +41,10 @@ contact you in the case of new releases or features update.
       "onchange=spy.plugins.gui.update(html.GetValue(~name~))",
       "onreturn=html.call(~name~.onchange)",
       "readonly=false")
-  $-</td>
+    $-
+  </td>
+  
+  
     $+
     html.Snippet(GetVar(default_link),
     "value=spy.plugins.gui.getAction()",
