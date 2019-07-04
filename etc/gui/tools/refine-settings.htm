@@ -146,6 +146,7 @@ $spy.gui.cif.check_for_embedded_hkl()
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+
 <!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
 <tr ALIGN='left' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Masks;1 -->
@@ -162,8 +163,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         )
       $-
 
-<!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
-
+<!-- #ignoreif not(spy.GetParam('snum.refinement.use_solvent_mask'))
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
@@ -178,7 +178,10 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     )
   $-
 
-  <td width="11%">solvent r</td>
+  <td width="11%">
+    Solvent r
+  </td>
+
   <td width="10%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
@@ -194,7 +197,11 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     >
     </font>
   </td>
-  <td width="11%">truncation</td>
+
+  <td width="11%">
+    Truncation
+  </td>
+
   <td width="10%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
@@ -212,23 +219,21 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
 <tr ALIGN='left' width='100%%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Masking-Info;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td>
 <!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
 </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
 <td>
-<!-- #ignoreif fs.Exists strcat(FileName(),_mask_notification.htm)
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
+</td>
 #ignoreif -->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
 
