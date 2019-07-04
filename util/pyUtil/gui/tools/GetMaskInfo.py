@@ -92,7 +92,7 @@ def get_mask_info():
         if not numbers:
           return return_note(note = "No Voids in CIF", col = gui_green)
       else:
-        return return_note(note = "No Voids in this structure", col=gui_green)
+        return return_note(note = "There is nothing known about voids in this structure.", col=gui_orange)
 
   mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
   if is_CIF:
