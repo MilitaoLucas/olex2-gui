@@ -36,8 +36,8 @@ def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
   w = int(olx.html.ClientWidth('self'))
   h = int(olx.html.ClientHeight('self'))
-  sw = 600+2*15+10
-  sh = 400+2*15+150
+  sw = 650+2*10+2
+  sh = 400+2*15+60
   olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
             x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
 
