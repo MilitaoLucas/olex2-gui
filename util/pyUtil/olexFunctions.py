@@ -1088,8 +1088,25 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
-
+def GetFormattedCompilationInfo():
+  d = {}
+  l = olx.GetCompilationInfo('full').split()
+  d['Date'] = l[0].rstrip(",")
+  d['SVN'] = l[1].split(".")[1].rstrip(",")
+  d['MSC'] = l[2].split(":")[1].rstrip(",")
+  d['OS'] = l[4].rstrip(",")
+  d['Python'] = l[6].rstrip(",")
+  d['wxWidgets'] = l[8].rstrip(",")
+  d['Vendor'] = l[10].rstrip(",")
+  t = "<font size='2'><table width='100%%' cellpadding='0' cellspacing='0'>"
+  t += "<tr><td><b>Date</b>: %(Date)s, <b>SVN</b>: %(SVN)s,  <b>MSC</b>: %(MSC)s</td></tr>" %d
+  t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
+  t += "</table></font>"
+  return t
+  
+  
 OV = OlexFunctions()
+OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
 OV.registerFunction(OV.HtmlGetValue)
