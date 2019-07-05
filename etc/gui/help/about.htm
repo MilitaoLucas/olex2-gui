@@ -1,23 +1,69 @@
 <html><body>
-<table width="100%">
-<tr><td align=center>
-<zimg src="BaseDir()/splash.jpg">
-</td></tr>
-<tr><td align=center>
-Olex2 v$spy.GetTag() &copy; OlexSys Ltd. 2004 &ndash; $time.FormatDateTime(time.now(),'yyyy')
-</td></tr>
-<tr><td align=center>
-Compilation Info: $GetCompilationInfo(full)
-</td></tr>
-<tr><td align=center>
-<a href="shell http://www.olex2.org/">%All credits are here%</a>
-</td></tr>
-<tr><td align=center>
-%Contact the Olex2 team at support@olex2.org%
-</td></tr>
+<font color="#ffffff">
 
-<tr><td align=center>
-<input type=button onclick="html.Hide about" value="OK">
-</td></tr>
+<table width='100%' cellpadding='0' cellspacing='0' bgcolor="#222222">
+<tr>
+  <td align='center'>
+    <zimg src="BaseDir()/splash.jpg">
+  </td>
+</tr>
+
+<tr>
+<td align='center'>&nbsp;</td>
+</tr>
+
+<tr>
+  <td align='center'>
+  <font size='4'>
+Olex2 v$spy.GetTag() &copy; OlexSys Ltd. 2004 &ndash; $time.FormatDateTime(time.now(),'yyyy')
+  </font>
+  </td>
+</tr>
 </table>
-</body></html>
+
+
+<table width='100%' cellpadding='0' cellspacing='0' bgcolor="#222222">
+
+<tr width='100%'>
+  <td align="center" width='50%'>
+    $spy.GetFormattedCompilationInfo()
+  </td>
+
+  <td align="center" width='25%'>
+    support@olex2.org
+  </td>
+
+  <td align="center" width='25%'>
+    <table width="100%">
+      <tr> 
+        $+
+          html.Snippet(GetVar(default_link),
+          "value=All Credits",
+          "name=Credits",
+          "width=100%",
+          "bgcolor=GetVar(gui.action_colour)",
+          "fgcolor=#ffffff",
+          "onclick=shell https://www.olexsys.org/Documentation/ArticleID/88/acknowledgements",
+          )
+        $-
+    </tr>
+    <tr>
+      $+
+        html.Snippet(GetVar(default_link),
+        "value=Close",
+        "name=CLOSE",
+        "width=100%",
+        "bgcolor=GetVar(gui.action_colour)",
+        "fgcolor=#ffffff",
+        "onclick=html.Hide about",
+        )
+      $-
+    </tr>
+   </table>
+  </td>
+</tr>
+</table>
+
+</font>
+</body>
+</html>
