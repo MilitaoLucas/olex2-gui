@@ -1539,8 +1539,19 @@ class Analysis(Graph):
 
     extraX = 29
     extraY = 48
-    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
-      pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
+    
+    window = olx.GetWindowSize().split(',')
+    
+    mouseX = int(olx.GetMouseX())
+    mouseY = int(olx.GetMouseY())
+    X = mouseX - int(width*1.033) + 20
+    Y = mouseY - 20
+    
+    if mouseX < width:
+      X = 10
+    
+    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
+      pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1), X, Y)
     olex.m(pstr)
     olx.html.SetBorders(pop_name,0)
     OV.UpdateHtml(pop_name)

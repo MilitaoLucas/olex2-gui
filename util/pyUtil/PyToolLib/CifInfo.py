@@ -135,8 +135,8 @@ class CifTools(ArgumentParser):
           self.update_cif_block({'_publ_section_references' : ''}, force=True)
       except:
         self.update_cif_block({'_publ_section_references' : ''}, force=True)
-
-    self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
+    version = OV.GetProgramVersionByName('Olex2')
+    self.olex2_reference_brief = "Olex2 %s (Dolomanov et al., 2009)" %version
     self.olex2_reference = """Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
  (2009), J. Appl. Cryst. 42, 339-341."""
     olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
@@ -497,7 +497,8 @@ class ExtractCifInfo(CifTools):
       ## END
       try:
         prg = self.SPD.programs[active_solution.program]
-        solution_reference = "%s (%s)" %(prg.name, prg.brief_reference)
+        version = OV.GetProgramVersionByName(prg.name)
+        solution_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
         full_references.append(prg.reference)
         olx.SetVar('solution_reference_short', prg.brief_reference)
         olx.SetVar('solution_reference_long', prg.reference)
@@ -520,7 +521,8 @@ class ExtractCifInfo(CifTools):
       ## END
       try:
         prg = self.RPD.programs[active_node.program]
-        refinement_reference = "%s (%s)" %(prg.name, prg.brief_reference)
+        version = OV.GetProgramVersionByName(prg.name)
+        refinement_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
         full_references.append(prg.reference)
         olx.SetVar('refinement_reference_short', prg.brief_reference)
         olx.SetVar('refinement_reference_long', prg.reference)

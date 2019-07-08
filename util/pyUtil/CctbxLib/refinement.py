@@ -230,13 +230,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       try:
         if(method=='Levenberg-Marquardt'):
+#          normal_eqns_solving.levenberg_marquardt_iterations.tau=1e-4
           refinementWrapper(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
               track_all=True,
               gradient_threshold=None,
-              step_threshold=None)
-          #gradient_threshold=1e-12,
-          #step_threshold=1e-12)
+              step_threshold=None,
+              tau = 1e-6,
+              )
         else:
           refinementWrapper(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,

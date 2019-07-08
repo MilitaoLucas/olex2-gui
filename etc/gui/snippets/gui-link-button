@@ -5,6 +5,7 @@
 #name=#value
 #onclick=#onclick
 #fit=false
+#focus=>>focus
 #flat=GetVar(linkButton.flat)
 #disabled=false
 #bgcolor=GetVar(linkButton.bgcolor)
@@ -21,7 +22,7 @@
       value="#value"
       width="#width"
       height="#height"
-      onclick="#onclick>>focus"
+      onclick="#onclick#focus"
       bgcolor="#bgcolor"
       fgcolor="#fgcolor"
       fit="#fit"
