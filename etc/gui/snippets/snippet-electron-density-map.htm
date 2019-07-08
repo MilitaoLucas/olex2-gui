@@ -4,22 +4,15 @@
   <b>&nbsp;MAP</b>
 </td>
 
-<td width='60%'>
     $+
-    html.Snippet("gui/snippets/input-button",
+    html.Snippet(GetVar(default_link),
     "value=Electron Density Map",
     "value='\$spy.gui.maps.getActionString()'",
     "onclick=spy.gui.maps.MapView()",
     )$-
-</td>
 
-<td>
-</td>
-
-<td width='20%' align='right'>
     $+
-    html.Snippet("gui/snippets/input-button",
+    html.Snippet(GetVar(default_link),
     "value=Map Settings",
     "onclick=spy.gui.SwitchTool(h2-tools-maps)>>spy.gui.tools.flash_gui_control(h2-Maps)>>spy.gui.SwitchTool(h3-electron-density)",
     )$-
-<td>

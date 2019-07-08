@@ -34,12 +34,22 @@ olex.registerFunction(SaveModel, False, "gui.dialog")
 
 def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
-  w = int(olx.html.ClientWidth('self'))
-  h = int(olx.html.ClientHeight('self'))
-  sw = 600+2*15+10
-  sh = 400+2*15+150
+  w = int(olx.html.ClientWidth('gl'))
+  h = int(olx.html.ClientHeight('gl'))
+
+  window = olx.GetWindowSize('gl').split(',')
+
+  sw = 650+2*10+2
+  sh = 400+2*15+60
+
+  x = int(window[0]) + int(int(window[2])/2) - int(sw/2)
+  y = int(window[1]) + int(int(window[3])/2) - int(sh/2)
+
+  #olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
+            #x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
   olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
-            x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
+            x=x, y=y, w=sw, h=sh)
+
 
 
 olex.registerFunction(About, False, "gui")

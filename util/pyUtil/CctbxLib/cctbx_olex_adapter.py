@@ -998,3 +998,36 @@ def generate_sf_table():
   SF_TableGenerator()
 
 OV.registerFunction(generate_sf_table, False, "test")
+
+def generate_DISP(table_name_, wavelength=None, elements=None):
+  import olx
+  from cctbx.eltbx import attenuation_coefficient as attc
+  nist_elements = attc.nist_elements()
+  table_name = table_name_.lower()
+  if not wavelength:
+    wavelength = olx.xf.exptl.Radiation()  
+  wavelength = float(wavelength)
+  if "sasaki" == table_name:
+    from cctbx.eltbx import sasaki
+    tables = sasaki
+  elif "henke" == table_name:
+    from cctbx.eltbx import henke
+    tables = henke
+  else:
+    raise Exception("Invalid table name")
+  if not elements:
+    formula = olx.xf.GetFormula('list')
+    elements = [x.split(':')[0] for x in formula.split(',')]
+  rv = []
+  for e in elements:
+    e = str(e)
+    try:
+      table = tables.table(e)
+      f = table.at_angstrom(wavelength)
+      m_table = attc.get_table(nist_elements.atomic_number(e))
+      rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
+    except ValueError:
+      rv.append(e + ',0.0, 0.0')
+  return ';'.join(rv)
+
+OV.registerFunction(generate_DISP, False, "sfac")
