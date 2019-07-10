@@ -41,9 +41,14 @@ def About():
 
   sw = 650+2*10+2
   sh = 400+2*15+60
-
+    
+  
   x = int(window[0]) + int(int(window[2])/2) - int(sw/2)
   y = int(window[1]) + int(int(window[3])/2) - int(sh/2)
+
+  if sz[0] > 600:
+    x += sz[0]
+
 
   #olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
             #x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
