@@ -199,7 +199,7 @@ class Graph(ArgumentParser):
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
     boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60
-    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 20
+    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 18
     colour = self.fillColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
@@ -1130,7 +1130,8 @@ class Graph(ArgumentParser):
         self.draw.line(((x, y_minus_dy), (x+marker_width, y_minus_dy)),
                        width=1, fill=self.outlineColour)
 
-    # Checking for isnan and isinf in xy pairs. These should not be there!
+      # Checking for isnan and isinf in xy pairs. These should not be there!
+    
     for i, (xr, yr) in enumerate(xy_pairs):
       if math.isnan(yr):
         print "-- got isnan (yr)"
@@ -1168,7 +1169,6 @@ class Graph(ArgumentParser):
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (hrefs[i], targets[i])))
 
-
       else:
         href="UpdateHtml"
         href=""
@@ -1176,10 +1176,15 @@ class Graph(ArgumentParser):
           target = '(%.3f,%.3f)' %(xr, yr)
         else:
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
-          target = 'OMIT %s' %(idx)
           href = "OMIT %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
+          target = 'OMIT %s' %(idx)
+          if self.model['omit'].has_key('hkl'):
+            if indices[i] in self.model['omit']['hkl']:
+              target = "Remove OMIT %s" %idx
+              href = "OMIT -u %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
+
 
   def draw_y_axis(self):
     max_y = self.max_y
@@ -1386,6 +1391,7 @@ class Analysis(Graph):
     self.fl = []
     self.item = None
     guiParams = OV.GuiParams()
+    self.model = olexex.OlexRefinementModel().model
 
   def run_Analysis(self, f, n_bins=0, method='olex'):
     self.basedir = OV.BaseDir()
@@ -1394,7 +1400,6 @@ class Analysis(Graph):
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
     self.data = {}
-
     fun = f
     self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.method = method           #Method by which graphs are generated
@@ -1550,10 +1555,11 @@ class Analysis(Graph):
     if mouseX < width:
       X = 10
     
-    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
+    if not olx.html.IsPopup(pop_name) == "true":
+      pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1), X, Y)
-    olex.m(pstr)
-    olx.html.SetBorders(pop_name,0)
+      olex.m(pstr)
+      olx.html.SetBorders(pop_name,0)
     OV.UpdateHtml(pop_name)
 
   def analyse_lst(self):
@@ -2390,6 +2396,7 @@ class Fobs_Fcalc_plot(Analysis):
     metadata["name"] = "Included Data"
     data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
+
     self.data.setdefault('dataset1', data)
 
     ## Omitted Data
@@ -2408,7 +2415,10 @@ class Fobs_Fcalc_plot(Analysis):
                          'label': OV.TranslatePhrase('Filtered Data')},
                         {'type':'marker',
                          'number': 2,
-                         'label': OV.TranslatePhrase('Omitted Data')}
+                         'label': OV.TranslatePhrase('Omitted (cut) Data')},
+                        {'type':'marker',
+                         'number': 3,
+                         'label': OV.TranslatePhrase('Omitted (hkl) Data')}
                         ))
     self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
@@ -3661,6 +3671,3 @@ def title_replace(title):
   title = title.replace(" vs ", " <i>vs</i>")
   title = title.replace("_", "-")
   return title
-
-
-
