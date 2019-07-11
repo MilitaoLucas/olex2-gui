@@ -676,6 +676,8 @@ OV.registerFunction(actaGuiDisplay)
 def refinement_acta_bg_colour():
   olx.html.SetFG('REFINEMENT_ACTA','#000000')
   retVal = gui_red.hexadecimal
+  if OV.IsFileType('cif'):
+    return retVal
   val = olx.Ins('acta')
   if not val:
     retVal = gui_green.hexadecimal
