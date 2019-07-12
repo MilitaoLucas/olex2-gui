@@ -391,6 +391,8 @@ def zipToOlexVFS(zip_path, base=None):
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
 def set_notification(string):
+  if not OV.HasGUI():
+    return
   if string is None:
     string = ""
   OV.SetVar('GuiNotification', string)
