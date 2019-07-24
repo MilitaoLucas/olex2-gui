@@ -411,7 +411,7 @@ class Node(object):
   def solution_node(self):
     nd = self
     while nd and not nd.is_solution:
-      nd = self.primary_parent_node
+      nd = nd.primary_parent_node
     return nd
 
   def _null(self):
