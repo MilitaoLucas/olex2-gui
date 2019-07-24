@@ -103,7 +103,7 @@ class RunPrg(ArgumentParser):
   def run(self):
     import time
     import gui
-      
+
     gui.set_notification(OV.GetVar('gui_notification'))
     OV.SetVar('gui_notification', "")
     if RunPrg.running:

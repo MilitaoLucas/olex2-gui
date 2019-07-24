@@ -368,7 +368,7 @@ def focus_on_control():
       return
   olx.Focus()
 olex.registerFunction(focus_on_control, False, "gui")
-  
+
 def escape_for_html(s):
   s = s.replace("(", "&#40;")
   s = s.replace(")", "&#41;")
