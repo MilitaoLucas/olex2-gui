@@ -32,10 +32,6 @@ class History(ArgumentParser):
     super(History, self).__init__()
 
   def _getItems(self):
-
-    self.demo_mode = OV.FindValue('autochem_demo_mode',False)
-
-    self.autochem = False
     self.solve = False
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
@@ -51,7 +47,7 @@ class History(ArgumentParser):
     self.his_file = None
     OV.registerFunction(self.make_graph,False,'History')
 
-  def create_history(self, solution=False):
+  def create_history(self, solution=False, label=None):
     self._getItems()
     self.solve = solution
     got_history = False
@@ -63,10 +59,6 @@ class History(ArgumentParser):
     if os.path.splitext(self.filefull)[-1].lower() == '.cif':
       return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
-    if self.autochem or self.demo_mode:
-      label = OV.GetParam('snum.history.autochem_next_solution')
-    else:
-      label = None
     if self.solve:
       tree.add_top_level_node(
         OV.HKLSrc(), self.filefull, filefull_lst, is_solution=True, label=label)
@@ -377,14 +369,18 @@ class Node(object):
       # XXX backwards compatibility 2010-11-22
       node = self._active_child_node
       if node not in self.link_table:
+        self._active_child_node = len(self.link_table)
         self.link_table.append(node)
-      self._active_child_node = self.link_table.index(node)
+      else:
+        self._active_child_node = self.link_table.index(node)
       return node
   @active_child_node.setter
   def active_child_node(self, node):
     if node not in self.link_table:
+      self._active_child_node = len(self.link_table)
       self.link_table.append(node)
-    self._active_child_node = self.link_table.index(node)
+    else:
+      self._active_child_node = self.link_table.index(node)
     if self._active_child_node not in self._children:
       self._children.append(self._active_child_node)
 
@@ -395,8 +391,10 @@ class Node(object):
   def children(self, children):
     for i, child in enumerate(children):
       if child not in self.link_table:
+        children[i] = len(self.link_table)
         self.link_table.append(child)
-      children[i] = self.link_table.index(child)
+      else:
+        children[i] = self.link_table.index(child)
     self._children = children
 
   @property
@@ -408,6 +406,32 @@ class Node(object):
     if node not in self.link_table:
       self.link_table.append(node)
     self._primary_parent_node = self.link_table.index(node)
+
+  @property
+  def solution_node(self):
+    nd = self
+    while nd and not nd.is_solution:
+      nd = self.primary_parent_node
+    return nd
+
+  def _null(self):
+    for ch in self.children:
+      ch._null()
+    self._children = []
+    self._active_child_node = None
+    self._primary_parent_node = None
+
+  def _reindex(self, old_table, new_index):
+    self.link_table = new_index
+    children = self._children
+    self._children = []
+    for ch in children:
+      self._children.append(new_index.index(old_table[ch]))
+    if self._active_child_node is not None:
+      self._active_child_node = new_index.index(old_table[self._active_child_node])
+    if self._primary_parent_node is not None:
+      pn = old_table[self._primary_parent_node]
+      self._primary_parent_node = new_index.index(pn)
 
   def set_params(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
@@ -456,6 +480,7 @@ class HistoryTree(Node):
     self._full_index = {self.name: self}
     self.version = 2.1
     self.hklFiles = {}
+    self.label = "root"
     self.next_sol_num = 1
 
   def add_top_level_node(
@@ -490,17 +515,57 @@ class HistoryTree(Node):
 
   @property
   def active_node(self):
-    if self._active_child_node is None: return None
+    if self._active_node is None: return None
     return self.link_table[self._active_node]
   @active_node.setter
   def active_node(self, node):
     if node not in self.link_table:
+      self._active_node = len(self.link_table)
       self.link_table.append(node)
-    self._active_node = self.link_table.index(node)
+    else:
+      self._active_node = self.link_table.index(node)
     OV.SetParam('snum.history.current_node', node.name)
     while node.primary_parent_node is not None:
       node.primary_parent_node.active_child_node = node
       node = node.primary_parent_node
+
+  def find_solution_node_by_label(self, label):
+    for ndi in self._children:
+      if self.link_table[ndi].label == label:
+        return self.link_table[ndi]
+    return None
+
+  def del_node(self, child):
+    # store old index
+    old_table = [x for x in self.link_table]
+    if child._primary_parent_node is not None:
+      n_idx = self.link_table.index(child) 
+      pn = child.primary_parent_node 
+      pn._children.remove(n_idx)
+      if pn._active_child_node == n_idx:
+         pn._active_child_node = None
+    child._null()
+    new_lt = [self]
+    for n in self.link_table:
+      if n._primary_parent_node is not None:
+        new_lt.append(n)
+    self.link_table = new_lt
+    for n in self.link_table:
+      n._reindex(old_table, new_lt)
+    self._full_index = index_node(self, {})
+
+  def delete_solution_node_by_label(self, label):
+    node = self.find_solution_node_by_label(label)
+    if not node:
+      return False
+    self._active_node = None
+    self.del_node(node)
+    if len(self._children) == 0:
+      self._active_node = None
+    else:
+      self._active_node = self._children[0]
+    self._full_index = index_node(self, {})
+    return True
 
   def __setstate__(self, state):
     if 'active_node' in state:
@@ -517,23 +582,24 @@ def index_node(node, full_index):
     index_node(child, full_index)
   return full_index
 
-def delete_node(node):
-  for child in node.children:
-    delete_node(child)
-  del(node)
-
 def delete_history(node_name):
   node = tree._full_index.get(node_name)
-  assert node is not None
+  if not node:
+    for nd in tree.link_table:
+      if nd.label == node_name:
+        node = nd
+        break
+  if not node:
+    print("Unknown branch: %s" %(node_name))
+    return
   parent = node.primary_parent_node
-  parent.children.remove(node)
-  if len(parent.children) == 0:
+  tree.del_node(node)
+  if len(parent._children) == 0:
     active_node = None
   else:
     active_node = parent.children[0]
     while active_node.active_child_node is not None:
       active_node = active_node.active_child_node
-  delete_node(node)
   tree.active_node = active_node
   tree._full_index = index_node(tree, {})
   hist.revert_history(active_node.name)
@@ -652,8 +718,7 @@ def make_html_tree(node, tree_text, indent_level, full_tree=False,
       node, tree_text, indent_level, full_tree, start_count, end_count)
   return tree_text
 
-OV.registerFunction(delete_history)
-
+OV.registerFunction(delete_history, False, "history")
 
 
 #########################################################
