@@ -101,7 +101,7 @@ class History(ArgumentParser):
       wFile.write(resFileData)
 
     hklFile = os.path.join(filepath, filename + ".hkl")
-    hklFileData = decompressFile(tree._full_index.get(filename).hklFiles.get(node.hkl))
+    hklFileData = decompressFile(tree.getHklData(node))
     with open(hklFile, 'wb') as wFile:
       wFile.write(hklFileData)
 
@@ -550,6 +550,9 @@ class HistoryTree(Node):
     for n in self.link_table:
       n._reindex(old_table, new_lt)
     self._full_index = index_node(self, {})
+
+  def getHklData(self, node):
+    return self.hklFiles[self.hklFilesMap[node.hkl]]
 
   def delete_solution_node_by_label(self, label):
     node = self.find_solution_node_by_label(label)
