@@ -579,6 +579,7 @@ class HistoryTree(Node):
     if self.version < 2.2:
       start_time = time.time()
       new_index = {}
+      self.hklFilesMap = {}
       for k,v in self.hklFiles.iteritems():
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
