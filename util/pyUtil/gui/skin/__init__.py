@@ -197,6 +197,11 @@ def export_parameters(load_phil=True):
         OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
         break
 
+
+
+  table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
+  OV.SetParam('HtmlTableWidth', table_width)
+  OV.SetVar('HtmlTableWidth', table_width)
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
