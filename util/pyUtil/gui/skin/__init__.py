@@ -180,6 +180,10 @@ def export_parameters(load_phil=True):
     deal_with_gui_phil(action='load')
 
   if OV.HasGUI():
+    table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
+    OV.SetParam('HtmlTableWidth', table_width)
+    OV.SetVar('HtmlTableWidth', table_width)
+
     ##Stepwise ajust relative font size according to cut-off
     font_size_steps = OV.GetParam('gui.font_size_steps')
     font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
@@ -196,12 +200,8 @@ def export_parameters(load_phil=True):
         OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
         OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
         break
+    
 
-
-
-  table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
-  OV.SetParam('HtmlTableWidth', table_width)
-  OV.SetVar('HtmlTableWidth', table_width)
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
