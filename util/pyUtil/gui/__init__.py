@@ -368,7 +368,7 @@ def focus_on_control():
       return
   olx.Focus()
 olex.registerFunction(focus_on_control, False, "gui")
-  
+
 def escape_for_html(s):
   s = s.replace("(", "&#40;")
   s = s.replace(")", "&#41;")
@@ -391,6 +391,8 @@ def zipToOlexVFS(zip_path, base=None):
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
 def set_notification(string):
+  if not OV.HasGUI():
+    return
   if string is None:
     string = ""
   OV.SetVar('GuiNotification', string)

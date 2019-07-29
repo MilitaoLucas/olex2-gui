@@ -32,10 +32,6 @@ class History(ArgumentParser):
     super(History, self).__init__()
 
   def _getItems(self):
-
-    self.demo_mode = OV.FindValue('autochem_demo_mode',False)
-
-    self.autochem = False
     self.solve = False
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
@@ -51,7 +47,7 @@ class History(ArgumentParser):
     self.his_file = None
     OV.registerFunction(self.make_graph,False,'History')
 
-  def create_history(self, solution=False):
+  def create_history(self, solution=False, label=None):
     self._getItems()
     self.solve = solution
     got_history = False
@@ -63,10 +59,6 @@ class History(ArgumentParser):
     if os.path.splitext(self.filefull)[-1].lower() == '.cif':
       return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
-    if self.autochem or self.demo_mode:
-      label = OV.GetParam('snum.history.autochem_next_solution')
-    else:
-      label = None
     if self.solve:
       tree.add_top_level_node(
         OV.HKLSrc(), self.filefull, filefull_lst, is_solution=True, label=label)
@@ -75,7 +67,6 @@ class History(ArgumentParser):
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     if timing:
-      import time
       t = time.time()
     self._make_history_bars()
     if timing:
@@ -110,7 +101,7 @@ class History(ArgumentParser):
       wFile.write(resFileData)
 
     hklFile = os.path.join(filepath, filename + ".hkl")
-    hklFileData = decompressFile(tree._full_index.get(filename).hklFiles.get(node.hkl))
+    hklFileData = decompressFile(tree.getHklData(node))
     with open(hklFile, 'wb') as wFile:
       wFile.write(hklFileData)
 
@@ -166,8 +157,7 @@ class History(ArgumentParser):
         historyName = OV.ModelSrc()
         tree.name = historyName
 
-      if tree.version < 2.0:
-        tree = _convert_history(tree)
+      tree.upgrade()
 
       if tree.active_node is None:
         self._createNewHistory()
@@ -368,23 +358,27 @@ class Node(object):
         self.program = history_leaf.refinement_program
         self.method = history_leaf.refinement_method
 
+  def get_node_index(self, node):
+    if node not in self.link_table:
+      self.link_table.append(node)
+      return len(self.link_table) -1
+    else:
+      return self.link_table.index(node)
+
   @property
   def active_child_node(self):
     try:
-      if self._active_child_node is None: return None
+      if self._active_child_node is None:
+        return None
       return self.link_table[self._active_child_node]
     except TypeError:
       # XXX backwards compatibility 2010-11-22
       node = self._active_child_node
-      if node not in self.link_table:
-        self.link_table.append(node)
-      self._active_child_node = self.link_table.index(node)
+      self._active_child_node = self.get_node_index(node)
       return node
   @active_child_node.setter
   def active_child_node(self, node):
-    if node not in self.link_table:
-      self.link_table.append(node)
-    self._active_child_node = self.link_table.index(node)
+    self._active_child_node = self.get_node_index(node)
     if self._active_child_node not in self._children:
       self._children.append(self._active_child_node)
 
@@ -394,20 +388,43 @@ class Node(object):
   @children.setter
   def children(self, children):
     for i, child in enumerate(children):
-      if child not in self.link_table:
-        self.link_table.append(child)
-      children[i] = self.link_table.index(child)
+      children[i] = self.get_node_index(child)
     self._children = children
 
   @property
   def primary_parent_node(self):
-    if self._primary_parent_node is None: return None
+    if self._primary_parent_node is None:
+      return None
     return self.link_table[self._primary_parent_node]
   @primary_parent_node.setter
   def primary_parent_node(self, node):
-    if node not in self.link_table:
-      self.link_table.append(node)
-    self._primary_parent_node = self.link_table.index(node)
+    self._primary_parent_node = self.get_node_index(node)
+
+  @property
+  def solution_node(self):
+    nd = self
+    while nd and not nd.is_solution:
+      nd = nd.primary_parent_node
+    return nd
+
+  def _null(self):
+    for ch in self.children:
+      ch._null()
+    self._children = []
+    self._active_child_node = None
+    self._primary_parent_node = None
+
+  def _reindex(self, old_table, new_index):
+    self.link_table = new_index
+    children = self._children
+    self._children = []
+    for ch in children:
+      self._children.append(new_index.index(old_table[ch]))
+    if self._active_child_node is not None:
+      self._active_child_node = new_index.index(old_table[self._active_child_node])
+    if self._primary_parent_node is not None:
+      pn = old_table[self._primary_parent_node]
+      self._primary_parent_node = new_index.index(pn)
 
   def set_params(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
@@ -443,7 +460,6 @@ class Node(object):
     self.__dict__.update(state)
 
 class HistoryTree(Node):
-
   is_root = True
 
   def __init__(self):
@@ -454,9 +470,22 @@ class HistoryTree(Node):
     self._active_node = None
     self.name = OV.ModelSrc()
     self._full_index = {self.name: self}
-    self.version = 2.1
+    # 2.1 - the HKL digest is only, 2.2 - the digest of actual reflections up
+    # to the end
+    self.version = 2.2
     self.hklFiles = {}
+    #maps simple digest of the file timestamp and path to full one
+    self.hklFilesMap = {}
+    self.label = "root"
     self.next_sol_num = 1
+
+  def _updateHKL(self, node, hklPath):
+    if node.hkl is not None and node.hkl not in self.hklFiles:
+      full_md = self.hklFilesMap.get(node.hkl, None)
+      if full_md is None:
+        full_md = digestHKLFile(hklPath)
+        self.hklFiles.setdefault(full_md, compressFile(hklPath))
+        self.hklFilesMap[node.hkl] = full_md
 
   def add_top_level_node(
     self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
@@ -473,9 +502,7 @@ class HistoryTree(Node):
     self.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(name, node)
-    if node.hkl is not None and node.hkl not in self.hklFiles:
-      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
-
+    self._updateHKL(node, hklPath)
     return self.active_child_node.name
 
   def add_node(self, hklPath, resPath, lstPath=None):
@@ -485,22 +512,60 @@ class HistoryTree(Node):
     self.active_node.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(ref_name, node)
-    if node.hkl and node.hkl not in self.hklFiles:
-      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
+    self._updateHKL(node, hklPath)
 
   @property
   def active_node(self):
-    if self._active_child_node is None: return None
+    if self._active_node is None: return None
     return self.link_table[self._active_node]
   @active_node.setter
   def active_node(self, node):
-    if node not in self.link_table:
-      self.link_table.append(node)
-    self._active_node = self.link_table.index(node)
+    self._active_node = self.get_node_index(node)
     OV.SetParam('snum.history.current_node', node.name)
-    while node.primary_parent_node is not None:
+    while node._primary_parent_node is not None:
       node.primary_parent_node.active_child_node = node
       node = node.primary_parent_node
+
+  def find_solution_node_by_label(self, label):
+    for ndi in self._children:
+      if self.link_table[ndi].label == label:
+        return self.link_table[ndi]
+    return None
+
+  def del_node(self, child):
+    # store old index
+    old_table = [x for x in self.link_table]
+    if child._primary_parent_node is not None:
+      n_idx = self.link_table.index(child) 
+      pn = child.primary_parent_node 
+      pn._children.remove(n_idx)
+      if pn._active_child_node == n_idx:
+         pn._active_child_node = None
+    child._null()
+    new_lt = [self]
+    for n in self.link_table:
+      if n._primary_parent_node is not None:
+        new_lt.append(n)
+    self.link_table = new_lt
+    for n in self.link_table:
+      n._reindex(old_table, new_lt)
+    self._full_index = index_node(self, {})
+
+  def getHklData(self, node):
+    return self.hklFiles[self.hklFilesMap[node.hkl]]
+
+  def delete_solution_node_by_label(self, label):
+    node = self.find_solution_node_by_label(label)
+    if not node:
+      return False
+    self._active_node = None
+    self.del_node(node)
+    if len(self._children) == 0:
+      self._active_node = None
+    else:
+      self._active_node = self._children[0]
+    self._full_index = index_node(self, {})
+    return True
 
   def __setstate__(self, state):
     if 'active_node' in state:
@@ -510,6 +575,21 @@ class HistoryTree(Node):
       del state['active_node']
     Node.__setstate__(self, state)
 
+  def upgrade(self):
+    if self.version < 2.2:
+      start_time = time.time()
+      new_index = {}
+      self.hklFilesMap = {}
+      for k,v in self.hklFiles.iteritems():
+        md = digestHKLData(decompressFile(v))
+        new_index.setdefault(md, v)
+        self.hklFilesMap[k] = md
+      self.hklFiles = new_index
+      self.version = 2.2
+      if timing:
+        print("History has been upgraded in: %s s" %(time.time() - start_time))
+
+
 def index_node(node, full_index):
   if node.name not in full_index:
     full_index.setdefault(node.name, node)
@@ -517,23 +597,24 @@ def index_node(node, full_index):
     index_node(child, full_index)
   return full_index
 
-def delete_node(node):
-  for child in node.children:
-    delete_node(child)
-  del(node)
-
 def delete_history(node_name):
   node = tree._full_index.get(node_name)
-  assert node is not None
+  if not node:
+    for nd in tree.link_table:
+      if nd.label == node_name:
+        node = nd
+        break
+  if not node:
+    print("Unknown branch: %s" %(node_name))
+    return
   parent = node.primary_parent_node
-  parent.children.remove(node)
-  if len(parent.children) == 0:
+  tree.del_node(node)
+  if len(parent._children) == 0:
     active_node = None
   else:
     active_node = parent.children[0]
     while active_node.active_child_node is not None:
       active_node = active_node.active_child_node
-  delete_node(node)
   tree.active_node = active_node
   tree._full_index = index_node(tree, {})
   hist.revert_history(active_node.name)
@@ -551,14 +632,32 @@ def saveOriginals(resPath, lstPath):
       shutil.copyfile(filePath,backupFileFull)
 
 def compressFile(filePath):
-  file = open(filePath, "rb")
-  fileData = file.read()
-  file.close()
-  fileData = zlib.compress(fileData,9)
-  return fileData
+  return zlib.compress(open(filePath, "rb").read(), 9)
 
 def decompressFile(fileData):
   return zlib.decompress(fileData)
+
+def digestHKLData(fileData):
+  from StringIO import StringIO
+  md = hashlib.md5()
+  input = StringIO(fileData)
+  l = input.readline()
+  while l:
+    l = l.strip()
+    if not l or len(l) < 12:
+      break
+    try:
+      tl = [int(x) for x in l[:12].split()]
+      if len(tl) != 3 or sum(tl) == 0:
+        break
+    except:
+      break
+    md.update(l)
+    l = input.readline()
+  return md.hexdigest()
+
+def digestHKLFile(filePath):
+  return digestHKLData(open(filePath, "rb").read())
 
 def make_history_bars():
   if olx.GetVar("update_history_bars", 'true') == 'false':
@@ -652,162 +751,4 @@ def make_html_tree(node, tree_text, indent_level, full_tree=False,
       node, tree_text, indent_level, full_tree, start_count, end_count)
   return tree_text
 
-OV.registerFunction(delete_history)
-
-
-
-#########################################################
-## START OF BACKWARDS COMPATIBILITY CLASSES 2010-01-19 ##
-#########################################################
-
-class HistoryBranch:
-  def __init__(self,resPath,lstPath,solution=True):
-    self.historyBranch = {}
-    if solution:
-      tree.current_refinement = 'solution'
-      self.historyBranch['solution'] = HistoryLeaf(resPath,lstPath)
-      self.solution_program = self.historyBranch['solution'].solution_program
-      self.solution_method = self.historyBranch['solution'].solution_method
-    else:
-      self.newLeaf(resPath,lstPath)
-      self.solution_program = None
-      self.solution_method = None
-    self.name = None
-
-  def newLeaf(self,resPath,lstPath):
-    ref_num = str(len(self.historyBranch.keys()) + 1)
-    if len(ref_num) == 1:
-      ref_num = "0%s" %ref_num
-    ref_name = 'refinement_%s' %ref_num
-    tree.current_refinement = ref_name
-    self.historyBranch[ref_name] = HistoryLeaf(resPath,lstPath)
-
-
-class HistoryLeaf:
-  def __init__(self,resPath,lstPath):
-    self.solution_program = None
-    self.solution_method = None
-    self.refinement_program = None
-    self.refinement_method = None
-    self.program_version = None
-    self.R1 = 'n/a'
-    self.wR2 = 'n/a'
-    self.lst = None
-    self.res = None
-
-    self.res = compressFile(resPath)
-    ref_program = OV.GetParam('snum.refinement.program')
-    sol_program = OV.GetParam('snum.solution.program')
-    if tree.current_refinement == 'solution' and sol_program == 'olex2.solve':
-      self.solution_program = sol_program
-      self.solution_method = OV.GetParam('snum.solution.method')
-    elif tree.current_refinement != 'solution' and ref_program == 'olex2.refine':
-      self.refinement_program = ref_program
-      self.refinement_method = OV.GetParam('snum.refinement.method')
-      try:
-        self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
-        self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
-      except ValueError:
-        pass
-
-    elif os.path.exists(lstPath):
-      self.lst = compressFile(lstPath)
-      self.getLeafInfoFromLst(lstPath)
-    else:
-      self.getLeafInfoFromRes(resPath)
-    OV.SetParam('snum.refinement.last_R1', self.R1)
-    OV.SetParam('snum.refinement.last_wR2', self.wR2)
-    if tree.current_refinement == 'solution':
-      if self.solution_program is None:
-        self.solution_program = OV.GetParam('snum.solution.program')
-      if self.solution_method is None:
-        self.solution_method = OV.GetParam('snum.solution.method')
-    else:
-      if self.refinement_program is None:
-        self.refinement_program = OV.GetParam('snum.refinement.program')
-      if self.refinement_method is None:
-        self.refinement_method = OV.GetParam('snum.refinement.method')
-
-  def getLeafInfoFromLst(self, filePath):
-    try:
-      lstValues = lst_reader.reader(filePath).values()
-    except:
-      lstValues = {'R1':'','wR2':''}
-    try:
-      self.R1 = float(lstValues.get('R1', 'n/a'))
-      self.wR2 = float(lstValues.get('wR2', 'n/a'))
-    except ValueError:
-      self.R1 = 'n/a'
-      self.wR2 = 'n/a'
-
-    if self.R1 == 'n/a':
-      self.solution_program = OV.GetParam('snum.solution.program')
-      self.solution_method = OV.GetParam('snum.solution.method')
-    else:
-      self.refinement_program = OV.GetParam('snum.refinement.program')
-      self.refinement_method = OV.GetParam('snum.refinement.method')
-
-    self.program_version = lstValues.get('version',None)
-
-  def getLeafInfoFromRes(self, filePath):
-    try:
-      iresValues = ires_reader.reader(open(filePath)).values()
-    except:
-      iresValues = {'R1':''}
-    try:
-      self.R1 = float(iresValues['R1'])
-    except ValueError:
-      self.R1 = 'n/a'
-    self.wR2 = 'n/a'
-    self.refinement_method = None
-    self.refinement_program = None
-
-  def setLeafInfo(self):
-    OV.SetParam('snum.refinement.last_R1',self.R1)
-    OV.SetParam('snum.last_wR2',self.wR2)
-    if self.refinement_program is not None:
-      if self.refinement_method is not None:
-        OV.set_refinement_program(self.refinement_program, self.refinement_method)
-      else:
-        OV.set_refinement_program(self.refinement_program)
-
-def _convert_history(history_tree):
-  _tree = HistoryTree()
-  hklPath = OV.HKLSrc()
-  branch_names = history_tree.historyTree.keys()
-  branch_names.sort()
-  for branch_name in branch_names:
-    branch = history_tree.historyTree[branch_name]
-    leaf_names = branch.historyBranch.keys()
-    leaf_names.sort()
-    try:
-      leaf_names.remove('solution')
-      leaf_names.insert(0, 'solution') # move solution to front
-    except ValueError:
-      pass
-    for leaf_name in leaf_names:
-      leaf = branch.historyBranch[leaf_name]
-      if leaf_name == 'solution':
-        name = hashlib.md5(branch_name).hexdigest()
-        node = Node(_tree.link_table, name, hklPath, is_solution=True,
-                    primary_parent_node=_tree, history_leaf=leaf)
-        _tree.children.append(node)
-        _tree.active_child_node = node
-      else:
-        name = hashlib.md5(branch_name + leaf_name).hexdigest()
-        if _tree.active_node is None:
-          node = Node(_tree.link_table, name, hklPath, is_solution=False,
-                      primary_parent_node=_tree, history_leaf=leaf)
-          _tree.children.append(node)
-          _tree.active_child_node = node
-        else:
-          node = Node(_tree.link_table, name, hklPath, is_solution=False,
-                      primary_parent_node=_tree.active_node, history_leaf=leaf)
-          _tree.active_node.active_child_node = node
-      _tree.active_node = node
-      _tree._full_index.setdefault(name, node)
-  return _tree
-
-############################################
-## END OF BACKWARDS COMPATIBILITY CLASSES ##
-############################################
+OV.registerFunction(delete_history, False, "history")
