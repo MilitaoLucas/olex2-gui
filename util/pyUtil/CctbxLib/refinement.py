@@ -268,6 +268,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.check_flack()
       if self.flack:
         OV.SetParam('snum.refinement.flack_str', self.flack)
+      else:
+        OV.SetParam('snum.refinement.flack_str', "")
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
