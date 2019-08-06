@@ -335,6 +335,27 @@ class OlexCctbxAdapter(object):
     weighting.compute(fc, scale_factor)
     return weighting.weights
 
+  def load_mask(self):
+    fab_path = os.path.join(OV.FilePath(), OV.FileName()) + ".fab"
+    if os.path.exists(fab_path):
+      with open(fab_path) as fab:
+        indices = []
+        data = []
+        for l in fab.readlines():
+          fields = l.split()
+          if len(fields) < 5:
+            break
+          indices.append((int(fields[0]), int(fields[1]), int(fields[2])))
+          data.append(complex(float(fields[3]), float(fields[4])))
+      miller_set = miller.set(
+        crystal_symmetry=self.xray_structure().crystal_symmetry(),
+        indices=flex.miller_index(indices)).auto_anomalous()
+      return miller.array(miller_set=miller_set, data=flex.complex_double(data))
+    mask_fn = os.path.join(filepath, OV.FileName())+"-f_mask.pickle"
+    if os.path.exists(mask_fn):
+      return easy_pickle.load(mask_fn)
+    return None
+
   def get_fo_sq_fc(self):
     fo2 = self.reflections.f_sq_obs_filtered
     fc = self.f_calc(None, self.exti is not None, True, True)
@@ -374,7 +395,13 @@ class OlexCctbxAdapter(object):
       return False
     return True
 
-
+def write_fab(f_mask, fab_path):
+  with open(fab_path, "w") as f:
+    for i,h in enumerate(f_mask.indices()):
+      line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
+      print >> f, line
+    print >> f, "0 0 0 0.0 0.0"
+  
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):

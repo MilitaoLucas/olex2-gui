@@ -2,6 +2,7 @@ from __future__ import division
 
 import math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
+import cctbx_olex_adapter as COA
 import boost.python
 ext = boost.python.import_ext("smtbx_refinement_least_squares_ext")
 
@@ -109,33 +110,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
-        self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
       if self.f_mask is None:
-        if os.path.exists(fab_path):
-          with open(fab_path) as fab:
-            indices = []
-            data = []
-            for l in fab.readlines():
-              fields = l.split()
-              if len(fields) < 5:
-                break
-              indices.append((int(fields[0]), int(fields[1]), int(fields[2])))
-              data.append(complex(float(fields[3]), float(fields[4])))
-          miller_set = miller.set(
-            crystal_symmetry=self.xray_structure().crystal_symmetry(),
-            indices=flex.miller_index(indices)).auto_anomalous()
-          self.f_mask = miller.array(miller_set=miller_set, data=flex.complex_double(data))
-      else:
+        self.f_mask = self.load_mask()
+      if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
-        with open(fab_path, "w") as f:
-          for i,h in enumerate(self.f_mask.indices()):
-            line = "%d %d %d " %h + "%.4f %.4f" % (self.f_mask.data()[i].real, self.f_mask.data()[i].imag)
-            print >> f, line
-          print >> f, "0 0 0 0.0 0.0"
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
