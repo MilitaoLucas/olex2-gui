@@ -282,6 +282,13 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_obs_merged).lone_set(f_calc_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        f_mask = f_mask.common_set(f_obs_filtered)
+        f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask)
+        f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))
