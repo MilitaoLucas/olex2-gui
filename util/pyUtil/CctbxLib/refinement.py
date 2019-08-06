@@ -105,12 +105,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OV.HKLSrc(original_hklsrc)
         # we need to reinitialise reflections
         self.initialise_reflections()
-      fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
-      if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      if self.f_mask is None:
+      else:
         self.f_mask = self.load_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
