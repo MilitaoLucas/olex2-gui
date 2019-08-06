@@ -5,7 +5,7 @@
 
 gui
   {
-  dpi_scaling = True
+  dpi_scaling = False
     .type = bool
   font_size_steps = 950 750 540 450 420 0
     .type = strings
