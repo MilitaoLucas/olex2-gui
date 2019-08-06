@@ -8,6 +8,7 @@ import olx
 import glob
 import OlexVFS
 import ntpath
+import cctbx_olex_adapter as COA
 
 
 class Method_shelx(Method):
@@ -129,14 +130,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
             anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
           if f_mask.size() != fo2.size():
             raise RuntimeError("f_mask array doesn't match hkl file")
-      if f_mask is not None:
-        with open(fab_path, "w") as f:
-          for i,h in enumerate(f_mask.indices()):
-            line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
-            print >> f, line
-          print >> f, "0 0 0 0.0 0.0"
-      #else:
-        #print "No mask present"
+          COA.write_fab(f_mask, fab_path)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
