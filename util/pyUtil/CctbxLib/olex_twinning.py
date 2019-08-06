@@ -635,7 +635,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #angle and the sine and cosine of that, for use in the rotation formula
     base_rotation_angle=2.*math.pi/rotation_fraction
 
-    for twin_axis in itertools.product(numpy.arange(-size,size+1),numpy.arange(-size,size+1),range(size+1)):
+    for twin_axis in self.all_axes(size): #itertools.product(numpy.arange(-size,size+1),numpy.arange(-size,size+1),range(size+1)):
           reciprocal_law=False
           #skip inverse axes
           if(twin_axis[2]==0):
@@ -756,7 +756,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   
   def purge_duplicates(self, twin_laws):
     non_duplicate_twin_laws=[]
-    law_amount=len(twin_laws)
     fo2 = self.reflections.f_sq_obs_filtered
     symmetry_ops=fo2.crystal_symmetry().space_group().all_ops()#list of symmetries to be retrieved with .as_double_array() and mapped to actual 3x3 matrices. 
     #However, they have 3 more numbers than expected - the last 3 are the +- for translations I think. Sadly, due to inversion symmetry, there are twice as many matrices as actual symmetry equivalents we need to care about.
@@ -766,7 +765,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #assumption - only the first half are unique, the rest represent inversion symmetries, which are inherantly discarded by only taking positive axes. 
     #additionally, the first is the identity, so is also discarded 
     num_matrix=len(symmetry_matrices)
-    symmetry_matrices=symmetry_matrices[1:int(num_matrix/2)]
+    symmetry_matrices=symmetry_matrices[0:int(num_matrix/2)] #changed from 1 to 0 so it purges pure duplicates
     for i, twin_law in enumerate(twin_laws):
       if i==0:
         non_duplicate_twin_laws+=[twin_law]
@@ -786,8 +785,23 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           
         
     return non_duplicate_twin_laws
+  
+  def all_axes(self, max_index):
+    fo2 = self.reflections.f_sq_obs_filtered
+    indexes=flex.miller_index()
+    for twin_axis in itertools.product(numpy.arange(-max_index,max_index+1),numpy.arange(-max_index,max_index+1),range(max_index+1)):
+      indexes.append(twin_axis)
     
-    
+    miller_set=miller.set(crystal_symmetry=fo2.crystal_symmetry(),
+          indices=indexes,
+          anomalous_flag=fo2.anomalous_flag())        
+    #new_thing=miller.set(crystal_symmetry, index)
+    miller_set=miller_set.map_to_asu()
+    asu_indexes=numpy.array(miller_set.indices())
+    asu_unique=numpy.unique(asu_indexes,axis=0)
+    for i in range(asu_unique.shape[0]):
+      yield asu_unique[i]
+  
       
     
 def format_twin_string_from_law(twin_law):
