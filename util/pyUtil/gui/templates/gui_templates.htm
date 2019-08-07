@@ -400,8 +400,32 @@ t:gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
   <tr>
     <td bgcolor='%(col)s'>
-      %(txt)s
+      %(txt)s	
     </td>
   </tr>
 </table>
 }
+
+t:weight_button{
+<b>
+<input
+  type="button"
+  name="Weight_1"
+  value="%(curr_1)s | %(sugg_1)s"
+  width="40%%"
+  fgcolor="%(col_1)s"
+  bgcolor="GetVar(HtmlTableFirstcolColour)"
+  onclick="UpdateWght>>html.Update"
+  custom="border.lightness: 100;highlight.lightness: 110"
+>
+<input
+  type="button"
+  name="Weight_2"
+  value="%(curr_2)s | %(sugg_2)s"
+  width="50%%"
+  fgcolor="%(col_2)s"
+  bgcolor="GetVar(HtmlTableFirstcolColour)"
+  onclick="UpdateWght>>html.Update"
+  custom="border.lightness: 100;highlight.lightness: 110"
+>
+</b>}
