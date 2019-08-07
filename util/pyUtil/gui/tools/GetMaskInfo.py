@@ -603,6 +603,7 @@ def add_mask_content(i,which):
   c_l = c.split(";")
   c_new_l = []
   for c in c_l:
+    c = c.strip()
     n = 1
     m = c
     if " " in c:
