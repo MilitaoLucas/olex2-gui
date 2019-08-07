@@ -61,7 +61,7 @@
     $+
     html.Snippet(GetVar(default_link),
     "value=Malbac",
-    "onclick=reap GetVar(sample_dir)/malbac/malbac.cif",
+    "onclick=if File.Exists(GetVar(sample_dir)/malbac/malbac.res) then 'reap GetVar(sample_dir)/malbac/malbac.res' else 'reap GetVar(sample_dir)/malbac/malbac.cif'",
     "hint=Toluene disordered across a symmetry element",
     )$-
 
