@@ -680,10 +680,6 @@ def get_auto_q_peaks():
   q = heavy + hydrogen
   if q == 0: q = 5
   OV.SetVar('auto_q',q)
-  if not OV.GetVar('manual_q_peak_override',0):
-    OV.SetMaxPeaks(q)
-  #if OV.IsControl('SET_SNUM_REFINEMENT_MAX_PEAKS'):
-    #olx.html.SetValue('SET_SNUM_REFINEMENT_MAX_PEAKS',q)
   return q
 
 def FindZOfHeaviestAtomInFormua():
