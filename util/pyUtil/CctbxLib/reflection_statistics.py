@@ -256,6 +256,9 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
 
 
 class f_obs_vs_f_calc(OlexCctbxAdapter):
+  import os
+  from cctbx.array_family import flex
+  from cctbx import maptbx, miller, sgtbx, uctbx, xray
   def __init__(self, batch_number=None):
     OlexCctbxAdapter.__init__(self)
     if self.hklf_code == 5:
@@ -272,6 +275,29 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_obs_merged = merging.array().f_sq_as_f()
         f_obs_filtered = merging.array().f_sq_as_f()
       else:
+        if OV.GetParam("snum.refinement.use_solvent_mask"):
+          modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+          original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
+          if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
+            # change back to original hklsrc
+            OV.HKLSrc(original_hklsrc)
+            # we need to reinitialise reflections
+            self.initialise_reflections()
+          fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
+          if os.path.exists(fab_path):
+            with open(fab_path) as fab:
+              indices = []
+              data = []
+              for l in fab.readlines():
+                fields = l.split()
+                if len(fields) < 5:
+                  break
+                indices.append((int(fields[0]), int(fields[1]), int(fields[2])))
+                data.append(complex(float(fields[3]), float(fields[4])))
+            miller_set = miller.set(
+              crystal_symmetry=self.xray_structure().crystal_symmetry(),
+              indices=flex.miller_index(indices)).auto_anomalous()
+            mask = miller.array(miller_set=miller_set, data=flex.complex_double(data))
         f_obs_merged = self.reflections.f_sq_obs_merged.f_sq_as_f()
         f_obs_filtered = f_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
 
