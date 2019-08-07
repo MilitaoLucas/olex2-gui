@@ -818,7 +818,7 @@ def weightGuiDisplay_new():
         sugg = 0
       elif curr-sugg > 0:
         sign = "&#9660;"
-      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s </b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
     html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
@@ -849,7 +849,10 @@ def weightGuiDisplay():
     for i in xrange (length_current - len(suggested_weight)):
       suggested_weight.append(0)
   if suggested_weight:
+    d = {}
+    i = 0
     for curr, sugg in zip(current_weight, suggested_weight):
+      i += 1
       curr = float(curr)
       if curr < 1:
         prec = 3
@@ -870,6 +873,12 @@ def weightGuiDisplay():
       _ = "%%.%sf"%prec
       curr = (_ %curr).lstrip('0')
       sugg = (_ %sugg).lstrip('0')
+
+      dd = {'curr_%i' %i:curr,
+           'sugg_%i' %i:sugg,
+           'col_%i' %i:colour,
+           }
+      d.update(dd)
       if html_scheme:
         html_scheme += "|&nbsp;"
       html_scheme += "<font color='%s'>%s(%s)</font>" %(colour, curr, sugg)
@@ -880,9 +889,12 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-    <a target="%s" href="UpdateWght>>html.Update">%s</a>
+    <a target="%s" href="UpdateWght>>html.Update">%s</a> 
     ''' %("Update Weighting Scheme", html_scheme)
-  return html
+  
+  weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug)%d
+  return weight_display
+
 OV.registerFunction(weightGuiDisplay,True,"gui.tools")
 
 def number_non_hydrogen_atoms():
