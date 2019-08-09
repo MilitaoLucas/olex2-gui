@@ -812,6 +812,11 @@ class ExtractCifInfo(CifTools):
       del self.cif_block['_smtbx_masks_void']
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
+      if '_smtbx_masks_void_probe_radius' in self.cif_block:
+        del self.cif_block['_smtbx_masks_void_probe_radius']
+      if '_smtbx_masks_void_truncation_radius' in self.cif_block:
+        del self.cif_block['_smtbx_masks_void_truncation_radius']
+      
     elif (not OV.GetParam('snum.refinement.use_solvent_mask')
           and '_platon_squeeze_void' in self.cif_block):
       del self.cif_block['_platon_squeeze_void']
