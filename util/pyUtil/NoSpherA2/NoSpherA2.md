@@ -1,3 +1,31 @@
+# NoSpherA2
+
+When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
+
+n^<font color='red'>**This is a new and experimental procedure, which requires intensive computing ressources. We do not accept any liability for the correctess of the results at this point.**</font>^n
+
+<br>
+<br>
+
+There are three steps to this procedure:
+
+* The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using either TONTO (shipped) or ORCA. Other programs will be supported in the future
+
+* The atomic non-spherical form factors are extracted from the molecular wavefunction
+
+* olex2.refine now uses these non-spherical form factor for the next refinement cycles.
+
+At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled.
+
+### Update Table
+After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **TONTO** and other programs (currently only **ORCA**) will appear if these are properly installed and Olex2 knows about them --> Settings). Once a program has been chosen, please also adjust 
+
+
+# NoSpherA2 Extras
+This tool provides all the settings required for the calculation of the molecular wavefunction.
+
+
+
 # Hirshfeld Atom Refinement
  The <b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement employs aspherical atomic scattering factors calculated from a theoretical density. This approach allows for an accurate localization of hydrogen atoms, an accurate determination of non-hydrogen ADPs and an anisotropic refinement of hydrogen atoms. It is being developed by Prof. Dylan Jayatilaka at the University of Western Australia in Perth in
  conjunction with Prof. Simon Grabowsky at the University of Bremen.
