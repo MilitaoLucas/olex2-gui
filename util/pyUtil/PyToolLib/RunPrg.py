@@ -467,6 +467,17 @@ class RunRefinementPrg(RunPrg):
         except NameError as error:
           print "Error during NoSpherA2: ",error
           RunRefinementPrg.running = None
+          OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
+          return False
+        dir = olx.FilePath()
+        tsc_exists = False
+        for file in os.listdir(olx.FilePath()):
+          if file.endswith(".tsc"):
+            tsc_exists = True
+        if tsc_exists == False:
+          print "Error during NoSpherA2: "
+          RunRefinementPrg.running = None
+          OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
           return False
       self.startRun()
       try:

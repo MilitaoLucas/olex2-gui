@@ -61,7 +61,7 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="12%" align='left'>
+<td width="20%" align='left'>
   <b>Charge </b>
 </td>
 <td width='5%'>
@@ -69,25 +69,56 @@ $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_Charge",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.charge')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge',html.GetValue('~name~'))",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge', html.GetValue('~name~'))",
+    )
+  $-
+</td>
+<td width="16%" align='right'>
+  <b>Multiplicity </b>
+</td>
+<td width='5%'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_Multiplicity",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.multiplicity', html.GetValue('~name~'))",
     )
   $-
 </td>
 
+<td width='5%'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Aniso",
-    "label=H Aniso ",
-    "td1=<td width='20%' align='right'>",
+    "label=H Aniso",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
     "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
     "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','False')"
     )
   $-
+</td>
+
+<td width='5%' align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Keep_WFN",
+    "label=Keep Wavefunction",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn','False')"
+    )
+  $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="26%" align="right">
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align="left">
   <b>Cluster radius  </b>
 </td>
 <td width="5%">
@@ -98,33 +129,40 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
   $-
   </td>
+<td width="16%" align='right'>
+    <b>DIIS Conv. </b>
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_DIIS@refine",
+    "items='0.1;0.01;0.001;0.0001;0.00001'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.DIIS', html.GetValue('~name~'))")
+   $-
+  </td>
+<td width="5%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=NoSpherA2_cluster_grow@refine",
     "label=Complete Cluster",
-    "td1=<td width='30%' align='right'>",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
     "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','True')",
     "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','False')"
     )
   $-
-
-#ignoreif -->
-
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
-<td width="35%"> </td>
-#ignoreif -->
-
+</td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 #ignoreif -->
 
 <!-- #ignoreif not spy.NoSpherA2.check_for_matching_fcf()
 <tr ALIGN='left' NAME='defden_buttons' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
 
   $+
     html.Snippet(GetVar(default_link),

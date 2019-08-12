@@ -11,6 +11,7 @@ import olex_core
 import gui
 
 
+import shutil
 import time
 debug = bool(OV.GetParam("olex2.debug", False))
 
@@ -60,6 +61,8 @@ class NoSpherA2(PT):
     self.parallel = False
     self.softwares = ""
     self.wfn_2_fchk = ""
+    self.wfn_job_dir = os.path.join(p_path,"olex2","Wfn_job")
+    self.history_dir = os.path.join(p_path,"olex2","NoSpherA2_history")
 
 
     if not from_outside:
@@ -157,10 +160,16 @@ class NoSpherA2(PT):
       No MPI implementation found in PATH!"""
       self.cpu_list_str = '1'
 
-  def launch(self):
+  def launch(self):  
     self.jobs_dir = os.path.join(olx.FilePath(),"olex2","Wfn_job")
+    self.history_dir = os.path.join(olx.FilePath(),"olex2","NoSpherA2_history")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
+    if not os.path.exists(self.history_dir):
+      os.mkdir(self.history_dir)
+    
+      
+   # time.sleep(0.1)  
 
     calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
     if not calculate:
@@ -168,29 +177,110 @@ class NoSpherA2(PT):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
+      
+    tsc_exists = False
+    time = None
+    for file in os.listdir(olx.FilePath()):
+      if file.endswith(".tsc"):
+        tsc_exists = True
+        time = os.path.getmtime(file)
+    if tsc_exists:
+      import datetime
+      timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S'))
+      if not os.path.exists(timestamp_dir):
+        os.mkdir(timestamp_dir)
+      for file in os.listdir(olx.FilePath()):
+        if file.endswith(".tsc"):
+          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+        if file.endswith(".wfn"):
+          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+        if file.endswith(".wfx"):
+          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+        if file.endswith(".ffn"):
+          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+        if file.endswith(".fchk"):
+          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+      
+    # Check if job folder already exists and (if needed) make the backup folders  
+    if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".cif")):  
+      self.backup = os.path.join(self.jobs_dir, "backup")  
+      i = 1  
+      while (os.path.exists(self.backup + "_%d"%i)):  
+        i = i + 1  
+      self.backup = self.backup + "_%d"%i  
+      os.mkdir(self.backup)  
+      try:  
+        files = (file for file in os.listdir(self.jobs_dir)  
+                 if os.path.isfile(os.path.join(self.jobs_dir, file)))  
+        for f in files:  
+          f_work = os.path.join(self.jobs_dir,f)  
+          f_dest = os.path.join(self.backup,f)
+          shutil.move(f_work,f_dest)  
+      except:  
+        pass  
 
     self.setup_har_executables()
+    
+    parts = OV.ListParts()
+    wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    
+    nr_parts = None 
+    if not parts:
+      nr_parts = 1
+    else:
+      deal_with_parts(wfn_code == "Tonto")
+      nr_parts = len(parts)
+      
+    for i in range(nr_parts):
+      if nr_parts > 1:
+        raise NameError("Please don't feed me disordered structures, yet")
+        return
+        if wfn_code.lower().endswith(".fchk"):
+          raise NameError('Disorder is not possible with precalculated fchks!')
+        elif wfn_code == "Tonto":
+          pass
+        else:
+          self.wfn_job_dir = os.path.join(self.jobs_dir,"Part %d"%i)
 
     job = Job(self, olx.FileName())
-
-    wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-    if wfn_code.lower().endswith(".fchk"):
-      OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-    elif wfn_code == "Tonto":
-      pass
+    if nr_parts > 1:
+      for i in range(nr_parts):
+        if wfn_code.lower().endswith(".fchk"):
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+        elif wfn_code == "Tonto":
+          pass
+        else:
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+          try:
+            self.wfn(folder=self.wfn_job_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+          except NameError as error:
+            print "Aborted due to: ",error
+            raise NameError(error)
+    
+        job.launch()
+        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+          raise NameError('Error during structure factor calculation!')
+        olx.html.Update()
+        combine_sfs(force=True,part=i)
     else:
-      OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-      try:
-        self.wfn() # Produces Fchk file in all cases that are not fchk or tonto directly
-      except NameError as error:
-        print "Aborted due to: ",error
-        raise NameError(error)
-
-    job.launch()
-    if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-      raise NameError('Error during structure factor calculation!')
-    olx.html.Update()
-    combine_sfs(force=True)
+      if wfn_code.lower().endswith(".fchk"):
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+      elif wfn_code == "Tonto":
+        pass
+      else:
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+        try:
+          self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+        except NameError as error:
+          print "Aborted due to: ",error
+          raise NameError("Wavefunction failed!")
+      
+      job.launch()
+      if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+        raise NameError('Error during structure factor calculation!')
+      olx.html.Update()
+      combine_sfs(force=True)
+    
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
     olex.m('delins list')
@@ -198,12 +288,12 @@ class NoSpherA2(PT):
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     olx.html.Update()
 
-  def wfn(self):
+  def wfn(self,folder=''):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
 
-    wfn_object = wfn_Job(self,olx.FileName())
+    wfn_object = wfn_Job(self,olx.FileName(),dir=folder)
     software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if software == "ORCA":
       wfn_object.write_orca_input()
@@ -347,7 +437,7 @@ class wfn_Job(object):
   full_dir = None
   exe_fn = None
 
-  def __init__(self, parent, name):
+  def __init__(self, parent, name, dir):
     self.parent = parent
     self.status = 0
     self.name = name
@@ -358,6 +448,9 @@ class wfn_Job(object):
       self.name = self.name[:-6]
     full_dir = olx.FilePath()
     self.full_dir = full_dir
+    if dir != '':
+      self.full_dir = dir
+      full_dir = dir
 
     if not os.path.exists(full_dir):
       return
@@ -367,7 +460,6 @@ class wfn_Job(object):
     self.completed = os.path.exists(self.fchk_fn)
     initialised = False
 
-    import shutil
     try:
       os.mkdir(self.full_dir)
     except:
@@ -413,7 +505,8 @@ class wfn_Job(object):
     com.write(title + '\n')
     com.write(" " + '\n')
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-    com.write(charge + " 1" + '\n')
+    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+    com.write(charge + " " + mult + '\n')
     atom_list = []
     i = 0
     for line in xyz:
@@ -489,7 +582,8 @@ class wfn_Job(object):
     else:
       control = "!B3LYP 3-21G TightSCF Grid4 AIM"
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult 1\n        units angs\n        coords\n")
+    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
     for line in xyz:
@@ -589,18 +683,21 @@ class wfn_Job(object):
       else:
         raise NameError('Gaussian did not terminate normally!')
       
-    import shutil
     if("g03" in args[0]):
-      shutil.move("Test.FChk",self.name+".fchk")
-      shutil.move(self.name + ".log",self.name+"_g03.log")
+      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
+      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
     if("g09" in args[0]):
-      shutil.move("Test.FChk",self.name+".fchk")
-      shutil.move(self.name + ".log",self.name+"_g09.log")
+      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
+      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g09.log"))
     if("g16" in args[0]):
-      shutil.move("Test.FChk",self.name+".fchk")
-      shutil.move(self.name + ".log",self.name+"_g16.log")
+      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
+      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
     if("orca" in args[0]):
-      shutil.move(self.name + ".log",self.name+"_orca.log")
+      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
+      shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
+      shutil.copy(os.path.join(self.full_dir,self.name+".wfx"), self.name+".wfx")
+      file_path = os.path.join(self.full_dir,self.name+".wfn")
+      print(file_path)
       move_args = []
       basis_dir = self.parent.basis_dir
       move_args.append(self.parent.wfn_2_fchk)
@@ -613,13 +710,17 @@ class wfn_Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
+      os.chdir(self.full_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
-      os.chdir(self.full_dir)
       m = subprocess.Popen(move_args, stdout=log)
       while m.poll() is None:
         time.sleep(1)
       log.close()
+      if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
+        shutil.copy(self.name+".fchk", os.path.join(olx.FilePath(), self.name+".fchk"))
+      else:
+        raise NameError("No fchk generated!")
 
 
 class Job(object):
@@ -645,6 +746,7 @@ class Job(object):
       self.name = self.name[:-6]
     full_dir = parent.jobs_dir
     self.full_dir = full_dir
+    print self.full_dir
 
     if not os.path.exists(full_dir):
       return
@@ -658,40 +760,6 @@ class Job(object):
     initialised = False
 
   def launch(self):
-    import shutil
-
-    # Check if job folder already exists and (if needed) make the backup folders
-    if os.path.exists(self.full_dir):
-      self.backup = os.path.join(self.full_dir, "backup")
-      i = 1
-      while (os.path.exists(self.backup + "_%d"%i)):
-        i = i + 1
-      self.backup = self.backup + "_%d"%i
-      os.mkdir(self.backup)
-      try:
-        files = (file for file in os.listdir(self.full_dir)
-                 if os.path.isfile(os.path.join(self.full_dir, file)))
-        for f in files:
-          f_work = os.path.join(self.full_dir,f)
-          f_dest = os.path.join(self.backup,f)
-          shutil.move(f_work,f_dest)
-      except:
-        pass
-    try:
-      os.mkdir(self.full_dir)
-    except:
-      pass
-    tries = 0
-    while not os.path.exists(self.full_dir) and tries < 5:
-      try:
-        os.mkdir(self.full_dir)
-        break
-      except:
-        time.sleep(0.1)
-        tries += 1
-        pass
-
-    time.sleep(0.1)
     self.origin_folder = OV.FilePath()
 
     model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
@@ -723,6 +791,7 @@ class Job(object):
               ,"-scf", OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
               ,"-basis", OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
               ,"-cluster-radius", str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'))
+              ,"-dtol", OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
               ]
       clustergrow = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')
       if clustergrow == False:
@@ -732,7 +801,7 @@ class Job(object):
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.fchk_file')
-      shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
+#      shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
       args = [self.name+".cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]    
@@ -745,6 +814,15 @@ class Job(object):
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge') != '0':
       args.append("-charge")
       args.append(OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'))
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity') != '1':
+      multiplicity = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+      if multiplicity == '0':
+        raise NameError('Multiplicity of 0 is meaningless!')
+      args.append("-mult")
+      args.append(multiplicity)
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn') == False:
+      args.append("-wfn")
+      args.append("f")
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
       import olexex
@@ -777,8 +855,7 @@ class Job(object):
     os.environ['hart_dir'] = self.full_dir
     OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
-    OV.SetParam('snum.refinement.cctbx.nsff.cmd', args)
-
+    OV.SetParam('snum.refinement.cctbx.nsff.cmd',args)
 
     pyl = OV.getPYLPath()
     if not pyl:
@@ -789,6 +866,43 @@ class Job(object):
                           os.path.join(p_path, "HARt-launch.py")])
     while p.poll() is None:
       time.sleep(3)
+      
+    if 'Error in' in open(os.path.join(self.full_dir,self.name+".err")).read():
+      raise NameError("Tonto Error!")
+    if 'Wall-clock time taken for job' in open(os.path.join(self.full_dir,self.name+".out")).read():
+      pass
+    else:
+      raise NameError("Tonto unsuccessfull!")
+	  
+    if fchk_source == "Tonto" and OV.GetParam('snum.refinement.cctbx.nsff.keep_wfn') == True:
+      if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
+        shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), os.path.join(olx.FilePath(),self.name+".wfn"))
+      else:
+        raise NameError("No WFN found!")
+      move_args = []
+      basis_dir = self.parent.basis_dir
+      basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
+      move_args.append(self.parent.wfn_2_fchk)
+      move_args.append("-wfn")
+      move_args.append(os.path.join(self.full_dir,self.name+".wfn"))
+      move_args.append("-b")
+      move_args.append(basis_name)
+      move_args.append("-d")
+      if sys.platform[:3] == 'win':
+        move_args.append(basis_dir.replace("/","\\"))
+      else:
+        move_args.append(basis_dir)
+      os.chdir(self.full_dir)
+      logname = self.name + "_wfn2fchk.log"
+      log = open(logname,'w')
+      m = subprocess.Popen(move_args, stdout=log)
+      while m.poll() is None:
+        time.sleep(1)
+      log.close()
+      if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
+        shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), os.path.join(olx.FilePath(), self.name+".fchk"))
+      else:
+        raise NameError("No fchk generated!")
 
 def combine_sfs(force=False):
   import glob
@@ -837,8 +951,7 @@ def combine_sfs(force=False):
     while (os.path.exists(os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)):
       i = i + 1
     try:
-      from shutil import move
-      move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
+      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
     except:
       pass
 
@@ -857,6 +970,7 @@ def combine_sfs(force=False):
     elif "Symops,ascii" in file_p:
       symops_fp = file_p
       continue
+    
     name = os.path.basename(file_p).split("_")[0]
     d.setdefault(name,{})
     values = open(file_p,'r').read().splitlines()
@@ -930,12 +1044,21 @@ def combine_sfs(force=False):
   method = OV.GetVar('settings.tonto.HAR.method')
   basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-  date = str(os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii")))
-  ol.append('   SOFTWARE:  %s'%software)
-  ol.append('   METHOD:    %s'%method)
-  ol.append('   BASIS SET: %s'%basis_set)
-  ol.append('   CHARGE:    %s'%charge)
-  ol.append('   DATE:      %s'%date)
+  mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+  time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
+  import datetime
+  date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S')
+  ol.append('   SOFTWARE:       %s'%software)
+  ol.append('   METHOD:         %s'%method)
+  ol.append('   BASIS SET:      %s'%basis_set)
+  ol.append('   CHARGE:         %s'%charge)
+  ol.append('   MULTIPLICITY:   %s'%mult)
+  ol.append('   DATE:           %s'%date)
+  if tsc_source == "Tonto":
+    radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
+    ol.append('   CLUSTER RADIUS: %s'%radius)
+    DIIS = OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
+    ol.append('   DIIS CONV.:     %s'%DIIS)
 
   ol.append("data:")
 
@@ -946,8 +1069,7 @@ def combine_sfs(force=False):
   with open(tsc_fn, 'w') as wFile:
     wFile.write(t)
 
-  from shutil import copyfile
-  copyfile(tsc_fn, tsc_dst)
+  shutil.copyfile(tsc_fn, tsc_dst)
   try:
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
     olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
@@ -960,7 +1082,7 @@ def combine_sfs(force=False):
 
 OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
-def deal_with_parts():
+def deal_with_parts(cif):
   parts = OV.ListParts()
   if not parts:
     return
@@ -968,7 +1090,10 @@ def deal_with_parts():
     if part == 0:
       continue
     olex.m("showp 0 %s" %part)
-    fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
+    if cif:
+      fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
+    else:
+      fn = "%s_part_%s.cif" %(OV.ModelSrc(), part)
     olx.File(fn)
   olex.m("showp")
 OV.registerFunction(deal_with_parts,True,'NoSpherA2')
