@@ -63,8 +63,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
     #super(OlexCctbxTwinLaws, self).__init__()    
-    OV.registerFunction(self.run,True,'twin')
-    OV.registerFunction(self.run_from_gui,True,'twin')
+    OV.registerFunction(self.run,False,'twin')
+    OV.registerFunction(self.run_from_gui,False,'twin')
 
   def run_from_gui(self, personal=False):
     print "Searching for Twin laws..."
