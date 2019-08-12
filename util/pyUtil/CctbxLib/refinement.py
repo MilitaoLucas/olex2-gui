@@ -672,26 +672,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if use_aspherical == True:
       for file in os.listdir(olx.FilePath()):
           if file.endswith(".tsc"):
-            text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
+            details_text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
             software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
             method = OV.GetVar('settings.tonto.HAR.method')
             basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
             charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
             mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-            time = os.path.getctime(os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii"))
+            f_time = os.path.getctime(os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii"))
             import datetime
-            date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S')
-            text = text + "   SOFTWARE:       %s\n"%software
-            text = text + "   METHOD:         %s\n"%method
-            text = text + "   BASIS SET:      %s\n"%basis_set
-            text = text + "   CHARGE:         %s\n"%charge
-            text = text + "   MULTIPLICITY:   %s\n"%mult
-            text = text + "   DATE:           %s\n"%date
+            f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+            details_text = details_text + "   SOFTWARE:       %s\n"%software
+            details_text = details_text + "   METHOD:         %s\n"%method
+            details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+            details_text = details_text + "   CHARGE:         %s\n"%charge
+            details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+            details_text = details_text + "   DATE:           %s\n"%f_date
             if software == "Tonto":
               radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-              text = text + "   CLUSTER RADIUS: %s\n"%radius
-            text = text + "\n;\n"
-            cif_block['_refine_special_details'] = text
+              details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+            details_text = details_text + "\n;\n"
+            cif_block['_refine_special_details'] = details_text
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1

@@ -179,14 +179,14 @@ class NoSpherA2(PT):
       return
       
     tsc_exists = False
-    time = None
+    f_time = None
     for file in os.listdir(olx.FilePath()):
       if file.endswith(".tsc"):
         tsc_exists = True
-        time = os.path.getmtime(file)
+        f_time = os.path.getmtime(file)
     if tsc_exists:
       import datetime
-      timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S'))
+      timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
       if not os.path.exists(timestamp_dir):
         os.mkdir(timestamp_dir)
       for file in os.listdir(olx.FilePath()):
@@ -1045,15 +1045,15 @@ def combine_sfs(force=False):
   basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-  time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
+  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
-  date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S')
+  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
   ol.append('   SOFTWARE:       %s'%software)
   ol.append('   METHOD:         %s'%method)
   ol.append('   BASIS SET:      %s'%basis_set)
   ol.append('   CHARGE:         %s'%charge)
   ol.append('   MULTIPLICITY:   %s'%mult)
-  ol.append('   DATE:           %s'%date)
+  ol.append('   DATE:           %s'%f_date)
   if tsc_source == "Tonto":
     radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
     ol.append('   CLUSTER RADIUS: %s'%radius)
