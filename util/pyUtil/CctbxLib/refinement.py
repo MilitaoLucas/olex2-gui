@@ -668,6 +668,30 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
+    use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    if use_aspherical == True:
+      for file in os.listdir(olx.FilePath()):
+          if file.endswith(".tsc"):
+            text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
+            software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+            method = OV.GetVar('settings.tonto.HAR.method')
+            basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+            charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+            mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+            time = os.path.getctime(os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii"))
+            import datetime
+            date = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d_%H-%M-%S')
+            text = text + "   SOFTWARE:       %s\n"%software
+            text = text + "   METHOD:         %s\n"%method
+            text = text + "   BASIS SET:      %s\n"%basis_set
+            text = text + "   CHARGE:         %s\n"%charge
+            text = text + "   MULTIPLICITY:   %s\n"%mult
+            text = text + "   DATE:           %s\n"%date
+            if software == "Tonto":
+              radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
+              text = text + "   CLUSTER RADIUS: %s\n"%radius
+            text = text + "\n;\n"
+            cif_block['_refine_special_details'] = text
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
