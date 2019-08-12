@@ -24,6 +24,29 @@ After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The 
 # NoSpherA2 Extras
 This tool provides all the settings required for the calculation of the molecular wavefunction.
 
+## Basis
+This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
+
+## Method
+The default method used for the calculation of the theoretical density is **Restricted Hartee-Fock**. **Restricted Kohn-Sham** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable in some cases.
+
+## CPU
+The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2!
+
+## Memory
+The maximum memory that NoSpherA2 is allowed to use.
+
+## Charge
+The charge of the molecule
+
+## Cluster
+I am not sure!!!
+
+## H Aniso
+Refine hydrogen atoms anisotrpically.
+
+## Keep Wavefunction
+Not sure!!
 
 
 # Hirshfeld Atom Refinement
