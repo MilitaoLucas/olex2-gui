@@ -256,6 +256,7 @@ from htmlTools import *
 def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
   global tutorial_box_initialised
   name = getGenericSwitchName(name).lstrip("h3-")
+  OV.SetVar('last_help_box', name)
   _= ""
   md_box = True
   if helpTxt == '#helpTxt':
