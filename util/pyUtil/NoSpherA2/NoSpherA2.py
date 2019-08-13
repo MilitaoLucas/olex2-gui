@@ -257,7 +257,11 @@ class NoSpherA2(PT):
             print "Aborted due to: ",error
             raise NameError(error)
     
-        job.launch()
+        try:
+          job.launch()
+        except NameError as error:
+          print "Aborted due to: ", error
+          raise NameError("Tonto Failed!")
         if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
           raise NameError('Error during structure factor calculation!')
         olx.html.Update()
@@ -275,7 +279,11 @@ class NoSpherA2(PT):
           print "Aborted due to: ",error
           raise NameError("Wavefunction failed!")
       
-      job.launch()
+      try:
+        job.launch()
+      except NameError as error:
+        print "Aborted due to: ", error
+        raise NameError("Tonto Failed!")
       if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
         raise NameError('Error during structure factor calculation!')
       olx.html.Update()
@@ -286,6 +294,8 @@ class NoSpherA2(PT):
     olex.m('delins list')
     olex.m('addins LIST 3')
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
+    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
+    gui.set_notification(OV.GetVar('gui_notification'))
     olx.html.Update()
 
   def wfn(self,folder=''):
@@ -575,8 +585,8 @@ class wfn_Job(object):
     else:
       cpu = "nprocs 1"
     mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
-    mem_value = int(mem) * 1000 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
-    mem = "%maxcore " + str(mem_value)
+    mem_value = int(mem) * 1024 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
+    mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
       control = "!rhf 3-21G TightSCF Grid4 AIM"
     else:
