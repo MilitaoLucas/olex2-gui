@@ -672,7 +672,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if use_aspherical == True:
       for file in os.listdir(olx.FilePath()):
           if file.endswith(".tsc"):
-            details_text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
+            details_text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
             software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
             method = OV.GetVar('settings.tonto.HAR.method')
             basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
