@@ -2,23 +2,23 @@
 
 When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
 
-n^<font color='red'>**This is a new and experimental procedure, which requires intensive computing ressources. We do not accept any liability for the correctess of the results at this point.**</font>^n
+n^<font color='red'>**This is a new and highly experimental procedure, which requires intensive computing ressources. We do not accept any liability for the correctess of the results at this point. They must not be publsihed until further testing is done!**</font>^n
 
 <br>
 <br>
 
 There are three steps to this procedure:
 
-* The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using either TONTO (shipped) or ORCA. Other programs will be supported in the future
+* The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using either TONTO (shipped) or ORCA (Versions 4.1.0 and up). Other programs will be supported in the future.
 
-* The atomic non-spherical form factors are extracted from the molecular wavefunction
+* The atomic non-spherical form factors are extracted from the molecular wavefunction by Hirshfeld partitioning of the atoms in the molecule.
 
-* olex2.refine now uses these non-spherical form factor for the next refinement cycles.
+* olex2.refine now uses these non-spherical form factors for the next refinement cycles. All normal commands for your refinement can be used, including restraints and contraints
 
 At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled.
 
 ### Update Table
-After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **TONTO** and other programs (currently only **ORCA**) will appear if these are properly installed and Olex2 knows about them --> Settings). Once a program has been chosen, please also adjust 
+After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **TONTO** and other programs (currently only **ORCA**) will appear if these are properly installed and Olex2 knows about them --> Settings). Once a program has been chosen, please also adjust the Extras according to your needs.
 
 
 # NoSpherA2 Extras
@@ -26,27 +26,39 @@ This tool provides all the settings required for the calculation of the molecula
 
 ## Basis
 This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
+The **def2**- and **cc-** series of basis sets is only defined for atoms up to Kr. Afterword ECPs woudl be needed to use these basis sets, whcih are by the natrue of the method not compatible. 
+Then the **x2c**-basis sets are usefull, as they are defined up to Rn without any ECPs.
+It is **highly** recommended to run basic first iterations using single valence basis sets and finish the structure with higher a basis.
 
 ## Method
-The default method used for the calculation of the theoretical density is **Restricted Hartee-Fock**. **Restricted Kohn-Sham** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable in some cases.
+The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be sued in ORCA.
 
 ## CPU
-The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2!
+The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files.
 
 ## Memory
-The maximum memory that NoSpherA2 is allowed to use.
+The maximum memory that NoSpherA2 is allowed to use. This must not exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
 
 ## Charge
-The charge of the molecule
+The charge of the molecule used for the wavefunction calculation. This **must** be properly assigned.
 
-## Cluster
-I am not sure!!!
+## Multiplicity
+The multiplicity (2S+1) of the wavefunction, where S is the total spin angular momentum of the configuration. E.g. a closed shell wavefunction in it's ground-state usually has multiplicity 1, one unpaired electron has multiplicity 2. Must be positive above 0.
 
 ## H Aniso
-Refine hydrogen atoms anisotrpically.
+Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
 
 ## Keep Wavefunction
-Not sure!!
+Select to keep a copy of the current wavefunction in the folder you are working. Backups of former wavefunctions are kept inside the olex2 folder in that directory.
+
+## Cluster Radius
+If Tonto is used for a wavefunction calculation a clsuter of **explicit charges** calcualted in a self consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius until no further charges are included.
+
+## Complete Cluster
+In case of a molecular structure this switch will try to complete the molecules for the charges calcualtion bsaed on distances of atoms. If the refined structrue is a network compound where no molecular boundary can easily be found (e.g. there is no way to grow the structure without having dangling bonds) this procedure will fail in a sense, that the computer will run out of memory. Therefore this option is highly recommended for molecular crystals but crucial to be deactivated for network compounds.
+
+## DIIS Conv.
+This option defines the convergence criterion the wavefunction calculation needs to achieve in order to be considered converged. A lower value will finish faster but drastically increases the chance for unreasonable wavefunctions, especially in complicated calculations.
 
 
 # Hirshfeld Atom Refinement
