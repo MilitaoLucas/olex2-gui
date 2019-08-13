@@ -15,7 +15,7 @@ class Method_cctbx_refinement(Method_refinement):
     _ = os.environ.get('OLEX2_CCTBX_DIR')
     if _ is not None:
       self.version = _
-    
+
   def pre_refinement(self, RunPrgObject):
     import gui
     RunPrgObject.make_unique_names = True
@@ -44,8 +44,8 @@ class Method_cctbx_refinement(Method_refinement):
       print("Using tabulated atomic form factors")
 
     Method_refinement.pre_refinement(self, RunPrgObject)
-    
-    
+
+
   def do_run(self, RunPrgObject):
     import time
     from refinement import FullMatrixRefine
