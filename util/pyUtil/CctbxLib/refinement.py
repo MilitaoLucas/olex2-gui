@@ -91,6 +91,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
+    try:
+      from fast_linalg import env
+      max_threads = int(OV.GetVar("refine.max_threads", 0))
+      if max_threads == 0:
+        max_threads = env.physical_cores
+      if max_threads is not None:
+        ext.build_normal_equations.available_threads = max_threads
+        env.threads = max_threads
+    except:
+      pass
     print("Using %s threads" %ext.build_normal_equations.available_threads)
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.reflections.show_summary(log=self.log)
@@ -514,6 +524,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
         conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
+      confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
+      if len(confs) and False: #fix me!
+        dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
+          connectivity_full.pair_asu_table,
+          site_labels=xs.scatterers().extract_labels(),
+          sites_frac=xs.sites_frac(),
+          covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+          cell_covariance_matrix=cell_vcv,
+          parameter_map=xs.parameter_map(),
+          include_bonds_to_hydrogen=bond_h,
+          fixed_angles=self.reparametrisation.fixed_angles,
+          conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
+        cif_block.add_loop(dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
       equivs = self.olx_atoms.model['equivalents']
       hbonds = []
@@ -562,12 +585,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       _ = OV.GetParam('snum.masks.user_sum_formula')
       if _:
         cif_block['_chemical_formula_moiety'] = _
-      
+
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
     cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
-    cif_block['_exptl_crystal_F_000'] \
-             = olx.xf.GetF000()
+    cif_block['_exptl_crystal_F_000'] = olx.xf.GetF000()
 
     write_fcf = False
     acta = olx.Ins("ACTA").strip()
@@ -578,7 +600,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         write_fcf = True
     if write_fcf:    
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
-      
+
       import StringIO
       f = StringIO.StringIO()
       fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
@@ -740,7 +762,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     elif list_code == 3:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc()
+        fo_sq, fc = self.get_fo_sq_fc(fc = self.normal_eqns.f_calc)
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)

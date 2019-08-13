@@ -356,9 +356,10 @@ class OlexCctbxAdapter(object):
       return easy_pickle.load(mask_fn)
     return None
 
-  def get_fo_sq_fc(self):
+  def get_fo_sq_fc(self, fc=None):
     fo2 = self.reflections.f_sq_obs_filtered
-    fc = self.f_calc(None, self.exti is not None, True, True)
+    if fc is None:
+      fc = self.f_calc(None, self.exti is not None, True, True)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
