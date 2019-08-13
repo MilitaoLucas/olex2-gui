@@ -115,7 +115,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       r_diff=twin_law.rbasf[2]
       lawcount += 1
       filename="%s_twin%02d.hkl"%(OV.FileName(), lawcount)
-      self.make_hklf5(filename, twin_law.hkl_rotation, hkl, f_obs,f_uncertainty)
+      self.make_hklf5(filename, twin_law, hkl, f_obs,f_uncertainty)
       self.twin_laws_d.setdefault(lawcount, {})
 
       r_no, basf_no, f_data, history = self.run_twin_ref_shelx(twin_law.hkl_rotation.flatten(), basf)
@@ -704,12 +704,15 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return numpy.average(filtered)
     
 
-  def make_hklf5(self, filename, twin_law, hkl, fo,sigmas):  
+  def make_hklf5(self, filename, twin_law_full, hkl, fo,sigmas):  
     """
     convert hklf4 file to hklf5 file
     """
     #Pulled directly from Pascal's, then edited to generate its own second component hkl, as some files don't have avlues for all
     
+    twin_law=twin_law_full.hkl_rotation
+    basf=twin_law_full.rbasf[0]
+    cell=self.cell
     hklf = open(filename,'w')
     hkl_new = numpy.dot(twin_law, hkl.T).T
     rounded_hkl_new=numpy.rint(hkl_new).astype(int)
@@ -733,7 +736,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i]*scale, sigmas[i]*scale, 1))
       
     hklf.write("%4d%4d%4d\n"%(0,0,0))
-    hklf.write("REM TWIN %s"%format_twin_string_from_law(twin_law))
+    hklf.write("CELL %s %s %s %s %s %s\n"%(cell[0],cell[1],cell[2],cell[3],cell[4],cell[5]))
+    hklf.write("REM TWIN %s\n"%format_twin_string_from_law(twin_law))
+    hklf.write("BASF %6.4f\n"%basf)
+    hklf.write("HKLF 5")
     hklf.close()
     
 
