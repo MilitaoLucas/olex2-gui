@@ -763,6 +763,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     elif list_code == 3:
       if self.hklf_code == 5:
         fo_sq, fc = self.get_fo_sq_fc(fc = self.normal_eqns.f_calc)
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
@@ -1104,7 +1108,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
     if self.hklf_code == 5:
-      fo2, f_calc = self.get_fo_sq_fc()
+      fo2, f_calc = self.get_fo_sq_fc(fc = self.normal_eqns.f_calc)
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       if( self.twin_components is not None
