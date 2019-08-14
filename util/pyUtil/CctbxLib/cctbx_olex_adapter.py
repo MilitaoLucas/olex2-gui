@@ -360,6 +360,9 @@ class OlexCctbxAdapter(object):
     fo2 = self.reflections.f_sq_obs_filtered
     if fc is None:
       fc = self.f_calc(None, self.exti is not None, True, True)
+    else:
+      unique_set = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
+      fc = fc.common_set(unique_set)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
@@ -374,6 +377,8 @@ class OlexCctbxAdapter(object):
         sigmas=obs.sigmas).set_observation_type(fo2)
     fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
     fc = fc.common_set(fo2)
+    if fc.size() != fo2.size():
+      fo2 = fo2.common_set(fc)
     return (fo2, fc)
 
   def update_twinning(self, tw_f, tw_c):
