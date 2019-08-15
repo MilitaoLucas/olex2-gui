@@ -161,8 +161,8 @@ class NoSpherA2(PT):
       self.cpu_list_str = '1'
 
   def launch(self):  
-    self.jobs_dir = os.path.join(olx.FilePath(),"olex2","Wfn_job")
-    self.history_dir = os.path.join(olx.FilePath(),"olex2","NoSpherA2_history")
+    self.jobs_dir = os.path.join("olex2","Wfn_job")
+    self.history_dir = os.path.join("olex2","NoSpherA2_history")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
     if not os.path.exists(self.history_dir):
@@ -189,7 +189,7 @@ class NoSpherA2(PT):
       timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
       if not os.path.exists(timestamp_dir):
         os.mkdir(timestamp_dir)
-      for file in os.listdir(olx.FilePath()):
+      for file in os.listdir('.'):
         if file.endswith(".tsc"):
           shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
         if file.endswith(".wfn"):
@@ -456,7 +456,7 @@ class wfn_Job(object):
       self.name = self.name[:-4]
     elif self.name.endswith('_input'):
       self.name = self.name[:-6]
-    full_dir = olx.FilePath()
+    full_dir = '.'
     self.full_dir = full_dir
     if dir != '':
       self.full_dir = dir
@@ -665,11 +665,11 @@ class wfn_Job(object):
     if software == "ORCA":
 #      args.append(">")
 #      args.append(self.name + ".log")
-      if os.path.exists(self.name + ".gbw"):
-        os.remove(self.name + ".gbw")
+      if os.path.exists(os.path.join(self.full_dir,self.name + ".gbw")):
+        os.remove(os.path.join(self.full_dir,self.name + ".gbw"))
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
-    os.environ['fchk_dir'] = self.full_dir
+    os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
 
     import subprocess
     import time
@@ -707,7 +707,6 @@ class wfn_Job(object):
       shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
       shutil.copy(os.path.join(self.full_dir,self.name+".wfx"), self.name+".wfx")
       file_path = os.path.join(self.full_dir,self.name+".wfn")
-      print(file_path)
       move_args = []
       basis_dir = self.parent.basis_dir
       move_args.append(self.parent.wfn_2_fchk)
@@ -720,15 +719,15 @@ class wfn_Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      os.chdir(self.full_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
       m = subprocess.Popen(move_args, stdout=log)
       while m.poll() is None:
         time.sleep(1)
       log.close()
-      if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
-        shutil.copy(self.name+".fchk", os.path.join(olx.FilePath(), self.name+".fchk"))
+      if os.path.exists(self.name+".fchk"):
+        shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
+        shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
       else:
         raise NameError("No fchk generated!")
 
@@ -756,7 +755,6 @@ class Job(object):
       self.name = self.name[:-6]
     full_dir = parent.jobs_dir
     self.full_dir = full_dir
-    print self.full_dir
 
     if not os.path.exists(full_dir):
       return
@@ -862,7 +860,7 @@ class Job(object):
     self.analysis_fn = os.path.join(self.full_dir, "stdout.fit_analysis")
     os.environ['hart_cmd'] = '+&-'.join(args)
     os.environ['hart_file'] = self.name
-    os.environ['hart_dir'] = self.full_dir
+    os.environ['hart_dir'] = os.path.join(OV.FilePath(),self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
     OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
     OV.SetParam('snum.refinement.cctbx.nsff.cmd',args)
@@ -883,11 +881,12 @@ class Job(object):
       pass
     else:
       raise NameError("Tonto unsuccessfull!")
-	  
-    if fchk_source == "Tonto" and OV.GetParam('snum.refinement.cctbx.nsff.keep_wfn') == True:
+    
+    if fchk_source == "Tonto" and OV.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn') == True:
       if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
-        shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), os.path.join(olx.FilePath(),self.name+".wfn"))
+        shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
       else:
+        print "WFN File not found!"
         raise NameError("No WFN found!")
       move_args = []
       basis_dir = self.parent.basis_dir
@@ -902,15 +901,15 @@ class Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      os.chdir(self.full_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
       m = subprocess.Popen(move_args, stdout=log)
       while m.poll() is None:
         time.sleep(1)
       log.close()
+      shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
       if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
-        shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), os.path.join(olx.FilePath(), self.name+".fchk"))
+        shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), self.name+".fchk")
       else:
         raise NameError("No fchk generated!")
 
