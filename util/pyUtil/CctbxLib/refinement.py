@@ -525,7 +525,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
       confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
-      if len(confs) and False: #fix me!
+      if len(confs) or olx.Ins("CONF") != "n/a": #fix me!
         dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
           connectivity_full.pair_asu_table,
           site_labels=xs.scatterers().extract_labels(),
@@ -533,7 +533,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           covariance_matrix=self.covariance_matrix_and_annotations.matrix,
           cell_covariance_matrix=cell_vcv,
           parameter_map=xs.parameter_map(),
-          include_bonds_to_hydrogen=bond_h,
+          include_bonds_to_hydrogen=False,
           fixed_angles=self.reparametrisation.fixed_angles,
           conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
         cif_block.add_loop(dihedrals.loop)
@@ -762,7 +762,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     elif list_code == 3:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc(fc = self.normal_eqns.f_calc)
+        fo_sq, fc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
         fo_sq = fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),
           sigmas=fo_sq.sigmas()*(1/self.scale_factor),
@@ -787,7 +787,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fmt_str = "%i %i %i %f %f %f %f"
     elif list_code == 6:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc()
+        fo_sq, fc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
@@ -1108,7 +1112,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
     if self.hklf_code == 5:
-      fo2, f_calc = self.get_fo_sq_fc(fc = self.normal_eqns.f_calc)
+      fo2, f_calc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       if( self.twin_components is not None
