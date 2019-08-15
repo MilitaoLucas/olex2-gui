@@ -291,6 +291,7 @@ class OlexCctbxAdapter(object):
              apply_extinction_correction=True,
              apply_twin_law=True,
              ignore_inversion_twin=False,
+             one_h_linearisation=None,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
@@ -308,8 +309,15 @@ class OlexCctbxAdapter(object):
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set_)
       twin_set = twinning.twin_complete_set
-      fc = twin_set.structure_factors_from_scatterers(
-        self.xray_structure(), algorithm=algorithm).f_calc()
+      if one_h_linearisation:
+        data = []
+        for mi in twin_set.indices():
+          one_h_linearisation.evaluate(mi)
+          data.append(one_h_linearisation.f_calc)
+        fc = twin_set.customized_copy(data=data)
+      else:
+        fc = twin_set.structure_factors_from_scatterers(
+          self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
         fc.as_intensity_array(), twin_component.value)
       if miller_set:
@@ -317,8 +325,15 @@ class OlexCctbxAdapter(object):
       else:
         fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
     else:
-      fc = miller_set_.structure_factors_from_scatterers(
-        self.xray_structure(), algorithm=algorithm).f_calc()
+      if one_h_linearisation:
+        data = []
+        for mi in miller_set_.indices():
+          one_h_linearisation.evaluate(mi)
+          data.append(one_h_linearisation.f_calc)
+        fc = miller_set_.customized_copy(data=data)
+      else:
+        fc = miller_set_.structure_factors_from_scatterers(
+          self.xray_structure(), algorithm=algorithm).f_calc()
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
@@ -363,13 +378,10 @@ class OlexCctbxAdapter(object):
       return easy_pickle.load(mask_fn)
     return None
 
-  def get_fo_sq_fc(self, fc=None):
+  def get_fo_sq_fc(self, one_h_linearisation=None):
     fo2 = self.reflections.f_sq_obs_filtered
-    if fc is None:
-      fc = self.f_calc(None, self.exti is not None, True, True)
-    else:
-      unique_set = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
-      fc = fc.common_set(unique_set)
+    fc = self.f_calc(None, self.exti is not None, True, True,
+                      one_h_linearisation=one_h_linearisation)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
