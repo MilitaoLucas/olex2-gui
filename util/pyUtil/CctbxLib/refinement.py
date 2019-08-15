@@ -79,6 +79,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
     self.idealise_secondary_xh2_angle = False
+    self.use_tsc = False
     sec_ch2_treatment = OV.GetParam('snum.smtbx.secondary_ch2_angle')
     if sec_ch2_treatment == 'idealise':
       self.idealise_secondary_xh2_angle = True
@@ -103,6 +104,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       pass
     print("Using %s threads" %ext.build_normal_equations.available_threads)
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
+    self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
@@ -360,7 +362,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.flack = utils.format_float_with_standard_uncertainty(flack, su)
       else:
         if self.observations.merohedral_components or self.observations.twin_fractions:
-          obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
+          if self.use_tsc:
+            obs_ = self.get_fo_sq_fc(one_h_function=\
+              self.normal_eqns.one_h_linearisation)[0].as_xray_observations()
+          else:
+            obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
         else:
           obs_ = self.observations
         from smtbx import absolute_structure
@@ -762,7 +768,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     elif list_code == 3:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
+        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
         fo_sq = fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),
           sigmas=fo_sq.sigmas()*(1/self.scale_factor),
@@ -787,7 +793,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fmt_str = "%i %i %i %f %f %f %f"
     elif list_code == 6:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
+        if self.use_tsc:
+          fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+        else:
+          fo_sq, fc = self.get_fo_sq_fc()
         fo_sq = fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),
           sigmas=fo_sq.sigmas()*(1/self.scale_factor),
@@ -1112,7 +1121,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
     if self.hklf_code == 5:
-      fo2, f_calc = self.get_fo_sq_fc(one_h_linearisation=self.normal_eqns.one_h_linearisation)
+      if self.use_tsc:
+        fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+      else:
+        fo2, f_calc = self.get_fo_sq_fc()
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       if( self.twin_components is not None
