@@ -95,7 +95,7 @@ class ImageTools(FontInstances):
     if dpi_scaling:
       w = OV.GetParam('gui.skin.base_width')
     else:
-      w = olx.html.ClientWidth('self')
+      w = int(olx.html.ClientWidth('self'))
 
     self.skin_width = w
     self.skin_width_margin = w - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
@@ -510,8 +510,8 @@ class ImageTools(FontInstances):
         im = Image.open(path)
         name = name[:-4]
     if not width:
-      #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-      width = int(self.skin_width*0.97)
+      width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      #width = int(self.skin_width*0.97)
 
     if im:
       if colourize:

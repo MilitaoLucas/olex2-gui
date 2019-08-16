@@ -3065,7 +3065,7 @@ class HealthOfStructure():
           try:
             acta = float(olx.Ins("ACTA"))/2
             if acta < self.theta_full:
-              self.theta_full = acta/2
+              self.theta_full = acta
           except:
             pass
         # adjust to the dataset theta max if needed

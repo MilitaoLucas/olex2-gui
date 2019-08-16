@@ -353,7 +353,7 @@ t:edit_help{
 }
 
 t:compile_help{
-<a href="spy.githelp.git_help(False '%s')">Recompile</a><p>
+<a href="spy.githelp.git_help(False, '%s')">Recompile</a><p>
 }
 
 t:input_html_tool{
@@ -400,8 +400,35 @@ t:gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
   <tr>
     <td bgcolor='%(col)s'>
-      %(txt)s
+      %(txt)s	
     </td>
   </tr>
 </table>
 }
+
+t:weight_button{
+<b>
+<input
+  type="button"
+  name="Weight_1"
+  value="%(curr_1)s | %(sugg_1)s"
+  width="45%%"
+  height="math.eval(GetVar('HtmlInputheight')-3)"
+  fgcolor="%(col_1)s"
+  bgcolor="GetVar(HtmlTableFirstcolColour)"
+  onclick="UpdateWght>>html.Update"
+  custom="border.lightness: 80;highlight.lightness: 110"
+>
+&nbsp;
+<input
+  type="button"
+  name="Weight_2"
+  value="%(curr_2)s | %(sugg_2)s"
+  width="45%%"
+  height="math.eval(GetVar('HtmlInputheight')-3)"
+  fgcolor="%(col_2)s"
+  bgcolor="GetVar(HtmlTableFirstcolColour)"
+  onclick="UpdateWght>>html.Update"
+  custom="border.lightness: 80;highlight.lightness: 110"
+>
+</b>}

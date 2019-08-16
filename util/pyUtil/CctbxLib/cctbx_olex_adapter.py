@@ -291,6 +291,7 @@ class OlexCctbxAdapter(object):
              apply_extinction_correction=True,
              apply_twin_law=True,
              ignore_inversion_twin=False,
+             one_h_function=None,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
@@ -308,8 +309,15 @@ class OlexCctbxAdapter(object):
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set_)
       twin_set = twinning.twin_complete_set
-      fc = twin_set.structure_factors_from_scatterers(
-        self.xray_structure(), algorithm=algorithm).f_calc()
+      if one_h_function:
+        data = []
+        for mi in twin_set.indices():
+          one_h_function.evaluate(mi)
+          data.append(one_h_function.f_calc)
+        fc = twin_set.customized_copy(data=data)
+      else:
+        fc = twin_set.structure_factors_from_scatterers(
+          self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
         fc.as_intensity_array(), twin_component.value)
       if miller_set:
@@ -317,8 +325,15 @@ class OlexCctbxAdapter(object):
       else:
         fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
     else:
-      fc = miller_set_.structure_factors_from_scatterers(
-        self.xray_structure(), algorithm=algorithm).f_calc()
+      if one_h_function:
+        data = []
+        for mi in miller_set_.indices():
+          one_h_function.evaluate(mi)
+          data.append(one_h_function.f_calc)
+        fc = miller_set.array(data=flex.complex_double(data), sigmas=None)
+      else:
+        fc = miller_set_.structure_factors_from_scatterers(
+          self.xray_structure(), algorithm=algorithm).f_calc()
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
@@ -335,9 +350,41 @@ class OlexCctbxAdapter(object):
     weighting.compute(fc, scale_factor)
     return weighting.weights
 
-  def get_fo_sq_fc(self):
+  def load_mask(self):
+    fab_path = OV.HKLSrc().replace(".hkl", ".fab")
+    #fab_path = os.path.join(OV.FilePath(), OV.FileName()) + ".fab"
+    if os.path.exists(fab_path):
+      with open(fab_path) as fab:
+        indices = []
+        data = []
+        for l in fab.readlines():
+          fields = l.split()
+          if len(fields) < 5:
+            break
+          try:
+            idx = (int(fields[0]), int(fields[1]), int(fields[2]))
+            if idx == (0,0,0):
+              break
+            indices.append(idx)
+            data.append(complex(float(fields[3]), float(fields[4])))
+          except:
+            pass
+      miller_set = miller.set(
+        crystal_symmetry=self.xray_structure().crystal_symmetry(),
+        indices=flex.miller_index(indices)).auto_anomalous().map_to_asu()
+      return miller.array(miller_set=miller_set, data=flex.complex_double(data))
+    mask_fn = os.path.join(filepath, OV.FileName())+"-f_mask.pickle"
+    if os.path.exists(mask_fn):
+      return easy_pickle.load(mask_fn)
+    return None
+
+  def get_fo_sq_fc(self, one_h_function=None):
     fo2 = self.reflections.f_sq_obs_filtered
-    fc = self.f_calc(None, self.exti is not None, True, True)
+    if one_h_function:
+      fc = self.f_calc(fo2, self.exti is not None, True, True,
+                       one_h_function=one_h_function)
+    else:
+      fc = self.f_calc(None, self.exti is not None, True, True)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
@@ -352,6 +399,8 @@ class OlexCctbxAdapter(object):
         sigmas=obs.sigmas).set_observation_type(fo2)
     fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
     fc = fc.common_set(fo2)
+    if fc.size() != fo2.size():
+      fo2 = fo2.common_set(fc)
     return (fo2, fc)
 
   def update_twinning(self, tw_f, tw_c):
@@ -374,7 +423,13 @@ class OlexCctbxAdapter(object):
       return False
     return True
 
-
+def write_fab(f_mask, fab_path):
+  with open(fab_path, "w") as f:
+    for i,h in enumerate(f_mask.indices()):
+      line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
+      print >> f, line
+    print >> f, "0 0 0 0.0 0.0"
+  
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):

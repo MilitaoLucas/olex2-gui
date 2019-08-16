@@ -2,6 +2,7 @@ from __future__ import division
 
 import math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
+import cctbx_olex_adapter as COA
 import boost.python
 ext = boost.python.import_ext("smtbx_refinement_least_squares_ext")
 
@@ -13,7 +14,7 @@ import olex
 import olex_core
 
 from cctbx.array_family import flex
-from cctbx import maptbx, miller, sgtbx, uctbx, xray
+from cctbx import maptbx, miller, sgtbx, uctbx, xray, crystal
 
 import iotbx.cif.model
 
@@ -78,6 +79,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
     self.idealise_secondary_xh2_angle = False
+    self.use_tsc = False
     sec_ch2_treatment = OV.GetParam('snum.smtbx.secondary_ch2_angle')
     if sec_ch2_treatment == 'idealise':
       self.idealise_secondary_xh2_angle = True
@@ -90,8 +92,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
+    try:
+      from fast_linalg import env
+      max_threads = int(OV.GetVar("refine.max_threads", 0))
+      if max_threads == 0:
+        max_threads = env.physical_cores
+      if max_threads is not None:
+        ext.build_normal_equations.available_threads = max_threads
+        env.threads = max_threads
+    except:
+      pass
     print("Using %s threads" %ext.build_normal_equations.available_threads)
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
+    self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
@@ -104,38 +117,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OV.HKLSrc(original_hklsrc)
         # we need to reinitialise reflections
         self.initialise_reflections()
-      fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
-      if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
-        self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
-      if self.f_mask is None:
-        if os.path.exists(fab_path):
-          with open(fab_path) as fab:
-            indices = []
-            data = []
-            for l in fab.readlines():
-              fields = l.split()
-              if len(fields) < 5:
-                break
-              indices.append((int(fields[0]), int(fields[1]), int(fields[2])))
-              data.append(complex(float(fields[3]), float(fields[4])))
-          miller_set = miller.set(
-            crystal_symmetry=self.xray_structure().crystal_symmetry(),
-            indices=flex.miller_index(indices)).auto_anomalous()
-          self.f_mask = miller.array(miller_set=miller_set, data=flex.complex_double(data))
       else:
+        self.f_mask = self.load_mask()
+      if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
-        with open(fab_path, "w") as f:
-          for i,h in enumerate(self.f_mask.indices()):
-            line = "%d %d %d " %h + "%.4f %.4f" % (self.f_mask.data()[i].real, self.f_mask.data()[i].imag)
-            print >> f, line
-          print >> f, "0 0 0 0.0 0.0"
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
@@ -268,6 +260,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.check_flack()
       if self.flack:
         OV.SetParam('snum.refinement.flack_str', self.flack)
+      else:
+        OV.SetParam('snum.refinement.flack_str', "")
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
@@ -368,7 +362,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.flack = utils.format_float_with_standard_uncertainty(flack, su)
       else:
         if self.observations.merohedral_components or self.observations.twin_fractions:
-          obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
+          if self.use_tsc:
+            obs_ = self.get_fo_sq_fc(one_h_function=\
+              self.normal_eqns.one_h_linearisation)[0].as_xray_observations()
+          else:
+            obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
         else:
           obs_ = self.observations
         from smtbx import absolute_structure
@@ -532,6 +530,62 @@ class FullMatrixRefine(OlexCctbxAdapter):
         conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
+      confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
+      if len(confs): #fix me!
+        all_conf = None
+        angles = []
+        angle_defs = []
+        for conf in confs:
+          atoms = conf['atoms']
+          if not atoms:
+            all_conf = OV.dict_obj(conf)
+            continue
+          seqs = []
+          rt_mxs = []
+          for atom in atoms:
+            if atom[1] > -1:
+              rt_mxs.append(rt_mx_from_olx(equivs[atom[1]]))
+            else:
+              rt_mxs.append(sgtbx.rt_mx())
+            seqs.append(atom[0])
+          angle_defs.append(crystal.dihedral_angle_def(seqs, rt_mxs))
+        if all_conf:
+          max_d = 1.7
+          max_angle = 170
+          if len(all_conf.args) > 0:
+            max_d = all_conf.args[0]
+          if len(all_conf.args) > 1:
+            max_angle = all_conf.args[1]
+          angles += crystal.calculate_dihedrals(
+            pair_asu_table=connectivity_full.pair_asu_table,
+            sites_frac=xs.sites_frac(),
+            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+            cell_covariance_matrix=cell_vcv,
+            parameter_map=xs.parameter_map(),
+            conformer_indices=self.reparametrisation.connectivity_table.conformer_indices,
+            max_d=max_d,
+            max_angle=max_angle)
+        if len(angle_defs):
+          defined_angles = crystal.calculate_dihedrals(
+            pair_asu_table=connectivity_full.pair_asu_table,
+            sites_frac=xs.sites_frac(),
+            dihedral_defs=angle_defs,
+            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+            cell_covariance_matrix=cell_vcv,
+            parameter_map=xs.parameter_map())
+          if all_conf:
+            for a in defined_angles:
+              if a not in angles:
+                angles.append(a)
+          else:
+            angles = defined_angles
+        space_group_info = sgtbx.space_group_info(group=xs.space_group())
+        cif_dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
+          angles,
+          space_group_info=space_group_info,
+          site_labels=xs.scatterers().extract_labels(),
+          include_bonds_to_hydrogen=False)
+        cif_block.add_loop(cif_dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
       equivs = self.olx_atoms.model['equivalents']
       hbonds = []
@@ -580,12 +634,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       _ = OV.GetParam('snum.masks.user_sum_formula')
       if _:
         cif_block['_chemical_formula_moiety'] = _
-      
+
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
     cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
-    cif_block['_exptl_crystal_F_000'] \
-             = olx.xf.GetF000()
+    cif_block['_exptl_crystal_F_000'] = olx.xf.GetF000()
 
     write_fcf = False
     acta = olx.Ins("ACTA").strip()
@@ -596,7 +649,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         write_fcf = True
     if write_fcf:    
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
-      
+
       import StringIO
       f = StringIO.StringIO()
       fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
@@ -686,6 +739,45 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
+    use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    if self.use_tsc and use_aspherical == True:
+      for file in os.listdir(olx.FilePath()):
+        if file.endswith(".tsc"):
+          details_text = """;
+Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020
+NoSpherA2 makes use of tailor-made aspherical atomic form factors calculated
+on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
+spherical-atom form factors.
+
+The ED is calculated from a gaussian basis set single determinant SCF
+wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in
+an electrostatic crystal field.
+The following options were used:
+"""
+          software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+          method = OV.GetVar('settings.tonto.HAR.method')
+          basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+          charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+          mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+          key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
+          if os.path.exists(key_file_name):
+            f_time = os.path.getctime(key_file_name)
+          else:
+            f_time = os.path.getctime(file)
+          import datetime
+          f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+          details_text = details_text + "   SOFTWARE:       %s\n"%software
+          details_text = details_text + "   METHOD:         %s\n"%method
+          details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+          details_text = details_text + "   CHARGE:         %s\n"%charge
+          details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+          details_text = details_text + "   DATE:           %s\n"%f_date
+          if software == "Tonto":
+            radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
+            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+          details_text = details_text + "\n;\n"
+          cif_block['_refine_special_details'] = details_text
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -734,7 +826,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     elif list_code == 3:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc()
+        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
@@ -755,7 +851,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fmt_str = "%i %i %i %f %f %f %f"
     elif list_code == 6:
       if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc()
+        if self.use_tsc:
+          fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+        else:
+          fo_sq, fc = self.get_fo_sq_fc()
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
@@ -848,7 +951,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         ignored = False
         row = numpy.zeros((FvarNum))
         for variable in equation['variables']:
-          label = "%s %d %d"%(variable[0]['references'][-1]['name'], variable[0]['references'][-1]['id'],variable[0]['references'][-1]['index'])
+          label = "%s %d %d"%(variable[0]['references'][-1]['name'],
+                              variable[0]['references'][-1]['id'],
+                              variable[0]['references'][-1]['index'])
           if(variable[0]['references'][-1]['index']==4):
             if(label not in rowheader):
               nextfree+=1
@@ -1076,7 +1181,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
     if self.hklf_code == 5:
-      fo2, f_calc = self.get_fo_sq_fc()
+      if self.use_tsc:
+        fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+      else:
+        fo2, f_calc = self.get_fo_sq_fc()
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       if( self.twin_components is not None

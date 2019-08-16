@@ -7,6 +7,7 @@ fchk_dir = os.getenv("fchk_dir", "")
 fchk_file = os.getenv("fchk_file", "")
 if not os.path.exists(fchk_dir):
   print("Incorrect launching directory!")
+  time.sleep(10)
   exit(1)
 os.chdir(fchk_dir)
 args = os.getenv("fchk_cmd", "").split('+&-')

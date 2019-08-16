@@ -1083,6 +1083,13 @@ class OlexFunctions(inheritFunctions):
     lock[1].close();
     os.remove(lock[0])
 
+  # constructs an object from dict
+  def dict_obj(self, d):
+    class d_o:
+      def __init__(self, **entries):
+        self.__dict__.update(entries)
+    return d_o(**d)
+
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.

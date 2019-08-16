@@ -7,6 +7,7 @@ OV = OlexFunctions()
 
 import olx
 
+
 from cctbx import statistics
 from cctbx.array_family import flex
 from cctbx import uctbx
@@ -257,6 +258,9 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
 
 class f_obs_vs_f_calc(OlexCctbxAdapter):
   def __init__(self, batch_number=None):
+    import os
+    from cctbx.array_family import flex
+    from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
     if self.hklf_code == 5:
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
@@ -282,6 +286,13 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_obs_merged).lone_set(f_calc_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        f_mask = f_mask.common_set(f_obs_filtered)
+        f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask)
+        f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))

@@ -667,6 +667,10 @@ def FindZOfHeaviestAtomInFormula():
 OV.registerFunction(FindZOfHeaviestAtomInFormula)
 
 def get_auto_q_peaks():
+  manual_q = OV.GetVar('manual_q_peak_override',0)
+  if manual_q:
+    return manual_q
+  
   heavy = OlexRefinementModel().getExpectedPeaks()
   if heavy <= 0:
     heavy = 0
@@ -676,10 +680,6 @@ def get_auto_q_peaks():
   q = heavy + hydrogen
   if q == 0: q = 5
   OV.SetVar('auto_q',q)
-  if not OV.GetVar('manual_q_peak_override',0):
-    OV.SetMaxPeaks(q)
-  #if OV.IsControl('SET_SNUM_REFINEMENT_MAX_PEAKS'):
-    #olx.html.SetValue('SET_SNUM_REFINEMENT_MAX_PEAKS',q)
   return q
 
 def FindZOfHeaviestAtomInFormua():
@@ -1261,10 +1261,10 @@ def GetTwinLawAndBASF(html=False):
   if html:
     if curr_law:
       txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(
-        OV.GetParam('gui.red').hexadecimal, txt)
+        OV.GetParam('gui.green_text').hexadecimal, txt)
     else:
       txt = "<tr><td><b><font color='%s'>HKLF 5 %s</font></b></td></tr>" %(
-        OV.GetParam('gui.red').hexadecimal, txt)
+        OV.GetParam('gui.green_text').hexadecimal, txt)
   return txt
 OV.registerFunction(GetTwinLawAndBASF)
 
