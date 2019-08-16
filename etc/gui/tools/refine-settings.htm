@@ -20,7 +20,7 @@ $spy.gui.cif.check_for_embedded_hkl()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
 <!-- ================================== -->
 <!-- HEADER_ABOVE ---- LEAVE UNTOUCHED! -->
@@ -107,7 +107,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         html.Snippet("gui/snippets/input-checkbox",
         "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
         "checked=spy.GetParam('snum.refinement.update_weight')",
-        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))",
         )
        $-
@@ -126,7 +126,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
         "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
         "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         )
        $-
     </td>
@@ -162,7 +162,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
-        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         )
       $-
 
@@ -178,7 +178,7 @@ $spy.gui.cif.check_for_embedded_hkl()
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
 html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     "onuncheck=spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')",
-    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
     )
   $-
 
@@ -247,7 +247,7 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
         "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
         "label=NoSpherA2 ",
         "height=0",
-        "bgcolor=GetVar(HtmlTableRowBgColour)",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td align='left' width="22%">",
         "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
       $-

@@ -8,6 +8,7 @@ import olx
 import glob
 import OlexVFS
 import ntpath
+import cctbx_olex_adapter as COA
 
 
 class Method_shelx(Method):
@@ -89,7 +90,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       method = "smbtx"
       if "_sq" in fab_path:
         method="SQUEEZE"
-      f_mask, f_model = None, None
+      f_mask = None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
         olx.SetVar('snum.masks.original_hklsrc', OV.HKLSrc())
@@ -106,10 +107,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           Method_refinement.pre_refinement(self, RunPrgObject)
           return
 
-        cctbx_olex_adapter.OlexCctbxMasks()
+        COA.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
-          f_model = olx.current_mask.f_model()
         else:
           _ = "There are no voids!"
           print _
@@ -123,20 +123,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
         if f_mask.size() != fo2.size():
-          f_model = f_model.generate_bijvoet_mates().customized_copy(
-            anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
           f_mask = f_mask.generate_bijvoet_mates().customized_copy(
             anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
           if f_mask.size() != fo2.size():
             raise RuntimeError("f_mask array doesn't match hkl file")
-      if f_mask is not None:
-        with open(fab_path, "w") as f:
-          for i,h in enumerate(f_mask.indices()):
-            line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
-            print >> f, line
-          print >> f, "0 0 0 0.0 0.0"
-      #else:
-        #print "No mask present"
+        COA.write_fab(f_mask, fab_path)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):

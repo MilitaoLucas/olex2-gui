@@ -7,6 +7,7 @@ hart_dir = os.getenv("hart_dir", "")
 hart_file = os.getenv("hart_file", "")
 if not os.path.exists(hart_dir):
   print("Incorrect launching directory!")
+  time.sleep(20)
   exit(1)
 os.chdir(hart_dir)
 args = os.getenv("hart_cmd", "").split('+&-')
