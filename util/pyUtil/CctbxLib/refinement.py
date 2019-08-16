@@ -14,7 +14,7 @@ import olex
 import olex_core
 
 from cctbx.array_family import flex
-from cctbx import maptbx, miller, sgtbx, uctbx, xray
+from cctbx import maptbx, miller, sgtbx, uctbx, xray, crystal
 
 import iotbx.cif.model
 
@@ -531,18 +531,61 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
       confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
-      if len(confs) or olx.Ins("CONF") != "n/a": #fix me!
-        dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
-          connectivity_full.pair_asu_table,
+      if len(confs): #fix me!
+        all_conf = None
+        angles = []
+        angle_defs = []
+        for conf in confs:
+          atoms = conf['atoms']
+          if not atoms:
+            all_conf = OV.dict_obj(conf)
+            continue
+          seqs = []
+          rt_mxs = []
+          for atom in atoms:
+            if atom[1] > -1:
+              rt_mxs.append(rt_mx_from_olx(equivs[atom[1]]))
+            else:
+              rt_mxs.append(sgtbx.rt_mx())
+            seqs.append(atom[0])
+          angle_defs.append(crystal.dihedral_angle_def(seqs, rt_mxs))
+        if all_conf:
+          max_d = 1.7
+          max_angle = 170
+          if len(all_conf.args) > 0:
+            max_d = all_conf.args[0]
+          if len(all_conf.args) > 1:
+            max_angle = all_conf.args[1]
+          angles += crystal.calculate_dihedrals(
+            pair_asu_table=connectivity_full.pair_asu_table,
+            sites_frac=xs.sites_frac(),
+            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+            cell_covariance_matrix=cell_vcv,
+            parameter_map=xs.parameter_map(),
+            conformer_indices=self.reparametrisation.connectivity_table.conformer_indices,
+            max_d=max_d,
+            max_angle=max_angle)
+        if len(angle_defs):
+          defined_angles = crystal.calculate_dihedrals(
+            pair_asu_table=connectivity_full.pair_asu_table,
+            sites_frac=xs.sites_frac(),
+            dihedral_defs=angle_defs,
+            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+            cell_covariance_matrix=cell_vcv,
+            parameter_map=xs.parameter_map())
+          if all_conf:
+            for a in defined_angles:
+              if a not in angles:
+                angles.append(a)
+          else:
+            angles = defined_angles
+        space_group_info = sgtbx.space_group_info(group=xs.space_group())
+        cif_dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
+          angles,
+          space_group_info=space_group_info,
           site_labels=xs.scatterers().extract_labels(),
-          sites_frac=xs.sites_frac(),
-          covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-          cell_covariance_matrix=cell_vcv,
-          parameter_map=xs.parameter_map(),
-          include_bonds_to_hydrogen=False,
-          fixed_angles=self.reparametrisation.fixed_angles,
-          conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
-        cif_block.add_loop(dihedrals.loop)
+          include_bonds_to_hydrogen=False)
+        cif_block.add_loop(cif_dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
       equivs = self.olx_atoms.model['equivalents']
       hbonds = []
@@ -697,29 +740,44 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
-    if use_aspherical == True:
+    if self.use_tsc and use_aspherical == True:
       for file in os.listdir(olx.FilePath()):
-          if file.endswith(".tsc"):
-            details_text = ";\nRefinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.\nPlease cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020\n\nNoSpherA2 makes use of tailor-made aspherical atomic form factors calculated\n on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from\n spherical-atom form factors.\n\nThe ED is calculated from a gaussian basis set single determinant SCF\n wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in\n an electrostatic crystal field\n\nThe following options were used:\n"
-            software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-            method = OV.GetVar('settings.tonto.HAR.method')
-            basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
-            charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-            mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-            f_time = os.path.getctime(os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii"))
-            import datetime
-            f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-            details_text = details_text + "   SOFTWARE:       %s\n"%software
-            details_text = details_text + "   METHOD:         %s\n"%method
-            details_text = details_text + "   BASIS SET:      %s\n"%basis_set
-            details_text = details_text + "   CHARGE:         %s\n"%charge
-            details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
-            details_text = details_text + "   DATE:           %s\n"%f_date
-            if software == "Tonto":
-              radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-              details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-            details_text = details_text + "\n;\n"
-            cif_block['_refine_special_details'] = details_text
+        if file.endswith(".tsc"):
+          details_text = """;
+Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020
+NoSpherA2 makes use of tailor-made aspherical atomic form factors calculated
+on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
+spherical-atom form factors.
+
+The ED is calculated from a gaussian basis set single determinant SCF
+wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in
+an electrostatic crystal field.
+The following options were used:
+"""
+          software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+          method = OV.GetVar('settings.tonto.HAR.method')
+          basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+          charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+          mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+          key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
+          if os.path.exists(key_file_name):
+            f_time = os.path.getctime(key_file_name)
+          else:
+            f_time = os.path.getctime(file)
+          import datetime
+          f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+          details_text = details_text + "   SOFTWARE:       %s\n"%software
+          details_text = details_text + "   METHOD:         %s\n"%method
+          details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+          details_text = details_text + "   CHARGE:         %s\n"%charge
+          details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+          details_text = details_text + "   DATE:           %s\n"%f_date
+          if software == "Tonto":
+            radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
+            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+          details_text = details_text + "\n;\n"
+          cif_block['_refine_special_details'] = details_text
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -893,7 +951,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         ignored = False
         row = numpy.zeros((FvarNum))
         for variable in equation['variables']:
-          label = "%s %d %d"%(variable[0]['references'][-1]['name'], variable[0]['references'][-1]['id'],variable[0]['references'][-1]['index'])
+          label = "%s %d %d"%(variable[0]['references'][-1]['name'],
+                              variable[0]['references'][-1]['id'],
+                              variable[0]['references'][-1]['index'])
           if(variable[0]['references'][-1]['index']==4):
             if(label not in rowheader):
               nextfree+=1
