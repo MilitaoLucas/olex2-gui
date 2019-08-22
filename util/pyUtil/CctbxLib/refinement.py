@@ -841,6 +841,9 @@ The following options were used:
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
+      if fo_sq.space_group().is_origin_centric():
+        for i in xrange(0, fc.size()):
+          fc.data()[i] = complex(fc.data()[i].real, 0.0)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas', format="coreCIF")
       mas_as_cif_block.add_miller_array(
