@@ -35,7 +35,7 @@ class NewsImageRetrivalThread(ThreadEx):
         img_url, url = self.get_image_from_list()
         if not img_url:
           return
-
+        img_data = None
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -52,7 +52,7 @@ class NewsImageRetrivalThread(ThreadEx):
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
-        if self.name == "news":
+        if img_data and self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
           olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
@@ -153,7 +153,10 @@ class NewsImageRetrivalThread(ThreadEx):
       url = 'http://www.olex2.org/adverts/expired_pop.html'
     else:
       return
-    l = self.make_call(url).readlines()
+    _ = self.make_call(url)
+    if _ is None:
+      return ""
+    l = _.readlines()
     _ = []
     for line in l:
       if line.strip().startswith("#"):
