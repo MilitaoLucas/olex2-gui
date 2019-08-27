@@ -430,7 +430,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         return "%s%.2f" %(type, count)
       else:
         return "%s%.1f" %(type, count)
-    refinement_refs = self.normal_eqns.observations.fo_sq
     unit_cell_content = self.xray_structure().unit_cell_content()
     formatted_type_count_pairs = []
     count = unit_cell_content.pop('C', None)
@@ -445,17 +444,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       formatted_type_count_pairs.append(
         format_type_count(type, unit_cell_content[type]))
 
+    completeness_refs = refinement_refs = self.normal_eqns.observations.fo_sq
+    if self.hklf_code == 5:
+      completeness_refs = completeness_refs.merge_equivalents(algorithm="shelx").array().map_to_asu()
     two_theta_full = olx.Ins('acta')
-    try: two_theta_full = float(two_theta_full)
-    except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
-      uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
-    ref_subset = refinement_refs.resolution_filter(
+    try:
+      two_theta_full = float(two_theta_full)
+    except ValueError:
+      two_theta_full = math.asin(self.wavelength*0.6)*360/math.pi
+    two_theta_full_set = uctbx.d_star_sq_as_two_theta(
+      uctbx.d_as_d_star_sq(completeness_refs.d_max_min()[1]), self.wavelength, deg=True)
+    if two_theta_full_set < two_theta_full:
+      two_theta_full = two_theta_full_set
+    ref_subset = completeness_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True))
     completeness_full = ref_subset.completeness()
-    completeness_theta_max = refinement_refs.completeness()
-    if refinement_refs.anomalous_flag():
+    completeness_theta_max = completeness_refs.completeness()
+    if completeness_refs.anomalous_flag():
       completeness_full_a = ref_subset.anomalous_completeness()
-      completeness_theta_max_a = refinement_refs.anomalous_completeness()
+      completeness_theta_max_a = completeness_refs.anomalous_completeness()
     else:
     # not sure why we need to duplicate these in the CIF but for now some
     # things rely on to it!
@@ -647,7 +654,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         write_fcf = True
       elif acta.upper() != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
-    if write_fcf:    
+    if write_fcf:
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
 
       import StringIO
@@ -671,7 +678,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
-    cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
+    if self.hklf_code == 5:
+      cif_block['_diffrn_reflns_number'] = refinement_refs.size()
+    else:
+      cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     if merging is not None:
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
