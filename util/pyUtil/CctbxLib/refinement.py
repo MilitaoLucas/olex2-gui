@@ -446,6 +446,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     completeness_refs = refinement_refs = self.normal_eqns.observations.fo_sq
     if self.hklf_code == 5:
+      completeness_refs = completeness_refs.select(self.normal_eqns.observations.measured_scale_indices == 1)
       completeness_refs = completeness_refs.merge_equivalents(algorithm="shelx").array().map_to_asu()
     two_theta_full = olx.Ins('acta')
     try:
@@ -458,11 +459,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       two_theta_full = two_theta_full_set
     ref_subset = completeness_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True))
-    completeness_full = ref_subset.completeness()
-    completeness_theta_max = completeness_refs.completeness()
+    completeness_full = ref_subset.completeness(as_non_anomalous_array=True)
+    completeness_theta_max = completeness_refs.completeness(as_non_anomalous_array=True)
     if completeness_refs.anomalous_flag():
-      completeness_full_a = ref_subset.anomalous_completeness()
-      completeness_theta_max_a = completeness_refs.anomalous_completeness()
+      completeness_full_a = ref_subset.completeness()
+      completeness_theta_max_a = completeness_refs.completeness()
     else:
     # not sure why we need to duplicate these in the CIF but for now some
     # things rely on to it!
