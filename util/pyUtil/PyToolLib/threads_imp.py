@@ -26,7 +26,9 @@ class NewsImageRetrivalThread(ThreadEx):
     import olex_fs
     try:
       if not NewsImageRetrivalThread.image_list.get(self.name,None):
-        NewsImageRetrivalThread.image_list[self.name] = [l.strip() for l in self.get_list_from_server(list_name=self.name)]
+        NewsImageRetrivalThread.image_list[self.name] = self.get_list_from_server(list_name=self.name)
+        if NewsImageRetrivalThread.image_list[self.name]:
+           NewsImageRetrivalThread.image_list[self.name] = [l.strip() for l in NewsImageRetrivalThread.image_list[self.name]]
 
       if NewsImageRetrivalThread.image_list.get(self.name,None):
         if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
