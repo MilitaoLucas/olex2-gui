@@ -538,6 +538,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
+      equivs = self.olx_atoms.model['equivalents']
       confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
       if len(confs): #fix me!
         all_conf = None
@@ -595,7 +596,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
           include_bonds_to_hydrogen=False)
         cif_block.add_loop(cif_dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
-      equivs = self.olx_atoms.model['equivalents']
       hbonds = []
       for htab in htabs:
         atoms = htab['atoms']
