@@ -27,6 +27,8 @@ snum{
             .type = str
           file = ""
             .type = str
+          h_afix = True
+            .type = bool
           h_aniso = True
             .type = bool
           keep_wfn = True
