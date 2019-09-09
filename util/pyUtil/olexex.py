@@ -671,7 +671,8 @@ def get_auto_q_peaks():
   manual_q = OV.GetVar('manual_q_peak_override',0)
   if manual_q:
     if OV.HasGUI() and OV.IsControl(ctrl_name):
-      olx.html.SetBG(ctrl_name,'#ff0000')
+      olx.html.SetBG(ctrl_name,'#ffeeee')
+      olx.html.SetValue(ctrl_name,manual_q)
     return manual_q
   
   heavy = OlexRefinementModel().getExpectedPeaks()

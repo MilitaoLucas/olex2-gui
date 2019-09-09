@@ -301,6 +301,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def SetMaxPeaks(self, max_peaks):
+    ctrl_name = 'SET_SNUM_REFINEMENT_MAX_PEAKS'
     try:
       max_peaks = int(max_peaks)
     except:
@@ -308,15 +309,23 @@ class OlexFunctions(inheritFunctions):
     
     auto_peaks = OV.GetVar('auto_q',None)
     if not auto_peaks:
-      import programSettings
-      auto_peaks = programSettings.get_auto_peaks()
+      import olexex
+      auto_peaks = olexex.get_auto_q_peaks()
 
     if not max_peaks:
       OV.SetVar('manual_q_peak_override',0)
       max_peaks = auto_peaks
+      if OV.HasGUI() and OV.IsControl(ctrl_name):
+        olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
+        olx.html.SetFG(ctrl_name,'#ffffff')
+        olx.html.SetValue(ctrl_name,0)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
       OV.SetVar('manual_q_peak_override',max_peaks)
+      if OV.HasGUI() and OV.IsControl(ctrl_name):
+        olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
+        olx.html.SetFG(ctrl_name,'#ffffff')
+        olx.html.SetValue(ctrl_name,max_peaks)
       
     try:
       import programSettings
