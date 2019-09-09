@@ -301,13 +301,21 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def SetMaxPeaks(self, max_peaks):
-    auto_peaks = OV.GetVar('auto_q',None)
     try:
       max_peaks = int(max_peaks)
     except:
       return
     
-    if auto_peaks != max_peaks:
+    auto_peaks = OV.GetVar('auto_q',None)
+    if not auto_peaks:
+      import programSettings
+      auto_peaks = programSettings.get_auto_peaks()
+
+    if not max_peaks:
+      OV.SetVar('manual_q_peak_override',0)
+      max_peaks = auto_peaks
+
+    if max_peaks != 0 and auto_peaks != max_peaks:
       OV.SetVar('manual_q_peak_override',max_peaks)
       
     try:

@@ -667,8 +667,11 @@ def FindZOfHeaviestAtomInFormula():
 OV.registerFunction(FindZOfHeaviestAtomInFormula)
 
 def get_auto_q_peaks():
+  ctrl_name = 'SET_SNUM_REFINEMENT_MAX_PEAKS'
   manual_q = OV.GetVar('manual_q_peak_override',0)
   if manual_q:
+    if OV.HasGUI() and OV.IsControl(ctrl_name):
+      olx.html.SetBG(ctrl_name,'#ff0000')
     return manual_q
   
   heavy = OlexRefinementModel().getExpectedPeaks()
