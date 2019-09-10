@@ -291,6 +291,18 @@
   >
 >
 
+<start_rpac help="Launches ReportPlusAC"
+  <body
+    <args
+      <arg1 name="filefull" def="'FileFull()'">
+    >
+    <cmd
+      <cmd1 "reap %1.ins">
+      <cmd2 "spy.ac4.create_report()">
+    >
+  >
+>
+
 <onexit help="Executes on program exit"
   <body
   <cmd
