@@ -348,9 +348,6 @@ class NoSpherA2(PT):
         raise NameError('Error during structure factor calculation!')
       olx.html.Update()
       combine_sfs(force=True)
-      
-    print("Lets stop here for now!\n")
-    return
     
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
