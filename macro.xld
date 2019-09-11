@@ -1026,10 +1026,11 @@
   <body
     <args
       <arg1 name="popup_name" def="none">
+      <arg1 name="-a" def="false">
     >
     <cmd
-      <cmd1 "if strcmp(%1,'none') then 'html.Dump DataDir()/html.htm'
-       else 'html.Dump %1 DataDir()/html.htm'">
+      <cmd1 "if strcmp(%1,'none') then 'html.Dump DataDir()/html.htm -a=%2'
+       else 'html.Dump %1 DataDir()/html.htm -a=%2'">
       <cmd2 "exec -o getvar(defeditor) DataDir()/html.htm">
     >
   >
