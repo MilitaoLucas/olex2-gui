@@ -30,8 +30,13 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
+    self.shifts_over_su = None
 
   def step_forward(self):
+    try:
+      a = self.cycles.shifts_over_su
+    except:
+      self.shifts_over_su = None
     self.n_current_cycle += 1
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
     super(normal_eqns, self).step_forward()
@@ -43,15 +48,22 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.feed_olex()
     return self
 
+  def step_backward(self):
+    super(normal_eqns, self).step_backward()
+    self.feed_olex()
+    return self
+
   #compatibility...
   def get_shifts(self):
     try:
       return self.cycles.shifts_over_su
     except:
-      shifts_over_su = flex.abs(self.step() /
-        flex.sqrt(self.covariance_matrix().matrix_packed_u_diagonal()))
-      jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc()
-      return jac_tr.transpose() * shifts_over_su
+      if not self.shifts_over_su:
+        shifts_over_su = flex.abs(self.step() /
+          flex.sqrt(self.covariance_matrix().matrix_packed_u_diagonal()))
+        jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc()
+        self.shifts_over_su = jac_tr.transpose() * shifts_over_su
+    return self.shifts_over_su
 
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
@@ -77,7 +89,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       max_shift_esd_item = self.reparametrisation.component_annotations[max_shift_idx]
       self.max_shift_esd = max_shift_esd
       self.max_shift_esd_item = max_shift_esd_item
-      
+
     except Exception as s:
       print s
 
