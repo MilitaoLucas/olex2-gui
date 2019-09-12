@@ -170,6 +170,58 @@ $+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),ORCA)
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="16%" align='right'>
+    <b>SCF Conv. Thresh. </b>
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Conv@refine",
+    "items='SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv', html.GetValue('~name~'))")
+   $-
+</td>
+<td width="16%" align='right'>
+    <b>SCF Conv. Strategy </b>
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Conv@refine",
+    "items='EasyConv;NormalConv;SlowConv;VerySlowConv'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy', html.GetValue('~name~'))")
+   $-
+</td> 
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='right'>
+    <b>Grouped Parts </b>
+</td>
+<td width="70%">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_Disorder_Groups@refine",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups', html.GetValue('~name~'))")
+   $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+
 #ignoreif -->
 
 <!-- #ignoreif not spy.NoSpherA2.check_for_matching_fcf()
