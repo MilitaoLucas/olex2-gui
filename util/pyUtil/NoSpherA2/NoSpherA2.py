@@ -218,6 +218,7 @@ class NoSpherA2(PT):
         cif = False
       deal_with_parts(cif)
       nr_parts = len(parts)
+      disorder_groups = read_disorder_groups()
 #    if nr_parts > 1:
 #        raise NameError("Please don't feed me disordered structures, yet")
 #        return
@@ -648,9 +649,10 @@ class wfn_Job(object):
     mem_value = int(mem) * 1024 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!rhf 3-21G TightSCF Grid4 AIM"
+      control = "!rhf 3-21G TightSCF Grid4 AIM "
     else:
-      control = "!B3LYP 3-21G TightSCF Grid4 AIM"
+      control = "!B3LYP 3-21G TightSCF Grid4 AIM "
+    control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
     mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -764,9 +766,9 @@ class wfn_Job(object):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
     if("orca" in args[0]):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
-      shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
-      shutil.copy(os.path.join(self.full_dir,self.name+".wfx"), self.name+".wfx")
-      file_path = os.path.join(self.full_dir,self.name+".wfn")
+      shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+      shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      file_path = os.path.join(self.full_dir,self.name + ".wfn")
       move_args = []
       basis_dir = self.parent.basis_dir
       move_args.append(self.parent.wfn_2_fchk)
@@ -966,7 +968,7 @@ class Job(object):
         move_args.append(basis_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
-      m = subprocess.Popen(move_args, stdout=log)
+      m = subprocess.Popen(move_args, stdout=log, stdin=None, stderr=subprocess.STDOUT)
       while m.poll() is None:
         time.sleep(1)
       log.close()
@@ -1117,8 +1119,8 @@ def combine_sfs(force=False,part=-100):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('settings.tonto.HAR.method')
-  basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
@@ -1295,8 +1297,8 @@ def combine_tscs(nr_parts):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('settings.tonto.HAR.method')
-  basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
@@ -1364,6 +1366,24 @@ def check_for_matching_fcf():
     OV.SetVar('have_valid_nosphera2_fcf', False)
     return False
 OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
+
+def read_disorder_groups():
+  input = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')
+  groups = input.split(';')
+  for i in range(len(groups)):
+    print(groups[i])
+  return ""
+OV.registerFunction(read_disorder_groups,True,'NoSpherA2')
+
+def is_disordered():
+  parts = OV.ListParts()
+  
+  nr_parts = None 
+  if not parts:
+    return False
+  else:
+    return True
+OV.registerFunction(is_disordered,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
