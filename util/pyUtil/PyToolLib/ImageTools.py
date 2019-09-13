@@ -95,7 +95,10 @@ class ImageTools(FontInstances):
     if dpi_scaling:
       w = OV.GetParam('gui.skin.base_width')
     else:
-      w = int(olx.html.ClientWidth('self'))
+      if OV.HasGUI():
+        w = int(olx.html.ClientWidth('self'))
+      else:
+        w = 800
 
     self.skin_width = w
     self.skin_width_margin = w - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
@@ -1766,4 +1769,5 @@ IT.get_available_width()
 if olx.HasGUI() == 'true':
   OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
   OV.registerFunction(IT.make_pie_graph, False, 'it')
+  
 OV.registerFunction(IT.trim_image, False, 'it')
