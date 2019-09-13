@@ -207,6 +207,7 @@ class NoSpherA2(PT):
     parts = OV.ListParts()
     wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     
+    disorder_groups = None
     nr_parts = None 
     if not parts:
       nr_parts = 1
@@ -219,6 +220,7 @@ class NoSpherA2(PT):
       deal_with_parts(cif)
       nr_parts = len(parts)
       disorder_groups = read_disorder_groups()
+#      print(disorder_groups)
 #    if nr_parts > 1:
 #        raise NameError("Please don't feed me disordered structures, yet")
 #        return
@@ -352,6 +354,9 @@ class NoSpherA2(PT):
     
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix') == True:
+      olex.m("sel $h")
+      olex.m("Afix 0")
     olex.m('delins list')
     olex.m('addins LIST 3')
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
@@ -783,7 +788,9 @@ class wfn_Job(object):
         move_args.append(basis_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
-      m = subprocess.Popen(move_args, stdout=log)
+      m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+      for line in m.stdout:
+        log.write(line)
       while m.poll() is None:
         time.sleep(1)
       log.close()
@@ -968,7 +975,9 @@ class Job(object):
         move_args.append(basis_dir)
       logname = self.name + "_wfn2fchk.log"
       log = open(logname,'w')
-      m = subprocess.Popen(move_args, stdout=log, stdin=None, stderr=subprocess.STDOUT)
+      m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+      for line in m.stdout:
+        log.write(line)
       while m.poll() is None:
         time.sleep(1)
       log.close()
@@ -1369,10 +1378,24 @@ OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 
 def read_disorder_groups():
   input = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')
+  if input == None:
+    return []
   groups = input.split(';')
+  from array import array
+  result = []
   for i in range(len(groups)):
-    print(groups[i])
-  return ""
+    result.append([])
+    for part in groups[i].split(','):
+      if '-' in part:
+        a, b = part.split('-')
+        a, b = int(a), int(b)
+        result[i].extend(range(a,b+1))
+      else:
+        a = int(part)
+        result[i].append(a) 
+    print result[i]
+#  print result
+  return result
 OV.registerFunction(read_disorder_groups,True,'NoSpherA2')
 
 def is_disordered():
