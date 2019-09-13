@@ -209,9 +209,10 @@ class NoSpherA2(PT):
     
     disorder_groups = None
     nr_parts = None 
+    print len(parts)
     if not parts:
       nr_parts = 1
-    else:
+    elif len(parts) > 1:
       cif = None
       if wfn_code == "Tonto":
         cif = True
@@ -219,7 +220,7 @@ class NoSpherA2(PT):
         cif = False
       deal_with_parts(cif)
       nr_parts = len(parts)
-      disorder_groups = read_disorder_groups()
+#      disorder_groups = read_disorder_groups()
 #      print(disorder_groups)
 #    if nr_parts > 1:
 #        raise NameError("Please don't feed me disordered structures, yet")
@@ -654,9 +655,9 @@ class wfn_Job(object):
     mem_value = int(mem) * 1024 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!rhf 3-21G TightSCF Grid4 AIM "
+      control = "!rhf 3-21G Grid4 AIM "
     else:
-      control = "!B3LYP 3-21G TightSCF Grid4 AIM "
+      control = "!B3LYP 3-21G Grid4 AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
     mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
