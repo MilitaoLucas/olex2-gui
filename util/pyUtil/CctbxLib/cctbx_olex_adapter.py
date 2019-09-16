@@ -351,8 +351,7 @@ class OlexCctbxAdapter(object):
     return weighting.weights
 
   def load_mask(self):
-    fab_path = OV.HKLSrc().replace(".hkl", ".fab")
-    #fab_path = os.path.join(OV.FilePath(), OV.FileName()) + ".fab"
+    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
     if os.path.exists(fab_path):
       with open(fab_path) as fab:
         indices = []
