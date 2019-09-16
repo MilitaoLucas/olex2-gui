@@ -481,12 +481,18 @@ class ExtractCifInfo(CifTools):
     all_sources_d = {}
 
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
+    str_solstion_from_cif = None
     if os.path.exists(curr_cif_p):
       try:
-        f = open(curr_cif_p, 'rb')
-        current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-        f.close()
-        all_sources_d[curr_cif_p] = current_cif
+        with open(curr_cif_p, 'rb') as f:
+          current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+          all_sources_d[curr_cif_p] = current_cif
+        try:
+          str_solstion_from_cif = current_cif.get('_computing_structure_solution', None)
+          if str_solstion_from_cif and str_solstion_from_cif == '?':
+            str_solstion_from_cif = None
+        except:
+          pass
       except iotbx.cif.CifParserError:
         print("Failed to parse the CIF for conflicts analysis")
 
@@ -497,8 +503,17 @@ class ExtractCifInfo(CifTools):
       ## END
       try:
         prg = self.SPD.programs[active_solution.program]
-        version = OV.GetProgramVersionByName(prg.name)
-        solution_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
+        # take value from the CIF only if solved with XT
+        if "xt" not in prg.name.lower():
+          str_solstion_from_cif = None
+        if str_solstion_from_cif is None:
+          version, full = OV.GetProgramVersionByName(prg.name, returnFlag = True)
+          if full:
+            solution_reference = version
+          else:
+            solution_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
+        else:
+          solution_reference = str_solstion_from_cif
         full_references.append(prg.reference)
         olx.SetVar('solution_reference_short', prg.brief_reference)
         olx.SetVar('solution_reference_long', prg.reference)
