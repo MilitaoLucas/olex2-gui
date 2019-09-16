@@ -481,6 +481,18 @@ class OlexFunctions(inheritFunctions):
 
       if update_atoms_loop is None:
         update_atoms_loop = olex2_refine
+      #create FAB if needed
+      if olx.Ins("ABIN") != 'n/a':
+        fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+        if not os.path.exists(fab_path):
+          try:
+            import cctbx_olex_adapter as COA
+            from cctbx_olex_adapter import OlexCctbxAdapter 
+            mask = COA.OlexCctbxAdapter().load_mask()
+            if mask:
+              COA.write_fab(mask, fab_path)
+          except Exception, e:
+            print("Failed to create FAB file: %s" %str(e))
       if type(filepath) == list:
         olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
       else:
