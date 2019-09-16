@@ -94,7 +94,7 @@ def get_mask_info():
       with open(sqf_f, 'rb') as f:
         sqf = iotbx.cif.fast_reader(input_string=f.read()).model()
     except:
-      return return_note(note = "Please switch ACTA on to obain the masking CIF info.", col=gui_orange)
+      return return_note(note = "No masking info yet!", col=gui_green)
     if sqf:
       olx.cif_model[current_sNum].update(sqf[current_sNum])
     volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
@@ -565,7 +565,9 @@ def update_sqf_file(current_sNum, scope, scope2=None):
     with open(sqf_file, 'w') as f:
       print >> f, cif
     f.close()
-    CifInfo.MergeCif()
+    
+    if os.path.exists(sqf_file.replace(".sqf", ".cif")):
+      CifInfo.MergeCif()
 
 def add_mask_content(i,which):
   global mask_info_has_updated
