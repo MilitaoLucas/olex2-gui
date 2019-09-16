@@ -849,17 +849,31 @@ class OlexFunctions(inheritFunctions):
     res = olx.Info()
     return res
 
-  def GetProgramVersionByName(self, name):
+  def GetProgramVersionByName(self, name, returnFlag=False):
     version = "n/a"
     name = name.lower()
-    if "shelx" in name.lower():
+    if "shelxl" in name:
       version = olx.Lst('version')
-    elif "olex2" in name.lower():
+    elif "xt" in name:
+      try:
+        marker = "_computing_structure_solution"
+        with open(self.HKLSrc(), "rb") as hkl:
+          for line in hkl:
+            if line.startswith(marker):
+              version = line[len(marker):].strip().strip("'")
+              if returnFlag:
+                return (version, True)
+              return version
+      except:
+        pass
+    elif "olex2" in name:
       version=self.GetTag()
-    elif "cctbx" in name.lower():
+    elif "cctbx" in name:
       version=self.GetTag() + "(ccbtx)"
-    elif "smtbx" in name.lower():
+    elif "smtbx" in name:
       version=self.GetTag() + "(smtbx)"
+    if returnFlag:
+      return (version, False)
     return version
 
   def GetTag(self):
