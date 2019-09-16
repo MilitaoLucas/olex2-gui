@@ -303,7 +303,7 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
     self._mu = value
 
   def check_shift_over_esd(self):
-    return self.do_scale_shifts(1e3)
+    return self.do_scale_shifts(1e16)
 
   def do(self):
     self.mu_history = flex.double()
@@ -323,7 +323,9 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
       h = self.non_linear_ls.step()
       expected_decrease = 0.5*h.dot(self.mu*h - g)
       self.non_linear_ls.step_forward()
-      if self.had_too_small_a_step() or self.check_shift_over_esd():
+      if self.check_shift_over_esd():
+        # not sure why but without this esds become very small!
+        self.non_linear_ls.build_up()
         break
       self.non_linear_ls.build_up(objective_only=True)
       objective_new = self.non_linear_ls.objective()
