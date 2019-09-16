@@ -50,7 +50,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def step_backward(self):
     super(normal_eqns, self).step_backward()
-    self.feed_olex()
     return self
 
   #compatibility...
@@ -137,7 +136,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def max_shift_esd(self):
     self.get_shifts()
-    
     return self.iter_shifts_u(max_items=1).next()
 
 
@@ -287,4 +285,61 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       olx.Refresh()
     if OV.isInterruptSet():
       raise RuntimeError('external_interrupt')
+
+
+from scitbx.lstbx import normal_eqns_solving
+class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
+
+  tau = 1e-3
+  convergence_as_shift_over_esd = 1e-5
+
+  @property
+  def mu(self):
+    return self._mu
+
+  @mu.setter
+  def mu(self, value):
+    self.mu_history.append(value)
+    self._mu = value
+
+  def check_shift_over_esd(self):
+    return self.do_scale_shifts(1e3)
+
+  def do(self):
+    self.mu_history = flex.double()
+    self.n_iterations = 0
+    nu = 2
+    self.non_linear_ls.build_up()
+    if self.has_gradient_converged_to_zero():
+      return
+    a = self.non_linear_ls.normal_matrix_packed_u()
+    self.mu = self.tau*flex.max(a.matrix_packed_u_diagonal())
+    while self.n_iterations < self.n_max_iterations:
+      a.matrix_packed_u_diagonal_add_in_place(self.mu)
+      objective = self.non_linear_ls.objective()
+      g = -self.non_linear_ls.opposite_of_gradient()
+      self.non_linear_ls.solve()
+      self.n_iterations += 1
+      h = self.non_linear_ls.step()
+      expected_decrease = 0.5*h.dot(self.mu*h - g)
+      self.non_linear_ls.step_forward()
+      if self.had_too_small_a_step() or self.check_shift_over_esd():
+        break
+      self.non_linear_ls.build_up(objective_only=True)
+      objective_new = self.non_linear_ls.objective()
+      actual_decrease = objective - objective_new
+      rho = actual_decrease/expected_decrease
+      if rho > 0:
+        self.mu *= max(1/3, 1 - (2*rho - 1)**3)
+        nu = 2
+      else:
+        if self.n_iterations + 1 < self.n_max_iterations:
+          self.non_linear_ls.step_backward()
+        self.mu *= nu
+        nu *= 2
+      self.non_linear_ls.build_up()
+
+  def __str__(self):
+    return "Levenberg-Marquardt"
+
 
