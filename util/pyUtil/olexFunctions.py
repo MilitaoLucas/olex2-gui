@@ -301,14 +301,31 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def SetMaxPeaks(self, max_peaks):
-    auto_peaks = OV.GetVar('auto_q',None)
+    ctrl_name = 'SET_SNUM_REFINEMENT_MAX_PEAKS'
     try:
       max_peaks = int(max_peaks)
     except:
       return
     
-    if auto_peaks != max_peaks:
+    auto_peaks = OV.GetVar('auto_q',None)
+    if not auto_peaks:
+      import olexex
+      auto_peaks = olexex.get_auto_q_peaks()
+
+    if not max_peaks:
+      OV.SetVar('manual_q_peak_override',0)
+      max_peaks = auto_peaks
+      if OV.HasGUI() and OV.IsControl(ctrl_name):
+        olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
+        olx.html.SetFG(ctrl_name,'#ffffff')
+        olx.html.SetValue(ctrl_name,0)
+
+    if max_peaks != 0 and auto_peaks != max_peaks:
       OV.SetVar('manual_q_peak_override',max_peaks)
+      if OV.HasGUI() and OV.IsControl(ctrl_name):
+        olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
+        olx.html.SetFG(ctrl_name,'#ffffff')
+        olx.html.SetValue(ctrl_name,max_peaks)
       
     try:
       import programSettings
@@ -464,6 +481,18 @@ class OlexFunctions(inheritFunctions):
 
       if update_atoms_loop is None:
         update_atoms_loop = olex2_refine
+      #create FAB if needed
+      if olx.Ins("ABIN") != 'n/a':
+        fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+        if not os.path.exists(fab_path):
+          try:
+            import cctbx_olex_adapter as COA
+            from cctbx_olex_adapter import OlexCctbxAdapter 
+            mask = COA.OlexCctbxAdapter().load_mask()
+            if mask:
+              COA.write_fab(mask, fab_path)
+          except Exception, e:
+            print("Failed to create FAB file: %s" %str(e))
       if type(filepath) == list:
         olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
       else:
@@ -832,17 +861,31 @@ class OlexFunctions(inheritFunctions):
     res = olx.Info()
     return res
 
-  def GetProgramVersionByName(self, name):
+  def GetProgramVersionByName(self, name, returnFlag=False):
     version = "n/a"
     name = name.lower()
-    if "shelx" in name.lower():
+    if "shelxl" in name:
       version = olx.Lst('version')
-    elif "olex2" in name.lower():
+    elif "xt" in name:
+      try:
+        marker = "_computing_structure_solution"
+        with open(self.HKLSrc(), "rb") as hkl:
+          for line in hkl:
+            if line.startswith(marker):
+              version = line[len(marker):].strip().strip("'")
+              if returnFlag:
+                return (version, True)
+              return version
+      except:
+        pass
+    elif "olex2" in name:
       version=self.GetTag()
-    elif "cctbx" in name.lower():
+    elif "cctbx" in name:
       version=self.GetTag() + "(ccbtx)"
-    elif "smtbx" in name.lower():
+    elif "smtbx" in name:
       version=self.GetTag() + "(smtbx)"
+    if returnFlag:
+      return (version, False)
     return version
 
   def GetTag(self):

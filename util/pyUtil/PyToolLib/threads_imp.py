@@ -27,6 +27,8 @@ class NewsImageRetrivalThread(ThreadEx):
     try:
       if not NewsImageRetrivalThread.image_list.get(self.name,None):
         NewsImageRetrivalThread.image_list[self.name] = self.get_list_from_server(list_name=self.name)
+        if NewsImageRetrivalThread.image_list[self.name]:
+           NewsImageRetrivalThread.image_list[self.name] = [l.strip() for l in NewsImageRetrivalThread.image_list[self.name]]
 
       if NewsImageRetrivalThread.image_list.get(self.name,None):
         if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
@@ -35,7 +37,7 @@ class NewsImageRetrivalThread(ThreadEx):
         img_url, url = self.get_image_from_list()
         if not img_url:
           return
-
+        img_data = None
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -52,7 +54,7 @@ class NewsImageRetrivalThread(ThreadEx):
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
-        if self.name == "news":
+        if img_data and self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
           olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
@@ -70,7 +72,7 @@ class NewsImageRetrivalThread(ThreadEx):
     if not img_list:
       return
     img_id = ""
-    tag = None
+    tags = None
     res_idx = -1
     if self.name == 'splash':
       if "-ac" in OV.GetTag():
@@ -84,9 +86,11 @@ class NewsImageRetrivalThread(ThreadEx):
         img_id = open(_,'r').read().strip().replace("http://", "")
       for idx, l in enumerate(img_list):
         if img_id in l:
-          if (idx +1) < len(img_list):
-            res_idx = idx
-            break
+          _ = l.split(',')
+          if len(_) == 2 or (len(_) > 2 and OV.GetTag() in _[2:]):
+            if (idx +1) < len(img_list):
+              res_idx = idx
+              break
 
       for idx in xrange(0, len(img_list)):
         res_idx += 1
@@ -96,20 +100,18 @@ class NewsImageRetrivalThread(ThreadEx):
         if "," in res:
           _ = res.split(',')
           if len(_) == 2:
-            img_url, url = res.split(',')
-            tag = None
-          elif len(_) == 3:
-            img_url, url, tag = res.split(',')
+            img_url, url = _
+            tags = None
+          elif len(_) > 2:
+            img_url, url = _[:2]
+            tags = _[2:]
         else:
           img_url = res
           url = "www.olex2.org"
 
-        if tag:
-          if tag.strip() != olx.olex2_tag:
-            img_url = None
-            continue
-          else:
-            break
+        if tags and OV.GetTag() not in tags:
+          img_url = None
+          continue
         else:
           break
     else:
@@ -118,22 +120,17 @@ class NewsImageRetrivalThread(ThreadEx):
         if "," in res:
           _ = res.split(',')
           if len(_) == 2:
-            img_url, url = res.split(',')
-            tag = None
-          elif len(_) == 3:
-            img_url, url, tag = res.split(',')
+            img_url, url = _
+            tags = None
+          elif len(_) > 2:
+            img_url, url = _[:2]
+            tags = _[2:]
         else:
           img_url = res
           url = "www.olex2.org"
-        if "-ac" in OV.GetTag():
-          if not tag or "-ac" not in tag:
-            continue
-        if tag:
-          if tag.strip() != olx.olex2_tag:
-            img_url = None
-            continue
-          else:
-            break
+        if tags and OV.GetTag() not in tags:
+          img_url = None
+          continue
         else:
           break
 
@@ -153,7 +150,10 @@ class NewsImageRetrivalThread(ThreadEx):
       url = 'http://www.olex2.org/adverts/expired_pop.html'
     else:
       return
-    l = self.make_call(url).readlines()
+    _ = self.make_call(url)
+    if _ is None:
+      return ""
+    l = _.readlines()
     _ = []
     for line in l:
       if line.strip().startswith("#"):

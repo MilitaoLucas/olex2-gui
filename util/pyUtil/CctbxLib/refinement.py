@@ -59,7 +59,8 @@ except Exception, e:
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
-    'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
+    #'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
+    'Levenberg-Marquardt': olex2_normal_equations.levenberg_marquardt_iterations,
     'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
   solvers_default_method = 'Levenberg-Marquardt'
@@ -117,12 +118,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OV.HKLSrc(original_hklsrc)
         # we need to reinitialise reflections
         self.initialise_reflections()
-      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+      if not OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+        self.f_mask = self.load_mask()
+      if not self.f_mask:
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      else:
-        self.f_mask = self.load_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
@@ -229,6 +230,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               gradient_threshold=None,
               step_threshold=None,
               tau = 1e-6,
+              convergence_as_shift_over_esd=1e-3,
               )
         else:
           refinementWrapper(self, self.normal_eqns,
@@ -430,7 +432,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         return "%s%.2f" %(type, count)
       else:
         return "%s%.1f" %(type, count)
-    refinement_refs = self.normal_eqns.observations.fo_sq
     unit_cell_content = self.xray_structure().unit_cell_content()
     formatted_type_count_pairs = []
     count = unit_cell_content.pop('C', None)
@@ -445,17 +446,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
       formatted_type_count_pairs.append(
         format_type_count(type, unit_cell_content[type]))
 
+    completeness_refs = refinement_refs = self.normal_eqns.observations.fo_sq
+    if self.hklf_code == 5:
+      completeness_refs = completeness_refs.select(self.normal_eqns.observations.measured_scale_indices == 1)
+      completeness_refs = completeness_refs.merge_equivalents(algorithm="shelx").array().map_to_asu()
     two_theta_full = olx.Ins('acta')
-    try: two_theta_full = float(two_theta_full)
-    except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
-      uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
-    ref_subset = refinement_refs.resolution_filter(
+    try:
+      two_theta_full = float(two_theta_full)
+    except ValueError:
+      two_theta_full = math.asin(self.wavelength*0.6)*360/math.pi
+    two_theta_full_set = uctbx.d_star_sq_as_two_theta(
+      uctbx.d_as_d_star_sq(completeness_refs.d_max_min()[1]), self.wavelength, deg=True)
+    if two_theta_full_set < two_theta_full:
+      two_theta_full = two_theta_full_set
+    ref_subset = completeness_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True))
-    completeness_full = ref_subset.completeness()
-    completeness_theta_max = refinement_refs.completeness()
-    if refinement_refs.anomalous_flag():
-      completeness_full_a = ref_subset.anomalous_completeness()
-      completeness_theta_max_a = refinement_refs.anomalous_completeness()
+    completeness_full = ref_subset.completeness(as_non_anomalous_array=True)
+    completeness_theta_max = completeness_refs.completeness(as_non_anomalous_array=True)
+    if completeness_refs.anomalous_flag():
+      completeness_full_a = ref_subset.completeness()
+      completeness_theta_max_a = completeness_refs.completeness()
     else:
     # not sure why we need to duplicate these in the CIF but for now some
     # things rely on to it!
@@ -530,6 +540,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
       cif_block.add_loop(distances.loop)
       cif_block.add_loop(angles.loop)
+      equivs = self.olx_atoms.model['equivalents']
       confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
       if len(confs): #fix me!
         all_conf = None
@@ -587,7 +598,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
           include_bonds_to_hydrogen=False)
         cif_block.add_loop(cif_dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
-      equivs = self.olx_atoms.model['equivalents']
       hbonds = []
       for htab in htabs:
         atoms = htab['atoms']
@@ -647,7 +657,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         write_fcf = True
       elif acta.upper() != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
-    if write_fcf:    
+    if write_fcf:
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
 
       import StringIO
@@ -671,7 +681,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
-    cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
+    if self.hklf_code == 5:
+      cif_block['_diffrn_reflns_number'] = refinement_refs.size()
+    else:
+      cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     if merging is not None:
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
@@ -841,6 +854,9 @@ The following options were used:
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
+      if fo_sq.space_group().is_origin_centric():
+        for i in xrange(0, fc.size()):
+          fc.data()[i] = complex(fc.data()[i].real, 0.0)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas', format="coreCIF")
       mas_as_cif_block.add_miller_array(

@@ -23,10 +23,14 @@ snum{
             .type = bool
           DIIS = "0.01"
             .type = str
+          Disorder_Groups = ""
+            .type = str
           fchk_file = ""
             .type = str
           file = ""
             .type = str
+          h_afix = True
+            .type = bool
           h_aniso = True
             .type = bool
           keep_wfn = True
@@ -36,6 +40,10 @@ snum{
           modular = "direct"
             .type = str
           multiplicity = 1
+            .type = str
+          ORCA_SCF_Conv = "NormalSCF"
+            .type = str
+          ORCA_SCF_Strategy = "NormalConv"
             .type = str
           source = "Tonto"
             .type = str

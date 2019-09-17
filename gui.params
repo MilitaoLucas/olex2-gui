@@ -185,7 +185,7 @@ gui
     highlight_colour = #ff8800
       .type = colour
 
-    input_bg_colour = #eeffff
+    input_bg_colour = #ffffff
       .type = colour
 
     input_height = 20

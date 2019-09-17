@@ -351,8 +351,7 @@ class OlexCctbxAdapter(object):
     return weighting.weights
 
   def load_mask(self):
-    fab_path = OV.HKLSrc().replace(".hkl", ".fab")
-    #fab_path = os.path.join(OV.FilePath(), OV.FileName()) + ".fab"
+    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
     if os.path.exists(fab_path):
       with open(fab_path) as fab:
         indices = []
@@ -373,7 +372,7 @@ class OlexCctbxAdapter(object):
         crystal_symmetry=self.xray_structure().crystal_symmetry(),
         indices=flex.miller_index(indices)).auto_anomalous().map_to_asu()
       return miller.array(miller_set=miller_set, data=flex.complex_double(data))
-    mask_fn = os.path.join(filepath, OV.FileName())+"-f_mask.pickle"
+    mask_fn = os.path.join(OV.StrDir(), OV.FileName())+"-f_mask.pickle"
     if os.path.exists(mask_fn):
       return easy_pickle.load(mask_fn)
     return None
