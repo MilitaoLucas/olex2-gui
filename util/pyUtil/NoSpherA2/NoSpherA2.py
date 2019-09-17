@@ -771,14 +771,19 @@ class wfn_Job(object):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
     if("orca" in args[0]):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
-      shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
       file_path = os.path.join(self.full_dir,self.name + ".wfn")
       move_args = []
       basis_dir = self.parent.basis_dir
+      mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(self.name+".wfn")
+      move_args.append("-mult")
+      move_args.append(mult)
       move_args.append("-b")
       move_args.append(basis_name)
       move_args.append("-d")
@@ -786,9 +791,16 @@ class wfn_Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      logname = self.name + "_wfn2fchk.log"
-      log = open(logname,'w')
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      # this is for testing writeout of SFs by my program, for comparison with tonto
+      if experimental_SF:
+        move_args.append("-hkl")
+        move_args.append(self.name+".hkl")
+        move_args.append("-cif")
+        move_args.append(self.name+".cif")
+      logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+      log = open(logname,'r')
       for line in m.stdout:
         log.write(line)
       while m.poll() is None:
