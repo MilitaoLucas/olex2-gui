@@ -209,7 +209,6 @@ class NoSpherA2(PT):
     
     disorder_groups = None
     nr_parts = None 
-    print len(parts)
     if not parts:
       nr_parts = 1
     elif len(parts) > 1:
