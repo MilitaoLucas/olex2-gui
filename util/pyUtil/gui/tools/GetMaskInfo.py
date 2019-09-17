@@ -79,7 +79,7 @@ def get_mask_info():
   mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
     
   is_CIF = (olx.IsFileType('cif') == 'true')
-
+  sqf = None
   if is_CIF:
     volumes = olx.Cif('_%s_void_volume' %base).split(",")
     electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
@@ -91,8 +91,10 @@ def get_mask_info():
   else:
     try:
       sqf_f = get_sqf_name()
-      with open(sqf_f, 'rb') as f:
-        sqf = iotbx.cif.fast_reader(input_string=f.read()).model()
+      rFile = open(sqf_f, 'rb').read()
+      if not rFile.startswith("data_"):
+        rFile = "data_%s\n"%str(current_sNum) + rFile
+      sqf = iotbx.cif.fast_reader(input_string=rFile).model()
     except:
       return return_note(note = "No masking info yet!", col=gui_green)
     if sqf:
