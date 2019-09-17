@@ -291,19 +291,28 @@
   >
 >
 
+<start_rpac help="Launches ReportPlusAC"
+  <body
+    <args
+      <arg1 name="filefull" def="'FileFull()'">
+    >
+    <cmd
+      <cmd1 "reap %1.ins">
+      <cmd2 "spy.ac4.create_report()">
+    >
+  >
+>
+
 <onexit help="Executes on program exit"
   <body
   <cmd
     <cmd "stop logging">
     <cmd "flush history">
     <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
-          spy.SaveCifInfo()>>mode off'">
+          spy.SaveCifInfo()'">
     <cmd "spy.SaveUserParams()">
     <cmd "spy.SaveOlex2Params()">
-    <cmd "storeparam startup file.relativePath(filefull())">
-    <cmd "storeparam last_version GetVar(last_version, '')">
     <cmd "spy.threading.joinAll()">
-    <cmd "user_onexit">
     <cmd "spy.onexit()">
     <cmd "echo Good Bye">
   >

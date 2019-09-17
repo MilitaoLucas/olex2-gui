@@ -3082,12 +3082,12 @@ class HealthOfStructure():
     from cctbx import uctbx
     try:
       wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-      
+
       l = (('Completeness','_diffrn_measured_fraction_theta_%s'),
            ('Completeness_laue','_diffrn_reflns_laue_measured_fraction_%s'),
            ('Completeness_point','_diffrn_reflns_point_measured_fraction_%s'),
           )
-      
+
       for alias,cif_item in l:
         _ = olx.Cif(cif_item%self.resolution_type)
         if _ == "n/a":
@@ -3121,10 +3121,10 @@ class HealthOfStructure():
           self.hkl_stats['Rint'] = float(_)
         else:
           self.hkl_stats['Rint'] = 1
-    
+
     except Exception, err:
       print "Could not get info from CIF: %s" %err
-    
+
 
   def initialise_HOS(self, force=False):
     """ Returns (bool, bool) the first boolean specifies if the initialisation

@@ -76,8 +76,35 @@ def get_mask_info():
   d["note"] = "No Masking Information"
   d["note_bg"] = OV.GetVar('HtmlHighlightCOlour')
 
+  mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
     
   is_CIF = (olx.IsFileType('cif') == 'true')
+  sqf = None
+  if is_CIF:
+    volumes = olx.Cif('_%s_void_volume' %base).split(",")
+    electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
+    contents = olx.Cif('_%s_void_content' %base).split(",")
+    details = olx.Cif('_%s_details' %base).split(",")
+    mask_special_details = olx.Cif('_%s_special_details' %base).split(",")
+    mask_special_details = mask_special_details[0].strip().lstrip("'").rstrip("'")
+
+  else:
+    try:
+      sqf_f = get_sqf_name()
+      rFile = open(sqf_f, 'rb').read()
+      if not rFile.startswith("data_"):
+        rFile = "data_%s\n"%str(current_sNum) + rFile
+      sqf = iotbx.cif.fast_reader(input_string=rFile).model()
+    except:
+      return return_note(note = "No masking info yet!", col=gui_green)
+    if sqf:
+      olx.cif_model[current_sNum].update(sqf[current_sNum])
+    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
+    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
+    contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
+    details = olx.cif_model[current_sNum].get('_%s_details' %base)
+    mask_special_details = olx.cif_model[current_sNum].get('_%s_special_details' %base)
+    if mask_special_details: mask_special_details = mask_special_details.strip()
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
@@ -91,25 +118,6 @@ def get_mask_info():
         numbers = olx.Cif('_%s_void_nr' %base).split(",")
         if not numbers:
           return return_note(note = "No Voids in CIF", col = gui_green)
-      else:
-        return return_note(note = "No Voids in this structure", col=gui_green)
-
-  mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
-  if is_CIF:
-    volumes = olx.Cif('_%s_void_volume' %base).split(",")
-    electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
-    contents = olx.Cif('_%s_void_content' %base).split(",")
-    details = olx.Cif('_%s_details' %base).split(",")
-    mask_special_details = olx.Cif('_%s_special_details' %base).split(",")
-    mask_special_details = mask_special_details[0].strip().lstrip("'").rstrip("'")
-
-  else:
-    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
-    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
-    contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
-    details = olx.cif_model[current_sNum].get('_%s_details' %base)
-    mask_special_details = olx.cif_model[current_sNum].get('_%s_special_details' %base)
-    if mask_special_details: mask_special_details = mask_special_details.strip()
 
   Z =float(olx.xf.au.GetZ())
   Zprime = float(olx.xf.au.GetZprime())
@@ -559,7 +567,9 @@ def update_sqf_file(current_sNum, scope, scope2=None):
     with open(sqf_file, 'w') as f:
       print >> f, cif
     f.close()
-    CifInfo.MergeCif()
+    
+    if os.path.exists(sqf_file.replace(".sqf", ".cif")):
+      CifInfo.MergeCif()
 
 def add_mask_content(i,which):
   global mask_info_has_updated

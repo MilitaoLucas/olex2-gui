@@ -294,7 +294,13 @@ class Method_refinement(Method):
         OV.AddIns("MORE -1")
       bond = olx.Ins('BOND')
       if bond == "n/a" or not bond:
-        OV.AddIns("BOND $H", quiet=True)
+        import re
+        _ = olx.xf.au.GetFormula().split()
+        for bit in _:
+          m = re.split('(\d.*)',bit)
+          if "H" in m:
+            OV.AddIns("BOND $H", quiet=True)
+            break
       if olx.Ins('ACTA') == "n/a":
         if olx.GetVar('refinement_acta', None) != "No ACTA":
           OV.AddIns("ACTA")

@@ -86,7 +86,7 @@ $+
   $-
 </td>
 
-<td width='5%'>
+<td width='5%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Aniso",
@@ -99,11 +99,24 @@ $+
   $-
 </td>
 
+<td width='5%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Afix 0",
+    "label=No Afix",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','False')"
+    )
+  $-
+</td>
+
 <td width='5%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=Keep_WFN",
-    "label=Keep Wavefunction",
+    "label=Keep WFN",
     "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn')",
     "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
@@ -156,6 +169,58 @@ $+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),ORCA)
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="16%" align='right'>
+    <b>SCF Conv. Thresh. </b>
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Conv@refine",
+    "items='SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv', html.GetValue('~name~'))")
+   $-
+</td>
+<td width="16%" align='right'>
+    <b>SCF Conv. Strategy </b>
+</td>
+<td width="25%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Strategy@refine",
+    "items='EasyConv;NormalConv;SlowConv;VerySlowConv'",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy', html.GetValue('~name~'))")
+   $-
+</td> 
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='right'>
+    <b>Grouped Parts </b>
+</td>
+<td width="70%">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_Disorder_Groups@refine",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups', html.GetValue('~name~'))")
+   $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 
 #ignoreif -->
 
