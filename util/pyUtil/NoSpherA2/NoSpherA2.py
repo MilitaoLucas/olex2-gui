@@ -808,7 +808,7 @@ class wfn_Job(object):
       log.close()
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
+        shutil.move(logname,os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
       else:
         raise NameError("No fchk generated!")
 
