@@ -800,12 +800,8 @@ class wfn_Job(object):
         move_args.append(self.name+".cif")
       logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      log = open(logname,'r')
-      for line in m.stdout:
-        log.write(line)
       while m.poll() is None:
         time.sleep(1)
-      log.close()
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
         shutil.move(logname,os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
@@ -985,15 +981,11 @@ class Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      logname = self.name + "_wfn2fchk.log"
-      log = open(logname,'w')
+      logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      for line in m.stdout:
-        log.write(line)
       while m.poll() is None:
         time.sleep(1)
-      log.close()
-      shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
+      shutil.move(logname,os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
       if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
         shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), self.name+".fchk")
       else:
