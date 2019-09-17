@@ -47,6 +47,8 @@ snum{
             .type = str
           source = "Tonto"
             .type = str
+          wfn2fchk_SF = False
+            .type = bool
         }
         mem = 2
           .type = str
