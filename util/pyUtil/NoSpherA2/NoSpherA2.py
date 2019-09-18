@@ -11,6 +11,7 @@ import olex_core
 import gui
 
 
+
 import shutil
 import time
 debug = bool(OV.GetParam("olex2.debug", False))
@@ -776,6 +777,15 @@ class wfn_Job(object):
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
       file_path = os.path.join(self.full_dir,self.name + ".wfn")
+      
+      import olx
+      from cctbx import crystal
+      cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+      sg = cs.space_group()
+      #for i in xrange(0, sg.n_smx()):
+        #print(sg.smx(i))
+      
+      
       move_args = []
       basis_dir = self.parent.basis_dir
       mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
@@ -1132,8 +1142,8 @@ def combine_sfs(force=False,part=-100):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
+  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
@@ -1310,8 +1320,8 @@ def combine_tscs(nr_parts):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
+  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
