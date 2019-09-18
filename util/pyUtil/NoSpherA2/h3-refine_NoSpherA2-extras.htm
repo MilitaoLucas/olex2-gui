@@ -131,10 +131,10 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="20%" align="left">
-  <b>Cluster radius  </b>
+<td width="13%" align="left">
+  <b>Cluster r </b>
 </td>
-<td width="5%">
+<td width='6%' align='left'>
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_cluster_radius@refine",
@@ -142,10 +142,10 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
   $-
   </td>
-<td width="16%" align='right'>
+<td width="16%" align='center'>
     <b>DIIS Conv. </b>
 </td>
-<td width="25%">
+<td width="20%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_DIIS@refine",
@@ -174,7 +174,7 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="16%" align='right'>
+<td width="25%" align='left'>
     <b>SCF Conv. Thresh. </b>
 </td>
 <td width="25%">
@@ -186,7 +186,7 @@ $+
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv', html.GetValue('~name~'))")
    $-
 </td>
-<td width="16%" align='right'>
+<td width="25%" align='right'>
     <b>SCF Conv. Strategy </b>
 </td>
 <td width="25%">
@@ -206,7 +206,7 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="20%" align='right'>
+<td width="25%" align='left'>
     <b>Grouped Parts </b>
 </td>
 <td width="70%">

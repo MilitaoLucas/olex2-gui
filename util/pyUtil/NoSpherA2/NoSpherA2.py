@@ -11,6 +11,7 @@ import olex_core
 import gui
 
 
+
 import shutil
 import time
 debug = bool(OV.GetParam("olex2.debug", False))
@@ -771,14 +772,28 @@ class wfn_Job(object):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
     if("orca" in args[0]):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
-      shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
       file_path = os.path.join(self.full_dir,self.name + ".wfn")
+      
+      import olx
+      from cctbx import crystal
+      cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+      sg = cs.space_group()
+      #for i in xrange(0, sg.n_smx()):
+        #print(sg.smx(i))
+      
+      
       move_args = []
       basis_dir = self.parent.basis_dir
+      mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(self.name+".wfn")
+      move_args.append("-mult")
+      move_args.append(mult)
       move_args.append("-b")
       move_args.append(basis_name)
       move_args.append("-d")
@@ -786,17 +801,20 @@ class wfn_Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      logname = self.name + "_wfn2fchk.log"
-      log = open(logname,'w')
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      # this is for testing writeout of SFs by my program, for comparison with tonto
+      if experimental_SF:
+        move_args.append("-hkl")
+        move_args.append(self.name+".hkl")
+        move_args.append("-cif")
+        move_args.append(self.name+".cif")
+      logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      for line in m.stdout:
-        log.write(line)
       while m.poll() is None:
         time.sleep(1)
-      log.close()
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
+        shutil.move(logname,os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
       else:
         raise NameError("No fchk generated!")
 
@@ -973,15 +991,11 @@ class Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir)
-      logname = self.name + "_wfn2fchk.log"
-      log = open(logname,'w')
+      logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      for line in m.stdout:
-        log.write(line)
       while m.poll() is None:
         time.sleep(1)
-      log.close()
-      shutil.move(self.name+"_wfn2fchk.log",os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
+      shutil.move(logname,os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
       if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
         shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), self.name+".fchk")
       else:
@@ -1128,8 +1142,8 @@ def combine_sfs(force=False,part=-100):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
+  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
@@ -1306,8 +1320,8 @@ def combine_tscs(nr_parts):
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
   software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetVar('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetVar('snum.refinement.cctbx.nsff.tsc.basis_name')
+  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))

@@ -308,10 +308,10 @@ class Method_refinement(Method):
         OV.AddIns('CONF')
 
     if RunPrgObject.make_unique_names:
-      pass
+      pass	
       #olx.Sel('-a')
       #olx.Name('sel 1 -c')
-    if RunPrgObject.params.snum.auto_hydrogen_naming:
+    if OV.GetParam('snum.auto_hydrogen_naming'):
       olx.FixHL()
 
     wave_length = float(olx.xf.exptl.Radiation())
