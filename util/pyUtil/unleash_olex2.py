@@ -318,7 +318,7 @@ if not os.path.isdir(bin_directory):
 def update_tags_file(dir):
   up_dir = '/'.join(dir.split('/')[:-1])
   #tags = os.listdir(up_dir)
-  tags = ['1.2', '1.2-beta', '1.1', '1.2-alpha', '1.0']
+  tags = ['1.3', '1.2', '1.3-beta', '1.3-alpha', '1.1', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
