@@ -253,8 +253,8 @@ routines requiring structure refinement
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' \
-      Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
+    program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine' \
+      Unknown 
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' '*Levenberg-Marquardt' \
       'Full Matrix' Unknown
@@ -803,6 +803,11 @@ routines requiring structure refinement
 olex2
   .short_caption = Olex2 Internal Settings
 {
+  news_img_src = http://www.olex2.org/adverts/olex2adverts.txt
+    .type = str
+  splash_img_src = http://www.olex2.org/adverts/splash.txt
+    .type = str
+
   stop_current_process = False
     .type = bool
   is_online = True
@@ -938,7 +943,7 @@ user
     .type = strings
   auto_close_settings_panel = False
     .type = bool
-  auto_insert_acta_stuff = False
+  auto_insert_acta_stuff = True
     .type = bool
   folder_view_root = None
     .type = path
