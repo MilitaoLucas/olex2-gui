@@ -100,6 +100,8 @@ def get_mask_info():
     if sqf:
       olx.cif_model[current_sNum].update(sqf[current_sNum])
     volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
+    if not volumes:
+      return return_note(note = "No void has been found.", col=gui_orange)
     electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
     contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
     details = olx.cif_model[current_sNum].get('_%s_details' %base)
