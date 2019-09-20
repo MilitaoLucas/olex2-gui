@@ -852,8 +852,10 @@ The following options were used:
           sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
           anomalous_flag=False)
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
+#        fo_sq = fo_sq.eliminate_sys_absent()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
+#        fc, fo = fc.common_sets(fo)
       if fo_sq.space_group().is_origin_centric():
         for i in xrange(0, fc.size()):
           fc.data()[i] = complex(fc.data()[i].real, 0.0)
@@ -890,6 +892,34 @@ The following options were used:
       mas_as_cif_block.add_miller_array(
         fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
       fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
+    elif list_code == 99:
+      if self.hklf_code == 5:
+        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
+        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
+      else:
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
+        fo_sq = fo_sq.eliminate_sys_absent()
+        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
+        fc, fo = fc.common_sets(fo)
+      if fo_sq.space_group().is_origin_centric():
+        for i in xrange(0, fc.size()):
+          fc.data()[i] = complex(fc.data()[i].real, 0.0)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fo, array_type='meas', format="coreCIF")
+      mas_as_cif_block.add_miller_array(
+        fc, column_names=['_refln_A_calc', '_refln_B_calc'])
+      if fixed_format:
+        fmt_str="%4i"*3 + "%12.4f"*4
+      else:
+        fmt_str = "%i %i %i %f %f %f %f"
 
     else:
       print "LIST code %i not supported" %list_code
