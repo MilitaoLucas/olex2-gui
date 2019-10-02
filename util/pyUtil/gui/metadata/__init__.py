@@ -107,7 +107,7 @@ def add_resolved_conflict_item_to_phil(item, value):
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
-  OV.set_cif_item(item, value)
+  OV.set_cif_item(item, value.replace("<br>", "\n"))
   global conflict_d
   del conflict_d[item]
   conflicts(d=conflict_d)
@@ -181,7 +181,7 @@ def conflicts(popout='auto', d=None):
       number_of_files = len(d['sources'])
       txt = "<table width='100%'><tr><td>" #START: encase everything in a table
       colspan = number_of_files + 1
-      
+
       ## CONFLICTS TOP SECTION ###########################
       gui_d = {'colspan':colspan}
       gui_d.update(gui_dd)
@@ -202,7 +202,7 @@ def conflicts(popout='auto', d=None):
         gui_d.update(gui_dd)
         txt += gett('conflicts_header_row_files')%gui_d
         ######################################################
-        
+
         #%(col_w, head_colour, f, i, i)
       txt += '</tr>' #Close TR for Header Row
 
@@ -223,11 +223,10 @@ def conflicts(popout='auto', d=None):
           else:
             bg = col_odd
 
-          val = d[conflict].get(source,'n/a')
+          val = d[conflict].get(source,'n/a').replace("\n", "<br>")
+          colour = ""
           if not val:
             display = "--"
-
-            
           elif cif == val:
             colour = OV.GetParam('gui.green').hexadecimal
           else:
@@ -236,16 +235,15 @@ def conflicts(popout='auto', d=None):
           ###########################################
           gui_d = {'conflict':conflict,'val':val, 'colour':colour, 'bg':bg, 'col_w':col_w}
           gui_d.update(gui_dd)
-          
+
           display = gett('conflicts_display_1')%gui_d
           ############################################
           gui_d['display'] = display
-            
+
           #TD conflict value
           txt += gett('conflicts_conflict_value')%gui_d
         # user resolved value
-        
-        
+
         ################################################################
         gui_d = {'conflict':conflict,'val':val, 'colour':colour, 'bg':bg, 'col_w':col_w}
         gui_d.update(gui_dd)
