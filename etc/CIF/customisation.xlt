@@ -35,7 +35,7 @@
       <pivot "_shelx_fab_file"> <pivot "_shelx_fab_checksum">
       <pivot "_platon">
       <pivot "_shelx">
-      <pivot "_refln">
+      <pivot "_refln"> <pivot "_diffrn_refln#">
       <pivot "_iucr">
     >
     <endings

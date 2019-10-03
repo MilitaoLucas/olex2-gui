@@ -806,6 +806,8 @@ The following options were used:
     return cif_block
 
   def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
+    anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
+    list_code = abs(list_code)
     if list_code == 4:
       fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
       fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
@@ -826,7 +828,6 @@ The following options were used:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"*2 + " %s"
         else:
           fmt_str = "%i %i %i %.3f %.3f %.3f %.3f %s"
-
       else:
         if fixed_format:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
@@ -843,14 +844,14 @@ The following options were used:
         fo_sq = fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),
           sigmas=fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=False)
+          anomalous_flag=anomalous_flag)
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       else:
-        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=anomalous_flag)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
           data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
           sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=False)
+          anomalous_flag=anomalous_flag)
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
@@ -874,13 +875,13 @@ The following options were used:
         fo_sq = fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),
           sigmas=fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=False)
+          anomalous_flag=anomalous_flag)
       else:
-        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=anomalous_flag)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
           data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
           sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=False)
+          anomalous_flag=anomalous_flag)
         fc = fc.sort(by_value="packed_indices")
         fo_sq = fo_sq.sort(by_value="packed_indices")
         #fc, fo_sq = fo_sq.common_sets(fc)
@@ -890,7 +891,6 @@ The following options were used:
       mas_as_cif_block.add_miller_array(
         fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
       fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
-
     else:
       print "LIST code %i not supported" %list_code
       return None, None
