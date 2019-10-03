@@ -160,7 +160,8 @@ def check_for_embedded_hkl():
   res1 = olx.Cif('_shelx_hkl_file')
   res2 = olx.Cif('_iucr_refine_reflections_details')
   res3 = olx.Cif('_refln_index_h')
-  if res1 == 'n/a' and res2 == 'n/a' and res3 == 'n/a':
+  res4 = olx.Cif('_diffrn_refln_index_h')
+  if res1 == 'n/a' and res2 == 'n/a' and res3 == 'n/a' and res4 == 'n/a':
     res = olx.Cif('_refln', 0)
     res = False
   if res:
