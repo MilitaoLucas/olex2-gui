@@ -211,11 +211,14 @@ def set_olex_paths():
   olx.VFSDependent = set()
 
 def set_plugins_paths():
+
   plugins = olexex.InstalledPlugins()
   olx.InstalledPlugins = set()
+  import AC4
+  if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
+    return
   
   from PluginTools import PluginTools
-  import AC4
   import FragmentDB
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
@@ -438,5 +441,7 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
       "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
-from HAR import HARp
-from NoSpherA2 import NoSpherA2
+
+if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
+  from HAR import HARp
+  from NoSpherA2 import NoSpherA2

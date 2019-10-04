@@ -38,6 +38,8 @@ class reader(object):
             else:
               txt = txt[1].strip()
             self._cifItems.setdefault("prog_version", "%s" %txt) ############################
+          elif "Crystal faces:" in line:
+            self._cifItems["_exptl_absorpt_correction_type"] = "numerical"
           elif "Effective data to parameter ratio" in line: ############################
             txt = line.split('=')
             txt = txt[1].strip()
@@ -91,6 +93,8 @@ class reader(object):
               raise Exception('Unsupported program version: ' + txt[-1].strip())
             self._twin_cifItems.setdefault("prog_version", "%s" %txt)
             self._twin_cifItems.setdefault("lambda_correction", "Not present")
+          elif "Crystal faces:" in line:
+            self._twin_cifItems["_exptl_absorpt_correction_type"] = "numerical"
           elif "mul" in line:
             txt = line.split('file')
             txt = txt[1].strip()
