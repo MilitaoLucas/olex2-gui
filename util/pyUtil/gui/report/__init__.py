@@ -435,7 +435,7 @@ def create_report():
   
   try:
     import AC4
-    if AC4.AC4.AC4_instance.HasAC4():
+    if AC4.AC4_instance.HasAC4():
       olex.m('spy.ac4.create_report()')
     else:
       olex.m("report")
