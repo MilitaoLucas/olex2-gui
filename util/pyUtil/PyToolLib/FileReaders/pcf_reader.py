@@ -1,20 +1,9 @@
 # pcf_reader.py
-
 class pcf_reader:
   def __init__(self, path):
     self.path = path
     self.ignore = set(["?", "'?'", ".", "'.'"])
-
-  def read_pcf(self):
-    """Reads the .pcf file with the given path.
-
-    Returns a dictionary of cif items found in the .pcf file."""
-
-    rfile = open(self.path, 'r')
-    lines = rfile.readlines()
-    rfile.close()
-
-    items = set([
+    self.items = set([
       "_symmetry_cell_setting",
       "_symmetry_space_group_name_H-M",
       #"_cell_measurement_temperature",
@@ -39,17 +28,42 @@ class pcf_reader:
       "_cell_measurement_theta_min",
       "_cell_measurement_theta_max",
       #"_diffrn_ambient_temperature",
+      "_exptl_crystal_face",
     ])
 
+
+  def read_pcf(self):
+    try:
+      import iotbx.cif
+      with open(self.path, 'rb') as f:
+        pcf = {}
+        cif_block = iotbx.cif.reader(file_object=f).model()
+        dn = cif_block.keys()[0]
+        cif_block = cif_block[dn]
+        for i in self.items:
+          val = cif_block.get(i, ".")
+          if isinstance(val, basestring):
+            if val in self.ignore:
+              continue
+            val = self.value_exceptions(i, val)
+          pcf[i] = val
+        return pcf
+    except Exception, e:
+      return self.read_pcf_old()
+
+  def read_pcf_old(self):
+    """Reads the .pcf file with the given path.
+    Returns a dictionary of cif items found in the .pcf file."""
+
+    lines = open(self.path, 'r').readlines()
     pcf = {}
     for line in lines:
       toks = line.strip().split()
       if len(toks) < 2: continue
-      if toks[0] in items:
+      if toks[0] in self.items:
         val = ' '.join(toks[1:])
         if val in self.ignore: continue
         val = self.value_exceptions(toks[0], val)
-        
         pcf.setdefault(toks[0], val)
     self.pcf_d = pcf
     return pcf
