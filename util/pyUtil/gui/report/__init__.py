@@ -431,6 +431,18 @@ def get_reflections_stats_dictionary():
     d.setdefault(item, {"value": stats[item], "html_item": d_aliases[item]})
   return d
 
+def create_report():
+  
+  try:
+    import AC4
+    if AC4.AC4.AC4_instance.HasAC4():
+      olex.m('spy.ac4.create_report()')
+    else:
+      olex.m("report")
+  except:
+    pass
+
+olex.registerFunction(create_report, False, "gui")
 olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")

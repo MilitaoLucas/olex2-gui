@@ -16,9 +16,9 @@
   </td>
 
   <td width='10%' align='right'>
-    %Image%
+    <b>%Image% </b>
   </td>
-  <td width='20%' align='left'>
+  <td width='23%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -34,15 +34,26 @@
     >
     </font>
   </td>
-  <td width='34%' align='right'>
-$spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
-  </td>
+          
+    $+
+      html.Snippet(GetVar(default_link),
+      "value=Create Report",
+      "width=90%",
+      "height=GetVar(HtmlComboHeight)",
+      "name=CONFLICT_%(no_of_file)s",
+      "bgcolor=GetVar(gui.action_colour)",
+      "fgcolor=#ffffff",
+      "onclick=spy.gui.create_report()",
+      "td1=<td align='right'>",
+      )
+    $-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='8%' align='left'>
-    &nbsp;%Style%
+  <td width='13%' align='left'>
+    <b>&nbsp;%Style% </b>
   </td>
   <td width='22%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -60,8 +71,8 @@ $spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refin
     </font>
   </td>
 
-  <td width='15%' align='right'>
-    %Begin with%
+  <td width='10%' align='right'>
+    <b>%Start% <b>
   </td>
   <td width='23%'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -79,8 +90,8 @@ $spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refin
     </font>
   </td>
 
-  <td width='13%' align='right'>
-    %End with%
+  <td width='10%' align='right'>
+    <b>%End% <b>
   </td>
   <td width='24%'>
     <font size="$GetVar('HtmlFontSizeControls')">
