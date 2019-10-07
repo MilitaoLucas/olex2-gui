@@ -562,13 +562,8 @@ def update_sqf_file(current_sNum, scope, scope2=None):
     else:
       cif_block[current_sNum][scope][scope2] = olx.cif_model[current_sNum][scope][scope2]
 
-    from iotbx.cif import model
-    cif = model.cif()
-    cif = cif_block
-    
     with open(sqf_file, 'w') as f:
-      print >> f, cif
-    f.close()
+      print >> f, cif_block
     
     if os.path.exists(sqf_file.replace(".sqf", ".cif")):
       CifInfo.MergeCif()
