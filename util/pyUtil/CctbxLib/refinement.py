@@ -1256,7 +1256,7 @@ The following options were used:
       verify_symmetry=False
       ).all()
     i = 0
-    olx.Kill('$Q', '-au') #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
+    olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
         if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
