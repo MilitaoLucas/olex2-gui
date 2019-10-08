@@ -359,7 +359,7 @@ class NoSpherA2(PT):
       olex.m("sel $h")
       olex.m("Afix 0")
     olex.m('delins list')
-    olex.m('addins LIST 99')
+    olex.m('addins LIST -3')
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
     gui.set_notification(OV.GetVar('gui_notification'))
