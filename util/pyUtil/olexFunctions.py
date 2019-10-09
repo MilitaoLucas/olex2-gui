@@ -1133,7 +1133,6 @@ class OlexFunctions(inheritFunctions):
         self.__dict__.update(entries)
     return d_o(**d)
 
-
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
