@@ -354,8 +354,8 @@ Palatinus et al., 2012""",
     prg.addMethod(cgls)
     RPD.addProgram(prg)
 
-  smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
+  smtbx_refine.addMethod(gauss_newton)
   RPD.addProgram(smtbx_refine)
 
   tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
