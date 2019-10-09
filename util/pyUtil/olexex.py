@@ -1814,8 +1814,10 @@ def EditIns():
 OV.registerFunction(EditIns)
 
 def FixMACQuotes(text):
-  return text.replace(u"\u2018", u"'")\
-    .replace(u"\u2019", u"'")\
-    .replace(u"\u201c", u"\"")\
-    .replace(u"\u201d", u"\"")\
-    .encode("ascii")
+  if text:
+    return text.replace(u"\u2018", u"'")\
+      .replace(u"\u2019", u"'")\
+      .replace(u"\u201c", u"\"")\
+      .replace(u"\u201d", u"\"")\
+     .encode("ascii")
+  return text
