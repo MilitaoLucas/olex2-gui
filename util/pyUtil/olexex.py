@@ -1813,3 +1813,11 @@ def EditIns():
   olx.html.Update()
 OV.registerFunction(EditIns)
 
+def FixMACQuotes(text):
+  if text:
+    return text.replace(u"\u2018", u"'")\
+      .replace(u"\u2019", u"'")\
+      .replace(u"\u201c", u"\"")\
+      .replace(u"\u201d", u"\"")\
+     .encode("ascii")
+  return text

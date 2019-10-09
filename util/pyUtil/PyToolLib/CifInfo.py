@@ -324,11 +324,6 @@ class EditCifInfo(CifTools):
     text += "\n%s" %append
     inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
     if inputText and inputText != text:
-      inputText = inputText.replace(u"\u2018", u"'")\
-        .replace(u"\u2019", u"'")\
-        .replace(u"\u201c", u"\"")\
-        .replace(u"\u201d", u"\"")\
-        .encode("ascii")
       reader = iotbx.cif.reader(input_string=inputText)
       if reader.error_count():
         return

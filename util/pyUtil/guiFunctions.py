@@ -10,9 +10,10 @@ class GuiFunctions(object):
   def GetUserInput(self, arg, title, contentText):
     """If first argument is 1 (number one) brings up one line input box, anything else brings up a multiline input."""
     try:
-      retStr = olex_gui.GetUserInput(arg,title,contentText)
+      import olexex
+      retStr = olexex.FixMACQuotes(olex_gui.GetUserInput(arg,title,contentText))
     except Exception, ex:
-      print >> sys.stderr, "An error occured"
+      print >> sys.stderr, "An error occurred"
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -34,7 +35,7 @@ class GuiFunctions(object):
     try:
       retStr = olx.Alert(title, text, buttons, tickboxText)
     except Exception, ex:
-      print >> sys.stderr, "An error occured"
+      print >> sys.stderr, "An error occurred"
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -43,14 +44,14 @@ class GuiFunctions(object):
     try:
       return bool(olex_gui.IsControl(ctrl_name))
     except Exception, ex:
-      print >> sys.stderr, "An error occured."
+      print >> sys.stderr, "An error occurred."
       sys.stderr.formatExceptionInfo()
 
   def TranslatePhrase(self, text):
     try:
       retStr = olx.TranslatePhrase(text)
     except Exception, ex:
-      print >> sys.stderr, "An error occured whilst translating %s" %(text)
+      print >> sys.stderr, "An error occurred whilst translating %s" %(text)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
