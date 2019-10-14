@@ -691,14 +691,19 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return matrix_lattice
 
   def find_fom(self, falsehkl, metrical):
-    hkl_dropped=numpy.floor(falsehkl)
-    adjacents=numpy.array([[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]])
-    distances=numpy.full(numpy.shape(falsehkl)[0],1000)
-    for i in numpy.arange(0,8):
-      hkl_adjacent=hkl_dropped+adjacents[i]
+    if all(numpy.sum(metrical, axis=1)>=0): #this is the condition which dictates rounding to the nearest integer will also give the closest reciprocal lattice point
+      hkl_adjacent=numpy.round(falsehkl)
       displacement=falsehkl-hkl_adjacent
-      size=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
-      distances=numpy.minimum(distances,size)
+      distances=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
+    else:
+      hkl_dropped=numpy.floor(falsehkl)
+      adjacents=numpy.array([[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]])
+      distances=numpy.full(numpy.shape(falsehkl)[0],1000)
+      for i in numpy.arange(0,8):
+        hkl_adjacent=hkl_dropped+adjacents[i]
+        displacement=falsehkl-hkl_adjacent
+        size=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
+        distances=numpy.minimum(distances,size)
     sortedDist=numpy.sort(distances)
     filtered=sortedDist[:-15]
     return numpy.average(filtered)
