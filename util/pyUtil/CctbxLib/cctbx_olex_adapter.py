@@ -383,7 +383,7 @@ class OlexCctbxAdapter(object):
       fc = self.f_calc(fo2, self.exti is not None, True, True,
                        one_h_function=one_h_function)
     else:
-      fc = self.f_calc(None, self.exti is not None, True, True)
+      fc = self.f_calc(None, self.exti is not None, True, ignore_inversion_twin=False)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
