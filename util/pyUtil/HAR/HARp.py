@@ -131,7 +131,7 @@ class HARp(PT):
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
-        self.mpiexec = olx.file.Which("openmpi/bin/mpiexec")
+        self.mpiexec = olx.file.Which("mpiexec")
       self.mpihome = self.mpiexec[:-11]
       if 'LD_LIBRARY_PATH' in os.environ:
         if self.mpihome + 'lib' not in os.environ['LD_LIBRARY_PATH']:

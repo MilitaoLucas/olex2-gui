@@ -13,7 +13,6 @@
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
-    "height=300",
     "items=strcat('Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.file')",
     "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.NoSpherA2.combine_sfs()",
@@ -51,5 +50,5 @@
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
-<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSphera2_Extras;onclick=;colspan=1;2; -->
+<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Extras;onclick=;colspan=1;2; -->
 #ignoreif -->
