@@ -48,8 +48,14 @@ The multiplicity (2S+1) of the wavefunction, where S is the total spin angular m
 ## H Aniso
 Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
 
+## Use Relativistics
+Use DKH2 relativistic Hamiltonian. This should only be used with x2c-family basis sets. But for them it is highly recommended.
+
 ## Keep Wavefunction
 Select to keep a copy of the current wavefunction in the folder you are working. Backups of former wavefunctions are kept inside the olex2 folder in that directory.
+
+## HAR
+Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time!
 
 ## Cluster Radius (For Tonto)
 If Tonto is used for a wavefunction calculation a clsuter of **explicit charges** calcualted in a self consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius until no further charges are included.
