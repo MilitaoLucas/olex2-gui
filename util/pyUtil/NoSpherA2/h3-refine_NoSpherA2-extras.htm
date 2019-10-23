@@ -85,8 +85,9 @@ $+
     )
   $-
 </td>
-
-<td width='5%' align='left'>
+<td width="8%">
+</td>
+<td width='8%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Aniso",
@@ -98,8 +99,9 @@ $+
     )
   $-
 </td>
-
-<td width='5%' align='left'>
+<td width="3%">
+</td>
+<td width='8%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Afix 0",
@@ -112,7 +114,26 @@ $+
   $-
 </td>
 
-<td width='5%' align="left">
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width="8%" align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=NoSpherA2_ORCA_Relativistics@refine",
+    "label=Use Relativistics",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic','True')",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic','False')"
+    )
+   $-
+</td> 
+
+<td width='8%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=Keep_WFN",
@@ -124,6 +145,38 @@ $+
     )
   $-
 </td>
+
+<td width='8%' align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=HAR",
+    "label=HAR",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','True')>>html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','False')>>html.Update()"
+    )
+  $-
+</td>
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'True')
+<td width="18%" align='right'>
+  <b>Max Cycles </b>
+</td>
+<td width='8%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_Max_HAR",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles', html.GetValue('~name~'))",
+    )
+  $-
+</td>
+#ignoreif -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'False')
+<td width="25%">
+</td>
+#ignoreif -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

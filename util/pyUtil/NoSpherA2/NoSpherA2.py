@@ -1,4 +1,3 @@
-
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -9,7 +8,6 @@ import olex
 import olx
 import olex_core
 import gui
-
 
 
 import shutil
@@ -112,13 +110,12 @@ class NoSpherA2(PT):
         self.exe = _
       else:
         self.exe = olx.file.Which("%s.exe" %exe_pre)
-
     else:
       mpiloc = os.path.join(self.p_path, "mpiexec")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
       else: 
-        self.mpiexec = olx.file.Which("openmpi/bin/mpiexec")
+        self.mpiexec = olx.file.Which("mpiexec")
       self.mpihome = self.mpiexec[:-11]
       if 'LD_LIBRARY_PATH' in os.environ:
         if self.mpihome + 'lib' not in os.environ['LD_LIBRARY_PATH']:
@@ -158,7 +155,8 @@ class NoSpherA2(PT):
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
       print """
-      No MPI implementation found in PATH!"""
+No MPI implementation found in PATH!
+"""
       self.cpu_list_str = '1'
 
   def launch(self):  
@@ -274,9 +272,6 @@ class NoSpherA2(PT):
               out_cif.write(line)
               
         out_cif.close()
-          #print ("Lets stop here!\n")
-          #return
-#        shutil.move("%s_part_%s.cif" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.cif"%(OV.ModelSrc())))
         if wfn_code != "Tonto":
           shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
           OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
@@ -296,7 +291,7 @@ class NoSpherA2(PT):
         olx.html.Update()
         combine_sfs(force=True,part=i)
         files = (file for file in os.listdir(self.jobs_dir)  
-                 if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
+                if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
         for f in files:
           if f.endswith(".tsc"):
             f_work = os.path.join(self.wfn_job_dir,f)  
@@ -352,7 +347,7 @@ class NoSpherA2(PT):
         raise NameError('Error during structure factor calculation!')
       olx.html.Update()
       combine_sfs(force=True)
-    
+      
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix') == True:
@@ -360,7 +355,7 @@ class NoSpherA2(PT):
       olex.m("Afix 0")
     olex.m('delins list')
     olex.m('addins LIST -3')
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
+    
     OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
     gui.set_notification(OV.GetVar('gui_notification'))
     olx.html.Update()
@@ -562,6 +557,7 @@ class wfn_Job(object):
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
     com = open(self.input_fn,"w")
+    method = None
     basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
     basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name"))
     basis = open(basis_set_fn,"r")
@@ -573,13 +569,18 @@ class wfn_Job(object):
     mem = "%mem=" + OV.GetParam('snum.refinement.cctbx.nsff.mem') + "GB"
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
       control = "# rhf/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+      method = "RHF"
     else:
       control = "# b3lyp/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+      method = "B3LYP"
+    relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+    if relativistic == True:
+      control = control + " Integral=DKH2"
     com.write(cpu + '\n')
     com.write(mem + '\n')
     com.write(control + '\n')
     com.write(" \n")
-    title = "Wavefunction calculation for " + self.name + " on a level of theory of " + OV.GetParam('snum.refinement.cctbx.nsff.method') + "/" + OV.GetParam("snum.refinement.cctbx.tsc.basis_name")
+    title = "Wavefunction calculation for " + self.name + " on a level of theory of " + method + "/" + basis_name
     com.write(title + '\n')
     com.write(" " + '\n')
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
@@ -659,6 +660,9 @@ class wfn_Job(object):
     else:
       control = "!B3LYP 3-21G Grid4 AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
+    relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+    if relativistic == True:
+      control = control + " DKH2"
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
     mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -764,12 +768,18 @@ class wfn_Job(object):
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
     if("g09" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g09.log"))
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
     if("g16" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
     if("orca" in args[0]):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
@@ -800,10 +810,10 @@ class wfn_Job(object):
       if sys.platform[:3] == 'win':
         move_args.append(basis_dir.replace("/","\\"))
       else:
-        move_args.append(basis_dir)
+        move_args.append(basis_dir+'/')
       experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
       # this is for testing writeout of SFs by my program, for comparison with tonto
-      if experimental_SF:
+      if experimental_SF == True:
         move_args.append("-hkl")
         move_args.append(self.name+".hkl")
         move_args.append("-cif")
@@ -895,6 +905,11 @@ class Job(object):
       if clustergrow == False:
         args.append("-complete-mol")
         args.append("f")
+        
+      rel = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+      if rel == True:
+        args.append("-dkh")
+        args.append("t")
 
     else:
       # We want these from supplied fchk file """
@@ -990,7 +1005,7 @@ class Job(object):
       if sys.platform[:3] == 'win':
         move_args.append(basis_dir.replace("/","\\"))
       else:
-        move_args.append(basis_dir)
+        move_args.append(basis_dir+'/')
       logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
