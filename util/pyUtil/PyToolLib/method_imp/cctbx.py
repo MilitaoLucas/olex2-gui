@@ -57,7 +57,7 @@ class Method_cctbx_refinement(Method_refinement):
     print '\n+++ STARTING olex2.refine +++++ %s' %self.version
 
     verbose = OV.GetParam('olex2.verbose')
-    cctbx = FullMatrixRefine(
+    RunPrgObject.cctbx = cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose,

@@ -29,12 +29,16 @@ snum{
             .type = str
           file = ""
             .type = str
+          full_HAR = False
+            .type = bool
           h_afix = True
             .type = bool
           h_aniso = True
             .type = bool
           keep_wfn = True
             .type = bool
+          Max_HAR_Cycles = 15
+            .type = int
           method = "rhf"
             .type = str
           modular = "direct"
@@ -45,6 +49,8 @@ snum{
             .type = str
           ORCA_SCF_Strategy = "NormalConv"
             .type = str
+          Relativistic = False
+            .type = bool
           source = "Tonto"
             .type = str
           wfn2fchk_SF = False

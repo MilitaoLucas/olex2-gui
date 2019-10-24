@@ -9,6 +9,8 @@ import OlexVFS
 from ArgumentParser import ArgumentParser
 from History import hist
 
+from olexex import OlexRefinementModel
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
@@ -72,7 +74,6 @@ class RunPrg(ArgumentParser):
     self.please_run_auto_vss = False
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
-
 
     if self.demo_mode:
       OV.demo_mode = True
@@ -376,7 +377,6 @@ class RunPrg(ArgumentParser):
     OlexVFS.write_to_olex(f_name, t)
 #    olx.html.Update()
 
-
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
@@ -391,7 +391,7 @@ class RunSolutionPrg(RunPrg):
         if r=="N":
           self.terminate = True
           return
-      
+
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
@@ -468,45 +468,31 @@ class RunRefinementPrg(RunPrg):
     RunRefinementPrg.running = self
     try:
       use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+      calculate_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
       if use_aspherical == True:
+        self.deal_with_AAFF()
+      else:
+        self.startRun()
         try:
-          olex.m('spy.NoSpherA2.launch()')
-        except NameError as error:
-          print "Error during NoSpherA2: ",error
-          RunRefinementPrg.running = None
-          OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
-          return False
-        dir = olx.FilePath()
-        tsc_exists = False
-        for file in os.listdir(olx.FilePath()):
-          if file.endswith(".tsc"):
-            tsc_exists = True
-        if tsc_exists == False:
-          print "Error during NoSpherA2: "
-          RunRefinementPrg.running = None
-          OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
-          return False
-      self.startRun()
-      try:
-        self.setupRefine()
-        OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
-        self.setupFiles()
-      except Exception, err:
-        sys.stderr.formatExceptionInfo()
+          self.setupRefine()
+          OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+          self.setupFiles()
+        except Exception, err:
+          sys.stderr.formatExceptionInfo()
 
-        print err
-        self.endRun()
-        return False
-      if self.terminate:
-        self.endRun()
-        return
-      if self.params.snum.refinement.graphical_output and self.HasGUI:
-        self.method.observe(self)
-      RunPrg.run(self)
+          print err
+          self.endRun()
+          return False
+        if self.terminate:
+          self.endRun()
+          return
+        if self.params.snum.refinement.graphical_output and self.HasGUI:
+          self.method.observe(self)
+        RunPrg.run(self)
     finally:
       RunRefinementPrg.running = None
 
-      
+
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
@@ -674,7 +660,6 @@ class RunRefinementPrg(RunPrg):
       hooft = hooft_analysis()
     except Sorry, e:
       print e
-
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
         s = format_float_with_standard_uncertainty(
@@ -781,6 +766,200 @@ class RunRefinementPrg(RunPrg):
         print >> f, "0 0 0 0.0 0.0"
       return f_mask
 
+  def deal_with_AAFF(self):
+    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    old_model = OlexRefinementModel()
+    if Full_HAR == True:
+      OV.SetParam('snum.refinement.max_cycles', 30)
+      OV.SetMaxCycles(30)
+      self.params.snum.refinement.max_cycles
+    converged = False
+    run = 0
+    HAR_log = open("%s/%s.har" %(OV.FilePath(),self.original_filename),"w")
+    HAR_log.write("HAR using NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
+    HAR_log.write("\n")
+    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
+    HAR_log.write("************************************************************************************\n")
+    
+    HAR_log.write("{:3d}".format(run))
+    energy = None
+    for file in os.listdir(olx.FilePath()):
+      if file.endswith(".wfn"):
+        with open(file) as f:
+          fread = f.readlines()
+          for line in fread:
+            if "THE VIRIAL" in line:
+              source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+              if "Gaussian" in source:
+                energy = float(line.split()[3])
+              else:
+                energy = float(line.split()[4])
+    if energy == None:
+      HAR_log.write("{:^24.10}".format(" "))
+    else:
+      HAR_log.write("{:^24.10f}".format(energy))
+    HAR_log.write("{:>44.4}".format(" "))
+    r1_old  = OV.GetParam('snum.refinement.last_R1')
+    wr2_old = OV.GetParam('snum.refinement.last_wR2')
+    HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
+    HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+    HAR_log.write("\n")
+    HAR_log.flush()
+
+    max_cycles = int(OV.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles'))
+
+    while converged == False:
+      run += 1
+      HAR_log.write("{:3d}".format(run))
+      #Calculate Wavefunction
+      try:
+        olex.m('spy.NoSpherA2.launch()')
+      except NameError as error:
+        print "Error during NoSpherA2: ",error
+        RunRefinementPrg.running = None
+        OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
+        return False
+      dir = olx.FilePath()
+      tsc_exists = False
+      wfn_file = None
+      for file in os.listdir(olx.FilePath()):
+        if file.endswith(".tsc"):
+          tsc_exists = True
+        elif file.endswith(".wfn"):
+          wfn_file = file
+      if tsc_exists == False:
+        print "Error during NoSpherA2: "
+        RunRefinementPrg.running = None
+        OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
+        return False
+
+      # get energy from wfn file 
+      energy = None
+      if wfn_file != None:
+        with open(wfn_file) as f:
+          fread = f.readlines()
+          for line in fread:
+            if "THE VIRIAL" in line:
+              source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+              if "Gaussian" in source:
+                energy = float(line.split()[3])
+              else:
+                energy = float(line.split()[4])
+        HAR_log.write("{:^24.10f}".format(energy))
+        fread = None
+      else:
+        HAR_log.write("{:24}".format(" "))
+
+      # Run Least-Squares
+      self.startRun()
+      try:
+        self.setupRefine()
+        OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+        self.setupFiles()
+      except Exception, err:
+        sys.stderr.formatExceptionInfo()
+
+        print err
+        self.endRun()
+        return False
+      if self.terminate:
+        self.endRun()
+        return
+      if self.params.snum.refinement.graphical_output and self.HasGUI:
+        self.method.observe(self)
+      RunPrg.run(self)
+
+      new_model=OlexRefinementModel()
+
+      max_dxyz = 0
+      max_duij = 0
+      max_shift_atom_xyz = 0
+      max_shift_atom_uij = 0
+
+      try:
+        jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
+        from scitbx.array_family import flex
+        cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+        esds = jac_tr.transpose() * flex.sqrt(flex.double(cov_matrix))
+        annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
+      except:
+        print ("Could not obtain cctbx object and calculate ESDs!\n")
+        return False
+      matrix_run = 0
+      for i, atom in enumerate(new_model._atoms):
+        xyz = atom['crd'][0]
+        xyz2 = old_model._atoms[i]['crd'][0]
+        for x in range(3):
+          # if parameter is fixed and therefore has 0 esd
+          if esds[matrix_run] > 0:
+            if abs(xyz[x] - xyz2[x])/esds[matrix_run] > max_dxyz:
+              max_dxyz = abs(xyz[x] - xyz2[x])/esds[matrix_run]
+              label_xyz = annotations[matrix_run]
+          matrix_run += 1
+        has_adp_new = new_model._atoms[i].get('adp')
+        has_adp_old = old_model._atoms[i].get('adp')
+        if has_adp_new != None and has_adp_old != None:
+          adp = atom['adp'][0]
+          adp2 = old_model._atoms[i]['adp'][0]
+          for u in range(6):
+            # if parameter is fixed and therefore has 0 esd
+            if esds[matrix_run] > 0:
+              if abs(adp[u] - adp2[u])/esds[matrix_run] > max_duij:
+                max_duij = abs(adp[u] - adp2[u])/esds[matrix_run]
+                label_uij = annotations[matrix_run]
+            matrix_run += 1
+        elif has_adp_new != None:
+          matrix_run += 6
+        elif has_adp_old != None:
+          matrix_run += 1
+
+      HAR_log.write("{:>16.4f}".format(max_dxyz))
+      HAR_log.write("{:>8}".format(label_xyz))
+
+      HAR_log.write("{:>10.4f}".format(max_duij))
+      HAR_log.write("{:>10}".format(label_uij))
+
+      r1  = OV.GetParam('snum.refinement.last_R1')
+      wr2 = OV.GetParam('snum.refinement.last_wR2')
+
+      HAR_log.write("{:>6.2f}".format(float(r1)*100))
+      HAR_log.write("{:>7.2f}".format(float(wr2)*100))
+
+      HAR_log.write("\n")
+      HAR_log.flush()
+
+      if Full_HAR == False: 
+        converged = True
+        break
+      elif calculate_aspherical == False:
+        converged = True
+        break
+      elif (max_duij <= 0.01) and (max_dxyz <= 0.01):
+        converged = True
+        break
+      elif run == max_cycles:
+        break
+      elif (float(r1) > float(r1_old) + 0.1) and (run > 1):
+        HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
+        break
+      else:
+        old_model = new_model
+        r1_old = r1
+        wr2_old = wr2
+
+    # Done with the while !Converged
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
+    if converged == False:
+      HAR_log.write("  !! UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!\n")
+    HAR_log.write("************************************************************************************\n")
+    HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
+    HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
+    HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
+    HAR_log.flush()
+    HAR_log.close()
+
+    with open("%s/%s.har" %(OV.FilePath(),self.original_filename), 'r') as f:
+      print(f.read())
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()
