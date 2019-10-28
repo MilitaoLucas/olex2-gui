@@ -109,11 +109,11 @@ def RemoveVariableFromUserInputList(variable):
     OV.SetParam("snum.metacif.user_input_variables", variable_list)
 OV.registerFunction(RemoveVariableFromUserInputList)
 
-
-
 def SwitchAllAlertsOn():
   alerts = ['user.alert_delete_history',
-            'user.alert_overwrite_history']
+            'user.alert_uninstall_plugin',
+            'user.alert_solve_anyway',
+            'user.alert_overwrite_history',]
   for item in alerts:
     OV.SetParam(item,'Y')
   SaveUserParams()

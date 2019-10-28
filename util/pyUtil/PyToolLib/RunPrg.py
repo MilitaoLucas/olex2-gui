@@ -387,10 +387,13 @@ class RunSolutionPrg(RunPrg):
   def run(self):
     if int(olx.xf.au.GetAtomCount()) != 0:
       if OV.HasGUI():
-        r = OV.Alert("Solve", "Are you sure you want to solve this again?", 'YNIR', "(Don't show this warning again)")
-        if r=="N":
-          self.terminate = True
-          return
+        if OV.GetParam('user.alert_solve_anyway') == 'Y':
+          r = OV.Alert("Solve", "Are you sure you want to solve this again?", 'YNIR', "(Don't show this warning again)")
+          if "R" in r:
+            OV.SetParam('user.alert_solve_anyway', 'N')
+          if "N" in r:
+            self.terminate = True
+            return
 
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
