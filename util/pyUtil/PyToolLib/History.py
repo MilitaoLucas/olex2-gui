@@ -677,6 +677,8 @@ def get(where, what):
       solution = False
     if acn and acn.is_solution == solution:
       if what == 'program':
+        if acn.program.lower().startswith('shelx'):
+          return acn.program.upper()
         return acn.program
       elif what == 'method':
         return acn.method

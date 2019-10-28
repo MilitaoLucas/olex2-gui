@@ -862,7 +862,7 @@ class OlexFunctions(inheritFunctions):
     return res
 
   def GetProgramVersionByName(self, name, returnFlag=False):
-    version = "n/a"
+    version = ""
     name = name.lower()
     if "shelxl" in name:
       version = olx.Lst('version')
