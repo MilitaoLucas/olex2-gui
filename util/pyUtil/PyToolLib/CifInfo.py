@@ -506,7 +506,10 @@ class ExtractCifInfo(CifTools):
           if full:
             solution_reference = version
           else:
-            solution_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
+            pname = prg.name
+            if prg.name.lower().startswith('shelx'):
+              pname = prg.name.upper()
+            solution_reference = "%s %s (%s)" %(pname, version, prg.brief_reference)
         else:
           solution_reference = str_solstion_from_cif
         full_references.append(prg.reference)
@@ -532,7 +535,10 @@ class ExtractCifInfo(CifTools):
       try:
         prg = self.RPD.programs[active_node.program]
         version = OV.GetProgramVersionByName(prg.name)
-        refinement_reference = "%s %s (%s)" %(prg.name, version, prg.brief_reference)
+        pname = prg.name
+        if prg.name.lower().startswith("shelx"):
+          pname = prg.name.upper()
+        refinement_reference = "%s %s (%s)" %(pname, version, prg.brief_reference)
         full_references.append(prg.reference)
         olx.SetVar('refinement_reference_short', prg.brief_reference)
         olx.SetVar('refinement_reference_long', prg.reference)

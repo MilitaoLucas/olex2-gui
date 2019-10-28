@@ -305,7 +305,7 @@ class OlexRefinementModel(object):
             continue
         else:
           i_seqs = [i[0] for i in restraint['atoms']]
-          
+
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
@@ -405,12 +405,12 @@ class OlexRefinementModel(object):
                               sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
                             else:
                               sym_ops.append(None)
-                            getmeout=True                            
+                            getmeout=True
                             break
                       if(getmeout): break
                   # end loop over neighbours
             # end search of pivot atom
-                            
+
             if(len(i_seqs)==4):
               yield restraint_type, dict(
                 i_seqs=i_seqs,
@@ -423,11 +423,10 @@ class OlexRefinementModel(object):
               print("Warning: Invalid chirality (CHIV) restraint. "+ 
                 "%s needs exactly 3 neighbours"%pivot_name)
           # end loop over each atom of chiv restraint
-          
+
         elif restraint_type == 'planarity':
           # The planarity restraint is implemented using the CHIV restraint
           # len(i_seqs)-3 CHIV restraints are necessary and used
-          
           # list of atom often is ordered, shuffle the list to give a random set of tetrahedron
           # this step is not done in shelx
           shuffle_ids=[i for i in range(len(i_seqs))]
@@ -524,27 +523,6 @@ def get_refine_ls_hydrogen_treatment():
 
 OV.registerFunction(get_refine_ls_hydrogen_treatment)
 
-def GetAvailableRefinementProgs():
-  retStr = "cctbx LBFGS<-cctbx;"
-  retStr += "ShelXL L.S.;"
-  retStr += "ShelXL CGLS;"
-  retStr += "ShelXH L.S.;"
-  retStr += "ShelXH CGLS;"
-  if OV.IsPluginInstalled('ODAC'):
-    retStr+= "cctbx AutoChem<-cctbx AutoChem"
-  return retStr
-OV.registerFunction(GetAvailableRefinementProgs)
-
-def GetAvailableSolutionProgs():
-  retStr = "cctbx;"
-  a = olx.file.Which('XS.exe')
-  if a == "":
-    a = olx.file.Which('ShelXS.exe')
-  if a:
-    retStr += "ShelXS;"
-  return retStr
-OV.registerFunction(GetAvailableSolutionProgs)
-
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
   SpyVar.MatchedFragments = {}
@@ -554,9 +532,10 @@ if haveGUI:
   OV.registerCallback('startmatch',OnMatchStart)
 
 def OnMatchFound(rms, fragA, fragB):
+  import string
   fragA = "'%s'" %fragA.replace(",", " ")
   fragB = "'%s'" %fragB.replace(",", " ")
-  fragL = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U']
+  fragL = string.ascii_uppercase
   if len(SpyVar.MatchedFragments) > 16:
     return
   if fragA not in SpyVar.MatchedFragments:
@@ -595,20 +574,6 @@ def OnMatchFound(rms, fragA, fragB):
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
-
-
-#def getScreenSize():
-  #retval = ()
-  #from win32api import GetSystemMetrics
-  #width = GetSystemMetrics (0)
-  #height = GetSystemMetrics (1)
-  #retval =  (width, height)
-  #print retval
-  #olx.SetVar("screen_width", width)
-  #olx.SetVar("screen_height", height)
-  #return "OK"
-#OV.registerFunction(getScreenSize)
-
 def SetFormulaFromInput():
   formula = OV.GetValue('SET_FORMULA')
   if not formula:
@@ -630,16 +595,6 @@ def SetFormulaFromInput():
   return ""
 if haveGUI:
   OV.registerFunction(SetFormulaFromInput)
-
-
-#def suvvd():
-  #from RunPrg import RunPrg
-  #a = RunPrg()
-  #a.save_user_parameters()
-  #print "The current settings have been saved for this user"
-  #return ""
-#OV.registerFunction(suvvd)
-
 
 def ChooseLabelContent(cmd):
   olx.Labels(**dict([(k, True) for k in cmd.split()]))
@@ -674,7 +629,7 @@ def get_auto_q_peaks():
       olx.html.SetBG(ctrl_name,'#ffeeee')
       olx.html.SetValue(ctrl_name,manual_q)
     return manual_q
-  
+
   heavy = OlexRefinementModel().getExpectedPeaks()
   if heavy <= 0:
     heavy = 0
@@ -733,7 +688,6 @@ def GetHklFileList():
   return ';'.join(reflection_files)
 if haveGUI:
   OV.registerFunction(GetHklFileList)
-
 
 def GetRcolour(R1):
   retVal = ""
@@ -1100,120 +1054,6 @@ def check_for_recent_update():
     OV.SetVar('last_version',str(version))
     OV.StoreParameter('last_version')
     return olx.has_recently_updated
-
-def register_new_odac(username=None, pwd=None):
-  OV.Cursor("Please wait while AutoChem will be installed")
-  mac_address = OV.GetMacAddress()[0]
-  computer_name = os.getenv('COMPUTERNAME')
-  url = "http://www.olex2.org/odac/register_new"
-  olex2_tag = OV.GetTag()
-  if not username:
-    print("Please provide a username and password")
-    OV.Cursor()
-    return
-  if not pwd:
-    print("Please provide a username and password")
-    OV.Cursor()
-    return
-  values = {'__ac_password':pwd,
-            '__ac_name':username,
-            'olex2Tag':olex2_tag,
-            'computerName':computer_name,
-            'username':username,
-            'context':"None",
-            'macAddress':mac_address,
-            }
-  try:
-    f = HttpTools.make_url_call(url, values)
-  except Exception, err:
-    print "You may have exceeded the number of AutoChem installs."
-    print "Please contact contact xrdapplications@agilent.com for further information."
-    return
-
-  f = f.read()
-
-  if not f:
-    print "Please provide a valid username and password, and make sure your computer is online."
-    print "You may also have used up the number of allowable installs."
-    return
-
-  elif not f.endswith(".exe"):
-    print "Please provide valid username and password. If this problem persitsts, please"
-    print "contact xrdapplications@agilent.com for further information."
-    return
-
-
-  p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
-  p = os.path.abspath(p)
-  if not os.path.exists(p):
-    os.makedirs(p)
-  else:
-    try:
-      import shutil
-      shutil.rmtree(p)
-      os.makedirs(p)
-    except Exception, err:
-      print "The installer could not delete this folder: %s" %p
-      print "Please remove all files in this folder manually and run the installer again."
-      olex.m('exec -o explorer "%s"' %p)
-      return
-
-
-  cont = GetHttpFile(f, force=True, fullURL = True)
-  if cont:
-    name = "AutoChem Installer.exe"
-    wFile = open("%s/%s" %(p, name),'wb')
-    wFile.write(cont)
-    wFile.close()
-  else:
-    print "Could not get %s" %f
-    return
-  ins = "%s/AutoChem Installer.exe" %p
-  cmd = r"%s /S" %ins
-#  print cmd
-  olx.Shell(ins)
-#  Popen(cmd, shell=True, stdout=PIPE).stdout
-  for i in xrange(10):
-    try:
-      os.remove(ins)
-      break
-    except:
-      time.sleep(5)
-  print "AutoChem is now installed on your computer."
-  print "Please restart Olex2 now."
-  OV.Cursor()
-
-OV.registerFunction(register_new_odac)
-
-
-def settings_tree():
-  l = []
-  added = []
-  handlers = [olx.phil_handler, olx.gui_phil_handler]
-  for handler in handlers:
-    raw_l = handler.get_root_scope_names()
-    for item in raw_l:
-      s = handler.get_scope_by_name(item)
-      if item not in added:
-        l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
-        added.append(item)
-      for tem in s.objects:
-        if tem.is_scope:
-          l.append("\t%s (%s)\n%s.%s\n" %(tem.name, tem.short_caption, item, tem.name))
-          for em in tem.objects:
-            if em.is_scope:
-              l.append("\t\t%s (%s)\n%s.%s.%s\n" %(em.name, em.short_caption, item, tem.name, em.name))
-              for m in em.objects:
-                if m.is_scope:
-                  l.append("\t\t\t%s (%s)\n%s.%s.%s.%s\n" %(m.name, m.short_caption, item, tem.name, em.name, m.name))
-                  for m1 in m.objects:
-                    if m1.is_scope:
-                      l.append("\t\t\t\t%s (%s)\n%s.%s.%s.%s.%s\n" %(m1.name, m1.short_caption, item, tem.name, em.name, m.name, m1.name))
-
-
-  OV.write_to_olex('settings_tree.ind', ''.join(l))
-OV.registerFunction(settings_tree)
-
 
 def GetOptionalHyphenString(txt):
   txt = txt.replace ("/", "/" + u"\u200B")
@@ -1615,32 +1455,8 @@ def olex_fs_copy(src_file, dst_file):
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
-def isPro():
-  p = "%s/pro.txt" %OV.BaseDir()
-  if os.path.exists(p):
-    OV.SetParam('olex2.hover_buttons',True)
-    return True
-  else:
-    return False
-OV.registerFunction(isPro)
-
 def revert_to_original():
   History.hist.revert_to_original()
-  #extensions = ['res','ins','cif']
-  #for extension in extensions:
-    #path = os.path.join(olx.StrDir(), 'originals', "%s.%s" %(OV.FileName(), extension))
-    #if os.path.exists(path):
-      #rFile = open(path,'rb')
-      #txt = rFile.read()
-      #rFile.close()
-      #outpath = OV.file_ChangeExt(OV.FileFull(),'ins')
-      #wFile = open(outpath,'wb')
-      #wFile.write(txt)
-      #wFile.close()
-      #OV.AtReap(outpath)
-      #print("Reverted to the original file %s" %path)
-  #return
-  #print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
 
 def fade_in(speed=0):
@@ -1672,7 +1488,6 @@ def StringsAreNotEqual(str1, str2):
   else:
     return True
 OV.registerFunction(StringsAreNotEqual)
-
 
 def check_for_selection(need_selection=True):
   res = haveSelection()
