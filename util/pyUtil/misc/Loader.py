@@ -376,11 +376,25 @@ def expired_pop(m):
   #OV.cmd(pstr)
   #olx.html.SetBorders(pop_name,border)
 
+def recordFeedback(email, token, plugin):
+  try:
+    import HttpTools
+    url_base = OV.GetParam('user.modules.provider_url')
+    url = url_base + "recordFeedback"
+    values = {
+      'email': email,
+      'token': token,
+      'plugin': plugin
+    }
+    HttpTools.make_url_call(url, values, http_timeout=30)
+  except:
+    if debug:
+      sys.stdout.formatExceptionInfo()
+    pass
 
 def ask_for_licence_extension(name, token, tag, institute, confession_status=False,
                               confession_structures=False, confession_have_licence=False,
                               confession_keep_evaluating=False, confession_no_thanks=False):
-
   d = {}
   d['institute'] = institute
   d['name'] = name
@@ -432,6 +446,8 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
       print "%s has been deleted" %name
     except:
       print "Could not delete %s. Is this folder open?" %name
+  else:
+    recordFeedback(d['email'], token, name)
 
 def checkLicences():
   queue_pop = [m for m in available_modules if m.action == 3]
@@ -518,7 +534,6 @@ def getAvailableModules_():
         m.action = 5
       else:
         m.action = 1
-        
   except Exception, e:
     if debug:
       sys.stdout.formatExceptionInfo()
