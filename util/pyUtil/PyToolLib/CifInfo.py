@@ -550,13 +550,6 @@ class ExtractCifInfo(CifTools):
         '_computing_structure_refinement': refinement_reference}, force=force)
 
     ##RANDOM THINGS
-    p, pp = self.sort_out_path(path, "frames")
-    if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
-      try:
-        info = os.stat(p)
-        file_time = time.strftime('%Y-%m-%d', time.localtime(info.st_mtime))
-      except:
-        print "Error reading Bruker frame file %s" %p
     # OD Data Collection Date
     p, pp = self.sort_out_path(path, "od_frame_date")
     if p:
@@ -568,61 +561,52 @@ class ExtractCifInfo(CifTools):
         print "Error reading OD frame Date %s" %p
 
     # OD Frame Image
+    def choose_max_6(pp):
+      j = len(pp)
+      if j <= 5:
+        return pp
+      else:
+        l = []
+        for i in xrange(6):
+          idx = ((i+1) * j/6) - j/5 + 1
+          l.append(pp[idx])
+        return l
+
     p, pp = self.sort_out_path(path, "od_frame_images")
     if p:
       try:
-        #info = os.stat(p)
-        #file_time = info.st_mtime
         OV.SetParam('snum.report.frame_image', p)
         OV.SetParam('snum.report.frame_images', pp)
       except:
-        print "Error reading OD frame image %s" %p
+        if debug:
+          print("Error processing OD frame image %s" %p)
+        pass
 
     # OD Crystal Image
     p, pp = self.sort_out_path(path, "od_crystal_images")
     if pp:
       try:
         OV.SetParam('snum.report.crystal_image', p)
-        l = []
-        j = len(pp)
-        if j <= 5:
-          l = pp
-        else:
-          for i in xrange(6):
-            idx = ((i+1) * j/6) - j/5 + 1
-            l.append(pp[idx])
-        OV.SetParam('snum.report.crystal_images', l)
+        OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
       except:
-        print "Error reading OD crystal image %s" %p
+        print("Error processing OD crystal image %s" %p)
 
     # OD Notes File
     p, pp = self.sort_out_path(path, "notes_file")
     if p:
       try:
-        info = os.stat(p)
-        file_time = info.st_mtime
         OV.SetParam('snum.report.data_collection_notes', p)
       except:
-        print "Error reading OD crystal image %s" %p
+        print("Error processing notes file %s" %p)
 
     # Bruker Crystal Image
     p, pp = self.sort_out_path(path, "bruker_crystal_images")
     if pp:
       try:
         OV.SetParam('snum.report.crystal_image', p)
-        l = []
-        j = len(pp)
-        if j <= 5:
-          l = pp
-        else:
-          for i in xrange(6):
-            idx = ((i+1) * j/6) - j/5 + 1
-            l.append(pp[idx])
-        OV.SetParam('snum.report.crystal_images', l)
+        OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
       except:
-        print "Error reading Bruker crystal image %s" %p
-
-
+        print("Error processing Bruker crystal image %s" %p)
 
     ##THINGS IN CIF FORMAT
     p, pp = self.sort_out_path(path, "smart")
@@ -635,7 +619,7 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(smart)
         all_sources_d[p] = smart
       except Exception, err:
-        print "Error reading Bruker SMART file %s: %s" %(p, err)
+        print("Error reading Bruker SMART file %s: %s" %(p, err))
 
     p, pp = self.sort_out_path(path, "p4p")
     if p and self.metacifFiles != self.metacifFiles.prev_p4p:
@@ -645,7 +629,7 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(p4p)
         all_sources_d[p] = p4p
       except:
-        print "Error reading p4p file %s" %p
+        print("Error reading p4p file %s" %p)
 
     p, pp = self.sort_out_path(path, "integ")
     if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
@@ -660,7 +644,7 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(integ)
         all_sources_d[p] = integ
       except:
-        print "Error reading Bruker Saint integration file %s" %p
+        print("Error reading Bruker Saint integration file %s" %p)
 
     p, pp = self.sort_out_path(path, "saint")
     if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
@@ -674,7 +658,7 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(saint)
         all_sources_d[p] = saint
       except:
-        print "Error reading Bruker saint.ini"
+        print("Error reading Bruker saint.ini")
 
     p, pp = self.sort_out_path(path, "abs")
     if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
@@ -703,7 +687,7 @@ class ExtractCifInfo(CifTools):
           all_sources_d[p] = twin
       except Exception, e:
         if 'Unsupported program version' in str(e):
-          print "%s for SADABS" %e
+          print("%s for SADABS" %e)
         else:
           import traceback
           traceback.print_exc()
@@ -724,7 +708,7 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(pcf)
         all_sources_d[p] = pcf
       except:
-        print "Error reading pcf file %s" %p
+        print("Error reading pcf file %s" %p)
 
     manu_cifs = ['cif_od', 'cfx', 'cfx_LANA']
     for manu_cif in manu_cifs:
@@ -737,7 +721,7 @@ class ExtractCifInfo(CifTools):
             self.update_cif_block(cif_s, force=False)
             all_sources_d[p] = cif_s
         except Exception, e:
-          print "Error reading %s CIF %s. The error was %s" %(manu_cif, p, e)
+          print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
 
 
     # Rigaku data collection CIF
@@ -759,7 +743,7 @@ class ExtractCifInfo(CifTools):
           all_sources_d[p] = crystal_clear
 
       except:
-        print "Error reading Rigaku CIF %s" %p
+        print("Error reading Rigaku CIF %s" %p)
 
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
@@ -779,35 +763,23 @@ class ExtractCifInfo(CifTools):
       self.update_cif_block(diffractometer_def, force=False)
       all_sources_d[p] = diffractometer_def
 
-      #try:
-        #import cif_reader
-        #cif_def = cif_reader.reader(p).cifItems()
-        #self.update_cif_block(cif_def)
-        #all_sources_d[p] = cif_block
-      #except:
-        #print "Error reading local diffractometer definition file %s" %p
 
     # smtbx solvent masks output file
-#    mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
     mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
     if os.path.isfile(mask_cif_path)\
-    and OV.GetParam('snum.refinement.use_solvent_mask'):
-    #and OV.GetParam('snum.masks.update_cif'):
-             #or '_smtbx_masks_void' not in self.cif_block)):
+        and OV.GetParam('snum.refinement.use_solvent_mask'):
       import iotbx.cif
       f = open(mask_cif_path, 'rb').read()
       add = ""
       if not f.strip().startswith("data"): # PLATON sqf files don't start with the data block line
         add = "tmp"
-        writeFile = open(mask_cif_path + add, 'w')
-        writeFile.write("data_" + self.data_name + "\r\n")
-        writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
-        writeFile.write(f)
-        writeFile.close()
+        with open(mask_cif_path + add, 'w') as writeFile:
+          writeFile.write("data_" + self.data_name + "\r\n")
+          writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
+          writeFile.write(f)
 
-      f = open(mask_cif_path + add, 'rb')
-      cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
-      f.close()
+      with open(mask_cif_path + add, 'rb') as f:
+        cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       if add: #i.e. we have a PLATON file
         os.remove(mask_cif_path + add)
         if '_smtbx_masks_void' in self.cif_block:
@@ -819,7 +791,6 @@ class ExtractCifInfo(CifTools):
           del self.cif_block['_platon_squeeze_void']
         if '_platon_squeeze_details' in self.cif_block:
           del self.cif_block['_platon_squeeze_details']
-
       if cif_block is not None:
         self.cif_block.update(cif_block)
         OV.SetParam('snum.masks.update_cif', False)
@@ -832,7 +803,6 @@ class ExtractCifInfo(CifTools):
         del self.cif_block['_smtbx_masks_void_probe_radius']
       if '_smtbx_masks_void_truncation_radius' in self.cif_block:
         del self.cif_block['_smtbx_masks_void_truncation_radius']
-      
     elif (not OV.GetParam('snum.refinement.use_solvent_mask')
           and '_platon_squeeze_void' in self.cif_block):
       del self.cif_block['_platon_squeeze_void']
@@ -907,13 +877,12 @@ class ExtractCifInfo(CifTools):
           continue
         if not self.all_sources_d.has_key(item):
           try:
-            f = open(item, 'rb')
-            _ = f.read()
-            if not _.startswith("data"):
-              _ = str("data_%s\r\n" %OV.ModelSrc() + _)
-            _ = iotbx.cif.reader(input_string=_).model().values()[0]
-            f.close()
-            self.all_sources_d.setdefault(item,_)
+            with open(item, 'rb') as f:
+              _ = f.read()
+              if not _.startswith("data"):
+                _ = str("data_%s\r\n" %OV.ModelSrc() + _)
+              _ = iotbx.cif.reader(input_string=_).model().values()[0]
+              self.all_sources_d.setdefault(item, _)
           except:
             pass
       self.sort_out_conflicting_sources()

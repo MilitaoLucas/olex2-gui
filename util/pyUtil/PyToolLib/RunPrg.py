@@ -599,6 +599,8 @@ class RunRefinementPrg(RunPrg):
       try:
         MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
       except Exception, e:
+        if debug:
+          sys.stdout.formatExceptionInfo()
         print("Failed in CifMerge: '%s'" %str(e))
     if timer:
       print "-- MergeCif: %.3f" %(time.time()-t)

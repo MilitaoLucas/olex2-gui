@@ -74,7 +74,7 @@ class OlexFunctions(inheritFunctions):
       elif isinstance(value, basestring):
         value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
       elif type(value) in (list, set):
-        value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
+        value = ' '.join("'%s'" %v.replace("'", "\\'").encode('utf-8') for v in value)
       elif "date_" in variable:
         try:
           if type(value) is unicode:
@@ -91,8 +91,6 @@ class OlexFunctions(inheritFunctions):
 
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
-
-
 
   def GetParam(self,variable, default=None, get_list=False):
     retVal = default
@@ -126,6 +124,8 @@ class OlexFunctions(inheritFunctions):
           retVal = retVal.decode('utf-8').replace('\\$', '$')
         elif isinstance(retVal, unicode):
           retVal = retVal.replace('\\$', '$')
+        elif isinstance(retVal, list) and len(retVal) > 0 and isinstance(retVal[0], str):
+          retVal = [x.decode('utf-8').replace('\\$', '$') for x in retVal]
       else:
         retVal = default
     except Exception, ex:
