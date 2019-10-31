@@ -921,9 +921,8 @@ The following options were used:
     if not fcf_cif:
       print "Unsupported list (fcf) format."
       return
-    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
-    fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
-    f.close()
+    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+      fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
 
   def setup_shared_parameters_constraints(self):
     constraints = []

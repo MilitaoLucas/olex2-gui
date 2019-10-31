@@ -364,7 +364,6 @@ routines requiring structure refinement
     }    
   }
 
-
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
@@ -966,6 +965,9 @@ user
     .type = str
     .expert_level = 1
   alert_uninstall_plugin = Y
+    .type = str
+    .expert_level = 1
+  alert_solve_anyway = Y
     .type = str
     .expert_level = 1
   start_where = home
