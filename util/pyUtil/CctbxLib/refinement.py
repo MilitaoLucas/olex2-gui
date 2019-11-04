@@ -769,8 +769,8 @@ an electrostatic crystal field.
 The following options were used:
 """
           software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-          method = OV.GetVar('settings.tonto.HAR.method')
-          basis_set = OV.GetVar('settings.tonto.HAR.basis.name')
+          method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+          basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
           charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
           mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
           key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
