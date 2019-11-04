@@ -39,7 +39,7 @@ snum{
             .type = bool
           Max_HAR_Cycles = 15
             .type = int
-          method = "rhf"
+          method = "rks"
             .type = str
           modular = "direct"
             .type = str

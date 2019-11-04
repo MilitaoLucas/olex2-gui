@@ -839,12 +839,19 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("{:>44.4}".format(" "))
     r1_old  = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
-    HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
-    HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+    if r1_old != "n/a":
+      HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
+    else:
+      HAR_log.write("{:>6}".format("N/A"))
+    if wr2_old != "n/a":
+      HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+    else:
+      HAR_log.write("{:>7}".format("N/A"))
     HAR_log.write("\n")
     HAR_log.flush()
 
     max_cycles = int(OV.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles'))
+    calculate_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 
     while converged == False:
       run += 1
@@ -919,11 +926,14 @@ class RunRefinementPrg(RunPrg):
         from scitbx.array_family import flex
         cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
         esds = jac_tr.transpose() * flex.sqrt(flex.double(cov_matrix))
+        jac_tr = None
         annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
       except:
         print ("Could not obtain cctbx object and calculate ESDs!\n")
         return False
       matrix_run = 0
+      label_uij = None
+      label_xyz = None
       for i, atom in enumerate(new_model._atoms):
         xyz = atom['crd'][0]
         xyz2 = old_model._atoms[i]['crd'][0]
@@ -952,10 +962,16 @@ class RunRefinementPrg(RunPrg):
           matrix_run += 1
 
       HAR_log.write("{:>16.4f}".format(max_dxyz))
-      HAR_log.write("{:>8}".format(label_xyz))
+      if label_xyz != None:
+        HAR_log.write("{:>8}".format(label_xyz))
+      else:
+        HAR_log.write("{:>8}".format("N/A"))
 
       HAR_log.write("{:>10.4f}".format(max_duij))
-      HAR_log.write("{:>10}".format(label_uij))
+      if label_uij != None:
+        HAR_log.write("{:>10}".format(label_uij))
+      else:
+        HAR_log.write("{:>10}".format("N/A"))
 
       r1  = OV.GetParam('snum.refinement.last_R1')
       wr2 = OV.GetParam('snum.refinement.last_wR2')
@@ -998,6 +1014,9 @@ class RunRefinementPrg(RunPrg):
 
     with open("%s/%s.har" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
+    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
+    import gui
+    gui.set_notification(OV.GetVar('gui_notification'))
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()
