@@ -462,7 +462,20 @@ class RunRefinementPrg(RunPrg):
     self.program, self.method = self.getProgramMethod('refine')
     if self.program is None or self.method is None:
       return
+
+    self.refinement_observer_timer = 0
+    self.refinement_has_failed = None
+
+    OV.registerCallback("procout", self.refinement_observer)
     self.run()
+    OV.unregisterCallback("procout", self.refinement_observer)
+    if self.refinement_has_failed:
+      if OV.HasGUI():
+        import gui
+        gui.set_notification("<font color=$GetVar(gui.red)><b> %s </b></font>." %self.refinement_has_failed)
+        gui.get_notification('#ff0000')
+        
+    
 
   def run(self):
     if RunRefinementPrg.running:
@@ -605,6 +618,26 @@ class RunRefinementPrg(RunPrg):
     if timer:
       print "-- MergeCif: %.3f" %(time.time()-t)
 
+  
+  def refinement_observer(self, msg):
+    if self.refinement_observer_timer == 0:
+      self.refinement_observer_timer = time.time()
+    #if time.time() - self.refinement_observer_timer  < 2:
+      #return
+    if "BAD AFIX CONNECTIVITY" in msg or "ATOM FOR AFIX" in msg:
+      self.refinement_has_failed = "Hydrogens"
+    elif "REFINEMNET UNSTABLE" in msg:
+      self.refinement_has_failed = "Unstable"
+    elif "???????" in msg:
+      self.refinement_has_failed = "ShelXL Crashed!"
+    elif "** " in msg:
+      import re
+      regex = re.compile(r"\*\*(.*?)\*\*")
+      m = regex.findall(msg)
+      if m:
+        self.refinement_has_failed = m[0].strip()
+  
+  
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
