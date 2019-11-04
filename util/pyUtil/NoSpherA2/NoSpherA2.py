@@ -167,8 +167,6 @@ No MPI implementation found in PATH!
     if not os.path.exists(self.history_dir):
       os.mkdir(self.history_dir)
     
-      
-   # time.sleep(0.1)  
 
     calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
     if not calculate:
@@ -347,6 +345,9 @@ No MPI implementation found in PATH!
         raise NameError('Error during structure factor calculation!')
       olx.html.Update()
       combine_sfs(force=True)
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      if experimental_SF == True:
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
       
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
@@ -648,12 +649,13 @@ class wfn_Job(object):
     basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
+    ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
-      cpu = "nprocs " + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+      cpu = "nprocs " + ncpus
     else:
       cpu = "nprocs 1"
     mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
-    mem_value = int(mem) * 1024 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
+    mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
       control = "!rhf 3-21G Grid4 AIM "
@@ -811,6 +813,9 @@ class wfn_Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir+'/')
+      move_args.append("-method")
+      method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+      move_args.append(method)
       experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
       # this is for testing writeout of SFs by my program, for comparison with tonto
       if experimental_SF == True:
@@ -818,13 +823,48 @@ class wfn_Job(object):
         move_args.append(self.name+".hkl")
         move_args.append("-cif")
         move_args.append(self.name+".cif")
-      logname = "wfn_2_fchk.log"
+        import olx
+        from cctbx import crystal
+        cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+        #print cs.space_group().n_smx()
+        symops = []
+        with open("symmetry.file",'w') as symm_file:
+          for rt in cs.space_group().smx(False):
+            #print rt
+            A=[[[] for i in range(3)] for i in range(3)]
+            xyz = ["x","y","z"]
+            input = str(rt).split(",")
+            def get_multiplier(input,target):
+              if input == None:
+                raise NameError("nonesense symmetry input!")
+              if target == None:
+                raise NameError("nonesense target input!")
+              index = input.find(target)
+              if index == -1:
+                return 0
+              else:
+                if input[index-1]=="-":
+                  return -1
+                else:
+                  return 1
+            for i in range(3):
+              for j in range(3):
+                A[j][i] = get_multiplier(input[i],xyz[j])
+                symm_file.write(str(A[j][i]))
+                symm_file.write(" ")
+            symops.append(A)
+            if len(symops) != cs.space_group().n_smx():
+              symm_file.write("\n")
+        #print symops
+        move_args.append("-symm")
+        move_args.append("symmetry.file")
+          
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        shutil.move(logname,os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
+        shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
       else:
         raise NameError("No fchk generated!")
 
@@ -996,6 +1036,7 @@ class Job(object):
       move_args = []
       basis_dir = self.parent.basis_dir
       basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
+      method = OV.GetParam("snum.refinement.cctbx.nsff.tsc.method")
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(os.path.join(self.full_dir,self.name+".wfn"))
@@ -1006,6 +1047,8 @@ class Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir+'/')
+      move_args.append("-method")
+      move_args.append(method)
       logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
@@ -1436,6 +1479,50 @@ def is_disordered():
   else:
     return True
 OV.registerFunction(is_disordered,True,'NoSpherA2')
+
+def set_default_cpu_and_mem():
+  import math
+  import multiprocessing
+  max_cpu = multiprocessing.cpu_count()
+  current_cpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+  if (max_cpu == 1): 
+    return
+  elif (current_cpus != "1"):
+    return
+  mem_gib = None
+  if sys.platform[:3] == 'win':
+    import ctypes
+
+    class MEMORYSTATUSEX(ctypes.Structure):
+      _fields_ = [
+        ("dwLength", ctypes.c_ulong),
+        ("dwMemoryLoad", ctypes.c_ulong),
+        ("ullTotalPhys", ctypes.c_ulonglong),
+        ("ullAvailPhys", ctypes.c_ulonglong),
+        ("ullTotalPageFile", ctypes.c_ulonglong),
+        ("ullAvailPageFile", ctypes.c_ulonglong),
+        ("ullTotalVirtual", ctypes.c_ulonglong),
+        ("ullAvailVirtual", ctypes.c_ulonglong),
+        ("sullAvailExtendedVirtual", ctypes.c_ulonglong),
+      ]
+
+      def __init__(self):
+        # have to initialize this to the size of MEMORYSTATUSEX
+        self.dwLength = ctypes.sizeof(self)
+        super(MEMORYSTATUSEX, self).__init__()
+
+    stat = MEMORYSTATUSEX()
+    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
+    mem_gib = math.floor(stat.ullAvailPhys / (1024**3))
+  else:
+    import os
+    mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')  # e.g. 4015976448
+    mem_gib = mem_bytes/(1024.**3)  # e.g. 3.74
+  tf_mem = math.floor(mem_gib/4*30)/10
+  tf_cpu = math.floor(max_cpu/4*3)
+  OV.SetParam('snum.refinement.cctbx.nsff.ncpus',str(int(tf_cpu)))
+  OV.SetParam('snum.refinement.cctbx.nsff.mem',str(tf_mem))
+OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
