@@ -53,7 +53,6 @@
       <cmd0  "xgrid.Visible(false)">
       <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  "spy.SaveStructureParams()">
-	  <cmd3  "spy.gui.set_notification('')">
       <cmd3  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd4  "if IsFileLoaded() then clear">
       <cmd5  "freeze true">
@@ -68,6 +67,7 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd14 "spy.setAllMainToolbarTabButtons()">
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
+	  <cmd3  "spy.gui.set_notification(Structure <b>FileName() </b> loaded;GetVar('HtmlTableFirstcolColour');#888888)">
       <cmd16 "html.Update">
       <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
   >
