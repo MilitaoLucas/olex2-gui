@@ -486,8 +486,8 @@ class RunRefinementPrg(RunPrg):
           bg = orange
         gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
       else:
-        if OV.GetVar('GuiNotification') == "Refining...;%s;%s" %(green,white):
-          gui.set_notification("Refinement Finished;%s;%s" %(table,'#888888'))
+        gui.set_notification("Refinement Finished;%s;%s" %(table,'#888888'))
+#        if OV.GetVar('GuiNotification') == "Refining...;%s;%s" %(green,white):
 
   def run(self):
     if RunRefinementPrg.running:
