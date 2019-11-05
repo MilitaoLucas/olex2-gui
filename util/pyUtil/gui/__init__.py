@@ -405,13 +405,18 @@ def get_notification():
   d = {}
   if not _:
     return
-  col = OV.GetVar('gui.dark_yellow')
+  col_bg = OV.GetVar('gui.dark_yellow')
+  col_fg = "#000000"
   txt = _
   if ";" in _:
-    txt = _.split(";")[0]
-    col = _.split(";")[1]
+    _ = _.split(";")
+    txt = _[0]
+    col_bg = _[1]
+    if len(_) > 2:
+      col_fg = _[2] 
 
-  d = {'col':col,
+  d = {'col_bg':col_bg,
+       'col_fg':col_fg,
        'txt':txt}
   import gui
   notification = gui.tools.TemplateProvider.get_template('gui_notification')%d

@@ -5,6 +5,8 @@ import olex_core
 import os
 import olexex
 import OlexVFS
+import gui
+
 
 from ArgumentParser import ArgumentParser
 from History import hist
@@ -16,6 +18,12 @@ OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
 
+green = OV.GetParam('gui.green')
+red = OV.GetParam('gui.red')
+orange = OV.GetParam('gui.orange')
+white = "#ffffff"
+black = "#000000"
+table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
@@ -106,8 +114,9 @@ class RunPrg(ArgumentParser):
     import gui
 
     gui.set_notification(OV.GetVar('gui_notification'))
-    OV.SetVar('gui_notification', "")
+    OV.SetVar('gui_notification', "Refining...;%s;%s" %(green,white))
     if RunPrg.running:
+      OV.SetVar('gui_notification', "Already running. Please wait...")
       print("Already running. Please wait...")
       return
     RunPrg.running = self
@@ -469,13 +478,16 @@ class RunRefinementPrg(RunPrg):
     OV.registerCallback("procout", self.refinement_observer)
     self.run()
     OV.unregisterCallback("procout", self.refinement_observer)
-    if self.refinement_has_failed:
-      if OV.HasGUI():
-        import gui
-        gui.set_notification("<font color=$GetVar(gui.red)><b> %s </b></font>." %self.refinement_has_failed)
-        gui.get_notification('#ff0000')
-        
-    
+    if OV.HasGUI():
+      if self.refinement_has_failed:
+        bg = red
+        fg = white
+        if "warning" in self.refinement_has_failed.lower():
+          bg = orange
+        gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
+      else:
+        if OV.GetVar('GuiNotification') == "Refining...;%s;%s" %(green,white):
+          gui.set_notification("Refinement Finished;%s;%s" %(table,'#888888'))
 
   def run(self):
     if RunRefinementPrg.running:
