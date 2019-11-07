@@ -872,12 +872,12 @@ class wfn_Job(object):
         move_args.append("symmetry.file")
           
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      with open("wfn_2_fchk.log", "rU") as stdout:
-        while m.poll() is None:
-          x = stdout.read()
-          if x:
-            print x
-          time.sleep(1)
+      while m.poll() is None:
+        time.sleep(1)
+      with open("wfn_2_fchk.log", "r") as log:
+        x = log.read()
+        if x:
+          print x
       if experimental_SF == False:
         if os.path.exists(self.name+".fchk"):
           shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
