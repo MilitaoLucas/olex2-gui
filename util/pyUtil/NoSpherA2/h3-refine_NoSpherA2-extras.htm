@@ -15,7 +15,7 @@
     "name=NoSpherA2_basis@refine",
     "items=spy.NoSpherA2.getBasisListStr()",
     "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name', html.GetValue('~name~'))")
+    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>>html.Update()")
    $-
   </td>
 
