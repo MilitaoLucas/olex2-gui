@@ -773,6 +773,7 @@ The following options were used:
           basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
           charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
           mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+          relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
           key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
           if os.path.exists(key_file_name):
             f_time = os.path.getctime(key_file_name)
@@ -785,6 +786,8 @@ The following options were used:
           details_text = details_text + "   BASIS SET:      %s\n"%basis_set
           details_text = details_text + "   CHARGE:         %s\n"%charge
           details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+          if relativistic == True:
+            details_text = details_text + "   RELATIVISTIC:   DKH2"
           details_text = details_text + "   DATE:           %s\n"%f_date
           if software == "Tonto":
             radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
