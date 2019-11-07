@@ -668,9 +668,9 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!MiniPrint NoProp rhf 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop rhf 3-21G Grid4 AIM "
     else:
-      control = "!MiniPrint NoProp B3LYP 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop B3LYP 3-21G Grid4 AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
