@@ -335,19 +335,29 @@ No MPI implementation found in PATH!
         except NameError as error:
           print "Aborted due to: ",error
           raise NameError("Wavefunction failed!")
-      
-      try:
-        job.launch()
-      except NameError as error:
-        print "Aborted due to: ", error
-        raise NameError("Tonto Failed!")
-      if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-        raise NameError('Error during structure factor calculation!')
-      olx.html.Update()
-      combine_sfs(force=True)
       experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
-      if experimental_SF == True:
+      if (experimental_SF == False) or wfn_code == "Tonto":
+        success = True
+        try:
+          job.launch()
+        except NameError as error:
+          print "Aborted due to: ", error
+          success = False
+        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+          success = False
+          with open(os.path.join(job.full_dir, job.name+".err")) as file:
+            for i in file.readlines():
+              if 'Error in' in i:
+                print(i)
+          raise NameError('Error during structure factor calculation!')
+        if success == False:
+          raise NameError("Tonto Failed!")
+        olx.html.Update()
+        combine_sfs(force=True)
+      else:
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
+        
+      
       
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
@@ -658,9 +668,9 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!rhf 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop rhf 3-21G Grid4 AIM "
     else:
-      control = "!B3LYP 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop B3LYP 3-21G Grid4 AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
@@ -801,24 +811,26 @@ class wfn_Job(object):
       move_args = []
       basis_dir = self.parent.basis_dir
       mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(self.name+".wfn")
       move_args.append("-mult")
       move_args.append(mult)
-      move_args.append("-b")
-      move_args.append(basis_name)
-      move_args.append("-d")
-      if sys.platform[:3] == 'win':
-        move_args.append(basis_dir.replace("/","\\"))
-      else:
-        move_args.append(basis_dir+'/')
-      move_args.append("-method")
-      method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-      move_args.append(method)
-      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      if experimental_SF == False:
+        move_args.append("-b")
+        move_args.append(basis_name)
+        move_args.append("-d")
+        if sys.platform[:3] == 'win':
+          move_args.append(basis_dir.replace("/","\\"))
+        else:
+          move_args.append(basis_dir+'/')
+        move_args.append("-method")
+        method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+        move_args.append(method)
+      
       # this is for testing writeout of SFs by my program, for comparison with tonto
-      if experimental_SF == True:
+      else:
         move_args.append("-hkl")
         move_args.append(self.name+".hkl")
         move_args.append("-cif")
@@ -860,13 +872,18 @@ class wfn_Job(object):
         move_args.append("symmetry.file")
           
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      while m.poll() is None:
-        time.sleep(1)
-      if os.path.exists(self.name+".fchk"):
-        shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
-      else:
-        raise NameError("No fchk generated!")
+      with open("wfn_2_fchk.log", "rU") as stdout:
+        while m.poll() is None:
+          x = stdout.read()
+          if x:
+            print x
+          time.sleep(1)
+      if experimental_SF == False:
+        if os.path.exists(self.name+".fchk"):
+          shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
+        else:
+          raise NameError("No fchk generated!")
+      shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
 
 
 class Job(object):
@@ -1204,6 +1221,7 @@ def combine_sfs(force=False,part=-100):
   basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
@@ -1212,6 +1230,8 @@ def combine_sfs(force=False,part=-100):
   ol.append('   BASIS SET:      %s'%basis_set)
   ol.append('   CHARGE:         %s'%charge)
   ol.append('   MULTIPLICITY:   %s'%mult)
+  if relativistic == True:
+    ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   if part != -100:
     ol.append('   PART:           %d'%part)
@@ -1382,6 +1402,7 @@ def combine_tscs(nr_parts):
   basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
   charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
   mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
@@ -1390,6 +1411,8 @@ def combine_tscs(nr_parts):
   ol.append('   BASIS SET:      %s'%basis_set)
   ol.append('   CHARGE:         %s'%charge)
   ol.append('   MULTIPLICITY:   %s'%mult)
+  if relativistic == True:
+    ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   ol.append('   PARTS:          %d'%int(nr_parts))
   if tsc_source == "Tonto":
@@ -1479,6 +1502,14 @@ def is_disordered():
   else:
     return True
 OV.registerFunction(is_disordered,True,'NoSpherA2')
+
+def change_basisset(input):
+  OV.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name',input)
+  if "x2c" in input:
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',True)
+  else:
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',False)
+OV.registerFunction(change_basisset,True,'NoSpherA2')
 
 def set_default_cpu_and_mem():
   import math
