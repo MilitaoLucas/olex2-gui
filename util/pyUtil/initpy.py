@@ -169,7 +169,7 @@ class StreamRedirection:
       recording_args = False
       args = {}
       try:
-        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().__next__):
+        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
           if ttype == tokenize.NAME and token in frame.f_locals:
             args[token] = frame.f_locals[token]
         if args:
