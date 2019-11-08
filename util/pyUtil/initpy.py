@@ -86,7 +86,6 @@ if debug == True:
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
 
-
 if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:
   stderr_redirection = False
 else:
@@ -107,7 +106,7 @@ def our_sys_exit(i):
     e = sys.on_sys_exit_raise
     sys.on_sys_exit_raise = None
     raise e
-  print "Terminate with %i" % i
+  print(("Terminate with %i" %i))
 sys.exit = our_sys_exit
 
 
@@ -122,12 +121,10 @@ class StreamRedirection:
     self.t0 = time.time()
 
     if self.isErrorStream:
-      self.errFile = open("%s/PythonError.log" %olex.f("DataDir()"), 'w')
+      self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w')
       self.version = olex.f("GetCompilationInfo()")
       try:
-        rFile = open("%s/version.txt" %olex.f("BaseDir()"), 'r')
-        self.GUIversion = rFile.readline()
-        rFile.close()
+        self.GUIversion = open(os.path.join(basedir, "version.txt"), 'r').readline()
       except:
         self.GUIversion = "unknown"
       self.errFile.write("================= PYTHON ERROR ================= Olex2 Version %s -- %s\n\n" %(self.version, self.GUIversion))
@@ -168,17 +165,17 @@ class StreamRedirection:
         try:
           yield inspect.getsource(frame)
         except:
-          print ">>>>> ERROR (formatExceptionInfo)"
+          print(">>>>> ERROR (formatExceptionInfo)")
       recording_args = False
       args = {}
       try:
-        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
+        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().__next__):
           if ttype == tokenize.NAME and token in frame.f_locals:
             args[token] = frame.f_locals[token]
         if args:
-          print >> sys.stderr, 'Key variable values:'
-          for var,val in args.iteritems():
-            print >> sys.stderr, '\t%s = %s' % (var, repr(val))
+          sys.stderr.write('Key variable values:')
+          for var,val in args.items():
+            sys.stderr.write('\t%s = %s' % (var, repr(val)))
       except inspect.tokenize.TokenError:
         pass
 
@@ -227,7 +224,7 @@ def set_plugins_paths():
       t = time.time()
     try:
       exec("import " + plugin)
-    except Exception, err:
+    except Exception as err:
       if debug:
         sys.stdout.formatExceptionInfo()
       else:
@@ -253,13 +250,14 @@ def setup_cctbx():
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
 sys.stderr = StreamRedirection(sys.stderr, stderr_redirection)
-
-
 t = time.time()
 try:
   import olx
-except Exception, e:
-  x = os.getcwdu()
+except Exception as e:
+  try:
+    x = os.getcwdu()
+  except AttributeError:
+    x = os.getcwd()
   os.chdir(datadir)
   import olx
   os.chdir(x)
@@ -285,9 +283,9 @@ import multipart
 t = time.time()
 try:
   setup_cctbx()
-except Exception, err:
-  print "There is a problem with the cctbx"
-  print err
+except Exception as err:
+  print("There is a problem with the cctbx")
+  print(err)
 if timer:
   tt.append("%.3f s == setup_cctbx()" %(time.time() - t))
   t = time.time()
@@ -383,9 +381,9 @@ if olx.IsPluginInstalled('MySQL') == "true":
     from OlexToMySQL import DownloadOlexLanguageDictionary
     a = DownloadOlexLanguageDictionary()
     #olex.registerFunction(a.downloadTranslation)
-  except Exception, ex:
-    print "MySQL Plugin is installed but a connection to the default server could not be established"
-    print ex
+  except Exception as ex:
+    print("MySQL Plugin is installed but a connection to the default server could not be established")
+    print(ex)
 if timer:
   tt.append("%.3f s == MySQL()" %(time.time() - t))
   t = time.time()
@@ -403,13 +401,13 @@ if sys.platform[:3] == 'win':
 t = time.time()
 try:
   import customScripts
-except ImportError, err:
-  print "Could not import customScripts: %s" %err
+except ImportError as err:
+  print("Could not import customScripts: %s" %err)
 
 try:
   import userScripts
-except ImportError, err:
-  print "Could not import userScripts: %s" %err
+except ImportError as err:
+  print("Could not import userScripts: %s" %err)
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()
@@ -432,13 +430,13 @@ if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
   tt.append("==================================================")
   for item in tt:
-    print item
-print "Welcome to Olex2"
-print "\nWe are grateful to our users for testing and supporting Olex2"
-print "Please find the link to credits in the About box"
-print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.," +\
+    print(item)
+print("Welcome to Olex2")
+print("\nWe are grateful to our users for testing and supporting Olex2")
+print("Please find the link to credits in the About box")
+print("\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.," +\
       "\nOLEX2: A complete structure solution, refinement and analysis program (2009)."+\
-      "\nJ. Appl. Cryst., 42, 339-341.\n"
+      "\nJ. Appl. Cryst., 42, 339-341.\n")
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
 
