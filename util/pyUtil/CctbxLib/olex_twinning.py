@@ -390,10 +390,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     always_basf=True
     do_very_long=False
     number_laws=4
+    height_axis_method=False
     twin_laws=[]
     twin_laws+=self.get_integral_twin_laws(hkl_all, f_calc, f_obs)
-    
-    
     
     
     if twin_laws:
@@ -417,7 +416,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         print ("Twin laws found via twofold rotation")
   
       
-    if new_methods:
+    if new_methods and height_axis_method:
       twin_laws+=self.find_twin_laws_axis_height(hkl, model, 0.002, 5)    
       if twin_laws:
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
@@ -666,6 +665,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       trials +=1
       
     r_difference=r_0-r_minimum
+    if r_difference<0.001:
+      return [0,r_0,0]
     
     return [basf_minimum, r_minimum, r_difference]
     
