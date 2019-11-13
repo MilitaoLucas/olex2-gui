@@ -1,8 +1,14 @@
-from __future__ import division
+# py 2to3 compatibility
+import future
+import builtins
+
+from builtins import bytes, chr #works in 2 and 3
+# END
+
 # -*- coding: latin-1 -*-
 
 import math
-from itertools import izip
+
 import ExternalPrgParameters
 import OlexVFS
 from PIL import Image
@@ -98,7 +104,7 @@ class Graph(ArgumentParser):
     x_values = []
     y_values = []
     x = self.min_x
-    for i in xrange(0,n_points+1):
+    for i in range(0,n_points+1):
       x_values.append(x)
       locals['x'] = x
       y_values.append(eval(function, math.__dict__, locals))
@@ -236,20 +242,20 @@ class Graph(ArgumentParser):
     txt = txt.replace("_sq", "^2")
     txt = txt.replace("_star", "*")
     txt = txt.replace("_", " ")
-    txt = txt.replace("lambda", unichr(61548))
-    txt = txt.replace("theta", unichr(61553))
-    txt = txt.replace("sigma", unichr(61555))
-    txt = txt.replace("^2", unichr(178))
-    txt = txt.replace("^3", unichr(179))
-    txt = txt.replace(">", unichr(61681))
-    txt = txt.replace("<", unichr(61665))
-    txt = txt.replace("Fo2", "Fo%s" %(unichr(178)))
-    txt = txt.replace("Fc2", "Fc%s" %(unichr(178)))
-    txt = txt.replace("Sum", unichr(8721))
+    txt = txt.replace("lambda", chr(61548))
+    txt = txt.replace("theta", chr(61553))
+    txt = txt.replace("sigma", chr(61555))
+    txt = txt.replace("^2", chr(178))
+    txt = txt.replace("^3", chr(179))
+    txt = txt.replace(">", chr(61681))
+    txt = txt.replace("<", chr(61665))
+    txt = txt.replace("Fo2", "Fo%s" %(chr(178)))
+    txt = txt.replace("Fc2", "Fc%s" %(chr(178)))
+    txt = txt.replace("Sum", chr(8721))
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
-    txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
-    txt = txt.replace("Angstrom", unichr(197))
+    txt = txt.replace("Fexp", "F%s" %(chr(2091)))
+    txt = txt.replace("Angstrom", chr(197))
     return txt
 
   def make_x_y_plot(self):
@@ -504,7 +510,7 @@ class Graph(ArgumentParser):
   def test_plotly(self):
 
     import plotly
-    print plotly.__version__  # version >1.9.4 required
+    print(plotly.__version__)  # version >1.9.4 required
     from plotly.graph_objs import Scatter, Layout
     import numpy as np
 
@@ -525,7 +531,7 @@ class Graph(ArgumentParser):
     i = 0
 
 
-    for dataset in self.data.values():
+    for dataset in list(self.data.values()):
       metadata = dataset.metadata()
       xs_raw = list(dataset.x)
       xs = [ '%.3f' % elem for elem in xs_raw ]
@@ -657,16 +663,20 @@ class Graph(ArgumentParser):
     if use_plotly:
       try:
         import plotly
-        self.test_plotly()
       except:
         print("Please install the plotly extension for Olex2 to make plots using plotly")
         print("Olex2 built-in plots will be made")
+      try:
+        self.test_plotly()
+      except Exception as err:
+        print(("Plotly failed: %s" %err))
+        print("Olex2 built-in plots will be made instead.")
 
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
     self.draw_y_axis()
-    for dataset in self.data.values():
+    for dataset in list(self.data.values()):
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
@@ -686,7 +696,7 @@ class Graph(ArgumentParser):
     max_ys = []
 
     assert len(self.data) > 0
-    for dataset in self.data.values():
+    for dataset in list(self.data.values()):
       i = 0
       for y in dataset.y:
         if math.isnan(y):
@@ -1134,16 +1144,16 @@ class Graph(ArgumentParser):
     
     for i, (xr, yr) in enumerate(xy_pairs):
       if math.isnan(yr):
-        print "-- got isnan (yr)"
+        print("-- got isnan (yr)")
         continue
       if math.isnan(xr):
-        print "-- got isnan (xr)"
+        print("-- got isnan (xr)")
         continue
       if math.isinf(yr):
-        print "-- got isinf (yr)"
+        print("-- got isinf (yr)")
         continue
       if math.isinf(xr):
-        print "-- got isinf (xr)"
+        print("-- got isinf (xr)")
         continue
 
 
@@ -1178,7 +1188,7 @@ class Graph(ArgumentParser):
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           href = "OMIT %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
           target = 'OMIT %s' %(idx)
-          if self.model['omit'].has_key('hkl'):
+          if 'hkl' in self.model['omit']:
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
               href = "OMIT -u %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
@@ -1652,12 +1662,12 @@ class Analysis(Graph):
       filename = '%s-%s.csv' %(self.filename,self.item)
     filefull = '%s/%s' %(self.filepath,filename)
     f = open(filefull, 'wb')
-    for dataset in self.data.values():
+    for dataset in list(self.data.values()):
       fieldnames = (dataset.metadata().get('x_label', 'x'),
                     dataset.metadata().get('y_label', 'y'))
       csv_utils.writer(f, (dataset.x,dataset.y), fieldnames)
     f.close()
-    print "%s was created" %filefull
+    print("%s was created" %filefull)
 
 class PrgAnalysis(Analysis):
   def __init__(self, program, method):
@@ -1771,13 +1781,13 @@ class ShelXL_graph(refinement_graph):
       self.cycle = int(line.split("before cycle")[1].strip().split()[0])
       self.data.setdefault("cycle_%i" %self.cycle, {})
     elif "Mean shift/esd =" in line:
-      if not self.data.has_key('mean_shift'):
+      if 'mean_shift' not in self.data:
         metadata={'labels':[], 'y_label':'Mean shift/esd'}
         self.data.setdefault('mean_shift', Dataset(metadata=metadata))
       mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
       self.data['mean_shift'].add_pair(self.cycle, mean_shift)
     elif "Max. shift = " in line:
-      if not self.data.has_key('max_shift'):
+      if 'max_shift' not in self.data:
         y_label = self.get_unicode_characters('Max shift in Angstrom')
         metadata={'labels':[], 'y_label':y_label}
         self.data.setdefault('max_shift', Dataset(metadata=metadata))
@@ -1940,7 +1950,7 @@ class WilsonPlot(Analysis):
       max2 = 128.0
       c2 = (255.0, 0, 0)
 
-    for i in xrange(boxWidth-2):
+    for i in range(boxWidth-2):
       i += 1
       if i == margin_left:
         txt = "acentric"
@@ -1993,7 +2003,7 @@ class WilsonPlot(Analysis):
         fill = self.grad_fill(max2, c2, col)
         draw.line(((i, top),(i, bottom)), fill=fill)
     val = int((value - begin) / scale)
-    txt = unichr(8226)
+    txt = chr(8226)
     wX, wY = draw.textsize(txt, font=self.font_bold_normal)
     draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
     draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
@@ -2227,7 +2237,7 @@ class SystematicAbsencesPlot(Analysis):
       self.have_data = False
       self.draw_origin = True
       self.make_empty_graph(axis_x = True)
-      print "No systematic absences present"
+      print("No systematic absences present")
       return None
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
@@ -2361,9 +2371,9 @@ class Fobs_Fcalc_plot(Analysis):
       self.batch_number = batch_number
     try:
       self.make_f_obs_f_calc_plot()
-    except AssertionError, e:
+    except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
-        print "You need some scatterers to do this!"
+        print("You need some scatterers to do this!")
         return
       else:
         raise
@@ -2438,12 +2448,12 @@ class Fobs_over_Fcalc_plot(Analysis):
     self.max_y = 1.05
     try:
       self.make_plot()
-    except AssertionError, e:
+    except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
-        print "You need some scatterers to do this!"
+        print("You need some scatterers to do this!")
         return
       else:
-        raise AssertionError, e
+        raise AssertionError(e)
     self.popout()
     if self.params.fobs_over_fcalc.output_csv_file:
       self.output_data_as_csv()
@@ -2487,12 +2497,12 @@ class scale_factor_vs_resolution_plot(Analysis):
     self.max_y = 1.05
     try:
       self.make_plot()
-    except AssertionError, e:
+    except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
-        print "You need some scatterers to do this!"
+        print("You need some scatterers to do this!")
         return
       else:
-        raise AssertionError, e
+        raise AssertionError(e)
     self.popout()
     if self.params.scale_factor_vs_resolution.output_csv_file:
       self.output_data_as_csv()
@@ -2528,9 +2538,9 @@ class item_vs_resolution_plot(Analysis):
     #self.max_y = 1.05
     try:
       res = self.make_plot()
-    except AssertionError, e:
+    except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
-        print "You need some scatterers to do this!"
+        print("You need some scatterers to do this!")
         return
       else:
         raise
@@ -2548,7 +2558,11 @@ class item_vs_resolution_plot(Analysis):
 
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
-    xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+    try:
+      xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+    except Exception as err:
+      print(err)
+      return
     if not xy_plot:
       return None
     while None in xy_plot.y:
@@ -2759,13 +2773,13 @@ class Dataset(object):
     self._metadata = metadata
 
   def xy_pairs(self):
-    return zip(self.x,self.y)
+    return list(zip(self.x,self.y))
 
   def metadata(self):
     return self._metadata
 
   def show_summary(self):
-    print ''.join("%f, %f\n" %(x,y) for x,y in self.xy_pairs())
+    print(''.join("%f, %f\n" %(x,y) for x,y in self.xy_pairs()))
 
   def add_pair(self, x, y):
     self.x.append(x)
@@ -2890,8 +2904,9 @@ def makeReflectionGraphGui():
     if not graph:
       value = "no phil"
       help_name = None
-    gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
-    help_name = graph.help
+    else:
+      gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
+      help_name = graph.help
     onclick = 'spy.make_reflection_graph\(%s)' %name
     d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
          'bgcolor':guiParams.html.input_bg_colour,
@@ -2964,9 +2979,9 @@ OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
   if not OV.HKLSrc():
-    print "To make the %s graph, the reflection file must be accessible." %name
-    print "Are you looking at a CIF file?"
-    print "Try typing 'export' to extract the embedded files from the CIF."
+    print("To make the %s graph, the reflection file must be accessible." %name)
+    print("Are you looking at a CIF file?")
+    print("Try typing 'export' to extract the embedded files from the CIF.")
     return
   name = name.lower().replace(" ", "_").replace("-", "_")
   run_d = {'wilson_plot': WilsonPlot,
@@ -2992,7 +3007,8 @@ def make_reflection_graph(name):
     arg = func[1]
     fun(arg)
   else:
-    func()
+    if func:
+      func()
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
@@ -3022,8 +3038,8 @@ class HealthOfStructure():
     try:
       if self.initialise_HOS():
         return self.summarise_HOS()
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
       return None
 
   def make_HOS(self, force=False, supplied_cif=False):
@@ -3055,7 +3071,7 @@ class HealthOfStructure():
       OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     self.stats = None
     if timing:
-      print "HOS took %.4f seconds" %(time.time() - t1)
+      print("HOS took %.4f seconds" %(time.time() - t1))
 
   def get_info_from_hkl_stats(self):
     try:
@@ -3075,8 +3091,8 @@ class HealthOfStructure():
       self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(self.theta_full*2))
       self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(self.theta_full*2,True))
       self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(self.theta_full*2,False))
-    except Exception, err:
-      print("Could not get info from hkl_stats: %s" %err)
+    except Exception as err:
+      print(("Could not get info from hkl_stats: %s" %err))
 
   def get_info_from_cif(self):
     from cctbx import uctbx
@@ -3122,8 +3138,8 @@ class HealthOfStructure():
         else:
           self.hkl_stats['Rint'] = 1
 
-    except Exception, err:
-      print "Could not get info from CIF: %s" %err
+    except Exception as err:
+      print("Could not get info from CIF: %s" %err)
 
 
   def initialise_HOS(self, force=False):
@@ -3158,8 +3174,8 @@ class HealthOfStructure():
       target = "&#013;- ".join(l)
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
 
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
       return (False, True)
     if self.scope == "refinement":
       return (True, True)
@@ -3189,8 +3205,8 @@ class HealthOfStructure():
       f_sq_obs = OCA.reflections.f_sq_obs_filtered
       retVal = f_sq_obs.completeness()
       OV.SetParam('snum.hkl.completeness_full',retVal)
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
       pass
     return retVal
 
@@ -3234,7 +3250,7 @@ class HealthOfStructure():
 
   def is_in_cache(self, var, val):
     global cache
-    if cache.has_key(var):
+    if var in cache:
       if cache[var]['val'] == val:
         return True
       else:
@@ -3432,7 +3448,7 @@ class HealthOfStructure():
           self.image_position = "middle"
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
         if timing:
-          print ".. hos image took %.3f s (%s) " %((time.time() - t),item)
+          print(".. hos image took %.3f s (%s) " %((time.time() - t),item))
       else:
         ref_open = ''
         ref_close = ''
@@ -3490,7 +3506,7 @@ class HealthOfStructure():
 
     if cache_image and cache_image_large:
       if debug:
-        print "HOS from Cache: %s" %cache_entry
+        print("HOS from Cache: %s" %cache_entry)
       im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
       OlexVFS.save_image_to_olex(im, item, 0)
       return txt
@@ -3526,7 +3542,10 @@ class HealthOfStructure():
           value_display_extra = IT.get_unicode_characters(value_display_extra)
       iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
       if iucr_value:
-        value_raw = float(iucr_value)
+        try:
+          value_raw = float(iucr_value)
+        except:
+          value_raw = 0
         iucr_2theta = OV.get_cif_item('_diffrn_reflns_theta_full')
         iucr_2theta = "IUCr"
         if iucr_2theta:
