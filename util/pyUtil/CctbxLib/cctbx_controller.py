@@ -1,4 +1,7 @@
 # cctbx_controller.py
+# py 2to3 compatibility
+from __future__ import print_function
+# END
 
 from my_refine_util import *
 import math
@@ -120,6 +123,9 @@ class reflections(object):
     )
     self.crystal_symmetry = cs
     miller_arrays = reflections_server.get_miller_arrays(None)
+    for array in miller_arrays:
+      array.info().source = reflection_file.encode("utf-8")
+    
     if hklf_code == 3:
       self.f_obs = miller_arrays[0]
       if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
@@ -219,20 +225,20 @@ class reflections(object):
       log = sys.stdout
     if self._merge is None:
       self.merge()
-    print >> log, "Merging summary:"
-    print >> log, "Total reflections: %i" %self.f_sq_obs.size()
-    print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
-    print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
+    print("Merging summary:", file=log)
+    print("Total reflections: %i" %self.f_sq_obs.size(), file=log)
+    print("Unique reflections: %i" %self.f_sq_obs_merged.size(), file=log)
+    print("Systematic Absences: %i removed" %self.n_sys_absent, file=log)
     if self.merging is not None:
-      print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
-      print >> log, "R(int): %f" %self.merging.r_int()
-      print >> log, "R(sigma): %f" %self.merging.r_sigma()
+      print("Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents(), file=log)
+      print("R(int): %f" %self.merging.r_int(), file=log)
+      print("R(sigma): %f" %self.merging.r_sigma(), file=log)
       self.merging.show_summary(out=log)
     if self.f_sq_obs_filtered is not None:
-      print >> log, "d min: %f" %self.d_min
-      print >> log, "n reflections filtered by resolution: %i" %(self.n_filtered_by_resolution)
-      print >> log, "n reflections filtered by hkl: %i" %(
-        self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size())
+      print("d min: %f" %self.d_min, file=log)
+      print("n reflections filtered by resolution: %i" %(self.n_filtered_by_resolution), file=log)
+      print("n reflections filtered by hkl: %i" %(
+        self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size()), file=log)
 
   def get_observations(self, twin_fractions, twin_components):
     if self.hklf_code == 5:
@@ -292,7 +298,7 @@ class create_cctbx_xray_structure(object):
         try:
           builder.process_restraint(restraint_type, **kwds)
         except:
-          print 'Your version of cctbx is too old for the restraint %s'%restraint_type
+          print('Your version of cctbx is too old for the restraint %s'%restraint_type)
     if constraints_iter is not None:
       for constraint_type, kwds in constraints_iter:
         builder.process_constraint(constraint_type, **kwds)
