@@ -6,6 +6,8 @@ import OlexVFS
 import time
 import math
 from cStringIO import StringIO
+import ntpath
+
 
 
 import cProfile
@@ -74,8 +76,6 @@ class twin_rules:
     self.fom=fom
     self.rbasf=rbasf
 
-
-
 class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
@@ -85,9 +85,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def run_from_gui(self, personal=False):
     print "Searching for Twin laws..."
-    olx.Cursor("busy", "Searching for Twin laws...")
+    OV.Cursor("busy", "Searching for Twin laws...")
     self.run(personal) #personal
-    olx.Cursor()
+    OV.Cursor()
+    
+  def write_twinning_result_to_disk(self, html):
+    with open(get_twinning_result_filename(), 'w') as wFile:
+      wFile.write(html)
   
   def run(self, personal=False):
     from PilTools import MatrixMaker
@@ -98,10 +102,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       txt = "Sorry, using solvent masking and twinning is not supported yet."
       print(txt)
       html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
-      OV.write_to_olex('twinning-result.htm', html, False)
+      self.write_twinning_result_to_disk(html)
       OV.UpdateHtml()
       return
-
+    if "_twin" in OV.HKLSrc():
+      print("It looks like your hklf file is already an hklf 5 format file")
+      return
+  
+    print(">> Searching for Twin Laws <<")
     use_image = ""
     MM = MatrixMaker()
     self.twin_laws_d = {}
@@ -158,8 +166,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
              {'txt':"basf=%s" %str(basf),
               'font_colour':font_color_basf}]
       states = ['on', 'off']
+      matrix = twin_law.hkl_rotation.flatten()
+      rounded_matrix = self.round_matrix_elements(matrix)
       for state in states:
-        image_name, img  = MM.make_3x3_matrix_image(name, twin_law.hkl_rotation.flatten(), txt, state)
+        image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state)
 
       #law_txt += "<zimg src=%s>" %image_name
 
@@ -180,38 +190,67 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_law_gui_txt = ""
     i = 0
     html = "<tr><td></td><td>"
+    fn_base = get_twinning_result_filename().rstrip(".html")
     for r, run, basf in r_list:
       i += 1
       image_name = self.twin_laws_d[run].get('law_image_name', "XX")
-      use_image = "%soff.png" %image_name
+      write_twin_images_to_disk(image_name, fn_base)
+      use_image = "%s%soff.png" %(fn_base, image_name)
       img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
       #href = 'spy.on_twin_image_click(%s)'
       href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
-      law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
+      law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
       self.twin_law_gui_txt += "%s" %(law_txt)
       control = "IMG_%s" %image_name.upper()
 
       html += '''
-<a href='%s' target='Apply this twin law'><zimg name='%s' border="0" src="%s"></a>&nbsp;
-    ''' %(href, control, img_src)
+<a href='%s' target='Apply this twin law'><img name='%s' border="0" src="%s"></a>&nbsp;
+    ''' %(href, control, use_image)
     if not use_image:
       return
     html += "</td></tr>"
-    p = os.path.join(OV.StrDir(), 'twinning-result.htm')
-    with open(p, 'w') as wFile:
-      wFile.write(html)
-    OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
+    self.write_twinning_result_to_disk(html)
+#    OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
     #OV.Refresh()
     #if OV.IsControl(control):
     #  OV.SetImage(control,use_image)
     OV.UpdateHtml()
     twin_laws_d = self.twin_laws_d
-    import cPickle as pickle
-    p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
-    with open( p, "wb" ) as out:
-      pickle.dump( twin_laws_d, out )
+    #import cPickle as pickle
+    #p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+    #with open( p, "wb" ) as out:
+      #pickle.dump( twin_laws_d, out )
     
+  def round_matrix_elements(self, matrix):
+    round_tol = 0.01
+    round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
+    round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
+    round_l = zip(round_val_l, round_disp_l)
+    new_matrix = []
+    for item in matrix:
+      try:
+        item = round(item,3)
+      except:
+        m.append(item)
+        continue
+      sign = ""
+      if abs(item) != item:
+        sign = "-"
+      if str(item) == "0.0":
+        item = "0"
+      elif str(item) == "1.0":
+        item = "1"
+      elif str(item) == "-1.0":
+        item = "-1"
+      else:
+        for val,disp in round_l:
+          if val-round_tol < abs(item) < val+round_tol:
+            item = sign+disp
+            break
+      new_matrix.append(item)
+    return new_matrix
+
 
   def run_twin_ref_shelx(self, law, basf):
     #law_ins = ' '.join(str(i) for i in law[:9])
@@ -386,11 +425,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return twin_laws
 
   def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
-    new_methods=True
-    always_basf=True
-    do_very_long=False
-    number_laws=4
-    height_axis_method=False
+    new_methods=OV.GetParam('snum.twinning.olex2.new_methods', False)
+    always_basf=OV.GetParam('snum.twinning.olex2.always_basf', False)
+    do_very_long=OV.GetParam('snum.twinning.olex2.very_long', False)
+    height_axis_method=OV.GetParam('twinning.olex2.height_axis_method', False)
+    number_laws=OV.GetParam('snum.twinning.olex2.number_laws', 4)
+    
     twin_laws=[]
     twin_laws+=self.get_integral_twin_laws(hkl_all, f_calc, f_obs)
     
@@ -413,17 +453,27 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)        
         print ("Twin laws found via twofold rotation")
   
-    if new_methods:  
+      
+    if new_methods and height_axis_method:
+      print(">> new_methods AND axis_method")
+      twin_laws+=self.find_twin_laws_axis_height(hkl, model, 0.002, 5)    
+      if twin_laws:
+        twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
+        print ("Found Twins through height-axis method")    
+        
+        
+    if new_methods:
+      print(">> new_methods: PART 1")
       if len(twin_laws)<number_laws:
         threshold=0.002
         twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
         if twin_laws:
           print("Twin laws found through new method")
           twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
-
       
-      
-    if new_methods and (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
+    if new_methods:
+      print(">> new_methods: PART 2")
+      if (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
         threshold=0.01
         twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
         if twin_laws:
@@ -447,8 +497,16 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
         print ("Twin found on extended search - whilst this improves the R-factor, the underestimated hkl may not justify this")
 
+    if (not twin_laws) and do_very_long and (not new_methods):
+      print(">> do_very_long AND new_methods")
+      
+      print ("No Likely axes, threshold increased. Note these twin laws are unlikely to provide improvement")
+      olx.Refresh()
+      threshold=1
+      twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
     
     if twin_laws and always_basf:
+      print(">> always_basf")
       #twin_laws_2=[]
       #for twin_law in twin_laws:
         #rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
@@ -1114,6 +1172,15 @@ def format_twin_string_from_law(twin_law):
   return " ".join(twin_str_l)
 
 
+def get_twinning_result_filename():
+  _ = ntpath.basename(OV.HKLSrc())
+  _ = _.rstrip(".hkl")
+  if "_twin" in _:
+    _ = _.split("_twin")[0]
+  _ = os.path.join(OV.StrDir(), _ + "_twinning.html")
+  return _
+OV.registerFunction(get_twinning_result_filename)
+
 def on_twin_image_click(run_number):
   global twin_laws_d
   if not twin_laws_d:
@@ -1152,6 +1219,16 @@ def on_twin_image_click(run_number):
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 
+def write_twin_images_to_disk(name, fn_base):
+  l = ['on', 'off']
+  for state in l:
+    n = '%s%s.png'%(name,state)
+    im_data = OlexVFS.read_from_olex(n)
+    image_name = fn_base+n
+    with open (image_name, 'wb') as wFile:
+      wFile.write(im_data)
+  return image_name
+  
 def reset_twin_law_img():
   global twin_laws_d
   olex_refinement_model = OV.GetRefinementModel(False)
