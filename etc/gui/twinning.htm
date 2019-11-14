@@ -1,10 +1,26 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING';help_ext=Twinning;1 -->
-  <td width='80%'>
-    <a href='spy.twin.run_from_gui()' target=''>%Search for Twin Laws%</a>&nbsp;|&nbsp;
-    <a href='cumulative_intensity' target=''>%Show Cumulative Intensities%</a>
-  </td>
+  
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Integr. Twin [cctbx]",
+    "name=TWINNING_CCTBX",
+    "onclick=spy.twin.run_from_gui()",
+    "td1=<td width='40%'>"
+    )
+  $-
+  
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Cumulative Plot",
+    "name=TWINNING_CUMULATIVE",
+    "onclick=cumulative_intensity",
+    "td1=<td width='40%'>"
+    )
+  $-
+
+ 
   <td width='10%'>
   Extended:
   </td>
@@ -18,13 +34,12 @@
     )
   $-
   </td>
-  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_2';help_ext=Twinning_2;1 -->
 
-  <td width='15%' align='right'>
-  Max Index:
+  <td width='15%' align='left'>
+  <b>Max Index </b>
   </td>
   <td width='10%' align='left'>
   $+
@@ -38,8 +53,8 @@
     )
   $-
   </td>
-  <td width='20%' align='right'>
-  Rotation Fraction:
+  <td width='15%' align='left'>
+  <b>Rot. Fract'n </b>
   </td>
   <td width='10%' align='left'>
   $+
@@ -53,10 +68,10 @@
   $-
   </td>
   
-  <td width='25%' align='right'>
-  Proximity Threshold:
+  <td width='15%' align='right'>
+  <b>Threshold </b>
   </td>
-  <td width='15%' align='left'>
+  <td width='12%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=TWIN_THRESHOLD",
@@ -73,5 +88,72 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #includeif File.Exists(StrDir()/twinning-result.htm) twinning-result StrDir()/twinning-result.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_EXTA';help_ext=Twinning;1 -->
+
+  <td width="15%" align="left"><b>new m'd</b></td>
+  <td width='5%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=TWINNING_NEW_METHODS",
+    "checked=spy.GetParam(snum.twinning.olex2.new_methods)",
+    "onclick=spy.SetParam(snum.twinning.olex2.new_methods, html.GetState(~name~))",
+    )
+  $-
+  </td>
+
+  <td width="15%" align="left"><b>alw's BASF</b></td>
+  <td width='5%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=TWINNING_ALWAYS_BASF",
+    "checked=spy.GetParam(snum.twinning.olex2.always_basf)",
+    "onclick=spy.SetParam(snum.twinning.olex2.always_basf, html.GetState(~name~))",
+    )
+  $-
+  </td>
+
+  <td width="15%" align='right'><b>very long</b></td>
+  <td width='5%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=TWINNING_VERY_LONG",
+    "checked=spy.GetParam(snum.twinning.olex2.very_long)",
+    "onclick=spy.SetParam(snum.twinning.olex2.very_long, html.GetState(~name~))",
+    )
+  $-
+  </td>
+
+
+  <td width="15%" align='right'><b>h.axis.m</b></td>
+  <td width='5%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=TWINNING_HEIGHT_AXIS_METHOD",
+    "checked=spy.GetParam(snum.twinning.olex2.height_axis_method)",
+    "onclick=spy.SetParam(snum.twinning.olex2.height_axis_method, html.GetState(~name~))",
+    )
+  $-
+  </td>
+
+
+  <td width="12%" align='right'><b>n_laws</b></td>
+  <td width='8%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=TWINNING_NUMBER_LAWS",
+    "value=4",
+    "items=2;4;6;8",
+    "checked=spy.GetParam(snum.twinning.olex2.number_laws)",
+    "onclick=spy.SetParam(snum.twinning.olex2.number_laws, html.GetState(~name~))",
+    "readonly=False",
+    )
+  $-
+  </td>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #includeif File.Exists(spy.get_twinning_result_filename()) twinning-result spy.get_twinning_result_filename();1; -->
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
