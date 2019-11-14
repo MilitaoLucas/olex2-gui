@@ -386,7 +386,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return twin_laws
 
   def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
-    new_methods=False
+    new_methods=True
     always_basf=True
     do_very_long=False
     number_laws=4
@@ -402,8 +402,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         #print ("Few Integral twin laws, investigating twofold non-integral twin laws")
     #else:
       #print ("No Integral twin laws, investigating twofold non-integral twin laws")
-
-      
        
       
     if len(twin_laws)<number_laws:
@@ -761,8 +759,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def find_fom(self, falsehkl, metrical):
     if all(numpy.sum(metrical, axis=1)>=0): #this is the condition which dictates rounding to the nearest integer will also give the closest reciprocal lattice point
-      hkl_adjacent=numpy.round(falsehkl)
-      displacement=falsehkl-hkl_adjacent
+      displacement = (falsehkl+0.5)%1-0.5
       distances=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1)) #      distances=numpy.linalg.norm(numpy.dot(orthogonalization.T,displacement.T),axis=0) is alternative but slower
     else:
       hkl_dropped=numpy.floor(falsehkl)
@@ -777,25 +774,45 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     filtered=sortedDist[:-15]
     return numpy.average(filtered)
     
-  def find_number_overlaps(self, falsehkl, orthogonalization, metrical):
-    #numpy.linalg.norm(numpy.dot(orthogonalization.T,hkl))
-    if all(numpy.sum(metrical, axis=1)>=0): #this is the condition which dictates rounding to the nearest integer will also give the closest reciprocal lattice point
-      hkl_adjacent=numpy.round(falsehkl)
-      displacement=falsehkl-hkl_adjacent
-      distances=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
-    else:
-      hkl_dropped=numpy.floor(falsehkl)
-      adjacents=numpy.array([[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]])
-      distances=numpy.full(numpy.shape(falsehkl)[0],1000)
-      for i in numpy.arange(0,8):
-        hkl_adjacent=hkl_dropped+adjacents[i]
-        displacement=falsehkl-hkl_adjacent
-        size=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
-        distances=numpy.minimum(distances,size)
-    sortedDist=numpy.sort(distances)
-    filtered=sortedDist[:-15]
-    return numpy.average(filtered)    
+  def find_number_overlaps(self, falsehkl, orthogonalization, metrical,threshold):
+    displacement = (falsehkl+0.5)%1-0.5
+    threshold2=threshold**2
+    overlaps=0
+    for line in displacement:
+      size=numpy.dot(line,numpy.dot(metrical,line))
+      if size<threshold2:
+        overlaps+=1    
+    return overlaps
     
+    ##numpy.linalg.norm(numpy.dot(orthogonalization.T,hkl))
+    #if all(numpy.sum(metrical, axis=1)>=0): #this is the condition which dictates rounding to the nearest integer will also give the closest reciprocal lattice point
+      #hkl_adjacent=numpy.round(falsehkl)
+      #displacement=falsehkl-hkl_adjacent
+      #distances=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
+    #else:
+      #hkl_dropped=numpy.floor(falsehkl)
+      #adjacents=numpy.array([[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]])
+      #distances=numpy.full(numpy.shape(falsehkl)[0],1000)
+      #for i in numpy.arange(0,8):
+        #hkl_adjacent=hkl_dropped+adjacents[i]
+        #displacement=falsehkl-hkl_adjacent
+        #size=numpy.sqrt(numpy.multiply(displacement,numpy.dot(metrical,displacement.T).T).sum(1))
+        #distances=numpy.minimum(distances,size)
+    #sortedDist=numpy.sort(distances)
+    #filtered=sortedDist[:-15]
+    #return numpy.average(filtered)    
+    
+  def sufficient_overlaps(self,hkl,threshold,metrical):
+    displacement = (hkl+0.5)%1-0.5
+    threshold2=threshold**2
+    overlaps=50
+    for line in displacement:
+      size=numpy.dot(line,numpy.dot(metrical,line))
+      if size>threshold2:
+        overlaps-=1    
+      if overlaps<35:
+        return 0
+    return overlaps    
 
   def make_hklf5(self, filename, twin_law_full, hkl, fo,sigmas):  
     """
@@ -821,7 +838,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       # looking where is the overlap
       diff = numpy.sum(numpy.abs(hkl_new[i] - rounded_hkl_new[i]))
 
-      if(diff<0.1):
+      if(diff<0.1): #threshold prior default is 0.1
         # adding contribution from overlap
         hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(rounded_hkl_new[i,0],rounded_hkl_new[i,1], rounded_hkl_new[i,2], fo[i]*scale, sigmas[i]*scale, -2))
         hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i]*scale, sigmas[i]*scale, 1))
@@ -988,17 +1005,18 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
               if duplicate:
                 continue
               
-              
               #reciprocal axis
               rotated_hkl=numpy.dot(hkl,rotation_lattice.T)
               
               hkl_displacement=self.find_fom(rotated_hkl, metrical_inverse) 
+              overlaps=self.find_number_overlaps(rotated_hkl, orthogonalization, metrical_inverse, threshold)
       
               if (hkl_displacement<threshold):
                 rbasf=self.basf_estimate(rotation_lattice, hkl_all, f_calc, f_obs)
                 if rbasf[0]>1e-10:
                   twin_laws+=[twin_rules("Alt",numpy.dot(orthogonalization_inverse,unit_axis),rotation_lattice,average_angle,hkl_displacement,rbasf)]
-    
+                                 
+                  
     
             
     twin_laws=self.do_rounding(twin_laws)    
