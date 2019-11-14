@@ -413,14 +413,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)        
         print ("Twin laws found via twofold rotation")
   
-      
-    if new_methods and height_axis_method:
-      twin_laws+=self.find_twin_laws_axis_height(hkl, model, 0.002, 5)    
-      if twin_laws:
-        twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
-        print ("Found Twins through height-axis method")    
-        
-        
     if new_methods:  
       if len(twin_laws)<number_laws:
         threshold=0.002
@@ -431,8 +423,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
       
       
-    if new_methods:    
-      if (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
+    if new_methods and (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
         threshold=0.01
         twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
         if twin_laws:
@@ -456,11 +447,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
         print ("Twin found on extended search - whilst this improves the R-factor, the underestimated hkl may not justify this")
 
-    if (not twin_laws) and do_very_long and (not new_methods):
-      print ("No Likely axes, threshold increased. Note these twin laws are unlikely to provide improvement")
-      olx.Refresh()
-      threshold=1
-      twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
     
     if twin_laws and always_basf:
       #twin_laws_2=[]
@@ -721,6 +707,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
             #real axis
             new_hkl=numpy.dot(rotation_matrix_lattice_base,new_hkl.T).T #correct
+            if not self.sufficient_overlaps(new_hkl, threshold, metrical_inverse):
+              continue
             hkl_displacement=self.find_fom(new_hkl, metrical_inverse)
 
             if (rec_hkl_displacement<threshold and rec_hkl_displacement>perfect_reflection_number):
@@ -748,7 +736,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return matrix_lattice
   
   
-  def make_real_lattice_rotation(self, axis, angle):
+  def make_real_lattice_rotation(self, axis, angle): #believe this is actually the euclidean rotation
     cosine_value=math.cos(angle)
     sine_value=math.sin(angle)
 
@@ -827,7 +815,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     hkl_new = numpy.dot(twin_law, hkl.T).T
     rounded_hkl_new=numpy.rint(hkl_new).astype(int)
     
-    scale = 99999.99/numpy.max(fo) # keep Fo in the scale of F8.2
+    scale = 999.99/numpy.max(fo) # keep Fo in the scale of F8.2
 
     check1=True
 
@@ -990,14 +978,33 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
             if abs(cosvw_angle)>1 or abs(cospq_angle)>1:
               continue
             
-            vw_angle=numpy.arccos(numpy.dot(v_per,w_per)/(numpy.linalg.norm(v_per)*numpy.linalg.norm(w_per)))
-            pq_angle=numpy.arccos(numpy.dot(p_per,q_per)/(numpy.linalg.norm(p_per)*numpy.linalg.norm(q_per)))
+            vw_angle=numpy.arccos(cosvw_angle)
+            pq_angle=numpy.arccos(cospq_angle)
+            #take positive as anticlockwise and negative as clockwise
             
             if abs(vw_angle-pq_angle)<0.0175: #needs to be larger  than 0.012 so put at 1 degree for now
+              v_w_dir=numpy.cross(v_per,w_per)
+              p_q_dir=numpy.cross(p_per,q_per)
+              if numpy.dot(v_w_dir,p_q_dir)<0:
+                #they rotate in opposite directions
+                continue
+              elif numpy.dot(v_w_dir,unit_axis)<0:
+                vw_angle*=-1
+                pq_angle*=-1
+              #the above should work but takes waaaay too long
               average_angle=(vw_angle+pq_angle)/2
               rotation=self.make_real_lattice_rotation(unit_axis, average_angle)
               orthogonalization_inverse=numpy.linalg.inv(orthogonalization.T)          
-              rotation_lattice=numpy.dot(orthogonalization_inverse,numpy.dot(rotation,orthogonalization.T))        
+              rotation_lattice=numpy.dot(orthogonalization_inverse,numpy.dot(rotation,orthogonalization.T))   
+              prot=numpy.dot(rotation_lattice,p)
+              vrot=numpy.dot(rotation_lattice,v)
+              if any(prot-q>0.1) or any(vrot-w>0.1):
+                rotation_lattice=numpy.linalg.inv(rotation_lattice)
+                prot=numpy.dot(rotation_lattice,p)
+                vrot=numpy.dot(rotation_lattice,v)  
+                if any(prot-q>0.1) or any(vrot-w>0.1):   
+                    continue
+              
               duplicate=False
               for twin_law in twin_laws:
                 if numpy.allclose(twin_law.hkl_rotation,rotation_lattice):
@@ -1007,167 +1014,21 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
               
               #reciprocal axis
               rotated_hkl=numpy.dot(hkl,rotation_lattice.T)
-              
+  
+              if not self.sufficient_overlaps(rotated_hkl, threshold, metrical_inverse):
+                continue              
               hkl_displacement=self.find_fom(rotated_hkl, metrical_inverse) 
-              overlaps=self.find_number_overlaps(rotated_hkl, orthogonalization, metrical_inverse, threshold)
       
               if (hkl_displacement<threshold):
                 rbasf=self.basf_estimate(rotation_lattice, hkl_all, f_calc, f_obs)
                 if rbasf[0]>1e-10:
                   twin_laws+=[twin_rules("Alt",numpy.dot(orthogonalization_inverse,unit_axis),rotation_lattice,average_angle,hkl_displacement,rbasf)]
-                                 
-                  
-    
+                            
             
     twin_laws=self.do_rounding(twin_laws)    
     twin_laws=self.purge_duplicates(twin_laws)
     return twin_laws    
     
-  def find_twin_laws_axis_height(self, hkl, model, threshold, max_index):
-    #finds twin laws via taking all axes, then finding in turn all points of the same /height/ up
-    twin_laws=[]
-    
-
-    hkl_all,f_calc,f_obs,f_uncertainty,leastSquare=self.get_differences()        
-
-    orthogonalization=numpy.linalg.inv(numpy.reshape(numpy.array(model.unit_cell().orthogonalization_matrix()),(3,3)))
-    metrical_matrix=self.getMetrical(model)
-    metrical_inverse=numpy.linalg.inv(metrical_matrix)    
-    a_star=orthogonalization[0]
-    b_star=orthogonalization[1]
-    c_star=orthogonalization[2]    
-    b_star_cross_c_star=numpy.cross(b_star,c_star)
-    c_star_cross_a_star=numpy.cross(c_star,a_star)
-    a_star_cross_b_star=numpy.cross(a_star,b_star)
-    
-    hkl_choice=hkl[:10]
-    for i,vec0 in enumerate(hkl_choice):
-      if len(twin_laws)>3:
-        print ("Twin laws found on try " + str(i))
-        return twin_laws
-      v=vec0
-      v_euclid=numpy.dot(orthogonalization.T,v)
-      j=-1
-      while j<i-1:
-        j=j+1
-        vec1=hkl_choice[j]
-        p=vec1   
-        if all(vec0==vec1):
-          continue
-        p_euclid=numpy.dot(orthogonalization.T,p)
-        for main_axis in self.all_axes(max_index):
-          axis_euclid=numpy.dot(orthogonalization.T, main_axis)
-          unit_axis=axis_euclid/numpy.linalg.norm(axis_euclid)
-          viable_rotation_points_0=self.find_equal_height_points(vec0, model, threshold, unit_axis)
-          viable_rotation_points_1=self.find_equal_height_points(vec1, model, threshold, unit_axis)
-          for w in viable_rotation_points_0:
-            for q in viable_rotation_points_1:
-              
-              #parallel and perpendicular components to the axis. Theoretically v_par and w_par are the same.
-              v_par=numpy.dot(unit_axis,v_euclid)*unit_axis
-              v_per=v_euclid-v_par
-              w_per=numpy.dot(orthogonalization.T,w)-v_par
-              p_par=numpy.dot(unit_axis,p_euclid)*unit_axis
-              p_per=p_euclid-p_par
-              q_per=numpy.dot(orthogonalization.T,q)-p_par   
-              
-              cosvw_angle=numpy.dot(v_per,w_per)/(numpy.linalg.norm(v_per)*numpy.linalg.norm(w_per))
-              cospq_angle=numpy.dot(p_per,q_per)/(numpy.linalg.norm(p_per)*numpy.linalg.norm(q_per))
-              
-              if abs(cosvw_angle)>1 or abs(cospq_angle)>1:
-                continue
-              
-              #can I just remove the arccosing?
-              
-              vw_angle=numpy.arccos(numpy.dot(v_per,w_per)/(numpy.linalg.norm(v_per)*numpy.linalg.norm(w_per)))
-              pq_angle=numpy.arccos(numpy.dot(p_per,q_per)/(numpy.linalg.norm(p_per)*numpy.linalg.norm(q_per)))
-              
-              if abs(vw_angle-pq_angle)<0.0175: #needs to be larger  than 0.012 so put at 1 degree for now
-                average_angle=(vw_angle+pq_angle)/2
-                rotation=self.make_real_lattice_rotation(unit_axis, average_angle)
-                orthogonalization_inverse=numpy.linalg.inv(orthogonalization.T)          
-                rotation_lattice=numpy.dot(orthogonalization_inverse,numpy.dot(rotation,orthogonalization.T))        
-                duplicate=False
-                for twin_law in twin_laws:
-                  if numpy.allclose(twin_law.hkl_rotation,rotation_lattice):
-                    duplicate=True
-                if duplicate:
-                  continue
-                
-                rotated_hkl=numpy.dot(hkl,rotation_lattice.T)
-                
-                hkl_displacement=self.find_fom(rotated_hkl, metrical_inverse) 
-        
-                if (hkl_displacement<threshold):
-                  rbasf=self.basf_estimate(rotation_lattice, hkl_all, f_calc, f_obs)
-                  if rbasf[0]>1e-10:
-                    twin_laws+=[twin_rules("Alt",numpy.dot(orthogonalization_inverse,unit_axis),rotation_lattice,average_angle,hkl_displacement,rbasf)]
-      
-    return twin_laws
-  
-  def find_equal_height_points(self,hkl,model, threshold, axis_euclid):
-    orthogonalization=numpy.linalg.inv(numpy.reshape(numpy.array(model.unit_cell().orthogonalization_matrix()),(3,3)))
-    hkl_euclid=numpy.dot(orthogonalization.T,hkl)
-    height=numpy.dot(hkl_euclid,axis_euclid)
-    size_square=numpy.dot(hkl_euclid,hkl_euclid)
-    #width=numpy.sqrt(numpy.dot(hkl_euclid,hkl_euclid)-height**2) #apparently sometimes bad?? Just change back to checking pure size it's easier
-    
-    rec_metrical=model.unit_cell().reciprocal_metrical_matrix()
-    metrical=model.unit_cell().metrical_matrix()
-    orthogonalization=numpy.linalg.inv(numpy.reshape(numpy.array(model.unit_cell().orthogonalization_matrix()),(3,3)))
-    a_star=orthogonalization[0]
-    b_star=orthogonalization[1]
-    c_star=orthogonalization[2]
-    mod_a_star=numpy.sqrt(rec_metrical[0])
-    mod_b_star=numpy.sqrt(rec_metrical[1])
-    mod_c_star=numpy.sqrt(rec_metrical[2])
-    a_star_dot_b_star=rec_metrical[3]
-    a_star_dot_c_star=rec_metrical[4]
-    b_star_dot_c_star=rec_metrical[5]
-    mod_a_square=metrical[0]
-    mod_b_square=metrical[1]
-    mod_c_square=metrical[2]
-    a_dot_b=metrical[3]
-    a_dot_c=metrical[4]
-    b_dot_c=metrical[5]
-    
-    size_hkl=numpy.linalg.norm(numpy.dot(orthogonalization.T,hkl))
-    max_distance=size_hkl+threshold
-    same_height_points=[]
-    
-    #The initial method to find the ranges was underestimating. Trying a new one.
-    
-    h_lambda=[mod_a_square,a_dot_b,a_dot_c]
-    k_lambda=[a_dot_b,mod_b_square,b_dot_c]
-    l_lambda=[a_dot_c,b_dot_c,mod_c_square]
-    
-    lambda_h=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,h_lambda)))
-    lambda_k=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,k_lambda)))
-    lambda_l=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,l_lambda)))
-            
-    #try to get the maximum h-value    
-
-    max_h=numpy.floor(h_lambda[0]/lambda_h)
-    max_k=numpy.floor(k_lambda[1]/lambda_k)
-    max_l=numpy.floor(l_lambda[2]/lambda_l)
-    
-    for h in range(-int(max_h),int(max_h)+1):
-      for k in range(-int(max_k),int(max_k)+1):  
-        for l in range(-int(max_l),int(max_l)+1):
-          if hkl[0]==h and hkl[1]==k and hkl[2]==l:
-            continue
-          hkl2_euclid=numpy.dot(orthogonalization.T,[h,k,l])
-          height_hkl2=numpy.dot(hkl2_euclid,axis_euclid)
-          if abs(height-height_hkl2)<threshold:
-            #width_hkl2=numpy.sqrt(numpy.dot(hkl2_euclid,hkl2_euclid)-height_hkl2**2) #check me
-            size_2_square=numpy.dot(hkl2_euclid,hkl2_euclid)
-            size_2=numpy.sqrt(size_2_square)
-            if abs(size_hkl-size_2)<threshold:
-              same_height_points+=[[h,k,l]]                
-                     
-    return same_height_points    
-    
-  
   
   def find_same_distance_points(self, hkl, model,threshold):
     #finds points with the same d-spacing as a reciprocal lattice point hkl
@@ -1226,11 +1087,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def check_basf(self, twin_laws, hkl_all, f_calc, f_obs):
     twin_laws_2=[]
     for twin_law in twin_laws:
+      if twin_law.rbasf[0]>1e-15:
+        twin_laws_2+=[twin_law]
+        continue
       rbasf=self.basf_estimate(twin_law.hkl_rotation, hkl_all, f_calc, f_obs)       
       twin_law.rbasf=rbasf
       if rbasf[0]>1e-15:
         twin_laws_2+=[twin_law]
-    twin_laws=twin_laws_2    
     return twin_laws_2
   
   
