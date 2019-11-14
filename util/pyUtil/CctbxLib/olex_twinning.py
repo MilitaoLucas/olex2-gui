@@ -425,10 +425,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return twin_laws
 
   def find_twin_laws(self,hkl_all,f_calc,f_obs, hkl, model):
-    new_methods=OV.GetParam('snum.twinning.olex2.new_methods', False)
-    always_basf=OV.GetParam('snum.twinning.olex2.always_basf', False)
-    do_very_long=OV.GetParam('snum.twinning.olex2.very_long', False)
-    height_axis_method=OV.GetParam('twinning.olex2.height_axis_method', False)
     number_laws=OV.GetParam('snum.twinning.olex2.number_laws', 4)
     
     twin_laws=[]
@@ -449,26 +445,27 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)        
         print ("Twin laws found via twofold rotation")
 
-    if new_methods:
+     
+    if len(twin_laws)<number_laws:
       print(">> new_methods: PART 1")
-      if len(twin_laws)<number_laws:
-        threshold=0.002
-        twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
-        if twin_laws:
-          print("Twin laws found through new method")
-          twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
+      threshold=0.002
+      twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
+      if twin_laws:
+        print("Twin laws found through new method")
+        twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
       
-    if new_methods:
-      print(">> new_methods: PART 2")
-      if (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'):
-        threshold=0.01
-        twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
-        if twin_laws:
-          print("Twin laws found through extended new method")
-          twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
     
-    if (not twin_laws) and (not new_methods):
-      print ("No Highly likely twofold axes, rotation fraction increased")
+    
+    if (not twin_laws) and OV.GetParam('snum.twinning.olex2.do_long'): 
+      print(">> new_methods: PART 2")
+      threshold=0.01
+      twin_laws+=self.find_twin_axes_sphere(hkl, model, threshold)   
+      if twin_laws:
+        print("Twin laws found through extended new method")
+        twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
+    
+    if (not twin_laws): # and OV.GetParam('snum.twinning.olex2.do_long')
+      print ("No twin laws found via quicker search, trying basic search")
       olx.Refresh()
       rotation_fraction=24
       twin_laws=self.find_twin_axes(hkl,model,threshold,size,rotation_fraction)
@@ -484,9 +481,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
         print ("Twin found on extended search - whilst this improves the R-factor, the underestimated hkl may not justify this")
 
-    if twin_laws and always_basf:
-      print(">> always_basf")
-      twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
+    twin_laws=self.check_basf(twin_laws, hkl_all, f_calc, f_obs)
     if twin_laws:
       twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
