@@ -12,6 +12,10 @@ CURR_CIF_FILE_NAME = None
 global CURR_CIF_FILE_LIST
 CURR_CIF_FILE_LIST = []
 
+global CURR_CIF_FILE_FOLDER
+CURR_CIF_FILE_FOLDER = None
+
+
 def BGColorForValue(value):
   if value == '' or value == '?':
     return "#FFDCDC"
@@ -21,9 +25,13 @@ def BGColorForValue(value):
 class MultipleDataset:
   def __init__(self):
     self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
+    self.CURR_CIF_FILE_FOLDER = CURR_CIF_FILE_FOLDER
     self.CURR_CIF_FILE_LIST = CURR_CIF_FILE_LIST
   
   def check(self):
+    if CURR_CIF_FILE_FOLDER:
+      if CURR_CIF_FILE_FOLDER != OV.FilePath():
+        return False
     if CURR_CIF_FILE_NAME:
       self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
       return True
@@ -36,6 +44,7 @@ class MultipleDataset:
   def generateHtml(self,make_always=False):
     global CURR_CIF_FILE_NAME
     global CURR_CIF_FILE_LIST
+    global CURR_CIF_FILE_FOLDER
     current = None
     html = '<table border="0" VALIGN="center" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableRowBgColour)"><tr>'
     
@@ -44,11 +53,15 @@ class MultipleDataset:
         CURR_CIF_FILE_NAME = None
         CURR_CIF_FILE_LIST = []
 
+    if not CURR_CIF_FILE_FOLDER:
+      if olx.IsFileType('cif') == 'true':
+        CURR_CIF_FILE_FOLDER = OV.FilePath()
+
     if not CURR_CIF_FILE_NAME:
       if olx.IsFileType('cif') == 'true':
         CURR_CIF_FILE_NAME = OV.FileFull()
         current = int(olx.xf.CurrentData())
-      
+
     if not CURR_CIF_FILE_LIST:
       cnt = int(olx.xf.DataCount())
       for i in xrange(0, cnt):
