@@ -192,10 +192,14 @@ class OlexCctbxAdapter(object):
       if sfac is not None:
         if len(sfac) > 0 and 'gaussian' not in sfac.items()[0][1]:
           for element, sfac_dict in sfac.iteritems():
+            if len(element) > 1:
+              element = element.upper()[0] + element.lower()[1:]
             custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
         else:
           from cctbx import eltbx
           for element, sfac_dict in sfac.iteritems():
+            if len(element) > 1:
+              element = element.upper()[0] + element.lower()[1:]
             custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
               sfac_dict['gaussian'][0],
               [-b for b in sfac_dict['gaussian'][1]],
