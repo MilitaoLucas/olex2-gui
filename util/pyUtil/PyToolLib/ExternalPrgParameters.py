@@ -365,7 +365,7 @@ Palatinus et al., 2012""",
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXT, ShelXD, ShelXD97, XM,
-              smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+              smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, SIR2014, Superflip):
     SPD.addProgram(prg)
 
   return SPD, RPD
