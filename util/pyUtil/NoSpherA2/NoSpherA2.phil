@@ -11,7 +11,7 @@ snum{
         cmd = ""
           .type = str
         tsc{
-          basis_name = "x2c-SVPall"
+          basis_name = "x2c-SVP"
             .type = str
           Calculate = True
             .type = bool
@@ -37,7 +37,7 @@ snum{
             .type = bool
           keep_wfn = True
             .type = bool
-          Max_HAR_Cycles = 15
+          Max_HAR_Cycles = 10
             .type = int
           method = "rks"
             .type = str
@@ -49,7 +49,9 @@ snum{
             .type = str
           ORCA_SCF_Strategy = "NormalConv"
             .type = str
-          Relativistic = False
+          precise_output = False
+            .type = bool
+          Relativistic = True
             .type = bool
           source = "Tonto"
             .type = str
