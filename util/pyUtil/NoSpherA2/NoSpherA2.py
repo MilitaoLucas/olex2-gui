@@ -310,6 +310,10 @@ No MPI implementation found in PATH!
       # Check if job folder already exists and (if needed) make the backup folders  
       self.backup = os.path.join(self.jobs_dir, "backup")
       if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".cif")):    
+        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        run = None
+        if Full_HAR == True:
+          run = OV.GetVar('Run_number')
         i = 1  
         while (os.path.exists(self.backup + "_%d"%i)):  
           i = i + 1  
@@ -319,9 +323,32 @@ No MPI implementation found in PATH!
           files = (file for file in os.listdir(self.jobs_dir)  
                   if os.path.isfile(os.path.join(self.jobs_dir, file)))  
           for f in files:  
-            f_work = os.path.join(self.jobs_dir,f)  
-            f_dest = os.path.join(self.backup,f)
-            shutil.move(f_work,f_dest)  
+            if Full_HAR == True:
+              if run > 1:
+                software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+                if software == "Tonto":
+                  if "restricted" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                elif software == "ORCA":
+                  if ".gbw" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                elif "Gaussian" in software:
+                  if ".chk" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+              else:
+                f_work = os.path.join(self.jobs_dir,f)  
+                f_dest = os.path.join(self.backup,f)
+                shutil.move(f_work,f_dest)
+            else:
+              f_work = os.path.join(self.jobs_dir,f)  
+              f_dest = os.path.join(self.backup,f)
+              shutil.move(f_work,f_dest)
         except:  
           pass  
       if wfn_code.lower().endswith(".fchk"):
@@ -353,7 +380,9 @@ No MPI implementation found in PATH!
         if success == False:
           raise NameError("Tonto Failed!")
         olx.html.Update()
-        combine_sfs(force=True)
+        shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+        #combine_sfs(force=True)
       else:
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
         
@@ -572,7 +601,7 @@ class wfn_Job(object):
     basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
     basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name"))
     basis = open(basis_set_fn,"r")
-    chk_destination = "%chk=" + self.name + ".chk"
+    chk_destination = "%chk=./" + self.name + ".chk"
     if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
       cpu = "%nproc=" + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     else:
@@ -587,6 +616,13 @@ class wfn_Job(object):
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
+    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    run = None
+    if Full_HAR == True:
+      run = OV.GetVar('Run_number')
+      if run > 1:
+        control += " Guess=Read"
+    com.write(chk_destination + '\n')
     com.write(cpu + '\n')
     com.write(mem + '\n')
     com.write(control + '\n')
@@ -652,7 +688,7 @@ class wfn_Job(object):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
-      olx.File(coordinates_fn,p=8)
+      olx.File(coordinates_fn,p=10)
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
@@ -668,9 +704,9 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!MiniPrint NoPop rhf 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop rhf 3-21G AIM "
     else:
-      control = "!MiniPrint NoPop B3LYP 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop B3LYP 3-21G AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
@@ -725,6 +761,12 @@ class wfn_Job(object):
       inp.write("end\n")
     basis.close()
     inp.write("end\n")
+    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    run = None
+    if Full_HAR == True:
+      run = OV.GetVar('Run_number')
+      if run > 1:
+        inp.write("%scf\n   MOInp \""+self.name+".gbw\"\n   GuessMode FMatrix\nend\n")
     inp.close()
 
   def run(self):
@@ -835,41 +877,42 @@ class wfn_Job(object):
         move_args.append(self.name+".hkl")
         move_args.append("-cif")
         move_args.append(self.name+".cif")
-        import olx
-        from cctbx import crystal
-        cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
-        #print cs.space_group().n_smx()
-        symops = []
-        with open("symmetry.file",'w') as symm_file:
-          for rt in cs.space_group().smx(False):
-            #print rt
-            A=[[[] for i in range(3)] for i in range(3)]
-            xyz = ["x","y","z"]
-            input = str(rt).split(",")
-            def get_multiplier(input,target):
-              if input == None:
-                raise NameError("nonesense symmetry input!")
-              if target == None:
-                raise NameError("nonesense target input!")
-              index = input.find(target)
-              if index == -1:
-                return 0
-              else:
-                if input[index-1]=="-":
-                  return -1
-                else:
-                  return 1
-            for i in range(3):
-              for j in range(3):
-                A[j][i] = get_multiplier(input[i],xyz[j])
-                symm_file.write(str(A[j][i]))
-                symm_file.write(" ")
-            symops.append(A)
-            if len(symops) != cs.space_group().n_smx():
-              symm_file.write("\n")
+        # Can read sym matrizes form CIF now
+        #import olx
+        #from cctbx import crystal
+        #cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+        ##print cs.space_group().n_smx()
+        #symops = []
+        #with open("symmetry.file",'w') as symm_file:
+        #  for rt in cs.space_group().smx(False):
+        #    #print rt
+        #    A=[[[] for i in range(3)] for i in range(3)]
+        #    xyz = ["x","y","z"]
+        #    input = str(rt).split(",")
+        #    def get_multiplier(input,target):
+        #      if input == None:
+        #        raise NameError("nonesense symmetry input!")
+        #      if target == None:
+        #        raise NameError("nonesense target input!")
+        #      index = input.find(target)
+        #      if index == -1:
+        #        return 0
+        #      else:
+        #        if input[index-1]=="-":
+        #          return -1
+        #        else:
+        #          return 1
+        #    for i in range(3):
+        #      for j in range(3):
+        #        A[j][i] = get_multiplier(input[i],xyz[j])
+        #        symm_file.write(str(A[j][i]))
+        #        symm_file.write(" ")
+        #    symops.append(A)
+        #    if len(symops) != cs.space_group().n_smx():
+        #      symm_file.write("\n")
         #print symops
-        move_args.append("-symm")
-        move_args.append("symmetry.file")
+        #move_args.append("-symm")
+        #move_args.append("symmetry.file")
           
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
@@ -927,7 +970,7 @@ class Job(object):
     if wfn_dir == '':
       model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
       olx.Kill("$Q")
-      olx.File(model_file_name)
+      olx.File(model_file_name,p=10)
     else:
       self.full_dir = wfn_dir
 
@@ -949,6 +992,8 @@ class Job(object):
     fchk_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
+      
+      run = OV.GetVar('Run_number')
 
       args = [self.name+".cif",
               "-basis-dir", self.parent.basis_dir,
@@ -967,6 +1012,10 @@ class Job(object):
       if rel == True:
         args.append("-dkh")
         args.append("t")
+      if(run > 1):
+        args.append("-restart-scf")
+        args.append("t")
+        
 
     else:
       # We want these from supplied fchk file """
@@ -1210,36 +1259,37 @@ def combine_sfs(force=False,part=-100):
         'title': OV.FileName(),
         'symmops': ";".join(sym_l),
         'scatterers': " ".join(scatterers_l),
+        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
+        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
+        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
+        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
+        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
+        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
+        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
+        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
         }
   ol.append('TITLE: %(title)s'%_d)
   ol.append('SYMM: %(symmops)s'%_d)
   ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
-  software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-  charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-  mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %s'%software)
-  ol.append('   METHOD:         %s'%method)
-  ol.append('   BASIS SET:      %s'%basis_set)
-  ol.append('   CHARGE:         %s'%charge)
-  ol.append('   MULTIPLICITY:   %s'%mult)
+  ol.append('   SOFTWARE:       %(software)s'%_d)
+  ol.append('   METHOD:         %(method)s'%_d)
+  ol.append('   BASIS SET:      %(basis_set)s'%_d)
+  ol.append('   CHARGE:         %(charge)s'%_d)
+  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
   if relativistic == True:
     ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   if part != -100:
     ol.append('   PART:           %d'%part)
   if tsc_source == "Tonto":
-    radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-    ol.append('   CLUSTER RADIUS: %s'%radius)
-    DIIS = OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
-    ol.append('   DIIS CONV.:     %s'%DIIS)
+    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
 
   ol.append("data:")
 
@@ -1391,35 +1441,36 @@ def combine_tscs(nr_parts):
         'title': OV.FileName(),
         'symmops': ";".join(sym_l),
         'scatterers': " ".join(scatterers_l),
+        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
+        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
+        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
+        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
+        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
+        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
+        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
+        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
         }
   ol.append('TITLE: %(title)s'%_d)
   ol.append('SYMM: %(symmops)s'%_d)
   ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
-  software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-  charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-  mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
   relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %s'%software)
-  ol.append('   METHOD:         %s'%method)
-  ol.append('   BASIS SET:      %s'%basis_set)
-  ol.append('   CHARGE:         %s'%charge)
-  ol.append('   MULTIPLICITY:   %s'%mult)
+  ol.append('   SOFTWARE:       %(software)s'%_d)
+  ol.append('   METHOD:         %(method)s'%_d)
+  ol.append('   BASIS SET:      %(basis_set)s'%_d)
+  ol.append('   CHARGE:         %(charge)s'%_d)
+  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
   if relativistic == True:
     ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   ol.append('   PARTS:          %d'%int(nr_parts))
   if tsc_source == "Tonto":
-    radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-    ol.append('   CLUSTER RADIUS: %s'%radius)
-    DIIS = OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
-    ol.append('   DIIS CONV.:     %s'%DIIS)
+    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
 
   ol.append("data:")
 
@@ -1510,6 +1561,46 @@ def change_basisset(input):
   else:
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',False)
 OV.registerFunction(change_basisset,True,'NoSpherA2')
+
+def write_symmetry_file(debug=False):
+  import olx
+  from cctbx import crystal
+  cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+  if(debug == True):
+    print cs.space_group().n_smx()
+  symops = []
+  with open("symmetry.file",'w') as symm_file:
+    for rt in cs.space_group().smx(False):
+      if(debug == True):
+        print rt
+      A=[[[] for i in range(3)] for i in range(3)]
+      xyz = ["x","y","z"]
+      input = str(rt).split(",")
+      def get_multiplier(input,target):
+        if input == None:
+          raise NameError("nonesense symmetry input!")
+        if target == None:
+          raise NameError("nonesense target input!")
+        index = input.find(target)
+        if index == -1:
+          return 0
+        else:
+          if input[index-1]=="-":
+            return -1
+          else:
+            return 1
+      for i in range(3):
+        for j in range(3):
+          A[j][i] = get_multiplier(input[i],xyz[j])
+          symm_file.write(str(A[j][i]))
+          symm_file.write(" ")
+      symops.append(A)
+      if len(symops) != cs.space_group().n_smx():
+        symm_file.write("\n")
+  if (debug == True):
+    print symops
+OV.registerFunction(write_symmetry_file,True,'NoSpherA2')
+    
 
 def set_default_cpu_and_mem():
   import math
