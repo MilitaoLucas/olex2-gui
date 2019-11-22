@@ -7,6 +7,13 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 from ImageTools import IT
 
+table_col = OV.GetVar('HtmlTableFirstcolColour')
+green_text = OV.GetParam('gui.green_text')
+green = OV.GetParam('gui.green')
+red = OV.GetParam('gui.red')
+orange = OV.GetParam('gui.orange')
+white = "#ffffff"
+black = "#000000"
 
 import htmlTools
 
@@ -390,11 +397,19 @@ def zipToOlexVFS(zip_path, base=None):
     OlexVFS.write_to_olex(filename, fc)
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
+def get_default_notification(txt="", txt_col='green_text'):
+  txt_col = OV.GetVar("gui.%s" %txt_col, '#ff0000')
+  poly = ""
+  _ = olx.xf.latt.IsPolymeric()
+  if _ == 'true':
+    poly = " | Polymeric structure"
+  set_notification("<font color='%s'>%s</font>%s;%s;%s" %(txt_col, txt, poly, table_col,'#888888'))
+  
 def set_notification(string):
   if not OV.HasGUI():
     return
   if string is None:
-    string = ""
+    get_default_notification()
   OV.SetVar('GuiNotification', string)
   olx.Freeze(True)
   OV.htmlUpdate()
@@ -422,6 +437,7 @@ def get_notification():
   notification = gui.tools.TemplateProvider.get_template('gui_notification')%d
   return notification
 
+olex.registerFunction(get_default_notification, False, "gui")
 olex.registerFunction(set_notification, False, "gui")
 olex.registerFunction(get_notification, False, "gui")
 

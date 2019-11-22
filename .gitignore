@@ -27,3 +27,16 @@ cctbx/cctbx_build
 
 # WingIDE debug stub
 util/pyUtil/wingdbstub.py
+
+# Filetypes
+*.pyc
+*.pyd
+*.pyo
+*.bak
+*.zip
+*.7z
+*.exe
+*.bat
+*.manifest
+*.key
+*.dll

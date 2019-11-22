@@ -4,7 +4,7 @@
   
   $+
     html.Snippet(GetVar(default_link),
-    "value=Integr. Twin [cctbx]",
+    "value=spy.twin.run_from_gui",
     "name=TWINNING_CCTBX",
     "onclick=spy.twin.run_from_gui()",
     "td1=<td width='40%'>"
@@ -21,10 +21,10 @@
   $-
 
  
-  <td width='10%'>
-  Extended:
+  <td width='17%' align='right'>
+  <b>Extended </b>
   </td>
-  <td width='10%' align='left'>
+  <td width='3%' align='right'>
   $+
     html.Snippet("gui/snippets/input-checkbox",
     "name=TWIN_DO_LONG",
@@ -152,6 +152,24 @@
   </td>
 
 
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+    <td ALIGN='left' width='12%'>
+      <b>hkl file </b>
+    </td>
+
+    <td ALIGN='left' width='45%'>
+<!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
+    </td>
+
+    <td ALIGN='center' width='39%'>
+      <b>hkl </b>:
+<!-- #include reflection-date reflection-date.htm;1; -->
+    </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
