@@ -9,8 +9,6 @@ import math
 from cStringIO import StringIO
 import ntpath
 
-
-
 import cProfile
 import pstats
 
@@ -98,6 +96,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def run(self, personal=False):
     from PilTools import MatrixMaker
     global twin_laws_d
+    from ImageTools import *
+    IT = ImageTools()
 
     OlexCctbxAdapter.__init__(self)
     if OV.GetParam('snum.refinement.use_solvent_mask'):
@@ -160,6 +160,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     ordered_twins=self.purge_duplicates(ordered_twins)
     top_twins=ordered_twins[:10]
     lawcount=0
+    bg_col = OV.GetParam('gui.html.table_bg_colour')
     for i, twin_law in enumerate(top_twins):
       basf=twin_law.rbasf[0]
       r=twin_law.rbasf[1]
@@ -180,27 +181,30 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         r = 0.99
       r_list.append((r, lawcount, basf))
       name = "law%i" %lawcount
-      font_color = "#444444"
+      font_col = "#444444"
+      font_col_basf = "#447744"
       if basf == "n/a":
-        font_color_basf = "blue"
+        font_col_basf = OV.GetParam('gui.blue').rgb
       elif float(basf) < 0.1:
-        font_color_basf = "red"
+        font_col_basf = OV.GetParam('gui.red').rgb
         basf = "%.2f" %float(basf)
       else:
-        font_color_basf = "green"
+        font_col_basf = OV.GetParam('gui.green_text').rgb
         basf = "%.2f" %float(basf)
+        
 
       txt = [{'txt':"R=%.2f%%, -%.2f%%" %((float(r)*100),(float(r_diff)*100)),
-              'font_colour':font_color},
+              'font_colour':font_col},
              {'txt':"basf=%s" %str(basf),
-              'font_colour':font_color_basf}]
-      states = ['on', 'off']
+              'font_colour':font_col_basf}]
+      states = ['on', 'off', 'hover', 'down']
       matrix = twin_law.hkl_rotation.flatten()
       rounded_matrix = self.round_matrix_elements(matrix)
+      
+      bg_col_img = IT.RGBToHTMLColor(IT.adjust_colour(bg_col.rgb,luminosity=0.95))
+      
       for state in states:
-        image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state)
-
-      #law_txt += "<zimg src=%s>" %image_name
+        image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
 
       self.twin_laws_d[lawcount] = {'number':lawcount,
                                     'law':twin_law.hkl_rotation,
@@ -218,7 +222,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     law_txt = ""
     self.twin_law_gui_txt = ""
     i = 0
-    html = "<tr><td></td><td>"
+    html = "<tr bgcolor='%s'><td></td><td>" %bg_col
     fn_base = get_twinning_result_filename().rstrip(".html")
     for r, run, basf in r_list:
       i += 1
@@ -230,12 +234,43 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       #href = 'spy.on_twin_image_click(%s)'
       href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
       law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
+      
+      d = {'name':image_name,
+           'nameupper':image_name.upper(),
+           'tool_img':image_name,
+           'down':'down',
+           'up':'up',
+           'on':'on',
+           'hover':'hover',
+           'cmds':href,
+           'target':"",
+           'feedback':"",
+           'bgcolor':"#ff9999",
+      }
+      
+      law_txt = '''
+      <font size='$GetVar(HtmlFontSizeControls)'>
+      <input
+      name="IMG_%(nameupper)s"
+      type="button"
+      image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
+      hint="%(target)s"
+      onclick="%(cmds)s%(feedback)s"
+      bgcolor="%(bgcolor)s"
+    >
+    </font>
+    '''%d
+      
+      
       self.twin_law_gui_txt += "%s" %(law_txt)
       control = "IMG_%s" %image_name.upper()
 
-      html += '''
-<a href='%s' target='Apply this twin law'><img name='%s' border="0" src="%s"></a>&nbsp;
-    ''' %(href, control, use_image)
+      #html += '''
+#<a href='%s' target='Apply this twin law'><img name='%s' border="0" src="%s"></a>&nbsp;
+    #''' %(href, control, use_image)
+      
+      html += law_txt
+      
     if not use_image:
       return
     html += "</td></tr>"

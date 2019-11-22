@@ -349,29 +349,34 @@ class MatrixMaker(ImageTools):
   def __init__(self):
     super(MatrixMaker, self).__init__()
     self.params = OV.GuiParams()
+    from PilTools import timage
+    self.TI = timage()
+    OV.registerFunction(self.make_3x3_matrix_image)
 
     #from PIL import PngImagePlugin
     #from PIL import Image
     #from PIL import ImageDraw, ImageChops
 
-  def make_3x3_matrix_image(self, name, matrix, text_def="", state=''):
+  def make_3x3_matrix_image(self, name, matrix, text_def="", state='', bar_col='#ababab', bgcolor='#dedede', height=64):
     if state == "on":
+      bgcolor = "#ababab"
+    if state == "hover":
       bgcolor = OV.GetParam('gui.html.highlight_colour').rgb
-    if state == "off":
-      bgcolor = '#dedede'
-    width = int(round(((IT.skin_width) / 4),0)) - 14
-    height = 62
-    size = (width, height)
+
+    scale = OV.GetParam('gui.internal_scale')
+    
+    width = int(round(((IT.skin_width) / 4),0)) - 10
+    size = (width*scale, height*scale)
     font_name = "Arial"
-    font_size = 11
+    font_size = 11 *scale
     font = IT.registerFontInstance(font_name, font_size)
-    font_small = IT.registerFontInstance(font_name, 10)
-    line_heigth = font_size + 2
+    font_small = IT.registerFontInstance(font_name, 10*scale)
+    line_heigth = font_size + 2*scale
     im = Image.new('RGBA', size, bgcolor)
     draw = ImageDraw.Draw(im)
     m = []
     i = 0
-    max_width = int(round(width/3))
+    max_width = int(round(width/3))*scale
 
     for item in matrix:
       use_font = font_small
@@ -406,8 +411,8 @@ class MatrixMaker(ImageTools):
         txt_size = draw.textsize(str(item), font=use_font)
       beg_adjust = 0
       if j == 0:
-        beg_adjust = 2
-      begin = (beg_adjust + ((j * max_width) + ((max_width - txt_size[0])/2)), k * line_heigth)
+        beg_adjust = 2*scale
+      begin = (beg_adjust + ((j * max_width) + ((max_width - txt_size[0])/2)), k * line_heigth + 1*scale)
       if item == -1:
         colour = (255, 0, 0)
       else:
@@ -415,8 +420,8 @@ class MatrixMaker(ImageTools):
       draw.text(begin, "%s" %item, font=use_font, fill=colour)
       i += 1
 
-    font_size = 10
-    line_heigth = font_size -1
+    font_size = 10*scale
+    line_heigth = font_size -1*scale
     font_name = "Arial"
     font = font_small
     w = 0
@@ -425,9 +430,24 @@ class MatrixMaker(ImageTools):
       item = text_def[i].get('txt',"")
       colour = text_def[i].get('font_colour',"")
       w = draw.textsize(str(item), font=font)[0]
-      draw.text(((width-w)/2, 40 + line_heigth * i), "%s" %item, font=font, fill=(colour))
+      draw.text(((width*scale-w)/2, 40*scale + line_heigth * i), "%s" %item, font=font, fill=(colour))
+    _ = 3*scale  
+    arrows = 'bar:left:%s'%_
+    arrow_scale = 1.0
+    hover_L = 0.8
+    on_L = 1.2
+    off_L = 1.2
+    base_colour = bar_col
+
+    im = self.TI.make_arrows(state, width, arrows, im, height, base_colour, off_L, on_L, hover_L, arrow_scale)
+
+    underground = self.params.html.bg_colour.rgb
+    im = self.TI.make_corners('1111', im, 3*scale, underground)
+    im = im.resize((width, height),Image.ANTIALIAS)
+    
     namestate = r"%s%s.png" %(name, state)
     name = r"%s" %(name)
+    
     OlexVFS.save_image_to_olex(im, namestate)
     if state == "off":
       OlexVFS.save_image_to_olex(im, "%s.png" %name)
