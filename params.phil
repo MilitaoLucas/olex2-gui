@@ -355,6 +355,16 @@ routines requiring structure refinement
     olex2{
       do_long = False
         .type = bool 
+      very_long = False
+        .type = bool 
+      always_basf = True
+        .type = bool 
+      new_methods = True
+        .type = bool 
+      height_axis_method = False
+        .type = bool 
+      number_laws = 4
+        .type = int
       max_index = 5
         .type = int 
       rotation_fraction = 12

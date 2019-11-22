@@ -67,7 +67,7 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd14 "spy.setAllMainToolbarTabButtons()">
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
-	  <cmd3  "spy.gui.set_notification(Structure <b>FileName() </b> loaded;GetVar('HtmlTableFirstcolColour');#888888)">
+	  <cmd3  "spy.gui.get_default_notification('Structure <b>$FileName() </b> loaded')">
       <cmd16 "html.Update">
       <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
   >
