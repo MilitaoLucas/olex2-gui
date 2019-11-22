@@ -2,8 +2,7 @@ $+
 run("SetVar(refinement_output, strcat(FileName(),_refinement_output.html))")
 $-
 
-$spy.gui.get_notification()
-
+<!-- $spy.gui.get_notification() -->
 
 <!-- #includeif fs.Exists(GetVar(refinement_output)) refinement_output GetVar(refinement_output);1; -->
 
@@ -249,7 +248,7 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
         "height=0",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td align='left' width="22%">",
-        "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>html.Update()")
+        "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>spy.NoSpherA2.set_default_cpu_and_mem()>>html.Update()")
       $-
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
