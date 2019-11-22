@@ -372,55 +372,15 @@ class MatrixMaker(ImageTools):
     m = []
     i = 0
     max_width = int(round(width/3))
+
     for item in matrix:
-      use_font = font
-      if i == 9: break
-      try:
-        item = round(item,3)
-      except:
-        m.append(item)
-        continue
-      sign = ""
-      if abs(item) != item:
-        sign = "-"
-      if str(item) == "0.0":
-        item = "0"
-      elif str(item) == "1.0":
-        item = "1"
-      elif str(item) == "-1.0":
-        item = "-1"
-      elif 0.97 < abs(item) < 1.03:
-        item = sign+"1"
-      elif 0 < abs(item) < 0.03:
-        item = "0"
-      elif 0.23 < abs(item) < 0.27:
-        item = sign+"1/4"
-      elif 0.73 < abs(item) < 0.77:
-        item = sign+"3/4"
-      elif 0.47 < abs(item) < 0.53:
-        item = sign+"1/2"
-      elif 0.31 < abs(item) < 0.35:
-        item = sign+"1/3"
-      elif 0.64 < abs(item) < 0.69:
-        item = sign+"2/3"
-      elif 0.11 < abs(item) < 0.14:
-        item = sign+"1/8"
-      elif 0.36 < abs(item) < 0.39:
-        item = sign+"3/8"
-      elif 0.61 < abs(item) < 0.64:
-        item = sign+"5/8"
-      elif 0.86 < abs(item) < 0.89:
-        item = sign+"7/8"
-      elif 0.95 < abs(item) < 1.05:
-        item = sign+"1"
-        
+      use_font = font_small
       txt_size = draw.textsize(str(item), font=use_font)
       w = txt_size[0]
       if w > max_width:
         max_width = w
       m.append(item)
       i += 1
-    i = 0
 
     i = 0
     j = 0

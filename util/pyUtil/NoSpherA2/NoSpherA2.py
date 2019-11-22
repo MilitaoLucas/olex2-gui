@@ -167,8 +167,6 @@ No MPI implementation found in PATH!
     if not os.path.exists(self.history_dir):
       os.mkdir(self.history_dir)
     
-      
-   # time.sleep(0.1)  
 
     calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
     if not calculate:
@@ -312,6 +310,10 @@ No MPI implementation found in PATH!
       # Check if job folder already exists and (if needed) make the backup folders  
       self.backup = os.path.join(self.jobs_dir, "backup")
       if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".cif")):    
+        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        run = None
+        if Full_HAR == True:
+          run = OV.GetVar('Run_number')
         i = 1  
         while (os.path.exists(self.backup + "_%d"%i)):  
           i = i + 1  
@@ -321,9 +323,32 @@ No MPI implementation found in PATH!
           files = (file for file in os.listdir(self.jobs_dir)  
                   if os.path.isfile(os.path.join(self.jobs_dir, file)))  
           for f in files:  
-            f_work = os.path.join(self.jobs_dir,f)  
-            f_dest = os.path.join(self.backup,f)
-            shutil.move(f_work,f_dest)  
+            if Full_HAR == True:
+              if run > 1:
+                software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+                if software == "Tonto":
+                  if "restricted" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                elif software == "ORCA":
+                  if ".gbw" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                elif "Gaussian" in software:
+                  if ".chk" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+              else:
+                f_work = os.path.join(self.jobs_dir,f)  
+                f_dest = os.path.join(self.backup,f)
+                shutil.move(f_work,f_dest)
+            else:
+              f_work = os.path.join(self.jobs_dir,f)  
+              f_dest = os.path.join(self.backup,f)
+              shutil.move(f_work,f_dest)
         except:  
           pass  
       if wfn_code.lower().endswith(".fchk"):
@@ -337,16 +362,31 @@ No MPI implementation found in PATH!
         except NameError as error:
           print "Aborted due to: ",error
           raise NameError("Wavefunction failed!")
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      if (experimental_SF == False) or wfn_code == "Tonto":
+        success = True
+        try:
+          job.launch()
+        except NameError as error:
+          print "Aborted due to: ", error
+          success = False
+        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+          success = False
+          with open(os.path.join(job.full_dir, job.name+".err")) as file:
+            for i in file.readlines():
+              if 'Error in' in i:
+                print(i)
+          raise NameError('Error during structure factor calculation!')
+        if success == False:
+          raise NameError("Tonto Failed!")
+        olx.html.Update()
+        shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+        #combine_sfs(force=True)
+      else:
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
+        
       
-      try:
-        job.launch()
-      except NameError as error:
-        print "Aborted due to: ", error
-        raise NameError("Tonto Failed!")
-      if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-        raise NameError('Error during structure factor calculation!')
-      olx.html.Update()
-      combine_sfs(force=True)
       
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
@@ -561,7 +601,7 @@ class wfn_Job(object):
     basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
     basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name"))
     basis = open(basis_set_fn,"r")
-    chk_destination = "%chk=" + self.name + ".chk"
+    chk_destination = "%chk=./" + self.name + ".chk"
     if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
       cpu = "%nproc=" + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     else:
@@ -576,6 +616,13 @@ class wfn_Job(object):
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
+    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    run = None
+    if Full_HAR == True:
+      run = OV.GetVar('Run_number')
+      if run > 1:
+        control += " Guess=Read"
+    com.write(chk_destination + '\n')
     com.write(cpu + '\n')
     com.write(mem + '\n')
     com.write(control + '\n')
@@ -641,24 +688,25 @@ class wfn_Job(object):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
-      olx.File(coordinates_fn,p=8)
+      olx.File(coordinates_fn,p=10)
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
+    ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
     if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
-      cpu = "nprocs " + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+      cpu = "nprocs " + ncpus
     else:
       cpu = "nprocs 1"
     mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
-    mem_value = int(mem) * 1024 / int(OV.GetParam('snum.refinement.cctbx.nsff.ncpus')) 
+    mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "!rhf 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop rhf 3-21G AIM "
     else:
-      control = "!B3LYP 3-21G Grid4 AIM "
+      control = "!MiniPrint NoPop B3LYP 3-21G AIM "
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
@@ -713,6 +761,12 @@ class wfn_Job(object):
       inp.write("end\n")
     basis.close()
     inp.write("end\n")
+    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    run = None
+    if Full_HAR == True:
+      run = OV.GetVar('Run_number')
+      if run > 1:
+        inp.write("%scf\n   MOInp \""+self.name+".gbw\"\n   GuessMode FMatrix\nend\n")
     inp.close()
 
   def run(self):
@@ -799,34 +853,80 @@ class wfn_Job(object):
       move_args = []
       basis_dir = self.parent.basis_dir
       mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(self.name+".wfn")
       move_args.append("-mult")
       move_args.append(mult)
-      move_args.append("-b")
-      move_args.append(basis_name)
-      move_args.append("-d")
-      if sys.platform[:3] == 'win':
-        move_args.append(basis_dir.replace("/","\\"))
-      else:
-        move_args.append(basis_dir+'/')
-      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      if experimental_SF == False:
+        move_args.append("-b")
+        move_args.append(basis_name)
+        move_args.append("-d")
+        if sys.platform[:3] == 'win':
+          move_args.append(basis_dir.replace("/","\\"))
+        else:
+          move_args.append(basis_dir+'/')
+        move_args.append("-method")
+        method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
+        move_args.append(method)
+      
       # this is for testing writeout of SFs by my program, for comparison with tonto
-      if experimental_SF == True:
+      else:
         move_args.append("-hkl")
         move_args.append(self.name+".hkl")
         move_args.append("-cif")
         move_args.append(self.name+".cif")
-      logname = "wfn_2_fchk.log"
+        # Can read sym matrizes form CIF now
+        #import olx
+        #from cctbx import crystal
+        #cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+        ##print cs.space_group().n_smx()
+        #symops = []
+        #with open("symmetry.file",'w') as symm_file:
+        #  for rt in cs.space_group().smx(False):
+        #    #print rt
+        #    A=[[[] for i in range(3)] for i in range(3)]
+        #    xyz = ["x","y","z"]
+        #    input = str(rt).split(",")
+        #    def get_multiplier(input,target):
+        #      if input == None:
+        #        raise NameError("nonesense symmetry input!")
+        #      if target == None:
+        #        raise NameError("nonesense target input!")
+        #      index = input.find(target)
+        #      if index == -1:
+        #        return 0
+        #      else:
+        #        if input[index-1]=="-":
+        #          return -1
+        #        else:
+        #          return 1
+        #    for i in range(3):
+        #      for j in range(3):
+        #        A[j][i] = get_multiplier(input[i],xyz[j])
+        #        symm_file.write(str(A[j][i]))
+        #        symm_file.write(" ")
+        #    symops.append(A)
+        #    if len(symops) != cs.space_group().n_smx():
+        #      symm_file.write("\n")
+        #print symops
+        #move_args.append("-symm")
+        #move_args.append("symmetry.file")
+          
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
-      if os.path.exists(self.name+".fchk"):
-        shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        shutil.move(logname,os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
-      else:
-        raise NameError("No fchk generated!")
+      with open("wfn_2_fchk.log", "r") as log:
+        x = log.read()
+        if x:
+          print x
+      if experimental_SF == False:
+        if os.path.exists(self.name+".fchk"):
+          shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
+        else:
+          raise NameError("No fchk generated!")
+      shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
 
 
 class Job(object):
@@ -870,7 +970,7 @@ class Job(object):
     if wfn_dir == '':
       model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
       olx.Kill("$Q")
-      olx.File(model_file_name)
+      olx.File(model_file_name,p=10)
     else:
       self.full_dir = wfn_dir
 
@@ -892,6 +992,8 @@ class Job(object):
     fchk_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
+      
+      run = OV.GetVar('Run_number')
 
       args = [self.name+".cif",
               "-basis-dir", self.parent.basis_dir,
@@ -910,6 +1012,10 @@ class Job(object):
       if rel == True:
         args.append("-dkh")
         args.append("t")
+      if(run > 1):
+        args.append("-restart-scf")
+        args.append("t")
+        
 
     else:
       # We want these from supplied fchk file """
@@ -996,6 +1102,7 @@ class Job(object):
       move_args = []
       basis_dir = self.parent.basis_dir
       basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
+      method = OV.GetParam("snum.refinement.cctbx.nsff.tsc.method")
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(os.path.join(self.full_dir,self.name+".wfn"))
@@ -1006,6 +1113,8 @@ class Job(object):
         move_args.append(basis_dir.replace("/","\\"))
       else:
         move_args.append(basis_dir+'/')
+      move_args.append("-method")
+      move_args.append(method)
       logname = "wfn_2_fchk.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
@@ -1150,33 +1259,37 @@ def combine_sfs(force=False,part=-100):
         'title': OV.FileName(),
         'symmops': ";".join(sym_l),
         'scatterers': " ".join(scatterers_l),
+        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
+        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
+        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
+        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
+        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
+        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
+        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
+        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
         }
   ol.append('TITLE: %(title)s'%_d)
   ol.append('SYMM: %(symmops)s'%_d)
   ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
-  software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-  charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-  mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %s'%software)
-  ol.append('   METHOD:         %s'%method)
-  ol.append('   BASIS SET:      %s'%basis_set)
-  ol.append('   CHARGE:         %s'%charge)
-  ol.append('   MULTIPLICITY:   %s'%mult)
+  ol.append('   SOFTWARE:       %(software)s'%_d)
+  ol.append('   METHOD:         %(method)s'%_d)
+  ol.append('   BASIS SET:      %(basis_set)s'%_d)
+  ol.append('   CHARGE:         %(charge)s'%_d)
+  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
+  if relativistic == True:
+    ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   if part != -100:
     ol.append('   PART:           %d'%part)
   if tsc_source == "Tonto":
-    radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-    ol.append('   CLUSTER RADIUS: %s'%radius)
-    DIIS = OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
-    ol.append('   DIIS CONV.:     %s'%DIIS)
+    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
 
   ol.append("data:")
 
@@ -1328,32 +1441,36 @@ def combine_tscs(nr_parts):
         'title': OV.FileName(),
         'symmops': ";".join(sym_l),
         'scatterers': " ".join(scatterers_l),
+        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
+        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
+        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
+        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
+        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
+        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
+        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
+        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
         }
   ol.append('TITLE: %(title)s'%_d)
   ol.append('SYMM: %(symmops)s'%_d)
   ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
   ol.append('SCATTERERS: %(scatterers)s'%_d)
   ol.append('QM Info:')
-  software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-  basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-  charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-  mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
   f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %s'%software)
-  ol.append('   METHOD:         %s'%method)
-  ol.append('   BASIS SET:      %s'%basis_set)
-  ol.append('   CHARGE:         %s'%charge)
-  ol.append('   MULTIPLICITY:   %s'%mult)
+  ol.append('   SOFTWARE:       %(software)s'%_d)
+  ol.append('   METHOD:         %(method)s'%_d)
+  ol.append('   BASIS SET:      %(basis_set)s'%_d)
+  ol.append('   CHARGE:         %(charge)s'%_d)
+  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
+  if relativistic == True:
+    ol.append('   RELATIVISTIC:   DKH2')
   ol.append('   DATE:           %s'%f_date)
   ol.append('   PARTS:          %d'%int(nr_parts))
   if tsc_source == "Tonto":
-    radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-    ol.append('   CLUSTER RADIUS: %s'%radius)
-    DIIS = OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
-    ol.append('   DIIS CONV.:     %s'%DIIS)
+    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
 
   ol.append("data:")
 
@@ -1436,6 +1553,98 @@ def is_disordered():
   else:
     return True
 OV.registerFunction(is_disordered,True,'NoSpherA2')
+
+def change_basisset(input):
+  OV.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name',input)
+  if "x2c" in input:
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',True)
+  else:
+    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',False)
+OV.registerFunction(change_basisset,True,'NoSpherA2')
+
+def write_symmetry_file(debug=False):
+  import olx
+  from cctbx import crystal
+  cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
+  if(debug == True):
+    print cs.space_group().n_smx()
+  symops = []
+  with open("symmetry.file",'w') as symm_file:
+    for rt in cs.space_group().smx(False):
+      if(debug == True):
+        print rt
+      A=[[[] for i in range(3)] for i in range(3)]
+      xyz = ["x","y","z"]
+      input = str(rt).split(",")
+      def get_multiplier(input,target):
+        if input == None:
+          raise NameError("nonesense symmetry input!")
+        if target == None:
+          raise NameError("nonesense target input!")
+        index = input.find(target)
+        if index == -1:
+          return 0
+        else:
+          if input[index-1]=="-":
+            return -1
+          else:
+            return 1
+      for i in range(3):
+        for j in range(3):
+          A[j][i] = get_multiplier(input[i],xyz[j])
+          symm_file.write(str(A[j][i]))
+          symm_file.write(" ")
+      symops.append(A)
+      if len(symops) != cs.space_group().n_smx():
+        symm_file.write("\n")
+  if (debug == True):
+    print symops
+OV.registerFunction(write_symmetry_file,True,'NoSpherA2')
+    
+
+def set_default_cpu_and_mem():
+  import math
+  import multiprocessing
+  max_cpu = multiprocessing.cpu_count()
+  current_cpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+  if (max_cpu == 1): 
+    return
+  elif (current_cpus != "1"):
+    return
+  mem_gib = None
+  if sys.platform[:3] == 'win':
+    import ctypes
+
+    class MEMORYSTATUSEX(ctypes.Structure):
+      _fields_ = [
+        ("dwLength", ctypes.c_ulong),
+        ("dwMemoryLoad", ctypes.c_ulong),
+        ("ullTotalPhys", ctypes.c_ulonglong),
+        ("ullAvailPhys", ctypes.c_ulonglong),
+        ("ullTotalPageFile", ctypes.c_ulonglong),
+        ("ullAvailPageFile", ctypes.c_ulonglong),
+        ("ullTotalVirtual", ctypes.c_ulonglong),
+        ("ullAvailVirtual", ctypes.c_ulonglong),
+        ("sullAvailExtendedVirtual", ctypes.c_ulonglong),
+      ]
+
+      def __init__(self):
+        # have to initialize this to the size of MEMORYSTATUSEX
+        self.dwLength = ctypes.sizeof(self)
+        super(MEMORYSTATUSEX, self).__init__()
+
+    stat = MEMORYSTATUSEX()
+    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
+    mem_gib = math.floor(stat.ullAvailPhys / (1024**3))
+  else:
+    import os
+    mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')  # e.g. 4015976448
+    mem_gib = mem_bytes/(1024.**3)  # e.g. 3.74
+  tf_mem = math.floor(mem_gib/4*30)/10
+  tf_cpu = math.floor(max_cpu/4*3)
+  OV.SetParam('snum.refinement.cctbx.nsff.ncpus',str(int(tf_cpu)))
+  OV.SetParam('snum.refinement.cctbx.nsff.mem',str(tf_mem))
+OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

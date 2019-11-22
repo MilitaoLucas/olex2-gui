@@ -5,6 +5,8 @@ import olex_core
 import os
 import olexex
 import OlexVFS
+import gui
+
 
 from ArgumentParser import ArgumentParser
 from History import hist
@@ -16,6 +18,12 @@ OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
 
+green = OV.GetParam('gui.green')
+red = OV.GetParam('gui.red')
+orange = OV.GetParam('gui.orange')
+white = "#ffffff"
+black = "#000000"
+table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
@@ -106,8 +114,9 @@ class RunPrg(ArgumentParser):
     import gui
 
     gui.set_notification(OV.GetVar('gui_notification'))
-    OV.SetVar('gui_notification', "")
+    OV.SetVar('gui_notification', "Refining...;%s;%s" %(green,white))
     if RunPrg.running:
+      OV.SetVar('gui_notification', "Already running. Please wait...")
       print("Already running. Please wait...")
       return
     RunPrg.running = self
@@ -462,7 +471,23 @@ class RunRefinementPrg(RunPrg):
     self.program, self.method = self.getProgramMethod('refine')
     if self.program is None or self.method is None:
       return
+
+    self.refinement_observer_timer = 0
+    self.refinement_has_failed = None
+
+    OV.registerCallback("procout", self.refinement_observer)
     self.run()
+    OV.unregisterCallback("procout", self.refinement_observer)
+    if OV.HasGUI():
+      if self.refinement_has_failed:
+        bg = red
+        fg = white
+        if "warning" in self.refinement_has_failed.lower():
+          bg = orange
+        gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
+      else:
+        gui.set_notification("Refinement Finished;%s;%s" %(table,'#888888'))
+#        if OV.GetVar('GuiNotification') == "Refining...;%s;%s" %(green,white):
 
   def run(self):
     if RunRefinementPrg.running:
@@ -605,6 +630,26 @@ class RunRefinementPrg(RunPrg):
     if timer:
       print "-- MergeCif: %.3f" %(time.time()-t)
 
+  
+  def refinement_observer(self, msg):
+    if self.refinement_observer_timer == 0:
+      self.refinement_observer_timer = time.time()
+    #if time.time() - self.refinement_observer_timer  < 2:
+      #return
+    if "BAD AFIX CONNECTIVITY" in msg or "ATOM FOR AFIX" in msg:
+      self.refinement_has_failed = "Hydrogens"
+    elif "REFINEMNET UNSTABLE" in msg:
+      self.refinement_has_failed = "Unstable"
+    elif "???????" in msg:
+      self.refinement_has_failed = "ShelXL Crashed!"
+    elif "** " in msg:
+      import re
+      regex = re.compile(r"\*\*(.*?)\*\*")
+      m = regex.findall(msg)
+      if m:
+        self.refinement_has_failed = m[0].strip()
+  
+  
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
@@ -772,6 +817,8 @@ class RunRefinementPrg(RunPrg):
       return f_mask
 
   def deal_with_AAFF(self):
+    from cctbx import adptbx
+    
     Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
     old_model = OlexRefinementModel()
     if Full_HAR == True:
@@ -806,16 +853,27 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("{:>44.4}".format(" "))
     r1_old  = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
-    HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
-    HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+    if r1_old != "n/a":
+      HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
+    else:
+      HAR_log.write("{:>6}".format("N/A"))
+    if wr2_old != "n/a":
+      HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+    else:
+      HAR_log.write("{:>7}".format("N/A"))
     HAR_log.write("\n")
     HAR_log.flush()
 
     max_cycles = int(OV.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles'))
+    calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 
     while converged == False:
       run += 1
       HAR_log.write("{:3d}".format(run))
+      
+      old_model = OlexRefinementModel()
+      OV.SetVar('Run_number',run)
+      
       #Calculate Wavefunction
       try:
         olex.m('spy.NoSpherA2.launch()')
@@ -863,7 +921,6 @@ class RunRefinementPrg(RunPrg):
         self.setupFiles()
       except Exception, err:
         sys.stderr.formatExceptionInfo()
-
         print err
         self.endRun()
         return False
@@ -879,18 +936,23 @@ class RunRefinementPrg(RunPrg):
       max_dxyz = 0
       max_duij = 0
       max_shift_atom_xyz = 0
+      matrix_run_max_shift_xyz = 0
       max_shift_atom_uij = 0
+      matrix_run_max_shift_uij = 0
 
       try:
         jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
         from scitbx.array_family import flex
         cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
-        esds = jac_tr.transpose() * flex.sqrt(flex.double(cov_matrix))
+        esds = jac_tr.transpose() * flex.double(cov_matrix)
+        jac_tr = None
         annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
       except:
         print ("Could not obtain cctbx object and calculate ESDs!\n")
         return False
       matrix_run = 0
+      label_uij = None
+      label_xyz = None
       for i, atom in enumerate(new_model._atoms):
         xyz = atom['crd'][0]
         xyz2 = old_model._atoms[i]['crd'][0]
@@ -900,18 +962,26 @@ class RunRefinementPrg(RunPrg):
             if abs(xyz[x] - xyz2[x])/esds[matrix_run] > max_dxyz:
               max_dxyz = abs(xyz[x] - xyz2[x])/esds[matrix_run]
               label_xyz = annotations[matrix_run]
+              max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
+              matrix_run_max_shift_xyz = matrix_run
           matrix_run += 1
         has_adp_new = new_model._atoms[i].get('adp')
         has_adp_old = old_model._atoms[i].get('adp')
         if has_adp_new != None and has_adp_old != None:
           adp = atom['adp'][0]
           adp2 = old_model._atoms[i]['adp'][0]
+          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
+          adp2 = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp2)
+          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
+          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
           for u in range(6):
             # if parameter is fixed and therefore has 0 esd
             if esds[matrix_run] > 0:
-              if abs(adp[u] - adp2[u])/esds[matrix_run] > max_duij:
-                max_duij = abs(adp[u] - adp2[u])/esds[matrix_run]
+              if abs(adp[u] - adp2[u])/adp_esds[u] > max_duij:
+                max_duij = abs(adp[u] - adp2[u])/adp_esds[u]
                 label_uij = annotations[matrix_run]
+                max_shift_atom_uij = abs(adp[u] - adp2[u])
+                matrix_run_max_shift_uij = matrix_run
             matrix_run += 1
         elif has_adp_new != None:
           matrix_run += 6
@@ -919,24 +989,31 @@ class RunRefinementPrg(RunPrg):
           matrix_run += 1
 
       HAR_log.write("{:>16.4f}".format(max_dxyz))
-      HAR_log.write("{:>8}".format(label_xyz))
+      if label_xyz != None:
+        HAR_log.write("{:>8}".format(label_xyz))
+      else:
+        HAR_log.write("{:>8}".format("N/A"))
 
       HAR_log.write("{:>10.4f}".format(max_duij))
-      HAR_log.write("{:>10}".format(label_uij))
+      if label_uij != None:
+        HAR_log.write("{:>10}".format(label_uij))
+      else:
+        HAR_log.write("{:>10}".format("N/A"))
 
       r1  = OV.GetParam('snum.refinement.last_R1')
       wr2 = OV.GetParam('snum.refinement.last_wR2')
 
       HAR_log.write("{:>6.2f}".format(float(r1)*100))
       HAR_log.write("{:>7.2f}".format(float(wr2)*100))
-
+      
       HAR_log.write("\n")
       HAR_log.flush()
-
-      if Full_HAR == False: 
+      
+      
+      if calculate == False:
         converged = True
         break
-      elif calculate_aspherical == False:
+      elif Full_HAR == False: 
         converged = True
         break
       elif (max_duij <= 0.01) and (max_dxyz <= 0.01):
@@ -944,11 +1021,11 @@ class RunRefinementPrg(RunPrg):
         break
       elif run == max_cycles:
         break
-      elif (float(r1) > float(r1_old) + 0.1) and (run > 1):
-        HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
-        break
+      elif r1_old != "n/a":
+        if (float(r1) > float(r1_old) + 0.1) and (run > 1):
+          HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
+          break
       else:
-        old_model = new_model
         r1_old = r1
         wr2_old = wr2
 
@@ -960,11 +1037,61 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
+    
+    precise = OV.GetParam('snum.refinement.cctbx.nsff.tsc.precise_output')
+    if precise == True:
+      matrix_run = 0
+      label_uij = None
+      label_xyz = None
+      old_model = OlexRefinementModel()
+      HAR_log.write("\n\n\nPositions:\n")
+      for i, atom in enumerate(old_model._atoms):
+        xyz = atom['crd'][0]
+        HAR_log.write("{:5}".format(atom['label'][0]))
+        for x in range(3):
+          HAR_log.write("{:12.8f}".format(xyz[x]))
+        HAR_log.write("\n")
+        HAR_log.write("{:5}".format(" "))
+        for x in range(3):
+          HAR_log.write("{:12.8f}".format(esds[matrix_run]))
+          matrix_run += 1
+        has_adp_old = old_model._atoms[i].get('adp')
+        if has_adp_old != None:
+          matrix_run += 6
+        else:
+          matrix_run += 1
+        HAR_log.write("\n")
+      matrix_run = 0
+      HAR_log.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)\n")
+      for i, atom in enumerate(old_model._atoms):
+        has_adp = old_model._atoms[i].get('adp')
+        HAR_log.write("{:5}".format(atom['label'][0]))
+        if has_adp != None:
+          adp = atom['adp'][0]
+          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
+          matrix_run += 3
+          for u in range(6):
+            HAR_log.write("{:12.8f}".format(adp[u]))
+          HAR_log.write("\n")
+          HAR_log.write("{:5}".format(" "))
+          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
+          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
+          for u in range(6):
+            HAR_log.write("{:12.8f}".format(adp_esds[u]))
+          matrix_run += 6
+        else:
+          HAR_log.write(" Isotropic atom")
+          matrix_run += 4
+        HAR_log.write("\n")
+        
     HAR_log.flush()
     HAR_log.close()
 
     with open("%s/%s.har" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
+    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
+    import gui
+    gui.set_notification(OV.GetVar('gui_notification'))
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()
