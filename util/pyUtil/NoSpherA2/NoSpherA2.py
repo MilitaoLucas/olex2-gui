@@ -287,13 +287,40 @@ No MPI implementation found in PATH!
         if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
           raise NameError('Error during structure factor calculation!')
         olx.html.Update()
-        combine_sfs(force=True,part=i)
+        #combine_sfs(force=True,part=i)
+        shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
+        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        run = None
+        if Full_HAR == True:
+          run = OV.GetVar('Run_number')
         files = (file for file in os.listdir(self.jobs_dir)  
                 if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
-        for f in files:
-          if f.endswith(".tsc"):
-            f_work = os.path.join(self.wfn_job_dir,f)  
-            f_dest = os.path.join(self.jobs_dir,f)
+        for f in files:  
+          if Full_HAR == True:
+            if run > 1:
+              software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+              if software == "Tonto":
+                if "restricted" not in f:
+                  f_work = os.path.join(self.jobs_dir,f)  
+                  f_dest = os.path.join(self.backup,f)
+                  shutil.move(f_work,f_dest)  
+              elif software == "ORCA":
+                if ".gbw" not in f:
+                  f_work = os.path.join(self.jobs_dir,f)  
+                  f_dest = os.path.join(self.backup,f)
+                  shutil.move(f_work,f_dest)  
+              elif "Gaussian" in software:
+                if ".chk" not in f:
+                  f_work = os.path.join(self.jobs_dir,f)  
+                  f_dest = os.path.join(self.backup,f)
+                  shutil.move(f_work,f_dest)
+            else:
+              f_work = os.path.join(self.jobs_dir,f)  
+              f_dest = os.path.join(self.backup,f)
+              shutil.move(f_work,f_dest)
+          else:
+            f_work = os.path.join(self.jobs_dir,f)  
+            f_dest = os.path.join(self.backup,f)
             shutil.move(f_work,f_dest)
         for file in os.listdir('.'):
           if file.endswith(".wfn"):
@@ -1334,113 +1361,111 @@ def combine_tscs(nr_parts):
   if not tsc_modular == "direct":
     _mod = "_%s"%tsc_modular
    
-  tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + "_total.tsc")
+  tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_total.tsc")
   if os.path.exists(tsc_dst):
     backup = os.path.join(OV.FilePath(), "tsc_backup")
     if not os.path.exists(backup):
       os.mkdir(backup)
     i = 1
-    while (os.path.exists(os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)):
+    while (os.path.exists(os.path.join(backup,sfc_name + _mod + ".tsc") + "_%d"%i)):
       i = i + 1
     try:
-      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
+      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + ".tsc") + "_%d"%i)
     except:
       pass
       
+  write_file = open(tsc_dst,'w')
   d = {}
   sfs_fp = None
   symops_fp = None
+  nr_atoms = 0
+  atom_list = []
+  nr_data_lines = 0
     
   for part in range(int(nr_parts)):
     if part == 0:
       continue
-    print "Working on Part %d of %d\n"%(part,int(nr_parts))
-    tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + "_part_%d.tsc"%part)
+    print "Working on Part %d of %d\n"%(part,int(nr_parts)-1)
+    tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%part)
 
-    p = os.path.join("olex2","Wfn_job","Part_%d"%part, "*,ascii")
+    p = os.path.join("olex2","Wfn_job","Part_%d"%part, "*.tsc")
     g = glob.glob(p)
     if not g:
-      print "Error finding ascii Files!\n"
+      print "Error finding tsc Files!\n"
       return False
 
     if debug:
       t1 = time.time()
     
-    for file_p in g:
-      if "SFs_key,ascii" in file_p:
-        sfs_fp = file_p
+    with open(tsc_fn) as f:
+      tsc = f.readlines()
+    part_atom_list = None
+    values = []
+    header = []
+    data = False
+    for line in tsc:
+      if data == False:
+        header.append(line.replace('\n',''))
+      if 'SCATTERERS' in line:
+        part_atom_list = line[12: ].replace('\n','').split(' ')
+        #print part_atom_list
+      elif 'data:' in line:
+        data = True
         continue
-      elif "Symops,ascii" in file_p:
-        symops_fp = file_p
+      if data == True:
+        values.append(line)
+        if part == 1:
+          nr_data_lines += 1
+      
+    for atom in range(len(part_atom_list)):
+      name = part_atom_list[atom]
+      if name in atom_list:
         continue
-    
-      name = os.path.basename(file_p).split("_")[0]
-      if name in d.keys():
-        continue
- #     else:
- #       print "Appending: %s\n"%name
+      else:
+        nr_atoms += 1
+        #print "Appending: %s\n"%name
+        atom_list.append(name)
       d.setdefault(name,{})
-      values = open(file_p,'r').read().splitlines()
       sfc_l = []
-      for line in values:
+      hkl_l = []
+ 
+      for line in range(len(values)):
+        digest = values[line].split(" ")
+        if atom == 0 and part == 1:
+          hkl_l.append([digest[0],digest[1],digest[2]])
         if tsc_modular == "modulus":
-          _ = line.split()
+          _ = digest[2+atom].split(",")
           a = float(_[0])
           b = float(_[1])
           v = math.sqrt(a*a + b*b)
           sfc_l.append("%.6f" %v)
         elif tsc_modular == "absolute":
-          _ = line.split()
+          _ = digest[2+atom].split(",")
           a = abs(float(_[0]))
           b = abs(float(_[1]))
           sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
         elif tsc_modular == "direct":
-          _ = line.split()
-          a = float(_[0])
-          b = float(_[1])
-          sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-  
+          sfc_l.append(digest[3+atom].replace('\n',''))
+      if atom == 0:
+        d.setdefault('hkl', hkl_l)
       d[name].setdefault('sfc', sfc_l)
-      d[name].setdefault('name', name)
-
-  sym = open(symops_fp,'r').read().splitlines()
-  sym_l = []
-  ll = []
-  for line in sym:
-    if line:
-      li = line.split()
-      for val in li:
-        ll.append(str(int(float((val)))))
-    else:
-      sym_l.append(" ".join(ll))
-      ll = []
 
   if debug:
     print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
 
-  #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
-  hkl_fn = "SFs_key,ascii"
-  hkl = open(sfs_fp, 'r').read().splitlines()
-  hkl_l = []  
-  for line in hkl:
-    hkl_l.append(" ".join(line.split()[0:3]))
-  d.setdefault('hkl', hkl_l)
-
-  values_l = []
-  values_l.append(d['hkl'])
-  scatterers_l = []
-  for item in d:
-    if item == "hkl":
-      continue
-    scatterers_l.append(d[item]['name'])
-    values_l.append(d[item]['sfc'])
-  tsc_l = zip(*values_l)
+  value_lines = []
+  for i in range(nr_data_lines):
+    temp_string = ""
+    for j in range(3):
+      temp_string += d['hkl'][i][j]+' '
+    for j in range(nr_atoms):
+      temp_string += d[atom_list[j]]['sfc'][i]+' '
+    value_lines.append(temp_string)
 
   ol = []
   _d = {'anomalous':'false',
         'title': OV.FileName(),
-        'symmops': ";".join(sym_l),
-        'scatterers': " ".join(scatterers_l),
+        'scatterers': " ".join(atom_list),
         'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
         'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
         'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
@@ -1450,36 +1475,31 @@ def combine_tscs(nr_parts):
         'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
         'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
         }
-  ol.append('TITLE: %(title)s'%_d)
-  ol.append('SYMM: %(symmops)s'%_d)
-  ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
-  ol.append('SCATTERERS: %(scatterers)s'%_d)
-  ol.append('QM Info:')
-  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
-  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
-  import datetime
-  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %(software)s'%_d)
-  ol.append('   METHOD:         %(method)s'%_d)
-  ol.append('   BASIS SET:      %(basis_set)s'%_d)
-  ol.append('   CHARGE:         %(charge)s'%_d)
-  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
-  if relativistic == True:
-    ol.append('   RELATIVISTIC:   DKH2')
-  ol.append('   DATE:           %s'%f_date)
-  ol.append('   PARTS:          %d'%int(nr_parts))
-  if tsc_source == "Tonto":
-    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
-    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
-
-  ol.append("data:")
-
-  for line in tsc_l:
-    ol.append(" ".join(line))
+  for i in range(len(header)):
+    if 'SCATTERERS' in header[i]:
+      ol.append('SCATTERERS: %(scatterers)s'%_d)
+    elif 'SOFTWARE' in header[i]:
+      ol.append('   SOFTWARE:       %(software)s'%_d)
+    elif 'BASIS SET' in header[i]:
+      ol.append('   BASIS SET:      %(basis_set)s'%_d)
+    elif 'data:' in header[i]:
+      f_time = os.path.getctime(os.path.join(OV.FilePath(),sfc_name + _mod + "_part_1.tsc"))
+      import datetime
+      f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+      ol.append('   DATE:           %s'%f_date)
+      ol.append('   PARTS:          %d'%(int(nr_parts)-1))
+      if tsc_source == "Tonto":
+        ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+        ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
+      ol.append('data:\n')
+    else:
+      ol.append(header[i].replace('\n',''))
 
   t = "\n".join(ol)
   with open(tsc_dst, 'w') as wFile:
     wFile.write(t)
+    for line in value_lines:
+      wFile.write(line+'\n')
 
   try:
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)

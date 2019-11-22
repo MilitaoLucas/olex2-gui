@@ -29,6 +29,7 @@ This specifies the basis set for the calculation of the theoretical density and 
 The **def2**- and **cc-** series of basis sets is only defined for atoms up to Kr. Afterword ECPs woudl be needed to use these basis sets, whcih are by the natrue of the method not compatible. 
 Then the **x2c**-basis sets are usefull, as they are defined up to Rn without any ECPs.
 It is **highly** recommended to run basic first iterations using single valence basis sets and finish the structure with a higher basis.
+If you really do not plan on using your computer you can use TZVPP, but these calculations will take extremely long and are more for benchmark and polishing.
 
 ## Method
 The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be sued in ORCA.
