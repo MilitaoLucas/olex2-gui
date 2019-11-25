@@ -3148,8 +3148,9 @@ class RunRefinementPrg(RunPrg):
           matrix_run += 6
         elif has_adp_old != None:
           matrix_run += 1
-        if 'occ' in annotations[matrix_run]:
-          matrix_run += 1
+        if matrix_run < len(annotations):
+          if 'occ' in annotations[matrix_run]:
+            matrix_run += 1
       HAR_log.write("{:>16.4f}".format(max_dxyz))
       if label_xyz != None:
         HAR_log.write("{:>8}".format(label_xyz))
