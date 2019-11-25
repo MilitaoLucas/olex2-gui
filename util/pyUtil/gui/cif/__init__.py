@@ -1,3 +1,5 @@
+# py 2to3 compatibility
+
 import olex
 import olx
 import os
@@ -68,7 +70,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     else:
       url = OV.GetParam('user.cif.checkcif.url')
     response = HttpTools.make_url_call(url, params, http_timeout=120)
-  except Exception, e:
+  except Exception as e:
     threadPrint('Failed to receive Checkcif report...')
   finally:
     rFile.close()
@@ -89,7 +91,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     del params['file']
     try:
       response = HttpTools.make_url_call(url, params, http_timeout=120)
-    except Exception, e:
+    except Exception as e:
       threadPrint('Failed to receive full Checkcif report...')
     finally:
       fcf_file.close()
@@ -112,9 +114,9 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
         try:
           response = HttpTools.make_url_call(href,"")
           threadPrint('Done')
-        except Exception, e:
+        except Exception as e:
           threadPrint('Failed to download PDF report...')
-          print e
+          print(e)
         if not response:
           return
         txt = response.read()
@@ -144,7 +146,7 @@ def get_snums_in_cif():
   if OV.FileExt() != "cif":
     return [OV.FileName()]
   cnt = int(olx.xf.DataCount())
-  for i in xrange(0, cnt):
+  for i in range(0, cnt):
     name = olx.xf.DataName(i)
     if not is_it_global(name):
       snums.append(name)
