@@ -7,7 +7,7 @@
     "value=spy.twin.run_from_gui",
     "name=TWINNING_CCTBX",
     "onclick=spy.twin.run_from_gui()",
-    "td1=<td width='40%'>"
+    "td1=<td width='50%'>"
     )
   $-
   
@@ -16,15 +16,21 @@
     "value=Cumulative Plot",
     "name=TWINNING_CUMULATIVE",
     "onclick=cumulative_intensity",
-    "td1=<td width='40%'>"
+    "td1=<td width='50%'>"
     )
   $-
 
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_GEN';help_ext=Twinning_2;1 -->
  
-  <td width='17%' align='right'>
-  <b>Extended </b>
+  <td width='10%' align='right'>
+  <b>General Options:</b>
+  </td> 
+  <td width='15%' align='right'>
+  <b>Extended Method</b>
   </td>
-  <td width='3%' align='right'>
+  <td width='5%' align='right'>
   $+
     html.Snippet("gui/snippets/input-checkbox",
     "name=TWIN_DO_LONG",
@@ -34,9 +40,90 @@
     )
   $-
   </td>
+  
+  
+  <td width="22%" align='right'><b>Minimum Number of Laws</b></td>
+  <td width='8%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=TWINNING_NUMBER_LAWS",
+    "items=1;2;4",
+    "value=spy.GetParam(snum.twinning.olex2.number_laws)",
+    "onchange=spy.SetParam(snum.twinning.olex2.number_laws, html.GetValue(~name~))",
+    "readonly=false",
+    )
+  $-
+  </td>
+  
+  
+  <td width="14%" align='right'><b>Overlap Threshold</b></td>
+  <td width='12%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=TWINNING_OVERLAP_THRESHOLD",
+    "items=0.1",
+    "value=spy.GetParam(snum.twinning.olex2.overlap_threshold)",
+    "onchange=spy.SetParam(snum.twinning.olex2.overlap_threshold, html.GetValue(~name~))",
+    "readonly=false",
+    )
+  $-
+  </td>
+      
+  <td width='15%' align='right'>
+  <a href='spy.twin.run_from_gui()' target=''>%Default Search%</a>&nbsp;
+  </td>
+  
+  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_2';help_ext=Twinning_2;1 -->
+
+  <td width='15%' align='left'>
+  <b>Spherical Search:</b>
+  </td>
+
+  <td width='15%' align='left'>
+  <b># Bad Refl'ns</b>
+  </td>
+  <td width='10%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SIZE_SPHERE",
+    "items=2;5;10;20",
+    "value=spy.GetParam(snum.twinning.olex2.size_sphere)",
+    "onchange=spy.SetParam(snum.twinning.olex2.size_sphere, html.GetValue(~name~))",
+    "readonly=false",
+    )
+  $-
+  </td>
+
+
+  <td width='15%' align='left'>
+  <b>Threshold</b>
+  </td>
+  <td width='15%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=THRESHOLD_SPHERE",
+    "items=0.001;0.002;0.01;0.1",
+    "value=spy.GetParam(snum.twinning.olex2.threshold_sphere)",
+    "onchange=spy.SetParam(snum.twinning.olex2.threshold_sphere, html.GetValue(~name~))",
+    "readonly=false",
+    )
+  $-
+  </td>
+  
+  <td width='5%'>
+  <a href='spy.twin.run_from_gui(2)' target=''>%Search%</a>&nbsp;
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_2';help_ext=Twinning_2;1 -->
+ 
+  <td width='15%' align='right'>
+  <b>Angle-Axis Search:</b>
+  </td> 
 
   <td width='15%' align='left'>
   <b>Max Index </b>
@@ -75,7 +162,7 @@
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=TWIN_THRESHOLD",
-    "items=0.001;0.002;0.01",
+    "items=0.001;0.002;0.01;0.1",
     "lable=Max Index",
     "value=spy.GetParam(snum.twinning.olex2.threshold)",
     "onchange=spy.SetParam(snum.twinning.olex2.threshold, html.GetValue(~name~))",
@@ -84,75 +171,10 @@
   $-
   </td>    
   <td width='5%'>
-  <a href='spy.twin.run_from_gui(personal=True)' target=''>%Search%</a>&nbsp;
+  <a href='spy.twin.run_from_gui(1)' target=''>%Search%</a>&nbsp;
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_EXTA';help_ext=Twinning;1 -->
-
-  <td width="15%" align="left"><b>new m'd</b></td>
-  <td width='5%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=TWINNING_NEW_METHODS",
-    "checked=spy.GetParam(snum.twinning.olex2.new_methods)",
-    "onclick=spy.SetParam(snum.twinning.olex2.new_methods, html.GetState(~name~))",
-    )
-  $-
-  </td>
-
-  <td width="15%" align="left"><b>alw's BASF</b></td>
-  <td width='5%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=TWINNING_ALWAYS_BASF",
-    "checked=spy.GetParam(snum.twinning.olex2.always_basf)",
-    "onclick=spy.SetParam(snum.twinning.olex2.always_basf, html.GetState(~name~))",
-    )
-  $-
-  </td>
-
-  <td width="15%" align='right'><b>very long</b></td>
-  <td width='5%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=TWINNING_VERY_LONG",
-    "checked=spy.GetParam(snum.twinning.olex2.very_long)",
-    "onclick=spy.SetParam(snum.twinning.olex2.very_long, html.GetState(~name~))",
-    )
-  $-
-  </td>
-
-
-  <td width="15%" align='right'><b>h.axis.m</b></td>
-  <td width='5%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox",
-    "name=TWINNING_HEIGHT_AXIS_METHOD",
-    "checked=spy.GetParam(snum.twinning.olex2.height_axis_method)",
-    "onclick=spy.SetParam(snum.twinning.olex2.height_axis_method, html.GetState(~name~))",
-    )
-  $-
-  </td>
-
-
-  <td width="12%" align='right'><b>n_laws</b></td>
-  <td width='8%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=TWINNING_NUMBER_LAWS",
-    "value=4",
-    "items=2;4;6;8",
-    "checked=spy.GetParam(snum.twinning.olex2.number_laws)",
-    "onclick=spy.SetParam(snum.twinning.olex2.number_laws, html.GetState(~name~))",
-    "readonly=False",
-    )
-  $-
-  </td>
-
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <tr ALIGN='left' width='100%'>

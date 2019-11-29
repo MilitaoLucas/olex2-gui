@@ -355,22 +355,20 @@ routines requiring structure refinement
     olex2{
       do_long = False
         .type = bool 
-      very_long = False
-        .type = bool 
-      always_basf = True
-        .type = bool 
-      new_methods = True
-        .type = bool 
-      height_axis_method = False
-        .type = bool 
-      number_laws = 4
+      number_laws = 1
         .type = int
+      overlap_threshold=0.1
+        .type = float
       max_index = 5
         .type = int 
       rotation_fraction = 12
         .type = int 
       threshold = 0.002
         .type = float
+      threshold_sphere= 0.002
+        .type=float
+      size_sphere=10
+        .type=int
     }    
   }
 
