@@ -141,6 +141,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.recip_orth=self.orthogonalization_inv.T
     self.recip_orth_inv=numpy.linalg.inv(self.recip_orth)    
     self.overlap_threshold=OV.GetParam('snum.twinning.olex2.overlap_threshold')
+    self.number_laws=OV.GetParam('snum.twinning.olex2.number_laws')
 
     
     rank=numpy.argsort(leastSquare)[::-1]
@@ -523,10 +524,18 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       twin_laws+=self.get_integral_twin_laws()
       
       
+      
       if twin_laws:
         twin_laws=self.purge_duplicates(twin_laws)
         print ("Found Integral Twins")
          
+         
+  
+      if len(twin_laws)<number_laws:    
+        twin_laws+=self.find_twofold_axes_sphere(hkl, 0.01)  
+        if twin_laws:
+          twin_laws=self.purge_duplicates(twin_laws)        
+          print ("Twin laws found via twofold sphere search")        
         
       if len(twin_laws)<number_laws:
         rotation_fraction=2
@@ -594,6 +603,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def find_SS_twin_laws(self):
     #Find the twin laws based only on the user's input parameters
     hkl=self.bad_hkl
+    number_laws=self.number_laws
     
     twin_laws=[]
     twin_laws+=self.get_integral_twin_laws()
@@ -604,7 +614,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     print ("Using Spherical Search: \n Bad HKL to check: %d, \n Cutoff Threshold %.4f"%(size,threshold))
     olx.Refresh()
     
-    twin_laws+=self.find_twin_axes_sphere(hkl, threshold,size)
+    twin_laws+=self.find_twofold_axes_sphere(hkl, threshold,size)
+    if len(twin_laws)<number_laws:
+      twin_laws+=self.find_twin_axes_sphere(hkl, threshold,size)
  
     if twin_laws:
       twin_laws=self.purge_duplicates(twin_laws)
@@ -1205,6 +1217,31 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     twin_laws+=laws    
     
     
+
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twofold_axes_sphere(hkl, 0.01)  
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Sphere Search\n")
+    testFile.write("threshold: "+str(threshold_finding)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+
+    twin_laws+=laws        
+    
+       
+    
+    
     pr = cProfile.Profile()
     pr.enable()
     
@@ -1413,13 +1450,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     hkl_choice=hkl[:size]
     
     viable_rotation_points=[]
-    for vec in hkl_choice:
-      viable_rotation_points+=[self.find_same_distance_points(vec,threshold)]
       
-    for i,vec0 in enumerate(hkl_choice):
+    for i,vec0 in enumerate(hkl_choice):    
       if len(twin_laws)>3:
         print ("Twin laws found on try " + str(i))
         break
+      viable_rotation_points+=[self.find_same_distance_points(vec0,threshold)]        
       viable_rotation_points_0=viable_rotation_points[i]
       v=vec0
       #all_v_minus_w=v-viable_rotation_points_0
@@ -1504,6 +1540,81 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     twin_laws=self.purge_duplicates(twin_laws)
     return twin_laws    
     
+  def find_twofold_axes_sphere(self,hkl,threshold,size=10):
+
+    model=self.model    
+    twin_laws=[]
+    recip_orth=self.recip_orth
+    metrical_matrix=self.metrical
+    metrical_inverse=self.metrical_inv 
+    recip_orth_inv=self.recip_orth_inv
+    number_laws=self.number_laws
+    a_star=recip_orth.T[0]
+    b_star=recip_orth.T[1]
+    c_star=recip_orth.T[2]    
+    b_star_cross_c_star=numpy.array(self.cross_product(b_star,c_star))
+    c_star_cross_a_star=numpy.array(self.cross_product(c_star,a_star))
+    a_star_cross_b_star=numpy.array(self.cross_product(a_star,b_star))
+    
+    maxRdrop=0
+
+    hkl_choice=hkl[:size]
+    
+    viable_rotation_points=[]
+    #for vec in hkl_choice:
+      #viable_rotation_points+=[self.find_same_distance_points(vec,threshold)]
+      
+    #R=I+sintheta K+(1-costheta )K^2
+    #R=I+2K^2
+      
+    for i,v in enumerate(hkl_choice):
+      if len(twin_laws)>number_laws:
+        print ("Twin laws found on try " + str(i))
+        break      
+      viable_rotation_points+=[self.find_same_distance_points(v,threshold)]
+      viable_rotation_points_0=viable_rotation_points[i]
+      for w in viable_rotation_points_0:
+        if all(w==-v):
+          continue
+        axis=v+w
+        axis_euclid=numpy.dot(recip_orth,axis)
+        axis_unit=axis_euclid/self.size_of_3d_vector(axis_euclid)
+        k=numpy.array([[0,-axis_unit[2],axis_unit[1]],[axis_unit[2],0,-axis_unit[0]],[-axis_unit[1],axis_unit[0],0]])
+        k2=numpy.dot(k,k)
+        rot_mat_euclid=numpy.eye(3)+2*k2
+        rotation_lattice=numpy.dot(recip_orth_inv,numpy.dot(rot_mat_euclid,recip_orth))
+        
+              
+        duplicate=False
+        for twin_law in twin_laws:
+          if numpy.allclose(twin_law.hkl_rotation,rotation_lattice):
+            duplicate=True
+        if duplicate:
+          continue
+        
+        rotated_hkl=numpy.dot(hkl,rotation_lattice.T)
+
+        if not self.sufficient_overlaps(rotated_hkl, threshold):
+          continue              
+        hkl_displacement=self.find_fom(rotated_hkl) 
+
+        if (hkl_displacement<threshold):             
+          rbasf=self.basf_estimate(rotation_lattice)
+          if rbasf[0]>1e-10 and rbasf[2]>maxRdrop/2:
+            twin_laws+=[twin_rules("Alt",v+w,rotation_lattice,numpy.pi,hkl_displacement,rbasf)]
+            maxRdrop=max(maxRdrop,rbasf[2])
+                      
+            
+    twin_laws=self.do_rounding(twin_laws)    
+    twin_laws=self.purge_duplicates(twin_laws)
+    return twin_laws    
+        
+    
+    
+    
+    
+    
+        
   
   def find_same_distance_points(self, hkl, threshold):
     #finds points with the same d-spacing as a reciprocal lattice point hkl
@@ -1548,16 +1659,30 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     max_k=numpy.floor(k_lambda[1]/lambda_k)
     max_l=numpy.floor(l_lambda[2]/lambda_l)
     
-    for h in range(-int(max_h),int(max_h)+1):
+    for h in range(0,int(max_h)+1):
       for k in range(-int(max_k),int(max_k)+1):  
-        for l in range(-int(max_l),int(max_l)+1):
+        discriminant_addition=-(h**2*mod_a_star**2+k**2*mod_b_star**2+2*h*k*a_star_dot_b_star)*mod_c_star**2+(h*a_star_dot_c_star+k*b_star_dot_c_star)**2
+        upper_discriminant=max_distance**2*mod_c_star**2+discriminant_addition
+        lower_discriminant=(max_distance-2*threshold)**2*mod_c_star**2+discriminant_addition
+        #still sometimes has upper <0 even when a twin laws is there. Needs work
+        if upper_discriminant<0:
+          continue
+        l_max=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(upper_discriminant))/mod_c_star**2)
+        l_min=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(upper_discriminant))/mod_c_star**2)
+        if lower_discriminant<0:
+          possible_l=range(int(l_min),int(l_max+1))
+        else:
+          l_max_lower=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(lower_discriminant))/mod_c_star**2)
+          l_min_upper=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(lower_discriminant))/mod_c_star**2)
+          possible_l=range(int(l_min),int(l_min_upper)+1)+range(int(l_max_lower),int(l_max+1))
+        for l in possible_l:
           size_h=self.size_of_3d_vector(numpy.dot(orthogonalization.T,[h,k,l]))
           if hkl[0]==h and hkl[1]==k and hkl[2]==l:
             continue
           if abs(size_hkl-size_h)<threshold:
             same_distance_points+=[[h,k,l]]                
                    
-    
+    same_distance_points+=numpy.negative(same_distance_points).tolist()
     return same_distance_points
   
   def check_basf(self, twin_laws):
