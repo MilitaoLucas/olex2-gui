@@ -4,9 +4,9 @@
   
   $+
     html.Snippet(GetVar(default_link),
-    "value=spy.twin.run_from_gui",
-    "name=TWINNING_CCTBX",
-    "onclick=spy.twin.run_from_gui()",
+    "value=Find 2-fold",
+    "name=TWINNING_Olex2",
+    "onclick=spy.find_2_fold_olex2()",
     "td1=<td width='50%'>"
     )
   $-
@@ -193,6 +193,21 @@
 <!-- #include reflection-date reflection-date.htm;1; -->
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+    <td ALIGN='left' width='12%'>
+      <b>hklf5 </b>
+    </td>
+
+    <td ALIGN='left' width='45%'>
+    $spy.tools.get_twin_law_from_hklf5()
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 
 <!-- #includeif File.Exists(spy.get_twinning_result_filename()) twinning-result spy.get_twinning_result_filename();1; -->

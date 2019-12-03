@@ -90,15 +90,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.run(personal) #personal
     OV.Cursor()
     
-  def write_twinning_result_to_disk(self, html):
-    with open(get_twinning_result_filename(), 'w') as wFile:
-      wFile.write(html)
   
   def run(self, personal=0):
-    from PilTools import MatrixMaker
     global twin_laws_d
-    from ImageTools import *
-    IT = ImageTools()
 
     OlexCctbxAdapter.__init__(self)
     if OV.GetParam('snum.refinement.use_solvent_mask'):
@@ -114,7 +108,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   
     print(">> Searching for Twin Laws <<")
     use_image = ""
-    MM = MatrixMaker()
     self.twin_laws_d = {}
     law_txt = ""
     l = 0
@@ -160,12 +153,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     else:
       print ("Invalid parameter passed, personal=", personal)
       
-      
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     ordered_twins=self.purge_duplicates(ordered_twins)
     top_twins=ordered_twins[:10]
     lawcount=0
-    bg_col = OV.GetParam('gui.html.table_bg_colour')
     for i, twin_law in enumerate(top_twins):
       basf=twin_law.rbasf[0]
       r=twin_law.rbasf[1]
@@ -175,7 +166,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       #self.make_hklf5(filename, twin_law, hkl, f_obs,f_uncertainty)
 
       self.make_hklf5_from_file(twin_law,new_file=filename) #ZZZZ
-
       self.twin_laws_d.setdefault(lawcount, {})
 
       r_no, basf_no, f_data, history = self.run_twin_ref_shelx(twin_law.hkl_rotation.flatten(), basf)
@@ -185,140 +175,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       except:
         r = 0.99
       r_list.append((r, lawcount, basf))
-      name = "law%i" %lawcount
-      font_col = "#444444"
-      font_col_basf = "#447744"
-      if basf == "n/a":
-        font_col_basf = OV.GetParam('gui.blue').rgb
-      elif float(basf) < 0.1:
-        font_col_basf = OV.GetParam('gui.red').rgb
-        basf = "%.2f" %float(basf)
-      else:
-        font_col_basf = OV.GetParam('gui.green_text').rgb
-        basf = "%.2f" %float(basf)
-        
-
-      txt = [{'txt':"R=%.2f%%, -%.2f%%" %((float(r)*100),(float(r_diff)*100)),
-              'font_colour':font_col},
-             {'txt':"basf=%s" %str(basf),
-              'font_colour':font_col_basf}]
-      states = ['on', 'off', 'hover', 'down']
-      matrix = twin_law.hkl_rotation.flatten()
-      rounded_matrix = self.round_matrix_elements(matrix)
       
-      bg_col_img = IT.RGBToHTMLColor(IT.adjust_colour(bg_col.rgb,luminosity=0.95))
+      self.twin_laws_d[lawcount]['BASF'] = basf
+      self.twin_laws_d[lawcount]['r'] = r
+      self.twin_laws_d[lawcount]['r_diff'] = r_diff
+      self.twin_laws_d[lawcount]['matrix'] = twin_law.hkl_rotation.flatten()
+    make_twinning_gui(self.twin_laws_d)   
       
-      for state in states:
-        image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
-
-      self.twin_laws_d[lawcount] = {'number':lawcount,
-                                    'law':twin_law.hkl_rotation,
-                                    'R1':r,
-                                    'BASF':basf,
-                                    'law_image':img,
-                                    'law_txt':law_txt,
-                                    'law_image_name':image_name,
-                                    'name':name,
-                                    'ins_file':f_data,
-                                    'history':history,
-                                    }
-      l += 1
-    #r_list.sort()
-    law_txt = ""
-    self.twin_law_gui_txt = ""
-    i = 0
-    html = "<tr bgcolor='%s'><td></td><td>" %bg_col
-    fn_base = get_twinning_result_filename().rstrip(".html")
-    for r, run, basf in r_list:
-      i += 1
-      image_name = self.twin_laws_d[run].get('law_image_name', "XX")
-      write_twin_images_to_disk(image_name, fn_base)
-      use_image = "%s%soff.png" %(fn_base, image_name)
-      img_src = "%s.png" %image_name
-      name = self.twin_laws_d[run].get('name', "XX")
-      #href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
-      law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
-      
-      d = {'name':image_name,
-           'nameupper':image_name.upper(),
-           'tool_img':image_name,
-           'down':'down',
-           'up':'up',
-           'on':'on',
-           'hover':'hover',
-           'cmds':href,
-           'target':"",
-           'feedback':"",
-           'bgcolor':"#ff9999",
-      }
-      
-      law_txt = '''
-      <font size='$GetVar(HtmlFontSizeControls)'>
-      <input
-      name="IMG_%(nameupper)s"
-      type="button"
-      image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
-      hint="%(target)s"
-      onclick="%(cmds)s%(feedback)s"
-      bgcolor="%(bgcolor)s"
-    >
-    </font>
-    '''%d
-      
-      
-      self.twin_law_gui_txt += "%s" %(law_txt)
-      control = "IMG_%s" %image_name.upper()
-
-      #html += '''
-#<a href='%s' target='Apply this twin law'><img name='%s' border="0" src="%s"></a>&nbsp;
-    #''' %(href, control, use_image)
-      
-      html += law_txt
-      
-    if not use_image:
-      return
-    html += "</td></tr>"
-    self.write_twinning_result_to_disk(html)
-#    OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
-    #OV.Refresh()
-    #if OV.IsControl(control):
-    #  OV.SetImage(control,use_image)
-    OV.UpdateHtml()
-    twin_laws_d = self.twin_laws_d
-    #import cPickle as pickle
-    #p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
-    #with open( p, "wb" ) as out:
-      #pickle.dump( twin_laws_d, out )
     
-  def round_matrix_elements(self, matrix):
-    round_tol = 0.01
-    round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
-    round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
-    round_l = zip(round_val_l, round_disp_l)
-    new_matrix = []
-    for item in matrix:
-      try:
-        item = round(item,3)
-      except:
-        m.append(item)
-        continue
-      sign = ""
-      if abs(item) != item:
-        sign = "-"
-      if str(item) == "0.0":
-        item = "0"
-      elif str(item) == "1.0":
-        item = "1"
-      elif str(item) == "-1.0":
-        item = "-1"
-      else:
-        for val,disp in round_l:
-          if val-round_tol < abs(item) < val+round_tol:
-            item = sign+disp
-            break
-      new_matrix.append(item)
-    return new_matrix
 
 
   def run_twin_ref_shelx(self, law, basf):
@@ -360,7 +224,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #r = olx.Lst("R1")
     #olex_refinement_model = OV.GetRefinementModel(False)
     #if olex_refinement_model.has_key('twin'):
-    #  basf = olex_refinement_model['twin']['basf'][0]
+    #  basf = olex_refinement_model['twin']['BASF'][0]
     #else:
     #  basf = "n/a"
 
@@ -1745,8 +1609,12 @@ def format_twin_string_from_law(twin_law):
       twin_str_l.append("%s" %ele)
   return " ".join(twin_str_l)
 
-
 def get_twinning_result_filename():
+  import ntpath
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  import os
+ 
   _ = ntpath.basename(OV.HKLSrc())
   _ = _.rstrip(".hkl")
   if "_twin" in _:
@@ -1766,11 +1634,14 @@ def on_twin_image_click(run_number):
       law = twin_laws_d[number]
       im = law.get('law_image')
       OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
-    
-  twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
-  twin_law_disp = format_twin_string_from_law(twin_law)
-  twin_law_rnd = numpy.rint(twin_law)
-  basf=float(twin_laws_d[int(run_number)]['BASF'])
+  try:
+    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
+    twin_law_disp = format_twin_string_from_law(twin_law)
+    twin_law_rnd = numpy.rint(twin_law)
+    basf=float(twin_laws_d[int(run_number)]['BASF'])
+  except:
+    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
+
   
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
     print ("Using twin law: %s" %twin_law_disp)
@@ -1839,3 +1710,175 @@ class HiddenPrints:
   def __exit__(self, exc_type, exc_val, exc_tb):
     sys.stdout.close()
     sys.stdout = self._original_stdout
+    
+
+def round_matrix_elements(matrix):
+  round_tol = 0.01
+  round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
+  round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
+  round_l = zip(round_val_l, round_disp_l)
+  new_matrix = []
+  for item in matrix:
+    try:
+      item = round(item,3)
+    except:
+      m.append(item)
+      continue
+    sign = ""
+    if abs(item) != item:
+      sign = "-"
+    if str(item) == "0.0":
+      item = "0"
+    elif str(item) == "1.0":
+      item = "1"
+    elif str(item) == "-1.0":
+      item = "-1"
+    else:
+      for val,disp in round_l:
+        if val-round_tol < abs(item) < val+round_tol:
+          item = sign+disp
+          break
+    new_matrix.append(item)
+  return new_matrix
+
+
+    
+def find_2_fold_olex2():
+  import gui.tools
+  cmd = "TestR"
+  res = filter(None, gui.tools.scrub(cmd))
+  matrix = res[-3:]
+  basf = 0.2
+  r = 0.05
+  r_diff = -0.03
+  d = {}
+  d.setdefault(1, {})
+  matrix = [float(i) for i in " ".join(matrix).split()]
+  d[1]['matrix'] = matrix
+  d[1]['BASF'] = basf
+  d[1]['r'] = r
+  d[1]['r_diff'] = r_diff
+  make_twinning_gui(d)
+OV.registerFunction(find_2_fold_olex2)
+
+def make_law_images(twin_law, lawcount):
+  global twin_laws_d
+  from ImageTools import *
+  IT = ImageTools()
+  from PilTools import MatrixMaker
+  MM = MatrixMaker()
+
+  bg_col = OV.GetParam('gui.html.table_bg_colour')
+  bg_col_img = IT.RGBToHTMLColor(IT.adjust_colour(bg_col.rgb,luminosity=1.3))
+  font_col = "#444444"
+  font_col_basf = "#447744"
+  
+  basf = twin_law['BASF']
+  r = twin_law['r']
+  r_diff = twin_law['r_diff']
+  matrix = twin_law['matrix']
+  name = "law%s" %lawcount
+  if basf == "n/a":
+    font_col_basf = OV.GetParam('gui.blue').rgb
+  elif float(basf) < 0.1:
+    font_col_basf = OV.GetParam('gui.red').rgb
+    basf = "%.2f" %float(basf)
+  else:
+    font_col_basf = OV.GetParam('gui.green_text').rgb
+    basf = "%.2f" %float(basf)
+  
+  txt = [{'txt':"R=%.2f%%, -%.2f%%" %((float(r)*100),(float(r_diff)*100)),
+          'font_colour':font_col},
+         {'txt':"basf=%s" %str(basf),
+          'font_colour':font_col_basf}]
+  states = ['on', 'off', 'hover', 'down']
+  rounded_matrix = round_matrix_elements(matrix)
+  for state in states:
+    image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
+    twin_laws_d[lawcount].setdefault('law_image_name', image_name)
+
+
+
+def make_twinning_gui(laws):
+  font_col = "#444444"
+  font_col_basf = "#447744"
+  bg_col = OV.GetParam('gui.html.table_bg_colour')
+  
+  global twin_laws_d
+  twin_laws_d = laws
+  
+  r_list = []
+  for count in laws:
+    twin_law_d = laws[count]
+    make_law_images(twin_law_d, count)
+    r_list.append((twin_law_d['r'], count, twin_law_d['BASF']))
+
+  history = ""
+  ins_file = ""
+  law_txt = ""
+  i = 0
+  html = "<tr bgcolor='%s'><td></td><td>" %bg_col
+  fn_base = get_twinning_result_filename().rstrip(".html")
+  
+  for r, run, basf in r_list:
+    i += 1
+    image_name = twin_laws_d[run].get('law_image_name', "XX")
+    write_twin_images_to_disk(image_name, fn_base)
+    use_image = "%s%soff.png" %(fn_base, image_name)
+    img_src = "%s.png" %image_name
+    name = twin_laws_d[run].get('name', "XX")
+    #href = 'spy.on_twin_image_click(%s)'
+    href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
+    law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
+    
+    d = {'name':image_name,
+         'nameupper':image_name.upper(),
+         'tool_img':image_name,
+         'down':'down',
+         'up':'up',
+         'on':'on',
+         'hover':'hover',
+         'cmds':href,
+         'target':"",
+         'feedback':"",
+         'bgcolor':"#ff9999",
+    }
+    
+    law_txt = '''
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+    name="IMG_%(nameupper)s"
+    type="button"
+    image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
+    hint="%(target)s"
+    onclick="%(cmds)s%(feedback)s"
+    bgcolor="%(bgcolor)s"
+  >
+  </font>
+  '''%d
+    #self.twin_law_gui_txt += "%s" %(law_txt)
+    control = "IMG_%s" %image_name.upper()
+    html += law_txt
+  
+  #twin_laws_d[lawcount] = {'number':lawcount,
+                                #'law':matrix,
+                                #'R1':r,
+                                #'BASF':basf,
+                                #'law_image':img,
+                                #'law_txt':law_txt,
+                                #'law_image_name':image_name,
+                                #'name':name,
+                                #'ins_file':f_data,
+                                #'history':history,
+                                #}
+  #l += 1
+  
+  
+  html += "</td></tr>"
+  write_twinning_result_to_disk(html)
+  OV.UpdateHtml()
+
+def write_twinning_result_to_disk(html):
+  with open(get_twinning_result_filename(), 'w') as wFile:
+    wFile.write(html)
+  
