@@ -99,7 +99,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       txt = "Sorry, using solvent masking and twinning is not supported yet."
       print(txt)
       html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
-      self.write_twinning_result_to_disk(html)
+      write_twinning_result_to_disk(html)
       OV.UpdateHtml()
       return
     if "_twin" in OV.HKLSrc():
@@ -1747,7 +1747,17 @@ def find_2_fold_olex2():
   import gui.tools
   cmd = "TestR"
   res = filter(None, gui.tools.scrub(cmd))
+
+  if "batch" not in " ".join(res).lower():
+    return
+
   matrix = res[-3:]
+  
+  i = 0
+  for line in res:
+    if line.startswith('wR2'):
+      basf = res[i+1].split()[2].strip()
+    i += 1  
   basf = 0.2
   r = 0.05
   r_diff = -0.03
