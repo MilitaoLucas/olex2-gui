@@ -122,7 +122,7 @@ class PlatonWrapper:
       if platonflag == "0":
         # Start just platon with the INS file
         print "Calling Platon Directly"
-        a = self.run_platon(["platon", inputfile])
+        a = self.run_platon([exe_name, inputfile])
         return a
       else:
         if platonflag == 'U':

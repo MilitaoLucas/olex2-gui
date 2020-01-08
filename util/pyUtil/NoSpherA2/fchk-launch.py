@@ -13,11 +13,16 @@ os.chdir(fchk_dir)
 args = os.getenv("fchk_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'")
 log = None
+err_fn = None
+out_fn = None
 if "orca" in args[0]:
-  log = open(fchk_file + '.log', 'w')
+  log = open(fchk_file + '_orca.log', 'w')
+  err_fn = fchk_file + "_orca.log"
+  out_fn = fchk_file + "_orca.log"
 p = subprocess.Popen(args, stdout=log)
-err_fn = fchk_file + ".log"
-out_fn = fchk_file + ".log"
+if err_fn == None:
+  err_fn = fchk_file + ".log"
+  out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
