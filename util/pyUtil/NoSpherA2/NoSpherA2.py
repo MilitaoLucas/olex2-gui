@@ -1069,9 +1069,9 @@ class Job(object):
       if rel == True:
         args.append("-dkh")
         args.append("t")
-      if(run > 1):
-        args.append("-restart-scf")
-        args.append("t")
+#      if(run > 1):
+#        args.append("-restart-scf")
+#        args.append("t")
         
 
     else:
@@ -1657,6 +1657,7 @@ def set_default_cpu_and_mem():
     OV.SetParam('snum.refinement.cctbx.nsff.ncpus',1)
     return
   if (max_cpu == 1): 
+    OV.SetParam('snum.refinement.cctbx.nsff.ncpus',1)
     return
   elif (current_cpus != "1"):
     return
