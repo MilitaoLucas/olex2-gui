@@ -708,7 +708,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       except:
         pass
 
-      if _ and mdict.has_key('_smtbx_masks_void_content') and len(_) == len(mdict['_smtbx_masks_void_content']):
+      if _ and '_smtbx_masks_void_content' in mdict.keys() and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
 
 
