@@ -258,13 +258,15 @@ class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
+    from cctbx import anharmonic
     builder = builders.weighted_constrained_restrained_crystal_structure_builder(
       min_distance_sym_equiv=0.2)
     unit_cell = uctbx.unit_cell(cell)
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
     u_star = shelx_adp_converter(builder.crystal_symmetry)
-    for label, site, occupancy, u, uiso_owner, scattering_type, fixed_vars in atom_iter:
+    init_tensors = False
+    for label, site, occupancy, u, anharmonic_u, uiso_owner, scattering_type, fixed_vars in atom_iter:
       behaviour_of_variable = [True]*12
       if fixed_vars is not None:
         for var in fixed_vars:
@@ -275,6 +277,9 @@ class create_cctbx_xray_structure(object):
                            u=u_star(*u),
                            occupancy=occupancy,
                            scattering_type=scattering_type)
+        if anharmonic_u:
+          a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
+          init_tensors = True
         behaviour_of_variable.pop(5)
       else:
         a = xray.scatterer(label=label,

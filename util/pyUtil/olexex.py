@@ -259,13 +259,14 @@ class OlexRefinementModel(object):
       xyz = atom['crd'][0]
       occu = atom['occu'][0]
       adp = atom.get('adp')
+      anharmonic_adp = atom.get('anharmonic_adp')
       if adp is None:
         uiso = atom.get('uiso')[0]
         u = (uiso,)
       else: u = adp[0]
       uiso_owner = atom.get('uisoOwner')
       if name[:1] != "Q":
-        yield name, xyz, occu, u, uiso_owner, element_type, self._fixed_variables.get(i)
+        yield name, xyz, occu, u, anharmonic_adp, uiso_owner, element_type, self._fixed_variables.get(i)
 
   def afix_iterator(self):
     for afix in self._afix:

@@ -290,7 +290,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           listi = numpy.argwhere(jac_tr[index, :]!=0)
           print "Crystallographic parameters linked:"
           for i in listi:
-            print i, self.reparametrisation.component_annotations[i]
+            print i, self.reparametrisation.component_annotations[i[0]]
       else:
         print "Refinement failed"
         import traceback
