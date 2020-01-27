@@ -978,6 +978,9 @@ class RunRefinementPrg(RunPrg):
                 max_shift_atom_uij = abs(adp[u] - adp2[u])
                 matrix_run_max_shift_uij = matrix_run
             matrix_run += 1
+          if matrix_run < len(annotations):
+            if "C111" in annotations[matrix_run]:
+              matrix_run += 25
         elif has_adp_new != None:
           matrix_run += 6
         elif has_adp_old == None:

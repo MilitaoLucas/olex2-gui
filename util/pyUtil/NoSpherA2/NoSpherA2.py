@@ -85,6 +85,7 @@ class NoSpherA2(PT):
     else:
       self.basis_list_str = None
       self.basis_dir = None
+      print("No Hart executable found!")
     OV.SetVar('have_valid_nosphera2_fcf', False)
 
   def setup_har_executables(self):
@@ -359,13 +360,17 @@ No MPI implementation found in PATH!
           i = i + 1  
         self.backup = self.backup + "_%d"%i  
         os.mkdir(self.backup)  
+        software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
         try:  
+          if software == "ORCA":
+            print os.path.join(self.jobs_dir,job.name+"2.gbw")
+            if os.path.exists(os.path.join(self.jobs_dir,job.name+"2.gbw")):
+              os.remove(os.path.join(self.jobs_dir,job.name+"2.gbw"))
           files = (file for file in os.listdir(self.jobs_dir)  
                   if os.path.isfile(os.path.join(self.jobs_dir, file)))  
           for f in files:  
             if Full_HAR == True:
               if run > 0:
-                software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
                 if software == "Tonto":
                   if "restricted" not in f:
                     f_work = os.path.join(self.jobs_dir,f)  
@@ -377,8 +382,6 @@ No MPI implementation found in PATH!
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)  
                   else:
-                    if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+"2.gbw")):
-                      shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw_org"))
                     shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))
                 elif "Gaussian" in software:
                   if ".chk" not in f:
@@ -395,10 +398,32 @@ No MPI implementation found in PATH!
               shutil.move(f_work,f_dest)
         except:  
           pass  
+      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      
+      # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
+      
       if wfn_code.lower().endswith(".fchk"):
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
       elif wfn_code == "Tonto":
-        pass
+        success = True
+        try:
+          job.launch()
+        except NameError as error:
+          print "Aborted due to: ", error
+          success = False
+        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+          success = False
+          with open(os.path.join(job.full_dir, job.name+".err")) as file:
+            for i in file.readlines():
+              if 'Error in' in i:
+                print(i)
+          raise NameError('Error during structure factor calculation!')
+        if success == False:
+          raise NameError("Tonto Failed!")
+        olx.html.Update()
+        if (experimental_SF == False):
+          shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
       else:
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
         try:
@@ -406,8 +431,20 @@ No MPI implementation found in PATH!
         except NameError as error:
           print "Aborted due to: ",error
           raise NameError("Wavefunction failed!")
-      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
-      if (experimental_SF == False) or wfn_code == "Tonto":
+      
+      # make the tsc file
+      
+      if (experimental_SF == True):
+        wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
+        hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
+        cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
+        asym_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
+        olx.Kill("$Q")
+        olx.File(asym_fn)
+        cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
+        
+      elif wfn_code != "Tonto":
         success = True
         try:
           job.launch()
@@ -426,19 +463,7 @@ No MPI implementation found in PATH!
         olx.html.Update()
         shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
-        #combine_sfs(force=True)
-      else:
-        wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
-        hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
-        cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-        asym_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
-        olx.Kill("$Q")
-        olx.File(asym_fn)
-        cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
-        
-      
-      
+
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix') == True:
@@ -926,25 +951,6 @@ class wfn_Job(object):
         else:
           raise NameError("No fchk generated!")
         shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
-      
-      # this is for testing writeout of SFs by my program, for comparison with tonto
-     #else:
-     #  olx.Kill("$Q")
-     #  olx.File(os.path.join(self.full_dir, self.name)+'.cif')
-     #  data_file_name = os.path.join(self.full_dir, self.name) + ".hkl"
-     #  if not os.path.exists(data_file_name):
-     #    from cctbx_olex_adapter import OlexCctbxAdapter
-     #    from iotbx.shelx import hklf
-     #    cctbx_adaptor = OlexCctbxAdapter()
-     #    with open(data_file_name, "w") as out:
-     #      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
-     #      f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-     #  move_args.append("-hkl")
-     #  move_args.append(data_file_name)
-     #  move_args.append("-cif")
-     #  move_args.append(self.name+".cif")
-     #  move_args.append("-asym_cif")
-     #  move_args.append(os.path.join(self.full_dir, self.name)+'.cif')
 
 def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
   folder = OV.FilePath()
@@ -972,6 +978,14 @@ def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
   if (ncpus > 1):
     move_args.append('-cpus')
     move_args.append(ncpus)
+  if (OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_debug') == True):
+    move_args.append('-v')
+  if (OV.GetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy') != "Normal"):
+    move_args.append('-acc')
+    if(OV.GetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy') == "Low"):
+      move_args.append('1')
+    else:
+      move_args.append('3')
   os.environ['cuqct_cmd'] = '+&-'.join(move_args)
   os.environ['cuqct_dir'] = folder
   pyl = OV.getPYLPath()
@@ -1099,6 +1113,9 @@ class Job(object):
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn') == False:
       args.append("-wfn")
       args.append("f")
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF') == True:
+      args.append("-scf-only")
+      args.append("t")
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
       import olexex
