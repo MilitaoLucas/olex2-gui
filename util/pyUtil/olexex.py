@@ -624,7 +624,7 @@ OV.registerFunction(FindZOfHeaviestAtomInFormula)
 
 def get_auto_q_peaks():
   ctrl_name = 'SET_SNUM_REFINEMENT_MAX_PEAKS'
-  manual_q = OV.GetVar('manual_q_peak_override',0)
+  manual_q = OV.GetParam('snum.refinement.manual_q_peak_override',0)
   if manual_q:
     if OV.HasGUI() and OV.IsControl(ctrl_name):
       olx.html.SetBG(ctrl_name,'#ffeeee')

@@ -269,6 +269,9 @@ routines requiring structure refinement
       .type = int
       .help = The maximum number of electron density peaks to be returned \
         after refinement
+    manual_q_peak_override = 0
+      .type = int
+      .help = Retain manually set numbers of peaks 
     update_weight = True
       .type = bool
       .help = Automatically update the weight instruction before the next \
@@ -1833,36 +1836,85 @@ user
       .type=str
     trim_border_colour = #dedede
       .type = str
-  bitmap{
-     AtomLabels{
-       font = '#olex2.fnt:frb_20'
+    bitmap{
+       AtomLabels{
+         font = '#olex2.fnt:frb_20'
+           .type = str
+       }
+       BondLabels{
+         font = '#olex2.fnt:fr__14'
+           .type = str
+       }
+       type = png
          .type = str
-     }
-     BondLabels{
-       font = '#olex2.fnt:fr__14'
+       resolution = 300
+         .type = int
+       resolution_unit = in
          .type = str
+       resolution_width= 4
+         .type = float
+       size= 1200
+         .type = int
+       transparent_background = False
+         .type = bool
+       trim = True
+         .type = bool
+       trim_border_colour = #bbbbbb
+         .type = str
+       trim_padding = 2
+         .type = float
+       trim_border = 0
+         .type = float
      }
-     type = png
-       .type = str
-     resolution = 300
-       .type = int
-     resolution_unit = in
-       .type = str
-     resolution_width= 4
-       .type = float
-     size= 1200
-       .type = int
-     transparent_background = False
-       .type = bool
-     trim = True
-       .type = bool
-     trim_border_colour = #bbbbbb
-       .type = str
-     trim_padding = 2
-       .type = float
-     trim_border = 0
-       .type = float
-   }
+    ps
+      {
+      type = *eps
+        .type = choice
+      colour_line= " "
+        .type = str
+      colour_bond= " "
+        .type = str
+      colour_fill= " "
+        .type = str
+      perspective = " "
+        .type = str
+      outline_width = 1.0
+        .type = float
+      octant_width = 1.0
+        .type = float
+      pie_width = 0.6
+        .type = float
+      octant_count = 5
+        .type = int
+      octant_atoms = -C
+        .type = str
+      h_bond_width = 0.6
+        .type = float
+      bond_width = 0.7
+        .type = float
+      font_weight = 1.2
+        .type = float
+      atom_label{
+        font_name = @
+          .type = str
+        font_size = 15
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
+      bond_label{
+        font_name = @
+          .type = str
+        font_size = 8
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
+    }
 
   }
   sorting {
