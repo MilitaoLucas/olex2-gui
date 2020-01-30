@@ -253,6 +253,7 @@ def onMaxPeaksChange(max_peaks):
       ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.html.SetValue(ctrl_name, max_peaks)
+        OV.SetParam('snum.refinement.max_peaks', max_peaks)
       addInstruction(prg.name, method.name, 'plan')
       return
 OV.registerFunction(OV.SetMaxPeaks)
