@@ -359,13 +359,13 @@ class MatrixMaker(ImageTools):
 
   def make_3x3_matrix_image(self, name, matrix, text_def="", state='', bar_col='#ababab', bgcolor='#dedede', height=64):
     if state == "on":
-      bgcolor = "#ababab"
+      bgcolor = "#efefef"
     if state == "hover":
       bgcolor = OV.GetParam('gui.html.highlight_colour').rgb
 
     scale = OV.GetParam('gui.internal_scale')
     
-    width = int(round(((IT.skin_width) / 4),0)) - 10
+    width = int(round(((IT.skin_width) / 3),0)) - 10
     size = (width*scale, height*scale)
     font_name = "Arial"
     font_size = 11 *scale

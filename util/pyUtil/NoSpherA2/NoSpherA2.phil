@@ -13,6 +13,8 @@ snum{
         tsc{
           basis_name = "x2c-SVP"
             .type = str
+          becke_accuracy = "Normal"
+            .type = str
           Calculate = True
             .type = bool
           charge = 0
@@ -38,7 +40,7 @@ snum{
           keep_wfn = True
             .type = bool
           Max_HAR_Cycles = 10
-            .type = int
+            .type = str
           method = "rks"
             .type = str
           modular = "direct"
@@ -55,7 +57,9 @@ snum{
             .type = bool
           source = "Tonto"
             .type = str
-          wfn2fchk_SF = False
+          wfn2fchk_SF = True
+            .type = bool
+          wfn2fchk_debug = False
             .type = bool
         }
         mem = 2

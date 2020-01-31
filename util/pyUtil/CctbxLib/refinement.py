@@ -259,11 +259,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
-      self.check_flack()
-      if self.flack:
-        OV.SetParam('snum.refinement.flack_str', self.flack)
-      else:
+      try:
+        self.check_flack()
+        if self.flack:
+          OV.SetParam('snum.refinement.flack_str', self.flack)
+        else:
+          OV.SetParam('snum.refinement.flack_str', "")
+      except:
         OV.SetParam('snum.refinement.flack_str', "")
+        print("Failed to evaluate Flack parameter")
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
@@ -284,13 +288,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print "Cholesky failure"
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
-        if(index > 0):
-          print "the leading minor of order %i is not positive definite"%index
-          jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc().as_dense_matrix().as_numpy_array()
-          listi = numpy.argwhere(jac_tr[index, :]!=0)
-          print "Crystallographic parameters linked:"
-          for i in listi:
-            print i, self.reparametrisation.component_annotations[i]
+        if index > 0:
+          param_name = ""
+          n_components = len(self.reparametrisation.component_annotations)
+          if index >= n_components:
+            param_name = "Scalar Parameter"
+          else:
+            param_name = self.reparametrisation.component_annotations[index]
+          print("the leading minor of order %i for %s is not positive definite"\
+           %(index, param_name))
       else:
         print "Refinement failed"
         import traceback

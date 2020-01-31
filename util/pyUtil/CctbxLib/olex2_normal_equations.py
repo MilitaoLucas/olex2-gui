@@ -243,21 +243,20 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         if a.flags.use_u_aniso():
           u_cif = adptbx.u_star_as_u_cart(self.xray_structure.unit_cell(), a.u_star)
           u = u_cif
+          if len(u) == 6:
+            u = [u[0], u[1], u[2], u[5], u[4], u[3]]
+            if a.is_anharmonic_adp():
+              u += a.anharmonic_adp.data() 
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
         yield (label, xyz, u, u_eq,
                a.occupancy*(a.multiplicity()/n_equiv_positions),
                symbol, a.flags)
     this_atom_id = 0
     for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
-      if len(u) == 6:
-        u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
-      else:
-        u_trans = u
-
       id = self.olx_atoms.atom_ids[this_atom_id]
       this_atom_id += 1
       olx.xf.au.SetAtomCrd(id, *xyz)
-      olx.xf.au.SetAtomU(id, *u_trans)
+      olx.xf.au.SetAtomU(id, *u)
       olx.xf.au.SetAtomOccu(id, occu)
     #update OSF
     OV.SetOSF(self.scale_factor())
