@@ -65,13 +65,17 @@ $+
   <b>Charge </b>
 </td>
 <td width='8%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-text",
-    "name=NoSpherA2_Charge",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.charge')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.charge', html.GetValue('~name~'))",
-    )
-  $-
+  <input
+            type="spin"
+            name="SET_CHARGE"
+            width="50"
+            height="17"
+            max='1000'
+            min='-1000'
+            bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+            value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.charge)'
+            onchange='spy.SetParam(snum.refinement.cctbx.nsff.tsc.charge,html.GetValue(~name~))'
+          >
 </td>
 <td width="16%" align='right'>
   <b>Multiplicity </b>
@@ -82,9 +86,10 @@ $+
         width='50', 
         height="17"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        min='1'
         name='SET_SNUM_MULTIPLICITY',
         value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.multiplicity)', 
-        onchange="spy.SetParam(snum.refinement.cctbx.nsff.tsc.multiplicity,'html.GetValue(~name~)')"
+        onchange="spy.SetParam(snum.refinement.cctbx.nsff.tsc.multiplicity,html.GetValue(~name~))"
       > 
 </td>
 <td width='6%' align="left">
@@ -112,7 +117,7 @@ $+
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_MAX_HAR',
         value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles)', 
-        onchange="spy.SetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles,'html.GetValue(~name~)')"
+        onchange='spy.SetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles,html.GetValue(~name~))'
       > 
 </td>
 #ignoreif -->
