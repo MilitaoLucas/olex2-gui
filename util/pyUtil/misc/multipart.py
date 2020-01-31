@@ -194,5 +194,9 @@ try:
       return RequestHandler().do_open(self, httplib.HTTPS, request)
 
   urllib2.HTTPSHandler = HTTPSHandler
+  import sys
+  if sys.platform == 'darwin':
+    import ssl
+    ssl._https_verify_certificates(False)
 except:
   print 'HTTPS handler is not installed'
