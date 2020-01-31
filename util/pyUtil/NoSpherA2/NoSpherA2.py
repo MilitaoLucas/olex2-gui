@@ -205,6 +205,7 @@ No MPI implementation found in PATH!
     
     parts = OV.ListParts()
     wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
     
     disorder_groups = None
     nr_parts = None 
@@ -230,7 +231,7 @@ No MPI implementation found in PATH!
         if i == 0:
           continue
         # Check if job folder already exists and (if needed) make the backup folders  
-        self.backup = os.path.join(self.jobs_dir, "Part_%d_backup"%i)
+        self.backup = os.path.join(self.jobs_dir, "Part_%d"%i,"backup")
         to_backup = os.path.join(self.jobs_dir,"Part_%d"%i)
         if os.path.exists(to_backup):    
           l = 1  
@@ -238,18 +239,44 @@ No MPI implementation found in PATH!
             l = l + 1  
           self.backup = self.backup + "_%d"%l  
           os.mkdir(self.backup)  
-          try:  
-            files = (file for file in os.listdir(to_backup)  
-                    if os.path.isfile(os.path.join(to_backup, file)))  
-            for f in files:  
-              f_work = os.path.join(to_backup,f)  
+        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%i)
+        if os.path.exists(os.path.join(self.wfn_job_dir,olx.FileName()+".hkl")): 
+          run = None
+          if Full_HAR == True:
+            run = OV.GetVar('Run_number')
+          files = (file for file in os.listdir(self.wfn_job_dir)  
+                  if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
+          for f in files:  
+            if Full_HAR == True:
+              if run > 0:
+                if wfn_code == "Tonto":
+                  if "restricted" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                elif wfn_code == "ORCA":
+                  if ".gbw" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)  
+                  else:
+                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))  
+                elif "Gaussian" in wfn_code:
+                  if ".chk" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+              else:
+                f_work = os.path.join(self.wfn_job_dir,f)  
+                f_dest = os.path.join(self.backup,f)
+                shutil.move(f_work,f_dest)
+            else:
+              f_work = os.path.join(self.wfn_job_dir,f)  
               f_dest = os.path.join(self.backup,f)
-              shutil.move(f_work,f_dest)  
-          except:  
-            pass 
+              shutil.move(f_work,f_dest)
         if wfn_code.lower().endswith(".fchk"):
           raise NameError('Disorder is not possible with precalculated fchks!')
-        self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%i)
         try:
           os.mkdir(self.wfn_job_dir)
         except:
@@ -280,9 +307,7 @@ No MPI implementation found in PATH!
           except NameError as error:
             print "Aborted due to: ",error
             raise NameError(error)
-        experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
-        software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-        if experimental_SF == False or software == "Tonto":
+        if experimental_SF == False or wfn_code == "Tonto":
           try:
             job.launch(self.wfn_job_dir)
           except NameError as error:
@@ -301,41 +326,6 @@ No MPI implementation found in PATH!
           cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
           shutil.copy("experimental.tsc",job.name+"_part_"+str(i)+".tsc")
           shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(i)+".log"))
-        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
-        run = None
-        if Full_HAR == True:
-          run = OV.GetVar('Run_number')
-        files = (file for file in os.listdir(self.jobs_dir)  
-                if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
-        for f in files:  
-          if Full_HAR == True:
-            if run > 0:
-              software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-              if software == "Tonto":
-                if "restricted" not in f:
-                  f_work = os.path.join(self.jobs_dir,f)  
-                  f_dest = os.path.join(self.backup,f)
-                  shutil.move(f_work,f_dest)  
-              elif software == "ORCA":
-                if ".gbw" not in f:
-                  f_work = os.path.join(self.jobs_dir,f)  
-                  f_dest = os.path.join(self.backup,f)
-                  shutil.move(f_work,f_dest)  
-                else:
-                  shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))  
-              elif "Gaussian" in software:
-                if ".chk" not in f:
-                  f_work = os.path.join(self.jobs_dir,f)  
-                  f_dest = os.path.join(self.backup,f)
-                  shutil.move(f_work,f_dest)
-            else:
-              f_work = os.path.join(self.jobs_dir,f)  
-              f_dest = os.path.join(self.backup,f)
-              shutil.move(f_work,f_dest)
-          else:
-            f_work = os.path.join(self.jobs_dir,f)  
-            f_dest = os.path.join(self.backup,f)
-            shutil.move(f_work,f_dest)
         for file in os.listdir('.'):
           if file.endswith(".wfn"):
             shutil.move(file,file + "_part%d"%i)
@@ -360,9 +350,8 @@ No MPI implementation found in PATH!
           i = i + 1  
         self.backup = self.backup + "_%d"%i  
         os.mkdir(self.backup)  
-        software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
         try:  
-          if software == "ORCA":
+          if wfn_code == "ORCA":
             print os.path.join(self.jobs_dir,job.name+"2.gbw")
             if os.path.exists(os.path.join(self.jobs_dir,job.name+"2.gbw")):
               os.remove(os.path.join(self.jobs_dir,job.name+"2.gbw"))
@@ -371,19 +360,19 @@ No MPI implementation found in PATH!
           for f in files:  
             if Full_HAR == True:
               if run > 0:
-                if software == "Tonto":
+                if wfn_code == "Tonto":
                   if "restricted" not in f:
                     f_work = os.path.join(self.jobs_dir,f)  
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)  
-                elif software == "ORCA":
+                elif wfn_code == "ORCA":
                   if ".gbw" not in f:
                     f_work = os.path.join(self.jobs_dir,f)  
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)  
                   else:
                     shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))
-                elif "Gaussian" in software:
+                elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
                     f_work = os.path.join(self.jobs_dir,f)  
                     f_dest = os.path.join(self.backup,f)
@@ -398,8 +387,7 @@ No MPI implementation found in PATH!
               shutil.move(f_work,f_dest)
         except:  
           pass  
-      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
-      
+
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
       
       if wfn_code.lower().endswith(".fchk"):
@@ -865,11 +853,11 @@ class wfn_Job(object):
       input_fn = self.name + ".com"
     args.append(fchk_exe)
     args.append(input_fn)
-    if software == "ORCA":
+    #if software == "ORCA":
 #      args.append(">")
 #      args.append(self.name + ".log")
-      if os.path.exists(os.path.join(self.full_dir,self.name + ".gbw")):
-        os.remove(os.path.join(self.full_dir,self.name + ".gbw"))
+      #if os.path.exists(os.path.join(self.full_dir,self.name + ".gbw")):
+      #  os.remove(os.path.join(self.full_dir,self.name + ".gbw"))
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
     os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
