@@ -22,7 +22,7 @@ After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The 
 
 
 # NoSpherA2 Extras
-This tool provides all the settings required for the calculation of the molecular wavefunction.
+This tool provides all the settings required for the calculation of the tsc file.
 
 ## Basis
 This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
@@ -32,13 +32,13 @@ It is **highly** recommended to run basic first iterations using single valence 
 If you really do not plan on using your computer you can use TZVPP, but these calculations will take extremely long and are more for benchmark and polishing.
 
 ## Method
-The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be sued in ORCA.
+The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be used in ORCA and are perfectly fine here.
 
-## CPU
-The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files.
+## CPUs
+The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files. Mostly copying files etc needs overhead CPU capacity, so please leave 1 CPU for these kinds of things.
 
 ## Memory
-The maximum memory that NoSpherA2 is allowed to use. This must not exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
+The maximum memory that NoSpherA2 is allowed to use. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
 
 ## Charge
 The charge of the molecule used for the wavefunction calculation. This **must** be properly assigned.
@@ -46,17 +46,26 @@ The charge of the molecule used for the wavefunction calculation. This **must** 
 ## Multiplicity
 The multiplicity (2S+1) of the wavefunction, where S is the total spin angular momentum of the configuration. E.g. a closed shell wavefunction in it's ground-state usually has multiplicity 1, one unpaired electron has multiplicity 2. Must be positive above 0.
 
-## H Aniso
-Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
+## HAR
+Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time!
+
+## Max Cycles
+This defines a criteria for the abortion of HAR, if convergence is not achieved. Maybe restraints or better parameters, resolution cutoffs or other improvements to your model might help with convergence.
+
+## Integration Accuracy
+Selectr which accuracy level is requested for the integration of electron density. This affects calcualtion of .tsc files significantly. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. Low can be used, if the number of electrons after integration is sill correct. Please check in the log files, whether this is the case!
 
 ## Use Relativistics
 Use DKH2 relativistic Hamiltonian. This should only be used with x2c-family basis sets. But for them it is highly recommended.
 
+## H Aniso
+Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
+
+## No Afix
+Remove any AFIX constraints from the current model. Use with caution, but highly usefull for starting from IAM.
+
 ## Keep Wavefunction
 Select to keep a copy of the current wavefunction in the folder you are working. Backups of former wavefunctions are kept inside the olex2 folder in that directory.
-
-## HAR
-Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time!
 
 ## Cluster Radius (For Tonto)
 If Tonto is used for a wavefunction calculation a clsuter of **explicit charges** calcualted in a self consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius until no further charges are included.
@@ -75,7 +84,6 @@ Selects which mechanism to use for the SCF to converge to the minmum. Refers to 
 
 ## Grouped Parts (For disordered structures)
 Since there might be different regions in your molecules containing disorder modelling you need to specify which disorders form a group for the calculation of Wavefunctions. A Group in this sense refers to PARTs, that resemble the same functional space. E.g. a disorder of a sodium atom with other singly charged ions around this position form a group (Let's say PARTs 1, 2 and 3 are PARTs describing three possibilities of this disorder), where these different PARTs are not interacting within the same molecular input structure, while at a second position there is a carboxylate in a disordered state, where one of the PARTs interacts with this disordered ion (PART 4), while the second PART (Nr. 5 in this case) does not.<br>
-Groups are given by syntax: 1-4,9,10;5-7;8 (Group1=[1,2,3,4,9,10] Group2=[5,6,7] Group3=[8])<br>
 For the given example a reasonable grouping would be: 1-3;4,5 <br>
 This would mean 1-3 are not to be interacting with each other, but each of them both with 4 and 5, respectively, leading to calcualtions:<br>
 PART 1 & 4<br>
@@ -84,6 +92,8 @@ PART 2 & 4<br>
 PART 2 & 5<br>
 PART 3 & 4<br>
 PART 3 & 5<br>
+<br>
+Groups are given by syntax: 1-4,9,10;5-7;8 (Group1=[1,2,3,4,9,10] Group2=[5,6,7] Group3=[8])<br>
 <br>
 It is easily understandible that having interactions between PART 1 and 2 in this example would be highly unphysical, which is why definition of disorder groups is crucial for occurances of disorder at more than one position.<br>
 <br>

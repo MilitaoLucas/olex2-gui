@@ -83,28 +83,23 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.registerFunction(self.run,False,'twin')
     OV.registerFunction(self.run_from_gui,False,'twin')
 
-  def run_from_gui(self, personal=False):
+  def run_from_gui(self, personal=0):
     print "Searching for Twin laws..."
     OV.Cursor("busy", "Searching for Twin laws...")
+    personal=int(personal)
     self.run(personal) #personal
     OV.Cursor()
     
-  def write_twinning_result_to_disk(self, html):
-    with open(get_twinning_result_filename(), 'w') as wFile:
-      wFile.write(html)
   
-  def run(self, personal=False):
-    from PilTools import MatrixMaker
+  def run(self, personal=0):
     global twin_laws_d
-    from ImageTools import *
-    IT = ImageTools()
 
     OlexCctbxAdapter.__init__(self)
     if OV.GetParam('snum.refinement.use_solvent_mask'):
       txt = "Sorry, using solvent masking and twinning is not supported yet."
       print(txt)
       html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
-      self.write_twinning_result_to_disk(html)
+      write_twinning_result_to_disk(html)
       OV.UpdateHtml()
       return
     if "_twin" in OV.HKLSrc():
@@ -113,7 +108,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   
     print(">> Searching for Twin Laws <<")
     use_image = ""
-    MM = MatrixMaker()
     self.twin_laws_d = {}
     law_txt = ""
     l = 0
@@ -122,7 +116,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.filename = olx.FileName()
     
     #class-wide variable initialisation
-    self.hklfile=OV.HKLSrc().rsplit('\\',1)[-1]
+    self.hklfile=OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl")
     self.model=self.xray_structure()
     
     hkl_sel_num=50
@@ -139,38 +133,39 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.orthogonalization_inv=numpy.linalg.inv(self.orthogonalization)
     self.recip_orth=self.orthogonalization_inv.T
     self.recip_orth_inv=numpy.linalg.inv(self.recip_orth)    
-    
-    
+    self.overlap_threshold=OV.GetParam('snum.twinning.olex2.overlap_threshold')
+    self.number_laws=OV.GetParam('snum.twinning.olex2.number_laws')
+
     
     rank=numpy.argsort(leastSquare)[::-1]
     hkl_sel = numpy.copy(hkl[rank[:hkl_sel_num],:])
-    
+    self.bad_fc=numpy.copy(f_calc[rank[:hkl_sel_num]])
+    self.bad_fo=numpy.copy(f_obs[rank[:hkl_sel_num]])
     self.bad_hkl=hkl_sel
     
     
-    
-    if not personal:
+    if personal==0:
       twin_laws=self.find_twin_laws()    
+    elif personal==1: #Angle-Axis
+      twin_laws=self.find_AA_twin_laws()
+    elif personal==2: #Sphere Search
+      twin_laws=self.find_SS_twin_laws()
     else:
-      twin_laws=self.find_personal_twin_laws()
-      
-      
+      print ("Invalid parameter passed, personal=", personal)
       
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     ordered_twins=self.purge_duplicates(ordered_twins)
     top_twins=ordered_twins[:10]
     lawcount=0
-    bg_col = OV.GetParam('gui.html.table_bg_colour')
     for i, twin_law in enumerate(top_twins):
       basf=twin_law.rbasf[0]
       r=twin_law.rbasf[1]
       r_diff=twin_law.rbasf[2]
       lawcount += 1
-      filename="%s_twin%02d.hkl"%(OV.FileName(), lawcount)
+      filename="%s_twin%02d.hkl"%(self.hklfile, lawcount)
       #self.make_hklf5(filename, twin_law, hkl, f_obs,f_uncertainty)
 
       self.make_hklf5_from_file(twin_law,new_file=filename) #ZZZZ
-
       self.twin_laws_d.setdefault(lawcount, {})
 
       r_no, basf_no, f_data, history = self.run_twin_ref_shelx(twin_law.hkl_rotation.flatten(), basf)
@@ -180,140 +175,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       except:
         r = 0.99
       r_list.append((r, lawcount, basf))
-      name = "law%i" %lawcount
-      font_col = "#444444"
-      font_col_basf = "#447744"
-      if basf == "n/a":
-        font_col_basf = OV.GetParam('gui.blue').rgb
-      elif float(basf) < 0.1:
-        font_col_basf = OV.GetParam('gui.red').rgb
-        basf = "%.2f" %float(basf)
-      else:
-        font_col_basf = OV.GetParam('gui.green_text').rgb
-        basf = "%.2f" %float(basf)
-        
-
-      txt = [{'txt':"R=%.2f%%, -%.2f%%" %((float(r)*100),(float(r_diff)*100)),
-              'font_colour':font_col},
-             {'txt':"basf=%s" %str(basf),
-              'font_colour':font_col_basf}]
-      states = ['on', 'off', 'hover', 'down']
-      matrix = twin_law.hkl_rotation.flatten()
-      rounded_matrix = self.round_matrix_elements(matrix)
       
-      bg_col_img = IT.RGBToHTMLColor(IT.adjust_colour(bg_col.rgb,luminosity=0.95))
+      self.twin_laws_d[lawcount]['BASF'] = basf
+      self.twin_laws_d[lawcount]['r'] = r
+      self.twin_laws_d[lawcount]['r_diff'] = r_diff
+      self.twin_laws_d[lawcount]['matrix'] = twin_law.hkl_rotation.flatten()
+    make_twinning_gui(self.twin_laws_d)   
       
-      for state in states:
-        image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
-
-      self.twin_laws_d[lawcount] = {'number':lawcount,
-                                    'law':twin_law.hkl_rotation,
-                                    'R1':r,
-                                    'BASF':basf,
-                                    'law_image':img,
-                                    'law_txt':law_txt,
-                                    'law_image_name':image_name,
-                                    'name':name,
-                                    'ins_file':f_data,
-                                    'history':history,
-                                    }
-      l += 1
-    #r_list.sort()
-    law_txt = ""
-    self.twin_law_gui_txt = ""
-    i = 0
-    html = "<tr bgcolor='%s'><td></td><td>" %bg_col
-    fn_base = get_twinning_result_filename().rstrip(".html")
-    for r, run, basf in r_list:
-      i += 1
-      image_name = self.twin_laws_d[run].get('law_image_name', "XX")
-      write_twin_images_to_disk(image_name, fn_base)
-      use_image = "%s%soff.png" %(fn_base, image_name)
-      img_src = "%s.png" %image_name
-      name = self.twin_laws_d[run].get('name', "XX")
-      #href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
-      law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
-      
-      d = {'name':image_name,
-           'nameupper':image_name.upper(),
-           'tool_img':image_name,
-           'down':'down',
-           'up':'up',
-           'on':'on',
-           'hover':'hover',
-           'cmds':href,
-           'target':"",
-           'feedback':"",
-           'bgcolor':"#ff9999",
-      }
-      
-      law_txt = '''
-      <font size='$GetVar(HtmlFontSizeControls)'>
-      <input
-      name="IMG_%(nameupper)s"
-      type="button"
-      image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
-      hint="%(target)s"
-      onclick="%(cmds)s%(feedback)s"
-      bgcolor="%(bgcolor)s"
-    >
-    </font>
-    '''%d
-      
-      
-      self.twin_law_gui_txt += "%s" %(law_txt)
-      control = "IMG_%s" %image_name.upper()
-
-      #html += '''
-#<a href='%s' target='Apply this twin law'><img name='%s' border="0" src="%s"></a>&nbsp;
-    #''' %(href, control, use_image)
-      
-      html += law_txt
-      
-    if not use_image:
-      return
-    html += "</td></tr>"
-    self.write_twinning_result_to_disk(html)
-#    OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
-    #OV.Refresh()
-    #if OV.IsControl(control):
-    #  OV.SetImage(control,use_image)
-    OV.UpdateHtml()
-    twin_laws_d = self.twin_laws_d
-    #import cPickle as pickle
-    #p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
-    #with open( p, "wb" ) as out:
-      #pickle.dump( twin_laws_d, out )
     
-  def round_matrix_elements(self, matrix):
-    round_tol = 0.01
-    round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
-    round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
-    round_l = zip(round_val_l, round_disp_l)
-    new_matrix = []
-    for item in matrix:
-      try:
-        item = round(item,3)
-      except:
-        m.append(item)
-        continue
-      sign = ""
-      if abs(item) != item:
-        sign = "-"
-      if str(item) == "0.0":
-        item = "0"
-      elif str(item) == "1.0":
-        item = "1"
-      elif str(item) == "-1.0":
-        item = "-1"
-      else:
-        for val,disp in round_l:
-          if val-round_tol < abs(item) < val+round_tol:
-            item = sign+disp
-            break
-      new_matrix.append(item)
-    return new_matrix
 
 
   def run_twin_ref_shelx(self, law, basf):
@@ -355,7 +224,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #r = olx.Lst("R1")
     #olex_refinement_model = OV.GetRefinementModel(False)
     #if olex_refinement_model.has_key('twin'):
-    #  basf = olex_refinement_model['twin']['basf'][0]
+    #  basf = olex_refinement_model['twin']['BASF'][0]
     #else:
     #  basf = "n/a"
 
@@ -498,53 +367,78 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     number_laws=OV.GetParam('snum.twinning.olex2.number_laws', 4)
     
     twin_laws=[]
-    twin_laws+=self.get_integral_twin_laws()
+    
+
     model=self.model
     found_early=False
     
-    if twin_laws:
-      twin_laws=self.check_basf(twin_laws)
-      print ("Found Integral Twins")
-       
-      
-    if len(twin_laws)<number_laws:
-      rotation_fraction=2
-      size=5
-      threshold=0.002
-      twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)   
-      if twin_laws:
-        twin_laws=self.check_basf(twin_laws)        
-        print ("Twin laws found via twofold rotation")
-
-     
-    if len(twin_laws)<number_laws:
-      print(">> new_methods: PART 1")
-      threshold=0.002
-      twin_laws+=self.find_twin_axes_sphere(hkl, threshold)   
-      if twin_laws:
-        print("Twin laws found through new method")
-        twin_laws=self.check_basf(twin_laws)
-      
+    tests=False
     
-    
-    if len(twin_laws)<number_laws and OV.GetParam('snum.twinning.olex2.do_long'): 
-      print(">> new_methods: PART 2")
+    if tests==True:
+      
+      #This is a test function which replaces the lower ones
+      twin_laws+=self.find_twin_laws_tests()
       threshold=0.01
-      twin_laws+=self.find_twin_axes_sphere(hkl, threshold)   
+      size=5
       if twin_laws:
-        print("Twin laws found through extended new method")
-        twin_laws=self.check_basf(twin_laws)
-    
-    if twin_laws:
-      found_early=True
-    
-    if len(twin_laws)<number_laws: # and OV.GetParam('snum.twinning.olex2.do_long')
-      print ("Not enough twin laws found via quicker search, trying basic search")
-      olx.Refresh()
-      rotation_fraction=24
-      twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)
+        found_early=True
+    else:
+        
+      
+      twin_laws+=self.get_integral_twin_laws()
+      
+      
+      
+      if twin_laws:
+        twin_laws=self.purge_duplicates(twin_laws)
+        print ("Found Integral Twins")
+         
+         
+  
+      if len(twin_laws)<number_laws:    
+        twin_laws+=self.find_twofold_axes_sphere(hkl, 0.01)  
+        if twin_laws:
+          twin_laws=self.purge_duplicates(twin_laws)        
+          print ("Twin laws found via twofold sphere search")        
+        
+      if len(twin_laws)<number_laws:
+        rotation_fraction=2
+        size=5
+        threshold=0.002
+        twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)   
+        if twin_laws:
+          twin_laws=self.purge_duplicates(twin_laws)        
+          print ("Twin laws found via twofold rotation")
+  
+       
+      if len(twin_laws)<number_laws:
+        print(">> new_methods: PART 1")
+        threshold=0.002
+        twin_laws+=self.find_twin_axes_sphere(hkl, threshold)   
+        if twin_laws:
+          print("Twin laws found through new method")
+          twin_laws=self.purge_duplicates(twin_laws)
+        
+      
+      
+      if len(twin_laws)<number_laws and OV.GetParam('snum.twinning.olex2.do_long'): 
+        print(">> new_methods: PART 2")
+        threshold=0.01
+        twin_laws+=self.find_twin_axes_sphere(hkl, threshold)   
+        if twin_laws:
+          print("Twin laws found through extended new method")
+          twin_laws=self.purge_duplicates(twin_laws)
+      
+      if twin_laws:
+        found_early=True
+      
+      if len(twin_laws)<number_laws: # and OV.GetParam('snum.twinning.olex2.do_long')
+        print ("Not enough twin laws found via quicker search, trying basic search")
+        olx.Refresh()
+        rotation_fraction=24
+        twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)
 
-    if len(twin_laws)<number_laws and OV.GetParam('snum.twinning.olex2.do_long'):
+    if len(twin_laws)<number_laws and OV.GetParam('snum.twinning.olex2.do_long') and not found_early:
       print ("Checking Extended Brute-Force Search")
       olx.Refresh()
       rotation_fraction=24
@@ -552,13 +446,12 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       threshold=0.01
       twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)
       if twin_laws:
-        twin_laws=self.check_basf(twin_laws)
+        twin_laws=self.purge_duplicates(twin_laws)
         if not found_early:
           print ("Twin found on extended search - whilst this improves the R-factor, the underestimated hkl may not justify this")
 
-    twin_laws=self.check_basf(twin_laws)
+    twin_laws=self.purge_duplicates(twin_laws)
     if twin_laws:
-      twin_laws=self.purge_duplicates(twin_laws)
       twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
@@ -571,12 +464,41 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         print ("No Twin Laws found. If there is evidence of twinning, try inputting your own parameters.")
     return twin_laws
 
-  def find_personal_twin_laws(self):
+  def find_SS_twin_laws(self):
+    #Find the twin laws based only on the user's input parameters
+    hkl=self.bad_hkl
+    number_laws=self.number_laws
+    
+    twin_laws=[]
+    twin_laws+=self.get_integral_twin_laws()
+    
+    
+    size=OV.GetParam('snum.twinning.olex2.size_sphere')
+    threshold=OV.GetParam('snum.twinning.olex2.threshold_sphere')
+    print ("Using Spherical Search: \n Bad HKL to check: %d, \n Cutoff Threshold %.4f"%(size,threshold))
+    olx.Refresh()
+    
+    twin_laws+=self.find_twofold_axes_sphere(hkl, threshold,size)
+    if len(twin_laws)<number_laws:
+      twin_laws+=self.find_twin_axes_sphere(hkl, threshold,size)
+ 
+    if twin_laws:
+      twin_laws=self.purge_duplicates(twin_laws)
+      twin_laws=self.do_rounding(twin_laws)
+      olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+      olex.m("html.ItemState h2-tools-twinning 1")
+      print ("Twin Laws Found - See the Twinning Tab")
+      olx.Refresh()
+    else:
+      print ("No Twin Laws found. If you think there is likely twinning, try increased index, rotation fraction or threshold.")
+ 
+    return twin_laws    
+
+
+  def find_AA_twin_laws(self):
     #Find the twin laws based only on the user's input parameters
     hkl=self.bad_hkl
     
-    always_basf=True
-    number_laws=4
     twin_laws=[]
     twin_laws+=self.get_integral_twin_laws()
     
@@ -588,11 +510,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     
     twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)
  
-    if twin_laws and always_basf:
-      for twin_law in twin_laws:
-        rbasf=self.basf_estimate(twin_law.hkl_rotation)       
-        twin_law.rbasf=rbasf
     if twin_laws:
+      twin_laws=self.purge_duplicates(twin_laws)
       twin_laws=self.do_rounding(twin_laws)
       olex.m("html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
       olex.m("html.ItemState h2-tools-twinning 1")
@@ -602,16 +521,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       print ("No Twin Laws found. If you think there is likely twinning, try increased index, rotation fraction or threshold.")
  
     return twin_laws    
-
+  
+  
+  
   def basf_estimate(self,twin_law):
     hkl=self.all_hkl
     Fc_sq=self.all_f_calc
     
-    
-    basf_lower=0
-    basf_upper=1
-    max_trials=100
-    accuracy=0.01
     hkl_new=numpy.dot(twin_law, hkl.T).T
     num_data=numpy.shape(hkl)[0]
     twin_component=numpy.zeros(num_data)
@@ -619,11 +535,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #the below is an ugly hash at what it should be
     #crystal_symmetry=crystal.symmetry
     fo2,fc = self.get_fo_sq_fc()
-    obs=self.observations.detwin(
-      fo2.crystal_symmetry().space_group(),
-      fo2.anomalous_flag(),
-      fc.indices(),
-      fc.as_intensity_array().data())
     
     #data_set=self.reflections.f_sq_obs.unique_under_symmetry() #this is a silly attempt just to get the crystal symmetry
     
@@ -635,7 +546,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       hkl_new_i=numpy.rint(hkl_new_i)
       loc=numpy.where((hkl[:,0]==hkl_new_i[0]) & (hkl[:,1]==hkl_new_i[1]) & (hkl[:,2]==hkl_new_i[2]))[0]
       if loc:
-        twin_component[loc]=Fc_sq[i]
+        twin_component[i]=Fc_sq[loc]
       else:
         index=flex.miller_index()
         index.append(hkl_new_i.astype(int))
@@ -651,7 +562,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         hkl_symmetric=numpy.array(index)[0]
         loc=numpy.where((hkl[:,0]==hkl_symmetric[0]) & (hkl[:,1]==hkl_symmetric[1]) & (hkl[:,2]==hkl_symmetric[2]))[0]
         if loc:
-          twin_component[loc]=Fc_sq[i]
+          twin_component[i]=Fc_sq[loc]
         
     
     if numpy.max(twin_component)==0:
@@ -660,16 +571,61 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     basf_r=self.find_basf_r(twin_component)
     
     return basf_r
-      
-  def find_basf_r(self,twin_component):
+  
+  
+  
+  def basf_estimate_short(self,twin_law):
+    hkl=self.bad_hkl
+    hkl_new=numpy.dot(twin_law, hkl.T).T
+    num_data=numpy.shape(hkl)[0]
+    twin_component=numpy.zeros(num_data) 
+    hkl_all=self.all_hkl
+    fc_all=self.all_f_calc 
     
+    fo2,fc = self.get_fo_sq_fc()    
+
+    for i, hkl_new_i in enumerate(hkl_new): #no real way to bypass this for non-integer hkl due to needing to ignore non-integral hkl
+      if(numpy.any(numpy.abs(numpy.rint(hkl_new_i)-hkl_new_i)>0.1)):
+        # skip non-integers
+        # This does not take into account the possible threshold variation, and should.
+        continue
+      hkl_new_i=numpy.rint(hkl_new_i)
+      loc=numpy.where((hkl_all[:,0]==hkl_new_i[0]) & (hkl_all[:,1]==hkl_new_i[1]) & (hkl_all[:,2]==hkl_new_i[2]))[0]
+      if loc:
+        twin_component[i]=fc_all[loc]
+      else:
+        index=flex.miller_index()
+        index.append(hkl_new_i.astype(int))
+        
+        #this is a botch to get the symmetry/anomaly correct as I don't understand them
+        miller_set=miller.set(crystal_symmetry=fo2.crystal_symmetry(),
+              indices=index,
+              anomalous_flag=fo2.anomalous_flag())        
+        #new_thing=miller.set(crystal_symmetry, index)
+        miller_set=miller_set.map_to_asu()
+        
+        index=miller_set.indices()
+        hkl_symmetric=numpy.array(index)[0]
+        loc=numpy.where((hkl_all[:,0]==hkl_symmetric[0]) & (hkl_all[:,1]==hkl_symmetric[1]) & (hkl_all[:,2]==hkl_symmetric[2]))[0]
+        if loc:
+          twin_component[i]=fc_all[loc]
+    
+    if numpy.max(twin_component)==0:
+      return [0,0.5,0] #basf 0, rmin=0.5, rdiff=0 - this mostly just indicates a bad twin law, although it should never reach here as laws without overlap should be ignored earlier.
+        
+    basf_r=self.find_basf_r(twin_component,short=True)
+    
+    return basf_r
+        
+      
+  def find_basf_r(self,twin_component,short=False):
     basf_lower=0
     basf_upper=1
     trials=0
     max_trials=100
     accuracy=0.01    
-    r_lower=self.r_from_basf(basf_lower,twin_component)
-    r_upper=self.r_from_basf(basf_upper,twin_component)
+    r_lower=self.r_from_basf(basf_lower,twin_component,short)
+    r_upper=self.r_from_basf(basf_upper,twin_component,short)
     r_0=r_lower
     if r_upper>r_lower:
       #prioritise lower over upper basf value
@@ -681,7 +637,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #need to establish a minimum, which could be at 0, before we can employ the golden section search
     while trials<max_trials and basf_upper-basf_lower>accuracy:
       basf_new=basf_lower+2/(3+math.sqrt(5))*(basf_upper-basf_lower)
-      r_new=self.r_from_basf(basf_new,twin_component)
+      r_new=self.r_from_basf(basf_new,twin_component,short)
       if r_new<r_minimum:
         basf_minimum=basf_new
         r_minimum=r_new
@@ -695,7 +651,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         basf_lower=basf_new
         r_lower=r_new
       else: 
-        print "error: basf midpoint has higher r value. Setting as highest basf"
+        #print "error: basf midpoint has higher r value. Setting as highest basf"
         basf_upper=basf_new
         r_upper=r_new        
       trials+=1
@@ -703,7 +659,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #this only runs if we have a minimum not at 0 or 1
     while trials<max_trials and basf_upper-basf_lower>accuracy:
       basf_new=basf_lower+basf_upper-basf_minimum
-      r_new=self.r_from_basf(basf_new,twin_component)
+      r_new=self.r_from_basf(basf_new,twin_component,short)
       if r_new<=r_minimum:
         if basf_minimum<basf_new:
           basf_lower=basf_minimum
@@ -737,10 +693,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return [basf_minimum, r_minimum, r_difference]
     
 
-  def r_from_basf(self,basf,twin_component):
-
-    Fc_sq=self.all_f_calc
-    Fo_sq=self.all_f_obs      
+  def r_from_basf(self,basf,twin_component,short=False):
+    if short:
+      Fc_sq=self.bad_fc
+      Fo_sq=self.bad_fo
+    else:
+      Fc_sq=self.all_f_calc
+      Fo_sq=self.all_f_obs      
     
     fcalc=(1-basf)*Fc_sq+basf*twin_component
     scale = numpy.sum(Fo_sq)/numpy.sum(fcalc)
@@ -802,12 +761,16 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
             if (rec_hkl_displacement<threshold and rec_hkl_displacement>perfect_reflection_number):
               reciprocal_rotation_lattice=numpy.linalg.matrix_power(recip_rot_lat_base,r)
-              possible_twin_laws+=[twin_rules("Reciprocal",twin_axis,numpy.around(reciprocal_rotation_lattice,decimals=3),r*base_rotation_angle,rec_hkl_displacement)]
-              reciprocal_law=True
+              rbasf=self.basf_estimate(reciprocal_rotation_lattice)
+              if rbasf[0]>1e-5:
+                possible_twin_laws+=[twin_rules("Reciprocal",twin_axis,numpy.around(reciprocal_rotation_lattice,decimals=3),r*base_rotation_angle,rec_hkl_displacement,rbasf=rbasf)]
+                reciprocal_law=True
 
             if (hkl_displacement<threshold and hkl_displacement>perfect_reflection_number):
               rotation_matrix_lattice=numpy.linalg.matrix_power(rotation_matrix_lattice_base,r)
-              possible_twin_laws+=[twin_rules("Direct",twin_axis,numpy.around(rotation_matrix_lattice,decimals=3),r*base_rotation_angle,hkl_displacement)]
+              rbasf=self.basf_estimate(rotation_matrix_lattice)
+              if rbasf[0]>1e-5:
+                possible_twin_laws+=[twin_rules("Direct",twin_axis,numpy.around(rotation_matrix_lattice,decimals=3),r*base_rotation_angle,hkl_displacement,rbasf=rbasf)]
 
     return possible_twin_laws
   
@@ -817,7 +780,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     reciprocal_orthogonalization_inverse=numpy.linalg.inv(reciprocal_orthogonalization_matrix)
 
     axis_cartesian=numpy.dot(axis_orthog,axis)
-    axis_unit_cartesian=axis_cartesian/numpy.linalg.norm(axis_cartesian)
+    axis_unit_cartesian=axis_cartesian/self.size_of_3d_vector(axis_cartesian)
     cross_product_matrix=numpy.array([[0,-axis_unit_cartesian[2],axis_unit_cartesian[1]],[axis_unit_cartesian[2],0,-axis_unit_cartesian[0]],[-axis_unit_cartesian[1],axis_unit_cartesian[0],0]],dtype=float)
     matrix=numpy.eye(3)+sine_value*cross_product_matrix+(1-cosine_value)*numpy.linalg.matrix_power(cross_product_matrix,2)
     matrix_lattice=numpy.dot(reciprocal_orthogonalization_inverse,numpy.dot(matrix,reciprocal_orthogonalization_matrix))
@@ -925,9 +888,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     convert hklf4 file to hklf5 file using the file as a base
     """
     if not filename:
-      filename=OV.FileName()+'.hkl' #OV.HKLSrc().rsplit('\\',1)[-1]
+      filename=self.hklfile+'.hkl' #OV.HKLSrc().rsplit('\\',1)[-1]
     if not new_file:
-      new_file=OV.FileName()+'twinX.hkl'
+      new_file=self.hklfile+'twinX.hkl'
     metrical=self.getMetrical()
     metrical_inv=numpy.linalg.inv(metrical)
     twin_law=twin_law_full.hkl_rotation
@@ -968,9 +931,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     adds an extra twin law to a hklf 5 or 4 file. The twin_law_full rotates the component_base component, and will be checked against that component only. The new component has integer new_component, which should differ from any other batch numbers
     """
     if not filename:
-      filename=OV.FileName()+'.hkl'
+      filename=self.hklfile+'.hkl'
     if not new_file:
-      new_file=OV.FileName()+'twinX.hkl'
+      new_file=self.hklfile+'twinX.hkl'
     metrical=self.getMetrical()
     metrical_inv=numpy.linalg.inv(metrical)
     twin_law=twin_law_full.hkl_rotation
@@ -1030,6 +993,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     return twin_laws
   
   def purge_duplicates(self, twin_laws):
+    twin_laws=self.check_basf(twin_laws)
+    twin_laws=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)  
+    
     non_duplicate_twin_laws=[]
     fo2 = self.reflections.f_sq_obs_filtered
     symmetry_ops=fo2.crystal_symmetry().space_group().all_ops()#list of symmetries to be retrieved with .as_double_array() and mapped to actual 3x3 matrices. 
@@ -1080,15 +1046,256 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         continue
       yield asu_unique[i]
   
-  def find_twin_laws_tests(self,hkl_all,f_calc,f_obs, hkl):
-    #hkl_all is all the hkl
-    #hkl is the 50 most extra reflections
+  def find_twin_laws_tests(self):
+    filename=OV.FileName()+'_test_records.txt'
+    open(filename,'w').close()
+    threshold_finding=0.002
+    threshold_using=0.1
+    size_limit=5
+    RF=2
+    
     twin_laws=[]
+
+    import cProfile, pstats, StringIO
+    sortby = 'cumulative'
     
     
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.get_integral_twin_laws()
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("CCtbx Integral Twins\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()    
+ 
+    twin_laws+=laws    
+    
+    
+
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twofold_axes_sphere(hkl, 0.01)  
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Sphere Search\n")
+    testFile.write("threshold: "+str(threshold_finding)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+
+    twin_laws+=laws        
+    
+       
+    
+    
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twin_axes(threshold_finding, size_limit, RF)
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Angle-Axis Search\n")
+    testFile.write("Threshold: "+str(threshold_finding)+", size: "+str(size_limit)+", Rotation Fraction: "+str(RF)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+    #print s.getvalue()
+
+    twin_laws+=laws        
+
+
+
+    threshold_finding=0.1
+    size_limit=1
+    
+    
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twin_axes(threshold_finding, size_limit, RF)
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Angle-Axis Search\n")
+    testFile.write("Threshold: "+str(threshold_finding)+", size: "+str(size_limit)+", Rotation Fraction: "+str(RF)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+    #print s.getvalue()
+
+    twin_laws+=laws    
+
+
+    threshold_finding=0.002    
+
+    hkl=self.bad_hkl
+    pr = cProfile.Profile()
+    pr.enable()    
+    
+    laws=self.find_twin_axes_sphere(hkl, threshold_finding)   
+
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Sphere Search\n")
+    testFile.write("threshold: "+str(threshold_finding)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+ 
+    twin_laws+=laws    
+    
+    
+
+    threshold_finding=0.01
+
+    pr = cProfile.Profile()
+    pr.enable()        
+    
+    laws=self.find_twin_axes_sphere(hkl, threshold_finding)  
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Sphere Search\n")
+    testFile.write("threshold: "+str(threshold_finding)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue()) 
+    testFile.close()   
+    
+    twin_laws+=laws      
+  
+  
+    RF=24
+    
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twin_axes(threshold_finding, size_limit, RF)
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Angle-Axis Search\n")
+    testFile.write("Threshold: "+str(threshold_finding)+", size: "+str(size_limit)+", Rotation Fraction: "+str(RF)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()    
+
+    twin_laws+=laws     
+    
+    
+    threshold_finding=0.1
+    
+    pr = cProfile.Profile()
+    pr.enable()        
+    
+    laws=self.find_twin_axes_sphere(hkl, threshold_finding)  
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Sphere Search\n")
+    testFile.write("threshold: "+str(threshold_finding)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue()) 
+    testFile.close()   
+    
+    twin_laws+=laws         
+    
+    
+
+
+    RF=24
+    size_limit=12
+    threshold_finding=0.01   
+  
+    pr = cProfile.Profile()
+    pr.enable()
+    
+    laws=self.find_twin_axes(threshold_finding, size_limit, RF)
+    
+    pr.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    
+    ps.print_stats(10)
+    
+    testFile=open(filename,'a')
+    testFile.write("Angle-Axis Search\n")
+    testFile.write("Threshold: "+str(threshold_finding)+", size: "+str(size_limit)+", Rotation Fraction: "+str(RF)+"\n")
+    testFile.write("Laws found: "+str(len(laws))+"\n")
+    self.tests_writer(laws,testFile)
+    testFile.write(s.getvalue())
+    testFile.close()
+
+    twin_laws+=laws      
+    
+  
     return twin_laws
   
-  def find_twin_axes_sphere(self, hkl, threshold):
+  def tests_writer(self,laws,testFile):
+    laws=self.purge_duplicates(laws)
+    for law in laws:
+      matrix=law.hkl_rotation
+      basf=law.rbasf[0]
+      r_red=law.rbasf[1:]
+      testFile.write(str(matrix)+"\n")
+      testFile.write("Basf: "+str(basf)+"\n")
+      testFile.write("R-reductions: "+str(r_red)+"\n")
+  
+  def find_twin_axes_sphere(self, hkl, threshold,size=10):
 
     model=self.model    
     twin_laws=[]
@@ -1099,21 +1306,20 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     a_star=recip_orth.T[0]
     b_star=recip_orth.T[1]
     c_star=recip_orth.T[2]    
-    b_star_cross_c_star=numpy.cross(b_star,c_star)
-    c_star_cross_a_star=numpy.cross(c_star,a_star)
-    a_star_cross_b_star=numpy.cross(a_star,b_star)
+    b_star_cross_c_star=numpy.array(self.cross_product(b_star,c_star))
+    c_star_cross_a_star=numpy.array(self.cross_product(c_star,a_star))
+    a_star_cross_b_star=numpy.array(self.cross_product(a_star,b_star))
     
     
-    hkl_choice=hkl[:10]
+    hkl_choice=hkl[:size]
     
     viable_rotation_points=[]
-    for vec in hkl_choice:
-      viable_rotation_points+=[self.find_same_distance_points(vec,threshold)]
       
-    for i,vec0 in enumerate(hkl_choice):
+    for i,vec0 in enumerate(hkl_choice):    
       if len(twin_laws)>3:
         print ("Twin laws found on try " + str(i))
         break
+      viable_rotation_points+=[self.find_same_distance_points(vec0,threshold)]        
       viable_rotation_points_0=viable_rotation_points[i]
       v=vec0
       #all_v_minus_w=v-viable_rotation_points_0
@@ -1129,11 +1335,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         p_euclid=numpy.dot(recip_orth,p)
         for w in viable_rotation_points_0:
           for q in viable_rotation_points_1:
-            cross=numpy.cross((v-w),(p-q))
+            cross=self.cross_product((v-w),(p-q))
             axis=cross[0]*b_star_cross_c_star+cross[1]*c_star_cross_a_star+cross[2]*a_star_cross_b_star
-            if numpy.linalg.norm(axis)<1e-16:
+            if self.size_of_3d_vector(axis)<1e-16:
               continue
-            unit_axis=axis/numpy.linalg.norm(axis)
+            unit_axis=axis/self.size_of_3d_vector(axis)
             #parallel and perpendicular components to the axis. Theoretically v_par and w_par are the same.
             v_par=numpy.dot(unit_axis,v_euclid)*unit_axis
             v_per=v_euclid-v_par
@@ -1142,8 +1348,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
             p_per=p_euclid-p_par
             q_per=numpy.dot(recip_orth,q)-p_par   
             
-            cosvw_angle=numpy.dot(v_per,w_per)/(numpy.linalg.norm(v_per)*numpy.linalg.norm(w_per))
-            cospq_angle=numpy.dot(p_per,q_per)/(numpy.linalg.norm(p_per)*numpy.linalg.norm(q_per))
+            cosvw_angle=numpy.dot(v_per,w_per)/(self.size_of_3d_vector(v_per)*self.size_of_3d_vector(w_per))
+            cospq_angle=numpy.dot(p_per,q_per)/(self.size_of_3d_vector(p_per)*self.size_of_3d_vector(q_per))
             
             if abs(cosvw_angle)>1 or abs(cospq_angle)>1:
               continue
@@ -1153,8 +1359,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
             #take positive as anticlockwise and negative as clockwise
             
             if abs(vw_angle-pq_angle)<0.0175: #needs to be larger  than 0.012 so put at 1 degree for now
-              v_w_dir=numpy.cross(v_per,w_per)
-              p_q_dir=numpy.cross(p_per,q_per)
+              v_w_dir=self.cross_product(v_per,w_per)
+              p_q_dir=self.cross_product(p_per,q_per)
               if numpy.dot(v_w_dir,p_q_dir)<0:
                 #they rotate in opposite directions
                 continue
@@ -1188,7 +1394,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                 continue              
               hkl_displacement=self.find_fom(rotated_hkl) 
       
-              if (hkl_displacement<threshold):
+              if (hkl_displacement<threshold):             
                 rbasf=self.basf_estimate(rotation_lattice)
                 if rbasf[0]>1e-10:
                   twin_laws+=[twin_rules("Alt",numpy.dot(orthogonalization_inverse,unit_axis),rotation_lattice,average_angle,hkl_displacement,rbasf)]
@@ -1198,6 +1404,81 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     twin_laws=self.purge_duplicates(twin_laws)
     return twin_laws    
     
+  def find_twofold_axes_sphere(self,hkl,threshold,size=10):
+
+    model=self.model    
+    twin_laws=[]
+    recip_orth=self.recip_orth
+    metrical_matrix=self.metrical
+    metrical_inverse=self.metrical_inv 
+    recip_orth_inv=self.recip_orth_inv
+    number_laws=self.number_laws
+    a_star=recip_orth.T[0]
+    b_star=recip_orth.T[1]
+    c_star=recip_orth.T[2]    
+    b_star_cross_c_star=numpy.array(self.cross_product(b_star,c_star))
+    c_star_cross_a_star=numpy.array(self.cross_product(c_star,a_star))
+    a_star_cross_b_star=numpy.array(self.cross_product(a_star,b_star))
+    
+    maxRdrop=0
+
+    hkl_choice=hkl[:size]
+    
+    viable_rotation_points=[]
+    #for vec in hkl_choice:
+      #viable_rotation_points+=[self.find_same_distance_points(vec,threshold)]
+      
+    #R=I+sintheta K+(1-costheta )K^2
+    #R=I+2K^2
+      
+    for i,v in enumerate(hkl_choice):
+      if len(twin_laws)>number_laws:
+        print ("Twin laws found on try " + str(i))
+        break      
+      viable_rotation_points+=[self.find_same_distance_points(v,threshold)]
+      viable_rotation_points_0=viable_rotation_points[i]
+      for w in viable_rotation_points_0:
+        if all(w==-v):
+          continue
+        axis=v+w
+        axis_euclid=numpy.dot(recip_orth,axis)
+        axis_unit=axis_euclid/self.size_of_3d_vector(axis_euclid)
+        k=numpy.array([[0,-axis_unit[2],axis_unit[1]],[axis_unit[2],0,-axis_unit[0]],[-axis_unit[1],axis_unit[0],0]])
+        k2=numpy.dot(k,k)
+        rot_mat_euclid=numpy.eye(3)+2*k2
+        rotation_lattice=numpy.dot(recip_orth_inv,numpy.dot(rot_mat_euclid,recip_orth))
+        
+              
+        duplicate=False
+        for twin_law in twin_laws:
+          if numpy.allclose(twin_law.hkl_rotation,rotation_lattice):
+            duplicate=True
+        if duplicate:
+          continue
+        
+        rotated_hkl=numpy.dot(hkl,rotation_lattice.T)
+
+        if not self.sufficient_overlaps(rotated_hkl, threshold):
+          continue              
+        hkl_displacement=self.find_fom(rotated_hkl) 
+
+        if (hkl_displacement<threshold):             
+          rbasf=self.basf_estimate(rotation_lattice)
+          if rbasf[0]>1e-10 and rbasf[2]>maxRdrop/2:
+            twin_laws+=[twin_rules("Alt",v+w,rotation_lattice,numpy.pi,hkl_displacement,rbasf)]
+            maxRdrop=max(maxRdrop,rbasf[2])
+                      
+            
+    twin_laws=self.do_rounding(twin_laws)    
+    twin_laws=self.purge_duplicates(twin_laws)
+    return twin_laws    
+        
+    
+    
+    
+    
+    
+        
   
   def find_same_distance_points(self, hkl, threshold):
     #finds points with the same d-spacing as a reciprocal lattice point hkl
@@ -1222,7 +1503,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     a_dot_c=metrical[4]
     b_dot_c=metrical[5]
     
-    size_hkl=numpy.linalg.norm(numpy.dot(orthogonalization.T,hkl))
+    size_hkl=self.size_of_3d_vector(numpy.dot(orthogonalization.T,hkl))
     max_distance=size_hkl+threshold
     same_distance_points=[]
     
@@ -1232,9 +1513,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     k_lambda=[a_dot_b,mod_b_square,b_dot_c]
     l_lambda=[a_dot_c,b_dot_c,mod_c_square]
     
-    lambda_h=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,h_lambda)))
-    lambda_k=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,k_lambda)))
-    lambda_l=1/max_distance*(numpy.linalg.norm(numpy.dot(orthogonalization.T,l_lambda)))
+    lambda_h=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,h_lambda)))
+    lambda_k=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,k_lambda)))
+    lambda_l=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,l_lambda)))
             
     #try to get the maximum h-value    
 
@@ -1242,16 +1523,30 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     max_k=numpy.floor(k_lambda[1]/lambda_k)
     max_l=numpy.floor(l_lambda[2]/lambda_l)
     
-    for h in range(-int(max_h),int(max_h)+1):
+    for h in range(0,int(max_h)+1):
       for k in range(-int(max_k),int(max_k)+1):  
-        for l in range(-int(max_l),int(max_l)+1):
-          size_h=numpy.linalg.norm(numpy.dot(orthogonalization.T,[h,k,l]))
+        discriminant_addition=-(h**2*mod_a_star**2+k**2*mod_b_star**2+2*h*k*a_star_dot_b_star)*mod_c_star**2+(h*a_star_dot_c_star+k*b_star_dot_c_star)**2
+        upper_discriminant=max_distance**2*mod_c_star**2+discriminant_addition
+        lower_discriminant=(max_distance-2*threshold)**2*mod_c_star**2+discriminant_addition
+        #still sometimes has upper <0 even when a twin laws is there. Needs work
+        if upper_discriminant<0:
+          continue
+        l_max=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(upper_discriminant))/mod_c_star**2)
+        l_min=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(upper_discriminant))/mod_c_star**2)
+        if lower_discriminant<0:
+          possible_l=range(int(l_min),int(l_max+1))
+        else:
+          l_max_lower=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(lower_discriminant))/mod_c_star**2)
+          l_min_upper=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(lower_discriminant))/mod_c_star**2)
+          possible_l=range(int(l_min),int(l_min_upper)+1)+range(int(l_max_lower),int(l_max+1))
+        for l in possible_l:
+          size_h=self.size_of_3d_vector(numpy.dot(orthogonalization.T,[h,k,l]))
           if hkl[0]==h and hkl[1]==k and hkl[2]==l:
             continue
           if abs(size_hkl-size_h)<threshold:
             same_distance_points+=[[h,k,l]]                
                    
-    
+    same_distance_points+=numpy.negative(same_distance_points).tolist()
     return same_distance_points
   
   def check_basf(self, twin_laws):
@@ -1266,7 +1561,38 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws_2+=[twin_law]
     return twin_laws_2
   
-  
+  def cross_product(self,x,y):
+    z=[0,0,0]
+    z[0]=x[1]*y[2]-x[2]*y[1]
+    z[1]=x[2]*y[0]-x[0]*y[2]
+    z[2]=x[0]*y[1]-x[1]*y[0]
+    return z
+    
+  def size_of_3d_vector(self,x):
+    z=0
+    z+=x[0]*x[0]
+    z+=x[1]*x[1]
+    z+=x[2]*x[2]
+    z=z**0.5
+    return z
+    
+  def test_law(self,twin_law,threshold):
+    new_hkl=numpy.dot(twin_law,self.bad_hkl)
+    if self.sufficient_overlaps(new_hkl,threshold)==0:
+      return None 
+    fom=self.find_fom()
+    if fom<threshold:
+      twin_law.fom=fom
+    else:
+      return None 
+    if self.basf_estimate_short(twin_law)[0]==0:
+      return None 
+    basf=self.basf_estimate(twin_law)
+    if basf[0]==0:
+      return None 
+    else:
+      twin_law.rbasf=basf
+      return twin_law
   
     
 def format_twin_string_from_law(twin_law):
@@ -1283,8 +1609,12 @@ def format_twin_string_from_law(twin_law):
       twin_str_l.append("%s" %ele)
   return " ".join(twin_str_l)
 
-
 def get_twinning_result_filename():
+  import ntpath
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  import os
+ 
   _ = ntpath.basename(OV.HKLSrc())
   _ = _.rstrip(".hkl")
   if "_twin" in _:
@@ -1304,11 +1634,14 @@ def on_twin_image_click(run_number):
       law = twin_laws_d[number]
       im = law.get('law_image')
       OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
-    
-  twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
-  twin_law_disp = format_twin_string_from_law(twin_law)
-  twin_law_rnd = numpy.rint(twin_law)
-  basf=float(twin_laws_d[int(run_number)]['BASF'])
+  try:
+    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
+    twin_law_disp = format_twin_string_from_law(twin_law)
+    twin_law_rnd = numpy.rint(twin_law)
+    basf=float(twin_laws_d[int(run_number)]['BASF'])
+  except:
+    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
+
   
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
     print ("Using twin law: %s" %twin_law_disp)
@@ -1318,7 +1651,7 @@ def on_twin_image_click(run_number):
     olx.HKLF(2)
     OV.DelIns("BASF")
     OV.AddIns("BASF %f"%basf)
-    hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
+    hklname="%s_twin%02d.hkl"%(OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl"), int(run_number))
     OV.HKLSrc(hklname)
   else:
     print ("Using twin law: %s" %twin_law_disp)
@@ -1377,3 +1710,185 @@ class HiddenPrints:
   def __exit__(self, exc_type, exc_val, exc_tb):
     sys.stdout.close()
     sys.stdout = self._original_stdout
+    
+
+def round_matrix_elements(matrix):
+  round_tol = 0.01
+  round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
+  round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
+  round_l = zip(round_val_l, round_disp_l)
+  new_matrix = []
+  for item in matrix:
+    try:
+      item = round(item,3)
+    except:
+      m.append(item)
+      continue
+    sign = ""
+    if abs(item) != item:
+      sign = "-"
+    if str(item) == "0.0":
+      item = "0"
+    elif str(item) == "1.0":
+      item = "1"
+    elif str(item) == "-1.0":
+      item = "-1"
+    else:
+      for val,disp in round_l:
+        if val-round_tol < abs(item) < val+round_tol:
+          item = sign+disp
+          break
+    new_matrix.append(item)
+  return new_matrix
+
+
+    
+def find_2_fold_olex2():
+  import gui.tools
+  cmd = "TestR"
+  res = filter(None, gui.tools.scrub(cmd))
+
+  if "batch" not in " ".join(res).lower():
+    return
+
+  matrix = res[-3:]
+  
+  i = 0
+  for line in res:
+    if line.startswith('wR2'):
+      basf = res[i+1].split()[2].strip()
+    i += 1  
+  basf = 0.2
+  r = 0.05
+  r_diff = -0.03
+  d = {}
+  d.setdefault(1, {})
+  matrix = [float(i) for i in " ".join(matrix).split()]
+  d[1]['matrix'] = matrix
+  d[1]['BASF'] = basf
+  d[1]['r'] = r
+  d[1]['r_diff'] = r_diff
+  make_twinning_gui(d)
+OV.registerFunction(find_2_fold_olex2)
+
+def make_law_images(twin_law, lawcount):
+  global twin_laws_d
+  from ImageTools import *
+  IT = ImageTools()
+  from PilTools import MatrixMaker
+  MM = MatrixMaker()
+
+  bg_col = OV.GetParam('gui.html.table_bg_colour')
+  bg_col_img = IT.RGBToHTMLColor(IT.adjust_colour(bg_col.rgb,luminosity=1.3))
+  font_col = "#444444"
+  font_col_basf = "#447744"
+  
+  basf = twin_law['BASF']
+  r = twin_law['r']
+  r_diff = twin_law['r_diff']
+  matrix = twin_law['matrix']
+  name = "law%s" %lawcount
+  if basf == "n/a":
+    font_col_basf = OV.GetParam('gui.blue').rgb
+  elif float(basf) < 0.1:
+    font_col_basf = OV.GetParam('gui.red').rgb
+    basf = "%.2f" %float(basf)
+  else:
+    font_col_basf = OV.GetParam('gui.green_text').rgb
+    basf = "%.2f" %float(basf)
+  
+  txt = [{'txt':"R=%.2f%%, -%.2f%%" %((float(r)*100),(float(r_diff)*100)),
+          'font_colour':font_col},
+         {'txt':"basf=%s" %str(basf),
+          'font_colour':font_col_basf}]
+  states = ['on', 'off', 'hover', 'down']
+  rounded_matrix = round_matrix_elements(matrix)
+  for state in states:
+    image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
+    twin_laws_d[lawcount].setdefault('law_image_name', image_name)
+
+
+
+def make_twinning_gui(laws):
+  font_col = "#444444"
+  font_col_basf = "#447744"
+  bg_col = OV.GetParam('gui.html.table_bg_colour')
+  
+  global twin_laws_d
+  twin_laws_d = laws
+  
+  r_list = []
+  for count in laws:
+    twin_law_d = laws[count]
+    make_law_images(twin_law_d, count)
+    r_list.append((twin_law_d['r'], count, twin_law_d['BASF']))
+
+  history = ""
+  ins_file = ""
+  law_txt = ""
+  i = 0
+  html = "<tr bgcolor='%s'><td></td><td>" %bg_col
+  fn_base = get_twinning_result_filename().rstrip(".html")
+  
+  for r, run, basf in r_list:
+    i += 1
+    image_name = twin_laws_d[run].get('law_image_name', "XX")
+    write_twin_images_to_disk(image_name, fn_base)
+    use_image = "%s%soff.png" %(fn_base, image_name)
+    img_src = "%s.png" %image_name
+    name = twin_laws_d[run].get('name', "XX")
+    #href = 'spy.on_twin_image_click(%s)'
+    href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
+    law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
+    
+    d = {'name':image_name,
+         'nameupper':image_name.upper(),
+         'tool_img':image_name,
+         'down':'down',
+         'up':'up',
+         'on':'on',
+         'hover':'hover',
+         'cmds':href,
+         'target':"",
+         'feedback':"",
+         'bgcolor':"#ff9999",
+    }
+    
+    law_txt = '''
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+    name="IMG_%(nameupper)s"
+    type="button"
+    image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
+    hint="%(target)s"
+    onclick="%(cmds)s%(feedback)s"
+    bgcolor="%(bgcolor)s"
+  >
+  </font>
+  '''%d
+    #self.twin_law_gui_txt += "%s" %(law_txt)
+    control = "IMG_%s" %image_name.upper()
+    html += law_txt
+  
+  #twin_laws_d[lawcount] = {'number':lawcount,
+                                #'law':matrix,
+                                #'R1':r,
+                                #'BASF':basf,
+                                #'law_image':img,
+                                #'law_txt':law_txt,
+                                #'law_image_name':image_name,
+                                #'name':name,
+                                #'ins_file':f_data,
+                                #'history':history,
+                                #}
+  #l += 1
+  
+  
+  html += "</td></tr>"
+  write_twinning_result_to_disk(html)
+  OV.UpdateHtml()
+
+def write_twinning_result_to_disk(html):
+  with open(get_twinning_result_filename(), 'w') as wFile:
+    wFile.write(html)
+  

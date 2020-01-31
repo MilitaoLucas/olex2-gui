@@ -49,8 +49,6 @@ gui_grey = OV.GetParam('gui.grey')
 
 import subprocess
 
-
-
 class FolderView:
   root = None
   class node:
@@ -1425,6 +1423,28 @@ def scrub(cmd):
 
 from GetMaskInfo import get_mask_info
 
+global twinlawsfromhklsrc
+twinlawsfromhklsrc = {}
+
+def get_twin_law_from_hklf5():
+  try:
+    global twinlawsfromhklsrc
+    src = OV.HKLSrc()
+    if src not in twinlawsfromhklsrc:
+      cmd = "HKLF5 %s" %src
+      res = scrub(cmd)
+      if "HKLF5 file is expected" in " ".join(res):
+        htm = "This is not an HKLF5 format hkl file."
+      else:
+        htm = "<b>Batch %s </b>: " %res[2][-1]
+        htm += " | ".join([res[4], res[6], res[8]])
+
+      twinlawsfromhklsrc.setdefault(src, htm)
+    return twinlawsfromhklsrc[src]
+  except:
+    return "ERR: Please check 'tools.get_twin_law_from_hklf5'"
+  
+OV.registerFunction(get_twin_law_from_hklf5, False, 'tools')
 
 def hklf_5_to_4(filename):
   '''

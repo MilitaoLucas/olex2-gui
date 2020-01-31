@@ -1,3 +1,5 @@
+# py 2to3 compatibility
+
 import olex
 import olx
 import os
@@ -82,7 +84,7 @@ class publication:
         changed = True
       elif newName in oldValue:
         newValue = oldValue
-        print "%s is already in the list of authors" %newName
+        print("%s is already in the list of authors" %newName)
       else:
         newValue = "%s;%s" %(oldValue, newName)
         changed = True
@@ -230,7 +232,7 @@ def play_crystal_images():
   imagelist = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
   current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
   idx = imagelist.index(current_image)
-  for i in xrange(0,len(imagelist)):
+  for i in range(0,len(imagelist)):
     if olx.GetVar('stop_movie') == "True":
       OV.SetParam('snum.report.crystal_image',imagelist[idx])
       return
@@ -309,7 +311,7 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     splitbit = '.vzs'
     directory = current_image.split(splitbit)[0] + splitbit
     if not os.path.exists(directory):
-      print "The path %s should have existed. It does not" %directory
+      print("The path %s should have existed. It does not" %directory)
       return None
     import zipfile
     images_zip = zipfile.ZipFile(directory, "r")
@@ -328,10 +330,10 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   total = len(file_list)
 
   if n > total:
-    print "There are only %s images, and you wanted to see %s" %(total, n)
+    print("There are only %s images, and you wanted to see %s" %(total, n))
     return
   inc = int(total/n)
-  for j in xrange(n):
+  for j in range(n):
     pos = j * inc
     if have_zip:
       content = images_zip.read(file_list[pos].filename)
@@ -378,8 +380,8 @@ def remove_from_citation_list(item):
     if not current_refs:
       l = ""
     OV.set_cif_item('_publ_section_references','\n\n'.join(current_refs))
-  except Exception, err:
-    print "Error in 'report.remove_from_citation: %s" %err
+  except Exception as err:
+    print("Error in 'report.remove_from_citation: %s" %err)
 OV.registerFunction(remove_from_citation_list, False, "report")
 
 def add_to_citation_list(item):
@@ -392,8 +394,8 @@ def add_to_citation_list(item):
       new_list.append(item)
     new_list.sort()
     OV.set_cif_item('_publ_section_references','\n\n'.join(new_list))
-  except Exception, err:
-    print "Error in 'report.add_to_citation: %s" %err
+  except Exception as err:
+    print("Error in 'report.add_to_citation: %s" %err)
 OV.registerFunction(add_to_citation_list, False, "report")
 
 def get_reflections_stats_dictionary():
@@ -432,7 +434,6 @@ def get_reflections_stats_dictionary():
   return d
 
 def create_report():
-  
   try:
     import AC4
     if AC4.AC4_instance.HasAC4():
@@ -441,6 +442,8 @@ def create_report():
       olex.m("report")
   except:
     pass
+  finally:
+    olex.m("report")
 
 olex.registerFunction(create_report, False, "gui")
 olex.registerFunction(get_crystal_image, False, "report")

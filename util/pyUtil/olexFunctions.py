@@ -306,14 +306,14 @@ class OlexFunctions(inheritFunctions):
       max_peaks = int(max_peaks)
     except:
       return
-    
+    self.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
     auto_peaks = OV.GetVar('auto_q',None)
     if not auto_peaks:
       import olexex
       auto_peaks = olexex.get_auto_q_peaks()
 
     if not max_peaks:
-      OV.SetVar('manual_q_peak_override',0)
+      OV.SetVar('snum.refinement.manual_q_peak_override',0)
       max_peaks = auto_peaks
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
@@ -321,7 +321,7 @@ class OlexFunctions(inheritFunctions):
         olx.html.SetValue(ctrl_name,0)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
-      OV.SetVar('manual_q_peak_override',max_peaks)
+      OV.SetVar('snum.refinement.manual_q_peak_override',max_peaks)
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
         olx.html.SetFG(ctrl_name,'#ffffff')
