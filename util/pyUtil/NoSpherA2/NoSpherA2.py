@@ -459,6 +459,7 @@ No MPI implementation found in PATH!
       olex.m("Afix 0")
     olex.m('delins list')
     olex.m('addins LIST -3')
+    olex.m('gendisp -source=sasaki')
     
     OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
     gui.set_notification(OV.GetVar('gui_notification'))
