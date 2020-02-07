@@ -1941,6 +1941,12 @@ user
     provider_url = "https://secure.olexsys.org/PluginProvider1/"
       .type = str
   }
+  NoSpherA2{
+    use_pyscf = False
+      .type = bool
+    has_pyscf = False
+      .type = bool
+  }
 }
 
 odac
