@@ -2,6 +2,8 @@
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
 
+<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),'DISCAMB')
+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -281,8 +283,100 @@ $+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+#ignoreif -->
 
 #ignoreif -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),'DISCAMB')
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='6%' align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Iterative",
+    "label=Iterative ",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','True')>>html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','False')>>html.Update()"
+    )
+  $-
+</td>
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'True')
+<td width="18%">
+<b>Max Cycles </b>
+</td>
+<td width='8%' align='left'>
+  <input 
+        type='spin', 
+        width='50', 
+        height="17"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_SNUM_MAX_HAR',
+        value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles)', 
+        onchange='spy.SetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles,html.GetValue(~name~))'
+      > 
+</td>
+#ignoreif -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'False')
+<td width="18%">
+ 
+</td>
+<td width="8%">
+ 
+</td>
+#ignoreif -->
+
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Aniso",
+    "label=H Aniso",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','False')"
+    )
+  $-
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Afix 0",
+    "label=No Afix",
+    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix')",
+    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','False')"
+    )
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="25%" align='left'>
+    <b>Grouped Parts </b>
+</td>
+<td width="70%">
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_Disorder_Groups@refine",
+    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')",
+    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups', html.GetValue('~name~'))")
+   $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+#ignoreif -->
+
 
 <!-- #ignoreif not spy.NoSpherA2.check_for_matching_fcf()
 <tr ALIGN='left' NAME='defden_buttons' width='100%'>
