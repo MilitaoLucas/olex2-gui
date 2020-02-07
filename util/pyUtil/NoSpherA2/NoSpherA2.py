@@ -68,6 +68,8 @@ class NoSpherA2(PT):
       self.setup_gui()
 
     self.setup_har_executables()
+    self.setup_pyscf()
+    self.setup_discamb()
     self.setup_g03_executables()
     self.setup_g09_executables()
     self.setup_g16_executables()
@@ -215,15 +217,12 @@ No MPI implementation found in PATH!
       cif = None
       if wfn_code == "Tonto":
         cif = True
+      elif wfn_code == "DISCAMB":
+        cif = True
       else:
         cif = False
       deal_with_parts(cif)
       nr_parts = len(parts)
-#      disorder_groups = read_disorder_groups()
-#      print(disorder_groups)
-#    if nr_parts > 1:
-#        raise NameError("Please don't feed me disordered structures, yet")
-#        return
         
     job = Job(self, olx.FileName())
     if nr_parts > 1:
@@ -267,6 +266,10 @@ No MPI implementation found in PATH!
                     f_work = os.path.join(self.wfn_job_dir,f)  
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
+                else:
+                  f_work = os.path.join(self.wfn_job_dir,f)  
+                  f_dest = os.path.join(self.backup,f)
+                  shutil.move(f_work,f_dest)
               else:
                 f_work = os.path.join(self.wfn_job_dir,f)  
                 f_dest = os.path.join(self.backup,f)
@@ -299,42 +302,46 @@ No MPI implementation found in PATH!
               out_cif.write(line)
               
         out_cif.close()
-        if wfn_code != "Tonto":
-          shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
-          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-          try:
-            self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
-          except NameError as error:
-            print "Aborted due to: ",error
-            raise NameError(error)
-        if experimental_SF == False or wfn_code == "Tonto":
-          try:
-            job.launch(self.wfn_job_dir)
-          except NameError as error:
-            print "Aborted due to: ", error
-            raise NameError("Tonto Failed!")
-          if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-            raise NameError('Error during structure factor calculation!')
-          olx.html.Update()
-          #combine_sfs(force=True,part=i)
-          shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
+        if wfn_code == "DISCAMB":
+          discamb(self.wfn_job_dir, job.name, out_cif)
+          shutil.copy(os.path.join(self.wfn_job_dir,"discamb.tsc"),job.name+"_part_"+str(i)+".tsc")
         else:
-          wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
-          hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
-          cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-          asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
-          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
-          shutil.copy("experimental.tsc",job.name+"_part_"+str(i)+".tsc")
-          shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(i)+".log"))
-        for file in os.listdir('.'):
-          if file.endswith(".wfn"):
-            shutil.move(file,file + "_part%d"%i)
-          if file.endswith(".wfx"):
-            shutil.move(file,file + "_part%d"%i)
-          if file.endswith(".ffn"):
-            shutil.move(file,file + "_part%d"%i)
-          if file.endswith(".fchk"):
-            shutil.move(file,file + "_part%d"%i)
+          if wfn_code != "Tonto":
+            shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
+            OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+            try:
+              self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
+            except NameError as error:
+              print "Aborted due to: ",error
+              raise NameError(error)
+          if experimental_SF == False or wfn_code == "Tonto":
+            try:
+              job.launch(self.wfn_job_dir)
+            except NameError as error:
+              print "Aborted due to: ", error
+              raise NameError("Tonto Failed!")
+            if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+              raise NameError('Error during structure factor calculation!')
+            olx.html.Update()
+            #combine_sfs(force=True,part=i)
+            shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
+          else:
+            wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
+            hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
+            cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
+            asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
+            cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
+            shutil.copy("experimental.tsc",job.name+"_part_"+str(i)+".tsc")
+            shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(i)+".log"))
+          for file in os.listdir('.'):
+            if file.endswith(".wfn"):
+              shutil.move(file,file + "_part%d"%i)
+            if file.endswith(".wfx"):
+              shutil.move(file,file + "_part%d"%i)
+            if file.endswith(".ffn"):
+              shutil.move(file,file + "_part%d"%i)
+            if file.endswith(".fchk"):
+              shutil.move(file,file + "_part%d"%i)
       print "Writing combined tsc file\n"
       combine_tscs(nr_parts)
     else:
@@ -352,7 +359,6 @@ No MPI implementation found in PATH!
         os.mkdir(self.backup)  
         try:  
           if wfn_code == "ORCA":
-            print os.path.join(self.jobs_dir,job.name+"2.gbw")
             if os.path.exists(os.path.join(self.jobs_dir,job.name+"2.gbw")):
               os.remove(os.path.join(self.jobs_dir,job.name+"2.gbw"))
           files = (file for file in os.listdir(self.jobs_dir)  
@@ -377,6 +383,10 @@ No MPI implementation found in PATH!
                     f_work = os.path.join(self.jobs_dir,f)  
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
+                else:
+                  f_work = os.path.join(self.wfn_job_dir,f)  
+                  f_dest = os.path.join(self.backup,f)
+                  shutil.move(f_work,f_dest)
               else:
                 f_work = os.path.join(self.jobs_dir,f)  
                 f_dest = os.path.join(self.backup,f)
@@ -390,67 +400,74 @@ No MPI implementation found in PATH!
 
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
       
-      if wfn_code.lower().endswith(".fchk"):
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-      elif wfn_code == "Tonto":
-        success = True
-        try:
-          job.launch()
-        except NameError as error:
-          print "Aborted due to: ", error
-          success = False
-        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-          success = False
-          with open(os.path.join(job.full_dir, job.name+".err")) as file:
-            for i in file.readlines():
-              if 'Error in' in i:
-                print(i)
-          raise NameError('Error during structure factor calculation!')
-        if success == False:
-          raise NameError("Tonto Failed!")
-        olx.html.Update()
-        if (experimental_SF == False):
+      if wfn_code == "DISCAMB":
+        cif = os.path.join(job.full_dir, job.name+".cif")
+        olx.file(cif)
+        discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), cif)
+        shutil.copy(os.path.join(OV.FilePath(),job.full_dir,"discamb.tsc"),job.name+".tsc")
+        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+      else:
+        if wfn_code.lower().endswith(".fchk"):
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+        elif wfn_code == "Tonto":
+          success = True
+          try:
+            job.launch()
+          except NameError as error:
+            print "Aborted due to: ", error
+            success = False
+          if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+            success = False
+            with open(os.path.join(job.full_dir, job.name+".err")) as file:
+              for i in file.readlines():
+                if 'Error in' in i:
+                  print(i)
+            raise NameError('Error during structure factor calculation!')
+          if success == False:
+            raise NameError("Tonto Failed!")
+          olx.html.Update()
+          if (experimental_SF == False):
+            shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
+            OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+        else:
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+          try:
+            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+          except NameError as error:
+            print "Aborted due to: ",error
+            raise NameError("Wavefunction failed!")
+      
+        # make the tsc file
+        
+        if (experimental_SF == True):
+          wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
+          hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
+          cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
+          asym_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
+          olx.Kill("$Q")
+          olx.File(asym_fn)
+          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
+          OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
+          
+        elif wfn_code != "Tonto":
+          success = True
+          try:
+            job.launch()
+          except NameError as error:
+            print "Aborted due to: ", error
+            success = False
+          if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+            success = False
+            with open(os.path.join(job.full_dir, job.name+".err")) as file:
+              for i in file.readlines():
+                if 'Error in' in i:
+                  print(i)
+            raise NameError('Error during structure factor calculation!')
+          if success == False:
+            raise NameError("Tonto Failed!")
+          olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
-      else:
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-        try:
-          self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-        except NameError as error:
-          print "Aborted due to: ",error
-          raise NameError("Wavefunction failed!")
-      
-      # make the tsc file
-      
-      if (experimental_SF == True):
-        wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
-        hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
-        cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-        asym_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
-        olx.Kill("$Q")
-        olx.File(asym_fn)
-        cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
-        
-      elif wfn_code != "Tonto":
-        success = True
-        try:
-          job.launch()
-        except NameError as error:
-          print "Aborted due to: ", error
-          success = False
-        if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-          success = False
-          with open(os.path.join(job.full_dir, job.name+".err")) as file:
-            for i in file.readlines():
-              if 'Error in' in i:
-                print(i)
-          raise NameError('Error during structure factor calculation!')
-        if success == False:
-          raise NameError("Tonto Failed!")
-        olx.html.Update()
-        shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
 
     if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
       olex.m("anis -h")
@@ -502,6 +519,52 @@ No MPI implementation found in PATH!
       else:
         self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
+    
+  def setup_pyscf(self):
+    if OV.GetParam('user.NoSpherA2.use_pyscf') == True:
+      if sys.platform[:3] == 'win':
+        self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+      else:
+        self.ubuntu_exe = None
+      self.has_pyscf = OV.GetParam('user.NoSpherA2.has_pyscf')
+      if self.has_pyscf == False:
+        if self.ubuntu_exe != None and os.path.exists(self.ubuntu_exe):
+          import subprocess
+          pyscf_check = None
+          try:
+            child = subprocess.Popen([self.ubuntu_exe,'run',"python -c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            rc = child.returncode
+            if rc == 0:
+              pyscf_check = True
+              OV.SetParam('user.NoSpherA2.has_pyscf',True) 
+          except:
+            pass
+          if pyscf_check == True:
+            self.has_pyscf = True
+          else:
+            print ("To use pySCF please install pySCF and pip in your ubuntu environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+        elif self.ubuntu_exe == None :
+          import subprocess
+          try:
+            child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            rc = child.returncode
+            if rc == 0:
+              pyscf_check = True
+              OV.SetParam('user.NoSpherA2.has_pyscf',True) 
+          except:
+            pass
+          if pyscf_check == True:
+            self.has_pyscf = True
+          else:
+            print ("To use pySCF please install pySCF in your ubuntu environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+        else:
+          if sys.platform[:3] == 'win':
+            print ("To use pySCF please install the ubuntu and linux subprocess framework for windows 10 and afterwords run:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+          else:
+            print ("To use pySCF please install python, pip and pyscf\n")
+      if self.has_pyscf == True:
+        if "pySCF" not in self.softwares:
+          self.softwares = self.softwares + ";pySCF"
 
   def setup_g09_executables(self):
     self.g09_exe = ""
@@ -572,7 +635,6 @@ No MPI implementation found in PATH!
   def setup_orca_executables(self):
     self.orca_exe = ""
     exe_pre = "orca"
-    self.orca_exe_pre = exe_pre
 
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
@@ -588,9 +650,29 @@ No MPI implementation found in PATH!
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre) 
     if os.path.exists(self.orca_exe):
-      OV.SetParam('snum.refinement.cctbx.nsff.ncpus',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
+        
+  def setup_discamb(self):
+    self.discamb_exe = ""
+    exe_pre = "discamb2tsc"
+
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.discamb_exe = _
+      else:
+        self.discamb_exe = olx.file.Which("%s.exe" %exe_pre)
+
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.discamb_exe = _
+      else:
+        self.discamb_exe = olx.file.Which("%s" %exe_pre) 
+    if os.path.exists(self.discamb_exe):
+      if "DISCAMB" not in self.softwares:
+        self.softwares = self.softwares + ";DISCAMB"
 
   def getBasisListStr(self):
     return self.basis_list_str
@@ -776,7 +858,9 @@ class wfn_Job(object):
     control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
     if relativistic == True:
-      control = control + " DKH2"
+      control = control + " DKH2 SARC/J RIJCOSX"
+    else:
+      control = control + " def2/J RIJCOSX"
     charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
     mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -987,7 +1071,36 @@ def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
   while p.poll() is None:
     time.sleep(5)
     olx.html.Update()
-    
+
+def discamb(folder, name, cif, discamb_exe):
+  folder = OV.FilePath()
+  move_args = []
+  move_args.append(discamb_exe)
+  hkl_file = os.path.join(folder,name+".hkl")
+  move_args.append("-hkl")
+  move_args.append(hkl_file)
+  if not os.path.exists(hkl_file):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    from iotbx.shelx import hklf
+    cctbx_adaptor = OlexCctbxAdapter()
+    with open(hkl_file, "w") as out:
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
+      f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
+  move_args.append("-cif")
+  move_args.append(cif)
+  os.environ['discamb_cmd'] = '+&-'.join(move_args)
+  os.environ['discamb_file'] = folder
+  pyl = OV.getPYLPath()
+  if not pyl:
+    print("A problem with pyl is encountered, aborting.")
+    return
+  import subprocess
+  p = subprocess.Popen([pyl,
+                        os.path.join(p_path, "discamb-launch.py")])
+  while p.poll() is None:
+    time.sleep(5)
+    olx.html.Update()
+
 
 class Job(object):
   origin_folder = " "
@@ -1041,11 +1154,6 @@ class Job(object):
       cctbx_adaptor = OlexCctbxAdapter()
       with open(data_file_name, "w") as out:
         f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
-#        for j, h in enumerate(f_sq_obs.indices()):
-#          s = f_sq_obs.sigmas()[j]
-#          if s <= 0: f_sq_obs.sigmas()[j] = 0.01
-#          i = f_sq_obs.data()[j]
-#          if i < 0: f_sq_obs.data()[j] = 0
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
     # We are asking to just get form factors to disk
@@ -1188,193 +1296,193 @@ class Job(object):
       else:
         raise NameError("No fchk generated!")
 
-def combine_sfs(force=False,part=-100):
-  import glob
-  import math
-
-  if debug:
-    t_beg = time.time()
-  sfc_dir = OV.GetParam('snum.refinement.cctbx.nsff.dir')
-  sfc_name = OV.GetParam('snum.refinement.cctbx.nsff.name')
-  tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
-  tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
-  
-  if tsc_source.lower().endswith("fchk"):
-    tsc_source = os.path.basename(tsc_source)
-
-  if not force:
-    if tsc_file.endswith(".tsc"):
-      return
-
-  if not sfc_dir:
-    return
-  _mod = ""
-  if not tsc_modular == "direct":
-    _mod = "_%s"%tsc_modular
-  if part == -100:
-    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + ".tsc")
-    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + ".tsc")
-  else:
-    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
-    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
-
-  if tsc_file == "Check for new":
-    if os.path.exists(tsc_fn) and os.path.exists(tsc_dst):
-      if "%0.f" %os.path.getctime(tsc_fn) == "%0.f" %os.path.getctime(tsc_dst):
-        print ("No new .tsc files")
-        olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE',  os.path.basename(tsc_dst))
-        return
-      else:
-        print ("Creating newer %s file" %tsc_dst)
-
-      t =  time.ctime(os.path.getmtime(tsc_dst))
-      OV.write_to_olex("%s_tsc_file_info"%OV.FileName() , t)
-
-  if os.path.exists(tsc_dst):
-    backup = os.path.join(OV.FilePath(), "tsc_backup")
-    if not os.path.exists(backup):
-      os.mkdir(backup)
-    i = 1
-    while (os.path.exists(os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)):
-      i = i + 1
-    try:
-      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
-    except:
-      pass
-
-  p = os.path.join(sfc_dir, "*,ascii")
-  g = glob.glob(p)
-  d = {}
-  if not g:
-    return False
-
-  if debug:
-    t1 = time.time()
-  for file_p in g:
-    if "SFs_key,ascii" in file_p:
-      sfs_fp = file_p
-      continue
-    elif "Symops,ascii" in file_p:
-      symops_fp = file_p
-      continue
-    
-    name = os.path.basename(file_p).split("_")[0]
-    d.setdefault(name,{})
-    values = open(file_p,'r').read().splitlines()
-    sfc_l = []
-    for line in values:
-      if tsc_modular == "modulus":
-        _ = line.split()
-        a = float(_[0])
-        b = float(_[1])
-        v = math.sqrt(a*a + b*b)
-        sfc_l.append("%.6f" %v)
-      elif tsc_modular == "absolute":
-        _ = line.split()
-        a = abs(float(_[0]))
-        b = abs(float(_[1]))
-        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-      elif tsc_modular == "direct":
-        _ = line.split()
-        a = float(_[0])
-        b = float(_[1])
-        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-
-    d[name].setdefault('sfc', sfc_l)
-    d[name].setdefault('name', name)
-
-  sym = open(symops_fp,'r').read().splitlines()
-  sym_l = []
-  ll = []
-  for line in sym:
-    if line:
-      li = line.split()
-      for val in li:
-        ll.append(str(int(float((val)))))
-    else:
-      sym_l.append(" ".join(ll))
-      ll = []
-
-  if debug:
-    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
-
-  #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
-  hkl_fn = "SFs_key,ascii"
-  hkl = open(sfs_fp, 'r').read().splitlines()
-  hkl_l = []  
-  for line in hkl:
-    hkl_l.append(" ".join(line.split()[0:3]))
-  d.setdefault('hkl', hkl_l)
-
-  values_l = []
-  values_l.append(d['hkl'])
-  scatterers_l = []
-  for item in d:
-    if item == "hkl":
-      continue
-    scatterers_l.append(d[item]['name'])
-    values_l.append(d[item]['sfc'])
-  tsc_l = zip(*values_l)
-
-  ol = []
-  _d = {'anomalous':'false',
-        'title': OV.FileName(),
-        'symmops': ";".join(sym_l),
-        'scatterers': " ".join(scatterers_l),
-        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
-        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
-        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
-        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
-        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
-        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
-        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
-        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
-        }
-  ol.append('TITLE: %(title)s'%_d)
-  ol.append('SYMM: %(symmops)s'%_d)
-  ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
-  ol.append('SCATTERERS: %(scatterers)s'%_d)
-  ol.append('QM Info:')
-  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
-  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
-  import datetime
-  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  ol.append('   SOFTWARE:       %(software)s'%_d)
-  ol.append('   METHOD:         %(method)s'%_d)
-  ol.append('   BASIS SET:      %(basis_set)s'%_d)
-  ol.append('   CHARGE:         %(charge)s'%_d)
-  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
-  if relativistic == True:
-    ol.append('   RELATIVISTIC:   DKH2')
-  ol.append('   DATE:           %s'%f_date)
-  if part != -100:
-    ol.append('   PART:           %d'%part)
-  if tsc_source == "Tonto":
-    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
-    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
-
-  ol.append("data:")
-
-  for line in tsc_l:
-    ol.append(" ".join(line))
-
-  t = "\n".join(ol)
-  with open(tsc_fn, 'w') as wFile:
-    wFile.write(t)
-
-  shutil.copyfile(tsc_fn, tsc_dst)
-  try:
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
-    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
-  except:
-    pass
-  olx.html.Update()
-  if debug:
-    print("Total time: %.2f"%(time.time() - t_beg))
-  return True
-
-OV.registerFunction(combine_sfs,True,'NoSpherA2')
+#def combine_sfs(force=False,part=-100):
+#  import glob
+#  import math
+#
+#  if debug:
+#    t_beg = time.time()
+#  sfc_dir = OV.GetParam('snum.refinement.cctbx.nsff.dir')
+#  sfc_name = OV.GetParam('snum.refinement.cctbx.nsff.name')
+#  tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
+#  tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+#  tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+#  
+#  if tsc_source.lower().endswith("fchk"):
+#    tsc_source = os.path.basename(tsc_source)
+#
+#  if not force:
+#    if tsc_file.endswith(".tsc"):
+#      return
+#
+#  if not sfc_dir:
+#    return
+#  _mod = ""
+#  if not tsc_modular == "direct":
+#    _mod = "_%s"%tsc_modular
+#  if part == -100:
+#    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + ".tsc")
+#    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + ".tsc")
+#  else:
+#    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
+#    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
+#
+#  if tsc_file == "Check for new":
+#    if os.path.exists(tsc_fn) and os.path.exists(tsc_dst):
+#      if "%0.f" %os.path.getctime(tsc_fn) == "%0.f" %os.path.getctime(tsc_dst):
+#        print ("No new .tsc files")
+#        olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE',  os.path.basename(tsc_dst))
+#        return
+#      else:
+#        print ("Creating newer %s file" %tsc_dst)
+#
+#      t =  time.ctime(os.path.getmtime(tsc_dst))
+#      OV.write_to_olex("%s_tsc_file_info"%OV.FileName() , t)
+#
+#  if os.path.exists(tsc_dst):
+#    backup = os.path.join(OV.FilePath(), "tsc_backup")
+#    if not os.path.exists(backup):
+#      os.mkdir(backup)
+#    i = 1
+#    while (os.path.exists(os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)):
+#      i = i + 1
+#    try:
+#      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
+#    except:
+#      pass
+#
+#  p = os.path.join(sfc_dir, "*,ascii")
+#  g = glob.glob(p)
+#  d = {}
+#  if not g:
+#    return False
+#
+#  if debug:
+#    t1 = time.time()
+#  for file_p in g:
+#    if "SFs_key,ascii" in file_p:
+#      sfs_fp = file_p
+#      continue
+#    elif "Symops,ascii" in file_p:
+#      symops_fp = file_p
+#      continue
+#    
+#    name = os.path.basename(file_p).split("_")[0]
+#    d.setdefault(name,{})
+#    values = open(file_p,'r').read().splitlines()
+#    sfc_l = []
+#    for line in values:
+#      if tsc_modular == "modulus":
+#        _ = line.split()
+#        a = float(_[0])
+#        b = float(_[1])
+#        v = math.sqrt(a*a + b*b)
+#        sfc_l.append("%.6f" %v)
+#      elif tsc_modular == "absolute":
+#        _ = line.split()
+#        a = abs(float(_[0]))
+#        b = abs(float(_[1]))
+#        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
+#      elif tsc_modular == "direct":
+#        _ = line.split()
+#        a = float(_[0])
+#        b = float(_[1])
+#        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
+#
+#    d[name].setdefault('sfc', sfc_l)
+#    d[name].setdefault('name', name)
+#
+#  sym = open(symops_fp,'r').read().splitlines()
+#  sym_l = []
+#  ll = []
+#  for line in sym:
+#    if line:
+#      li = line.split()
+#      for val in li:
+#        ll.append(str(int(float((val)))))
+#    else:
+#      sym_l.append(" ".join(ll))
+#      ll = []
+#
+#  if debug:
+#    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
+#
+#  #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
+#  hkl_fn = "SFs_key,ascii"
+#  hkl = open(sfs_fp, 'r').read().splitlines()
+#  hkl_l = []  
+#  for line in hkl:
+#    hkl_l.append(" ".join(line.split()[0:3]))
+#  d.setdefault('hkl', hkl_l)
+#
+#  values_l = []
+#  values_l.append(d['hkl'])
+#  scatterers_l = []
+#  for item in d:
+#    if item == "hkl":
+#      continue
+#    scatterers_l.append(d[item]['name'])
+#    values_l.append(d[item]['sfc'])
+#  tsc_l = zip(*values_l)
+#
+#  ol = []
+#  _d = {'anomalous':'false',
+#        'title': OV.FileName(),
+#        'symmops': ";".join(sym_l),
+#        'scatterers': " ".join(scatterers_l),
+#        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
+#        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
+#        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
+#        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
+#        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
+#        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
+#        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
+#        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
+#        }
+#  ol.append('TITLE: %(title)s'%_d)
+#  ol.append('SYMM: %(symmops)s'%_d)
+#  ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
+#  ol.append('SCATTERERS: %(scatterers)s'%_d)
+#  ol.append('QM Info:')
+#  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+#  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
+#  import datetime
+#  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+#  ol.append('   SOFTWARE:       %(software)s'%_d)
+#  ol.append('   METHOD:         %(method)s'%_d)
+#  ol.append('   BASIS SET:      %(basis_set)s'%_d)
+#  ol.append('   CHARGE:         %(charge)s'%_d)
+#  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
+#  if relativistic == True:
+#    ol.append('   RELATIVISTIC:   DKH2')
+#  ol.append('   DATE:           %s'%f_date)
+#  if part != -100:
+#    ol.append('   PART:           %d'%part)
+#  if tsc_source == "Tonto":
+#    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
+#    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
+#
+#  ol.append("data:")
+#
+#  for line in tsc_l:
+#    ol.append(" ".join(line))
+#
+#  t = "\n".join(ol)
+#  with open(tsc_fn, 'w') as wFile:
+#    wFile.write(t)
+#
+#  shutil.copyfile(tsc_fn, tsc_dst)
+#  try:
+#    OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
+#    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
+#  except:
+#    pass
+#  olx.html.Update()
+#  if debug:
+#    print("Total time: %.2f"%(time.time() - t_beg))
+#  return True
+#
+#OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
 def combine_tscs(nr_parts):
   import glob
