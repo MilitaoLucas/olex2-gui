@@ -53,6 +53,8 @@ snum{
             .type = str
           precise_output = False
             .type = bool
+          pySCF_PBC = False
+            .type = bool
           Relativistic = True
             .type = bool
           source = "Tonto"

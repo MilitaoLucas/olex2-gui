@@ -20,12 +20,16 @@ if "orca" in args[0]:
   err_fn = fchk_file + "_orca.log"
   out_fn = fchk_file + "_orca.log"
 p = subprocess.Popen(args, stdout=log)
+if "ubuntu" in args[0]:
+  print "Starting Ubuntu and running pySCF, please be patient for start"
 if err_fn == None:
   err_fn = fchk_file + ".log"
   out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
+  if "ubuntu" in args[0]:
+    time.sleep(5)
   tries += 1
   if tries >= 5:
     print("Failed to locate the output file")
