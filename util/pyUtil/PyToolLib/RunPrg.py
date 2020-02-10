@@ -893,7 +893,8 @@ class RunRefinementPrg(RunPrg):
 
       # get energy from wfn file 
       energy = None
-      if wfn_file != None:
+      source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+      if wfn_file != None and "pySCF" not in source:
         with open(wfn_file) as f:
           fread = f.readlines()
           for line in fread:
@@ -901,8 +902,10 @@ class RunRefinementPrg(RunPrg):
               source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
               if "Gaussian" in source:
                 energy = float(line.split()[3])
-              else:
+              elif "ORCA" in source:
                 energy = float(line.split()[4])
+              elif "pySCF" in source:
+                energy = 0.0
         HAR_log.write("{:^24.10f}".format(energy))
         fread = None
       else:
