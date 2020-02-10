@@ -497,6 +497,8 @@ No MPI implementation found in PATH!
       wfn_object.write_gX_input(xyz)
     elif software == "Gaussian16":
       wfn_object.write_gX_input(xyz)
+    elif software == "pySCF":
+      wfn_object.write_pyscf_script(xyz)
 
     try:
       wfn_object.run()
@@ -635,6 +637,7 @@ No MPI implementation found in PATH!
   def setup_orca_executables(self):
     self.orca_exe = ""
     exe_pre = "orca"
+    self.orca_exe_pre = exe_pre
 
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
@@ -650,6 +653,7 @@ No MPI implementation found in PATH!
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre) 
     if os.path.exists(self.orca_exe):
+      OV.SetParam('snum.refinement.cctbx.nsff.tsc.source',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
         
@@ -702,6 +706,7 @@ class wfn_Job(object):
     self.status = 0
     self.name = name
     self.parallel = parent.parallel
+    self.ubuntu_exe = parent.ubuntu_exe
     if self.name.endswith('_HAR'):
       self.name = self.name[:-4]
     elif self.name.endswith('_input'):
@@ -741,7 +746,7 @@ class wfn_Job(object):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
-      olx.File(coordinates_fn,p=8)
+      olx.File(coordinates_fn,p=10)
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
     com = open(self.input_fn,"w")
@@ -918,6 +923,195 @@ class wfn_Job(object):
       if run > 1:
         inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
     inp.close()
+    
+  def write_pyscf_script(self,xyz):
+    coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    olx.Kill("$Q")
+    if xyz:
+      olx.File(coordinates_fn,p=10)
+    xyz = open(coordinates_fn,"r")
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".py"
+    inp = open(self.input_fn,"w")
+    basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
+    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+    basis = open(basis_set_fn,"r")
+    ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
+    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+    mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
+    mem_value = float(mem) * 1024
+    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.pySCF_PBC') == False:
+      inp.write('''#!/usr/bin/env python
+
+from pyscf import gto, scf, dft, lib
+''')
+      inp.write("lib.num_threads(%s)\nmol = gto.M(\n  atom = '''"%ncpus)
+      atom_list = []
+      i = 0
+      for line in xyz:
+        i = i+1
+        if i > 2:
+          atom = line.split()
+          inp.write(line)
+          if not atom[0] in atom_list:
+            atom_list.append(atom[0])
+      xyz.close()
+      inp.write("''',\n  verbose = 5,\n)\nmol.output = '%s.log'\n"%self.name)
+      inp.write("mol.charge = %s\n"%charge)
+      inp.write("mol.spin = %s\n"%str(int(mult)-1))
+      inp.write("mol.max_memory = %s\n"%str(mem_value))
+      inp.write("mol.basis = {")
+      for i in range(0,len(atom_list)):
+        atom_type = "'" +atom_list[i] + "': ["
+        inp.write(atom_type)
+        temp_atom = atom_list[i] + ":" + basis_name
+        basis.seek(0,0)
+        while True:
+          line = basis.readline()
+          if line[0] == "!":
+            continue
+          if "keys=" in line:
+            key_line = line.split(" ")
+            type = key_line[key_line.index("keys=")+2]
+          if temp_atom in line:
+            break
+        line_run = basis.readline()
+        if "{"  in line_run:
+          line_run = basis.readline()
+        while (not "}" in line_run):
+          shell_line = line_run.split()
+          if type == "turbomole=":
+            n_primitives = shell_line[0]
+            shell_type = shell_line[1]
+          elif type == "gamess-us=":
+            n_primitives = shell_line[1]
+            shell_type = shell_line[0]
+          if shell_type.upper() == "S":
+            momentum = '0'
+          elif shell_type.upper() == "P":
+            momentum = '1'
+          elif shell_type.upper() == "D":
+            momentum = '2'
+          elif shell_type.upper() == "F":
+            momentum = '3'
+          inp.write("[%s,"%momentum)
+          for n in range(0,int(n_primitives)):
+            if type == "turbomole=":
+              number1, number2 = basis.readline().replace("D","E").split()
+              inp.write("\n                (" + number1 + ', ' + number2 + "),")
+            else:
+              number1, number2, number3 = basis.readline().replace("D","E").split()
+              inp.write("\n                (" + number2 + ', ' + number3 + "),") 
+          inp.write("],\n")
+          line_run = basis.readline()
+        inp.write("],\n")
+      basis.close()
+      inp.write("\n}\nmol.build()\n")
+      
+      model_line = None
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
+        model_line = "scf.RHF(mol)"
+      else:
+        model_line = "dft.RKS(mol)"
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic') == True:
+        model_line += ".x2c()"
+      #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
+      inp.write("mf = %s\n"%model_line)
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rks":
+        #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
+        inp.write("mf.xc = 'b3lyp'\nmf = mf.density_fit()\nmf.with_df.auxbasis = 'weigend'\n")
+      inp.write("mf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,mol,mf.mo_coeff, mo_energy=mf.mo_energy, mo_occ=mf.mo_occ)\n"%self.name)
+      inp.close()
+    else:
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      cctbx_adaptor = OlexCctbxAdapter()
+      uc = cctbx_adaptor.reflections.f_obs.unit_cell()
+      cm = uc.metrical_matrix()
+      from math import sqrt
+      inp.write('''#!/usr/bin/env python
+
+from pyscf.pbc import gto, scf, dft
+from pyscf import lib
+''')
+      inp.write("lib.num_threads(%s)\ncell = gto.M(\n  atom = '''"%ncpus)
+      atom_list = []
+      i = 0
+      for line in xyz:
+        i = i+1
+        if i > 2:
+          atom = line.split()
+          inp.write(line)
+          if not atom[0] in atom_list:
+            atom_list.append(atom[0])
+      xyz.close()
+      inp.write("''',\n  verbose = 5,\n)\ncell.output = '%s.log'\n"%self.name)
+      inp.write("cell.a = '''%.5f %.5f %.5f\n            %.5f %.5f %.5f\n            %.5f %.5f %.5f'''\n"%(sqrt(cm[0]),sqrt(cm[3]),sqrt(cm[4]),sqrt(cm[3]),sqrt(cm[1]),sqrt(cm[5]),sqrt(cm[4]),sqrt(cm[5]),sqrt(cm[2])))
+      inp.write("cell.charge = %s\n"%charge)
+      inp.write("cell.spin = %s\n"%str(int(mult)-1))
+      inp.write("cell.max_memory = %s\n"%str(mem_value))
+      inp.write("cell.precision = 1.0e-09\ncell.exp_to_discard = 0.1\n")
+      inp.write("cell.basis = {")
+      for i in range(0,len(atom_list)):
+        atom_type = "'" +atom_list[i] + "': ["
+        inp.write(atom_type)
+        temp_atom = atom_list[i] + ":" + basis_name
+        basis.seek(0,0)
+        while True:
+          line = basis.readline()
+          if line[0] == "!":
+            continue
+          if "keys=" in line:
+            key_line = line.split(" ")
+            type = key_line[key_line.index("keys=")+2]
+          if temp_atom in line:
+            break
+        line_run = basis.readline()
+        if "{"  in line_run:
+          line_run = basis.readline()
+        while (not "}" in line_run):
+          shell_line = line_run.split()
+          if type == "turbomole=":
+            n_primitives = shell_line[0]
+            shell_type = shell_line[1]
+          elif type == "gamess-us=":
+            n_primitives = shell_line[1]
+            shell_type = shell_line[0]
+          if shell_type.upper() == "S":
+            momentum = '0'
+          elif shell_type.upper() == "P":
+            momentum = '1'
+          elif shell_type.upper() == "D":
+            momentum = '2'
+          elif shell_type.upper() == "F":
+            momentum = '3'
+          inp.write("[%s,"%momentum)
+          for n in range(0,int(n_primitives)):
+            if type == "turbomole=":
+              number1, number2 = basis.readline().replace("D","E").split()
+              inp.write("\n                (" + number1 + ', ' + number2 + "),")
+            else:
+              number1, number2, number3 = basis.readline().replace("D","E").split()
+              inp.write("\n                (" + number2 + ', ' + number3 + "),") 
+          inp.write("],\n")
+          line_run = basis.readline()
+        inp.write("],\n")
+      basis.close()
+      inp.write("\n}\ncell.build()\n")
+      
+      model_line = None
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
+        model_line = "scf.RHF(cell)"
+      else:
+        model_line = "dft.RKS(cell)"
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic') == True:
+        model_line += ".x2c()"
+      #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
+      inp.write("cf = %s\n"%model_line)
+      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rks":
+        #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
+        inp.write("cf.xc = 'b3lyp'\ncf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\n")
+      inp.write("cf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
+      inp.close()
 
   def run(self):
     args = []
@@ -925,24 +1119,33 @@ class wfn_Job(object):
     software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     fchk_exe = ""
     if software == "ORCA":
-      fchk_exe = self.parent.orca_exe
+      args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
+      args.append(input_fn)
     elif software == "Gaussian03":
-      fchk_exe = self.parent.g03_exe
+      args.append(self.parent.g03_exe)
       input_fn = self.name + ".com"
+      args.append(input_fn)
     elif software == "Gaussian09":
-      fchk_exe = self.parent.g09_exe
+      args.append(self.parent.g09_exe)
       input_fn = self.name + ".com"
+      args.append(input_fn)
     elif software == "Gaussian16":
-      fchk_exe = self.parent.g16_exe
+      args.append(self.parent.g16_exe)
       input_fn = self.name + ".com"
-    args.append(fchk_exe)
-    args.append(input_fn)
-    #if software == "ORCA":
-#      args.append(">")
-#      args.append(self.name + ".log")
-      #if os.path.exists(os.path.join(self.full_dir,self.name + ".gbw")):
-      #  os.remove(os.path.join(self.full_dir,self.name + ".gbw"))
+      args.append(input_fn)
+    elif software == "pySCF":
+      input_fn = self.name + ".py"
+      if self.ubuntu_exe != None and os.path.exists(self.ubuntu_exe):
+        args.append(self.ubuntu_exe)
+        args.append('run')
+        args.append("python %s"%input_fn)
+      elif self.ubuntu_exe == None :
+        args.append('python')
+        args.append(input_fn)
+        
+    print args
+
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
     os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
@@ -963,7 +1166,7 @@ class wfn_Job(object):
         pass
       else:
         raise NameError('Orca did not terminate normally!')
-    else:
+    elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
         pass
       else:
@@ -974,22 +1177,25 @@ class wfn_Job(object):
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-    if("g09" in args[0]):
+    elif("g09" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g09.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-    if("g16" in args[0]):
+    elif("g16" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-    if("orca" in args[0]):
+    elif("orca" in args[0]):
       #shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+    elif software == "pySCF":
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
       
       experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
       
