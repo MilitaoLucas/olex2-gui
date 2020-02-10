@@ -535,6 +535,7 @@ No MPI implementation found in PATH!
           pyscf_check = None
           try:
             child = subprocess.Popen([self.ubuntu_exe,'run',"python -c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            out, err = child.communicate()
             rc = child.returncode
             if rc == 0:
               pyscf_check = True
@@ -549,6 +550,7 @@ No MPI implementation found in PATH!
           import subprocess
           try:
             child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            out, err = child.communicate()
             rc = child.returncode
             if rc == 0:
               pyscf_check = True
@@ -1103,8 +1105,6 @@ from pyscf import lib
         model_line = "scf.RHF(cell)"
       else:
         model_line = "dft.RKS(cell)"
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic') == True:
-        model_line += ".x2c()"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("cf = %s\n"%model_line)
       if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rks":
