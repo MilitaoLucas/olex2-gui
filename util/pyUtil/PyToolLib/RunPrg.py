@@ -822,8 +822,8 @@ class RunRefinementPrg(RunPrg):
     old_model = OlexRefinementModel()
     converged = False
     run = 0
-    HAR_log = open("%s/%s.har" %(OV.FilePath(),self.original_filename),"w")
-    HAR_log.write("HAR using NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
+    HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
+    HAR_log.write("NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
     HAR_log.write("\n")
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
     HAR_log.write("************************************************************************************\n")

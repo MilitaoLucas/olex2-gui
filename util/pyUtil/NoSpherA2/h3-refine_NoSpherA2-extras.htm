@@ -232,26 +232,6 @@ $+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),pySCF)
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="5%" align="left">
-  $+
-    html.Snippet("gui/snippets/input-checkbox-td",
-    "name=NoSpherA2_pyscf_pbc@refine",
-    "label=Use PBC",
-    "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.pySCF_PBC')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.pySCF_PBC','True')",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.pySCF_PBC','False')"
-    )
-  $-
-</td>
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
-
 <!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),ORCA)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
