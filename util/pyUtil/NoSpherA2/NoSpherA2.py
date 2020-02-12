@@ -303,7 +303,7 @@ No MPI implementation found in PATH!
               
         out_cif.close()
         if wfn_code == "DISCAMB":
-          discamb(self.wfn_job_dir, job.name, self.discamb_exe)
+          discamb(os.path.join(OV.FilePath(),self.wfn_job_dir), job.name, self.discamb_exe)
           shutil.copy(os.path.join(self.wfn_job_dir,job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
         else:
           if wfn_code != "Tonto":

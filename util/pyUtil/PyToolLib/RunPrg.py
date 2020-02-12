@@ -1099,7 +1099,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.flush()
     HAR_log.close()
 
-    with open("%s/%s.har" %(OV.FilePath(),self.original_filename), 'r') as f:
+    with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
     OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
     import gui
