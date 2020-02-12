@@ -303,8 +303,8 @@ No MPI implementation found in PATH!
               
         out_cif.close()
         if wfn_code == "DISCAMB":
-          discamb(self.wfn_job_dir, job.name, out_cif)
-          shutil.copy(os.path.join(self.wfn_job_dir,"discamb.tsc"),job.name+"_part_"+str(i)+".tsc")
+          discamb(self.wfn_job_dir, job.name, self.discamb_exe)
+          shutil.copy(os.path.join(self.wfn_job_dir,job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
         else:
           if wfn_code != "Tonto":
             shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
@@ -401,10 +401,10 @@ No MPI implementation found in PATH!
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
       
       if wfn_code == "DISCAMB":
-        cif = os.path.join(job.full_dir, job.name+".cif")
-        olx.file(cif)
-        discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), cif)
-        shutil.copy(os.path.join(OV.FilePath(),job.full_dir,"discamb.tsc"),job.name+".tsc")
+        cif = str(os.path.join(job.full_dir, job.name+".cif"))
+        olx.File(cif)
+        discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), self.discamb_exe)
+        shutil.copy(os.path.join(OV.FilePath(),job.full_dir,job.name+".tsc"),job.name+".tsc")
         OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
       else:
         if wfn_code.lower().endswith(".fchk"):
@@ -1278,12 +1278,12 @@ def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
     time.sleep(5)
     olx.html.Update()
 
-def discamb(folder, name, cif, discamb_exe):
-  folder = OV.FilePath()
+def discamb(folder, name, discamb_exe):
   move_args = []
   move_args.append(discamb_exe)
   hkl_file = os.path.join(folder,name+".hkl")
-  move_args.append("-hkl")
+  cif = os.path.join(folder,name+".cif")
+  move_args.append(cif)
   move_args.append(hkl_file)
   if not os.path.exists(hkl_file):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1292,8 +1292,7 @@ def discamb(folder, name, cif, discamb_exe):
     with open(hkl_file, "w") as out:
       f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-  move_args.append("-cif")
-  move_args.append(cif)
+
   os.environ['discamb_cmd'] = '+&-'.join(move_args)
   os.environ['discamb_file'] = folder
   pyl = OV.getPYLPath()
