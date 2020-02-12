@@ -13,18 +13,18 @@ args = os.getenv("discamb_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'" + ' in: ' + discamb_file)
 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
 tries = 0
-while not os.path.exists('discamb.log'):
+while not os.path.exists('discamb2tsc.log'):
   time.sleep(1)
   tries += 1
   if tries >= 5:
     print("Failed to locate the output file")
     time.sleep(10)
     exit(1)
-with open('discamb.log', "rU") as stdout:
+with open('discamb2tsc.log', "rU") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:
       print x
-    time.sleep(3)
+    time.sleep(1)
   
 print "Finished"
