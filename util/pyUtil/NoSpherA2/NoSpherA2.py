@@ -206,6 +206,8 @@ No MPI implementation found in PATH!
     self.setup_har_executables()
     
     parts = OV.ListParts()
+    if parts != None:
+      parts = list(parts)
     wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
     experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
     
@@ -227,11 +229,11 @@ No MPI implementation found in PATH!
     job = Job(self, olx.FileName())
     if nr_parts > 1:
       for i in range(nr_parts):
-        if i == 0:
+        if parts[i] == 0:
           continue
         # Check if job folder already exists and (if needed) make the backup folders  
-        self.backup = os.path.join(self.jobs_dir, "Part_%d"%i,"backup")
-        to_backup = os.path.join(self.jobs_dir,"Part_%d"%i)
+        self.backup = os.path.join(self.jobs_dir, "Part_%d"%parts[i],"backup")
+        to_backup = os.path.join(self.jobs_dir,"Part_%d"%parts[i])
         if os.path.exists(to_backup):    
           l = 1  
           while (os.path.exists(self.backup + "_%d"%l)):  
@@ -239,7 +241,7 @@ No MPI implementation found in PATH!
           self.backup = self.backup + "_%d"%l  
           os.mkdir(self.backup)  
         Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
-        self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%i)
+        self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%parts[i])
         if os.path.exists(os.path.join(self.wfn_job_dir,olx.FileName()+".hkl")): 
           run = None
           if Full_HAR == True:
@@ -286,7 +288,7 @@ No MPI implementation found in PATH!
           pass
         atom_loop_reached = False
         out_cif = open(os.path.join(self.wfn_job_dir,"%s.cif"%(OV.ModelSrc())),"w")
-        with open("%s_part_%s.cif" %(OV.ModelSrc(), i),"r") as incif:
+        with open("%s_part_%s.cif" %(OV.ModelSrc(), parts[i]),"r") as incif:
           for line in incif:
             if "_atom_site_disorder_group" in line:
               atom_loop_reached = True
@@ -304,10 +306,11 @@ No MPI implementation found in PATH!
         out_cif.close()
         if wfn_code == "DISCAMB":
           discamb(os.path.join(OV.FilePath(),self.wfn_job_dir), job.name, self.discamb_exe)
-          shutil.copy(os.path.join(self.wfn_job_dir,job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
+          shutil.copy(os.path.join(self.wfn_job_dir,job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
+          shutil.copy(os.path.join(self.wfn_job_dir,"discamb2tsc.log"),os.path.join(self.jobs_dir,"discamb2tsc.log"))
         else:
           if wfn_code != "Tonto":
-            shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), i),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
+            shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), parts[i]),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
             OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
             try:
               self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
@@ -324,26 +327,26 @@ No MPI implementation found in PATH!
               raise NameError('Error during structure factor calculation!')
             olx.html.Update()
             #combine_sfs(force=True,part=i)
-            shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(i)+".tsc")
+            shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
           else:
             wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
             hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
             asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
             cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
-            shutil.copy("experimental.tsc",job.name+"_part_"+str(i)+".tsc")
-            shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(i)+".log"))
+            shutil.copy("experimental.tsc",job.name+"_part_"+str(parts[i])+".tsc")
+            shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(parts[i])+".log"))
           for file in os.listdir('.'):
             if file.endswith(".wfn"):
-              shutil.move(file,file + "_part%d"%i)
+              shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".wfx"):
-              shutil.move(file,file + "_part%d"%i)
+              shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".ffn"):
-              shutil.move(file,file + "_part%d"%i)
+              shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".fchk"):
-              shutil.move(file,file + "_part%d"%i)
+              shutil.move(file,file + "_part%d"%parts[i])
       print "Writing combined tsc file\n"
-      combine_tscs(nr_parts)
+      combine_tscs()
     else:
       # Check if job folder already exists and (if needed) make the backup folders  
       self.backup = os.path.join(self.jobs_dir, "backup")
@@ -1689,9 +1692,12 @@ class Job(object):
 #
 #OV.registerFunction(combine_sfs,True,'NoSpherA2')
 
-def combine_tscs(nr_parts):
+def combine_tscs():
   import glob
   import math
+  
+  parts = list(OV.ListParts())
+  nr_parts = len(parts)
 
   if debug:
     t_beg = time.time()
@@ -1731,9 +1737,9 @@ def combine_tscs(nr_parts):
   for part in range(int(nr_parts)):
     if part == 0:
       continue
-    print "Working on Part %d of %d\n"%(part,int(nr_parts)-1)
-    print "looking for: "+os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%part)
-    tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%part)
+    print "Working on Part %d of %d\n"%(parts[part],int(nr_parts)-1)
+    #print "looking for: "+os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
+    tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
     if not os.path.isfile(tsc_fn):
       print "Error finding tsc Files!\n"
       return False
@@ -1754,6 +1760,9 @@ def combine_tscs(nr_parts):
         part_atom_list = line[12: ].replace('\n','').split(' ')
         #print part_atom_list
       elif 'data:' in line:
+        data = True
+        continue
+      elif 'DATA:' in line:
         data = True
         continue
       if data == True:

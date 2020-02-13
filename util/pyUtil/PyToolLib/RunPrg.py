@@ -861,6 +861,7 @@ class RunRefinementPrg(RunPrg):
 
     max_cycles = int(OV.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+    source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
 
     while converged == False:
       run += 1
@@ -893,7 +894,6 @@ class RunRefinementPrg(RunPrg):
 
       # get energy from wfn file 
       energy = None
-      source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
       if wfn_file != None and "pySCF" not in source:
         with open(wfn_file) as f:
           fread = f.readlines()
@@ -1044,7 +1044,22 @@ class RunRefinementPrg(RunPrg):
     # Done with the while !Converged
     OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
     if converged == False:
-      HAR_log.write("  !! UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!\n")
+      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!!\n")
+      self.refinement_has_failed= "Warning: Unconverged Model!"
+    if "DISCAMB" in source:
+      unknown_sources = False
+      with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
+        for i in discamb_log.readlines():
+          if "unassigned atom types" in i:
+            unknown_sources = True
+          if unknown_sources == True:
+            HAR_log.write(i)
+      if unknown_sources == True:
+        HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
+        if self.refinement_has_failed != None:
+          self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
+        else:
+          self.refinement_has_failed = "Unassigned Atom Types!"
     HAR_log.write("************************************************************************************\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
