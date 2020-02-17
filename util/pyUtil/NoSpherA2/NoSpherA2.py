@@ -711,7 +711,7 @@ class wfn_Job(object):
     self.status = 0
     self.name = name
     self.parallel = parent.parallel
-    self.ubuntu_exe = parent.ubuntu_exe
+#    self.ubuntu_exe = parent.ubuntu_exe
     if self.name.endswith('_HAR'):
       self.name = self.name[:-4]
     elif self.name.endswith('_input'):
