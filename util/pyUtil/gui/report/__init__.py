@@ -437,13 +437,15 @@ def create_report():
   try:
     import AC4
     if AC4.AC4_instance.HasAC4():
-      olex.m('spy.ac4.create_report()')
+      try:
+        olex.m('spy.ac4.create_report()')
+      except:
+        print("Tried to make AC4 report and failed. Making default report instead")
+        olex.m("report")
     else:
       olex.m("report")
   except:
-    pass
-  finally:
-    olex.m("report")
+    print("Failed to make a report")
 
 olex.registerFunction(create_report, False, "gui")
 olex.registerFunction(get_crystal_image, False, "report")

@@ -333,17 +333,20 @@ class Node(object):
       if resPath is not None and os.path.exists(resPath):
         self.res = compressFile(resPath)
 
-      try:
-        self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
-        self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
-      except:
-        pass
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
+        
       else:
         self.program = OV.GetParam('snum.refinement.program')
         self.method = OV.GetParam('snum.refinement.method')
+        
+        try:
+          self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+          self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
+        except:
+          pass
+        
     else:
       # XXX backwards compatibility 2010-01-15
       self.R1 = history_leaf.R1
