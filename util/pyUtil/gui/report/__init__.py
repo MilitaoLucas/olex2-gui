@@ -434,7 +434,6 @@ def get_reflections_stats_dictionary():
   return d
 
 def create_report():
-  report_made = False
   try:
     import AC4
     if AC4.AC4_instance.HasAC4():
