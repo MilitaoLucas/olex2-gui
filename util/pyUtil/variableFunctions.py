@@ -164,34 +164,6 @@ def get_phil_file_path(which):
   else:
     return None
 
-def get_snum_phil():
-  user_phil_file = os.path.join(OV.DataDir(), 'snum.phil')
-  if os.path.exists(user_phil_file):
-    return user_phil_file
-  else:
-    return None
-
-def get_user_phil():
-  user_phil_file = os.path.join(OV.DataDir(), 'user.phil')
-  if os.path.exists(user_phil_file):
-    return user_phil_file
-  else:
-    return None
-
-def get_olex2_phil():
-  olex2_phil_file = "%s/olex2.phil" %OV.DataDir()
-  if os.path.exists(olex2_phil_file):
-    return olex2_phil_file
-  else:
-    return None
-
-def get_custom_phil():
-  custom_phil_file = "%s/custom.phil" %OV.DataDir()
-  if os.path.isfile(custom_phil_file):
-    return custom_phil_file
-  else:
-    return None
-
 def LoadParams():
   # snum params
 
