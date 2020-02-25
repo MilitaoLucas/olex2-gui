@@ -157,24 +157,10 @@ def VVD_to_phil():
         break
   return '\n'.join(phil_strings)
 
-def get_user_phil():
-  user_phil_file = "%s/user.phil" %OV.DataDir()
+def get_phil_file_path(which):
+  user_phil_file = os.path.join(OV.DataDir(), '%s.phil' %which)
   if os.path.exists(user_phil_file):
     return user_phil_file
-  else:
-    return None
-
-def get_olex2_phil():
-  olex2_phil_file = "%s/olex2.phil" %OV.DataDir()
-  if os.path.exists(olex2_phil_file):
-    return olex2_phil_file
-  else:
-    return None
-
-def get_custom_phil():
-  custom_phil_file = "%s/custom.phil" %OV.DataDir()
-  if os.path.isfile(custom_phil_file):
-    return custom_phil_file
   else:
     return None
 
@@ -182,32 +168,19 @@ def LoadParams():
   # snum params
 
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
-
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
     parse=phil_interface.parse)
-
-  # Olex2 Phil
-  olex2_phil = get_olex2_phil()
-  if olex2_phil:
-    try:
-      phil_handler.update(phil_file=olex2_phil)
-    except:
-      print("Failed to read olex2.phil")
-  # User Phil
-  user_phil = get_user_phil()
-  if user_phil:
-    try:
-      phil_handler.update(phil_file=user_phil)
-    except:
-      print("Failed to read user.phil")
-  custom_phil = get_custom_phil()
-  if custom_phil:
-    try:
-      phil_handler.update(phil_file=custom_phil)
-    except:
-      print("Failed to read custom.phil")
-  olx.phil_handler = phil_handler
+  
+  scopes = ['olex2', 'user', 'custom', 'snum']
+  for scope in scopes:
+    phil_p = get_phil_file_path(scope)
+    if phil_p:
+      try:
+        phil_handler.update(phil_file=phil_p)
+      except:
+        print("Failed to read %.phil" %scope)
+  olx.phil_handler = phil_handler		
 
   # GUI Phil
   if OV.HasGUI() or True:
@@ -328,10 +301,12 @@ def OnStructureLoaded(previous):
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
     olx.CifExtract(cif_name)
+
+  LoadStructureParams()
+
   if previous != OV.FileFull() and olx.FileExt() != "cif":
     import History
     History.hist.loadHistory()
-  LoadStructureParams()
   if olx.IsFileType('ires') == 'true':
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   try:
@@ -353,17 +328,26 @@ def OnHKLChange(hkl):
     pass
 OV.registerFunction(OnHKLChange)
 
-def SaveUserParams():
-  user_phil_file = "%s/user.phil" %(OV.DataDir())
+def SavesNumParams():
+  snum_phil_file = os.path.join(OV.DataDir(), "snum.phil")
   olx.phil_handler.save_param_file(
-    file_name=user_phil_file, scope_name='user', diff_only=True)
-  gui_phil_file = "%s/gui.phil" %(OV.DataDir())
+    file_name=snum_phil_file, scope_name='snum', diff_only=True)
+OV.registerFunction(SavesNumParams)
+
+def SaveGuiParams():
+  gui_phil_file = os.path.join(OV.DataDir(), "gui.phil")
   olx.gui_phil_handler.save_param_file(
     file_name=gui_phil_file, scope_name='gui', diff_only=True)
+OV.registerFunction(SaveGuiParams)
+
+def SaveUserParams():
+  user_phil_file = os.path.join(OV.DataDir(), "user.phil")
+  olx.phil_handler.save_param_file(
+    file_name=user_phil_file, scope_name='user', diff_only=True)
 OV.registerFunction(SaveUserParams)
 
 def SaveOlex2Params():
-  olex2_phil_file = "%s/olex2.phil" %(OV.DataDir())
+  olex2_phil_file = os.path.join(OV.DataDir(), "olex2.phil")
   olx.phil_handler.save_param_file(
     file_name=olex2_phil_file, scope_name='olex2', diff_only=True)
 OV.registerFunction(SaveOlex2Params)
