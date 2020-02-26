@@ -387,14 +387,14 @@ class OlexRefinementModel(object):
                   sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1]) 
                     if atom_restraint[1] is not None else None) )
                   pivot_name = atom['label']
-                  
+
                   # if symmetry related we have a tuple, not an int
                   for neighbour in atom['neighbours']: 
                     if(type(neighbour)==type(())):
                       neighbour_id=neighbour[0]
                     else:
                       neighbour_id=neighbour
-                    
+
                     # now finding the type of the neighbour
                     getmeout=False
                     for residuebis in self.model['aunit']['residues']:

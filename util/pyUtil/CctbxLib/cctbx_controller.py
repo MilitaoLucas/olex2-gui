@@ -265,7 +265,6 @@ class create_cctbx_xray_structure(object):
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
     u_star = shelx_adp_converter(builder.crystal_symmetry)
-    init_tensors = False
     for label, site, occupancy, u, anharmonic_u, uiso_owner, scattering_type, fixed_vars in atom_iter:
       behaviour_of_variable = [True]*12
       if fixed_vars is not None:
@@ -279,7 +278,6 @@ class create_cctbx_xray_structure(object):
                            scattering_type=scattering_type)
         if anharmonic_u:
           a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
-          init_tensors = True
         behaviour_of_variable.pop(5)
       else:
         a = xray.scatterer(label=label,
