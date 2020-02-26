@@ -216,6 +216,15 @@ class OlexCctbxAdapter(object):
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
         self._xray_structure.set_inelastic_form_factors(
           self.wavelength, inelastic_table)
+
+    r_disp = self.olx_atoms.model.get('refine_disp')
+    if r_disp:
+      for sc in self._xray_structure.scatterers():
+        if sc.scattering_type in r_disp:
+          sc.flags.set_grad_fp(True)
+          if not self._xray_structure.space_group().is_origin_centric():
+            sc.flags.set_grad_fdp(True)
+
     return self._xray_structure
 
   def restraints_manager(self):

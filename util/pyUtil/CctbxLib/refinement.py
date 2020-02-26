@@ -26,7 +26,7 @@ from smtbx.refinement import least_squares
 from smtbx.refinement import restraints
 from smtbx.refinement import constraints
 from smtbx.refinement.constraints import geometrical
-from smtbx.refinement.constraints import adp
+from smtbx.refinement.constraints import adp, fpfdp
 from smtbx.refinement.constraints import site
 from smtbx.refinement.constraints import occupancy
 from smtbx.refinement.constraints import rigid
@@ -1050,6 +1050,27 @@ The following options were used:
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
       constraints.append(rigid.same_group(sg))
+    fps = {}
+    fdps = {}
+    for idx, xs in enumerate(self._xray_structure.scatterers()):
+      if xs.flags.grad_fp():
+        fpl = fps.get(xs.scattering_type)
+        if fpl is None:
+          fps[xs.scattering_type] = [idx]
+        else:
+          fpl.append(idx)
+      if xs.flags.grad_fdp():
+        fdpl = fdps.get(xs.scattering_type)
+        if fdpl is None:
+          fdps[xs.scattering_type] = [idx]
+        else:
+          fdpl.append(idx)
+    for t, l in fps.iteritems():
+      if len(l) > 1:
+        constraints.append(fpfdp.shared_fp(l))
+    for t, l in fdps.iteritems():
+      if len(l) > 1:
+        constraints.append(fpfdp.shared_fdp(l))
     return constraints
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
