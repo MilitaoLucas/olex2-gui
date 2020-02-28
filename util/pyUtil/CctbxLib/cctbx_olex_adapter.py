@@ -222,8 +222,7 @@ class OlexCctbxAdapter(object):
       for sc in self._xray_structure.scatterers():
         if sc.scattering_type in r_disp:
           sc.flags.set_grad_fp(True)
-          if not self._xray_structure.space_group().is_origin_centric():
-            sc.flags.set_grad_fdp(True)
+          sc.flags.set_grad_fdp(True)
 
     return self._xray_structure
 
