@@ -906,7 +906,8 @@ class RunRefinementPrg(RunPrg):
                 energy = float(line.split()[4])
               elif "pySCF" in source:
                 energy = 0.0
-        HAR_log.write("{:^24.10f}".format(energy))
+        if energy is not None:
+          HAR_log.write("{:^24.10f}".format(energy))
         fread = None
       else:
         HAR_log.write("{:24}".format(" "))
