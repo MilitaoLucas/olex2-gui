@@ -981,8 +981,8 @@ class ImageTools(FontInstances):
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
 
-    txt = self._shorten_text(txt=txt, draw=draw, font=font, left_start=self.txt_left, width=max_width)
-
+    if txt == "%%":
+      txt = "%"
     self.font_colour = font_colour
 
     self.get_valign_font_modifications()
