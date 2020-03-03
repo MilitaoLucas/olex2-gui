@@ -234,6 +234,13 @@ class OlexRefinementModel(object):
     for residue in asu['residues']:
       for atom in residue['atoms']:
         self._atoms.append(atom)
+        if residue['class'] != 'default':
+          chainId = residue['chainId']
+          if chainId != '~':
+            nl = "%s:%s_%s" %(chainId, atom['label'], residue['number'])
+          else:
+            nl = "%s_%s" %(atom['label'], residue['number'])
+          atom['label'] = nl
         element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
     vars = olex_refinement_model['variables']['variables']
@@ -435,8 +442,8 @@ class OlexRefinementModel(object):
           random.shuffle(shuffle_ids)
           for i in xrange(len(i_seqs)-3):
             yield 'chirality', dict(
-              i_seqs=[i_seqs[i] for i in shuffle_ids[i:i+4]],
-              sym_ops=[kwds['sym_ops'][i] for i in shuffle_ids[i:i+4]],
+              i_seqs=[i_seqs[j] for j in shuffle_ids[i:i+4]],
+              sym_ops=[kwds['sym_ops'][j] for j in shuffle_ids[i:i+4]],
               volume_ideal=0.0,
               both_signs=False,
               weight=kwds['weight'],

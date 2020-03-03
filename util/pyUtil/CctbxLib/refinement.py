@@ -36,6 +36,7 @@ import numpy
 import scipy.linalg
 
 import olex2_normal_equations
+from my_refine_util import hydrogen_atom_constraints_customisation
 
 # try to initialise openblas
 try:
@@ -332,7 +333,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
-
     finally:
       sys.stdout.refresh = True
       self.log.close()
@@ -1221,6 +1221,10 @@ The following options were used:
           elif self.refine_secondary_xh2_angle:
             kwds['flapping'] = True
         current = constraint_type(**kwds)
+        # overrdide the default h-atom placement as it is hard to adjust cctbx
+        # connectivity to match Olex2's
+        current.add_to = hydrogen_atom_constraints_customisation(
+          current, self.olx_atoms.atoms()).add_to
         geometrical_constraints.append(current)
 
     return geometrical_constraints
