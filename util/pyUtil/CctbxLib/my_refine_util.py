@@ -7,6 +7,7 @@ from iotbx import reflection_file_utils
 import itertools
 from cctbx import sgtbx
 from cctbx import maptbx
+
 def shelx_adp_converter(crystal_symmetry):
   def u_star(u11, u22, u33, u23, u13, u12):
     # non-diagonal ADP in reverse order compared to ShelX
@@ -93,3 +94,78 @@ def create_xray_stucture_model(cell, spacegroup, atom_iter, reflections):
     sc.fp = fp_fdp.fp()
     sc.fdp = fp_fdp.fdp()
   return xs
+
+class hydrogen_atom_constraints_customisation(object):
+  def __init__(self, src, olx_atoms):
+    self.src = src
+    self._add_to = src.add_to
+    self.olx_atoms = olx_atoms
+
+  def j_rt_mx_from_olx(self, inp):
+    if isinstance(inp, tuple):
+      from libtbx.utils import flat_list
+      return inp[0], sgtbx.rt_mx(flat_list(inp[2][:-1]), inp[2][-1])
+    else:
+      return inp, sgtbx.rt_mx()
+
+  def add_to(self, reparametrisation):
+    i_pivot = self.src.pivot
+    scatterers = reparametrisation.structure.scatterers()
+    pivot_site = scatterers[i_pivot].site
+    pivot_site_param = reparametrisation.add_new_site_parameter(i_pivot)
+    pivot_neighbour_sites = ()
+    pivot_neighbour_site_params = ()
+    pivot_neighbour_substituent_site_params = ()
+    for b in self.olx_atoms[i_pivot]['neighbours']:
+      j, op = self.j_rt_mx_from_olx(b)
+      if j in self.src.constrained_site_indices: continue
+      if not op.is_unit_mx() and op*scatterers[i_pivot].site == scatterers[i_pivot].site:
+        continue
+      s = reparametrisation.add_new_site_parameter(j, op)
+      pivot_neighbour_site_params += (s,)
+      pivot_neighbour_sites += (op*scatterers[j].site,)
+      if (self.src.need_pivot_neighbour_substituents):
+        for c in reparametrisation.pair_sym_table[j].items():
+          k, op_k = self.j_rt_mx_from_olx(c)
+          if k != i_pivot and scatterers[k].scattering_type != 'H':
+            s = reparametrisation.add_new_site_parameter(k, op*op_k)
+            pivot_neighbour_substituent_site_params += (s,)
+
+    length_value = self.src.bond_length
+    if length_value is None:
+      length_value = self.src.ideal_bond_length(scatterers[i_pivot],
+                                            reparametrisation.temperature)
+    import smtbx.refinement.constraints as _
+    if self.src.stretching:
+      uc = reparametrisation.structure.unit_cell()
+      _length_value = uc.distance(
+        col(scatterers[i_pivot].site),
+        col(scatterers[self.src.constrained_site_indices[0]].site))
+      if _length_value > 0.5: #check for dummy values
+        length_value = _length_value
+
+    bond_length = reparametrisation.add(
+      _.independent_scalar_parameter,
+      value=length_value,
+      variable=self.src.stretching)
+
+    if not self.src.stretching:
+      for i in self.src.constrained_site_indices:
+        reparametrisation.fixed_distances.setdefault(
+          (i_pivot, i), bond_length.value)
+
+    hydrogens = tuple(
+      [ scatterers[i_sc] for i_sc in self.src.constrained_site_indices ])
+
+    param = self.src.add_hydrogen_to(
+      reparametrisation=reparametrisation,
+      bond_length=bond_length,
+      pivot_site=pivot_site,
+      pivot_neighbour_sites=pivot_neighbour_sites,
+      pivot_site_param=pivot_site_param,
+      pivot_neighbour_site_params=pivot_neighbour_site_params,
+      pivot_neighbour_substituent_site_params=
+        pivot_neighbour_substituent_site_params,
+      hydrogens=hydrogens)
+    for i_sc in self.src.constrained_site_indices:
+      reparametrisation.asu_scatterer_parameters[i_sc].site = param
