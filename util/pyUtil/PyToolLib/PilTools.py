@@ -1184,7 +1184,7 @@ class timage(ArgumentParser):
     }
 
     batt_a = int(OV.GetVar('batt_a', 1))
-    batt_w = int(OV.GetVar('batt_w', 22))
+    batt_w = int(OV.GetVar('batt_w', 20))
 
     d = {
       '01':{'name':"settings_small",
