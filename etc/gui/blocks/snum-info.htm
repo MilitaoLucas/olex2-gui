@@ -51,13 +51,17 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 <td>
   <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
   <tr>
-    <td width='64%' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='60%' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor='$GetVar(HtmlTableFirstcolColour)'>
 $spy.gui.tools.make_cell_dimensions_display()
       </table>
     </td>
+      
+    <td align='center' width='8%'>
+      $spy.GetDPRInfo()
+    </td>
 
-    <td width='36%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='32%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" height="100%" cellpadding="1" cellspacing="1" >
         <tr>
           <td align='right'>

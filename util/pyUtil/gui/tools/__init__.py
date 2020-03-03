@@ -1246,7 +1246,7 @@ class Templates():
 TemplateProvider = Templates()
 
 
-def get_diagnostics_colour(scope, item, val):
+def get_diagnostics_colour(scope, item, val, number_only=False):
   grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
   grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
   grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
@@ -1279,6 +1279,9 @@ def get_diagnostics_colour(scope, item, val):
       if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac:
         break
 
+  if number_only:
+    return i
+
   if i == 1:
     retVal = grade_1_colour
   elif i == 2:
@@ -1289,6 +1292,64 @@ def get_diagnostics_colour(scope, item, val):
     retVal = grade_4_colour
 
   return retVal
+
+def GetDPRInfo():
+  retVal = ""
+  dpr = OV.GetParam('snum.refinement.data_parameter_ratio', None)
+  
+  if not dpr:
+    try:
+      parameters = int(olx.Cif('_refine_ls_number_parameters'))
+      data = int(olx.Cif('_reflns_number_gt'))
+      dpr = data/parameters
+    except:
+      pass
+  
+  if dpr:
+    dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
+    text_output= ["Data/Parameter ratio is very good",
+                  "Data/Parameter ratio is adequate",
+                  "Data/Parameter ratio is low",
+                  "Data/Parameter ratio is VERY LOW"]
+    colour_txt= ["green",
+                 "yellow",
+                 "orange",
+                 "red"]
+
+    colour_txt_rev= ["green",
+                 "yellow",
+                 "orange",
+                 "red"]
+
+    image = """
+    <zimg src=batt_%s.png>
+    """%(colour_txt[4 - dpr_col_number])
+    
+    d = {
+      'dpr':"%.1f"%dpr,
+      'image':image,
+    }
+    
+    t = """
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align='center'>
+          %(image)s
+        </td>
+      </tr>
+      <tr>
+        <td align='center'>
+          <font size='-1'>
+            <b> %(dpr)s </b>
+          </font>
+        </td>
+      </tr>
+    </table>
+    """ %d
+    retVal = t
+  return retVal
+OV.registerFunction(GetDPRInfo)
+
 
 def GetRInfo(txt="",d_format='html'):
   if not OV.HasGUI():
@@ -1346,7 +1407,8 @@ def FormatRInfo(R1, wR2,d_format):
       wR2 = float(wR2)
       col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
       wR2 = "%.2f" %(wR2*100)
-
+      
+        
       d = {
         'R1':R1,
         'wR2':wR2,

@@ -215,6 +215,8 @@ routines requiring structure refinement
     {
     ata = 0
       .type = float
+    data_parameter_ratio = None
+      .type = float
     max_shift_over_esd = None
       .type = float
     max_shift_over_esd_atom = None
@@ -1328,6 +1330,26 @@ user
     scopes = hkl refinement
       .type = strings
     refinement{
+      dpr{
+        display = "Data/Parameter"
+          .type = str
+        op = "smaller"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = 5
+          .type = float
+        grade2 = 7
+          .type = float
+        grade3 = 9
+          .type = float
+        grade4 = 12
+          .type = float
+        href = Data/Parameter
+          .type = str
+        target = "Data/Parameter Ratio"
+          .type = str
+      }
 
       flack_str{
         display = "Flack"
