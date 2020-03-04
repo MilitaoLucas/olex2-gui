@@ -1316,14 +1316,15 @@ def GetDPRInfo():
                  "orange",
                  "red"]
 
-    colour_txt_rev= ["green",
-                 "yellow",
-                 "orange",
-                 "red"]
-
+    idx = 4 - dpr_col_number
     image = """
-    <zimg src=batt_%s.png>
-    """%(colour_txt[4 - dpr_col_number])
+    <input
+    name="BATTERY-EDIT"
+    type="button"
+    image="batt_%s.png"
+    hint="%s"
+    >
+    """%(colour_txt[idx], text_output[idx])
     
     d = {
       'dpr':"%.1f"%dpr,
@@ -1425,7 +1426,10 @@ def FormatRInfo(R1, wR2,d_format):
       else:
         t =gett('R_factor_display')%d
     except:
-      t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
+      disp = R1
+      if not R1:
+        disp = "No R factors!"
+      t = "<td colspan='2' align='center' rowspan='2' align='right'><font size='%s' color='%s'><b>%s</b></font></td>" %(font_size_wR2, gui_grey, disp)
     finally:
       retVal = t
 
@@ -1497,6 +1501,8 @@ def get_twin_law_from_hklf5():
       res = scrub(cmd)
       if "HKLF5 file is expected" in " ".join(res):
         htm = "This is not an HKLF5 format hkl file."
+      elif "negative batch numbers" in " ".join(res):
+        htm = "This is not an HKLF5 format hkl file (no negative batch numbers)."
       else:
         htm = "<b>Batch %s </b>: " %res[2][-1]
         htm += " | ".join([res[4], res[6], res[8]])
@@ -1531,6 +1537,12 @@ def hklf_5_to_4(filename):
   print "done. HKLF4 base file at %s"%hklf4name
   return
 OV.registerFunction(hklf_5_to_4, False, 'tools')
+
+
+def record_commands():
+  res = scrub()
+  
+
 
 def show_nsff():
   retVal = False
