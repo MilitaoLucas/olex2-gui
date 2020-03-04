@@ -1068,7 +1068,12 @@ class OlexFunctions(inheritFunctions):
     """
     This function takes a list of Olex2 commands and will execute these sequentially.
     """
-    cmd = ">>".join(cmds)
+    
+    if type(cmds) is unicode:
+      cmd = cmds.split(">>")
+      cmd = ">>".join(cmd)
+    else:
+      cmd = ">>".join(cmds)
     try:
       olx.Run(cmd)
     except Exception, err:
