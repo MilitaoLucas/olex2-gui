@@ -116,9 +116,13 @@ class hydrogen_atom_constraints_customisation(object):
     pivot_neighbour_sites = ()
     pivot_neighbour_site_params = ()
     pivot_neighbour_substituent_site_params = ()
+    part = self.olx_atoms[self.src.constrained_site_indices[0]]['part']
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
       if j in self.src.constrained_site_indices: continue
+      b_part = self.olx_atoms[j]['part']
+      if part != 0 and (b_part != 0 and b_part != part):
+        continue 
       if not op.is_unit_mx() and op*scatterers[i_pivot].site == scatterers[i_pivot].site:
         continue
       s = reparametrisation.add_new_site_parameter(j, op)
@@ -128,6 +132,9 @@ class hydrogen_atom_constraints_customisation(object):
         for c in reparametrisation.pair_sym_table[j].items():
           k, op_k = self.j_rt_mx_from_olx(c)
           if k != i_pivot and scatterers[k].scattering_type != 'H':
+            k_part = self.olx_atoms[k]['part']
+            if part != 0 and (k_part != 0 or k_part != part):
+              continue 
             s = reparametrisation.add_new_site_parameter(k, op*op_k)
             pivot_neighbour_substituent_site_params += (s,)
 
