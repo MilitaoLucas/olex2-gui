@@ -451,6 +451,57 @@ class OlexRefinementModel(object):
         else:
           yield restraint_type, kwds
 
+  def same_iterator(self):
+    groups = self.model['same']
+    if not groups:
+      return
+    for group in groups:
+      dependent = group['dependent']
+      if not dependent:
+        continue
+      # build 12 and 13 distances
+      dis12 = set()
+      dis13 = set()
+      group_atoms = [x[0] for x in group['atoms']]
+      idx_map = {}
+      for idx, a_id in enumerate(group_atoms):
+        idx_map[a_id] = idx
+        for b_id in self._atoms[a_id]['neighbours']:
+          # consider only AU atoms and inside the group
+          if isinstance(b_id, tuple) or b_id not in group_atoms:
+            continue
+          if a_id > b_id:
+            dis12.add((b_id, a_id))
+          else:
+            dis12.add((a_id, b_id))
+          for c_id in self._atoms[b_id]['neighbours']:
+            if isinstance(c_id, tuple) or c_id not in group_atoms or\
+               c_id == a_id or c_id == b_id:
+              continue
+            if a_id > c_id:
+              dis13.add((c_id, a_id))
+            else:
+              dis13.add((a_id, c_id))
+      for a_id, b_id in dis12:
+        i_seqs = [[a_id, b_id]]
+        for dependent_group in dependent:
+          dependent_atoms = [x[0] for x in groups[dependent_group]['atoms']]
+          i_seqs.append([dependent_atoms[idx_map[a_id]],
+                          dependent_atoms[idx_map[b_id]]])
+        kwds = {'i_seqs': i_seqs,
+                'weights': [1/math.pow(groups[dependent_group]['esd12'],2)]*len(i_seqs)}
+        yield 'bond_similarity', kwds
+      for a_id, b_id in dis13:
+        i_seqs = [[a_id, b_id]]
+        for dependent_group in dependent:
+          dependent_atoms = [x[0] for x in groups[dependent_group]['atoms']]
+          i_seqs.append([dependent_atoms[idx_map[a_id]],
+                          dependent_atoms[idx_map[b_id]]])
+        kwds = {'i_seqs': i_seqs,
+                'weights': [1/math.pow(groups[dependent_group]['esd13'],2)]*len(i_seqs)}
+        yield 'bond_similarity', kwds
+
+
   def constraints_iterator(self):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
