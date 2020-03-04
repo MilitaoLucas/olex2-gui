@@ -170,13 +170,17 @@ class OlexCctbxAdapter(object):
       if construct_restraints:
         restraints_iter=self.olx_atoms.restraints_iterator(
           self.connectivity_table.pair_sym_table)
-      else: restraints_iter = None
+        same_iter = self.olx_atoms.same_iterator()
+      else:
+         restraints_iter = None
+         same_iter = None
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
         self.olx_atoms.iterator(),
         restraints_iter=restraints_iter,
-        constraints_iter=None #self.olx_atoms.constraints_iterator()
+        constraints_iter=None, #self.olx_atoms.constraints_iterator()
+        same_iter=same_iter
       )
       if construct_restraints:
         from smtbx.refinement import restraints
