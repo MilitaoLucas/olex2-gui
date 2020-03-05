@@ -2758,6 +2758,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         font_colour = self.params.html.highlight_colour.rgb
       if e_font_colour:
         font_colour = e_font_colour
+      font_size = int(width*0.75)
 
     elif item_type == 'g3_big':
       shadow = True
