@@ -2,27 +2,34 @@
 
 When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
 
-n^<font color='red'>**This is a new and highly experimental procedure, which requires intensive computing ressources. We do not accept any liability for the correctess of the results at this point. They must not be publsihed until further testing is done!**</font>^n
+n^<font color='red'>**This is a new and highly experimental procedure inside Olex2, which requires intensive computing ressources. Testing was performed using ORCA and Tonto as .tsc sources.**</font>^n
 
 <br>
 <br>
 
-There are three steps to this procedure:
-
-* The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using either TONTO (shipped) or ORCA (Versions 4.1.0 and up). Untested interfaces for Gaussian of various versions are present but not maintained. Other programs will be supported in the future.
+For **Hirshfeld Atom Refinement** There are three steps to this procedure:
+<ol>
+<li>The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using:</li>
+  <ul>
+    <li>TONTO (shipped)</li>
+    <li>ORCA (Versions 4.1.0 and up, obtainable from <a href="https://orcaforum.kofo.mpg.de/index.php"> ORCA Forum</a>)</li>
+    <li>pySCF</li>
+    <li>Gaussian of various versions (implemented but not maintained)</li>
+  </ul>
+<li>The atomic non-spherical form factors are extracted from the molecular wavefunction by Hirshfeld partitioning of the atoms in the molecule.</li>
+<li>olex2.refine now uses these non-spherical form factors for the next refinement cycles. All normal commands for your refinement can be used, including restraints and contraints.</li>
+</ol>
 <br>
-* The atomic non-spherical form factors are extracted from the molecular wavefunction by Hirshfeld partitioning of the atoms in the molecule.
 <br>
-* olex2.refine now uses these non-spherical form factors for the next refinement cycles. All normal commands for your refinement can be used, including restraints and contraints.
+At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled. This process can be autmoatized by using the **HAR* switch. Otherwise this procedure is called a *rigid body fit*.
 <br>
-At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled.
+If you want to use more CPUs make sure the proper MPI Installation is found on your computer. For Windows user install MS-MPI of at least Version 10, for Linux Users openMPI version 4 or up is required. MacOS users please refer to homebrew and install apropiate version of openMPI. The mpiexec(.exe) is needed to be found in the PATH, either through Settings or Environment Variables.
 
 ### Update Table
-After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **TONTO** and other programs (currently only **ORCA** and **Gaussian** [HIGHLY UNTESTED]) will appear if these are properly installed and Olex2 knows about them --> Settings). Once a program has been chosen, please also adjust the Extras according to your needs.
-
+After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **Tonto**. The most benchmarked and recommended software is **ORCA**. There is also an option to use **Gaussian** [HIGHLY UNTESTED]. A present **.wfn** file can also be used but **must** agree to the geometry currtly used in Olex2. These options will appear, depending on whether they are properly installed and Olex2 knows about them -> Settings and PATH). Once a program has been chosen, please also adjust the Extras according to your needs if you do not want to use minimal settings.<br>If Update Table is deactivated a Dropdown of all found .tsc files in the current folder is given to be used for refinement, without updating the files.
 
 # NoSpherA2 Extras
-This tool provides all the settings required for the calculation of the tsc file.
+This tool provides all the settings required for the calculation of the .tsc file.
 
 ## Basis
 This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
@@ -35,7 +42,7 @@ If you really do not plan on using your computer you can use TZVPP, but these ca
 The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be used in ORCA and are perfectly fine here.
 
 ## CPUs
-The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files. Mostly copying files etc needs overhead CPU capacity, so please leave 1 CPU for these kinds of things.
+The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files. Mostly copying files etc needs overhead CPU capacity, so please leave 1 CPU for these kinds of things. Also note: It is not recommended to run jobs in a Dropbox Folder... They tend to break.
 
 ## Memory
 The maximum memory that NoSpherA2 is allowed to use. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
@@ -44,16 +51,16 @@ The maximum memory that NoSpherA2 is allowed to use. This **must not** exceed th
 The charge of the molecule used for the wavefunction calculation. This **must** be properly assigned.
 
 ## Multiplicity
-The multiplicity (2S+1) of the wavefunction, where S is the total spin angular momentum of the configuration. E.g. a closed shell wavefunction in it's ground-state usually has multiplicity 1, one unpaired electron has multiplicity 2. Must be positive above 0.
+The multiplicity (2*S*+1) of the wavefunction, where S is the total spin angular momentum of the configuration. E.g. a closed shell wavefunction in it's ground-state usually has multiplicity 1, one unpaired electron has multiplicity 2. Must be positive above 0.
 
-## HAR
-Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time!
+## HAR // Iterative
+Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time. But in case you use ORCA the last wavefunction is used as initial guess, which will save a lot of time on the consecutive steps.
 
 ## Max Cycles
 This defines a criteria for the abortion of HAR, if convergence is not achieved. Maybe restraints or better parameters, resolution cutoffs or other improvements to your model might help with convergence.
 
 ## Integration Accuracy
-Selectr which accuracy level is requested for the integration of electron density. This affects calcualtion of .tsc files significantly. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. Low can be used, if the number of electrons after integration is sill correct. Please check in the log files, whether this is the case!
+Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files significantly. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. Low can be used, if the number of electrons after integration is sill correct. Please check in the log files, whether this is the case!
 
 ## Use Relativistics
 Use DKH2 relativistic Hamiltonian. This should only be used with x2c-family basis sets. But for them it is highly recommended.

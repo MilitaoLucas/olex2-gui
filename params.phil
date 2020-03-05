@@ -1968,6 +1968,8 @@ user
       .type = bool
     has_pyscf = False
       .type = bool
+    enable_discamb = False
+      .type = bool
   }
 }
 
