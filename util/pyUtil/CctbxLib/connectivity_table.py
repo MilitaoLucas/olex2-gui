@@ -35,13 +35,12 @@ class connectivity_table(object):
   def create(self, structure, olx_atoms, buffer_thickness):
     asu_mappings = structure.asu_mappings(buffer_thickness=buffer_thickness)
     self._pair_asu_table = crystal.pair_asu_table(asu_mappings)
-    for a in olx_atoms:
+    for idx, a in enumerate(olx_atoms):
       for b in a['neighbours']:
         if isinstance(b, tuple):
-          self._pair_asu_table.add_pair(a['aunit_id'], b[0], self.rt_mx_from_olx(b[2]))
-          pass
+          self._pair_asu_table.add_pair(idx, b[0], self.rt_mx_from_olx(b[2]))
         else:
-          self._pair_asu_table.add_pair(a['aunit_id'], b, sgtbx.rt_mx())
+          self._pair_asu_table.add_pair(idx, b, sgtbx.rt_mx())
     self.pair_sym_table = self.pair_asu_table.extract_pair_sym_table()
 
   @property
