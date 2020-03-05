@@ -26,14 +26,14 @@ class Method_cctbx_refinement(Method_refinement):
     if not hide_nsff:
       html = "Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors"
       OV.SetVar('gui_notification', html)
-      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+      use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
     else:
       self.table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
       if not os.path.exists(self.table_file_name):
         self.table_file_name = None
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
-      self.table_file_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+      self.table_file_name = OV.GetParam('snum.NoSpherA2.file')
       html = "smtbx.refine using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(self.table_file_name)
       OV.SetVar('gui_notification', html)
       if not os.path.exists(self.table_file_name):
