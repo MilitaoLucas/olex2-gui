@@ -24,13 +24,11 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_GEN';help_ext=Twinning_2;1 -->
  
-  <td width='10%' align='right'>
-  <b>General Options:</b>
-  </td> 
-  <td width='15%' align='right'>
-  <b>Extended Method</b>
+  <td width='14%' align='left'>
+     Extended
   </td>
-  <td width='5%' align='right'>
+
+  <td width='4%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox",
     "name=TWIN_DO_LONG",
@@ -41,8 +39,11 @@
   $-
   </td>
   
-  
-  <td width="22%" align='right'><b>Minimum Number of Laws</b></td>
+ 
+  <td width='14%' align='right'>
+    Min. Laws
+  </td>
+
   <td width='8%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
@@ -55,9 +56,11 @@
   $-
   </td>
   
-  
-  <td width="14%" align='right'><b>Overlap Threshold</b></td>
-  <td width='12%' align='left'>
+  <td width='14%' align='right'>
+    Threshold
+  </td>
+
+  <td width='10%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=TWINNING_OVERLAP_THRESHOLD",
@@ -68,9 +71,28 @@
     )
   $-
   </td>
-      
+  
+  <td width='12%'>
+    &nbsp;
+  </td>
+  
+     
   <td width='15%' align='right'>
-  <a href='spy.twin.run_from_gui()' target=''>%Default Search%</a>&nbsp;
+    <input
+      type="button"
+      name="TWIN_DEFAULT_SEARCH"
+      value="General Search"
+      width="100%"
+      height="GetVar(HtmlComboHeight)"
+      onclick="spy.twin.run_from_gui()"
+      bgcolor="GetVar(gui.action_colour)"
+      fgcolor="#ffffff"
+      fit="false"
+      flat="GetVar(linkButton.flat)"
+      hint=""
+      disabled="false"
+      custom="GetVar(custom_button)"
+    >
   </td>
   
   
@@ -78,12 +100,8 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_2';help_ext=Twinning_2;1 -->
 
-  <td width='15%' align='left'>
-  <b>Spherical Search:</b>
-  </td>
-
-  <td width='15%' align='left'>
-  <b># Bad Refl'ns</b>
+  <td width='14%' align='left'>
+    Bad Refl'ns
   </td>
   <td width='10%' align='left'>
   $+
@@ -98,8 +116,8 @@
   </td>
 
 
-  <td width='15%' align='left'>
-  <b>Threshold</b>
+  <td width='14%' align='right'>
+    Threshold
   </td>
   <td width='15%' align='left'>
   $+
@@ -112,21 +130,36 @@
     )
   $-
   </td>
-  
-  <td width='5%'>
-  <a href='spy.twin.run_from_gui(2)' target=''>%Search%</a>&nbsp;
+  <td width='22%'>
+    &nbsp;
   </td>
+
+  <td align='right'>
+    <input
+      type="button"
+      name="TWIN_SPHERICAL_SEARCH"
+      value="Spherical Search"
+      width="100%"
+      height="GetVar(HtmlComboHeight)"
+      onclick="spy.twin.run_from_gui(2)"
+      bgcolor="GetVar(gui.action_colour)"
+      fgcolor="#ffffff"
+      fit="false"
+      flat="GetVar(linkButton.flat)"
+      hint=""
+      disabled="false"
+      custom="GetVar(custom_button)"
+    >
+  </td>
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_2';help_ext=Twinning_2;1 -->
  
-  <td width='15%' align='right'>
-  <b>Angle-Axis Search:</b>
-  </td> 
 
-  <td width='15%' align='left'>
-  <b>Max Index </b>
+  <td width='14%' align='left'>
+    Max Index
   </td>
   <td width='10%' align='left'>
   $+
@@ -140,10 +173,10 @@
     )
   $-
   </td>
-  <td width='15%' align='left'>
-  <b>Rot. Fract'n </b>
+  <td width='14%' align='right'>
+     Rot. Fract'n
   </td>
-  <td width='10%' align='left'>
+  <td width='9%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=TWIN_ROTATION_FRACTION",
@@ -155,10 +188,10 @@
   $-
   </td>
   
-  <td width='15%' align='right'>
-  <b>Threshold </b>
+  <td width='14%' align='right'>
+    Threshold
   </td>
-  <td width='12%' align='left'>
+  <td width='14%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=TWIN_THRESHOLD",
@@ -170,9 +203,25 @@
     )
   $-
   </td>    
-  <td width='5%'>
-  <a href='spy.twin.run_from_gui(1)' target=''>%Search%</a>&nbsp;
+
+  <td align='right'>
+    <input
+      type="button"
+      name="TWIN_ANGLE-AXIS_SEARCH"
+      value="Angle-Axis Search"
+      width="100%"
+      height="GetVar(HtmlComboHeight)"
+      onclick="spy.twin.run_from_gui(1)"
+      bgcolor="GetVar(gui.action_colour)"
+      fgcolor="#ffffff"
+      fit="false"
+      flat="GetVar(linkButton.flat)"
+      hint=""
+      disabled="false"
+      custom="GetVar(custom_button)"
+    >
   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
