@@ -128,39 +128,8 @@ class OlexCctbxAdapter(object):
 
     self.exti = self.olx_atoms.model.get('exti', None)
     self.initialise_reflections()
-    #init the connectivity
-    shelx_parts = flex.int(self.olx_atoms.disorder_parts())
-    conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
-    sym_excl_indices = flex.abs(
-      shelx_parts.deep_copy().set_selected(shelx_parts > 0, 0))
-    olx_conn = self.olx_atoms.model['conn']
-    radii = {}
-    for l, v in olx_conn['type'].items():
-      radii[str(l)] = v['radius'] #unicode->str!
-    connectivity_table = smtbx.utils.connectivity_table(
-      self.xray_structure(),
-      conformer_indices=flex.size_t(list(conformer_indices)),
-      sym_excl_indices=flex.size_t(list(sym_excl_indices)),
-      covalent_bond_tolerance=olx_conn['delta'],
-      radii=radii
-    )
-    equivs = self.olx_atoms.model['equivalents']
-    for i_seq, v in olx_conn['atom'].items():
-      for bond_to_delete in v.get('delete', []):
-        if bond_to_delete['eqiv'] == -1:
-          connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
-        else:
-          connectivity_table.remove_bond(
-            i_seq, bond_to_delete['to'],
-            rt_mx_from_olx(equivs[bond_to_delete['eqiv']]))
-      for bond_to_add in v.get('create', []):
-        if bond_to_add['eqiv'] == -1:
-          connectivity_table.add_bond(i_seq, bond_to_add['to'])
-        else:
-          connectivity_table.add_bond(
-            i_seq, bond_to_add['to'],
-            rt_mx_from_olx(equivs[bond_to_add['eqiv']]))
-    self.connectivity_table = connectivity_table
+    from connectivity_table import connectivity_table
+    self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
 
   def __del__(self):
     sys.stdout.refresh = False
