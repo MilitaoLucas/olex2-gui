@@ -10,7 +10,7 @@ if not os.path.exists(discamb_file):
   exit(1)
 os.chdir(discamb_file)
 args = os.getenv("discamb_cmd", "").split('+&-')
-print("Running: '" + ' '.join(args) + "'" + ' in: ' + discamb_file)
+#print("Running: '" + ' '.join(args) + "'" + ' in: ' + discamb_file)
 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
 tries = 0
 while not os.path.exists('discamb2tsc.log'):

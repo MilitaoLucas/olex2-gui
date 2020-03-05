@@ -766,7 +766,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
-    use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
     if self.use_tsc and use_aspherical == True:
       for file in os.listdir(olx.FilePath()):
         if file.endswith(".tsc"):
@@ -782,13 +782,13 @@ wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embe
 an electrostatic crystal field.
 The following options were used:
 """
-          software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-          method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-          basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-          charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-          mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-          relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
-          key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
+          software = OV.GetParam('snum.NoSpherA2.source')
+          method = OV.GetParam('snum.NoSpherA2.method')
+          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+          charge = OV.GetParam('snum.NoSpherA2.charge')
+          mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+          key_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),"SFs_key,ascii")
           if os.path.exists(key_file_name):
             f_time = os.path.getctime(key_file_name)
           else:
@@ -804,7 +804,7 @@ The following options were used:
             details_text = details_text + "   RELATIVISTIC:   DKH2"
           details_text = details_text + "   DATE:           %s\n"%f_date
           if software == "Tonto":
-            radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
+            radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
             details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
           details_text = details_text + "\n;\n"
           cif_block['_refine_special_details'] = details_text

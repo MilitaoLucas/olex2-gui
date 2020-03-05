@@ -11,7 +11,7 @@ if not os.path.exists(fchk_dir):
   exit(1)
 os.chdir(fchk_dir)
 args = os.getenv("cuqct_cmd", "").split('+&-')
-print("Running: '" + ' '.join(args) + "'" + ' in: ' + fchk_dir)
+#print("Running: '" + ' '.join(args) + "'" + ' in: ' + fchk_dir)
 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
 tries = 0
 while not os.path.exists('wfn_2_fchk.log'):

@@ -158,9 +158,7 @@ class NoSpherA2(PT):
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print """
-No MPI implementation found in PATH!
-"""
+      print "No MPI implementation found in PATH!\n"
       self.cpu_list_str = '1'
 
   def launch(self):  
@@ -172,7 +170,7 @@ No MPI implementation found in PATH!
       os.mkdir(self.history_dir)
     
 
-    calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+    calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     if not calculate:
       return
     if not self.basis_list_str:
@@ -181,6 +179,7 @@ No MPI implementation found in PATH!
       
     tsc_exists = False
     f_time = None
+    wfn_code = OV.GetParam('snum.NoSpherA2.source')
     for file in os.listdir(olx.FilePath()):
       if file.endswith(".tsc"):
         tsc_exists = True
@@ -193,7 +192,7 @@ No MPI implementation found in PATH!
       for file in os.listdir('.'):
         if file.endswith(".tsc"):
           shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".wfn"):
+        if file.endswith(".wfn") and ("wfn" not in wfn_code):
           shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
         if file.endswith(".wfx"):
           shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
@@ -208,8 +207,7 @@ No MPI implementation found in PATH!
     parts = OV.ListParts()
     if parts != None:
       parts = list(parts)
-    wfn_code = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-    experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+    experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
     
     disorder_groups = None
     nr_parts = None 
@@ -240,7 +238,7 @@ No MPI implementation found in PATH!
             l = l + 1  
           self.backup = self.backup + "_%d"%l  
           os.mkdir(self.backup)  
-        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
         self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%parts[i])
         if os.path.exists(os.path.join(self.wfn_job_dir,olx.FileName()+".hkl")): 
           run = None
@@ -269,9 +267,9 @@ No MPI implementation found in PATH!
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                 else:
-                  f_work = os.path.join(self.wfn_job_dir,f)  
-                  f_dest = os.path.join(self.backup,f)
-                  shutil.move(f_work,f_dest)
+                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
               else:
                 f_work = os.path.join(self.wfn_job_dir,f)  
                 f_dest = os.path.join(self.backup,f)
@@ -311,7 +309,7 @@ No MPI implementation found in PATH!
         else:
           if wfn_code != "Tonto":
             shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), parts[i]),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
-            OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+            OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
             try:
               self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
@@ -351,7 +349,7 @@ No MPI implementation found in PATH!
       # Check if job folder already exists and (if needed) make the backup folders  
       self.backup = os.path.join(self.jobs_dir, "backup")
       if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".hkl")):    
-        Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+        Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
         run = None
         if Full_HAR == True:
           run = OV.GetVar('Run_number')
@@ -387,7 +385,7 @@ No MPI implementation found in PATH!
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                 else:
-                  f_work = os.path.join(self.wfn_job_dir,f)  
+                  f_work = os.path.join(self.jobs_dir,f)  
                   f_dest = os.path.join(self.backup,f)
                   shutil.move(f_work,f_dest)
               else:
@@ -408,10 +406,12 @@ No MPI implementation found in PATH!
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), self.discamb_exe)
         shutil.copy(os.path.join(OV.FilePath(),job.full_dir,job.name+".tsc"),job.name+".tsc")
-        OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+        OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
       else:
-        if wfn_code.lower().endswith(".fchk"):
-          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
+        if wfn_code.lower().endswith(".wfn"):
+          cif = str(os.path.join(job.full_dir, job.name+".cif"))
+          olx.File(cif)
+          OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
         elif wfn_code == "Tonto":
           success = True
           try:
@@ -431,26 +431,32 @@ No MPI implementation found in PATH!
           olx.html.Update()
           if (experimental_SF == False):
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
-            OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+            OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
         else:
-          OV.SetParam('snum.refinement.cctbx.nsff.tsc.fchk_file',olx.FileName() + ".fchk")
-          try:
-            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-          except NameError as error:
-            print "Aborted due to: ",error
-            raise NameError("Wavefunction failed!")
+          #OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
+          if wfn_code.lower().endswith(".wfn"):
+            pass
+          else:
+            try:
+              self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+            except NameError as error:
+              print "Aborted due to: ",error
+              return
       
         # make the tsc file
         
         if (experimental_SF == True):
-          wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
+          if wfn_code.lower().endswith(".wfn"):
+            wfn_fn = os.path.join(OV.FilePath(), job.name+".wfn")
+          else:
+            wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
           hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
           cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-          asym_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
+          wfn_cif_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
           olx.Kill("$Q")
-          olx.File(asym_fn)
-          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
-          OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',"experimental.tsc")
+          olx.File(wfn_cif_fn)
+          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn)
+          OV.SetParam('snum.NoSpherA2.file',"experimental.tsc")
           
         elif wfn_code != "Tonto":
           success = True
@@ -470,19 +476,17 @@ No MPI implementation found in PATH!
             raise NameError("Tonto Failed!")
           olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
-          OV.SetParam('snum.refinement.cctbx.nsff.tsc.file',job.name+".tsc")
+          OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
 
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso') == True:
+    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
       olex.m("anis -h")
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix') == True:
+    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
       olex.m("sel $h")
       olex.m("Afix 0")
     olex.m('delins list')
     olex.m('addins LIST -3')
     olex.m('gendisp -source=sasaki')
     
-    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
-    gui.set_notification(OV.GetVar('gui_notification'))
     olx.html.Update()
 
   def wfn(self,folder='',xyz=True):
@@ -491,7 +495,7 @@ No MPI implementation found in PATH!
       return
 
     wfn_object = wfn_Job(self,olx.FileName(),dir=folder)
-    software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    software = OV.GetParam('snum.NoSpherA2.source')
     if software == "ORCA":
       wfn_object.write_orca_input(xyz)
     elif software == "Gaussian03":
@@ -658,9 +662,11 @@ No MPI implementation found in PATH!
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre) 
     if os.path.exists(self.orca_exe):
-      OV.SetParam('snum.refinement.cctbx.nsff.tsc.source',"ORCA")
+      OV.SetParam('snum.NoSpherA2.source',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
+    else:
+      self.softwares = self.softwares + ";Get ORCA"
         
   def setup_discamb(self):
     self.discamb_exe = ""
@@ -682,6 +688,9 @@ No MPI implementation found in PATH!
     if os.path.exists(self.discamb_exe):
       if "DISCAMB" not in self.softwares:
         self.softwares = self.softwares + ";DISCAMB"
+    else:
+      if OV.GetParam('user.NoSpherA2.enable_discamb') == True:
+        self.softwares = self.softwares + ";Get DISCAMB"
 
   def getBasisListStr(self):
     return self.basis_list_str
@@ -743,7 +752,6 @@ class wfn_Job(object):
         time.sleep(0.1)
         tries += 1
         pass
-
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
 
@@ -756,25 +764,27 @@ class wfn_Job(object):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
     com = open(self.input_fn,"w")
     method = None
-    basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
-    basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name"))
+    basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
+    basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.NoSpherA2.basis_name"))
     basis = open(basis_set_fn,"r")
     chk_destination = "%chk=./" + self.name + ".chk"
-    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
-      cpu = "%nproc=" + OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
+      cpu = "%nproc=" + OV.GetParam('snum.NoSpherA2.ncpus')
     else:
       cpu = "%nproc=1"
-    mem = "%mem=" + OV.GetParam('snum.refinement.cctbx.nsff.mem') + "GB"
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "# rhf/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+    mem = "%mem=" + OV.GetParam('snum.NoSpherA2.mem') + "GB"
+    control = "# "
+    if OV.GetParam('snum.NoSpherA2.method') == "HF":
+      control += "rhf"
       method = "RHF"
     else:
-      control = "# b3lyp/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
-      method = "B3LYP"
-    relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+      control += method
+      method = OV.GetParam('snum.NoSpherA2.method')
+    cxontrol += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
-    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
@@ -788,8 +798,8 @@ class wfn_Job(object):
     title = "Wavefunction calculation for " + self.name + " on a level of theory of " + method + "/" + basis_name
     com.write(title + '\n')
     com.write(" " + '\n')
-    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     com.write(charge + " " + mult + '\n')
     atom_list = []
     i = 0
@@ -850,29 +860,39 @@ class wfn_Job(object):
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
-    ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
-    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
+    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       cpu = "nprocs " + ncpus
     else:
       cpu = "nprocs 1"
-    mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
+    mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
-      control = "! NoPop rhf 3-21G AIM "
+    control = "! NoPop 3-21G AIM "
+    method = OV.GetParam('snum.NoSpherA2.method')
+    if method == "HF":
+      control += "rhf "
     else:
-      control = "! NoPop B3LYP 3-21G AIM "
-    control = control + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')
-    relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
-    if relativistic == True:
-      control = control + " DKH2 SARC/J RIJCOSX"
+      control += method + ' '
+      if method == "M062X":
+        control += "Grid6 "
+    control = control + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+    if method == "BP86" or method == "PBE":
+      if relativistic == True:
+        control = control + " DKH2 SARC/J RI"
+      else:
+        control = control + " def2/J RI"
     else:
-      control = control + " def2/J RIJCOSX"
-    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+      if relativistic == True:
+        control = control + " DKH2 SARC/J RIJCOSX"
+      else:
+        control = control + " def2/J RIJCOSX"
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
@@ -921,7 +941,7 @@ class wfn_Job(object):
       inp.write("end\n")
     basis.close()
     inp.write("end\n")
-    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
@@ -937,19 +957,16 @@ class wfn_Job(object):
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".py"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
-    ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
-    charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-    mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-    mem = OV.GetParam('snum.refinement.cctbx.nsff.mem')
+    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.pySCF_PBC') == False:
-      inp.write('''#!/usr/bin/env python
-
-from pyscf import gto, scf, dft, lib
-''')
+    if OV.GetParam('snum.NoSpherA2.pySCF_PBC') == False:
+      inp.write("#!/usr/bin/env python\n\nfrom pyscf import gto, scf, dft, lib\n")
       inp.write("lib.num_threads(%s)\nmol = gto.M(\n  atom = '''"%ncpus)
       atom_list = []
       i = 0
@@ -961,7 +978,7 @@ from pyscf import gto, scf, dft, lib
           if not atom[0] in atom_list:
             atom_list.append(atom[0])
       xyz.close()
-      inp.write("''',\n  verbose = 5,\n)\nmol.output = '%s.log'\n"%self.name)
+      inp.write("''',\n  verbose = 5,\n)\nmol.output = '%s_pyscf.log'\n"%self.name)
       inp.write("mol.charge = %s\n"%charge)
       inp.write("mol.spin = %s\n"%str(int(mult)-1))
       inp.write("mol.max_memory = %s\n"%str(mem_value))
@@ -1014,15 +1031,15 @@ from pyscf import gto, scf, dft, lib
       inp.write("\n}\nmol.build()\n")
       
       model_line = None
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
+      if OV.GetParam('snum.NoSpherA2.method') == "rhf":
         model_line = "scf.RHF(mol)"
       else:
         model_line = "dft.RKS(mol)"
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic') == True:
+      if OV.GetParam('snum.NoSpherA2.Relativistic') == True:
         model_line += ".x2c()"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("mf = %s\n"%model_line)
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rks":
+      if OV.GetParam('snum.NoSpherA2.method') == "rks":
         #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
         inp.write("mf.xc = 'b3lyp'\nmf = mf.density_fit()\nmf.with_df.auxbasis = 'weigend'\n")
       inp.write("mf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,mol,mf.mo_coeff, mo_energy=mf.mo_energy, mo_occ=mf.mo_occ)\n"%self.name)
@@ -1033,11 +1050,7 @@ from pyscf import gto, scf, dft, lib
       uc = cctbx_adaptor.reflections.f_obs.unit_cell()
       cm = uc.metrical_matrix()
       from math import sqrt
-      inp.write('''#!/usr/bin/env python
-
-from pyscf.pbc import gto, scf, dft
-from pyscf import lib
-''')
+      inp.write("#!/usr/bin/env python\n\nfrom pyscf.pbc import gto, scf, dft\nfrom pyscf import lib\n")
       inp.write("lib.num_threads(%s)\ncell = gto.M(\n  atom = '''"%ncpus)
       atom_list = []
       i = 0
@@ -1049,7 +1062,7 @@ from pyscf import lib
           if not atom[0] in atom_list:
             atom_list.append(atom[0])
       xyz.close()
-      inp.write("''',\n  verbose = 5,\n)\ncell.output = '%s.log'\n"%self.name)
+      inp.write("''',\n  verbose = 5,\n)\ncell.output = '%s_pyscf.log'\n"%self.name)
       inp.write("cell.a = '''%.5f %.5f %.5f\n            %.5f %.5f %.5f\n            %.5f %.5f %.5f'''\n"%(sqrt(cm[0]),sqrt(cm[3]),sqrt(cm[4]),sqrt(cm[3]),sqrt(cm[1]),sqrt(cm[5]),sqrt(cm[4]),sqrt(cm[5]),sqrt(cm[2])))
       inp.write("cell.charge = %s\n"%charge)
       inp.write("cell.spin = %s\n"%str(int(mult)-1))
@@ -1104,13 +1117,13 @@ from pyscf import lib
       inp.write("\n}\ncell.build()\n")
       
       model_line = None
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rhf":
+      if OV.GetParam('snum.NoSpherA2.method') == "HF":
         model_line = "scf.RHF(cell)"
       else:
         model_line = "dft.RKS(cell)"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("cf = %s\n"%model_line)
-      if OV.GetParam('snum.refinement.cctbx.nsff.tsc.method') == "rks":
+      if OV.GetParam('snum.NoSpherA2.method') != "HF":
         #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
         inp.write("cf.xc = 'b3lyp'\ncf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\n")
       inp.write("cf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
@@ -1118,8 +1131,8 @@ from pyscf import lib
 
   def run(self):
     args = []
-    basis_name = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-    software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    software = OV.GetParam('snum.NoSpherA2.source')
     fchk_exe = ""
     if software == "ORCA":
       args.append(self.parent.orca_exe)
@@ -1139,15 +1152,13 @@ from pyscf import lib
       args.append(input_fn)
     elif software == "pySCF":
       input_fn = self.name + ".py"
-      if self.ubuntu_exe != None and os.path.exists(self.ubuntu_exe):
-        args.append(self.ubuntu_exe)
+      if self.parent.ubuntu_exe != None and os.path.exists(self.parent.ubuntu_exe):
+        args.append(self.parent.ubuntu_exe)
         args.append('run')
         args.append("python %s"%input_fn)
-      elif self.ubuntu_exe == None :
+      elif self.ubuntu_exe == None:
         args.append('python')
         args.append(input_fn)
-        
-    print args
 
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
@@ -1200,12 +1211,12 @@ from pyscf import lib
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
       
-      experimental_SF = OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF')
+      experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
       
       if experimental_SF == False:
         move_args = []
         basis_dir = self.parent.basis_dir
-        mult = str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'))
+        mult = str(OV.GetParam('snum.NoSpherA2.multiplicity'))
         move_args.append(self.parent.wfn_2_fchk)
         move_args.append("-wfn")
         move_args.append(self.name+".wfn")
@@ -1219,8 +1230,11 @@ from pyscf import lib
         else:
           move_args.append(basis_dir+'/')
         move_args.append("-method")
-        method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-        move_args.append(method)
+        method = OV.GetParam('snum.NoSpherA2.method')
+        if method == "HF":
+          move_args.append("rhf")
+        else:
+          move_args.append("rks")
         m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
         while m.poll() is None:
           time.sleep(1)
@@ -1234,9 +1248,9 @@ from pyscf import lib
           raise NameError("No fchk generated!")
         shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
 
-def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
+def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
   folder = OV.FilePath()
-  ncpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+  ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, "wfn_2_fchk.log")):
     shutil.move(os.path.join(folder, "wfn_2_fchk.log"), os.path.join(folder, "wfn_2_fchk.log_org"))
   move_args = []
@@ -1254,17 +1268,17 @@ def cuqct_tsc(wfn_file, hkl_file, wfn_cif, asym_cif):
   move_args.append("-hkl")
   move_args.append(hkl_file)
   move_args.append("-cif")
-  move_args.append(wfn_cif)
+  move_args.append(cif)
   move_args.append("-asym_cif")
-  move_args.append(asym_cif)
+  move_args.append(wfn_cif)
   if (ncpus > 1):
     move_args.append('-cpus')
     move_args.append(ncpus)
-  if (OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_debug') == True):
+  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
     move_args.append('-v')
-  if (OV.GetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy') != "Normal"):
+  if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
     move_args.append('-acc')
-    if(OV.GetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy') == "Low"):
+    if(OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
       move_args.append('1')
     else:
       move_args.append('3')
@@ -1365,7 +1379,7 @@ class Job(object):
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
     # We are asking to just get form factors to disk
-    fchk_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+    fchk_source = OV.GetParam('snum.NoSpherA2.source')
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
       
@@ -1374,17 +1388,23 @@ class Job(object):
       args = [self.name+".cif",
               "-basis-dir", self.parent.basis_dir,
               "-shelx-f2", self.name+".hkl"
-              ,"-scf", OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-              ,"-basis", OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-              ,"-cluster-radius", str(OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'))
-              ,"-dtol", OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
+              ,"-basis", OV.GetParam('snum.NoSpherA2.basis_name')
+              ,"-cluster-radius", str(OV.GetParam('snum.NoSpherA2.cluster_radius'))
+              ,"-dtol", OV.GetParam('snum.NoSpherA2.DIIS')
               ]
-      clustergrow = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')
+      method = OV.GetParam('snum.NoSpherA2.method')
+      if method == "HF":
+        args.append("-scf")
+        args.append("rhf")
+      else:
+        args.append("-scf")
+        args.append("rks")
+      clustergrow = OV.GetParam('snum.NoSpherA2.cluster_grow')
       if clustergrow == False:
         args.append("-complete-mol")
         args.append("f")
         
-      rel = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+      rel = OV.GetParam('snum.NoSpherA2.Relativistic')
       if rel == True:
         args.append("-dkh")
         args.append("t")
@@ -1395,30 +1415,30 @@ class Job(object):
 
     else:
       # We want these from supplied fchk file """
-      fchk_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.fchk_file')
+      fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
 #      shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
       args = [self.name+".cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]    
 
-    if OV.GetParam('snum.refinement.cctbx.nsff.ncpus') != '1':
-      args = [self.parent.mpiexec, "-np", OV.GetParam('snum.refinement.cctbx.nsff.ncpus'), self.parent.mpi_har] + args
+    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
+      args = [self.parent.mpiexec, "-np", OV.GetParam('snum.NoSpherA2.ncpus'), self.parent.mpi_har] + args
     else:
       args = [self.parent.exe] + args
 
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge') != '0':
+    if OV.GetParam('snum.NoSpherA2.charge') != '0':
       args.append("-charge")
-      args.append(OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'))
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity') != '1':
-      multiplicity = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
+      args.append(OV.GetParam('snum.NoSpherA2.charge'))
+    if OV.GetParam('snum.NoSpherA2.multiplicity') != '1':
+      multiplicity = OV.GetParam('snum.NoSpherA2.multiplicity')
       if multiplicity == '0':
         raise NameError('Multiplicity of 0 is meaningless!')
       args.append("-mult")
       args.append(multiplicity)
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn') == False:
+    if OV.GetParam('snum.NoSpherA2.keep_wfn') == False:
       args.append("-wfn")
       args.append("f")
-    if OV.GetParam('snum.refinement.cctbx.nsff.tsc.wfn2fchk_SF') == True:
+    if OV.GetParam('snum.NoSpherA2.wfn2fchk_SF') == True:
       args.append("-scf-only")
       args.append("t")
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
@@ -1451,9 +1471,9 @@ class Job(object):
     os.environ['hart_cmd'] = '+&-'.join(args)
     os.environ['hart_file'] = self.name
     os.environ['hart_dir'] = os.path.join(OV.FilePath(),self.full_dir)
-    OV.SetParam('snum.refinement.cctbx.nsff.name',self.name)
-    OV.SetParam('snum.refinement.cctbx.nsff.dir',self.full_dir)
-    OV.SetParam('snum.refinement.cctbx.nsff.cmd',args)
+    OV.SetParam('snum.NoSpherA2.name',self.name)
+    OV.SetParam('snum.NoSpherA2.dir',self.full_dir)
+    OV.SetParam('snum.NoSpherA2.cmd',args)
 
     pyl = OV.getPYLPath()
     if not pyl:
@@ -1472,7 +1492,7 @@ class Job(object):
     else:
       raise NameError("Tonto unsuccessfull!")
     
-    if fchk_source == "Tonto" and OV.GetParam('snum.refinement.cctbx.nsff.tsc.keep_wfn') == True:
+    if fchk_source == "Tonto" and OV.GetParam('snum.NoSpherA2.keep_wfn') == True:
       if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
         shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
       else:
@@ -1480,8 +1500,8 @@ class Job(object):
         raise NameError("No WFN found!")
       move_args = []
       basis_dir = self.parent.basis_dir
-      basis_name = OV.GetParam("snum.refinement.cctbx.nsff.tsc.basis_name")
-      method = OV.GetParam("snum.refinement.cctbx.nsff.tsc.method")
+      basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
+      method = OV.GetParam("snum.NoSpherA2.method")
       move_args.append(self.parent.wfn_2_fchk)
       move_args.append("-wfn")
       move_args.append(os.path.join(self.full_dir,self.name+".wfn"))
@@ -1510,11 +1530,11 @@ class Job(object):
 #
 #  if debug:
 #    t_beg = time.time()
-#  sfc_dir = OV.GetParam('snum.refinement.cctbx.nsff.dir')
-#  sfc_name = OV.GetParam('snum.refinement.cctbx.nsff.name')
-#  tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
-#  tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-#  tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+#  sfc_dir = OV.GetParam('snum.NoSpherA2.dir')
+#  sfc_name = OV.GetParam('snum.NoSpherA2.name')
+#  tsc_modular = OV.GetParam('snum.NoSpherA2.modular')
+#  tsc_source = OV.GetParam('snum.NoSpherA2.source')
+#  tsc_file = OV.GetParam('snum.NoSpherA2.file')
 #  
 #  if tsc_source.lower().endswith("fchk"):
 #    tsc_source = os.path.basename(tsc_source)
@@ -1638,21 +1658,21 @@ class Job(object):
 #        'title': OV.FileName(),
 #        'symmops': ";".join(sym_l),
 #        'scatterers': " ".join(scatterers_l),
-#        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
-#        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
-#        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
-#        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
-#        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
-#        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
-#        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
-#        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
+#        'software': OV.GetParam('snum.NoSpherA2.source'),
+#        'method': OV.GetParam('snum.NoSpherA2.method'),
+#        'basis_set': OV.GetParam('snum.NoSpherA2.basis_name'),
+#        'charge': OV.GetParam('snum.NoSpherA2.charge'),
+#        'mult': OV.GetParam('snum.NoSpherA2.multiplicity'),
+#        'relativistic': OV.GetParam('snum.NoSpherA2.Relativistic'),
+#        'radius': OV.GetParam('snum.NoSpherA2.cluster_radius'),
+#        'DIIS': OV.GetParam('snum.NoSpherA2.DIIS')
 #        }
 #  ol.append('TITLE: %(title)s'%_d)
 #  ol.append('SYMM: %(symmops)s'%_d)
 #  ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
 #  ol.append('SCATTERERS: %(scatterers)s'%_d)
 #  ol.append('QM Info:')
-#  relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
+#  relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
 #  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
 #  import datetime
 #  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
@@ -1681,7 +1701,7 @@ class Job(object):
 #
 #  shutil.copyfile(tsc_fn, tsc_dst)
 #  try:
-#    OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
+#    OV.SetParam('snum.NoSpherA2.file', tsc_dst)
 #    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
 #  except:
 #    pass
@@ -1702,9 +1722,9 @@ def combine_tscs():
   if debug:
     t_beg = time.time()
   sfc_name = OV.ModelSrc()
-  tsc_modular = OV.GetParam('snum.refinement.cctbx.nsff.tsc.modular')
-  tsc_source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-  tsc_file = OV.GetParam('snum.refinement.cctbx.nsff.tsc.file')
+  tsc_modular = OV.GetParam('snum.NoSpherA2.modular')
+  tsc_source = OV.GetParam('snum.NoSpherA2.source')
+  tsc_file = OV.GetParam('snum.NoSpherA2.file')
   
   if tsc_source.lower().endswith("fchk"):
     tsc_source = os.path.basename(tsc_source)
@@ -1819,14 +1839,14 @@ def combine_tscs():
   _d = {'anomalous':'false',
         'title': OV.FileName(),
         'scatterers': " ".join(atom_list),
-        'software': OV.GetParam('snum.refinement.cctbx.nsff.tsc.source'),
-        'method': OV.GetParam('snum.refinement.cctbx.nsff.tsc.method'),
-        'basis_set': OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name'),
-        'charge': OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge'),
-        'mult': OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity'),
-        'relativistic': OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic'),
-        'radius': OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius'),
-        'DIIS': OV.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')
+        'software': OV.GetParam('snum.NoSpherA2.source'),
+        'method': OV.GetParam('snum.NoSpherA2.method'),
+        'basis_set': OV.GetParam('snum.NoSpherA2.basis_name'),
+        'charge': OV.GetParam('snum.NoSpherA2.charge'),
+        'mult': OV.GetParam('snum.NoSpherA2.multiplicity'),
+        'relativistic': OV.GetParam('snum.NoSpherA2.Relativistic'),
+        'radius': OV.GetParam('snum.NoSpherA2.cluster_radius'),
+        'DIIS': OV.GetParam('snum.NoSpherA2.DIIS')
         }
   for i in range(len(header)):
     if 'SCATTERERS' in header[i]:
@@ -1855,7 +1875,7 @@ def combine_tscs():
       wFile.write(line+'\n')
 
   try:
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.file', tsc_dst)
+    OV.SetParam('snum.NoSpherA2.file', tsc_dst)
     olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
@@ -1884,7 +1904,7 @@ def deal_with_parts(cif=True):
 OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
 def check_for_matching_fcf():
-  p = os.path.dirname(OV.GetParam('snum.refinement.cctbx.nsff.tsc.file'))
+  p = os.path.dirname(OV.GetParam('snum.NoSpherA2.file'))
   name = OV.ModelSrc()
   fcf = os.path.join(p,name + '.fcf')
   if os.path.exists(fcf) and os.path.exists(fcf):
@@ -1896,7 +1916,7 @@ def check_for_matching_fcf():
 OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 
 def read_disorder_groups():
-  input = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')
+  input = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
   if input == None:
     return []
   groups = input.split(';')
@@ -1912,7 +1932,7 @@ def read_disorder_groups():
       else:
         a = int(part)
         result[i].append(a) 
-    print result[i]
+#    print result[i]
 #  print result
   return result
 OV.registerFunction(read_disorder_groups,True,'NoSpherA2')
@@ -1928,12 +1948,33 @@ def is_disordered():
 OV.registerFunction(is_disordered,True,'NoSpherA2')
 
 def change_basisset(input):
-  OV.SetParam('snum.refinement.cctbx.nsff.tsc.basis_name',input)
+  OV.SetParam('snum.NoSpherA2.basis_name',input)
   if "x2c" in input:
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',True)
+    OV.SetParam('snum.NoSpherA2.Relativistic',True)
   else:
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic',False)
+    OV.SetParam('snum.NoSpherA2.Relativistic',False)
 OV.registerFunction(change_basisset,True,'NoSpherA2')
+
+def get_functional_list():
+  wfn_code = OV.GetParam('snum.NoSpherA2.source')
+  list = None
+  if wfn_code == "Tonto" or wfn_code == "pySCF":
+    list = "HF;B3LYP;"
+  else:
+    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;wB97;wB97X;"
+  return list
+OV.registerFunction(get_functional_list,True,'NoSpherA2')
+
+def change_tsc_generator(input):
+  if input == "Get ORCA":
+    import webbrowser
+    webbrowser.open('https://orcaforum.kofo.mpg.de/index.php', new=2)
+  elif input == "Get DISCAMB":
+    import webbrowser
+    webbrowser.open('http://4xeden.uw.edu.pl/software/discamb/', new=2)
+  else:
+    OV.SetParam('snum.NoSpherA2.source',input)
+OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
 
 def write_symmetry_file(debug=False):
   import olx
@@ -1980,12 +2021,12 @@ def set_default_cpu_and_mem():
   import multiprocessing
   parallel = OV.GetVar("Parallel")
   max_cpu = multiprocessing.cpu_count()
-  current_cpus = OV.GetParam('snum.refinement.cctbx.nsff.ncpus')
+  current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if not parallel:
-    OV.SetParam('snum.refinement.cctbx.nsff.ncpus',1)
+    OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
   if (max_cpu == 1): 
-    OV.SetParam('snum.refinement.cctbx.nsff.ncpus',1)
+    OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
   elif (current_cpus != "1"):
     return
@@ -2020,8 +2061,8 @@ def set_default_cpu_and_mem():
     mem_gib = mem_bytes/(1024.**3)  # e.g. 3.74
   tf_mem = math.floor(mem_gib/4*30)/10
   tf_cpu = math.floor(max_cpu/4*3)
-  OV.SetParam('snum.refinement.cctbx.nsff.ncpus',str(int(tf_cpu)))
-  OV.SetParam('snum.refinement.cctbx.nsff.mem',str(tf_mem))
+  OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
+  OV.SetParam('snum.NoSpherA2.mem',str(tf_mem))
 OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
