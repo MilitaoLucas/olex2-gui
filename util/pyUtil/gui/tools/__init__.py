@@ -45,7 +45,7 @@ gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
-
+gui_yellow = OV.GetParam('gui.dark_yellow')
 
 import subprocess
 
@@ -1293,6 +1293,54 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
 
   return retVal
 
+def get_battery_image(colour, colourize=True):
+  from PIL import Image, ImageDraw
+  from ImageTools import IT as IT
+  name = "battery_%s.png" %colour
+  if OlexVFS.exists(name):
+    return name
+  d_col = {'green':gui_green,
+       'yellow':gui_yellow,
+       'orange':gui_orange,
+       'red':gui_red}
+  max_dots = 4
+  d_dots = {'green':4,
+       'yellow':3,
+       'orange':2,
+       'red':1}
+    
+  n_dots = d_dots[colour]
+  
+  src_battery = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_rgb.png")
+
+  IM_battery = Image.open(src_battery)
+
+  bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
+  im = Image.alpha_composite(bg, IM_battery)
+  draw = ImageDraw.Draw(im)
+  width, height = bg.size
+  
+  col = d_col[colour].rgb
+  top_gap = int(height*0.11)
+  bot_gap = int(height*0.04)
+  gaps = int(height*0.06)
+
+  avail_height = height - top_gap - bot_gap - gaps*(max_dots+1)
+  boxHeight = int(avail_height/max_dots)
+  boxWidth = int(width*0.6)
+  for dot in range(n_dots):
+    i = max_dots-dot
+    top = height-bot_gap - (boxHeight+gaps)*(dot+1)
+    left = int((width - boxWidth)/2)
+    box = (left,top,boxWidth+left,boxHeight+top)
+    draw.rectangle(box, fill=col, outline='#ababab')
+  new_width = 18
+  new_height = int(im.size[1]/im.size[0] * 18)
+  IM = im.resize((new_width,new_height), Image.ANTIALIAS)
+  OlexVFS.save_image_to_olex(IM, name, 0)
+  return name
+  
+
 def GetDPRInfo():
   retVal = ""
   dpr = OV.GetParam('snum.refinement.data_parameter_ratio', None)
@@ -1316,15 +1364,29 @@ def GetDPRInfo():
                  "orange",
                  "red"]
 
+    
     idx = 4 - dpr_col_number
+    colour = colour_txt[idx]
+    name = "battery_%s.png" %colour
+    if not OlexVFS.exists(name):
+      try:
+        name = get_battery_image(colour)
+      except:
+        name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" %colour)
     image = """
     <input
     name="BATTERY-EDIT"
     type="button"
-    image="batt_%s.png"
+    align="center"
+    image="%s"
     hint="%s"
     >
-    """%(colour_txt[idx], text_output[idx])
+    """%(name, text_output[idx])
+
+    image = """
+    <a target="%s" href="echo '%s'"><zimg src="%s"></a>
+    """%(text_output[idx],text_output[idx],name)
+
     
     d = {
       'dpr':"%.1f"%dpr,
