@@ -3330,6 +3330,11 @@ class HealthOfStructure():
           _ = "Cu"
         elif _.startswith("0.71"):
           _ = "Mo"
+        elif _.startswith("1.34"):
+          _ = "Ga"
+        elif _.startswith("0.56"):
+          _ = "Ag"
+
         display += " (%s)" %_
 
       value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
