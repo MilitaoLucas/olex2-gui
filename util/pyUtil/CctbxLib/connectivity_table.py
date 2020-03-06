@@ -23,24 +23,37 @@ class connectivity_table(object):
       if r > max_r:
         max_r = r
       self.radii[str(l)] = r
-    self.delta = olx_conn['delta']
+    self.delta = olx_conn['delta'] + 0.3
     tries = 0;
     while tries < 3:
       tries += 1
       try:
-        self.create(structure, olx_rm.atoms(), max_r+self.delta)
+        self.create(structure, olx_rm.atoms(), max_r+self.delta, False)
+        return
       except RuntimeError:
-        self.delta += 0.5
+        self.delta += 1
+    # ignore bonds cctbx cannot handle
+    print("Warning: there are some bonds that are not taken into account by olex2.refine")
+    self.create(structure, olx_rm.atoms(), max_r+self.delta, True)
 
-  def create(self, structure, olx_atoms, buffer_thickness):
+  def create(self, structure, olx_atoms, buffer_thickness, safe=False):
     asu_mappings = structure.asu_mappings(buffer_thickness=buffer_thickness)
     self._pair_asu_table = crystal.pair_asu_table(asu_mappings)
     for idx, a in enumerate(olx_atoms):
       for b in a['neighbours']:
-        if isinstance(b, tuple):
-          self._pair_asu_table.add_pair(idx, b[0], self.rt_mx_from_olx(b[2]))
+        if safe:
+          try:
+            if isinstance(b, tuple):
+              self._pair_asu_table.add_pair(idx, b[0], self.rt_mx_from_olx(b[2]))
+            else:
+              self._pair_asu_table.add_pair(idx, b, sgtbx.rt_mx())
+          except RuntimeError as ex:
+            pass
         else:
-          self._pair_asu_table.add_pair(idx, b, sgtbx.rt_mx())
+          if isinstance(b, tuple):
+            self._pair_asu_table.add_pair(idx, b[0], self.rt_mx_from_olx(b[2]))
+          else:
+            self._pair_asu_table.add_pair(idx, b, sgtbx.rt_mx())
     self.pair_sym_table = self.pair_asu_table.extract_pair_sym_table()
 
   @property
