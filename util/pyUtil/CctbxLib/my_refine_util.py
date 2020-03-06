@@ -129,13 +129,13 @@ class hydrogen_atom_constraints_customisation(object):
       pivot_neighbour_site_params += (s,)
       pivot_neighbour_sites += (op*scatterers[j].site,)
       if (self.src.need_pivot_neighbour_substituents):
-        for c in reparametrisation.pair_sym_table[j].items():
+        for c in self.olx_atoms[j]['neighbours']:
           k, op_k = self.j_rt_mx_from_olx(c)
           if k != i_pivot and scatterers[k].scattering_type != 'H':
             k_part = self.olx_atoms[k]['part']
             if part != 0 and (k_part != 0 or k_part != part):
               continue 
-            s = reparametrisation.add_new_site_parameter(k, op*op_k)
+            s = reparametrisation.add_new_site_parameter(k, op.multiply(op_k))
             pivot_neighbour_substituent_site_params += (s,)
 
     length_value = self.src.bond_length
