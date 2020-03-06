@@ -171,11 +171,11 @@ t:mask_output_end_rp{
         custom="#custom"
       >
     </td>
-    <td width="35%%">
-        <b>%(add_to_formula)s</b>
-    </td>
     <td>
-        <b>%(formula)s </b>
+        %(formula)s
+    </td>
+    <td align='right'>
+        <b>%(add_to_formula)s</b>
     </td>
   </tr>
   <tr >
@@ -190,16 +190,16 @@ t:mask_output_end_rp{
         custom="#custom"
       >
     </td>
-    <td>
-        <b>%(add_to_moiety)s</b>
+    <td width='50%%'>
+        %(suggested_moiety)s
     </td>
-    <td>
+    <td width='10%%'>
       <input
         type="button"
         name="MASK_MOIETY_EDIT"
         bgcolor="GetVar('linkButton.bgcolor')"
         width="100%%"
-        value="Manually Edit"
+        value="Edit"
         onclick="spy.EditCifInfo()"
         custom="#custom"
       >
