@@ -88,7 +88,7 @@ class NoSpherA2(PT):
       self.basis_list_str = None
       self.basis_dir = None
       print("No Hart executable found!")
-    OV.SetVar('have_valid_nosphera2_fcf', False)
+    check_for_matching_fcf()
 
   def setup_har_executables(self):
     self.exe = None
@@ -485,9 +485,10 @@ class NoSpherA2(PT):
       olex.m("Afix 0")
     olex.m('delins list')
     olex.m('addins LIST -3')
-    olex.m('gendisp -source=sasaki')
-    
-    olx.html.Update()
+    add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
+    if add_disp is True:
+      olex.m('gendisp -source=sasaki')
+    #add_info_to_tsc()
 
   def wfn(self,folder='',xyz=True):
     if not self.basis_list_str:
@@ -1211,42 +1212,42 @@ class wfn_Job(object):
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
       
-      experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-      
-      if experimental_SF == False:
-        move_args = []
-        basis_dir = self.parent.basis_dir
-        mult = str(OV.GetParam('snum.NoSpherA2.multiplicity'))
-        move_args.append(self.parent.wfn_2_fchk)
-        move_args.append("-wfn")
-        move_args.append(self.name+".wfn")
-        move_args.append("-mult")
-        move_args.append(mult)
-        move_args.append("-b")
-        move_args.append(basis_name)
-        move_args.append("-d")
-        if sys.platform[:3] == 'win':
-          move_args.append(basis_dir.replace("/","\\"))
-        else:
-          move_args.append(basis_dir+'/')
-        move_args.append("-method")
-        method = OV.GetParam('snum.NoSpherA2.method')
-        if method == "HF":
-          move_args.append("rhf")
-        else:
-          move_args.append("rks")
-        m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-        while m.poll() is None:
-          time.sleep(1)
-        with open("wfn_2_fchk.log", "r") as log:
-          x = log.read()
-          if x:
-            print x
-        if os.path.exists(self.name+".fchk"):
-          shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-        else:
-          raise NameError("No fchk generated!")
-        shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
+    experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+    
+    if (experimental_SF == False) and ("g" not in args[0]):
+      move_args = []
+      basis_dir = self.parent.basis_dir
+      mult = str(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      move_args.append(self.parent.wfn_2_fchk)
+      move_args.append("-wfn")
+      move_args.append(self.name+".wfn")
+      move_args.append("-mult")
+      move_args.append(mult)
+      move_args.append("-b")
+      move_args.append(basis_name)
+      move_args.append("-d")
+      if sys.platform[:3] == 'win':
+        move_args.append(basis_dir.replace("/","\\"))
+      else:
+        move_args.append(basis_dir+'/')
+      move_args.append("-method")
+      method = OV.GetParam('snum.NoSpherA2.method')
+      if method == "HF":
+        move_args.append("rhf")
+      else:
+        move_args.append("rks")
+      m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+      while m.poll() is None:
+        time.sleep(1)
+      with open("wfn_2_fchk.log", "r") as log:
+        x = log.read()
+        if x:
+          print x
+      if os.path.exists(self.name+".fchk"):
+        shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
+      else:
+        raise NameError("No fchk generated!")
+      shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
 
 def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
   folder = OV.FilePath()
@@ -1524,193 +1525,93 @@ class Job(object):
       else:
         raise NameError("No fchk generated!")
 
-#def combine_sfs(force=False,part=-100):
-#  import glob
-#  import math
-#
-#  if debug:
-#    t_beg = time.time()
-#  sfc_dir = OV.GetParam('snum.NoSpherA2.dir')
-#  sfc_name = OV.GetParam('snum.NoSpherA2.name')
-#  tsc_modular = OV.GetParam('snum.NoSpherA2.modular')
-#  tsc_source = OV.GetParam('snum.NoSpherA2.source')
-#  tsc_file = OV.GetParam('snum.NoSpherA2.file')
-#  
-#  if tsc_source.lower().endswith("fchk"):
-#    tsc_source = os.path.basename(tsc_source)
-#
-#  if not force:
-#    if tsc_file.endswith(".tsc"):
-#      return
-#
-#  if not sfc_dir:
-#    return
-#  _mod = ""
-#  if not tsc_modular == "direct":
-#    _mod = "_%s"%tsc_modular
-#  if part == -100:
-#    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + ".tsc")
-#    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + ".tsc")
-#  else:
-#    tsc_fn = os.path.join(sfc_dir, sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
-#    tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_" + tsc_source + "_part_" + str(part) + ".tsc")
-#
-#  if tsc_file == "Check for new":
-#    if os.path.exists(tsc_fn) and os.path.exists(tsc_dst):
-#      if "%0.f" %os.path.getctime(tsc_fn) == "%0.f" %os.path.getctime(tsc_dst):
-#        print ("No new .tsc files")
-#        olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE',  os.path.basename(tsc_dst))
-#        return
-#      else:
-#        print ("Creating newer %s file" %tsc_dst)
-#
-#      t =  time.ctime(os.path.getmtime(tsc_dst))
-#      OV.write_to_olex("%s_tsc_file_info"%OV.FileName() , t)
-#
-#  if os.path.exists(tsc_dst):
-#    backup = os.path.join(OV.FilePath(), "tsc_backup")
-#    if not os.path.exists(backup):
-#      os.mkdir(backup)
-#    i = 1
-#    while (os.path.exists(os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)):
-#      i = i + 1
-#    try:
-#      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + "_" + tsc_source + ".tsc") + "_%d"%i)
-#    except:
-#      pass
-#
-#  p = os.path.join(sfc_dir, "*,ascii")
-#  g = glob.glob(p)
-#  d = {}
-#  if not g:
-#    return False
-#
-#  if debug:
-#    t1 = time.time()
-#  for file_p in g:
-#    if "SFs_key,ascii" in file_p:
-#      sfs_fp = file_p
-#      continue
-#    elif "Symops,ascii" in file_p:
-#      symops_fp = file_p
-#      continue
-#    
-#    name = os.path.basename(file_p).split("_")[0]
-#    d.setdefault(name,{})
-#    values = open(file_p,'r').read().splitlines()
-#    sfc_l = []
-#    for line in values:
-#      if tsc_modular == "modulus":
-#        _ = line.split()
-#        a = float(_[0])
-#        b = float(_[1])
-#        v = math.sqrt(a*a + b*b)
-#        sfc_l.append("%.6f" %v)
-#      elif tsc_modular == "absolute":
-#        _ = line.split()
-#        a = abs(float(_[0]))
-#        b = abs(float(_[1]))
-#        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-#      elif tsc_modular == "direct":
-#        _ = line.split()
-#        a = float(_[0])
-#        b = float(_[1])
-#        sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-#
-#    d[name].setdefault('sfc', sfc_l)
-#    d[name].setdefault('name', name)
-#
-#  sym = open(symops_fp,'r').read().splitlines()
-#  sym_l = []
-#  ll = []
-#  for line in sym:
-#    if line:
-#      li = line.split()
-#      for val in li:
-#        ll.append(str(int(float((val)))))
-#    else:
-#      sym_l.append(" ".join(ll))
-#      ll = []
-#
-#  if debug:
-#    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
-#
-#  #hkl_fn = os.path.join(OV.FilePath(), OV.FileName() + ".hkl")
-#  hkl_fn = "SFs_key,ascii"
-#  hkl = open(sfs_fp, 'r').read().splitlines()
-#  hkl_l = []  
-#  for line in hkl:
-#    hkl_l.append(" ".join(line.split()[0:3]))
-#  d.setdefault('hkl', hkl_l)
-#
-#  values_l = []
-#  values_l.append(d['hkl'])
-#  scatterers_l = []
-#  for item in d:
-#    if item == "hkl":
-#      continue
-#    scatterers_l.append(d[item]['name'])
-#    values_l.append(d[item]['sfc'])
-#  tsc_l = zip(*values_l)
-#
-#  ol = []
-#  _d = {'anomalous':'false',
-#        'title': OV.FileName(),
-#        'symmops': ";".join(sym_l),
-#        'scatterers': " ".join(scatterers_l),
-#        'software': OV.GetParam('snum.NoSpherA2.source'),
-#        'method': OV.GetParam('snum.NoSpherA2.method'),
-#        'basis_set': OV.GetParam('snum.NoSpherA2.basis_name'),
-#        'charge': OV.GetParam('snum.NoSpherA2.charge'),
-#        'mult': OV.GetParam('snum.NoSpherA2.multiplicity'),
-#        'relativistic': OV.GetParam('snum.NoSpherA2.Relativistic'),
-#        'radius': OV.GetParam('snum.NoSpherA2.cluster_radius'),
-#        'DIIS': OV.GetParam('snum.NoSpherA2.DIIS')
-#        }
-#  ol.append('TITLE: %(title)s'%_d)
-#  ol.append('SYMM: %(symmops)s'%_d)
-#  ol.append('AD ACCOUNTED: %(anomalous)s'%_d)
-#  ol.append('SCATTERERS: %(scatterers)s'%_d)
-#  ol.append('QM Info:')
-#  relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-#  f_time = os.path.getctime(os.path.join(sfc_dir,"SFs_key,ascii"))
-#  import datetime
-#  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-#  ol.append('   SOFTWARE:       %(software)s'%_d)
-#  ol.append('   METHOD:         %(method)s'%_d)
-#  ol.append('   BASIS SET:      %(basis_set)s'%_d)
-#  ol.append('   CHARGE:         %(charge)s'%_d)
-#  ol.append('   MULTIPLICITY:   %(mult)s'%_d)
-#  if relativistic == True:
-#    ol.append('   RELATIVISTIC:   DKH2')
-#  ol.append('   DATE:           %s'%f_date)
-#  if part != -100:
-#    ol.append('   PART:           %d'%part)
-#  if tsc_source == "Tonto":
-#    ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
-#    ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
-#
-#  ol.append("data:")
-#
-#  for line in tsc_l:
-#    ol.append(" ".join(line))
-#
-#  t = "\n".join(ol)
-#  with open(tsc_fn, 'w') as wFile:
-#    wFile.write(t)
-#
-#  shutil.copyfile(tsc_fn, tsc_dst)
-#  try:
-#    OV.SetParam('snum.NoSpherA2.file', tsc_dst)
-#    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
-#  except:
-#    pass
-#  olx.html.Update()
-#  if debug:
-#    print("Total time: %.2f"%(time.time() - t_beg))
-#  return True
-#
-#OV.registerFunction(combine_sfs,True,'NoSpherA2')
+def add_info_to_tsc():
+  tsc_fn = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  if not os.path.isfile(tsc_fn):
+    print "Error finding tsc File!\n"
+    return False
+  with open(tsc_fn) as f:
+    tsc = f.readlines()
+
+  import shutil
+  try:
+    shutil.move(tsc_fn,tsc_fn+"_old")
+  except:
+    pass
+  write_file = open(tsc_fn,"w")
+  
+  details_text = """CIF:
+Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+NoSpherA2 implementation of HAR makes use of tailor-made aspherical atomic form factors calculated
+on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
+spherical-atom form factors.
+
+The ED is calculated from a gaussian basis set single determinant SCF
+wavefunction - either Hartree-Fock or DFT using selected funtionals - for a fragment of the crystal.
+This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
+The following options were used:
+"""
+  software = OV.GetParam('snum.NoSpherA2.source')
+  details_text = details_text + "   SOFTWARE:       %s\n"%software
+  if software != "DISCAMB":
+    method = OV.GetParam('snum.NoSpherA2.method')
+    basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+    partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+    accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    if partitioning == True:
+      details_text = details_text + "   PARTITIONING:   NoSpherA2\n"
+      details_text = details_text + "   INT ACCURACY:   %s\n"%accuracy
+    else:
+      details_text = details_text + "   PARTITIONING:   Tonto\n"
+    details_text = details_text + "   METHOD:         %s\n"%method
+    details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+    details_text = details_text + "   CHARGE:         %s\n"%charge
+    details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+    if relativistic == True:
+      details_text = details_text + "   RELATIVISTIC:   DKH2\n"
+    if software == "Tonto":
+      radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+      details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+  tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  if os.path.exists(tsc_file_name):
+    f_time = os.path.getctime(tsc_file_name)
+  else:
+    f_time = os.path.getctime(file)
+  import datetime
+  f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+  details_text = details_text + "   DATE:           %s\n"%f_date    
+  details_text = details_text + ":CIF"
+  details_text += str(hash(details_text)) + '\n'
+  cif_block_present = False
+  data_block = False
+  for line in tsc:
+    if ("CIF:" not in line) and ("DATA:" not in line) and ("data:" not in line):
+      write_file.write(line)
+    elif "CIF:" in line:
+      cif_block_present = True
+      write_file.write(line)
+    elif ("DATA:" in line):
+      data_block = True
+      if cif_block_present == False:
+        write_file.write(details_text)
+        write_file.write(line)
+      else:
+        write_file.write(line)
+    elif ("data:" in line):
+      data_block = True
+      if cif_block_present == False:
+        write_file.write(details_text)
+        write_file.write(line)
+      else:
+        print "CIF BLOCK is there"
+        write_file.write(line)
+  write_file.close()
+        
+OV.registerFunction(add_info_to_tsc,True,'NoSpherA2')
 
 def combine_tscs():
   import glob
@@ -1746,7 +1647,6 @@ def combine_tscs():
     except:
       pass
       
-  write_file = open(tsc_dst,'w')
   d = {}
   sfs_fp = None
   symops_fp = None
@@ -1855,7 +1755,7 @@ def combine_tscs():
       ol.append('   SOFTWARE:       %(software)s'%_d)
     elif 'BASIS SET' in header[i]:
       ol.append('   BASIS SET:      %(basis_set)s'%_d)
-    elif 'data:' in header[i]:
+    elif 'DATA:' in header[i]:
       f_time = os.path.getctime(os.path.join(OV.FilePath(),sfc_name + _mod + "_part_1.tsc"))
       import datetime
       f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
@@ -1864,7 +1764,7 @@ def combine_tscs():
       if tsc_source == "Tonto":
         ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
         ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
-      ol.append('data:\n')
+      ol.append('DATA:\n')
     else:
       ol.append(header[i].replace('\n',''))
 
@@ -1974,6 +1874,14 @@ def change_tsc_generator(input):
     webbrowser.open('http://4xeden.uw.edu.pl/software/discamb/', new=2)
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
+    if input != "DICAMB":
+      F000 = olx.xf.getF000()
+      Z = olx.xf.au.getZ()
+      nr_electrons= F000 / Z
+      if nr_electrons % 2 == 0:
+        OV.SetParam('snum.NoSpherA2.multiplicity',1)
+      else:
+        OV.SetParam('snum.NoSpherA2.multiplicity',2)
 OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
 
 def write_symmetry_file(debug=False):

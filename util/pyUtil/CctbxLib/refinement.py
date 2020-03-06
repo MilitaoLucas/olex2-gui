@@ -768,46 +768,68 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
     if self.use_tsc and use_aspherical == True:
-      for file in os.listdir(olx.FilePath()):
-        if file.endswith(".tsc"):
-          details_text = """;
-Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
-Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020
-NoSpherA2 makes use of tailor-made aspherical atomic form factors calculated
+      tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+      if os.path.exists(tsc_file_name):
+        tsc = None
+        with open(tsc_file_name, 'r') as tsc_f:
+          tsc = f.readlines()
+        cif_block_found = False
+        tsc_info = """;\n"""
+        for line in tsc:
+          if "CIF:" in line:
+            cif_block_found = True
+            continue
+          if ":CIF" in line:
+            break
+          if cif_block_found == True:
+            tsc_info = tsc_info + line
+        if cif_block_found == False:
+          details_text = """Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+NoSpherA2 implementation of HAR makes use of tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
 The ED is calculated from a gaussian basis set single determinant SCF
-wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in
-an electrostatic crystal field.
+wavefunction - either Hartree-Fock or DFT using selected funtionals - for a fragment of the crystal.
+This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
 The following options were used:
 """
           software = OV.GetParam('snum.NoSpherA2.source')
-          method = OV.GetParam('snum.NoSpherA2.method')
-          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
-          charge = OV.GetParam('snum.NoSpherA2.charge')
-          mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-          key_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),"SFs_key,ascii")
-          if os.path.exists(key_file_name):
-            f_time = os.path.getctime(key_file_name)
+          details_text = details_text + "   SOFTWARE:       %s\n"%software
+          if software != "DISCAMB":
+            method = OV.GetParam('snum.NoSpherA2.method')
+            basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+            charge = OV.GetParam('snum.NoSpherA2.charge')
+            mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+            relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+            partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+            accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+            if partitioning == True:
+              details_text = details_text + "   PARTITIONING:   NoSpherA2\n"
+              details_text = details_text + "   INT ACCURACY:   %s\n"%accuracy
+            else:
+              details_text = details_text + "   PARTITIONING:   Tonto\n"
+            details_text = details_text + "   METHOD:         %s\n"%method
+            details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+            details_text = details_text + "   CHARGE:         %s\n"%charge
+            details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+            if relativistic == True:
+              details_text = details_text + "   RELATIVISTIC:   DKH2\n"
+            if software == "Tonto":
+              radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+              details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+          tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+          if os.path.exists(tsc_file_name):
+            f_time = os.path.getctime(tsc_file_name)
           else:
             f_time = os.path.getctime(file)
           import datetime
           f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-          details_text = details_text + "   SOFTWARE:       %s\n"%software
-          details_text = details_text + "   METHOD:         %s\n"%method
-          details_text = details_text + "   BASIS SET:      %s\n"%basis_set
-          details_text = details_text + "   CHARGE:         %s\n"%charge
-          details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
-          if relativistic == True:
-            details_text = details_text + "   RELATIVISTIC:   DKH2"
-          details_text = details_text + "   DATE:           %s\n"%f_date
-          if software == "Tonto":
-            radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
-            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-          details_text = details_text + "\n;\n"
-          cif_block['_refine_special_details'] = details_text
+          details_text = details_text + "   DATE:           %s\n"%f_date    
+          tsc_info = tsc_info + details_text
+        tsc_info = tsc_info + ";\n"
+        cif_block['_refine_special_details'] = tsc_info
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1

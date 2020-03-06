@@ -490,7 +490,7 @@ class RunRefinementPrg(RunPrg):
       elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
         _ = gui.get_default_notification(txt="Refinement Finished", txt_col='green_text')
       else:
-        _ = gui.get_default_notification(txt="Refinement Finished<br>Please Cite NoSpherA2:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>", txt_col='green_text')
+        _ = gui.get_default_notification(txt="Refinement Finished<br>Please Cite NoSpherA2: DOI", txt_col='green_text')
 
   def run(self):
     if RunRefinementPrg.running:
@@ -1127,9 +1127,6 @@ class RunRefinementPrg(RunPrg):
 
     with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
-    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
-    import gui
-    gui.set_notification(OV.GetVar('gui_notification'))
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()
