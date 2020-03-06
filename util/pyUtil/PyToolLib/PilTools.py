@@ -1183,9 +1183,6 @@ class timage(ArgumentParser):
       'font_colour':self.params.html.font_colour.rgb,
     }
 
-    batt_a = int(OV.GetVar('batt_a', 1))
-    batt_w = int(OV.GetVar('batt_w', 20))
-
     d = {
       '01':{'name':"settings_small",
        'cut':(55*sf, 150*sf, 80*sf, 175*sf),
@@ -1222,39 +1219,6 @@ class timage(ArgumentParser):
          'font_colour':(self.params.html.font_colour.rgb),
          },
        },
-       
-       '08':{'name':"batt_red",
-             'cut':(batt_a*sf, 111*sf, (batt_a+batt_w)*sf, 150*sf),
-       },
-       
-       '09':{'name':"batt_orange",
-             'cut':((batt_a+batt_w)*sf, 111*sf, (batt_a+batt_w*2)*sf, 150*sf),
-       },
-   
-       '10':{'name':"batt_yellow",
-             'cut':((batt_a+batt_w*2)*sf, 111*sf, (batt_a+batt_w*3)*sf, 150*sf),
-       },
-   
-       '11':{'name':"batt_green",
-             'cut':((batt_a+batt_w*3)*sf, 111*sf, (batt_a+batt_w*4)*sf, 150*sf),
-       },
-
-       #'08':{'name':"batt_red",
-             #'cut':(0*sf, 108*sf, 25*sf, 150*sf),
-       #},
-       
-       #'09':{'name':"batt_orange",
-             #'cut':(25*sf, 108*sf, 50*sf, 150*sf),
-       #},
-   
-       #'10':{'name':"batt_yellow",
-             #'cut':(50*sf, 108*sf, 75*sf, 150*sf),
-       #},
-   
-       #'11':{'name':"batt_green",
-             #'cut':(75*sf, 108*sf, 100*sf, 150*sf),
-       #},
-
     }
 
 
@@ -2471,11 +2435,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("polyhedra", (6, 9))
     iconIndex.setdefault("refresh", (7, 6))
     iconIndex.setdefault("anisH", (7, 7))
-    iconIndex.setdefault("battery_1", (8, 3))
-    iconIndex.setdefault("battery_2", (8, 2))
-    iconIndex.setdefault("battery_3", (8, 1))
-    iconIndex.setdefault("battery_4", (8, 0))
-    iconIndex.setdefault("percent", (8, 4, {'circle':True} ))
 
     also_make_small_icons_l = ['open']
 
@@ -2758,7 +2717,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         font_colour = self.params.html.highlight_colour.rgb
       if e_font_colour:
         font_colour = e_font_colour
-      font_size = int(width*0.75)
 
     elif item_type == 'g3_big':
       shadow = True
