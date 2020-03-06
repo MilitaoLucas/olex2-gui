@@ -348,8 +348,6 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
-    OV.SetParam('snum.refinement.data_parameter_ratio', 0)
-    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
     LM.startRun(self)
 
   def endRun(self):
@@ -406,6 +404,8 @@ class RunSolutionPrg(RunPrg):
             self.terminate = True
             return
 
+    OV.SetParam('snum.refinement.data_parameter_ratio', 0)
+    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
