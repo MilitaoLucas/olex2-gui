@@ -94,7 +94,7 @@ $+
         onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))"
       > 
 </td>
-<td width='6%' align="left">
+<td width='2%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=HAR",
@@ -137,10 +137,12 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
-<td width="20%" align="left">
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'True')
+<td width="16%" align="left">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_becke_accuracy@refine",
@@ -150,7 +152,14 @@ $+
     )
    $-
 </td> 
-<td width="6%" align="left">
+#ignoreif -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'False')
+<td width="16%">
+N/A 
+</td>
+#ignoreif -->
+
+<td width="2%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=NoSpherA2_ORCA_Relativistics@refine",
@@ -163,7 +172,7 @@ $+
    $-
 </td> 
 
-<td width='6%' align='left'>
+<td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Aniso",
@@ -175,7 +184,7 @@ $+
     )
   $-
 </td>
-<td width='6%' align='left'>
+<td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Afix 0",
@@ -184,6 +193,18 @@ $+
     "oncheck=spy.SetParam('snum.NoSpherA2.h_afix','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
     "onuncheck=spy.SetParam('snum.NoSpherA2.h_afix','False')"
+    )
+  $-
+</td>
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=DISP",
+    "label=DISP",
+    "checked=spy.GetParam('snum.NoSpherA2.add_disp')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.add_disp','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.add_disp','False')"
     )
   $-
 </td>

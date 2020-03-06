@@ -12,7 +12,7 @@ For **Hirshfeld Atom Refinement** There are three steps to this procedure:
 <li>The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using:</li>
   <ul>
     <li>TONTO (shipped)</li>
-    <li>ORCA (Versions 4.1.0 and up, obtainable from <a href="https://orcaforum.kofo.mpg.de/index.php"> ORCA Forum</a>)</li>
+    <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,ORCA Forum])</li>
     <li>pySCF</li>
     <li>Gaussian of various versions (implemented but not maintained)</li>
   </ul>
@@ -59,8 +59,8 @@ Continue calculations until final convergence is achieved over a full cycle of W
 ## Max Cycles
 This defines a criteria for the abortion of HAR, if convergence is not achieved. Maybe restraints or better parameters, resolution cutoffs or other improvements to your model might help with convergence.
 
-## Integration Accuracy
-Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files significantly. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. Low can be used, if the number of electrons after integration is sill correct. Please check in the log files, whether this is the case!
+## Integr(ation) Accuracy
+Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. If you have high symmetry or very heavy elements and high resolution data it might improv results. Low can be used, if the number of electrons after integration is sill correct. Mostly fine for organic molecules. Please check in the log files, whether this is the case!
 
 ## Use Relativistics
 Use DKH2 relativistic Hamiltonian. This should only be used with x2c-family basis sets. But for them it is highly recommended.
@@ -70,6 +70,9 @@ Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX 
 
 ## No Afix
 Remove any AFIX constraints from the current model. Use with caution, but highly usefull for starting from IAM.
+
+## DISP
+Add DISP Instructuion to your .ins file based on sasaki table as implemented in olex2.
 
 ## Keep Wavefunction
 Select to keep a copy of the current wavefunction in the folder you are working. Backups of former wavefunctions are kept inside the olex2 folder in that directory.
