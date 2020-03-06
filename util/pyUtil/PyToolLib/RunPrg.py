@@ -13,7 +13,7 @@ from History import hist
 
 from olexex import OlexRefinementModel
 
-from olexFunctions import OlexFunctions
+from olexFunctions import OlexFunctions, SilentException
 OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
@@ -156,7 +156,7 @@ class RunPrg(ArgumentParser):
       if self.please_run_auto_vss:
         self.run_auto_vss()
       if caught_exception:
-        raise caught_exception
+        raise SilentException(caught_exception)
 
   def run_auto_vss(self):
     olx.Freeze(True)
