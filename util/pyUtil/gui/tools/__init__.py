@@ -1333,7 +1333,7 @@ def get_battery_image(colour, colourize=True):
     top = height-bot_gap - (boxHeight+gaps)*(dot+1)
     left = int((width - boxWidth)/2)
     box = (left,top,boxWidth+left,boxHeight+top)
-    draw.rectangle(box, fill=col, outline='#ababab')
+    draw.rectangle(box, fill=col)
   new_width = 18
   new_height = int(im.size[1]/im.size[0] * 18)
   IM = im.resize((new_width,new_height), Image.ANTIALIAS)
@@ -1387,15 +1387,19 @@ def GetDPRInfo():
     <a target="%s" href="echo '%s'"><zimg src="%s"></a>
     """%(text_output[idx],text_output[idx],name)
 
+    if dpr <= 10:
+      disp_dpr = "%.2f"%dpr
+    else:
+      disp_dpr = "%.1f"%dpr
     
     d = {
-      'dpr':"%.1f"%dpr,
+      'dpr':disp_dpr,
       'image':image,
     }
     
     t = """
-    <table border="0" cellpadding="0" cellspacing="0">
-      <tr>
+    <table border="0" cellpadding="0" cellspacing="0" align='center'>
+      <tr align='center'>
         <td align='center'>
           %(image)s
         </td>
@@ -1403,7 +1407,7 @@ def GetDPRInfo():
       <tr>
         <td align='center'>
           <font size='-1'>
-            <b> %(dpr)s </b>
+            <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
           </font>
         </td>
       </tr>
