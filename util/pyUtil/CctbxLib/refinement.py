@@ -66,7 +66,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   }
   solvers_default_method = 'Levenberg-Marquardt'
 
-  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
+  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     OlexCctbxAdapter.__init__(self)
     self.interrupted = False
     self.max_cycles = max_cycles
@@ -87,6 +87,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.idealise_secondary_xh2_angle = True
     elif sec_ch2_treatment == 'refine':
       self.refine_secondary_xh2_angle = True
+    self.weighting = weighting
+    if self.weighting is None:
+      weight = self.olx_atoms.model['weight']
+      params = dict(a=0.1, b=0,
+                    #c=0, d=0, e=0, f=1./3,
+                    )
+      for param, value in zip(params.keys()[:min(2,len(weight))], weight):
+        params[param] = value
+      self.weighting = least_squares.mainstream_shelx_weighting(**params)
+
 
   def run(self, build_only=False,
           table_file_name = None,
@@ -124,7 +134,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not self.f_mask:
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
-          self.f_mask = olx.current_mask.f_mask()
+            self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
@@ -179,13 +189,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #  print label
     #===========================================================================
 
-    weight = self.olx_atoms.model['weight']
-    params = dict(a=0.1, b=0,
-                  #c=0, d=0, e=0, f=1./3,
-                  )
-    for param, value in zip(params.keys()[:min(2,len(weight))], weight):
-      params[param] = value
-    weighting = least_squares.mainstream_shelx_weighting(**params)
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
     self.normal_eqns = normal_equations_class(
@@ -195,7 +198,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       table_file_name=table_file_name,
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
-      weighting_scheme=weighting,
+      weighting_scheme=self.weighting,
       log=self.log,
       may_parallelise=True
     )
@@ -322,7 +325,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.CifMerge(f=inc_hkl, u=True)
 
       self.output_fcf()
-      new_weighting = weighting.optimise_parameters(
+      new_weighting = self.weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
@@ -1259,30 +1262,19 @@ The following options were used:
 
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
-    if self.hklf_code == 5:
+    detwin = self.twin_components is not None\
+        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
+    if detwin or self.hklf_code == 5:
       if self.use_tsc:
         fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
       else:
         fo2, f_calc = self.get_fo_sq_fc()
+      if self.f_mask:
+        from smtbx import masks
+        fo2 = masks.modified_intensities(fo2, f_calc, self.f_mask)
     else:
       fo2 = self.normal_eqns.observations.fo_sq
-      if( self.twin_components is not None
-        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-        import cctbx_controller
-        hemihedral_twinning = cctbx_controller.hemihedral_twinning(
-          self.twin_components[0].twin_law.as_double(), miller_set=fo2)
-        #fo2 = hemihedral_twinning.detwin_with_twin_fraction(
-          #fo2, self.twin_components[0].twin_fraction)
-        f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
-          self.xray_structure()).f_calc()
-        val = self.twin_components[0].value
-        if val < 0:
-          val = 0.001
-        fo2 = hemihedral_twinning.detwin_with_model_data(
-          fo2, f_calc, val)
-        f_calc = f_calc.common_set(fo2)
-      else:
-        f_calc = self.normal_eqns.f_calc
+      f_calc = self.normal_eqns.f_calc
     f_obs = fo2.f_sq_as_f()
     if scale_factor is None:
       k = f_obs.scale_factor(f_calc)
