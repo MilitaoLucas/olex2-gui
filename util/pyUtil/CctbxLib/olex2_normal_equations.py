@@ -308,11 +308,11 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
 
   def do(self):
     self.mu_history = flex.double()
-    self.n_iterations = 0
-    nu = 2
     self.non_linear_ls.build_up()
     if self.has_gradient_converged_to_zero():
       return
+    self.n_iterations = 0
+    nu = 2
     a = self.non_linear_ls.normal_matrix_packed_u()
     self.mu = self.tau*flex.max(a.matrix_packed_u_diagonal())
     while self.n_iterations < self.n_max_iterations:
