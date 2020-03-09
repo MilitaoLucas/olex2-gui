@@ -24,7 +24,7 @@ class leverage_normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
   def __init__(self, observations, reparametrisation, olx_atoms, table_file_name=None, **kwds):
     super(leverage_normal_eqns, self).__init__(
-      observations, reparametrisation, initial_scale_factor=float(olx.xf.rm.OSF()), **kwds)
+      observations, reparametrisation, initial_scale_factor=math.pow(float(olx.xf.rm.OSF()), 2), **kwds)
     if table_file_name:
       self.one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, table_file_name=table_file_name)

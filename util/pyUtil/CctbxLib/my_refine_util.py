@@ -7,6 +7,7 @@ from iotbx import reflection_file_utils
 import itertools
 from cctbx import sgtbx
 from cctbx import maptbx
+from smtbx.refinement.constraints import InvalidConstraint
 
 def shelx_adp_converter(crystal_symmetry):
   def u_star(u11, u22, u33, u23, u13, u12):
@@ -110,13 +111,15 @@ class hydrogen_atom_constraints_customisation(object):
 
   def add_to(self, reparametrisation):
     i_pivot = self.src.pivot
+    self.reparametrisation = reparametrisation
     scatterers = reparametrisation.structure.scatterers()
-    pivot_site = scatterers[i_pivot].site
-    pivot_site_param = reparametrisation.add_new_site_parameter(i_pivot)
-    pivot_neighbour_sites = ()
-    pivot_neighbour_site_params = ()
-    pivot_neighbour_substituent_site_params = ()
+    self.pivot_site = scatterers[i_pivot].site
+    self.pivot_site_param = reparametrisation.add_new_site_parameter(i_pivot)
+    self.pivot_neighbour_sites = ()
+    self.pivot_neighbour_site_params = ()
+    self.pivot_neighbour_substituent_site_params = ()
     part = self.olx_atoms[self.src.constrained_site_indices[0]]['part']
+    special_sites = []
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
       if j in self.src.constrained_site_indices: continue
@@ -124,10 +127,11 @@ class hydrogen_atom_constraints_customisation(object):
       if part != 0 and (b_part != 0 and b_part != part):
         continue 
       if not op.is_unit_mx() and op*scatterers[i_pivot].site == scatterers[i_pivot].site:
+        special_sites.append((j, op))
         continue
       s = reparametrisation.add_new_site_parameter(j, op)
-      pivot_neighbour_site_params += (s,)
-      pivot_neighbour_sites += (op*scatterers[j].site,)
+      self.pivot_neighbour_site_params += (s,)
+      self.pivot_neighbour_sites += (op*scatterers[j].site,)
       if (self.src.need_pivot_neighbour_substituents):
         for c in self.olx_atoms[j]['neighbours']:
           k, op_k = self.j_rt_mx_from_olx(c)
@@ -136,7 +140,7 @@ class hydrogen_atom_constraints_customisation(object):
             if part != 0 and (k_part != 0 or k_part != part):
               continue 
             s = reparametrisation.add_new_site_parameter(k, op.multiply(op_k))
-            pivot_neighbour_substituent_site_params += (s,)
+            self.pivot_neighbour_substituent_site_params += (s,)
 
     length_value = self.src.bond_length
     if length_value is None:
@@ -151,7 +155,7 @@ class hydrogen_atom_constraints_customisation(object):
       if _length_value > 0.5: #check for dummy values
         length_value = _length_value
 
-    bond_length = reparametrisation.add(
+    self.bond_length = reparametrisation.add(
       _.independent_scalar_parameter,
       value=length_value,
       variable=self.src.stretching)
@@ -159,20 +163,34 @@ class hydrogen_atom_constraints_customisation(object):
     if not self.src.stretching:
       for i in self.src.constrained_site_indices:
         reparametrisation.fixed_distances.setdefault(
-          (i_pivot, i), bond_length.value)
+          (i_pivot, i), self.bond_length.value)
 
-    hydrogens = tuple(
+    self.hydrogens = tuple(
       [ scatterers[i_sc] for i_sc in self.src.constrained_site_indices ])
+    if not self.try_add(True) and special_sites:
+      for j, op in special_sites:
+        s = reparametrisation.add_new_site_parameter(j, op)
+        self.pivot_neighbour_site_params += (s,)
+        self.pivot_neighbour_sites += (op*scatterers[j].site,)
+      self.try_add(False)
 
-    param = self.src.add_hydrogen_to(
-      reparametrisation=reparametrisation,
-      bond_length=bond_length,
-      pivot_site=pivot_site,
-      pivot_neighbour_sites=pivot_neighbour_sites,
-      pivot_site_param=pivot_site_param,
-      pivot_neighbour_site_params=pivot_neighbour_site_params,
-      pivot_neighbour_substituent_site_params=
-        pivot_neighbour_substituent_site_params,
-      hydrogens=hydrogens)
-    for i_sc in self.src.constrained_site_indices:
-      reparametrisation.asu_scatterer_parameters[i_sc].site = param
+  def try_add(self, quiet):
+    try:
+      param = self.src.add_hydrogen_to(
+        reparametrisation=self.reparametrisation,
+        bond_length=self.bond_length,
+        pivot_site=self.pivot_site,
+        pivot_neighbour_sites=self.pivot_neighbour_sites,
+        pivot_site_param=self.pivot_site_param,
+        pivot_neighbour_site_params=self.pivot_neighbour_site_params,
+        pivot_neighbour_substituent_site_params=
+          self.pivot_neighbour_substituent_site_params,
+        hydrogens=self.hydrogens)
+      for i_sc in self.src.constrained_site_indices:
+        self.reparametrisation.asu_scatterer_parameters[i_sc].site = param
+      return True
+    except InvalidConstraint as exc:
+      if not quiet:
+        raise exc
+      return False
+    
