@@ -71,6 +71,14 @@
     "onclick=if File.Exists(GetVar(sample_dir)/timmy/timmy.res) then 'reap GetVar(sample_dir)/timmy/timmy.res' else 'reap GetVar(sample_dir)/timmy/timmy.cif'",
     )$-
 
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=...",
+    "onclick=spy.internal.get_sample_list()",
+    )$-
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 

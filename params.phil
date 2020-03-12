@@ -857,6 +857,12 @@ olex2
   network = True
     .type = bool
 
+  samples{
+    url = http://www.olex2.org/adverts/samples
+      .type = str
+      .help = Location of online sample structures.
+  }
+
   ccdc{
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
       .type = strings
