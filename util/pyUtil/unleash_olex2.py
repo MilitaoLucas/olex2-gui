@@ -318,7 +318,7 @@ if not os.path.isdir(bin_directory):
 def update_tags_file(dir):
   up_dir = '/'.join(dir.split('/')[:-1])
   #tags = os.listdir(up_dir)
-  tags = ['1.3', '1.2', '1.3-beta', '1.3-alpha', '1.1', '1.0']
+  tags = ['1.2', '1.2-beta', '1.1', '1.2-alpha', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
@@ -361,14 +361,9 @@ def promote_distro(src, dest, forward=True):
   tag_file.close()
   #end creating the tag file
   for zipfi in distro_zips:
-    full_zn = dest + '/' + zipfi[0]
-    if os.path.exists(full_zn):
-      print 'Updating ' + zipfi[0] + '...'
-    else:
-      print 'Skipping ' + zipfi[0] + '...'
-      continue
-    src_zfile = zipfile.ZipFile(full_zn, mode='r', compression=zipfile.ZIP_DEFLATED)
-    dest_zfile = zipfile.ZipFile(full_zn + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
+    print 'Updating ' + zipfi[0] + '...'
+    src_zfile = zipfile.ZipFile(dest + '/' + zipfi[0], mode='r', compression=zipfile.ZIP_DEFLATED)
+    dest_zfile = zipfile.ZipFile(dest + '/' + zipfi[0] + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
     prefix = zipfi[1]
     if not prefix:  prefix = ''
     zip_tag_name = prefix + 'olex2.tag'
@@ -379,8 +374,8 @@ def promote_distro(src, dest, forward=True):
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
     dest_zfile.close()
-    os.remove(full_zn);
-    os.rename(full_zn + '_', full_zn)
+    os.remove(dest + '/' + zipfi[0]);
+    os.rename(dest + '/' + zipfi[0] + '_', dest + '/' + zipfi[0])
   update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released

@@ -497,11 +497,12 @@ class RunRefinementPrg(RunPrg):
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    calculate_aspherical = OV.GetParam('snum.NoSpherA2.Calculate')
+    result = False
     try:
-      use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
-      calculate_aspherical = OV.GetParam('snum.NoSpherA2.Calculate')
       if use_aspherical == True:
-        self.deal_with_AAFF()
+        result = self.deal_with_AAFF()
       else:
         self.startRun()
         try:
@@ -520,7 +521,19 @@ class RunRefinementPrg(RunPrg):
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
         RunPrg.run(self)
+    except:
+      RunRefinementPrg.running = None
+      self.terminate = True
+      print "Catching wrong Multiplicity!!"
+      raise NameError("Impossible Multiplicity!\n")
     finally:
+      if result == False:
+        self.terminate = True
+        if use_aspherical == True:
+          if self.refinement_has_failed != None:
+            self.refinement_has_failed = self.refinement_has_failed + " and Error during NoSpherA2!"
+          else:
+            self.refinement_has_failed = "Error during NoSpherA2!"
       RunRefinementPrg.running = None
 
 
@@ -876,11 +889,17 @@ class RunRefinementPrg(RunPrg):
       
       #Calculate Wavefunction
       try:
+        #import NoSpherA2
+        #NoSpherA2.launch()
         olex.m('spy.NoSpherA2.launch()')
       except NameError as error:
         print "Error during NoSpherA2: ",error
         RunRefinementPrg.running = None
-        OV.SetParam('snum.NoSpherA2.use_aspherical',False)
+        RunRefinementPrg.Terminate = True
+        return False
+      Error_Status = OV.GetVar('NoSpherA2-Error')
+      if Error_Status != "None":
+        print "Error in NoSpherA2: %s" %Error_Status
         return False
       dir = olx.FilePath()
       tsc_exists = False
@@ -893,12 +912,11 @@ class RunRefinementPrg(RunPrg):
       if tsc_exists == False:
         print "Error during NoSpherA2: "
         RunRefinementPrg.running = None
-        OV.SetParam('snum.NoSpherA2.use_aspherical',False)
         return False
 
       # get energy from wfn file 
       energy = None
-      if wfn_file != None:
+      if (wfn_file != None) and (calculate == True):
         with open(wfn_file) as f:
           fread = f.readlines()
           for line in fread:
@@ -922,23 +940,26 @@ class RunRefinementPrg(RunPrg):
       else:
         HAR_log.write("{:24}".format(" "))
 
-      # Run Least-Squares
-      self.startRun()
-      try:
-        self.setupRefine()
-        OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
-        self.setupFiles()
-      except Exception, err:
-        sys.stderr.formatExceptionInfo()
-        print err
-        self.endRun()
-        return False
-      if self.terminate:
-        self.endRun()
-        return
-      if self.params.snum.refinement.graphical_output and self.HasGUI:
-        self.method.observe(self)
-      RunPrg.run(self)
+      if OV.GetParam('snum.NoSpherA2.run_refine') == True:
+        # Run Least-Squares
+        self.startRun()
+        try:
+          self.setupRefine()
+          OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+          self.setupFiles()
+        except Exception, err:
+          sys.stderr.formatExceptionInfo()
+          print err
+          self.endRun()
+          return False
+        if self.terminate:
+          self.endRun()
+          return
+        if self.params.snum.refinement.graphical_output and self.HasGUI:
+          self.method.observe(self)
+        RunPrg.run(self)
+      else:
+        break
 
       new_model=OlexRefinementModel()
 
@@ -1127,6 +1148,7 @@ class RunRefinementPrg(RunPrg):
 
     with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
+    return True
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()

@@ -161,14 +161,20 @@ class NoSpherA2(PT):
       print "No MPI implementation found in PATH!\n"
       self.cpu_list_str = '1'
 
-  def launch(self):  
+  def launch(self):
+    OV.SetVar('NoSpherA2-Error',"None")
+    wfn_code = OV.GetParam('snum.NoSpherA2.source')
+    if wfn_code == "Please Select...":
+      olx.Alert("No tsc generator selected",\
+"""Error: No generator for tsc files selected. 
+Please select one of the generators from the drop-down menu.""", "O", False)
+      return
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
     if not os.path.exists(self.history_dir):
       os.mkdir(self.history_dir)
-    
 
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     if not calculate:
@@ -179,7 +185,23 @@ class NoSpherA2(PT):
       
     tsc_exists = False
     f_time = None
-    wfn_code = OV.GetParam('snum.NoSpherA2.source')
+    
+    if (wfn_code != "DICAMB") and (olx.xf.latt.IsGrown() != 'true'):
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      ne = 0
+      for sc in OlexCctbxAdapter().xray_structure().scatterers():
+        ne += sc.electron_count()
+      Z = olx.xf.au.GetZ()
+      mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      if (ne % 2 == 0) and (mult % 2 == 0):
+        print "Error! Multiplicity and number of electrons is even. This is imposible!\n"
+        OV.SetVar('NoSpherA2-Error',"Multiplicity")
+        return False
+      elif (ne % 2 == 1) and (mult % 2 == 1):
+        print "Error! Multiplicity and number of electrons is uneven. This is imposible!\n"
+        OV.SetVar('NoSpherA2-Error',"Multiplicity")
+        return False
+        
     for file in os.listdir(olx.FilePath()):
       if file.endswith(".tsc"):
         tsc_exists = True
@@ -314,15 +336,18 @@ class NoSpherA2(PT):
               self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
               print "Aborted due to: ",error
-              raise NameError(error)
+              OV.SetVar('NoSpherA2-Error',error)
+              return False
           if experimental_SF == False or wfn_code == "Tonto":
             try:
               job.launch(self.wfn_job_dir)
             except NameError as error:
               print "Aborted due to: ", error
-              raise NameError("Tonto Failed!")
+              OV.SetVar('NoSpherA2-Error',error)
+              return False
             if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
-              raise NameError('Error during structure factor calculation!')
+              OV.SetVar('NoSpherA2-Error',"StructrueFactor")
+              return False
             olx.html.Update()
             #combine_sfs(force=True,part=i)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
@@ -425,9 +450,11 @@ class NoSpherA2(PT):
               for i in file.readlines():
                 if 'Error in' in i:
                   print(i)
-            raise NameError('Error during structure factor calculation!')
+            OV.SetVar('NoSpherA2-Error',"StructureFactor")
+            return False
           if success == False:
-            raise NameError("Tonto Failed!")
+            OV.SetVar('NoSpherA2-Error',"Tonro")
+            return False
           olx.html.Update()
           if (experimental_SF == False):
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
@@ -441,7 +468,8 @@ class NoSpherA2(PT):
               self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
               print "Aborted due to: ",error
-              return
+              OV.SetVar('NoSpherA2-Error',error)
+              return False
       
         # make the tsc file
         
@@ -471,9 +499,11 @@ class NoSpherA2(PT):
               for i in file.readlines():
                 if 'Error in' in i:
                   print(i)
-            raise NameError('Error during structure factor calculation!')
+            OV.SetVar('NoSpherA2-Error',"StructureFactor")
+            return False
           if success == False:
-            raise NameError("Tonto Failed!")
+            OV.SetVar('NoSpherA2-Error',"Tonto")
+            return False
           olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
@@ -515,7 +545,7 @@ class NoSpherA2(PT):
       raise NameError('Unsuccesfull Wavefunction Calculation!')
 
   def setup_wfn_2_fchk(self):
-    exe_pre ="Wfn_2_Fchk"
+    exe_pre ="NoSpherA2"
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
@@ -872,14 +902,29 @@ class wfn_Job(object):
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024 / int(ncpus) 
     mem = "%maxcore " + str(mem_value) 
-    control = "! NoPop 3-21G AIM "
+    control = "! NoPop NoFinalGrid 3-21G AIM "
     method = OV.GetParam('snum.NoSpherA2.method')
+    grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
       control += "rhf "
     else:
       control += method + ' '
       if method == "M062X":
-        control += "Grid6 "
+        if grid == "Normal":
+          control += "Grid6 "
+        elif grid == "Low":
+          control += "Grid5 "
+        elif grid == "High":
+          control += "Grid7 "
+        elif grid == "Max":
+          control += "Grid7 "
+      else:
+        if grid == "Low":
+          control += "Grid1 "
+        elif grid == "High":
+          control += "Grid4 "
+        elif grid == "Max":
+          control += "Grid7 "
     control = control + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if method == "BP86" or method == "PBE":
@@ -892,6 +937,14 @@ class wfn_Job(object):
         control = control + " DKH2 SARC/J RIJCOSX"
       else:
         control = control + " def2/J RIJCOSX"
+      if grid == "Normal":
+        control += "NoFinalGridX "
+      elif grid == "Low":
+        control += "GridX2 NoFinalGridX "
+      elif grid == "High":
+        control += "GridX5 NoFinalGridX "
+      elif grid == "Max":
+        control += "GridX9 NoFinalGridX "
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -1180,11 +1233,13 @@ class wfn_Job(object):
       if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+"_orca.log")).read():
         pass
       else:
+        OV.SetVar('NoSpherA2-Error',"ORCA")
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
         pass
       else:
+        OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
       
     if("g03" in args[0]):
@@ -1246,6 +1301,7 @@ class wfn_Job(object):
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
       else:
+        OV.SetVar('NoSpherA2-Error',"NoFchk")
         raise NameError("No fchk generated!")
       shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
 
@@ -1279,10 +1335,12 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
     move_args.append('-v')
   if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
     move_args.append('-acc')
-    if(OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
+    if (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
       move_args.append('1')
-    else:
+    elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "High"):
       move_args.append('3')
+    elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Max"):
+      move_args.append('4')
   os.environ['cuqct_cmd'] = '+&-'.join(move_args)
   os.environ['cuqct_dir'] = folder
   pyl = OV.getPYLPath()
@@ -1433,6 +1491,7 @@ class Job(object):
     if OV.GetParam('snum.NoSpherA2.multiplicity') != '1':
       multiplicity = OV.GetParam('snum.NoSpherA2.multiplicity')
       if multiplicity == '0':
+        OV.SetVar('NoSpherA2-Error',"Multiplicity0")
         raise NameError('Multiplicity of 0 is meaningless!')
       args.append("-mult")
       args.append(multiplicity)
@@ -1487,10 +1546,12 @@ class Job(object):
       time.sleep(3)
       
     if 'Error in' in open(os.path.join(self.full_dir,self.name+".err")).read():
+      OV.SetVar('NoSpherA2-Error',"TontoError")
       raise NameError("Tonto Error!")
     if 'Wall-clock time taken for job' in open(os.path.join(self.full_dir,self.name+".out")).read():
       pass
     else:
+      OV.SetVar('NoSpherA2-Error',"Tonto")
       raise NameError("Tonto unsuccessfull!")
     
     if fchk_source == "Tonto" and OV.GetParam('snum.NoSpherA2.keep_wfn') == True:
@@ -1498,6 +1559,7 @@ class Job(object):
         shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
       else:
         print "WFN File not found!"
+        OV.SetVar('NoSpherA2-Error',"NoWFN")
         raise NameError("No WFN found!")
       move_args = []
       basis_dir = self.parent.basis_dir
@@ -1875,12 +1937,13 @@ def change_tsc_generator(input):
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DICAMB":
-      F000 = olx.xf.getF000()
-      Z = olx.xf.au.getZ()
-      nr_electrons= F000 / Z
-      if nr_electrons % 2 == 0:
+      F000 = olx.xf.GetF000()
+      Z = olx.xf.au.GetZ()
+      nr_electrons= int(float(F000) / float(Z))
+      mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      if (nr_electrons % 2 == 0) and (mult %2 == 0):
         OV.SetParam('snum.NoSpherA2.multiplicity',1)
-      else:
+      elif (nr_electrons % 2 != 0) and (mult %2 != 0):
         OV.SetParam('snum.NoSpherA2.multiplicity',2)
 OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
 

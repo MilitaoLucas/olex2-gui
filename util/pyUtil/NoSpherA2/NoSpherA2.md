@@ -1,5 +1,16 @@
 # NoSpherA2
 
+## Literature
+
+* Jayatilaka & Dittrich., Acta Cryst. 2008, A64, 383
+&nbsp; URL[http://scripts.iucr.org/cgi-bin/paper?s0108767308005709,PAPER]
+
+* Capelli et al., IUCrJ. 2014, 1, 361
+&nbsp; URL[http://journals.iucr.org/m/issues/2014/05/00/fc5002/index.html,PAPER]
+
+* Kleemiss et al., to be published
+<!--&nbsp; URL[http://journals.iucr.org/m/issues/2018/01/00/lc5093/lc5093.pdf,PAPER]-->
+
 When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
 
 n^<font color='red'>**This is a new and highly experimental procedure inside Olex2, which requires intensive computing ressources. Testing was performed using ORCA and Tonto as .tsc sources.**</font>^n
@@ -24,6 +35,14 @@ For **Hirshfeld Atom Refinement** There are three steps to this procedure:
 At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled. This process can be autmoatized by using the **HAR* switch. Otherwise this procedure is called a *rigid body fit*.
 <br>
 If you want to use more CPUs make sure the proper MPI Installation is found on your computer. For Windows user install MS-MPI of at least Version 10, for Linux Users openMPI version 4 or up is required. MacOS users please refer to homebrew and install apropiate version of openMPI. The mpiexec(.exe) is needed to be found in the PATH, either through Settings or Environment Variables.
+<br>
+A recommended strategy for efficient refinements using ORCA is:
+<ol>
+  <li>PBE/SVP (if you have no element with Z>36) and Normal Grids</li>
+  <li>PBE/TZVPP and Normal Grids</li>
+  <li>PBE/TZVPP and High Grids</li>
+</ol>
+In case you want to make sure it is the best possible fit you can try finishing up with meta or hybrid functionals, but in the benchmarks it did not change anything significantly. In case of all atoms lighter than Kr it is best to use def2- familiy of basis sets. In case of any heavy element or significant relativistic effects use x2c- with relativistics on.
 
 ### Update Table
 After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **Tonto**. The most benchmarked and recommended software is **ORCA**. There is also an option to use **Gaussian** [HIGHLY UNTESTED]. A present **.wfn** file can also be used but **must** agree to the geometry currtly used in Olex2. These options will appear, depending on whether they are properly installed and Olex2 knows about them -> Settings and PATH). Once a program has been chosen, please also adjust the Extras according to your needs if you do not want to use minimal settings.<br>If Update Table is deactivated a Dropdown of all found .tsc files in the current folder is given to be used for refinement, without updating the files.
@@ -33,10 +52,9 @@ This tool provides all the settings required for the calculation of the .tsc fil
 
 ## Basis
 This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
-The **def2**- and **cc-** series of basis sets is only defined for atoms up to Kr. Afterword ECPs woudl be needed to use these basis sets, whcih are by the natrue of the method not compatible. 
+The **def2**- and **cc-** series of basis sets is only defined for atoms up to Kr. Afterword ECPs (Effective core potentials) would be needed to use these basis sets, which are by the nature of the method not compatible. 
 Then the **x2c**-basis sets are usefull, as they are defined up to Rn without any ECPs.
 It is **highly** recommended to run basic first iterations using single valence basis sets and finish the structure with a higher basis.
-If you really do not plan on using your computer you can use TZVPP, but these calculations will take extremely long and are more for benchmark and polishing.
 
 ## Method
 The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be used in ORCA and are perfectly fine here.

@@ -10,7 +10,7 @@ snum{
       .type = str
     cmd = ""
       .type = str
-    basis_name = "x2c-SVP"
+    basis_name = "def2-SVP"
       .type = str
     becke_accuracy = "Normal"
       .type = str
@@ -56,7 +56,9 @@ snum{
       .type = bool
     Relativistic = True
       .type = bool
-    source = "None"
+    run_refine = True
+      .type = bool
+    source = "Please Select..."
       .type = str
     wfn2fchk_SF = True
       .type = bool
@@ -123,7 +125,7 @@ snum{
             .type = bool
           pySCF_PBC = False
             .type = bool
-          Relativistic = True
+          Relativistic = False
             .type = bool
           source = "Tonto"
             .type = str
