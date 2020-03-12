@@ -9,7 +9,7 @@
     $-
 
 <!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
-<td width='45%' align='right'>
+<td width='35%' align='right'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
@@ -22,7 +22,7 @@
 </td>
 
 <td width='12%' align='right' >
-<b>TSC File</b>
+<b>.tsc File</b>
 </td>
 
 
@@ -31,11 +31,11 @@
 
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
 
-<td width='25%' align='left'>
+<td width='35%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_SOURCE",
-    "items=strcat(spy.NoSpherA2.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'wfn'))",
+    "items='Please Select';strcat(spy.NoSpherA2.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'wfn'))",
     "value=spy.GetParam('snum.NoSpherA2.source')",
     "onchange=spy.SetParam('snum.NoSpherA2.source',html.GetValue('~name~'))>>html.Update()",
     "onchangealways=True"
@@ -43,7 +43,7 @@
   $-
 </td>
 
-<td width='22%' align='right'>
+<td width='12%' align='right'>
 <b>Source of .tsc</b> 
 </td>
 
