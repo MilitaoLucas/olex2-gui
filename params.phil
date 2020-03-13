@@ -858,7 +858,7 @@ olex2
     .type = bool
 
   samples{
-    url = http://www.olex2.org/adverts/samples
+    url = https://secure.opencryst.org/samples
       .type = str
       .help = Location of online sample structures.
   }

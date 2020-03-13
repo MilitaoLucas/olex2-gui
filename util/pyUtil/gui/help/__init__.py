@@ -272,7 +272,7 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
       _ = open(helpTxt, 'r').read()
 
     elif helpTxt:
-      _ = olx.GetVar(helpTxt,None)
+      _ = olx.GetVar(helpTxt,helpTxt)
 
     elif not helpTxt or helpTxt == "#helpTxt":
       _ = olx.GetVar(name,None)
