@@ -522,10 +522,7 @@ class RunRefinementPrg(RunPrg):
           self.method.observe(self)
         RunPrg.run(self)
     except:
-      RunRefinementPrg.running = None
       self.terminate = True
-      print "Catching wrong Multiplicity!!"
-      raise NameError("Impossible Multiplicity!\n")
     finally:
       if result == False:
         self.terminate = True

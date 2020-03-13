@@ -168,6 +168,7 @@ class NoSpherA2(PT):
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected. 
 Please select one of the generators from the drop-down menu.""", "O", False)
+      OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
       return
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
@@ -453,7 +454,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             OV.SetVar('NoSpherA2-Error',"StructureFactor")
             return False
           if success == False:
-            OV.SetVar('NoSpherA2-Error',"Tonro")
+            OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
           olx.html.Update()
           if (experimental_SF == False):
@@ -541,7 +542,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     try:
       wfn_object.run()
     except NameError as error:
-      print "The follwing error occured druing QM Calculation: ",error
+      print "The following error occured during QM Calculation: ",error
+      OV.SetVar('NoSpherA2-Error',error)
       raise NameError('Unsuccesfull Wavefunction Calculation!')
 
   def setup_wfn_2_fchk(self):
