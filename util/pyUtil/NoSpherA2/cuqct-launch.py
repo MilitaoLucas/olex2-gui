@@ -22,10 +22,12 @@ while not os.path.exists('wfn_2_fchk.log'):
     time.sleep(10)
     exit(1)
 with open('wfn_2_fchk.log', "rU") as stdout:
+  import sys
   while p.poll() is None:
     x = stdout.read()
     if x:
-      print x
-    time.sleep(3)
+      sys.stdout.write(x)
+      sys.stdout.flush()
+    time.sleep(1)
   
 print "Finished"
