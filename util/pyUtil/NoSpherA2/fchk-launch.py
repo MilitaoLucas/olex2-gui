@@ -17,18 +17,14 @@ err_fn = None
 out_fn = None
 if "orca" in args[0]:
   log = open(fchk_file + '_orca.log', 'w')
-  err_fn = fchk_file + "_orca.log"
   out_fn = fchk_file + "_orca.log"
 p = subprocess.Popen(args, stdout=log)
 if "ubuntu" in args[0]:
   print "Starting Ubuntu and running pySCF, please be patient for start"
-if err_fn == None:
-  if "ubuntu" in args[0]:
-    err_fn = fchk_file + "_pyscf.log"
-    out_fn = fchk_file + "_pyscf.log"
-  else:
-    err_fn = fchk_file + ".log"
-    out_fn = fchk_file + ".log"
+if "ubuntu" in args[0]:
+  out_fn = fchk_file + "_pyscf.log"
+elif out_fn == None:
+  out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
@@ -39,12 +35,12 @@ while not os.path.exists(out_fn):
     print("Failed to locate the output file")
     exit(1)
 with open(out_fn, "rU") as stdout:
+  import sys
   while p.poll() is None:
     x = stdout.read()
     if x:
-      print x
-    time.sleep(3)
-with open(err_fn, "rU") as stderr:
-  print stderr.read()
+      sys.stdout.write(x)
+      sys.stdout.flush()
+    time.sleep(1)
   
 print "Finished"
