@@ -58,7 +58,7 @@ snum{
       .type = bool
     run_refine = True
       .type = bool
-    source = "Please Select..."
+    source = "'Please Select'"
       .type = str
     wfn2fchk_SF = True
       .type = bool

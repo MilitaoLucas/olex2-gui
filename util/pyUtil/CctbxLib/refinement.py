@@ -787,14 +787,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if cif_block_found == True:
             tsc_info = tsc_info + line
         if cif_block_found == False:
-          details_text = """Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
-Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
-NoSpherA2 implementation of HAR makes use of tailor-made aspherical atomic form factors calculated
+          details_text = """Refinement using NoSpherA2, an implementation of 
+NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:
+F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+NoSpherA2 implementation of HAR makes use of 
+tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
 The ED is calculated from a gaussian basis set single determinant SCF
-wavefunction - either Hartree-Fock or DFT using selected funtionals - for a fragment of the crystal.
+wavefunction - either Hartree-Fock or DFT using selected funtionals
+ - for a fragment of the crystal.
 This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
 The following options were used:
 """
