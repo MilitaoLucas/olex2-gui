@@ -23,7 +23,8 @@ For **Hirshfeld Atom Refinement** There are three steps to this procedure:
 <li>The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using:</li>
   <ul>
     <li>TONTO (shipped)</li>
-    <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,ORCA Forum])</li>
+    <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,WEB]
+	)</li>
     <li>pySCF</li>
     <li>Gaussian of various versions (implemented but not maintained)</li>
   </ul>
