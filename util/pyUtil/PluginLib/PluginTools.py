@@ -106,7 +106,7 @@ class PluginTools(VFSDependent):
                           before=before, filetype='', image=image, onclick=self.p_onclick)
       except:
         pass
-    #gui.help.gh.git_help(quick=False, specific=self.p_path)
+    gui.help.gh.git_help(quick=False, specific=self.p_path)
 
   def edit_customisation_folder(self,custom_name=None):
     self.get_customisation_path(custom_name=None)
