@@ -9,7 +9,7 @@
 &nbsp; URL[http://journals.iucr.org/m/issues/2014/05/00/fc5002/index.html,PAPER]
 
 * Kleemiss et al., to be published
-<!--&nbsp; URL[http://journals.iucr.org/m/issues/2018/01/00/lc5093/lc5093.pdf,PAPER]-->
+&nbsp; URL[http://journals.iucr.org/m/issues/2018/01/00/lc5093/lc5093.pdf,PAPER]
 
 When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
 
@@ -23,8 +23,7 @@ For **Hirshfeld Atom Refinement** There are three steps to this procedure:
 <li>The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using:</li>
   <ul>
     <li>TONTO (shipped)</li>
-    <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,WEB]
-	)</li>
+    <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,WEB])</li>
     <li>pySCF</li>
     <li>Gaussian of various versions (implemented but not maintained)</li>
   </ul>
@@ -39,7 +38,7 @@ If you want to use more CPUs make sure the proper MPI Installation is found on y
 <br>
 A recommended strategy for efficient refinements using ORCA is:
 <ol>
-  <li>PBE/SVP (if you have no element with Z>36) and Normal Grids</li>
+  <li>PBE/SVP and Normal Grids</li>
   <li>PBE/TZVPP and Normal Grids</li>
   <li>PBE/TZVPP and High Grids</li>
 </ol>
