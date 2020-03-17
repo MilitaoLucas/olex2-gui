@@ -47,7 +47,7 @@
           name="$strcat(#name,_VALUE)"
           width="100%"
           height="18"
-          bgcolor="$GetVar(HtmlTableBgColour)"
+          bgcolor="$GetVar(HtmlInputBgColour)"
           fgcolor="$GetVar(HtmlFontColour)"
           value="math.eval(#invert * spy.GetParam(#param))"
           onreturn="html.SetValue($strcat(#name,_SLIDE),$math.eval(#invert*#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
