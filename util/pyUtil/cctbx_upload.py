@@ -44,7 +44,7 @@ build_def = {
 
   'win32-32bit':
     [('e:/cctbx/cctbx_latest/build_win32/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
-      'e:/tmp/cctbx/', 'cctbx-win32.zip', '-j6')],
+      'e:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j6')],
   'win32-64bit':
     [('e:/cctbx/cctbx_latest/build_win64/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
       'e:/tmp/cctbx/', 'cctbx-win64.zip', '-j6')],
