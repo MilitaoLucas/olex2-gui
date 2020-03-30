@@ -32,6 +32,8 @@ snum{
       .type = str
     full_HAR = False
       .type = bool
+    gl_pointsize = "1"
+      .type = str
     h_afix = True
       .type = bool
     h_aniso = True
@@ -52,9 +54,19 @@ snum{
       .type = str
     precise_output = False
       .type = bool
+    Property_Elf = False
+      .type = bool
+    Property_Eli = False
+      .type = bool
+    Property_ESP = False
+      .type = bool
+    Property_Lap = False
+      .type = bool
+    Property_RDG = False
+      .type = bool
     pySCF_PBC = False
       .type = bool
-    Relativistic = True
+    Relativistic = False
       .type = bool
     run_refine = True
       .type = bool
@@ -64,82 +76,26 @@ snum{
       .type = bool
     wfn2fchk_debug = False
       .type = bool
+    map_min = 0.0
+      .type = float
+    map_max = 0.0
+      .type = float
+    map_radius = "2.0"
+      .type = str
+    map_resolution = "0.1"
+      .type = str
+    map_scale_max = "0.01"
+      .type = str
+    map_scale_min = "-0.01"
+      .type = str
+    map_scale_name = "BWR"
+      .type = str
+    map_type = ""
+      .type = str
     mem = 2
       .type = str
     ncpus = 1
-      .type = str
-  }
-  refinement{
-    cctbx{
-      nsff{
-        use_aspherical = False
-          .type = bool
-        dir = ""
-          .type = str
-        name = ""
-          .type = str
-        cmd = ""
-          .type = str
-        tsc{
-          basis_name = "x2c-SVP"
-            .type = str
-          becke_accuracy = "Normal"
-            .type = str
-          Calculate = True
-            .type = bool
-          charge = 0
-            .type = str
-          cluster_radius = 0
-            .type = int
-          cluster_grow = True
-            .type = bool
-          DIIS = "0.01"
-            .type = str
-          Disorder_Groups = ""
-            .type = str
-          fchk_file = ""
-            .type = str
-          file = ""
-            .type = str
-          full_HAR = False
-            .type = bool
-          h_afix = True
-            .type = bool
-          h_aniso = True
-            .type = bool
-          keep_wfn = True
-            .type = bool
-          Max_HAR_Cycles = 10
-            .type = str
-          method = "rks"
-            .type = str
-          modular = "direct"
-            .type = str
-          multiplicity = 1
-            .type = str
-          ORCA_SCF_Conv = "NormalSCF"
-            .type = str
-          ORCA_SCF_Strategy = "NormalConv"
-            .type = str
-          precise_output = False
-            .type = bool
-          pySCF_PBC = False
-            .type = bool
-          Relativistic = False
-            .type = bool
-          source = "Tonto"
-            .type = str
-          wfn2fchk_SF = True
-            .type = bool
-          wfn2fchk_debug = False
-            .type = bool
-        }
-        mem = 2
-          .type = str
-        ncpus = 1
-          .type = str
-      }
-    }
+      .type = str    
   }
 }
 
