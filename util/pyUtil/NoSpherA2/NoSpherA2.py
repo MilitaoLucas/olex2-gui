@@ -509,7 +509,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
-    add_info_to_tsc()
+    #add_info_to_tsc()
 
   def wfn(self,folder='',xyz=True):
     if not self.basis_list_str:
