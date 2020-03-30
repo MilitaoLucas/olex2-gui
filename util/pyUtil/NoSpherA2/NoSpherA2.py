@@ -89,6 +89,7 @@ class NoSpherA2(PT):
       self.basis_dir = None
       print("No Hart executable found!")
     check_for_matching_fcf()
+    print " "
 
   def setup_har_executables(self):
     self.exe = None
@@ -359,7 +360,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
             cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
             shutil.copy("experimental.tsc",job.name+"_part_"+str(parts[i])+".tsc")
-            shutil.move("wfn_2_fchk.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"wfn_2_fchk_part_"+str(parts[i])+".log"))
+            shutil.move("NoSpherA2.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"NoSpherA2_part_"+str(parts[i])+".log"))
           for file in os.listdir('.'):
             if file.endswith(".wfn"):
               shutil.move(file,file + "_part%d"%parts[i])
@@ -508,18 +509,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
-
-    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
-      olex.m("anis -h")
-    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
-      olex.m("sel $h")
-      olex.m("Afix 0")
-    olex.m('delins list')
-    olex.m('addins LIST -3')
-    add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
-    if add_disp is True:
-      olex.m('gendisp -source=sasaki')
-    #add_info_to_tsc()
+    add_info_to_tsc()
 
   def wfn(self,folder='',xyz=True):
     if not self.basis_list_str:
@@ -560,6 +550,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.wfn_2_fchk = _
       else:
         self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
+    if self.wfn_2_fchk == "":
+      print "ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!"
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
     
   def setup_pyscf(self):
@@ -940,13 +932,13 @@ class wfn_Job(object):
       else:
         control = control + " def2/J RIJCOSX"
       if grid == "Normal":
-        control += "NoFinalGridX "
+        control += " NoFinalGridX "
       elif grid == "Low":
-        control += "GridX2 NoFinalGridX "
+        control += " GridX2 NoFinalGridX "
       elif grid == "High":
-        control += "GridX5 NoFinalGridX "
+        control += " GridX5 NoFinalGridX "
       elif grid == "Max":
-        control += "GridX9 NoFinalGridX "
+        control += " GridX9 NoFinalGridX "
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -1296,7 +1288,7 @@ class wfn_Job(object):
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
-      with open("wfn_2_fchk.log", "r") as log:
+      with open("NoSpherA2.log", "r") as log:
         x = log.read()
         if x:
           print x
@@ -1305,13 +1297,13 @@ class wfn_Job(object):
       else:
         OV.SetVar('NoSpherA2-Error',"NoFchk")
         raise NameError("No fchk generated!")
-      shutil.move("wfn_2_fchk.log",os.path.join(self.full_dir, self.name+"_wfn2fchk.log"))
+      shutil.move("NoSpherA2.log",os.path.join(self.full_dir, self.name+"_NoSpherA2.log"))
 
 def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
   folder = OV.FilePath()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-  if os.path.isfile(os.path.join(folder, "wfn_2_fchk.log")):
-    shutil.move(os.path.join(folder, "wfn_2_fchk.log"), os.path.join(folder, "wfn_2_fchk.log_org"))
+  if os.path.isfile(os.path.join(folder, "NoSpherA2.log")):
+    shutil.move(os.path.join(folder, "NoSpherA2.log"), os.path.join(folder, "NoSpherA2.log_org"))
   move_args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   move_args.append(wfn_2_fchk)
@@ -1383,8 +1375,7 @@ def discamb(folder, name, discamb_exe):
   while p.poll() is None:
     time.sleep(5)
     olx.html.Update()
-
-
+   
 class Job(object):
   origin_folder = " "
   is_copied_back = False
@@ -1521,7 +1512,7 @@ class Job(object):
           if element_type not in fp_fdps:
             fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
             fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
+      disp_arg = " ".join(["%s %s %s" %(k, data2[0], data2[1]) for k,v in fp_fdps.iteritems()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
 
@@ -1579,7 +1570,7 @@ class Job(object):
         move_args.append(basis_dir+'/')
       move_args.append("-method")
       move_args.append(method)
-      logname = "wfn_2_fchk.log"
+      logname = "NoSpherA2.log"
       m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
@@ -1868,16 +1859,24 @@ def deal_with_parts(cif=True):
 OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
 def check_for_matching_fcf():
-  p = os.path.dirname(OV.GetParam('snum.NoSpherA2.file'))
+  p = OV.FilePath()
   name = OV.ModelSrc()
   fcf = os.path.join(p,name + '.fcf')
-  if os.path.exists(fcf) and os.path.exists(fcf):
-    OV.SetVar('have_valid_nosphera2_fcf', True)
+  if os.path.exists(fcf):
     return True
   else:
-    OV.SetVar('have_valid_nosphera2_fcf', False)
     return False
 OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
+
+def check_for_matching_wfn():
+  p = OV.FilePath()
+  name = OV.ModelSrc()
+  wfn = os.path.join(p,name + '.wfn')
+  if os.path.exists(wfn):
+    return True
+  else:
+    return False
+OV.registerFunction(check_for_matching_wfn,True,'NoSpherA2')
 
 def read_disorder_groups():
   input = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
@@ -1922,7 +1921,7 @@ OV.registerFunction(change_basisset,True,'NoSpherA2')
 def get_functional_list():
   wfn_code = OV.GetParam('snum.NoSpherA2.source')
   list = None
-  if wfn_code == "Tonto" or wfn_code == "pySCF":
+  if wfn_code == "Tonto" or wfn_code == "pySCF" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   else:
     list = "HF;BP86;PBE;PBE0;M062X;B3LYP;wB97;wB97X;"
@@ -1988,6 +1987,384 @@ def write_symmetry_file(debug=False):
     print symops
 OV.registerFunction(write_symmetry_file,True,'NoSpherA2')
     
+def calculate_cubes():
+  if is_disordered == True:
+    print "Disordered structures not implemented!"
+    return
+
+  wfn2fchk = OV.GetVar("Wfn2Fchk")
+  args = []
+  
+  args.append(wfn2fchk)
+  cpus = OV.GetParam('snum.NoSpherA2.ncpus')
+  args.append("-cpus")
+  args.append(cpus)
+  args.append("-wfn")
+  args.append(OV.ModelSrc() + ".wfn")
+  Lap = OV.GetParam('snum.NoSpherA2.Property_Lap')
+  Eli = OV.GetParam('snum.NoSpherA2.Property_Eli')
+  Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
+  RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
+  ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
+  if Lap == True:
+    args.append("-lap")
+  if Eli == True:
+    args.append("-eli")
+  if Elf == True:
+    args.append("-elf")
+  if RDG == True:
+    args.append("-rdg")
+  if ESP == True:
+    args.append("-esp")
+  
+  radius = OV.GetParam('snum.NoSpherA2.map_radius')
+  res = OV.GetParam('snum.NoSpherA2.map_resolution')
+  args.append("-resolution")
+  args.append(res)
+  args.append("-cif")
+  args.append(OV.ModelSrc() + ".cif")
+  
+  os.environ['cube_cmd'] = '+&-'.join(args)
+  os.environ['cube_file'] = OV.ModelSrc()
+  os.environ['cube_dir'] = OV.FilePath()
+
+  import subprocess
+  pyl = OV.getPYLPath()
+  if not pyl:
+    print("A problem with pyl is encountered, aborting.")
+    return
+  p = subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
+  
+OV.registerFunction(calculate_cubes,True,'NoSpherA2')
+
+def get_map_types():
+  name = OV.ModelSrc()
+  folder = OV.FilePath()
+  list = ""
+  if os.path.isfile(os.path.join(folder,name+".fcf")):
+    list = "Residual<-diff;Deformation<-fcfmc;"
+  if os.path.isfile(os.path.join(folder,name+"_eli.cube")):
+    list += "ELI-D;"
+  if os.path.isfile(os.path.join(folder,name+"_lap.cube")):
+    list += "Laplacian;"
+  if os.path.isfile(os.path.join(folder,name+"_elf.cube")):
+    list += "ELF;"
+  if os.path.isfile(os.path.join(folder,name+"_esp.cube")):
+    list += "ESP;"
+  if os.path.isfile(os.path.join(folder,name+"_rdg.cube")) and os.path.isfile(os.path.join(folder,name+"_signed_rho.cube")):
+    list += "NCI;"
+  if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
+    list += "Rho + ESP;"
+  if list == "":
+    return "None;"
+  return list
+OV.registerFunction(get_map_types,True,'NoSpherA2')
+
+def change_map():
+  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  if Type == "None" or Type == "":
+    return
+  name = OV.ModelSrc()
+  if Type == "ELI-D":
+    plot_cube(name+"_eli.cube",None)
+  elif Type == "Laplacian":
+    plot_cube(name+"_lap.cube",None)
+  elif Type == "ELF":
+    plot_cube(name+"_elf.cube",None)
+  elif Type == "ESP":
+    plot_cube(name+"_esp.cube",None)
+  elif Type == "NCI":
+    OV.SetParam('snum.NoSpherA2.map_scale_name',"RGB")
+    plot_cube(name+"_rdg.cube",name+"_signed_rho.cube")
+  elif Type == "Rho + ESP":
+    OV.SetParam('snum.NoSpherA2.map_scale_name',"BWR")
+    plot_cube(name+"_rho.cube",name+"_esp.cube")
+  elif Type == "fcfmc" or Type == "diff":
+    OV.SetVar('map_slider_scale',50)
+    OV.SetParam('snum.map.type',Type)
+    olex.m("calcFourier -fcf -%s -r=%s -m" %(Type,OV.GetParam('snum.NoSpherA2.map_resolution')))
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    #olex.m("html.Update()")
+    minimal = float(olx.xgrid.GetMin())
+    maximal = float(olx.xgrid.GetMax())
+    if -minimal > maximal:
+      maximal = -minimal
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',maximal*50)
+    olex.m("html.Update()")
+  else: 
+    print "Sorry, no map type available or selected map type not correct!"
+    return
+OV.registerFunction(change_map,True,'NoSpherA2')
+
+def change_pointsize():
+  PS = OV.GetParam('snum.NoSpherA2.gl_pointsize')
+  olex.m('gl.PointSize ' + PS)
+OV.registerFunction(change_pointsize,True,'NoSpherA2')
+
+
+def plot_cube(name,color_cube):
+  import olex_xgrid
+  if not os.path.isfile(name):
+    print "Cube file does not exist!"
+    return
+  olex.m("html.Update()")
+  with open(name) as cub:
+    cube = cub.readlines()
+  
+  run = 0
+  na = 0
+  x_size = 0
+  y_size = 0
+  z_size = 0
+  x_run = 0
+  y_run = 0
+  z_run = 0
+  data = None
+  
+  min = 100000
+  max = 0
+  
+  for line in cube:
+    run += 1
+    if (run==3):
+      values = line.split()
+      na = int(values[0])
+    if (run==4):
+      values = line.split()
+      x_size = int(values[0])
+    if (run==5):
+      values = line.split()
+      y_size = int(values[0])
+    if (run==6):
+      values = line.split()
+      z_size = int(values[0])
+      data = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+    if (run > na + 6):
+      values = line.split()
+      for i in range(len(values)):
+        data[x_run][y_run][z_run] = float(values[i])
+        if data[x_run][y_run][z_run] > max:
+          max = data[x_run][y_run][z_run]
+        if data[x_run][y_run][z_run] < min:
+          min = data[x_run][y_run][z_run]
+        z_run += 1
+        if z_run == z_size:
+          y_run += 1
+          z_run = 0
+          if y_run == y_size:
+            x_run += 1
+            y_run = 0
+        if x_run > x_size:
+          print "ERROR! Mismatched indices while reading!"
+          return
+  
+  cube = None
+  
+  make_colorfull = (color_cube != None)
+  if make_colorfull == True:
+    with open(color_cube) as cub:
+      cube2 = cub.readlines()
+  
+    run = 0
+    na2 = 0
+    x_size2 = 0
+    y_size2 = 0
+    z_size2 = 0
+    x_run = 0
+    y_run = 0
+    z_run = 0
+    data2 = None
+    
+    for line in cube2:
+      run += 1
+      if (run==3):
+        values = line.split()
+        na2 = int(values[0])
+      if (run==4):
+        values = line.split()
+        x_size2 = int(values[0])
+      if (run==5):
+        values = line.split()
+        y_size2 = int(values[0])
+      if (run==6):
+        values = line.split()
+        z_size2 = int(values[0])
+        data2 = [[[float(0.0) for k in xrange(z_size2)] for j in xrange(y_size2)] for i in xrange(x_size2)]
+      if (run > na + 6):
+        values = line.split()
+        for i in range(len(values)):
+          data2[x_run][y_run][z_run] = float(values[i])
+          z_run += 1
+          if z_run == z_size2:
+            y_run += 1
+            z_run = 0
+            if y_run == y_size2:
+              x_run += 1
+              y_run = 0
+          if x_run > x_size2:
+            print "ERROR! Mismatched indices while reading!"
+            return
+    
+    cube2 = None
+    values = None
+    z_run = None
+    y_run = None
+    x_run = None
+    na = None
+    na2 = None
+    line = None
+    run = None
+    olex_xgrid.Init(x_size+1,y_size+1,z_size+1,True)
+    
+    def interpolate(x,y,z):
+      #trilinear interpolation between the points... sorry for the mess
+      x_1 = x/x_size
+      y_1 = y/y_size
+      z_1 = z/z_size
+      x_2 = x_1 * x_size2
+      y_2 = y_1 * y_size2
+      z_2 = z_1 * z_size2
+      ix2 = int(x_2)
+      iy2 = int(y_2)
+      iz2 = int(z_2)
+      ix21 = ix2 + 1
+      iy21 = iy2 + 1
+      iz21 = iz2 + 1
+      a_0 = data2[ix2][iy2][iz2]*ix21*iy21*iz21 - data2[ix2][iy2][iz21]*ix21*iy21*iz2 - data2[ix2][iy21][iz2]*ix21*iy2*iz21 + data2[ix2][iy21][iz21]*ix21*iy2*iz2 - data2[ix21][iy2][iz2]*ix2*iy21*iz21 + data2[ix21][iy2][iz21]*ix2*iy21*iz2 + data2[ix21][iy21][iz2]*ix2*iy2*iz21 - data2[ix21][iy21][iz21]*ix2*iy2*iz2
+      a_1 = - data2[ix2][iy2][iz2]*iy21*iz21 + data2[ix2][iy2][iz21]*iy21*iz2 + data2[ix2][iy21][iz2]*iy2*iz21 - data2[ix2][iy21][iz21]*iy2*iz2 + data2[ix21][iy2][iz2]*iy21*iz21 - data2[ix21][iy2][iz21]*iy21*iz2 - data2[ix21][iy21][iz2]*iy2*iz21 + data2[ix21][iy21][iz21]*iy2*iz2
+      a_2 = - data2[ix2][iy2][iz2]*ix21*iz21 + data2[ix2][iy2][iz21]*ix21*iz2 + data2[ix2][iy21][iz2]*ix2*iz21 - data2[ix2][iy21][iz21]*ix2*iz2 + data2[ix21][iy2][iz2]*ix21*iz21 - data2[ix21][iy2][iz21]*ix21*iz2 - data2[ix21][iy21][iz2]*ix2*iz21 + data2[ix21][iy21][iz21]*ix2*iz2
+      a_3 = - data2[ix2][iy2][iz2]*ix21*iy21 + data2[ix2][iy2][iz21]*ix21*iy2 + data2[ix2][iy21][iz2]*ix2*iy21 - data2[ix2][iy21][iz21]*ix2*iy2 + data2[ix21][iy2][iz2]*ix21*iy21 - data2[ix21][iy2][iz21]*ix21*iy2 - data2[ix21][iy21][iz2]*ix2*iy21 + data2[ix21][iy21][iz21]*ix2*iy2
+      a_4 = data2[ix2][iy2][iz2]*iz21 - data2[ix2][iy2][iz21]*iz2 - data2[ix2][iy21][iz2]*iz21 + data2[ix2][iy2][iz21]*iz2 - data2[ix21][iy2][iz2]*iz21 + data2[ix21][iy2][iz21]*iz2 + data2[ix21][iy21][iz2]*iz21 - data2[ix21][iy21][iz21]*iz2
+      a_5 = data2[ix2][iy2][iz2]*iy21 - data2[ix2][iy2][iz21]*iy2 - data2[ix2][iy21][iz2]*iy21 + data2[ix2][iy2][iz21]*iy2 - data2[ix21][iy2][iz2]*iy21 + data2[ix21][iy2][iz21]*iy2 + data2[ix21][iy21][iz2]*iy21 - data2[ix21][iy21][iz21]*iy2
+      a_6 = data2[ix2][iy2][iz2]*ix21 - data2[ix2][iy2][iz21]*ix2 - data2[ix2][iy21][iz2]*ix21 + data2[ix2][iy2][iz21]*ix2 - data2[ix21][iy2][iz2]*ix21 + data2[ix21][iy2][iz21]*ix2 + data2[ix21][iy21][iz2]*ix21 - data2[ix21][iy21][iz21]*ix2
+      a_7 = -(data2[ix2][iy2][iz2] - data2[ix2][iy2][iz21] - data2[ix2][iy21][iz2] + data2[ix2][iy2][iz21] - data2[ix21][iy2][iz2] + data2[ix21][iy2][iz21] + data2[ix21][iy21][iz2] - data2[ix21][iy21][iz21])
+      
+      return a_0 + a_1 * ix2 + a_2 * iy2 + a_3 * z_2 + a_4 * x_2 * y_2 + a_5 * x_2 * z_2 + a_6 * y_2 * z_2 + a_7 * x_2 * y_2 * z_2
+      
+      
+    value = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+    i=None
+    j=None
+    k=None
+    if x_size == x_size2 and y_size == y_size2 and z_size == z_size2:
+      for x in range(x_size):
+        for y in range(y_size):
+          for z in range(z_size):
+            value[x][y][z] = data2[x][y][z]
+    else:
+      print "Interpolating..."
+      #from dask import delayed
+      #from multiprocessing import Pool
+      #nproc = int(OV.GetParam("snum.NoSpherA2.ncpus"))
+      #pool = Pool(processes=nproc)
+      for x in range(x_size):
+        for y in range(y_size):
+          for z in range(z_size):
+            res = interpolate(x,y,z)
+            value[x][y][z] = res
+    data2 = None
+    for x in range(x_size):
+      for y in range(y_size):
+        for z in range(z_size):
+          colour = int(get_color(value[x][y][z]))
+          olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
+  else:
+    olex_xgrid.Init(x_size+1,y_size+1,z_size+1)
+    for x in range(x_size):
+      for y in range(y_size):
+        for z in range(z_size):
+          olex_xgrid.SetValue(x,y,z,data[x][y][z])
+  data = None
+  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  if Type == "Laplacian":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',40)
+    OV.SetVar('map_slider_scale',40)
+  elif Type == "ELI-D":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',60)
+    OV.SetVar('map_slider_scale',20)
+  elif Type == "ELF":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',40)
+    OV.SetVar('map_slider_scale',40)
+  elif Type == "ESP":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',50)
+  elif Type == "NCI":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
+  elif Type == "Rho + ESP":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
+  olex_xgrid.SetMinMax(min, max)
+  olex_xgrid.SetVisible(True)
+  olex_xgrid.InitSurface(False)
+  
+OV.registerFunction(plot_cube,True,'NoSpherA2')
+
+def get_color(value):
+  a = 127
+  b = 0
+  g = 0
+  r = 0
+  scale_min = OV.GetParam('snum.NoSpherA2.map_scale_min')
+  scale_max = OV.GetParam('snum.NoSpherA2.map_scale_max')
+  scale = OV.GetParam('snum.NoSpherA2.map_scale_name') #BWR = Blue White Red; RGB = Red Green Blue
+  x = 0
+  if value <= float(scale_min):
+    x = 0
+  elif value >= float(scale_max):
+    x = 1
+  else:
+    x = (value - float(scale_min)) / (float(scale_max) - float (scale_min))
+  if scale == "RWB":
+    x = 1 - x
+    scale = "BWR"
+  if scale == "RGB":
+    x = 1 - x
+    scale = "BGR"
+  if scale == "BWR":
+    if x <= 0.5:
+      h = 2 * x
+      b = 255
+      g = int(255 * h)
+      r = int(255 * h)
+    else:
+      h = -2*x + 2
+      b = int(255 * h)
+      g = int(255 * h)
+      r = 255
+  elif scale == "BGR":
+    if x <= 0.5:
+      h = 2*x
+      b = int(255*1-h)
+      g = int(255* h)
+      r = 0
+    elif x > 0.5:
+      b = 0
+      g = int(255 * (-2 * x + 2))
+      r = int(255 * ( 2 * x - 1))
+  rgba = (127 << 24) | (b << 16) | (g << 8) | r
+  if value == "0.00101":
+    print rgba
+  return rgba
+OV.registerFunction(get_color,True,'NoSpherA2')
+  
+def is_colored():
+  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  if Type == "NCI":
+    return True
+  elif Type == "Rho + ESP":
+    return True
+  else:
+    return False
+OV.registerFunction(is_colored,True,'NoSpherA2')
 
 def set_default_cpu_and_mem():
   import math
@@ -1995,6 +2372,7 @@ def set_default_cpu_and_mem():
   parallel = OV.GetVar("Parallel")
   max_cpu = multiprocessing.cpu_count()
   current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')
+  update = False
   if not parallel:
     OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
@@ -2002,7 +2380,7 @@ def set_default_cpu_and_mem():
     OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
   elif (current_cpus != "1"):
-    return
+    update = True
   mem_gib = None
   if sys.platform[:3] == 'win':
     import ctypes
@@ -2034,9 +2412,21 @@ def set_default_cpu_and_mem():
     mem_gib = mem_bytes/(1024.**3)  # e.g. 3.74
   tf_mem = math.floor(mem_gib/4*30)/10
   tf_cpu = math.floor(max_cpu/4*3)
-  OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
+  if update == False:
+    OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
   OV.SetParam('snum.NoSpherA2.mem',str(tf_mem))
 OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
+
+def toggle_GUI():
+  use = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use == True:
+    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
+    OV.SetParam('snum.NoSpherA2.Calculate',False)
+  else:
+    OV.SetParam('snum.NoSpherA2.use_aspherical', True)
+    set_default_cpu_and_mem()
+  olex.m("html.Update()")
+OV.registerFunction(toggle_GUI,True,'NoSpherA2')
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

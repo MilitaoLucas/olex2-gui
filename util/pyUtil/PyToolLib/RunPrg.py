@@ -876,6 +876,17 @@ class RunRefinementPrg(RunPrg):
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     source = OV.GetParam('snum.NoSpherA2.source')
+    
+    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+      olex.m("anis -h")
+    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+      olex.m("sel $h")
+      olex.m("Afix 0")
+    olex.m('delins list')
+    olex.m('addins LIST -3')
+    add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
+    if add_disp is True:
+      olex.m('gendisp -source=sasaki')
 
     while converged == False:
       run += 1

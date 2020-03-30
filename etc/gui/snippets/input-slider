@@ -9,6 +9,8 @@
 #td1=<td>
 #td2=</td>
 #td1
+#value=$math.eval(spy.GetParam(#param)*#scale)
+#bgcolor=$GetVar(HtmlTableBgColour)
 #param=snum.xgrid.step
 #name=SNUM_XGRID_STEP
 #min=-10
@@ -29,8 +31,8 @@
           name="$strcat(#name,_SLIDE)"
           width="100%"
           height="18"
-          value="$math.eval(spy.GetParam(#param)*#scale)"
-          bgcolor="$GetVar(HtmlTableBgColour)"
+          value="#value"
+          bgcolor="#bgcolor"
           fgcolor="$GetVar(HtmlFontColour)"
           min="#min"
           max="#max"
