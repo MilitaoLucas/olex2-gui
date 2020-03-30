@@ -47,7 +47,7 @@ In case you want to make sure it is the best possible fit you can try finishing 
 ### Update Table
 After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **Tonto**. The most benchmarked and recommended software is **ORCA**. There is also an option to use **Gaussian** [HIGHLY UNTESTED]. A present **.wfn** file can also be used but **must** agree to the geometry currtly used in Olex2. These options will appear, depending on whether they are properly installed and Olex2 knows about them -> Settings and PATH). Once a program has been chosen, please also adjust the Extras according to your needs if you do not want to use minimal settings.<br>If Update Table is deactivated a Dropdown of all found .tsc files in the current folder is given to be used for refinement, without updating the files.
 
-# NoSpherA2 Extras
+# NoSpherA2 Refinement
 This tool provides all the settings required for the calculation of the .tsc file.
 
 ## Basis
@@ -77,7 +77,10 @@ Continue calculations until final convergence is achieved over a full cycle of W
 ## Max Cycles
 This defines a criteria for the abortion of HAR, if convergence is not achieved. Maybe restraints or better parameters, resolution cutoffs or other improvements to your model might help with convergence.
 
-## Integr(ation) Accuracy
+## Update .tsc & .wfn
+This button will only generate a new .tsc and .wfn file, without running a least squares refinement. This is usefull after a converged model was found to get the most up-to-date wavefunction for property plotting or to test things before submitting a bigger calculation.
+
+## Integr.(ation) Accuracy
 Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. If you have high symmetry or very heavy elements and high resolution data it might improv results. Low can be used, if the number of electrons after integration is sill correct. Mostly fine for organic molecules. Please check in the log files, whether this is the case!
 
 ## Use Relativistics
@@ -90,10 +93,7 @@ Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX 
 Remove any AFIX constraints from the current model. Use with caution, but highly usefull for starting from IAM.
 
 ## DISP
-Add DISP Instructuion to your .ins file based on sasaki table as implemented in olex2.
-
-## Keep Wavefunction
-Select to keep a copy of the current wavefunction in the folder you are working. Backups of former wavefunctions are kept inside the olex2 folder in that directory.
+Add DISP Instructuion to your .ins file based on sasaki table as implemented in olex2. DISP instructions are needed for correct maps and refinements in case of non metal-based wavelengths.
 
 ## Cluster Radius (For Tonto)
 If Tonto is used for a wavefunction calculation a clsuter of **explicit charges** calcualted in a self consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius until no further charges are included.
@@ -126,6 +126,72 @@ Groups are given by syntax: 1-4,9,10;5-7;8 (Group1=[1,2,3,4,9,10] Group2=[5,6,7]
 It is easily understandible that having interactions between PART 1 and 2 in this example would be highly unphysical, which is why definition of disorder groups is crucial for occurances of disorder at more than one position.<br>
 <br>
 <font color='red'>**IMPORTANT: Superposition of two atoms with partial occupation freely refined without assignment to PARTs will lead to SEVERE problems during the wavefunction calcualtion, as there will be two atoms at 0 separation. Most likeley the SCF code will give up, but will NEVER give reasonable results!**</font>
+
+# NoSpherA2 Properties
+Utility for plotting and visualizing the results of NoSpherA2. Select desired reolustion of the grid to be calculated and properties to evaluate and click calcualte to start the beackground generation of grids. When done the calcualted fields will become available from the dropdown to show maps.<br>
+The reading of maps might take some time and olex might become irresponsive, please be patient.<br>
+So far the calculation can only happen in the unit cell adn on the wavefunction in the folder. If you need an updated wavefunction (e.g. due to moved atoms or different spin state) hit the update tsc file button.<br>
+n^<font color='red'>**The obtainable plots depend on your wavefunction calculated. Please make sure it is reasonbale. Also: If you use multiple CPUs the progress bar *might* behave in non-linear ways, this is due to the computations being executed in parallel and all CPUs being able to report progress. Some parts of the calculation might be faster than others.**</font>^n
+
+## Lap
+Laplacian of the electron density. This Grid shows regions of electron accumulation (negative values) and elecrton depletion (positive values), as it is the curvature of the density. Usefull to understand polrisation of bonds, position of lone-pairs etc.
+
+## ELI
+Calculates the Electron Localizability indicater. This function in summary describes the volume needed to find a different electron to the one at position <b>r</b>. This measure of localization very well correpsonods with chemically intuitive feautures like lone-pairs, bonds etc. The shape of isosurfaces is usually a nice indicator for bonding situations. In Olex2 the ELI-D of same spin electrons is used.<br>
+A nice overview of all kinds of indicators developed by the original authors is given on this website:<br>
+* URL[https://www.cpfs.mpg.de/2019352/eli,PAPER] &nbsp; 
+
+## ELF
+Calcuales the arbitrarily scaled Electron Localisation Function. This function is scaled between 0 and 1. There is no general rule how to select isovalues. Only included for legacy reasons. In general it is recommended to use ELI.
+
+## ESP
+Calculation of the total electrostatic potential. This is a complex caluclations, since the Potential V is an integral over the whole wavefunction:<br>
+* <math>
+	V<sub>tot</sub>(<b>r</b>) = V<sub>nuc</sub>(<b>r</b>) + V<sub>tot</sub>(<b>r</b>) = Σ<sub>A</sub> (Z<sub>A</sub> / |<b>r</b>-<b>R</b><sub>A</sub>|) - ∫ ρ(<b>r</b>') / |<b>r</b>-<b>r</b>'| <i>d<b>r</b>'</i>
+</math> &nbsp; 
+<br>This integral is the potential at each point in space due to all other electrons in the wavefunction, therefore the calculation of ESP does not scale with the thirs power of resolution of the grid, but rather the 9th power, which makes it really time consuming.<br>If you decide to cancel the job all cubes of the other calculations will be saved before starting ESP calculation, so you can restart only the ESP step.
+
+## Res
+Defines the resolution the calculated grid should have. Keep in mind that the complexity of teh calculation rises cubically.
+
+## Calculate
+Start the Calculaton of selected fields using NoSpherA2.
+
+## Map
+Selects which map is to be displayed. Only shows maps, which are already available. If there is none available try to calculate a new wavefunction of check for LIST 3 or 6 in the .ins file, as a fcf file with phases is needed.
+
+## Toggle Map
+Shows/Hides Map
+
+## View
+
+Selects what type of map is to be displayed. Choices include:<br>
+  <ul>
+    <li>plane - 2D</li>
+    <li>plane + contour - 2D</li>
+    <li>wire - 3D</li>
+    <li>surface - 3D</li>
+    <li>points - 3D</li>
+  </ul>
+  
+## Edit Style
+Edits the colour of the various map surfaces.
+
+## Level
+When a 3D map is displayed the slider bar enables you to adjust the detail shown in the map.
+
+## Min
+This will define the minimum value of your 2D map. The slider works in quarter-integer values but also accepts manual input in the text-box next to it.
+
+## Step
+This will define the step size of your 2D map between two contours/colours. As with **Min** this slider has pre-defined slider values (difference 0.02), but also manual input will work.
+
+## Depth
+This slider controls the depth of the plane "into" the screen. If the value is negative the map will go "behind" the model, positive will move it to the front.<br>
+If you select atoms and click on the **Depth** button the map will be aligned so the map is in plane with these selected atoms.
+
+## Size
+Size will control the size of the plotted plane. Bigger values will decrease the visual size, but will increase the resultion of the map.
 
 
 # Hirshfeld Atom Refinement
