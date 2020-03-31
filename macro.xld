@@ -25,7 +25,6 @@
               \"reap file.AbsolutePath(GetVar(startup))\"'">
       <cmd9 "bind wheel 'ShowQ -wheel='">
       <cmd13 "deletemenu 'Structure;Export picture (experimental)'">
-      <cmd14 "spy.gui.get_help()'">
       <cmd14 "spy.get_news_image_from_server('splash')'">
     >
 
