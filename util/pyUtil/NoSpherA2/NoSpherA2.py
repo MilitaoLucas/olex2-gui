@@ -188,7 +188,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     tsc_exists = False
     f_time = None
     
-    if (wfn_code != "DICAMB") and (olx.xf.latt.IsGrown() != 'true'):
+    if (wfn_code != "DICAMB") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       from cctbx_olex_adapter import OlexCctbxAdapter
       ne = 0
       for sc in OlexCctbxAdapter().xray_structure().scatterers():
@@ -196,11 +196,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       Z = olx.xf.au.GetZ()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
-        print "Error! Multiplicity and number of electrons is even. This is imposible!\n"
+        print "Error! Multiplicity and number of electrons is even. This is impossible!\n"
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
       elif (ne % 2 == 1) and (mult % 2 == 1):
-        print "Error! Multiplicity and number of electrons is uneven. This is imposible!\n"
+        print "Error! Multiplicity and number of electrons is uneven. This is impossible!\n"
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
         
@@ -1228,6 +1228,11 @@ class wfn_Job(object):
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
+        with open(os.path.join(self.full_dir, self.name+"_orca.log")) as file:
+          lines = file.readlines()
+        for line in lines:
+          if "Error" in line: 
+            print line
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
@@ -2051,6 +2056,8 @@ def get_map_types():
     list += "ELF;"
   if os.path.isfile(os.path.join(folder,name+"_esp.cube")):
     list += "ESP;"
+  if os.path.isfile(os.path.join(folder,name+"_rdg.cube")):
+    list += "RDG;"
   if os.path.isfile(os.path.join(folder,name+"_rdg.cube")) and os.path.isfile(os.path.join(folder,name+"_signed_rho.cube")):
     list += "NCI;"
   if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
@@ -2076,6 +2083,8 @@ def change_map():
   elif Type == "NCI":
     OV.SetParam('snum.NoSpherA2.map_scale_name',"RGB")
     plot_cube(name+"_rdg.cube",name+"_signed_rho.cube")
+  elif Type == "RDG":
+    plot_cube(name+"_rdg.cube",None)
   elif Type == "Rho + ESP":
     OV.SetParam('snum.NoSpherA2.map_scale_name',"BWR")
     plot_cube(name+"_rho.cube",name+"_esp.cube")
@@ -2295,6 +2304,10 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',50)
   elif Type == "NCI":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
+  elif Type == "RDG":
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
