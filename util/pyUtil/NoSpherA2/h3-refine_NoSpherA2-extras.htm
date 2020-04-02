@@ -1,6 +1,8 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
@@ -14,9 +16,9 @@
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_basis@refine",
     "items=spy.NoSpherA2.getBasisListStr()",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')",
+    "value=spy.GetParam('snum.NoSpherA2.basis_name')",
     "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>>html.Update()")
-   $-
+  $-
   </td>
 
 <td width="11%" align='right'>
@@ -26,35 +28,35 @@
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_method@refine",
-    "items='Hartree-Fock<-rhf;B3LYP<-rks'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.method')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.method', html.GetValue('~name~'))")
-   $-
+    "items=spy.NoSpherA2.get_functional_list()",
+    "value=spy.GetParam('snum.NoSpherA2.method')",
+    "onchange=spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))")
+  $-
 </td>
 
 <td width="8%" align='right'>
   <b>CPUs</b>
 </td>
 <td width="9%" align='center'>
-$+
+  $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_cpus@refine",
     "items=spy.NoSpherA2.getCPUListStr()",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.ncpus')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.ncpus', html.GetValue('~name~'))>>html.Update()")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.ncpus')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))>>html.Update()")
+  $-
 </td>
 
  <td width="8%" align='right'>
   <b>Mem(Gb) </b>
 </td>
 <td width="9%" align='center'>
-$+
+  $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_mem",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.mem')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.mem', html.GetValue('~name~'))")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.mem')",
+    "onchange=spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))")
+  $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -66,68 +68,70 @@ $+
 </td>
 <td width='8%' align='left'>
   <input
-            type="spin"
-            name="SET_CHARGE"
-            width="50"
-            height="17"
-            max='1000'
-            min='-1000'
-            bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-            value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.charge)'
-            onchange='spy.SetParam(snum.refinement.cctbx.nsff.tsc.charge,html.GetValue(~name~))'
-          >
+    type="spin"
+    name="SET_CHARGE"
+    width="50"
+    height="17"
+    max='1000'
+    min='-1000'
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    value='$spy.GetParam(snum.NoSpherA2.charge)'
+    onchange='spy.SetParam(snum.NoSpherA2.charge,html.GetValue(~name~))'
+  >
 </td>
 <td width="16%" align='right'>
   <b>Multiplicity </b>
 </td>
 <td width='8%'>
-      <input 
-        type='spin', 
-        width='50', 
-        height="17"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        min='1'
-        name='SET_SNUM_MULTIPLICITY',
-        value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.multiplicity)', 
-        onchange="spy.SetParam(snum.refinement.cctbx.nsff.tsc.multiplicity,html.GetValue(~name~))"
-      > 
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_MULTIPLICITY',
+    value='$spy.GetParam(snum.NoSpherA2.multiplicity)', 
+    onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))"
+  > 
 </td>
-<td width='6%' align="left">
+<td width='2%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=HAR",
     "label=HAR ",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','True')>>html.Update()",
+    "checked=spy.GetParam('snum.NoSpherA2.full_HAR')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.full_HAR','True')>>html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.full_HAR','False')>>html.Update()"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.full_HAR','False')>>html.Update()"
     )
   $-
 </td>
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'True')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
 <td width="18%">
 <b>Max Cycles </b>
 </td>
 <td width='8%' align='left'>
   <input 
-        type='spin', 
-        width='50', 
-        height="17"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_SNUM_MAX_HAR',
-        value='$spy.GetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles)', 
-        onchange='spy.SetParam(snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles,html.GetValue(~name~))'
-      > 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    name='SET_SNUM_MAX_HAR',
+    value='$spy.GetParam(snum.NoSpherA2.Max_HAR_Cycles)', 
+    onchange='spy.SetParam(snum.NoSpherA2.Max_HAR_Cycles,html.GetValue(~name~))'
+  > 
 </td>
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR'),'False')
-<td width="18%">
- 
-</td>
-<td width="8%">
- 
-</td>
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Update .tsc & .wfn'",
+    "onclick=spy.NoSpherA2.launch() >> spy.SetParam('snum.NoSpherA2.Calculate',False) >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="29%" align='center'>",
+    )
+  $-
 #ignoreif -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -135,59 +139,80 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
-<td width="20%" align="left">
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'True')
+<td width="16%" align="left">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_becke_accuracy@refine",
-    "items='Low;Normal;Extreme'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.becke_accuracy', html.GetValue('~name~'))"
+    "items='Low;Normal;High;Max'",
+    "value=spy.GetParam('snum.NoSpherA2.becke_accuracy')",
+    "onchange=spy.SetParam('snum.NoSpherA2.becke_accuracy', html.GetValue('~name~'))"
     )
-   $-
+  $-
 </td> 
-<td width="6%" align="left">
+#ignoreif -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'False')
+<td width="16%">
+N/A 
+</td>
+#ignoreif -->
+
+<td width="2%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=NoSpherA2_ORCA_Relativistics@refine",
     "label=Relativistics",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic','True')",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Relativistic','False')"
+    "checked=spy.GetParam('snum.NoSpherA2.Relativistic')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Relativistic','True')",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Relativistic','False')"
     )
-   $-
+  $-
 </td> 
 
-<td width='6%' align='left'>
+<td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Aniso",
     "label=H Aniso",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_aniso')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','True')",
+    "checked=spy.GetParam('snum.NoSpherA2.h_aniso')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.h_aniso','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_aniso','False')"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.h_aniso','False')"
     )
   $-
 </td>
-<td width='6%' align='left'>
+<td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Afix 0",
     "label=No Afix",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.h_afix')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','True')",
+    "checked=spy.GetParam('snum.NoSpherA2.h_afix')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.h_afix','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.h_afix','False')"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.h_afix','False')"
+    )
+  $-
+</td>
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=DISP",
+    "label=DISP",
+    "checked=spy.GetParam('snum.NoSpherA2.add_disp')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.add_disp','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.add_disp','False')"
     )
   $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),Tonto)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),Tonto)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -198,8 +223,8 @@ $+
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_cluster_radius@refine",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius', html.GetValue('~name~'))")
+    "value=spy.GetParam('snum.NoSpherA2.cluster_radius')",
+    "onchange=spy.SetParam('snum.NoSpherA2.cluster_radius', html.GetValue('~name~'))")
   $-
   </td>
 <td width="16%" align='center'>
@@ -210,9 +235,9 @@ $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_DIIS@refine",
     "items='0.1;0.01;0.001;0.0001;0.00001'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.DIIS')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.DIIS', html.GetValue('~name~'))")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.DIIS')",
+    "onchange=spy.SetParam('snum.NoSpherA2.DIIS', html.GetValue('~name~'))")
+  $-
   </td>
 <td width="5%" align="left">
   $+
@@ -220,9 +245,9 @@ $+
     "name=NoSpherA2_cluster_grow@refine",
     "label=Complete Cluster",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow')",
-    "oncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','True')",
-    "onuncheck=spy.SetParam('snum.refinement.cctbx.nsff.tsc.cluster_grow','False')"
+    "checked=spy.GetParam('snum.NoSpherA2.cluster_grow')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.cluster_grow','True')",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.cluster_grow','False')"
     )
   $-
 </td>
@@ -230,7 +255,7 @@ $+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.cctbx.nsff.tsc.source'),ORCA)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),ORCA)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -242,9 +267,9 @@ $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_ORCA_SCF_Conv@refine",
     "items='SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Conv', html.GetValue('~name~'))")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_SCF_Conv', html.GetValue('~name~'))")
+  $-
 </td>
 <td width="25%" align='right'>
     <b>SCF Conv. Strategy </b>
@@ -254,9 +279,9 @@ $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_ORCA_SCF_Strategy@refine",
     "items='EasyConv;NormalConv;SlowConv;VerySlowConv'",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.ORCA_SCF_Strategy', html.GetValue('~name~'))")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy', html.GetValue('~name~'))")
+  $-
 </td> 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -273,74 +298,113 @@ $+
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_Disorder_Groups@refine",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Disorder_Groups', html.GetValue('~name~'))")
-   $-
+    "value=spy.GetParam('snum.NoSpherA2.Disorder_Groups')",
+    "onchange=spy.SetParam('snum.NoSpherA2.Disorder_Groups', html.GetValue('~name~'))")
+  $-
 </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+#ignoreif -->
 
 #ignoreif -->
 
-<!-- #ignoreif not spy.NoSpherA2.check_for_matching_fcf()
-<tr ALIGN='left' NAME='defden_buttons' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
+<td width='6%' align="left">
   $+
-    html.Snippet(GetVar(default_link),
-    "value=Show Residual Density",
-    "onclick=spy.SetParam('snum.map.type','diff')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
-   )
-  $-
-  $+
-    html.Snippet(GetVar(default_link),
-    "value=Show Deformation Density",
-    "onclick=spy.SetParam('snum.map.type','fcfmc')>>spy.SetParam('snum.map.source','fcf')>>spy.gui.maps.MapView('off')>>spy.gui.maps.MapView('on')",
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Iterative",
+    "label=Iterative ",
+    "checked=spy.GetParam('snum.NoSpherA2.full_HAR')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.full_HAR','True')>>html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.full_HAR','False')>>html.Update()"
     )
   $-
+</td>
 
-<td width="10%" align="right"> <b>%Res%/&Aring</b></td>
-<td width="10%" align='right'>
-  <font size="$GetVar('HtmlFontSizeControls')">
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
+<td width="18%">
+<b>Max Cycles </b>
+</td>
+<td width='8%' align='left'>
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    name='SET_SNUM_MAX_HAR',
+    value='$spy.GetParam(snum.NoSpherA2.Max_HAR_Cycles)', 
+    onchange='spy.SetParam(snum.NoSpherA2.Max_HAR_Cycles,html.GetValue(~name~))'
+  > 
+</td>
+#ignoreif -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
+<td width="18%">
+ 
+</td>
+<td width="8%">
+ 
+</td>
+#ignoreif -->
+
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Aniso",
+    "label=H Aniso",
+    "checked=spy.GetParam('snum.NoSpherA2.h_aniso')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.h_aniso','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.h_aniso','False')"
+    )
+  $-
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=H_Afix 0",
+    "label=No Afix",
+    "checked=spy.GetParam('snum.NoSpherA2.h_afix')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.h_afix','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.h_afix','False')"
+    )
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="25%" align='left'>
+    <b>Grouped Parts </b>
+</td>
+<td width="70%">
   $+
     html.Snippet("gui/snippets/input-text",
-    "name=SET_SNUM_MAP_RESOLUTION_NoSpherA2",
-    "value=spy.GetParam('snum.map.resolution')",
-    "onchange=spy.SetParam('snum.map.resolution',html.GetValue(~name~))>>spy.gui.maps.MapView('off')",
-    "onchangealways=True",
-    )
+    "name=NoSpherA2_Disorder_Groups@refine",
+    "value=spy.GetParam('snum.NoSpherA2.Disorder_Groups')",
+    "onchange=spy.SetParam('snum.NoSpherA2.Disorder_Groups', html.GetValue('~name~'))")
   $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+#ignoreif -->
+<!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="25%" align='center'>
+No Settings available.
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
-
-<!-- #ignoreif spy.NoSpherA2.check_for_matching_fcf()
-<tr ALIGN='left' NAME='defden_buttons' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Non-Spherical Form Factors;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="20%" align="center"><b>No proper fcf found!</b> (include List 3 or 6 in .ins maybe?)</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
-
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
-
-$spy.gui.maps.SetXgridView()
-<!-- #include xgrid gui\snippets\snippet-xgrid.htm;suffix=maps;1; -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'))
-<tr bgcolor="$GetVar(HtmlTableBgColour)">
-<!-- #include xgrid gui\snippets\snippet-3D-xgrid.htm;1; -->
-#ignoreif -->
-
-<!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')))
-<tr bgcolor="$GetVar(HtmlTableBgColour)">
-<!-- #include xgrid gui\snippets\snippet-2D-xgrid.htm;1; -->
-#ignoreif -->
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-

@@ -13,7 +13,7 @@ from History import hist
 
 from olexex import OlexRefinementModel
 
-from olexFunctions import OlexFunctions
+from olexFunctions import OlexFunctions, SilentException
 OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
@@ -156,7 +156,7 @@ class RunPrg(ArgumentParser):
       if self.please_run_auto_vss:
         self.run_auto_vss()
       if caught_exception:
-        raise caught_exception
+        raise SilentException(caught_exception)
 
   def run_auto_vss(self):
     olx.Freeze(True)
@@ -404,6 +404,8 @@ class RunSolutionPrg(RunPrg):
             self.terminate = True
             return
 
+    OV.SetParam('snum.refinement.data_parameter_ratio', 0)
+    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
@@ -485,19 +487,22 @@ class RunRefinementPrg(RunPrg):
         if "warning" in self.refinement_has_failed.lower():
           bg = orange
         gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
-      else:
+      elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
         _ = gui.get_default_notification(txt="Refinement Finished", txt_col='green_text')
+      else:
+        _ = gui.get_default_notification(txt="Refinement Finished<br>Please Cite NoSpherA2: DOI", txt_col='green_text')
 
   def run(self):
     if RunRefinementPrg.running:
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    calculate_aspherical = OV.GetParam('snum.NoSpherA2.Calculate')
+    result = False
     try:
-      use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
-      calculate_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
       if use_aspherical == True:
-        self.deal_with_AAFF()
+        result = self.deal_with_AAFF()
       else:
         self.startRun()
         try:
@@ -516,7 +521,16 @@ class RunRefinementPrg(RunPrg):
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
         RunPrg.run(self)
+    except:
+      self.terminate = True
     finally:
+      if result == False:
+        self.terminate = True
+        if use_aspherical == True:
+          if self.refinement_has_failed != None:
+            self.refinement_has_failed = self.refinement_has_failed + " and Error during NoSpherA2!"
+          else:
+            self.refinement_has_failed = "Error during NoSpherA2!"
       RunRefinementPrg.running = None
 
 
@@ -818,12 +832,12 @@ class RunRefinementPrg(RunPrg):
   def deal_with_AAFF(self):
     from cctbx import adptbx
     
-    Full_HAR = OV.GetParam('snum.refinement.cctbx.nsff.tsc.full_HAR')
+    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     old_model = OlexRefinementModel()
     converged = False
     run = 0
-    HAR_log = open("%s/%s.har" %(OV.FilePath(),self.original_filename),"w")
-    HAR_log.write("HAR using NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
+    HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
+    HAR_log.write("NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
     HAR_log.write("\n")
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
     HAR_log.write("************************************************************************************\n")
@@ -836,7 +850,7 @@ class RunRefinementPrg(RunPrg):
           fread = f.readlines()
           for line in fread:
             if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+              source = OV.GetParam('snum.NoSpherA2.source')
               if "Gaussian" in source:
                 energy = float(line.split()[3])
               else:
@@ -859,8 +873,20 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("\n")
     HAR_log.flush()
 
-    max_cycles = int(OV.GetParam('snum.refinement.cctbx.nsff.tsc.Max_HAR_Cycles'))
-    calculate = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+    max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
+    calculate = OV.GetParam('snum.NoSpherA2.Calculate')
+    source = OV.GetParam('snum.NoSpherA2.source')
+    
+    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+      olex.m("anis -h")
+    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+      olex.m("sel $h")
+      olex.m("Afix 0")
+    olex.m('delins list')
+    olex.m('addins LIST -3')
+    add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
+    if add_disp is True:
+      olex.m('gendisp -source=sasaki')
 
     while converged == False:
       run += 1
@@ -871,11 +897,17 @@ class RunRefinementPrg(RunPrg):
       
       #Calculate Wavefunction
       try:
+        #import NoSpherA2
+        #NoSpherA2.launch()
         olex.m('spy.NoSpherA2.launch()')
       except NameError as error:
         print "Error during NoSpherA2: ",error
         RunRefinementPrg.running = None
-        OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
+        RunRefinementPrg.Terminate = True
+        return False
+      Error_Status = OV.GetVar('NoSpherA2-Error')
+      if Error_Status != "None":
+        print "Error in NoSpherA2: %s" %Error_Status
         return False
       dir = olx.FilePath()
       tsc_exists = False
@@ -888,43 +920,54 @@ class RunRefinementPrg(RunPrg):
       if tsc_exists == False:
         print "Error during NoSpherA2: "
         RunRefinementPrg.running = None
-        OV.SetParam('snum.refinement.cctbx.nsff.use_aspherical',False)
         return False
 
       # get energy from wfn file 
       energy = None
-      if wfn_file != None:
+      if (wfn_file != None) and (calculate == True):
         with open(wfn_file) as f:
           fread = f.readlines()
           for line in fread:
             if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
+              source = OV.GetParam('snum.NoSpherA2.source')
               if "Gaussian" in source:
                 energy = float(line.split()[3])
-              else:
+              elif "ORCA" in source:
                 energy = float(line.split()[4])
-        HAR_log.write("{:^24.10f}".format(energy))
+              elif "pySCF" in source:
+                energy = 0.0
+              elif ".wfn" in source:
+                energy = 0.0
+              elif "Tonto" in source:
+                energy = float(line.split()[4])
+              else:
+                energy = 0.0
+        if energy is not None:
+          HAR_log.write("{:^24.10f}".format(energy))
         fread = None
       else:
         HAR_log.write("{:24}".format(" "))
 
-      # Run Least-Squares
-      self.startRun()
-      try:
-        self.setupRefine()
-        OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
-        self.setupFiles()
-      except Exception, err:
-        sys.stderr.formatExceptionInfo()
-        print err
-        self.endRun()
-        return False
-      if self.terminate:
-        self.endRun()
-        return
-      if self.params.snum.refinement.graphical_output and self.HasGUI:
-        self.method.observe(self)
-      RunPrg.run(self)
+      if OV.GetParam('snum.NoSpherA2.run_refine') == True:
+        # Run Least-Squares
+        self.startRun()
+        try:
+          self.setupRefine()
+          OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+          self.setupFiles()
+        except Exception, err:
+          sys.stderr.formatExceptionInfo()
+          print err
+          self.endRun()
+          return False
+        if self.terminate:
+          self.endRun()
+          return
+        if self.params.snum.refinement.graphical_output and self.HasGUI:
+          self.method.observe(self)
+        RunPrg.run(self)
+      else:
+        break
 
       new_model=OlexRefinementModel()
 
@@ -1039,15 +1082,30 @@ class RunRefinementPrg(RunPrg):
         wr2_old = wr2
 
     # Done with the while !Converged
-    OV.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate',False)
+    OV.SetParam('snum.NoSpherA2.Calculate',False)
     if converged == False:
-      HAR_log.write("  !! UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!\n")
+      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!!\n")
+      self.refinement_has_failed= "Warning: Unconverged Model!"
+    if "DISCAMB" in source:
+      unknown_sources = False
+      with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
+        for i in discamb_log.readlines():
+          if "unassigned atom types" in i:
+            unknown_sources = True
+          if unknown_sources == True:
+            HAR_log.write(i)
+      if unknown_sources == True:
+        HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
+        if self.refinement_has_failed != None:
+          self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
+        else:
+          self.refinement_has_failed = "Unassigned Atom Types!"
     HAR_log.write("************************************************************************************\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
     
-    precise = OV.GetParam('snum.refinement.cctbx.nsff.tsc.precise_output')
+    precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
       matrix_run = 0
       label_uij = None
@@ -1096,11 +1154,9 @@ class RunRefinementPrg(RunPrg):
     HAR_log.flush()
     HAR_log.close()
 
-    with open("%s/%s.har" %(OV.FilePath(),self.original_filename), 'r') as f:
+    with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
       print(f.read())
-    OV.SetVar('gui_notification',"Please cite:<br>F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - <i>to be publsihed</i> - <b>2020</b>")
-    import gui
-    gui.set_notification(OV.GetVar('gui_notification'))
+    return True
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()

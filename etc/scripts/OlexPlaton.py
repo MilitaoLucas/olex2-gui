@@ -74,9 +74,19 @@ class PlatonWrapper:
     print "Olex2 to Platon Linker"
     # initialisation step
     exe_name = "platon"
+    try:
+      from_outside = False
+      p_path = os.path.dirname(os.path.abspath(__file__))
+    except:
+      from_outside = True
+      p_path = os.path.dirname(os.path.abspath("__file__"))
     if sys.platform[:3] == 'win':
       exe_name += ".exe"
-    exe_name = olx.file.Which(exe_name)
+    _ = os.path.join(p_path, exe_name)
+    if os.path.exists(_):
+      exe_name = _
+    else:
+      exe_name = olx.file.Which(exe_name)
     if not exe_name:
       print 'The Platon executable could not be located, aborting'
       return

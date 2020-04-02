@@ -23,14 +23,14 @@ while not os.path.exists(out_fn):
     print("Failed to locate the output file")
     exit(1)
 with open(out_fn, "rU") as stdout:
+  import sys
   while p.poll() is None:
     x = stdout.read()
     if x:
-      print x
-    time.sleep(3)
+      sys.stdout.write(x)
+      sys.stdout.flush()
+    time.sleep(1)
 with open(err_fn, "rU") as stderr:
   print stderr.read()
 
 print "Finished"
-if "-hart" in args:
-  os.system("pause")

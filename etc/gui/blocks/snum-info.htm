@@ -26,7 +26,7 @@ $spy.MakeHoverButton('toolbar-open', 'dire')
 $spy.MakeHoverButton('toolbar-text', 'text') 
       </td>  
       <td align='right' width='7%'>
-$spy.MakeHoverButton('toolbar-twins', "spy.twin.run_from_gui()") 
+$spy.MakeHoverButton('toolbar-twins', "spy.find_2_fold_olex2()>>spy.gui.SwitchTool(h2-tools-twinning)>>spy.gui.tools.flash_gui_control(h2-Twinning)") 
       </td>  
       <td align='right' width='7%'>
 $spy.gui.tools.checkPlaton() 
@@ -51,13 +51,17 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 <td>
   <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
   <tr>
-    <td width='64%' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='60%' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor='$GetVar(HtmlTableFirstcolColour)'>
 $spy.gui.tools.make_cell_dimensions_display()
       </table>
     </td>
+      
+    <td align='center' width='8%'>
+      $spy.GetDPRInfo()
+    </td>
 
-    <td width='36%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='32%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" height="100%" cellpadding="1" cellspacing="1" >
         <tr>
           <td align='right'>

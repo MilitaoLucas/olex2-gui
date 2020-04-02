@@ -45,7 +45,7 @@ gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
-
+gui_yellow = OV.GetParam('gui.dark_yellow')
 
 import subprocess
 
@@ -1246,7 +1246,7 @@ class Templates():
 TemplateProvider = Templates()
 
 
-def get_diagnostics_colour(scope, item, val):
+def get_diagnostics_colour(scope, item, val, number_only=False):
   grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
   grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
   grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
@@ -1279,6 +1279,9 @@ def get_diagnostics_colour(scope, item, val):
       if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac:
         break
 
+  if number_only:
+    return i
+
   if i == 1:
     retVal = grade_1_colour
   elif i == 2:
@@ -1289,6 +1292,131 @@ def get_diagnostics_colour(scope, item, val):
     retVal = grade_4_colour
 
   return retVal
+
+def get_battery_image(colour, colourize=True):
+  from PIL import Image, ImageDraw
+  from ImageTools import IT as IT
+  name = "battery_%s.png" %colour
+  if OlexVFS.exists(name):
+    return name
+  d_col = {'green':gui_green,
+       'yellow':gui_yellow,
+       'orange':gui_orange,
+       'red':gui_red}
+  max_dots = 4
+  d_dots = {'green':4,
+       'yellow':3,
+       'orange':2,
+       'red':1}
+    
+  n_dots = d_dots[colour]
+  
+  src_battery = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_rgb.png")
+
+  IM_battery = Image.open(src_battery)
+
+  bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
+  im = Image.alpha_composite(bg, IM_battery)
+  draw = ImageDraw.Draw(im)
+  width, height = bg.size
+  
+  col = d_col[colour].rgb
+  top_gap = int(height*0.11)
+  bot_gap = int(height*0.04)
+  gaps = int(height*0.06)
+
+  avail_height = height - top_gap - bot_gap - gaps*(max_dots+1)
+  boxHeight = int(avail_height/max_dots)
+  boxWidth = int(width*0.6)
+  for dot in range(n_dots):
+    i = max_dots-dot
+    top = height-bot_gap - (boxHeight+gaps)*(dot+1)
+    left = int((width - boxWidth)/2)
+    box = (left,top,boxWidth+left,boxHeight+top)
+    draw.rectangle(box, fill=col)
+  new_width = 18
+  new_height = int(im.size[1]/im.size[0] * 18)
+  IM = im.resize((new_width,new_height), Image.ANTIALIAS)
+  OlexVFS.save_image_to_olex(IM, name, 0)
+  return name
+  
+
+def GetDPRInfo():
+  retVal = ""
+  dpr = OV.GetParam('snum.refinement.data_parameter_ratio', None)
+  
+  if not dpr:
+    try:
+      parameters = int(olx.Cif('_refine_ls_number_parameters'))
+      data = int(olx.Cif('_reflns_number_gt'))
+      dpr = data/parameters
+    except:
+      pass
+  
+  if dpr:
+    dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
+    text_output= ["Data/Parameter ratio is very good",
+                  "Data/Parameter ratio is adequate",
+                  "Data/Parameter ratio is low",
+                  "Data/Parameter ratio is VERY LOW"]
+    colour_txt= ["green",
+                 "yellow",
+                 "orange",
+                 "red"]
+
+    
+    idx = 4 - dpr_col_number
+    colour = colour_txt[idx]
+    name = "battery_%s.png" %colour
+    if not OlexVFS.exists(name):
+      try:
+        name = get_battery_image(colour)
+      except:
+        name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" %colour)
+    image = """
+    <input
+    name="BATTERY-EDIT"
+    type="button"
+    align="center"
+    image="%s"
+    hint="%s"
+    >
+    """%(name, text_output[idx])
+
+    image = """
+    <a target="%s" href="echo '%s'"><zimg src="%s"></a>
+    """%(text_output[idx],text_output[idx],name)
+
+    if dpr <= 10:
+      disp_dpr = "%.2f"%dpr
+    else:
+      disp_dpr = "%.1f"%dpr
+    
+    d = {
+      'dpr':disp_dpr,
+      'image':image,
+    }
+    
+    t = """
+    <table border="0" cellpadding="0" cellspacing="0" align='center'>
+      <tr align='center'>
+        <td align='center'>
+          %(image)s
+        </td>
+      </tr>
+      <tr>
+        <td align='center'>
+          <font size='-1'>
+            <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
+          </font>
+        </td>
+      </tr>
+    </table>
+    """ %d
+    retVal = t
+  return retVal
+OV.registerFunction(GetDPRInfo)
+
 
 def GetRInfo(txt="",d_format='html'):
   if not OV.HasGUI():
@@ -1346,7 +1474,8 @@ def FormatRInfo(R1, wR2,d_format):
       wR2 = float(wR2)
       col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
       wR2 = "%.2f" %(wR2*100)
-
+      
+        
       d = {
         'R1':R1,
         'wR2':wR2,
@@ -1363,7 +1492,10 @@ def FormatRInfo(R1, wR2,d_format):
       else:
         t =gett('R_factor_display')%d
     except:
-      t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
+      disp = R1
+      if not R1:
+        disp = "No R factors!"
+      t = "<td colspan='2' align='center' rowspan='2' align='right'><font size='%s' color='%s'><b>%s</b></font></td>" %(font_size_wR2, gui_grey, disp)
     finally:
       retVal = t
 
@@ -1435,6 +1567,8 @@ def get_twin_law_from_hklf5():
       res = scrub(cmd)
       if "HKLF5 file is expected" in " ".join(res):
         htm = "This is not an HKLF5 format hkl file."
+      elif "negative batch numbers" in " ".join(res):
+        htm = "This is not an HKLF5 format hkl file (no negative batch numbers)."
       else:
         htm = "<b>Batch %s </b>: " %res[2][-1]
         htm += " | ".join([res[4], res[6], res[8]])
@@ -1469,6 +1603,12 @@ def hklf_5_to_4(filename):
   print "done. HKLF4 base file at %s"%hklf4name
   return
 OV.registerFunction(hklf_5_to_4, False, 'tools')
+
+
+def record_commands():
+  res = scrub()
+  
+
 
 def show_nsff():
   retVal = False

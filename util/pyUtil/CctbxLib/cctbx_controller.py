@@ -256,7 +256,8 @@ class reflections(object):
 
 class create_cctbx_xray_structure(object):
 
-  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
+  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None,
+                constraints_iter=None, same_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
     from cctbx import anharmonic
     builder = builders.weighted_constrained_restrained_crystal_structure_builder(
@@ -265,7 +266,6 @@ class create_cctbx_xray_structure(object):
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
     u_star = shelx_adp_converter(builder.crystal_symmetry)
-    init_tensors = False
     for label, site, occupancy, u, anharmonic_u, uiso_owner, scattering_type, fixed_vars in atom_iter:
       behaviour_of_variable = [True]*12
       if fixed_vars is not None:
@@ -279,7 +279,6 @@ class create_cctbx_xray_structure(object):
                            scattering_type=scattering_type)
         if anharmonic_u:
           a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
-          init_tensors = True
         behaviour_of_variable.pop(5)
       else:
         a = xray.scatterer(label=label,
@@ -304,6 +303,9 @@ class create_cctbx_xray_structure(object):
           builder.process_restraint(restraint_type, **kwds)
         except:
           print('Your version of cctbx is too old for the restraint %s'%restraint_type)
+    if same_iter is not None:
+      for restraint_type, kwds in same_iter:
+        builder.process_restraint(restraint_type, **kwds)
     if constraints_iter is not None:
       for constraint_type, kwds in constraints_iter:
         builder.process_constraint(constraint_type, **kwds)

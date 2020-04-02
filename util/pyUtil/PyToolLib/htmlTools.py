@@ -1244,6 +1244,8 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   #d.setdefault('BT', n[0].upper())
   #d.setdefault('BN', n[1].upper())
   d.setdefault('cmds', cmds.replace("\(","("))
+  if "cbtn" in cmds.lower():
+    target = target + "-settings"
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
   if click_console_feedback:
     d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
@@ -1302,6 +1304,8 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   d.setdefault('tool_img', tool_img)
   d.setdefault('nameupper', name.upper())
   d.setdefault('cmds', cmds.replace("\(","("))
+  if "cbtn" in cmds.lower():
+    target = target + "-settings"
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
   if click_console_feedback:
     d.setdefault('feedback',">>echo '%(target)s: OK'" %target)

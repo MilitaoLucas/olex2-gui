@@ -234,6 +234,13 @@ class OlexRefinementModel(object):
     for residue in asu['residues']:
       for atom in residue['atoms']:
         self._atoms.append(atom)
+        if residue['class'] != 'default':
+          chainId = residue['chainId']
+          if chainId != '~':
+            nl = "%s:%s_%s" %(chainId, atom['label'], residue['number'])
+          else:
+            nl = "%s_%s" %(atom['label'], residue['number'])
+          atom['label'] = nl
         element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
     vars = olex_refinement_model['variables']['variables']
@@ -387,14 +394,14 @@ class OlexRefinementModel(object):
                   sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1]) 
                     if atom_restraint[1] is not None else None) )
                   pivot_name = atom['label']
-                  
+
                   # if symmetry related we have a tuple, not an int
                   for neighbour in atom['neighbours']: 
                     if(type(neighbour)==type(())):
                       neighbour_id=neighbour[0]
                     else:
                       neighbour_id=neighbour
-                    
+
                     # now finding the type of the neighbour
                     getmeout=False
                     for residuebis in self.model['aunit']['residues']:
@@ -435,14 +442,65 @@ class OlexRefinementModel(object):
           random.shuffle(shuffle_ids)
           for i in xrange(len(i_seqs)-3):
             yield 'chirality', dict(
-              i_seqs=[i_seqs[i] for i in shuffle_ids[i:i+4]],
-              sym_ops=[kwds['sym_ops'][i] for i in shuffle_ids[i:i+4]],
+              i_seqs=[i_seqs[j] for j in shuffle_ids[i:i+4]],
+              sym_ops=[kwds['sym_ops'][j] for j in shuffle_ids[i:i+4]],
               volume_ideal=0.0,
               both_signs=False,
               weight=kwds['weight'],
               )
         else:
           yield restraint_type, kwds
+
+  def same_iterator(self):
+    groups = self.model['same']
+    if not groups:
+      return
+    for group in groups:
+      dependent = group['dependent']
+      if not dependent:
+        continue
+      # build 12 and 13 distances
+      dis12 = set()
+      dis13 = set()
+      group_atoms = [x[0] for x in group['atoms']]
+      idx_map = {}
+      for idx, a_id in enumerate(group_atoms):
+        idx_map[a_id] = idx
+        for b_id in self._atoms[a_id]['neighbours']:
+          # consider only AU atoms and inside the group
+          if isinstance(b_id, tuple) or b_id not in group_atoms:
+            continue
+          if a_id > b_id:
+            dis12.add((b_id, a_id))
+          else:
+            dis12.add((a_id, b_id))
+          for c_id in self._atoms[b_id]['neighbours']:
+            if isinstance(c_id, tuple) or c_id not in group_atoms or\
+               c_id == a_id or c_id == b_id:
+              continue
+            if a_id > c_id:
+              dis13.add((c_id, a_id))
+            else:
+              dis13.add((a_id, c_id))
+      for a_id, b_id in dis12:
+        i_seqs = [[a_id, b_id]]
+        for dependent_group in dependent:
+          dependent_atoms = [x[0] for x in groups[dependent_group]['atoms']]
+          i_seqs.append([dependent_atoms[idx_map[a_id]],
+                          dependent_atoms[idx_map[b_id]]])
+        kwds = {'i_seqs': i_seqs,
+                'weights': [1/math.pow(groups[dependent_group]['esd12'],2)]*len(i_seqs)}
+        yield 'bond_similarity', kwds
+      for a_id, b_id in dis13:
+        i_seqs = [[a_id, b_id]]
+        for dependent_group in dependent:
+          dependent_atoms = [x[0] for x in groups[dependent_group]['atoms']]
+          i_seqs.append([dependent_atoms[idx_map[a_id]],
+                          dependent_atoms[idx_map[b_id]]])
+        kwds = {'i_seqs': i_seqs,
+                'weights': [1/math.pow(groups[dependent_group]['esd13'],2)]*len(i_seqs)}
+        yield 'bond_similarity', kwds
+
 
   def constraints_iterator(self):
     from libtbx.utils import flat_list

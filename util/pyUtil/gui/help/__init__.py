@@ -6,6 +6,9 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam("olex2.debug", False))
 have_help = True
+
+global helpIsInitialised
+helpIsInitialised = False
  
 import cPickle as pickle
 
@@ -51,10 +54,10 @@ class GetHelp(VFSDependent):
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
     self.p_path = p_path
     self.get_templates()
-    try:
-      self.get_help()
-    except:
-      pass
+    #try:
+      #self.get_help()
+    #except:
+      #pass
 
   def get_help_item(self, help_id):
     help_id = help_id.replace(" ", "_")
@@ -71,16 +74,46 @@ class GetHelp(VFSDependent):
     txt = txt.replace("GetVar(gui_link)","GetVar(gui.skin.link_type")
     return txt
 
+
+  def make_call(self, url):
+    import HttpTools
+    try:
+      res = HttpTools.make_url_call(url, values = '', http_timeout=5)
+    except Exception, err:
+      return None
+    return res
+
+  def get_latest_help_file(self, which):
+    url = OV.GetParam('olex2.samples.url') + r"/%s"%which + ".htm"
+    _ = self.make_call(url)
+    if _ is None:
+      return ""
+    cont = _.read()
+    return cont
+
   def get_templates(self):
     gui.tools.TemplateProvider.get_all_templates(path=self.p_path, mask="*.html")
 
   def get_help(self, quick=True):
-    builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui')
-    all_help = os.path.join(builtin_help_location, 'HELP_EN.htm')
-    base = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
-    rFile = gui.file_open(path=all_help, base=base)
-    if not rFile:
+    global helpIsInitialised
+    if helpIsInitialised:
       return
+    language = 'EN'
+    help_file_n = 'HELP_%s.htm' %language
+    builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui')
+    base = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
+    rFile = self.get_latest_help_file('HELP_%s' %language)
+    all_help = os.path.join(OV.DataDir(), help_file_n)
+    if rFile:
+      with open(all_help, 'wb') as wFile:
+        wFile.write(rFile)
+    else:
+      if not os.path.exists(all_help):
+        all_help = os.path.join(builtin_help_location, help_file_n)
+      rFile = gui.file_open(path=all_help, base=base)
+      if not rFile:
+        return
+    helpIsInitialised = True
     #if os.path.exists(all_help):
       #rFile = gui.file_open(all_help).read()
       ##rFile = open(all_help, 'rb').read()
@@ -255,6 +288,8 @@ if have_help:
 from htmlTools import *
 def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
   global tutorial_box_initialised
+  if not helpIsInitialised:
+    gh.get_help()
   name = getGenericSwitchName(name).lstrip("h3-")
   OV.SetVar('last_help_box', name)
   _= ""
@@ -272,7 +307,7 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
       _ = open(helpTxt, 'r').read()
 
     elif helpTxt:
-      _ = olx.GetVar(helpTxt,None)
+      _ = olx.GetVar(helpTxt,helpTxt)
 
     elif not helpTxt or helpTxt == "#helpTxt":
       _ = olx.GetVar(name,None)

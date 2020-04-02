@@ -5,6 +5,8 @@ import sys
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
 
 
 class NewsImageRetrivalThread(ThreadEx):
@@ -17,6 +19,8 @@ class NewsImageRetrivalThread(ThreadEx):
     Thread.__init__(self)
     self.name = name
     NewsImageRetrivalThread.instance = self
+    olex.registerFunction(self.get_sample_list, False, 'internal')
+    olex.registerFunction(self.get_structure_from_url, False, 'internal')
 
   def run(self):
     from olexFunctions import OlexFunctions
@@ -140,6 +144,36 @@ class NewsImageRetrivalThread(ThreadEx):
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
+
+  def get_sample_list(self, which='samples'):
+    url = OV.GetParam('olex2.samples.url') + r"/%s"%which + ".html"
+    _ = self.make_call(url)
+    if _ is None:
+      return ""
+    import gui
+    from gui import help
+    cont = _.read()
+    help.make_help_box(helpTxt=cont, name="Sample_list")
+    
+  def get_structure_from_url(self, name, url=None):
+    if not url:
+      url = OV.GetParam('olex2.samples.url')
+    url = '%s/%s.cif' %(url, name)
+    _ = self.make_call(url)
+    if _ is None:
+      return ""
+    p = os.path.join(OV.DataDir(), 'samples', name)
+    if not os.path.exists(p):
+      os.makedirs(p)
+    pp = os.path.join(p, name + '.cif')  
+    if not os.path.exists(pp):
+      cont = _.read()
+      with open(pp, 'w') as wFile:
+        wFile.write(cont)
+    else:
+      print("Loading the existing structure; please delete this structure (cif file) if you want to get it again!")
+    olex.m("reap '%s'" %pp)  
+
 
   def get_list_from_server(self, list_name='news'):
     if list_name == "news":

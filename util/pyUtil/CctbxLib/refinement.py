@@ -26,7 +26,7 @@ from smtbx.refinement import least_squares
 from smtbx.refinement import restraints
 from smtbx.refinement import constraints
 from smtbx.refinement.constraints import geometrical
-from smtbx.refinement.constraints import adp
+from smtbx.refinement.constraints import adp, fpfdp
 from smtbx.refinement.constraints import site
 from smtbx.refinement.constraints import occupancy
 from smtbx.refinement.constraints import rigid
@@ -36,6 +36,7 @@ import numpy
 import scipy.linalg
 
 import olex2_normal_equations
+from my_refine_util import hydrogen_atom_constraints_customisation
 
 # try to initialise openblas
 try:
@@ -65,7 +66,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   }
   solvers_default_method = 'Levenberg-Marquardt'
 
-  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
+  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     OlexCctbxAdapter.__init__(self)
     self.interrupted = False
     self.max_cycles = max_cycles
@@ -86,6 +87,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.idealise_secondary_xh2_angle = True
     elif sec_ch2_treatment == 'refine':
       self.refine_secondary_xh2_angle = True
+    self.weighting = weighting
+    if self.weighting is None:
+      weight = self.olx_atoms.model['weight']
+      params = dict(a=0.1, b=0,
+                    #c=0, d=0, e=0, f=1./3,
+                    )
+      for param, value in zip(params.keys()[:min(2,len(weight))], weight):
+        params[param] = value
+      self.weighting = least_squares.mainstream_shelx_weighting(**params)
+
 
   def run(self, build_only=False,
           table_file_name = None,
@@ -123,7 +134,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not self.f_mask:
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
-          self.f_mask = olx.current_mask.f_mask()
+            self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
@@ -178,13 +189,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #  print label
     #===========================================================================
 
-    weight = self.olx_atoms.model['weight']
-    params = dict(a=0.1, b=0,
-                  #c=0, d=0, e=0, f=1./3,
-                  )
-    for param, value in zip(params.keys()[:min(2,len(weight))], weight):
-      params[param] = value
-    weighting = least_squares.mainstream_shelx_weighting(**params)
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
     self.normal_eqns = normal_equations_class(
@@ -194,7 +198,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       table_file_name=table_file_name,
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
-      weighting_scheme=weighting,
+      weighting_scheme=self.weighting,
       log=self.log,
       may_parallelise=True
     )
@@ -212,7 +216,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     assert iterations is not None
     try:
       damping = OV.GetDampingParams()
-
+      self.data_to_parameter_watch()
       self.print_table_header()
       self.print_table_header(self.log)
 
@@ -321,7 +325,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.CifMerge(f=inc_hkl, u=True)
 
       self.output_fcf()
-      new_weighting = weighting.optimise_parameters(
+      new_weighting = self.weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
@@ -332,10 +336,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
-
     finally:
       sys.stdout.refresh = True
       self.log.close()
+      
+  def data_to_parameter_watch(self):
+    #parameters = self.normal_eqns.n_parameters
+    parameters = self.reparametrisation.n_independents + 1
+    data = self.reflections.f_sq_obs_filtered.size()
+    dpr = "%.2f" %(data/parameters)
+    OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
+    print("Data/Parameter ratio = %s" %dpr)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
@@ -758,48 +769,74 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
-    use_aspherical = OV.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
     if self.use_tsc and use_aspherical == True:
-      for file in os.listdir(olx.FilePath()):
-        if file.endswith(".tsc"):
-          details_text = """;
-Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
-Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be publsihed - 2020
-NoSpherA2 makes use of tailor-made aspherical atomic form factors calculated
+      tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+      if os.path.exists(tsc_file_name):
+        tsc = None
+        with open(tsc_file_name, 'r') as tsc_f:
+          tsc = f.readlines()
+        cif_block_found = False
+        tsc_info = """;\n"""
+        for line in tsc:
+          if "CIF:" in line:
+            cif_block_found = True
+            continue
+          if ":CIF" in line:
+            break
+          if cif_block_found == True:
+            tsc_info = tsc_info + line
+        if cif_block_found == False:
+          details_text = """Refinement using NoSpherA2, an implementation of 
+NOn-SPHERical Atom-form-factors in Olex2.
+Please cite:
+F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+NoSpherA2 implementation of HAR makes use of 
+tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
 The ED is calculated from a gaussian basis set single determinant SCF
-wavefunction - either Hartree-Fock or B3LYP - for a fragment of the crystal embedded in
-an electrostatic crystal field.
+wavefunction - either Hartree-Fock or DFT using selected funtionals
+ - for a fragment of the crystal.
+This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
 The following options were used:
 """
-          software = OV.GetParam('snum.refinement.cctbx.nsff.tsc.source')
-          method = OV.GetParam('snum.refinement.cctbx.nsff.tsc.method')
-          basis_set = OV.GetParam('snum.refinement.cctbx.nsff.tsc.basis_name')
-          charge = OV.GetParam('snum.refinement.cctbx.nsff.tsc.charge')
-          mult = OV.GetParam('snum.refinement.cctbx.nsff.tsc.multiplicity')
-          relativistic = OV.GetParam('snum.refinement.cctbx.nsff.tsc.Relativistic')
-          key_file_name = os.path.join(OV.GetParam('snum.refinement.cctbx.nsff.dir'),"SFs_key,ascii")
-          if os.path.exists(key_file_name):
-            f_time = os.path.getctime(key_file_name)
+          software = OV.GetParam('snum.NoSpherA2.source')
+          details_text = details_text + "   SOFTWARE:       %s\n"%software
+          if software != "DISCAMB":
+            method = OV.GetParam('snum.NoSpherA2.method')
+            basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+            charge = OV.GetParam('snum.NoSpherA2.charge')
+            mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+            relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+            partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+            accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+            if partitioning == True:
+              details_text = details_text + "   PARTITIONING:   NoSpherA2\n"
+              details_text = details_text + "   INT ACCURACY:   %s\n"%accuracy
+            else:
+              details_text = details_text + "   PARTITIONING:   Tonto\n"
+            details_text = details_text + "   METHOD:         %s\n"%method
+            details_text = details_text + "   BASIS SET:      %s\n"%basis_set
+            details_text = details_text + "   CHARGE:         %s\n"%charge
+            details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
+            if relativistic == True:
+              details_text = details_text + "   RELATIVISTIC:   DKH2\n"
+            if software == "Tonto":
+              radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+              details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+          tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+          if os.path.exists(tsc_file_name):
+            f_time = os.path.getctime(tsc_file_name)
           else:
             f_time = os.path.getctime(file)
           import datetime
           f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-          details_text = details_text + "   SOFTWARE:       %s\n"%software
-          details_text = details_text + "   METHOD:         %s\n"%method
-          details_text = details_text + "   BASIS SET:      %s\n"%basis_set
-          details_text = details_text + "   CHARGE:         %s\n"%charge
-          details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
-          if relativistic == True:
-            details_text = details_text + "   RELATIVISTIC:   DKH2"
-          details_text = details_text + "   DATE:           %s\n"%f_date
-          if software == "Tonto":
-            radius = OV.GetParam('snum.refinement.cctbx.nsff.tsc.cluster_radius')
-            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-          details_text = details_text + "\n;\n"
-          cif_block['_refine_special_details'] = details_text
+          details_text = details_text + "   DATE:           %s\n"%f_date    
+          tsc_info = tsc_info + details_text
+        tsc_info = tsc_info + ";\n"
+        cif_block['_refine_special_details'] = tsc_info
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -1050,6 +1087,27 @@ The following options were used:
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
       constraints.append(rigid.same_group(sg))
+    fps = {}
+    fdps = {}
+    for idx, xs in enumerate(self._xray_structure.scatterers()):
+      if xs.flags.grad_fp():
+        fpl = fps.get(xs.scattering_type)
+        if fpl is None:
+          fps[xs.scattering_type] = [idx]
+        else:
+          fpl.append(idx)
+      if xs.flags.grad_fdp():
+        fdpl = fdps.get(xs.scattering_type)
+        if fdpl is None:
+          fdps[xs.scattering_type] = [idx]
+        else:
+          fdpl.append(idx)
+    for t, l in fps.iteritems():
+      if len(l) > 1:
+        constraints.append(fpfdp.shared_fp(l))
+    for t, l in fdps.iteritems():
+      if len(l) > 1:
+        constraints.append(fpfdp.shared_fdp(l))
     return constraints
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
@@ -1192,6 +1250,10 @@ The following options were used:
           elif self.refine_secondary_xh2_angle:
             kwds['flapping'] = True
         current = constraint_type(**kwds)
+        # overrdide the default h-atom placement as it is hard to adjust cctbx
+        # connectivity to match Olex2's
+        current.add_to = hydrogen_atom_constraints_customisation(
+          current, self.olx_atoms.atoms()).add_to
         geometrical_constraints.append(current)
 
     return geometrical_constraints
@@ -1204,30 +1266,19 @@ The following options were used:
 
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
-    if self.hklf_code == 5:
+    detwin = self.twin_components is not None\
+        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
+    if detwin or self.hklf_code == 5:
       if self.use_tsc:
         fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
       else:
         fo2, f_calc = self.get_fo_sq_fc()
+      if self.f_mask:
+        from smtbx import masks
+        fo2 = masks.modified_intensities(fo2, f_calc, self.f_mask)
     else:
       fo2 = self.normal_eqns.observations.fo_sq
-      if( self.twin_components is not None
-        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-        import cctbx_controller
-        hemihedral_twinning = cctbx_controller.hemihedral_twinning(
-          self.twin_components[0].twin_law.as_double(), miller_set=fo2)
-        #fo2 = hemihedral_twinning.detwin_with_twin_fraction(
-          #fo2, self.twin_components[0].twin_fraction)
-        f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
-          self.xray_structure()).f_calc()
-        val = self.twin_components[0].value
-        if val < 0:
-          val = 0.001
-        fo2 = hemihedral_twinning.detwin_with_model_data(
-          fo2, f_calc, val)
-        f_calc = f_calc.common_set(fo2)
-      else:
-        f_calc = self.normal_eqns.f_calc
+      f_calc = self.normal_eqns.f_calc
     f_obs = fo2.f_sq_as_f()
     if scale_factor is None:
       k = f_obs.scale_factor(f_calc)

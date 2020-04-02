@@ -13,6 +13,7 @@ except:
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 import olx
+import olex
 import iotbx.cif.model
 import CifInfo
 
@@ -208,7 +209,7 @@ def get_mask_info():
 
     content = content.strip("'")
 
-    _ = content.split(";")
+    _ = content.split(",")
     
     content_disp_l = []
     
@@ -230,8 +231,9 @@ def get_mask_info():
       if entity != "?":
         content_disp_l.append("%s %s" %(format_number(multiplicity * user_number/f), entity))
       else:
-        content_disp_l.append(entity)
-    content_disp = ";".join(content_disp_l)
+        _ = "<font color=%s><b>%s</b></font>" %(gui.red, entity)
+        content_disp_l.append(_)
+    content_disp = ",".join(content_disp_l)
 
     electrons_accounted_for = electrons_accounted_for * multiplicity
     non_h_accounted_for = non_h_accounted_for * multiplicity
@@ -297,6 +299,7 @@ def get_mask_info():
   for entry in sum_content:
     entity = entry[1]
     if "?" in entity:
+      add_to_moiety = "[+ solvents]"
       continue
     multiplicity = float(entry[0])
     entity, multi = split_entity(entity)
@@ -317,8 +320,9 @@ def get_mask_info():
 
   add_to_moiety = add_to_moiety.rstrip(", ")
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
-
-  
+  if "[+ solvents]" in suggested_moiety:
+    olex.m("spy.set_cif_item(_chemical_formula_moiety,'%s')" %suggested_moiety)
+    
   total_void_no_plural = ""
   if total_void_no > 1:
     total_void_no_plural = "s"
@@ -343,7 +347,7 @@ def get_mask_info():
       mask_special_details = ""
     mask_info_has_updated = False
   if mask_special_details:
-    mask_special_details = mask_special_details.strip().lstrip('"').rstrip('"').replace("\r","")
+    mask_special_details = mask_special_details.strip().lstrip('"').rstrip('"').replace("\r"," ")
   if mask_info_has_updated:
     olx.cif_model[current_sNum]['_%s_special_details' %base] = mask_special_details
     update_sqf_file(current_sNum, '_%s_special_details' %base)
@@ -370,7 +374,7 @@ def get_moieties_from_list():
     _ = os.path.join(p_path,'moieties.csv')
   rFile = open(_,'r').readlines()
   for line in rFile:
-    if line.startswith("#"):
+    if line.startswith("#") or line=='\n':
       continue
     nick,formula = line.split(";")
     nick = nick.strip()
@@ -470,7 +474,7 @@ def split_entity(entry):
 cleaned_formulae = {}
 def formula_cleaner(formula):
   formula = formula.replace(" ", "").replace(" ", "")
-  if cleaned_formulae.has_key(formula):
+  if formula in cleaned_formulae:
     return cleaned_formulae[formula]
   retVal = ""
   el = ""
@@ -607,7 +611,7 @@ def add_mask_content(i,which):
     c = ""
   c = c.lstrip("'").rstrip("'")
 
-  c_l = c.split(";")
+  c_l = c.split(",")
   c_new_l = []
   for c in c_l:
     c = c.strip()
@@ -622,7 +626,7 @@ def add_mask_content(i,which):
     else:
       c = m
     c_new_l.append(c)
-  c = "; ".join(c_new_l)
+  c = ", ".join(c_new_l)
   
   user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s based on %s"%(which, disp, based_on_display), c)).strip()
   if user_value == "None":
@@ -630,12 +634,17 @@ def add_mask_content(i,which):
   if not user_value:
     user_value = "?"
  
-  user_value_l = user_value.split(";")
+  user_value_l = user_value.split(",")
   user_value_new_l = []
   for string in user_value_l:
     string=string.lstrip().rstrip()
     if " " in string:
       val, entity = string.split()
+    elif "(" in string:
+      val, entity = string.split("(")
+      val = int(val)
+      entity = entity.rstrip().rstrip(")")
+      
     else:
       entity = string
       val = "1"
@@ -646,7 +655,7 @@ def add_mask_content(i,which):
     user_value_new_l.append("%s %s" %(format_number(float(val) * f / multiplicity), entity))
 #    user_value_new_l.append("%s %s" %(format_number(float(val) * f), entity))
 #    user_value_new_l.append("%s %s" %(float(val) / f, entity))
-  user_value = ";".join(user_value_new_l)
+  user_value = ",".join(user_value_new_l)
   
   _ = list(contents)
   for idx in i_l:

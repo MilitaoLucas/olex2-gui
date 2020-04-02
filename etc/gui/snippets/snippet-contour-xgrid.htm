@@ -15,69 +15,59 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_SCOPE';help_ext=2D-Map-Scale;1 -->
 
   <td width="14%" align='left'>Map Scale</td>
 
   $+
     html.Snippet(GetVar(default_link),
-    "value=Scaled to Visible",
-    "onclick=xgrid.fix 1 0>>html.SetValue(SNUM_XGRID_STEP_VALUE,0)>>html.SetValue(SNUM_XGRID_STEP_SLIDE,0)",
+    "value=Automatic",
+    "onclick=xgrid.fix 1 0>>html.SetValue(SNUM_XGRID_STEP_VALUE,0)>>html.SetValue(SNUM_XGRID_STEP_SLIDE,0)>>html.SetValue(SNUM_XGRID_FIX,0)",
     "td1=<td width='43%'>",
     )
     $-
 
   $+
     html.Snippet(GetVar(default_link),
-    "value=Scaled to Full Map",
+    "value=Static",
     "onclick=spy.gui.maps.get_best_contour_maps()",
     "td1=<td width='43%'>",
     )
   $-
 
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_SCOPE';help_ext=2D-Static-Map-Scale;1 -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
-  <td width="7%" align='left'>Scale</td>
-
-
-  $+
-    html.Snippet("gui/snippets/input-text-td",
-    "param=snum.xgrid.slider_Scale",
-    "name=SNUM_XGRID_SLIDER_SCALE",
-    "value=spy.GetParam(snum.xgrid.slider_scale)",
-    "onenter=spy.SetParam(snum.xgrid.slider_scale,html.GetValue(~name~))>>SetVar(xgrid_slider_scale,html.GetValue(~name~))>>html.Update()",
-    "td1=<td width='7%'>",
-    )
-  $-
-
-
-  $+
-    html.Snippet("gui/snippets/input-slider",
-    "param=snum.xgrid.step",
-    "name=SNUM_XGRID_STEP",
-    "min=-10",
-    "max=10",
-    "scale=\$spy.GetParam(snum.xgrid.slider_scale)",
-    "cmd=xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE),html.GetValue(SNUM_XGRID_STEP_VALUE))",
-    "td1=<td width='43%'>",
-    "swidth=70"
-    )
-  $-
-
-  <td width="8%" align='right'>Fix</td>
-
+  <td width="7%" align='left'>Min.</td>
   $+
     html.Snippet("gui/snippets/input-slider",
     "param=snum.xgrid.fix",
     "name=SNUM_XGRID_FIX",
-    "min=-10",
-    "max=10",
-    "scale=\$spy.GetParam(snum.xgrid.slider_scale)",
+    "min=-40",
+    "max=40",
+    "scale=4",
+    "bgcolor=GetVar(HtmlInputBgColour)",
     "cmd=xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE),html.GetValue(SNUM_XGRID_STEP_VALUE))",
     "td1=<td width='43%'>",
     "swidth=70"
     )
   $-
+  <td width="7%" align='left'> Step</td>
+  $+
+    html.Snippet("gui/snippets/input-slider",
+    "param=snum.xgrid.step",
+    "name=SNUM_XGRID_STEP",
+    "min=1",
+    "max=25",
+    "scale=50",
+    "bgcolor=GetVar(HtmlInputBgColour)",
+    "cmd=xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE),html.GetValue(SNUM_XGRID_STEP_VALUE))",
+    "td1=<td width='43%'>",
+    "swidth=70"
+    )
+  $-
+  
+
+
+  
