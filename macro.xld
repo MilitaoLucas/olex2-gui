@@ -25,7 +25,6 @@
               \"reap file.AbsolutePath(GetVar(startup))\"'">
       <cmd9 "bind wheel 'ShowQ -wheel='">
       <cmd13 "deletemenu 'Structure;Export picture (experimental)'">
-      <cmd14 "spy.gui.get_help()'">
       <cmd14 "spy.get_news_image_from_server('splash')'">
     >
 
@@ -126,6 +125,7 @@
     <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
           spy.SaveCifInfo()>>mode off'">
     <cmd "spy.SaveUserParams()">
+    <cmd "spy.SaveGuiParams()">
     <cmd "spy.SaveOlex2Params()">
     <cmd "storeparam startup file.relativePath(filefull())">
     <cmd "storeparam last_version GetVar(last_version, '')">
@@ -1410,6 +1410,19 @@
     >
   >
 >
+
+<cmds help="Remembers a sequence of commands separated by '>>'"
+  <body
+    <args
+      <arg1 name="cmd1">
+    \>
+ <cmd
+     <cmd1 "spy.runCommands(%1)">
+    \>
+  \>
+\>
+
+
 
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >

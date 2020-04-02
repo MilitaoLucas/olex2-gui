@@ -7,15 +7,14 @@
 </td>
 
 <td><a href='spy.make_help_box -name=ChangeLog'>CHANGELOG</a></td>
-<td></td>
-<td></td>
-<td></td>
+<td width='11%'>&nbsp;</td>
+<td> </td>
 
     $+
     html.Snippet(GetVar(default_link),
     "value=Open",
     "onclick=reap",
-    "td1=<td width='29%'>"
+    "td1=<td width='25%'>"
     )$-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -70,6 +69,14 @@
     "value=Timmy",
     "onclick=if File.Exists(GetVar(sample_dir)/timmy/timmy.res) then 'reap GetVar(sample_dir)/timmy/timmy.res' else 'reap GetVar(sample_dir)/timmy/timmy.cif'",
     )$-
+
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=...",
+    "onclick=spy.internal.get_sample_list()",
+    )$-
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

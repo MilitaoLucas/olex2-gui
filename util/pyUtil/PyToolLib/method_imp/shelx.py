@@ -160,8 +160,16 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       v = olx.Lst(v)
       if v == 'n/a':  v = 0
       OV.SetParam(k, v)
-
-
+    try: 
+      parameters = float(olx.Lst('param_n'))
+      data = float(olx.Lst('ref_4sig'))
+      ratio = data/parameters
+      OV.SetParam('snum.refinement.data_parameter_ratio', ratio)
+    except:
+      OV.SetParam('snum.refinement.data_parameter_ratio', None)
+      
+      
+    
   def gather_refinement_information(self):
     cif = {}
     cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1all'))
@@ -172,7 +180,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift/esd'))
     cif.setdefault('_reflns_number_total', olx.Lst('ref_total'))
     cif.setdefault('_reflns_number_gt', olx.Lst('ref_4sig'))
-    cif.setdefault('_refine_ls_number_parameters', olx.Lst('params_n'))
+    cif.setdefault('_refine_ls_number_parameters', olx.Lst('param_n'))
     cif.setdefault('_refine_ls_number_restraints', olx.Lst('restraints_n'))
     cif.setdefault('_refine_ls_abs_structure_Flack', olx.Lst('flack'))
     cif.setdefault('_refine_diff_density_max', olx.Lst('peak'))

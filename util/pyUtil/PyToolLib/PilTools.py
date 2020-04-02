@@ -1060,109 +1060,115 @@ class timage(ArgumentParser):
       self.makeCharcterCircles(str(i), im, self.params.html.table_firstcol_colour.rgb)
 
     colo =  IT.adjust_colour(self.params.green.rgb,saturation=0.7,luminosity=2.1)
+    colo = self.params.html.table_firstcol_colour.rgb
     l = ["a", "b", "c", "d", "e", "f"]
     for letter in l:
       self.makeCharcterCircles(letter, im, colo)
 
-      up_down_enlarge = 1/self.scale
-      cut = 186*sf, 154*sf, 204*sf, 172*sf
-      crop =  im.crop(cut)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
-      IM =  Image.new('RGBA', crop.size)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      _ = (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge)))
-      name = "next.png"
-      IM = IT.resize_image(IM, size=_, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
-      name = "right.png"
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    #whitespace = 'top:20'
+    #top_left = (int(OV.GetVar('top')), int(OV.GetVar('left')), (28, 2))
+    #whitespace = OV.GetVar('whitespace', 'top:20')
+    #self.makeCharcterCircles("%", im, colo, whitespace=whitespace, top_left=top_left)
 
-      cut = 204*sf, 154*sf, 222*sf, 172*sf
-      cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
-      crop =  im.crop(cut)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
-      IM =  Image.new('RGBA', crop.size)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
-      name = "previous.png"
-      IM = IT.resize_image(IM, size=_, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
-      name = "down.png"
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    up_down_enlarge = 1/self.scale
+    cut = 186*sf, 154*sf, 204*sf, 172*sf
+    crop =  im.crop(cut)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    _ = (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge)))
+    name = "next.png"
+    IM = IT.resize_image(IM, size=_, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    name = "right.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
-      cut = 222*sf, 154*sf, 240*sf, 172*sf
-      cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
-      crop =  im.crop(cut)
-      name = "up_raw.png"
-      _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
-      IM = IT.resize_image(crop, size=_, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
-      IM =  Image.new('RGBA', crop.size)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
-      name = "up.png"
-      IM = IT.resize_image(IM, size=_, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    cut = 204*sf, 154*sf, 222*sf, 172*sf
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+    crop =  im.crop(cut)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
+    name = "previous.png"
+    IM = IT.resize_image(IM, size=_, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    name = "down.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
-      cut = 240*sf, 154*sf, 258*sf, 172*sf
-      cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
-      crop =  im.crop(cut)
-      name = "down_raw.png"
-      _ = (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge)))
-      IM = IT.resize_image(crop, size=_, name=name )
-      OlexVFS.save_image_to_olex(IM, name, 2)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
-      IM =  Image.new('RGBA', crop.size)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
-      name = "down.png"
-      IM = IT.resize_image(IM, size=_, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    cut = 222*sf, 154*sf, 240*sf, 172*sf
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+    crop =  im.crop(cut)
+    name = "up_raw.png"
+    _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
+    IM = IT.resize_image(crop, size=_, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
+    name = "up.png"
+    IM = IT.resize_image(IM, size=_, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
-      cut = 140*sf, 98*sf, 400*sf, 140*sf
-      cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
-      max_width = cut[2] - cut[0]
-      crop =  im.crop(cut)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
-      IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      draw = ImageDraw.Draw(IM)
-      IT.write_text_to_draw(draw,
-                   "You are in a Mode",
-                   top_left=(5, 1),
-                   font_name = 'Vera Bold',
-                   font_size=90,
-                   font_colour=self.params.html.font_colour.rgb,
-                   align='centre',
-                   max_width=max_width
-                   )
-      sfm = sf*0.95
-      name = "pop_background.png"
-      IM = IT.resize_image(IM, size=cut_size, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    cut = 240*sf, 154*sf, 258*sf, 172*sf
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+    crop =  im.crop(cut)
+    name = "down_raw.png"
+    _ = (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge)))
+    IM = IT.resize_image(crop, size=_, name=name )
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    _ = int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))
+    name = "down.png"
+    IM = IT.resize_image(IM, size=_, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
-      cut = 140*sf, 98*sf, 400*sf, 140*sf
-      cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
-      max_width = cut[2] - cut[0]
-      crop =  im.crop(cut)
-      crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
-      IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      draw = ImageDraw.Draw(IM)
-      IT.write_text_to_draw(draw,
-                   "You are in a Mode",
-                   top_left=(5, 1),
-                   font_name = 'Vera Bold',
-                   font_size=90,
-                   font_colour=self.params.html.font_colour.rgb,
-                   align='centre',
-                   max_width=max_width
-                   )
-      sfm = sf*0.95
-      name = "pop_background.png"
-      IM = IT.resize_image(IM, size=cut_size, name=name)
-      OlexVFS.save_image_to_olex(IM, name, 2)
+    cut = 140*sf, 98*sf, 400*sf, 140*sf
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    draw = ImageDraw.Draw(IM)
+    IT.write_text_to_draw(draw,
+                 "You are in a Mode",
+                 top_left=(5, 1),
+                 font_name = 'Vera Bold',
+                 font_size=90,
+                 font_colour=self.params.html.font_colour.rgb,
+                 align='centre',
+                 max_width=max_width
+                 )
+    sfm = sf*0.95
+    name = "pop_background.png"
+    IM = IT.resize_image(IM, size=cut_size, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    cut = 140*sf, 98*sf, 400*sf, 140*sf
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    draw = ImageDraw.Draw(IM)
+    IT.write_text_to_draw(draw,
+                 "You are in a Mode",
+                 top_left=(5, 1),
+                 font_name = 'Vera Bold',
+                 font_size=90,
+                 font_colour=self.params.html.font_colour.rgb,
+                 align='centre',
+                 max_width=max_width
+                 )
+    sfm = sf*0.95
+    name = "pop_background.png"
+    IM = IT.resize_image(IM, size=cut_size, name=name)
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
 
     d_default = {
@@ -1176,8 +1182,6 @@ class timage(ArgumentParser):
       'font_size':6,
       'font_colour':self.params.html.font_colour.rgb,
     }
-
-
 
     d = {
       '01':{'name':"settings_small",
@@ -1213,13 +1217,15 @@ class timage(ArgumentParser):
          'font_name':"Vera",
          'font_size':6,
          'font_colour':(self.params.html.font_colour.rgb),
-       }
-      },
+         },
+       },
     }
 
 
     for _ in d:
+      
       d[_].update(d_default)
+      
       try:
         name = d[_]['name'] + ".png"
       except:
@@ -1766,24 +1772,37 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return crop
 
 
-  def makeCharcterCircles(self, character, im, colour, resize = True):
-    cut = 30*self.sf, 150*self.sf, 55*self.sf, 175*self.sf
+  def makeCharcterCircles(self, character, im, colour, resize = True, whitespace=False, top_left= None):
+    cut = 30*self.sf, 150*self.sf, 53*self.sf, 175*self.sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     #IM =  Image.new('RGBA', crop.size)
     crop_colouriszed = IT.colourize(crop, (0,0,0,0), colour)
     IM.paste(crop_colouriszed, (0,0), crop)
     draw = ImageDraw.Draw(IM)
+    
+    if not top_left:
+      top_left = (25, 6)
+    
     IT.write_text_to_draw(draw,
                  "%s" %(character),
-                 top_left=(24, 6),
+                 top_left=top_left,
                  font_name = 'Vera Bold',
                  font_size=70,
                  font_colour=self.params.html.font_colour.rgb)
     name = "circle_%s.png" %character
+    
     if resize:
       _ = int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)
       IM = IT.resize_image(IM, size=_, name=name)
+
+    if whitespace:
+      w = whitespace.split(':')
+      side = w[0]
+      weight = int(w[1])
+      bg = colour
+      IM = IT.add_whitespace(IM, side, weight, bg)
+
     OlexVFS.save_image_to_olex(IM, name, 2)
     return IM
 
@@ -2691,8 +2710,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if state == "on":
         grad_colour = self.params.html.highlight_colour.rgb
       if state == "hover":
-        if colour:
-          grad_colour = IT.adjust_colour(colour, luminosity=0.9)
+        grad_colour = self.params.html.highlight_colour.rgb
+        #if colour:
+          #grad_colour = IT.adjust_colour(colour, luminosity=0.9)
       if state == "highlight":
         font_colour = self.params.html.highlight_colour.rgb
       if e_font_colour:
@@ -2744,8 +2764,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     bg_colour = underground #hp#
 
     if 'tinybutton' not in type_key and not force:
-      if timage_blanks[self.params.skin.name].has_key(type_key):
-        if timage_blanks[self.params.skin.name][type_key].has_key(state):
+      if type_key in timage_blanks[self.params.skin.name]:
+        if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
@@ -3609,6 +3629,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     border = d.get('border', True)
     colourise = d.get('colourise', False)
     offset = d.get('offset', False)
+    circle = d.get('circle', False)
 
     #cs = self.cs
 
@@ -3655,6 +3676,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if border:
       draw.rectangle((0, 0, image.size[0]-1, image.size[1]-1), outline=outline_colour)
+      
+    if circle:
+      pass
+      #from PIL import ImageOps
+      #mask = Image.new('L', image.size, 0)
+      #draw = ImageDraw.Draw(mask) 
+      #draw.ellipse((0, 0) + size, fill=255)
+      #image = ImageOps.fit(image, mask.size, centering=(0.5, 0.5))
+      #image.putalpha(mask)
+      
+      
     if offset:
       dup = ImageChops.duplicate(image)
       dup = ImageChops.invert(dup)
@@ -3662,7 +3694,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image = ImageChops.blend(image, dup, 0.05)
     return image
 
-
+ 
   def resize_skin_logo(self):
     IT.resize_skin_logo(self.width)
     return "Done"

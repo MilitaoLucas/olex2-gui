@@ -250,14 +250,16 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
         yield (label, xyz, u, u_eq,
                a.occupancy*(a.multiplicity()/n_equiv_positions),
-               symbol, a.flags)
+               symbol, a.flags, a)
     this_atom_id = 0
-    for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
+    for name, xyz, u, ueq, occu, symbol, flags, a in iter_scatterers():
       id = self.olx_atoms.atom_ids[this_atom_id]
       this_atom_id += 1
       olx.xf.au.SetAtomCrd(id, *xyz)
       olx.xf.au.SetAtomU(id, *u)
       olx.xf.au.SetAtomOccu(id, occu)
+      if flags.grad_fp():
+        olx.xf.au.SetAtomDisp(id, a.fp, a.fdp)
     #update OSF
     OV.SetOSF(self.scale_factor())
     #update FVars
@@ -306,11 +308,11 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
 
   def do(self):
     self.mu_history = flex.double()
-    self.n_iterations = 0
-    nu = 2
     self.non_linear_ls.build_up()
     if self.has_gradient_converged_to_zero():
       return
+    self.n_iterations = 0
+    nu = 2
     a = self.non_linear_ls.normal_matrix_packed_u()
     self.mu = self.tau*flex.max(a.matrix_packed_u_diagonal())
     while self.n_iterations < self.n_max_iterations:

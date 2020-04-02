@@ -173,9 +173,9 @@ class StreamRedirection:
           if ttype == tokenize.NAME and token in frame.f_locals:
             args[token] = frame.f_locals[token]
         if args:
-          sys.stderr.write('Key variable values:')
+          sys.stderr.write('Key variable values:\n')
           for var,val in args.items():
-            sys.stderr.write('\t%s = %s' % (var, repr(val)))
+            sys.stderr.write('\t%s = %s\n' % (var, repr(val)))
       except inspect.tokenize.TokenError:
         pass
 

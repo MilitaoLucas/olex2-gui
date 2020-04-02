@@ -243,15 +243,15 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=USE_ASPHERICAL@refine",
-        "checked=spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')",
+        "checked=spy.GetParam('snum.NoSpherA2.use_aspherical')",
         "label=NoSpherA2 ",
         "height=0",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td align='left' width="22%">",
-        "onclick=spy.SetParam('snum.refinement.cctbx.nsff.use_aspherical', html.GetState('~name~'))>>spy.NoSpherA2.set_default_cpu_and_mem()>>html.Update()")
+        "onclick=spy.NoSpherA2.toggle_GUI()")
       $-
 
-<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
 <!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

@@ -4,51 +4,53 @@
       "label=Update Table",
       "bgcolor=GetVar(HtmlTableRowBgColour)",
       "td1=<td align='left' width="22%">",
-      "checked=spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')",
-      "onclick=spy.SetParam('snum.refinement.cctbx.nsff.tsc.Calculate', html.GetState('~name~'))>>html.Update()")
+      "checked=spy.GetParam('snum.NoSpherA2.Calculate')",
+      "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>html.Update()")
     $-
 
-<!-- #ignoreif spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
-<td width='45%' align='right'>
+<!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
+<td width='35%' align='right'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
-    "items=strcat('Check for new;', spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc'))",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.file')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.file',html.GetValue('~name~'))>>spy.NoSpherA2.combine_sfs()",
+    "items=spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc')",
+    "value=spy.GetParam('snum.NoSpherA2.file')",
+    "onchange=spy.SetParam('snum.NoSpherA2.file',html.GetValue('~name~'))",
     "onchangealways=True"
     )
   $-
 </td>
 
 <td width='12%' align='right' >
-<b>TSC File</b>
+<b>.tsc File</b>
 </td>
 
 
 #ignoreif -->
 
 
-<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.tsc.Calculate')
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
 
-<td width='25%' align='left'>
+<td width='35%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_SOURCE",
-    "items=strcat(spy.NoSphera2.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'fchk'))",
-    "value=spy.GetParam('snum.refinement.cctbx.nsff.tsc.source')",
-    "onchange=spy.SetParam('snum.refinement.cctbx.nsff.tsc.source',html.GetValue('~name~'))>>html.Update()",
+    "items='Please Select';strcat(spy.NoSpherA2.getwfn_softwares(),spy.gui.GetFileListAsDropdownItems(FilePath(),'wfn'))",
+    "value=spy.GetParam('snum.NoSpherA2.source')",
+    "onchange=spy.SetParam('snum.NoSpherA2.source',html.GetValue('~name~'))>>html.Update()",
     "onchangealways=True"
     )
   $-
 </td>
 
-<td width='22%' align='right'>
+<td width='12%' align='right'>
 <b>Source of .tsc</b> 
 </td>
 
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<!-- #ignoreif not spy.GetParam('snum.refinement.cctbx.nsff.use_aspherical')
-<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Extras;onclick=;colspan=1;2; -->
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
+<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Refinement;onclick=;colspan=1;2; -->
+<!-- #include h3-NoSpherA2-Properties ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-Properties.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Properties;onclick=;colspan=1;2; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->

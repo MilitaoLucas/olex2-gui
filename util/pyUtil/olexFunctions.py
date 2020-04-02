@@ -29,6 +29,10 @@ if HasGUI:
 else:
   inheritFunctions = guiFunctions.NoGuiFunctions
 
+class SilentException(Exception):
+  def __init__(self, cause):
+    self.cause = cause
+
 class OlexFunctions(inheritFunctions):
   def __init__(self):
     if HasGUI:
@@ -513,7 +517,7 @@ class OlexFunctions(inheritFunctions):
         wFile.write(txt)
         wFile.close()
     except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to write to the VFS"
+      print >> sys.stderr, "An error occurred whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
@@ -529,7 +533,7 @@ class OlexFunctions(inheritFunctions):
         wFile.write(text)
         wFile.close()
     except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to write to the VFS"
+      print >> sys.stderr, "An error occurred whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
 
   def external_edit(self,filePath):
@@ -568,7 +572,6 @@ class OlexFunctions(inheritFunctions):
       olex.m("@reap \"%s\"" %(r"%s/%s.res" %(path, file)))
       return
     fader = self.FindValue('gui_use_fader')
-    #print "AtReap %s/%s" %(path, file)
     try:
       if OV.HasGUI():
         if fader == 'true':
@@ -579,8 +582,6 @@ class OlexFunctions(inheritFunctions):
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
           olx.html.Update()
-
-
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
       sys.stderr.formatExceptionInfo()
@@ -600,17 +601,18 @@ class OlexFunctions(inheritFunctions):
       olx.File()
 
   def timer_wrap(self,f,*args, **kwds):
+    import time
+    t0 = time.time()
+    retVal = ''
     try:
-      import time
-      t0 = time.time()
       retVal = f(*args, **kwds)
-      t1 = time.time()
-      print "Time take for the function %s is %s" %(f.__name__,(t1-t0))
     except Exception, ex:
-      print >> sys.stderr, "An error occured running the function/macro %s" %(f.__name__)
+      sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
       sys.stderr.formatExceptionInfo()
-      retVal = ''
-    return retVal
+    finally:
+      t1 = time.time()
+      print("Time take for the function %s is %s" %(f.__name__,(t1-t0)))
+      return retVal
 
   def registerFunction(self,function,profiling=False,namespace=""):
     g = self.func_wrap(function)
@@ -636,39 +638,38 @@ class OlexFunctions(inheritFunctions):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex.registerCallback(event,function,profiling)
-    #olex.registerCallback(event,function)
 
   def unregisterCallback(self,event,function,profiling=False):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex.unregisterCallback(event,function,profiling)
-    #olex.registerCallback(event,function)
 
   def func_wrap(self,f):
     def func(*args, **kwds):
+      retVal = ''
       try:
         retVal = f(*args, **kwds)
+      except SilentException:
+        pass
       except Exception, ex:
-        print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
+        sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
         sys.stderr.formatExceptionInfo()
-        retVal = ''
-      return retVal
+      finally:
+        return retVal
     return func
 
   if False:  ## Change this to True to print out information about all the function calls
     def func_wrap(self,f):
       def func(*args, **kwds):
-        #a = f
         print f
         print f.func_code
         print
         try:
           retVal = f(*args, **kwds)
         except Exception, ex:
-          print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
+          sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
           sys.stderr.formatExceptionInfo()
           retVal = ''
-        #retVal = a.runcall(f, *args, **kwds)
         return retVal
       return func
 
@@ -1068,7 +1069,12 @@ class OlexFunctions(inheritFunctions):
     """
     This function takes a list of Olex2 commands and will execute these sequentially.
     """
-    cmd = ">>".join(cmds)
+    
+    if type(cmds) is unicode:
+      cmd = cmds.split(">>")
+      cmd = ">>".join(cmd)
+    else:
+      cmd = ">>".join(cmds)
     try:
       olx.Run(cmd)
     except Exception, err:

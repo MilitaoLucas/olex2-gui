@@ -31,6 +31,7 @@ class PluginTools(VFSDependent):
     p = os.path.join(self.p_path, self.p_htm + ".htm")
     if OV.HasGUI() and make_gui:
       try:
+        gui.help.gh.git_help(quick=False, specific=self.p_path)
         t = gui.file_open(p, 'r')
         OlexVFS.write_to_olex(p, t)
         olx.html.Update()
