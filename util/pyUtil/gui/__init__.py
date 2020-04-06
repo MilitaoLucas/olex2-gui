@@ -347,6 +347,9 @@ def copy_datadir_items(force=False):
         OV.SetVar('sample_dir', dest)
       elif "customisation" in src:
         OV.SetParam('user.customisation_dir',dest)
+    if not os.path.exists(src):
+      print("Sorry - installation does not have samples")
+      return
     things = os.listdir(src)
     for thing in things:
       if thing == '.svn': continue

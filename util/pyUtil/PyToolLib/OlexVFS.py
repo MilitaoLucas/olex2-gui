@@ -36,6 +36,8 @@ def save_image_to_olex(image, name, isPersistent=0):
   ImageToOlexWriter.endWrite(isPersistent)
 
 def write_to_olex(filename, data, isPersistent=0):
+  if isinstance(data, unicode):
+    data = data.encode("utf-8")
   olex.writeImage(filename, data, isPersistent)
 
 def read_from_olex(filename):
