@@ -1550,7 +1550,7 @@ class DisorderDisplayTools(object):
   
   def show_unique_only(self):
     if OV.GetParam('user.parts.keep_unique') == True:
-      make_unique(add_to=True)
+      self.make_unique(add_to=True)
       if self.unique_selection:
         olex.m('Sel -u')
         olx.Uniq()
