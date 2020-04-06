@@ -466,9 +466,6 @@ class OlexFunctions(inheritFunctions):
 
   def CifMerge(self, filepath, update_atoms_loop=None, report=True):
     try:
-      cmd = ''
-      if filepath:
-        cmd = '%s' %filepath
       olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
       finalise_value = None
