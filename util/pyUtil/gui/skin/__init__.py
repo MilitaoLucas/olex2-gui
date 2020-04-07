@@ -510,7 +510,7 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(scope="", colour="", display_style=""):
+def change_bond_colour(scope="", colour="", display_style="", bypass_collections=False):
   if not colour:
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
@@ -525,20 +525,24 @@ def change_bond_colour(scope="", colour="", display_style=""):
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
-
+    
   olx.ShowH("a", True)
   olx.ShowH("b", False)
 
+  if bypass_collections:
+    olex.m("sel %s" %bypass_collections)
+    olex.m("sel -i")
+  else:
+    olex.m("sel -a")
 
-  olex.m("sel collections")
-  olex.m("sel -i")
   olex.m("sel atoms -u")
 
   if colour == 'elements':
     olx.Mask(48)
-    OV.SetParam('snum.bonds.mask', 48)
+    olx.Individualise()
     olx.ShowH("b", True)
     OV.SetParam('snum.bonds.colour','elements')
+    OV.SetParam('snum.bonds.mask', 48)
 
   else:
     c = get_user_bond_colour(colour)
