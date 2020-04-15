@@ -273,6 +273,20 @@ def LoadStructureParams():
       solutionMethod = 'Patterson Method' # work-around for bug #48
     if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
       refinementMethod = 'CGLS' # work-around for bug #26
+    params = {
+      'R1_gt': 'snum.refinement.last_R1',
+      'wR_ref': 'snum.refinement.last_wR2',
+      'Peak': 'snum.refinement.max_peak',
+      'Hole': 'snum.refinement.max_hole',
+      'Shift_max': 'snum.refinement.max_shift_over_esd',
+      'Flack': 'snum.refinement.flack_str',
+      'GOOF': 'snum.refinement.goof',
+    }
+    for p in olx.xf.RefinementInfo().split(';'):
+      t = p.split('=')
+      if len(t) != 2 or t[0] not in params or t[1].lower() == 'n/a': continue
+      OV.SetParam(params[t[0]], t[1])
+
   olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
   olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
 
