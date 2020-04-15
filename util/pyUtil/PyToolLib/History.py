@@ -431,7 +431,7 @@ class Node(object):
 
   def set_params(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
-    OV.SetParam('snum.last_wR2',self.wR2)
+    OV.SetParam('snum.refinement.last_wR2',self.wR2)
     if self.is_solution:
       OV.set_solution_program(OV.getCompatibleProgramName(self.program), self.method)
     else:
