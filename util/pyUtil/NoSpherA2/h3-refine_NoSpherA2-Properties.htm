@@ -3,10 +3,10 @@
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #ignoreif not spy.NoSpherA2.check_for_matching_wfn()
-<td width="10%" align='left'>
+<td width="13%" align='left'>
   <b>CPUs</b>
 </td>
-<td width="10%" align='center'>
+<td width="9%" align='center'>
 $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_cpus@refine",
@@ -61,6 +61,17 @@ $+
   $-
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
+    "name=MO",
+    "label=MO",
+    "checked=spy.GetParam('snum.NoSpherA2.Property_MO')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_MO','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_MO','False')>>html.Update()"
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
     "name=ESP",
     "label=ESP",
     "checked=spy.GetParam('snum.NoSpherA2.Property_ESP')",
@@ -71,29 +82,80 @@ $+
     )
   $-
 <td width="20%" align='center'><font color='red'><b> Attention, ESP is slow!</b></font></td>
+ 
+<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_MO)
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="13%" align='left'>
+  <b>MO #</b>
+</td>
+  <td width='5%'>
+
+    <input 
+      type='spin', 
+      width='50', 
+      height="17"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      min='1'
+      max='$spy.NoSpherA2.get_nmo()',
+      name='Set_MO',
+      value='$spy.GetParam(snum.NoSpherA2.Property_MO_number)', 
+      onchange="spy.SetParam(snum.NoSpherA2.Property_MO_number,html.GetValue(~name~))",
+    > 
+
+  </td>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=All MOs",
+    "label=All MOs",
+    "checked=spy.GetParam('snum.NoSpherA2.Property_all_MOs')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_all_MOs','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td align='center' width = '12%'>",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_all_MOs','False')"
+    )
+  $-
+  
+#ignoreif -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="10%" align="left"> <b>Res /&Aring</b></td>
+  
+  <td width="13%" align="left"> <b>Radius /&Aring</b></td>
+  <td width="9%" align='center'>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=SET_SNUM_CUBE_RADIUS_NoSpherA2",
+      "value=spy.GetParam('snum.NoSpherA2.map_radius')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map_radius',html.GetValue(~name~))",
+      "onchangealways=True",
+      )
+    $-
+  </td>
+  <td width='1%'> </td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Calculate",
+    "onclick=spy.NoSpherA2.calculate_cubes()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='15%'>",
+    )
+  $-
+#ignoreif -->
+<!-- #ignoreif spy.NoSpherA2.check_for_matching_wfn()
+<td width="50%" align="center"><b>No .wfn found!</b> (run NoSpherA2 maybe?)</td>
+#ignoreif -->
+  <td width="10%" align="center"> <b>Res /&Aring</b></td>
   <td width="10%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_RESOLUTION_NoSpherA2",
       "value=spy.GetParam('snum.NoSpherA2.map_resolution')",
       "onchange=spy.SetParam('snum.NoSpherA2.map_resolution',html.GetValue(~name~))>>spy.SetParam('snum.map.resolution',html.GetValue(~name~))",
-      "onchangealways=True",
-      )
-    $-
-  </td>
-  <td width="15%" align="center"> <b>Radius /&Aring</b></td>
-  <td width="10%" align='center'>
-    $+
-      html.Snippet("gui/snippets/input-text",
-      "name=SET_SNUM_CUBE_RADIUS_NoSpherA2",
-      "value=spy.GetParam('snum.NoSpherA2.map_radius')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_radius',html.GetValue(~name~))",
       "onchangealways=True",
       )
     $-
@@ -110,18 +172,7 @@ $+
       )
     $-
   </td>
-    $+
-      html.Snippet("gui/snippets/gui-link-button",
-      "value=Calculate",
-      "onclick=spy.NoSpherA2.calculate_cubes()",
-      "bgcolor=GetVar(HtmlTableRowBgColour)",
-      )
-    $-
-#ignoreif -->
-
-<!-- #ignoreif spy.NoSpherA2.check_for_matching_wfn()
-<td width="20%" align="center"><b>No .wfn found!</b> (run NoSpherA2 maybe?)</td>
-#ignoreif -->
+    
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -165,7 +216,7 @@ $+
   </td>
 #ignoreif -->
 <!-- #ignoreif spy.NoSpherA2.is_colored()
-  <td width='64%' align='center'>No Coloured Map selected</td>
+  <td width='61%' align='center'>No Coloured Map selected</td>
 #ignoreif -->
 <!-- #ignoreif strcmp(xgrid.Visible(), false)
   $+
@@ -187,7 +238,7 @@ $+
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=map-header;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-<td width='10%'><b>View</b></td>
+<td width='13%'><b>View</b></td>
 
 <td width='21%'>
     $+
