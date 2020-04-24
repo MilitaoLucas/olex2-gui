@@ -214,11 +214,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print "WARNING: unsupported method: '" + method + "' is replaced by '" +\
         solvers_default_method + "'"
     assert iterations is not None
+    fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     try:
       damping = OV.GetDampingParams()
       self.data_to_parameter_watch()
-      self.print_table_header()
-      self.print_table_header(self.log)
+      if fcf_only == False:
+        self.print_table_header()
+        self.print_table_header(self.log)
 
       class refinementWrapper(iterations):
         def __init__(self, parent, *args, **kwds):
@@ -311,8 +313,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
-      self.show_summary()
-      self.show_comprehensive_summary(log=self.log)
+      if fcf_only == False:
+        self.show_summary()
+        self.show_comprehensive_summary(log=self.log)
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()

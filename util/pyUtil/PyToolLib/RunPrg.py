@@ -502,7 +502,11 @@ class RunRefinementPrg(RunPrg):
     result = False
     try:
       if use_aspherical == True:
-        result = self.deal_with_AAFF()
+        make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+        if make_fcf_only == True:
+          self.make_fcf()
+        else:
+          result = self.deal_with_AAFF()
       else:
         self.startRun()
         try:
@@ -828,6 +832,34 @@ class RunRefinementPrg(RunPrg):
           print >> f, line
         print >> f, "0 0 0 0.0 0.0"
       return f_mask
+  
+  def make_fcf(self):
+    from refinement import FullMatrixRefine
+    table = str(OV.GetParam('snum.NoSpherA2.file'))
+    self.startRun()
+    try:
+      self.setupRefine()
+      OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+      self.setupFiles()
+    except Exception, err:
+      sys.stderr.formatExceptionInfo()
+      print err
+      self.endRun()
+      return False
+    if self.terminate:
+      self.endRun()
+      return
+    if self.params.snum.refinement.graphical_output and self.HasGUI:
+      self.method.observe(self)
+    FM = FullMatrixRefine(
+          max_cycles=0,
+          max_peaks=1)
+    ne = FM.run(False,table)
+    
+    fcf_cif, fmt_str = FM.create_fcf_content(list_code = 6)
+    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+      fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+    return    
 
   def deal_with_AAFF(self):
     from cctbx import adptbx
@@ -852,9 +884,15 @@ class RunRefinementPrg(RunPrg):
             if "THE VIRIAL" in line:
               source = OV.GetParam('snum.NoSpherA2.source')
               if "Gaussian" in source:
-                energy = float(line.split()[3])
+                try:
+                  energy = float(line.split()[3])
+                except:
+                  energy = None
               else:
-                energy = float(line.split()[4])
+                try:
+                  energy = float(line.split()[4])
+                except:
+                  energy = None
     if energy == None:
       HAR_log.write("{:^24.10}".format(" "))
     else:

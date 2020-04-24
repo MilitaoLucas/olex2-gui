@@ -798,14 +798,16 @@ class wfn_Job(object):
     else:
       cpu = "%nproc=1"
     mem = "%mem=" + OV.GetParam('snum.NoSpherA2.mem') + "GB"
-    control = "# "
+    control = "# " 
     if OV.GetParam('snum.NoSpherA2.method') == "HF":
       control += "rhf"
       method = "RHF"
     else:
-      control += method
       method = OV.GetParam('snum.NoSpherA2.method')
-    cxontrol += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+      control += method
+      if method == "BP86" or method == "PBE":
+        control += " DensityFit"
+    control += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
@@ -939,6 +941,9 @@ class wfn_Job(object):
         control += " GridX5 NoFinalGridX "
       elif grid == "Max":
         control += " GridX9 NoFinalGridX "
+    FrozenCore = OV.GetParam('snum.NoSpherA2.ORCA_FC')
+    if FrozenCore == True:
+      control += " FrozenCore"
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -1929,9 +1934,21 @@ def get_functional_list():
   if wfn_code == "Tonto" or wfn_code == "pySCF" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   else:
-    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;wB97;wB97X;"
+    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
 OV.registerFunction(get_functional_list,True,'NoSpherA2')
+
+def get_nmo():
+  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+    return -1
+  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
+  line = ""
+  while "MOL ORBITAL" not in line:
+    line = wfn.readline()
+  values = line.split()
+  return values[1]
+
+OV.registerFunction(get_nmo,True,'NoSpherA2')
 
 def change_tsc_generator(input):
   if input == "Get ORCA":
@@ -2011,6 +2028,8 @@ def calculate_cubes():
   Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
   RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
   ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
+  MO  = OV.GetParam('snum.NoSpherA2.Property_MO')
+  all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
   if Lap == True:
     args.append("-lap")
   if Eli == True:
@@ -2021,6 +2040,15 @@ def calculate_cubes():
     args.append("-rdg")
   if ESP == True:
     args.append("-esp")
+  if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
+    args.append("-v")
+    
+  if MO == True:
+    args.append("-MO")
+    if all_MOs == True:
+      args.append("all")
+    else:
+      args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
   
   radius = OV.GetParam('snum.NoSpherA2.map_radius')
   res = OV.GetParam('snum.NoSpherA2.map_resolution')
@@ -2062,6 +2090,13 @@ def get_map_types():
     list += "NCI;"
   if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
     list += "Rho + ESP;"
+  if get_nmo() != -1:
+    exists = False
+    for i in range(int(get_nmo())+1):
+      if os.path.isfile(os.path.join(folder,name+"_MO_"+str(i)+".cube")):
+        exists = True
+    if exists == True:
+      list += "MO;"
   if list == "":
     return "None;"
   return list
@@ -2102,6 +2137,9 @@ def change_map():
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',maximal*50)
     olex.m("html.Update()")
+  elif Type == "MO":
+    number = int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) -1
+    plot_cube(name+"_MO_"+str(number)+".cube",None)
   else: 
     print "Sorry, no map type available or selected map type not correct!"
     return
@@ -2312,6 +2350,10 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
   elif Type == "Rho + ESP":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
+  elif Type == "MO":
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
