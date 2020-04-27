@@ -961,8 +961,8 @@ user
     .type = strings
   auto_close_settings_panel = False
     .type = bool
-  auto_insert_acta_stuff = True
-    .type = bool
+  auto_insert_user_ins = "MORE -1, CONF, BOND \$H"
+    .type = str
   folder_view_root = None
     .type = path
   use_fader = 0
