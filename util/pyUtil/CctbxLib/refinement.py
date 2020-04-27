@@ -54,7 +54,7 @@ try:
       if env.initialised:
         print("Successfully initialised SciPy OpenBlas:")
         print(env.build_config)
-except Exception, e:
+except Exception as e:
   print("Could not initialise OpenBlas: %s" %e)
 
 class FullMatrixRefine(OlexCctbxAdapter):
@@ -211,14 +211,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if iterations == None:
       method = solvers_default_method
       iterations = FullMatrixRefine.solvers.get(method)
-      print "WARNING: unsupported method: '" + method + "' is replaced by '" +\
-        solvers_default_method + "'"
+      print("WARNING: unsupported method: '%s' is replaced by '%s'"\
+        %(method, solvers_default_method))
     assert iterations is not None
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     try:
       damping = OV.GetDampingParams()
       self.data_to_parameter_watch()
-      if fcf_only == False:
+      if not fcf_only:
         self.print_table_header()
         self.print_table_header(self.log)
 
@@ -248,9 +248,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
               gradient_threshold=None,
               step_threshold=None)
 
-      except RuntimeError, e:
+      except RuntimeError as e:
         if str(e) == 'external_interrupt':
-          print "Refinement interrupted"
+          print("Refinement interrupted")
           self.interrupted = True
         else:
           raise e
@@ -287,11 +287,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
         pass
-    except RuntimeError, e:
+    except RuntimeError as e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
-        print "Refinement failed to converge"
+        print("Refinement failed to converge")
       elif "SCITBX_ASSERT(!cholesky.failure) failure" in str(e):
-        print "Cholesky failure"
+        print("Cholesky failure")
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
         if index > 0:
@@ -304,7 +304,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("the leading minor of order %i for %s is not positive definite"\
            %(index, param_name))
       else:
-        print "Refinement failed"
+        print("Refinement failed")
         import traceback
         traceback.print_exc()
       self.failure = True
@@ -313,7 +313,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
-      if fcf_only == False:
+      if not fcf_only:
         self.show_summary()
         self.show_comprehensive_summary(log=self.log)
       block_name = OV.FileName().replace(' ', '')
@@ -789,7 +789,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             break
           if cif_block_found == True:
             tsc_info = tsc_info + line
-        if cif_block_found == False:
+        if not cif_block_found:
           details_text = """Refinement using NoSpherA2, an implementation of 
 NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
@@ -941,7 +941,7 @@ The following options were used:
         fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
       fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
     else:
-      print "LIST code %i not supported" %list_code
+      print("LIST code %i not supported" %list_code)
       return None, None
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
 
@@ -968,7 +968,7 @@ The following options were used:
 
     fcf_cif, fmt_str = self.create_fcf_content(list_code)
     if not fcf_cif:
-      print "Unsupported list (fcf) format."
+      print("Unsupported list (fcf) format")
       return
     with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
@@ -1071,7 +1071,7 @@ The following options were used:
           eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
-          print "Invalid variable use - mixes occupancy and U"
+          print("Invalid variable use - mixes occupancy and U")
           continue
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
@@ -1321,7 +1321,8 @@ The following options were used:
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
-        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
+        if self.verbose:
+          print("Position of peak %s = %s, Height = %s" %(i, xyz, height))
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf.au.SetAtomU(id, "0.06")
