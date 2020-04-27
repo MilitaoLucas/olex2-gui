@@ -342,7 +342,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     finally:
       sys.stdout.refresh = True
       self.log.close()
-      
+
   def data_to_parameter_watch(self):
     #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
@@ -790,12 +790,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if cif_block_found == True:
             tsc_info = tsc_info + line
         if not cif_block_found:
-          details_text = """Refinement using NoSpherA2, an implementation of 
-NOn-SPHERical Atom-form-factors in Olex2.
+          details_text = """Refinement using NoSpherA2, an implementation of
+ NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
 F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
-NoSpherA2 implementation of HAR makes use of 
-tailor-made aspherical atomic form factors calculated
+NoSpherA2 implementation of HAR makes use of
+ tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
@@ -836,7 +836,7 @@ The following options were used:
             f_time = os.path.getctime(file)
           import datetime
           f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-          details_text = details_text + "   DATE:           %s\n"%f_date    
+          details_text = details_text + "   DATE:           %s\n"%f_date
           tsc_info = tsc_info + details_text
         tsc_info = tsc_info + ";\n"
         cif_block['_refine_special_details'] = tsc_info
@@ -1244,7 +1244,6 @@ The following options were used:
           'stretching' : stretching,
           'bond_length' : bond_length,
           'pivot' : pivot,
-          'bond_length' : bond_length,
           'constrained_site_indices':dependent
           }
         if m == 2:
@@ -1349,7 +1348,7 @@ The following options were used:
 
     if log is None: log = sys.stdout
 
-    pad = 2 - len(str(self.cycles.n_iterations)) 
+    pad = 2 - len(str(self.cycles.n_iterations))
     print >> log, "\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural)
     #print >> log, " +"
     print >> log, "  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1
