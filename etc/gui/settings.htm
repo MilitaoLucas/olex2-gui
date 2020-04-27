@@ -198,18 +198,12 @@
   <td width='23%'>
    <b>%Auto MORE%:</b>
   </td>
-  <td width='55%'>
-    Add MORE -1, CONF, BOND $H automatically
-  </td>
-  <td width="22%" align='right'>
-    $+
-      html.Snippet("gui/snippets/input-checkbox",
-      "name=AUTO_INSERT_ACTA_STUFF",
-      "checked=spy.GetParam(user.auto_insert_acta_stuff)",
-      "oncheck=spy.SetParam(user.auto_insert_acta_stuff,True)",
-      "onuncheck=spy.SetParam(user.auto_insert_acta_stuff,False)",
-      )
-    $-
+  <td align='left'>$+
+    html.Snippet("gui/snippets/input-text", "name=user_ins",
+    "width=100%",
+    "value=spy.GetParam(user.auto_insert_user_ins)",
+    "onchange=spy.SetParam(user.auto_insert_user_ins, html.GetValue(~name~))")
+   $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
