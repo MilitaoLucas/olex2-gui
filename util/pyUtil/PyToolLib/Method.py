@@ -288,26 +288,26 @@ class Method_refinement(Method):
         suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
         if suggested_weight is not None:
           olx.UpdateWght(*suggested_weight)
-
-    for i in RunPrgObject.params.user.auto_insert_user_ins.split(','):
-      i = i.strip().upper()
-      if i.startswith('MORE'):
-        if olx.Ins('MORE') == "n/a":
-          OV.AddIns(i)
-      elif i.startswith('BOND'):
-        bond = olx.Ins('BOND')
-        if bond == "n/a" or not bond:
-          if (int(olx.xf.au.GetAtomCount('H')) > 0):
-            OV.AddIns("BOND $H", quiet=True)
-      elif i.startswith('ACTA'):
-        if olx.Ins('ACTA') == "n/a":
-          if olx.GetVar('refinement_acta', None) != "No ACTA":
-            OV.AddIns("ACTA")
-      elif i.startswith("CONF"):
-        if olx.Ins("CONF") == "n/a":
-          OV.AddIns('CONF')
-      else:
-        olx.AddIns(i, q=True)
+    if RunPrgObject.params.user.auto_insert_user_ins:
+      for i in RunPrgObject.params.user.auto_insert_user_ins.split(','):
+        i = i.strip().upper()
+        if i.startswith('MORE'):
+          if olx.Ins('MORE') == "n/a":
+            OV.AddIns(i)
+        elif i.startswith('BOND'):
+          bond = olx.Ins('BOND')
+          if bond == "n/a" or not bond:
+            if (int(olx.xf.au.GetAtomCount('H')) > 0):
+              OV.AddIns("BOND $H", quiet=True)
+        elif i.startswith('ACTA'):
+          if olx.Ins('ACTA') == "n/a":
+            if olx.GetVar('refinement_acta', None) != "No ACTA":
+              OV.AddIns("ACTA")
+        elif i.startswith("CONF"):
+          if olx.Ins("CONF") == "n/a":
+            OV.AddIns('CONF')
+        else:
+          olx.AddIns(i, q=True)
 
     if RunPrgObject.make_unique_names:
       pass
