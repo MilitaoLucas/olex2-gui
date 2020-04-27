@@ -26,7 +26,7 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
-  
+
 else:
   set_sys_path = True
   try:
@@ -66,7 +66,7 @@ py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plug
                     'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
                     'oleg3': r'E:\eclipse-luna\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
                     }
-debug = False or 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
+debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
 if debug == True:
   try:
     import wingdbstub
@@ -81,7 +81,6 @@ if debug == True:
           pydevd.settrace()
     except:
       pass
-
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
@@ -149,7 +148,7 @@ class StreamRedirection:
   def flush(self):
     pass
 
-  def formatExceptionInfo(maxTBlevel=5):
+  def formatExceptionInfo(self, maxTBlevel=5):
     import traceback
     import inspect
     import tokenize
@@ -160,13 +159,11 @@ class StreamRedirection:
     if tb is not None:
       while tb.tb_next is not None: tb = tb.tb_next
       frame = tb.tb_frame
-      lineno = frame.f_lineno
       def reader():
         try:
           yield inspect.getsource(frame)
         except:
           print(">>>>> ERROR (formatExceptionInfo)")
-      recording_args = False
       args = {}
       try:
         for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
@@ -214,7 +211,7 @@ def set_plugins_paths():
   import AC4
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
-  
+
   from PluginTools import PluginTools
   import FragmentDB
   for plugin in plugins:
@@ -332,7 +329,6 @@ if OV.HasGUI():
   #load_user_gui_phil()
   #export_parameters()
   from Analysis import Analysis
-
 #from gui.skin import *
 
 if timer:
@@ -411,7 +407,7 @@ except ImportError as err:
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()
-  
+
 def pip(package):
   import sys
   sys.stdout.isatty = lambda: False
@@ -420,11 +416,10 @@ def pip(package):
   try:
     from pip import main as pipmain
   except:
-    from pip._internal import main as pipmain    
+    from pip._internal import main as pipmain
   pipmain(['install', '--user', package])
 #  pip.main(['install', package])
 OV.registerFunction(pip,False)
- 
 
 if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
