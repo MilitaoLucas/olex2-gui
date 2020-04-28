@@ -58,29 +58,12 @@ def onexit():
   pass
 olex.registerFunction(onexit,False)
 
-# This is more flexible for different computers:
-py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plugins/org.python.pydev_4.3.0.201508181931/pysrc',
-                    'oleg': r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc',
-                    'dk-uni': r'D:\Programme\Brainwy\LiClipse 1.4.0\plugins\org.python.pydev_3.9.2.201502042042\pysrc',
-                    'dk-home': r'C:\Program Files\Brainwy\LiClipse 2.0.0\plugins\org.python.pydev_4.0.0.201504092214\pysrc',
-                    'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
-                    'oleg3': r'E:\eclipse-luna\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
-                    }
 debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
 if debug == True:
   try:
     import wingdbstub
   except:
-    try:
-      for py_dev_path in py_dev_path_dict.values():
-        if not os.path.exists(py_dev_path):
-          pass
-        if os.path.exists(py_dev_path):
-          sys.path.append(py_dev_path)
-          import pydevd
-          pydevd.settrace()
-    except:
-      pass
+    pass
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
@@ -99,7 +82,7 @@ if timer:
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
   '''
-  this is not used anywhere (DK)
+  some scripts call exit - and Olex2 does exit if not for this function
   '''
   if sys.on_sys_exit_raise:
     e = sys.on_sys_exit_raise
@@ -107,8 +90,6 @@ def our_sys_exit(i):
     raise e
   print(("Terminate with %i" %i))
 sys.exit = our_sys_exit
-
-
 
 class StreamRedirection:
   def __init__(self, stream, is_redirecting=True):
