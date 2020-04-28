@@ -1710,3 +1710,24 @@ def debugInVSC():
     print(x)
     pass
 OV.registerFunction(debugInVSC)
+
+def debugInEclipse():
+  sfn = os.path.join(olx.BaseDir(), ".pydevd")
+  if not os.path.exists(sfn):
+    print("Please created setting file with path to pydevd:")
+    print(sfn)
+    return
+  try:
+    for py_dev_path in open(sfn, "r").readlines():
+      py_dev_path = py_dev_path.strip()
+      if not os.path.exists(py_dev_path):
+        pass
+      sys.path.append(py_dev_path)
+      import pydevd
+      pydevd.settrace()
+      break
+  except:
+    print("Failed to attach the debugger")
+OV.registerFunction(debugInEclipse)
+
+
