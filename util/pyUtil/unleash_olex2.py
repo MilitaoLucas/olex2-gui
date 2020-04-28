@@ -261,37 +261,37 @@ def zip_destination(working_path, prefix=None):
 
 parser = OptionParser(usage='unleash_olex2.py [options]')
 parser.add_option('--web_directory',
-		  dest='web_directory',
-		  help='the path to the directory that Apache will expose'
-		       'the distro from')
+      dest='web_directory',
+      help='the path to the directory that Apache will expose'
+           'the distro from')
 parser.add_option('--working_directory',
-		  dest='working_directory',
-		  help='the path to the svn working directory to build'
-		       'the distro from')
+      dest='working_directory',
+      help='the path to the svn working directory to build'
+           'the distro from')
 parser.add_option('--bin_directory',
-		  dest='bin_directory',
-		  help='the path where the binary files, not icnlcuded to svn reside')
+      dest='bin_directory',
+      help='the path where the binary files, not icnlcuded to svn reside')
 parser.add_option('--beta',
-		  dest='beta',
-		  action='store_true',
-		  help='whether to use the normal or the tag-beta web directory')
+      dest='beta',
+      action='store_true',
+      help='whether to use the normal or the tag-beta web directory')
 parser.add_option('--alpha',
-		  dest='alpha',
-		  action='store_true',
-		  help='whether to use the normal or the tag-alpha web directory')
+      dest='alpha',
+      action='store_true',
+      help='whether to use the normal or the tag-alpha web directory')
 parser.add_option('--dev',
-		  dest='dev',
-		  action='store_true',
-		  help='whether to use the normal or the tag-dev web directory')
+      dest='dev',
+      action='store_true',
+      help='whether to use the normal or the tag-dev web directory')
 parser.add_option('--revert',
-		  dest='revert',
-		  action='store_true',
-		  help='whether to revert vs promoting a distribution')
+      dest='revert',
+      action='store_true',
+      help='whether to revert vs promoting a distribution')
 parser.add_option('-f', '--file',
-		  dest='update_file',
+      dest='update_file',
                   default='',
-		  action='store',
-		  help='whether to use update any particluare file only')
+      action='store',
+      help='whether to use update any particluare file only')
 parser.add_option('-p', '--platform',
       dest='release_platform',
       default='win32-sse,win32,win64,mac32,mac64,lin32,lin64',
@@ -300,13 +300,13 @@ parser.add_option('-p', '--platform',
 option, args = parser.parse_args()
 
 working_directory = os.path.expanduser(option.working_directory
-				       or 'e:/tmp/test-svn')
+               or 'e:/tmp/test-svn')
 if not os.path.isdir(working_directory):
   print "ERROR: '%s' is not a directory" % working_directory
   parser.print_help()
 
 web_directory = os.path.expanduser(option.web_directory
-				   or 'e:/tmp/1.0')
+           or 'e:/tmp/1.0')
 bin_directory = os.path.expanduser(option.bin_directory
                                    or 'e:/tmp/bin_dir')
 if not os.path.isdir(bin_directory):
@@ -318,7 +318,7 @@ if not os.path.isdir(bin_directory):
 def update_tags_file(dir):
   up_dir = '/'.join(dir.split('/')[:-1])
   #tags = os.listdir(up_dir)
-  tags = ['1.2', '1.2-beta', '1.1', '1.2-alpha', '1.0']
+  tags = ['1.3', '1.2', '1.3-beta', '1.3-alpha', '1.1', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
@@ -361,9 +361,14 @@ def promote_distro(src, dest, forward=True):
   tag_file.close()
   #end creating the tag file
   for zipfi in distro_zips:
-    print 'Updating ' + zipfi[0] + '...'
-    src_zfile = zipfile.ZipFile(dest + '/' + zipfi[0], mode='r', compression=zipfile.ZIP_DEFLATED)
-    dest_zfile = zipfile.ZipFile(dest + '/' + zipfi[0] + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
+    full_zn = dest + '/' + zipfi[0]
+    if os.path.exists(full_zn):
+      print 'Updating ' + zipfi[0] + '...'
+    else:
+      print 'Skipping ' + zipfi[0] + '...'
+      continue
+    src_zfile = zipfile.ZipFile(full_zn, mode='r', compression=zipfile.ZIP_DEFLATED)
+    dest_zfile = zipfile.ZipFile(full_zn + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
     prefix = zipfi[1]
     if not prefix:  prefix = ''
     zip_tag_name = prefix + 'olex2.tag'
@@ -374,8 +379,8 @@ def promote_distro(src, dest, forward=True):
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
     dest_zfile.close()
-    os.remove(dest + '/' + zipfi[0]);
-    os.rename(dest + '/' + zipfi[0] + '_', dest + '/' + zipfi[0])
+    os.remove(full_zn);
+    os.rename(full_zn + '_', full_zn)
   update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
@@ -486,7 +491,7 @@ filter_out_directories(
 
 #evaluate available properties for plugins
 plugin_props = set()
-for f, ps in client.proplist(working_directory,	recurse=True):
+for f, ps in client.proplist(working_directory,  recurse=True):
   for p in ps:
     if p.startswith('plugin-'):
       plugin_props.add(p[7:])
@@ -502,7 +507,7 @@ files_for_plugin = dict(
   [ (plugin,
      filter_out_directories(
        client.propget('plugin-%s'%plugin, working_directory,
-		      recurse=True).keys())
+          recurse=True).keys())
      )
      for plugin in plugin_props ])
 
@@ -560,7 +565,7 @@ update_directory_pat = re.compile(update_directory + '/?')
 for f in top_files:
   shutil.copy2(f, destination(f))
 for f in itertools.chain(update_files,
-			 *[ files_for_plugin[x] for x in files_for_plugin
+      *[ files_for_plugin[x] for x in files_for_plugin
                             if x != 'cctbx-win' ]):
   if os.path.exists(f):
     shutil.copy2(f, destination(f, 'update'))
