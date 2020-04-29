@@ -196,11 +196,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       Z = olx.xf.au.GetZ()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
-        print "Error! Multiplicity and number of electrons is even. This is impossible!\n"
+        print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
       elif (ne % 2 == 1) and (mult % 2 == 1):
-        print "Error! Multiplicity and number of electrons is uneven. This is impossible!\n"
+        print ("Error! Multiplicity and number of electrons is uneven. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
         
@@ -208,7 +208,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if file.endswith(".tsc"):
         tsc_exists = True
         f_time = os.path.getmtime(file)
-    if tsc_exists:
+    if tsc_exists and ".wfn" not in wfn_code:
       import datetime
       timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
       if not os.path.exists(timestamp_dir):
@@ -250,6 +250,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         
     job = Job(self, olx.FileName())
     if nr_parts > 1:
+      if ".wfn" in wfn_code:
+        print("Calcualtion from wfn with disorder not possible, sorry!\n")
+        return
       for i in range(nr_parts):
         if parts[i] == 0:
           continue
@@ -337,14 +340,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             try:
               self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
-              print "Aborted due to: ",error
+              print ("Aborted due to: ",error)
               OV.SetVar('NoSpherA2-Error',error)
               return False
           if experimental_SF == False or wfn_code == "Tonto":
             try:
               job.launch(self.wfn_job_dir)
             except NameError as error:
-              print "Aborted due to: ", error
+              print ("Aborted due to: ", error)
               OV.SetVar('NoSpherA2-Error',error)
               return False
             if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
@@ -370,7 +373,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".fchk"):
               shutil.move(file,file + "_part%d"%parts[i])
-      print "Writing combined tsc file\n"
+      print ("Writing combined tsc file\n")
       combine_tscs()
     else:
       # Check if job folder already exists and (if needed) make the backup folders  
@@ -436,15 +439,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
       else:
         if wfn_code.lower().endswith(".wfn"):
-          cif = str(os.path.join(job.full_dir, job.name+".cif"))
-          olx.File(cif)
-          OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
+          pass
         elif wfn_code == "Tonto":
           success = True
           try:
             job.launch()
           except NameError as error:
-            print "Aborted due to: ", error
+            print ("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -463,21 +464,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
         else:
           #OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
-          if wfn_code.lower().endswith(".wfn"):
-            pass
-          else:
-            try:
-              self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-            except NameError as error:
-              print "Aborted due to: ",error
-              OV.SetVar('NoSpherA2-Error',error)
-              return False
+          try:
+            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+          except NameError as error:
+            print ("Aborted due to: ",error)
+            OV.SetVar('NoSpherA2-Error',error)
+            return False
       
         # make the tsc file
         
         if (experimental_SF == True):
           if wfn_code.lower().endswith(".wfn"):
-            wfn_fn = os.path.join(OV.FilePath(), job.name+".wfn")
+            wfn_fn = wfn_code
           else:
             wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
           hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
@@ -493,7 +491,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             job.launch()
           except NameError as error:
-            print "Aborted due to: ", error
+            print ("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -532,7 +530,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     try:
       wfn_object.run()
     except NameError as error:
-      print "The following error occured during QM Calculation: ",error
+      print ("The following error occured during QM Calculation: ",error)
       OV.SetVar('NoSpherA2-Error',error)
       raise NameError('Unsuccesfull Wavefunction Calculation!')
 
@@ -551,7 +549,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
     if self.wfn_2_fchk == "":
-      print "ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!"
+      print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
     
   def setup_pyscf(self):
@@ -1952,11 +1950,9 @@ OV.registerFunction(get_nmo,True,'NoSpherA2')
 
 def change_tsc_generator(input):
   if input == "Get ORCA":
-    import webbrowser
-    webbrowser.open('https://orcaforum.kofo.mpg.de/index.php', new=2)
+    olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "Get DISCAMB":
-    import webbrowser
-    webbrowser.open('http://4xeden.uw.edu.pl/software/discamb/', new=2)
+    olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DICAMB":
@@ -2054,6 +2050,8 @@ def calculate_cubes():
   res = OV.GetParam('snum.NoSpherA2.map_resolution')
   args.append("-resolution")
   args.append(res)
+  args.append("-radius")
+  args.append(radius)
   args.append("-cif")
   args.append(OV.ModelSrc() + ".cif")
   
