@@ -913,11 +913,11 @@ class RunRefinementPrg(RunPrg):
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     source = OV.GetParam('snum.NoSpherA2.source')
-
-    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
-      olx.Anis("$H", h=True)
-    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
-      olex.m("Afix 0 $H")
+    if calculate == True:
+      if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+        olx.Anis("$H", h=True)
+      if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+        olex.m("Afix 0 $H")
     olex.m('delins list')
     olex.m('addins LIST -3')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')

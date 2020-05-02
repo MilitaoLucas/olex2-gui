@@ -228,6 +228,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
     self.setup_har_executables()
     
+    olex.m("CifCreate")
+    
     parts = OV.ListParts()
     if parts != None:
       parts = list(parts)
@@ -1406,7 +1408,7 @@ class Job(object):
     elif self.name.endswith('_input'):
       self.name = self.name[:-6]
     full_dir = parent.jobs_dir
-    self.full_dir = full_dir
+    self.full_dir = os.path.join(OV.FilePath(),full_dir)
 
     if not os.path.exists(full_dir):
       return
@@ -2261,7 +2263,7 @@ def plot_cube(name,color_cube):
     na2 = None
     line = None
     run = None
-    olex_xgrid.Init(x_size+1,y_size+1,z_size+1,True)
+    olex_xgrid.Init(x_size,y_size,z_size,True)
     
     def interpolate(x,y,z):
       #trilinear interpolation between the points... sorry for the mess
@@ -2316,7 +2318,7 @@ def plot_cube(name,color_cube):
           colour = int(get_color(value[x][y][z]))
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
-    olex_xgrid.Init(x_size+1,y_size+1,z_size+1)
+    olex_xgrid.Init(x_size,y_size,z_size)
     for x in range(x_size):
       for y in range(y_size):
         for z in range(z_size):
@@ -2357,7 +2359,7 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_slider_scale',100)
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(False)
+  olex_xgrid.InitSurface(True,1)
   
 OV.registerFunction(plot_cube,True,'NoSpherA2')
 
