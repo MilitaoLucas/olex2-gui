@@ -774,9 +774,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.use_tsc and use_aspherical == True:
       tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
       if os.path.exists(tsc_file_name):
-        tsc = None
-        with open(tsc_file_name, 'r') as tsc_f:
-          tsc = f.readlines()
+        tsc = open(tsc_file_name, 'r').readlines()
         cif_block_found = False
         tsc_info = """;\n"""
         for line in tsc:
