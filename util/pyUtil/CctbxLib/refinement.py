@@ -118,8 +118,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
-    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
-    filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())

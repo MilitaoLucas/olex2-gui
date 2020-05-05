@@ -148,9 +148,6 @@ class RunPrg(ArgumentParser):
       sys.stdout.graph = False
       if timer:
         print("endRun: %.3f" %(time.time() - t1))
-      if self.HasGUI:
-        pass
-        #olx.html.Update()
       RunPrg.running = False
 
       if self.please_run_auto_vss:
@@ -256,18 +253,15 @@ class RunPrg(ArgumentParser):
     if not os.path.exists(copy_to):
       shutil.copyfile(copy_from, copy_to)
     #fab file...
-#    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
     copy_from = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
-    copy_to = "%s%s%s.fab" %(self.tempPath, os.sep, self.shelx_alias)
-    if os.path.exists(copy_from):
-      if not os.path.exists(copy_to):
-        shutil.copyfile(copy_from, copy_to)
+    copy_to = os.path.join(self.tempPath, self.shelx_alias) + ".fab"
+    if os.path.exists(copy_from) and not os.path.exists(copy_to):
+      shutil.copyfile(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
     print('+++ STARTING olex2.refine ++++++++++++++++++++++++++++++++++++')
     OV.reloadStructureAtreap(self.filePath, self.curr_file)
-    #olx.Atreap(r"%s" %(r"%s/%s.ins" %(self.filePath, self.curr_file)))
     cctbx = OlexSetupRefineCctbxAuto('refine', self.params.snum.refinement.max_cycles)
     try:
       cctbx.run()
@@ -277,7 +271,6 @@ class RunPrg(ArgumentParser):
     print('+++ END olex2.refine +++++++++++++++++++++++++++++++++++++++++')
 
   def runAfterProcess(self):
-    #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
       if timer:
         t = time.time()
@@ -397,7 +390,8 @@ class RunSolutionPrg(RunPrg):
     if int(olx.xf.au.GetAtomCount()) != 0:
       if OV.HasGUI():
         if OV.GetParam('user.alert_solve_anyway') == 'Y':
-          r = OV.Alert("Solve", "Are you sure you want to solve this again?", 'YNIR', "(Don't show this warning again)")
+          r = OV.Alert("Solve", "Are you sure you want to solve this again?",
+            'YNIR', "(Don't show this warning again)")
           if "R" in r:
             OV.SetParam('user.alert_solve_anyway', 'N')
           if "N" in r:
@@ -430,7 +424,6 @@ class RunSolutionPrg(RunPrg):
     self.post_prg_html()
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
-
 
   def setupSolve(self):
     try:
@@ -488,9 +481,12 @@ class RunRefinementPrg(RunPrg):
           bg = orange
         gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
       elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
-        _ = gui.get_default_notification(txt="Refinement Finished", txt_col='green_text')
+        gui.get_default_notification(txt="Refinement Finished",
+          txt_col='green_text')
       else:
-        _ = gui.get_default_notification(txt="Refinement Finished<br>Please Cite NoSpherA2: DOI", txt_col='green_text')
+        gui.get_default_notification(
+          txt="Refinement Finished<br>Please Cite NoSpherA2: DOI",
+          txt_col='green_text')
 
   def run(self):
     if RunRefinementPrg.running:
@@ -744,10 +740,6 @@ class RunRefinementPrg(RunPrg):
       flack_display = "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
-      if len(fs) > 1:
-        flack_esd = float(fs[1].strip(")"))
-      else:
-        flack_esd = None
       if flack_val > 0.8:
         inversion_needed = True
 
@@ -773,11 +765,7 @@ class RunRefinementPrg(RunPrg):
       return None
 
     import cctbx_olex_adapter
-    from smtbx import masks
-    from libtbx import easy_pickle
     #from iotbx.shelx import hklf
-    filepath = OV.StrDir()
-    modified_intensities = None
     modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
     if OV.HKLSrc():
       fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
@@ -793,11 +781,10 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
       if OV.HKLSrc() == modified_hkl_path:
         _ = "You can't calculate a mask on an already masked file!"
-        OlexVFS.write('mask_notification.htm',_,1)
+        OlexVFS.write_to_olex('mask_notification.htm',_)
         raise Exception(_)
       if method == "SQUEEZE":
         olex.m("spy.OlexPlaton(q)")
-        Method_refinement.pre_refinement(self, RunPrgObject)
         return
       cctbx_olex_adapter.OlexCctbxMasks()
       if olx.current_mask.flood_fill.n_voids() > 0:
@@ -933,9 +920,8 @@ class RunRefinementPrg(RunPrg):
 
       #Calculate Wavefunction
       try:
-        #import NoSpherA2
-        #NoSpherA2.launch()
-        olex.m('spy.NoSpherA2.launch()')
+        from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+        nsp2.launch()
       except NameError as error:
         print("Error during NoSpherA2:")
         print(error)
