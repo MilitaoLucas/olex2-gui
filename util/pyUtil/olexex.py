@@ -1240,13 +1240,9 @@ def AvailableExternalProgramsHtml():
 
 
 def getReportTitleSrc():
-  import PIL
   from PIL import Image
   from PIL import ImageDraw
-  from PIL import PngImagePlugin
-  import StringIO
   import base64
-  from PIL import EpsImagePlugin
   from ImageTools import ImageTools
   IT = ImageTools()
 
@@ -1286,7 +1282,6 @@ def getReportTitleSrc():
 
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
-  rFile.close()
   retVal ='data:image/png;base64,' + data
   return retVal
 OV.registerFunction(getReportTitleSrc)
