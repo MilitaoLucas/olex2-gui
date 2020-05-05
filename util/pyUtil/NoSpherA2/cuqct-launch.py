@@ -29,5 +29,5 @@ with open('NoSpherA2.log', "rU") as stdout:
       sys.stdout.write(x)
       sys.stdout.flush()
     time.sleep(1)
-  
+
 print "Finished"
