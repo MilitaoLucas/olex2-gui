@@ -551,7 +551,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
   olx.ShowH("b", True)
   if scope:
     olx.html.SetValue("BOND_COLOUR_COMBO%s"%scope, colour)
-  olex.m("showQ a true")
+  #olex.m("showQ a true")
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
 
 
