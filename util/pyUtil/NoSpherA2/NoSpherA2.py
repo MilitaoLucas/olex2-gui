@@ -203,27 +203,28 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print ("Error! Multiplicity and number of electrons is uneven. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
-
-    for file in os.listdir(olx.FilePath()):
-      if file.endswith(".tsc"):
-        tsc_exists = True
-        f_time = os.path.getmtime(file)
-    if tsc_exists and ".wfn" not in wfn_code:
-      import datetime
-      timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
-      if not os.path.exists(timestamp_dir):
-        os.mkdir(timestamp_dir)
-      for file in os.listdir('.'):
+      
+    if OV.GetParam('snum.NoSpherA2.no_backup') == False:
+      for file in os.listdir(olx.FilePath()):
         if file.endswith(".tsc"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".wfn") and ("wfn" not in wfn_code):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".wfx"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".ffn"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".fchk"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          tsc_exists = True
+          f_time = os.path.getmtime(file)
+      if tsc_exists and ".wfn" not in wfn_code:
+        import datetime
+        timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
+        if not os.path.exists(timestamp_dir):
+          os.mkdir(timestamp_dir)
+        for file in os.listdir('.'):
+          if file.endswith(".tsc"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".wfn") and ("wfn" not in wfn_code):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".wfx"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".ffn"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".fchk"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
 
 
     self.setup_har_executables()
