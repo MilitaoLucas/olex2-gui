@@ -105,7 +105,9 @@ snum{
     mem = 2
       .type = str
     ncpus = 1
-      .type = str    
+      .type = str
+    no_backup = False
+      .type = bool
   }
 }
 
