@@ -1373,15 +1373,20 @@ The following options were used:
       max_shift_esd,
       max_shift_esd_item
       )
+    else:
+      max_shift_site = 99
+      max_shift_u = 99
+      max_shift_esd = 99
+      max_shift_esd_item = 99
+      print >> log, "NO CYCLES!"
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
 
-
+    
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)
-
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
