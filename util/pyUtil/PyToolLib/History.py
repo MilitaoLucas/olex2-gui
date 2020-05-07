@@ -50,8 +50,6 @@ class History(ArgumentParser):
   def create_history(self, solution=False, label=None):
     self._getItems()
     self.solve = solution
-    got_history = False
-    info = ""
     global tree
     if not tree:
       tree = HistoryTree()
@@ -83,9 +81,9 @@ class History(ArgumentParser):
 
   def revert_to_original(self):
     node = tree._full_index.get(OV.FileName())
-    self.revert_history(node.children[0].name)
+    self.revert_history(node.children[0].name, revert_hkl=True)
 
-  def revert_history(self, node_index):
+  def revert_history(self, node_index, revert_hkl=None):
     node = tree._full_index.get(node_index)
     assert node is not None
     if node.is_root:
@@ -100,10 +98,13 @@ class History(ArgumentParser):
     with open(resFile, 'wb') as wFile:
       wFile.write(resFileData)
 
-    hklFile = os.path.join(filepath, filename + ".hkl")
-    hklFileData = decompressFile(tree.getHklData(node))
-    with open(hklFile, 'wb') as wFile:
-      wFile.write(hklFileData)
+    if revert_hkl is None:
+      revert_hkl = OV.GetParam("snum.history.revert_hkl")
+    if revert_hkl:
+      hklFile = os.path.join(filepath, filename + ".hkl")
+      hklFileData = decompressFile(tree.getHklData(node))
+      with open(hklFile, 'wb') as wFile:
+        wFile.write(hklFileData)
 
     lstFile = os.path.join(filepath, filename + ".lst")
     if node.lst is not None:
@@ -197,7 +198,6 @@ class History(ArgumentParser):
 
   def _createNewHistory(self):
     self.filename = OV.ModelSrc()
-    historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
     historyFolder = '/'.join([self.strdir,"%s-history" %self.filename])
     global tree
     if os.path.exists(historyFolder):
@@ -336,17 +336,17 @@ class Node(object):
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
-        
+
       else:
         self.program = OV.GetParam('snum.refinement.program')
         self.method = OV.GetParam('snum.refinement.method')
-        
+
         try:
           self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
           self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
         except:
           pass
-        
+
     else:
       # XXX backwards compatibility 2010-01-15
       self.R1 = history_leaf.R1
@@ -473,9 +473,11 @@ class HistoryTree(Node):
     self._active_node = None
     self.name = OV.ModelSrc()
     self._full_index = {self.name: self}
-    # 2.1 - the HKL digest is only, 2.2 - the digest of actual reflections up
-    # to the end
-    self.version = 2.2
+    # 2.1 - the HKL digest is only,
+    # 2.2 - the digest of actual reflections up to the end
+    # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
+    # no upgrade available for 2.2 and 2.3...
+    self.version = 2.3
     self.hklFiles = {}
     #maps simple digest of the file timestamp and path to full one
     self.hklFilesMap = {}
@@ -521,6 +523,7 @@ class HistoryTree(Node):
   def active_node(self):
     if self._active_node is None: return None
     return self.link_table[self._active_node]
+
   @active_node.setter
   def active_node(self, node):
     self._active_node = self.get_node_index(node)
@@ -539,8 +542,8 @@ class HistoryTree(Node):
     # store old index
     old_table = [x for x in self.link_table]
     if child._primary_parent_node is not None:
-      n_idx = self.link_table.index(child) 
-      pn = child.primary_parent_node 
+      n_idx = self.link_table.index(child)
+      pn = child.primary_parent_node
       pn._children.remove(n_idx)
       if pn._active_child_node == n_idx:
          pn._active_child_node = None
@@ -650,8 +653,8 @@ def digestHKLData(fileData):
     if not l or len(l) < 12:
       break
     try:
-      tl = [int(x) for x in l[:12].split()]
-      if len(tl) != 3 or sum(tl) == 0:
+      s = abs(int(l[0:4])) + abs(int(l[4:8])) + abs(int(l[8:12]))
+      if s == 0:
         break
     except:
       break
