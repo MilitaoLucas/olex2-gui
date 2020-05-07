@@ -1003,16 +1003,14 @@ class Graph(ArgumentParser):
   onchange="spy.SetParam('user.graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
-
         if all_in_one_history:
           all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
-<a href="reap '%s\%s.ins'">Reload INS</a>
-''' %(OV.FilePath(), OV.FileName())
+<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>
+'''
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
@@ -1031,18 +1029,13 @@ class Graph(ArgumentParser):
         historyTextPrevious = _ %(previous_img, scaleTxt, all_in_oneText, "")
         historyTextBoth = _%(previous_img, scaleTxt, all_in_oneText, next_img)
         if img_no == 1 and i != last - 1:
-#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextNext
         elif img_no == 1 and i == last - 1 and not all_in_one_history:
           historyText += "<tr><td>%s</td></tr>" %scaleTxt
           pass
-#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
         elif i == last - 1:
-#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextPrevious
-#          IT.write_text_to_draw(barDraw, 'next', align='right', max_width=width)#
         else:
-#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextBoth
 
         self.im.paste(barImage, (int(self.bSides+1),int(top+1)), None)
@@ -1053,7 +1046,6 @@ class Graph(ArgumentParser):
           pass
         self.draw_legend(label, font_size=self.font_size_normal)
         OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
-        #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
         OV.write_to_olex('history-info_%s.htm' %img_no, historyText)
         OV.write_to_olex('history-info.htm', historyText)
 
@@ -1141,7 +1133,7 @@ class Graph(ArgumentParser):
                        width=1, fill=self.outlineColour)
 
       # Checking for isnan and isinf in xy pairs. These should not be there!
-    
+
     for i, (xr, yr) in enumerate(xy_pairs):
       if math.isnan(yr):
         print("-- got isnan (yr)")
@@ -1554,17 +1546,17 @@ class Analysis(Graph):
 
     extraX = 29
     extraY = 48
-    
+
     window = olx.GetWindowSize().split(',')
-    
+
     mouseX = int(olx.GetMouseX())
     mouseY = int(olx.GetMouseY())
     X = mouseX - int(width*1.033) + 20
     Y = mouseY - 20
-    
+
     if mouseX < width:
       X = 10
-    
+
     if not olx.html.IsPopup(pop_name) == "true":
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1), X, Y)
@@ -3110,8 +3102,8 @@ class HealthOfStructure():
           self.hkl_stats[alias] = 0
         else:
           self.hkl_stats[alias] = float(_)
-        
-      if olx.Cif('_diffrn_reflns_theta_max') != "n/a": 
+
+      if olx.Cif('_diffrn_reflns_theta_max') != "n/a":
         twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
       else:
@@ -3422,12 +3414,12 @@ class HealthOfStructure():
           except:
             pass
 
-      ## Check for NULL values    
+      ## Check for NULL values
       have_null = False
       null_values = [0, "0.0", "0.00", "n/a"]
       if raw_val in null_values:
         have_null = True
-        
+
       if item == 'Rint':
         if raw_val == 1:
           have_null = True
@@ -3435,11 +3427,11 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
-    
+
       if have_null:
         bg_colour = "#555555"
         value = "n/a"
-      ##========================  
+      ##========================
 
       use_image = True
       if use_image:
@@ -3523,7 +3515,7 @@ class HealthOfStructure():
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
-    
+
     if value_raw != "n/a":
       try:
         value_raw = float(value_raw)
@@ -3583,7 +3575,7 @@ class HealthOfStructure():
 
 
     if item == "Completeness":
-  
+
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
@@ -3652,7 +3644,7 @@ class HealthOfStructure():
     draw.text((x, y_s), "%s" %display, font=font_s, fill=fill)
 
     ## ADD THE ACTUAL VALUE
-    
+
     y += 0
     if value_display_extra:
       dxs,dxy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
