@@ -314,6 +314,7 @@ class Graph(ArgumentParser):
 
     if draw_title:
       txt = self.graphInfo["Title"]
+      txt = IT.get_unicode_characters(txt)
       if not txt: txt = "Not available"
       x = 0 + self.bSides+self.xSpace
       y = self.bTop
@@ -1326,6 +1327,11 @@ class Graph(ArgumentParser):
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
     y = self.boxY  + self.imY * 0.01
+
+    box = (x, y, x+wX, y+wY)
+    fill = (256, 256, 256)
+    self.draw.rectangle(box, fill=fill)
+    
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
 
   #def draw_bars(self):
@@ -3610,7 +3616,7 @@ class HealthOfStructure():
 
 
     if item == "MeanIOverSigma":
-      display = IT.get_unicode_characters("I/sigma")
+      display = IT.get_unicode_characters("I/sigma(I)")
     elif item == "Rint":
       display = "Rint"
 

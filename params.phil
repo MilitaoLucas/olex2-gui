@@ -1224,7 +1224,7 @@ user
         .caption = "I/sigma vs Resolution"
         .help = "R1-factor-vs-resolution"
       {
-        title = "I/sigma vs. Resolution"
+        title = "I/sigma(I) vs. Resolution"
           .type = str
         resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
           .type = choice
