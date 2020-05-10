@@ -107,7 +107,7 @@ class ImageTools(FontInstances):
     self.max_width = w
 
     self.skin_width = self.skin_width_margin
-    
+
     if OV.HasGUI():
       client_width = int(olx.html.ClientWidth('self'))
     else:
@@ -1000,9 +1000,6 @@ class ImageTools(FontInstances):
     txt_l = []
     t = ""
     wXT = 0
-
-
-
     if wX > max_width and " " in txt:
       txt_in = txt.split()
 
@@ -1016,7 +1013,6 @@ class ImageTools(FontInstances):
           wXT = 0
           t = "%s" % word
       txt_l.append(t.strip())
-
     else:
       w_counter = 0
       while wX > max_width and w_counter < 100:
@@ -1029,7 +1025,6 @@ class ImageTools(FontInstances):
       self.txt = txt
       self.print_html_to_draw()
       return
-
     elif '<br>' in txt:
       txt = txt.split('<br>')
       txt_l = txt
@@ -1047,8 +1042,6 @@ class ImageTools(FontInstances):
         for txt in txt_l:
           left = self.txt_left
           top_n = self.txt_top + wY * i
-          fc = font_colour
-          f = font
           if '<sub>' in txt:
             t = txt.split('<sub>')
             _ = t[1].split('</sub>')
@@ -1063,10 +1056,10 @@ class ImageTools(FontInstances):
                 top += int(font_size / 2)
               j += 1
               wX, wY = draw.textsize(item, font=f)
-              draw.text((left, top), item, font=f, fill=font_colour)
+              draw.text((left, top), item.encode("utf-8"), font=f, fill=font_colour)
               left += wX
           else:
-            draw.text((left, int(top_n)), txt, font=font, fill=font_colour)
+            draw.text((left, int(top_n)), txt.encode("utf-8"), font=font, fill=font_colour)
           i += 1
       except Exception, ex:
         print "Text %s could not be drawn: %s" % (txt, ex)
@@ -1769,5 +1762,5 @@ IT.get_available_width()
 if olx.HasGUI() == 'true':
   OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
   OV.registerFunction(IT.make_pie_graph, False, 'it')
-  
+
 OV.registerFunction(IT.trim_image, False, 'it')
