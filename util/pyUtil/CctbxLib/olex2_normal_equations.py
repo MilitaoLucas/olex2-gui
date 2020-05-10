@@ -323,6 +323,8 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
       self.n_iterations += 1
       h = self.non_linear_ls.step()
       expected_decrease = 0.5*h.dot(self.mu*h - g)
+      if OV.GetParam('snum.NoSpherA2.make_fcf_only') == True:
+        return
       self.non_linear_ls.step_forward()
       if self.check_shift_over_esd():
         # not sure why but without this esds become very small!

@@ -95,7 +95,7 @@ class RunPrg(ArgumentParser):
     self.params = olx.phil_handler.get_python_object()
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
-      print "No structure loaded"
+      print("No structure loaded")
       return
     self.original_filename = self.filename
     olx.Stop('listen')
@@ -127,18 +127,18 @@ class RunPrg(ArgumentParser):
         t1 = time.time()
       res = self.method.run(self)
       if timer:
-        print "REFINEMENT: %.3f" %(time.time() - t1)
-      if res == False:
+        print("REFINEMENT: %.3f" %(time.time() - t1))
+      if not res:
         return False
       if not self.method.failure:
         if timer:
           t1 = time.time()
         self.runAfterProcess()
         if timer:
-          print "runAfterProcess: %.3f" %(time.time() - t1)
+          print("runAfterProcess: %.3f" %(time.time() - t1))
       if timer:
         t1 = time.time()
-    except Exception, e:
+    except Exception as e:
       sys.stdout.formatExceptionInfo()
       caught_exception = e
     finally:
@@ -147,10 +147,7 @@ class RunPrg(ArgumentParser):
       sys.stdout.refresh = False
       sys.stdout.graph = False
       if timer:
-        print "endRun: %.3f" %(time.time() - t1)
-      if self.HasGUI:
-        pass
-        #olx.html.Update()
+        print("endRun: %.3f" %(time.time() - t1))
       RunPrg.running = False
 
       if self.please_run_auto_vss:
@@ -241,7 +238,7 @@ class RunPrg(ArgumentParser):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
       if os.path.exists(self.hkl_src):
         OV.HKLSrc(self.hkl_src)
-        print "HKL Source Filename reset to default file!"
+        print("HKL Source Filename reset to default file!")
       else:
         raise Exception("Please choose a reflection file")
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
@@ -256,34 +253,30 @@ class RunPrg(ArgumentParser):
     if not os.path.exists(copy_to):
       shutil.copyfile(copy_from, copy_to)
     #fab file...
-#    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
     copy_from = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
-    copy_to = "%s%s%s.fab" %(self.tempPath, os.sep, self.shelx_alias)
-    if os.path.exists(copy_from):
-      if not os.path.exists(copy_to):
-        shutil.copyfile(copy_from, copy_to)
+    copy_to = os.path.join(self.tempPath, self.shelx_alias) + ".fab"
+    if os.path.exists(copy_from) and not os.path.exists(copy_to):
+      shutil.copyfile(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
-    print '+++ STARTING olex2.refine ++++++++++++++++++++++++++++++++++++'
+    print('+++ STARTING olex2.refine ++++++++++++++++++++++++++++++++++++')
     OV.reloadStructureAtreap(self.filePath, self.curr_file)
-    #olx.Atreap(r"%s" %(r"%s/%s.ins" %(self.filePath, self.curr_file)))
     cctbx = OlexSetupRefineCctbxAuto('refine', self.params.snum.refinement.max_cycles)
     try:
       cctbx.run()
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
     olex.f('GetVar(cctbx_R1)')
-    print '+++ END olex2.refine +++++++++++++++++++++++++++++++++++++++++'
+    print('+++ END olex2.refine +++++++++++++++++++++++++++++++++++++++++')
 
   def runAfterProcess(self):
-    #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
       if timer:
         t = time.time()
       self.doFileResInsMagic()
       if timer:
-        print "--- doFilseResInsMagic: %.3f" %(time.time() - t)
+        print("--- doFilseResInsMagic: %.3f" %(time.time() - t))
 
       if timer:
         t = time.time()
@@ -293,7 +286,7 @@ class RunPrg(ArgumentParser):
       if self.HasGUI:
         olx.Freeze(False)
       if timer:
-        print "--- reloadStructureAtreap: %.3f" %(time.time() - t)
+        print("--- reloadStructureAtreap: %.3f" %(time.time() - t))
 
       # XT changes the HKL file - so it *will* match the file name
       if 'xt' not in self.program.name.lower():
@@ -305,7 +298,7 @@ class RunPrg(ArgumentParser):
           t = time.time()
         self.doBroadcast()
         if timer:
-          print "--- doBroacast: %.3f" %(time.time() - t)
+          print("--- doBroacast: %.3f" %(time.time() - t))
 
       lstFile = '%s/%s.lst' %(self.filePath, self.original_filename)
       if os.path.exists(lstFile):
@@ -397,7 +390,8 @@ class RunSolutionPrg(RunPrg):
     if int(olx.xf.au.GetAtomCount()) != 0:
       if OV.HasGUI():
         if OV.GetParam('user.alert_solve_anyway') == 'Y':
-          r = OV.Alert("Solve", "Are you sure you want to solve this again?", 'YNIR', "(Don't show this warning again)")
+          r = OV.Alert("Solve", "Are you sure you want to solve this again?",
+            'YNIR', "(Don't show this warning again)")
           if "R" in r:
             OV.SetParam('user.alert_solve_anyway', 'N')
           if "N" in r:
@@ -431,7 +425,6 @@ class RunSolutionPrg(RunPrg):
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
 
-
   def setupSolve(self):
     try:
       self.sg = '\'' + olex.f(r'sg(%n)') + '\''
@@ -447,7 +440,7 @@ class RunSolutionPrg(RunPrg):
           return
         self.formula = r
       else:
-        print 'Please provide the structure composition'
+        print('Please provide the structure composition')
         self.terminate = True
     if "olex2" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
@@ -488,9 +481,12 @@ class RunRefinementPrg(RunPrg):
           bg = orange
         gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
       elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
-        _ = gui.get_default_notification(txt="Refinement Finished", txt_col='green_text')
+        gui.get_default_notification(txt="Refinement Finished",
+          txt_col='green_text')
       else:
-        _ = gui.get_default_notification(txt="Refinement Finished<br>Please Cite NoSpherA2: DOI", txt_col='green_text')
+        gui.get_default_notification(
+          txt="Refinement Finished<br>Please Cite NoSpherA2: DOI",
+          txt_col='green_text')
 
   def run(self):
     if RunRefinementPrg.running:
@@ -502,17 +498,20 @@ class RunRefinementPrg(RunPrg):
     result = False
     try:
       if use_aspherical == True:
-        result = self.deal_with_AAFF()
+        make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+        if make_fcf_only == True:
+          self.make_fcf()
+        else:
+          result = self.deal_with_AAFF()
       else:
         self.startRun()
         try:
           self.setupRefine()
           OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
           self.setupFiles()
-        except Exception, err:
+        except Exception as err:
           sys.stderr.formatExceptionInfo()
-
-          print err
+          print(err)
           self.endRun()
           return False
         if self.terminate:
@@ -606,7 +605,7 @@ class RunRefinementPrg(RunPrg):
       t = time.time()
     self.method.post_refinement(self)
     if timer:
-      print "-- self.method.post_refinement(self): %.3f" %(time.time()-t)
+      print("-- self.method.post_refinement(self): %.3f" %(time.time()-t))
 
     delete_stale_fcf()
 
@@ -615,7 +614,7 @@ class RunRefinementPrg(RunPrg):
     self.post_prg_html()
     self.doHistoryCreation()
     if timer:
-      print "-- self.method.post_refinement(self): %3f" %(time.time()-t)
+      print("-- self.method.post_refinement(self): %3f" %(time.time()-t))
 
     if self.R1 == 'n/a':
       return
@@ -626,8 +625,8 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       try:
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
-      except Exception, e:
-        print "Could not determine whether structure inversion is needed: %s" %e
+      except Exception as e:
+        print("Could not determine whether structure inversion is needed: %s" %e)
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
@@ -636,14 +635,14 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.cifmerge_after_refinement:
       try:
         MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
-      except Exception, e:
+      except Exception as e:
         if debug:
           sys.stdout.formatExceptionInfo()
         print("Failed in CifMerge: '%s'" %str(e))
     if timer:
-      print "-- MergeCif: %.3f" %(time.time()-t)
+      print("-- MergeCif: %.3f" %(time.time()-t))
 
-  
+
   def refinement_observer(self, msg):
     if self.refinement_observer_timer == 0:
       self.refinement_observer_timer = time.time()
@@ -661,8 +660,8 @@ class RunRefinementPrg(RunPrg):
       m = regex.findall(msg)
       if m:
         self.refinement_has_failed = m[0].strip()
-  
-  
+
+
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
@@ -686,15 +685,15 @@ class RunRefinementPrg(RunPrg):
       if not self.params.snum.init.skip_routine:
         try:
           self.his_file = hist.create_history()
-        except Exception, ex:
-          print >> sys.stderr, "History could not be created"
+        except Exception as ex:
+          sys.stderr.write("History could not be created\n")
           sys.stderr.formatExceptionInfo()
       else:
         print ("Skipping History")
     else:
       R1 = "n/a"
       self.his_file = None
-      print "The refinement has failed, no R value was returned by the refinement."
+      print("The refinement has failed, no R value was returned by the refinement")
     self.R1 = R1
     self.wR2 = wR2
     OV.SetParam('snum.refinement.current_history', self.his_file)
@@ -710,7 +709,7 @@ class RunRefinementPrg(RunPrg):
     from cctbx import sgtbx
     from libtbx.utils import Sorry
     if debug:
-      print "Checking absolute structure..."
+      print("Checking absolute structure...")
     inversion_needed = False
     possible_racemic_twin = False
     inversion_warning = "WARNING: Structure should be inverted (inv -f), unless there is a good reason not to do so."
@@ -721,8 +720,8 @@ class RunRefinementPrg(RunPrg):
 
     try:
       hooft = hooft_analysis()
-    except Sorry, e:
-      print e
+    except Sorry as e:
+      print(e)
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
         s = format_float_with_standard_uncertainty(
@@ -741,26 +740,22 @@ class RunRefinementPrg(RunPrg):
       flack_display = "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
-      if len(fs) > 1:
-        flack_esd = float(fs[1].strip(")"))
-      else:
-        flack_esd = None
       if flack_val > 0.8:
         inversion_needed = True
 
-    print "%s, %s" %(hooft_display, flack_display)
+    print("%s, %s" %(hooft_display, flack_display))
 
     if force and inversion_needed:
       olex.m('Inv -f')
       OV.File('%s.res' %OV.FileName())
       OV.SetParam('snum.refinement.auto.invert',False)
-      print "The Structure has been inverted"
+      print("The Structure has been inverted")
     elif inversion_needed:
-      print inversion_warning
+      print(inversion_warning)
     if possible_racemic_twin:
       if (hooft.twin_components is not None and
           hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-        print racemic_twin_warning
+        print(racemic_twin_warning)
     if not inversion_needed and not possible_racemic_twin:
       #print "OK"
       pass
@@ -770,11 +765,7 @@ class RunRefinementPrg(RunPrg):
       return None
 
     import cctbx_olex_adapter
-    from smtbx import masks
-    from libtbx import easy_pickle
     #from iotbx.shelx import hklf
-    filepath = OV.StrDir()
-    modified_intensities = None
     modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
     if OV.HKLSrc():
       fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
@@ -790,11 +781,10 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
       if OV.HKLSrc() == modified_hkl_path:
         _ = "You can't calculate a mask on an already masked file!"
-        OlexVFS.write('mask_notification.htm',_,1)
+        OlexVFS.write_to_olex('mask_notification.htm',_)
         raise Exception(_)
       if method == "SQUEEZE":
         olex.m("spy.OlexPlaton(q)")
-        Method_refinement.pre_refinement(self, RunPrgObject)
         return
       cctbx_olex_adapter.OlexCctbxMasks()
       if olx.current_mask.flood_fill.n_voids() > 0:
@@ -802,7 +792,7 @@ class RunRefinementPrg(RunPrg):
         f_model = olx.current_mask.f_model()
       else:
         _ = "There are no voids!"
-        print _
+        print(_)
         OV.SetParam("snum.refinement.use_solvent_mask", False)
         olex.m('delins ABIN')
         OlexVFS.write_to_olex('mask_notification.htm',_,1)
@@ -829,9 +819,37 @@ class RunRefinementPrg(RunPrg):
         print >> f, "0 0 0 0.0 0.0"
       return f_mask
 
+  def make_fcf(self):
+    from refinement import FullMatrixRefine
+    table = str(OV.GetParam('snum.NoSpherA2.file'))
+    self.startRun()
+    try:
+      self.setupRefine()
+      OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+      self.setupFiles()
+    except Exception as err:
+      sys.stderr.formatExceptionInfo()
+      print(err)
+      self.endRun()
+      return False
+    if self.terminate:
+      self.endRun()
+      return
+    if self.params.snum.refinement.graphical_output and self.HasGUI:
+      self.method.observe(self)
+    FM = FullMatrixRefine(
+          max_cycles=0,
+          max_peaks=1)
+    ne = FM.run(False,table)
+
+    fcf_cif, fmt_str = FM.create_fcf_content(list_code = 6)
+    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+      fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+    return
+
   def deal_with_AAFF(self):
     from cctbx import adptbx
-    
+
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     old_model = OlexRefinementModel()
     converged = False
@@ -841,7 +859,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("\n")
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
     HAR_log.write("************************************************************************************\n")
-    
+
     HAR_log.write("{:3d}".format(run))
     energy = None
     for file in os.listdir(olx.FilePath()):
@@ -852,9 +870,15 @@ class RunRefinementPrg(RunPrg):
             if "THE VIRIAL" in line:
               source = OV.GetParam('snum.NoSpherA2.source')
               if "Gaussian" in source:
-                energy = float(line.split()[3])
+                try:
+                  energy = float(line.split()[3])
+                except:
+                  energy = None
               else:
-                energy = float(line.split()[4])
+                try:
+                  energy = float(line.split()[4])
+                except:
+                  energy = None
     if energy == None:
       HAR_log.write("{:^24.10}".format(" "))
     else:
@@ -876,12 +900,11 @@ class RunRefinementPrg(RunPrg):
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     source = OV.GetParam('snum.NoSpherA2.source')
-    
-    if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
-      olex.m("anis -h")
-    if OV.GetParam('snum.NoSpherA2.h_afix') == True:
-      olex.m("sel $h")
-      olex.m("Afix 0")
+    if calculate == True:
+      if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+        olx.Anis("$H", h=True)
+      if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+        olex.m("Afix 0 $H")
     olex.m('delins list')
     olex.m('addins LIST -3')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
@@ -891,23 +914,23 @@ class RunRefinementPrg(RunPrg):
     while converged == False:
       run += 1
       HAR_log.write("{:3d}".format(run))
-      
+
       old_model = OlexRefinementModel()
       OV.SetVar('Run_number',run)
-      
+
       #Calculate Wavefunction
       try:
-        #import NoSpherA2
-        #NoSpherA2.launch()
-        olex.m('spy.NoSpherA2.launch()')
+        from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+        nsp2.launch()
       except NameError as error:
-        print "Error during NoSpherA2: ",error
+        print("Error during NoSpherA2:")
+        print(error)
         RunRefinementPrg.running = None
         RunRefinementPrg.Terminate = True
         return False
       Error_Status = OV.GetVar('NoSpherA2-Error')
       if Error_Status != "None":
-        print "Error in NoSpherA2: %s" %Error_Status
+        print("Error in NoSpherA2: %s" %Error_Status)
         return False
       dir = olx.FilePath()
       tsc_exists = False
@@ -918,11 +941,11 @@ class RunRefinementPrg(RunPrg):
         elif file.endswith(".wfn"):
           wfn_file = file
       if tsc_exists == False:
-        print "Error during NoSpherA2: "
+        print("Error during NoSpherA2")
         RunRefinementPrg.running = None
         return False
 
-      # get energy from wfn file 
+      # get energy from wfn file
       energy = None
       if (wfn_file != None) and (calculate == True):
         with open(wfn_file) as f:
@@ -955,9 +978,9 @@ class RunRefinementPrg(RunPrg):
           self.setupRefine()
           OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
           self.setupFiles()
-        except Exception, err:
+        except Exception as err:
           sys.stderr.formatExceptionInfo()
-          print err
+          print(err)
           self.endRun()
           return False
         if self.terminate:
@@ -1057,15 +1080,15 @@ class RunRefinementPrg(RunPrg):
 
       HAR_log.write("{:>6.2f}".format(float(r1)*100))
       HAR_log.write("{:>7.2f}".format(float(wr2)*100))
-      
+
       HAR_log.write("\n")
       HAR_log.flush()
-      
-      
+
+
       if calculate == False:
         converged = True
         break
-      elif Full_HAR == False: 
+      elif Full_HAR == False:
         converged = True
         break
       elif (max_duij <= 0.01) and (max_dxyz <= 0.01):
@@ -1104,7 +1127,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
-    
+
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
       matrix_run = 0
@@ -1150,7 +1173,7 @@ class RunRefinementPrg(RunPrg):
           HAR_log.write(" Isotropic atom")
           matrix_run += 4
         HAR_log.write("\n")
-        
+
     HAR_log.flush()
     HAR_log.close()
 

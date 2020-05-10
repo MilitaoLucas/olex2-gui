@@ -496,6 +496,8 @@ routines requiring structure refinement
       .expert_level = 2
     condensed_tree = True
       .type = bool
+    revert_hkl = True
+      .type = bool
   }
 
   autochem_current_solution = "Autochem 01"
@@ -961,8 +963,8 @@ user
     .type = strings
   auto_close_settings_panel = False
     .type = bool
-  auto_insert_acta_stuff = True
-    .type = bool
+  auto_insert_user_ins = "MORE -1, CONF, BOND \$H"
+    .type = str
   folder_view_root = None
     .type = path
   use_fader = 0
@@ -1222,7 +1224,7 @@ user
         .caption = "I/sigma vs Resolution"
         .help = "R1-factor-vs-resolution"
       {
-        title = "I/sigma vs. Resolution"
+        title = "I/sigma(I) vs. Resolution"
           .type = str
         resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
           .type = choice

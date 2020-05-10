@@ -100,7 +100,7 @@ class NoSpherA2(PT):
       mpiloc = os.path.join(self.p_path, "mpiexec.exe")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
-      else: 
+      else:
         self.mpiexec = olx.file.Which("mpiexec.exe")
 
       _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
@@ -118,7 +118,7 @@ class NoSpherA2(PT):
       mpiloc = os.path.join(self.p_path, "mpiexec")
       if os.path.exists(mpiloc):
         self.mpiexec = mpiloc
-      else: 
+      else:
         self.mpiexec = olx.file.Which("mpiexec")
       self.mpihome = self.mpiexec[:-11]
       if 'LD_LIBRARY_PATH' in os.environ:
@@ -142,7 +142,7 @@ class NoSpherA2(PT):
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("%s" %exe_pre)   
+        self.exe = olx.file.Which("%s" %exe_pre)
 
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
@@ -167,7 +167,7 @@ class NoSpherA2(PT):
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
     if "Please S" in wfn_code:
       olx.Alert("No tsc generator selected",\
-"""Error: No generator for tsc files selected. 
+"""Error: No generator for tsc files selected.
 Please select one of the generators from the drop-down menu.""", "O", False)
       OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
       return
@@ -184,10 +184,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-      
+
     tsc_exists = False
     f_time = None
-    
+
     if (wfn_code != "DICAMB") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       from cctbx_olex_adapter import OlexCctbxAdapter
       ne = 0
@@ -196,45 +196,48 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       Z = olx.xf.au.GetZ()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
-        print "Error! Multiplicity and number of electrons is even. This is impossible!\n"
+        print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
       elif (ne % 2 == 1) and (mult % 2 == 1):
-        print "Error! Multiplicity and number of electrons is uneven. This is impossible!\n"
+        print ("Error! Multiplicity and number of electrons is uneven. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
-        
-    for file in os.listdir(olx.FilePath()):
-      if file.endswith(".tsc"):
-        tsc_exists = True
-        f_time = os.path.getmtime(file)
-    if tsc_exists:
-      import datetime
-      timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
-      if not os.path.exists(timestamp_dir):
-        os.mkdir(timestamp_dir)
-      for file in os.listdir('.'):
-        if file.endswith(".tsc"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".wfn") and ("wfn" not in wfn_code):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".wfx"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".ffn"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
-        if file.endswith(".fchk"):
-          shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
       
+    if OV.GetParam('snum.NoSpherA2.no_backup') == False:
+      for file in os.listdir(olx.FilePath()):
+        if file.endswith(".tsc"):
+          tsc_exists = True
+          f_time = os.path.getmtime(file)
+      if tsc_exists and ".wfn" not in wfn_code:
+        import datetime
+        timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
+        if not os.path.exists(timestamp_dir):
+          os.mkdir(timestamp_dir)
+        for file in os.listdir('.'):
+          if file.endswith(".tsc"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".wfn") and ("wfn" not in wfn_code):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".wfx"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".ffn"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+          if file.endswith(".fchk"):
+            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+
 
     self.setup_har_executables()
+
+    olex.m("CifCreate")
     
     parts = OV.ListParts()
     if parts != None:
       parts = list(parts)
     experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-    
+
     disorder_groups = None
-    nr_parts = None 
+    nr_parts = None
     if not parts:
       nr_parts = 1
     elif len(parts) > 1:
@@ -247,59 +250,62 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         cif = False
       deal_with_parts(cif)
       nr_parts = len(parts)
-        
+
     job = Job(self, olx.FileName())
     if nr_parts > 1:
+      if ".wfn" in wfn_code:
+        print("Calcualtion from wfn with disorder not possible, sorry!\n")
+        return
       for i in range(nr_parts):
         if parts[i] == 0:
           continue
-        # Check if job folder already exists and (if needed) make the backup folders  
+        # Check if job folder already exists and (if needed) make the backup folders
         self.backup = os.path.join(self.jobs_dir, "Part_%d"%parts[i],"backup")
         to_backup = os.path.join(self.jobs_dir,"Part_%d"%parts[i])
-        if os.path.exists(to_backup):    
-          l = 1  
-          while (os.path.exists(self.backup + "_%d"%l)):  
-            l = l + 1  
-          self.backup = self.backup + "_%d"%l  
-          os.mkdir(self.backup)  
+        if os.path.exists(to_backup):
+          l = 1
+          while (os.path.exists(self.backup + "_%d"%l)):
+            l = l + 1
+          self.backup = self.backup + "_%d"%l
+          os.mkdir(self.backup)
         Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
         self.wfn_job_dir = os.path.join(self.jobs_dir,"Part_%d"%parts[i])
-        if os.path.exists(os.path.join(self.wfn_job_dir,olx.FileName()+".hkl")): 
+        if os.path.exists(os.path.join(self.wfn_job_dir,olx.FileName()+".hkl")):
           run = None
           if Full_HAR == True:
             run = OV.GetVar('Run_number')
-          files = (file for file in os.listdir(self.wfn_job_dir)  
-                  if os.path.isfile(os.path.join(self.wfn_job_dir, file)))  
-          for f in files:  
+          files = (file for file in os.listdir(self.wfn_job_dir)
+                  if os.path.isfile(os.path.join(self.wfn_job_dir, file)))
+          for f in files:
             if Full_HAR == True:
               if run > 0:
                 if wfn_code == "Tonto":
                   if "restricted" not in f:
-                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
-                    shutil.move(f_work,f_dest)  
+                    shutil.move(f_work,f_dest)
                 elif wfn_code == "ORCA":
                   if ".gbw" not in f:
-                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
-                    shutil.move(f_work,f_dest)  
+                    shutil.move(f_work,f_dest)
                   else:
-                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))  
+                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
-                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                 else:
-                    f_work = os.path.join(self.wfn_job_dir,f)  
+                    f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
               else:
-                f_work = os.path.join(self.wfn_job_dir,f)  
+                f_work = os.path.join(self.wfn_job_dir,f)
                 f_dest = os.path.join(self.backup,f)
                 shutil.move(f_work,f_dest)
             else:
-              f_work = os.path.join(self.wfn_job_dir,f)  
+              f_work = os.path.join(self.wfn_job_dir,f)
               f_dest = os.path.join(self.backup,f)
               shutil.move(f_work,f_dest)
         if wfn_code.lower().endswith(".fchk"):
@@ -324,7 +330,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 out_cif.write('\n')
             else:
               out_cif.write(line)
-              
+
         out_cif.close()
         if wfn_code == "DISCAMB":
           discamb(os.path.join(OV.FilePath(),self.wfn_job_dir), job.name, self.discamb_exe)
@@ -337,14 +343,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             try:
               self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
-              print "Aborted due to: ",error
+              print ("Aborted due to: ",error)
               OV.SetVar('NoSpherA2-Error',error)
               return False
           if experimental_SF == False or wfn_code == "Tonto":
             try:
               job.launch(self.wfn_job_dir)
             except NameError as error:
-              print "Aborted due to: ", error
+              print ("Aborted due to: ", error)
               OV.SetVar('NoSpherA2-Error',error)
               return False
             if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
@@ -370,64 +376,64 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".fchk"):
               shutil.move(file,file + "_part%d"%parts[i])
-      print "Writing combined tsc file\n"
+      print ("Writing combined tsc file\n")
       combine_tscs()
     else:
-      # Check if job folder already exists and (if needed) make the backup folders  
+      # Check if job folder already exists and (if needed) make the backup folders
       self.backup = os.path.join(self.jobs_dir, "backup")
-      if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".hkl")):    
+      if os.path.exists(os.path.join(self.jobs_dir,olx.FileName()+".hkl")):
         Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
         run = None
         if Full_HAR == True:
           run = OV.GetVar('Run_number')
-        i = 1  
-        while (os.path.exists(self.backup + "_%d"%i)):  
-          i = i + 1  
-        self.backup = self.backup + "_%d"%i  
-        os.mkdir(self.backup)  
-        try:  
+        i = 1
+        while (os.path.exists(self.backup + "_%d"%i)):
+          i = i + 1
+        self.backup = self.backup + "_%d"%i
+        os.mkdir(self.backup)
+        try:
           if wfn_code == "ORCA":
             if os.path.exists(os.path.join(self.jobs_dir,job.name+"2.gbw")):
               os.remove(os.path.join(self.jobs_dir,job.name+"2.gbw"))
-          files = (file for file in os.listdir(self.jobs_dir)  
-                  if os.path.isfile(os.path.join(self.jobs_dir, file)))  
-          for f in files:  
+          files = (file for file in os.listdir(self.jobs_dir)
+                  if os.path.isfile(os.path.join(self.jobs_dir, file)))
+          for f in files:
             if Full_HAR == True:
               if run > 0:
                 if wfn_code == "Tonto":
                   if "restricted" not in f:
-                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_work = os.path.join(self.jobs_dir,f)
                     f_dest = os.path.join(self.backup,f)
-                    shutil.move(f_work,f_dest)  
+                    shutil.move(f_work,f_dest)
                 elif wfn_code == "ORCA":
                   if ".gbw" not in f:
-                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_work = os.path.join(self.jobs_dir,f)
                     f_dest = os.path.join(self.backup,f)
-                    shutil.move(f_work,f_dest)  
+                    shutil.move(f_work,f_dest)
                   else:
                     shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
-                    f_work = os.path.join(self.jobs_dir,f)  
+                    f_work = os.path.join(self.jobs_dir,f)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                 else:
-                  f_work = os.path.join(self.jobs_dir,f)  
+                  f_work = os.path.join(self.jobs_dir,f)
                   f_dest = os.path.join(self.backup,f)
                   shutil.move(f_work,f_dest)
               else:
-                f_work = os.path.join(self.jobs_dir,f)  
+                f_work = os.path.join(self.jobs_dir,f)
                 f_dest = os.path.join(self.backup,f)
                 shutil.move(f_work,f_dest)
             else:
-              f_work = os.path.join(self.jobs_dir,f)  
+              f_work = os.path.join(self.jobs_dir,f)
               f_dest = os.path.join(self.backup,f)
               shutil.move(f_work,f_dest)
-        except:  
-          pass  
+        except:
+          pass
 
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
-      
+
       if wfn_code == "DISCAMB":
         cif = str(os.path.join(job.full_dir, job.name+".cif"))
         olx.File(cif)
@@ -436,15 +442,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
       else:
         if wfn_code.lower().endswith(".wfn"):
-          cif = str(os.path.join(job.full_dir, job.name+".cif"))
-          olx.File(cif)
-          OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
+          pass
         elif wfn_code == "Tonto":
           success = True
           try:
             job.launch()
           except NameError as error:
-            print "Aborted due to: ", error
+            print ("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -463,21 +467,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
         else:
           #OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
-          if wfn_code.lower().endswith(".wfn"):
-            pass
-          else:
-            try:
-              self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-            except NameError as error:
-              print "Aborted due to: ",error
-              OV.SetVar('NoSpherA2-Error',error)
-              return False
-      
+          try:
+            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+          except NameError as error:
+            print ("Aborted due to: ",error)
+            OV.SetVar('NoSpherA2-Error',error)
+            return False
+
         # make the tsc file
-        
+
         if (experimental_SF == True):
           if wfn_code.lower().endswith(".wfn"):
-            wfn_fn = os.path.join(OV.FilePath(), job.name+".wfn")
+            wfn_fn = wfn_code
           else:
             wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
           hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
@@ -487,13 +488,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           olx.File(wfn_cif_fn)
           cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn)
           OV.SetParam('snum.NoSpherA2.file',"experimental.tsc")
-          
+
         elif wfn_code != "Tonto":
           success = True
           try:
             job.launch()
           except NameError as error:
-            print "Aborted due to: ", error
+            print ("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -532,7 +533,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     try:
       wfn_object.run()
     except NameError as error:
-      print "The following error occured during QM Calculation: ",error
+      print ("The following error occured during QM Calculation: ",error)
       OV.SetVar('NoSpherA2-Error',error)
       raise NameError('Unsuccesfull Wavefunction Calculation!')
 
@@ -551,9 +552,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
     if self.wfn_2_fchk == "":
-      print "ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!"
+      print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
-    
+
   def setup_pyscf(self):
     if OV.GetParam('user.NoSpherA2.use_pyscf') == True:
       if sys.platform[:3] == 'win':
@@ -571,7 +572,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             rc = child.returncode
             if rc == 0:
               pyscf_check = True
-              OV.SetParam('user.NoSpherA2.has_pyscf',True) 
+              OV.SetParam('user.NoSpherA2.has_pyscf',True)
           except:
             pass
           if pyscf_check == True:
@@ -586,7 +587,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             rc = child.returncode
             if rc == 0:
               pyscf_check = True
-              OV.SetParam('user.NoSpherA2.has_pyscf',True) 
+              OV.SetParam('user.NoSpherA2.has_pyscf',True)
           except:
             pass
           if pyscf_check == True:
@@ -619,7 +620,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if os.path.exists(_):
         self.g09_exe = _
       else:
-        self.g09_exe = olx.file.Which("%s" %exe_pre)   
+        self.g09_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.g09_exe):
       if "Gaussian09" not in self.softwares:
         self.softwares = self.softwares + ";Gaussian09"
@@ -641,7 +642,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if os.path.exists(_):
         self.g03_exe = _
       else:
-        self.g03_exe = olx.file.Which("%s" %exe_pre) 
+        self.g03_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.g03_exe):
       if "Gaussian03" not in self.softwares:
         self.softwares = self.softwares + ";Gaussian03"
@@ -663,7 +664,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if os.path.exists(_):
         self.g16_exe = _
       else:
-        self.g16_exe = olx.file.Which("%s" %exe_pre) 
+        self.g16_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.g16_exe):
       if "Gaussian16" not in self.softwares:
         self.softwares = self.softwares + ";Gaussian16"
@@ -685,14 +686,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if os.path.exists(_):
         self.orca_exe = _
       else:
-        self.orca_exe = olx.file.Which("%s" %exe_pre) 
+        self.orca_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.orca_exe):
       OV.SetParam('snum.NoSpherA2.source',"ORCA")
       if "ORCA" not in self.softwares:
         self.softwares = self.softwares + ";ORCA"
     else:
       self.softwares = self.softwares + ";Get ORCA"
-        
+
   def setup_discamb(self):
     self.discamb_exe = ""
     exe_pre = "discamb2tsc"
@@ -709,7 +710,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if os.path.exists(_):
         self.discamb_exe = _
       else:
-        self.discamb_exe = olx.file.Which("%s" %exe_pre) 
+        self.discamb_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.discamb_exe):
       if "DISCAMB" not in self.softwares:
         self.softwares = self.softwares + ";DISCAMB"
@@ -803,9 +804,11 @@ class wfn_Job(object):
       control += "rhf"
       method = "RHF"
     else:
-      control += method
       method = OV.GetParam('snum.NoSpherA2.method')
-    cxontrol += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+      control += method
+      if method == "BP86" or method == "PBE":
+        control += " DensityFit"
+    control += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
@@ -866,7 +869,7 @@ class wfn_Job(object):
         com.write(shell_gaussian)
         for n in range(0,int(n_primitives)):
           if type == "turbomole=":
-            com.write(basis.readline())   
+            com.write(basis.readline())
           else:
             temp_line = basis.readline()
             temp = temp_line.split()
@@ -894,8 +897,8 @@ class wfn_Job(object):
     else:
       cpu = "nprocs 1"
     mem = OV.GetParam('snum.NoSpherA2.mem')
-    mem_value = float(mem) * 1024 / int(ncpus) 
-    mem = "%maxcore " + str(mem_value) 
+    mem_value = float(mem) * 1024 / int(ncpus)
+    mem = "%maxcore " + str(mem_value)
     control = "! NoPop NoFinalGrid 3-21G AIM "
     method = OV.GetParam('snum.NoSpherA2.method')
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
@@ -939,6 +942,9 @@ class wfn_Job(object):
         control += " GridX5 NoFinalGridX "
       elif grid == "Max":
         control += " GridX9 NoFinalGridX "
+    FrozenCore = OV.GetParam('snum.NoSpherA2.ORCA_FC')
+    if FrozenCore == True:
+      control += " FrozenCore"
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -982,9 +988,9 @@ class wfn_Job(object):
         inp.write(shell_gaussian)
         for n in range(0,int(n_primitives)):
           if type == "turbomole=":
-            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))   
+            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
           else:
-            inp.write(basis.readline().replace("D","E"))   
+            inp.write(basis.readline().replace("D","E"))
         line_run = basis.readline()
       inp.write("end\n")
     basis.close()
@@ -996,7 +1002,7 @@ class wfn_Job(object):
       if run > 1:
         inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
     inp.close()
-    
+
   def write_pyscf_script(self,xyz):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
@@ -1071,13 +1077,13 @@ class wfn_Job(object):
               inp.write("\n                (" + number1 + ', ' + number2 + "),")
             else:
               number1, number2, number3 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number2 + ', ' + number3 + "),") 
+              inp.write("\n                (" + number2 + ', ' + number3 + "),")
           inp.write("],\n")
           line_run = basis.readline()
         inp.write("],\n")
       basis.close()
       inp.write("\n}\nmol.build()\n")
-      
+
       model_line = None
       if OV.GetParam('snum.NoSpherA2.method') == "rhf":
         model_line = "scf.RHF(mol)"
@@ -1157,13 +1163,13 @@ class wfn_Job(object):
               inp.write("\n                (" + number1 + ', ' + number2 + "),")
             else:
               number1, number2, number3 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number2 + ', ' + number3 + "),") 
+              inp.write("\n                (" + number2 + ', ' + number3 + "),")
           inp.write("],\n")
           line_run = basis.readline()
         inp.write("],\n")
       basis.close()
       inp.write("\n}\ncell.build()\n")
-      
+
       model_line = None
       if OV.GetParam('snum.NoSpherA2.method') == "HF":
         model_line = "scf.RHF(cell)"
@@ -1231,7 +1237,7 @@ class wfn_Job(object):
         with open(os.path.join(self.full_dir, self.name+"_orca.log")) as file:
           lines = file.readlines()
         for line in lines:
-          if "Error" in line: 
+          if "Error" in line:
             print line
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in software:
@@ -1240,7 +1246,7 @@ class wfn_Job(object):
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-      
+
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
@@ -1265,9 +1271,9 @@ class wfn_Job(object):
     elif software == "pySCF":
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      
+
     experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-    
+
     if (experimental_SF == False) and ("g" not in args[0]):
       move_args = []
       basis_dir = self.parent.basis_dir
@@ -1380,7 +1386,7 @@ def discamb(folder, name, discamb_exe):
   while p.poll() is None:
     time.sleep(5)
     olx.html.Update()
-   
+
 class Job(object):
   origin_folder = " "
   is_copied_back = False
@@ -1403,7 +1409,7 @@ class Job(object):
     elif self.name.endswith('_input'):
       self.name = self.name[:-6]
     full_dir = parent.jobs_dir
-    self.full_dir = full_dir
+    self.full_dir = os.path.join(OV.FilePath(),full_dir)
 
     if not os.path.exists(full_dir):
       return
@@ -1439,7 +1445,7 @@ class Job(object):
     fchk_source = OV.GetParam('snum.NoSpherA2.source')
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
-      
+
       run = OV.GetVar('Run_number')
 
       args = [self.name+".cif",
@@ -1460,7 +1466,7 @@ class Job(object):
       if clustergrow == False:
         args.append("-complete-mol")
         args.append("f")
-        
+
       rel = OV.GetParam('snum.NoSpherA2.Relativistic')
       if rel == True:
         args.append("-dkh")
@@ -1468,7 +1474,7 @@ class Job(object):
 #      if(run > 1):
 #        args.append("-restart-scf")
 #        args.append("t")
-        
+
 
     else:
       # We want these from supplied fchk file """
@@ -1476,7 +1482,7 @@ class Job(object):
 #      shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
       args = [self.name+".cif",
               "-shelx-f2", self.name+".hkl ",
-              "-fchk", fchk_file]    
+              "-fchk", fchk_file]
 
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       args = [self.parent.mpiexec, "-np", OV.GetParam('snum.NoSpherA2.ncpus'), self.parent.mpi_har] + args
@@ -1542,7 +1548,7 @@ class Job(object):
                           os.path.join(p_path, "HARt-launch.py")])
     while p.poll() is None:
       time.sleep(3)
-      
+
     if 'Error in' in open(os.path.join(self.full_dir,self.name+".err")).read():
       OV.SetVar('NoSpherA2-Error',"TontoError")
       raise NameError("Tonto Error!")
@@ -1551,7 +1557,7 @@ class Job(object):
     else:
       OV.SetVar('NoSpherA2-Error',"Tonto")
       raise NameError("Tonto unsuccessfull!")
-    
+
     if fchk_source == "Tonto" and OV.GetParam('snum.NoSpherA2.keep_wfn') == True:
       if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
         shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
@@ -1599,7 +1605,7 @@ def add_info_to_tsc():
   except:
     pass
   write_file = open(tsc_fn,"w")
-  
+
   details_text = """CIF:
 Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
@@ -1643,7 +1649,7 @@ The following options were used:
     f_time = os.path.getctime(file)
   import datetime
   f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-  details_text = details_text + "   DATE:           %s\n"%f_date    
+  details_text = details_text + "   DATE:           %s\n"%f_date
   details_text = details_text + ":CIF"
   details_text += str(hash(details_text)) + '\n'
   cif_block_present = False
@@ -1670,13 +1676,13 @@ The following options were used:
         print "CIF BLOCK is there"
         write_file.write(line)
   write_file.close()
-        
+
 OV.registerFunction(add_info_to_tsc,True,'NoSpherA2')
 
 def combine_tscs():
   import glob
   import math
-  
+
   parts = list(OV.ListParts())
   nr_parts = len(parts)
 
@@ -1686,14 +1692,14 @@ def combine_tscs():
   tsc_modular = OV.GetParam('snum.NoSpherA2.modular')
   tsc_source = OV.GetParam('snum.NoSpherA2.source')
   tsc_file = OV.GetParam('snum.NoSpherA2.file')
-  
+
   if tsc_source.lower().endswith("fchk"):
     tsc_source = os.path.basename(tsc_source)
 
   _mod = ""
   if not tsc_modular == "direct":
     _mod = "_%s"%tsc_modular
-   
+
   tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_total.tsc")
   if os.path.exists(tsc_dst):
     backup = os.path.join(OV.FilePath(), "tsc_backup")
@@ -1706,14 +1712,14 @@ def combine_tscs():
       shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + ".tsc") + "_%d"%i)
     except:
       pass
-      
+
   d = {}
   sfs_fp = None
   symops_fp = None
   nr_atoms = 0
   atom_list = []
   nr_data_lines = 0
-    
+
   for part in range(int(nr_parts)):
     if part == 0:
       continue
@@ -1726,7 +1732,7 @@ def combine_tscs():
 
     if debug:
       t1 = time.time()
-    
+
     with open(tsc_fn) as f:
       tsc = f.readlines()
     part_atom_list = None
@@ -1749,7 +1755,7 @@ def combine_tscs():
         values.append(line)
         if part == 1:
           nr_data_lines += 1
-      
+
     for atom in range(len(part_atom_list)):
       name = part_atom_list[atom]
       if name in atom_list:
@@ -1761,7 +1767,7 @@ def combine_tscs():
       d.setdefault(name,{})
       sfc_l = []
       hkl_l = []
- 
+
       for line in range(len(values)):
         digest = values[line].split(" ")
         if atom == 0 and part == 1:
@@ -1899,7 +1905,7 @@ def read_disorder_groups():
         result[i].extend(range(a,b+1))
       else:
         a = int(part)
-        result[i].append(a) 
+        result[i].append(a)
 #    print result[i]
 #  print result
   return result
@@ -1907,8 +1913,8 @@ OV.registerFunction(read_disorder_groups,True,'NoSpherA2')
 
 def is_disordered():
   parts = OV.ListParts()
-  
-  nr_parts = None 
+
+  nr_parts = None
   if not parts:
     return False
   else:
@@ -1929,17 +1935,27 @@ def get_functional_list():
   if wfn_code == "Tonto" or wfn_code == "pySCF" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   else:
-    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;wB97;wB97X;"
+    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
 OV.registerFunction(get_functional_list,True,'NoSpherA2')
 
+def get_nmo():
+  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+    return -1
+  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
+  line = ""
+  while "MOL ORBITAL" not in line:
+    line = wfn.readline()
+  values = line.split()
+  return values[1]
+
+OV.registerFunction(get_nmo,True,'NoSpherA2')
+
 def change_tsc_generator(input):
   if input == "Get ORCA":
-    import webbrowser
-    webbrowser.open('https://orcaforum.kofo.mpg.de/index.php', new=2)
+    olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "Get DISCAMB":
-    import webbrowser
-    webbrowser.open('http://4xeden.uw.edu.pl/software/discamb/', new=2)
+    olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DICAMB":
@@ -1991,7 +2007,7 @@ def write_symmetry_file(debug=False):
   if (debug == True):
     print symops
 OV.registerFunction(write_symmetry_file,True,'NoSpherA2')
-    
+
 def calculate_cubes():
   if is_disordered == True:
     print "Disordered structures not implemented!"
@@ -1999,7 +2015,7 @@ def calculate_cubes():
 
   wfn2fchk = OV.GetVar("Wfn2Fchk")
   args = []
-  
+
   args.append(wfn2fchk)
   cpus = OV.GetParam('snum.NoSpherA2.ncpus')
   args.append("-cpus")
@@ -2011,6 +2027,8 @@ def calculate_cubes():
   Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
   RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
   ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
+  MO  = OV.GetParam('snum.NoSpherA2.Property_MO')
+  all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
   if Lap == True:
     args.append("-lap")
   if Eli == True:
@@ -2021,14 +2039,25 @@ def calculate_cubes():
     args.append("-rdg")
   if ESP == True:
     args.append("-esp")
-  
+  if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
+    args.append("-v")
+
+  if MO == True:
+    args.append("-MO")
+    if all_MOs == True:
+      args.append("all")
+    else:
+      args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
+
   radius = OV.GetParam('snum.NoSpherA2.map_radius')
   res = OV.GetParam('snum.NoSpherA2.map_resolution')
   args.append("-resolution")
   args.append(res)
+  args.append("-radius")
+  args.append(radius)
   args.append("-cif")
   args.append(OV.ModelSrc() + ".cif")
-  
+
   os.environ['cube_cmd'] = '+&-'.join(args)
   os.environ['cube_file'] = OV.ModelSrc()
   os.environ['cube_dir'] = OV.FilePath()
@@ -2039,7 +2068,7 @@ def calculate_cubes():
     print("A problem with pyl is encountered, aborting.")
     return
   p = subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
-  
+
 OV.registerFunction(calculate_cubes,True,'NoSpherA2')
 
 def get_map_types():
@@ -2062,6 +2091,13 @@ def get_map_types():
     list += "NCI;"
   if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
     list += "Rho + ESP;"
+  if get_nmo() != -1:
+    exists = False
+    for i in range(int(get_nmo())+1):
+      if os.path.isfile(os.path.join(folder,name+"_MO_"+str(i)+".cube")):
+        exists = True
+    if exists == True:
+      list += "MO;"
   if list == "":
     return "None;"
   return list
@@ -2102,7 +2138,10 @@ def change_map():
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',maximal*50)
     olex.m("html.Update()")
-  else: 
+  elif Type == "MO":
+    number = int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) -1
+    plot_cube(name+"_MO_"+str(number)+".cube",None)
+  else:
     print "Sorry, no map type available or selected map type not correct!"
     return
 OV.registerFunction(change_map,True,'NoSpherA2')
@@ -2121,7 +2160,7 @@ def plot_cube(name,color_cube):
   olex.m("html.Update()")
   with open(name) as cub:
     cube = cub.readlines()
-  
+
   run = 0
   na = 0
   x_size = 0
@@ -2131,10 +2170,10 @@ def plot_cube(name,color_cube):
   y_run = 0
   z_run = 0
   data = None
-  
+
   min = 100000
   max = 0
-  
+
   for line in cube:
     run += 1
     if (run==3):
@@ -2168,14 +2207,14 @@ def plot_cube(name,color_cube):
         if x_run > x_size:
           print "ERROR! Mismatched indices while reading!"
           return
-  
+
   cube = None
-  
+
   make_colorfull = (color_cube != None)
   if make_colorfull == True:
     with open(color_cube) as cub:
       cube2 = cub.readlines()
-  
+
     run = 0
     na2 = 0
     x_size2 = 0
@@ -2185,7 +2224,7 @@ def plot_cube(name,color_cube):
     y_run = 0
     z_run = 0
     data2 = None
-    
+
     for line in cube2:
       run += 1
       if (run==3):
@@ -2215,7 +2254,7 @@ def plot_cube(name,color_cube):
           if x_run > x_size2:
             print "ERROR! Mismatched indices while reading!"
             return
-    
+
     cube2 = None
     values = None
     z_run = None
@@ -2225,8 +2264,8 @@ def plot_cube(name,color_cube):
     na2 = None
     line = None
     run = None
-    olex_xgrid.Init(x_size+1,y_size+1,z_size+1,True)
-    
+    olex_xgrid.Init(x_size,y_size,z_size,True)
+
     def interpolate(x,y,z):
       #trilinear interpolation between the points... sorry for the mess
       x_1 = x/x_size
@@ -2249,10 +2288,10 @@ def plot_cube(name,color_cube):
       a_5 = data2[ix2][iy2][iz2]*iy21 - data2[ix2][iy2][iz21]*iy2 - data2[ix2][iy21][iz2]*iy21 + data2[ix2][iy2][iz21]*iy2 - data2[ix21][iy2][iz2]*iy21 + data2[ix21][iy2][iz21]*iy2 + data2[ix21][iy21][iz2]*iy21 - data2[ix21][iy21][iz21]*iy2
       a_6 = data2[ix2][iy2][iz2]*ix21 - data2[ix2][iy2][iz21]*ix2 - data2[ix2][iy21][iz2]*ix21 + data2[ix2][iy2][iz21]*ix2 - data2[ix21][iy2][iz2]*ix21 + data2[ix21][iy2][iz21]*ix2 + data2[ix21][iy21][iz2]*ix21 - data2[ix21][iy21][iz21]*ix2
       a_7 = -(data2[ix2][iy2][iz2] - data2[ix2][iy2][iz21] - data2[ix2][iy21][iz2] + data2[ix2][iy2][iz21] - data2[ix21][iy2][iz2] + data2[ix21][iy2][iz21] + data2[ix21][iy21][iz2] - data2[ix21][iy21][iz21])
-      
+
       return a_0 + a_1 * ix2 + a_2 * iy2 + a_3 * z_2 + a_4 * x_2 * y_2 + a_5 * x_2 * z_2 + a_6 * y_2 * z_2 + a_7 * x_2 * y_2 * z_2
-      
-      
+
+
     value = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
     i=None
     j=None
@@ -2280,7 +2319,7 @@ def plot_cube(name,color_cube):
           colour = int(get_color(value[x][y][z]))
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
-    olex_xgrid.Init(x_size+1,y_size+1,z_size+1)
+    olex_xgrid.Init(x_size,y_size,z_size)
     for x in range(x_size):
       for y in range(y_size):
         for z in range(z_size):
@@ -2315,10 +2354,14 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
+  elif Type == "MO":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(False)
-  
+  olex_xgrid.InitSurface(True,1)
+
 OV.registerFunction(plot_cube,True,'NoSpherA2')
 
 def get_color(value):
@@ -2368,7 +2411,7 @@ def get_color(value):
     print rgba
   return rgba
 OV.registerFunction(get_color,True,'NoSpherA2')
-  
+
 def is_colored():
   Type = OV.GetParam('snum.NoSpherA2.map_type')
   if Type == "NCI":
@@ -2389,7 +2432,7 @@ def set_default_cpu_and_mem():
   if not parallel:
     OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
-  if (max_cpu == 1): 
+  if (max_cpu == 1):
     OV.SetParam('snum.NoSpherA2.ncpus',1)
     return
   elif (current_cpus != "1"):

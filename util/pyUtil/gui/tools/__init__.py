@@ -1,6 +1,7 @@
 from __future__ import division
 import olex
 import olx
+import olexex
 import os
 import sys
 import OlexVFS
@@ -21,9 +22,6 @@ last_element_html = ""
 
 global current_sNum
 current_sNum = ""
-
-global unique_selection
-unique_selection = ""
 
 haveGUI = OV.HasGUI()
 
@@ -973,95 +971,6 @@ def refine_extinction():
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
 
-def hasDisorder():
-  olx_atoms = olexex.OlexRefinementModel()
-  parts = olx_atoms.disorder_parts()
-  if not parts:
-    return False
-  else:
-    sp = set(parts)
-    if len(sp) == 1 and 0 in sp:
-      return False
-    else:
-      return True
-OV.registerFunction(hasDisorder,False,'gui.tools')
-
-def show_unique_only():
-  global unique_selection
-  if OV.GetParam('user.parts.keep_unique') == True:
-    make_unique(add_to=True)
-    if unique_selection:
-      olex.m('Sel -u')
-      olx.Uniq()
-      olx.Sel(unique_selection)
-      olx.Uniq()
-OV.registerFunction(show_unique_only,False,'gui.tools')
-
-def make_unique(add_to=False):
-  global unique_selection
-
-  if not unique_selection:
-    add_to = True
-  if add_to:
-    olex.m('sel -a')
-  _ = " ".join(scrub('Sel'))
-  _ = _.replace('Sel',' ')
-  while "  " in _:
-    _ = _.replace("  ", " ").strip()
-
-  _l = _.split()
-  if _:
-    if add_to and unique_selection:
-      _l += unique_selection.split()
-      _l = list(set(_l))
-    unique_selection = " ".join(_l)
-
-  olx.Sel(unique_selection)
-  olx.Uniq()
-OV.registerFunction(make_unique,False,'gui.tools')
-
-def sel_part(part,sel_bonds=True):
-  select = OV.GetParam('user.parts.select')
-  if not select:
-    return
-  else:
-    olex.m("sel part %s" %part)
-    if sel_bonds:
-      olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
-OV.registerFunction(sel_part,False,'gui.tools')
-
-def make_disorder_quicktools(scope='main', show_options=True):
-  import olexex
-  if 'scope' in scope:
-    scope = scope.split('scope=')[1]
-  parts = set(olexex.OlexRefinementModel().disorder_parts())
-  select = OV.GetParam('user.parts.select')
-  parts_display = ""
-  sel = ""
-  for item in parts:
-    _ = None
-    d = {}
-    if item == 0:
-      continue
-      #item =  ' '.join(str(s) for s in parts)
-      #d['part'] = "All"
-    else:
-      d['part'] = item
-    d['parts'] = item
-    d['scope'] = scope
-    if select:
-      sel = ">>sel part %s" %item
-
-    parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
-
-  d={'parts_display':parts_display, 'scope':scope}
-  if show_options:
-    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
-  else:
-    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
-  return retVal
-
-OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
 def deal_with_gui_phil(action):
   skin_name = OV.GetParam('gui.skin.name', 'default')
@@ -1609,13 +1518,116 @@ def record_commands():
   res = scrub()
   
 
-
 def show_nsff():
   retVal = False
   if OV.have_nsff():
     retVal = True
   return retVal
 OV.registerFunction(show_nsff, False, 'tools')
-    
-    
 
+class DisorderDisplayTools(object):
+  def __init__(self):
+    self.unique_selection = ""
+    ##self.haveHighlights = False
+    OV.registerFunction(self.hasDisorder,False,'gui.tools')
+    OV.registerFunction(self.show_unique_only,False,'gui.tools')
+    OV.registerFunction(self.make_unique,False,'gui.tools')
+    OV.registerFunction(self.sel_part,False,'gui.tools')
+    OV.registerFunction(self.make_disorder_quicktools,False,'gui.tools')
+    OV.registerFunction(self.set_part_display,False,'gui.tools')
+
+  def hasDisorder(self):
+    olx_atoms = olexex.OlexRefinementModel()
+    parts = olx_atoms.disorder_parts()
+    if not parts:
+      return False
+    else:
+      sp = set(parts)
+      if len(sp) == 1 and 0 in sp:
+        return False
+      else:
+        return True
+  
+  def show_unique_only(self):
+    if OV.GetParam('user.parts.keep_unique') == True:
+      self.make_unique(add_to=True)
+      if self.unique_selection:
+        olex.m('Sel -u')
+        olx.Uniq()
+        olx.Sel(self.unique_selection)
+        olx.Uniq()
+  
+  def make_unique(self, add_to=False):
+    if not self.unique_selection:
+      add_to = True
+    if add_to:
+      olex.m('sel -a')
+    _ = " ".join(scrub('Sel'))
+    _ = _.replace('Sel',' ')
+    while "  " in _:
+      _ = _.replace("  ", " ").strip()
+  
+    _l = _.split()
+    if _:
+      if add_to and self.unique_selection:
+        _l += self.unique_selection.split()
+        _l = list(set(_l))
+      unique_selection = " ".join(_l)
+  
+    olx.Sel(self.unique_selection)
+    olx.Uniq()
+  
+  def sel_part(self, part,sel_bonds=True):
+    select = OV.GetParam('user.parts.select')
+    if not select:
+      return
+    else:
+      olex.m("sel part %s" %part)
+      if sel_bonds:
+        olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
+  
+  def make_disorder_quicktools(self, scope='main', show_options=True):
+    import olexex
+    if 'scope' in scope:
+      scope = scope.split('scope=')[1]
+    parts = set(olexex.OlexRefinementModel().disorder_parts())
+    select = OV.GetParam('user.parts.select')
+    display = OV.GetParam('user.parts.display')
+    parts_display = ""
+    sel = ""
+    d = {}
+    for item in parts:
+      _ = None
+      if item == 0:
+        continue
+      else:
+        d['part'] = item
+      d['parts'] = item
+      d['scope'] = scope
+      d['show_options'] = show_options
+      if select:
+        sel = ">>sel part %s" %item
+      parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
+  
+    dd={'parts_display':parts_display, 'scope':scope, 'show_options':show_options}
+    return self.load_disorder_tool_template(dd)
+
+  def load_disorder_tool_template(self, d):
+    if d['show_options']:
+      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
+    else:
+      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
+    return retVal
+  
+  #def clear_higlights(self):
+    #if self.haveHighlights:
+      #olex.m("sel %s"%self.haveHighlights)
+      #olex.m("mask 48")
+      #olex.m("Individualise")
+      #self.haveHighlights = False
+    
+  def set_part_display(self, parts,part):
+    self.show_unique_only()
+    olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" %parts)
+
+DisorderDisplayTools_instance = DisorderDisplayTools()

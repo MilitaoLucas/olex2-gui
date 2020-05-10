@@ -52,7 +52,7 @@ class Method(object):
         t1 = time.time()
       self.do_run(RunPrgObject)
       if timer:
-        print "-- self.do_run(RunPrgObject): %.3f" %(time.time() - t1)
+        print("-- self.do_run(RunPrgObject): %.3f" %(time.time() - t1))
       return True
     finally:
       Method.running = False
@@ -204,7 +204,7 @@ class Method_solution(Method):
           RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
           olx.xf.SetFormula(RunPrgObject.formula)
       else:
-        print "Formula is invalid"
+        print("Formula is invalid")
     if 'D' in formula.keys():
       D_count = formula.pop('D')
       formula['H'] = formula.get('H',0) + D_count
@@ -247,9 +247,9 @@ class Method_solution(Method):
           d.setdefault(item[:1],1.0)
         else:
           d.setdefault(item[:2],1.0)
-      except Exception, ex:
-        print >> sys.stderr, "An error occurred in the function getFormulaAsDict."+\
-          "\nFormula: %s, item: %s" %(formula, item)
+      except Exception:
+        sys.stderr.write("An error occurred in the function getFormulaAsDict."+\
+          "\nFormula: %s, item: %s\n" %(formula, item))
         sys.stderr.formatExceptionInfo()
     return d
 
@@ -275,7 +275,7 @@ class Method_refinement(Method):
         RunPrgObject.isAllQ = False
         break
     if RunPrgObject.isAllQ:
-      print "Please provide some atoms to refine"
+      print("Please provide some atoms to refine")
       RunPrgObject.terminate = True
       return
 
@@ -288,27 +288,29 @@ class Method_refinement(Method):
         suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
         if suggested_weight is not None:
           olx.UpdateWght(*suggested_weight)
-
-    if RunPrgObject.params.user.auto_insert_acta_stuff:
-      if olx.Ins('MORE') == "n/a":
-        OV.AddIns("MORE -1")
-      bond = olx.Ins('BOND')
-      if bond == "n/a" or not bond:
-        import re
-        _ = olx.xf.au.GetFormula().split()
-        for bit in _:
-          m = re.split('(\d.*)',bit)
-          if "H" in m:
-            OV.AddIns("BOND $H", quiet=True)
-            break
-      if olx.Ins('ACTA') == "n/a":
-        if olx.GetVar('refinement_acta', None) != "No ACTA":
-          OV.AddIns("ACTA")
-      if olx.Ins("CONF") == "n/a":
-        OV.AddIns('CONF')
+    if RunPrgObject.params.user.auto_insert_user_ins:
+      for i in RunPrgObject.params.user.auto_insert_user_ins.split(','):
+        i = i.strip().upper()
+        if i.startswith('MORE'):
+          if olx.Ins('MORE') == "n/a":
+            OV.AddIns(i)
+        elif i.startswith('BOND'):
+          bond = olx.Ins('BOND')
+          if bond == "n/a" or not bond:
+            if (int(olx.xf.au.GetAtomCount('H')) > 0):
+              OV.AddIns("BOND $H", quiet=True)
+        elif i.startswith('ACTA'):
+          if olx.Ins('ACTA') == "n/a":
+            if olx.GetVar('refinement_acta', None) != "No ACTA":
+              OV.AddIns("ACTA")
+        elif i.startswith("CONF"):
+          if olx.Ins("CONF") == "n/a":
+            OV.AddIns('CONF')
+        else:
+          olx.AddIns(i, q=True)
 
     if RunPrgObject.make_unique_names:
-      pass	
+      pass
       #olx.Sel('-a')
       #olx.Name('sel 1 -c')
     if OV.GetParam('snum.auto_hydrogen_naming'):
@@ -320,7 +322,7 @@ class Method_refinement(Method):
        round(wave_length, 2)  == round(0.56053, 2):
       pass
     else:
-      print "Using non-standard wavelength (%f) calculating DISP and adding\n"%wave_length
+      print("Using non-standard wavelength (%f) calculating DISP and adding\n" %wave_length)
       olx.GenDisp()
 
   def post_refinement(self, RunPrgObject):

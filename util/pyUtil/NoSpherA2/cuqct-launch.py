@@ -28,6 +28,6 @@ with open('NoSpherA2.log', "rU") as stdout:
     if x:
       sys.stdout.write(x)
       sys.stdout.flush()
-    time.sleep(1)
-  
+    time.sleep(0.5)
+
 print "Finished"

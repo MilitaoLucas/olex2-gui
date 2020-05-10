@@ -26,7 +26,7 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
-  
+
 else:
   set_sys_path = True
   try:
@@ -58,30 +58,12 @@ def onexit():
   pass
 olex.registerFunction(onexit,False)
 
-# This is more flexible for different computers:
-py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plugins/org.python.pydev_4.3.0.201508181931/pysrc',
-                    'oleg': r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc',
-                    'dk-uni': r'D:\Programme\Brainwy\LiClipse 1.4.0\plugins\org.python.pydev_3.9.2.201502042042\pysrc',
-                    'dk-home': r'C:\Program Files\Brainwy\LiClipse 2.0.0\plugins\org.python.pydev_4.0.0.201504092214\pysrc',
-                    'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
-                    'oleg3': r'E:\eclipse-luna\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
-                    }
-debug = False or 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
+debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
 if debug == True:
   try:
     import wingdbstub
   except:
-    try:
-      for py_dev_path in py_dev_path_dict.values():
-        if not os.path.exists(py_dev_path):
-          pass
-        if os.path.exists(py_dev_path):
-          sys.path.append(py_dev_path)
-          import pydevd
-          pydevd.settrace()
-    except:
-      pass
-
+    pass
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
@@ -100,7 +82,7 @@ if timer:
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
   '''
-  this is not used anywhere (DK)
+  some scripts call exit - and Olex2 does exit if not for this function
   '''
   if sys.on_sys_exit_raise:
     e = sys.on_sys_exit_raise
@@ -108,8 +90,6 @@ def our_sys_exit(i):
     raise e
   print(("Terminate with %i" %i))
 sys.exit = our_sys_exit
-
-
 
 class StreamRedirection:
   def __init__(self, stream, is_redirecting=True):
@@ -149,7 +129,7 @@ class StreamRedirection:
   def flush(self):
     pass
 
-  def formatExceptionInfo(maxTBlevel=5):
+  def formatExceptionInfo(self, maxTBlevel=5):
     import traceback
     import inspect
     import tokenize
@@ -160,13 +140,11 @@ class StreamRedirection:
     if tb is not None:
       while tb.tb_next is not None: tb = tb.tb_next
       frame = tb.tb_frame
-      lineno = frame.f_lineno
       def reader():
         try:
           yield inspect.getsource(frame)
         except:
           print(">>>>> ERROR (formatExceptionInfo)")
-      recording_args = False
       args = {}
       try:
         for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
@@ -214,7 +192,7 @@ def set_plugins_paths():
   import AC4
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
-  
+
   from PluginTools import PluginTools
   import FragmentDB
   for plugin in plugins:
@@ -332,7 +310,6 @@ if OV.HasGUI():
   #load_user_gui_phil()
   #export_parameters()
   from Analysis import Analysis
-
 #from gui.skin import *
 
 if timer:
@@ -411,7 +388,7 @@ except ImportError as err:
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()
-  
+
 def pip(package):
   import sys
   sys.stdout.isatty = lambda: False
@@ -420,11 +397,10 @@ def pip(package):
   try:
     from pip import main as pipmain
   except:
-    from pip._internal import main as pipmain    
+    from pip._internal import main as pipmain
   pipmain(['install', '--user', package])
 #  pip.main(['install', package])
 OV.registerFunction(pip,False)
- 
 
 if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
