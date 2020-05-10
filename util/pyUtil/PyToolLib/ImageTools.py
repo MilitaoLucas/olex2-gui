@@ -1056,10 +1056,10 @@ class ImageTools(FontInstances):
                 top += int(font_size / 2)
               j += 1
               wX, wY = draw.textsize(item, font=f)
-              draw.text((left, top), item.encode("utf-8"), font=f, fill=font_colour)
+              draw.text((left, top), OV.correct_rendered_text(item), font=f, fill=font_colour)
               left += wX
           else:
-            draw.text((left, int(top_n)), txt.encode("utf-8"), font=font, fill=font_colour)
+            draw.text((left, int(top_n)), OV.correct_rendered_text(txt), font=font, fill=font_colour)
           i += 1
       except Exception, ex:
         print "Text %s could not be drawn: %s" % (txt, ex)

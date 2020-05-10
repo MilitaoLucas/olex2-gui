@@ -330,7 +330,7 @@ class OlexFunctions(inheritFunctions):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
         olx.html.SetFG(ctrl_name,'#ffffff')
         olx.html.SetValue(ctrl_name,max_peaks)
-      
+
     try:
       import programSettings
       old_value = self.GetParam('snum.refinement.max_peaks')
@@ -488,7 +488,7 @@ class OlexFunctions(inheritFunctions):
         if not os.path.exists(fab_path):
           try:
             import cctbx_olex_adapter as COA
-            from cctbx_olex_adapter import OlexCctbxAdapter 
+            from cctbx_olex_adapter import OlexCctbxAdapter
             mask = COA.OlexCctbxAdapter().load_mask()
             if mask:
               COA.write_fab(mask, fab_path)
@@ -811,7 +811,7 @@ class OlexFunctions(inheritFunctions):
 
   def HasGUI(self):
     return HasGUI
-  
+
   def ListParts(self):
     import olexex
     parts = set(olexex.OlexRefinementModel().disorder_parts())
@@ -1066,7 +1066,7 @@ class OlexFunctions(inheritFunctions):
     """
     This function takes a list of Olex2 commands and will execute these sequentially.
     """
-    
+
     if type(cmds) is unicode:
       cmd = cmds.split(">>")
       cmd = ">>".join(cmd)
@@ -1126,7 +1126,7 @@ class OlexFunctions(inheritFunctions):
     if sys.platform[:3] == 'win':
       import olex_core
       return olex_core.DeleteLock(lock)
-    lock[1].close();
+    lock[1].close()
     os.remove(lock[0])
 
   # constructs an object from dict
@@ -1135,6 +1135,13 @@ class OlexFunctions(inheritFunctions):
       def __init__(self, **entries):
         self.__dict__.update(entries)
     return d_o(**d)
+
+  #Somehow on localised Linux Unicode does not work
+  # may be wrongly assebled Python?
+  def correct_rendered_text(self, t):
+    if sys.platform[:3] == 'lin':
+      return t.encode("utf-8")
+    return t
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
@@ -1166,8 +1173,8 @@ def GetFormattedCompilationInfo():
     t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   t += "</table></font>"
   return t
-  
-  
+
+
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
