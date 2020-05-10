@@ -3484,7 +3484,6 @@ class HealthOfStructure():
     scale = self.scale
     font_name = 'Vera'
     value_display_extra = ""
-    completeness_box_width = 150
     targetWidth = round(width/n)
     targetHeight = round(OV.GetParam('gui.timage.h3.height'))
 
@@ -3516,7 +3515,6 @@ class HealthOfStructure():
 
     boxWidth = int(targetWidth * scale)
     boxHeight = int(targetHeight * scale)
-    boxHalf = int(3 * scale)
 
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
@@ -3528,9 +3526,6 @@ class HealthOfStructure():
       except:
         value_raw = 0
 
-    op = OV.GetParam('user.diagnostics.hkl.%s.op' %item)
-    curr_x = 0
-    limit_width = 0
     od_value = None
     theoretical_val = value_raw
 
@@ -3647,18 +3642,16 @@ class HealthOfStructure():
       fill = '#ffffff'
     else:
       fill = '#ffffff'
-    draw.text((x, y_s), "%s" %display, font=font_s, fill=fill)
+    draw.text((x, y_s), OV.correct_rendered_text(display), font=font_s, fill=fill)
 
     ## ADD THE ACTUAL VALUE
 
     y += 0
-    if value_display_extra:
-      dxs,dxy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
     dx,dy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
     x = boxWidth - dx - 7 #right inside margin
-    draw.text((x, y), "%s" %value_display, font=font, fill=fill)
+    draw.text((x, y), OV.correct_rendered_text(value_display), font=font, fill=fill)
     if value_display_extra:
-      draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
+      draw.text((0, y - 1 + dy/2), OV.correct_rendered_text(value_display_extra), font=font_s, fill="#ffffff")
 
     _ = im.copy()
     _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
