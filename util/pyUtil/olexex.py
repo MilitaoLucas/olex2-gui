@@ -388,15 +388,15 @@ class OlexRefinementModel(object):
             # looking for the pivot atom in the model
             for residue in self.model['aunit']['residues']:
               for atom in residue['atoms']:
-                if(atom['aunit_id']==atom_restraint[0]): 
+                if(atom['aunit_id']==atom_restraint[0]):
                   # found the pivot atom
                   i_seqs.append(atom_restraint[0])
-                  sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1]) 
+                  sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1])
                     if atom_restraint[1] is not None else None) )
                   pivot_name = atom['label']
 
                   # if symmetry related we have a tuple, not an int
-                  for neighbour in atom['neighbours']: 
+                  for neighbour in atom['neighbours']:
                     if(type(neighbour)==type(())):
                       neighbour_id=neighbour[0]
                     else:
@@ -428,7 +428,7 @@ class OlexRefinementModel(object):
                 weight=kwds['weight'],
                 )
             else:
-              print("Warning: Invalid chirality (CHIV) restraint. "+ 
+              print("Warning: Invalid chirality (CHIV) restraint. "+
                 "%s needs exactly 3 neighbours"%pivot_name)
           # end loop over each atom of chiv restraint
 
@@ -1240,13 +1240,9 @@ def AvailableExternalProgramsHtml():
 
 
 def getReportTitleSrc():
-  import PIL
   from PIL import Image
   from PIL import ImageDraw
-  from PIL import PngImagePlugin
-  import StringIO
   import base64
-  from PIL import EpsImagePlugin
   from ImageTools import ImageTools
   IT = ImageTools()
 
@@ -1286,7 +1282,6 @@ def getReportTitleSrc():
 
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
-  rFile.close()
   retVal ='data:image/png;base64,' + data
   return retVal
 OV.registerFunction(getReportTitleSrc)
@@ -1407,12 +1402,12 @@ def getReportImageData(size='w400', imageName=None):
     return ""
   if "Dir()" in imagePath: # data/base/str
     imagePath = olex.f(imagePath)
-    
+
   if type(imagePath) != list:
     imagePath_l = [imagePath]
   else:
     imagePath_l = imagePath
-    
+
   html = ""
   for imagePath in imagePath_l:
 
@@ -1428,7 +1423,7 @@ def getReportImageData(size='w400', imageName=None):
         nHeight = size
         nWidth = int(oSize[0]*(size/oSize[1]))
         IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
-  
+
     if make_border:
       from ImageTools import ImageTools
       IT = ImageTools()
@@ -1440,7 +1435,7 @@ def getReportImageData(size='w400', imageName=None):
         draw.line((0,height -1,width-1,height -1), fill = fill)
         draw.line((0,0,0,height - 1), fill = fill)
         draw.line((width -1,0,width-1,height -1), fill = fill)
-  
+
     out = StringIO.StringIO()
     IM.save(out, "PNG")
     data = base64.b64encode(out.getvalue())
@@ -1696,3 +1691,38 @@ def FixMACQuotes(text):
       .replace(u"\u201d", u"\"")\
      .encode("ascii")
   return text
+
+def debugInVSC():
+  try:
+    import ptvsd
+    sys.argv = [olx.app.GetArg(0)]
+    # 5678 is the default attach port in the VS Code debug configurations
+    print("Waiting for debugger attach")
+    ptvsd.enable_attach(address=('localhost', 5678), redirect_output=False)
+    ptvsd.wait_for_attach()
+    breakpoint()
+  except Exception as x:
+    print(x)
+    pass
+OV.registerFunction(debugInVSC)
+
+def debugInEclipse():
+  sfn = os.path.join(olx.BaseDir(), ".pydevd")
+  if not os.path.exists(sfn):
+    print("Please created setting file with path to pydevd:")
+    print(sfn)
+    return
+  try:
+    for py_dev_path in open(sfn, "r").readlines():
+      py_dev_path = py_dev_path.strip()
+      if not os.path.exists(py_dev_path):
+        pass
+      sys.path.append(py_dev_path)
+      import pydevd
+      pydevd.settrace()
+      break
+  except:
+    print("Failed to attach the debugger")
+OV.registerFunction(debugInEclipse)
+
+

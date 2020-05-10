@@ -7,6 +7,18 @@
 <table border="0" width="100%" cellpadding="1" cellspacing="1">
 $spy.make_history_bars()
 <!-- #include history history-info.htm;1; -->
+<tr>
+  <td><table width='100%' border='0' cellpadding='0'><tr>
+     <td width='10%'>&nbsp;</td>
+     <td width='42%' align='left'><a href="reap 'FilePath()/FileName().ins'">Reload INS</a></td>
+     <td align='left'>Revert HKL when reverting history</td>
+     <td align="right" width='5%'>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=revert_hkl",
+         "checked=spy.GetParam('snum.history.revert_hkl')",
+         "onclick=spy.SetParam('snum.history.revert_hkl',html.GetState(~name~))")
+      $-</td>
+    </tr></table>
+  </td></tr>
 </table>
 </td></tr>
 

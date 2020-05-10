@@ -54,7 +54,7 @@ try:
       if env.initialised:
         print("Successfully initialised SciPy OpenBlas:")
         print(env.build_config)
-except Exception, e:
+except Exception as e:
   print("Could not initialise OpenBlas: %s" %e)
 
 class FullMatrixRefine(OlexCctbxAdapter):
@@ -118,8 +118,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
-    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
-    filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
@@ -211,14 +209,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if iterations == None:
       method = solvers_default_method
       iterations = FullMatrixRefine.solvers.get(method)
-      print "WARNING: unsupported method: '" + method + "' is replaced by '" +\
-        solvers_default_method + "'"
+      print("WARNING: unsupported method: '%s' is replaced by '%s'"\
+        %(method, solvers_default_method))
     assert iterations is not None
+    fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     try:
       damping = OV.GetDampingParams()
       self.data_to_parameter_watch()
-      self.print_table_header()
-      self.print_table_header(self.log)
+      if not fcf_only:
+        self.print_table_header()
+        self.print_table_header(self.log)
 
       class refinementWrapper(iterations):
         def __init__(self, parent, *args, **kwds):
@@ -246,9 +246,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
               gradient_threshold=None,
               step_threshold=None)
 
-      except RuntimeError, e:
+      except RuntimeError as e:
         if str(e) == 'external_interrupt':
-          print "Refinement interrupted"
+          print("Refinement interrupted")
           self.interrupted = True
         else:
           raise e
@@ -285,11 +285,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
         pass
-    except RuntimeError, e:
+    except RuntimeError as e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
-        print "Refinement failed to converge"
+        print("Refinement failed to converge")
       elif "SCITBX_ASSERT(!cholesky.failure) failure" in str(e):
-        print "Cholesky failure"
+        print("Cholesky failure")
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
         if index > 0:
@@ -302,7 +302,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("the leading minor of order %i for %s is not positive definite"\
            %(index, param_name))
       else:
-        print "Refinement failed"
+        print("Refinement failed")
         import traceback
         traceback.print_exc()
       self.failure = True
@@ -311,8 +311,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
-      self.show_summary()
-      self.show_comprehensive_summary(log=self.log)
+      if not fcf_only:
+        self.show_summary()
+        self.show_comprehensive_summary(log=self.log)
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()
@@ -339,7 +340,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     finally:
       sys.stdout.refresh = True
       self.log.close()
-      
+
   def data_to_parameter_watch(self):
     #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
@@ -773,9 +774,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.use_tsc and use_aspherical == True:
       tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
       if os.path.exists(tsc_file_name):
-        tsc = None
-        with open(tsc_file_name, 'r') as tsc_f:
-          tsc = f.readlines()
+        tsc = open(tsc_file_name, 'r').readlines()
         cif_block_found = False
         tsc_info = """;\n"""
         for line in tsc:
@@ -786,13 +785,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
             break
           if cif_block_found == True:
             tsc_info = tsc_info + line
-        if cif_block_found == False:
-          details_text = """Refinement using NoSpherA2, an implementation of 
-NOn-SPHERical Atom-form-factors in Olex2.
+        if not cif_block_found:
+          details_text = """Refinement using NoSpherA2, an implementation of
+ NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
 F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
-NoSpherA2 implementation of HAR makes use of 
-tailor-made aspherical atomic form factors calculated
+NoSpherA2 implementation of HAR makes use of
+ tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
@@ -833,7 +832,7 @@ The following options were used:
             f_time = os.path.getctime(file)
           import datetime
           f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-          details_text = details_text + "   DATE:           %s\n"%f_date    
+          details_text = details_text + "   DATE:           %s\n"%f_date
           tsc_info = tsc_info + details_text
         tsc_info = tsc_info + ";\n"
         cif_block['_refine_special_details'] = tsc_info
@@ -903,7 +902,7 @@ The following options were used:
         fc, fo = fc.map_to_asu().common_sets(fo)
       if fo_sq.space_group().is_origin_centric():
         for i in xrange(0, fc.size()):
-          fc.data()[i] = complex(fc.data()[i].real, 0.0)
+          fc.data()[i] = complex(math.copysign(abs(fc.data()[i]), fc.data()[i].real), 0.0)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas', format="coreCIF")
       mas_as_cif_block.add_miller_array(
@@ -938,7 +937,7 @@ The following options were used:
         fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
       fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
     else:
-      print "LIST code %i not supported" %list_code
+      print("LIST code %i not supported" %list_code)
       return None, None
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
 
@@ -965,7 +964,7 @@ The following options were used:
 
     fcf_cif, fmt_str = self.create_fcf_content(list_code)
     if not fcf_cif:
-      print "Unsupported list (fcf) format."
+      print("Unsupported list (fcf) format")
       return
     with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
@@ -1068,7 +1067,7 @@ The following options were used:
           eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
-          print "Invalid variable use - mixes occupancy and U"
+          print("Invalid variable use - mixes occupancy and U")
           continue
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
@@ -1241,7 +1240,6 @@ The following options were used:
           'stretching' : stretching,
           'bond_length' : bond_length,
           'pivot' : pivot,
-          'bond_length' : bond_length,
           'constrained_site_indices':dependent
           }
         if m == 2:
@@ -1318,7 +1316,8 @@ The following options were used:
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
-        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
+        if self.verbose:
+          print("Position of peak %s = %s, Height = %s" %(i, xyz, height))
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf.au.SetAtomU(id, "0.06")
@@ -1345,7 +1344,7 @@ The following options were used:
 
     if log is None: log = sys.stdout
 
-    pad = 2 - len(str(self.cycles.n_iterations)) 
+    pad = 2 - len(str(self.cycles.n_iterations))
     print >> log, "\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural)
     #print >> log, " +"
     print >> log, "  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1
@@ -1374,15 +1373,20 @@ The following options were used:
       max_shift_esd,
       max_shift_esd_item
       )
+    else:
+      max_shift_site = 99
+      max_shift_u = 99
+      max_shift_esd = 99
+      max_shift_esd_item = 99
+      print >> log, "NO CYCLES!"
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
 
-
+    
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)
-
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())

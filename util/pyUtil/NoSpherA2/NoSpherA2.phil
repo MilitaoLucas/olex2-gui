@@ -52,17 +52,25 @@ snum{
       .type = str
     ORCA_SCF_Strategy = "NormalConv"
       .type = str
+    ORCA_FC = False
+      .type = bool
     precise_output = False
       .type = bool
     Property_Elf = False
       .type = bool
-    Property_Eli = False
+    Property_Eli = True
       .type = bool
     Property_ESP = False
       .type = bool
-    Property_Lap = False
+    Property_Lap = True
       .type = bool
-    Property_RDG = False
+    Property_RDG = True
+      .type = bool
+    Property_MO = False
+      .type = bool
+    Property_MO_number = 0
+      .type = int
+    Property_all_MOs = False
       .type = bool
     pySCF_PBC = False
       .type = bool
@@ -75,6 +83,8 @@ snum{
     wfn2fchk_SF = True
       .type = bool
     wfn2fchk_debug = False
+      .type = bool
+    make_fcf_only = False
       .type = bool
     map_min = 0.0
       .type = float
@@ -95,7 +105,9 @@ snum{
     mem = 2
       .type = str
     ncpus = 1
-      .type = str    
+      .type = str
+    no_backup = False
+      .type = bool
   }
 }
 

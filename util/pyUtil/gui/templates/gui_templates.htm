@@ -24,7 +24,7 @@ t:part_0_and_n{
   name="0 | %(part)s@%(scope)s""
   value="0 | %(part)s"
   width="100%%"
-  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
+  onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s)>>freeze false>>focus"
   bgcolor="GetVar('linkButton.bgcolor')"
   fgcolor="GetVar('linkButton.fgcolor')"
   custom="#custom"

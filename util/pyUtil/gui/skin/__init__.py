@@ -510,11 +510,12 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(scope="", colour="", display_style=""):
+def change_bond_colour(scope="", colour="", display_style="", bypass_collections=False):
   if not colour:
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
     colour = OV.GetParam('user.bonds.colour')
+    
   import shlex
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
@@ -525,33 +526,46 @@ def change_bond_colour(scope="", colour="", display_style=""):
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
-
+    
   olx.ShowH("a", True)
   olx.ShowH("b", False)
-
-
-  olex.m("sel collections")
-  olex.m("sel -i")
-  olex.m("sel atoms -u")
+  
+  _select_bonds(bypass_collections=bypass_collections)
 
   if colour == 'elements':
     olx.Mask(48)
-    OV.SetParam('snum.bonds.mask', 48)
-    olx.ShowH("b", True)
-    OV.SetParam('snum.bonds.colour','elements')
 
+    OV.SetParam('snum.bonds.colour','elements')
+    OV.SetParam('snum.bonds.mask', 48)
   else:
     c = get_user_bond_colour(colour)
     olx.Mask(1)
-    OV.SetParam('snum.bonds.mask', 1)
     olx.SetMaterial("Singlecone", "%s" %str(c))
+
+    OV.SetParam('snum.bonds.mask', 1)
     OV.SetParam('snum.bonds.colour', colour)
 
   olex.m("sel -u")
   olex.m("sel bonds where xbond.b.bai.z == -1")
   olx.Sel("-u")
   olx.ShowH("b", True)
+  if scope:
+    olx.html.SetValue("BOND_COLOUR_COMBO%s"%scope, colour)
+  #olex.m("showQ a true")
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
+
+
+def _select_bonds(bypass_collections=False):
+  if bypass_collections:
+    olex.m("sel %s" %bypass_collections)
+    olex.m("sel bonds where xbond.type==3")
+    olex.m("sel -i")
+  else:
+    olex.m("showQ a false")
+    olex.m("sel bonds where xbond.type==3")
+    olex.m("sel -i")
+  olex.m("sel atoms -u")
+OV.registerFunction(_select_bonds, True, 'gui.skin')
 
 
 def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True, ppi_aware=True):
