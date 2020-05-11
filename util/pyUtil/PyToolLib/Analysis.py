@@ -219,7 +219,7 @@ class Graph(ArgumentParser):
     for key in keys_to_draw:
       key_type = key['type']
       assert key_type in ("function", "marker")
-      label = key['label']
+      label = OV.correct_rendered_text(key['label'])
       left = 15
       wX, wY = draw.textsize(label, font=self.font_tiny)
       if key_type == "function":
@@ -231,7 +231,7 @@ class Graph(ArgumentParser):
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
       left = 60
-      draw.text((left,top), "%s" %label, font=self.font_tiny, fill=txt_colour)
+      draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
     return im
@@ -322,12 +322,12 @@ class Graph(ArgumentParser):
       IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
       currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
       # Write something in the right-hand top spot on the graph
-      txt = self.graphInfo.get("TopRightTitle", "")
+      txt = OV.correct_rendered_text(self.graphInfo.get("TopRightTitle", ""))
       font = self.font_bold_large
       txtX, txtY = self.draw.textsize(txt, font=font)
       x = (self.imX - self.bSides - txtX) # align text right
       y = self.bTop
-      draw.text((x, y), "%s" %txt, font=font, fill=self.filenameColour)
+      draw.text((x, y), txt, font=font, fill=self.filenameColour)
       currX, currY = draw.textsize(txt, font=self.font_bold_large)
       self.currX += currX
       self.currY += currY
@@ -367,9 +367,9 @@ class Graph(ArgumentParser):
       try:
         f = float(item)
         if f < 1:
-          yAxis.append(  "%.2f" %(float(item)))
+          yAxis.append("%.2f" %(float(item)))
         elif f > 1:
-          yAxis.append(  "%.1f" %(float(item)))
+          yAxis.append("%.1f" %(float(item)))
       except:
         pass
 
@@ -381,12 +381,11 @@ class Graph(ArgumentParser):
 
     i = 0
     for item in yAxis:
-      txt = item
-      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
+      wX, wY = IT.textsize(self.draw, OV.correct_rendered_text(item), font_size=self.font_size_small)
       x = int(self.bSides + i * barX + (barX - wX)/2)
       y = self.graph_bottom
       top_left = (x,y)
-      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
+      IT.write_text_to_draw(self.draw, item, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
       i += 1
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
@@ -495,17 +494,16 @@ class Graph(ArgumentParser):
           self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
     if write_text:
-      txt = write_text
       adj_x = 7
       adj_y = 7
       if x1 > self.max_x*self.scale_x/2:
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
+        wX, wY = IT.textsize(self.draw, OV.correct_rendered_text(write_text), font_size=self.font_size_small)
         adj_x = -wX - 7
       if y1 > self.max_y*self.scale_y/2:
         adj_y = -20
       top_left = (x1 + adj_x,y1 + adj_y)
       IT.write_text_to_draw(
-        self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+        self.draw, write_text, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
 
   def test_plotly(self):
@@ -1254,14 +1252,14 @@ class Graph(ArgumentParser):
       self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("y_label", "y Axis Label")
-    txt = self.get_unicode_characters(txt)
+    txt = OV.correct_rendered_text(self.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     size = (wX, wY)
     new = Image.new('RGB', size, self.fillColour)
     draw = ImageDraw.Draw(new)
     x = 0
     y = 0
-    draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
+    draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
 
@@ -1323,7 +1321,7 @@ class Graph(ArgumentParser):
       self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("x_label", "x Axis Label")
-    txt = self.get_unicode_characters(txt)
+    txt = OV.correct_rendered_text(self.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
     y = self.boxY  + self.imY * 0.01
@@ -1331,8 +1329,8 @@ class Graph(ArgumentParser):
     box = (x, y, x+wX, y+wY)
     fill = (256, 256, 256)
     self.draw.rectangle(box, fill=fill)
-    
-    self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
+
+    self.draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
 
   #def draw_bars(self):
     #from PIL import ImageFont
