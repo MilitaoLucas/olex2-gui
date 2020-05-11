@@ -392,7 +392,7 @@ class ImageTools(FontInstances):
     alpha = Image.new("L", im.size, "Black")
     drtext = ImageDraw.Draw(imtext)
     font = ImageFont.truetype(font_file, font_size)
-    drtext.text(top_left, txt, font=font, fill="white")
+    drtext.text(top_left, OV.correct_rendered_text(txt), font=font, fill="white")
     # Add the white text to our collected alpha channel. Gray pixels around
     # the edge of the text will eventually become partially transparent
     # pixels in the alpha channel.
@@ -977,7 +977,7 @@ class ImageTools(FontInstances):
 
     self.get_text_modifications()
     self.deal_with_encodings_and_languages()
-    txt = self.txt
+    txt = self.txt = OV.correct_rendered_text(self.txt)
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
 
@@ -1056,13 +1056,13 @@ class ImageTools(FontInstances):
                 top += int(font_size / 2)
               j += 1
               wX, wY = draw.textsize(item, font=f)
-              draw.text((left, top), OV.correct_rendered_text(item), font=f, fill=font_colour)
+              draw.text((left, top), item, font=f, fill=font_colour)
               left += wX
           else:
-            draw.text((left, int(top_n)), OV.correct_rendered_text(txt), font=font, fill=font_colour)
+            draw.text((left, int(top_n)), txt, font=font, fill=font_colour)
           i += 1
-      except Exception, ex:
-        print "Text %s could not be drawn: %s" % (txt, ex)
+      except Exception as ex:
+        print("Text %s could not be drawn: %s" % (txt, ex))
     else:
       pass
     return wX, wY
@@ -1099,7 +1099,6 @@ class ImageTools(FontInstances):
         top += self.line_height
 
       else:
-        wX, wY = self.draw.textsize(txt, font=self.font)
         self.draw.text((left, top), txt, font=self.font, fill=self.font_colour)
         top += self.line_height
 
