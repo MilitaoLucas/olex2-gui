@@ -158,7 +158,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.extinction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, exti)
       self.extinction.grad = True
-      self.extinction.expression = 'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
+      self.extinction.expression = r'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
     else:
       self.extinction = xray.dummy_extinction_correction()
       self.extinction.expression = ''
@@ -1384,7 +1384,7 @@ The following options were used:
     print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
 
-    
+
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
