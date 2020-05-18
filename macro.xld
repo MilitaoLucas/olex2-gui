@@ -360,7 +360,6 @@
     >
     <cmd
       <cmd3 "telp_a %1">
-      <cmd3 "telp_b">
     >
   >
 >
