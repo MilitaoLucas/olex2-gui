@@ -511,6 +511,8 @@ def change_bond_radius():
   olex.m("brad %s" %rad)
 
 def change_bond_colour(scope="", colour="", display_style="", bypass_collections=False):
+  include_H = True
+
   if not colour:
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
@@ -526,9 +528,10 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
-    
-  olx.ShowH("a", True)
-  olx.ShowH("b", False)
+  
+  if include_H:
+    olx.ShowH("a", True)
+    olx.ShowH("b", False)
   
   _select_bonds(bypass_collections=bypass_collections)
 
@@ -545,13 +548,13 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     OV.SetParam('snum.bonds.mask', 1)
     OV.SetParam('snum.bonds.colour', colour)
 
-  olex.m("sel -u")
-  olex.m("sel bonds where xbond.b.bai.z == -1")
-  olx.Sel("-u")
-  olx.ShowH("b", True)
+  if include_H:
+    olex.m("sel -u")
+    olex.m("sel bonds where xbond.b.bai.z == -1")
+    olx.Sel("-u")
+    olx.ShowH("b", True)
   if scope:
     olx.html.SetValue("BOND_COLOUR_COMBO%s"%scope, colour)
-  #olex.m("showQ a true")
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
 
 
