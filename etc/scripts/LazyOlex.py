@@ -21,7 +21,7 @@ import subprocess
 import math
 from operator import itemgetter, attrgetter
 import collections
-from itertools import izip
+
 from pyx import *
 
 
@@ -34,7 +34,7 @@ def merge(i2Theta):
   for i, grp in itertools.groupby(i2Theta, key=k):
     lst = list(grp)
     if len(lst) > 2:
-      print lst
+      print(lst)
       #item = mergepings(lst)
     else:
       item = lst[0]
@@ -54,32 +54,32 @@ def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2th
   SirCompatSymmSetting = brokensym.pop(0)
   SirCompatSymmOpps = []
   while len(brokensym) > 0:
-    print brokensym
-    print SirCompatSymmOpps
+    print(brokensym)
+    print(SirCompatSymmOpps)
     if brokensym[0] == '-':
-      print "true for -"
+      print("true for -")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       SirCompatSymmOpps.append(brokensym.pop(0))
       continue
     elif brokensym[0] in "a b c d n m":
-      print "true for letter"
+      print("true for letter")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
     elif brokensym[0] in "1":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(brokensym.pop(0))
       continue
     elif brokensym[0] in "2 3 4 6 8 9":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
     elif brokensym[0] in "/":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
-    print brokensym
-    print SirCompatSymmOpps
-  print ''.join(SirCompatSymmOpps)
+    print(brokensym)
+    print(SirCompatSymmOpps)
+  print(''.join(SirCompatSymmOpps))
 
   # Write HKL dat input
   # format is:
@@ -98,11 +98,11 @@ def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2th
   
   # All this need error control
   try:
-    print "Running hklgen calculation now"
+    print("Running hklgen calculation now")
     olx.Exec("hklgen %s"%filename)
-    print "Finished calculation"
+    print("Finished calculation")
   except:
-    print "hklgen calculation failed to run"
+    print("hklgen calculation failed to run")
     return
 
 def graph_it(filename):
@@ -161,21 +161,21 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
     #wavelength = radiation
     filename = "/home/xray/olextrunk/etc/scripts/sucrose"
   if (ops == '0'):
-    print "You can: "
-    print "1) Run hklgen"
-    print "2) Run hkl2powder"
+    print("You can: ")
+    print("1) Run hklgen")
+    print("2) Run hkl2powder")
     return
   elif (ops == '1'):
     hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2theta)
     return
   elif (ops == '2'):
-    print "Converting HKL to powder"
+    print("Converting HKL to powder")
   else:
-    print "That option %s is not available at the moment"%ops
+    print("That option %s is not available at the moment"%ops)
     return
 
-  print "Calculating Powder Pattern This Is Slow - Sorry"
-  print "Using Wavelength: ", wavelength
+  print("Calculating Powder Pattern This Is Slow - Sorry")
+  print("Using Wavelength: ", wavelength)
 
   
   # Set up some variables
@@ -185,8 +185,8 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
   # Read in the hkl file
   try:
     rHKL = open("%s.hkl"%filename, 'r')
-    print "Openning HKL for Analysis"
-  except OSError, why:
+    print("Openning HKL for Analysis")
+  except OSError as why:
     rHKL.close()
     errors.extend(("failed to open file", str(why)))
   for line in rHKL:
@@ -198,7 +198,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
     iHKL.append({'H' : int(line.rstrip()[0:4]), 'K' : int(line.rstrip()[4:8]), 'L' : int(line.rstrip()[8:12]), 'Fsqd' : float(line.rstrip()[12:20]), 'D' : '', '2Theta' : ''})
     i+=1
   rHKL.close()
-  print "Closing HKL"
+  print("Closing HKL")
   # See what we have
   #print "1st : ", iHKL[0]
   #print "last: ", iHKL[-1]
@@ -224,7 +224,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
     #i2Theta = {twotheta : abs(iHKL[i]['Fsqd'])}
     i2Theta.append([round(twotheta, 2),abs(iHKL[i]['Fsqd'])])
     i+=1
-  print "Starting Writing Out Powder File"
+  print("Starting Writing Out Powder File")
   ordered_list = []
   i2ThetaS = []
   i2ThetaSj = []
@@ -241,7 +241,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
   mergeDict = {}
   count = 0
   merid = []
-  for Sj, Sf in izip(i2ThetaSj, i2ThetaSf):
+  for Sj, Sf in zip(i2ThetaSj, i2ThetaSf):
       key = (Sj)
       try:
         # if this (row, col) location already has data, merge var1's
@@ -263,7 +263,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
         mergeDict[key] = [Sf]
         merid.append(mergeDict[key][0])
 
-  print "**************"
+  print("**************")
   #print mergeDict
 
   for j in range(min2theta, points):
@@ -280,10 +280,10 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
        )
     #print twotheta, newFsqd
   wFileC.close()
-  print "Finished Writing Out Powder File"
+  print("Finished Writing Out Powder File")
   
   if (pdf == 'y') or (pdf == 'Y'):
-    print "creating pdf graph"
+    print("creating pdf graph")
     graph_it(filename)
     
     # Stage 1 create Lazy P input file basically an INS with ATOM instead of LABEL SFAC

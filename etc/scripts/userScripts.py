@@ -29,5 +29,5 @@ if olx.HasGUI().lower() == "true":
 for script in scripts:
   try:
     __import__(script)
-  except Exception, ex:
-    print "Import from userScripts.py failed: %s" %ex
+  except Exception as ex:
+    print("Import from userScripts.py failed: %s" %ex)

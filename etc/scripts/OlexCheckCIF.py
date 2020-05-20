@@ -13,10 +13,10 @@ import re
 import olex
 import olx
 try:
-  import urllib
-  import urllib2
+  import urllib.request, urllib.parse, urllib.error
+  import urllib.request, urllib.error, urllib.parse
 except:
-  print "You appear to be missing the urllib modules you will need these for this to work"
+  print("You appear to be missing the urllib modules you will need these for this to work")
   sys.exit()
 #import urllib2_file
 from olexFunctions import OlexFunctions
@@ -37,7 +37,7 @@ def OlexCheckCIF():
   try:
     filename = open('%s/%s.cif' %(OV.FilePath(), OV.FileName()), 'rb')
   except IOError:
-    print "The file does not exist, creating CIF file"
+    print("The file does not exist, creating CIF file")
     OV.cmd("addins acta")
     OV.cmd("refine 4")
     return OlexCheckCIF()
@@ -50,7 +50,7 @@ def OlexCheckCIF():
   }
   #print params #Parameter check
   #params = urllib.urlencode(params)
-  f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
+  f = urllib.request.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
 
   cifcheck_res = open('%s/%s_checkcif_report.%s' %(OV.FilePath(), OV.FileName(), result_filetype), 'w')
   cifcheck_res.write("%s"%f.read())
@@ -59,6 +59,6 @@ def OlexCheckCIF():
   olx.Shell('%s/%s_checkcif_report.%s' %(OV.FilePath(), OV.FileName(), result_filetype)) # Thanks to Richard G. for this
 
   # Need to build a PDF version as well
-  print "Completed Check your webrowser"
+  print("Completed Check your webrowser")
 
 OV.registerFunction(OlexCheckCIF)

@@ -31,17 +31,17 @@ cm is the cell multiplier 1 = pack cell 2 would be a 2x2x2 cell etc.
 '''
 
 def Olexhole(endrad="3", cm="1"):
-  print "This script converts the current model and creates a hole2 input file, runs hole2 and reports the result"
+  print("This script converts the current model and creates a hole2 input file, runs hole2 and reports the result")
   # We can assume that the INS name and information can come from Olex2
   # Need to allow for all possible options, at the moment this is very basic implementation.
   
   cm = int(cm)
   run_inc = 0
   base_path = OV.FilePath()
-  print OV.FilePath()
+  print(OV.FilePath())
   while True:
     if(os.path.exists('%s/hole2_run_%2.2d'%(base_path, run_inc))):
-      print "Failed to make hole2_run_%2.2d directory, as already present - incrementing"%run_inc
+      print("Failed to make hole2_run_%2.2d directory, as already present - incrementing"%run_inc)
       run_inc = run_inc+1
     else:
       os.mkdir('%s/hole2_run_%2.2d'%(base_path, run_inc))
@@ -63,7 +63,7 @@ def Olexhole(endrad="3", cm="1"):
   qptcmd = "%s/qpt_conv"%hole2_path
   
   # General stuff for the user to see in Olex2
-  print "Job name", Olex2holeIn
+  print("Job name", Olex2holeIn)
 # Write the hole input file
 # This is primative will need to add features such as patterson on and off
   holeINS= open("%s/%s.inp"%(hole2_path, Olex2holeIn), 'w')
@@ -112,28 +112,28 @@ def Olexhole(endrad="3", cm="1"):
   
 # All this need error control
   try:
-    print "**** Running hole calculation now"
+    print("**** Running hole calculation now")
     command = "hole < %s/%s.inp > %s/%s_hole.log "%(hole2_path, Olex2holeIn, hole2_path, Olex2holeIn)
-    print command
+    print(command)
     os.system(command)
     #hole_result = olx.Exec(command)
-    print "Finished calculation ****"
+    print("Finished calculation ****")
   except:
-    print "hole calculation failed to run"
+    print("hole calculation failed to run")
     return
   try:
     hole_result_file = open("%s/%s_hole.log"%(hole2_path, Olex2holeIn), 'r')
-    print "Reviewing Log File to Window:"
+    print("Reviewing Log File to Window:")
     for hole_line in hole_result_file:
-      print hole_line.rstrip("\n")
+      print(hole_line.rstrip("\n"))
     hole_result_file.close()
   except IOError: 
-    print "Failed to open file"
-    print "You can read this file by typing:"
-    print "edit %s/%s_hole.log"%(hole2_path, Olex2holeIn)
+    print("Failed to open file")
+    print("You can read this file by typing:")
+    print("edit %s/%s_hole.log"%(hole2_path, Olex2holeIn))
     return
   try:
-    print "Running hole conversion for dots....."
+    print("Running hole conversion for dots.....")
     command = "sph_process -dotden 15 -color %s/atoms_%s.sph %s/atoms_%s.qpt > %s/%s_sph_process_1_.log"%(
       hole2_path, 
       Olex2holeIn, 
@@ -141,11 +141,11 @@ def Olexhole(endrad="3", cm="1"):
       Olex2holeIn,
       hole2_path,
       Olex2holeIn)
-    print "Running command: ", command
+    print("Running command: ", command)
     os.system(command)
-    print "Finished conversion part 1"
+    print("Finished conversion part 1")
   except:
-    print "hole conversion 1 failed to run"
+    print("hole conversion 1 failed to run")
     return
   """
     try:
@@ -161,7 +161,7 @@ def Olexhole(endrad="3", cm="1"):
       return
   """  
   try:
-    print "Running hole conversion for surface...."
+    print("Running hole conversion for surface....")
     command = "sph_process -sos -dotden 15 -color %s/atoms_%s.sph %s/atoms_%s.sos > %s/%s_sph_process_2_.log"%(
       hole2_path,
       Olex2holeIn,
@@ -169,15 +169,15 @@ def Olexhole(endrad="3", cm="1"):
       Olex2holeIn,
       hole2_path,
       Olex2holeIn)
-    print "Running command: ", command
+    print("Running command: ", command)
     os.system(command)
-    print "Finished conversion part 2"
-    print "If you want TUBES then run"
-    print "sos_triangle -s < atoms_%s.sos > atoms_%s.vmd_tri"%(Olex2holeIn, Olex2holeIn)
-    print "from %s"%hole2_path
-    print "Now run 'qpt_conv' with option D to generate files for VMD"
+    print("Finished conversion part 2")
+    print("If you want TUBES then run")
+    print("sos_triangle -s < atoms_%s.sos > atoms_%s.vmd_tri"%(Olex2holeIn, Olex2holeIn))
+    print("from %s"%hole2_path)
+    print("Now run 'qpt_conv' with option D to generate files for VMD")
   except:
-    print "hole conversion 2 failed to run"
+    print("hole conversion 2 failed to run")
     return
 
   """

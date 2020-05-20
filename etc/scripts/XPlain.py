@@ -18,7 +18,7 @@ class XPlain:
 
   def run(self, run_auto=True, sync=False):
     if not self.exe_file:
-      print 'Could not locate the XPlain executable, aborting...'
+      print('Could not locate the XPlain executable, aborting...')
       return False
     run_auto = run_auto not in ('False', 'false', False)
     loaded_file = OV.FileFull()
@@ -28,7 +28,7 @@ class XPlain:
     if not os.path.exists(hkl_file):
       hkl_file = olx.file.ChangeExt(loaded_file, 'hkl')
     if not os.path.exists(hkl_file):
-      print 'Could not locate HKL file, aborting...'
+      print('Could not locate HKL file, aborting...')
       return False
     #print 'Hkl file: ' + hkl_file
     for e in exts:
@@ -41,7 +41,7 @@ class XPlain:
       if os.path.exists(fn):
         cell_input_file = fn
     if not cell_input_file:
-      print 'Could not locate cell input file, aborting...'
+      print('Could not locate cell input file, aborting...')
       return False
     out_dir = olx.StrDir() + '\\'
     out_file = self.get_output_name()
@@ -61,12 +61,12 @@ class XPlain:
       ' /OutputReflectionsFilename="' + hkl_out_file + '"' + \
       ' /LogFilename="' + log_out_file + '"'
     if not olx.Exec(self.exe_file, cmdl, s=True):
-      print 'Failed to execute the command...'
+      print('Failed to execute the command...')
       return False
 
     version = ''
     if not(os.path.exists(log_out_file)):
-      print 'Could not locate the output log file'
+      print('Could not locate the output log file')
       return False
     else:
       f = file(log_out_file)
@@ -74,10 +74,10 @@ class XPlain:
         f.readline()
         version = f.readline().strip().split()[1]
       except:
-        print 'Could not locate XPlain version'
+        print('Could not locate XPlain version')
       f.close()
     if version:
-      print 'XPlain version: ' + version
+      print('XPlain version: ' + version)
 
     out_ = file(out_file, 'rb').readlines()
     out = {}
@@ -92,10 +92,10 @@ class XPlain:
     sg0 = ''
     cell_counter = 0
     line_cnt = len(out)
-    print 'Found space groups:'
+    print('Found space groups:')
     while True:
       cell_line = "ConstrainedCell%i" %cell_counter
-      if not out.has_key(cell_line):
+      if cell_line not in out:
         break
       esd_line = "ConstrainedCellSU%i" %cell_counter
       sg_line = "SpaceGroupNameHMAlt%i" %cell_counter
@@ -109,9 +109,9 @@ class XPlain:
       sgs.append(Template(sg_line_tmpl).substitute(out))
       if cell_counter == 0: sg0 = out[sg_line]
       cell_counter = cell_counter + 1
-      print "%i: %s" %(cell_counter, out[sg_line])
+      print("%i: %s" %(cell_counter, out[sg_line]))
     if len(sgs) == 0:
-      print 'None'
+      print('None')
       return False
     rv = ';'.join(sgs)
     OV.SetParam('snum.refinement.sg_list', rv)
