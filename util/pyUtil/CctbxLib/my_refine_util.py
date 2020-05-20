@@ -21,20 +21,20 @@ def shelx_adp_converter(crystal_symmetry):
 
 def print_thermal_axes(s0, s):
   cs = s0.special_position_settings()
-  for a0, a in itertools.izip(s0.scatterers(), s.scatterers()):
+  for a0, a in zip(s0.scatterers(), s.scatterers()):
     if not a.anisotropic_flag: continue
-    print '*** %s ***' % a0.label
+    print('*** %s ***' % a0.label)
     for u in (a0.u_star, a.u_star):
       u_cart = adptbx.u_star_as_u_cart(cs.unit_cell(), u)
       eigensys = adptbx.eigensystem(u_cart)
-      for i in xrange(3):
-        print 'v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i), 
-        print 'lambda=%.6f' % eigensys.values()[i]
-      print '---'
+      for i in range(3):
+        print('v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i), end=' ') 
+        print('lambda=%.6f' % list(eigensys.values())[i])
+      print('---')
 
 
 def compare_structures(s0, s):
-  for a0, a in itertools.izip(s0.scatterers(), s.scatterers()):
+  for a0, a in zip(s0.scatterers(), s.scatterers()):
     diff_sites = tuple(
       (flex.double(a.site)-flex.double(a0.site))/flex.double(a0.site)
       *100
@@ -48,7 +48,7 @@ def compare_structures(s0, s):
     else:
       diff_adp = ( ( a.u_iso - a0.u_iso )/a0.u_iso, )
       n = 1
-    print (
+    print(
       '%s: site moved by ' + '%.0f%%, '*3
       + 'and adp moved by ' + '%.0f%%, '*n
       ) % (

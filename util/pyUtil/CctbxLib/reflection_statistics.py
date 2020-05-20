@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 from cctbx_olex_adapter import OlexCctbxAdapter
 
@@ -19,16 +19,16 @@ import math
 
 class empty: pass
 def ShowFitSummary(f):
-  print "is_well_defined:", f.is_well_defined()
-  print "y_intercept: %.4f" %f.y_intercept()
-  print "slope: %.4f" %f.slope()
+  print("is_well_defined:", f.is_well_defined())
+  print("y_intercept: %.4f" %f.y_intercept())
+  print("slope: %.4f" %f.slope())
 
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
   def __init__(self, graph, *args, **kwds):
     OlexCctbxAdapter.__init__(self)
     if self.reflections is None:
-      raise RuntimeError, "There was an error reading the reflection file."
+      raise RuntimeError("There was an error reading the reflection file.")
     self.graph = graph
     twinning=self.olx_atoms.model.get('twin')
 
@@ -48,8 +48,8 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
       elif graph == "sys_absent":
         self.xy_plot = sys_absent_intensity_distribution(self.reflections)
 
-    except Exception, err:
-      raise Exception, err
+    except Exception as err:
+      raise Exception(err)
     finally:
       OV.DeleteBitmap(bitmap)
 
@@ -57,13 +57,13 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
   def __init__(self, *args, **kwds):
     OlexCctbxAdapter.__init__(self)
     if self.reflections is None:
-      raise RuntimeError, "There was an error reading the reflection file."
+      raise RuntimeError("There was an error reading the reflection file.")
     twinning=self.olx_atoms.model.get('twin')
     try:
       import iotbx.command_line.reflection_statistics
       import sys
       saveout = sys.stdout
-      from cStringIO import StringIO
+      from io import StringIO
       s = StringIO()
       sys.stdout = s
       self.cctbx_stats = iotbx.command_line.reflection_statistics.array_cache(self.reflections.f_obs, 10, 3)
@@ -83,8 +83,8 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
 #      if stat == "completeness":
 #        self.cctbx_stats = completeness_statistics_value(self.reflections, self.wavelength, **kwds)
 
-    except Exception, err:
-      raise Exception, err
+    except Exception as err:
+      raise Exception(err)
     finally:
       OV.DeleteBitmap(bitmap)
 
@@ -117,7 +117,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2 = fo2.customized_copy(data=a)
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.mean(use_binning=True)
-      print "CC 1/2 = %.3f" %fo2.cc_one_half()
+      print("CC 1/2 = %.3f" %fo2.cc_one_half())
     elif self.item == "cc_half_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -147,8 +147,8 @@ class item_vs_resolution(OlexCctbxAdapter):
     try:
       d_star_sq = self.binned_data.binner.bin_centers(2)
     except:
-      print "This seems to be the new kind of binned data."
-      print "While we learn how to plot this, please look at the table above."
+      print("This seems to be the new kind of binned data.")
+      print("While we learn how to plot this, please look at the table above.")
       return None
 
     if self.resolution_as == "two_theta":
@@ -402,7 +402,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.fit_y_intercept = fit.y_intercept()
     self.fit_slope = fit.slope()
     self.correlation = corr.coefficient()
-    print "coefficient: %.4f" %self.correlation
+    print("coefficient: %.4f" %self.correlation)
 
   def xy_plot_info(self):
     r = empty()
@@ -517,7 +517,7 @@ def wilson_statistics(model, cctbx_adaptor, n_bins=10):
   asu_contents = {}
 
   for scatterer in model.scatterers():
-    if scatterer.scattering_type in asu_contents.keys():
+    if scatterer.scattering_type in list(asu_contents.keys()):
       asu_contents[scatterer.scattering_type] += 1
     else:
       asu_contents.setdefault(scatterer.scattering_type, 1)
@@ -547,7 +547,7 @@ def wilson_statistics(model, cctbx_adaptor, n_bins=10):
     f_obs.binner().show_summary()
   wp = statistics.wilson_plot(f_obs, asu_contents, e_statistics=True)
   if (0 or verbose):
-    print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
+    print("wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b)
   return wp
 
 class completeness_statistics_value(object):
@@ -598,12 +598,12 @@ class completeness_statistics(object):
       resolutions = missing_set.sin_theta_over_lambda_sq().data()
     self.missing_set = missing_set
     if missing_set.size() > 0:
-      print "Missing data: %s" %missing_set.size()
+      print("Missing data: %s" %missing_set.size())
       #print "  h  k  l  %s" %bin_range_as
     else:
-      print "No missing data"
+      print("No missing data")
     for indices, resolution in zip(missing_set.indices(), resolutions):
-      print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution
+      print(("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution)
 
 def cumulative_intensity_distribution(cctbx_adaptor,
                                       n_bins=20,

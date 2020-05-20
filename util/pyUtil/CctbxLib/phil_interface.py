@@ -1,5 +1,5 @@
 import os, sys, string
-import cStringIO
+import io
 import libtbx.phil
 import libtbx.phil.interface
 from libtbx.phil.interface import index
@@ -113,8 +113,8 @@ def _merge_objects(self, object):
           matching._merge_objects(obj)
         else:
           tobj.words = obj.words
-      except Exception, e:
-        print e
+      except Exception as e:
+        print(e)
     else:
       if obj.is_scope:
         obj.change_primary_parent_scope(self)
@@ -231,7 +231,7 @@ class phil_handler(index):
       self.rebuild_index()
 
   def reset(self, scope_name=None, scope_names=None):
-    print "Use reset_scope() instead of this function."
+    print("Use reset_scope() instead of this function.")
     self.reset_scope(scope_name)
 
   def merge_phil(self, phil_object=None, phil_string=None, phil_file=None,
@@ -262,8 +262,8 @@ class phil_handler(index):
     if phil_object:
       try:
         self.merge_phil(phil_object=phil_object)
-      except Exception, e:
-        print >> sys.stderr, "Error updating Phil"
+      except Exception as e:
+        print("Error updating Phil", file=sys.stderr)
         sys.stderr.formatExceptionInfo()
 
   def update_single_param(self, name, value):
@@ -319,4 +319,4 @@ def coerce_value(e):
   try:
     OV.SetParam(_[0], int(float(_[1].strip('"').strip("'"))))
   except:
-    print "Please make sure that this value for %s is an integer, and not a text string or a float." %(_[0])
+    print("Please make sure that this value for %s is an integer, and not a text string or a float." %(_[0]))

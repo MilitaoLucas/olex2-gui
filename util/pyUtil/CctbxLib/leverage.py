@@ -131,9 +131,9 @@ def parameter_labels(self, n_params):
   if self.reparametrisation.extinction is not None and self.reparametrisation.extinction.grad:
     annotations_1.append("EXTI")
   Jt = self.reparametrisation.jacobian_transpose_matching_grad_fc()
-  for j in xrange(0, n_params):
+  for j in range(0, n_params):
     label = []
-    for k in xrange(0, Jt.n_cols):
+    for k in range(0, Jt.n_cols):
       if Jt[(j,k)]:
         label.append("%s" %(annotations[k]))
     if len(label) == 0:
@@ -175,7 +175,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
                                             self.weighting_scheme))
   ds_mat = result.design_matrix()
   ds_mat = ds_mat.as_numpy_array()
-  for r in xrange(0, ds_mat.shape[0]):
+  for r in range(0, ds_mat.shape[0]):
     ds_mat[r,:] *= math.sqrt(result.weights()[r])
   #self.weights = scla.block_diag([math.sqrt(x) for x in result.weights()])
   Z_mat = ds_mat #self.weights*ds_mat
@@ -184,7 +184,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
   Pp_mat_d = (Z_mat.dot(Zi_mat) * Z_mat).sum(-1)
   t_mat = Z_mat.dot(Zi_mat)
   t_mat = t_mat**2
-  for i in xrange(0, t_mat.shape[0]):
+  for i in range(0, t_mat.shape[0]):
     t_mat[i,:] /= (1+Pp_mat_d[i])
   if threshold is not None:
     maxT = np.amax(t_mat)
@@ -192,7 +192,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
     maxT = 0
   Ts = []
   labels = parameter_labels(self, n_params=ds_mat.shape[1])
-  for j in xrange(0, t_mat.shape[1]):
+  for j in range(0, t_mat.shape[1]):
     if threshold is not None:
       if np.amax(t_mat[:,j])/maxT < threshold:
         continue
@@ -222,7 +222,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
     output_to.write(fm_header %("H", "K", "L", "V", "Fo_sq", "Fc_sq"))
     for j, Ts_ in Ts:
       output_to.write("#%s\n" %(labels[j]))
-      for i in xrange(0, len(Ts_)):
+      for i in range(0, len(Ts_)):
         idx = self.observations.indices[Ts_[i][0]]
         val = Ts_[i][1]*100/maxT
         output_to.write(fm_hkl %(idx[0], idx[1], idx[2],\
