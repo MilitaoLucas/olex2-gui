@@ -9,7 +9,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 def Olex2vmd():
-  print "This script converts the current model and creates a vmd compatible pdb"
+  print("This script converts the current model and creates a vmd compatible pdb")
   # We can assume that the INS name and information can come from Olex2
   # The modified pdb which uses the same process as for hole2 seems to produce pdb files where all the bonding
   # is fine in vmd the default output from Olex2 does not
@@ -17,10 +17,10 @@ def Olex2vmd():
   # This basically creates a new folder everytime the command is run
   run_inc = 0
   base_path = OV.FilePath()
-  print OV.FilePath()
+  print(OV.FilePath())
   while True:
     if(os.path.exists('%s/vmd_run_%2.2d'%(base_path, run_inc))):
-      print "Failed to make vmd_run_%2.2d directory, as already present - incrementing"%run_inc
+      print("Failed to make vmd_run_%2.2d directory, as already present - incrementing"%run_inc)
       run_inc = run_inc+1
     else:
       os.mkdir('%s/vmd_run_%2.2d'%(base_path, run_inc))
@@ -33,7 +33,7 @@ def Olex2vmd():
   OV.File("%s/olex_%s.pdb"%(hole2_path, Olex2holeIn)) # Olex2 format pdb file of whatever is selected/present
  
   # General stuff for the user to see in Olex2
-  print "Job name: ", Olex2holeIn
+  print("Job name: ", Olex2holeIn)
  
   holePDB= open("%s/atoms_%s.pdb"%(hole2_path, Olex2holeIn), 'w')
   rawPDB= open("%s/olex_%s.pdb"%(hole2_path, Olex2holeIn), 'r')
