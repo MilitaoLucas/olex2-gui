@@ -64,7 +64,7 @@ def compile(_platform):
       bin_dir = build_dir+'bin/'
       os.chdir(build_dir)
       if os.system(bin_dir + 'libtbx.scons ' + d[4]) != 0:
-        print 'Scons returned non zero...'
+        print('Scons returned non zero...')
         return False
       bundle_dir = tmp_dir + 'bundle'
       if os.path.exists(bundle_dir):
@@ -72,12 +72,12 @@ def compile(_platform):
       os.mkdir(bundle_dir)
       os.chdir(bundle_dir)
       if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
-        print 'Failed to create a distribution...'
+        print('Failed to create a distribution...')
         return False
       shutil.copytree(src_dir + "boost", "cctbx_sources/boost")
 
       zip_name = tmp_dir + d[3]
-      print 'Creating ' +  zip_name + ':'
+      print('Creating ' +  zip_name + ':')
       root_dir_len = len(bundle_dir.replace('\\', '/') + '/')
       dest_zip = zipfile.ZipFile(zip_name,
                                 mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -95,18 +95,18 @@ def compile(_platform):
 
 if __name__ == '__main__':
   plat = sys.platform + '-' + platform.architecture()[0]
-  print 'Compiling for: ' + plat
+  print('Compiling for: ' + plat)
   zip_names = compile(plat)
   if len(zip_names) == 0:
-    print 'Compilation failed. Aborting...'
+    print('Compilation failed. Aborting...')
     sys.exit(1)
 
   up_str = upload_cmd
   for f in zip_names: up_str += ' ' + f
   up_str = up_str +  ' ' + destination
-  print 'Uploading; ' + up_str
+  print('Uploading; ' + up_str)
   sys.exit(0)
   if os.system(up_str) != 0:
-    print 'Upload has failed...'
+    print('Upload has failed...')
   else:
-    print 'Done...'
+    print('Done...')
