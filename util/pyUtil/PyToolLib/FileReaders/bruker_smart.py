@@ -73,12 +73,12 @@ class reader:
         pass
       i += 1
 
-    if self._cifItems.has_key('_diffrn_source_voltage') and self._cifItems.has_key('_diffrn_source_current'):
+    if '_diffrn_source_voltage' in self._cifItems and '_diffrn_source_current' in self._cifItems:
       self._cifItems.setdefault('_diffrn_source_power', (self._cifItems['_diffrn_source_voltage'] * self._cifItems['_diffrn_source_current'])/1000)
     self._cifItems.setdefault('_exptl_special_details', self.prepare_exptl_special_details(special_details))
     
     to_delete = []
-    for k,v in self._cifItems.iteritems():
+    for k,v in self._cifItems.items():
       if v == '?':
         to_delete.append(k)
     for v in to_delete:
@@ -101,4 +101,4 @@ class reader:
 
 if __name__ == '__main__':
   a = reader('C:/datasets/08srv071/smart.ini')
-  print a.cifItems()
+  print(a.cifItems())

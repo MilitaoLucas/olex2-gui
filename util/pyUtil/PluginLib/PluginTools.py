@@ -42,7 +42,7 @@ class PluginTools(VFSDependent):
     return time.ctime(os.path.getmtime(self.p_path))
 
   def print_version_date(self):
-    print "Loading %s (Version %s)\n" %(self.p_name, self.get_plugin_date()),
+    print("Loading %s (Version %s)\n" %(self.p_name, self.get_plugin_date()), end=' ')
 
   def deal_with_phil(self, operation='read', which='user_local'):
     ### define paths
@@ -119,9 +119,9 @@ class PluginTools(VFSDependent):
       os.rename("%s/branding/olex2" %p, "%s/branding/custom" %p)
     else:
       if os.path.exists(p):
-        print "The location %s already exists. No files have been copied" %p
+        print("The location %s already exists. No files have been copied" %p)
       else:
-        print "This path %s should exist, but does not." %p
+        print("This path %s should exist, but does not." %p)
         return
     olx.Shell(p)
 
@@ -144,13 +144,13 @@ def make_new_plugin(name,overwrite=False):
       import shutil
       shutil.rmtree(path)
     else:
-      print "This plugin already exists."
+      print("This plugin already exists.")
       return
   if not os.path.exists (path):
     try:
       os.mkdir(path)
     except:
-      print "Failed to make folder %s" %path
+      print("Failed to make folder %s" %path)
       return
 
   d = {'name':name,
@@ -211,7 +211,7 @@ def make_new_plugin(name,overwrite=False):
   wFile.write(t)
   wFile.close()
 
-  print "New Plugin %s created. Please restart Olex2" %name
+  print("New Plugin %s created. Please restart Olex2" %name)
 
 
 OV.registerFunction(make_new_plugin,False,'pt')

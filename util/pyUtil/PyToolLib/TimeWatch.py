@@ -18,7 +18,7 @@ class Stats:
 
   def summary(self):
     total = 0
-    for k,v in self.tasks.items():
+    for k,v in list(self.tasks.items()):
       print("Task '%s' was executed %s times and consumed %.3f seconds" %(k, v[0], v[1]))
       total += v[1]
     try:
@@ -34,10 +34,10 @@ def stats():
   return Stats.instance
 
 def start(evt):
-  return (evt, time.clock())
+  return (evt, time.time())
 
 def finish(token):
-  stats().add(token[0], time.clock()-token[1])
+  stats().add(token[0], time.time()-token[1])
 
 def record(evt, time):
   stats().add(evt, time)

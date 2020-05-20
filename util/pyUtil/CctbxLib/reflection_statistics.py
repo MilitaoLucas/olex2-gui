@@ -1,5 +1,3 @@
-
-
 from cctbx_olex_adapter import OlexCctbxAdapter
 
 from olexFunctions import OlexFunctions

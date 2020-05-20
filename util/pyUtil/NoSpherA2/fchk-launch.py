@@ -20,7 +20,7 @@ if "orca" in args[0]:
   out_fn = fchk_file + "_orca.log"
 p = subprocess.Popen(args, stdout=log)
 if "ubuntu" in args[0]:
-  print "Starting Ubuntu and running pySCF, please be patient for start"
+  print("Starting Ubuntu and running pySCF, please be patient for start")
 if "ubuntu" in args[0]:
   out_fn = fchk_file + "_pyscf.log"
 elif out_fn == None:
@@ -43,4 +43,4 @@ with open(out_fn, "rU") as stdout:
       sys.stdout.flush()
     time.sleep(0.5)
   
-print "Finished"
+print("Finished")

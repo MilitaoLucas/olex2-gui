@@ -96,7 +96,7 @@ class NewsImageRetrivalThread(ThreadEx):
               res_idx = idx
               break
 
-      for idx in xrange(0, len(img_list)):
+      for idx in range(0, len(img_list)):
         res_idx += 1
         if res_idx >= len(img_list):
           res_idx = -1
@@ -199,7 +199,7 @@ class NewsImageRetrivalThread(ThreadEx):
     import HttpTools
     try:
       res = HttpTools.make_url_call(url, values = '', http_timeout=5)
-    except Exception, err:
+    except Exception as err:
       return None
     return res
 
@@ -215,7 +215,7 @@ class CheckCifRetrivalThread(ThreadEx):
     import gui.cif as cif
     try:
       cif.GetCheckcifReport(send_fcf=self.send_fcf)
-    except Exception, e:
+    except Exception as e:
       #print e
       pass
     finally:

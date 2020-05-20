@@ -89,7 +89,7 @@ class NoSpherA2(PT):
       self.basis_dir = None
       print("No Hart executable found!")
     check_for_matching_fcf()
-    print " "
+    print(" ")
 
   def setup_har_executables(self):
     self.exe = None
@@ -159,7 +159,7 @@ class NoSpherA2(PT):
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print "No MPI implementation found in PATH!\n"
+      print("No MPI implementation found in PATH!\n")
       self.cpu_list_str = '1'
 
   def launch(self):
@@ -448,7 +448,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             job.launch()
           except NameError as error:
-            print ("Aborted due to: ", error)
+            print("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -470,7 +470,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
           except NameError as error:
-            print ("Aborted due to: ",error)
+            print("Aborted due to: ",error)
             OV.SetVar('NoSpherA2-Error',error)
             return False
 
@@ -494,7 +494,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             job.launch()
           except NameError as error:
-            print ("Aborted due to: ", error)
+            print("Aborted due to: ", error)
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -533,7 +533,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     try:
       wfn_object.run()
     except NameError as error:
-      print ("The following error occured during QM Calculation: ",error)
+      print("The following error occured during QM Calculation: ",error)
       OV.SetVar('NoSpherA2-Error',error)
       raise NameError('Unsuccesfull Wavefunction Calculation!')
 
@@ -1238,7 +1238,7 @@ class wfn_Job(object):
           lines = file.readlines()
         for line in lines:
           if "Error" in line:
-            print line
+            print(line)
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
@@ -1302,7 +1302,7 @@ class wfn_Job(object):
       with open("NoSpherA2.log", "r") as log:
         x = log.read()
         if x:
-          print x
+          print(x)
       if os.path.exists(self.name+".fchk"):
         shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
       else:
@@ -1514,7 +1514,7 @@ class Job(object):
       fp_fdps = {}
       wavelength = olex_refinement_model['exptl']['radiation']
       if sfac is not None:
-        for element, sfac_dict in sfac.iteritems():
+        for element, sfac_dict in sfac.items():
           custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
       asu = olex_refinement_model['aunit']
       for residue in asu['residues']:
@@ -1523,7 +1523,7 @@ class Job(object):
           if element_type not in fp_fdps:
             fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
             fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, data2[0], data2[1]) for k,v in fp_fdps.iteritems()])
+      disp_arg = " ".join(["%s %s %s" %(k, data2[0], data2[1]) for k,v in fp_fdps.items()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
 
@@ -1562,7 +1562,7 @@ class Job(object):
       if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
         shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
       else:
-        print "WFN File not found!"
+        print("WFN File not found!")
         OV.SetVar('NoSpherA2-Error',"NoWFN")
         raise NameError("No WFN found!")
       move_args = []
@@ -1594,7 +1594,7 @@ class Job(object):
 def add_info_to_tsc():
   tsc_fn = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
   if not os.path.isfile(tsc_fn):
-    print "Error finding tsc File!\n"
+    print("Error finding tsc File!\n")
     return False
   with open(tsc_fn) as f:
     tsc = f.readlines()
@@ -1673,7 +1673,7 @@ The following options were used:
         write_file.write(details_text)
         write_file.write(line)
       else:
-        print "CIF BLOCK is there"
+        print("CIF BLOCK is there")
         write_file.write(line)
   write_file.close()
 
@@ -1723,11 +1723,11 @@ def combine_tscs():
   for part in range(int(nr_parts)):
     if part == 0:
       continue
-    print "Working on Part %d of %d\n"%(parts[part],int(nr_parts)-1)
+    print("Working on Part %d of %d\n"%(parts[part],int(nr_parts)-1))
     #print "looking for: "+os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
     tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
     if not os.path.isfile(tsc_fn):
-      print "Error finding tsc Files!\n"
+      print("Error finding tsc Files!\n")
       return False
 
     if debug:
@@ -1790,7 +1790,7 @@ def combine_tscs():
       d[name].setdefault('sfc', sfc_l)
 
   if debug:
-    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
+    print("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
 
   value_lines = []
   for i in range(nr_data_lines):
@@ -1902,7 +1902,7 @@ def read_disorder_groups():
       if '-' in part:
         a, b = part.split('-')
         a, b = int(a), int(b)
-        result[i].extend(range(a,b+1))
+        result[i].extend(list(range(a,b+1)))
       else:
         a = int(part)
         result[i].append(a)
@@ -1974,12 +1974,12 @@ def write_symmetry_file(debug=False):
   from cctbx import crystal
   cs = crystal.symmetry(space_group_symbol="hall: "+str(olx.xf.au.GetCellSymm("hall")))
   if(debug == True):
-    print cs.space_group().n_smx()
+    print(cs.space_group().n_smx())
   symops = []
   with open("symmetry.file",'w') as symm_file:
     for rt in cs.space_group().smx(False):
       if(debug == True):
-        print rt
+        print(rt)
       A=[[[] for i in range(3)] for i in range(3)]
       xyz = ["x","y","z"]
       input = str(rt).split(",")
@@ -2005,12 +2005,12 @@ def write_symmetry_file(debug=False):
       if len(symops) != cs.space_group().n_smx():
         symm_file.write("\n")
   if (debug == True):
-    print symops
+    print(symops)
 OV.registerFunction(write_symmetry_file,True,'NoSpherA2')
 
 def calculate_cubes():
   if is_disordered == True:
-    print "Disordered structures not implemented!"
+    print("Disordered structures not implemented!")
     return
 
   wfn2fchk = OV.GetVar("Wfn2Fchk")
@@ -2142,7 +2142,7 @@ def change_map():
     number = int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) -1
     plot_cube(name+"_MO_"+str(number)+".cube",None)
   else:
-    print "Sorry, no map type available or selected map type not correct!"
+    print("Sorry, no map type available or selected map type not correct!")
     return
 OV.registerFunction(change_map,True,'NoSpherA2')
 
@@ -2155,7 +2155,7 @@ OV.registerFunction(change_pointsize,True,'NoSpherA2')
 def plot_cube(name,color_cube):
   import olex_xgrid
   if not os.path.isfile(name):
-    print "Cube file does not exist!"
+    print("Cube file does not exist!")
     return
   olex.m("html.Update()")
   with open(name) as cub:
@@ -2188,7 +2188,7 @@ def plot_cube(name,color_cube):
     if (run==6):
       values = line.split()
       z_size = int(values[0])
-      data = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+      data = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
     if (run > na + 6):
       values = line.split()
       for i in range(len(values)):
@@ -2205,7 +2205,7 @@ def plot_cube(name,color_cube):
             x_run += 1
             y_run = 0
         if x_run > x_size:
-          print "ERROR! Mismatched indices while reading!"
+          print("ERROR! Mismatched indices while reading!")
           return
 
   cube = None
@@ -2239,7 +2239,7 @@ def plot_cube(name,color_cube):
       if (run==6):
         values = line.split()
         z_size2 = int(values[0])
-        data2 = [[[float(0.0) for k in xrange(z_size2)] for j in xrange(y_size2)] for i in xrange(x_size2)]
+        data2 = [[[float(0.0) for k in range(z_size2)] for j in range(y_size2)] for i in range(x_size2)]
       if (run > na + 6):
         values = line.split()
         for i in range(len(values)):
@@ -2252,7 +2252,7 @@ def plot_cube(name,color_cube):
               x_run += 1
               y_run = 0
           if x_run > x_size2:
-            print "ERROR! Mismatched indices while reading!"
+            print("ERROR! Mismatched indices while reading!")
             return
 
     cube2 = None
@@ -2292,7 +2292,7 @@ def plot_cube(name,color_cube):
       return a_0 + a_1 * ix2 + a_2 * iy2 + a_3 * z_2 + a_4 * x_2 * y_2 + a_5 * x_2 * z_2 + a_6 * y_2 * z_2 + a_7 * x_2 * y_2 * z_2
 
 
-    value = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+    value = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
     i=None
     j=None
     k=None
@@ -2302,7 +2302,7 @@ def plot_cube(name,color_cube):
           for z in range(z_size):
             value[x][y][z] = data2[x][y][z]
     else:
-      print "Interpolating..."
+      print("Interpolating...")
       #from dask import delayed
       #from multiprocessing import Pool
       #nproc = int(OV.GetParam("snum.NoSpherA2.ncpus"))
@@ -2408,7 +2408,7 @@ def get_color(value):
       r = int(255 * ( 2 * x - 1))
   rgba = (127 << 24) | (b << 16) | (g << 8) | r
   if value == "0.00101":
-    print rgba
+    print(rgba)
   return rgba
 OV.registerFunction(get_color,True,'NoSpherA2')
 

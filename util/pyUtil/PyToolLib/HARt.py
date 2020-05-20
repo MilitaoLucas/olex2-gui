@@ -31,7 +31,7 @@ class Job(object):
 
   def save(self):
     with open(os.path.join(self.parent.jobs_dir, self.name, "job.options"), "w") as f:
-      for k, v in HARt.options.iteritems():
+      for k, v in HARt.options.items():
         val = olx.GetVar(k, None)
         if val is not None:
           f.write("%s: %s\n" %(k, val))
@@ -122,7 +122,7 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
       fp_fdps = {}
       wavelength = olex_refinement_model['exptl']['radiation']
       if sfac is not None:
-        for element, sfac_dict in sfac.iteritems():
+        for element, sfac_dict in sfac.items():
           custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
       asu = olex_refinement_model['aunit']
       for residue in asu['residues']:
@@ -131,11 +131,11 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           if element_type not in fp_fdps:
             fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
             fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
+      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.items()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
 
-    for k,v in HARt.options.iteritems():
+    for k,v in HARt.options.items():
       val = olx.GetVar(k, None)
       if len(v) == 2:
         if val is not None:
@@ -204,7 +204,7 @@ class HARt(object):
     self.set_defaults()
 
   def set_defaults(self):
-    for k,v in self.options.iteritems():
+    for k,v in self.options.items():
       olx.SetVar(k, v[0])
 
   def launch(self):
@@ -319,7 +319,7 @@ def getAnalysisPlotData(input_f):
         else:
           mm = _
       if not mm:
-        print "No Data"
+        print("No Data")
         continue
       raw_data = mm.strip()
       raw_data = raw_data.split("\n")
@@ -339,7 +339,7 @@ def getAnalysisPlotData(input_f):
       d[name].setdefault('ys', ys)
       d[name].setdefault('text', text)
     else:
-      print "Could not evaluate REGEX %s." %repr(regex_t)
+      print("Could not evaluate REGEX %s." %repr(regex_t))
 
 
   makePlotlyGraph(d)
@@ -350,17 +350,17 @@ def makePlotlyGraph(d):
 
   try:
     import plotly
-    print plotly.__version__  # version >1.9.4 required
+    print(plotly.__version__)  # version >1.9.4 required
     from plotly.graph_objs import Scatter, Layout
     import numpy as np
     import plotly.plotly as py
     import plotly.graph_objs as go
   except:
-    print "Please install plot.ly for python!"
+    print("Please install plot.ly for python!")
     return
 
   data = []
-  print len(d)
+  print(len(d))
   for trace in d:
     _ = go.Scatter(
       x = d[trace]['xs'],

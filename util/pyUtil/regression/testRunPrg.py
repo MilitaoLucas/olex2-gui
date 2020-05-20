@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 import sys
-from StringIO import StringIO
+from io import StringIO
 
 import test_utils
 
@@ -25,7 +25,7 @@ class RunPrgTestCase(test_utils.TestCaseBase):
     os.chdir(self.cwd)
     test_utils.TestCaseBase.tearDown(self)
     olexFunctions.HasGUI = True # reset
-    print self.stdout.getvalue()
+    print(self.stdout.getvalue())
 
   def test_refinement_shelxl(self):
     OV.SetParam('snum.refinement.program','ShelXL')

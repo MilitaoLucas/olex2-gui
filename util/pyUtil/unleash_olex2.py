@@ -9,19 +9,9 @@
 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-mac32_legacy_port_name = 'port-mac-intel-py27'
-mac32_port_name = 'port-mac32'
-mac32_port_zip_name = 'olex2-mac32-intel.zip'
-mac32_port_prefix = 'olex2.app/Contents/MacOS/'
-
 mac64_port_name = 'port-mac64'
 mac64_port_zip_name = 'olex2-mac64-intel.zip'
 mac64_port_prefix = 'olex2.app/Contents/MacOS/'
-
-linux32_legacy_port_name = 'port-suse101x32-py27'
-linux32_port_name = 'port-linux32'
-linux32_port_zip_name = 'olex2-linux32.zip'
-linux32_port_prefix = 'olex2/'
 
 linux64_legacy_port_name = 'port-suse101x64-py27'
 linux64_port_name = 'port-linux64'
@@ -37,49 +27,24 @@ win64_port_name = 'port-win64'
 win64_port_zip_name = 'olex2-win64.zip'
 win64_port_prefix = None
 
-win32_sse_port_name = 'port-win32-sse'
-win32_sse_port_zip_name = 'olex2-win32-sse.zip'
-win32_sse_port_prefix = None
-
 portable_zip_name = 'portable-gui.zip'
 portable_prefix = None
 # iteratable list of zips and prefixes
 distro_zips = (
-  (mac32_port_zip_name, mac32_port_prefix),
   (mac64_port_zip_name, mac64_port_prefix),
-  (linux32_port_zip_name, linux32_port_prefix),
   (linux64_port_zip_name, linux64_port_prefix),
-  (win32_sse_port_zip_name, win32_sse_port_prefix),
   (win32_sse2_port_zip_name, win32_sse2_port_prefix),
   (win64_port_zip_name, win64_port_prefix),
   (portable_zip_name, portable_prefix)
 )
 
 external_files = {
-  #mac32
-  'olex2-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
-                      'action:extract', 'action:delete'),
-  'unirun-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
-                       'action:extract', 'action:delete'),
-  'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
-                      'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name,
-                    'action:extract', 'action:delete'),
   #mac64
   'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'lib-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
   'hart-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
-  #linux32
-  'olex2-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
-                        'action:extract', 'action:delete'),
-  'unirun-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
-                         'action:extract', 'action:delete'),
-  'cctbx-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
-                        'action:extract', 'action:delete'),
-  'lib-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
-                      'action:extract', 'action:delete'),
   #linux64
   'olex2-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                         'action:extract', 'action:delete'),
@@ -97,9 +62,6 @@ external_files = {
   #SSE2
   'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
-  #windows SSE vc SSE2
-  'cctbx-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
-  'olex2-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
   #windows 64
   'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'python27-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
@@ -125,11 +87,8 @@ external_files = {
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
-  'plgl-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
   'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
-  'plgl-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
   'plgl-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'plgl-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
   'plgl-win32-sse.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   'plgl-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
 
@@ -165,15 +124,6 @@ set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
       'hart-win32.zip'
       ]
    ) | portable_zip_files
-win32_sse_zip_files = \
-set(  ['cctbx-win32-sse.zip',    #cctbx/cctb_sources,...
-      'python27-win32.zip',      #Pyhton27/..., ..., + python27.dll!!!
-      'launch-win32.zip',    #olex2.exe
-      'plgl-win32-sse.zip',
-      'olex2-win32-sse.zip',  #olex2.dll
-      'hart-win32.zip'
-      ]
-   ) | portable_zip_files
 win64_zip_files = \
 set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
       'python27-win64.zip',   #Pyhton27/..., ..., + python27.dll!!!
@@ -183,15 +133,6 @@ set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
       'hart-win64.zip'
       ]
    ) | portable_zip_files
-mac32_zip_files = \
-set(  ['cctbx-mac32.zip',  #cctbx/cctb_sources,...
-      'olex2-mac32.zip',    #olex2 executable
-      'unirun-mac32.zip',
-      'plgl-mac32.zip',
-      'lib-mac32.zip'
-      ]
-   ) | portable_zip_files
-
 mac64_zip_files = \
 set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
       'olex2-mac64.zip',    #olex2 executable
@@ -199,15 +140,6 @@ set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
       'plgl-mac64.zip',
       'lib-mac64.zip',
       'hart-mac64.zip',
-      ]
-   ) | portable_zip_files
-
-linux32_zip_files = \
-set(  ['cctbx-linux32.zip',  #cctbx/cctb_sources,...
-      'lib-linux32.zip',     #lib/dlls
-      'olex2-linux32.zip',    #olex2 executable
-      'plgl-linux32.zip',
-      'unirun-linux32.zip'
       ]
    ) | portable_zip_files
 linux64_zip_files = \
@@ -221,8 +153,8 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
    ) | portable_zip_files
 
 # a set of all zip files...
-all_zip_files = win32_sse2_zip_files | win32_sse_zip_files | win64_zip_files\
-              | mac32_zip_files | mac64_zip_files | linux32_zip_files | linux64_zip_files
+all_zip_files = win32_sse2_zip_files | win64_zip_files\
+              | mac64_zip_files | linux64_zip_files
 
 
 altered_files = set([])
@@ -232,7 +164,7 @@ import os.path
 import sys
 from optparse import OptionParser
 import pysvn
-import cStringIO
+import io
 import zipfile
 import shutil
 import itertools
@@ -302,7 +234,7 @@ option, args = parser.parse_args()
 working_directory = os.path.expanduser(option.working_directory
                or 'e:/tmp/test-svn')
 if not os.path.isdir(working_directory):
-  print "ERROR: '%s' is not a directory" % working_directory
+  print("ERROR: '%s' is not a directory" % working_directory)
   parser.print_help()
 
 web_directory = os.path.expanduser(option.web_directory
@@ -310,7 +242,7 @@ web_directory = os.path.expanduser(option.web_directory
 bin_directory = os.path.expanduser(option.bin_directory
                                    or 'e:/tmp/bin_dir')
 if not os.path.isdir(bin_directory):
-  print "ERROR: '%s' is not a directory" % bin_directory
+  print("ERROR: '%s' is not a directory" % bin_directory)
   parser.print_help()
   #os.abort()
 
@@ -323,9 +255,9 @@ def update_tags_file(dir):
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
       if not os.path.exists(up_dir+'/'+dir+'/olex2.tag'):
-        print 'Skipping invalid TAG folder: ' + dir
+        print('Skipping invalid TAG folder: ' + dir)
         continue
-      print >> tags_file, dir
+      print(dir, file=tags_file)
   tags_file.close()
 
 def is_distro_uptodate(src, dest):
@@ -337,16 +269,16 @@ def is_distro_uptodate(src, dest):
 
 def promote_distro(src, dest, forward=True):
   if not os.path.exists(src):
-    print "Source distribution does not exist, exiting..."
+    print("Source distribution does not exist, exiting...")
     sys.exit(0)
   if os.path.exists(dest):
     if forward:
       if is_distro_uptodate(src, dest):
-        print 'Destination repository is newer than the source one or up-to-date, exiting'
+        print('Destination repository is newer than the source one or up-to-date, exiting')
         sys.exit(0)
     else:
       if is_distro_uptodate(dest, src):
-        print 'Destination repository is older than the source one or up-to-date, exiting'
+        print('Destination repository is older than the source one or up-to-date, exiting')
         sys.exit(0)
     shutil.rmtree(dest)
     shutil.copytree(src, dest)
@@ -357,15 +289,15 @@ def promote_distro(src, dest, forward=True):
   if dest.endswith('/'):  dest = dest[:-1]
   tag_file_name = dest+'/'+'olex2.tag'
   tag_file = open(tag_file_name, 'w+b')
-  print >> tag_file, dest.split('/')[-1]
+  print(dest.split('/')[-1], file=tag_file)
   tag_file.close()
   #end creating the tag file
   for zipfi in distro_zips:
     full_zn = dest + '/' + zipfi[0]
     if os.path.exists(full_zn):
-      print 'Updating ' + zipfi[0] + '...'
+      print('Updating ' + zipfi[0] + '...')
     else:
-      print 'Skipping ' + zipfi[0] + '...'
+      print('Skipping ' + zipfi[0] + '...')
       continue
     src_zfile = zipfile.ZipFile(full_zn, mode='r', compression=zipfile.ZIP_DEFLATED)
     dest_zfile = zipfile.ZipFile(full_zn + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -386,42 +318,42 @@ def promote_distro(src, dest, forward=True):
 # do the promotion of alpha->beta->release, only alpha can be re-released
 if option.beta:
   if option.revert:
-    print 'Reverting release distro to beta'
+    print('Reverting release distro to beta')
     promote_distro(web_directory, web_directory + '-beta')
   else:
-    print 'Promoting alpha distro to beta'
+    print('Promoting alpha distro to beta')
     promote_distro(web_directory + '-alpha', web_directory + '-beta')
 elif option.alpha:
   if option.revert:
-    print 'Reverting beta distro to alpha'
+    print('Reverting beta distro to alpha')
     promote_distro(web_directory+ '-beta', web_directory + '-alpha', forward=False)
   else:
     web_directory += '-alpha'
-    print 'Creating alpha distro...'
+    print('Creating alpha distro...')
 elif option.dev:
   web_directory += '-dev'
-  print 'Creating dev distro...'
+  print('Creating dev distro...')
 else:
   if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
-    print 'Beta distro is not up-to-date, aborting'
+    print('Beta distro is not up-to-date, aborting')
     sys.exit(0)
-  print 'Promoting beta distro to release'
+  print('Promoting beta distro to release')
   promote_distro(web_directory + '-beta', web_directory)
 
 if not os.path.isdir(os.path.dirname(web_directory)):
-  print "ERROR: '%s' is not a directory" % working_directory
+  print("ERROR: '%s' is not a directory" % working_directory)
   parser.print_help()
 
 # remove the files from the repository: helps to find collisions
-for val, key in external_files.iteritems():
+for val, key in external_files.items():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
     os.unlink(fn)
-    print "Binary distribution file removed: " + fn
+    print("Binary distribution file removed: " + fn)
 
 # create olex2_exe.zip from olex2.exe, if exists...
 if os.path.exists(bin_directory + '/olex2.exe'):
-  print "Updating olex2_exe.zip file..."
+  print("Updating olex2_exe.zip file...")
   olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip',
                             mode='w', compression=zipfile.ZIP_DEFLATED)
   olex2_exe_zip.write(bin_directory + '/olex2.exe', 'olex2.dll')
@@ -442,21 +374,21 @@ platforms = {
 try:
   if option.release_platform:
     toks = option.release_platform.split(',')
-    for k,v in platforms.iteritems():
+    for k,v in platforms.items():
       platforms[k] = False
     for t in toks:
       platforms[t] = True
 
   if option.update_file:
     filepath = option.update_file
-    print 'Updating %s only...' %filepath
+    print('Updating %s only...' %filepath)
     n = client.update(working_directory + filepath)
     revision_number = n[0].number
-    print "SVN Revision Number %i" %revision_number
+    print("SVN Revision Number %i" %revision_number)
   elif True:  #defuging can set it to false to leave the folder in tact
     n = client.update(working_directory)
     revision_number = n[0].number
-    print "SVN Revision Number %i" %revision_number
+    print("SVN Revision Number %i" %revision_number)
     nv_line = "SVN Revision No. %s" %revision_number
     same_version = False
     if os.path.exists(bin_directory + '/version.txt'):
@@ -469,7 +401,7 @@ try:
       wFile.close()
 #  revnum = pysvn.Revision( pysvn.opt_revision_kind.working )
 #  print revnum.number
-except pysvn.ClientError, err:
+except pysvn.ClientError as err:
   if str(err).find('locked'):
     client.cleanup(working_directory)
     if option.update_file:
@@ -477,17 +409,17 @@ except pysvn.ClientError, err:
     else:
       client.update(working_directory)
   else:
-    print "ERROR: %s" % err
+    print("ERROR: %s" % err)
     parser.print_help()
 
 # gather files and put them in different groups
 top_files = filter_out_directories(
-  client.propget('olex-top', working_directory, recurse=True).keys())
+  list(client.propget('olex-top', working_directory, recurse=True).keys()))
 
 update_files = filter_out_directories(
-  client.propget('olex-update', working_directory, recurse=True).keys()) +\
+  list(client.propget('olex-update', working_directory, recurse=True).keys())) +\
 filter_out_directories(
-  client.propget('olex-port', working_directory, recurse=True).keys())
+  list(client.propget('olex-port', working_directory, recurse=True).keys()))
 
 #evaluate available properties for plugins
 plugin_props = set()
@@ -495,33 +427,33 @@ for f, ps in client.proplist(working_directory,  recurse=True):
   for p in ps:
     if p.startswith('plugin-'):
       plugin_props.add(p[7:])
-for f, ps in external_files.iteritems():
+for f, ps in external_files.items():
   for p in ps:
     if p.startswith('plugin-'):
       plugin_props.add(p[7:])
 #end of the plugin property evaluation
 
 installer_files = filter_out_directories(
-  client.propget('olex-install', working_directory, recurse=True).keys())
+  list(client.propget('olex-install', working_directory, recurse=True).keys()))
 files_for_plugin = dict(
   [ (plugin,
      filter_out_directories(
-       client.propget('plugin-%s'%plugin, working_directory,
-          recurse=True).keys())
+       list(client.propget('plugin-%s'%plugin, working_directory,
+          recurse=True).keys()))
      )
      for plugin in plugin_props ])
 
 # process binary files, new folders might get created, so the call is before creating dirs
-for val, key in external_files.iteritems():
+for val, key in external_files.items():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
-    print "File exist both on the svn and in the binary folder '" + fn + "' skipping..."
+    print("File exist both on the svn and in the binary folder '" + fn + "' skipping...")
     continue
   if not os.path.exists(bin_directory + '/' + val):
     if option.dev:
       if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
         continue
-    print "Specified binary file does not exist '" + val + "' aborting..."
+    print("Specified binary file does not exist '" + val + "' aborting...")
     os._exit(1)
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
@@ -553,8 +485,8 @@ shutil.rmtree(web_directory, ignore_errors=True)
 directories_to_create = {web_directory: 1}
 directories_to_create.update(dict(
   [ (os.path.dirname(destination(p, 'update')), 1)
-    for p in itertools.chain(update_files, *files_for_plugin.values()) ]))
-directories_to_create = directories_to_create.keys()
+    for p in itertools.chain(update_files, *list(files_for_plugin.values())) ]))
+directories_to_create = list(directories_to_create.keys())
 directories_to_create.sort()
 for d in directories_to_create:
   os.makedirs(d)
@@ -570,7 +502,7 @@ for f in itertools.chain(update_files,
   if os.path.exists(f):
     shutil.copy2(f, destination(f, 'update'))
   else:
-    print "Invalid file '" + f + "' skipping"
+    print("Invalid file '" + f + "' skipping")
 
 # create the index file
 def info(web_file_name, working_file_name):
@@ -590,7 +522,7 @@ def info(web_file_name, working_file_name):
     try:
       props = client.proplist(working_file_name)
       if props:
-        props = tuple([ k for k in props[0][1].keys() if 'svn:' not in k ])
+        props = tuple([ k for k in list(props[0][1].keys()) if 'svn:' not in k ])
       else:
         props = ()
     except:
@@ -621,7 +553,7 @@ class IndexEntry:
     if not self.folder:
       return 1
     cnt = 0
-    for item in self.items.itervalues():
+    for item in self.items.values():
       cnt += item.ItemCount()
     return cnt;
   def IsValid(self):
@@ -639,10 +571,10 @@ class IndexEntry:
     if not self.IsValid():
       return
     if self.parent:
-      print >> idx_file, indent + self.name
-      print >> idx_file, indent + format_info(self.stats, self.props)
+      print(indent + self.name, file=idx_file)
+      print(indent + format_info(self.stats, self.props), file=idx_file)
       indent += '\t'
-    for item in self.items.itervalues():
+    for item in self.items.values():
       item.SaveToFile(idx_file, indent)
 
 def filter_installer_file(only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
@@ -651,7 +583,7 @@ def filter_installer_file(only_prop=None, port_props = None, portable=False, enf
     stats, props = info(f, f)
     if props is None: continue
     prop_set = set(props)
-    if portable and external_files.has_key(f):
+    if portable and f in external_files:
       if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
           continue
     elif (enforce_only_prop or f not in all_zip_files) and ((only_prop is not None) and (only_prop not in prop_set)):
@@ -690,7 +622,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       prop_set = set(props)
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
-      if portable and external_files.has_key(f):
+      if portable and f in external_files:
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
       elif (enforce_only_prop or f not in all_zip_files) and\
@@ -718,7 +650,7 @@ if web_directory.endswith('/'):
   web_directory = web_directory[:-1]
 olex2_tag_file_name = web_directory+'/'+'olex2.tag'
 olex2_tag_file = open(olex2_tag_file_name, 'w+b')
-print >> olex2_tag_file, web_directory.split('/')[-1]
+print(web_directory.split('/')[-1], file=olex2_tag_file)
 olex2_tag_file.close()
 #end creating the tag file
 ####################################################################################################
@@ -726,7 +658,7 @@ olex2_tag_file.close()
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
   port_files = create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
   inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
-  print 'Creating portable zip: ' + zip_name
+  print('Creating portable zip: ' + zip_name)
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
   for f in inst_files:
@@ -736,17 +668,17 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.write(olex2_tag_file_name, prefix + 'olex2.tag')
   #process zip files - just extract - to add to the zip file
   for zip_name in port_zips:
-    print 'Appending ' + zip_name + '...'
+    print('Appending ' + zip_name + '...')
     src_zip = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
     for zip_info in src_zip.infolist():
       zi = zipfile.ZipInfo(prefix + zip_info.filename)
       zi.date_time = zip_info.date_time;
       zi.compress_type = zipfile.ZIP_DEFLATED
-      zi.external_attr = 0775 << 16L # it is NEEDED on Linux and Mac
+      zi.external_attr = 0o775 << 16 # it is NEEDED on Linux and Mac
       dest_zip.writestr(zi, src_zip.read(zip_info.filename) )
     src_zip.close()
   if extra_files:
-    for k,v in extra_files.iteritems():
+    for k,v in extra_files.items():
       dest_zip.write(k, v)
   dest_zip.close()
   return
@@ -847,9 +779,9 @@ if platforms.get("mac64"):
 
 #init plugin relations
 plugins_to_del = set()
-for p1, f1 in files_for_plugin.items():
+for p1, f1 in list(files_for_plugin.items()):
   p1_toks = p1.split('-')
-  for p2, f2 in files_for_plugin.items():
+  for p2, f2 in list(files_for_plugin.items()):
     p2_toks = p2.split('-')
     if len(p2_toks) <= len(p1_toks): continue
     matches = True
@@ -864,7 +796,7 @@ for p in plugins_to_del:
   del files_for_plugin[p]
 #create plugin zips with indexes
 plugin_index_file_name = update_directory + 'plugin.ind'
-for plugin, files in files_for_plugin.items():
+for plugin, files in list(files_for_plugin.items()):
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
@@ -886,7 +818,7 @@ os.unlink(zip_index_file_name)
 
 update_tags_file(web_directory)
 
-print 'Done'
+print('Done')
 
 if __name__ == '__main__':
   import sys

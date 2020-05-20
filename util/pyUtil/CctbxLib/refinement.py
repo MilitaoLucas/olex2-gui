@@ -1258,8 +1258,8 @@ The following options were used:
 
   def export_var_covar(self, matrix):
     with open(os.path.join(OV.FilePath(),OV.FileName()+".npy"), "wb") as wFile:
-      wFile.write("VCOV\n")
-      wFile.write(" ".join(matrix.annotations) + "\n")
+      wFile.write(b"VCOV\n")
+      wFile.write((" ".join(matrix.annotations) + "\n").encode())
       numpy.save(wFile, matrix.matrix.as_numpy_array())
 
   def f_obs_minus_f_calc_map(self, resolution):

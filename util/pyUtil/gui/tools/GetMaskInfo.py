@@ -111,7 +111,7 @@ def get_mask_info():
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
-  if numbers == [u'n/a']:
+  if numbers == ['n/a']:
     return return_note(note = "No Voids Found", col = gui_green)
 
   if not numbers:
@@ -220,7 +220,7 @@ def get_mask_info():
       entity, user_number = split_entity(entry)
       user_number = float(user_number)
       ent = moieties.get(entity.lower(), entity)
-      ent = formula_cleaner(unicode(ent))
+      ent = formula_cleaner(str(ent))
 
       try:
         Z, N = get_sum_electrons_from_formula(ent)
@@ -307,7 +307,7 @@ def get_mask_info():
     ent = moieties.get(entity.lower(), entity)
     ent_disp = ent.replace(" ", "")
     ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
-    ent = formula_cleaner(unicode(ent))
+    ent = formula_cleaner(str(ent))
 
     try:
       total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
@@ -481,21 +481,21 @@ def formula_cleaner(formula):
   n = ""
   i = 0
   for char in formula:
-    if unicode.isnumeric(char) or unicode.isspace(char) or unicode.islower(char):
+    if str.isnumeric(char) or str.isspace(char) or str.islower(char):
       continue
-    while unicode.isalpha(char):
+    while str.isalpha(char):
       i += 1
       if not el:
         el += char
       else:
-        if unicode.islower(char):
+        if str.islower(char):
           el += char
-        elif unicode.isupper(char):
+        elif str.isupper(char):
           n = "1"
           i -= 1
           break
       char = formula[i:(i+1)]
-    while unicode.isnumeric(char):
+    while str.isnumeric(char):
       i += 1
       n += char
       char = formula[i:(i+1)]
@@ -505,7 +505,7 @@ def formula_cleaner(formula):
     n = ""
     el = ""
   if debug:
-    print "%s --> %s" %(formula, retVal.strip())
+    print("%s --> %s" %(formula, retVal.strip()))
   cleaned_formulae[formula] = retVal
   return retVal.strip()
 
@@ -514,7 +514,7 @@ def update_metacif(sNum, file_name):
   pass
   ciflist = OV.GetCifMergeFilesList()
   if file_name not in ciflist:
-    gui.report.publication.add_cif_to_merge_list.im_func(file_name)
+    gui.report.publication.add_cif_to_merge_list.__func__(file_name)
   
   
   try:
@@ -567,7 +567,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
       cif_block[current_sNum][scope][scope2] = olx.cif_model[current_sNum][scope][scope2]
 
     with open(sqf_file, 'w') as f:
-      print >> f, cif_block
+      print(cif_block, file=f)
     
     if os.path.exists(sqf_file.replace(".sqf", ".cif")):
       CifInfo.MergeCif()
