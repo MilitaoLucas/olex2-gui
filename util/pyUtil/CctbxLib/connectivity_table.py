@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 from cctbx import crystal, sgtbx
 import libtbx
 
@@ -18,7 +18,7 @@ class connectivity_table(object):
     olx_conn = olx_rm.model['conn']
     self.radii = {}
     max_r = 0
-    for l, v in olx_conn['type'].items():
+    for l, v in list(olx_conn['type'].items()):
       r = v['radius']
       if r > max_r:
         max_r = r

@@ -1,7 +1,4 @@
 # cctbx_controller.py
-# py 2to3 compatibility
-from __future__ import print_function
-# END
 
 from my_refine_util import *
 import math
