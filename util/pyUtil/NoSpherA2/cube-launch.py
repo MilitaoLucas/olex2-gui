@@ -33,5 +33,5 @@ with open('NoSpherA2_cube.log', "rU") as stdout:
       sys.stdout.flush()
     time.sleep(1)
     
-print " "
+print(" ")
 os.system("pause")

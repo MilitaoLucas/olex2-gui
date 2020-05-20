@@ -1,5 +1,3 @@
-# py 2to3 compatibility
-
 import olex
 import olx
 import os
@@ -330,7 +328,7 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   total = len(file_list)
 
   if n > total:
-    print("There are only %s images, and you wanted to see %s" %(total, n))
+    print(("There are only %s images, and you wanted to see %s" %(total, n)))
     return
   inc = int(total/n)
   for j in range(n):
@@ -381,7 +379,7 @@ def remove_from_citation_list(item):
       l = ""
     OV.set_cif_item('_publ_section_references','\n\n'.join(current_refs))
   except Exception as err:
-    print("Error in 'report.remove_from_citation: %s" %err)
+    print(("Error in 'report.remove_from_citation: %s" %err))
 OV.registerFunction(remove_from_citation_list, False, "report")
 
 def add_to_citation_list(item):
@@ -395,7 +393,7 @@ def add_to_citation_list(item):
     new_list.sort()
     OV.set_cif_item('_publ_section_references','\n\n'.join(new_list))
   except Exception as err:
-    print("Error in 'report.add_to_citation: %s" %err)
+    print(("Error in 'report.add_to_citation: %s" %err))
 OV.registerFunction(add_to_citation_list, False, "report")
 
 def get_reflections_stats_dictionary():

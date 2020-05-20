@@ -2,7 +2,7 @@
 
 
 
-from __future__ import generators
+
 
 import os
 import os.path
@@ -437,10 +437,10 @@ class Node(object):
     """
     try:
       os.chmod(self.path, mode)
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
-  def make_directory(self, mode=0777):
+  def make_directory(self, mode=0o777):
     """ Make a directory at 'path' in the filesystem
       or raise NotADirectory if there is already a node of a different kind
       Note: returns self to make room for the syntaxic sugar
@@ -449,7 +449,7 @@ class Node(object):
     try:
       os.makedirs(str(self.path), mode)
       return self
-    except OSError, err:
+    except OSError as err:
       if err.errno == errno.EEXIST:
         return self
       else:
@@ -465,7 +465,7 @@ class Node(object):
     try:
       open(str(self.path),'a')
       return self
-    except OSError, err:
+    except OSError as err:
       if err.errno == errno.EEXIST:
         return self
       else:
@@ -482,7 +482,7 @@ class Node(object):
       nodes = [ NodeInfo(self.path / name) for name in dircache.listdir(str(self.path)) ]
       nodes = afilter.filter(nodes)
       return [ Node(info.path) for info in nodes ]
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def walk(self, pattern=None, afilter=None):
@@ -497,14 +497,14 @@ class Node(object):
       for child in self.list('*(/)'):
         for grandchild in child.walk(afilter=afilter):
           yield grandchild
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def rename(self, path):
     """ Changes the path of self to 'path' """
     try:
       os.renames(str(self.path), path)
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
     else:
       self.path = path
@@ -516,7 +516,7 @@ class Node(object):
     try:
       try:
         os.remove(str(self.path))
-      except OSError, err:
+      except OSError as err:
         if err.errno == errno.EPERM:
           self.remove_dir(empty=1)
         else:
@@ -534,7 +534,7 @@ class Node(object):
         os.rmdir(str(self.path))
       else:
         shutil.rmtree(str(self.path))
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def copy_file(self, path, overwrite=False, copy_access_times=False):
@@ -562,7 +562,7 @@ class Node(object):
       if copy_access_times:
         shutil.copymode(str(info.path), str(path))
       return Node(dst.path)
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def copy_into(self, path, copy_access_times=False):
@@ -579,7 +579,7 @@ class Node(object):
         shutil.copy(str(info.path), str(path))
       if copy_access_times:
         shutil.copystat(str(info.path), str(path))
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def change_working_directory(self):
@@ -594,7 +594,7 @@ class Node(object):
         os.chdir(str(self.path))
       else:
         os.chdir(str(self._restoration / self.path))
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def restore_working_directory(self):
@@ -607,7 +607,7 @@ class Node(object):
       if hasattr(self, '_restoration'):
         os.chdir(str(self._restoration))
         delattr(self, '_restoration')
-    except OSError, err:
+    except OSError as err:
       self._dispatch_exception(err)
 
   def open(self, mode='r', bufsize=-1, retry_after=0):
@@ -618,7 +618,7 @@ class Node(object):
     """
     try:
       return open(str(self.path), mode, bufsize)
-    except OSError, err:
+    except OSError as err:
       if retry_after > 0:
         time.sleep(retry_after)
         self.open(mode, bufsize, 0)
@@ -646,31 +646,31 @@ if __name__ == '__main__':
   def test_Path():
     import sys
     p = Path('~/foo/bar')
-    print "~/foo/bar == %s" % p
+    print("~/foo/bar == %s" % p)
     p = Path(sys.prefix)
     p = p / '..' / 'foo' / '.'
-    print "%s / .. / foo / . = %s" % (sys.prefix, p)
+    print("%s / .. / foo / . = %s" % (sys.prefix, p))
     for p in [Path("a/b/c/d/e/f"), Path("/a/b/c")]:
-      print
-      print "With p=%s," % p
-      print "p[0]=%s" % p[0]
-      print "p[1:3]=%s" % p[1:3]
-      print "... and all parts:"
+      print()
+      print("With p=%s," % p)
+      print("p[0]=%s" % p[0])
+      print("p[1:3]=%s" % p[1:3])
+      print("... and all parts:")
       for q in p:
-        print q
+        print(q)
     p = Path("a/b/c/d/e/f")
     q1 = Path("a/b/c/d/e/f/g/h/i")
     q2 = Path("a/b/c")
     q3 = Path("a/b/c/dd/ee")
     for q in (q1,q2,q3):
     #for q in (q2,):
-      print
-      print "With p=%s and q=%s:" % (p,q)
+      print()
+      print("With p=%s and q=%s:" % (p,q))
       common, p_leftover, q_leftover = p.common(q)
-      print "p = {%s} / {%s}" % (common, p_leftover)
-      print "q = idem / {%s}" % q_leftover
-      print "p from q = %s" % p.relative(q)
-    print
+      print("p = {%s} / {%s}" % (common, p_leftover))
+      print("q = idem / {%s}" % q_leftover)
+      print("p from q = %s" % p.relative(q))
+    print()
 
   def test_Path_Immutability():
     p = Path('foo')
@@ -678,89 +678,89 @@ if __name__ == '__main__':
     d = {}
     d[p] = 1
     d[q] = 2
-    for (k,v) in d.iteritems():
-      print "%s: %s" % (k,v)
-    print
+    for (k,v) in d.items():
+      print("%s: %s" % (k,v))
+    print()
 
   def test_Node(path):
     n = Node(path)
-    print "%s:" % n.path
+    print("%s:" % n.path)
     def yesno(flag):
       if flag: return 'yes'
       return 'no'
     info = n.info
-    print "\tdirectory?\t%s" % yesno(info.is_directory)
-    print "\treadable?\t%s" % yesno(info.has_permissions(NodeInfo.owner_readable))
-    print "\twritable?\t%s" % yesno(info.has_permissions(NodeInfo.owner_writable))
+    print("\tdirectory?\t%s" % yesno(info.is_directory))
+    print("\treadable?\t%s" % yesno(info.has_permissions(NodeInfo.owner_readable)))
+    print("\twritable?\t%s" % yesno(info.has_permissions(NodeInfo.owner_writable)))
 
   def test_Node_removal(path):
     import sys
     d = Node(path).make_directory()
-    print "Root: %s" % d.path
+    print("Root: %s" % d.path)
     d1 = Node(d.path / 'foo').make_directory()
     Node(d1.path / 'bar').make_directory()
     Node(d1.path / 'foo.txt').make_file()
     Node(d1.path / 'bar' / 'bar.txt').make_file()
     d2 = Node(d.path / 'bar').make_directory()
-    print "Created hierarchy:"
+    print("Created hierarchy:")
     for n in d.walk():
       if n.info.is_directory:
-        print "%s :" % n.path
+        print("%s :" % n.path)
       else:
-        print "\t%s" % n.path
+        print("\t%s" % n.path)
 
-    print "\nLet's try remove() on %s ..." % d2.path
+    print("\nLet's try remove() on %s ..." % d2.path)
     d2.remove()
-    print "Success!!"
-    print "Let's try remove_dir() on %s ..." % d1.path
+    print("Success!!")
+    print("Let's try remove_dir() on %s ..." % d1.path)
     try:
       d1.remove_dir()
     except NotEmptyADirectory:
-      print "Caught NotEmptyADirectory: fine!!"
-      print "Let's try remove_dir(empty=True) now ..."
+      print("Caught NotEmptyADirectory: fine!!")
+      print("Let's try remove_dir(empty=True) now ...")
       d1.remove_dir(empty=True)
-      print "Success!!"
+      print("Success!!")
 
-    print "\nPruned hierarchy:"
+    print("\nPruned hierarchy:")
     for n in d.walk():
       if n.info.is_directory:
-        print "%s :" % n.path
+        print("%s :" % n.path)
       else:
-        print "\t%s" % n.path
+        print("\t%s" % n.path)
 
 
   def test_Directory_chdir(path):
-    print "Starting in '%s'" % path
+    print("Starting in '%s'" % path)
     working = Node(".")
     working.change_working_directory()
     d = Node(path)
-    print "Working directory: %s" % os.getcwd()
+    print("Working directory: %s" % os.getcwd())
     d.change_working_directory()
-    print "Working directory is now %s" % os.getcwd()
+    print("Working directory is now %s" % os.getcwd())
     d.restore_working_directory()
-    print "Working directory back to its original value: %s" % os.getcwd()
+    print("Working directory back to its original value: %s" % os.getcwd())
 
   def test_Directory_walk(dir, pattern):
-    print "Nodes %s in this directory:" % pattern
+    print("Nodes %s in this directory:" % pattern)
     for n in Node(dir).list(pattern):
       if n.info.is_directory:
-        print "%s [Directory]" % n.path
+        print("%s [Directory]" % n.path)
       else:
-        print "%s" % n.path
-    print "\nNodes and subnodes %s in this directory:" % pattern
+        print("%s" % n.path)
+    print("\nNodes and subnodes %s in this directory:" % pattern)
     for n in Node(dir).walk(pattern):
       if n.info.is_directory:
-        print "%s :" % n.path
+        print("%s :" % n.path)
       else:
-        print "\t%s" % n.path
+        print("\t%s" % n.path)
 
   def test_time():
     n = NodeInfo("aljfaljffa")
-    print "date and time (inexistant file): %s" % n.last_access
+    print("date and time (inexistant file): %s" % n.last_access)
     n = NodeInfo("./FileSystem.py")
-    print "last access of this module: %s" % n.last_access
-    print "last access of this module: %s" % n.last_modification
-    print "last access of this module: %s" % n.last_status_change
+    print("last access of this module: %s" % n.last_access)
+    print("last access of this module: %s" % n.last_modification)
+    print("last access of this module: %s" % n.last_status_change)
 
   def test_copy(dir):
     d = Node(dir)
@@ -771,9 +771,9 @@ if __name__ == '__main__':
         d1.make_directory()
         d1.copy_file("copy")
       except NotAFile:
-        print "NotAFile raised: OK!"
+        print("NotAFile raised: OK!")
       else:
-        print "Eeek!!"
+        print("Eeek!!")
     finally:
       d1.remove()
     try:
@@ -784,9 +784,9 @@ if __name__ == '__main__':
         d2.make_directory()
         d1.copy_file("copy", overwrite=True)
       except NotAFile:
-        print "NotAFile raised: OK!"
+        print("NotAFile raised: OK!")
       else:
-        print "Eeek!!"
+        print("Eeek!!")
     finally:
       d1.remove()
       d2.remove()
@@ -798,9 +798,9 @@ if __name__ == '__main__':
         d2.make_file()
         d1.copy_file("copy", overwrite=False)
       except ExistingNode:
-        print "ExistingNode raised: OK!"
+        print("ExistingNode raised: OK!")
       else:
-        print "Eeek!"
+        print("Eeek!")
     finally:
       d1.remove()
       d2.remove()
@@ -816,13 +816,13 @@ if __name__ == '__main__':
         before = d2.info.size
         d1.copy_file("copy", overwrite=True)
       except ExistingNode:
-        print "Eeek!"
+        print("Eeek!")
       else:
         after = d2.info.size
         if before > after:
-          print "OK!"
+          print("OK!")
         else:
-          print "Eeek!"
+          print("Eeek!")
     finally:
       d1.remove()
       d2.remove()
@@ -832,12 +832,12 @@ if __name__ == '__main__':
         d1.make_file()
         d1.copy_file("copy")
       except FileSystemError:
-        print "Eeek!"
+        print("Eeek!")
       else:
         if NodeInfo("copy").exists:
-          print "OK!"
+          print("OK!")
         else:
-          print "Eeek!"
+          print("Eeek!")
     finally:
       d1.remove()
       d2.remove()
@@ -847,26 +847,26 @@ if __name__ == '__main__':
         d1.make_file()
         d1.copy_file("orig")
       except SystemError:
-        print "Eeek!!"
+        print("Eeek!!")
       else:
-        print "Copied onto itself. Nothing done."
+        print("Copied onto itself. Nothing done.")
     finally:
       d1.remove()
 
   def test_glob(pattern):
-    print "**[%s]**" % pattern
+    print("**[%s]**" % pattern)
     for p in NodeInfoFilter(pattern).glob():
-      print p.path
+      print(p.path)
 
   def test_open():
     tmp = Node("~/Developer/Tests/toto.txt").make_file()
     reader = tmp.open('r')
-    print reader.readline()
+    print(reader.readline())
     writer2 = tmp.open('w')
     writer2.write("something else")
     reader = tmp.open('r')
-    print reader.readline()
-    print reader.readline()
+    print(reader.readline())
+    print(reader.readline())
     reader.close()
     writer2.close()
     os.system("open ~/Developer/Tests/toto.txt")
@@ -881,4 +881,4 @@ if __name__ == '__main__':
   #test_copy("~/Tests")
   #test_Path_Immutability()
   test_open()
-  print
+  print()

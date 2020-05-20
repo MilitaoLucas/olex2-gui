@@ -16,11 +16,11 @@ class MakeMovie():
     self.size = OV.GetParam('snum.image.image_series.size_of_frames')
     self.filepath = OV.FilePath()
     
-    print "Making %i frames by rotating around axis %i in %.2f degree steps in size %.2f" %(self.frames, self.axis, self.steps, self.size)
+    print("Making %i frames by rotating around axis %i in %.2f degree steps in size %.2f" %(self.frames, self.axis, self.steps, self.size))
     path = "%s/movie" %(self.filepath)
     if not os.path.exists(path):
       os.mkdir(path)
-    for i in xrange(self.frames):
+    for i in range(self.frames):
       olx.Rota(self.axis, self.steps)
       OV.Refresh()
       if i > 99: number = i
@@ -74,7 +74,7 @@ class MakeMovie():
           continue
         rotations.append(degrees)
         totalrot+=degrees
-        print "Totalrot = %.3f" %(totalrot)
+        print("Totalrot = %.3f" %(totalrot))
     else:
       if self.maxdegree != 0:
         counter = rotation/self.maxdegree
@@ -87,7 +87,7 @@ class MakeMovie():
         rotations.append(degrees)
         totalrot+=degrees
         self.maxdegree = degrees
-        print "Totalrot = %.3f" %(totalrot)
+        print("Totalrot = %.3f" %(totalrot))
 
     if type == "end":
       rotations.reverse()
@@ -112,7 +112,7 @@ class MakeMovie():
         txt_zoom =  '    <cmd1 cmd="zoom eval((zoom()^.5 + %.4f)^2.2)"\\>\n' %(zoom)
       totaldegrees += degrees
       self.write_commands([txt_rota, txt_zoom])
-      print "Totaldegrees = %.3f" %totaldegrees
+      print("Totaldegrees = %.3f" %totaldegrees)
 
 
   if __name__ == '__main__':

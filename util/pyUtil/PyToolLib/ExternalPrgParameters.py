@@ -33,10 +33,10 @@ class ExternalProgramDictionary(object):
     if type(name) == str:
       return name in self.programs
     else:
-      return name in self.programs.values()
+      return name in list(self.programs.values())
 
   def __iter__(self):
-    return self.programs.itervalues()
+    return iter(self.programs.values())
 
 
 class Program(object):
@@ -58,10 +58,10 @@ class Program(object):
     if type(name) == str:
       return name in self.methods
     else:
-      return name in self.methods.values()
+      return name in list(self.methods.values())
 
   def __iter__(self):
-    return self.methods.itervalues()
+    return iter(self.methods.values())
 
   def addMethod(self, method):
     method.order = self.counter

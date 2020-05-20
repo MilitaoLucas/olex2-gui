@@ -69,12 +69,12 @@ class IndexFile:
             file._toFile(out, level+1)
     def _toFile(self, out, level):
         indent = "\t"*level
-        print >> out, indent + self.name
+        print(indent + self.name, file=out)
         if self.properties:
             props = ';'.join(self.properties)
         else:
             props = ''
-        print >> out, "%s%i,%i,{%s}" %(indent, self.epochTime, self.size, props)
+        print("%s%i,%i,{%s}" %(indent, self.epochTime, self.size, props), file=out)
         self.toFile(out, level)
                  
         

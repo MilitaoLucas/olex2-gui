@@ -329,7 +329,7 @@ class dimas_info(object):
     except:
       self.param = param
     self.debug = False
-    if self.debug: print self.basedir
+    if self.debug: print(self.basedir)
     self.dimas_d = {}
   
   def format_html_reference(self):
@@ -387,7 +387,7 @@ WHERE (((submission.ID)="%s"));
       self.archive('*')
 
     else:
-      print "Please enter an argument for the DIMAS tool: 'info', 'load' or 'archive'"
+      print("Please enter an argument for the DIMAS tool: 'info', 'load' or 'archive'")
 
   def test_tables(self):
     sNum = self.filename
@@ -395,7 +395,7 @@ WHERE (((submission.ID)="%s"));
     sql = "SELECT SubmitterID, AccountID, OperatorID FROM submission WHERE ID = '%s'" %(sNum)
     rs = ds.run_select_sql(sql)
     for entry in rs:
-      print entry
+      print(entry)
 
     tables = ["submission", "crystal", "progress"]
     for table in tables:
@@ -450,13 +450,13 @@ WHERE (((submission.ID)="%s"));
     import os, zlib
 
     dimasdir = datadir + r"\dimas\%s" %id
-    if self.debug: print dimasdir
+    if self.debug: print(dimasdir)
     resfile = dimasdir + r"\%s.ins" %id
     inspath = dimasdir + r"\%s.ins" %id
 
-    if self.debug: print resfile
+    if self.debug: print(resfile)
     hklfile = dimasdir + r"\%s.hkl" %id
-    if self.debug: print hklfile
+    if self.debug: print(hklfile)
 
     sql = """
 SELECT submission.ID, refinement_data.res, diffraction_data.hkl
@@ -465,7 +465,7 @@ WHERE (((submission.ID)='%s'));""" %(id)
 
     rs = ds.run_select_sql(sql, how=0)
     if not rs:
-      print "\n*** There is no hkl file deposited for structure %s\n" %id
+      print("\n*** There is no hkl file deposited for structure %s\n" %id)
       return
 
     if not os.path.isdir(dimasdir):
@@ -481,7 +481,7 @@ WHERE (((submission.ID)='%s'));""" %(id)
       hklfile = open(hklfile, 'w')
       hklfile.write(hkl)
       hklfile.close()
-      print inspath
+      print(inspath)
       if olx:
         import PilTools
         olx.Clear()
@@ -492,8 +492,8 @@ WHERE (((submission.ID)='%s'));""" %(id)
 #        makeImage = PilTools.sNumTitle(width, tool_arg)
 #        makeImage.run()
       else:
-        print "*cmd=clear"
-        print "*cmd=reap '%s'" %inspath
+        print("*cmd=clear")
+        print("*cmd=reap '%s'" %inspath)
 
   def sql_get_reference(self):
     sNum = self.filename
@@ -558,7 +558,7 @@ WHERE (((submission.ID)="%s"));
       OV.SetVar("DateSubmitted",d.get("DateSubmitted", 'Unknown'))
       OV.SetVar("preparation",d.get("preparation", 'Unknown'))
     else:
-      print "No dimas_d dictionary"
+      print("No dimas_d dictionary")
 
   def reset_olex_variables(self):
     d = self.dimas_d
@@ -578,9 +578,9 @@ WHERE (((submission.ID)="%s"));
       return
     txt = []
     if not d:
-      print "This structure is not in the DIMAS database"
+      print("This structure is not in the DIMAS database")
       txt = self.test_tables()
-      print txt
+      print(txt)
       return
     ID = d.get("ID", r"n/a")
     operator = d.get("operator_fullnames.display", r"n/a")
@@ -610,8 +610,8 @@ WHERE (((submission.ID)="%s"));
     txt.append("+" * maxlen)
 
     for line in txt:
-      print line
-    print
+      print(line)
+    print()
     self.txt = txt
 
 
@@ -650,7 +650,7 @@ WHERE (((submission.ID)="%s"));
     elif sNum[:1] == "0":
       prefix = "20"
     else:
-      print "This structure does not conform to naming conventions and can not be archived at present"
+      print("This structure does not conform to naming conventions and can not be archived at present")
       return
 
     year = prefix + sNum[:2]
@@ -669,7 +669,7 @@ WHERE (((submission.ID)="%s"));
     for fullpath in glob.glob(os.path.join(directory)):
       info = os.stat(fullpath)
     if not info:
-      yn = raw_input("Folder %s does not exist. Do you want to create it? [n]\n"%(directory))
+      yn = input("Folder %s does not exist. Do you want to create it? [n]\n"%(directory))
       if yn == "yes" or yn == "y":
         os.mkdir(directory)
       else:
@@ -681,8 +681,8 @@ WHERE (((submission.ID)="%s"));
       info = os.stat(fullpath)
     yn = ''
     if info:
-      print directory
-      print "This structure is already archived"
+      print(directory)
+      print("This structure is already archived")
       #yn = raw_input("Do you want to add to this folder? [n]\n")
       yn = 'y'
     else:
@@ -707,10 +707,10 @@ WHERE (((submission.ID)="%s"));
         file = directory + "\\" + filename
         try:
           FS.Node("%s\\%s" %(filepath, filename)).copy_file((file),overwrite=False)
-          print "--> %s " %file
+          print("--> %s " %file)
           res = self.uploadFiles(file, sNum)
         except FS.ExistingNode:
-          print "The file %s already exists!" %filename
+          print("The file %s already exists!" %filename)
         except:
           try:
             f = filepath.split("\\")
@@ -718,15 +718,15 @@ WHERE (((submission.ID)="%s"));
             for i in range (len(f) -1):
               level_up += "%s\\" %f[i]
               i += 1
-            print level_up
+            print(level_up)
             FS.Node("%s\\%s" %(level_up, filename)).copy_file((file),overwrite=False)
-            print "--> %s " %file
+            print("--> %s " %file)
             res = self.uploadFiles(file, sNum)
           except:
-            print "The file %s appears to be missing" %filename
+            print("The file %s appears to be missing" %filename)
 
     else:
-      print "Good Bye"
+      print("Good Bye")
 
   def dimas_cif(self):
     basename = self.filename

@@ -507,7 +507,7 @@ class RunRefinementPrg(RunPrg):
         self.startRun()
         try:
           self.setupRefine()
-          OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+          OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
           self.setupFiles()
         except Exception as err:
           sys.stderr.formatExceptionInfo()
@@ -553,7 +553,7 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.pruneU:
       i = 0
       uref = 0
-      for i in xrange(int(olx.xf.au.GetAtomCount())):
+      for i in range(int(olx.xf.au.GetAtomCount())):
         ueq = float(olx.xf.au.GetAtomUiso(i))
         if uref:
           if uref == ueq:
@@ -815,8 +815,8 @@ class RunRefinementPrg(RunPrg):
       with open(fab_path, "w") as f:
         for i,h in enumerate(f_mask.indices()):
           line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
-          print >> f, line
-        print >> f, "0 0 0 0.0 0.0"
+          print(line, file=f)
+        print("0 0 0 0.0 0.0", file=f)
       return f_mask
 
   def make_fcf(self):
@@ -825,7 +825,7 @@ class RunRefinementPrg(RunPrg):
     self.startRun()
     try:
       self.setupRefine()
-      OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+      OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
       self.setupFiles()
     except Exception as err:
       sys.stderr.formatExceptionInfo()
@@ -976,7 +976,7 @@ class RunRefinementPrg(RunPrg):
         self.startRun()
         try:
           self.setupRefine()
-          OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+          OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
           self.setupFiles()
         except Exception as err:
           sys.stderr.formatExceptionInfo()
@@ -1225,7 +1225,7 @@ def delete_stale_fcf():
     if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
       return True
     else:
-      print ("Deleting stale fcf: %s" %fcf)
+      print("Deleting stale fcf: %s" %fcf)
       os.remove(fcf)
       if OV.HasGUI():
         import gui

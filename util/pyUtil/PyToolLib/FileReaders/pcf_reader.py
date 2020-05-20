@@ -38,17 +38,17 @@ class pcf_reader:
       with open(self.path, 'rb') as f:
         pcf = {}
         cif_block = iotbx.cif.reader(file_object=f).model()
-        dn = cif_block.keys()[0]
+        dn = list(cif_block.keys())[0]
         cif_block = cif_block[dn]
         for i in self.items:
           val = cif_block.get(i, ".")
-          if isinstance(val, basestring):
+          if isinstance(val, str):
             if val in self.ignore:
               continue
             val = self.value_exceptions(i, val)
           pcf[i] = val
         return pcf
-    except Exception, e:
+    except Exception as e:
       return self.read_pcf_old()
 
   def read_pcf_old(self):
@@ -77,4 +77,4 @@ class pcf_reader:
 if __name__ == '__main__':
   a = pcf_reader('C:/datasets/Richard 4th year project/Crystals/06rjg003/work/rjg003_m.pcf')
   info = a.read_pcf()
-  print
+  print()

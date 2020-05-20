@@ -10,7 +10,7 @@ have_help = True
 global helpIsInitialised
 helpIsInitialised = False
  
-import cPickle as pickle
+import pickle as pickle
 
 import olex
 import olx
@@ -20,14 +20,14 @@ p_path = os.path.dirname(os.path.abspath(__file__))
 OV.SetVar('help_path', p_path)
 
 try:
-  import markdown2
+  from . import markdown2
   if debug:
-    print "markdown2 imported!"
-except Exception, err:
-  print err
+    print("markdown2 imported!")
+except Exception as err:
+  print(err)
   with open(os.path.join(p_path, 'markdown2.pyo'), 'r') as f:
     markdown2 = imp.load_compiled('markdown2', os.path.join(p_path, 'markdown2.pyo'))
-  print "markdown2 imported through imp."
+  print("markdown2 imported through imp.")
 
 from PluginTools import VFSDependent
 class GetHelp(VFSDependent):
@@ -79,7 +79,7 @@ class GetHelp(VFSDependent):
     import HttpTools
     try:
       res = HttpTools.make_url_call(url, values = '', http_timeout=5)
-    except Exception, err:
+    except Exception as err:
       return None
     return res
 
@@ -132,7 +132,7 @@ class GetHelp(VFSDependent):
       help = help.split("</h1>")[1].strip()
       OV.SetVar(var, help)
       if debug:
-        print "  - %s" %var
+        print("  - %s" %var)
 
   def format_html(self, txt):
     while "\n" in txt:
@@ -162,7 +162,7 @@ class GetHelp(VFSDependent):
           copy_to = os.path.join(builtin_help_location, cp_file)
           copyfile(copy_from, copy_to)
       except:
-        print "Can not copy files; most probably Olex2 was not started in Admin Mode"
+        print("Can not copy files; most probably Olex2 was not started in Admin Mode")
 
       if "false" in repr(quick).lower():
         quick = False
@@ -178,11 +178,11 @@ class GetHelp(VFSDependent):
 
 
       if os.path.exists(all_help):
-        print "Deleting builtin help at %s" %all_help
+        print("Deleting builtin help at %s" %all_help)
         try:
           os.remove(all_help)
-        except Exception, err:
-          print "Can not remove all_help: %s" %err
+        except Exception as err:
+          print("Can not remove all_help: %s" %err)
 
     matches = []
 
@@ -194,13 +194,13 @@ class GetHelp(VFSDependent):
       return
 
     if debug:
-      print "Building help icon text"
-      print "======================="
+      print("Building help icon text")
+      print("=======================")
 
     for var,md_path in matches:
       if debug:
-        print md_path
-      fc = (open(md_path,'r').read())
+        print(md_path)
+      fc = open(md_path,'rb').read().decode("utf-8")
       fc = fc.replace("####", "@@@@")
       fc = fc.replace("###", "@@@")
       fc = fc.replace("##", "@@")
@@ -261,8 +261,8 @@ class GetHelp(VFSDependent):
             wFile.write(var_dis)
             wFile.write(help)
             wFile.close()
-          except Exception, err:
-            print "-->> " + var + "--" + repr(err)
+          except Exception as err:
+            print("-->> " + var + "--" + repr(err))
             try:
               wFile.write(repr(help))
               wFile.close()
@@ -278,7 +278,7 @@ class GetHelp(VFSDependent):
         OV.SetVar(var, help)
 #        self.help[var] = help
         if debug:
-          print "  - %s" %var
+          print("  - %s" %var)
     #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
 
 
@@ -494,7 +494,7 @@ def get_template(name, base_path=None):
   return gui.tools.TemplateProvider.get_template(name)
 
 
-from Tutorials import AutoDemo
+from .Tutorials import AutoDemo
 class AutoDemoTemp(AutoDemo):
   def __init__(self, name='default_auto_tutorial', reading_speed=2):
     super(AutoDemoTemp, self).__init__(name='default_auto_tutorial', reading_speed=2)
@@ -510,7 +510,7 @@ class AutoDemoTemp(AutoDemo):
     t = ""
     for item in g:
       if debug:
-        print item
+        print(item)
       item_name = os.path.basename(item).split(".txt")[0]
 
       href = "spy.demo.run_autodemo(item_name)"
@@ -611,8 +611,8 @@ class AutoDemoTemp(AutoDemo):
       cmd_type = self.run_demo_item()
 
 
-    except Exception, err:
-      print "+++ ERROR IN TUTORIALS: %s" %err
+    except Exception as err:
+      print("+++ ERROR IN TUTORIALS: %s" %err)
       sys.stderr.formatExceptionInfo()
       self.end_tutorial()
 
@@ -624,7 +624,7 @@ class AutoDemoTemp(AutoDemo):
     _ = os.path.join(self.source_dir, self.name + ".txt")
     self.current_tutorial_file = _
     if debug:
-      print "opening %s" %self.current_tutorial_file
+      print("opening %s" %self.current_tutorial_file)
     rFile = gui.file_open(_,mode='r',base=p_path)
     l = rFile.split("\n")
     self.items = self.items + l

@@ -374,7 +374,7 @@ class reader(object):
         if url:
           keywords = self.get_url_keywords(url)
           if 'google' in url and 'q' in keywords:
-            print(('%s\t%s' %(ip,keywords['q'])))
+            print('%s\t%s' %(ip,keywords['q']))
         access_time = self.get_access_time(line)
 
         if ip not in users:

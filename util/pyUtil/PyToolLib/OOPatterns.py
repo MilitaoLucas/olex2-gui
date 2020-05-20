@@ -53,7 +53,7 @@ class Null(object):
   def __call__(self, *args, **kwargs): return self
   def __str__(self): return 'Null'
   def __repr__(self): return 'Null()'
-  def __nonzero__(self): return False
+  def __bool__(self): return False
   def __eq__(self, other): return isinstance(other,Null)
   def __gt__(self, other): return False
   def __lt__(self, other): return False
@@ -101,22 +101,22 @@ if __name__ == '__main__':
   proxy.y = "yy"
   assert(subject.y == 'yy')
   assert(proxy.msg() == "foo!")
-  print "**** Proxy test succeeded!!! ****"
+  print("**** Proxy test succeeded!!! ****")
   proxy=Proxy("toto", alias="titi", others={'ga':'bo'})
   assert(proxy.titi == "toto")
   assert(proxy.ga == 'bo')
-  print
+  print()
 
   # Test Null #
 
   null = Null()
   if(not null):
-    print "An instance of Null has a boolean value of 0: fine!"
+    print("An instance of Null has a boolean value of 0: fine!")
   else:
-    print "Eeekk!!"
-  print "String representation: %s" % null
-  print "Return value of non-existing method as string: %s" % null.foo(1,4,5)
-  print "Comparison (equality): %s, %s" % (null == [5,6], null == Null("??"))
-  print "Comparison (strict): %s, %s" % (null > 3, null < 4)
-  print "Comparison : %s, %s" % (null >= 3, null <= 4)
-  print
+    print("Eeekk!!")
+  print("String representation: %s" % null)
+  print("Return value of non-existing method as string: %s" % null.foo(1,4,5))
+  print("Comparison (equality): %s, %s" % (null == [5,6], null == Null("??")))
+  print("Comparison (strict): %s, %s" % (null > 3, null < 4))
+  print("Comparison : %s, %s" % (null >= 3, null <= 4))
+  print()

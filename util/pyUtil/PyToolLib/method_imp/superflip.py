@@ -39,7 +39,7 @@ class Method_Superflip(Method_solution):
       'cleanup': 'true',
       'use_centering' : 'true'
     }
-    for k,v in defaults.iteritems():
+    for k,v in defaults.items():
       olx.SetVar("%s.%s" %(prefix,k), v)
 
 

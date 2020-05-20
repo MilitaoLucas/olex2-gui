@@ -537,9 +537,9 @@ def restraint_builder(cmd):
     "DIANG":["name_DIANG", "var_n: ", "help_diang-htmhelp", "cmd_restrain dihedral"],
   }
 
-  if atom_pairs.has_key(cmd):
+  if cmd in atom_pairs:
     l = atom_pairs[cmd]
-  elif atom_names.has_key(cmd):
+  elif cmd in atom_names:
     l = atom_names[cmd]
   else:
     return "Unknow restraint/constraint"

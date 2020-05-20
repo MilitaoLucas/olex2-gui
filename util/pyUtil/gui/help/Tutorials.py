@@ -53,7 +53,7 @@ class AutoDemo(object):
       self.font_colour_code = '#222222'
       self.font_colour_bold = '#555555'
 
-    if type(c) is long:
+    if type(c) is int:
       c = IT.decimalColorToHTMLcolor(int(olx.gl.lm.ClearColor()))
 
     self.bg_colour = c
@@ -83,7 +83,7 @@ class AutoDemo(object):
     for item in self.items:
       #if OV.FindValue('stop_current_process'):
       if OV.GetParam('olex2.stop_current_process'):
-        print "AutoTutorial Interrupted!"
+        print("AutoTutorial Interrupted!")
         #OV.SetVar('stop_current_process',False)
         OV.SetParam('olex2.stop_current_process',False)
         self.end_tutorial()
@@ -114,8 +114,8 @@ class AutoDemo(object):
       cmd_type = self.run_demo_item()
 
 
-    except Exception, err:
-      print "+++ ERROR IN TUTORIALS: %s" %err
+    except Exception as err:
+      print("+++ ERROR IN TUTORIALS: %s" %err)
       self.end_tutorial()
 
     #please_exit = False

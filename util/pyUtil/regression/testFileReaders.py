@@ -18,7 +18,7 @@ class FileReaderTestCase(unittest.TestCase):
     if hasattr(FileReader, 'cifItems'):
       self.assertEqual(FileReader.cifItems(), expected)
     else:
-      self.assertEqual(FileReader.values(), expected)
+      self.assertEqual(list(FileReader.values()), expected)
     return FileReader
 
   def test_bruker_frames(self):
