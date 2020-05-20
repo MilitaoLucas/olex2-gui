@@ -1,15 +1,16 @@
 import olex
 import olex_fs
+import io
 
 class ImageWriter:
   def init(self):
     self.position = 0
-    self.data = ""
+    self.data = b""
     self.name = ""
 
   def setName(self, name):
     self.name = name
-    self.data = ""
+    self.data = b""
 
   def endWrite(self, isPersistent):
     if self.data:
@@ -36,7 +37,7 @@ def save_image_to_olex(image, name, isPersistent=0):
   ImageToOlexWriter.endWrite(isPersistent)
 
 def write_to_olex(filename, data, isPersistent=0):
-  if isinstance(data, unicode):
+  if isinstance(data, str):
     data = data.encode("utf-8")
   olex.writeImage(filename, data, isPersistent)
 

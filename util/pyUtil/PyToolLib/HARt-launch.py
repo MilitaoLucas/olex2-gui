@@ -25,10 +25,10 @@ with open(out_fn, "rU") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:
-      print x
+      print(x)
     time.sleep(3)
 with open(err_fn, "rU") as stderr:
-  print stderr.read()
+  print(stderr.read())
 
-print "Finished"
+print("Finished")
 os.system("pause")

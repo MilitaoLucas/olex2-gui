@@ -149,7 +149,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     elif personal==2: #Sphere Search
       twin_laws=self.find_SS_twin_laws()
     else:
-      print(("Invalid parameter passed, personal=", personal))
+      print("Invalid parameter passed, personal=", personal)
 
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     ordered_twins=self.purge_duplicates(ordered_twins)
@@ -1315,7 +1315,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     for i,vec0 in enumerate(hkl_choice):
       if len(twin_laws)>3:
-        print(("Twin laws found on try " + str(i)))
+        print("Twin laws found on try " + str(i))
         break
       viable_rotation_points+=[self.find_same_distance_points(vec0,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
@@ -1431,7 +1431,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     for i,v in enumerate(hkl_choice):
       if len(twin_laws)>number_laws:
-        print(("Twin laws found on try " + str(i)))
+        print("Twin laws found on try " + str(i))
         break
       viable_rotation_points+=[self.find_same_distance_points(v,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
@@ -1642,8 +1642,8 @@ def on_twin_image_click(run_number):
 
 
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
-    print(("Using twin law: %s" %twin_law_disp))
-    print ("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
+    print("Using twin law: %s" %twin_law_disp)
+    print("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
     olx.HKLF(2)
@@ -1652,8 +1652,8 @@ def on_twin_image_click(run_number):
     hklname="%s_twin%02d.hkl"%(OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl"), int(run_number))
     OV.HKLSrc(hklname)
   else:
-    print(("Using twin law: %s" %twin_law_disp))
-    print ("This is an integral twin law, and twinning will be handled by the refinement program.")
+    print("Using twin law: %s" %twin_law_disp)
+    print("This is an integral twin law, and twinning will be handled by the refinement program.")
     OV.DelIns("TWIN")
     olx.HKLF(0)
     OV.DelIns("BASF")

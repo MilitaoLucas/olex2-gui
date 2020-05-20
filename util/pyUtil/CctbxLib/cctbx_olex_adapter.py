@@ -1,5 +1,3 @@
-
-
 import os, sys
 import olx
 import OlexVFS
@@ -859,9 +857,9 @@ def charge_flipping_loop(solving, verbose=True):
       if verbose == "highly":
         if previous_state is not solving.guessing_delta:
           print("Guessing delta...")
-          print(("%10s | %10s | %10s | %10s | %10s | %10s | %10s"
+          print("%10s | %10s | %10s | %10s | %10s | %10s | %10s"
                  % ('delta', 'delta/sig', 'R', 'F000',
-                    'c_tot', 'c_flip', 'c_tot/c_flip')))
+                    'c_tot', 'c_flip', 'c_tot/c_flip'))
           print("-"*90)
         rho = flipping.rho_map
         c_tot = rho.c_tot()

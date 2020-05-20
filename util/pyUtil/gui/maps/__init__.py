@@ -72,7 +72,7 @@ class MapUtil:
   def void_observer(self, msg):
     try:
       if "penetrated" in msg:
-        print "@@@@@@@@@@@@@@@@@@@@@@@@@"
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@")
         self.void_html += msg
     except:
       pass
@@ -164,8 +164,8 @@ class MapUtil:
     map_minimum = round(minimum*10,0)/10
 
     if debug:
-      print "Map Maximum = %s (%s)" %(map_maximum, maximum)
-      print "Map Minimum = %s (%s)" %(map_minimum, minimum)
+      print("Map Maximum = %s (%s)" %(map_maximum, maximum))
+      print("Map Minimum = %s (%s)" %(map_minimum, minimum))
 
 
     if maximum > 0 and minimum < 0:
@@ -175,7 +175,7 @@ class MapUtil:
 
     step = round((difference/contours) * 100, 0)/100
     if debug:
-      print "Map Step = %s" %(step)
+      print("Map Step = %s" %(step))
 
     OV.SetParam('snum.xgrid.step',step)
     OV.SetParam('snum.xgrid.fix',map_minimum)
@@ -245,10 +245,10 @@ class MapUtil:
     map_value = int(round(float(olx.xgrid.Scale()) * slider_scale))
     self.value = map_value
 
-    print "slider_scale: %s" %slider_scale
-    print "map_min: %s" %map_min
-    print "map_max: %s" %map_max
-    print "map_value: %s" %map_value
+    print("slider_scale: %s" %slider_scale)
+    print("map_min: %s" %map_min)
+    print("map_max: %s" %map_max)
+    print("map_value: %s" %map_value)
 
     s = abs(slider_scale)
     if 0 <= s < 15:

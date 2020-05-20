@@ -68,7 +68,7 @@ class decrypt_file():
       doc = fd.read()
       fd.close()
     else:
-      print "No demo licence file found."
+      print("No demo licence file found.")
       return False
 #      self.sign_file(cr1, cr2, file_name)
 #      return self.fileContent
@@ -79,10 +79,10 @@ class decrypt_file():
     sig = fd.read()
     fd.close()
     if k.verifyString(doc, sig):
-      print "Verification successful - signature is authentic"
+      print("Verification successful - signature is authentic")
       return doc
     else:
-      print "Verification failed - bad signature"
+      print("Verification failed - bad signature")
       return False
       
     

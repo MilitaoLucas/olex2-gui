@@ -108,5 +108,5 @@ class reader:
 
 if __name__ == '__main__':
   a = BrukerFrame('C:/datasets/08srv071/frm071_1.001')
-  print a.cifItems()
-  print a.saint_cfg()
+  print(a.cifItems())
+  print(a.saint_cfg())

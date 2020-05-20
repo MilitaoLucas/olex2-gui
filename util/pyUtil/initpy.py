@@ -88,7 +88,7 @@ def our_sys_exit(i):
     e = sys.on_sys_exit_raise
     sys.on_sys_exit_raise = None
     raise e
-  print(("Terminate with %i" %i))
+  print("Terminate with %i" %i)
 sys.exit = our_sys_exit
 
 class StreamRedirection:
@@ -147,12 +147,12 @@ class StreamRedirection:
           print(">>>>> ERROR (formatExceptionInfo)")
       args = {}
       try:
-        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
+        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().__next__):
           if ttype == tokenize.NAME and token in frame.f_locals:
             args[token] = frame.f_locals[token]
         if args:
           sys.stderr.write('Key variable values:\n')
-          for var,val in args.items():
+          for var,val in list(args.items()):
             sys.stderr.write('\t%s = %s\n' % (var, repr(val)))
       except inspect.tokenize.TokenError:
         pass
@@ -233,7 +233,7 @@ try:
   import olx
 except Exception as e:
   try:
-    x = os.getcwdu()
+    x = os.getcwd()
   except AttributeError:
     x = os.getcwd()
   os.chdir(datadir)
@@ -254,7 +254,7 @@ if timer:
 
 olx.Clear()
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
 

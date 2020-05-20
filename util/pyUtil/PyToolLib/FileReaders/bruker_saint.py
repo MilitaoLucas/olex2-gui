@@ -32,4 +32,4 @@ class reader:
 if __name__ == '__main__':
   a = bruker_saint('C:/datasets/08srv071/work/saint.ini')
   saint = a.cifItems()
-  print
+  print()

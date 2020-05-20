@@ -1,4 +1,4 @@
-from __future__ import division
+
 import olex
 import olx
 import olexex
@@ -150,16 +150,16 @@ def flash_gui_control(control, wait=300):
 
   control_name = "IMG_%s" %control.upper()
   if '@' in control:
-    print "@ in control"
+    print("@ in control")
     control_image = control.lower().split('@')[0]
   else:
     control_image = control
 
   if not olx.fs.Exists("%son.png" %control_image):
-    print "This image %s does not exist. So I can't make it blink" %control_image
+    print("This image %s does not exist. So I can't make it blink" %control_image)
     return
 
-  for i in xrange(n):
+  for i in range(n):
     if "element" in control:
       new_image = "up=%son.png" %control_image
       olx.html.SetImage(control_name,new_image)
@@ -255,7 +255,7 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
   else:
     file_to_write_to = r'%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), location)
   if not os.path.exists(file_to_write_to):
-    print "This location does not exist: %s" %file_to_write_to
+    print("This location does not exist: %s" %file_to_write_to)
     file_to_write_to = '%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), "tools")
     before = "top"
 
@@ -358,7 +358,7 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   global last_formula
   global last_element_html
   model_formula = olexex.OlexRefinementModel().currentFormula()
-  mf = ["%s:%s" %(x, model_formula[x]) for x in model_formula.iterkeys()]
+  mf = ["%s:%s" %(x, model_formula[x]) for x in model_formula.keys()]
   mf.sort()
 
   formula = olx.xf.GetFormula('list')
@@ -560,7 +560,7 @@ def get_mask_info_old():
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
-  if numbers == [u'n/a']:
+  if numbers == ['n/a']:
     return "no mask info"
 
   if not numbers:
@@ -797,7 +797,7 @@ def weightGuiDisplay_new():
   suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
   if suggested_weight is None: suggested_weight = []
   if len(suggested_weight) < length_current:
-    for i in xrange (length_current - len(suggested_weight)):
+    for i in range (length_current - len(suggested_weight)):
       suggested_weight.append(0)
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
@@ -842,7 +842,7 @@ def weightGuiDisplay():
   suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
   if suggested_weight is None: suggested_weight = []
   if len(suggested_weight) < length_current:
-    for i in xrange (length_current - len(suggested_weight)):
+    for i in range (length_current - len(suggested_weight)):
       suggested_weight.append(0)
   if suggested_weight:
     d = {}
@@ -1043,8 +1043,8 @@ def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=Non
       replace = pair[1].strip('"')
       try:
         txt = regex.sub(r"%s" %replace, txt)
-      except Exception, err:
-        print err
+      except Exception as err:
+        print(err)
     if timer:
       print_timer(tt, t_timer, pad="    ", sep="..")
   except Exception:
@@ -1067,7 +1067,7 @@ class LogListen():
     for item in self.printed:
       item = item.split('\r\n')
       for tem in item:
-        if type(tem) == unicode:
+        if type(tem) == str:
           l.append(tem)
         else:
           for em in tem:
@@ -1176,7 +1176,7 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
   op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
   if op == "between":
     soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(scope, item))
-  for i in xrange(4):
+  for i in range(4):
     i += 1
     if op == "greater":
       if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
@@ -1363,7 +1363,7 @@ def GetRInfo(txt="",d_format='html'):
           R1 = 'n/s'
           return R1
           
-  if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None) and cache.has_key('GetRInfo'):
+  if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None) and 'GetRInfo' in cache:
     if d_format == 'html':
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
@@ -1462,7 +1462,7 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
-from GetMaskInfo import get_mask_info
+from .GetMaskInfo import get_mask_info
 
 global twinlawsfromhklsrc
 twinlawsfromhklsrc = {}
@@ -1509,7 +1509,7 @@ def hklf_5_to_4(filename):
       hklf4.write(line[:-2]+"\n")
   base_file.close()
   hklf4.close()
-  print "done. HKLF4 base file at %s"%hklf4name
+  print("done. HKLF4 base file at %s"%hklf4name)
   return
 OV.registerFunction(hklf_5_to_4, False, 'tools')
 

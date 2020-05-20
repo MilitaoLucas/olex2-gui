@@ -48,7 +48,7 @@ def getAuthenticationToken(force=False):
   if not force and os.path.exists(tfn):
     import time
     fst = os.stat(tfn)
-    tdiff = long(time.time()) - fst.st_ctime
+    tdiff = int(time.time()) - fst.st_ctime
     #read cache only if within 36 days of creation
     if tdiff < 60*60*24*36:
       with open(tfn, "r") as tf:
@@ -72,7 +72,7 @@ def getAuthenticationToken(force=False):
             at = f
         else:
           at = ats.split(";")[-1]
-      except Exception, e:
+      except Exception as e:
         print("Failed to match the authentication tokens %s" %str(e))
         at = _plgl.createAuthenticationToken()
     else:
@@ -115,7 +115,7 @@ def getModule(name, email=None):
       with open(etoken_fn, "wb") as efn:
         efn.write(f)
       etoken = f
-    except Exception, e:
+    except Exception as e:
       msg = '''
 <font color='%s'><b>An error occurred while downloading the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
@@ -179,7 +179,7 @@ def getModule(name, email=None):
           ##del available_modules[idx]
         ##getAvailableModules()
       return True
-  except Exception, e:
+  except Exception as e:
     msg = '''
 <font color='%s'><b>An error occurred while installing the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
@@ -189,7 +189,7 @@ def getModule(name, email=None):
 
 
 def rollback(d):
-  print "Rolling back extension module %s" %d
+  print("Rolling back extension module %s" %d)
   update_or_install(d,rollback=True)
 
 def update_or_install(d, rollback=False):
@@ -215,10 +215,10 @@ def update_or_install(d, rollback=False):
           if not rollback:
             rollback_zip = os.path.join("%s.rollback" %pdir)
             shutil.make_archive(rollback_zip, 'zip', pdir)
-            print "The original module %s has been backed up." %d
+            print("The original module %s has been backed up." %d)
           shutil.rmtree(pdir)
-        except Exception, e:
-          print "The original module %s could not be removed" %d
+        except Exception as e:
+          print("The original module %s could not be removed" %d)
           return False
     try:
       from zipfile import ZipFile
@@ -228,20 +228,20 @@ def update_or_install(d, rollback=False):
         path = os.path.join(m_dir, d)
       zp.extractall(path=path)
       zp.close()
-      print "Module %s has been installed/updated" %d
+      print("Module %s has been installed/updated" %d)
       retVal = True
     except:
-      print "Module %s is no longer present" %d
+      print("Module %s is no longer present" %d)
       return False
     try:
       os.remove(update_zip)
       retVal = True
     except:
-      print "Update file for module %s could not be removed" %d
+      print("Update file for module %s could not be removed" %d)
       return False
     return retVal
   else:
-    print "This function expected the file %s, but it could not be found." %update_zip
+    print("This function expected the file %s, but it could not be found." %update_zip)
     return False
 
 def loadAll():
@@ -272,7 +272,7 @@ def loadAll():
     try:
       if _plgl.loadPlugin(d, key, m_dir):
         print("Module %s has been successfully loaded." %d)
-    except Exception, e:
+    except Exception as e:
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
@@ -285,7 +285,7 @@ def updateKey(module):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  if isinstance(module, basestring):
+  if isinstance(module, str):
     found = False
     if available_modules:
       for m in available_modules:
@@ -294,7 +294,7 @@ def updateKey(module):
           found = True
           break
     if not found:
-      print "No modules information available"
+      print("No modules information available")
       return
   try:
     m_dir = getModulesDir()
@@ -322,13 +322,13 @@ def updateKey(module):
         print("Module %s has been successfully loaded." %(module.name))
         module.action = 0
         return True
-    except Exception, e:
+    except Exception as e:
       msg = e.message
       if "is expired" in e.message:
         msg = "The key has expired."
       print("Error while reloading '%s': %s" %(module.name, msg))
       return False
-  except Exception, e:
+  except Exception as e:
     if debug:
       sys.stdout.formatExceptionInfo()
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
@@ -443,9 +443,9 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
     mdir = getModulesDir() + os.sep + name
     try:
       shutil.rmtree(mdir)
-      print "%s has been deleted" %name
+      print("%s has been deleted" %name)
     except:
-      print "Could not delete %s. Is this folder open?" %name
+      print("Could not delete %s. Is this folder open?" %name)
   else:
     recordFeedback(d['email'], token, name)
 
@@ -510,7 +510,7 @@ def getAvailableModules_():
             if getCurrentPlatformString() not in plat:
               continue
           available_modules.append(module)
-        except Exception, e:
+        except Exception as e:
           if debug:
             sys.stdout.formatExceptionInfo()
           pass
@@ -534,7 +534,7 @@ def getAvailableModules_():
         m.action = 5
       else:
         m.action = 1
-  except Exception, e:
+  except Exception as e:
     if debug:
       sys.stdout.formatExceptionInfo()
     return "No modules information available"
@@ -699,7 +699,7 @@ def doAct():
     shutil.make_archive(rollback_zip, 'zip', pdir)
     avaialbaleModulesRetrieved = False
     
-    print "The original module %s has been backed up and deleted." %current_module.name
+    print("The original module %s has been backed up and deleted." %current_module.name)
     shutil.rmtree(pdir)
     avaialbaleModulesRetrieved = False
     getAvailableModules_()
@@ -867,7 +867,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(ask_for_licence_extension, False, "plugins")
     olex.registerFunction(rollback, False, "plugins")
     loadAll()
-  except Exception, e:
+  except Exception as e:
     print("Plugin loader initialisation failed: '%s'" %e)
 else:
   print("Plugin loader is not initialised")

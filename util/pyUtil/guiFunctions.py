@@ -12,30 +12,30 @@ class GuiFunctions(object):
     try:
       import olexex
       retStr = olexex.FixMACQuotes(olex_gui.GetUserInput(arg,title,contentText))
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred"
+    except Exception as ex:
+      print("An error occurred", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
 
   def Alert(self, title, text, buttons=None, tickboxText=None):
     '''
-    Opens an alert window. 
+    Opens an alert window.
     :param title: Window title in the title bar
     :param text: Text content to display in the window.
-    :param buttons: String with different possible flags. 
-                    Flags can be mixed like'YNHR': 
+    :param buttons: String with different possible flags.
+                    Flags can be mixed like'YNHR':
     'YNCO' yes,no,cancel,ok  -> Text on the buttons
-    'XHEIQ-icon' exclamation,hand,eror,information,question 
-                  --> Icon beside the window text. 
+    'XHEIQ-icon' exclamation,hand,eror,information,question
+                  --> Icon beside the window text.
     'R-show' checkbox --> show a checkbox
     :param tickboxText: checkbox message
     :return retStr: returns blooean values of the buttons.
     '''
     try:
       retStr = olx.Alert(title, text, buttons, tickboxText)
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred"
+    except Exception as ex:
+      print("An error occurred", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -43,15 +43,15 @@ class GuiFunctions(object):
   def IsControl(self, ctrl_name):
     try:
       return bool(olex_gui.IsControl(ctrl_name))
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred."
+    except Exception as ex:
+      print("An error occurred.", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def TranslatePhrase(self, text):
     try:
       retStr = olx.TranslatePhrase(text)
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred whilst translating %s" %(text)
+    except Exception as ex:
+      print("An error occurred whilst translating %s" %(text), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -88,14 +88,14 @@ class GuiFunctions(object):
     from ImageTools import IT
     l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
     v = []
-    for i in xrange(4):
+    for i in range(4):
       val = OV.GetParam('gui.grad_%s' %(l[i]))
       if not val:
         val = "#ffffff"
       val = IT.hex2dec(val)
       v.append(val)
     olex.m("Grad %i %i %i %i" %(v[0], v[1], v[2], v[3]))
-    
+
   def GetFormulaDisplay(self):
     rv = ""
     s = olx.xf.GetFormula('list')
@@ -134,8 +134,8 @@ olex.registerFunction(a.GetFormulaDisplay)
 
 class NoGuiFunctions(object):
   def GetUserInput(self,arg,title,contentText):
-    print '%s:' %title
-    print contentText
+    print('%s:' %title)
+    print(contentText)
     return contentText
 
   def Alert(self, title, text, buttons=None, tickboxText=None):

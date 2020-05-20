@@ -668,7 +668,7 @@ class Graph(ArgumentParser):
       try:
         self.test_plotly()
       except Exception as err:
-        print(("Plotly failed: %s" %err))
+        print("Plotly failed: %s" %err)
         print("Olex2 built-in plots will be made instead.")
 
     self.ax_marker_length = int(self.imX * 0.006)
@@ -3088,7 +3088,7 @@ class HealthOfStructure():
       self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(self.theta_full*2,True))
       self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(self.theta_full*2,False))
     except Exception as err:
-      print(("Could not get info from hkl_stats: %s" %err))
+      print("Could not get info from hkl_stats: %s" %err)
 
   def get_info_from_cif(self):
     from cctbx import uctbx
@@ -3472,7 +3472,6 @@ class HealthOfStructure():
         txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
           <tr><td><b>Twin component completeness (in P1): %s</b></td></tr></table>""" %(
             txt, ", ".join(["%.2f%%%%" %(x*100) for x in completeness]))
-    txt = txt.decode('utf-8')
     self.hos_text += txt
     OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())
 

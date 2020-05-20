@@ -22,8 +22,8 @@ class ThreadRegistry:
         if th.instance: th.instance.join(1)
         if th.instance and th.instance.is_alive():
           th.instance.force_exit()
-      except Exception, e:
-        print e
+      except Exception as e:
+        print(e)
         pass
 
 

@@ -40,4 +40,4 @@ class p4p_reader:
 if __name__ == '__main__':
   a = p4p_reader('C:/datasets/08srv071/first.p4p')
   info = a.read_p4p()
-  print
+  print()

@@ -31,6 +31,6 @@ with open(out_fn, "rU") as stdout:
       sys.stdout.flush()
     time.sleep(1)
 with open(err_fn, "rU") as stderr:
-  print stderr.read()
+  print(stderr.read())
 
-print "Finished"
+print("Finished")

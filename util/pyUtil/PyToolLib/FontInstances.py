@@ -507,8 +507,8 @@ class FontInstances(ArgumentParser):
       self.fonts[font_name].setdefault("fontInstance",{})
       try:
         fontInstance = ImageFont.truetype(font_name, font_size, encoding=encoding)
-      except IOError, err:
-        print err
+      except IOError as err:
+        print(err)
       failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
       fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
       self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)

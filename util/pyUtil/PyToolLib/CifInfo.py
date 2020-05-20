@@ -1,7 +1,7 @@
 import os
 import string
 import glob
-from cStringIO import StringIO
+from io import StringIO
 import datetime
 import math
 
@@ -86,11 +86,11 @@ class ValidateCif(object):
     if os.path.isfile(filepath):
       with open(filepath, 'rb') as f:
         cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
-      print "Validating %s" %filepath
+      print("Validating %s" %filepath)
       cif_dic = validation.smart_load_dictionary(cif_dic)
       error_handler = cif_model.validate(cif_dic, show_warnings)
       if error_handler.error_count == 0 and error_handler.warning_count == 0:
-        print "No errors found"
+        print("No errors found")
       if OV.GetParam('user.cif.checkcif.send'):
         olex.m('spy.cif.GetCheckcifReport()')
 
@@ -112,7 +112,7 @@ class CifTools(ArgumentParser):
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
     self.data_name = model_src.replace(' ', '')
     just_loaded = False
-    if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
+    if olx.cif_model is None or self.data_name.lower() not in list(olx.cif_model.keys_lower.keys()):
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       if olx.cif_model is None:
@@ -121,7 +121,7 @@ class CifTools(ArgumentParser):
       just_loaded = True
     self.cif_model = olx.cif_model
     if not olx.cif_model:
-      print "The Olex2 metacif file for this structure appears to be empty"
+      print("The Olex2 metacif file for this structure appears to be empty")
       return
     self.cif_block = olx.cif_model[self.data_name]
     if just_loaded:
@@ -152,7 +152,7 @@ class CifTools(ArgumentParser):
     self.update_manageable()
 
   def save_specials(self):
-    for special_item, special_cif in CifTools.specials.iteritems():
+    for special_item, special_cif in CifTools.specials.items():
       sv = OV.GetParam(special_item, '')
       if sv:
         self.cif_block[special_cif] = sv
@@ -160,7 +160,7 @@ class CifTools(ArgumentParser):
         del self.cif_block[special_cif]
 
   def update_specials(self):
-    for special_item, special_cif in CifTools.specials.iteritems():
+    for special_item, special_cif in CifTools.specials.items():
       if special_cif in self.cif_block:
         OV.SetParam(special_item, self.cif_block[special_cif])
       else:
@@ -191,7 +191,7 @@ class CifTools(ArgumentParser):
   def write_metacif_file(self):
     self.save_specials()
     with open(self.metacif_path, 'wb') as f:
-      print >> f, self.cif_model
+      print(self.cif_model, file=f)
 
   def sort_diffractometer(self):
     if not OV.GetParam('snum.report.diffractometer'):
@@ -239,8 +239,8 @@ class CifTools(ArgumentParser):
     user_modified = OV.GetParam('snum.metacif.user_modified')
     user_removed = OV.GetParam('snum.metacif.user_removed')
     user_added = OV.GetParam('snum.metacif.user_added')
-    for key, value in dictionary.iteritems():
-      if not isinstance(key, basestring):
+    for key, value in dictionary.items():
+      if not isinstance(key, str):
         continue
       if key.startswith('_') and value not in ('?', '.'):
         if force:
@@ -263,7 +263,7 @@ class CifTools(ArgumentParser):
 #        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
     import iotbx.cif
     if isinstance(dictionary, iotbx.cif.model.block):
-      for key, value in dictionary.loops.iteritems():
+      for key, value in dictionary.loops.items():
         self.cif_block[key] = value # overwrite these for now
 
   def sort_publication_info(self):
@@ -319,7 +319,7 @@ class EditCifInfo(CifTools):
     ## view metacif information in internal text editor
     s = StringIO()
     self.save_specials()
-    print >> s, self.cif_model
+    print(self.cif_model, file=s)
     text = s.getvalue()
     text += "\n%s" %append
     inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
@@ -328,16 +328,16 @@ class EditCifInfo(CifTools):
       if reader.error_count():
         return
       updated_cif_model = reader.model()
-      if '_diffrn_ambient_temperature' in updated_cif_model.values()[0]:
+      if '_diffrn_ambient_temperature' in list(updated_cif_model.values())[0]:
         OV.set_cif_item(
           '_diffrn_ambient_temperature',
-          updated_cif_model.values()[0]['_diffrn_ambient_temperature'])
-      diff_1 = self.cif_model.values()[0].difference(updated_cif_model.values()[0])
+          list(updated_cif_model.values())[0]['_diffrn_ambient_temperature'])
+      diff_1 = list(self.cif_model.values())[0].difference(list(updated_cif_model.values())[0])
       modified_items = diff_1._set
-      removed_items = self.cif_model.values()[0]._set\
-                    - updated_cif_model.values()[0]._set
-      added_items = updated_cif_model.values()[0]._set\
-                  - self.cif_model.values()[0]._set
+      removed_items = list(self.cif_model.values())[0]._set\
+                    - list(updated_cif_model.values())[0]._set
+      added_items = list(updated_cif_model.values())[0]._set\
+                  - list(self.cif_model.values())[0]._set
       user_modified = OV.GetParam('snum.metacif.user_modified')
       user_removed = OV.GetParam('snum.metacif.user_removed')
       user_added = OV.GetParam('snum.metacif.user_added')
@@ -480,7 +480,7 @@ class ExtractCifInfo(CifTools):
     if os.path.exists(curr_cif_p):
       try:
         with open(curr_cif_p, 'rb') as f:
-          current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+          current_cif = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
           all_sources_d[curr_cif_p] = current_cif
         try:
           str_solstion_from_cif = current_cif.get('_computing_structure_solution', None)
@@ -558,7 +558,7 @@ class ExtractCifInfo(CifTools):
         file_time = time.strftime('%Y-%m-%d', time.localtime(info.st_mtime))
         OV.SetParam('snum.report.date_collected', file_time)
       except:
-        print "Error reading OD frame Date %s" %p
+        print("Error reading OD frame Date %s" %p)
 
     # OD Frame Image
     def choose_max_6(pp):
@@ -567,7 +567,7 @@ class ExtractCifInfo(CifTools):
         return pp
       else:
         l = []
-        for i in xrange(6):
+        for i in range(6):
           idx = ((i+1) * j/6) - j/5 + 1
           l.append(pp[idx])
         return l
@@ -618,7 +618,7 @@ class ExtractCifInfo(CifTools):
         smart.setdefault("_computing_data_collection", computing_data_collection)
         self.update_cif_block(smart)
         all_sources_d[p] = smart
-      except Exception, err:
+      except Exception as err:
         print("Error reading Bruker SMART file %s: %s" %(p, err))
 
     p, pp = self.sort_out_path(path, "p4p")
@@ -685,14 +685,14 @@ class ExtractCifInfo(CifTools):
           twin.setdefault("_exptl_absorpt_process_details", t)
           self.update_cif_block(twin, force=True)
           all_sources_d[p] = twin
-      except Exception, e:
+      except Exception as e:
         if 'Unsupported program version' in str(e):
           print("%s for SADABS" %e)
         else:
           import traceback
           traceback.print_exc()
-          print "There was an error reading the SADABS/TWINABS output file\n" +\
-                "'%s'" %p + ".\nThe file may be incomplete."
+          print("There was an error reading the SADABS/TWINABS output file\n" +\
+                "'%s'" %p + ".\nThe file may be incomplete.")
     else:
       sad = {'_exptl_absorpt_correction_T_max':'.',
              '_exptl_absorpt_correction_T_min':'.',
@@ -716,11 +716,11 @@ class ExtractCifInfo(CifTools):
       if p:
         try:
           with open(p, 'rb') as f:
-            cif_s = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(cif_s)
             self.update_cif_block(cif_s, force=False)
             all_sources_d[p] = cif_s
-        except Exception, e:
+        except Exception as e:
           print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
 
 
@@ -734,10 +734,10 @@ class ExtractCifInfo(CifTools):
           if p not in ciflist and os.path.exists(p):
             ## Add this file to list of merged files
             import gui
-            gui.report.publication.add_cif_to_merge_list.im_func(p)
+            gui.report.publication.add_cif_to_merge_list.__func__(p)
         else:
           with open(p, 'rb') as f:
-            crystal_clear = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(crystal_clear)
           self.update_cif_block(crystal_clear, force=False)
           all_sources_d[p] = crystal_clear
@@ -758,7 +758,7 @@ class ExtractCifInfo(CifTools):
           .replace("\xe2\x80\x99", "'")\
           .replace("\xe2\x80\x9c", "\"")\
           .replace("\xe2\x80\x9d", "\"")
-        diffractometer_def = iotbx.cif.reader(input_string=content).model().values()[0]
+        diffractometer_def = list(iotbx.cif.reader(input_string=content).model().values())[0]
         self.exclude_cif_items(diffractometer_def)
       self.update_cif_block(diffractometer_def, force=False)
       all_sources_d[p] = diffractometer_def
@@ -875,13 +875,13 @@ class ExtractCifInfo(CifTools):
         item = item.strip()
         if not item:
           continue
-        if not self.all_sources_d.has_key(item):
+        if item not in self.all_sources_d:
           try:
             with open(item, 'rb') as f:
               _ = f.read()
               if not _.startswith("data"):
                 _ = str("data_%s\r\n" %OV.ModelSrc() + _)
-              _ = iotbx.cif.reader(input_string=_).model().values()[0]
+              _ = list(iotbx.cif.reader(input_string=_).model().values())[0]
               self.all_sources_d.setdefault(item, _)
           except:
             pass
@@ -908,7 +908,7 @@ class ExtractCifInfo(CifTools):
     already_resolved = 0
     conflict_count = 0
     for k in k_l:
-      if not isinstance(k, basestring):
+      if not isinstance(k, str):
         continue
       l = []
       if k in resolved:
@@ -916,14 +916,14 @@ class ExtractCifInfo(CifTools):
       for ld in self.all_sources_d:
         try:
           val = self.all_sources_d[ld].get(k,'')
-          if isinstance(val, basestring):
+          if isinstance(val, str):
             val = val.strip("'")
             l.append(val)
           else:
             #print "k is %s" %k
             continue
-        except Exception, err:
-          print err
+        except Exception as err:
+          print(err)
       ll = set()
       for tem in l:
         if not tem: continue
@@ -937,24 +937,24 @@ class ExtractCifInfo(CifTools):
         for ld in self.all_sources_d:
           try:
             val = self.all_sources_d[ld].get(k,'')
-            if isinstance(val, basestring):
+            if isinstance(val, str):
               val = val.strip("'")
             self.conflict_d[k].setdefault(ld, val)
-          except Exception, err:
-            print err
+          except Exception as err:
+            print(err)
 
     if conflict_count and not already_resolved:
-      print "There is conflicting information in the sources of metadata"
+      print("There is conflicting information in the sources of metadata")
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
     elif already_resolved < conflict_count:
-      print "%s Out of %s conflicts have been resolved" %(already_resolved, conflict_count)
+      print("%s Out of %s conflicts have been resolved" %(already_resolved, conflict_count))
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
     elif conflict_count and already_resolved == conflict_count:
-      print "All %s conflicts have been resolved" %(conflict_count)
+      print("All %s conflicts have been resolved" %(conflict_count))
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 # o: what is this supposed to do?
@@ -996,7 +996,7 @@ class ExtractCifInfo(CifTools):
           try:
             del cif_block[item]
           except:
-            print "Can't delete CIF item %s" %item
+            print("Can't delete CIF item %s" %item)
 
   #def prepare_exptl_absorpt_process_details(self, dictionary, version, p):
     #parameter_ratio = dictionary["parameter_ratio"]
@@ -1179,7 +1179,7 @@ If more than one file is present, the path of the most recent file is returned b
           return None, None
       directory = directory + os.sep + "movie"
       if OV.FileName() not in directory:
-        print "Crystal images found, but crystal name not in path!"
+        print("Crystal images found, but crystal name not in path!")
 #        return None, None
       from gui import report
       l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
@@ -1314,7 +1314,7 @@ def reloadMetadata(force=False):
       with open(metacif_path, 'rb') as file_object:
         reader = iotbx.cif.reader(file_object=file_object)
         olx.cif_model = reader.model()
-  except Exception, e:
+  except Exception as e:
     print("Failed to reload matadata: %s", e)
 
 OV.registerFunction(reloadMetadata, False, "cif")
@@ -1352,62 +1352,62 @@ OV.registerFunction(set_source_file)
 
 def unicode_to_cif(u):
   d = {
-    u'\xe0':'\`a',
-    u'\xe8':'\`e',
-    u'\xec':'\`i',
-    u'\xf2':'\`o',
-    u'\xf9':'\`u',
+    '\xe0':'\`a',
+    '\xe8':'\`e',
+    '\xec':'\`i',
+    '\xf2':'\`o',
+    '\xf9':'\`u',
 
-    u'\xc0':'\`A',
-    u'\xc8':'\`E',
-    u'\xcc':'\`I',
-    u'\xd2':'\`O',
-    u'\xd9':'\`U',
+    '\xc0':'\`A',
+    '\xc8':'\`E',
+    '\xcc':'\`I',
+    '\xd2':'\`O',
+    '\xd9':'\`U',
 
-    u'\xe1':'\'a',
-    u'\xe9':'\'e',
-    u'\xed':'\'i',
-    u'\xf3':'\'o',
-    u'\xfa':'\'u',
-    u'\xfd':'\'y',
+    '\xe1':'\'a',
+    '\xe9':'\'e',
+    '\xed':'\'i',
+    '\xf3':'\'o',
+    '\xfa':'\'u',
+    '\xfd':'\'y',
 
-    u'\xc1':'\'A',
-    u'\xc9':'\'E',
-    u'\xed':'\'I',
-    u'\xd3':'\'O',
-    u'\xda':'\'U',
-    u'\xdd':'\'Y',
+    '\xc1':'\'A',
+    '\xc9':'\'E',
+    '\xed':'\'I',
+    '\xd3':'\'O',
+    '\xda':'\'U',
+    '\xdd':'\'Y',
 
-    u'\xe2':'\^a',
-    u'\xea':'\^e',
-    u'\xee':'\^i',
-    u'\xf4':'\^o',
-    u'\xfb':'\^u',
+    '\xe2':'\^a',
+    '\xea':'\^e',
+    '\xee':'\^i',
+    '\xf4':'\^o',
+    '\xfb':'\^u',
 
-    u'\xc2':'\^A',
-    u'\xca':'\^E',
-    u'\xce':'\^I',
-    u'\xd4':'\^O',
-    u'\xdb':'\^U',
+    '\xc2':'\^A',
+    '\xca':'\^E',
+    '\xce':'\^I',
+    '\xd4':'\^O',
+    '\xdb':'\^U',
 
-    u'\xe3':'\^a',
-    u'\xf1':'\^n',
-    u'\xf5':'\^o',
+    '\xe3':'\^a',
+    '\xf1':'\^n',
+    '\xf5':'\^o',
 
-    u'\xc3':'\^A',
-    u'\xd1':'\^N',
-    u'\xd5':'\^O',
+    '\xc3':'\^A',
+    '\xd1':'\^N',
+    '\xd5':'\^O',
 
-    u'\xe7':'\,c',
+    '\xe7':'\,c',
 
-    u'\xc7':'\,C',
+    '\xc7':'\,C',
 
  }
-  retVal = u''
+  retVal = ''
   for char in u:
     retVal += d.get(char,char)
   return retVal
 
 for item in timings:
-  print item
+  print(item)
 #print "Total Time: %s" %(time.time() - start)

@@ -64,7 +64,7 @@ class MultipleDataset:
 
     if not CURR_CIF_FILE_LIST:
       cnt = int(olx.xf.DataCount())
-      for i in xrange(0, cnt):
+      for i in range(0, cnt):
         if olx.IsFileType('cif') == 'true':
           if olx.xf.DataName(i) == "global" or not olx.xf.DataName(i):
             cnt -= 1
@@ -82,7 +82,7 @@ class MultipleDataset:
         CURR_CIF_FILE_LIST.append((i, name, display))
     else:
       cnt = len(CURR_CIF_FILE_LIST)
-      for i in xrange(0, cnt):
+      for i in range(0, cnt):
         if OV.ModelSrc() in CURR_CIF_FILE_LIST[i]:
           current = i
           break
@@ -97,7 +97,7 @@ class MultipleDataset:
     else:
       td_width='25'
 
-    for i in xrange(0, cnt):
+    for i in range(0, cnt):
       index = CURR_CIF_FILE_LIST[i][0]
       name = CURR_CIF_FILE_LIST[i][1]
       display = CURR_CIF_FILE_LIST[i][2]

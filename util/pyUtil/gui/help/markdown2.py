@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 ActiveState Corp.
 # License: MIT (http://www.opensource.org/licenses/mit-license.php)
 
-from __future__ import generators
+
 
 r"""A fast and complete Python implementation of Markdown.
 
@@ -118,10 +118,10 @@ if sys.version_info[0] <= 2:
         bytes
     except NameError:
         bytes = str
-    base_string_type = basestring
+    base_string_type = str
 elif sys.version_info[0] >= 3:
     py3 = True
-    unicode = str
+    str = str
     base_string_type = str
 
 
@@ -265,9 +265,9 @@ class Markdown(object):
         # articles):
         self.reset()
 
-        if not isinstance(text, unicode):
+        if not isinstance(text, str):
             #TODO: perhaps shouldn't presume UTF-8 for string input?
-            text = unicode(text, 'utf-8')
+            text = str(text, 'utf-8')
 
         if self.use_file_vars:
             # Look for emacs-style file variable hints.
@@ -2034,7 +2034,7 @@ class MarkdownWithExtras(Markdown):
 
 #---- internal support functions
 
-class UnicodeWithAttrs(unicode):
+class UnicodeWithAttrs(str):
     """A subclass of unicode used for the return value of conversion to
     possibly attach some attributes. E.g. the "toc_html" attribute when
     the "toc" extra is used.
