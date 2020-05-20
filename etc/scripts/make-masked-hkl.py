@@ -34,6 +34,6 @@ class Worker(OlexCctbxAdapter):
       with open(modified_hkl_path, 'w') as file_out:
         modified_intensities.export_as_shelx_hklf(file_out,
           normalise_if_format_overflow=True)
-      print("Created the modified hkl file: %s" %modified_hkl_path)
+      print(("Created the modified hkl file: %s" %modified_hkl_path))
 
 Worker().run()
