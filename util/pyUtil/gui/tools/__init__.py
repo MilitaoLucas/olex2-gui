@@ -260,8 +260,8 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
     before = "top"
 
   file_to_write_to = file_to_write_to.replace(r"//","/")
-  txt = OlexVFS.read_from_olex(file_to_write_to)
-  
+  txt = OlexVFS.read_from_olex(file_to_write_to).decode()
+
   if onclick:
     OlexVFS.write_to_olex('%s/%s.htm' %(path, link), "")
 
@@ -548,7 +548,7 @@ def copy_mask_infro_from_comment():
 
 
 def get_mask_info_old():
-  
+
   global current_sNum
   import gui
   current_sNum = OV.ModelSrc()
@@ -885,9 +885,9 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-    <a target="%s" href="UpdateWght>>html.Update">%s</a> 
+    <a target="%s" href="UpdateWght>>html.Update">%s</a>
     ''' %("Update Weighting Scheme", html_scheme)
-  
+
   weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug)%d
   return weight_display
 
@@ -1122,8 +1122,8 @@ class Templates():
         g = [path]
       _ = os.path.join(OV.DataDir(), 'custom_templates.html')
       if os.path.exists(_): g.append(_)
-    
-    
+
+
     for f_path in g:
       include = ["txt", "html", "htm"]
       ext = f_path.split(".")[-1:][0]
@@ -1217,9 +1217,9 @@ def get_battery_image(colour, colourize=True):
        'yellow':3,
        'orange':2,
        'red':1}
-    
+
   n_dots = d_dots[colour]
-  
+
   src_battery = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_rgb.png")
 
   IM_battery = Image.open(src_battery)
@@ -1228,7 +1228,7 @@ def get_battery_image(colour, colourize=True):
   im = Image.alpha_composite(bg, IM_battery)
   draw = ImageDraw.Draw(im)
   width, height = bg.size
-  
+
   col = d_col[colour].rgb
   top_gap = int(height*0.11)
   bot_gap = int(height*0.04)
@@ -1248,12 +1248,12 @@ def get_battery_image(colour, colourize=True):
   IM = im.resize((new_width,new_height), Image.ANTIALIAS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
-  
+
 
 def GetDPRInfo():
   retVal = ""
   dpr = OV.GetParam('snum.refinement.data_parameter_ratio', None)
-  
+
   if not dpr:
     try:
       parameters = int(olx.Cif('_refine_ls_number_parameters'))
@@ -1261,7 +1261,7 @@ def GetDPRInfo():
       dpr = data/parameters
     except:
       pass
-  
+
   if dpr:
     dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
     text_output= ["Data/Parameter ratio is very good",
@@ -1273,7 +1273,7 @@ def GetDPRInfo():
                  "orange",
                  "red"]
 
-    
+
     idx = 4 - dpr_col_number
     colour = colour_txt[idx]
     name = "battery_%s.png" %colour
@@ -1300,12 +1300,12 @@ def GetDPRInfo():
       disp_dpr = "%.2f"%dpr
     else:
       disp_dpr = "%.1f"%dpr
-    
+
     d = {
       'dpr':disp_dpr,
       'image':image,
     }
-    
+
     t = """
     <table border="0" cellpadding="0" cellspacing="0" align='center'>
       <tr align='center'>
@@ -1362,13 +1362,13 @@ def GetRInfo(txt="",d_format='html'):
         except:
           R1 = 'n/s'
           return R1
-          
+
   if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None) and 'GetRInfo' in cache:
     if d_format == 'html':
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
 OV.registerFunction(GetRInfo)
-  
+
 def FormatRInfo(R1, wR2,d_format):
   cache['R1'] = R1
   cache['wR2'] = wR2
@@ -1383,8 +1383,8 @@ def FormatRInfo(R1, wR2,d_format):
       wR2 = float(wR2)
       col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
       wR2 = "%.2f" %(wR2*100)
-      
-        
+
+
       d = {
         'R1':R1,
         'wR2':wR2,
@@ -1486,18 +1486,18 @@ def get_twin_law_from_hklf5():
     return twinlawsfromhklsrc[src]
   except:
     return "ERR: Please check 'tools.get_twin_law_from_hklf5'"
-  
+
 OV.registerFunction(get_twin_law_from_hklf5, False, 'tools')
 
 def hklf_5_to_4(filename):
   '''
   Creates a hklf4 file corresponding to the first component of the structure
-  
+
   This function will only retrieve component 1.
-  
+
   Need to seperate double-lines based on basf which is harder - making seperate function (Laura Midgely)
   '''
-  
+
   hklf4name="%s_hklf4.hkl"%filename
   hklf4=open(hklf4name,"w")
   #put in a thing to note 'you seem to have positive numbers which correlate to things not in the first component - maybe try with basfs'.
@@ -1516,7 +1516,7 @@ OV.registerFunction(hklf_5_to_4, False, 'tools')
 
 def record_commands():
   res = scrub()
-  
+
 
 def show_nsff():
   retVal = False
@@ -1547,7 +1547,7 @@ class DisorderDisplayTools(object):
         return False
       else:
         return True
-  
+
   def show_unique_only(self):
     if OV.GetParam('user.parts.keep_unique') == True:
       self.make_unique(add_to=True)
@@ -1556,7 +1556,7 @@ class DisorderDisplayTools(object):
         olx.Uniq()
         olx.Sel(self.unique_selection)
         olx.Uniq()
-  
+
   def make_unique(self, add_to=False):
     if not self.unique_selection:
       add_to = True
@@ -1566,17 +1566,17 @@ class DisorderDisplayTools(object):
     _ = _.replace('Sel',' ')
     while "  " in _:
       _ = _.replace("  ", " ").strip()
-  
+
     _l = _.split()
     if _:
       if add_to and self.unique_selection:
         _l += self.unique_selection.split()
         _l = list(set(_l))
       unique_selection = " ".join(_l)
-  
+
     olx.Sel(self.unique_selection)
     olx.Uniq()
-  
+
   def sel_part(self, part,sel_bonds=True):
     select = OV.GetParam('user.parts.select')
     if not select:
@@ -1585,7 +1585,7 @@ class DisorderDisplayTools(object):
       olex.m("sel part %s" %part)
       if sel_bonds:
         olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
-  
+
   def make_disorder_quicktools(self, scope='main', show_options=True):
     import olexex
     if 'scope' in scope:
@@ -1608,7 +1608,7 @@ class DisorderDisplayTools(object):
       if select:
         sel = ">>sel part %s" %item
       parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
-  
+
     dd={'parts_display':parts_display, 'scope':scope, 'show_options':show_options}
     return self.load_disorder_tool_template(dd)
 
@@ -1618,14 +1618,14 @@ class DisorderDisplayTools(object):
     else:
       retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
     return retVal
-  
+
   #def clear_higlights(self):
     #if self.haveHighlights:
       #olex.m("sel %s"%self.haveHighlights)
       #olex.m("mask 48")
       #olex.m("Individualise")
       #self.haveHighlights = False
-    
+
   def set_part_display(self, parts,part):
     self.show_unique_only()
     olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" %parts)

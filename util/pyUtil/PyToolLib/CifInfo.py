@@ -1274,7 +1274,7 @@ If more than one file is present, the path of the most recent file is returned b
         if line[:1] == "_":
           versions["default"].append(line)
         elif line[:1] == "=":
-          line = string.split(line, "=",3)
+          line = line.split("=",3)
           prgname = line[1]
           versionnumber = line[2]
           versiontext = line[3]
@@ -1333,7 +1333,7 @@ def getOrUpdateDimasVar(getOrUpdate):
               ('snum_dimas_crystal_preparation_comment','exptl_crystal_preparation'),
               ('snum_dimas_diffraction_diffractometer','diffrn_measurement_device_type'),
               ('snum_dimas_diffraction_ambient_temperature','snum_metacif_diffrn_ambient_temperature'),
-              ('snum_dimas_diffraction_comment','snum_metacif_diffrn_special_details')
+              ('snum_dimas_diffraction_comment','snum_metacif_diffrn_special_details'),
               ('snum.report.diffractometer','_diffrn_measurement_device_type')
               ]:
     if OV.GetParam(var[0]) != OV.GetParam('snum.metacif.%s' %var[-1]):
