@@ -1774,7 +1774,7 @@ OV.registerFunction(find_2_fold_olex2)
 
 def make_law_images(twin_law, lawcount):
   global twin_laws_d
-  from ImageTools import *
+  from ImageTools import IT
   IT = ImageTools()
   from PilTools import MatrixMaker
   MM = MatrixMaker()

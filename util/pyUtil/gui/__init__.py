@@ -48,8 +48,8 @@ def About():
 
   sw = 650+2*10+2
   sh = 400+2*15+60
-    
-  
+
+
   x = int(window[0]) + int(int(window[2])/2) - int(sw/2)
   y = int(window[1]) + int(int(window[3])/2) - int(sh/2)
 
@@ -405,7 +405,7 @@ def get_default_notification(txt="", txt_col='green_text'):
   if _ == 'true':
     poly = " | Polymeric structure"
   set_notification("<font color='%s'>%s</font>%s;%s;%s" %(txt_col, txt, poly, table_col,'#888888'))
-  
+
 def set_notification(string):
   if not OV.HasGUI():
     return
@@ -429,7 +429,7 @@ def get_notification():
     txt = _[0]
     col_bg = _[1]
     if len(_) > 2:
-      col_fg = _[2] 
+      col_fg = _[2]
 
   d = {'col_bg':col_bg,
        'col_fg':col_fg,
@@ -448,9 +448,9 @@ def file_open(path, base="", mode='r', readlines=False):
       -- path: the FULL path to the file
       -- base: the everything up to where the directory lives
   '''
-  
+
   import OlexVFS
-  retVal = None  
+  retVal = None
   if os.path.exists(path):
     if readlines:
       retVal = open(path, mode).readlines()
@@ -466,10 +466,10 @@ def file_open(path, base="", mode='r', readlines=False):
       path = path[0].replace("\\","/")
     try:
       path = path.replace("\\","/")
-      retVal = OlexVFS.read_from_olex(path)
+      retVal = OlexVFS.read_from_olex(path).decode()
     except:
       print("gui.file_open malfunctioned with getting %s" %path)
-      
+
     if readlines:
       retVal = retVal.splitlines()
   return retVal

@@ -122,7 +122,6 @@ class StreamRedirection:
           self.t0 = t1
       if self.graph!=False:
         self.graph(Str)
-
     else:
       self.redirected.write(Str)
 
@@ -341,7 +340,9 @@ if timer:
   tt.append("%.3f s == onstartup()" %(time.time() - t))
   t = time.time()
   tt.append("IMPORTING PLUGINS...")
+
 set_plugins_paths()
+
 if timer:
   tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))
   t = time.time()
@@ -351,7 +352,6 @@ import Loader
 if timer:
   tt.append("%.3f s == Loader" %(time.time() - t))
   t = time.time()
-
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
