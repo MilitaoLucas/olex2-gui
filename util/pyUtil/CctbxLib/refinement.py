@@ -50,7 +50,7 @@ try:
       ob_path = os.path.join(olx.BaseDir(), 'lib')
       files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
     if files:
-      env.initialise(os.path.join(ob_path, files[0]).encode("utf-8"))
+      env.initialise(os.path.join(ob_path, files[0]))
       if env.initialised:
         print("Successfully initialised SciPy OpenBlas:")
         print(env.build_config)
@@ -1289,7 +1289,7 @@ The following options were used:
     )
 
   def post_peaks(self, fft_map, max_peaks=5):
-    
+
     ####
     if False:
       import olex_xgrid
