@@ -58,13 +58,13 @@ external_files = {
                       'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
-  'python27-win32.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
+  'python38-win32.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
   #SSE2
   'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   #windows 64
   'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'python27-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'python38-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'cctbx-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'olex2-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   #portables
@@ -453,8 +453,7 @@ for val, key in external_files.items():
     if option.dev:
       if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
         continue
-    print("Specified binary file does not exist '" + val + "' aborting...")
-    os._exit(1)
+    print("Specified binary file does not exist '" + val + "' check..")
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
       update_files.append(fn)
@@ -508,7 +507,7 @@ for f in itertools.chain(update_files,
 def info(web_file_name, working_file_name):
   stats = os.stat(web_file_name)
   if os.path.isfile(web_file_name):
-    _file = file(web_file_name, "rb")
+    _file = open(web_file_name, "rb")
     stats = (stats.st_mtime, stats.st_size, hashlib.md5(_file.read()).hexdigest())
   else:
     stats = (stats.st_mtime, stats.st_size, 'dir')
@@ -555,7 +554,7 @@ class IndexEntry:
     cnt = 0
     for item in self.items.values():
       cnt += item.ItemCount()
-    return cnt;
+    return cnt
   def IsValid(self):
     if self.folder and self.ItemCount() == 0:
       return False
@@ -701,17 +700,6 @@ if platforms.get("win32"):
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
-if platforms.get("win32-sse"):
-  create_portable_distro(
-    port_props=set([win32_sse_port_name,win32_port_name]),
-    zip_name=win32_sse_port_zip_name,
-    port_zips=win32_sse_zip_files,
-    prefix=win32_sse_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
-    }
-  )
 if platforms.get("win64"):
   create_portable_distro(
     port_props=set([win64_port_name]),
@@ -801,7 +789,7 @@ for plugin, files in list(files_for_plugin.items()):
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
 
-  props = [];
+  props = []
   p_toks = plugin.split('-')
   while len(p_toks) != 0:
     props.append('plugin-'+'-'.join(p_toks))
