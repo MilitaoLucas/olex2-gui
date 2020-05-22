@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+from __future__ import print_function
 """ Olex 2 distro management """
 
 # plugin properties name-platform-architecture, like Headless-win-32
@@ -311,7 +311,7 @@ def promote_distro(src, dest, forward=True):
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
     dest_zfile.close()
-    os.remove(full_zn);
+    os.remove(full_zn)
     os.rename(full_zn + '_', full_zn)
   update_tags_file(src)
   sys.exit(0)
