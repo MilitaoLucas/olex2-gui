@@ -14,17 +14,14 @@ option, args = parser.parse_args()
 
 if option.dest == 'next':
   destination = 'distro@www2.olex2.org:/var/distro/bin_dir_next/'
-elif options.dest == 'trunk':
+elif option.dest == 'trunk':
   destination = 'distro@www2.olex2.org:/var/distro/bin_dir_trunk/'
 else:
   destination = 'distro@www2.olex2.org:/var/distro/bin_dir/'
 
 tmp_folder = '~/tmp/cctbx/'
 if sys.platform[:3] == 'win':
-  if platform.architecture()[0] == '64bit':
-    upload_cmd = r'"C:\Program Files (x86)\PuTTY\pscp.exe"'
-  else:
-    upload_cmd = r'"C:\Program Files\PuTTY\pscp.exe"'
+  upload_cmd = r'"C:\Program Files\PuTTY\pscp.exe"'
 else:
   upload_cmd = 'scp'
 
