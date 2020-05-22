@@ -95,7 +95,7 @@ external_files = {
   'hart-win64.zip': ('olex-port', win64_port_name,
               'action:extract', 'action:delete'),
 
-  'hart-win32.zip': ('olex-port', win32_sse_port_name,
+  'hart-win32.zip': ('olex-port', win32_sse2_port_name,
                win32_sse2_port_name,
               'action:extract', 'action:delete'),
 
@@ -454,6 +454,7 @@ for val, key in external_files.items():
       if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
         continue
     print("Specified binary file does not exist '" + val + "' check..")
+    continue
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
       update_files.append(fn)
@@ -476,7 +477,7 @@ for val, key in external_files.items():
     alt_dir = alt_dir + '/' + dir
     altered_dirs.add(alt_dir)
   # end of the folder remembering, copy2 copies the stat as well
-  shutil.copy2( bin_directory + '/' + val, working_directory + '/' + val);
+  shutil.copy2(bin_directory + '/' + val, working_directory + '/' + val);
   altered_files.add(fn)
 
 # create web directory structure (top + update)
@@ -697,7 +698,7 @@ if platforms.get("win32"):
     prefix=win32_sse2_port_prefix,
     extra_files =
     {
-      bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
+      bin_directory + '/VC_redist.x86.exe' : 'vcredist_x86.exe'
     }
   )
 if platforms.get("win64"):
@@ -708,7 +709,7 @@ if platforms.get("win64"):
     prefix=win64_port_prefix,
     extra_files =
     {
-      bin_directory + '/vcredist_x64.exe' : 'vcredist_x64.exe'
+      bin_directory + '/VC_redist.x64.exe' : 'vcredist_x64.exe'
     }
   )
 #create linux and mac distro only in releases
