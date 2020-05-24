@@ -8,6 +8,7 @@ import itertools
 from cctbx import sgtbx
 from cctbx import maptbx
 from smtbx.refinement.constraints import InvalidConstraint
+from scitbx.matrix import col
 
 def shelx_adp_converter(crystal_symmetry):
   def u_star(u11, u22, u33, u23, u13, u12):
@@ -28,7 +29,7 @@ def print_thermal_axes(s0, s):
       u_cart = adptbx.u_star_as_u_cart(cs.unit_cell(), u)
       eigensys = adptbx.eigensystem(u_cart)
       for i in xrange(3):
-        print 'v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i), 
+        print 'v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i),
         print 'lambda=%.6f' % eigensys.values()[i]
       print '---'
 
@@ -52,7 +53,7 @@ def compare_structures(s0, s):
       '%s: site moved by ' + '%.0f%%, '*3
       + 'and adp moved by ' + '%.0f%%, '*n
       ) % (
-        (a.label,) + diff_sites 
+        (a.label,) + diff_sites
         + diff_adp
       )
 
@@ -63,7 +64,7 @@ def shake_structure(s, thermal_shift, site_shift):
     elif(a.flags.use_u_iso() and a.flags.grad_u_iso()):
       a.u_iso += (thermal_shift * random.random())
     elif(a.flags.use_u_aniso() and a.flags.grad_u_aniso()):
-      a.u_star = [ u + thermal_shift * random.random() 
+      a.u_star = [ u + thermal_shift * random.random()
                    for u in a.u_star ]
 
 def create_xray_stucture_model(cell, spacegroup, atom_iter, reflections):
@@ -126,7 +127,7 @@ class hydrogen_atom_constraints_customisation(object):
       b_part = self.olx_atoms[j]['part']
       #this case as below is for multiple H groups on a single pivot
       if part != 0 and b_part != 0 and b_part != part:
-        continue 
+        continue
       if not op.is_unit_mx() and op*scatterers[i_pivot].site == scatterers[i_pivot].site:
         special_sites.append((j, op))
         continue
@@ -139,7 +140,7 @@ class hydrogen_atom_constraints_customisation(object):
           if k != i_pivot and scatterers[k].scattering_type != 'H':
             k_part = self.olx_atoms[k]['part']
             if part != 0 and k_part != 0 and k_part != part:
-              continue 
+              continue
             s = reparametrisation.add_new_site_parameter(k, op.multiply(op_k))
             self.pivot_neighbour_substituent_site_params += (s,)
 
@@ -194,4 +195,3 @@ class hydrogen_atom_constraints_customisation(object):
       if not quiet:
         raise exc
       return False
-    
