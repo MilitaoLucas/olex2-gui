@@ -108,7 +108,7 @@ class publication:
           continue
         display = os.path.basename(item)
         remove = """<a target='Remove from merge'
-href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
+href='spy.gui.report.publication.remove_cif_from_merge_list("%s")>>html.Update'>
 <font color='red'><zimg src='delete_small.png'></font></a>""" %item
         s += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(
           item, display, remove)
