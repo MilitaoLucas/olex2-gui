@@ -115,7 +115,7 @@ class CifTools(ArgumentParser):
     if olx.cif_model is None or self.data_name.lower() not in list(olx.cif_model.keys_lower.keys()):
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
-      if olx.cif_model is None:
+      if not olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
       just_loaded = True
@@ -190,7 +190,7 @@ class CifTools(ArgumentParser):
 
   def write_metacif_file(self):
     self.save_specials()
-    with open(self.metacif_path, 'wb') as f:
+    with open(self.metacif_path, 'w') as f:
       print(self.cif_model, file=f)
 
   def sort_diffractometer(self):
@@ -568,7 +568,7 @@ class ExtractCifInfo(CifTools):
       else:
         l = []
         for i in range(6):
-          idx = ((i+1) * j/6) - j/5 + 1
+          idx = ((i+1) * j//6) - j//5 + 1
           l.append(pp[idx])
         return l
 
