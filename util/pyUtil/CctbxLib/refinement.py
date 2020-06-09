@@ -838,13 +838,15 @@ The following options were used:
         cif_block['_refine_special_details'] = tsc_info
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
-        return -1
+        return "a"
       elif key.startswith('_atom_type'):
-        return 0
+        return "b"
       elif key.startswith('_geom_bond'):
         return '_geom_0'
       elif key.startswith('_geom_angle'):
         return '_geom_1'
+      elif key == "_iucr_refine_fcf_details":
+        return "z"
       else:
         return key
     cif_block.sort(key=sort_key)
