@@ -111,7 +111,7 @@ def get_mask_info():
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
 
-  if numbers == [u'n/a']:
+  if numbers == ['n/a']:
     return return_note(note = "No Voids Found", col = gui_green)
 
   if not numbers:
@@ -220,7 +220,7 @@ def get_mask_info():
       entity, user_number = split_entity(entry)
       user_number = float(user_number)
       ent = moieties.get(entity.lower(), entity)
-      ent = formula_cleaner(unicode(ent))
+      ent = formula_cleaner(str(ent))
 
       try:
         Z, N = get_sum_electrons_from_formula(ent)
@@ -307,7 +307,7 @@ def get_mask_info():
     ent = moieties.get(entity.lower(), entity)
     ent_disp = ent.replace(" ", "")
     ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
-    ent = formula_cleaner(unicode(ent))
+    ent = formula_cleaner(str(ent))
 
     try:
       total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
@@ -315,9 +315,9 @@ def get_mask_info():
       total_electrons_accounted_for += 0
     f = number_of_symm_op * Zprime  
     add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
-    total_formula = _add_formula(total_formula, add_to_formula, 1)
     add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
+  total_formula = _add_formula(total_formula, add_to_formula, 1)
   add_to_moiety = add_to_moiety.rstrip(", ")
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
   if "[+ solvents]" in suggested_moiety:
@@ -474,6 +474,7 @@ def split_entity(entry):
 cleaned_formulae = {}
 def formula_cleaner(formula):
   formula = formula.replace(" ", "").replace(" ", "")
+  formula = unicode(formula) #py3HP
   if formula in cleaned_formulae:
     return cleaned_formulae[formula]
   retVal = ""
@@ -505,7 +506,7 @@ def formula_cleaner(formula):
     n = ""
     el = ""
   if debug:
-    print "%s --> %s" %(formula, retVal.strip())
+    print("%s --> %s" %(formula, retVal.strip()))
   cleaned_formulae[formula] = retVal
   return retVal.strip()
 
@@ -514,7 +515,7 @@ def update_metacif(sNum, file_name):
   pass
   ciflist = OV.GetCifMergeFilesList()
   if file_name not in ciflist:
-    gui.report.publication.add_cif_to_merge_list.im_func(file_name)
+    gui.report.publication.add_cif_to_merge_list.__func__(file_name)
   
   
   try:
