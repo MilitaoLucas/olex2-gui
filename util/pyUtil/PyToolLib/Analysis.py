@@ -1522,6 +1522,9 @@ class Analysis(Graph):
     assert self.item is not None
     image_location = "%s.png" %(self.item)
     OlexVFS.save_image_to_olex(self.im, image_location, 1)
+    if OV.GetParam('user.diagnostics.save_file'):
+      disk_fn = OV.ModelSrc() + "_" + image_location
+      self.im.save(disk_fn)
     width, height = self.im.size
     pop_html = self.graphInfo.get("pop_html", None)
     pop_name = self.graphInfo.get("pop_name", None)
