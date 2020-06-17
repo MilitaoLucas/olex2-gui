@@ -1677,7 +1677,7 @@ def write_twin_images_to_disk(name, fn_base):
 def reset_twin_law_img():
   global twin_laws_d
   olex_refinement_model = OV.GetRefinementModel(False)
-  if olex_refinement_model.has_key('twin'):
+  if 'twin' in olex_refinement_model:
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
     for row in c:
