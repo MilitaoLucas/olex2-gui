@@ -1406,7 +1406,6 @@ def getReportImageData(size='w400', imageName=None):
   else:
     imagePath_l = imagePath
 
-  html = ""
   for imagePath in imagePath_l:
 
     IM = Image.open(imagePath)
@@ -1424,7 +1423,6 @@ def getReportImageData(size='w400', imageName=None):
 
     if make_border:
       from ImageTools import ImageTools
-      IT = ImageTools()
       draw = ImageDraw.Draw(IM)
       fill = '#ababab'
       width, height = IM.size
@@ -1434,13 +1432,13 @@ def getReportImageData(size='w400', imageName=None):
         draw.line((0,0,0,height - 1), fill = fill)
         draw.line((width -1,0,width-1,height -1), fill = fill)
 
-    out = io.StringIO()
+    out = io.BytesIO()
     IM.save(out, "PNG")
     data = base64.b64encode(out.getvalue())
-    html +='''
-  <!--[if IE]><img width=%s src='%s'><![endif]-->
-  <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
-    '''%(int(size/2), os.path.split(imagePath)[1], int(size/2), data)
+    html = b'''
+  <!--[if IE]><img width='%s' src='%s'><![endif]-->
+  <![if !IE]><img width='%s' src='data:image/png;base64,%b'><![endif]>
+    '''%(bytes(size//2), os.path.split(imagePath)[1].encode(), bytes(size//2), data)
   return html
 OV.registerFunction(getReportImageData)
 
