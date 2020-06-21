@@ -6,6 +6,7 @@ import sys
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 from ImageTools import IT
+import htmlTools
 
 table_col = OV.GetVar('HtmlTableFirstcolColour')
 green_text = OV.GetParam('gui.green_text')
@@ -14,9 +15,6 @@ red = OV.GetParam('gui.red')
 orange = OV.GetParam('gui.orange')
 white = "#ffffff"
 black = "#000000"
-
-import htmlTools
-
 
 def FileOpen(title, filter, location, default='', default_name=''):
   res = olx.FileOpen(title, filter,location, default_name)
@@ -442,13 +440,11 @@ olex.registerFunction(get_default_notification, False, "gui")
 olex.registerFunction(set_notification, False, "gui")
 olex.registerFunction(get_notification, False, "gui")
 
-
-def file_open(path, base="", mode='r', readlines=False):
+def file_open(path, base="", mode='r', readlines=False, binary=False):
   ''' Open a file, either from a real file, or, if that is not found, from the OlexVFS.
       -- path: the FULL path to the file
       -- base: the everything up to where the directory lives
   '''
-
   import OlexVFS
   retVal = None
   if os.path.exists(path):
@@ -466,7 +462,12 @@ def file_open(path, base="", mode='r', readlines=False):
       path = path[0].replace("\\","/")
     try:
       path = path.replace("\\","/")
-      retVal = OlexVFS.read_from_olex(path).decode()
+      retVal = OlexVFS.read_from_olex(path)
+      if not binary:
+        try:
+          retVal = retVal.decode()
+        except:
+          pass
     except:
       print("gui.file_open malfunctioned with getting %s" %path)
 
@@ -475,3 +476,14 @@ def file_open(path, base="", mode='r', readlines=False):
   return retVal
 
 olex.registerFunction(file_open, False, "tools")
+# initialise some things on import at program start
+initialised = False
+if not initialised:
+  initialised = True
+  # check if the new file exists
+  import olex_fs
+  tag = OV.GetTag()
+  news_file = "news\\content-%s.htm" %(tag)
+  if not olex_fs.Exists(news_file) and "ac" in tag:
+    base_tag = "-".join(tag.split('-')[:2])
+    olex_fs.NewFile(news_file, "<!-- #include news news/content-%s.htm;1; -->" %(base_tag))

@@ -515,10 +515,6 @@ class OlexFunctions(inheritFunctions):
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
     try:
-      text = text.encode('utf-8')
-    except:
-      pass
-    try:
       import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
       if copyToDisk:
