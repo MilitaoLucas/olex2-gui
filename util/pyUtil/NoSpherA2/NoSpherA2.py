@@ -39,8 +39,6 @@ p_htm = d['p_htm']
 p_img = eval(d['p_img'])
 p_scope = d['p_scope']
 
-OV.SetVar('HARp_plugin_path', p_path)
-
 from PluginTools import PluginTools as PT
 
 from gui.images import GuiImages
@@ -546,11 +544,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.wfn_2_fchk = olx.file.Which("%s.exe" %exe_pre)
     else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.wfn_2_fchk = _
+      base_dir = OV.BaseDir()
+      if os.path.exists(os.path.join(base_dir,exe_pre)):
+        self.wfn_2_fchk = os.path.join(base_dir,exe_pre)
       else:
-        self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
+        _ = os.path.join(self.p_path, "%s" %exe_pre)
+        if os.path.exists(_):
+          self.wfn_2_fchk = _
+        else:
+          self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
+      print ("NoSpherA2 executable is:")
+      print (self.wfn_2_fchk)
     if self.wfn_2_fchk == "":
       print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
@@ -924,7 +928,7 @@ class wfn_Job(object):
           control += "Grid7 "
     control = control + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-    if method == "BP86" or method == "PBE":
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
       if relativistic == True:
         control = control + " DKH2 SARC/J RI"
       else:
@@ -945,6 +949,9 @@ class wfn_Job(object):
     FrozenCore = OV.GetParam('snum.NoSpherA2.ORCA_FC')
     if FrozenCore == True:
       control += " FrozenCore"
+    Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+    if Solvation != "Vacuum" and Solvation != None:
+      control += " CPCM("+Solvation+") "
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -1558,39 +1565,6 @@ class Job(object):
       OV.SetVar('NoSpherA2-Error',"Tonto")
       raise NameError("Tonto unsuccessfull!")
 
-    if fchk_source == "Tonto" and OV.GetParam('snum.NoSpherA2.keep_wfn') == True:
-      if os.path.exists(os.path.join(self.full_dir,self.name+".wfn")):
-        shutil.copy(os.path.join(self.full_dir,self.name+".wfn"), self.name+".wfn")
-      else:
-        print "WFN File not found!"
-        OV.SetVar('NoSpherA2-Error',"NoWFN")
-        raise NameError("No WFN found!")
-      move_args = []
-      basis_dir = self.parent.basis_dir
-      basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
-      method = OV.GetParam("snum.NoSpherA2.method")
-      move_args.append(self.parent.wfn_2_fchk)
-      move_args.append("-wfn")
-      move_args.append(os.path.join(self.full_dir,self.name+".wfn"))
-      move_args.append("-b")
-      move_args.append(basis_name)
-      move_args.append("-d")
-      if sys.platform[:3] == 'win':
-        move_args.append(basis_dir.replace("/","\\"))
-      else:
-        move_args.append(basis_dir+'/')
-      move_args.append("-method")
-      move_args.append(method)
-      logname = "NoSpherA2.log"
-      m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      while m.poll() is None:
-        time.sleep(1)
-      shutil.move(logname,os.path.join(self.full_dir,self.name+"_wfn2fchk.log"))
-      if os.path.exists(os.path.join(self.full_dir,self.name+".fchk")):
-        shutil.copy(os.path.join(self.full_dir,self.name+".fchk"), self.name+".fchk")
-      else:
-        raise NameError("No fchk generated!")
-
 def add_info_to_tsc():
   tsc_fn = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
   if not os.path.isfile(tsc_fn):
@@ -1935,7 +1909,7 @@ def get_functional_list():
   if wfn_code == "Tonto" or wfn_code == "pySCF" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   else:
-    list = "HF;BP86;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
+    list = "HF;BP86;PWLDA;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
 OV.registerFunction(get_functional_list,True,'NoSpherA2')
 
@@ -1949,7 +1923,18 @@ def get_nmo():
   values = line.split()
   return values[1]
 
+def get_ncen():
+  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+    return -1
+  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
+  line = ""
+  while "MOL ORBITAL" not in line:
+    line = wfn.readline()
+  values = line.split()
+  return values[6]
+
 OV.registerFunction(get_nmo,True,'NoSpherA2')
+OV.registerFunction(get_ncen,True,'NoSpherA2')
 
 def change_tsc_generator(input):
   if input == "Get ORCA":
@@ -2028,6 +2013,8 @@ def calculate_cubes():
   RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
   ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
   MO  = OV.GetParam('snum.NoSpherA2.Property_MO')
+  ATOM = OV.GetParam('snum.NoSpherA2.Property_ATOM')
+  DEF = OV.GetParam('snum.NoSpherA2.Property_DEF')
   all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
   if Lap == True:
     args.append("-lap")
@@ -2048,6 +2035,12 @@ def calculate_cubes():
       args.append("all")
     else:
       args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
+  
+  if ATOM == True:
+    args.append("-HDEF")
+    
+  if DEF == True:
+    args.append("-def")
 
   radius = OV.GetParam('snum.NoSpherA2.map_radius')
   res = OV.GetParam('snum.NoSpherA2.map_resolution')
@@ -2087,17 +2080,28 @@ def get_map_types():
     list += "ESP;"
   if os.path.isfile(os.path.join(folder,name+"_rdg.cube")):
     list += "RDG;"
+  if os.path.isfile(os.path.join(folder,name+"_def.cube")):
+    list += "Stat. Def.;"  
   if os.path.isfile(os.path.join(folder,name+"_rdg.cube")) and os.path.isfile(os.path.join(folder,name+"_signed_rho.cube")):
     list += "NCI;"
   if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
     list += "Rho + ESP;"
-  if get_nmo() != -1:
+  nmo = get_nmo()
+  if nmo != -1:
     exists = False
-    for i in range(int(get_nmo())+1):
+    for i in range(int(nmo)+1):
       if os.path.isfile(os.path.join(folder,name+"_MO_"+str(i)+".cube")):
         exists = True
     if exists == True:
       list += "MO;"
+  ncen = get_ncen()
+  if ncen != -1:
+    exists = False
+    for i in range(int(ncen)+1):
+      if os.path.isfile(os.path.join(folder,name+"_HDEF_"+str(i)+".cube")):
+        exists = True
+    if exists == True:
+      list += "HDEF;"  
   if list == "":
     return "None;"
   return list
@@ -2116,6 +2120,8 @@ def change_map():
     plot_cube(name+"_elf.cube",None)
   elif Type == "ESP":
     plot_cube(name+"_esp.cube",None)
+  elif Type == "Stat. Def.":
+    plot_cube(name+"_def.cube",None)
   elif Type == "NCI":
     OV.SetParam('snum.NoSpherA2.map_scale_name',"RGB")
     plot_cube(name+"_rdg.cube",name+"_signed_rho.cube")
@@ -2141,6 +2147,9 @@ def change_map():
   elif Type == "MO":
     number = int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) -1
     plot_cube(name+"_MO_"+str(number)+".cube",None)
+  elif Type == "HDEF":
+    number = int(OV.GetParam('snum.NoSpherA2.Property_ATOM_number')) -1
+    plot_cube(name+"_HDEF_"+str(number)+".cube",None)  
   else:
     print "Sorry, no map type available or selected map type not correct!"
     return
@@ -2358,6 +2367,14 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
+  elif Type == "ATOM":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)  
+  elif Type == "Stat. Def.":
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)  
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
