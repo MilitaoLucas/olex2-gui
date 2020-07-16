@@ -217,6 +217,8 @@ routines requiring structure refinement
       .type = float
     data_parameter_ratio = None
       .type = float
+    parameters = None
+      .type = int
     max_shift_over_esd = None
       .type = float
     max_shift_over_esd_atom = None
@@ -1339,19 +1341,21 @@ user
       .type = strings
     refinement{
       dpr{
+        halve_for_non_centro = False
+          .type = bool
         display = "Data/Parameter"
           .type = str
         op = "smaller"
           .type = str
         value_format= "1f"
           .type = str
-        grade1  = 5
+        grade1  = 4
           .type = float
-        grade2 = 7
+        grade2 = 6
           .type = float
-        grade3 = 9
+        grade3 = 8
           .type = float
-        grade4 = 12
+        grade4 = 10
           .type = float
         href = Data/Parameter
           .type = str
