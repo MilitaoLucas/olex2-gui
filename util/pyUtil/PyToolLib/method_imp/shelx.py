@@ -165,9 +165,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       data = float(olx.Lst('ref_4sig'))
       ratio = data/parameters
       OV.SetParam('snum.refinement.data_parameter_ratio', ratio)
+      OV.SetParam('snum.refinement.parameters', parameters)
     except:
       OV.SetParam('snum.refinement.data_parameter_ratio', None)
-      
       
     
   def gather_refinement_information(self):
