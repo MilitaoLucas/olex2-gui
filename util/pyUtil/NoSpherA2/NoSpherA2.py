@@ -163,7 +163,8 @@ class NoSpherA2(PT):
   def launch(self):
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
-    if "Please S" in wfn_code:
+    update = OV.GetParam('snum.NoSpherA2.Calculate')
+    if "Please S" in wfn_code and update == True:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
 Please select one of the generators from the drop-down menu.""", "O", False)
