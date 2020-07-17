@@ -362,7 +362,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
             asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
-            cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn)
+            groups = []
+            groups.append(0)
+            groups.append(parts[i])
+            cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn,groups)
             shutil.copy("experimental.tsc",job.name+"_part_"+str(parts[i])+".tsc")
             shutil.move("NoSpherA2.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"NoSpherA2_part_"+str(parts[i])+".log"))
           for file in os.listdir('.'):
@@ -484,7 +487,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           wfn_cif_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
           olx.Kill("$Q")
           olx.File(wfn_cif_fn)
-          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn)
+          cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn,[-1000])
           OV.SetParam('snum.NoSpherA2.file',"experimental.tsc")
 
         elif wfn_code != "Tonto":
@@ -1317,7 +1320,7 @@ class wfn_Job(object):
         raise NameError("No fchk generated!")
       shutil.move("NoSpherA2.log",os.path.join(self.full_dir, self.name+"_NoSpherA2.log"))
 
-def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
+def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
   folder = OV.FilePath()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, "NoSpherA2.log")):
@@ -1353,6 +1356,10 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif):
       move_args.append('3')
     elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Max"):
       move_args.append('4')
+  if(groups[0] != -1000):
+    move_args.append('-group')
+    for i in range(len(groups)):
+      move_args.append(str(groups[i]))
   os.environ['cuqct_cmd'] = '+&-'.join(move_args)
   os.environ['cuqct_dir'] = folder
   pyl = OV.getPYLPath()
@@ -1695,7 +1702,7 @@ def combine_tscs():
   nr_data_lines = 0
 
   for part in range(int(nr_parts)):
-    if part == 0:
+    if parts[part] == 0:
       continue
     print "Working on Part %d of %d\n"%(parts[part],int(nr_parts)-1)
     #print "looking for: "+os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
@@ -1744,6 +1751,9 @@ def combine_tscs():
 
       for line in range(len(values)):
         digest = values[line].split(" ")
+        if parts[0] != 0:
+          if atom == 0 and part == 0:
+            hkl_l.append([digest[0],digest[1],digest[2]])
         if atom == 0 and part == 1:
           hkl_l.append([digest[0],digest[1],digest[2]])
         if tsc_modular == "modulus":
