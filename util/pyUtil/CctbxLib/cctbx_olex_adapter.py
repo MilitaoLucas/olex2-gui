@@ -299,7 +299,7 @@ class OlexCctbxAdapter(object):
         for mi in twin_set.indices():
           one_h_function.evaluate(mi)
           data.append(one_h_function.f_calc)
-        fc = twin_set.customized_copy(data=data)
+        fc = twin_set.array(data=flex.complex_double(data))
       else:
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
@@ -413,7 +413,7 @@ def write_fab(f_mask, fab_path):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
       print >> f, line
     print >> f, "0 0 0 0.0 0.0"
-  
+
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
@@ -1044,7 +1044,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   nist_elements = attc.nist_elements()
   table_name = table_name_.lower()
   if not wavelength:
-    wavelength = olx.xf.exptl.Radiation()  
+    wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
   if "sasaki" == table_name:
     from cctbx.eltbx import sasaki
