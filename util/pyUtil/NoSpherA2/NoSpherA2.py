@@ -163,6 +163,7 @@ class NoSpherA2(PT):
   def launch(self):
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
+    basis = OV.GetParam('snum.NoSpherA2.basis_name')
     update = OV.GetParam('snum.NoSpherA2.Calculate')
     if "Please S" in wfn_code and update == True:
       olx.Alert("No tsc generator selected",\
@@ -191,8 +192,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       from cctbx_olex_adapter import OlexCctbxAdapter
       ne = 0
       for sc in OlexCctbxAdapter().xray_structure().scatterers():
-        ne += sc.electron_count()
-      Z = olx.xf.au.GetZ()
+        Z = sc.electron_count()
+        if (Z > 36) and ("x2c" not in basis) and ("jorge" not in basis):
+          print("Atoms with Z > 36 require x2c basis sets!")
+          OV.SetVar('NoSpherA2-Error',"Heavy Atom but no heavy atom basis set!")
+          return False
+        ne += Z
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
         print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
@@ -323,7 +328,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             elif atom_loop_reached == True:
               if line != '\n':
                 temp = line.split(' ')
-                out_cif.write("%s %s %s %s %s %s %s %s 1 . 1 .\n" %(temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7]))
+                if (temp[11]==(str(parts[i]))+"\n") or (temp[11]==".\n"):
+                  out_cif.write("%s %s %s %s %s %s %s %s 1 . 1 .\n" %(temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7]))
               else:
                 atom_loop_reached = False
                 out_cif.write('\n')
@@ -1959,10 +1965,11 @@ def change_tsc_generator(input):
       Z = olx.xf.au.GetZ()
       nr_electrons= int(float(F000) / float(Z))
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
-      if (nr_electrons % 2 == 0) and (mult %2 == 0):
-        OV.SetParam('snum.NoSpherA2.multiplicity',1)
-      elif (nr_electrons % 2 != 0) and (mult %2 != 0):
-        OV.SetParam('snum.NoSpherA2.multiplicity',2)
+      if mult == 0:
+        if (nr_electrons % 2 == 0):
+          OV.SetParam('snum.NoSpherA2.multiplicity',1)
+        elif (nr_electrons % 2 != 0):
+          OV.SetParam('snum.NoSpherA2.multiplicity',2)
 OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
 
 def write_symmetry_file(debug=False):
