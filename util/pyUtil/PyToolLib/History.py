@@ -649,9 +649,6 @@ def digestHKLData(fileData):
   input = StringIO(fileData)
   l = input.readline()
   while l:
-    l = l.strip()
-    if not l or len(l) < 12:
-      break
     try:
       s = abs(int(l[0:4])) + abs(int(l[4:8])) + abs(int(l[8:12]))
       if s == 0:
