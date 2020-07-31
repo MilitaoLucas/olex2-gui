@@ -171,7 +171,7 @@ def LoadParams():
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
     parse=phil_interface.parse)
-  
+
   scopes = ['olex2', 'user', 'custom', 'snum']
   for scope in scopes:
     phil_p = get_phil_file_path(scope)
@@ -179,8 +179,8 @@ def LoadParams():
       try:
         phil_handler.update(phil_file=phil_p)
       except:
-        print("Failed to read %.phil" %scope)
-  olx.phil_handler = phil_handler		
+        print("Failed to read %s.phil" %scope)
+  olx.phil_handler = phil_handler
 
   # GUI Phil
   if OV.HasGUI() or True:
