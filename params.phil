@@ -498,7 +498,7 @@ routines requiring structure refinement
       .expert_level = 2
     condensed_tree = True
       .type = bool
-    revert_hkl = True
+    revert_hkl = False
       .type = bool
   }
 
