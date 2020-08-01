@@ -735,18 +735,43 @@ def GetHklFileList():
     a = ""
 
   if not os.path.exists(a) and not g:
-    print "There is no reflection file or the reflection file is not accessible"
+    print("There is no reflection file or the reflection file is not accessible")
   reflection_files = []
   file_names = set()
   for item in g:
     fn = OV.FileName(item)
     file_names.add(fn)
     reflection_files.append("%s.%s<-%s" %(fn, OV.FileExt(item), item))
-  if len(reflection_files) > 1 and OV.FileName() not in file_names:
+  history_hkl = os.path.join(OV.StrDir(), "history.hkl")
+  if a:
+    if a == history_hkl:
+      reflection_files.insert(0, "Reverted from History<-%s" %(a))
+    elif a not in g:
+      reflection_files.insert(0, "%s<-%s" %(
+        (a[:15] + '..' + a[-15:]) if len(a) > 30 else a, a))
+
+  elif len(reflection_files) > 1 and OV.FileName() not in file_names:
     reflection_files.insert(0, "None<-")
   return ';'.join(reflection_files)
+
+def GetHklFileValue():
+  try:
+    a = OV.HKLSrc()
+    if not a:
+      return ""
+    history_hkl = os.path.join(OV.StrDir(), "history.hkl")
+    if a == history_hkl:
+      return "Reverted from History"
+    path_toks = os.path.split(a)
+    if OV.FilePath() == path_toks[0]:
+      return path_toks[1]
+    return (a[:15] + '..' + a[-15:]) if len(a) > 30 else a
+  except:
+    return ""
+
 if haveGUI:
   OV.registerFunction(GetHklFileList)
+  OV.registerFunction(GetHklFileValue)
 
 def GetRcolour(R1):
   retVal = ""
@@ -1694,6 +1719,8 @@ def FixMACQuotes(text):
 
 def debugInVSC():
   try:
+    cd = os.getcwd()
+    os.chdir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
     import ptvsd
     sys.argv = [olx.app.GetArg(0)]
     # 5678 is the default attach port in the VS Code debug configurations
@@ -1703,7 +1730,8 @@ def debugInVSC():
     breakpoint()
   except Exception as x:
     print(x)
-    pass
+  finally:
+    os.chdir(cd)
 OV.registerFunction(debugInVSC)
 
 def debugInEclipse():
