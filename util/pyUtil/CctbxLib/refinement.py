@@ -344,9 +344,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def data_to_parameter_watch(self):
     #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
-    data = self.reflections.f_sq_obs_filtered.size()
+    data_all = self.reflections.f_sq_obs_filtered.size()
+    data = self.reflections.f_sq_obs_merged.size()
     dpr = "%.2f" %(data/parameters)
     OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
+    OV.SetParam('snum.refinement.parameters', parameters)
     print("Data/Parameter ratio = %s" %dpr)
 
   def print_table_header(self, log=None):

@@ -39,6 +39,7 @@ regex_l = {}
 global cache
 cache = {}
 
+
 gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
@@ -1249,80 +1250,106 @@ def get_battery_image(colour, colourize=True):
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
 
+def get_data_number():
+  import olex_core
+  hkl_stats = olex_core.GetHklStat()
+  data = hkl_stats.get('DataCount', None)
+  absences = hkl_stats.get('SystematicAbsencesRemoved', 0)
+  if not data:
+    try:
+      data = int(olx.Cif('_reflns_number_gt'))
+    except:
+      return data
+  if OV.GetParam('user.diagnostics.refinement.dpr.halve_for_non_centro'):
+    if not olex_core.SGInfo()['Centrosymmetric']:
+      data = int(data/2)
+  return data
+
+def get_parameter_number():
+  parameters = OV.GetParam('snum.refinement.parameters', None)
+  if not parameters:
+    try:
+      parameters = int(olx.Cif('_refine_ls_number_parameters'))
+    except:
+      pass
+  return parameters
 
 def GetDPRInfo():
   retVal = ""
-  dpr = OV.GetParam('snum.refinement.data_parameter_ratio', None)
-
-  if not dpr:
-    try:
-      parameters = int(olx.Cif('_refine_ls_number_parameters'))
-      data = int(olx.Cif('_reflns_number_gt'))
-      dpr = data/parameters
-    except:
-      pass
+  data = get_data_number()
+  parameters = get_parameter_number()
+  dpr = None
+  if data and parameters:
+    dpr = data/parameters
 
   if dpr:
-    dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
-    text_output= ["Data/Parameter ratio is very good",
-                  "Data/Parameter ratio is adequate",
-                  "Data/Parameter ratio is low",
-                  "Data/Parameter ratio is VERY LOW"]
-    colour_txt= ["green",
-                 "yellow",
-                 "orange",
-                 "red"]
+    if dpr in cache:
+      return cache[dpr]
 
+  else:
+    return
+    
+  dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
+  text_output= ["Data/Parameter ratio is very good",
+                "Data/Parameter ratio is adequate",
+                "Data/Parameter ratio is low",
+                "Data/Parameter ratio is VERY LOW"]
+  colour_txt= ["green",
+               "yellow",
+               "orange",
+               "red"]
 
-    idx = 4 - dpr_col_number
-    colour = colour_txt[idx]
-    name = "battery_%s.png" %colour
-    if not OlexVFS.exists(name):
-      try:
-        name = get_battery_image(colour)
-      except:
-        name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" %colour)
-    image = """
-    <input
-    name="BATTERY-EDIT"
-    type="button"
-    align="center"
-    image="%s"
-    hint="%s"
-    >
-    """%(name, text_output[idx])
+  
+  idx = 4 - dpr_col_number
+  colour = colour_txt[idx]
+  name = "battery_%s.png" %colour
+  if not OlexVFS.exists(name):
+    try:
+      name = get_battery_image(colour)
+    except:
+      name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" %colour)
+  image = """
+  <input
+  name="BATTERY-EDIT"
+  type="button"
+  align="center"
+  image="%s"
+  hint="%s"
+  >
+  """%(name, text_output[idx])
 
-    image = """
-    <a target="%s" href="echo '%s'"><zimg src="%s"></a>
-    """%(text_output[idx],text_output[idx],name)
+  image = """
+  <a target="%s" href="echo '%s'"><zimg src="%s"></a>
+  """%(text_output[idx],text_output[idx],name)
 
-    if dpr <= 10:
-      disp_dpr = "%.2f"%dpr
-    else:
-      disp_dpr = "%.1f"%dpr
-
-    d = {
-      'dpr':disp_dpr,
-      'image':image,
-    }
-
-    t = """
-    <table border="0" cellpadding="0" cellspacing="0" align='center'>
-      <tr align='center'>
-        <td align='center'>
-          %(image)s
-        </td>
-      </tr>
-      <tr>
-        <td align='center'>
-          <font size='-1'>
-            <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
-          </font>
-        </td>
-      </tr>
-    </table>
-    """ %d
-    retVal = t
+  if dpr <= 10:
+    disp_dpr = "%.2f"%dpr
+  else:
+    disp_dpr = "%.1f"%dpr
+  
+  d = {
+    'dpr':disp_dpr,
+    'image':image,
+  }
+  
+  t = """
+  <table border="0" cellpadding="0" cellspacing="0" align='center'>
+    <tr align='center'>
+      <td align='center'>
+        %(image)s
+      </td>
+    </tr>
+    <tr>
+      <td align='center'>
+        <font size='-1'>
+          <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
+        </font>
+      </td>
+    </tr>
+  </table>
+  """ %d
+  retVal = t
+  cache[dpr] = t
   return retVal
 OV.registerFunction(GetDPRInfo)
 
@@ -1629,5 +1656,7 @@ class DisorderDisplayTools(object):
   def set_part_display(self, parts,part):
     self.show_unique_only()
     olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" %parts)
+    if OV.GetParam('user.parts.select'):
+      olex.m('sel part %s' %parts)
 
 DisorderDisplayTools_instance = DisorderDisplayTools()

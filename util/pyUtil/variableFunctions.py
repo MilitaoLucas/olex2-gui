@@ -168,7 +168,7 @@ def LoadParams():
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
     parse=phil_interface.parse)
-  
+
   scopes = ['olex2', 'user', 'custom', 'snum']
   for scope in scopes:
     phil_p = get_phil_file_path(scope)
@@ -176,8 +176,8 @@ def LoadParams():
       try:
         phil_handler.update(phil_file=phil_p)
       except:
-        print("Failed to read %.phil" %scope)
-  olx.phil_handler = phil_handler		
+        print("Failed to read %s.phil" %scope)
+  olx.phil_handler = phil_handler
 
   # GUI Phil
   if OV.HasGUI() or True:
@@ -315,9 +315,10 @@ def OnStructureLoaded(previous):
 
   LoadStructureParams()
 
-  if olx.IsFileType('oxm') == 'false':
-    import gui.skin
-    gui.skin.change_bond_colour()
+  # Disable this altogether until it works properly.
+  #if olx.IsFileType('oxm') == 'false':
+    #import gui.skin
+    #gui.skin.change_bond_colour()
 
   if previous != OV.FileFull() and olx.FileExt() != "cif":
     import History

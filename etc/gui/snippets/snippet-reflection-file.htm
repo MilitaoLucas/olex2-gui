@@ -1,7 +1,7 @@
 
   $+
     html.Snippet("gui/snippets/input-combo",
-    "value=FileName(HKLSrc())'.'FileExt(HKLSrc())",
+    "value=spy.GetHklFileValue()",
     "name=SET_REFLECTIONS_parent_name",
     "items=spy.GetHklFileList()",
     "onchange=spy.OnHKLChange(html.GetValue(~name~))>>html.Update",

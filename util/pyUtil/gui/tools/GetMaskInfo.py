@@ -315,9 +315,9 @@ def get_mask_info():
       total_electrons_accounted_for += 0
     f = number_of_symm_op * Zprime  
     add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
-    total_formula = _add_formula(total_formula, add_to_formula, 1)
     add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
+  total_formula = _add_formula(total_formula, add_to_formula, 1)
   add_to_moiety = add_to_moiety.rstrip(", ")
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
   if "[+ solvents]" in suggested_moiety:
@@ -474,6 +474,7 @@ def split_entity(entry):
 cleaned_formulae = {}
 def formula_cleaner(formula):
   formula = formula.replace(" ", "").replace(" ", "")
+  formula = unicode(formula) #py3HP
   if formula in cleaned_formulae:
     return cleaned_formulae[formula]
   retVal = ""
