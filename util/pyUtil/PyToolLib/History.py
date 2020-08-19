@@ -603,9 +603,9 @@ class HistoryTree(Node):
       new_index = {}
       r_index = {}
       # build reverse index
-      for k,v in self.hklFilesMap.iteritems():
+      for k,v in self.hklFilesMap.items():
         r_index.setdefault(v, list()).append(k)
-      for k,v in self.hklFiles.iteritems():
+      for k,v in self.hklFiles.items():
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
         for hkl_d in r_index[k]:
