@@ -12,7 +12,7 @@ if not os.path.exists(fchk_dir):
 os.chdir(fchk_dir)
 args = os.getenv("cuqct_cmd", "").split('+&-')
 #print("Running: '" + ' '.join(args) + "'" + ' in: ' + fchk_dir)
-p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 tries = 0
 while not os.path.exists('NoSpherA2.log'):
   time.sleep(1)

@@ -58,7 +58,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
   if send_fcf:
     if not os.path.exists(fcf_name):
       threadPrint("You have requested full Checkcif report, but unfortunately the FCF file could not be located."+\
-                  "\nPleas make sure that there is LIST 4 instruction is in your INS file before the refinement.")
+                  "\nPlease make sure that there is LIST 4 instruction is in your INS file before the refinement.")
       send_fcf = False
     else:
       params['validtype'] = 'checkcif_with_hkl'

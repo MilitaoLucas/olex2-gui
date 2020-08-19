@@ -98,14 +98,6 @@ class History(ArgumentParser):
     with open(resFile, 'wb') as wFile:
       wFile.write(resFileData)
 
-    if revert_hkl is None:
-      revert_hkl = OV.GetParam("snum.history.revert_hkl")
-    if revert_hkl:
-      hklFile = os.path.join(filepath, filename + ".hkl")
-      hklFileData = decompressFile(tree.getHklData(node))
-      with open(hklFile, 'wb') as wFile:
-        wFile.write(hklFileData)
-
     lstFile = os.path.join(filepath, filename + ".lst")
     if node.lst is not None:
       lstFileData = decompressFile(node.lst)
@@ -120,6 +112,18 @@ class History(ArgumentParser):
     destination = "%s" %destination.strip('"').strip("'")
     sg = olex.f("sg()")
     olx.Atreap("%s" %destination)
+
+    if revert_hkl is None:
+      revert_hkl = OV.GetParam("snum.history.revert_hkl")
+    if revert_hkl:
+      str_dir = OV.StrDir()
+      if str_dir:
+        hklFile = os.path.join(str_dir, "history.hkl")
+        hklFileData = decompressFile(tree.getHklData(node))
+        with open(hklFile, 'wb') as wFile:
+          wFile.write(hklFileData)
+        OV.HKLSrc(hklFile)
+
     olx.File() ## needed to make new .ins file
     sg1 = olex.f("sg()")
     if sg != sg1:
@@ -476,8 +480,8 @@ class HistoryTree(Node):
     # 2.1 - the HKL digest is only,
     # 2.2 - the digest of actual reflections up to the end
     # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
-    # no upgrade available for 2.2 and 2.3...
-    self.version = 2.3
+    # 2.4 - fixing so that 2.2-3 actually proceed to the end
+    self.version = 2.4
     self.hklFiles = {}
     #maps simple digest of the file timestamp and path to full one
     self.hklFilesMap = {}
@@ -582,8 +586,12 @@ class HistoryTree(Node):
     Node.__setstate__(self, state)
 
   def upgrade(self):
+    # current version
+    current_version = 2.4
+    if self.version == current_version:
+      return
+    start_time = time.time()
     if self.version < 2.2:
-      start_time = time.time()
       new_index = {}
       self.hklFilesMap = {}
       for k,v in self.hklFiles.items():
@@ -591,9 +599,22 @@ class HistoryTree(Node):
         new_index.setdefault(md, v)
         self.hklFilesMap[k] = md
       self.hklFiles = new_index
-      self.version = 2.2
-      if timing:
-        print("History has been upgraded in: %s s" %(time.time() - start_time))
+    elif self.version < 2.4:
+      new_index = {}
+      r_index = {}
+      # build reverse index
+      for k,v in self.hklFilesMap.iteritems():
+        r_index.setdefault(v, list()).append(k)
+      for k,v in self.hklFiles.iteritems():
+        md = digestHKLData(decompressFile(v))
+        new_index.setdefault(md, v)
+        for hkl_d in r_index[k]:
+          self.hklFilesMap[hkl_d] = md
+      self.hklFiles = new_index
+    self.version = current_version
+    print("History has been upgraded in: %.2f ms" %((time.time() - start_time)*1000))
+    print("History contains %s HKL file(s) and %s nodes" %(
+      len(self.hklFiles),len(self._full_index)))
 
 
 def index_node(node, full_index):
@@ -649,9 +670,6 @@ def digestHKLData(fileData):
   input = io.BytesIO(fileData)
   l = input.readline()
   while l:
-    l = l.strip()
-    if not l or len(l) < 12:
-      break
     try:
       s = abs(int(l[0:4])) + abs(int(l[4:8])) + abs(int(l[8:12]))
       if s == 0:

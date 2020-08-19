@@ -529,7 +529,7 @@ class RunRefinementPrg(RunPrg):
           if self.refinement_has_failed != None:
             self.refinement_has_failed = self.refinement_has_failed + " and Error during NoSpherA2!"
           else:
-            self.refinement_has_failed = "Error during NoSpherA2!"
+            self.refinement_has_failed = "Error during NoSpherA2 causing an exception!"
       RunRefinementPrg.running = None
 
 
@@ -857,6 +857,10 @@ class RunRefinementPrg(RunPrg):
     HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
     HAR_log.write("NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
     HAR_log.write("\n")
+    import datetime
+    HAR_log.write("Refinement startet at: ")
+    HAR_log.write(str(datetime.datetime.now()))
+    HAR_log.write("\n")
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
     HAR_log.write("************************************************************************************\n")
 
@@ -906,7 +910,7 @@ class RunRefinementPrg(RunPrg):
       if OV.GetParam('snum.NoSpherA2.h_afix') == True:
         olex.m("Afix 0 $H")
     olex.m('delins list')
-    olex.m('addins LIST -3')
+    olex.m('addins LIST -6')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
     if add_disp is True:
       olex.m('gendisp -source=sasaki')
@@ -1127,6 +1131,9 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
+    HAR_log.write("Refinement finished at: ")
+    HAR_log.write(str(datetime.datetime.now()))
+    HAR_log.write("\n")    
 
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:

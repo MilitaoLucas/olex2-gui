@@ -15,7 +15,7 @@ if os.path.exists('NoSpherA2_cube.log'):
   import shutil
   shutil.move('NoSpherA2_cube.log','NoSpherA2_cube.log_org')
 #print("Running: '" + ' '.join(args) + "'" + ' in: ' + fchk_dir)
-p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 tries = 0
 while not os.path.exists('NoSpherA2_cube.log'):
   time.sleep(1)
