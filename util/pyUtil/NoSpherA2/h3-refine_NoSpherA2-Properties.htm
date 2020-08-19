@@ -61,13 +61,13 @@ $+
   $-
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
-    "name=MO",
-    "label=MO",
-    "checked=spy.GetParam('snum.NoSpherA2.Property_MO')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.Property_MO','True')",
+    "name=DEF",
+    "label=DEF",
+    "checked=spy.GetParam('snum.NoSpherA2.Property_DEF')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_DEF','True')",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
     "td1=<td align='center'>",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_MO','False')>>html.Update()"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_DEF','False')"
     )
   $-
   $+
@@ -83,11 +83,22 @@ $+
   $-
 <td width="20%" align='center'><font color='red'><b> Attention, ESP is slow!</b></font></td>
  
-<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_MO)
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=MO",
+    "label=MO",
+    "checked=spy.GetParam('snum.NoSpherA2.Property_MO')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_MO','True')>>html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_MO','False')>>html.Update()"
+    )
+  $-
+<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_MO)
 <td width="13%" align='left'>
   <b>MO #</b>
 </td>
@@ -117,8 +128,44 @@ $+
     "onuncheck=spy.SetParam('snum.NoSpherA2.Property_all_MOs','False')"
     )
   $-
-  
 #ignoreif -->
+
+<!-- #ignoreif spy.GetParam(snum.NoSpherA2.Property_MO)
+  <td width=30%> </td>
+#ignoreif -->
+
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=HDEF",
+    "label=HDEF",
+    "checked=spy.GetParam('snum.NoSpherA2.Property_ATOM')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','False')"
+    )
+  $-
+<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_ATOM)
+  <td width="13%" align='left'>
+    <b>ATOM #</b>
+  </td>
+  <td width='5%'>
+
+    <input 
+      type='spin', 
+      width='50', 
+      height="17"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      min='1'
+      max='$spy.NoSpherA2.get_ncen()',
+      name='Set_ATOM',
+      value='$spy.GetParam(snum.NoSpherA2.Property_ATOM_number)', 
+      onchange="spy.SetParam(snum.NoSpherA2.Property_ATOM_number,html.GetValue(~name~))",
+    > 
+
+  </td>
+#ignoreif -->
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>

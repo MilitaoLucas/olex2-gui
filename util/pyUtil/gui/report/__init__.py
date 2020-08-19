@@ -106,7 +106,7 @@ class publication:
           continue
         display = os.path.basename(item)
         remove = """<a target='Remove from merge'
-href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
+href='spy.gui.report.publication.remove_cif_from_merge_list("%s")>>html.Update'>
 <font color='red'><zimg src='delete_small.png'></font></a>""" %item
         s += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(
           item, display, remove)
@@ -433,8 +433,13 @@ def get_reflections_stats_dictionary():
 
 def create_report():
   try:
-    import AC4
-    if AC4.AC4_instance.HasAC4():
+    ac4i = None
+    import AC4 as ac4
+    try:
+      ac4i = ac4.AC4_instance
+    except:
+      ac4i = ac4.AC4.AC4_instance
+    if ac4i.HasAC4():
       try:
         olex.m('spy.ac4.create_report()')
       except:
@@ -442,8 +447,8 @@ def create_report():
         olex.m("report")
     else:
       olex.m("report")
-  except:
-    print("Failed to make a report")
+  except Exception as e:
+    print("Failed to make a report: %s" %str(e))
 
 olex.registerFunction(create_report, False, "gui")
 olex.registerFunction(get_crystal_image, False, "report")
