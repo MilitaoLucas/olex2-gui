@@ -687,17 +687,18 @@ class RunRefinementPrg(RunPrg):
           self.his_file = hist.create_history()
         except Exception as ex:
           sys.stderr.write("History could not be created\n")
-          sys.stderr.formatExceptionInfo()
+          if debug:
+            sys.stderr.formatExceptionInfo()
       else:
         print ("Skipping History")
+      self.R1 = R1
+      self.wR2 = wR2
     else:
-      R1 = "n/a"
+      self.R1 = self.wR2 = "n/a"
       self.his_file = None
       print("The refinement has failed, no R value was returned by the refinement")
-    self.R1 = R1
-    self.wR2 = wR2
     OV.SetParam('snum.refinement.current_history', self.his_file)
-    return self.his_file, R1
+    return self.his_file, self.R1
 
   def isInversionNeeded(self, force=False):
     if self.params.snum.init.skip_routine:
@@ -1133,7 +1134,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
     HAR_log.write("Refinement finished at: ")
     HAR_log.write(str(datetime.datetime.now()))
-    HAR_log.write("\n")    
+    HAR_log.write("\n")
 
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
