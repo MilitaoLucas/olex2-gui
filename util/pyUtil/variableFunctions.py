@@ -64,13 +64,14 @@ def unPickle(path):
   pFile = None
   try:
     pFile = open(path, 'rb')
-    data = pickle.load(pFile)
-  except:
+    data = pickle.load(pFile, encoding='latin1')
+  except Exception as e:
+    print(e)
     # compatibility for files that were not saved in mode 'wb'
     if pFile is not None:
       pFile.close()
       pFile = None
-    pFile = open(path, 'r')
+    pFile = open(path, 'r', encoding='latin1')
     data = pickle.load(pFile)
   finally:
     if pFile is not None:
