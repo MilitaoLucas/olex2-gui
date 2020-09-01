@@ -1752,5 +1752,3 @@ def debugInEclipse():
   except:
     print("Failed to attach the debugger")
 OV.registerFunction(debugInEclipse)
-
-
