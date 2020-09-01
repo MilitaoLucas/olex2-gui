@@ -116,9 +116,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           OV.SetParam("snum.refinement.use_solvent_mask", False)
           olex.m('delins ABIN')
           OlexVFS.write_to_olex('mask_notification.htm',_,1)
-      #elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
-        #f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
-        #f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
       if f_mask is not None:
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered

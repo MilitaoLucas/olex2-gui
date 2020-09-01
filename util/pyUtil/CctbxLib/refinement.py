@@ -132,12 +132,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not self.f_mask:
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
-            self.f_mask = olx.current_mask.f_mask()
+          self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
+        if self.f_mask.size() != fo_sq.size():
+          print("The mask is out of date. Please update.")
+          self.failure = True
+          return
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
