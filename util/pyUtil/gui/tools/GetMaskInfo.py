@@ -341,6 +341,9 @@ def get_mask_info():
   d['total_void_no'] = total_void_no
 
   if mask_special_details == "?" or mask_info_has_updated:
+    OV.SetParam('snum.masks.special_detail_colour', gui_red)
+    OV.SetParam('snum.masks.special_detail_button_text', 'Use & Edit')
+    
     if add_to_formula:
       mask_special_details = get_template('mask_special_detail_default', path=template_path, force=debug)%d
     else:
@@ -550,6 +553,8 @@ def edit_mask_special_details(txt,base,sNum):
     olx.cif_model[current_sNum]['_%s_special_details' %base] = user_value
     model_src = OV.ModelSrc()
     update_sqf_file(current_sNum, '_%s_special_details' %base)
+    OV.SetParam('snum.masks.special_detail_colour', gui_green)
+    OV.SetParam('snum.masks.special_detail_button_text', 'Edit')
     olx.html.Update()
 
 OV.registerFunction(edit_mask_special_details)
