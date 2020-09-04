@@ -78,7 +78,7 @@ def getAuthenticationToken(force=False):
     else:
       at = ats
     if at:
-      with open(tfn, "wb") as tf:
+      with open(tfn, "w") as tf:
         tf.write(at)
     else:
       raise Exception("Could not retrieve authentication token")
@@ -112,7 +112,7 @@ def getModule(name, email=None):
       if "Error" in f:
         olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %(red, email, f), 0)
         return False
-      with open(etoken_fn, "wb") as efn:
+      with open(etoken_fn, "w") as efn:
         efn.write(f)
       etoken = f
     except Exception as e:
@@ -127,7 +127,7 @@ def getModule(name, email=None):
 
   if etoken is None:
     if os.path.exists(etoken_fn):
-      etoken = open(etoken_fn, "rb").readline().strip()
+      etoken = open(etoken_fn, "r").readline().strip()
 
   if etoken is None:
     if not email:
@@ -158,7 +158,7 @@ def getModule(name, email=None):
 
     else:
       _ = os.path.join(m_dir, "%s.update" %name)
-      with open(_,'wb') as wFile:
+      with open(_,'w') as wFile:
         wFile.write(f)
 
       if not update_or_install(name):
@@ -268,7 +268,7 @@ def loadAll():
       print("The module %s does not contain key file, skipping" %d)
       continue
 
-    key = open(key, 'rb').readline()
+    key = open(key, 'r').readline()
     try:
       if _plgl.loadPlugin(d, key, m_dir):
         print("Module %s has been successfully loaded." %d)
@@ -300,7 +300,7 @@ def updateKey(module):
     m_dir = getModulesDir()
     etoken_fn = "%s%setoken" %(m_dir, os.sep)
     if os.path.exists(etoken_fn):
-      etoken = open(etoken_fn, "rb").readline().strip()
+      etoken = open(etoken_fn, "r").readline().strip()
     else:
       print("Failed to update the key - email is not registered")
       return False
@@ -315,7 +315,7 @@ def updateKey(module):
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
     keyfn = "%s%s%s%skey" %(m_dir, os.sep, module.folder_name, os.sep)
-    with open(keyfn, "wb") as keyf:
+    with open(keyfn, "w") as keyf:
       keyf.write(key)
     try:
       if _plgl.loadPlugin(module.folder_name, key, m_dir):
