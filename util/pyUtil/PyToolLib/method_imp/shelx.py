@@ -304,7 +304,7 @@ class Method_shelx_direct_methods(Method_shelx_solution):
     lstPath = "%s/%s.lst" %(OV.FilePath(), OV.FileName())
     if os.path.exists(lstPath):
       import lst_reader
-      lstValues = list(lst_reader.reader(path=lstPath).values())
+      lstValues = lst_reader.reader(path=lstPath).values()
 
       RunPrgObject.Ralpha = lstValues.get('Ralpha','')
       RunPrgObject.Nqual = lstValues.get('Nqual','')
