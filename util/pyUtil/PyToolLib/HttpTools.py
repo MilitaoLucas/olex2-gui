@@ -22,7 +22,7 @@ def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
   return opener.open(url,values, http_timeout)
 
 
-def make_url_call(url, values, http_timeout = 5):
+def make_url_call(url, values=None, http_timeout = 5):
   global use_proxy_settings
   global proxy
   localhost = False

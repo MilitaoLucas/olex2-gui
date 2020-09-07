@@ -66,7 +66,7 @@ def getAuthenticationToken(force=False):
           'at': ats
         }
         f = HttpTools.make_url_call(url, values, http_timeout=30)
-        f = f.read().strip()
+        f = f.read().decode("utf-8").strip()
         if f:
           if "Error" not in f:
             at = f
@@ -74,6 +74,8 @@ def getAuthenticationToken(force=False):
           at = ats.split(";")[-1]
       except Exception as e:
         print("Failed to match the authentication tokens %s" %str(e))
+        if debug:
+          sys.stdout.formatExceptionInfo()
         at = _plgl.createAuthenticationToken()
     else:
       at = ats
@@ -108,7 +110,7 @@ def getModule(name, email=None):
         'e': email
       }
       f = HttpTools.make_url_call(url, values, http_timeout=30)
-      f = f.read().strip()
+      f = f.read().decode("utf-8").strip()
       if "Error" in f:
         olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %(red, email, f), 0)
         return False
@@ -145,8 +147,8 @@ def getModule(name, email=None):
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read()
-    if f.startswith('<html>'):
-      txt = f[6:]
+    if f.startswith(b'<html>'):
+      txt = f[6:].decode("utf-8")
       txt = txt.replace("Your licence has expired","<font color='%s'><b>Your %s licence has expired</b></font>" %(red,name))
       txt = txt.replace("Unknown/invalid module name","<font color='%s'><b>Unknown or invalid module %s</b></font>" %(red,name))
       txt = txt.replace("The activation link is sent. Check your e-mail. Once the download is activated, install the module again","<font color='%s'>Please check your e-mail to activate the <b>%s</b> module and then press the <b>Install</b> button above.</font>" %(green,name))
@@ -155,10 +157,9 @@ def getModule(name, email=None):
         #expired_pop(name)
 
       olex.writeImage(info_file_name, txt, 0)
-
     else:
       _ = os.path.join(m_dir, "%s.update" %name)
-      with open(_,'w') as wFile:
+      with open(_,'wb') as wFile:
         wFile.write(f)
 
       if not update_or_install(name):
@@ -311,7 +312,7 @@ def updateKey(module):
       'et': etoken
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
-    key = f.read()
+    key = f.read().decode("utf-8")
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
     keyfn = "%s%s%s%skey" %(m_dir, os.sep, module.folder_name, os.sep)
@@ -492,7 +493,11 @@ def getAvailableModules_():
      't' : OV.GetTag()
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
-    xml = et.fromstring(f.read())
+    f = f.read().decode("utf-8").strip()
+    if not f:
+      print("No modules evailable")
+      return
+    xml = et.fromstring(f)
     for m in xml.getchildren():
       if m.tag == "module" or m.tag == "internal_module":
         try:
@@ -522,7 +527,7 @@ def getAvailableModules_():
         d = 0
         if os.path.exists(rd):
           try:
-            d = file(rd, 'rb').read().strip()
+            d = open(rd, 'r').read().strip()
           except:
             pass
         if m.folder_name in failed_modules:
@@ -698,13 +703,13 @@ def doAct():
     rollback_zip = os.path.join("%s.rollback" %pdir)
     shutil.make_archive(rollback_zip, 'zip', pdir)
     avaialbaleModulesRetrieved = False
-    
+
     print("The original module %s has been backed up and deleted." %current_module.name)
     shutil.rmtree(pdir)
     avaialbaleModulesRetrieved = False
     getAvailableModules_()
     olx.html.Update()
-    
+
   else:
     getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
     #current_module = None
