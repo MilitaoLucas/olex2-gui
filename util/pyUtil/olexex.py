@@ -1709,8 +1709,7 @@ def FixMACQuotes(text):
       .replace("\u2014", "-")\
       .replace("\u2019", "'")\
       .replace("\u201c", "\"")\
-      .replace("\u201d", "\"")\
-     .encode("ascii")
+      .replace("\u201d", "\"")
   return text
 
 def debugInVSC():

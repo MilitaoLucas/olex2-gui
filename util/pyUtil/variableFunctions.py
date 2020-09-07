@@ -386,7 +386,7 @@ def EditParams(scope_name="", expert_level=0, attributes_level=0):
     output_phil.show(out=s, expert_level=expert_level, attributes_level=attributes_level)
     input_phil_string = OV.GetUserInput(0, "Edit parameters", s.getvalue())
     if input_phil_string is not None and not input_phil_string == s.getvalue():
-      handler.update(phil_string=str(input_phil_string))
+      handler.update(phil_string=input_phil_string)
     else:
       # need to set scope name back to original since scope isn't rebuilt
       output_phil.name = original_name

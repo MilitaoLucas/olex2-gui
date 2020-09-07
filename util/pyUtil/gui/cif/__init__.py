@@ -100,29 +100,26 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
 
   #outputtype = 'htm'
   if outputtype == "html":
-    wFile = open(out_file_name,'w')
-    wFile.write(response.read())
-    wFile.close()
+    with open(out_file_name,'w') as wFile:
+      wFile.write(response.read().decode('utf-8'))
     threadPrint('Done')
   elif outputtype == "pdf":
     l = response.readlines()
     for line in l:
-      if "checkcif.pdf" in line:
-        href = line.split('"')[1]
+      if b"checkcif.pdf" in line:
+        href = line.split(b'"')[1]
         threadPrint('Downloading PDF report')
         response = None
         try:
-          response = HttpTools.make_url_call(href,"")
+          response = HttpTools.make_url_call(href.decode('utf-8'))
           threadPrint('Done')
         except Exception as e:
           threadPrint('Failed to download PDF report...')
           print(e)
         if not response:
           return
-        txt = response.read()
-        wFile = open(out_file_name,'wb')
-        wFile.write(txt)
-        wFile.close()
+        with open(out_file_name,'wb') as wFile:
+          wFile.write(response.read())
   fileName = '%s'%os.path.join(OV.FilePath(),out_file_name)
   olx.Schedule(1, "spy.threading.shell.run(\"%s\")" %fileName)
   #print time.time() -t_
