@@ -1,6 +1,4 @@
 # -*- coding:utf8 -*-
-
-
 # import PngImagePlugin
 from PIL import Image
 from PIL import ImageDraw, ImageChops, ImageColor
@@ -479,6 +477,7 @@ class ImageTools(FontInstances):
 
   def resize_to_panelwidth(self, i, colourize=False, width_adjust=0, width=None):
     import olex
+    import io
     do_cache_image = True
     name = i
     im = None
@@ -490,8 +489,8 @@ class ImageTools(FontInstances):
         return
       olex.writeImage(name, "")
       name = name[:-4]
-      sio = StringIO(s)
-      if not sio.len:  # resize was called twice in a raw
+      sio = io.BytesIO(s)
+      if not sio.getbuffer().nbytes:  # resize was called twice in a raw
         return
       im = Image.open(sio)
     else:
