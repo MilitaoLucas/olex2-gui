@@ -170,8 +170,6 @@ def deal_with_gui_phil(action):
 
 
 def export_parameters(load_phil=True):
-
-
   if timing:
     t = time.time()
   if check_for_first_run():
@@ -180,6 +178,8 @@ def export_parameters(load_phil=True):
     deal_with_gui_phil(action='load')
 
   if OV.HasGUI():
+    from gui import tools as gtools
+    gtools.cache = {}
     table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
     OV.SetParam('HtmlTableWidth', table_width)
     OV.SetVar('HtmlTableWidth', table_width)

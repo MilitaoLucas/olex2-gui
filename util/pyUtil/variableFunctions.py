@@ -237,7 +237,7 @@ def LoadStructureParams():
   #
   StrDir = OV.StrDir()
   olx.cif_model = None #reset the cif model, #399
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
+  metacif_path = os.path.join(OV.StrDir(), model_src + ".metacif")
   if StrDir and not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(

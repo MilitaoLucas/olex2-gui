@@ -109,13 +109,13 @@ class CifTools(ArgumentParser):
   def __init__(self):
     super(CifTools, self).__init__()
     model_src = OV.ModelSrc()
-    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
+    self.metacif_path = os.path.join(OV.StrDir(), model_src + ".metacif")
     self.data_name = model_src.replace(' ', '')
     just_loaded = False
     if olx.cif_model is None or self.data_name.lower() not in list(olx.cif_model.keys_lower.keys()):
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
-      if not olx.cif_model is None:
+      if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
       just_loaded = True
@@ -328,16 +328,15 @@ class EditCifInfo(CifTools):
       if reader.error_count():
         return
       updated_cif_model = reader.model()
-      if '_diffrn_ambient_temperature' in list(updated_cif_model.values())[0]:
-        OV.set_cif_item(
-          '_diffrn_ambient_temperature',
-          list(updated_cif_model.values())[0]['_diffrn_ambient_temperature'])
-      diff_1 = list(self.cif_model.values())[0].difference(list(updated_cif_model.values())[0])
+      updated_values = list(updated_cif_model.values())
+      current_values = list(self.cif_model.values())
+      if '_diffrn_ambient_temperature' in updated_values[0]:
+        OV.set_cif_item('_diffrn_ambient_temperature',
+          updated_values[0]['_diffrn_ambient_temperature'])
+      diff_1 = current_values[0].difference(updated_values[0])
       modified_items = diff_1._set
-      removed_items = list(self.cif_model.values())[0]._set\
-                    - list(updated_cif_model.values())[0]._set
-      added_items = list(updated_cif_model.values())[0]._set\
-                  - list(self.cif_model.values())[0]._set
+      removed_items = current_values[0]._set - updated_values[0]._set
+      added_items = updated_values[0]._set - current_values[0]._set
       user_modified = OV.GetParam('snum.metacif.user_modified')
       user_removed = OV.GetParam('snum.metacif.user_removed')
       user_added = OV.GetParam('snum.metacif.user_added')
@@ -823,7 +822,8 @@ class ExtractCifInfo(CifTools):
           su = float(temp[1].split(')')[0]) / math.pow(10, precision)
           t = format_float_with_standard_uncertainty(t, su)
           self.cif_block['_diffrn_ambient_temperature'] = t
-        self.cif_block['_diffrn_ambient_temperature'] = t
+        else:
+          self.cif_block['_diffrn_ambient_temperature'] = '{:.2f}'.format(t)
 
     if '_diffrn_ambient_temperature' in self.cif_block and\
        '_cell_measurement_temperature' not in self.cif_block:
@@ -1305,7 +1305,7 @@ def reloadMetadata(force=False):
   try:
     fileName = OV.FileName()
     dataName = OV.ModelSrc()
-    metacif_path = '%s/%s.metacif' %(OV.StrDir(), dataName)
+    metacif_path = os.path.join(OV.StrDir(), dataName + ".metacif")
     dataName = fileName.replace(' ', '')
     #check if the
     if dataName != fileName and not force:
