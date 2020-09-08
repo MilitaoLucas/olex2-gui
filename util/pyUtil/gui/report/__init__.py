@@ -197,7 +197,7 @@ def ResolvePrograms():
   pop_name = 'report_resolve'
   olx.Popup(pop_name, olx.BaseDir() + "/etc/gui/report-resolve-programs.htm",
    t="Missing data", b="tc",
-   x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh, s=True)
+   x=sz[0] + w//2 + sw//2, y=sz[1] + h//2 - sh//2, w=sw, h=sh, s=True)
   res = olx.html.ShowModal(pop_name)
   if not res or int(res) == 1:
     return False
@@ -434,16 +434,16 @@ def get_reflections_stats_dictionary():
 def create_report():
   try:
     ac4i = None
-    import AC4 as ac4
+    import AC5 as ac5
     try:
-      ac4i = ac4.AC4_instance
+      ac4i = ac5.AC5_instance
     except:
-      ac4i = ac4.AC4.AC4_instance
-    if ac4i.HasAC4():
+      ac4i = ac5.AC5.AC5_instance
+    if ac4i.HasAC5():
       try:
-        olex.m('spy.ac4.create_report()')
+        olex.m('spy.ac5.create_report()')
       except:
-        print("Tried to make AC4 report and failed. Making default report instead")
+        print("Tried to make AC5 report and failed. Making default report instead")
         olex.m("report")
     else:
       olex.m("report")
