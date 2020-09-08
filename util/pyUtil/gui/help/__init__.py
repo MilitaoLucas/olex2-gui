@@ -9,7 +9,7 @@ have_help = True
 
 global helpIsInitialised
 helpIsInitialised = False
- 
+
 import pickle as pickle
 
 import olex
@@ -558,9 +558,7 @@ class AutoDemoTemp(AutoDemo):
       if self.interactive:
         txt = gui.tools.TemplateProvider.get_template('pop_tutorials')%d
       else:
-        txt = gui.tools.TemplateProvider.get_template('pop_tutorials_loop')%s
-
-      txt = txt.decode('utf-8')
+        txt = gui.tools.TemplateProvider.get_template('pop_tutorials_loop')%d
 
       OV.write_to_olex("%s.htm" %self.pop_name.lower(), txt)
       boxWidth = 450

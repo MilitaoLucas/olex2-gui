@@ -336,7 +336,7 @@ def EditGuiItem(OXD,language="English"):
     else:
       tool_name = OXD.split("/")[1].split(".")[0]
       gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
-    
+
   if not os.path.exists(gui_file):
     return
 
@@ -672,7 +672,7 @@ def format_help(txt):
   ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
 
-  regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
+  regex = re.compile(r"  XX (.*?)( [^\\XX\\XX]* ) XX ", re.X)
   m = regex.findall(txt)
   code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
   code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal

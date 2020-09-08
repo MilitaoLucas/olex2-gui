@@ -1,3 +1,4 @@
+# obsolete module
 import sys
 import os
 import smtplib
