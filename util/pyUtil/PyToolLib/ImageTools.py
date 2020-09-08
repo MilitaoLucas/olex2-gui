@@ -288,22 +288,9 @@ class ImageTools(FontInstances):
     return retVal
 
   def decimalColorToHTMLcolor(self, dec_colour):
-    val = hex(dec_colour)
-    val = val.lstrip('0x')
-    if len(val) == 9:
-      val = val[:6]
-    elif len(val) > 6:
-      return dec_colour
-    w_counter = 0
-    while len(val) != 6 and w_counter < 1000:
-      w_counter += 1
-      val = "0" + val
-    retVal = "#"
-    retVal += val[-2:]
-    retVal += val[-4:-2]
-    retVal += val[-6:-4]
+    retVal = "#%s%s%s" %(hex(dec_colour&255)[2:],
+      hex((dec_colour>>8)&255)[2:], hex((dec_colour>>16)&255)[2:])
     return retVal
-
 
   def getOlexVariables(self):
     # self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
@@ -1659,7 +1646,6 @@ class ImageTools(FontInstances):
 
     if not trimcolour and OV.HasGUI():
       import struct
-      trimcolour = "#%s" %self.dec2hex(int(olx.gl.lm.ClearColor()))
       _ = struct.unpack("4B",struct.pack(">I",int(olx.gl.lm.ClearColor())))
       trimcolour = (_[3], _[2], _[1])
 
