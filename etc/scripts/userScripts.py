@@ -7,7 +7,6 @@ This file WILL be updated by us
 
 scripts = [
   'OlexPlaton',
-  'OlexMail',
   'OlexCheckCIF',
   'OlexCDS',
   'flipsmall',
@@ -19,7 +18,6 @@ scripts = [
 
 if olx.HasGUI().lower() == "true":
   scripts += ['Olex2CCDC',
-              'Tutorials',
               'XPlain',
               'ZSGH'
               ]
