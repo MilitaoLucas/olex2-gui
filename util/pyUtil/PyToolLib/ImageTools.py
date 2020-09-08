@@ -487,7 +487,7 @@ class ImageTools(FontInstances):
       s = OlexVFS.read_from_olex(name)
       if s is None:
         return
-      olex.writeImage(name, "")
+      olex.writeImage(name, b"")
       name = name[:-4]
       sio = io.BytesIO(s)
       if not sio.getbuffer().nbytes:  # resize was called twice in a raw
