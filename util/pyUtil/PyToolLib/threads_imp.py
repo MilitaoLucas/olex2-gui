@@ -154,7 +154,7 @@ class NewsImageRetrivalThread(ThreadEx):
     from gui import help
     cont = _.read()
     help.make_help_box(helpTxt=cont, name="Sample_list")
-    
+
   def get_structure_from_url(self, name, url=None):
     if not url:
       url = OV.GetParam('olex2.samples.url')
@@ -165,14 +165,14 @@ class NewsImageRetrivalThread(ThreadEx):
     p = os.path.join(OV.DataDir(), 'samples', name)
     if not os.path.exists(p):
       os.makedirs(p)
-    pp = os.path.join(p, name + '.cif')  
+    pp = os.path.join(p, name + '.cif')
     if not os.path.exists(pp):
       cont = _.read()
       with open(pp, 'w') as wFile:
         wFile.write(cont)
     else:
       print("Loading the existing structure; please delete this structure (cif file) if you want to get it again!")
-    olex.m("reap '%s'" %pp)  
+    olex.m("reap '%s'" %pp)
 
 
   def get_list_from_server(self, list_name='news'):
@@ -190,15 +190,15 @@ class NewsImageRetrivalThread(ThreadEx):
     l = _.readlines()
     _ = []
     for line in l:
-      if line.strip().startswith("#"):
+      if line.strip().startswith(b"#"):
         continue
-      _.append(line)
+      _.append(line.decode('utf-8'))
     return _
 
   def make_call(self, url):
     import HttpTools
     try:
-      res = HttpTools.make_url_call(url, values = '', http_timeout=5)
+      res = HttpTools.make_url_call(url, http_timeout=5)
     except Exception as err:
       return None
     return res
