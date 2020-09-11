@@ -1018,11 +1018,47 @@ OV.registerFunction(generate_sf_table, False, "test")
 def generate_DISP(table_name_, wavelength=None, elements=None):
   import olx
   from cctbx.eltbx import attenuation_coefficient as attc
+  if not elements:
+    formula = olx.xf.GetFormula('list')
+    elements = [x.split(':')[0] for x in formula.split(',')]
   nist_elements = attc.nist_elements()
   table_name = table_name_.lower()
+  # user dir first
+  anom_dirs = [os.path.join(olx.DataDir(), "anom"),
+    os.path.join(olx.BaseDir(), "etc", "anom")]
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
+  afile = None
+  for d in anom_dirs:
+    if not os.path.exists(d):
+      continue
+    for af in os.listdir(d):
+      try:
+        fw = float(af)
+        if abs(wavelength-fw) < 0.001:
+          afile = os.path.join(d, af)
+          break
+      except:
+        pass
+    if afile:
+      break
+  rv = []
+  if afile:
+    with open(afile, 'r') as disp:
+      for l in disp.readlines():
+        l = l.strip()
+        if not l or l.startswith('#'):
+          continue
+        ts = [x.strip() for x in l.split(',')]
+        if ts[1] not in elements:
+          continue
+        rv.append("%s,%s,%s,%s" %(ts[1],
+          ts[3].split(':')[1].strip(),
+          ts[4].split(':')[1].strip(),
+          ts[5].split(':')[1].strip()))
+    return ';'.join(rv)
+
   if "sasaki" == table_name:
     from cctbx.eltbx import sasaki
     tables = sasaki
@@ -1031,10 +1067,6 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     tables = henke
   else:
     raise Exception("Invalid table name")
-  if not elements:
-    formula = olx.xf.GetFormula('list')
-    elements = [x.split(':')[0] for x in formula.split(',')]
-  rv = []
   for e in elements:
     e = str(e)
     try:
