@@ -407,7 +407,9 @@ class OlexCctbxAdapter(object):
       return False
     return True
 
-def write_fab(f_mask, fab_path):
+def write_fab(f_mask, fab_path=None):
+  if not fab_path:
+    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
@@ -640,12 +642,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
-        easy_pickle.dump(
-          '%s/%s-mask.pickle' %(filepath, OV.FileName()), mask.mask.data)
-        easy_pickle.dump(
-          '%s/%s-f_mask.pickle' %(filepath, OV.FileName()), mask.f_mask())
-        easy_pickle.dump(
-          '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
+        write_fab(mask.f_mask())
       out = StringIO()
       fo2 = self.reflections.f_sq_obs
       fo2.show_comprehensive_summary(f=out)
@@ -656,26 +653,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
       (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
-      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w')
-      print >> f, out.getvalue()
-      f.close()
+      with open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w') as f:
+        print >> f, out.getvalue()
       print out.getvalue()
-      #cif_block['_diffrn_reflns_number'] = fo2.size()
-      #if merging: #HKLF5 will not have one
-        #cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
-        #cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
-
-
-      #cif_block['_diffrn_reflns_limit_h_min'] = h_min
-      #cif_block['_diffrn_reflns_limit_h_max'] = h_max
-      #cif_block['_diffrn_reflns_limit_k_min'] = k_min
-      #cif_block['_diffrn_reflns_limit_k_max'] = k_max
-      #cif_block['_diffrn_reflns_limit_l_min'] = l_min
-      #cif_block['_diffrn_reflns_limit_l_max'] = l_max
-      #cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
-        #0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
-      #cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
-        #0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
       cif_block['_smtbx_masks_void_probe_radius'] = self.params.solvent_radius
       cif_block['_smtbx_masks_void_truncation_radius'] = self.params.shrink_truncation_radius
 
@@ -699,11 +679,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       cif[data_name] = cif_block
 
       mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
-      f = open(mask_cif_path, 'w')
-#      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'w')
-
-      print >> f, cif
-      f.close()
+      with open(mask_cif_path, 'w') as f:
+        print >> f, cif
       OV.SetParam('snum.masks.update_cif', True)
       data = None
     else:
@@ -1041,11 +1018,47 @@ OV.registerFunction(generate_sf_table, False, "test")
 def generate_DISP(table_name_, wavelength=None, elements=None):
   import olx
   from cctbx.eltbx import attenuation_coefficient as attc
+  if not elements:
+    formula = olx.xf.GetFormula('list')
+    elements = [x.split(':')[0] for x in formula.split(',')]
   nist_elements = attc.nist_elements()
   table_name = table_name_.lower()
+  # user dir first
+  anom_dirs = [os.path.join(olx.DataDir(), "anom"),
+    os.path.join(olx.BaseDir(), "etc", "anom")]
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
+  afile = None
+  for d in anom_dirs:
+    if not os.path.exists(d):
+      continue
+    for af in os.listdir(d):
+      try:
+        fw = float(af)
+        if abs(wavelength-fw) < 0.001:
+          afile = os.path.join(d, af)
+          break
+      except:
+        pass
+    if afile:
+      break
+  rv = []
+  if afile:
+    with open(afile, 'r') as disp:
+      for l in disp.readlines():
+        l = l.strip()
+        if not l or l.startswith('#'):
+          continue
+        ts = [x.strip() for x in l.split(',')]
+        if ts[1] not in elements:
+          continue
+        rv.append("%s,%s,%s,%s" %(ts[1],
+          ts[3].split(':')[1].strip(),
+          ts[4].split(':')[1].strip(),
+          ts[5].split(':')[1].strip()))
+    return ';'.join(rv)
+
   if "sasaki" == table_name:
     from cctbx.eltbx import sasaki
     tables = sasaki
@@ -1054,10 +1067,6 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     tables = henke
   else:
     raise Exception("Invalid table name")
-  if not elements:
-    formula = olx.xf.GetFormula('list')
-    elements = [x.split(':')[0] for x in formula.split(',')]
-  rv = []
   for e in elements:
     e = str(e)
     try:
