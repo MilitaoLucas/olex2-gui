@@ -261,15 +261,15 @@ t:mask_special_details{
         type="button"
         height="math.eval(GetVar('HtmlComboHeight')*2)"
         name="EDIT_MASK_SPECIAL_DETAILS"
-        value="Edit"
+        value="$spy.GetParam('snum.masks.special_detail_button_text')"
         bgcolor="GetVar('linkButton.bgcolor')"
-        fgcolor="GetVar('linkButton.fgcolor')"
+        fgcolor="$spy.GetParam('snum.masks.special_detail_colour')"
         onclick="spy.edit_mask_special_details('$GetVar(%(mask_special_details_vn)s)',%(base)s,%(current_sNum)s)"
         custom="#custom"
       >
     </td>
     <td width=92%%>
-        %(mask_special_details)s
+        <font color=$spy.GetParam('snum.masks.special_detail_colour')>%(mask_special_details)s</font>
     </td>
   </tr>
 </table>
