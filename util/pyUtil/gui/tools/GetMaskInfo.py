@@ -77,7 +77,8 @@ def get_mask_info():
   d["note"] = "No Masking Information"
   d["note_bg"] = OV.GetVar('HtmlHighlightCOlour')
 
-  mask_special_details_vn = "%s_%s" %(OV.ModelSrc(), "mask_special_details")
+  _ = escape_param_names(name=OV.ModelSrc())
+  mask_special_details_vn = "%s_%s" %(_, "mask_special_details")
     
   is_CIF = (olx.IsFileType('cif') == 'true')
   sqf = None
@@ -333,6 +334,7 @@ def get_mask_info():
   d['add_to_formula']= add_to_formula.replace(".0 ", " ")
   d['base']= base
   d['current_sNum']= current_sNum
+  d['escaped_model_src']= escape_param_names(OV.ModelSrc())
 
   d['total_void_electrons'] = total_void_electrons
   d['total_void_accounted_for_electrons'] = total_void_accounted_for_electrons
@@ -748,6 +750,13 @@ def return_note(note,note_details="", col=OV.GetVar('HtmlHighlightCOlour')):
   t = gui.tools.TemplateProvider.get_template('masking_note', path=template_path, force=debug)%d
   OlexVFS.write_to_olex(output_fn, t)
   return output_fn
+
+def escape_param_names(name):
+  l = ["[", "]","(", ")"]
+  for item in l:
+    name = name.replace(item, "_")
+  return name
+
 
 def change_based_on_button_states():
   l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
