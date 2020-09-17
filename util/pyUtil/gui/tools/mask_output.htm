@@ -264,7 +264,7 @@ t:mask_special_details{
         value="$spy.GetParam('snum.masks.special_detail_button_text')"
         bgcolor="GetVar('linkButton.bgcolor')"
         fgcolor="$spy.GetParam('snum.masks.special_detail_colour')"
-        onclick="spy.edit_mask_special_details('$GetVar(%(mask_special_details_vn)s)',%(base)s,%(current_sNum)s)"
+        onclick="spy.edit_mask_special_details('$GetVar(%(mask_special_details_vn)s)',%(base)s,%(escaped_model_src)s)"
         custom="#custom"
       >
     </td>
