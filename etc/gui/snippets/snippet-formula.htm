@@ -56,7 +56,7 @@
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_Z_PRIME_#name'
       value='xf.au.GetZprime()'
-      onchange="xf.au.SetZprime(html.GetValue(~name~))>>html.Update"
+      onleave='spy.gui.get_Z_prime_from_fraction(html.GetValue(~name~))>>html.update'
       label="Z' "
     >
     </font>
