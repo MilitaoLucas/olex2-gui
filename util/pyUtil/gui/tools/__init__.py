@@ -1251,20 +1251,31 @@ def get_battery_image(colour, colourize=True):
   return name
 
 def get_data_number():
-  import olex_core
-  hkl_stats = olex_core.GetHklStat()
-  data = hkl_stats.get('DataCount', None)
-  absences = hkl_stats.get('SystematicAbsencesRemoved', 0)
-  if not data:
-    try:
-      data = int(olx.Cif('_reflns_number_gt'))
-    except:
-      return data
-  if OV.GetParam('user.diagnostics.refinement.dpr.halve_for_non_centro'):
-    if not olex_core.SGInfo()['Centrosymmetric']:
-      data = int(data/2)
-  return data
-
+  try:
+    import olex_core
+    hkl_stats = olex_core.GetHklStat()
+    data = hkl_stats.get('DataCount', None)
+    absences = hkl_stats.get('SystematicAbsencesRemoved', 0)
+    if not data:
+      try:
+        data = int(olx.Cif('_reflns_number_gt'))
+      except:
+        return data
+    if OV.GetParam('user.diagnostics.refinement.dpr.halve_for_non_centro'):
+      if not olex_core.SGInfo()['Centrosymmetric']:
+        data = int(data/2)
+    return data
+  except Exception as err:
+    print("An error occured: %s" %err)
+    
+def get_Z_prime_from_fraction(string):
+  val = string
+  if "/" in val:
+    _ = val.split("/")
+    val = int(_[0])/int(_[1])
+  olx.xf.au.SetZprime(val)
+olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
+    
 def get_parameter_number():
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
@@ -1275,6 +1286,7 @@ def get_parameter_number():
   return parameters
 
 def GetDPRInfo():
+  hklsrc=OV.HKLSrc()
   retVal = ""
   data = get_data_number()
   parameters = get_parameter_number()
