@@ -962,7 +962,7 @@ class timage(ArgumentParser):
         print("\t - %s took %.3f s to complete" %(item, self.time.time()-t1))
 
   def resize_news_image(self, width_adjust=0, width=None, vfs=False):
-    tag = OV.GetTag().split('-')[0]
+    tag = OV.GetBaseTag()
     name = 'news/news-%s' % tag
     if vfs: name += '_tmp@vfs'
     else: name += '.png'
