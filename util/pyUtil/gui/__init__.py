@@ -476,14 +476,3 @@ def file_open(path, base="", mode='r', readlines=False, binary=False):
   return retVal
 
 olex.registerFunction(file_open, False, "tools")
-# initialise some things on import at program start
-initialised = False
-if not initialised:
-  initialised = True
-  # check if the new file exists
-  import olex_fs
-  tag = OV.GetTag()
-  news_file = "news\\content-%s.htm" %(tag)
-  if not olex_fs.Exists(news_file) and "ac" in tag:
-    base_tag = "-".join(tag.split('-')[:2])
-    olex_fs.NewFile(news_file, "<!-- #include news news/content-%s.htm;1; -->" %(base_tag))

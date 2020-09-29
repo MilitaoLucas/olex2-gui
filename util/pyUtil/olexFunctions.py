@@ -890,6 +890,9 @@ class OlexFunctions(inheritFunctions):
       pass
     return olx.olex2_tag
 
+  def GetBaseTag(self):
+    return self.GetTag().split('-')[0]
+
   def GetKeyname(self):
     import glob
     g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
@@ -1183,3 +1186,6 @@ OV.registerFunction(OV.ModelSrc)
 OV.registerFunction(OV.HasCif)
 OV.registerFunction(OV.GetCifMergeFilesList)
 OV.registerFunction(OV.runCommands)
+OV.registerFunction(OV.IsPluginInstalled)
+OV.registerFunction(OV.GetTag)
+OV.registerFunction(OV.GetBaseTag)
