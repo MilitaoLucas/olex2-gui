@@ -1656,8 +1656,6 @@ if not haveGUI:
     print("This is not available in Headless Olex")
     return ""
   #OV.registerFunction(tbxs)
-OV.registerFunction(OV.IsPluginInstalled)
-OV.registerFunction(OV.GetTag)
 
 def SetMasking(v):
   if v == 'true':
