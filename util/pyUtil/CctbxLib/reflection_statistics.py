@@ -597,11 +597,8 @@ class completeness_statistics(object):
     self.missing_set = missing_set
     if missing_set.size() > 0:
       print("Missing data: %s" %missing_set.size())
-      #print "  h  k  l  %s" %bin_range_as
     else:
       print("No missing data")
-    for indices, resolution in zip(missing_set.indices(), resolutions):
-      print(("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution)
 
 def cumulative_intensity_distribution(cctbx_adaptor,
                                       n_bins=20,

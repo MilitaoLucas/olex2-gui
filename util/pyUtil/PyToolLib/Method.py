@@ -315,15 +315,12 @@ class Method_refinement(Method):
       #olx.Name('sel 1 -c')
     if OV.GetParam('snum.auto_hydrogen_naming'):
       olx.FixHL()
-
     wave_length = float(olx.xf.exptl.Radiation())
     if round(wave_length, 2) == round(0.71073,2) or\
-       round(wave_length, 2) == round(1.5414, 2) or\
-       round(wave_length, 2)  == round(0.56053, 2):
+       round(wave_length, 2) == round(1.5414, 2):
       pass
     else:
-      print("Using non-standard wavelength (%f) calculating DISP and adding\n" %wave_length)
-      olx.GenDisp()
+      olx.GenDisp(source='auto')
 
   def post_refinement(self, RunPrgObject):
     pass

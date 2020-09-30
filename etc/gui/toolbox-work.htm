@@ -77,7 +77,7 @@ $+
       "gui/snippets/input-text",
       "name=SET_Z_PRIME_FIXUNIT",
       "value=xf.au.GetZprime()",
-      "onleave=xf.au.SetZprime(html.GetValue(~name~))>>html.update"
+      "onleave=spy.gui.get_Z_prime_from_fraction(html.GetValue(~name~))>>html.update"
     )
 $-
   </td>
