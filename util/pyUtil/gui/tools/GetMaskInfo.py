@@ -557,8 +557,8 @@ OV.registerFunction(edit_mask_special_details)
 def update_sqf_file(current_sNum, scope, scope2=None):
   sqf_file = get_sqf_name()
   if os.path.exists(sqf_file):
-    with file(sqf_file, 'r') as original: data = original.read()
-    with file(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
+    with open(sqf_file, 'r') as original: data = original.read()
+    with open(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
     with open(sqf_file, 'rb') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
