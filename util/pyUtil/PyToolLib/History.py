@@ -595,6 +595,8 @@ class HistoryTree(Node):
       new_index = {}
       self.hklFilesMap = {}
       for k,v in self.hklFiles.items():
+        if not isinstance(v, (bytes, bytearray)):
+          v = v.encode('latin1')
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
         self.hklFilesMap[k] = md
