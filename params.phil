@@ -801,6 +801,10 @@ routines requiring structure refinement
       .type = str
     user_moiety_formula = ""
       .type = str
+    special_detail_button_text = 'Use & Edit'
+      .type = str
+    special_detail_colour = #ff0000
+      .type = colour
   }
 
   cif {
