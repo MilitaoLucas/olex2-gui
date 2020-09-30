@@ -655,7 +655,7 @@ class Graph(ArgumentParser):
     #self.popout(htm_location=plot_url.replace(r"file://",''))
 
 
-  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None, lt=None):
+  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None, lt=None, no_negatives=False):
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
     use_plotly = OV.GetParam('user.diagnostics.use_plotly')
@@ -682,7 +682,7 @@ class Graph(ArgumentParser):
         self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt)
+        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives)
 
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
@@ -1066,7 +1066,7 @@ class Graph(ArgumentParser):
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
-  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, no_negatives=False):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -1142,9 +1142,10 @@ class Graph(ArgumentParser):
         msg = "-- got isinf (yr)"
       if math.isinf(xr):
         msg = "-- got isinf (xr)"
-      if xr < 0:
+        
+      if xr < 0 and no_negatives:
         msg = "-- got negative (xr)"
-      if yr < 0:
+      if yr < 0 and no_negatives:
         msg = "-- got negative (yr)"
       if msg:
         print("%s: I can't plot that (%.2f, %.2f). Maybe change the binning?" %(msg, xr, yr))
@@ -1833,7 +1834,7 @@ class WilsonPlot(Analysis):
       filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
       self.get_simple_x_y_pair_data_from_file(filepath)
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs(reverse_y = True)
+    self.draw_pairs(reverse_y = True, no_negatives=False)
     grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
     #size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
     size = ((self.im.size[0]), self.im.size[1])
@@ -2162,7 +2163,7 @@ class CumulativeIntensityDistribution(Analysis):
                    int(self.graph_bottom-(key.size[1]+40)))
                   )
 
-    self.draw_pairs()
+    self.draw_pairs(no_negatives=True)
 
   def cctbx_cumulative_intensity_distribution(self, verbose=False):
     from reflection_statistics import OlexCctbxGraphs
