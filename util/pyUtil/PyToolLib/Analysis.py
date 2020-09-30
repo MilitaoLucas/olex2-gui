@@ -1131,22 +1131,25 @@ class Graph(ArgumentParser):
         self.draw.line(((x, y_minus_dy), (x+marker_width, y_minus_dy)),
                        width=1, fill=self.outlineColour)
 
-      # Checking for isnan and isinf in xy pairs. These should not be there!
-
+    # Checking for isnan, isinf and negative in xy pairs. These should not be there!
+    msg = ""
     for i, (xr, yr) in enumerate(xy_pairs):
       if math.isnan(yr):
-        print("-- got isnan (yr)")
-        continue
+        msg = "-- got isnan (yr)"
       if math.isnan(xr):
-        print("-- got isnan (xr)")
-        continue
+        msg = "-- got isnan (xr)"
       if math.isinf(yr):
-        print("-- got isinf (yr)")
-        continue
+        msg = "-- got isinf (yr)"
       if math.isinf(xr):
-        print("-- got isinf (xr)")
+        msg = "-- got isinf (xr)"
+      if xr < 0:
+        msg = "-- got negative (xr)"
+      if yr < 0:
+        msg = "-- got negative (yr)"
+      if msg:
+        print("%s: I can't plot that (%.2f, %.2f). Maybe change the binning?" %(msg, xr, yr))
+        msg = ""
         continue
-
 
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
