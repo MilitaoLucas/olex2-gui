@@ -164,10 +164,10 @@ class History(ArgumentParser):
 
       tree.upgrade()
 
-      if tree.active_node is None:
+      if tree.active_node is None or tree.name != OV.ModelSrc():
         self._createNewHistory()
-      elif tree.name != OV.ModelSrc():
-        self._createNewHistory()
+      if tree.active_node:
+        OV.SetParam('snum.history.current_node', tree.active_node.name)
     else:
       self._createNewHistory()
 

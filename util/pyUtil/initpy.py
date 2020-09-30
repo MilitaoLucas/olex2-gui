@@ -115,7 +115,7 @@ class StreamRedirection:
         self.errFile.write(Str)
         self.errFile.flush()
       olex.post( '\'' + Str + '\'')
-      if self.refresh:
+      if self.refresh and olx.HasGUI() == 'true':
         t1 = time.time()
         if t1 - self.t0 > 0.5:
           olex.m("refresh")

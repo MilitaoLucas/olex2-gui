@@ -1340,9 +1340,8 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
     return rv
   try:
     import iotbx
-    fo = file(cf_name, "rUb")
-    reader = iotbx.cif.reader(file_object=fo)
-    fo.close()
+    with open(cf_name, "rUb") as fo:
+      reader = iotbx.cif.reader(file_object=fo)
     models = []
     for k, v in reader.model().items():
       if k.lower() != 'global':
@@ -1355,7 +1354,7 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
         rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
           %(name_td_class,value_td_class,flack)
       else:
-        rv = r"Flack parameter & %s\\" % flack.replace('-', '@@-@@')
+        rv = "Flack parameter & %s\\" % flack.replace('-', '@@-@@')
 
   except Exception as err:
     print(err)
