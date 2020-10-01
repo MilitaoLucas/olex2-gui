@@ -385,6 +385,10 @@ try:
   import userScripts
 except ImportError as err:
   print("Could not import userScripts: %s" %err)
+
+if olx.app.IsBaseDirWritable() == "true":
+  olexex.Cleanup(".tmp")
+
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()
