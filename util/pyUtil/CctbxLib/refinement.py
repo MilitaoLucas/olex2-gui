@@ -736,6 +736,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.extinction.expression:
       cif_block['_refine_ls_extinction_expression'] = self.extinction.expression
+      cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
