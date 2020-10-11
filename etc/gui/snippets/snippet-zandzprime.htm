@@ -38,7 +38,7 @@
       valign='center'
       align='right'
       value='xf.au.GetZprime()'
-      onleave="xf.au.SetZprime(html.GetValue(~name~))>>html.Update"
+      onleave='spy.gui.get_Z_prime_from_fraction(html.GetValue(~name~))>>html.update'
       onreturn="html.Call(~name~.onleave)"
       label="Z' = "
     >
