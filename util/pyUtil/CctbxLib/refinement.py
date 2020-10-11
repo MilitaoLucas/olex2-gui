@@ -1323,8 +1323,12 @@ The following options were used:
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
-        if self.verbose:
-          print("Position of peak %s = %s, Height = %s" %(i, xyz, height))
+        a = olx.xf.uc.Closest(*xyz).split(',')
+        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
+            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if self.verbose or i == 0:
+          print(pi)
+        self.log.write(pi + '\n')
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf.au.SetAtomU(id, "0.06")
