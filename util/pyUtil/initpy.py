@@ -58,12 +58,6 @@ def onexit():
   pass
 olex.registerFunction(onexit,False)
 
-debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
-if debug == True:
-  try:
-    import wingdbstub
-  except:
-    pass
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
@@ -78,6 +72,17 @@ if timer:
   tt.append("Initial imports took %.3f s" %(time.time() - t))
   t = time.time()
 
+
+def get_wing():
+  print("If OLEX2_ATTACHED_WITH_PYDEBUGGER is set...")
+  debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
+  if debug == True:
+    print("Trying to connect to WING.")
+    try:
+      import wingdbstub
+    except Exception as err:
+      print("Wing has failed: %s" %err)
+      pass
 
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
@@ -342,6 +347,8 @@ if timer:
   tt.append("IMPORTING PLUGINS...")
 
 set_plugins_paths()
+
+get_wing()
 
 if timer:
   tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))
