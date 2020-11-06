@@ -195,6 +195,7 @@
         -n=spy.GetParam(snum.report.title)_tables -l=spy.GetParam(user.report_label_style)">
       <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
       <cmd13 "cursor()">
+      <cmd14 "echo 'Done'">
     >
     <onabort
       <cmd "echo lasterror()">

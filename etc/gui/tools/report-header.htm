@@ -43,7 +43,7 @@
       "name=CONFLICT_%(no_of_file)s",
       "bgcolor=GetVar(gui.action_colour)",
       "fgcolor=#ffffff",
-      "onclick=spy.gui.create_report()",
+      "onclick=report",
       "td1=<td align='right'>",
       )
     $-
@@ -63,10 +63,11 @@
       height="GetVar('HtmlComboHeight')"
       bgcolor="spy.GetParam('gui.html.input_bg_colour')"
       name='SET_USER_REPORT_STYLE'
-      value="spy.GetParam('user.report.style')"
+      value="spy.GetParam('user.report_style')"
       items='spy.getStylesList()'
       valign='center'
       onchange="spy.SetReportStyle(html.GetValue('~name~'))"
+      onchangealways='True'
     >
     </font>
   </td>
@@ -82,10 +83,11 @@
       height="GetVar('HtmlComboHeight')"
       bgcolor="GetVar('HtmlInputBgColour')"
       name='SET_USER_REPORT_TEMPLATE'
-      value="spy.GetParam('user.report.template')"
+      value="spy.GetParam('user.report_template')"
       items='spy.getTemplatesList()'
       valign='center'
       onchange="spy.SetReportTemplate(html.GetValue('~name~'),template)"
+      onchangealways='True'
     >
     </font>
   </td>
@@ -105,6 +107,7 @@
       items='spy.getTemplatesList()'
       valign='center'
       onchange="spy.SetReportTemplate(html.GetValue('~name~'),footer)"
+      onchangealways='True'
     >
     </font>
   </td>
