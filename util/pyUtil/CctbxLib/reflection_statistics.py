@@ -490,8 +490,11 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
     if not self.have_bijvoet_pairs: return None
     r = empty()
     r.title = "Bijvoet differences scatter plot"
-    if (self.info != 0):
-      r.title += ": " + str(self.info)
+    try:
+      if self.info:
+        r.title += ": " + str(self.info)
+    except:
+      pass
     r.x = self.delta_fc2.data()
     r.y = self.delta_fo2.data()
     fit = flex.linear_regression(r.x, r.y)
