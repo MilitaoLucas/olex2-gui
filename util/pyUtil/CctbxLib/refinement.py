@@ -736,6 +736,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.extinction.expression:
       cif_block['_refine_ls_extinction_expression'] = self.extinction.expression
+      cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
@@ -1324,8 +1325,12 @@ The following options were used:
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < 3:
-        if self.verbose:
-          print("Position of peak %s = %s, Height = %s" %(i, xyz, height))
+        a = olx.xf.uc.Closest(*xyz).split(',')
+        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
+            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if self.verbose or i == 0:
+          print(pi)
+        self.log.write(pi + '\n')
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf.au.SetAtomU(id, "0.06")
