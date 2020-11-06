@@ -336,7 +336,7 @@ def EditGuiItem(OXD,language="English"):
     else:
       tool_name = OXD.split("/")[1].split(".")[0]
       gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
-    
+
   if not os.path.exists(gui_file):
     return
 
@@ -864,7 +864,7 @@ def SetReportStyle(val):
     OV.UpdateHtml()
   else:
     style_file = val
-  OV.SetParam('user.report.style', style_file)
+  OV.SetParam('user.report_style', style_file)
   OV.SetParam('user.report.style_full_path', "%s/%s" %(styles_path, style_file))
 OV.registerFunction(SetReportStyle)
 
@@ -881,7 +881,7 @@ def SetReportTemplate(val,which):
     OV.UpdateHtml()
   else:
     template_file = val
-  OV.SetParam('user.report.%s' %which, template_file)
+  OV.SetParam('user.report_%s' %which, template_file)
   OV.SetParam('user.report.%s_full_path' %which, "%s/%s" %(templates_path, template_file))
 OV.registerFunction(SetReportTemplate)
 
