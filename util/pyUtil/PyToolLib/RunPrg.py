@@ -485,7 +485,7 @@ class RunRefinementPrg(RunPrg):
           txt_col='green_text')
       else:
         gui.get_default_notification(
-          txt="Refinement Finished<br>Please Cite NoSpherA2: DOI",
+          txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
 
   def run(self):
@@ -963,7 +963,7 @@ class RunRefinementPrg(RunPrg):
               elif "ORCA" in source:
                 energy = float(line.split()[4])
               elif "pySCF" in source:
-                energy = 0.0
+                energy = float(line.split()[4])
               elif ".wfn" in source:
                 energy = 0.0
               elif "Tonto" in source:

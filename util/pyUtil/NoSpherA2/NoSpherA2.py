@@ -68,11 +68,19 @@ class NoSpherA2(PT):
     self.setup_har_executables()
     self.setup_pyscf()
     self.setup_discamb()
+    self.setup_elmodb()
     self.setup_g03_executables()
     self.setup_g09_executables()
     self.setup_g16_executables()
     self.setup_orca_executables()
     self.setup_wfn_2_fchk()
+    
+    import platform
+    if platform.architecture()[0] != "64bit":
+      print ("NoSpherA2 only works on 64 bit OS.")
+      self.softwares = ""
+      self.wfn_2_fchk = ""
+      return
 
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
@@ -87,7 +95,6 @@ class NoSpherA2(PT):
       self.basis_dir = None
       print("No Hart executable found!")
     check_for_matching_fcf()
-    print " "
 
   def setup_har_executables(self):
     self.exe = None
@@ -207,7 +214,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print ("Error! Multiplicity and number of electrons is uneven. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
-      
+      if (wfn_code == "ELMOdb") and (mult > 1):
+        print ("Error! Multiplicity is not 1. This is currently not supported in ELMOdb. Consider using QM-ELMO instead!\n")
+        OV.SetVar('NoSpherA2-Error',"Multiplicity")
+        return False
+        
+
     if OV.GetParam('snum.NoSpherA2.no_backup') == False:
       for file in os.listdir(olx.FilePath()):
         if file.endswith(".tsc"):
@@ -230,9 +242,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if file.endswith(".fchk"):
             shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
 
-
-    self.setup_har_executables()
-
     olex.m("CifCreate")
     
     parts = OV.ListParts()
@@ -240,11 +249,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       parts = list(parts)
     experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
 
-    disorder_groups = None
     nr_parts = None
     if not parts:
       nr_parts = 1
     elif len(parts) > 1:
+      olx.Kill("$Q")
       cif = None
       if wfn_code == "Tonto":
         cif = True
@@ -252,6 +261,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         cif = True
       else:
         cif = False
+      fn = os.path.join(self.jobs_dir ,"%s.cif" %(OV.ModelSrc()))
+      olx.File(fn)
       deal_with_parts(cif)
       nr_parts = len(parts)
 
@@ -300,6 +311,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
+                elif "ELMOdb" in wfn_code:
+                  if ".wfx" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+                elif "pySCF" in wfn_code:
+                  if ".chk" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)                     
                 else:
                     f_work = os.path.join(self.wfn_job_dir,f)
                     f_dest = os.path.join(self.backup,f)
@@ -320,7 +341,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           pass
         atom_loop_reached = False
         out_cif = open(os.path.join(self.wfn_job_dir,"%s.cif"%(OV.ModelSrc())),"w")
-        with open("%s_part_%s.cif" %(OV.ModelSrc(), parts[i]),"r") as incif:
+        with open(os.path.join(self.jobs_dir,"%s.cif" %(OV.ModelSrc())),"r") as incif:
           for line in incif:
             if "_atom_site_disorder_group" in line:
               atom_loop_reached = True
@@ -365,7 +386,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             #combine_sfs(force=True,part=i)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
           else:
-            wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
+            if wfn_code == "ELMOdb":
+              wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfx")
+            else: 
+              wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
             hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
             asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
@@ -373,7 +397,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             groups.append(0)
             groups.append(parts[i])
             cuqct_tsc(wfn_fn,hkl_fn,cif_fn,asym_fn,groups)
-            shutil.copy("experimental.tsc",job.name+"_part_"+str(parts[i])+".tsc")
+            shutil.move("experimental.tsc",job.name+"_part_"+str(parts[i])+".tsc")
             shutil.move("NoSpherA2.log",os.path.join(OV.FilePath(),self.wfn_job_dir,"NoSpherA2_part_"+str(parts[i])+".log"))
           for file in os.listdir('.'):
             if file.endswith(".wfn"):
@@ -425,6 +449,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     f_work = os.path.join(self.jobs_dir,f)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
+                elif "ELMOdb" in wfn_code:
+                  if ".wfx" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+                elif "pySCF" in wfn_code:
+                  if ".chk" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)                    
                 else:
                   f_work = os.path.join(self.jobs_dir,f)
                   f_dest = os.path.join(self.backup,f)
@@ -474,7 +508,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
         else:
-          #OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
           try:
             self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
           except NameError as error:
@@ -487,6 +520,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if (experimental_SF == True):
           if wfn_code.lower().endswith(".wfn"):
             wfn_fn = wfn_code
+          elif wfn_code == "ELMOdb":
+            wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfx")
           else:
             wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
           hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
@@ -495,7 +530,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           olx.Kill("$Q")
           olx.File(wfn_cif_fn)
           cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn,[-1000])
-          OV.SetParam('snum.NoSpherA2.file',"experimental.tsc")
+          shutil.move("experimental.tsc",job.name+".tsc")
+          OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
 
         elif wfn_code != "Tonto":
           success = True
@@ -537,6 +573,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_gX_input(xyz)
     elif software == "pySCF":
       wfn_object.write_pyscf_script(xyz)
+    elif software == "ELMOdb":
+      wfn_object.write_elmodb_input(xyz)
 
     try:
       wfn_object.run()
@@ -567,55 +605,51 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       print (self.wfn_2_fchk)
     if self.wfn_2_fchk == "":
       print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
+      OV.SetVar('NoSpherA2-Error',"None")
+      raise NameError('No NoSpherA2 Executable')
     OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
 
   def setup_pyscf(self):
-    if OV.GetParam('user.NoSpherA2.use_pyscf') == True:
-      if sys.platform[:3] == 'win':
-        self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+    self.has_pyscf = OV.GetParam('user.NoSpherA2.has_pyscf')
+    if self.has_pyscf == False:
+      if "Get pySCF" not in self.softwares:
+        self.softwares = self.softwares + ";Get pySCF"      
+    if self.has_pyscf == True:
+      if "pySCF" not in self.softwares:
+        self.softwares = self.softwares + ";pySCF"
+
+  def setup_elmodb(self):
+    self.elmodb_exe = ""
+    exe_pre = "elmodb"
+    self.elmodb_exe_pre = exe_pre
+
+    if sys.platform[:3] == 'win':
+      self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.elmodb_exe = _
       else:
-        self.ubuntu_exe = None
-      self.has_pyscf = OV.GetParam('user.NoSpherA2.has_pyscf')
-      if self.has_pyscf == False:
-        if self.ubuntu_exe != None and os.path.exists(self.ubuntu_exe):
-          import subprocess
-          pyscf_check = None
-          try:
-            child = subprocess.Popen([self.ubuntu_exe,'run',"python -c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            out, err = child.communicate()
-            rc = child.returncode
-            if rc == 0:
-              pyscf_check = True
-              OV.SetParam('user.NoSpherA2.has_pyscf',True)
-          except:
-            pass
-          if pyscf_check == True:
-            self.has_pyscf = True
-          else:
-            print ("To use pySCF please install pySCF and pip in your ubuntu environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
-        elif self.ubuntu_exe == None :
-          import subprocess
-          try:
-            child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            out, err = child.communicate()
-            rc = child.returncode
-            if rc == 0:
-              pyscf_check = True
-              OV.SetParam('user.NoSpherA2.has_pyscf',True)
-          except:
-            pass
-          if pyscf_check == True:
-            self.has_pyscf = True
-          else:
-            print ("To use pySCF please install pySCF in your ubuntu environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
-        else:
-          if sys.platform[:3] == 'win':
-            print ("To use pySCF please install the ubuntu and linux subprocess framework for windows 10 and afterwords run:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
-          else:
-            print ("To use pySCF please install python, pip and pyscf\n")
-      if self.has_pyscf == True:
-        if "pySCF" not in self.softwares:
-          self.softwares = self.softwares + ";pySCF"
+        self.elmodb_exe = olx.file.Which("%s.exe" %exe_pre)
+
+    else:
+      self.ubuntu_exe = None
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.elmodb_exe = _
+      else:
+        self.elmodb_exe = olx.file.Which("%s.exe" %exe_pre)
+    if os.path.exists(self.elmodb_exe):
+      if "ELMOdb" not in self.softwares:
+        self.softwares = self.softwares + ";ELMOdb"
+        
+    self.elmodb_lib = ""
+    lib_name = "LIBRARIES_AND_BASIS-SETS/"
+    self.elmodb_lib_name = lib_name
+    _ = os.path.join(self.p_path, "%s" %lib_name)
+    if os.path.exists(_):
+      self.elmodb_lib = _
+    else:
+      self.elmodb_lib = olx.file.Which("%s" %lib_name)
 
   def setup_g09_executables(self):
     self.g09_exe = ""
@@ -794,6 +828,90 @@ class wfn_Job(object):
         pass
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
+
+  def write_elmodb_input(self,xyz):
+    coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    run = None
+    olx.Kill("$Q")
+    if xyz:
+      olx.File(coordinates_fn,p=10)
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
+    inp = open(self.input_fn,"w")
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    elmodb_libs = None
+    if sys.platform[:3] == "win":
+      temp = self.parent.elmodb_lib
+      drive = temp[0].lower()
+      folder = temp[2:]
+      elmodb_libs = "/mnt/"+drive+folder.replace('\\' , r'/')
+    else:
+      elmodb_libs = self.parent.elmodb_lib
+    inp.write(" $INPUT_METHOD" +  '\n' + "   job_title='"  + self.name + "'" + '\n' + "   iprint_level=0" + '\n')
+    inp.write("   basis_set='"  + basis_name + "'" + '\n' +  "   xyz=.true." + '\n' +  "   wfx=.true." + '\n')
+    inp.write("   lib_path='" + elmodb_libs + "'" + '\n')
+    inp.write("   bset_path='" + elmodb_libs + "'" + '\n')
+    inp.write(" $END" + '\n')
+    inp.write(" " + '\n')
+    inp.write(" $INPUT_STRUCTURE" +  '\n' + "   pdb_file='"  + self.name + ".pdb'" '\n' + "   xyz_file='"  + self.name + ".xyz'" + '\n')
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    if charge != '0':
+      inp.write("   icharge=" + charge + '\n')
+    ssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.ssbond')
+    if ssbond == True:
+      nssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.nssbond')
+      inp.write("   nssbond=" + nssbond + '\n')
+    tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+    if tail == True:
+      maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+      inp.write("   ntail=" + str(maxtail) + '\n')
+      resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
+      resnames = resnames.split(';')
+      nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
+      nat = nat.split(';')
+      nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')                                                                          
+      nfrag = nfrag.split(';')
+      ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')                                                                          
+      ncltd = ncltd.split(';')
+      specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
+      specac = specac.split(';')
+      exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp') 
+      exbsinp = exbsinp.split(';')
+      fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
+      fraginp = fraginp.split(';')
+      if int(max(nfrag)) > 50:
+        inp.write("   max_frtail=" + str(max(nfrag)) + '\n') 
+      if int(max(nat)) > 50:
+        inp.write("   max_atail=" + str(max(nat)) + '\n')
+    spect = OV.GetParam('snum.NoSpherA2.ELMOdb.spect')
+    nspect = OV.GetParam('snum.NoSpherA2.ELMOdb.nspect')
+    if spect == True:
+      inp.write("   nspec=" + str(nspect) + '\n')
+    inp.write(" $END" + '\n')
+    inp.write(" " + '\n')
+
+    if tail == True:
+      for i in range(0,maxtail):
+        control = ""
+        control = control + str(resnames[i])  + ' ' + str(nat[i]) + ' ' + str(nfrag[i]) + ' ' 
+        if specac[i] == "True":
+           control += ".t. "
+        else:
+           control += ".f. "
+        if ncltd[i] == "True":
+           control += ".t. "
+        else:
+           control += ".f. "
+        inp.write('  ' + control + '\n' + ' ' + '\n' )
+        if nat[i] != "0": 
+          inp.write( str(exbsinp[i]) + ' ' + '\n')
+        inp.write(" " + '\n' + str(fraginp[i])+ '\n' + ' ' + '\n')
+      if spect == True:
+        inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.specinp') + '\n' + ' ' + '\n')
+    if ssbond == True:
+      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n') 
+    inp.close()
+
 
   def write_gX_input(self,xyz):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
@@ -1021,6 +1139,326 @@ class wfn_Job(object):
     inp.close()
 
   def write_pyscf_script(self,xyz):
+    solv_epsilon = {
+      "Water"                                  :78.3553,
+      "Acetonitrile"                           :35.688 ,
+      "Methanol"                               :32.613 ,
+      "Ethanol"                                :24.852 ,
+      "IsoQuinoline"                           :11.00  ,
+      "Quinoline"                              :9.16   ,
+      "Chloroform"                             :4.7113 ,
+      "DiethylEther"                           :4.2400 ,
+      "Dichloromethane"                        :8.93   ,
+      "DiChloroEthane"                         :10.125 ,
+      "CarbonTetraChloride"                    :2.2280 ,
+      "Benzene"                                :2.2706 ,
+      "Toluene"                                :2.3741 ,
+      "ChloroBenzene"                          :5.6968 ,
+      "NitroMethane"                           :36.562 ,
+      "Heptane"                                :1.9113 ,
+      "CycloHexane"                            :2.0165 ,
+      "Aniline"                                :6.8882 ,
+      "Acetone"                                :20.493 ,
+      "TetraHydroFuran"                        :7.4257 ,
+      "DiMethylSulfoxide"                      :46.826 ,
+      "Argon"                                  :1.430  ,
+      "Krypton"                                :1.519  ,
+      "Xenon"                                  :1.706  ,
+      "n-Octanol"                              :9.8629 ,
+      "1,1,1-TriChloroEthane"                  :7.0826 ,
+      "1,1,2-TriChloroEthane"                  :7.1937 ,
+      "1,2,4-TriMethylBenzene"                 :2.3653 ,
+      "1,2-DiBromoEthane"                      :4.9313 ,
+      "1,2-EthaneDiol"                         :40.245 ,
+      "1,4-Dioxane"                            :2.2099 ,
+      "1-Bromo-2-MethylPropane"                :7.7792 ,
+      "1-BromoOctane"                          :5.0244 ,
+      "1-BromoPentane"                         :6.269  ,
+      "1-BromoPropane"                         :8.0496 ,
+      "1-Butanol"                              :17.332 ,
+      "1-ChloroHexane"                         :5.9491 ,
+      "1-ChloroPentane"                        :6.5022 ,
+      "1-ChloroPropane"                        :8.3548 ,
+      "1-Decanol"                              :7.5305 ,
+      "1-FluoroOctane"                         :3.89   ,
+      "1-Heptanol"                             :11.321 ,
+      "1-Hexanol"                              :12.51  ,
+      "1-Hexene"                               :2.0717 ,
+      "1-Hexyne"                               :2.615  ,
+      "1-IodoButane"                           :6.173  ,
+      "1-IodoHexaDecane"                       :3.5338 ,
+      "1-IodoPentane"                          :5.6973 ,
+      "1-IodoPropane"                          :6.9626 ,
+      "1-NitroPropane"                         :23.73  ,
+      "1-Nonanol"                              :8.5991 ,
+      "1-Pentanol"                             :15.13  ,
+      "1-Pentene"                              :1.9905 ,
+      "1-Propanol"                             :20.524 ,
+      "2,2,2-TriFluoroEthanol"                 :26.726 ,
+      "2,2,4-TriMethylPentane"                 :1.9358 ,
+      "2,4-DiMethylPentane"                    :1.8939 ,
+      "2,4-DiMethylPyridine"                   :9.4176 ,
+      "2,6-DiMethylPyridine"                   :7.1735 ,
+      "2-BromoPropane"                         :9.3610 ,
+      "2-Butanol"                              :15.944 ,
+      "2-ChloroButane"                         :8.3930 ,
+      "2-Heptanone"                            :11.658 ,
+      "2-Hexanone"                             :14.136 ,
+      "2-MethoxyEthanol"                       :17.2   ,
+      "2-Methyl-1-Propanol"                    :16.777 ,
+      "2-Methyl-2-Propanol"                    :12.47  ,
+      "2-MethylPentane"                        :1.89   ,
+      "2-MethylPyridine"                       :9.9533 ,
+      "2-NitroPropane"                         :25.654 ,
+      "2-Octanone"                             :9.4678 ,
+      "2-Pentanone"                            :15.200 ,
+      "2-Propanol"                             :19.264 ,
+      "2-Propen-1-ol"                          :19.011 ,
+      "3-MethylPyridine"                       :11.645 ,
+      "3-Pentanone"                            :16.78  ,
+      "4-Heptanone"                            :12.257 ,
+      "4-Methyl-2-Pentanone"                   :12.887 ,
+      "4-MethylPyridine"                       :11.957 ,
+      "5-Nonanone"                             :10.6   ,
+      "AceticAcid"                             :6.2528 ,
+      "AcetoPhenone"                           :17.44  ,
+      "a-ChloroToluene"                        :6.7175 ,
+      "Anisole"                                :4.2247 ,
+      "Benzaldehyde"                           :18.220 ,
+      "BenzoNitrile"                           :25.592 ,
+      "BenzylAlcohol"                          :12.457 ,
+      "BromoBenzene"                           :5.3954 ,
+      "BromoEthane"                            :9.01   ,
+      "Bromoform"                              :4.2488 ,
+      "Butanal"                                :13.45  ,
+      "ButanoicAcid"                           :2.9931 ,
+      "Butanone"                               :18.246 ,
+      "ButanoNitrile"                          :24.291 ,
+      "ButylAmine"                             :4.6178 ,
+      "ButylEthanoate"                         :4.9941 ,
+      "CarbonDiSulfide"                        :2.6105 ,
+      "Cis-1,2-DiMethylCycloHexane"            :2.06   ,
+      "Cis-Decalin"                            :2.2139 ,
+      "CycloHexanone"                          :15.619 ,
+      "CycloPentane"                           :1.9608 ,
+      "CycloPentanol"                          :16.989 ,
+      "CycloPentanone"                         :13.58  ,
+      "Decalin-mixture"                        :2.196  ,
+      "DiBromomEthane"                         :7.2273 ,
+      "DiButylEther"                           :3.0473 ,
+      "DiEthylAmine"                           :3.5766 ,
+      "DiEthylSulfide"                         :5.723  ,
+      "DiIodoMethane"                          :5.32   ,
+      "DiIsoPropylEther"                       :3.38   ,
+      "DiMethylDiSulfide"                      :9.6    ,
+      "DiPhenylEther"                          :3.73   ,
+      "DiPropylAmine"                          :2.9112 ,
+      "e-1,2-DiChloroEthene"                   :2.14   ,
+      "e-2-Pentene"                            :2.051  ,
+      "EthaneThiol"                            :6.667  ,
+      "EthylBenzene"                           :2.4339 ,
+      "EthylEthanoate"                         :5.9867 ,
+      "EthylMethanoate"                        :8.3310 ,
+      "EthylPhenylEther"                       :4.1797 ,
+      "FluoroBenzene"                          :5.42   ,
+      "Formamide"                              :108.94 ,
+      "FormicAcid"                             :51.1   ,
+      "HexanoicAcid"                           :2.6    ,
+      "IodoBenzene"                            :4.5470 ,
+      "IodoEthane"                             :7.6177 ,
+      "IodoMethane"                            :6.8650 ,
+      "IsoPropylBenzene"                       :2.3712 ,
+      "m-Cresol"                               :12.44  ,
+      "Mesitylene"                             :2.2650 ,
+      "MethylBenzoate"                         :6.7367 ,
+      "MethylButanoate"                        :5.5607 ,
+      "MethylCycloHexane"                      :2.024  ,
+      "MethylEthanoate"                        :6.8615 ,
+      "MethylMethanoate"                       :8.8377 ,
+      "MethylPropanoate"                       :6.0777 ,
+      "m-Xylene"                               :2.3478 ,
+      "n-ButylBenzene"                         :2.36   ,
+      "n-Decane"                               :1.9846 ,
+      "n-Dodecane"                             :2.0060 ,
+      "n-Hexadecane"                           :2.0402 ,
+      "n-Hexane"                               :1.8819 ,
+      "NitroBenzene"                           :34.809 ,
+      "NitroEthane"                            :28.29  ,
+      "n-MethylAniline"                        :5.9600 ,
+      "n-MethylFormamide-mixture"              :181.56 ,
+      "n,n-DiMethylAcetamide"                  :37.781 ,
+      "n,n-DiMethylFormamide"                  :37.219 ,
+      "n-Nonane"                               :1.9605 ,
+      "n-Octane"                               :1.9406 ,
+      "n-Pentadecane"                          :2.0333 ,
+      "n-Pentane"                              :1.8371 ,
+      "n-Undecane"                             :1.9910 ,
+      "o-ChloroToluene"                        :4.6331 ,
+      "o-Cresol"                               :6.76   ,
+      "o-DiChloroBenzene"                      :9.9949 ,
+      "o-NitroToluene"                         :25.669 ,
+      "o-Xylene"                               :2.5454 ,
+      "Pentanal"                               :10.0   ,
+      "PentanoicAcid"                          :2.6924 ,
+      "PentylAmine"                            :4.2010 ,
+      "PentylEthanoate"                        :4.7297 ,
+      "PerFluoroBenzene"                       :2.029  ,
+      "p-IsoPropylToluene"                     :2.2322 ,
+      "Propanal"                               :18.5   ,
+      "PropanoicAcid"                          :3.44   ,
+      "PropanoNitrile"                         :29.324 ,
+      "PropylAmine"                            :4.9912 ,
+      "PropylEthanoate"                        :5.5205 ,
+      "p-Xylene"                               :2.2705 ,
+      "Pyridine"                               :12.978 ,
+      "sec-ButylBenzene"                       :2.3446 ,
+      "tert-ButylBenzene"                      :2.3447 ,
+      "TetraChloroEthene"                      :2.268  ,
+      "TetraHydroThiophene-s,s-dioxide"        :43.962 ,
+      "Tetralin"                               :2.771  ,
+      "Thiophene"                              :2.7270 ,
+      "Thiophenol"                             :4.2728 ,
+      "trans-Decalin"                          :2.1781 ,
+      "TriButylPhosphate"                      :8.1781 ,
+      "TriChloroEthene"                        :3.422  ,
+      "TriEthylAmine"                          :2.3832 ,
+      "Xylene-mixture"                         :2.3879 ,
+      "z-1,2-DiChloroEthene"                   :9.2
+    }
+    
+    mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+    fixed_wfn_function = """
+import numpy
+
+TYPE_MAP = [
+  [1],  # S
+  [2, 3, 4],  # P
+  [5, 8, 9, 6, 10, 7],  # D
+  [11,14,15,17,20,18,12,16,19,13],  # F
+  [21,24,25,30,33,31,26,34,35,28,22,27,32,29,23],  # G
+  [56,55,54,53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36],  # H
+]
+
+def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
+  from pyscf.x2c import x2c
+"""
+    if mult != 1:
+      fixed_wfn_function +="""  total_nmo = 0
+  MO_offset = 0
+  for s in range(2):
+    for i in range(len(mo_occ[s])):
+      if mo_occ[s][i] != 0:
+        total_nmo += 1
+  for s in range(2):
+    temp_mol, ctr = x2c._uncontract_mol(mol, True, 0.)
+    temp_mo_coeff = numpy.dot(ctr, mo_coeff[s])
+    
+    nmo = temp_mo_coeff.shape[1]
+    mo_cart = []
+    centers = []
+    types = []
+    exps = []
+    p0 = 0
+    for ib in range(temp_mol.nbas):
+      ia = temp_mol.bas_atom(ib)
+      l = temp_mol.bas_angular(ib)
+      es = temp_mol.bas_exp(ib)
+      c = temp_mol._libcint_ctr_coeff(ib)
+      np, nc = c.shape
+      nd = nc*(2*l+1)
+      mosub = temp_mo_coeff[p0:p0+nd].reshape(-1,nc,nmo)
+      c2s = gto.cart2sph(l)
+      new_mosub = numpy.einsum('yki,cy,pk->pci', mosub, c2s, c)
+      mo_cart.append(new_mosub.transpose(1,0,2).reshape(-1,nmo))
+    
+      for t in TYPE_MAP[l]:
+          types.append([t]*np)
+      ncart = temp_mol.bas_len_cart(ib)
+      exps.extend([es]*ncart)
+      centers.extend([ia+1]*(np*ncart))
+      p0 += nd
+    mo_cart = numpy.vstack(mo_cart)
+    centers = numpy.hstack(centers)
+    types = numpy.hstack(types)
+    exps = numpy.hstack(exps)
+    nprim, nmo = mo_cart.shape
+    if s == 0:
+      fout.write('From PySCF\n')
+      fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\n'%(total_nmo, mo_cart.shape[0], mol.natm))
+      for ia in range(mol.natm):
+        x, y, z = temp_mol.atom_coord(ia)
+        fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
+      for i0, i1 in lib.prange(0, nprim, 20):
+        fout.write('CENTRE ASSIGNMENTS  %s\n'% ''.join('%3d'%x for x in centers[i0:i1]))
+      for i0, i1 in lib.prange(0, nprim, 20):
+        fout.write('TYPE ASSIGNMENTS    %s\n'% ''.join('%3d'%x for x in types[i0:i1]))
+      for i0, i1 in lib.prange(0, nprim, 5):
+        fout.write('EXPONENTS  %s\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
+    
+    for k in range(nmo):
+      if mo_occ[s][k] != 0.0:
+        mo = mo_cart[:,k]
+        fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\n'%(k+1+MO_offset, mo_occ[s][k], mo_energy[s][k]))
+        if s == 0:
+          MO_offset += 1
+        for i0, i1 in lib.prange(0, nprim, 5):
+          fout.write(' %s\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
+    if s == 1:
+      fout.write('END DATA\n')
+      fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\n'%tot_ener)"""
+    else:
+      fixed_wfn_function +="""  mol, ctr = x2c._uncontract_mol(mol, True, 0.)
+  mo_coeff = numpy.dot(ctr, mo_coeff)
+
+  nmo = mo_coeff.shape[1]
+  mo_cart = []
+  centers = []
+  types = []
+  exps = []
+  p0 = 0
+  for ib in range(mol.nbas):
+    ia = mol.bas_atom(ib)
+    l = mol.bas_angular(ib)
+    es = mol.bas_exp(ib)
+    c = mol._libcint_ctr_coeff(ib)
+    np, nc = c.shape
+    nd = nc*(2*l+1)
+    mosub = mo_coeff[p0:p0+nd].reshape(-1,nc,nmo)
+    c2s = gto.cart2sph(l)
+    mosub = numpy.einsum('yki,cy,pk->pci', mosub, c2s, c)
+    mo_cart.append(mosub.transpose(1,0,2).reshape(-1,nmo))
+
+    for t in TYPE_MAP[l]:
+        types.append([t]*np)
+    ncart = mol.bas_len_cart(ib)
+    exps.extend([es]*ncart)
+    centers.extend([ia+1]*(np*ncart))
+    p0 += nd
+  mo_cart = numpy.vstack(mo_cart)
+  centers = numpy.hstack(centers)
+  types = numpy.hstack(types)
+  exps = numpy.hstack(exps)
+  nprim, nmo = mo_cart.shape
+
+  fout.write('From PySCF\\n')
+  fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\\n'%(mo_cart.shape[1], mo_cart.shape[0], mol.natm))
+  for ia in range(mol.natm):
+    x, y, z = mol.atom_coord(ia)
+    fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
+  for i0, i1 in lib.prange(0, nprim, 20):
+    fout.write('CENTRE ASSIGNMENTS  %s\\n'% ''.join('%3d'%x for x in centers[i0:i1]))
+  for i0, i1 in lib.prange(0, nprim, 20):
+    fout.write('TYPE ASSIGNMENTS    %s\\n'% ''.join('%3d'%x for x in types[i0:i1]))
+  for i0, i1 in lib.prange(0, nprim, 5):
+    fout.write('EXPONENTS  %s\\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
+
+  for k in range(nmo):
+      mo = mo_cart[:,k]
+      fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\\n'%(k+1, mo_occ[k], mo_energy[k]))
+      for i0, i1 in lib.prange(0, nprim, 5):
+        fout.write(' %s\\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
+  fout.write('END DATA\\n')
+  fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\\n'%tot_ener)"""
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
@@ -1032,12 +1470,11 @@ class wfn_Job(object):
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-    charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    charge = int(OV.GetParam('snum.NoSpherA2.charge'))
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024
     if OV.GetParam('snum.NoSpherA2.pySCF_PBC') == False:
-      inp.write("#!/usr/bin/env python\n\nfrom pyscf import gto, scf, dft, lib\n")
+      inp.write("#!/usr/bin/env python\n%s\n\nfrom pyscf import gto, scf, dft, lib\n"%fixed_wfn_function)
       inp.write("lib.num_threads(%s)\nmol = gto.M(\n  atom = '''"%ncpus)
       atom_list = []
       i = 0
@@ -1049,9 +1486,7 @@ class wfn_Job(object):
           if not atom[0] in atom_list:
             atom_list.append(atom[0])
       xyz.close()
-      inp.write("''',\n  verbose = 5,\n)\nmol.output = '%s_pyscf.log'\n"%self.name)
-      inp.write("mol.charge = %s\n"%charge)
-      inp.write("mol.spin = %s\n"%str(int(mult)-1))
+      inp.write("''',\n  verbose = 4,\n  charge = %d,\n  spin = %d\n)\nmol.output = '%s_pyscf.log'\n"%(int(charge),int(mult-1),self.name))
       inp.write("mol.max_memory = %s\n"%str(mem_value))
       inp.write("mol.basis = {")
       for i in range(0,len(atom_list)):
@@ -1102,18 +1537,73 @@ class wfn_Job(object):
       inp.write("\n}\nmol.build()\n")
 
       model_line = None
-      if OV.GetParam('snum.NoSpherA2.method') == "rhf":
-        model_line = "scf.RHF(mol)"
+      method = OV.GetParam('snum.NoSpherA2.method')
+      if method == "HF":
+        if mult == 1:
+          model_line = "scf.RHF(mol)"
+        else:
+          model_line = "scf.UHF(mol)"
       else:
-        model_line = "dft.RKS(mol)"
+        if mult == 1:
+          model_line = "dft.RKS(mol)"
+        else:
+          model_line = "dft.UKS(mol)"
       if OV.GetParam('snum.NoSpherA2.Relativistic') == True:
         model_line += ".x2c()"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("mf = %s\n"%model_line)
-      if OV.GetParam('snum.NoSpherA2.method') == "rks":
+      if method == "B3LYP":
         #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
-        inp.write("mf.xc = 'b3lyp'\nmf = mf.density_fit()\nmf.with_df.auxbasis = 'weigend'\n")
-      inp.write("mf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,mol,mf.mo_coeff, mo_energy=mf.mo_energy, mo_occ=mf.mo_occ)\n"%self.name)
+        inp.write("mf.xc = 'b3lyp'\n")
+      elif method == "PBE":
+        inp.write("mf.xc = 'pbe,pbe'\n")
+      elif method == "BLYP":
+        inp.write("mf.xc = 'b88,lyp'\n")
+      elif method == "M062X":
+        inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+      elif method == "PBE0":
+        inp.write("mf.xc = 'PBE0'\n")
+      grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+      grid = None
+      if grid_accuracy == "Low":
+        grid = 0
+      elif grid_accuracy == "Normal":
+        grid = 0
+      elif grid_accuracy == "High":
+        grid = 3
+      else:
+        grid = 9
+      rest = "mf = mf.density_fit()\n"
+      if method != "HF":
+        rest += "mf.grids.radi_method = dft.gauss_chebyshev\n"
+      rest += "mf.grids.level = "+str(grid)+"\n"
+      rest += """mf.with_df.auxbasis = 'def2-tzvp-jkfit'
+mf.diis_space = 19
+mf.conv_tol = 0.0033
+mf.conv_tol_grad = 1e-2
+mf.level_shift = 0.25"""
+      damp = float(OV.GetParam('snum.NoSpherA2.pySCF_Damping'))
+      rest += "\nmf.damp = %f\n"%damp
+      rest += "mf.chkfile = '%s.chk'\n"%self.name
+      Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+      run = None
+      if Full_HAR == True:
+        run = OV.GetVar('Run_number')
+        if run > 1:
+          rest += "mf.init_guess = 'chk'\n"
+      solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+      if solv != "Vacuum":
+        rest += "from pyscf import solvent\nmf = mf.ddCOSMO()\nmf.with_solvent.lebedev_order = 11\nmf.with_solvent.lmax = 5\nmf.with_solvent.grids.radi_method = dft.gauss_chebyshev\nmf.with_solvent.grids.level = %d\nmf.with_solvent.eps = %f\n"%(int(grid),float(solv_epsilon[solv]))
+      rest +="""mf.kernel()
+print("Switching to SOSCF and shutting down damping & levelshift")
+mf.conv_tol = 1e-9
+mf.conv_tol_grad = 1e-5
+mf.level_shift = 0.0
+mf.damp = 0.0
+mf = scf.newton(mf)
+mf.kernel()"""
+      rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
+      inp.write(rest)
       inp.close()
     else:
       from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1138,7 +1628,7 @@ class wfn_Job(object):
       inp.write("cell.charge = %s\n"%charge)
       inp.write("cell.spin = %s\n"%str(int(mult)-1))
       inp.write("cell.max_memory = %s\n"%str(mem_value))
-      inp.write("cell.precision = 1.0e-09\ncell.exp_to_discard = 0.1\n")
+      inp.write("cell.precision = 1.0e-06\ncell.exp_to_discard = 0.1\n")
       inp.write("cell.basis = {")
       for i in range(0,len(atom_list)):
         atom_type = "'" +atom_list[i] + "': ["
@@ -1188,23 +1678,66 @@ class wfn_Job(object):
       inp.write("\n}\ncell.build()\n")
 
       model_line = None
-      if OV.GetParam('snum.NoSpherA2.method') == "HF":
-        model_line = "scf.RHF(cell)"
+      method = OV.GetParam('snum.NoSpherA2.method')
+      if method == "HF":
+        if mult == 1:
+          model_line = "scf.RHF(cell)"
+        else:
+          model_line = "scf.UHF(cell)"
       else:
-        model_line = "dft.RKS(cell)"
+        if mult == 1:
+          model_line = "dft.RKS(cell)"
+        else:
+          model_line = "dft.UKS(cell)"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("cf = %s\n"%model_line)
-      if OV.GetParam('snum.NoSpherA2.method') != "HF":
+      if method == "B3LYP":
         #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
-        inp.write("cf.xc = 'b3lyp'\ncf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\n")
-      inp.write("cf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
+        inp.write("cf.xc = 'b3lyp'\n")
+      elif method == "PBE":
+        inp.write("cf.xc = 'pbe,pbe'\n")
+      elif method == "BLYP":
+        inp.write("cf.xc = 'b88,lyp'\n")
+      elif method == "M062X":
+        inp.write("cf.xc = 'M06X2X,M06X2C'\n")
+      elif method == "PBE0":
+        inp.write("cf.xc = 'PBE0'\n")
+      grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+      grid = None
+      if grid_accuracy == "Low":
+        grid = 0
+      elif grid_accuracy == "Normal":
+        grid = 0
+      elif grid_accuracy == "High":
+        grid = 3
+      else:
+        grid = 9
+      #rest = "cf = cf.mix_density_fit()\ncf.grids.radi_method = dft.gauss_chebyshev\ncf.grids.level = "+str(grid)+"\n"
+      rest = "cf = cf.mix_density_fit()\ncf.grids.level = "+str(grid)+"\n"
+      rest += """cf.with_df.auxbasis = 'def2-tzvp-jkfit'
+cf.diis_space = 19
+cf.conv_tol = 0.0033
+cf.conv_tol_grad = 1e-2
+cf.level_shift = 0.25
+cf.damp = 0.7
+cf.kernel()
+print("Switching to SOSCF and shutting down damping & levelshift")
+cf.conv_tol = 1e-9
+cf.conv_tol_grad = 1e-5
+cf.level_shift = 0.0
+cf.damp = 0.0
+cf = scf.newton(cf)
+ener = mf.kernel()"""
+      rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,cf.mo_coeff,cf.mo_energy,cf.mo_occ,ener)"%self.name
+      inp.write(rest)        
+      #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
 
   def run(self):
     args = []
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     software = OV.GetParam('snum.NoSpherA2.source')
-    fchk_exe = ""
+
     if software == "ORCA":
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
@@ -1230,6 +1763,32 @@ class wfn_Job(object):
       elif self.ubuntu_exe == None:
         args.append('python')
         args.append(input_fn)
+    elif software == "ELMOdb":
+      if self.parent.ubuntu_exe != None and os.path.exists(self.parent.ubuntu_exe):
+        args.append(self.parent.ubuntu_exe)
+        args.append('run')
+        temp = self.parent.elmodb_exe
+        drive = temp[0].lower()
+        folder = temp[2:]
+        elmodb_exe = "/mnt/"+drive+folder.replace('\\' , r'/')        
+        args.append(elmodb_exe)
+      elif self.parent.ubuntu_exe == None:
+        args.append(self.parent.elmodb_exe)
+      args.append("<")
+      args.append(self.name + ".inp")
+      args.append(">")
+      args.append(self.name + ".out")
+      if os.path.exists(os.path.join(self.origin_folder,self.name + ".pdb")):
+        shutil.copy(os.path.join(self.origin_folder,self.name + ".pdb"),os.path.join(self.full_dir,self.name + ".pdb"))
+      else: 
+        OV.SetVar('NoSpherA2-Error',"ELMOdb")
+        raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
+      if basis_name == "extrabasis":  
+        if os.path.exists(os.path.join(self.origin_folder,"extrabasis")):
+          shutil.copy(os.path.join(self.origin_folder,"extrabasis"),os.path.join(self.full_dir,"extrabasis"))
+        else:
+          OV.SetVar('NoSpherA2-Error',"ELMOdb")
+          raise NameError('No extrabasis file available!')
 
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
@@ -1263,6 +1822,17 @@ class wfn_Job(object):
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
+    elif software == "ELMOdb":
+      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(os.path.join(self.full_dir, self.name+".out")).read():
+        pass
+      else:
+        OV.SetVar('NoSpherA2-Error',"ELMOdb")
+        with open(os.path.join(self.full_dir, self.name+".out")) as file:
+          lines = file.readlines()
+        for line in lines:
+          if "Error" in line:
+            print line
+        raise NameError('ELMOdb did not terminate normally!')
 
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
@@ -1280,9 +1850,11 @@ class wfn_Job(object):
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
     elif("orca" in args[0]):
-      #shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_orca.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+    elif("elmodb" in args[0]):
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
     elif software == "pySCF":
@@ -1845,7 +2417,6 @@ OV.registerFunction(combine_tscs,True,'NoSpherA2')
 
 def deal_with_parts(cif=True):
   parts = OV.ListParts()
-  olx.Kill("$Q")
   if not parts:
     return
   for part in parts:
@@ -1855,8 +2426,6 @@ def deal_with_parts(cif=True):
     if cif == False:
       fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
       olx.File(fn,p=8)
-    fn = "%s_part_%s.cif" %(OV.ModelSrc(), part)
-    olx.File(fn)
   olex.m("showp")
 OV.registerFunction(deal_with_parts,True,'NoSpherA2')
 
@@ -1920,11 +2489,273 @@ def change_basisset(input):
     OV.SetParam('snum.NoSpherA2.Relativistic',False)
 OV.registerFunction(change_basisset,True,'NoSpherA2')
 
+def get_ntail_list():
+  # for tailor made residues in ELMOdb
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    ntail_list = ['1',]
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if maxtail == 1:
+      ntail_list_str = "1;"
+    else: 
+      for n in range(1,maxtail):
+        ntail_list.append(str(n+1))
+        ntail_list_str = ';'.join(ntail_list)
+    return ntail_list_str
+OV.registerFunction(get_ntail_list,True,'NoSpherA2')
+
+def get_resname():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
+    resnames = resnames.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(resnames) < maxtail:
+      diff = maxtail - len(resnames)
+      for i in range(diff):
+        resnames.append([])
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return resnames[n]
+OV.registerFunction(get_resname,True,'NoSpherA2')
+
+def get_nat():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:                                                                                                                       
+    nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
+    nat = nat.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
+    if len(nat) < maxtail:                                                                                                               
+      diff = maxtail - len(nat)                                                                                                          
+      for i in range(diff):                                                                                                              
+        nat.append(0)                                                                                                                   
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1                                                                                                                        
+    return nat[n]
+OV.registerFunction(get_nat,True,'NoSpherA2')   
+
+def get_nfrag():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')
+    nfrag = nfrag.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(nfrag) < maxtail:
+      diff = maxtail - len(nfrag)
+      for i in range(diff):
+        nfrag.append(1)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return nfrag[n]
+OV.registerFunction(get_nfrag,True,'NoSpherA2')
+
+def get_ncltd():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')
+    ncltd = ncltd.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(ncltd) < maxtail:
+      diff = maxtail - len(ncltd)
+      for i in range(diff):
+        ncltd.append(False)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return ncltd[n]
+OV.registerFunction(get_ncltd,True,'NoSpherA2')
+
+def get_specac():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
+    specac = specac.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(specac) < maxtail:
+      diff = maxtail - len(specac)
+      for i in range(diff):
+        specac.append(False)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return specac[n]
+OV.registerFunction(get_specac,True,'NoSpherA2')
+
+def get_exbsinp():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')
+    exbsinp = exbsinp.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(exbsinp) < maxtail:
+      diff = maxtail - len(exbsinp)
+      for i in range(diff):
+        exbsinp.append(0)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return exbsinp[n]
+OV.registerFunction(get_exbsinp,True,'NoSpherA2')
+
+def get_fraginp():
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
+    fraginp = fraginp.split(';')
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(fraginp) < maxtail:
+      diff = maxtail - len(fraginp)
+      for i in range(diff):
+        fraginp.append(0)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    return fraginp[n]
+OV.registerFunction(get_fraginp,True,'NoSpherA2')
+
+def change_resname(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
+    resnames = resnames.split(';')
+
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(resnames) < maxtail:
+      diff = maxtail - len(resnames)
+      for i in range(diff):
+        resnames.append([])
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    resnames[n] = input
+    str_resname = resnames
+    str_resname = ";".join([str(i) for i in resnames])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_resname', str_resname)
+    return resnames[n]
+OV.registerFunction(change_resname,True,'NoSpherA2')
+
+def change_nat(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
+    nat = nat.split(';')
+
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(nat) < maxtail:
+      diff = maxtail - len(nat)
+      for i in range(diff):
+        nat.append(0)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    nat[n] = input
+    str_nat = nat
+    str_nat = ";".join([str(i) for i in nat])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_nat', str_nat)
+    return nat[n]
+OV.registerFunction(change_nat,True,'NoSpherA2')
+
+def change_nfrag(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:
+    nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')                                                                          
+    nfrag = nfrag.split(';')
+    
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
+    if len(nfrag) < maxtail:
+      diff = maxtail - len(nfrag)                                                                                                     
+      for i in range(diff):                                                                                                              
+        nfrag.append(1)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1 
+    nfrag[n] = input
+    str_nfrag = nfrag
+    str_nfrag = ";".join([str(i) for i in nfrag])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_nfrag', str_nfrag)                                                                        
+    return nfrag[n]
+OV.registerFunction(change_nfrag,True,'NoSpherA2')      
+
+def change_ncltd(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:
+    ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')                                                                          
+    ncltd = ncltd.split(';')
+    
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
+    if len(ncltd) < maxtail:
+      diff = maxtail - len(ncltd)                                                                                                     
+      for i in range(diff):                                                                                                              
+        ncltd.append(False)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1 
+    ncltd[n] = input
+    str_ncltd = ncltd
+    str_ncltd = ";".join([str(i) for i in ncltd])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_ncltd', str_ncltd)                                                                        
+    return ncltd[n]
+OV.registerFunction(change_ncltd,True,'NoSpherA2')  
+
+def change_specac(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
+    specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
+    specac = specac.split(';')
+
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(specac) < maxtail:
+      diff = maxtail - len(specac)
+      for i in range(diff):
+        specac.append(False)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    specac[n] = input
+    str_specac = specac
+    str_specac = ";".join([str(i) for i in specac])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_specac', str_specac)
+    return specac[n]
+OV.registerFunction(change_specac,True,'NoSpherA2')
+
+def change_exbsinp(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:
+    exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')                                                                                   
+    exbsinp = exbsinp.split(';')                                                                                                                 
+  
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(exbsinp) < maxtail:
+      diff = maxtail - len(exbsinp)
+      for i in range(diff):
+        exbsinp.append(0)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    exbsinp[n] = input
+    str_exbsinp = exbsinp
+    str_exbsinp = ";".join([str(i) for i in exbsinp])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_exbsinp', str_exbsinp)
+    return exbsinp[n]
+OV.registerFunction(change_exbsinp,True,'NoSpherA2')
+
+def change_fraginp(input):
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:
+    fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')                                                                                   
+    fraginp = fraginp.split(';')                                                                                                                 
+  
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(fraginp) < maxtail:
+      diff = maxtail - len(fraginp)
+      for i in range(diff):
+        fraginp.append(0)
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
+    fraginp[n] = input
+    str_fraginp = fraginp
+    str_fraginp = ";".join([str(i) for i in fraginp])
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_fraginp', str_fraginp)
+    return fraginp[n]
+OV.registerFunction(change_fraginp,True,'NoSpherA2')
+
 def get_functional_list():
   wfn_code = OV.GetParam('snum.NoSpherA2.source')
   list = None
-  if wfn_code == "Tonto" or wfn_code == "pySCF" or wfn_code == "'Please Select'":
+  if wfn_code == "Tonto" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
+  elif wfn_code == "pySCF":
+    list = "HF;PBE;B3LYP;BLYP;M062X"
   else:
     list = "HF;BP86;PWLDA;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
@@ -1953,11 +2784,154 @@ def get_ncen():
 OV.registerFunction(get_nmo,True,'NoSpherA2')
 OV.registerFunction(get_ncen,True,'NoSpherA2')
 
+def check_for_pyscf(loud=True):
+  ubuntu_exe = None
+  if sys.platform[:3] == 'win':
+    ubuntu_exe = olx.file.Which("ubuntu.exe")
+  else:
+    ubuntu_exe = None    
+  if ubuntu_exe != None and os.path.exists(ubuntu_exe):
+    import subprocess
+    try:
+      child = subprocess.Popen([ubuntu_exe,'run',"python -c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      out, err = child.communicate()
+      rc = child.returncode
+      if rc == 0:
+        OV.SetParam('user.NoSpherA2.has_pyscf',True)
+        return True
+    except:
+      pass
+    if loud == True:
+      print ("To use pySCF please install pySCF and pip in your ubuntu environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+    return False
+  elif ubuntu_exe == None :
+    import subprocess
+    try:
+      child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      out, err = child.communicate()
+      rc = child.returncode
+      if rc == 0:
+        OV.SetParam('user.NoSpherA2.has_pyscf',True)
+        return True
+    except:
+      pass
+    if loud == True:
+      print ("To use pySCF please install pySCF in your python environment:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+    return False
+  else:
+    if sys.platform[:3] == 'win':
+      if loud == True:
+        print ("To use pySCF please install the ubuntu and linux subprocess framework for windows 10 and afterwords run:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
+    else:
+      if loud == True:
+        print ("To use pySCF please install python, pip and pyscf\n")    
+    return False
+
 def change_tsc_generator(input):
   if input == "Get ORCA":
     olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "Get DISCAMB":
     olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
+  elif input == "Get pySCF":
+    result = check_for_pyscf(False)
+    if result == False:
+      selection = olx.Alert("No working pySCF installation found!",\
+"""Error: No wokring pySCF installation found!.
+Do you want to have a guide how do install pySCF?""", "YN", False)
+      if selection == 'Y':
+        win = (sys.platform[:3] == 'win')
+        if win:
+          cont = False
+          tries = 0
+          ubuntu_exe = None
+          wsl = olx.file.Which("wsl.exe")
+#Check for WSL
+          if wsl == None or os.path.exists(wsl) == False:
+            olx.Alert("Could not find Windows Subsystem for Linux",\
+"""pySCF requires Ubuntu to be installed on your system.
+This requires the Windows Subsystem for Linux.
+It can be enabled in the settings of Windows.
+1) Open Settings
+2) Click on Apps
+3) Under the "Related settings" section, click the Programs and Features option.
+4) Click the Turn Windows features on or off option from the left pane.
+5) Check the Windows Subsystem for Linux option.
+6) Click the OK button
+7) Click the 'Restart Now' button
+Your computer will restart and next time you select "Get pySCF the next 
+step of installation will be shown if the installation was succesfull""", "O", False)
+            return
+
+#Check for Ubuntu installation
+          ubuntu_exe = olx.file.Which("ubuntu.exe")
+          if ubuntu_exe == None or os.path.exists(ubuntu_exe) == False:
+            olx.Alert("Please install Ubuntu",\
+"""pySCF requires Ubuntu to be installed on your system.
+It is reletively easy to do that. 
+You can go to the Microsoft store and install it by searching for 'ubuntu' in clicking the install button.
+Once it is downloaded click the 'Launch' button and set up a username and password.
+After this setup is completed you can close the Ubuntu window and continue with this guide.
+Please do this now and klick 'Ok' once everything is done!""", "O", False)
+            while not cont:
+              ubuntu_exe = olx.file.Which("ubuntu.exe")
+              if os.path.exists(ubuntu_exe) == False:
+                tries += 1
+                if tries == 4:
+                  print ("Something seems wrong, aborting installation guide after 3 unsuccesfull attempts!")
+                  return
+                olx.Alert("Could not find Ubuntu",\
+"""pySCF requires Ubuntu to be installed on your system.
+It is reletively easy to do that. 
+You can go to the Microsoft store and install it by searching for 'ubuntu' in clicking the install button.
+Once it is downloaded click the 'Launch' button and set up a username and password.
+After this setup is completed you can close the Ubuntu window and continue with this guide.
+Please do this now and klick 'Ok' once everything is done!""", "O", False)
+              else:
+                cont = True
+                break
+              
+#Check for pySCF
+          cont = False
+          tries = 0
+          test = check_for_pyscf(False)
+          if test == False:
+            while not cont:
+              tries += 1
+              if tries == 4:
+                print ("Something seems wrong, aborting installation guide after 3 unsuccesfull attempts!")
+                return                
+              olx.Alert("Please install Python and pySCF in Ubuntu",\
+"""Almost done! Now we need to install Python and pySCF in your Ubuntu environment.
+Please open a Ubuntu terminal by starting Ubuntu.
+To do so you can use the Win+R shortcut and type 'ubuntu' or select it from the start menu.
+This will start a terminal in Ubuntu.
+There please type the following commands, each line followed by the Enter key:
+> sudo apt update
+     Ubuntu will ask for you password that you gave when setting up the installation
+> sudo apt install python3 python3-pip python-is-python3
+> sudo -H pip3 install pyscf
+Please do this now and klick 'Ok' once everything is done!""", "O", False)
+              cont = check_for_pyscf(False)
+              if cont == True:
+                print ("PySCF installed sucessfully!")              
+          else:
+            olx.Alert("Installation sucessful",\
+"""Installation Sucessfull!
+In order to load the new functionality Olex2 will need to restart!
+Once you click 'Ok' Olex2 will do so automatically!""", "O", False)            
+            print ("PySCF installed sucessfully!")
+            olx.m('restart')
+          
+        else:
+            olx.Alert("Please install pySCF",\
+"""Please install pySCF in your python distribution.
+On Ubuntu this can be done by typing in a command line:
+1) sudo apt install python-pip
+2) sudo pip install pyscf
+if that worked try to execute the following in a terminal:
+python -c 'import pyscf'
+If that does not throw an error message you were succesfull.""", "O", False)           
+            
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DICAMB":
@@ -2053,10 +3027,10 @@ def calculate_cubes():
       args.append("all")
     else:
       args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
-  
+
   if ATOM == True:
     args.append("-HDEF")
-    
+
   if DEF == True:
     args.append("-def")
 
@@ -2099,7 +3073,7 @@ def get_map_types():
   if os.path.isfile(os.path.join(folder,name+"_rdg.cube")):
     list += "RDG;"
   if os.path.isfile(os.path.join(folder,name+"_def.cube")):
-    list += "Stat. Def.;"  
+    list += "Stat. Def.;"
   if os.path.isfile(os.path.join(folder,name+"_rdg.cube")) and os.path.isfile(os.path.join(folder,name+"_signed_rho.cube")):
     list += "NCI;"
   if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
@@ -2119,7 +3093,7 @@ def get_map_types():
       if os.path.isfile(os.path.join(folder,name+"_HDEF_"+str(i)+".cube")):
         exists = True
     if exists == True:
-      list += "HDEF;"  
+      list += "HDEF;"
   if list == "":
     return "None;"
   return list
@@ -2167,7 +3141,7 @@ def change_map():
     plot_cube(name+"_MO_"+str(number)+".cube",None)
   elif Type == "HDEF":
     number = int(OV.GetParam('snum.NoSpherA2.Property_ATOM_number')) -1
-    plot_cube(name+"_HDEF_"+str(number)+".cube",None)  
+    plot_cube(name+"_HDEF_"+str(number)+".cube",None)
   else:
     print "Sorry, no map type available or selected map type not correct!"
     return
@@ -2385,19 +3359,187 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale',100)
-  elif Type == "ATOM":
+  elif Type == "HDEF":
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
-    OV.SetVar('map_slider_scale',100)  
+    OV.SetVar('map_slider_scale',100)
   elif Type == "Stat. Def.":
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
-    OV.SetVar('map_slider_scale',100)  
+    OV.SetVar('map_slider_scale',100)
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
 
 OV.registerFunction(plot_cube,True,'NoSpherA2')
+
+def plot_cube_single(name):
+  import olex_xgrid
+  if not os.path.isfile(name):
+    print "Cube file does not exist!"
+    return
+  olex.m("html.Update()")
+  with open(name) as cub:
+    cube = cub.readlines()
+
+  run = 0
+  na = 0
+  x_size = 0
+  y_size = 0
+  z_size = 0
+  x_run = 0
+  y_run = 0
+  z_run = 0
+  data = None
+
+  min = 100000
+  max = 0
+
+  for line in cube:
+    run += 1
+    if (run==3):
+      values = line.split()
+      na = int(values[0])
+    if (run==4):
+      values = line.split()
+      x_size = int(values[0])
+    if (run==5):
+      values = line.split()
+      y_size = int(values[0])
+    if (run==6):
+      values = line.split()
+      z_size = int(values[0])
+      data = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+    if (run > na + 6):
+      values = line.split()
+      for i in range(len(values)):
+        data[x_run][y_run][z_run] = float(values[i])
+        if data[x_run][y_run][z_run] > max:
+          max = data[x_run][y_run][z_run]
+        if data[x_run][y_run][z_run] < min:
+          min = data[x_run][y_run][z_run]
+        z_run += 1
+        if z_run == z_size:
+          y_run += 1
+          z_run = 0
+          if y_run == y_size:
+            x_run += 1
+            y_run = 0
+        if x_run > x_size:
+          print "ERROR! Mismatched indices while reading!"
+          return
+
+  cube = None
+
+  olex_xgrid.Init(x_size,y_size,z_size)
+  for x in range(x_size):
+    for y in range(y_size):
+      for z in range(z_size):
+        olex_xgrid.SetValue(x,y,z,data[x][y][z])
+  data = None
+  OV.SetVar('map_min',0)
+  OV.SetVar('map_max',40)
+  OV.SetVar('map_slider_scale',100)
+  olex_xgrid.SetMinMax(min, max)
+  olex_xgrid.SetVisible(True)
+  olex_xgrid.InitSurface(True,1)
+    
+OV.registerFunction(plot_cube_single,True,'NoSpherA2')
+
+def plot_map_cube(map_type,resolution):
+  olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
+  import olex_xgrid
+  import math
+
+  temp = olex_xgrid.GetSize()
+  size = [int(temp[0]),int(temp[1]),int(temp[2])]
+  name = OV.ModelSrc()
+
+  n_atoms = int(olx.xf.au.GetAtomCount())
+  positions = [[float(0.0) for k in xrange(3)] for l in xrange(n_atoms)]
+  cm = [[float(0.0) for k in xrange(3)] for l in xrange(3)]
+  cm_inv = [[float(0.0) for k in xrange(3)] for l in xrange(3)]
+  temp = olx.xf.au.GetCell().split(',')
+  cell = [float(temp[0]),float(temp[1]),float(temp[2]),float(temp[3]),float(temp[4]),float(temp[5])]
+  a2b = 0.52917749
+  fac = 0.0174532925199432944444444444444
+
+  types = ["Q","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
+
+  ca = math.cos(fac * cell[3])
+  cb = math.cos(fac * cell[4])
+  cg = math.cos(fac * cell[5])
+  sg = math.sin(fac * cell[5])
+  cm[0][0] = cell[0] / a2b
+  cm[0][1] = cell[1] * cg / a2b
+  cm[1][1] = cell[1] * sg / a2b
+  cm[0][2] = cell[2] * cb / a2b
+  cm[1][2] = (cell[2] * (ca - cb * cg) / sg) / a2b
+  cm[2][2] = float(olx.xf.au.GetCellVolume())/(cell[0] * cell[1] * sg * a2b)
+
+  cm_inv[0][0] = 1/cm[0][0] / a2b
+  cm_inv[1][1] = 1/cm[1][1] / a2b
+  cm_inv[2][2] = 1/cm[2][2] / a2b
+  cm_inv[0][1] = -cm[0][1]/(cm[0][0]*cm[1][1]) / a2b
+  cm_inv[0][2] = ((cm[0][1]*cm[1][2])-(cm[0][2]*cm[1][1]))/(cm[0][0]*cm[1][1]*cm[2][2]) / a2b
+  cm_inv[1][2] = -cm[1][2]/(cm[1][1]*cm[2][2]) / a2b
+  cm_inv[1][0] = cm[0][1]/(cm[0][0]*cm[1][1]) /a2b
+  cm_inv[2][0] = (-cm[0][1]*cm[1][2]+cm[0][2]*cm[1][1])/(cm[0][0]*cm[1][1]*cm[2][2]) /a2b
+  cm_inv[2][1] = cm[1][2]/(cm[1][1]*cm[2][2]) /a2b
+
+  cmnorm = [
+    math.sqrt(cm_inv[0][0]*cm_inv[0][0] + cm_inv[0][1]*cm_inv[0][1] + cm_inv[0][2]*cm_inv[0][2]),
+    math.sqrt(cm_inv[1][0]*cm_inv[1][0] + cm_inv[1][1]*cm_inv[1][1] + cm_inv[1][2]*cm_inv[2][2]),
+    math.sqrt(cm_inv[2][0]*cm_inv[2][0] + cm_inv[2][1]*cm_inv[2][1] + cm_inv[2][2]*cm_inv[2][2])]
+
+  for a in range(n_atoms):
+    pos = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+
+    positions[a] = [
+      (float(pos[0])*cm_inv[0][0]+float(pos[1])*cm_inv[0][1]+float(pos[2])*cm_inv[0][2])/cmnorm[0],
+      (float(pos[0])*cm_inv[1][0]+float(pos[1])*cm_inv[1][1]+float(pos[2])*cm_inv[1][2])/cmnorm[1],
+      (float(pos[0])*cm_inv[2][0]+float(pos[1])*cm_inv[2][1]+float(pos[2])*cm_inv[2][2])/cmnorm[2]]
+
+  print ("start writing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
+
+  with open("%s_%s.cube"%(name,map_type),'w') as cube:
+    cube.write("Fcalc fourier synthesis map created by Olex2\n")
+    cube.write("Model name: %s\n"%name)
+    #Origin of cube
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(n_atoms,0.0,0.0,0.0))
+    # need to write vectors!
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[0],cm[0][0]/(size[0]-1),cm[0][1]/(size[0]-1),cm[0][2]/(size[0]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[1],cm[1][0]/(size[1]-1),cm[1][1]/(size[1]-1),cm[1][2]/(size[1]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[2],cm[2][0]/(size[2]-1),cm[2][1]/(size[2]-1),cm[2][2]/(size[2]-1)))
+    for i in range(n_atoms):
+      atom_type = olx.xf.au.GetAtomType(i)
+      charge = 200
+      for j in range(104):
+        if types[j] == atom_type:
+          charge = j
+          break
+      if charge == 200:
+        print "ATOM NOT FOUND!"
+      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n"%(charge,charge,positions[i][0]/a2b,positions[i][1]/a2b,positions[i][2]/a2b))
+    for x in range(size[0]):
+      for y in range(size[1]):
+        string = ""
+        for z in range(size[2]):
+          value = olex_xgrid.GetValue(x,y,z)
+          string += ("%15.7e"%value)
+          if (z+1) % 6 == 0 and (z+1) != size[2]:
+            string += '\n'
+        if (y != (size[1] - 1)):
+          string += '\n'
+        cube.write(string)
+      if(x != (size[0] -1)):
+        cube.write('\n')
+        
+    cube.close()
+
+  print "Saved Fourier map successfully"
+
+OV.registerFunction(plot_map_cube,True,'NoSpherA2')
 
 def get_color(value):
   a = 127
@@ -2518,6 +3660,22 @@ def toggle_GUI():
     set_default_cpu_and_mem()
   olex.m("html.Update()")
 OV.registerFunction(toggle_GUI,True,'NoSpherA2')
+
+def sample_folder(input_name):
+  import shutil
+  job_folder = os.path.join(OV.DataDir(), "HAR_samples", input_name)
+  if not os.path.exists(os.path.join(OV.DataDir(), "HAR_samples")):
+    os.mkdir(os.path.join(OV.DataDir(), "HAR_samples"))
+  sample_file = os.path.join(p_path, "samples", input_name + ".cif")
+  i = 1
+  while (os.path.exists(job_folder + "_%d"%i)):
+    i = i + 1
+  job_folder = job_folder + "_%d"%i
+  os.mkdir(job_folder)
+  shutil.copy(sample_file, job_folder)
+  load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
+  olex.m(load_input_cif)
+OV.registerFunction(sample_folder, False, "NoSpherA2")
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
