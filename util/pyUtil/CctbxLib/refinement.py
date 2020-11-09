@@ -796,7 +796,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           details_text = """Refinement using NoSpherA2, an implementation of
  NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
-F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+F. Kleemiss et al. DOI 10.1039/D0SC05526C - 2020
 NoSpherA2 implementation of HAR makes use of
  tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
