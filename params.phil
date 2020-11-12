@@ -1030,7 +1030,7 @@ user
       .type = str
     default_method = ""
       .type = str
-    hide_nsff = True
+    hide_nsff = False
       .type = bool
       .expert_level = 2
   }
@@ -1980,11 +1980,9 @@ user
       .type = str
   }
   NoSpherA2{
-    use_pyscf = False
-      .type = bool
     has_pyscf = False
       .type = bool
-    enable_discamb = False
+    enable_discamb = True
       .type = bool
   }
 }
