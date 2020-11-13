@@ -1142,7 +1142,7 @@ class Graph(ArgumentParser):
         msg = "-- got isinf (yr)"
       if math.isinf(xr):
         msg = "-- got isinf (xr)"
-        
+
       if xr < 0 and no_negatives:
         msg = "-- got negative (xr)"
       if yr < 0 and no_negatives:
@@ -3534,33 +3534,14 @@ class HealthOfStructure():
     od_value = None
     theoretical_val = value_raw
 
-    if item == "Completeness":
-      od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
-      if od_value:
-        value_raw = float(od_value)
-        od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
-        if od_2theta:
-          od_2theta = float(od_2theta) * 2
-          value_display_extra = "at 2Theta=%.0fdegrees" %(od_2theta)
-          value_display_extra = IT.get_unicode_characters(value_display_extra)
-      iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
-      if iucr_value:
-        try:
-          value_raw = float(iucr_value)
-        except:
-          value_raw = 0
-        iucr_2theta = OV.get_cif_item('_diffrn_reflns_theta_full')
-        iucr_2theta = "IUCr"
-        if iucr_2theta:
-          value_display_extra = "%.0f%% (IUCr)" %(value_raw *100)
-
-
     if type(colour) == tuple:
       fill = colour[0]
       second_colour = colour[2]
       second_colour_begin = colour[1]
     else:
       fill = colour
+      second_colour = colour
+      second_colour_begin = colour
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
@@ -3581,16 +3562,26 @@ class HealthOfStructure():
 
 
     if item == "Completeness":
-
-      od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
-      if od_value:
+      iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
+      if iucr_value:
+        try:
+          value_raw = float(iucr_value)
+        except:
+          value_raw = 0
+        if value_raw:
+          value_display_extra = "%.0f%% (IUCr)" %(value_raw *100)
+      if not value_display_extra:
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
         if od_2theta:
           od_2theta = float(od_2theta) * 2
-
+          value_display_extra = IT.get_unicode_characters(
+            "at 2Theta=%.0fdegrees" %(od_2theta))
       laue = float(self.hkl_stats['Completeness_laue'])
       laue_col = self.get_bg_colour('Completeness', laue)
-
+      if self.resolution_type == "full":
+        display = "%s(full)" %display
+      else:
+        display = "%s(max)" %display
       ## Point Group value!
       _ = int(boxWidth * (1-self.hkl_stats['Completeness_point']))
       if _ == 0 and theoretical_val < 0.95:
