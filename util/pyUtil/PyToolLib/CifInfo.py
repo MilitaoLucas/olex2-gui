@@ -852,24 +852,23 @@ class ExtractCifInfo(CifTools):
           ref = "%s\n%s" %(ref, l)
         else:
           ref = l
-    NoSpherA2 = OV.GetParam('snum.NoSpherA2.use_aspherical')
-    if NoSpherA2:
-      if "Kleemiss" not in full_references:
-        full_references.append("""Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
-Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C.""")
-        full_references_set.add(''.join("""Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
-Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C.""".replace('\r', '').split())) 
     if ref:
       ref_t = ''.join(ref.replace('\r', '').split())
       if ref_t not in full_references_set:
         full_references.append(ref)
         full_references_set.add(ref_t)
-    
-    
+
+    NoSpherA2 = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    if NoSpherA2:
+      ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
+Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
+White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
+Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C."""
+      ref_t = ref.replace('\r', '').replace('\n', '').replace(' ', '')
+      if ref_t not in full_references_set:
+        full_references.append(ref)
+        full_references_set.add(ref_t)
+
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
