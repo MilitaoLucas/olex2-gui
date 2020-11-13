@@ -796,7 +796,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           details_text = """Refinement using NoSpherA2, an implementation of
  NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
-F. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+F. Kleemiss et al. DOI 10.1039/D0SC05526C - 2020
 NoSpherA2 implementation of HAR makes use of
  tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
@@ -843,6 +843,14 @@ The following options were used:
           tsc_info = tsc_info + details_text
         tsc_info = tsc_info + ";\n"
         cif_block['_refine_special_details'] = tsc_info
+        if acta_stuff:
+          # remove IAM scatterer reference
+          for sl in ['a', 'b']:
+            for sn in range(1,5):
+              cif_block.pop('_atom_type_scat_Cromer_Mann_%s%s' %(sl, sn))
+          cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          for i in range(cif_block['_atom_type_scat_source'].size()):
+            cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return "a"
