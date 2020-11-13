@@ -843,17 +843,14 @@ The following options were used:
           tsc_info = tsc_info + details_text
         tsc_info = tsc_info + ";\n"
         cif_block['_refine_special_details'] = tsc_info
-        cif_block.pop('_atom_type_scat_Cromer_Mann_a1')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_a2')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_a3')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_a4')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_b1')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_b2')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_b3')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_b4')
-        cif_block.pop('_atom_type_scat_Cromer_Mann_c')
-        for i in range(cif_block['_atom_type_scat_source'].size()):
-          cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
+        if acta_stuff:
+          # remove IAM scatterer reference
+          for sl in ['a', 'b']:
+            for sn in range(1,5):
+              cif_block.pop('_atom_type_scat_Cromer_Mann_%s%s' %(sl, sn))
+          cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          for i in range(cif_block['_atom_type_scat_source'].size()):
+            cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
