@@ -1750,7 +1750,7 @@ user
       Completeness{
         op = "greater"
           .type = str
-        display = "complete"
+        display = "Compl."
           .type = str
         value_format= "0%"
           .type = str
@@ -1982,7 +1982,7 @@ user
   NoSpherA2{
     has_pyscf = False
       .type = bool
-    enable_discamb = True
+    enable_discamb = False
       .type = bool
   }
 }

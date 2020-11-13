@@ -246,7 +246,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           if len(u) == 6:
             u = [u[0], u[1], u[2], u[5], u[4], u[3]]
             if a.is_anharmonic_adp():
-              u += a.anharmonic_adp.data() 
+              u += a.anharmonic_adp.data()
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
         yield (label, xyz, u, u_eq,
                a.occupancy*(a.multiplicity()/n_equiv_positions),

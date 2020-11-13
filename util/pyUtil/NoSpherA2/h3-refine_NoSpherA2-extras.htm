@@ -3,12 +3,14 @@
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
 
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+
+<!-- =======!= ELMO / DISCAMB=================== HAR NOSPHERA2 INTERFACE BEGIN == -->
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
 <td width="13%" align='left'>
     <b>Basis Set </b>
 </td>
@@ -60,8 +62,15 @@
   $-
 </td>
 #ignoreif -->
+<!-- =======!= ELMO / DISCAMB=================== HAR NOSPHERA2 INTERFACE END == -->
+
+<!-- ======= = ELMO =================== HAR-ELMO NOSPHERA2 INTERFACE BEGIN == -->
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
-<td width="20%" align='left'>
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width="13%" align='left'>
     <b>Basis Set </b>
 </td>
 <td width="20%">
@@ -74,6 +83,8 @@
   $-
   </td>
 #ignoreif -->
+<!-- ======= = ELMO =================== HAR-ELMO NOSPHERA2 INTERFACE END == -->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -113,8 +124,8 @@
 <td width='2%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
-    "name=HAR",
-    "label=HAR ",
+    "name=Iterative",
+    "label=Iterative ",
     "checked=spy.GetParam('snum.NoSpherA2.full_HAR')",
     "oncheck=spy.SetParam('snum.NoSpherA2.full_HAR','True')>>html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
@@ -123,7 +134,9 @@
   $-
 </td>
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
+<!-- ======= FULL HAR SWITCH ===================== -->
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
 <td width="18%">
 <b>Max Cycles </b>
 </td>
@@ -139,7 +152,7 @@
   > 
 </td>
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
   $+
     html.Snippet("gui/snippets/gui-link-button",
     "value='Update .tsc & .wfn'",
@@ -149,6 +162,8 @@
     )
   $-
 #ignoreif -->
+
+<!-- ======= FULL HAR SWITCH END ===================== -->
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -230,6 +245,8 @@ N/A
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- ======= TONTO SPECIFIC START ===================== -->
+
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),Tonto)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
@@ -269,9 +286,10 @@ N/A
     )
   $-
 </td>
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
+
+<!-- ======= ORCA SPECIFIC START ===================== -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),ORCA)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -312,10 +330,11 @@ N/A
     "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
     "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
   $-
-</td> 
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 #ignoreif -->
+
+<!-- ======= pySCF SPECIFIC START ===================== -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -358,8 +377,9 @@ N/A
   $-
 </td> 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 #ignoreif -->
+
+<!-- ======= ELMO SPECIFIC START ===================== -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -377,6 +397,9 @@ N/A
     )
   $-
 </td>
+
+<!-- ============ START DISULFIDE BOND====================-->
+
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.ssbond'),'True')
 <td width="40%" align='right'>
     <b> # of disulfide bonds </b>
@@ -411,12 +434,15 @@ N/A
     "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbondinp', html.GetValue('~name~'))")
   $-
 </td>
+#ignoreif -->
+<!-- ============ END DISULFIDE BOND====================-->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-#ignoreif -->
+
 <td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -430,9 +456,11 @@ N/A
   $-
 </td>
 
+<!-- ============ START TAILOR MADE RESIDUES====================-->
+
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.tail'),'True')
-<td width="30%" align='right'>
-    <b> # of tailor made residues </b>
+<td width="50%" align='right'>
+    <b># of tailor made residues </b>
 </td>
 <td width="1%">
   <input 
@@ -446,10 +474,7 @@ N/A
     onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.maxtail,html.GetValue(~name~)) >> html.Update()"
   > 
 </td>
-#ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.tail'),'True')
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -588,7 +613,8 @@ $-
   $-
 </td>
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.spect'),'True')
+<!-- ============ START SPECIAL TRIAD====================-->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.spect'),'False')
 <td width="30%" align='right'>
     <b> # of special triads  </b>
 </td>
@@ -623,33 +649,17 @@ $-
   $-
 </td>
 #ignoreif -->
+<!-- ============ END SPECIAL TRIAD====================-->
+#ignoreif -->
+<!-- ============ END TAILOR MADE RESIDUES====================-->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
-#ignoreif -->
-<!-- #ignoreif not spy.NoSpherA2.is_disordered()
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="25%" align='left'>
-    <b>Grouped Parts </b>
-</td>
-<td width="70%">
-  $+
-    html.Snippet("gui/snippets/input-text",
-    "name=NoSpherA2_Disorder_Groups@refine",
-    "value=spy.GetParam('snum.NoSpherA2.Disorder_Groups')",
-    "onchange=spy.SetParam('snum.NoSpherA2.Disorder_Groups', html.GetValue('~name~'))")
-  $-
-</td>
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
+<!-- ============ ELMO SPECIFIC END ====================-->
 
 #ignoreif -->
+<!-- ============ END != DISCAMB====================-->
 
-#ignoreif -->
 
-<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
@@ -718,6 +728,7 @@ $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
+<!-- =============END DISCAMB==================-->
 
 <!-- #ignoreif not spy.NoSpherA2.is_disordered()
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>

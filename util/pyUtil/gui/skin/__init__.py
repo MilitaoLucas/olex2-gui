@@ -170,8 +170,6 @@ def deal_with_gui_phil(action):
 
 
 def export_parameters(load_phil=True):
-
-
   if timing:
     t = time.time()
   if check_for_first_run():
@@ -180,6 +178,8 @@ def export_parameters(load_phil=True):
     deal_with_gui_phil(action='load')
 
   if OV.HasGUI():
+    from gui import tools as gtools
+    gtools.cache = {}
     table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
     OV.SetParam('HtmlTableWidth', table_width)
     OV.SetVar('HtmlTableWidth', table_width)
@@ -200,7 +200,7 @@ def export_parameters(load_phil=True):
         OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
         OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
         break
-    
+
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
@@ -517,7 +517,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
     colour = OV.GetParam('user.bonds.colour')
-    
+
   import shlex
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
@@ -528,11 +528,11 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
-  
+
   if include_H:
     olx.ShowH("a", True)
     olx.ShowH("b", False)
-  
+
   _select_bonds(bypass_collections=bypass_collections)
 
   if colour == 'elements':
