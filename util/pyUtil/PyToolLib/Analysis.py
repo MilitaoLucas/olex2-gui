@@ -3540,6 +3540,8 @@ class HealthOfStructure():
       second_colour_begin = colour[1]
     else:
       fill = colour
+      second_colour = colour
+      second_colour_begin = colour
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
@@ -3560,6 +3562,20 @@ class HealthOfStructure():
 
 
     if item == "Completeness":
+      iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
+      if iucr_value:
+        try:
+          value_raw = float(iucr_value)
+        except:
+          value_raw = 0
+        if value_raw:
+          value_display_extra = "%.0f%% (IUCr)" %(value_raw *100)
+      if not value_display_extra:
+        od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
+        if od_2theta:
+          od_2theta = float(od_2theta) * 2
+          value_display_extra = IT.get_unicode_characters(
+            "at 2Theta=%.0fdegrees" %(od_2theta))
       laue = float(self.hkl_stats['Completeness_laue'])
       laue_col = self.get_bg_colour('Completeness', laue)
       if self.resolution_type == "full":
