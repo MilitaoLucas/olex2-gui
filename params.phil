@@ -1030,7 +1030,7 @@ user
       .type = str
     default_method = ""
       .type = str
-    hide_nsff = True
+    hide_nsff = False
       .type = bool
       .expert_level = 2
   }
@@ -1750,7 +1750,7 @@ user
       Completeness{
         op = "greater"
           .type = str
-        display = "complete"
+        display = "Compl."
           .type = str
         value_format= "0%"
           .type = str
@@ -1980,8 +1980,6 @@ user
       .type = str
   }
   NoSpherA2{
-    use_pyscf = False
-      .type = bool
     has_pyscf = False
       .type = bool
     enable_discamb = False

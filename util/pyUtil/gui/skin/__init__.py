@@ -200,7 +200,7 @@ def export_parameters(load_phil=True):
         OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
         OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
         break
-    
+
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
@@ -517,7 +517,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     colour = OV.GetParam('snum.bonds.colour')
   if not colour:
     colour = OV.GetParam('user.bonds.colour')
-    
+
   import shlex
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
@@ -528,11 +528,11 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
-  
+
   if include_H:
     olx.ShowH("a", True)
     olx.ShowH("b", False)
-  
+
   _select_bonds(bypass_collections=bypass_collections)
 
   if colour == 'elements':

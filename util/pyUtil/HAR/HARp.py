@@ -55,7 +55,7 @@ class HARp(PT):
     self.p_htm = p_htm
     self.p_img = p_img
     self.deal_with_phil(operation='read')
-    self.print_version_date()
+    #self.print_version_date()
     self.jobs = []
     self.parallel = False
     self.softwares = ""
@@ -64,6 +64,8 @@ class HARp(PT):
    
     if not from_outside:
       self.setup_gui()
+      
+    return
     
     # END Generated =======================================
     options = {
@@ -163,8 +165,7 @@ class HARp(PT):
       import multiprocessing
       max_cpu = multiprocessing.cpu_count()
       self.max_cpu = max_cpu
-      print("""
-      Number of CPUs Detected for parallel calculations: """ + str(max_cpu))
+      print ("\nNumber of CPUs Detected for parallel calculations: " + str(max_cpu))
       cpu_list = ['1',]
       for n in range(1,max_cpu):
         cpu_list.append(str(n+1))
@@ -172,8 +173,7 @@ class HARp(PT):
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print("""
-      No MPI implementation found in PATH!""")
+      print ("\nNo MPI implementation found in PATH!")
       self.cpu_list_str = '1'
 
 
@@ -620,7 +620,6 @@ class Job(object):
     self.dump_fn = os.path.join(full_dir, "hart.exe.stackdump")
     self.analysis_fn = os.path.join(full_dir, "stdout.fit_analysis")
     self.completed = os.path.exists(self.result_fn)
-    initialised = False
 
   def save(self):
     with open(os.path.join(self.full_dir, "job.options"), "w") as f:

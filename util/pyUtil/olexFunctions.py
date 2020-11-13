@@ -202,9 +202,9 @@ class OlexFunctions(inheritFunctions):
       except KeyError:
         return default
 #      print "Accessing %s" %key
-      if tem is None: return default
-      retVal = default
-      if type(tem) == str:
+      if tem is None or tem == default:
+        return default
+      if isinstance(tem, basestring):
         if output_format == 'html':
           tem = tem.replace(';\n','')
           tem = tem.replace('\n;','')
@@ -221,9 +221,7 @@ class OlexFunctions(inheritFunctions):
           return ", ".join([bit for bit in tem])
         except Exception as ex:
           print(ex)
-      return retVal
-    else:
-      return default
+    return default
 
   def update_crystal_size(self):
     vals = [self.get_cif_item('_exptl_crystal_size_min'),

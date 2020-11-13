@@ -11,14 +11,24 @@ if not os.path.exists(fchk_dir):
   exit(1)
 os.chdir(fchk_dir)
 args = os.getenv("fchk_cmd", "").split('+&-')
-#print("Running: '" + ' '.join(args) + "'")
+print("Running: '" + ' '.join(args) + "'")
 log = None
 err_fn = None
 out_fn = None
 if "orca" in args[0]:
-  log = open(fchk_file + '_orca.log', 'w')
   out_fn = fchk_file + "_orca.log"
+  log = open(out_fn, 'w')
+elif "elmo" in args[2]:
+  out_fn = fchk_file + '.out'
+  log = open(out_fn, 'w')
+elif "python" in args[2]:
+  out_fn = fchk_file + "_pyscf.log"
+  log = open(out_fn, 'w')
+  
+print (out_fn)
+  
 p = subprocess.Popen(args, stdout=log)
+
 if "ubuntu" in args[0]:
   print("Starting Ubuntu and running pySCF, please be patient for start")
 if "ubuntu" in args[0]:
@@ -28,10 +38,10 @@ elif out_fn == None:
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
-  if "ubuntu" in args[0]:
-    time.sleep(5)
   tries += 1
   if tries >= 5:
+    if "python" in args[2] and tries <=10:
+      continue
     print("Failed to locate the output file")
     exit(1)
 with open(out_fn, "rU") as stdout:
