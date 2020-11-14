@@ -1919,7 +1919,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
   move_args.append(cif)
   move_args.append("-asym_cif")
   move_args.append(wfn_cif)
-  if (ncpus > 1):
+  if (int(ncpus) > 1):
     move_args.append('-cpus')
     move_args.append(ncpus)
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
