@@ -204,7 +204,7 @@ class OlexFunctions(inheritFunctions):
 #      print "Accessing %s" %key
       if tem is None or tem == default:
         return default
-      if isinstance(tem, basestring):
+      if isinstance(tem, str):
         if output_format == 'html':
           tem = tem.replace(';\n','')
           tem = tem.replace('\n;','')

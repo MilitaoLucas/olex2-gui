@@ -768,7 +768,7 @@ class ExtractCifInfo(CifTools):
     if os.path.isfile(mask_cif_path)\
         and OV.GetParam('snum.refinement.use_solvent_mask'):
       import iotbx.cif
-      f = open(mask_cif_path, 'rb').read()
+      f = open(mask_cif_path, 'r').read()
       add = ""
       if not f.strip().startswith("data"): # PLATON sqf files don't start with the data block line
         add = "tmp"

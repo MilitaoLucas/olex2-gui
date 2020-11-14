@@ -1829,7 +1829,7 @@ ener = mf.kernel()"""
           lines = file.readlines()
         for line in lines:
           if "Error" in line:
-            print line
+            print(line)
         raise NameError('ELMOdb did not terminate normally!')
 
     if("g03" in args[0]):
@@ -3374,7 +3374,7 @@ OV.registerFunction(plot_cube,True,'NoSpherA2')
 def plot_cube_single(name):
   import olex_xgrid
   if not os.path.isfile(name):
-    print "Cube file does not exist!"
+    print("Cube file does not exist!")
     return
   olex.m("html.Update()")
   with open(name) as cub:
@@ -3424,7 +3424,7 @@ def plot_cube_single(name):
             x_run += 1
             y_run = 0
         if x_run > x_size:
-          print "ERROR! Mismatched indices while reading!"
+          print("ERROR! Mismatched indices while reading!")
           return
 
   cube = None
@@ -3517,7 +3517,7 @@ def plot_map_cube(map_type,resolution):
           charge = j
           break
       if charge == 200:
-        print "ATOM NOT FOUND!"
+        print("ATOM NOT FOUND!")
       cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n"%(charge,charge,positions[i][0]/a2b,positions[i][1]/a2b,positions[i][2]/a2b))
     for x in range(size[0]):
       for y in range(size[1]):
@@ -3535,7 +3535,7 @@ def plot_map_cube(map_type,resolution):
 
     cube.close()
 
-  print "Saved Fourier map successfully"
+  print("Saved Fourier map successfully")
 
 OV.registerFunction(plot_map_cube,True,'NoSpherA2')
 
