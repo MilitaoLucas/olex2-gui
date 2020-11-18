@@ -122,7 +122,7 @@ class reflections(object):
     miller_arrays = reflections_server.get_miller_arrays(None)
     for array in miller_arrays:
       array.info().source = reflection_file.encode("utf-8")
-    
+
     if hklf_code == 3:
       self.f_obs = miller_arrays[0]
       if hklf_matrix is not None and not hklf_matrix.is_unit_mx():

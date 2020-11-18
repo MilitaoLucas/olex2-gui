@@ -161,33 +161,31 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
+      #  default for DISP first
+      if self.reflections._merge < 4:
+        from cctbx.eltbx import wavelengths
+        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
+        self._xray_structure.set_inelastic_form_factors(
+          self.wavelength, inelastic_table)
+        for sc in self._xray_structure.scatterers():
+          custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
       if sfac is not None:
-        if len(sfac) > 0 and 'gaussian' not in list(sfac.items())[0][1]:
-          for element, sfac_dict in sfac.items():
-            if len(element) > 1:
-              element = element.upper()[0] + element.lower()[1:]
-            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
-        else:
-          from cctbx import eltbx
-          for element, sfac_dict in sfac.items():
-            if len(element) > 1:
-              element = element.upper()[0] + element.lower()[1:]
+        from cctbx import eltbx
+        for element, sfac_dict in sfac.items():
+          if len(element) > 1:
+            element = element.upper()[0] + element.lower()[1:]
+          if 'gaussian' in sfac_dict:
             custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
               sfac_dict['gaussian'][0],
               [-b for b in sfac_dict['gaussian'][1]],
               sfac_dict['gaussian'][2]))
-            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
+          custom_fp_fdps[element] = sfac_dict['fpfdp']
         self._xray_structure.set_custom_inelastic_form_factors(
           custom_fp_fdps)
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
         table=str(table),
         d_min=self.reflections.f_sq_obs.d_min())
-      if self.reflections._merge < 4 and len(custom_fp_fdps) == 0:
-        from cctbx.eltbx import wavelengths
-        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        self._xray_structure.set_inelastic_form_factors(
-          self.wavelength, inelastic_table)
 
     r_disp = self.olx_atoms.model.get('refine_disp')
     if r_disp:
@@ -507,7 +505,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
-    
+
     from libtbx import group_args
 
     t2 = time.time()
