@@ -511,7 +511,6 @@ class RunRefinementPrg(RunPrg):
           self.setupFiles()
         except Exception as err:
           sys.stderr.formatExceptionInfo()
-          print(err)
           self.endRun()
           return False
         if self.terminate:
@@ -520,7 +519,8 @@ class RunRefinementPrg(RunPrg):
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
         RunPrg.run(self)
-    except:
+    except Exception as err:
+      sys.stderr.formatExceptionInfo()
       self.terminate = True
     finally:
       if result == False:
