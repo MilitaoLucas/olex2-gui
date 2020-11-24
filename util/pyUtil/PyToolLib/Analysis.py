@@ -236,28 +236,6 @@ class Graph(ArgumentParser):
 
     return im
 
-  def get_unicode_characters(self, txt):
-    txt = txt.replace("two_theta", "2theta")
-    txt = txt.replace("stol", "(sin(theta)/lambda)")
-    txt = txt.replace("_sq", "^2")
-    txt = txt.replace("_star", "*")
-    txt = txt.replace("_", " ")
-    txt = txt.replace("lambda", chr(61548))
-    txt = txt.replace("theta", chr(61553))
-    txt = txt.replace("sigma", chr(61555))
-    txt = txt.replace("^2", chr(178))
-    txt = txt.replace("^3", chr(179))
-    txt = txt.replace(">", chr(61681))
-    txt = txt.replace("<", chr(61665))
-    txt = txt.replace("Fo2", "Fo%s" %(chr(178)))
-    txt = txt.replace("Fc2", "Fc%s" %(chr(178)))
-    txt = txt.replace("Sum", chr(8721))
-    #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
-    #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
-    txt = txt.replace("Fexp", "F%s" %(chr(2091)))
-    txt = txt.replace("Angstrom", chr(197))
-    return txt
-
   def make_x_y_plot(self):
     pass
 
@@ -1256,7 +1234,7 @@ class Graph(ArgumentParser):
       self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("y_label", "y Axis Label")
-    txt = OV.correct_rendered_text(self.get_unicode_characters(txt))
+    txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     size = (wX, wY)
     new = Image.new('RGB', size, self.fillColour)
@@ -1325,7 +1303,7 @@ class Graph(ArgumentParser):
       self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("x_label", "x Axis Label")
-    txt = OV.correct_rendered_text(self.get_unicode_characters(txt))
+    txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
     y = self.boxY  + self.imY * 0.01
@@ -1763,7 +1741,7 @@ class smtbx_refine_graph(refinement_graph):
     method = program.methods["LBFGS"]
     self.item = "olex2.refine"
     refinement_graph.__init__(self, program, method)
-    y_label = self.get_unicode_characters('Max shift in angstrom')
+    y_label = IT.get_unicode_characters('Max shift in angstrom')
     metadata={'labels':[], 'y_label':y_label}
     self.data.setdefault('max_shift', Dataset(metadata=metadata))
 
@@ -1791,7 +1769,7 @@ class ShelXL_graph(refinement_graph):
       self.data['mean_shift'].add_pair(self.cycle, mean_shift)
     elif "Max. shift = " in line:
       if 'max_shift' not in self.data:
-        y_label = self.get_unicode_characters('Max shift in Angstrom')
+        y_label = IT.get_unicode_characters('Max shift in Angstrom')
         metadata={'labels':[], 'y_label':y_label}
         self.data.setdefault('max_shift', Dataset(metadata=metadata))
       max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
@@ -1863,7 +1841,7 @@ class WilsonPlot(Analysis):
     top_original = top
     i = 0
     for txt in text:
-      unicode_txt = self.get_unicode_characters(txt)
+      unicode_txt = IT.get_unicode_characters(txt)
       wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
 
       colour = "#444444"
@@ -3079,21 +3057,24 @@ class HealthOfStructure():
   def get_info_from_hkl_stats(self):
     try:
       self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
-      if self.resolution_type == "full":
-        if olx.IsFileType("ires") == 'true':
-          try:
-            acta = float(olx.Ins("ACTA"))/2
-            if acta < self.theta_full:
-              self.theta_full = acta
-          except:
-            pass
-        # adjust to the dataset theta max if needed
-        theta_full1 = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
-        if theta_full1 < self.theta_full:
-          self.theta_full = theta_full1
-      self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(self.theta_full*2))
-      self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(self.theta_full*2,True))
-      self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(self.theta_full*2,False))
+      self.theta_max = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
+      if olx.IsFileType("ires") == 'true':
+        try:
+          od_theta = OV.get_cif_item('_reflns_odcompleteness_theta')
+          if od_theta:
+            self.theta_full = float(od_theta)
+          else:
+            self.theta_full = float(olx.Ins("ACTA"))/2
+          if self.theta_max < self.theta_full:
+            self.theta_full = self.theta_max
+        except:
+          pass
+      # adjust to the dataset theta max if needed
+      if self.theta_max < self.theta_full:
+        self.theta_full = self. theta_max
+      for x in (('full', self.theta_full), ('max', self.theta_max)):
+        self.hkl_stats['Completeness_laue_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,True))
+        self.hkl_stats['Completeness_point_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,False))
     except Exception as err:
       print(("Could not get info from hkl_stats: %s" %err))
 
@@ -3102,21 +3083,24 @@ class HealthOfStructure():
     try:
       wl = float(olx.Cif('_diffrn_radiation_wavelength'))
 
-      l = (('Completeness','_diffrn_measured_fraction_theta_%s'),
-           ('Completeness_laue','_diffrn_reflns_laue_measured_fraction_%s'),
-           ('Completeness_point','_diffrn_reflns_point_measured_fraction_%s'),
+      l = (('Completeness_laue_%s','_diffrn_measured_fraction_theta_%s'),
+           ('Completeness_laue_%s','_diffrn_reflns_laue_measured_fraction_%s'),
+           ('Completeness_point_%s','_diffrn_reflns_point_group_measured_fraction_%s'),
           )
-
-      for alias,cif_item in l:
-        _ = olx.Cif(cif_item%self.resolution_type)
-        if _ == "n/a":
-          self.hkl_stats[alias] = 0
-        else:
-          self.hkl_stats[alias] = float(_)
-
-      if olx.Cif('_diffrn_reflns_theta_max') != "n/a":
-        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
-        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+      for x in ('full', 'max'):
+        for alias,cif_item in l:
+          alias = alias%x
+          _ = olx.Cif(cif_item%x)
+          if _ == "n/a":
+            self.hkl_stats.setdefault(alias,  0)
+          else:
+            self.hkl_stats.setdefault(alias, float(_))
+      theta_max = olx.Cif('_diffrn_reflns_theta_max')
+      if theta_max == "n/a":
+        theta_max = olx.Cif('_diffrn_reflns_Laue_measured_fraction_max')
+      if theta_max != "n/a":
+        self.theta_max = float(theta_max)
+        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(2 * self.theta_max ,wl, True)
       else:
         self.hkl_stats['MinD'] = 0
 
@@ -3153,12 +3137,13 @@ class HealthOfStructure():
       return (False, True)
     self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
-      self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
       self.radiation = float(olx.xf.exptl.Radiation())
       self.theta_full = math.asin(self.radiation*0.6)*180/math.pi
+      self.theta_max = 0
       self.hkl_stats = olex_core.GetHklStat()
       if self.hkl_stats['DataCount'] == 0:
         self.hkl_stats = {}
+      self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
       self.resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
 
       if self.is_CIF:
@@ -3166,14 +3151,20 @@ class HealthOfStructure():
 
       else:
         self.get_info_from_hkl_stats()
-      point_c = self.hkl_stats.get('Completeness_point','unknown')
-      if point_c is int: point_c = "%.2f" %point_c
-      laue_c = self.hkl_stats.get('Completeness_laue','unknown')
-      if point_c is int: laue_c = "%.2f" %laue_c
 
-      l = ["- Point Group Completeness: %s" %point_c,
-           "- Laue Group Completeness: %s" %laue_c
-           ]
+      completnesses = []
+      for x in ('full', 'max'):
+        completnesses.append(self.hkl_stats.get('Completeness_point_%s' %x, 0.0)*100)
+        completnesses.append(self.hkl_stats.get('Completeness_laue_%s' %x, 0.0)*100)
+
+      ttheta = IT.get_unicode_characters(u"2\u0398")
+      l = ["- Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[1])]
+      if self.theta_full != self.theta_max:
+        l.append("Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[3]))
+      if not self.hkl_stats['IsCentrosymmetric']:
+        l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[0]))
+        if self.theta_full != self.theta_max:
+          l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
       target = "&#013;- ".join(l)
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
 
@@ -3200,19 +3191,6 @@ class HealthOfStructure():
 
     return (True, None)
 
-  def get_cctbx_completeness(self, dmin=None):
-    retVal = None
-    try:
-      from cctbx_olex_adapter import OlexCctbxAdapter
-      OCA = OlexCctbxAdapter()
-      f_sq_obs = OCA.reflections.f_sq_obs_filtered
-      retVal = f_sq_obs.completeness()
-      OV.SetParam('snum.hkl.completeness_full',retVal)
-    except Exception as err:
-      print(err)
-      pass
-    return retVal
-
   def get_cctbx_reflection_statistics_html(self):
     from reflection_statistics import OlexCctbxReflectionStats
     self.stats = OlexCctbxReflectionStats()
@@ -3222,10 +3200,6 @@ class HealthOfStructure():
   def summarise_HOS(self):
     d = {}
     txt = ""
-    #    item = "Completeness"
-    #    value = self.get_cctbx_completeness()
-    #    d.setdefault('Completeness', value)
-    #    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
@@ -3330,15 +3304,17 @@ class HealthOfStructure():
       if item == "MinD":
         _ = olx.xf.exptl.Radiation()
         if _.startswith("1.54"):
-          _ = "Cu"
+          _ = "Cu\\a"
         elif _.startswith("0.71"):
           _ = "Mo"
         elif _.startswith("1.34"):
           _ = "Ga"
         elif _.startswith("0.56"):
           _ = "Ag"
+        elif _.startswith("1.39"):
+          _ = "Cu\\b"
 
-        display += " (%s)" %_
+        display += " (%s)" % (IT.get_unicode_characters(_))
 
       value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
@@ -3479,7 +3455,6 @@ class HealthOfStructure():
         txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
           <tr><td><b>Twin component completeness (in P1): %s</b></td></tr></table>""" %(
             txt, ", ".join(["%.2f%%%%" %(x*100) for x in completeness]))
-    txt = txt.decode('utf-8')
     self.hos_text += txt
     OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())
 
@@ -3560,30 +3535,36 @@ class HealthOfStructure():
       draw.rectangle(box, fill=fill)
       value_display = value_display.replace("0.",".")
 
-
     if item == "Completeness":
-      iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
-      if iucr_value:
-        try:
-          value_raw = float(iucr_value)
-        except:
-          value_raw = 0
-        if value_raw:
-          value_display_extra = "%.0f%% (IUCr)" %(value_raw *100)
-      if not value_display_extra:
-        od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
-        if od_2theta:
-          od_2theta = float(od_2theta) * 2
-          value_display_extra = IT.get_unicode_characters(
-            "at 2Theta=%.0fdegrees" %(od_2theta))
-      laue = float(self.hkl_stats['Completeness_laue'])
-      laue_col = self.get_bg_colour('Completeness', laue)
+      laue_name = 'Completeness_laue_full'
+      point_name = 'Completeness_point_full'
+      if self.theta_full != self.theta_max:
+        if self.resolution_type == 'full':
+          if round(self.hkl_stats['Completeness_laue_max']*100) !=\
+             round(self.hkl_stats[laue_name]*100):
+            value_display_extra = "%.1f to 2Theta=%.1f" %(
+              self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2)
+        else:
+          laue_name = 'Completeness_laue_max'
+          point_name = 'Completeness_point_max'
+          if round(self.hkl_stats['Completeness_laue_full']*100) !=\
+             round(self.hkl_stats[laue_name]*100):
+            value_display_extra = "%.1f to 2Theta=%.1f" %(
+              self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2)
+
+      value_display = "%.1f" %(self.hkl_stats[laue_name]*100)
+      if value_display.endswith(".0"):
+        value_display = value_display[:-2]
+      laue = float(self.hkl_stats[laue_name])
+      laue_col = self.get_bg_colour('Completeness_laue', laue)
       if self.resolution_type == "full":
-        display = "%s(full)" %display
+        display = "To 2Theta=%.1f" %(self.theta_full*2)
       else:
-        display = "%s(max)" %display
+        display = "To 2Theta=%.1f" %(self.theta_max*2)
+      display = IT.get_unicode_characters(display)
+      value_display_extra = IT.get_unicode_characters(value_display_extra)
       ## Point Group value!
-      _ = int(boxWidth * (1-self.hkl_stats['Completeness_point']))
+      _ = int(boxWidth * (1-self.hkl_stats[point_name]))
       if _ == 0 and theoretical_val < 0.95:
         _ = 1
       if _ != 0:
@@ -3635,6 +3616,8 @@ class HealthOfStructure():
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)
 #      fill = '#555555'
+      value_display_extra = "2Theta=%.1f" %(self.theta_max*2)
+      value_display_extra = IT.get_unicode_characters(value_display_extra)
       fill = '#ffffff'
     else:
       fill = '#ffffff'
@@ -3670,7 +3653,6 @@ class HealthOfStructure():
 
 HOS_instance = HealthOfStructure()
 OV.registerFunction(HOS_instance.make_HOS)
-
 
 
 def title_replace(title):
