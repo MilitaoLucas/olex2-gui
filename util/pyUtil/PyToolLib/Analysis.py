@@ -3005,7 +3005,7 @@ class HealthOfStructure():
     self.scale = OV.GetParam('gui.internal_scale')
     self.scope = "hkl"
     self.supplied_cif = False
-
+    self.deg = u"\u00B0"
     self.im_cache = {}
     _ = ['Completeness', 'MeanIOverSigma','Rint']
     _ += ['_refine_ls_shift/su_max', '_refine_diff_density_max',
@@ -3145,6 +3145,7 @@ class HealthOfStructure():
         self.hkl_stats = {}
       self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
       self.resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
+      self.resolution_display = OV.GetParam("user.diagnostics.hkl.Completeness.resolution_display")
 
       if self.is_CIF:
         self.get_info_from_cif()
@@ -3542,25 +3543,30 @@ class HealthOfStructure():
         if self.resolution_type == 'full':
           if round(self.hkl_stats['Completeness_laue_max']*100) !=\
              round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.1f to 2Theta=%.1f" %(
-              self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2)
+            value_display_extra = "LM %.0f%% %.0f%s" %(
+              self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
         else:
           laue_name = 'Completeness_laue_max'
           point_name = 'Completeness_point_max'
           if round(self.hkl_stats['Completeness_laue_full']*100) !=\
              round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.1f to 2Theta=%.1f" %(
-              self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2)
+            value_display_extra = "LF %.0f%% %.0f%s" %(
+              self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
 
       value_display = "%.1f" %(self.hkl_stats[laue_name]*100)
-      if value_display.endswith(".0"):
-        value_display = value_display[:-2]
+      value_display = value_display.replace("100.0", "100")
+      #if value_display.endswith(".0"):
+        #value_display = value_display[:-2]
       laue = float(self.hkl_stats[laue_name])
       laue_col = self.get_bg_colour('Completeness_laue', laue)
       if self.resolution_type == "full":
-        display = "To 2Theta=%.1f" %(self.theta_full*2)
+        label = "Full"
+        if OV.get_cif_item('_reflns_odcompleteness_theta', None):
+           label = "CAP"
+        display = "%s %.1f%s" %(label, self.theta_full*2, self.deg)
       else:
-        display = "To 2Theta=%.1f" %(self.theta_max*2)
+        label = "Max"
+        display = "$s %.1f%s" %(label, self.theta_max*2, self.deg)
       display = IT.get_unicode_characters(display)
       value_display_extra = IT.get_unicode_characters(value_display_extra)
       ## Point Group value!
@@ -3602,21 +3608,21 @@ class HealthOfStructure():
       y = 1 * scale
 
     else:
-      font_size = 17
-      font_size_s = 10
+      font_size = 18
+      font_size_s = 11
       x = 2
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
     font = IT.registerFontInstance("Vera", int(font_size * scale))
     font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
-
+    
     ## ADD THE Key
 
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)
 #      fill = '#555555'
-      value_display_extra = "2Theta=%.1f" %(self.theta_max*2)
+      value_display_extra = "2Theta=%.1f%s" %(self.theta_max*2,self.deg)
       value_display_extra = IT.get_unicode_characters(value_display_extra)
       fill = '#ffffff'
     else:
@@ -3625,12 +3631,12 @@ class HealthOfStructure():
 
     ## ADD THE ACTUAL VALUE
 
-    y += 0
+    y += 1
     dx,dy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
     x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), OV.correct_rendered_text(value_display), font=font, fill=fill)
     if value_display_extra:
-      draw.text((0, y - 1 + dy/2), OV.correct_rendered_text(value_display_extra), font=font_s, fill="#ffffff")
+      draw.text((0, y + 3 + dy/2), OV.correct_rendered_text(value_display_extra), font=font_s, fill="#ffffff")
 
     _ = im.copy()
     _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
