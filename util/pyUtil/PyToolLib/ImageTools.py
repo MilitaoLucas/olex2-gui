@@ -1016,12 +1016,7 @@ class ImageTools(FontInstances):
           t = "%s" % word
       txt_l.append(t.strip())
     else:
-      w_counter = 0
-      while wX > max_width and w_counter < 100:
-        w_counter += 1
-        txt = txt.rstrip('...')
-        txt = txt[:-1] + "..."
-        wX, wY = draw.textsize(txt, font=font)
+      txt = self._shorten_text(txt, draw, 0, max_width, font)
 
     if "</p>" in txt:
       self.txt = txt
