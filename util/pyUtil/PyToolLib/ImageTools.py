@@ -1008,7 +1008,7 @@ class ImageTools(FontInstances):
       for word in txt_in:
         wX, wY = draw.textsize(word, font=font)
         wXT += wX
-        if wXT < max_width:
+        if wXT < max_width-1:
           t += " %s" % word
         else:
           txt_l.append(t.strip())

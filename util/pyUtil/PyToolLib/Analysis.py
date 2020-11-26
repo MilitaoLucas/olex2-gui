@@ -3539,7 +3539,7 @@ class HealthOfStructure():
     if item == "Completeness":
       laue_name = 'Completeness_laue_full'
       point_name = 'Completeness_point_full'
-      if self.theta_full != self.theta_max:
+      if round(self.theta_full*100) != round(self.theta_max*100):
         if self.resolution_type == 'full':
           if round(self.hkl_stats['Completeness_laue_max']*100) !=\
              round(self.hkl_stats[laue_name]*100):
