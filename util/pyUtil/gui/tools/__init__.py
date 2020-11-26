@@ -736,11 +736,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   t = '''
   <tr bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='33%%'>
+    <td width='32%%'>
       &nbsp;<b>a</b> = %(a)s
     </td>
 
-    <td width='34%%'>
+    <td width='35%%'>
       &nbsp;<b>&alpha;</b> = %(alpha)s&deg;
     </td>
 
@@ -751,11 +751,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
 
-    <td width='33%%'>
+    <td width='32%%'>
       &nbsp;<b>b</b> = %(b)s
     </td>
 
-    <td width='34%%'>
+    <td width='35%%'>
       &nbsp;<b>&beta;</b> = %(beta)s&deg;
     </td>
 
@@ -765,10 +765,10 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='34%%' >
+    <td width='32%%' >
       &nbsp;<b>c</b> = %(c)s
     </td>
-    <td width='33%%'>
+    <td width='35%%'>
       &nbsp;<b>&gamma;</b> = %(gamma)s&deg;
     </td>
     <td width='33%%'>
