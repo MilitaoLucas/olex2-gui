@@ -1036,7 +1036,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     for af in os.listdir(d):
       try:
         fw = float(af)
-        if abs(wavelength-fw) < 0.001:
+        if abs(wavelength-fw) < 0.01:
           afile = os.path.join(d, af)
           break
       except:
@@ -1059,14 +1059,16 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
           ts[5].split(':')[1].strip()))
     return ';'.join(rv)
 
-  if "sasaki" == table_name:
+  if "sasaki" == table_name or "auto" == table_name:
     from cctbx.eltbx import sasaki
     tables = sasaki
   elif "henke" == table_name:
     from cctbx.eltbx import henke
     tables = henke
   else:
-    raise Exception("Invalid table name")
+    print("Invalid table name %s, resetting to Sasaki" %table_name_)
+    from cctbx.eltbx import sasaki
+    tables = sasaki
   for e in elements:
     e = str(e)
     try:
