@@ -3543,22 +3543,19 @@ class HealthOfStructure():
         if self.resolution_type == 'full':
           if round(self.hkl_stats['Completeness_laue_max']*100) !=\
              round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "LM %.0f%% %.0f%s" %(
+            value_display_extra = "%.0f%% to %.1f%s" %(
               self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
         else:
           laue_name = 'Completeness_laue_max'
           point_name = 'Completeness_point_max'
           if round(self.hkl_stats['Completeness_laue_full']*100) !=\
              round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "LF %.0f%% %.0f%s" %(
+            value_display_extra = "%.0f%% to %.1f%s" %(
               self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
 
       value_display = "%.1f" %(self.hkl_stats[laue_name]*100)
       value_display = value_display.replace("100.0", "100")
-      #if value_display.endswith(".0"):
-        #value_display = value_display[:-2]
-      laue = float(self.hkl_stats[laue_name])
-      laue_col = self.get_bg_colour('Completeness_laue', laue)
+      value_display_extra = value_display_extra.replace("100.0", "100")
       if self.resolution_type == "full":
         label = "Full"
         if OV.get_cif_item('_reflns_odcompleteness_theta', None):
@@ -3566,32 +3563,29 @@ class HealthOfStructure():
         display = "%s %.1f%s" %(label, self.theta_full*2, self.deg)
       else:
         label = "Max"
-        display = "$s %.1f%s" %(label, self.theta_max*2, self.deg)
+        display = "%s %.1f%s" %(label, self.theta_max*2, self.deg)
       display = IT.get_unicode_characters(display)
       value_display_extra = IT.get_unicode_characters(value_display_extra)
-      ## Point Group value!
-      _ = int(boxWidth * (1-self.hkl_stats[point_name]))
-      if _ == 0 and theoretical_val < 0.95:
-        _ = 1
-      if _ != 0:
-        x = boxWidth - _
-        box = (x,0,boxWidth,boxHeight)
-        fill = laue_col
-        draw.rectangle(box, fill=fill)
-
+      # Laue bar
+      laue = self.hkl_stats[laue_name]
+      laue_col = self.get_bg_colour(item, laue)
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
       if _ != 0:
-        col = self.get_bg_colour(item, laue)
         right = int(laue * boxWidth)
-        #box = (x,int(boxHeight/2),x+right,boxHeight)
-        box = (0,int(boxHeight/2),right,boxHeight)
-        fill = col
-        draw.rectangle(box, fill=fill)
-
-      top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
-
+        box = (0,0,right,boxHeight)
+        draw.rectangle(box, fill=laue_col)
+      ## Point group bar
+      point = self.hkl_stats[point_name]
+      _ = int(boxWidth * (1-point))
+      if _ == 0 and theoretical_val < 0.95:
+        _ = 1
+      if _ != 0:
+        x = boxWidth - _
+        box = (0,int(boxHeight/2),x,boxHeight)
+        point_col = self.get_bg_colour(item, point)
+        draw.rectangle(box, fill=point_col)
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma(I)")
@@ -3616,7 +3610,7 @@ class HealthOfStructure():
 
     font = IT.registerFontInstance("Vera", int(font_size * scale))
     font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
-    
+
     ## ADD THE Key
 
     if item == "MinD":
