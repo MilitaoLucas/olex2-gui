@@ -1764,7 +1764,7 @@ user
           .type = float
         top = 0.15
           .type = float
-        href = HklStat
+        href = "spy.make_reflection_graph(completeness)>>hklstat"
           .type = str
         resolution = max *full
            .type = choice
