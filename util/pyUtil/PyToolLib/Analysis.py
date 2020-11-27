@@ -200,7 +200,7 @@ class Graph(ArgumentParser):
     txt = "self.graph_top"
     self.draw.text((250, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
 
-  def draw_key(self, keys_to_draw):
+  def draw_key(self, keys_to_draw, border=False):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
@@ -209,8 +209,9 @@ class Graph(ArgumentParser):
     colour = self.fillColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
-    box = (2,2,boxWidth-2,boxHeight-2)
-    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+    if border:
+      box = (2,2,boxWidth-2,boxHeight-2)
+      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -230,7 +231,7 @@ class Graph(ArgumentParser):
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 60
+      left = 40
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
@@ -2169,7 +2170,6 @@ class CompletenessPlot(Analysis):
     self.auto_axes = False
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
-    self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
     self.popout()
     if self.params.completeness.output_csv_file:
@@ -2178,6 +2178,7 @@ class CompletenessPlot(Analysis):
   def cctbx_completeness_statistics(self):
     from reflection_statistics import OlexCctbxGraphs
     params = self.params.completeness
+    self.make_empty_graph(axis_x = True)
     xy_plot = OlexCctbxGraphs(
       'completeness',
       reflections_per_bin=params.reflections_per_bin,
@@ -2190,6 +2191,29 @@ class CompletenessPlot(Analysis):
     x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     self.data.setdefault('dataset1', Dataset(x, y, metadata=metadata))
+
+    xy_plot = OlexCctbxGraphs(
+      'completeness',
+      reflections_per_bin=params.reflections_per_bin,
+      bin_range_as=params.resolution_as, merge=False).xy_plot
+    x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+    y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+    self.data.setdefault('dataset2', Dataset(x, y, metadata=metadata))
+
+    key = self.draw_key(({'type': 'marker',
+                         'number': 1,
+                         'label': OV.TranslatePhrase('Merged')},
+                        {'type':'marker',
+                         'number': 2,
+                         'label': OV.TranslatePhrase('Unmerged')},
+                        ))
+    self.im.paste(key,
+                  (int(self.graph_left + 10),
+                   int(self.graph_bottom-(key.size[1]+20)))
+                  )
+
+
+
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
@@ -3470,7 +3494,7 @@ class HealthOfStructure():
     font_name = 'Vera'
     value_display_extra = ""
     targetWidth = round(width/n)
-    targetHeight = round(OV.GetParam('gui.timage.h3.height'))
+    targetHeight = round(OV.GetParam('gui.timage.hos.height'))
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
     target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
