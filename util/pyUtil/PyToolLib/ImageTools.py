@@ -266,8 +266,8 @@ class ImageTools(FontInstances):
     txt = txt.replace("Fexp", "F%s" % (chr(2091)))
     txt = txt.replace("Angstrom", chr(197))
     txt = txt.replace("degrees", "\u00B0")
-    txt = txt.replace("alpha", unichr(945))
-    txt = txt.replace("beta", unichr(946))
+    txt = txt.replace("alpha", chr(945))
+    txt = txt.replace("beta", chr(946))
     return txt
 
 
