@@ -3149,7 +3149,6 @@ class HealthOfStructure():
 
       if self.is_CIF:
         self.get_info_from_cif()
-
       else:
         self.get_info_from_hkl_stats()
 
@@ -3558,7 +3557,7 @@ class HealthOfStructure():
       value_display_extra = value_display_extra.replace("100.0", "100")
       if self.resolution_type == "full":
         label = "Full"
-        if OV.get_cif_item('_reflns_odcompleteness_theta', None):
+        if not self.is_CIF and OV.get_cif_item('_reflns_odcompleteness_theta', None):
            label = "CAP"
         display = "%s %.1f%s" %(label, self.theta_full*2, self.deg)
       else:
