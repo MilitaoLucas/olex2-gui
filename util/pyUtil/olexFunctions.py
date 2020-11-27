@@ -22,6 +22,7 @@ except:
   olx.olex2_tag = None
   olx.olex2_svn_version = None
 
+gui_encoding = olx.app.OptValue('gui.encoding')
 
 HasGUI = olx.HasGUI() == 'true'
 if HasGUI:
@@ -1137,8 +1138,8 @@ class OlexFunctions(inheritFunctions):
   #Somehow on localised Linux Unicode does not work
   # may be wrongly assebled Python?
   def correct_rendered_text(self, t):
-    if sys.platform[:3] == 'lin':
-      return t.encode("utf-8")
+    if gui_encoding:
+      return t.encode(gui_encoding)
     return t
 
 def GetParam(variable, default=None):
