@@ -3104,6 +3104,11 @@ class HealthOfStructure():
       else:
         self.hkl_stats['MinD'] = 0
 
+      theta_full = olx.Cif('_diffrn_reflns_theta_full')
+      if theta_full == "n/a":
+        theta_full = olx.Cif('_diffrn_reflns_Laue_measured_fraction_full')
+      if theta_full != "n/a":
+        self.theta_full = float(theta_full)
       ##The following items can have alternate/deprecated identifiers
       l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
       self.hkl_stats[''] = 0
