@@ -658,7 +658,6 @@ def actaGuiDisplay(val=None):
       olex.m('delins acta')
     if val != "No ACTA":
       olex.m("addins %s" %val)
-
   else:
     val = olx.Ins('acta')
   if val == "n/a":
@@ -670,7 +669,6 @@ def actaGuiDisplay(val=None):
   olx.html.SetValue('REFINEMENT_ACTA', val)
   olx.html.SetBG('REFINEMENT_ACTA',refinement_acta_bg_colour())
   olx.SetVar('refinement_acta', val)
-
 OV.registerFunction(actaGuiDisplay)
 
 def refinement_acta_bg_colour():
@@ -690,7 +688,7 @@ def refinement_acta_bg_colour():
     retVal = gui_orange.hexadecimal
   else:
     try:
-      int(val)
+      float(val)
       retVal = gui_green.hexadecimal
       olx.html.SetValue('REFINEMENT_ACTA', 'ACTA %s' %val)
     except:
@@ -699,9 +697,7 @@ def refinement_acta_bg_colour():
 OV.registerFunction(refinement_acta_bg_colour)
 
 
-
 def refineDataMaker():
-
   txt = """
 <tr><td>R1(Fo > 4sig(Fo))</td><td>0.0511</td><td>R1(all data)</td><td>0.0690</td></tr>
 <tr><td>wR2</td><td>0.1138</td><td>GooF</td><td>1.16</td></tr>
