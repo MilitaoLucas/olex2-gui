@@ -564,11 +564,14 @@ class completeness_statistics_value(object):
 
 class completeness_statistics(object):
   def __init__(self, reflections, wavelength=None, reflections_per_bin=20,
-               bin_range_as="two_theta", verbose=False):
+               bin_range_as="two_theta", verbose=False, merge=True):
     assert bin_range_as in ["d_spacing", "d_star_sq", "two_theta", "stol", "stol_sq"]
     f_obs=reflections.f_obs
     f_sq_obs = reflections.f_sq_obs_merged
-    f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
+    if merge:
+      f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
+    else:
+      f_sq_obs = f_sq_obs.eliminate_sys_absent()
     f_obs = f_sq_obs.f_sq_as_f()
     binner = f_obs.complete_set().setup_binner(
       reflections_per_bin=reflections_per_bin,
