@@ -35,7 +35,7 @@ gui
     .type = str
   purple = #a245a2
     .type = colour
-  red = #b40000
+  red = #bd2010
     .type = colour
   green = #00b400
     .type = colour
@@ -151,7 +151,7 @@ gui
         .type = colour
       colour_grade3 = #d6a113
         .type = colour
-      colour_grade4 = #d62613
+      colour_grade4 = #c21a08
         .type = colour
       colour_grade5 = #660066
         .type = colour
@@ -582,7 +582,7 @@ gui
     h3{
       scale = 2
         .type = int
-      height = 19
+      height = 22
         .type = int
       width_adjust = 7
         .type = int
@@ -786,6 +786,5 @@ gui
       }
     }
   }
-
 }
 
