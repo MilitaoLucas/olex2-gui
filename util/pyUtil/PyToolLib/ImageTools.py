@@ -268,6 +268,8 @@ class ImageTools(FontInstances):
     txt = txt.replace("Fexp", "F%s" % (unichr(2091)))
     txt = txt.replace("Angstrom", unichr(197))
     txt = txt.replace("degrees", u"\u00B0")
+    txt = txt.replace("alpha", unichr(945))
+    txt = txt.replace("beta", unichr(946))
     return txt
 
 
@@ -1006,7 +1008,7 @@ class ImageTools(FontInstances):
       for word in txt_in:
         wX, wY = draw.textsize(word, font=font)
         wXT += wX
-        if wXT < max_width:
+        if wXT < max_width-1:
           t += " %s" % word
         else:
           txt_l.append(t.strip())
@@ -1014,12 +1016,7 @@ class ImageTools(FontInstances):
           t = "%s" % word
       txt_l.append(t.strip())
     else:
-      w_counter = 0
-      while wX > max_width and w_counter < 100:
-        w_counter += 1
-        txt = txt.rstrip('...')
-        txt = txt[:-1] + "..."
-        wX, wY = draw.textsize(txt, font=font)
+      txt = self._shorten_text(txt, draw, 0, max_width, font)
 
     if "</p>" in txt:
       self.txt = txt
