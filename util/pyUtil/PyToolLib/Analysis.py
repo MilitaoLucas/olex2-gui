@@ -200,7 +200,7 @@ class Graph(ArgumentParser):
     txt = "self.graph_top"
     self.draw.text((250, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
 
-  def draw_key(self, keys_to_draw):
+  def draw_key(self, keys_to_draw, border=False):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
@@ -209,8 +209,9 @@ class Graph(ArgumentParser):
     colour = self.fillColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
-    box = (2,2,boxWidth-2,boxHeight-2)
-    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+    if border:
+      box = (2,2,boxWidth-2,boxHeight-2)
+      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -230,7 +231,7 @@ class Graph(ArgumentParser):
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 60
+      left = 40
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
@@ -2169,7 +2170,6 @@ class CompletenessPlot(Analysis):
     self.auto_axes = False
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
-    self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
     self.popout()
     if self.params.completeness.output_csv_file:
@@ -2178,10 +2178,11 @@ class CompletenessPlot(Analysis):
   def cctbx_completeness_statistics(self):
     from reflection_statistics import OlexCctbxGraphs
     params = self.params.completeness
+    self.make_empty_graph(axis_x = True)
     xy_plot = OlexCctbxGraphs(
       'completeness',
       reflections_per_bin=params.reflections_per_bin,
-      bin_range_as=params.resolution_as).xy_plot
+      bin_range_as=params.resolution_as, non_anomalous=True).xy_plot
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
     metadata.setdefault("x_label", params.resolution_as)
@@ -2190,6 +2191,28 @@ class CompletenessPlot(Analysis):
     x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     self.data.setdefault('dataset1', Dataset(x, y, metadata=metadata))
+
+    if not olex_core.SGInfo()['Centrosymmetric']:
+      xy_plot = OlexCctbxGraphs(
+        'completeness',
+        reflections_per_bin=params.reflections_per_bin,
+        bin_range_as=params.resolution_as, non_anomalous=False).xy_plot
+      x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+      y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+      self.data.setdefault('dataset2', Dataset(x, y, metadata=metadata))
+
+      key = self.draw_key(({'type': 'marker',
+                          'number': 1,
+                          'label': OV.TranslatePhrase('Laue')},
+                          {'type':'marker',
+                          'number': 2,
+                          'label': OV.TranslatePhrase('Point group')},
+                          ))
+      self.im.paste(key,
+                    (int(self.graph_left + 10),
+                    int(self.graph_bottom-(key.size[1]+20)))
+                    )
+
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
@@ -2609,22 +2632,8 @@ class X_Y_plot(Analysis):
     print("Good things will come to those who wait")
 
   def run(self):
-#    filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
-#    filepath = ("%s/%s.csv" %(self.datadir,"s"))
-#    self.get_simple_x_y_pair_data_from_file(filepath)
-#    meta = data['meta']
-#    self.graphInfo["imSize"] = meta["imSize"]
-#    self.graphInfo["Title"] = meta["Title"]
-#    self.graphInfo["pop_html"] = meta["pop_html"]
-#    self.graphInfo["pop_name"] = meta["pop_name"]
-#    self.graphInfo["TopRightTitle"] = meta["TopRightTitle"]
-#    self.graphInfo["FontScale"] = meta["FontScale"]
-
-
-
     self.graphInfo.update(self.metadata)
     self.make_empty_graph(axis_x = True)
-
     i = 1
     for item in self.series:
       self.data.setdefault('dataset%s'%i,Dataset(x=item[0],
@@ -2650,26 +2659,15 @@ class HistoryGraph(Analysis):
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
-    #self.params.size_x, self.params.size_y = size
-    #self.make_empty_graph(draw_title=False)
-    #self.image_location = "history.png"
     self.green = OV.GetParam('gui.green').rgb[1]
     self.red = OV.GetParam('gui.red').rgb[0]
     self.blue = 0
     self.make_graph()
-    #self.popout()
-
 
   def make_graph(self):
     global PreviousHistoryNode
     bars = []
-
     node = self.tree.active_child_node
-    #if node == PreviousHistoryNode:
-    #  return
-    #else:
-    #  PreviousHistoryNode = node
-
     while node is not None:
       R1 = node.R1
       href = "spy.revert_history(%s)>>html.Update>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
@@ -2695,7 +2693,6 @@ class HistoryGraph(Analysis):
 
     y_scale_factor = self.params.y_scale_factor
 
-
     if len(bars) > 0:
       x = []
       y = []
@@ -2710,32 +2707,13 @@ class HistoryGraph(Analysis):
       self.draw_history_bars(dataset=data, y_scale_factor=y_scale_factor,
                      colour_function=self.get_bar_colours,
                      draw_bar_labels=False)
-      #label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
-      #try:
-        #label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
-      #except (ValueError, TypeError):
-        #pass
-      #self.draw_legend(label)
-    ##self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
-    #historyText = """\
-#<zimg name="HISTORY_IMAGE" border="0" src="%s">
-#%s
-#</zimg>
-#""" %(self.image_location, self.map_txt)
-    #OV.write_to_olex('history-info.htm',historyText)
 
   def get_bar_colours(self, bar_height):
     factor = self.params.y_scale_factor
-    #if self.i_bar == self.i_active_node:
-      #fill = (int(255*bar_height), int(255*(1.3-bar_height)), 0)
-      #self.decorated = True
-      ##fill = OV.GetParam('gui.grey').rgb
     if bar_height == factor:
       fill = (139, 0, 204)
     else:
       fill = (int(self.red*bar_height), int(self.green*(1.3-bar_height)), self.blue)
-    #if self.i_bar != self.i_active_node:
-      #fill = IT.adjust_colour(fill, luminosity=1.5)
     self.i_bar += 1
     return fill
 
@@ -3470,7 +3448,7 @@ class HealthOfStructure():
     font_name = 'Vera'
     value_display_extra = ""
     targetWidth = round(width/n)
-    targetHeight = round(OV.GetParam('gui.timage.h3.height'))
+    targetHeight = round(OV.GetParam('gui.timage.hos.height'))
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
     target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
