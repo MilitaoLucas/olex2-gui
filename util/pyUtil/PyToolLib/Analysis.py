@@ -54,6 +54,10 @@ PreviousHistoryNode = None
 global cache
 cache = {}
 
+global completeness_info_text
+completeness_info_text = {}
+
+
 if OV.HasGUI():
   import olex_gui
 
@@ -368,7 +372,7 @@ class Graph(ArgumentParser):
       i += 1
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
-                    x_intercept=None, write_text=False, R=None):
+                    x_intercept=None, write_text=False, R=None, rotate_text=False):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
     if not x_intercept:
@@ -473,16 +477,44 @@ class Graph(ArgumentParser):
           self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
     if write_text:
-      adj_x = 7
-      adj_y = 7
-      if x1 > self.max_x*self.scale_x/2:
-        wX, wY = IT.textsize(self.draw, OV.correct_rendered_text(write_text), font_size=self.font_size_small)
-        adj_x = -wX - 7
-      if y1 > self.max_y*self.scale_y/2:
-        adj_y = -20
-      top_left = (x1 + adj_x,y1 + adj_y)
-      IT.write_text_to_draw(
-        self.draw, write_text, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+      text = OV.correct_rendered_text(write_text)
+      wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
+      if rotate_text:
+        gap = 6
+        x = 0
+        y = 0
+        ins = rotate_text.split("_")
+        if ins[0] == "top":
+          y = int(self.graph_top) + gap
+        elif ins[0] == "bottom":
+          y = int(self.graph_bottom -gap - wX)
+        if ins[1] == "left":
+          x = int(self.graph_left) + wY
+        elif ins[1] == "right":
+          x = int(self.graph_right) - wY -gap
+        elif ins[1] == "lineright":
+          x = int(x1) + wY - 8
+        elif ins[1] == "lineleft":
+          x = int(x1) - wY - gap
+        if len(ins) > 2:
+          colour=ins[2]
+        else: colour=self.axislabelColour
+          
+        new = Image.new('RGB', (wX, wY), self.fillColour)
+        draw = ImageDraw.Draw(new)
+        draw.text((0, 0), text, font=self.font_tiny, fill=colour)
+        new = new.rotate(90, expand=1)
+        self.im.paste(new, (x, y))
+      else:
+        adj_x = 7
+        adj_y = 7
+        if x1 > self.max_x*self.scale_x/2:
+          adj_x = -wX - 7
+        if y1 > self.max_y*self.scale_y/2:
+          adj_y = -20
+        top_left = (x1 + adj_x,y1 + adj_y)
+        IT.write_text_to_draw(
+          self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
 
 
   def test_plotly(self):
@@ -2187,10 +2219,31 @@ class CompletenessPlot(Analysis):
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
     metadata.setdefault("x_label", params.resolution_as)
     metadata.setdefault("name", 'Completeness')
+
+    # ALL LAUE Info
+    deg = u"\u00B0"
+    ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
+    compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
+    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full) 
+    ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
+    compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
+    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max) 
+
+    point = completeness_info_text.get("Point Full", None)
+
+    if point:
+      compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
+      text_full += ", Point: %s%%" %(compl_full_point) 
+      compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
+      text_max += ", Point: %s%%" %(compl_max_point) 
+      
     self.metadata = metadata
     x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     self.data.setdefault('dataset1', Dataset(x, y, metadata=metadata))
+    self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
+    self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineright")
+
 
     if not olex_core.SGInfo()['Centrosymmetric']:
       xy_plot = OlexCctbxGraphs(
@@ -2609,7 +2662,7 @@ class item_vs_resolution_plot(Analysis):
 
     if self.item == "i_over_sigma_vs_resolution":
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution", rotate_text="top_lineleft")
 
     #if self.item == "cc_half_vs_resolution":
       #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
@@ -3141,14 +3194,20 @@ class HealthOfStructure():
         completnesses.append(self.hkl_stats.get('Completeness_laue_%s' %x, 0.0)*100)
 
       ttheta = IT.get_unicode_characters(u"2\u0398")
+      global completeness_info_text
       l = ["- Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[1])]
+      completeness_info_text['Laue Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[1] }
       if self.theta_full != self.theta_max:
         l.append("Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[3]))
+        completeness_info_text['Laue Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[3] }
       if not self.hkl_stats['IsCentrosymmetric']:
         l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[0]))
+        completeness_info_text['Point Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[0] }
         if self.theta_full != self.theta_max:
           l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
+          completeness_info_text['Point Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[2] }
       target = "&#013;- ".join(l)
+      
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
 
     except Exception as err:
@@ -3551,6 +3610,12 @@ class HealthOfStructure():
       # Laue bar
       laue = self.hkl_stats[laue_name]
       laue_col = self.get_bg_colour(item, laue)
+      
+      if self.resolution_type == "full":
+        completeness_info_text["Laue Full"]["colour"] = laue_col
+      if self.resolution_type == "max":
+        completeness_info_text["Laue Max"]["colour"] = laue_col
+        
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
@@ -3568,6 +3633,13 @@ class HealthOfStructure():
         box = (0,int(boxHeight/2),x,boxHeight)
         point_col = self.get_bg_colour(item, point)
         draw.rectangle(box, fill=point_col)
+
+      if self.resolution_type == "full":
+        completeness_info_text["Point Full"]["colour"] = point_col
+      if self.resolution_type == "max":
+        completeness_info_text["Point Max"]["colour"] = point_col
+
+
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma(I)")
