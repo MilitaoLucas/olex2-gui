@@ -54,10 +54,6 @@ PreviousHistoryNode = None
 global cache
 cache = {}
 
-global completeness_info_text
-completeness_info_text = {}
-
-
 if OV.HasGUI():
   import olex_gui
 
@@ -500,7 +496,7 @@ class Graph(ArgumentParser):
           colour=ins[2]
         else: colour=self.axislabelColour
           
-        new = Image.new('RGB', (wX, wY), self.fillColour)
+        new = Image.new('RGB', (wX+1, wY+1), self.fillColour)
         draw = ImageDraw.Draw(new)
         draw.text((0, 0), text, font=self.font_tiny, fill=colour)
         new = new.rotate(90, expand=1)
@@ -2203,9 +2199,31 @@ class CompletenessPlot(Analysis):
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
+    self.draw_fitlines()
     self.popout()
     if self.params.completeness.output_csv_file:
       self.output_data_as_csv()
+      
+  def draw_fitlines(self):
+    # ALL LAUE Info
+    deg = u"\u00B0"
+    completeness_info_text = HOS_instance.completeness_info_text
+    ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
+    compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
+    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full) 
+    ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
+    compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
+    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max) 
+    if not HOS_instance.hkl_stats['IsCentrosymmetric']:
+      compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
+      text_full += ", Point: %s%%" %(compl_full_point) 
+      compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
+      text_max += ", Point: %s%%" %(compl_max_point)
+    try:
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineleft")
+    except:
+      pass
 
   def cctbx_completeness_statistics(self):
     from reflection_statistics import OlexCctbxGraphs
@@ -2220,29 +2238,10 @@ class CompletenessPlot(Analysis):
     metadata.setdefault("x_label", params.resolution_as)
     metadata.setdefault("name", 'Completeness')
 
-    # ALL LAUE Info
-    deg = u"\u00B0"
-    ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
-    compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
-    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full) 
-    ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
-    compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
-    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max) 
-
-    point = completeness_info_text.get("Point Full", None)
-
-    if point:
-      compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
-      text_full += ", Point: %s%%" %(compl_full_point) 
-      compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
-      text_max += ", Point: %s%%" %(compl_max_point) 
-      
     self.metadata = metadata
     x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     self.data.setdefault('dataset1', Dataset(x, y, metadata=metadata))
-    self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
-    self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineright")
 
 
     if not olex_core.SGInfo()['Centrosymmetric']:
@@ -2265,7 +2264,6 @@ class CompletenessPlot(Analysis):
                     (int(self.graph_left + 10),
                     int(self.graph_bottom-(key.size[1]+20)))
                     )
-
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
@@ -3189,23 +3187,25 @@ class HealthOfStructure():
         self.get_info_from_hkl_stats()
 
       completnesses = []
+      self.completeness_info_text = {}
       for x in ('full', 'max'):
         completnesses.append(self.hkl_stats.get('Completeness_point_%s' %x, 0.0)*100)
         completnesses.append(self.hkl_stats.get('Completeness_laue_%s' %x, 0.0)*100)
 
       ttheta = IT.get_unicode_characters(u"2\u0398")
-      global completeness_info_text
+
+      self.completeness_info_text['Point Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[0] }
+      self.completeness_info_text['Laue Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[1] }
+      self.completeness_info_text['Point Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[2] }
+      self.completeness_info_text['Laue Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[3] }
+
       l = ["- Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[1])]
-      completeness_info_text['Laue Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[1] }
       if self.theta_full != self.theta_max:
         l.append("Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[3]))
-        completeness_info_text['Laue Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[3] }
       if not self.hkl_stats['IsCentrosymmetric']:
         l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[0]))
-        completeness_info_text['Point Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[0] }
         if self.theta_full != self.theta_max:
           l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
-          completeness_info_text['Point Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[2] }
       target = "&#013;- ".join(l)
       
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
@@ -3611,11 +3611,6 @@ class HealthOfStructure():
       laue = self.hkl_stats[laue_name]
       laue_col = self.get_bg_colour(item, laue)
       
-      if self.resolution_type == "full":
-        completeness_info_text["Laue Full"]["colour"] = laue_col
-      if self.resolution_type == "max":
-        completeness_info_text["Laue Max"]["colour"] = laue_col
-        
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
@@ -3633,13 +3628,6 @@ class HealthOfStructure():
         box = (0,int(boxHeight/2),x,boxHeight)
         point_col = self.get_bg_colour(item, point)
         draw.rectangle(box, fill=point_col)
-
-      if self.resolution_type == "full":
-        completeness_info_text["Point Full"]["colour"] = point_col
-      if self.resolution_type == "max":
-        completeness_info_text["Point Max"]["colour"] = point_col
-
-
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma(I)")
