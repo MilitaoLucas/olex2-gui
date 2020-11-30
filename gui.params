@@ -586,7 +586,7 @@ gui
     h3{
       scale = 2
         .type = int
-      height = 22
+      height = 19
         .type = int
       width_adjust = 7
         .type = int
