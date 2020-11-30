@@ -102,7 +102,7 @@ class Sir(object):#{{{
 #                'P-43m', 'F-43m', 'I-43m', 'P-43n', 'F-43c', 'I-43d', 'Pm-3m', 'Pn-3n', 'Pm-3n',
 #                'Pn-3m', 'Fm-3m', 'Fm-3c', 'Fd-3m', 'Fd-3c', 'Im-3m', 'Ia-3d')
 
-        for item in data.items():
+        for item in list(data.items()):
             invalid_val = 'Invalid value "%s" for Key "%s".\nDeleting Key %s!'%(item[1], item[0], item[0])
 
             if item[0] in ('CHECK', 'NOSIGMA', 'FOBS', 'FOSQUARED',
@@ -110,7 +110,7 @@ class Sir(object):#{{{
                 if item[1] in validTrue:
                     self._data[item[0]] = True
                 else:
-                    print invalid_val
+                    print(invalid_val)
                     del self._data[item[0]]
 
             elif item[0] in ('RHOMAX', 'RESMAX', 'RECORD', 'NREFLECTION',
@@ -118,7 +118,7 @@ class Sir(object):#{{{
                 try:
                     val = float(item[1])
                 except ValueError:
-                    print invalid_val
+                    print(invalid_val)
                     del self._data[item[0]]
                 else:
                     self._data[item[0]] = val
@@ -144,38 +144,38 @@ class Sir(object):#{{{
                     sg = sgtbx.space_group_info(str(item[1])).type().lookup_symbol()
                     self._data[item[0]] = sg
                 except RuntimeError:
-                    print invalid_val
+                    print(invalid_val)
                     del self._data[item[0]]
 
             elif item[0] in ('WAVE') and item[1] not in ('Mo', 'Cu'):
-                print invalid_val
+                print(invalid_val)
                 del self._data[item[0]]
 
             elif item[0] in ('CELL', 'ERRORS', 'CONTENTS', 'SFACTORS', 'ANOMALOUS',
-                    'FORMAT', 'REFLECTIONS') and type(item[1]) not in (str,unicode):
-                    print invalid_val
+                    'FORMAT', 'REFLECTIONS') and type(item[1]) not in (str,str):
+                    print(invalid_val)
                     del self._data[item[0]]
 
-        for item in inv.items():
+        for item in list(inv.items()):
             invalid_val = 'Invalid value "%s" for Key "%s".\nDeleting Key %s!'%(item[1], item[0], item[0])
 
             if item[0] in ('COCHRAN', 'NQUARTETS') and item[1] is not True:
                 if item[1] in validTrue:
                     self._invariants[item[0]] = True
                 else:
-                    print invalid_val
+                    print(invalid_val)
                     del self._invariants[item[0]]
 
             elif item[0] in ('GMIN'):
                 try:
                     val = float(item[1])
                 except ValueError:
-                    print invalid_val
+                    print(invalid_val)
                     del self._invariants[item[0]]
                 else:
                     self._invariants[item[0]] = val
 
-        for item in phase.items():
+        for item in list(phase.items()):
             invalid_val = 'Invalid value "%s" for Key "%s".\nDeleting Key %s!'%(item[1], item[0], item[0])
 
             if item[0] in ('TANGENT', 'PATTERSON', 'RELAX', 'UNRELAX', 'NOLSQ',
@@ -183,7 +183,7 @@ class Sir(object):#{{{
                 if item[1] in validTrue:
                     self._phase[item[0]] = True
                 else:
-                    print invalid_val
+                    print(invalid_val)
                     del self._phase[item[0]]
 
             elif item[0] in ('ITERATION','TRIAL', 'STRIAL', 'PEAKS', 'CYCLE',
@@ -191,21 +191,21 @@ class Sir(object):#{{{
                 try:
                     val = float(item[1])
                 except ValueError:
-                    print invalid_val
+                    print(invalid_val)
                     del self._phase[item[0]]
                 else:
                     self._phase[item[0]] = val
 
             elif item[0] in ('SIZE') and str(item[1]).lower() not in sizestr:
-                    print invalid_val
+                    print(invalid_val)
                     del self._phase[item[0]]
 
             elif item[0] in ('FRAGMENT') and not isFileHasExt(item[1],'fra'):
-                    print invalid_val
+                    print(invalid_val)
                     del self._phase[item[0]]
 
-            elif item[0] in ('BLOCK') and type(item[1]) not in (str,unicode):
-                    print invalid_val
+            elif item[0] in ('BLOCK') and type(item[1]) not in (str,str):
+                    print(invalid_val)
                     del self._phase[item[0]]
 
         return True
@@ -219,16 +219,16 @@ class Sir(object):#{{{
         elif sirgui == False:
             self._sirgui = False
         else:
-            print 'Invalid value for GUI: True or False'
+            print('Invalid value for GUI: True or False')
 #}}}
     def setDirectives(self, **kwargs):#{{{
         '''
         Sets a Dict of SIR directives
         '''
-        for value in kwargs.values():
-            if type(value) not in (unicode,str,int,float,bool):
-                print type(value)
-                print 'ERROR: Invalid type for Value %s!'%value
+        for value in list(kwargs.values()):
+            if type(value) not in (str,str,int,float,bool):
+                print(type(value))
+                print('ERROR: Invalid type for Value %s!'%value)
                 return False
         data = kwargs.copy()
         invariants = kwargs.copy()
@@ -244,7 +244,7 @@ class Sir(object):#{{{
                              'TANGENT', 'PATTERSON', 'TRIAL', 'STRIAL',
                              'RELAX', 'UNRELAX', 'PEAKS', 'NOLSQ',
                              'CYCLE', 'RESIDUAL', 'FRAGMENT', 'RECYCLE')
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             if key.upper() not in valid_data_direc:
                 del data[key]
             else:
@@ -262,7 +262,7 @@ class Sir(object):#{{{
 
             if key.upper() not in valid_data_direc and key.upper() not in\
             valid_inv_direc and key.upper() not in valid_phase_direc:
-                print 'Key %s not allowed in any directive!\nDeleting %s!'%(key.upper(), key.upper())
+                print('Key %s not allowed in any directive!\nDeleting %s!'%(key.upper(), key.upper()))
 
         self._data.update(data)
         self._invariants.update(invariants)
@@ -284,11 +284,11 @@ class Sir(object):#{{{
         inv = self._invariants.copy()
         phase = self._phase.copy()
         for arg in args:
-            if arg.upper() in data.keys():
+            if arg.upper() in list(data.keys()):
                 del self._data[arg.upper()]
-            if arg.upper() in inv.keys():
+            if arg.upper() in list(inv.keys()):
                 del self._invariants[arg.upper()]
-            if arg.upper() in phase.keys():
+            if arg.upper() in list(phase.keys()):
                 del self._phase[arg.upper()]
         return True
 #}}}
@@ -309,21 +309,21 @@ class Sir(object):#{{{
         SIROUT.write('%INIT\n')
         if not data == None:
             SIROUT.write('%DATA\n')
-            for key in data.keys():
+            for key in list(data.keys()):
                 if data[key] == True and isinstance(data[key], bool):
                     SIROUT.write('\t%s\n'%(key))
                 else:
                     SIROUT.write('\t%s %s\n'%(key, data[key]))
         if not invariants == None:
             SIROUT.write('%INVARIANTS\n')
-            for key in invariants.keys():
+            for key in list(invariants.keys()):
                 if invariants[key] == True and isinstance(invariants[key], bool):
                     SIROUT.write('\t%s\n'%(key))
                 else:
                     SIROUT.write('\t%s %s\n'%(key, invariants[key]))
         if not phase == None:
             SIROUT.write('%PHASE\n')
-            for key in phase.keys():
+            for key in list(phase.keys()):
                 if phase[key] == True and isinstance(phase[key], bool):
                     SIROUT.write('\t%s\n'%(key))
                 else:
@@ -342,7 +342,7 @@ class Sir(object):#{{{
                 and filepath.lower().split('.')[-1] in ext
 
         if not isFileHasExt(sirfile, 'sir'):
-            print 'Invalid Path for Sir Input'
+            print('Invalid Path for Sir Input')
             return False
         if self._sirgui:
             olx.Exec('sir%s'%sirversion, sirfile, o=True)
@@ -361,12 +361,12 @@ if __name__ == '__main__':
     oxs = Sir()
     (data, inv, phase) = oxs.getDirectives()
     directs = {'cell':'7 7 7 90 90 90', 'SPACEGROUP':'P 5', 'contents':'C H 4',
-                      'blobb':'bllla', 'Resmax':u'8', 'size':'M', 'rhomax':'1',
-                      'reflections':u'tästee.hkl', 'check':1, 'gmin':0.5, 'cochran':True}
+                      'blobb':'bllla', 'Resmax':'8', 'size':'M', 'rhomax':'1',
+                      'reflections':'tästee.hkl', 'check':1, 'gmin':0.5, 'cochran':True}
     oxs.setDirectives(**directs)
-    print 'DATA',data
-    print 'INV',inv
-    print 'PHASE',phase
+    print('DATA',data)
+    print('INV',inv)
+    print('PHASE',phase)
     oxs.write('%s'%name,data,inv,phase)
 #    for key in data.keys():
 #        if data[key] == True:

@@ -7,7 +7,6 @@ This file WILL be updated by us
 
 scripts = [
   'OlexPlaton',
-  'OlexMail',
   'OlexCheckCIF',
   'OlexCDS',
   'flipsmall',
@@ -19,7 +18,6 @@ scripts = [
 
 if olx.HasGUI().lower() == "true":
   scripts += ['Olex2CCDC',
-              'Tutorials',
               'XPlain',
               'ZSGH'
               ]
@@ -29,5 +27,5 @@ if olx.HasGUI().lower() == "true":
 for script in scripts:
   try:
     __import__(script)
-  except Exception, ex:
-    print "Import from userScripts.py failed: %s" %ex
+  except Exception as ex:
+    print("Import from userScripts.py failed: %s" %ex)

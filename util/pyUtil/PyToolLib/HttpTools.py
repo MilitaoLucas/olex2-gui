@@ -8,7 +8,7 @@ auto_update = True
 use_proxy_settings = True
 proxy = None
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import os
 import olx
 
@@ -17,33 +17,33 @@ def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
     proxies = {'http': proxy}
   else:
     proxies = {}
-  opener = urllib2.build_opener(
-    urllib2.ProxyHandler(proxies))
+  opener = urllib.request.build_opener(
+    urllib.request.ProxyHandler(proxies))
   return opener.open(url,values, http_timeout)
 
 
-def make_url_call(url, values, http_timeout = 5):
+def make_url_call(url, values=None, http_timeout = 5):
   global use_proxy_settings
   global proxy
   localhost = False
-  if isinstance(url, urllib2.Request):
+  if isinstance(url, urllib.request.Request):
     localhost = 'localhost' in url.get_host().lower()
-  elif isinstance(url, basestring):
+  elif isinstance(url, str):
     localhost = 'localhost' in url
   if use_proxy_settings and not localhost:
     try:
       read_usettings()
       res = make_url_call_with_proxy(url, proxy, values, http_timeout)
-    except urllib2.URLError: #try system settings
+    except urllib.error.URLError: #try system settings
       try:
-        res = urllib2.urlopen(url,values, http_timeout)
+        res = urllib.request.urlopen(url,values, http_timeout)
         use_proxy_settings = False
       except Exception:
         raise
   else:
     try:
-      res = urllib2.urlopen(url,values, http_timeout)
-    except urllib2.URLError: #try setting file
+      res = urllib.request.urlopen(url,values, http_timeout)
+    except urllib.error.URLError: #try setting file
       try:
         read_usettings()
         res = make_url_call_with_proxy(url, proxy, values, http_timeout)

@@ -32,9 +32,9 @@ class CcdcSubmit():
       res = self.make_pop_box()
       if res != 1:
         f = "Cancel: Nothing has been sent to the CCDC"
-        print f
+        print(f)
         return False
-      print "Sending to the CCDC now..."
+      print("Sending to the CCDC now...")
 
       self.zip_files()
 
@@ -64,25 +64,25 @@ class CcdcSubmit():
           response = HttpTools.make_url_call(url, self.params)
           retval = True
           break
-        except Exception, err:
+        except Exception as err:
           err_msg = err
           retval = False
           continue
 
       if retval == False:
-        print "The data submission has failed. Please try again."
-        print "Details:"
-        print err_msg
+        print("The data submission has failed. Please try again.")
+        print("Details:")
+        print(err_msg)
         return False
 
       msg = response.read()
       if 'successfully' in msg:
-        print "The structure has been submitted. Please check your e-mail for further information"
+        print("The structure has been submitted. Please check your e-mail for further information")
         return True
       else:
-        print "Something has gone wrong with this submission. Please try again."
-        print "Details:"
-        print msg
+        print("Something has gone wrong with this submission. Please try again.")
+        print("Details:")
+        print(msg)
         return False
 
     finally:
@@ -112,11 +112,11 @@ class CcdcSubmit():
         self.email = userDictionaries.people.getPersonInfo(id, 'email')
         #http://code.activestate.com/recipes/65215-e-mail-address-validation/
         if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", self.email):
-          print "Failed to validate e-mail address"
+          print("Failed to validate e-mail address")
           return False
         self.address = userDictionaries.people.getPersonInfo(id, 'address')
     else:
-      print "Please supply at least a contact author name, address and e-mail!"
+      print("Please supply at least a contact author name, address and e-mail!")
       olex.m("html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
       olex.m("html.ItemState cbtn* 1 cbtn-report 2 *settings 0 report-settings 1")
       olex.m("html.ItemState metadata-report-settings-h3-publication 1")

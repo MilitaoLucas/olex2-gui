@@ -1,4 +1,4 @@
-from __future__ import division
+
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
 import glob, os
@@ -580,7 +580,7 @@ image="%(image)s"
         most_recent_reflection_file = g[0]
         show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(g[0])))
       else:
-        print "There is no reflection file or the reflection file is not accessible"
+        print("There is no reflection file or the reflection file is not accessible")
         self.abort = True
         return
     most_recent_reflection_file = ""	

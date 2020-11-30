@@ -117,7 +117,7 @@ def resolve_all(idx):
   idx = int(idx)
   key = conflict_d['sources'][idx]
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
-  for i,v in conflict_d.iteritems():
+  for i,v in conflict_d.items():
     if not i.startswith('_'): continue
     l.append(i)
     OV.set_cif_item(i, v[key])
@@ -191,7 +191,7 @@ def conflicts(popout='auto', d=None):
       txt += gett('conflicts_header_row_start')
 
       col_w = int(70/(number_of_files+1))
-      for i in xrange(number_of_files+1):
+      for i in range(number_of_files+1):
         if i == number_of_files:
           txt += gett('conflicts_user_value_header')%gui_d
           break
@@ -254,8 +254,8 @@ def conflicts(popout='auto', d=None):
         txt += '''</tr>''' #CONFLICT TR CLOSE
       txt += '''</td></tr></table>'''
 
-  except Exception, err:
-    print err
+  except Exception as err:
+    print(err)
     return 0
   make_no_conflicts_gui(resolved, conflict_count > 0)
   if conflict_count == 0:

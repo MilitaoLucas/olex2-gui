@@ -62,15 +62,15 @@ def adjust_skin_luminosity():
               OV.SetParam('%s.%s' %(scope,name),
                 IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('%s.%s_L' %(scope,name))))
           #print "%s.%s: %s" %(scope, name, OV.GetParam('%s.%s' %(scope,name)))
-      except Exception, ex:
-        print ex
+      except Exception as ex:
+        print(ex)
         pass
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
 
 def SetGrad():
   l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
   v = []
-  for i in xrange(4):
+  for i in range(4):
     val = OV.GetParam('gui.grad_%s' %(l[i])).hexadecimal
     if not val:
       val = "#ffffff"
@@ -166,7 +166,7 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
   if timing:
-    print "After 'Reading/Saving PHIL Stuff': %.2f s" % (time.time() - t)
+    print("After 'Reading/Saving PHIL Stuff': %.2f s" % (time.time() - t))
 
 
 def export_parameters(load_phil=True):
@@ -248,7 +248,7 @@ def export_parameters(load_phil=True):
 
 
   if timing:
-    print "export_parameters took %.4fs" %(time.time()-t)
+    print("export_parameters took %.4fs" %(time.time()-t))
 OV.registerFunction(export_parameters,False,'skin')
 
 
@@ -310,7 +310,7 @@ class Skin():
 
     if timing:
       t = time.time()
-      print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+      print("After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
     self.TI.run_timage(force_images=False)
@@ -321,12 +321,12 @@ class Skin():
 
     if timing:
       t = time.time()
-      print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+      print("After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
     if timing:
       t = time.time()
-      print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+      print("After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
     if not internal_change and not new_width:
@@ -344,12 +344,12 @@ class Skin():
 
     if timing:
       t = time.time()
-      print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+      print("After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
     if timing:
       t = time.time()
-      print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+      print("After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2)))
       t2 = t
 
     export_parameters(load_phil=False)
@@ -361,8 +361,8 @@ class Skin():
       for item in olx.VFSDependent:
         try:
           item.load_ressources()
-        except Exception, err:
-          print "Could not load ressources for '%s': %s" %(item, err)
+        except Exception as err:
+          print("Could not load ressources for '%s': %s" %(item, err))
     except:
       pass
 
@@ -371,8 +371,8 @@ class Skin():
       for plugin in olx.InstalledPlugins:
         try:
           plugin.setup_gui(force=True)
-        except Exception, err:
-          print "Could not update images for plugin '%s': %s" %(plugin, err)
+        except Exception as err:
+          print("Could not update images for plugin '%s': %s" %(plugin, err))
     except:
       pass
 
@@ -393,7 +393,7 @@ class Skin():
     except ImportError:
       #print "pyTools -- Using Default PilTools for Tool: %s" %tool
       import PilTools
-    except Exception, err:
+    except Exception as err:
       raise
     self.GuiSkinChanger_instance = PilTools.GuiSkinChanger()
     self.GuiSkinChanger_instance.run_GuiSkinChanger()
@@ -411,7 +411,7 @@ class Skin():
 #      a = PilTools.timage()
       self.TI.run_timage(force_images=True)
       if timing:
-        print "run_skin timage took %.4fs" %(time.time()-t)
+        print("run_skin timage took %.4fs" %(time.time()-t))
     elif f == 'sNumTitle':
       try:
         data_idx = olx.xf.CurrentData() + olx.FileExt()
@@ -420,7 +420,7 @@ class Skin():
       if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\
          and  self.sg == olex.f('sg()') and self.data_index == data_idx:
         if timing:
-          print "run_skin sNumTitle took %.4fs (not run)" %(time.time()-t)
+          print("run_skin sNumTitle took %.4fs (not run)" %(time.time()-t))
         return
       items = {}
       sNum = items.setdefault("sNum", OV.FileName())
@@ -430,7 +430,7 @@ class Skin():
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
 
       if timing:
-        print "run_skin sNumTitle took %.4fs" %(time.time()-t)
+        print("run_skin sNumTitle took %.4fs" %(time.time()-t))
       self.sNum = OV.FileName()
       self.sg = olex.f('sg()')
       try:
@@ -443,7 +443,7 @@ class Skin():
       self.TI.run_timage()
       self.sNumTitle_instance.run_sNumTitle(force=True)
       if timing:
-        print "run_skin change took %.4fs" %(time.time()-t)
+        print("run_skin change took %.4fs" %(time.time()-t))
 
     olx.FlushFS()
 
@@ -523,7 +523,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
     return
   if "@" in colour:
-    print "Please do not use the '@' character in colour names"
+    print("Please do not use the '@' character in colour names")
     return
 
   if not colour:

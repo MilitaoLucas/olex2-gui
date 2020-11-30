@@ -178,7 +178,7 @@ class HARp(PT):
 
 
   def set_defaults(self):
-    for k,v in self.options.iteritems():
+    for k,v in self.options.items():
       olx.SetVar(k, v[0])
 
   def launch(self):
@@ -238,7 +238,7 @@ class HARp(PT):
       output_cif = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
       if os.path.exists(job_cif) and os.path.exists(output_cif):
         if "%0.f" %os.path.getctime(job_cif) == "%0.f" %os.path.getctime(output_cif):
-          print "%s is up to date" %self.jobs[i].name
+          print("%s is up to date" %self.jobs[i].name)
           self.jobs[i].is_copied_back = True
         else:
           self.jobs[i].is_copied_back = False
@@ -294,7 +294,7 @@ class HARp(PT):
                 self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
                 self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
               except:
-                print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
+                print("Something went wrong during copying back the results of job %s" %self.jobs[i].name)
                 continue
             else:
               self.jobs[i].result_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
@@ -343,12 +343,12 @@ class HARp(PT):
     import math
 #    ''' Tries to complete what it can from the existing IAM cif'''
     if not os.path.exists(har_cif):
-      print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+      print("The file %s does not exist. It doesn't look like HAR has been run here." %har_cif)
       return
     iam_cif = os.path.join(har_cif.rstrip("_HAR.cif") + ".cif")
     print(iam_cif)
     if not os.path.exists(iam_cif):
-      print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+      print("The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif)
       return
   
     hkl_stats = olex_core.GetHklStat()
@@ -413,7 +413,7 @@ class HARp(PT):
           else:
             mm = _
         if not mm:
-          print "No Data"
+          print("No Data")
           continue
         raw_data = mm.strip()
         raw_data = raw_data.split("\n")
@@ -433,7 +433,7 @@ class HARp(PT):
         d[name].setdefault('ys', ys)
         d[name].setdefault('text', text)
       else:
-        print "Could not evaluate REGEX %s." %repr(regex_t)
+        print("Could not evaluate REGEX %s." %repr(regex_t))
 
 
     makePlotlyGraph(d)
@@ -442,17 +442,17 @@ class HARp(PT):
 
     try:
       import plotly
-      print plotly.__version__  # version >1.9.4 required
+      print(plotly.__version__)  # version >1.9.4 required
       from plotly.graph_objs import Scatter, Layout
       import numpy as np
       import plotly.plotly as py
       import plotly.graph_objs as go
     except:
-      print "Please install plot.ly for python!"
+      print("Please install plot.ly for python!")
       return
 
     data = []
-    print len(d)
+    print(len(d))
     for trace in d:
       _ = go.Scatter(
         x = d[trace]['xs'],
@@ -514,7 +514,7 @@ def getAnalysisPlotData(input_f):
         else:
           mm = _
       if not mm:
-        print "No Data"
+        print("No Data")
         continue
       raw_data = mm.strip()
       raw_data = raw_data.split("\n")
@@ -534,7 +534,7 @@ def getAnalysisPlotData(input_f):
       d[name].setdefault('ys', ys)
       d[name].setdefault('text', text)
     else:
-      print "Could not evaluate REGEX %s." %repr(regex_t)
+      print("Could not evaluate REGEX %s." %repr(regex_t))
 
 
   makePlotlyGraph(d)
@@ -543,17 +543,17 @@ def makePlotlyGraph(d):
 
   try:
     import plotly
-    print plotly.__version__  # version >1.9.4 required
+    print(plotly.__version__)  # version >1.9.4 required
     from plotly.graph_objs import Scatter, Layout
     import numpy as np
     import plotly.plotly as py
     import plotly.graph_objs as go
   except:
-    print "Please install plot.ly for python!"
+    print("Please install plot.ly for python!")
     return
 
   data = []
-  print len(d)
+  print(len(d))
   for trace in d:
     _ = go.Scatter(
       x = d[trace]['xs'],
@@ -623,7 +623,7 @@ class Job(object):
 
   def save(self):
     with open(os.path.join(self.full_dir, "job.options"), "w") as f:
-      for k, v in HARp_instance.options.iteritems():
+      for k, v in HARp_instance.options.items():
         val = olx.GetVar(k, None)
         if val is not None:
           f.write("%s:%s\n" %(k, val))
@@ -777,7 +777,7 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       fp_fdps = {}
       wavelength = olex_refinement_model['exptl']['radiation']
       if sfac is not None:
-        for element, sfac_dict in sfac.iteritems():
+        for element, sfac_dict in sfac.items():
           custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
       asu = olex_refinement_model['aunit']
       for residue in asu['residues']:
@@ -786,11 +786,11 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
           if element_type not in fp_fdps:
             fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
             fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
+      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.items()])
       args.append("-dispersion")
       args.append('%s' %disp_arg)
       
-    for k,v in HARp_instance.options.iteritems():
+    for k,v in HARp_instance.options.items():
       val = olx.GetVar(k, None)
       if len(v) == 2:
         if val is not None:
@@ -840,11 +840,11 @@ def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''
   har_cif = os.path.join(OV.FilePath(), OV.FileName() + ".cif")
   if not os.path.exists(har_cif):
-    print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+    print("The file %s does not exist. It doesn't look like HAR has been run here." %har_cif)
     return
   iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif")
   if not os.path.exists(iam_cif):
-    print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+    print("The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif)
     return
 
   hkl_stats = olex_core.GetHklStat()

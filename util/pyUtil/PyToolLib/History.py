@@ -68,7 +68,7 @@ class History(ArgumentParser):
       t = time.time()
     self._make_history_bars()
     if timing:
-      print time.time() - t
+      print(time.time() - t)
     self.saveHistory()
     return tree.active_node.name
 
@@ -138,7 +138,7 @@ class History(ArgumentParser):
     if self.strdir:
       variableFunctions.Pickle(tree,self.history_filepath)
     if timing:
-      print "saveHistory took %4fs" %(time.time() - t)
+      print("saveHistory took %4fs" %(time.time() - t))
 
   def loadHistory(self):
     if timing:
@@ -164,16 +164,16 @@ class History(ArgumentParser):
 
       tree.upgrade()
 
-      if tree.active_node is None:
+      if tree.active_node is None or tree.name != OV.ModelSrc():
         self._createNewHistory()
-      elif tree.name != OV.ModelSrc():
-        self._createNewHistory()
+      if tree.active_node:
+        OV.SetParam('snum.history.current_node', tree.active_node.name)
     else:
       self._createNewHistory()
 
     self._make_history_bars()
     if timing:
-      print "loadHistory took %4fs" %(time.time() - t)
+      print("loadHistory took %4fs" %(time.time() - t))
 
   def resetHistory(self):
     self._getItems()
@@ -265,7 +265,7 @@ class History(ArgumentParser):
     #TODO must be a better way, this does not work when switching between upper
     #tabs like work and view while the history is still opened - loading another
     #structure does not update it
-    if state == u'0' or state == None:
+    if state == '0' or state == None:
       full_tree = not OV.GetParam('snum.history.condensed_tree')
       OV.write_to_olex(
         'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
@@ -331,7 +331,7 @@ class Node(object):
 
     if hklPath and os.path.exists(hklPath):
       self.hkl = hashlib.md5(
-        '%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
+        b'%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
 
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):
@@ -504,7 +504,7 @@ class HistoryTree(Node):
     if label is None:
       label = 'Solution %s' %self.next_sol_num
       self.next_sol_num += 1
-    name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    name = hashlib.md5(time.asctime(time.localtime()).encode('utf-8')).hexdigest()
     node = Node(self.link_table, name, hklPath, resPath, lstPath, label=label,
                 is_solution=is_solution, primary_parent_node=self)
     self.children.append(node)
@@ -515,7 +515,7 @@ class HistoryTree(Node):
     return self.active_child_node.name
 
   def add_node(self, hklPath, resPath, lstPath=None):
-    ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    ref_name = hashlib.md5(time.asctime(time.localtime()).encode()).hexdigest()
     node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
                 primary_parent_node=self.active_node)
     self.active_node.active_child_node = node
@@ -594,7 +594,9 @@ class HistoryTree(Node):
     if self.version < 2.2:
       new_index = {}
       self.hklFilesMap = {}
-      for k,v in self.hklFiles.iteritems():
+      for k,v in self.hklFiles.items():
+        if not isinstance(v, (bytes, bytearray)):
+          v = v.encode('latin1')
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
         self.hklFilesMap[k] = md
@@ -603,9 +605,11 @@ class HistoryTree(Node):
       new_index = {}
       r_index = {}
       # build reverse index
-      for k,v in self.hklFilesMap.iteritems():
+      for k,v in self.hklFilesMap.items():
         r_index.setdefault(v, list()).append(k)
-      for k,v in self.hklFiles.iteritems():
+      for k,v in self.hklFiles.items():
+        if not isinstance(v, (bytes, bytearray)):
+          v = v.encode('latin1')
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
         for hkl_d in r_index[k]:
@@ -665,9 +669,9 @@ def decompressFile(fileData):
   return zlib.decompress(fileData)
 
 def digestHKLData(fileData):
-  from StringIO import StringIO
+  import io
   md = hashlib.md5()
-  input = StringIO(fileData)
+  input = io.BytesIO(fileData)
   l = input.readline()
   while l:
     try:

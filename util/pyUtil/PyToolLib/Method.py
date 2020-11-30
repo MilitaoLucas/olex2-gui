@@ -197,18 +197,18 @@ class Method_solution(Method):
             RunPrgObject.formula = olx.xf.GetFormula()
           except RuntimeError:
             formula['C'] = guess_C
-            RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
+            RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in list(formula.items()))
             olx.xf.SetFormula(RunPrgObject.formula)
         else:
           formula['C'] = guess_C
-          RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
+          RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in list(formula.items()))
           olx.xf.SetFormula(RunPrgObject.formula)
       else:
         print("Formula is invalid")
-    if 'D' in formula.keys():
+    if 'D' in list(formula.keys()):
       D_count = formula.pop('D')
       formula['H'] = formula.get('H',0) + D_count
-      text_formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
+      text_formula = ' '.join('%s%s' %(type,count) for type,count in list(formula.items()))
       RunPrgObject.formula = text_formula
     if RunPrgObject.formula != "None":
       args += " -c='%s' " % RunPrgObject.formula
@@ -269,7 +269,7 @@ class Method_refinement(Method):
 
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.isAllQ = True
-    for i in xrange(int(olx.xf.au.GetAtomCount())):
+    for i in range(int(olx.xf.au.GetAtomCount())):
       ret = olx.xf.au.IsPeak(i)
       if ret == "false":
         RunPrgObject.isAllQ = False

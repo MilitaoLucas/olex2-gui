@@ -1,11 +1,9 @@
 # -*- coding:utf8 -*-
-
-from __future__ import division
 # import PngImagePlugin
 from PIL import Image
 from PIL import ImageDraw, ImageChops, ImageColor
 
-from StringIO import StringIO
+from io import StringIO
 
 import OlexVFS
 import RoundedCorners
@@ -66,7 +64,7 @@ class ImageTools(FontInstances):
     if OV.HasGUI():
       self.gui_current_language = olx.CurrentLanguage()
     else:
-      self.gui_current_language = u'English'
+      self.gui_current_language = 'English'
 
     self.get_font_peculiarities()
 
@@ -228,7 +226,7 @@ class ImageTools(FontInstances):
 
   def show_image(self, IM):
     import sys
-    sys.path.append("C:\Users\Horst\Documents\olex-trunk\Python26\Lib\site-packages\wx-2.8-msw-unicode")
+    sys.path.append("C:\\Users\Horst\Documents\olex-trunk\Python26\Lib\site-packages\wx-2.8-msw-unicode")
     import wx
     a = wx.PySimpleApp()
     wximg = wx.Image('%s/splash.jpg' % OV.BaseDir(), wx.BITMAP_TYPE_JPEG)
@@ -252,24 +250,24 @@ class ImageTools(FontInstances):
     txt = txt.replace("_sq", "^2")
     txt = txt.replace("_star", "*")
     txt = txt.replace("_", " ")
-    txt = txt.replace("lambda", unichr(61548))
-    txt = txt.replace("theta", unichr(61553))
-    txt = txt.replace("Theta", unichr(61553))
-    txt = txt.replace("sigma", unichr(61555))
-    txt = txt.replace("^2", unichr(178))
-    txt = txt.replace("^3", unichr(179))
-    txt = txt.replace(">", unichr(61681))
-    txt = txt.replace("<", unichr(61665))
-    txt = txt.replace("Fo2", "Fo%s" % (unichr(178)))
-    txt = txt.replace("Fc2", "Fc%s" % (unichr(178)))
-    txt = txt.replace("Sum", unichr(8721))
+    txt = txt.replace("lambda", chr(61548))
+    txt = txt.replace("theta", chr(61553))
+    txt = txt.replace("Theta", chr(61553))
+    txt = txt.replace("sigma", chr(61555))
+    txt = txt.replace("^2", chr(178))
+    txt = txt.replace("^3", chr(179))
+    txt = txt.replace(">", chr(61681))
+    txt = txt.replace("<", chr(61665))
+    txt = txt.replace("Fo2", "Fo%s" % (chr(178)))
+    txt = txt.replace("Fc2", "Fc%s" % (chr(178)))
+    txt = txt.replace("Sum", chr(8721))
     # txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     # txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
-    txt = txt.replace("Fexp", "F%s" % (unichr(2091)))
-    txt = txt.replace("Angstrom", unichr(197))
-    txt = txt.replace("degrees", u"\u00B0")
-    txt = txt.replace("alpha", unichr(945))
-    txt = txt.replace("beta", unichr(946))
+    txt = txt.replace("Fexp", "F%s" % (chr(2091)))
+    txt = txt.replace("Angstrom", chr(197))
+    txt = txt.replace("degrees", "\u00B0")
+    txt = txt.replace("alpha", chr(945))
+    txt = txt.replace("beta", chr(946))
     return txt
 
 
@@ -290,22 +288,9 @@ class ImageTools(FontInstances):
     return retVal
 
   def decimalColorToHTMLcolor(self, dec_colour):
-    val = hex(dec_colour)
-    val = val.lstrip('0x')
-    if len(val) == 9:
-      val = val[:6]
-    elif len(val) > 6:
-      return dec_colour
-    w_counter = 0
-    while len(val) != 6 and w_counter < 1000:
-      w_counter += 1
-      val = "0" + val
-    retVal = "#"
-    retVal += val[-2:]
-    retVal += val[-4:-2]
-    retVal += val[-6:-4]
+    retVal = "#%s%s%s" %(hex(dec_colour&255)[2:],
+      hex((dec_colour>>8)&255)[2:], hex((dec_colour>>16)&255)[2:])
     return retVal
-
 
   def getOlexVariables(self):
     # self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
@@ -343,7 +328,7 @@ class ImageTools(FontInstances):
         return colorstring
       if colorstring[0] == '#': colorstring = colorstring[1:]
       if len(colorstring) != 6:
-          raise ValueError, "input #%s is not in #RRGGBB format" % colorstring
+          raise ValueError("input #%s is not in #RRGGBB format" % colorstring)
       r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
       r, g, b = [int(n, 16) for n in (r, g, b)]
       return (r, g, b)
@@ -381,8 +366,8 @@ class ImageTools(FontInstances):
     img = img.convert("RGBA")
     pixdata = img.load()
 
-    for y in xrange(img.size[1]):
-      for x in xrange(img.size[0]):
+    for y in range(img.size[1]):
+      for x in range(img.size[0]):
         if pixdata[x, y] == (255, 255, 255, 255):
             pixdata[x, y] = (255, 255, 255, 0)
     return img
@@ -472,7 +457,7 @@ class ImageTools(FontInstances):
 
     image = image.resize((width,height), Image.ANTIALIAS)
     if debug:
-      print "+++ Resize %s (%s)!" %(name, s)
+      print("+++ Resize %s (%s)!" %(name, s))
     #if name:
       #self.im_cache[cache_name] = image
     return image
@@ -494,6 +479,7 @@ class ImageTools(FontInstances):
 
   def resize_to_panelwidth(self, i, colourize=False, width_adjust=0, width=None):
     import olex
+    import io
     do_cache_image = True
     name = i
     im = None
@@ -503,10 +489,10 @@ class ImageTools(FontInstances):
       s = OlexVFS.read_from_olex(name)
       if s is None:
         return
-      olex.writeImage(name, "")
+      olex.writeImage(name, b"")
       name = name[:-4]
-      sio = StringIO(s)
-      if not sio.len:  # resize was called twice in a raw
+      sio = io.BytesIO(s)
+      if not sio.getbuffer().nbytes:  # resize was called twice in a raw
         return
       im = Image.open(sio)
     else:
@@ -747,7 +733,7 @@ class ImageTools(FontInstances):
   def gradient_bgr(self, draw, width, height, colour=(237, 237, 235), fraction=0.85, increment=10, step=1):
     inc = increment
     if "#" in colour: colour = self.HTMLColorToRGB(colour)
-    for i in xrange(int(height * fraction)):
+    for i in range(int(height * fraction)):
       if i < height / inc:
         adjusted_step = 0.6 * step
       elif height / inc < i < (height / inc) * 2:
@@ -773,7 +759,7 @@ class ImageTools(FontInstances):
       font = ImageFont.truetype("%s" % font_file, font_size, encoding=self.test_encoding("unic"))
 
     except:
-      print "The font %s is required for this option." % font_name
+      print("The font %s is required for this option." % font_name)
       self.abort = True
     pass
 
@@ -791,7 +777,7 @@ class ImageTools(FontInstances):
   def get_im_data_d_from_filename(self, filename, units='pt', target_width=0, max_height=0):
     import base64
 
-    if type(filename) == unicode or type(filename) == str:
+    if type(filename) == str or type(filename) == str:
       if os.path.exists(filename):
         im = Image.open(filename)
         data = open(filename, 'rb').read()
@@ -821,7 +807,7 @@ class ImageTools(FontInstances):
 
 
   def get_im_and_draw_from_filename(self, filename):
-    if type(filename) == unicode:
+    if type(filename) == str:
       if os.path.exists(filename):
         im = Image.open(filename)
         draw = ImageDraw.Draw(im)
@@ -914,8 +900,8 @@ class ImageTools(FontInstances):
           self.txt_top += self.top_adjust
         else:
           break
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
 
   def _shorten_text(self, txt, draw, left_start, width, font):
     tw = (draw.textsize(txt, font)[0])
@@ -1029,10 +1015,10 @@ class ImageTools(FontInstances):
       txt_l.append(txt)
 
     if not self.abort:
-      if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != unicode:
+      if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != str:
         try:
           font_colour = font_colour.hexadecimal
-        except Exception, ex:
+        except Exception as ex:
           print("font_colour is ill defined: %s" % ex)
       try:
         i = 0
@@ -1620,7 +1606,7 @@ class ImageTools(FontInstances):
     OV.UpdateHtml()
 
   def get_PIL_image_from_olex_VFS(self, name):
-    from StringIO import StringIO
+    import io
 
     if olx.fs.Exists(name) != "true":
       from PilTools import timage
@@ -1629,7 +1615,7 @@ class ImageTools(FontInstances):
 
     if olx.fs.Exists(name) == "true":
       _ = OlexVFS.read_from_olex(name)
-      sio = StringIO(_)
+      sio = io.BytesIO(_)
       retVal = Image.open(sio)
     else:
       retVal = False
@@ -1640,7 +1626,7 @@ class ImageTools(FontInstances):
 
     from PIL import Image, ImageChops, ImageOps
     p = None
-    if type(im) == str or type(im) == unicode:
+    if type(im) == str or type(im) == str:
       im = im.strip("'")
       im = im.strip('"')
       if os.path.exists("%s" % im):
@@ -1656,7 +1642,6 @@ class ImageTools(FontInstances):
 
     if not trimcolour and OV.HasGUI():
       import struct
-      trimcolour = "#%s" %self.dec2hex(int(olx.gl.lm.ClearColor()))
       _ = struct.unpack("4B",struct.pack(">I",int(olx.gl.lm.ClearColor())))
       trimcolour = (_[3], _[2], _[1])
 

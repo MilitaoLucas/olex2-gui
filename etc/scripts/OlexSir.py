@@ -12,7 +12,7 @@ To run this example script, type spy.OlexSir() in Olex2
 '''
 
 def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
-  print "This script takes an exsiting file and pushes it into SIR"
+  print("This script takes an exsiting file and pushes it into SIR")
   # Experimenting with patterson function but having issues using the partial command to work?
   patterson = 0
 
@@ -37,46 +37,46 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   SirCompatSymmSetting = brokensym.pop(0)
   SirCompatSymmOpps = []
   while len(brokensym) > 0:
-    print brokensym
-    print SirCompatSymmOpps
+    print(brokensym)
+    print(SirCompatSymmOpps)
     if brokensym[0] == '-':
-      print "true for -"
+      print("true for -")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       SirCompatSymmOpps.append(brokensym.pop(0))
       continue
     elif brokensym[0] in "a b c d n m":
-      print "true for letter"
+      print("true for letter")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
     elif brokensym[0] in "1":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(brokensym.pop(0))
       continue
     elif brokensym[0] in "2 3 4 6 8 9":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
     elif brokensym[0] in "/":
-      print "true for number"
+      print("true for number")
       SirCompatSymmOpps.append(" "+brokensym.pop(0))
       continue
-    print brokensym
-    print SirCompatSymmOpps
-  print ''.join(SirCompatSymmOpps)
+    print(brokensym)
+    print(SirCompatSymmOpps)
+  print(''.join(SirCompatSymmOpps))
   OlexZ = int(olx.xf.au.GetZ())
   AtomPairs = olx.xf.GetFormula().split()
-  print AtomPairs
+  print(AtomPairs)
   AtomGroups = []
   CorrectedAtoms = []
   for atom in AtomPairs:
     AtomGroups.append(re.split("([A-Za-z]*)",atom)[1:3])
-  print AtomGroups
+  print(AtomGroups)
   for j in range(0, len(AtomGroups)):
-    print AtomGroups[j][0], AtomGroups[j][1]
+    print(AtomGroups[j][0], AtomGroups[j][1])
     CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1])))
   AtomContents = ' '.join(CorrectedAtoms)
-  print AtomContents
-  print "ETF", AtomContents
+  print(AtomContents)
+  print("ETF", AtomContents)
   #AtomContents = ' '.join(re.split("([A-Za-z]*)",olx.xf.GetFormula()))
   snuff = re.split("([A-Za-z]*)",olx.xf.GetFormula())
 
@@ -84,16 +84,16 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   CellV = float(olx.xf.au.GetCellVolume())
   if ManAtomContents == " " or ManAtomContents != "C 20 H 20 O 10":
 # Ok allowing the manual input of a formula is great but we really need to check it and make sure it is in the correct format, and or take a couple of formats and convert them
-    print "Using user input formula", ManAtomContents
+    print("Using user input formula", ManAtomContents)
     AtomContents = ManAtomContents
   
-  print "Job name", Olex2SirIn
-  print "Unit Cell", SirCompatCell
-  print "Olex2 Symmetry:Sir Symmetry", olx.xf.au.GetCellSymm(), ':',   SirCompatSymmSetting, ' '.join(SirCompatSymmOpps)
-  print "Olex2 Formula", olx.xf.GetFormula()
-  print "Sir Friendly Formula", AtomContents
-  print "New formula using Z", OlexZ, 
-  print "Number of atoms to look for", NumPeaks, 'or', float(CellV/18.0)
+  print("Job name", Olex2SirIn)
+  print("Unit Cell", SirCompatCell)
+  print("Olex2 Symmetry:Sir Symmetry", olx.xf.au.GetCellSymm(), ':',   SirCompatSymmSetting, ' '.join(SirCompatSymmOpps))
+  print("Olex2 Formula", olx.xf.GetFormula())
+  print("Sir Friendly Formula", AtomContents)
+  print("New formula using Z", OlexZ, end=' ') 
+  print("Number of atoms to look for", NumPeaks, 'or', float(CellV/18.0))
 # There is an issue with ever decreasing returns from Olex2 and SIR.
 # Basically Olex2 is updating the SFAC from SIR results this then is being posted back to if you try again
 # NET result is you end up with NO ATOMS!
@@ -122,7 +122,7 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   
 # All this need error control
   content = os.popen("sir%s %s.sir "%(sirversion, Olex2SirIn)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
-  print content # Output from pipe need proper error control here
+  print(content) # Output from pipe need proper error control here
 
 # File generated from SIR - name controlled by the Structure line in .sir file - made sir to prevent overwrite of INS
   src = "sir%s.res"%sirversion

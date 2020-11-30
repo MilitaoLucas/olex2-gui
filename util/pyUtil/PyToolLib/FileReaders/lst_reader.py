@@ -80,7 +80,7 @@ class reader:
         args = {'L.S.':'Least Squares', 'CGLS':'CGLS'}
       elif solution:
         args = {'TREF':'Direct Methods', 'PATT':'Patterson Method', 'NTRY':'Dual Space'}
-      for item in args.items():
+      for item in list(args.items()):
         if item[0] in line:
           method = item[1]
           
@@ -106,7 +106,7 @@ class reader:
           if 'R1 =' in line:
             self._values['R1'] = line.split()[2]
           elif 'wR2 =' in line:
-            if self._values.has_key('R1'):
+            if 'R1' in self._values:
               self._values['wR2'] = line.split()[2].strip(',')
               break
           else:
@@ -141,4 +141,4 @@ class reader:
 
 if __name__ == '__main__':
   a = reader(open(r'C:\Users\Richard\AppData\Roaming\Olex2u\samples\sucrose\sucrose.lst'))
-  print a.values()
+  print(list(a.values()))

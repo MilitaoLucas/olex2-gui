@@ -118,10 +118,10 @@ class auto(ArgumentParser):
     sol = self.sol
     ref = self.ref
     #sys.stdout.flush()
-    print "+++++++++++++++++++++++++++++++++++++* v. 22-10-06 + "
-    print "Structure: %s" %(self.filefull)
-    print
-    print
+    print("+++++++++++++++++++++++++++++++++++++* v. 22-10-06 + ")
+    print("Structure: %s" %(self.filefull))
+    print()
+    print()
 
     useModel = 'OVModel'
     #useModel = 'OlexViewedModel'
@@ -168,7 +168,7 @@ class auto(ArgumentParser):
 
     self.clean_temp()
 
-    print "=========== %s =========== ok"  %(self.filefull)
+    print("=========== %s =========== ok"  %(self.filefull))
     return model.R1*100
 
   def clean_temp(self):
@@ -195,10 +195,10 @@ class auto(ArgumentParser):
 
 
         self.process_all()
-    except Exception, err:
-      print "\n"
-      print "!!!!!!!!!!! EXCEPTION: %s:%s" % (err.__doc__, err)
-      print
+    except Exception as err:
+      print("\n")
+      print("!!!!!!!!!!! EXCEPTION: %s:%s" % (err.__doc__, err))
+      print()
 
   def process_all(self):
     for sNumPath in self.sNumPathList:
@@ -214,9 +214,9 @@ class auto(ArgumentParser):
         self.filefull = sNumPath
         self.process_one()
         #sys.stdin.readline()
-      except Exception, err:
-        print "\n"
-        print "!!!!!!!!!!! EXCEPTION: %s:%s" % (err.__doc__, err)
+      except Exception as err:
+        print("\n")
+        print("!!!!!!!!!!! EXCEPTION: %s:%s" % (err.__doc__, err))
         continue
 
     sys.stdin = sys.__stdin__
@@ -233,23 +233,23 @@ class hadd(ArgumentParser):
 
   def run(self):
     self.model.retrieve(self.filefull, status=self.model.RefinedStatus)
-    print "+   --> Debugging Adding Hydrogens >>>"
+    print("+   --> Debugging Adding Hydrogens >>>")
     #self.model.q_peak_intensity_cut_off = 2
-    print "Bond Cutoff: %s"%self.model.q_peak_bond_cut_off
-    print "Min Length: %s" %self.model.q_peak_bond_min_length
-    print "Intensity cutoff: %s" %self.model.q_peak_intensity_cut_off
+    print("Bond Cutoff: %s"%self.model.q_peak_bond_cut_off)
+    print("Min Length: %s" %self.model.q_peak_bond_min_length)
+    print("Intensity cutoff: %s" %self.model.q_peak_intensity_cut_off)
 
     #self.model.Q_peaks_filtering = True
     self.model.make_fourier_map()
-    print "+   --> Adding Hydrogens >>>"
+    print("+   --> Adding Hydrogens >>>")
     self.model.hydrogens_on = True
-    print "+   --> Refining <<<"
+    print("+   --> Refining <<<")
     self.model.q_peak_intensity_cut_off = 0.5
     self.model.Q_peaks_filtering = True
-    print "Bond Cutoff: %s"%self.model.q_peak_bond_cut_off
-    print "Min Length: %s" %self.model.q_peak_bond_min_length
-    print "Intensity cutoff: %s" %self.model.q_peak_intensity_cut_off
+    print("Bond Cutoff: %s"%self.model.q_peak_bond_cut_off)
+    print("Min Length: %s" %self.model.q_peak_bond_min_length)
+    print("Intensity cutoff: %s" %self.model.q_peak_intensity_cut_off)
 
     self.model.fit(force_fit=True)
-    print "+++++++++++++++++++++++++++++++++++++++ %s DONE +" %"hadd"
+    print("+++++++++++++++++++++++++++++++++++++++ %s DONE +" %"hadd")
     #print "*cmd=@reap %s.res" %self.filename

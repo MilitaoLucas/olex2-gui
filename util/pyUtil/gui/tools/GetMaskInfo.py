@@ -487,21 +487,21 @@ def formula_cleaner(formula):
   n = ""
   i = 0
   for char in formula:
-    if unicode.isnumeric(char) or unicode.isspace(char) or unicode.islower(char):
+    if str.isnumeric(char) or str.isspace(char) or str.islower(char):
       continue
-    while unicode.isalpha(char):
+    while str.isalpha(char):
       i += 1
       if not el:
         el += char
       else:
-        if unicode.islower(char):
+        if str.islower(char):
           el += char
-        elif unicode.isupper(char):
+        elif str.isupper(char):
           n = "1"
           i -= 1
           break
       char = formula[i:(i+1)]
-    while unicode.isnumeric(char):
+    while str.isnumeric(char):
       i += 1
       n += char
       char = formula[i:(i+1)]
@@ -564,8 +564,8 @@ OV.registerFunction(edit_mask_special_details)
 def update_sqf_file(current_sNum, scope, scope2=None):
   sqf_file = get_sqf_name()
   if os.path.exists(sqf_file):
-    with file(sqf_file, 'r') as original: data = original.read()
-    with file(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
+    with open(sqf_file, 'r') as original: data = original.read()
+    with open(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
     with open(sqf_file, 'rb') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
@@ -575,7 +575,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
       cif_block[current_sNum][scope][scope2] = olx.cif_model[current_sNum][scope][scope2]
 
     with open(sqf_file, 'w') as f:
-      print >> f, cif_block
+      print(cif_block, file=f)
     
     if os.path.exists(sqf_file.replace(".sqf", ".cif")):
       CifInfo.MergeCif()

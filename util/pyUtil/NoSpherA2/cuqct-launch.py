@@ -30,4 +30,4 @@ with open('NoSpherA2.log', "rU") as stdout:
       sys.stdout.flush()
     time.sleep(0.5)
 
-print "Finished"
+print("Finished")

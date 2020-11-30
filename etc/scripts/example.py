@@ -9,6 +9,6 @@ To run this example script, type spy.example("Hello") in Olex2
 '''
 
 def example(text="No Text Provided"):
-  print "Example Function is now printing your text: %s" %text
+  print("Example Function is now printing your text: %s" %text)
 
 OV.registerFunction(example)

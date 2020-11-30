@@ -150,7 +150,7 @@ class Method_tonto_HAR(Method_refinement):
 
   def do_run(self, RunPrgObject):
     self.failure = False
-    print 'STARTING Tonto HAR refinement'
+    print('STARTING Tonto HAR refinement')
     try:
       import CifInfo
       olx.Exec("tonto")
@@ -160,7 +160,7 @@ class Method_tonto_HAR(Method_refinement):
       if not os.path.exists(self.result_file):
         if os.path.exists("stderr"):
           try:
-            print open("stderr", 'r').read()
+            print(open("stderr", 'r').read())
           except:
             pass
         return
@@ -186,7 +186,7 @@ class Method_tonto_HAR(Method_refinement):
        '_refine_diff_density_max', '_refine_diff_density_min'
        ])
 
-      for k,v in params.iteritems():
+      for k,v in params.items():
         kv = olx.Cif(k)
         if kv != 'n/a':
           OV.SetParam(v, kv)
@@ -201,7 +201,7 @@ class Method_tonto_HAR(Method_refinement):
       #olex.m("reap '%s'" %res_file)
       if os.path.exists("stdout"):
         try:
-          print open("stdout", 'r').read()
+          print(open("stdout", 'r').read())
         except:
           pass
     except Exception:

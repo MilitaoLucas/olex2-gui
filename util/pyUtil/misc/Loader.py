@@ -48,7 +48,7 @@ def getAuthenticationToken(force=False):
   if not force and os.path.exists(tfn):
     import time
     fst = os.stat(tfn)
-    tdiff = long(time.time()) - fst.st_ctime
+    tdiff = int(time.time()) - fst.st_ctime
     #read cache only if within 36 days of creation
     if tdiff < 60*60*24*36:
       with open(tfn, "r") as tf:
@@ -66,19 +66,21 @@ def getAuthenticationToken(force=False):
           'at': ats
         }
         f = HttpTools.make_url_call(url, values, http_timeout=30)
-        f = f.read().strip()
+        f = f.read().decode("utf-8").strip()
         if f:
           if "Error" not in f:
             at = f
         else:
           at = ats.split(";")[-1]
-      except Exception, e:
+      except Exception as e:
         print("Failed to match the authentication tokens %s" %str(e))
+        if debug:
+          sys.stdout.formatExceptionInfo()
         at = _plgl.createAuthenticationToken()
     else:
       at = ats
     if at:
-      with open(tfn, "wb") as tf:
+      with open(tfn, "w") as tf:
         tf.write(at)
     else:
       raise Exception("Could not retrieve authentication token")
@@ -108,14 +110,14 @@ def getModule(name, email=None):
         'e': email
       }
       f = HttpTools.make_url_call(url, values, http_timeout=30)
-      f = f.read().strip()
+      f = f.read().decode("utf-8").strip()
       if "Error" in f:
         olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %(red, email, f), 0)
         return False
-      with open(etoken_fn, "wb") as efn:
+      with open(etoken_fn, "w") as efn:
         efn.write(f)
       etoken = f
-    except Exception, e:
+    except Exception as e:
       msg = '''
 <font color='%s'><b>An error occurred while downloading the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
@@ -127,7 +129,7 @@ def getModule(name, email=None):
 
   if etoken is None:
     if os.path.exists(etoken_fn):
-      etoken = open(etoken_fn, "rb").readline().strip()
+      etoken = open(etoken_fn, "r").readline().strip()
 
   if etoken is None:
     if not email:
@@ -145,8 +147,8 @@ def getModule(name, email=None):
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read()
-    if f.startswith('<html>'):
-      txt = f[6:]
+    if f.startswith(b'<html>'):
+      txt = f[6:].decode("utf-8")
       txt = txt.replace("Your licence has expired","<font color='%s'><b>Your %s licence has expired</b></font>" %(red,name))
       txt = txt.replace("Unknown/invalid module name","<font color='%s'><b>Unknown or invalid module %s</b></font>" %(red,name))
       txt = txt.replace("The activation link is sent. Check your e-mail. Once the download is activated, install the module again","<font color='%s'>Please check your e-mail to activate the <b>%s</b> module and then press the <b>Install</b> button above.</font>" %(green,name))
@@ -155,7 +157,6 @@ def getModule(name, email=None):
         #expired_pop(name)
 
       olex.writeImage(info_file_name, txt, 0)
-
     else:
       _ = os.path.join(m_dir, "%s.update" %name)
       with open(_,'wb') as wFile:
@@ -179,7 +180,7 @@ def getModule(name, email=None):
           ##del available_modules[idx]
         ##getAvailableModules()
       return True
-  except Exception, e:
+  except Exception as e:
     msg = '''
 <font color='%s'><b>An error occurred while installing the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
@@ -189,7 +190,7 @@ def getModule(name, email=None):
 
 
 def rollback(d):
-  print "Rolling back extension module %s" %d
+  print("Rolling back extension module %s" %d)
   update_or_install(d,rollback=True)
 
 def update_or_install(d, rollback=False):
@@ -215,10 +216,10 @@ def update_or_install(d, rollback=False):
           if not rollback:
             rollback_zip = os.path.join("%s.rollback" %pdir)
             shutil.make_archive(rollback_zip, 'zip', pdir)
-            print "The original module %s has been backed up." %d
+            print("The original module %s has been backed up." %d)
           shutil.rmtree(pdir)
-        except Exception, e:
-          print "The original module %s could not be removed" %d
+        except Exception as e:
+          print("The original module %s could not be removed" %d)
           return False
     try:
       from zipfile import ZipFile
@@ -228,20 +229,20 @@ def update_or_install(d, rollback=False):
         path = os.path.join(m_dir, d)
       zp.extractall(path=path)
       zp.close()
-      print "Module %s has been installed/updated" %d
+      print("Module %s has been installed/updated" %d)
       retVal = True
     except:
-      print "Module %s is no longer present" %d
+      print("Module %s is no longer present" %d)
       return False
     try:
       os.remove(update_zip)
       retVal = True
     except:
-      print "Update file for module %s could not be removed" %d
+      print("Update file for module %s could not be removed" %d)
       return False
     return retVal
   else:
-    print "This function expected the file %s, but it could not be found." %update_zip
+    print("This function expected the file %s, but it could not be found." %update_zip)
     return False
 
 def loadAll():
@@ -268,11 +269,11 @@ def loadAll():
       print("The module %s does not contain key file, skipping" %d)
       continue
 
-    key = open(key, 'rb').readline()
+    key = open(key, 'r').readline()
     try:
       if _plgl.loadPlugin(d, key, m_dir):
         print("Module %s has been successfully loaded." %d)
-    except Exception, e:
+    except Exception as e:
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
@@ -285,7 +286,7 @@ def updateKey(module):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  if isinstance(module, basestring):
+  if isinstance(module, str):
     found = False
     if available_modules:
       for m in available_modules:
@@ -294,13 +295,13 @@ def updateKey(module):
           found = True
           break
     if not found:
-      print "No modules information available"
+      print("No modules information available")
       return
   try:
     m_dir = getModulesDir()
     etoken_fn = "%s%setoken" %(m_dir, os.sep)
     if os.path.exists(etoken_fn):
-      etoken = open(etoken_fn, "rb").readline().strip()
+      etoken = open(etoken_fn, "r").readline().strip()
     else:
       print("Failed to update the key - email is not registered")
       return False
@@ -311,24 +312,24 @@ def updateKey(module):
       'et': etoken
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
-    key = f.read()
+    key = f.read().decode("utf-8")
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
     keyfn = "%s%s%s%skey" %(m_dir, os.sep, module.folder_name, os.sep)
-    with open(keyfn, "wb") as keyf:
+    with open(keyfn, "w") as keyf:
       keyf.write(key)
     try:
       if _plgl.loadPlugin(module.folder_name, key, m_dir):
         print("Module %s has been successfully loaded." %(module.name))
         module.action = 0
         return True
-    except Exception, e:
+    except Exception as e:
       msg = e.message
       if "is expired" in e.message:
         msg = "The key has expired."
       print("Error while reloading '%s': %s" %(module.name, msg))
       return False
-  except Exception, e:
+  except Exception as e:
     if debug:
       sys.stdout.formatExceptionInfo()
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
@@ -443,9 +444,9 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
     mdir = getModulesDir() + os.sep + name
     try:
       shutil.rmtree(mdir)
-      print "%s has been deleted" %name
+      print("%s has been deleted" %name)
     except:
-      print "Could not delete %s. Is this folder open?" %name
+      print("Could not delete %s. Is this folder open?" %name)
   else:
     recordFeedback(d['email'], token, name)
 
@@ -492,7 +493,11 @@ def getAvailableModules_():
      't' : OV.GetTag()
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
-    xml = et.fromstring(f.read())
+    f = f.read().decode("utf-8").strip()
+    if not f:
+      print("No modules evailable")
+      return
+    xml = et.fromstring(f)
     for m in xml.getchildren():
       if m.tag == "module" or m.tag == "internal_module":
         try:
@@ -510,7 +515,7 @@ def getAvailableModules_():
             if getCurrentPlatformString() not in plat:
               continue
           available_modules.append(module)
-        except Exception, e:
+        except Exception as e:
           if debug:
             sys.stdout.formatExceptionInfo()
           pass
@@ -522,7 +527,7 @@ def getAvailableModules_():
         d = 0
         if os.path.exists(rd):
           try:
-            d = file(rd, 'rb').read().strip()
+            d = open(rd, 'r').read().strip()
           except:
             pass
         if m.folder_name in failed_modules:
@@ -534,7 +539,7 @@ def getAvailableModules_():
         m.action = 5
       else:
         m.action = 1
-  except Exception, e:
+  except Exception as e:
     if debug:
       sys.stdout.formatExceptionInfo()
     return "No modules information available"
@@ -698,13 +703,13 @@ def doAct():
     rollback_zip = os.path.join("%s.rollback" %pdir)
     shutil.make_archive(rollback_zip, 'zip', pdir)
     avaialbaleModulesRetrieved = False
-    
-    print "The original module %s has been backed up and deleted." %current_module.name
+
+    print("The original module %s has been backed up and deleted." %current_module.name)
     shutil.rmtree(pdir)
     avaialbaleModulesRetrieved = False
     getAvailableModules_()
     olx.html.Update()
-    
+
   else:
     getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
     #current_module = None
@@ -867,7 +872,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(ask_for_licence_extension, False, "plugins")
     olex.registerFunction(rollback, False, "plugins")
     loadAll()
-  except Exception, e:
+  except Exception as e:
     print("Plugin loader initialisation failed: '%s'" %e)
 else:
   print("Plugin loader is not initialised")

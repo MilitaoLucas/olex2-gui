@@ -18,7 +18,7 @@ class ZSGH:
 
   def run(self, run_auto=True, sync=False):
     if not self.exe_file:
-      print 'Could not locate the ZSGH executable, aborting...'
+      print('Could not locate the ZSGH executable, aborting...')
       return False
     return olx.Exec("zsgh", olx.FileName(), o=True, s=sync)
 

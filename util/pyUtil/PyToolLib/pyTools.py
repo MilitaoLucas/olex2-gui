@@ -24,22 +24,22 @@ class pyTools(ArgumentParser):
     self.get_tool()
     tool = dispatching[tool](self.function, self.param)
     if debug:
-      print ""
-      print ""
-      print "***********************************************"
-      print "tool = %s" %self.tool
-      print "function = %s" %self.function
-      print "parameters = %s" %self.param
-      print ". . . . . . . . . . . . . . . . . . . . . . . ."
+      print("")
+      print("")
+      print("***********************************************")
+      print("tool = %s" %self.tool)
+      print("function = %s" %self.function)
+      print("parameters = %s" %self.param)
+      print(". . . . . . . . . . . . . . . . . . . . . . . .")
     try:
       if timing:
         import time
         beginT = time.time()
       tool.run()
       if timing:
-        print "%s took %.3f seconds to complete" %(tool, time.time()-beginT)
+        print("%s took %.3f seconds to complete" %(tool, time.time()-beginT))
     except:
-      print >> sys.stderr, "Tool %s has created an error" %tool
+      print("Tool %s has created an error" %tool, file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
 
@@ -62,36 +62,36 @@ class pyTools(ArgumentParser):
       except ImportError:
         #print "pyTools -- Using Default PilTools for Tool: %s" %tool
         import PilTools
-      except Exception, err:
+      except Exception as err:
         raise
 
       if tool == "timage":
         try:
           dispatching.setdefault('timage', PilTools.timage)
-        except Exception, err:
+        except Exception as err:
           raise
       elif tool == "sNumTitle":
         try:
           dispatching.setdefault('sNumTitle', PilTools.sNumTitle)
-        except Exception, err:
+        except Exception as err:
           raise
 
       elif tool == "GuiSkinChanger":
         try:
           dispatching.setdefault('GuiSkinChanger', PilTools.GuiSkinChanger)
-        except Exception, err:
+        except Exception as err:
           raise
 
       elif tool == "BarGenerator":
         try:
           dispatching.setdefault('BarGenerator', PilTools.BarGenerator)
-        except Exception, err:
+        except Exception as err:
           raise
 
       elif tool == "MakeAllRBars":
         try:
           dispatching.setdefault('MakeAllRBars', PilTools.MakeAllRBars)
-        except Exception, err:
+        except Exception as err:
           raise
 
 
@@ -108,7 +108,7 @@ class pyTools(ArgumentParser):
         from DimasInfo import dimas_info
         dispatching.setdefault('dimas', dimas_info)
       except:
-        print "Dimas Server not available"
+        print("Dimas Server not available")
         sys.stderr.formatExceptionInfo()
 
     elif tool == "cif":
@@ -140,7 +140,7 @@ class pyTools(ArgumentParser):
       dispatching.setdefault('file_copy', file_copy)
 
     elif tool == "mm":
-      if debug: print "Howdy, I am tool %s!" %tool
+      if debug: print("Howdy, I am tool %s!" %tool)
       from FileTools import mm
       dispatching.setdefault('mm', mm)
 
@@ -158,7 +158,7 @@ class pyTools(ArgumentParser):
 
     elif tool == "RA":
       from AutoChem import RunPrgAuto
-      print "Import finished"
+      print("Import finished")
       self.timing = True
       dispatching.setdefault('RA', RunPrgAuto)
 
@@ -178,12 +178,12 @@ class pyTools(ArgumentParser):
       OV.DeleteBitmap(bitmap)
 
     elif tool == "Tutorials":
-      if debug: print "Howdy, I am tool %s!" %tool
+      if debug: print("Howdy, I am tool %s!" %tool)
       from Tutorials import Tutorials
       dispatching.setdefault('Tutorials', Tutorials)
 
     elif tool == "GuiTools":
-      if debug: print "Howdy, I am tool %s!" %tool
+      if debug: print("Howdy, I am tool %s!" %tool)
       from GuiTools import MakeGuiTools
       dispatching.setdefault('GuiTools', MakeGuiTools)
 

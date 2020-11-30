@@ -4,7 +4,7 @@ import sys
 import olx
 
 def setup_cctbx():
-  basedir = olx.BaseDir().encode('utf-8')
+  basedir = olx.BaseDir()
   cctbx_dir = os.environ.get('OLEX2_CCTBX_DIR')
   if cctbx_dir and os.path.isdir(cctbx_dir):
     cctbxRoot = cctbx_dir
@@ -33,14 +33,14 @@ def setup_cctbx():
         build_path = build_path.lower()
       need_cold_start = (not os.path.exists(envi_path)
                          or envi_path != build_path)
-  except IOError, err:
+  except IOError as err:
     if err.args[1] == 'No such file or directory' and err.filename.endswith('libtbx_env'):
       need_cold_start = True
     else:
       raise
-  except AssertionError, err:
+  except AssertionError as err:
     need_cold_start = True
-  except Exception, err:
+  except Exception as err:
     if str(err) == "cold_start":
       need_cold_start = True
     else:
@@ -79,7 +79,7 @@ Current cctbx build: '%s'
     # Added as if not os.environ[lib_path] gives false positive is the key is missing
   if not cctbx_dir:
     os.environ['OLEX2_CCTBX_DIR'] = cctbxRoot
-  if os.environ.has_key(lib_path):
+  if lib_path in os.environ:
     # synchronise current values as Python anc CRT use cached values!
     os.environ[lib_path] = olx.GetEnv(lib_path)
     if not os.environ[lib_path] or os.environ[lib_path].endswith(lib_sep):
@@ -90,7 +90,7 @@ Current cctbx build: '%s'
     os.environ[lib_path] = abs(libtbx.env.lib_path)
 
 def cold_start(cctbx_sources, build_path):
-  saved_cwd = os.getcwdu()
+  saved_cwd = os.getcwd()
   os.chdir(build_path)
   sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, 'smtbx', 'iotbx', 'fast_linalg']
   #execfile(sys.argv[0])

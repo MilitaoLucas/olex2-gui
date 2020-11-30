@@ -21,14 +21,14 @@ class Spy(object):
       from pyTools import pyTools
       t = pyTools(self.tool, self.fun, self.param)
       t.run()
-    except Exception, ex:
+    except Exception as ex:
       basedir = OV.BaseDir()
       rFile = open(r"%s/version.txt" %basedir)
       version = rFile.readline()
       rFile.close()
-      print >> sys.stderr, "===================================== Gui SVN Version: %s -- Olex Compilation Date: %s" %(version, OV.GetCompilationInfo())
-      print >> sys.stderr, "A Python Error has occured."
-      print >> sys.stderr, "Tool: %s, Function: %s, Parameters: %s"
+      print("===================================== Gui SVN Version: %s -- Olex Compilation Date: %s" %(version, OV.GetCompilationInfo()), file=sys.stderr)
+      print("A Python Error has occured.", file=sys.stderr)
+      print("Tool: %s, Function: %s, Parameters: %s", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
 if __name__ == "__main__":
@@ -42,9 +42,9 @@ if __name__ == "__main__":
       a = spy_CProfile.Spy(tool, fun, param)
     else:
       a = Spy(tool, fun, param)
-    print "Running an old-style spy tool: %s" %tool  
-    print "You should not be seeing this line. If you do, please let us know immediately"
+    print("Running an old-style spy tool: %s" %tool)  
+    print("You should not be seeing this line. If you do, please let us know immediately")
     a.run()
-  except Exception, ex:
-    print >> sys.stderr, "There was an outer problem"
+  except Exception as ex:
+    print("There was an outer problem", file=sys.stderr)
     sys.stderr.formatExceptionInfo()

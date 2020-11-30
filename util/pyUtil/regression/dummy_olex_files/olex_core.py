@@ -1,10 +1,10 @@
 # replicate Olex2 internal functions accessed through olex_core.py
 
 def IsVar(variable):
-  return _variables.has_key(variable)
+  return variable in _variables
 
-def FindValue(variable, default=u''):
-  return _variables.get(variable, u'')
+def FindValue(variable, default=''):
+  return _variables.get(variable, '')
 
 def SetVar(variable, value):
   _variables[variable] = value

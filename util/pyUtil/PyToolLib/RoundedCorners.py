@@ -42,12 +42,12 @@ def create_rounded_rectangle(size=(600,400),cache={},radius=100,fill=255,
   #rounded_rectangle
   im_x, im_y  = size
   rounded_rectangle_id    = ROUNDED_RECTANGLE_ID%(radius,fill,size,pos)
-  if cache.has_key(rounded_rectangle_id):
+  if rounded_rectangle_id in cache:
     return cache[rounded_rectangle_id]
   else:
     #cross
     cross_id    = ROUNDED_RECTANGLE_ID%(radius,fill,size,CROSS_POS)
-    if cache.has_key(cross_id):
+    if cross_id in cache:
       cross   = cache[cross_id]
     else:
       cross   = cache[cross_id]   = Image.new('L',size,0)
@@ -58,7 +58,7 @@ def create_rounded_rectangle(size=(600,400),cache={},radius=100,fill=255,
       return cross
     #corner
     corner_id   = CORNER_ID%(radius,fill)
-    if cache.has_key(corner_id):
+    if corner_id in cache:
       corner  = cache[corner_id]
     else:
       corner  = cache[corner_id] = create_corner(radius,fill)

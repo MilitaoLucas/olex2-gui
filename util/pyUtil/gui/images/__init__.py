@@ -1,4 +1,4 @@
-from __future__ import division
+
 import olex
 import olx
 
@@ -147,7 +147,7 @@ def MakePovRayImage():
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
   olex.m('pictPR "%s"' %filefull)
-  print 'Image %s created' %filefull
+  print('Image %s created' %filefull)
   OV.Cursor()
   from gui import ImageListener
   ImageListener.OnChange()
@@ -196,7 +196,7 @@ def MakePostScriptImage(notify_listener=True, output_folder=None):
          " " + "-octants=" + octant_atoms + \
          " " + "-scale_hb=" + scale_hb)
 
-  print 'Image %s created' %filefull
+  print('Image %s created' %filefull)
   OV.Cursor()
   if notify_listener:
     from gui import ImageListener

@@ -20,11 +20,11 @@ class Spy(object):
       from pyTools import pyTools
       t = pyTools(self.tool, self.fun, self.param)
       t.run()
-    except Exception, ex:
+    except Exception as ex:
       basedir = OV.BaseDir()
       rFile = open(r"%s/version.txt" %basedir)
       version = rFile.readline()
-      print >> sys.stderr, "===================================== Gui SVN Version: %s -- Olex Compilation Date: %s" %(version, OV.GetCompilationInfo())
-      print >> sys.stderr, "A Python Error has occured."
-      print >> sys.stderr, "Tool: %s, Function: %s, Parameters: %s"
+      print("===================================== Gui SVN Version: %s -- Olex Compilation Date: %s" %(version, OV.GetCompilationInfo()), file=sys.stderr)
+      print("A Python Error has occured.", file=sys.stderr)
+      print("Tool: %s, Function: %s, Parameters: %s", file=sys.stderr)
       sys.stderr.formatExceptionInfo()

@@ -54,7 +54,7 @@ class Method_cctbx_refinement(Method_refinement):
 
     timer = debug = bool(OV.GetParam('olex2.debug',False))
     self.failure = True
-    print '\n+++ STARTING olex2.refine +++++ %s' %self.version
+    print('\n+++ STARTING olex2.refine +++++ %s' %self.version)
 
     verbose = OV.GetParam('olex2.verbose')
     RunPrgObject.cctbx = cctbx = FullMatrixRefine(
@@ -67,17 +67,17 @@ class Method_cctbx_refinement(Method_refinement):
         t1 = time.time()
       cctbx.run(table_file_name=self.table_file_name)
       if timer:
-        print "-- do_run(): %.3f" %(time.time() - t1)
+        print("-- do_run(): %.3f" %(time.time() - t1))
       if timer:
         t1 = time.time()
       self.flack = cctbx.flack
       if timer:
-        print "-- cctbx.flack: %.3f" %(time.time() - t1)
+        print("-- cctbx.flack: %.3f" %(time.time() - t1))
 
-    except InvalidConstraint, e:
-      print e
-    except NotImplementedError, e:
-      print e
+    except InvalidConstraint as e:
+      print(e)
+    except NotImplementedError as e:
+      print(e)
     else:
       self.failure = cctbx.failure
       if not self.failure:
@@ -115,7 +115,7 @@ class Method_cctbx_refinement(Method_refinement):
       pass
 
   def writeRefinementInfoForGui(self, cif):
-    for key, value in cif.iteritems():
+    for key, value in cif.items():
       if "." in value:
         try:
           cif[key] = "%.4f" %float(value)
@@ -133,7 +133,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
   def do_run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
     import traceback
-    print '+++ STARTING olex2.solve ++++++++++++++++++++++++++++++++++++'
+    print('+++ STARTING olex2.solve ++++++++++++++++++++++++++++++++++++')
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
 
@@ -149,9 +149,9 @@ class Method_cctbx_ChargeFlip(Method_solution):
     try:
       have_solution = cctbx.runChargeFlippingSolution(solving_interval=solving_interval)
       if not have_solution:
-        print "*** No solution found ***"
-    except Exception, err:
-      print err
+        print("*** No solution found ***")
+    except Exception as err:
+      print(err)
       traceback.print_exc()
     if OV.HasGUI():
       try:

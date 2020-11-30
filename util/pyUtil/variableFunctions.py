@@ -1,11 +1,8 @@
-# variableFunctions.py
-
 import os
 import shutil
 import sys
-import exceptions
 try:
-  import cPickle as pickle # faster C reimplementation of pickle module
+  import pickle as pickle # faster C reimplementation of pickle module
 except ImportError:
   import pickle # fall back on Python version
 import olex
@@ -14,7 +11,7 @@ import userDictionaries
 import ExternalPrgParameters
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-from cStringIO import StringIO
+from io import StringIO
 
 import phil_interface
 
@@ -67,13 +64,14 @@ def unPickle(path):
   pFile = None
   try:
     pFile = open(path, 'rb')
-    data = pickle.load(pFile)
-  except:
+    data = pickle.load(pFile, encoding='latin1')
+  except Exception as e:
+    print(e)
     # compatibility for files that were not saved in mode 'wb'
     if pFile is not None:
       pFile.close()
       pFile = None
-    pFile = open(path, 'r')
+    pFile = open(path, 'r', encoding='latin1')
     data = pickle.load(pFile)
   finally:
     if pFile is not None:
@@ -142,10 +140,10 @@ def VVD_to_phil():
     structureVVD = pickle.load(structureFile)
   else:
     return
-  if structureVVD.has_key('refinement'):
+  if 'refinement' in structureVVD:
     return
 
-  for variable, value in structureVVD.items():  # Set values of all variables in Olex2
+  for variable, value in list(structureVVD.items()):  # Set values of all variables in Olex2
     variable_name = variable[5:] # remove "snum_" from beginning of name
     for scope in snum_scopes:
       if variable_name.startswith(scope):
@@ -211,7 +209,7 @@ def LoadStructureParams():
     refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
   model_src = OV.ModelSrc()
-  structure_phil_path = u"%s/%s.phil" %(OV.StrDir(), model_src)
+  structure_phil_path = "%s/%s.phil" %(OV.StrDir(), model_src)
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
@@ -239,7 +237,7 @@ def LoadStructureParams():
   #
   StrDir = OV.StrDir()
   olx.cif_model = None #reset the cif model, #399
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
+  metacif_path = os.path.join(OV.StrDir(), model_src + ".metacif")
   if StrDir and not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(
@@ -262,7 +260,7 @@ def LoadStructureParams():
         cif_block[key] = value
       cif_model = model.cif({model_src: cif_block})
       with open(metacif_path, 'wb') as f:
-        print >> f, cif_model
+        print(cif_model, file=f)
   #
   # End backwards compatibility
   #
@@ -382,13 +380,13 @@ def EditParams(scope_name="", expert_level=0, attributes_level=0):
     original_name = output_phil.name
     output_phil.name = scope_name
   except KeyError:
-    print '"%s" is not a valid scope name' %scope_name
+    print('"%s" is not a valid scope name' %scope_name)
   else:
     s = StringIO()
     output_phil.show(out=s, expert_level=expert_level, attributes_level=attributes_level)
     input_phil_string = OV.GetUserInput(0, "Edit parameters", s.getvalue())
     if input_phil_string is not None and not input_phil_string == s.getvalue():
-      handler.update(phil_string=str(input_phil_string))
+      handler.update(phil_string=input_phil_string)
     else:
       # need to set scope name back to original since scope isn't rebuilt
       output_phil.name = original_name

@@ -1,13 +1,12 @@
-from __future__ import division
-
 import os, sys
 import olx
 import OlexVFS
 import time
 import math
-from cStringIO import StringIO
+from io import StringIO
 
 from PeriodicTable import PeriodicTable
+from functools import reduce
 try:
   olx.current_hklsrc
 except:
@@ -154,7 +153,7 @@ class OlexCctbxAdapter(object):
       if construct_restraints:
         from smtbx.refinement import restraints
         proxies = create_cctbx_xray_structure.restraint_proxies()
-        kwds = dict([(key+"_proxies", value) for key, value in proxies.iteritems()])
+        kwds = dict([(key+"_proxies", value) for key, value in proxies.items()])
         self._restraints_manager = restraints.manager(**kwds)
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
@@ -162,33 +161,31 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
+      #  default for DISP first
+      if self.reflections._merge < 4:
+        from cctbx.eltbx import wavelengths
+        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
+        self._xray_structure.set_inelastic_form_factors(
+          self.wavelength, inelastic_table)
+        for sc in self._xray_structure.scatterers():
+          custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
       if sfac is not None:
-        if len(sfac) > 0 and 'gaussian' not in sfac.items()[0][1]:
-          for element, sfac_dict in sfac.iteritems():
-            if len(element) > 1:
-              element = element.upper()[0] + element.lower()[1:]
-            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
-        else:
-          from cctbx import eltbx
-          for element, sfac_dict in sfac.iteritems():
-            if len(element) > 1:
-              element = element.upper()[0] + element.lower()[1:]
+        from cctbx import eltbx
+        for element, sfac_dict in sfac.items():
+          if len(element) > 1:
+            element = element.upper()[0] + element.lower()[1:]
+          if 'gaussian' in sfac_dict:
             custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
               sfac_dict['gaussian'][0],
               [-b for b in sfac_dict['gaussian'][1]],
               sfac_dict['gaussian'][2]))
-            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
+          custom_fp_fdps[element] = sfac_dict['fpfdp']
         self._xray_structure.set_custom_inelastic_form_factors(
           custom_fp_fdps)
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
         table=str(table),
         d_min=self.reflections.f_sq_obs.d_min())
-      if self.reflections._merge < 4 and len(custom_fp_fdps) == 0:
-        from cctbx.eltbx import wavelengths
-        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        self._xray_structure.set_inelastic_form_factors(
-          self.wavelength, inelastic_table)
 
     r_disp = self.olx_atoms.model.get('refine_disp')
     if r_disp:
@@ -413,8 +410,8 @@ def write_fab(f_mask, fab_path=None):
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
-      print >> f, line
-    print >> f, "0 0 0 0.0 0.0"
+      print(line, file=f)
+    print("0 0 0 0.0 0.0", file=f)
 
 from smtbx import absolute_structure
 
@@ -426,15 +423,15 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
     if use_fcf:
       fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
       if not os.path.exists(fcf_path):
-        print "No fcf file is present"
+        print("No fcf file is present")
         return
-      reflections = miller.array.from_cif(file_path=str(fcf_path)).values()[0]
+      reflections = list(miller.array.from_cif(file_path=str(fcf_path)).values())[0]
       try:
         fo2 = reflections['_refln_F_squared_meas']
         fc2 = reflections['_refln_F_squared_calc']
       except:
-        print 'Unsupported format, _refln_F_squared_meas and " +\
-        "_refln_F_squared_calc is expected'
+        print('Unsupported format, _refln_F_squared_meas and " +\
+        "_refln_F_squared_calc is expected')
         return
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
       if self.hklf_code == 5:
@@ -450,7 +447,7 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       weights = self.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
-      print "No Bijvoet pairs"
+      print("No Bijvoet pairs")
       return
     absolute_structure.hooft_analysis.__init__(
       self, fo2, fc, probability_plot_slope=probability_plot_slope, scale_factor=scale)
@@ -463,7 +460,7 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
     if use_fcf:
       fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
       if not os.path.exists(fcf_path):
-        print "No fcf file is present"
+        print("No fcf file is present")
         return
       reflections = miller.array.from_cif(file_path=str(fcf_path))
       fo2 = reflections['_refln_F_squared_meas']
@@ -476,7 +473,7 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
       weights = self.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
-      print "No Bijvoet pairs"
+      print("No Bijvoet pairs")
       return
     analysis = absolute_structure.hooft_analysis(fo2, fc, scale_factor=scale)
     bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(
@@ -492,7 +489,7 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
     fit = flex.linear_regression(
       expected_deviations[5:-5], observed_deviations[5:-5])
     self.slope = fit.slope()
-    print "Student's t nu: %.1f" %nu
+    print("Student's t nu: %.1f" %nu)
     absolute_structure.students_t_hooft_analysis.__init__(
       self, fo2, fc, nu, scale_factor=scale, probability_plot_slope=self.slope)
 
@@ -508,11 +505,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
-    from itertools import izip
+
     from libtbx import group_args
 
     t2 = time.time()
-    print 'imports took %0.3f ms' %((t2-t1)*1000.0)
+    print('imports took %0.3f ms' %((t2-t1)*1000.0))
     # Get the reflections from the specified path
     f_obs = self.reflections.f_obs
     data = self.reflections.f_sq_obs
@@ -565,7 +562,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           max_clusters=expected_peaks,),
         verify_symmetry=False
         ).all()
-      for xyz, height in izip(peaks.sites(), peaks.heights()):
+      for xyz, height in zip(peaks.sites(), peaks.heights()):
         if not xyz:
           have_solution = False
           break
@@ -646,7 +643,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       out = StringIO()
       fo2 = self.reflections.f_sq_obs
       fo2.show_comprehensive_summary(f=out)
-      print >> out
+      print(file=out)
       mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
@@ -654,8 +651,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
       (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
       with open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w') as f:
-        print >> f, out.getvalue()
-      print out.getvalue()
+        print(out.getvalue(), file=f)
+      print(out.getvalue())
       cif_block['_smtbx_masks_void_probe_radius'] = self.params.solvent_radius
       cif_block['_smtbx_masks_void_truncation_radius'] = self.params.shrink_truncation_radius
 
@@ -669,7 +666,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       except:
         pass
 
-      if _ and '_smtbx_masks_void_content' in mdict.keys() and len(_) == len(mdict['_smtbx_masks_void_content']):
+      if _ and '_smtbx_masks_void_content' in list(mdict.keys()) and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
 
 
@@ -680,7 +677,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
       mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
       with open(mask_cif_path, 'w') as f:
-        print >> f, cif
+        print(cif, file=f)
       OV.SetParam('snum.masks.update_cif', True)
       data = None
     else:
@@ -696,7 +693,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         elif self.params.type == "f_model":
           data = mask.f_model()
       if not data:
-        print 'Empty mask'
+        print('Empty mask')
         return
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
@@ -829,44 +826,44 @@ def charge_flipping_loop(solving, verbose=True):
       # Guessing a value of delta leading to subsequent good convergence
       if verbose:
         if previous_state is solving.solving:
-          print "** Restarting (no phase transition) **"
+          print("** Restarting (no phase transition) **")
         elif previous_state is solving.evaluating:
-          print "** Restarting (no sharp correlation map) **"
+          print("** Restarting (no sharp correlation map) **")
       if verbose == "highly":
         if previous_state is not solving.guessing_delta:
-          print "Guessing delta..."
-          print ("%10s | %10s | %10s | %10s | %10s | %10s | %10s"
+          print("Guessing delta...")
+          print("%10s | %10s | %10s | %10s | %10s | %10s | %10s"
                  % ('delta', 'delta/sig', 'R', 'F000',
                     'c_tot', 'c_flip', 'c_tot/c_flip'))
-          print "-"*90
+          print("-"*90)
         rho = flipping.rho_map
         c_tot = rho.c_tot()
         c_flip = rho.c_flip(flipping.delta)
         # to compare with superflip output
         c_tot *= flipping.fft_scale; c_flip *= flipping.fft_scale
-        print "%10.4f | %10.4f | %10.3f | %10.3f | %10.1f | %10.1f | %10.2f"\
+        print("%10.4f | %10.4f | %10.3f | %10.3f | %10.1f | %10.1f | %10.2f"\
               % (flipping.delta, flipping.delta/rho.sigma(),
                  flipping.r1_factor(), flipping.f_000,
-                 c_tot, c_flip, c_tot/c_flip)
+                 c_tot, c_flip, c_tot/c_flip))
 
     elif solving.state is solving.solving:
       # main charge flipping loop to solve the structure
       if verbose=="highly":
         if previous_state is not solving.solving:
-          print
-          print "Solving..."
-          print "with delta=%.4f" % flipping.delta
-          print
-          print "%5s | %10s | %10s" % ('#', 'F000', 'skewness')
-          print '-'*33
-        print "%5i | %10.1f | %10.3f" % (solving.iteration_index,
+          print()
+          print("Solving...")
+          print("with delta=%.4f" % flipping.delta)
+          print()
+          print("%5s | %10s | %10s" % ('#', 'F000', 'skewness'))
+          print('-'*33)
+        print("%5i | %10.1f | %10.3f" % (solving.iteration_index,
                                          flipping.f_000,
-                                         flipping.rho_map.skewness())
+                                         flipping.rho_map.skewness()))
 
     elif solving.state is solving.polishing:
       if verbose == 'highly':
-        print
-        print "Polishing"
+        print()
+        print("Polishing")
     elif solving.state is solving.finished:
       break
 
@@ -874,7 +871,7 @@ def charge_flipping_loop(solving, verbose=True):
     previous_state = solving.state
 
   if timing:
-    print "Total Time: %.2f s" %(time.time() - t0)
+    print("Total Time: %.2f s" %(time.time() - t0))
 
 
 def write_grid_to_olex(grid):
@@ -896,11 +893,11 @@ class as_pdb_file(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     fractional_coordinates = fractional_coordinates in (True, 'True', 'true')
     with open(filepath, 'w') as f:
-      print >> f, self.xray_structure().as_pdb_file(
+      print(self.xray_structure().as_pdb_file(
         remark=remark,
         remarks=remarks,
         fractional_coordinates=fractional_coordinates,
-        resname=resname)
+        resname=resname), file=f)
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
@@ -927,7 +924,7 @@ class symmetry_search(OlexCctbxAdapter):
         xray_structure=xs_p1,
         algorithm="direct").f_calc()
     sf_symm = symmetry_search.structure_factor_symmetry(fc_in_p1)
-    print sf_symm
+    print(sf_symm)
     sf_symm.space_group_info.show_summary()
 
 OV.registerFunction(symmetry_search)

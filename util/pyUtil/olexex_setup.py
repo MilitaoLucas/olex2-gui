@@ -35,7 +35,7 @@ class SetupWizard(object):
 
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 
-'''% (self.previous, self.next)
+'''% (self.previous, self.__next__)
 
     t = OV.TranslatePhrase('setup-txt-%s' %name)
     t, d = htmlTools.format_help(t)
@@ -129,7 +129,7 @@ class ConfigSkin(object):
   def getVarFromOlex(self):
     olexValues = variableFunctions.getVVD('gui')
     for var in self.config:
-      if var.lower() in olexValues.keys():
+      if var.lower() in list(olexValues.keys()):
         self.config[var]['val'] = olexValues[var.lower()]
 
   def generate_config_box_text(self):

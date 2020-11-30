@@ -24,11 +24,11 @@ class reader(object):
           self._twin_cifItems.setdefault("abs_type", "TWINABS")
           break
       except:
-        print "This is a new type of abs file I do not recognise"
+        print("This is a new type of abs file I do not recognise")
         break
     if abs_type == "SADABS":
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
-      for i in xrange(0, len(lines)):
+      for i in range(0, len(lines)):
         line = lines[i]
         try:
           if "SADABS" in line:
@@ -73,7 +73,7 @@ class reader(object):
           elif line.strip().startswith("Lambda"):
             txt = line.split('=')
             self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
-        except Exception, e:
+        except Exception as e:
           import traceback
           traceback.print_exc()
           pass
@@ -81,7 +81,7 @@ class reader(object):
 
     elif abs_type == "TWINABS":
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
-      for i in xrange(0, len(lines)):
+      for i in range(0, len(lines)):
         line = lines[i].strip()
         try:
           if "TWINABS" in line:
@@ -161,7 +161,7 @@ class reader(object):
           if "HKLF 5" in line:
             break
         except (RuntimeError, TypeError, NameError):
-          print "there was an error"
+          print("there was an error")
           pass
 
 
@@ -191,7 +191,7 @@ def abs_type(path):
         abs_type = "TWINABS"
         return abs_type
     except:
-      print "This is a new type of abs file I do not recognise"
+      print("This is a new type of abs file I do not recognise")
       return abs_type
     i+= 1
   i = 0
@@ -204,6 +204,6 @@ if __name__ == '__main__':
   info_cif = a.cifItems()
   info_twin = a.twin_cifItems()
   #info_sad = b.cifItems()
-  print info_cif
-  print info_twin
+  print(info_cif)
+  print(info_twin)
   #print info_sad
