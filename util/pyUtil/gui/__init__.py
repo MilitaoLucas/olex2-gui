@@ -6,6 +6,7 @@ import sys
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 from ImageTools import IT
+import htmlTools
 
 table_col = OV.GetVar('HtmlTableFirstcolColour')
 green_text = OV.GetParam('gui.green_text')
@@ -14,9 +15,6 @@ red = OV.GetParam('gui.red')
 orange = OV.GetParam('gui.orange')
 white = "#ffffff"
 black = "#000000"
-
-import htmlTools
-
 
 def FileOpen(title, filter, location, default='', default_name=''):
   res = olx.FileOpen(title, filter,location, default_name)
@@ -48,8 +46,8 @@ def About():
 
   sw = 650+2*10+2
   sh = 400+2*15+60
-    
-  
+
+
   x = int(window[0]) + int(int(window[2])/2) - int(sw/2)
   y = int(window[1]) + int(int(window[3])/2) - int(sh/2)
 
@@ -93,7 +91,7 @@ def SwitchPanel(name="home"):
   elif name == "info":
     OV.setItemstate("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
   else:
-    print "Invalid argument for the panel name: " + name
+    print("Invalid argument for the panel name: " + name)
   return ""
 
 olex.registerFunction(SwitchPanel, False, "gui")
@@ -118,10 +116,10 @@ olex.registerFunction(PopTool, False, "gui")
 def UpdateWeight():
   w = OV.GetParam('snum.refinement.suggested_weight')
   if not w:
-    print "No suggested weighting scheme present. Please refine and try again."
+    print("No suggested weighting scheme present. Please refine and try again.")
     return ""
   olex.m("UpdateWght %s %s" %(w[0], w[1]))
-  print "Weighting scheme has been updated"
+  print("Weighting scheme has been updated")
 olex.registerFunction(UpdateWeight, False, "gui")
 
 def GetPathParam(variable, default=None):
@@ -139,7 +137,7 @@ olex.registerFunction(GetPathParam, False, "gui")
 def GetFileList(root, extensions):
   import ntpath
   l = []
-  if type(extensions) == unicode:
+  if type(extensions) == str:
     extensions = extensions.split(";")
   for extension in extensions:
     extension = extension.strip("'")
@@ -273,7 +271,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
 
   try:
       os.makedirs(dst)
-  except OSError, exc:
+  except OSError as exc:
       # XXX - this is pretty ugly
       if "file already exists" in exc[1]:  # Windows
           pass
@@ -297,21 +295,21 @@ def copytree(src, dst, symlinks=False, ignore=None):
           else:
               copy2(srcname, dstname)
           # XXX What about devices, sockets etc.?
-      except (IOError, os.error), why:
+      except (IOError, os.error) as why:
           errors.append((srcname, dstname, str(why)))
       # catch the Error from the recursive copytree so that we can
       # continue with other files
-      except Error, err:
+      except Error as err:
           errors.extend(err.args[0])
   try:
       copystat(src, dst)
   except WindowsError:
       # can't copy file access times on Windows
       pass
-  except OSError, why:
+  except OSError as why:
       errors.extend((src, dst, str(why)))
   if errors:
-      raise Error, errors
+      raise Error(errors)
 
 def copy_datadir_items(force=False):
   '''
@@ -334,7 +332,6 @@ def copy_datadir_items(force=False):
     user_customisation_directory = '%s%scustomisation' %(OV.DataDir(),os.sep)
 
   dirs = ((svn_samples_directory, user_samples_directory), )
-
   for src, dest in dirs:
     if not os.path.exists(dest):
       os.makedirs(dest)
@@ -359,9 +356,8 @@ def copy_datadir_items(force=False):
         if not force and os.path.exists(to_f):
           continue
         copytree(from_f, to_f, ignore=ignore_patterns)
-      except Exception, err:
-        print err
-        pass
+      except Exception as err:
+        print(err)
 
 olex.registerFunction(copy_datadir_items, False, "gui")
 
@@ -370,7 +366,7 @@ def focus_on_control():
   control = OV.GetVar('set_focus_on_control_please',None)
   if control == "None": control = None
   if control:
-    print "focus on %s" %control
+    print("focus on %s" %control)
     if OV.IsControl(control):
       olx.html.SetBG(control,highlight)
       olx.html.SetFocus(control)
@@ -407,7 +403,7 @@ def get_default_notification(txt="", txt_col='green_text'):
   if _ == 'true':
     poly = " | Polymeric structure"
   set_notification("<font color='%s'>%s</font>%s;%s;%s" %(txt_col, txt, poly, table_col,'#888888'))
-  
+
 def set_notification(string):
   if not OV.HasGUI():
     return
@@ -431,7 +427,7 @@ def get_notification():
     txt = _[0]
     col_bg = _[1]
     if len(_) > 2:
-      col_fg = _[2] 
+      col_fg = _[2]
 
   d = {'col_bg':col_bg,
        'col_fg':col_fg,
@@ -444,15 +440,13 @@ olex.registerFunction(get_default_notification, False, "gui")
 olex.registerFunction(set_notification, False, "gui")
 olex.registerFunction(get_notification, False, "gui")
 
-
-def file_open(path, base="", mode='r', readlines=False):
+def file_open(path, base="", mode='r', readlines=False, binary=False):
   ''' Open a file, either from a real file, or, if that is not found, from the OlexVFS.
       -- path: the FULL path to the file
       -- base: the everything up to where the directory lives
   '''
-  
   import OlexVFS
-  retVal = None  
+  retVal = None
   if os.path.exists(path):
     if readlines:
       retVal = open(path, mode).readlines()
@@ -469,9 +463,14 @@ def file_open(path, base="", mode='r', readlines=False):
     try:
       path = path.replace("\\","/")
       retVal = OlexVFS.read_from_olex(path)
+      if not binary:
+        try:
+          retVal = retVal.decode()
+        except:
+          pass
     except:
-      print "gui.file_open malfunctioned with getting %s" %path
-      
+      print("gui.file_open malfunctioned with getting %s" %path)
+
     if readlines:
       retVal = retVal.splitlines()
   return retVal

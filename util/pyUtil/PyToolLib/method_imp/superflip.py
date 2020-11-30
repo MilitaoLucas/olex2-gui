@@ -39,7 +39,7 @@ class Method_Superflip(Method_solution):
       'cleanup': 'true',
       'use_centering' : 'true'
     }
-    for k,v in defaults.iteritems():
+    for k,v in defaults.items():
       olx.SetVar("%s.%s" %(prefix,k), v)
 
 
@@ -165,7 +165,7 @@ class Method_Superflip(Method_solution):
     input.append('endf')
     self.input_file_name = os.path.normpath("%s.sfi" %(self.file_name))
     try:
-      input_file = file(self.input_file_name, 'w+')
+      input_file = open(self.input_file_name, 'w+')
       input_file.write('\n'.join(input))
       input_file.close()
       self.to_cleanup.append(self.input_file_name)
@@ -192,7 +192,7 @@ class Method_Superflip(Method_solution):
           if self.derive_symmetry:
             log_file_name = "%s.sflog" %self.file_name
             if os.path.exists(log_file_name):
-              log_file = file(log_file_name, "r")
+              log_file = open(log_file_name, "r")
               for l in log_file:
                 if "Hall symbol:" in l:
                   l = l.strip()

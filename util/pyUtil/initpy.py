@@ -58,12 +58,6 @@ def onexit():
   pass
 olex.registerFunction(onexit,False)
 
-debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
-if debug == True:
-  try:
-    import wingdbstub
-  except:
-    pass
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
@@ -79,6 +73,17 @@ if timer:
   t = time.time()
 
 
+def get_wing():
+  print("If OLEX2_ATTACHED_WITH_PYDEBUGGER is set...")
+  debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
+  if debug == True:
+    print("Trying to connect to WING.")
+    try:
+      import wingdbstub
+    except Exception as err:
+      print("Wing has failed: %s" %err)
+      pass
+
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
   '''
@@ -88,7 +93,7 @@ def our_sys_exit(i):
     e = sys.on_sys_exit_raise
     sys.on_sys_exit_raise = None
     raise e
-  print(("Terminate with %i" %i))
+  print("Terminate with %i" %i)
 sys.exit = our_sys_exit
 
 class StreamRedirection:
@@ -115,14 +120,13 @@ class StreamRedirection:
         self.errFile.write(Str)
         self.errFile.flush()
       olex.post( '\'' + Str + '\'')
-      if self.refresh:
+      if self.refresh and olx.HasGUI() == 'true':
         t1 = time.time()
         if t1 - self.t0 > 0.5:
           olex.m("refresh")
           self.t0 = t1
       if self.graph!=False:
         self.graph(Str)
-
     else:
       self.redirected.write(Str)
 
@@ -147,12 +151,12 @@ class StreamRedirection:
           print(">>>>> ERROR (formatExceptionInfo)")
       args = {}
       try:
-        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().next):
+        for ttype, token, start, end, line in inspect.tokenize.generate_tokens(reader().__next__):
           if ttype == tokenize.NAME and token in frame.f_locals:
             args[token] = frame.f_locals[token]
         if args:
           sys.stderr.write('Key variable values:\n')
-          for var,val in args.items():
+          for var,val in list(args.items()):
             sys.stderr.write('\t%s = %s\n' % (var, repr(val)))
       except inspect.tokenize.TokenError:
         pass
@@ -189,7 +193,7 @@ def set_plugins_paths():
 
   plugins = olexex.InstalledPlugins()
   olx.InstalledPlugins = set()
-  import AC4
+  import AC5
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
 
@@ -233,7 +237,7 @@ try:
   import olx
 except Exception as e:
   try:
-    x = os.getcwdu()
+    x = os.getcwd()
   except AttributeError:
     x = os.getcwd()
   os.chdir(datadir)
@@ -254,7 +258,7 @@ if timer:
 
 olx.Clear()
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
 
@@ -341,7 +345,11 @@ if timer:
   tt.append("%.3f s == onstartup()" %(time.time() - t))
   t = time.time()
   tt.append("IMPORTING PLUGINS...")
+
 set_plugins_paths()
+
+get_wing()
+
 if timer:
   tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))
   t = time.time()
@@ -351,7 +359,6 @@ import Loader
 if timer:
   tt.append("%.3f s == Loader" %(time.time() - t))
   t = time.time()
-
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
@@ -385,6 +392,10 @@ try:
   import userScripts
 except ImportError as err:
   print("Could not import userScripts: %s" %err)
+
+if olx.app.IsBaseDirWritable() == "true":
+  olexex.Cleanup(".tmp")
+
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()

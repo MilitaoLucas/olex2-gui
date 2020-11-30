@@ -9,10 +9,10 @@ f.close()
 #create a huma readible file
 tmp_fn = "%s/people.pickle.tmp" %olx.DataDir()
 f = open(tmp_fn, "w")
-for k, v in data.iteritems():
-  for k1, v1 in v.iteritems():
+for k, v in data.items():
+  for k1, v1 in v.items():
     f.write("%s\n" %k1)
-    for k2, v2 in v1.iteritems():
+    for k2, v2 in v1.items():
       f.write("    %s: %s\n" %(k2, v2))
 f.close()
 #edit the file
@@ -20,7 +20,7 @@ olx.Exec("notepad -o -s '%s'" %tmp_fn)
 #update the data
 f = open(tmp_fn, "r")
 dt = {}
-data[data.keys()[0]] = dt
+data[list(data.keys())[0]] = dt
 last_p = None
 for l in f:
   l = l.rstrip()
@@ -32,11 +32,11 @@ for l in f:
     if len(l) != 2:
       raise Exception('Invalid syntax: numer of tokens')
     last_p[l[0]] = l[1]
-    print "  New field %s: %s" %(l[0], l[1])
+    print("  New field %s: %s" %(l[0], l[1]))
   else:
     last_p = {}
     dt[l] = last_p
-    print 'New person: %s' %l
+    print('New person: %s' %l)
 f.close()
 #store new data
 f = open(fn, "wb")

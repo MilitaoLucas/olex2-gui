@@ -10,9 +10,9 @@ class Method_SIR(Method_solution):
   def do_run(self, RunPrgObject):
     from olexsir import Sir
 
-    print 'STARTING %s %s with %s' %(
+    print('STARTING %s %s with %s' %(
       RunPrgObject.program.name,
-      RunPrgObject.program.program_type, self.name)
+      RunPrgObject.program.program_type, self.name))
     RunPrgObject.solve = True
     sirversion = RunPrgObject.program.versions
     sirfile = "%s.sir"%(OV.FileName())
@@ -74,10 +74,10 @@ class Method_SIR(Method_solution):
 
     if OV.FindValue('settings_Gui') in (True, 'True', 'true'):
         oxs.Gui = True
-        print 'Starting with GUI'
+        print('Starting with GUI')
     else:
         oxs.Gui = False
-        print 'Starting without GUI'
+        print('Starting without GUI')
 
     if oxs.write(filename, data, inv, phase):
         resfile = r"%s/%s.res" %(olx.FilePath(), OV.FileName())
@@ -89,7 +89,7 @@ class Method_SIR(Method_solution):
           self.sort_out_sir2011_res_file()
 #        olx.Atreap(resfile) #No need to reap, it will be reaped anyway!
     else:
-        print 'No *.sir File!'
+        print('No *.sir File!')
 
   def sort_out_sir2011_res_file(self):
     import glob

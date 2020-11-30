@@ -1,3 +1,4 @@
+# obsolete module
 import sys
 import os
 import smtplib
@@ -16,11 +17,11 @@ OV = OlexFunctions()
 
 def OlexMail(SendorNot=0):
   if SendorNot <= 0:
-    print "This will attempt to email your PythonError.log to the Olex2 boys"
-    print "If this is what you want please check you have setup your:"
-    print "email address as email_address=; and"
-    print "mailserver information as mailserver="
-    print "In the usettings.dat file"
+    print("This will attempt to email your PythonError.log to the Olex2 boys")
+    print("If this is what you want please check you have setup your:")
+    print("email address as email_address=; and")
+    print("mailserver information as mailserver=")
+    print("In the usettings.dat file")
     return
   # These are just some variables for emailing
   recipients_address = "olex2pythonerrorlog@googlemail.com"
@@ -35,12 +36,12 @@ def OlexMail(SendorNot=0):
     if not email_address or not mailserver:
       if "email_address" in usettings_line:
         email_address = usettings_line.split("=")[-1].strip()
-        print "email_address = ", email_address
+        print("email_address = ", email_address)
       elif "mailserver" in usettings_line:
         mailserver = usettings_line.split("=")[-1].strip()
-        print "mailserver = ", mailserver
+        print("mailserver = ", mailserver)
     else:
-      print "Mail and server", email_address, mailserver
+      print("Mail and server", email_address, mailserver)
       break
   usettings.close()
 
@@ -60,7 +61,7 @@ def OlexMail(SendorNot=0):
     ctype = 'application/octet-stream'
     maintype, subtype = ctype.split('/', 1)
     fp = open(path, 'rb')
-    print maintype, subtype
+    print(maintype, subtype)
     attach = MIMEBase(maintype, subtype)
     attach.set_payload(fp.read())
     encode_base64(attach)
@@ -73,6 +74,6 @@ def OlexMail(SendorNot=0):
   server = smtplib.SMTP(mailserver)
   server.sendmail(From, To, msg.as_string()) #Send away
   server.quit()
-  print "Your log file has been emailed to the Olex2 Team, thank you for your support"
+  print("Your log file has been emailed to the Olex2 Team, thank you for your support")
   
 OV.registerFunction(OlexMail)

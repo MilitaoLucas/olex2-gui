@@ -18,10 +18,10 @@ experimantal = None
 def sql_update_str(table_name, d):
   sql = ["UPDATE %s SET" %table_name]
   fields = []
-  for k,v in d.iteritems():
+  for k,v in d.items():
     if k != 'id':
       if v is None: v = ""
-      elif isinstance(v, basestring):
+      elif isinstance(v, str):
         v = v.replace("'", "''")
       fields.append("%s='%s'" %(k, v))
   sql.append("%s where id='%s'" %(','.join(fields), d['id']))
@@ -31,11 +31,11 @@ def sql_update_str(table_name, d):
 def sql_insert_str(table_name, d):
   sql = ["INSERT INTO %s" %table_name]
   fields, values = [], []
-  for k,v in d.iteritems():
+  for k,v in d.items():
     if k != 'id':
       fields.append(k)
       if v is None: v = ""
-      elif isinstance(v, basestring):
+      elif isinstance(v, str):
         v = v.replace("'", "''")
       values.append("'%s'" %v)
   sql.append("(%s)" %(','.join(fields)))
@@ -138,8 +138,7 @@ class site:
       self.country = country
 
   def get_address(self):
-    return '\n'.join(filter(
-      None, (self.name, self.department, self.address, self.city, self.postcode, self.country)))
+    return '\n'.join([_f for _f in (self.name, self.department, self.address, self.city, self.postcode, self.country) if _f])
 
   def update(self):
     cursor = DBConnection().conn.cursor()
@@ -173,7 +172,7 @@ class LocalList:
       journalType = 'reference'
 
     if whatList in ('diffractometers','journals'):
-      if not self.dictionary[whatList].has_key(newValue):
+      if newValue not in self.dictionary[whatList]:
         if whatList == 'diffractometers':
           self.dictionary[whatList].setdefault(newValue,{'cif_def':'?'})
         else:
@@ -193,7 +192,7 @@ class LocalList:
         elif journalType == 'reference':
           OV.SetVar('snum_dimas_reference_journal_name', newValue)
     else:
-      print "Argument %s not allowed for parameter whatList" %whatList
+      print("Argument %s not allowed for parameter whatList" %whatList)
     return ""
 
   def getListJournals(self):
@@ -218,7 +217,7 @@ class LocalList:
       saveDict = {'diffractometers':self.dictionary['diffractometers']}
       saveLocalDictionary(saveDict)
     else:
-      print "The file specified does not exist"
+      print("The file specified does not exist")
     return ''
 
   def getDiffractometerDefinitionFile(self,diffractometer):
@@ -349,17 +348,16 @@ def getLocalDictionary(whichDict):
   if not os.path.exists(picklePath):
     createNewLocalDictionary(whichDict)
 
-  pfile = open(picklePath)
-  dictionary = pickle.load(pfile)
-  pfile.close()
+  with open(picklePath, 'rb') as pfile:
+    dictionary = pickle.load(pfile)
   if whichDict == 'diffractometers':
     dictionary = convertDiffractometerDictionary(dictionary)
 
   return dictionary
 
 def convertDiffractometerDictionary(dictionary):
-  if '' in dictionary['diffractometers'].values():
-    for item, value in dictionary['diffractometers'].items():
+  if '' in list(dictionary['diffractometers'].values()):
+    for item, value in list(dictionary['diffractometers'].items()):
       if value == '':
         dictionary['diffractometers'][item] = {'cif_def':'?'}
     saveLocalDictionary(dictionary)
@@ -449,9 +447,9 @@ def createNewLocalDictionary(whichDict):
 
 def saveLocalDictionary(dictionary):
   import variableFunctions
-  if dictionary.has_key('journals'):
+  if 'journals' in dictionary:
     picklePath = getPicklePath('journals')
-  elif dictionary.has_key('diffractometers'):
+  elif 'diffractometers' in dictionary:
     picklePath = getPicklePath('diffractometers')
   variableFunctions.Pickle(dictionary,picklePath)
 
@@ -506,7 +504,7 @@ class DBConnection():
       s = site()
       s.name = a[0]
       s.department = a[1]
-      s.address = (' '.join(filter(None, a[2:4]))).strip()
+      s.address = (' '.join([_f for _f in a[2:4] if _f])).strip()
       s.city = a[4]
       s.postcode = a[5]
       s.update()
@@ -536,7 +534,7 @@ class DBConnection():
     dictionary = pickle.load(pfile)
     pfile.close()
     dictionary = dictionary[name]
-    for k,v in dictionary.iteritems():
+    for k,v in dictionary.items():
       a_all = v['address']
       if '\n' in a_all:
         a_all = a_all.split('\n')
@@ -623,7 +621,7 @@ CREATE INDEX affiliationfk ON person (affiliationid);
       cursor = DBConnection._conn.cursor()
       try:
         cursor.execute("SELECT orchid_id FROM person limit 1")
-      except Exception, e:
+      except Exception as e:
         cursor.execute("Alter table person add column orchid_id TEXT default ''")
         print("Added orchid_id to person")
 

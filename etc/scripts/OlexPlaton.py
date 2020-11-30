@@ -67,11 +67,11 @@ class PlatonWrapper:
       olex_core.OnPlatonRun(p.pid)
       return p
     except:
-      print "Platon failed to run"
+      print("Platon failed to run")
       return
 
   def OlexPlaton(self, platonflag="0"):
-    print "Olex2 to Platon Linker"
+    print("Olex2 to Platon Linker")
     # initialisation step
     exe_name = "platon"
     try:
@@ -88,20 +88,20 @@ class PlatonWrapper:
     else:
       exe_name = olx.file.Which(exe_name)
     if not exe_name:
-      print 'The Platon executable could not be located, aborting'
+      print('The Platon executable could not be located, aborting')
       return
     chk_def = os.getenv("CHECKDEF")
     if not chk_def or not os.path.isfile(chk_def):
       chk_def = os.path.join(os.path.dirname(exe_name), "check.def")
       if not os.path.exists(chk_def):
-        print "Could not locate check.def, try setting the CHECKDEF system variable" +\
-            "or place it next to the executable"
+        print("Could not locate check.def, try setting the CHECKDEF system variable" +\
+            "or place it next to the executable")
       else:
         os.putenv("CHECKDEF", chk_def)
     #end of the initialisation
-    print "You are running flag: %s"%(platonflag)
+    print("You are running flag: %s"%(platonflag))
     inputfilename = OV.FileName()
-    print "Input file is: ", inputfilename
+    print("Input file is: ", inputfilename)
 
     # OS Checking
     if sys.platform[:3] == 'lin':
@@ -117,11 +117,11 @@ class PlatonWrapper:
 
     # Checking for help string
     if len(platonflag) > 1 or platonflag == "help":
-      print "Unknown option, please check options and try again"
+      print("Unknown option, please check options and try again")
       #if platonflag == help: # If no options given then we print all the possible commands out LOL
       # Preferred printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
       for key in self.platonflagcodes:
-        print " '%s' - %s"%(key, self.platonflagcodes[key][0])
+        print(" '%s' - %s"%(key, self.platonflagcodes[key][0]))
       return
     else:
       inputfile = inputfilename + ".cif"
@@ -131,47 +131,47 @@ class PlatonWrapper:
           olx.File(inputfile)
       if platonflag == "0":
         # Start just platon with the INS file
-        print "Calling Platon Directly"
+        print("Calling Platon Directly")
         a = self.run_platon([exe_name, inputfile])
         return a
       else:
         if platonflag == 'U':
           inputfile = OV.FileName() + '.cif'
           if not os.path.exists(inputfile):
-            print "This option requires a valid CIF file - checking"
-            print "No CIF present - why not make one with ACTA?"
-            print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
+            print("This option requires a valid CIF file - checking")
+            print("No CIF present - why not make one with ACTA?")
+            print("Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName()))
             return
         if not platonflag:
           tickornot = ""
         command = ["platon", "%s%s"%(tickornot, platonflag), inputfile] 
-        print "Now running this command %s" %command
+        print("Now running this command %s" %command)
         try:
           a = self.run_platon(command)
           a.wait()
           return
-        except Exception, err:
-          print "PLATON gave up. This is why: %s" %err
+        except Exception as err:
+          print("PLATON gave up. This is why: %s" %err)
 
       # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
       #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
       # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
         platon_extension = self.platonflagcodes[platonflag][1]
-        print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
+        print("The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension))
         try:
           platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
-          print "Successfully opened file", platon_result_file
-          print platon_result_file.read()
+          print("Successfully opened file", platon_result_file)
+          print(platon_result_file.read())
           platon_result_file.close()
         except IOError:
-          print "Failed to open file"
-        print "You can read this file by typing:"
-        print "edit %s"%(platon_extension)
+          print("Failed to open file")
+        print("You can read this file by typing:")
+        print("edit %s"%(platon_extension))
         return
 
   def command_list(self):
     rv = []
-    for k, v in self.platonflagcodes.iteritems():
+    for k, v in self.platonflagcodes.items():
       i = "%s<-%s>>echo %s" %(v[0],  "spy.OlexPlaton(%s)" % k, v[1])
       rv.append(i)
     rv.sort()

@@ -1,5 +1,3 @@
-# olexFunctions.py
-
 import math
 import os
 import sys
@@ -47,15 +45,15 @@ class OlexFunctions(inheritFunctions):
   def SetVar(self,variable,value):
     try:
       olex_core.SetVar(variable,value)
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
+    except Exception as ex:
+      print("Variable %s could not be set with value %s" %(variable,value), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def GetVar(self,variable,def_val=""):
     try:
       return olex_core.FindValue(variable,def_val)
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be retrieved" %(variable)
+    except Exception as ex:
+      print("Variable %s could not be retrieved" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def _replace_object(self, scope, object):
@@ -76,22 +74,22 @@ class OlexFunctions(inheritFunctions):
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
-      elif isinstance(value, basestring):
-        value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
+      elif isinstance(value, str):
+        value = "'%s'" %value.replace("'", "\\'").replace('$', '\\$')
       elif type(value) in (list, set):
-        value = ' '.join("'%s'" %v.replace("'", "\\'").encode('utf-8') for v in value)
+        value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
         try:
-          if type(value) is unicode:
+          if type(value) is str:
             pattern = '%d-%m-%Y'
             value = int(time.mktime(time.strptime(value, pattern)))
         except:
           pass
       else:
-        value = "'%s'"  %unicode(value).encode('utf-8')
+        value = "'%s'"  %str(value)
       handler.update_single_param(str(variable), value)
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
+    except Exception as ex:
+      print("Variable %s could not be set with value %s" %(variable,value), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def GetCifMergeFilesList(self):
@@ -109,6 +107,7 @@ class OlexFunctions(inheritFunctions):
 
       retVal = handler.get_validated_param(variable)
 
+      do_replace = True
       if type(retVal) == str and "()" in retVal:
         base = retVal.split('()')
         try:
@@ -116,25 +115,22 @@ class OlexFunctions(inheritFunctions):
           path = _()
           if os.path.exists(path):
             retVal = os.path.join(path, base[1][1:])
+          do_replace = False
         except:
           pass
 
-      #if not get_list:
-        #retVal = handler.get_validated_param(variable)
-      #else:
-        #retVal = handler.get_values_by_name(variable)
-
       if retVal is not None:
-        if isinstance(retVal, str):
-          retVal = retVal.decode('utf-8').replace('\\$', '$')
-        elif isinstance(retVal, unicode):
-          retVal = retVal.replace('\\$', '$')
-        elif isinstance(retVal, list) and len(retVal) > 0 and isinstance(retVal[0], str):
-          retVal = [x.decode('utf-8').replace('\\$', '$') for x in retVal]
+        if do_replace:
+          if isinstance(retVal, bytes):
+            retVal = str(retVal, 'utf-8').replace('\\$', '$')
+          elif isinstance(retVal, str):
+            retVal = retVal.replace('\\$', '$')
+          elif isinstance(retVal, list) and len(retVal) > 0 and isinstance(retVal[0], str):
+            retVal = [x.replace('\\$', '$') for x in retVal]
       else:
         retVal = default
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be found" %(variable)
+    except Exception as ex:
+      print("Variable %s could not be found" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
     return retVal
 
@@ -209,7 +205,7 @@ class OlexFunctions(inheritFunctions):
 #      print "Accessing %s" %key
       if tem is None or tem == default:
         return default
-      if isinstance(tem, basestring):
+      if isinstance(tem, str):
         if output_format == 'html':
           tem = tem.replace(';\n','')
           tem = tem.replace('\n;','')
@@ -225,7 +221,7 @@ class OlexFunctions(inheritFunctions):
         try:
           return ", ".join([bit for bit in tem])
         except Exception as ex:
-          print ex
+          print(ex)
     return default
 
   def update_crystal_size(self):
@@ -244,7 +240,7 @@ class OlexFunctions(inheritFunctions):
     if olx.cif_model is not None:
       data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
-      if isinstance(value, basestring):
+      if isinstance(value, str):
         value = value.strip()
         if value == '': value = '?'
         data_block[key] = value
@@ -275,8 +271,8 @@ class OlexFunctions(inheritFunctions):
       import olexex
       self.SetParam('%s.solution.program' %scope, program)
       olexex.onSolutionProgramChange(program, method,scope)
-    except Exception, ex:
-      print >> sys.stderr, "Program %s could not be set" %(program)
+    except Exception as ex:
+      print("Program %s could not be set" %(program), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def set_refinement_program(self, program, method=None, scope='snum'):
@@ -284,8 +280,8 @@ class OlexFunctions(inheritFunctions):
       import olexex
       self.SetParam('%s.refinement.program' %scope, program)
       olexex.onRefinementProgramChange(program, method, scope)
-    except Exception, ex:
-      print >> sys.stderr, "Program %s could not be set" %(program)
+    except Exception as ex:
+      print("Program %s could not be set" %(program), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def have_nsff(self):
@@ -299,8 +295,8 @@ class OlexFunctions(inheritFunctions):
       import programSettings
       self.SetParam('snum.refinement.max_cycles', max_cycles)
       programSettings.onMaxCyclesChange(max_cycles)
-    except Exception, ex:
-      print >> sys.stderr, "Could not set max cycles to %s" %(max_cycles)
+    except Exception as ex:
+      print("Could not set max cycles to %s" %(max_cycles), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def SetMaxPeaks(self, max_peaks):
@@ -339,8 +335,8 @@ class OlexFunctions(inheritFunctions):
           max_peaks = int(math.copysign(max_peaks, old_value)) # keep sign of old value
       self.SetParam('snum.refinement.max_peaks', max_peaks)
       programSettings.onMaxPeaksChange(max_peaks)
-    except Exception, ex:
-      print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
+    except Exception as ex:
+      print("Could not set max peaks to %s" %(max_peaks), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def GetOSF(self):
@@ -401,15 +397,15 @@ class OlexFunctions(inheritFunctions):
     except:
       return False
 
-  def FindValue(self,variable,default=u''):
+  def FindValue(self,variable,default=''):
     try:
       retVal = olex_core.FindValue(variable, default)
-    except SystemError, ex:
-      print >> sys.stderr, "System error with variable %s" %(variable)
+    except SystemError as ex:
+      print("System error with variable %s" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retVal = ''
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be found" %(variable)
+    except Exception as ex:
+      print("Variable %s could not be found" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retVal = ''
     return retVal
@@ -420,8 +416,8 @@ class OlexFunctions(inheritFunctions):
   def FindObject(self,variable):
     try:
       retVal = olex_core.FindObject(variable)
-    except Exception, ex:
-      print >> sys.stderr, "An object for variable %s could not be found" %(variable)
+    except Exception as ex:
+      print("An object for variable %s could not be found" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retVal = None
     return retVal
@@ -429,8 +425,8 @@ class OlexFunctions(inheritFunctions):
   def IsVar(self,variable):
     try:
       retVal = olex_core.IsVar(variable)
-    except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to find variable %s" %(variable)
+    except Exception as ex:
+      print("An error occured whilst trying to find variable %s" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retVal = False
     return retVal
@@ -438,8 +434,8 @@ class OlexFunctions(inheritFunctions):
   def Translate(self,text):
     try:
       retStr = olex_core.Translate(text)
-    except Exception, ex:
-      print >> sys.stderr, "An error occured whilst translating %s" %(text)
+    except Exception as ex:
+      print("An error occured whilst translating %s" %(text), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -447,8 +443,8 @@ class OlexFunctions(inheritFunctions):
   def TranslatePhrase(self,text):
     try:
       retStr = olx.GetVar(text, olx.TranslatePhrase(text))
-    except Exception, ex:
-      print >> sys.stderr, "An error occured whilst translating %s" %(text)
+    except Exception as ex:
+      print("An error occured whilst translating %s" %(text), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -457,8 +453,8 @@ class OlexFunctions(inheritFunctions):
   def CurrentLanguageEncoding(self):
     try:
       retStr = olx.CurrentLanguageEncoding()
-    except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to determine the current language encoding"
+    except Exception as ex:
+      print("An error occured whilst trying to determine the current language encoding", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
@@ -491,7 +487,7 @@ class OlexFunctions(inheritFunctions):
             mask = COA.OlexCctbxAdapter().load_mask()
             if mask:
               COA.write_fab(mask, fab_path)
-          except Exception, e:
+          except Exception as e:
             print("Failed to create FAB file: %s" %str(e))
       if type(filepath) == list:
         olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
@@ -500,8 +496,8 @@ class OlexFunctions(inheritFunctions):
       if report:
         pass
         #print "Refinement CIF file has been merged with the meta-data cif file"
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred whilst trying to find merge cif files"
+    except Exception as ex:
+      print("An error occurred whilst trying to find merge cif files", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def reset_file_in_OFS(self,fileName,txt=" ",copyToDisk = False):
@@ -509,18 +505,14 @@ class OlexFunctions(inheritFunctions):
       import OlexVFS
       OlexVFS.write_to_olex(fileName, txt)
       if copyToDisk:
-        wFile = open("%s/%s" %(self.DataDir(),fileName),'w')
+        wFile = open("%s/%s" %(self.DataDir(),fileName),'wb')
         wFile.write(txt)
         wFile.close()
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred whilst trying to write to the VFS"
+    except Exception as ex:
+      print("An error occurred whilst trying to write to the VFS", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
-    try:
-      text = text.encode('utf-8')
-    except:
-      text = text.decode('utf-8')
     try:
       import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
@@ -528,8 +520,8 @@ class OlexFunctions(inheritFunctions):
         wFile = open("%s/%s" %(self.DataDir(),fileName),'w')
         wFile.write(text)
         wFile.close()
-    except Exception, ex:
-      print >> sys.stderr, "An error occurred whilst trying to write to the VFS"
+    except Exception as ex:
+      print("An error occurred whilst trying to write to the VFS", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def external_edit(self,filePath):
@@ -578,15 +570,15 @@ class OlexFunctions(inheritFunctions):
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
           olx.html.Update()
-    except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
+    except Exception as ex:
+      print("An error occured whilst trying to reload %s/%s" %(path, file), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
   def file_ChangeExt(self, path, newExt):
     try:
       newPath = olx.file.ChangeExt(path, newExt)
-    except Exception, ex:
-      print >> sys.stderr, "An error occured"
+    except Exception as ex:
+      print("An error occured", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
     return newPath
 
@@ -602,7 +594,7 @@ class OlexFunctions(inheritFunctions):
     retVal = ''
     try:
       retVal = f(*args, **kwds)
-    except Exception, ex:
+    except Exception as ex:
       sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
       sys.stderr.formatExceptionInfo()
     finally:
@@ -647,7 +639,7 @@ class OlexFunctions(inheritFunctions):
         retVal = f(*args, **kwds)
       except SilentException:
         pass
-      except Exception, ex:
+      except Exception as ex:
         sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
         sys.stderr.formatExceptionInfo()
       finally:
@@ -657,12 +649,12 @@ class OlexFunctions(inheritFunctions):
   if False:  ## Change this to True to print out information about all the function calls
     def func_wrap(self,f):
       def func(*args, **kwds):
-        print f
-        print f.func_code
-        print
+        print(f)
+        print(f.__code__)
+        print()
         try:
           retVal = f(*args, **kwds)
-        except Exception, ex:
+        except Exception as ex:
           sys.stderr.write("An error occurred running the function/macro %s\n" %(f.__name__))
           sys.stderr.formatExceptionInfo()
           retVal = ''
@@ -683,8 +675,8 @@ class OlexFunctions(inheritFunctions):
         a = cProfile.Profile()
         try:
           retVal = a.runcall(f, *args, **kwds)
-        except Exception, ex:
-          print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
+        except Exception as ex:
+          print("An error occurred running the function/macro %s" %(f.__name__), file=sys.stderr)
           sys.stderr.formatExceptionInfo()
           retVal = ''
         #retVal = cProfile.runctx('f(*args, **kwds)', {'f':f, 'args':args, 'kwds':kwds}, {}, filename="olex.prof")
@@ -780,8 +772,8 @@ class OlexFunctions(inheritFunctions):
     try:
       retval = olex.f(str)
       return retval
-    except Exception, err:
-      print "Printing error %s" %err
+    except Exception as err:
+      print("Printing error %s" %err)
       return "Error"
 
   def HKLSrc(self, new_HKLSrc=''):
@@ -897,6 +889,9 @@ class OlexFunctions(inheritFunctions):
       pass
     return olx.olex2_tag
 
+  def GetBaseTag(self):
+    return self.GetTag().split('-')[0]
+
   def GetKeyname(self):
     import glob
     g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
@@ -907,7 +902,7 @@ class OlexFunctions(inheritFunctions):
   def ListFiles(self, dir_name, mask=None):
     import glob
     rv = []
-    cd = os.getcwdu()
+    cd = os.getcwd()
     try:
       dir_name = os.path.normpath(dir_name)
       if not mask:
@@ -1066,15 +1061,15 @@ class OlexFunctions(inheritFunctions):
     This function takes a list of Olex2 commands and will execute these sequentially.
     """
 
-    if type(cmds) is unicode:
+    if type(cmds) is str:
       cmd = cmds.split(">>")
       cmd = ">>".join(cmd)
     else:
       cmd = ">>".join(cmds)
     try:
       olx.Run(cmd)
-    except Exception, err:
-      print err
+    except Exception as err:
+      print(err)
 
 
   def canNetwork(self, show_msg=True):
@@ -1190,3 +1185,6 @@ OV.registerFunction(OV.ModelSrc)
 OV.registerFunction(OV.HasCif)
 OV.registerFunction(OV.GetCifMergeFilesList)
 OV.registerFunction(OV.runCommands)
+OV.registerFunction(OV.IsPluginInstalled)
+OV.registerFunction(OV.GetTag)
+OV.registerFunction(OV.GetBaseTag)
