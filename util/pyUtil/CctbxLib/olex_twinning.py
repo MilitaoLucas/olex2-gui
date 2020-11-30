@@ -1,12 +1,10 @@
-from __future__ import division
-
 import os, sys
 import olx
 import olex_hkl
 import OlexVFS
 import time
 import math
-from cStringIO import StringIO
+from io import StringIO
 import ntpath
 
 import cProfile
@@ -84,7 +82,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.registerFunction(self.run_from_gui,False,'twin')
 
   def run_from_gui(self, personal=0):
-    print "Searching for Twin laws..."
+    print("Searching for Twin laws...")
     OV.Cursor("busy", "Searching for Twin laws...")
     personal=int(personal)
     self.run(personal) #personal
@@ -151,7 +149,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     elif personal==2: #Sphere Search
       twin_laws=self.find_SS_twin_laws()
     else:
-      print ("Invalid parameter passed, personal=", personal)
+      print("Invalid parameter passed, personal=", personal)
 
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     ordered_twins=self.purge_duplicates(ordered_twins)
@@ -475,7 +473,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     size=OV.GetParam('snum.twinning.olex2.size_sphere')
     threshold=OV.GetParam('snum.twinning.olex2.threshold_sphere')
-    print ("Using Spherical Search: \n Bad HKL to check: %d, \n Cutoff Threshold %.4f"%(size,threshold))
+    print("Using Spherical Search: \n Bad HKL to check: %d, \n Cutoff Threshold %.4f"%(size,threshold))
     olx.Refresh()
 
     twin_laws+=self.find_twofold_axes_sphere(hkl, threshold,size)
@@ -505,7 +503,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     rotation_fraction=OV.GetParam('snum.twinning.olex2.rotation_fraction')
     size=OV.GetParam('snum.twinning.olex2.max_index')
     threshold=OV.GetParam('snum.twinning.olex2.threshold')
-    print ("Using personal values: \n Max Index: %d, \n Rotation Fractions: %d, \n Cutoff Threshold %.4f"%(size,rotation_fraction,threshold))
+    print("Using personal values: \n Max Index: %d, \n Rotation Fractions: %d, \n Cutoff Threshold %.4f"%(size,rotation_fraction,threshold))
     olx.Refresh()
 
     twin_laws+=self.find_twin_axes(threshold,size,rotation_fraction)
@@ -672,7 +670,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           basf_minimum=basf_new
           r_minimum=r_new
         else:
-          print "basf equivalent, breaking"
+          print("basf equivalent, breaking")
           break
       else: #r_new>r_minimum
         if basf_minimum<basf_new:
@@ -682,7 +680,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           basf_lower=basf_new
           r_lower=r_new
         else:
-          print "basf equivalent, breaking"
+          print("basf equivalent, breaking")
           break
       trials +=1
 
@@ -1032,7 +1030,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def all_axes(self, max_index):
     fo2 = self.reflections.f_sq_obs_filtered
     indexes=flex.miller_index()
-    for twin_axis in itertools.product(numpy.arange(-max_index,max_index+1),numpy.arange(-max_index,max_index+1),range(max_index+1)):
+    for twin_axis in itertools.product(numpy.arange(-max_index,max_index+1),numpy.arange(-max_index,max_index+1),list(range(max_index+1))):
       indexes.append(twin_axis)
 
     miller_set=miller.set(crystal_symmetry=fo2.crystal_symmetry(),
@@ -1056,7 +1054,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     twin_laws=[]
 
-    import cProfile, pstats, StringIO
+    import cProfile, pstats
     sortby = 'cumulative'
 
 
@@ -1066,7 +1064,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.get_integral_twin_laws()
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1088,7 +1086,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twofold_axes_sphere(hkl, 0.01)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1112,7 +1110,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes(threshold_finding, size_limit, RF)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1140,7 +1138,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes(threshold_finding, size_limit, RF)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1166,7 +1164,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes_sphere(hkl, threshold_finding)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1191,7 +1189,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes_sphere(hkl, threshold_finding)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1215,7 +1213,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes(threshold_finding, size_limit, RF)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1239,7 +1237,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes_sphere(hkl, threshold_finding)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1267,7 +1265,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     laws=self.find_twin_axes(threshold_finding, size_limit, RF)
 
     pr.disable()
-    s = StringIO.StringIO()
+    s = io.StringIO()
     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 
     ps.print_stats(10)
@@ -1317,7 +1315,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     for i,vec0 in enumerate(hkl_choice):
       if len(twin_laws)>3:
-        print ("Twin laws found on try " + str(i))
+        print("Twin laws found on try " + str(i))
         break
       viable_rotation_points+=[self.find_same_distance_points(vec0,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
@@ -1433,7 +1431,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     for i,v in enumerate(hkl_choice):
       if len(twin_laws)>number_laws:
-        print ("Twin laws found on try " + str(i))
+        print("Twin laws found on try " + str(i))
         break
       viable_rotation_points+=[self.find_same_distance_points(v,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
@@ -1534,11 +1532,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         l_max=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(upper_discriminant))/mod_c_star**2)
         l_min=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(upper_discriminant))/mod_c_star**2)
         if lower_discriminant<0:
-          possible_l=range(int(l_min),int(l_max+1))
+          possible_l=list(range(int(l_min),int(l_max+1)))
         else:
           l_max_lower=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(lower_discriminant))/mod_c_star**2)
           l_min_upper=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(lower_discriminant))/mod_c_star**2)
-          possible_l=range(int(l_min),int(l_min_upper)+1)+range(int(l_max_lower),int(l_max+1))
+          possible_l=list(range(int(l_min),int(l_min_upper)+1))+list(range(int(l_max_lower),int(l_max+1)))
         for l in possible_l:
           size_h=self.size_of_3d_vector(numpy.dot(orthogonalization.T,[h,k,l]))
           if hkl[0]==h and hkl[1]==k and hkl[2]==l:
@@ -1626,7 +1624,7 @@ OV.registerFunction(get_twinning_result_filename)
 def on_twin_image_click(run_number):
   global twin_laws_d
   if not twin_laws_d:
-    import cPickle as pickle
+    import pickle as pickle
     p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
     with open (p, "rb") as infile:
       twin_laws_d = pickle.load(infile)
@@ -1644,8 +1642,8 @@ def on_twin_image_click(run_number):
 
 
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
-    print ("Using twin law: %s" %twin_law_disp)
-    print ("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
+    print("Using twin law: %s" %twin_law_disp)
+    print("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
     olx.HKLF(2)
@@ -1654,8 +1652,8 @@ def on_twin_image_click(run_number):
     hklname="%s_twin%02d.hkl"%(OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl"), int(run_number))
     OV.HKLSrc(hklname)
   else:
-    print ("Using twin law: %s" %twin_law_disp)
-    print ("This is an integral twin law, and twinning will be handled by the refinement program.")
+    print("Using twin law: %s" %twin_law_disp)
+    print("This is an integral twin law, and twinning will be handled by the refinement program.")
     OV.DelIns("TWIN")
     olx.HKLF(0)
     OV.DelIns("BASF")
@@ -1683,7 +1681,7 @@ def reset_twin_law_img():
     for row in c:
       for el in row:
         curr_law.append(el)
-    for i in xrange(3):
+    for i in range(3):
       curr_law.append(0.0)
     curr_law = tuple(curr_law)
 
@@ -1719,7 +1717,7 @@ def round_matrix_elements(matrix):
   round_tol = 0.01
   round_val_l = [0,0.25,0.5,0.75,1,0.333,0.666]
   round_disp_l = ['0','1/4','1/2','3/4','1','1/3','2/3']
-  round_l = zip(round_val_l, round_disp_l)
+  round_l = list(zip(round_val_l, round_disp_l))
   new_matrix = []
   for item in matrix:
     try:
@@ -1749,7 +1747,7 @@ def round_matrix_elements(matrix):
 def find_2_fold_olex2():
   import gui.tools
   cmd = "TestR"
-  res = filter(None, gui.tools.scrub(cmd))
+  res = [_f for _f in gui.tools.scrub(cmd) if _f]
 
   if "batch" not in " ".join(res).lower():
     return
@@ -1776,7 +1774,7 @@ OV.registerFunction(find_2_fold_olex2)
 
 def make_law_images(twin_law, lawcount):
   global twin_laws_d
-  from ImageTools import *
+  from ImageTools import IT
   IT = ImageTools()
   from PilTools import MatrixMaker
   MM = MatrixMaker()

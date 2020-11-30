@@ -1,4 +1,4 @@
-from __future__ import division
+
 #import PngImagePlugin
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
@@ -278,13 +278,13 @@ class GuiSkinChanger(ImageTools):
           extensionFile = open(r"%s/config%s.txt" %(skinpath, skin_extension), 'r')
           files.append(extensionFile)
         except:
-          print "Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, skin_extension)
+          print("Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, skin_extension))
       # Then load the actual named skin.
       path = r"%s/config.txt" %(skinpath)
       if os.path.exists(path):
         rFile = open(path, 'r')
       else:
-        print "The file %s can not be found" %path
+        print("The file %s can not be found" %path)
         extensionFile.close()
         return
       files.append(rFile)
@@ -300,11 +300,11 @@ class GuiSkinChanger(ImageTools):
         sys.path.append("%s/util/pyUtil/PluginLib/Skins/plugin-%sSkin" %(olx.BaseDir(), skin))
         PilTools = __import__("PilTools_%s" %skin)
         if verbose:
-          print "Using %s skin." %"PilTools_%s" %(skin)
-      except ImportError, err:
-        print "Import Error: %s (Now Using Default PilTools)" %err
+          print("Using %s skin." %"PilTools_%s" %(skin))
+      except ImportError as err:
+        print("Import Error: %s (Now Using Default PilTools)" %err)
         import PilTools
-      except Exception, err:
+      except Exception as err:
         raise
       #self.params.html.base_colour.rgb = config.get('GUI_HTMLself.params.html.base_colour.rgb', '#0000ff')
       self.setGuiAttributes(config)
@@ -426,7 +426,7 @@ class MatrixMaker(ImageTools):
     font = font_small
     w = 0
 
-    for i in xrange(len(text_def)):
+    for i in range(len(text_def)):
       item = text_def[i].get('txt',"")
       colour = text_def[i].get('font_colour',"")
       w = draw.textsize(str(item), font=font)[0]
@@ -500,7 +500,7 @@ class BarMaker(object):
 
     j = 0
     k = 0
-    for i in xrange(weight):
+    for i in range(weight):
       draw.line(((i, 0) ,(i, size[1])), fill=colour[k])
       j += 1
       if j > 3:
@@ -562,14 +562,14 @@ class BarGenerator(ArgumentParser):
     image = Image.new('RGBA', size, colour[0])
     draw = ImageDraw.Draw(image)
 
-    for i in xrange(weight):
+    for i in range(weight):
       draw.line(((i, 0) ,(i, size[1])), fill=colour[i])
 
     adjustment_bottom = (1.1, 1.3, 2)
     adjustment_top = (0.8, 0.95, 1.03)
 
-    for j in xrange(3):
-      for i in xrange(weight):
+    for j in range(3):
+      for i in range(weight):
         c = []
         for item in colour[i]:
           c.append(item/adjustment_bottom[j])
@@ -612,7 +612,7 @@ class BarGenerator(ArgumentParser):
       size = (width, int(height))
       image = Image.new('RGBA', size, colour[0])
       draw = ImageDraw.Draw(image)
-      for i in xrange(weight):
+      for i in range(weight):
         draw.line(((i, 0) ,(i, size[1])), fill=colour[i])
     else:
       #Automatic adjustment
@@ -627,8 +627,8 @@ class BarGenerator(ArgumentParser):
     adjustment_bottom = (1.1, 1.3, 2)
     adjustment_top = (0.8, 0.95, 1.03)
     # Create the top and bottom shading for each bar
-    for j in xrange(3):
-      for i in xrange(width):
+    for j in range(3):
+      for i in range(width):
         c = []
         samplepixheight = int(image.size[1]/2)
         cpx = image.getpixel((i,samplepixheight))
@@ -659,7 +659,7 @@ class MakeAllRBars(BarGenerator):
     OlexVFS.save_image_to_olex(self.makeRBarScale(), name, 2)
     name = "vbar-sol.png"
     OlexVFS.save_image_to_olex(self.make_RBar('sol', factor=self.factor), name, 2)
-    for i in xrange(221):
+    for i in range(221):
       R = i/1000
       name = "vbar-%i.png" %(R*1000)
       image_exists = olex_fs.Exists(name)
@@ -670,7 +670,7 @@ class MakeAllRBars(BarGenerator):
         OlexVFS.save_image_to_olex(image, name, 2)
 
   def run_(self):
-    for i in xrange (100):
+    for i in range (100):
       size = i + 1
       if i >= 20:
         colour = 'purple'
@@ -711,7 +711,7 @@ class MakeAllRBars(BarGenerator):
     font = IT.registerFontInstance(font_name, font_size)
 
     divisions = 4
-    for i in xrange(divisions):
+    for i in range(divisions):
       if i ==0:
         continue
       txt = str((divisions - (i - 1)) * scale)
@@ -851,7 +851,7 @@ class timage(ArgumentParser):
     self.advertise_new = False
 
     new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
-    self.new_l = map(lambda s: s.strip(), new_l)
+    self.new_l = [s.strip() for s in new_l]
 
     self.width = IT.skin_width
     self.max_width = IT.max_width
@@ -959,10 +959,10 @@ class timage(ArgumentParser):
       a = getattr(self, item)
       a()
       if self.timer:
-        print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+        print("\t - %s took %.3f s to complete" %(item, self.time.time()-t1))
 
   def resize_news_image(self, width_adjust=0, width=None, vfs=False):
-    tag = OV.GetTag().split('-')[0]
+    tag = OV.GetBaseTag()
     name = 'news/news-%s' % tag
     if vfs: name += '_tmp@vfs'
     else: name += '.png'
@@ -1056,7 +1056,7 @@ class timage(ArgumentParser):
     #cut = 30*sf, 150*sf, 55*sf, 175*sf
     #crop =  im.crop(cut)
     #crop_colouriszed = IT.colourize(crop, (0,0,0), self.params.html.table_firstcol_colour.rgb)
-    for i in xrange(12):
+    for i in range(12):
       self.makeCharcterCircles(str(i), im, self.params.html.table_firstcol_colour.rgb)
 
     colo =  IT.adjust_colour(self.params.green.rgb,saturation=0.7,luminosity=2.1)
@@ -1428,7 +1428,7 @@ class timage(ArgumentParser):
         else:
           self.name = name = "%s%s.png" %(auto_name.replace(" ", "_"), state)
         if not image:
-          print "Image %s has not been created" %name
+          print("Image %s has not been created" %name)
         self.save_with_checking_for_needed()
         self.advertise_new = False
 
@@ -1537,10 +1537,10 @@ class timage(ArgumentParser):
     IM =  Image.new('RGBA', size, bannerbg)
     #IM =  Image.new('RGBA', size, "#aaaa00")
     draw = ImageDraw.Draw(IM)
-    for i in xrange(22):
+    for i in range(22):
       lum = 1.00 - ((5-i) * (0.02))
       draw.line(((0,i),(width,i)), fill=IT.adjust_colour(bannerbg,luminosity=lum,saturation = lum))
-    for i in xrange(22):
+    for i in range(22):
       lum = 1.00 - ((5 -i) * (0.02))
       draw.line(((0,height  - i),(width,height - i)), fill=IT.adjust_colour(bannerbg,luminosity=lum, saturation = lum))
 
@@ -1548,7 +1548,7 @@ class timage(ArgumentParser):
     title_l = [True, False, False]
     lower_l = [False, True, True]
 
-    for i in xrange(3):
+    for i in range(3):
       for item in txt_items:
         row = txt_items[item].get("row",0)
         if row != i:
@@ -1580,7 +1580,7 @@ class timage(ArgumentParser):
     size = (width, height)
     self.banner_make_decoration_image(size)
 
-    for j in xrange(129):
+    for j in range(129):
       self.banner_map = "<map name='banner_map'>"
       step = 10
       x1 = 0 + j * step
@@ -1597,7 +1597,7 @@ class timage(ArgumentParser):
       title_l = [True, False, False]
       lower_l = [False, True, True]
 
-      for i in xrange(3):
+      for i in range(3):
         for item in txt_items:
           row = txt_items[item].get("row",0)
           if row != i:
@@ -1707,7 +1707,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     division_col = IT.HTMLColorToRGB(self.params.html.base_colour.rgb) + (255,)
     left = width/2
     right = width/2
-    for j in xrange(40):
+    for j in range(40):
       y1 = 1
       if j % 2:
         y1 = 2
@@ -1761,7 +1761,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     division_col = self.params.html.base_colour.rgb
     left = width/2
     right = width/2
-    for j in xrange(40):
+    for j in range(40):
       y1 = 1
       if j % 2:
         y1 = 2
@@ -1911,7 +1911,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       a = getattr(self, item)
       a()
       if self.timer:
-        print "/t%s took %.3f s to complete" %(item, self.time.time()-t1)
+        print("/t%s took %.3f s to complete" %(item, self.time.time()-t1))
 
   def save_with_checking_for_needed(self):
     name = self.name#.lower()
@@ -2063,7 +2063,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if self.timer:
         t = self.time.time()-t1
         self.text_time += t
-        print "\t\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
+        print("\t\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item))
 
 
 
@@ -2105,7 +2105,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           self.image_type = image_type
           self.save_with_checking_for_needed()
         if self.timer:
-          print "\t\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+          print("\t\t - %s took %.3f s to complete" %(item, self.time.time()-t1))
 
   def make_text_and_tab_items(self):
     bitmap = "working"
@@ -2178,7 +2178,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             try:
               OlexVFS.save_image_to_olex(image,name, 2)
             except:
-              print "Oh-OH!!!"
+              print("Oh-OH!!!")
             #image.save("C:/tmp/%s" %name)
             i += 1
 
@@ -2293,7 +2293,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         el = ""
         i = 0
         char = bit[0:1]
-        while unicode.isalpha(char):
+        while str.isalpha(char):
           el += char
           i += 1
           char = bit[i:(i+1)]
@@ -2543,14 +2543,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     self.params = OV.GuiParams()
     if not self.width:
-      print "Width not set"
+      print("Width not set")
       return
 
     if not width:
       width = self.width
 
     if width < 2:
-      print "Width of this object is too small!"
+      print("Width of this object is too small!")
       return
 
     global image_blanks
@@ -2769,7 +2769,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = timage_blanks[self.params.skin.name][type_key][state]
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
-            print "FROM CACHE: %s (%s)" %(item, state)
+            print("FROM CACHE: %s (%s)" %(item, state))
 
           nam = item
           if outside_name:
@@ -2842,7 +2842,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
     if self.debug:
-      print "FROM SCRATCH: %s" %item
+      print("FROM SCRATCH: %s" %item)
 
     nam = item
     if outside_name:
@@ -2890,7 +2890,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt = olx.xf.DataName(current)
       cnt = int(olx.xf.DataCount())
       counter = 0
-      for i in xrange(0, cnt):
+      for i in range(0, cnt):
         if olx.xf.DataName(i) == "global":
           continue
         else:
@@ -2917,7 +2917,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     width, height = image.size
     draw = ImageDraw.Draw(image)
-    for i in xrange(weight):
+    for i in range(weight):
       draw.line((i,i,width-1-i,i), fill = fill)
       draw.line((i,height -1-i,width-1-i,height -1-i), fill = fill)
       draw.line((i,i,i,height - 1-i), fill = fill)
@@ -2980,9 +2980,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         fill = "#ff0000"
 
       margin += bm_width * 2
-      for i in xrange(int(h/2) - 2):
+      for i in range(int(h/2) - 2):
         y = 2 + i * 2
-        for j in xrange(bm_width):
+        for j in range(bm_width):
           x = (w - margin) + j * 2
           draw.point((x, y), fill)
 

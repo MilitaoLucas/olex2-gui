@@ -24,7 +24,7 @@ with open('discamb2tsc.log', "rU") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:
-      print x
+      print(x)
     time.sleep(1)
   
-print "Finished"
+print("Finished")

@@ -62,7 +62,7 @@ def makeHtmlTable(list):
     boxText = ''
     i = 0
     for box in ['box1','box2','box3','box4']:
-      if box in input_d.keys():
+      if box in list(input_d.keys()):
         i += 1
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
@@ -74,7 +74,7 @@ def makeHtmlTable(list):
           box_d.setdefault('value', "spy.GetParam('%(varName)s')" %box_d)
           box_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %box_d)
 
-        if box_d.has_key('extra_onchange'):
+        if 'extra_onchange' in box_d:
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
         bt =  makeHtmlInputBox(box_d)
         #IN
@@ -113,7 +113,7 @@ def makeHtmlTable(list):
         input_d.setdefault('value', "spy.GetParam('%(varName)s')" %input_d)
         input_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %input_d)
       input_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
-      if input_d.has_key('extra_onchange'):
+      if 'extra_onchange' in input_d:
         input_d['onchange'] += ">>%s" %input_d['extra_onchange']
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
@@ -124,7 +124,7 @@ def makeHtmlTable(list):
   return OV.Translate(text)
 
 def makeHtmlInputBox(inputDictionary):
-  if inputDictionary.has_key('items'):
+  if 'items' in inputDictionary:
     inputDictionary.setdefault('type','combo')
     inputDictionary.setdefault('readonly','readonly')
   else:
@@ -132,7 +132,7 @@ def makeHtmlInputBox(inputDictionary):
       inputDictionary['onleave'] = inputDictionary['onchange']
       del inputDictionary['onchange']
 
-  if inputDictionary.has_key('multiline'):
+  if 'multiline' in inputDictionary:
     inputDictionary.setdefault('height','35')
 
   dictionary = {
@@ -197,15 +197,15 @@ def makeHtmlTableRow(dictionary):
   href_1 = ""
   href_2 = ""
 
-  if 'href' in dictionary.keys():
+  if 'href' in list(dictionary.keys()):
     href_content= dictionary['href']
     href_1 = '<a href="%s">' %href_content
     href_2 = '</a>'
     dictionary['href'] = ""
 
-  if 'chooseFile' in dictionary.keys():
+  if 'chooseFile' in list(dictionary.keys()):
     chooseFile_dict = dictionary['chooseFile']
-    if 'file_type' in chooseFile_dict.keys():
+    if 'file_type' in list(chooseFile_dict.keys()):
       href = "spy.set_source_file(%(file_type)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>html.Update" %chooseFile_dict
     else:
       href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>html.Update" %chooseFile_dict
@@ -230,7 +230,7 @@ def makeHtmlTableRow(dictionary):
   FieldText = ''
   count=0
   for field in ['field1','field2']:
-    if field in dictionary.keys():
+    if field in list(dictionary.keys()):
       count += 1
       field_d = dictionary[field]
       field_d.setdefault('itemName', '')
@@ -454,7 +454,7 @@ def make_combo_text_box(d):
      }
   dic.update(d)
 
-  if dic.has_key('readonly'):
+  if 'readonly' in dic:
     if dic['readonly']:
       dic['readonly'] = "readonly"
     else:
@@ -496,7 +496,7 @@ def make_tick_box_input(d):
          'state':'',
      }
   dic.update(d)
-  if dic.has_key('checked'):
+  if 'checked' in dic:
     dic['checked'] = "checked='%s'" %dic.get('checked')
   else:
     dic.setdefault('checked','')
@@ -672,7 +672,7 @@ def format_help(txt):
   ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
 
-  regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
+  regex = re.compile(r"  XX (.*?)( [^\\XX\\XX]* ) XX ", re.X)
   m = regex.findall(txt)
   code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
   code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
@@ -1451,7 +1451,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
 
   elif number == "list":
     txt = ""
-    for i in xrange(max_i):
+    for i in range(max_i):
       if i == 0: continue
       t = OV.TranslatePhrase("tip-%i" %i)
       if "tip-" in t:

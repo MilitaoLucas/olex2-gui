@@ -1,4 +1,4 @@
-from __future__ import division
+
 #import FileSystem as FS
 from ArgumentParser import ArgumentParser
 import glob, os
@@ -197,10 +197,10 @@ class BrukerSaint(ImageTools):
           self.make_reset_structure_gui()
         olx.html.Update()
           
-    except Exception, ex:
-      print "There was a problem in BrukerSaint"
+    except Exception as ex:
+      print("There was a problem in BrukerSaint")
       sys.stderr.formatExceptionInfo()
-      print repr(ex)
+      print(repr(ex))
       
       
   def make_box_image(self):
@@ -303,7 +303,7 @@ class BrukerSaint(ImageTools):
           jj = j
         box_id = "%s-%s" %(run, jj)
         ls_file['boxes'].setdefault(box_id, [])
-        for k in xrange(29):
+        for k in range(29):
           if len(lsf) <= i + k:
             return
           dataline = lsf[i + k]
@@ -328,16 +328,16 @@ class BrukerSaint(ImageTools):
     #print "GGG"
     if "Number of reflections read" in line:
       #self.ls_statistics[run]["Reflections"]["Number"] =  int(string.strip(line.split('=')[1]))
-      print line
+      print(line)
     elif r"# Rejected due to poor spot shape" in line:
       #self.ls_statistics[run]["Reflections"]["Rejected"] =  int(string.strip(line.split(':')[1]).split()[0])
-      print line
+      print(line)
     elif r"Total HKLs predicted: " in line:
       #self.ls_statistics[run]["Reflections"]["Predicted"] =  int(string.strip(line.split(':')[1]).split()[0])
-      print line
+      print(line)
     elif r"Average I/sigma:" in line:
       #self.ls_statistics[run]["Reflections"]["IOSIG"] =  round(float((string.strip(line.split(':')[1]).split()[0])))
-      print line
+      print(line)
 
   def observe_outdir_(self):
     OV.registerCallback("procout", self.ls)
@@ -386,7 +386,7 @@ class BrukerSaint(ImageTools):
       
       #rFile = open(ls_file, 'r')
       
-    print "Done"
+    print("Done")
     
 
   def write_saint_ini_file(self):
@@ -546,7 +546,7 @@ class BrukerSaint(ImageTools):
     for run in runs:
       sRuns.append([run, runs[run]])
     if not sRuns:
-      print "Your smart.ini file does not match any runs in your directory"
+      print("Your smart.ini file does not match any runs in your directory")
       self.exit=True
       return
     sRuns.sort()
@@ -842,8 +842,8 @@ INTEGRATE /TITLE="%(title)s" &
     for run in self.runs:
       nFrames += ("%s ") %(run[1]['nFrames'])
       framedata = r"""[<b>%(width)s</b>&deg;, <b>%(time)s</b>s, <b>%(mA)s</b>mA, <b>%(kV)s</b>kV]""" %(run[1])
-      if self.ls_statistics.has_key(run[0]):
-        if self.ls_statistics[run[0]].has_key('Reflections'):
+      if run[0] in self.ls_statistics:
+        if 'Reflections' in self.ls_statistics[run[0]]:
           framedata = r"""[%(Predicted)s/<b>%(Number)s</b>/%(Rejected)s. I/<font face="Symbol">s</font>=%(IOSIG)s]""" %(self.ls_statistics[run[0]]['Reflections'])
       framedata_d.setdefault(run[0], framedata)
     

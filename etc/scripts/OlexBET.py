@@ -33,7 +33,7 @@ To run type spy.OlexBET() in Olex2
 '''
 
 def OlexBET(probe="N2", trials="5000"):
-  print "This script converts the current model and creates a non_ortho_surface_area input dat, runs non_ortho_surface_area and reports the result"
+  print("This script converts the current model and creates a non_ortho_surface_area input dat, runs non_ortho_surface_area and reports the result")
   # We can assume that the INS name and information can come from Olex2
   # These probe values are from the AIC group standards KS uses 3.4 and 3.2 for N2 and CO2
   """probetypes = {
@@ -112,10 +112,10 @@ def OlexBET(probe="N2", trials="5000"):
   run_inc = 0
   base_path = OV.FilePath()
   Olex2BETIn_start = OV.FileFull()
-  print OV.FilePath()
+  print(OV.FilePath())
   while True:
     if(os.path.exists('%s/BET_run_%2.2d'%(base_path, run_inc))):
-      print "Failed to make BET_run_%2.2d directory, as already present - incrementing"%run_inc
+      print("Failed to make BET_run_%2.2d directory, as already present - incrementing"%run_inc)
       run_inc = run_inc+1
     else:
       os.mkdir('%s/BET_run_%2.2d'%(base_path, run_inc))
@@ -139,18 +139,18 @@ def OlexBET(probe="N2", trials="5000"):
   OV.AtReap(Olex2BETIn_start)
   
   # General stuff for the user to see in Olex2
-  print "Job name", Olex2BETIn
-  print "Unit Cell", BETCompatCell
-  print "Olex2 Formula", olx.xf.GetFormula()
-  print "Atom Count", olx.xf.au.GetAtomCount()
-  print "Mw", olx.xf.au.GetWeight()
-  print "New formula using Z", OlexZ
-  print "Cell voume", CellV
-  print "Calculated density", CalDen
-  print "RAddiiii?", olex_core.GetVdWRadii()
-  print "Probe Used", probe, " : ", probetypes[probe]
+  print("Job name", Olex2BETIn)
+  print("Unit Cell", BETCompatCell)
+  print("Olex2 Formula", olx.xf.GetFormula())
+  print("Atom Count", olx.xf.au.GetAtomCount())
+  print("Mw", olx.xf.au.GetWeight())
+  print("New formula using Z", OlexZ)
+  print("Cell voume", CellV)
+  print("Calculated density", CalDen)
+  print("RAddiiii?", olex_core.GetVdWRadii())
+  print("Probe Used", probe, " : ", probetypes[probe])
   for element in olex_core.GetVdWRadii():
-    print "Element: %2.2s Radii: %2.2f Diameter: %2.2f"%(element, olex_core.GetVdWRadii()[element], 2*olex_core.GetVdWRadii()[element])
+    print("Element: %2.2s Radii: %2.2f Diameter: %2.2f"%(element, olex_core.GetVdWRadii()[element], 2*olex_core.GetVdWRadii()[element]))
 
 # Write the BET input file
 # This is primative will need to add features such as patterson on and off
@@ -173,23 +173,23 @@ def OlexBET(probe="N2", trials="5000"):
   
 # All this need error control
   try:
-    print "Running BET calculation now"
+    print("Running BET calculation now")
     content = os.popen("nonorthoSA.exe < %s/%s.dat > %s/%s_BET.log"%(BET_path, Olex2BETIn, BET_path, Olex2BETIn)).read() # This pipes our new .dat file into nonortho
     #BET_result = olx.Exec("nonorthoSA.exe < %s.dat > %s_BET.log"%(Olex2BETIn, Olex2BETIn))
-    print "Finished calculation"
+    print("Finished calculation")
   except:
-    print "BET calculation failed to run"
+    print("BET calculation failed to run")
     return
   try:
     BET_result_file = open("%s/%s_BET.log"%(BET_path, Olex2BETIn), 'r')
-    print "Reviewing Log File to Window:"
+    print("Reviewing Log File to Window:")
     for BET_line in BET_result_file:
-      print BET_line.rstrip("\n")
+      print(BET_line.rstrip("\n"))
     BET_result_file.close()
   except IOError: 
-    print "Failed to open file"
-    print "You can read this file by typing:"
-    print "edit %s/%s_BET.log"%(BET_path, Olex2BETIn)
+    print("Failed to open file")
+    print("You can read this file by typing:")
+    print("edit %s/%s_BET.log"%(BET_path, Olex2BETIn))
     return
   #print content # Output from pipe need proper error control here
 

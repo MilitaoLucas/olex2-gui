@@ -1,4 +1,5 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 $spy.get_news_image_from_server("news")
-<!-- #include news news\content-$spy.GetTag().htm;1; -->
+<!-- #includeif file.Exists(BaseDir()\etc\news\content-$spy.GetTag().htm) news news\content-$spy.GetTag().htm;1; -->
+<!-- #includeif not(file.Exists(BaseDir()\etc\news\content-$spy.GetTag().htm)) news news\content-$spy.GetBaseTag().htm;1; -->
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=1;1; -->

@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 import math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
@@ -50,7 +50,7 @@ try:
       ob_path = os.path.join(olx.BaseDir(), 'lib')
       files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
     if files:
-      env.initialise(os.path.join(ob_path, files[0]).encode("utf-8"))
+      env.initialise(os.path.join(ob_path, files[0]))
       if env.initialised:
         print("Successfully initialised SciPy OpenBlas:")
         print(env.build_config)
@@ -93,7 +93,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       params = dict(a=0.1, b=0,
                     #c=0, d=0, e=0, f=1./3,
                     )
-      for param, value in zip(params.keys()[:min(2,len(weight))], weight):
+      for param, value in zip(list(params.keys())[:min(2,len(weight))], weight):
         params[param] = value
       self.weighting = least_squares.mainstream_shelx_weighting(**params)
 
@@ -285,7 +285,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OV.SetExtinction(self.reparametrisation.extinction.value, su)
         dlen -= 1
       try:
-        for i in xrange(dlen):
+        for i in range(dlen):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
         pass
@@ -324,7 +324,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       acta = olx.Ins("ACTA").strip()
       if acta != "n/a":
         with open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w') as f:
-          print >> f, cif
+          print(cif, file=f)
         inc_hkl = acta and "NOHKL" != acta.split()[-1].upper()
         if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
           olx.CifMerge(f=inc_hkl, u=True)
@@ -362,9 +362,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
      #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print >>log, "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
-    print >>log, "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      "
-    print >>log, "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
+    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
+    print("   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      ", file=log)
+    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
 
   def get_twin_fractions(self):
     rv = None
@@ -464,7 +464,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       count = unit_cell_content.pop('H', None)
       if count is not None:
         formatted_type_count_pairs.append(format_type_count('H', count))
-    types = unit_cell_content.keys()
+    types = list(unit_cell_content.keys())
     types.sort()
     for type in types:
       formatted_type_count_pairs.append(
@@ -684,8 +684,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if write_fcf:
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
 
-      import StringIO
-      f = StringIO.StringIO()
+      import io
+      f = io.StringIO()
       fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
       cif_block['_iucr_refine_fcf_details'] = f.getvalue()
 
@@ -853,13 +853,15 @@ The following options were used:
             cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
-        return -1
+        return "a"
       elif key.startswith('_atom_type'):
-        return 0
+        return "b"
       elif key.startswith('_geom_bond'):
         return '_geom_0'
       elif key.startswith('_geom_angle'):
         return '_geom_1'
+      elif key == "_iucr_refine_fcf_details":
+        return "z"
       else:
         return key
     cif_block.sort(key=sort_key)
@@ -916,7 +918,7 @@ The following options were used:
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
       if fo_sq.space_group().is_origin_centric():
-        for i in xrange(0, fc.size()):
+        for i in range(0, fc.size()):
           fc.data()[i] = complex(math.copysign(abs(fc.data()[i]), fc.data()[i].real), 0.0)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas', format="coreCIF")
@@ -1116,10 +1118,10 @@ The following options were used:
           fdps[xs.scattering_type] = [idx]
         else:
           fdpl.append(idx)
-    for t, l in fps.iteritems():
+    for t, l in fps.items():
       if len(l) > 1:
         constraints.append(fpfdp.shared_fp(l))
-    for t, l in fdps.iteritems():
+    for t, l in fdps.items():
       if len(l) > 1:
         constraints.append(fpfdp.shared_fdp(l))
     return constraints
@@ -1132,14 +1134,14 @@ The following options were used:
 
     if pivot is not None:
      for i, a in enumerate(group):
-       for j in xrange(i+1, len(group)):
+       for j in range(i+1, len(group)):
          self.fixed_angles.setdefault((a, pivot, group[j]), 1)
 
     for a in group:
       ns = self.olx_atoms._atoms[a]['neighbours']
       for i, b in enumerate(ns):
         if b not in group: continue
-        for j in xrange(i+1, len(ns)):
+        for j in range(i+1, len(ns)):
           if ns[j] not in group: continue
           self.fixed_angles.setdefault((a, b, ns[j]), 1)
 
@@ -1273,8 +1275,8 @@ The following options were used:
 
   def export_var_covar(self, matrix):
     with open(os.path.join(OV.FilePath(),OV.FileName()+".npy"), "wb") as wFile:
-      wFile.write("VCOV\n")
-      wFile.write(" ".join(matrix.annotations) + "\n")
+      wFile.write(b"VCOV\n")
+      wFile.write((" ".join(matrix.annotations) + "\n").encode())
       numpy.save(wFile, matrix.matrix.as_numpy_array())
 
   def f_obs_minus_f_calc_map(self, resolution):
@@ -1304,7 +1306,7 @@ The following options were used:
     )
 
   def post_peaks(self, fft_map, max_peaks=5):
-    from itertools import izip
+
     ####
     if False:
       import olex_xgrid
@@ -1329,7 +1331,7 @@ The following options were used:
       ).all()
     i = 0
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
-    for xyz, height in izip(peaks.sites(), peaks.heights()):
+    for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < 3:
         a = olx.xf.uc.Closest(*xyz).split(',')
         pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
@@ -1364,44 +1366,44 @@ The following options were used:
     if log is None: log = sys.stdout
 
     pad = 2 - len(str(self.cycles.n_iterations))
-    print >> log, "\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural)
+    print("\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural), file=log)
     #print >> log, " +"
-    print >> log, "  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1
-    print >> log, "  +  R1 (all): %.4f for %i reflections" %self.r1_all_data
+    print("  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1, file=log)
+    print("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data, file=log)
 
-    print >> log, "  +  wR2:      %.4f, GooF:  %.4f" % (
+    print("  +  wR2:      %.4f, GooF:  %.4f" % (
       self.normal_eqns.wR2(),
       self.normal_eqns.goof()
-    )
+    ), file=log)
 
-    print >> log, "  +  Diff:     max=%.2f, min=%.2f" %(
+    print("  +  Diff:     max=%.2f, min=%.2f" %(
       self.diff_stats.max(),
       self.diff_stats.min()
-    )
+    ), file=log)
 
     if(self.cycles.n_iterations>0):
       max_shift_site = self.normal_eqns.max_shift_site()
       max_shift_u = self.normal_eqns.max_shift_u()
       max_shift_esd = self.normal_eqns.max_shift_esd
       max_shift_esd_item = self.normal_eqns.max_shift_esd_item
-      print >> log, "  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
+      print("  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
       max_shift_site[0],
       max_shift_site[1].label,
       max_shift_u[0],
       max_shift_u[1].label,
       max_shift_esd,
       max_shift_esd_item
-      )
+      ), file=log)
     else:
       max_shift_site = 99
       max_shift_u = 99
       max_shift_esd = 99
       max_shift_esd_item = 99
-      print >> log, "NO CYCLES!"
+      print("NO CYCLES!", file=log)
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
-    print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
-      %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
+    print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
+      %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
 
 
     OV.SetParam("snum.refinement.max_shift_over_esd",
@@ -1421,7 +1423,7 @@ The following options were used:
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
 
     bad_refs = []
-    for i in xrange(result.fo_sq.size()):
+    for i in range(result.fo_sq.size()):
       sig = math.fabs(
         result.fo_sq.data()[i]-result.fc_sq.data()[i])/result.delta_f_sq_over_sigma[i]
       bad_refs.append((
@@ -1435,14 +1437,14 @@ The following options were used:
     self.show_summary(log)
     standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
     if self.twin_components is not None and len(self.twin_components):
-      print >> log
-      print >> log, "Twin summary:"
-      print >> log, "twin_law  fraction  standard_uncertainty"
+      print(file=log)
+      print("Twin summary:", file=log)
+      print("twin_law  fraction  standard_uncertainty", file=log)
       for i, twin in enumerate(self.twin_components):
         if twin.grad:
-          print >> log, "%-9s %-9.4f %.4f" %(
-            twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
-    print >> log
-    print >> log, "Disagreeable reflections:"
+          print("%-9s %-9.4f %.4f" %(
+            twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
+    print(file=log)
+    print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
 

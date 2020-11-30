@@ -1,5 +1,3 @@
-from __future__ import division
-
 import olex
 import olex_fs
 import glob
@@ -58,8 +56,8 @@ def txt():
     # in gui/blocks/snum-info.txt to make it default
 
     olx.Text(output_file_name)
-  except ImportError, err:
-    print "Could not initialise spy.txt() function: %s" %err
+  except ImportError as err:
+    print("Could not initialise spy.txt() function: %s" %err)
 OV.registerFunction(txt)
 
 def expand(start, finish, increment=1):
@@ -74,7 +72,7 @@ def expand(start, finish, increment=1):
   finish_atom = str(finish).translate(None, string.digits).lower()
   finish_number = int(str(finish).translate(None, string.ascii_letters))
   if (finish_atom != start_atom) or (start_number == finish_number):
-    print "The start and end element types must be the same and the numbers different"
+    print("The start and end element types must be the same and the numbers different")
     return
   return_string = []
   for x in range(start_number, finish_number+1, int(increment)):
@@ -95,19 +93,19 @@ if __debug__:
   OV.registerFunction(dump)
 
   def collect(generation=None):
-    print gc.get_count()
+    print(gc.get_count())
     if generation != None:
       a = gc.collect(generation)
     else:
       a = gc.collect()
-    print "%s garbage items collected" %a
+    print("%s garbage items collected" %a)
   OV.registerFunction(collect)
 
   def getObjectCount():
     #a = gc.get_objects()
     a = get_all_objects()
     #a = []
-    print "Number of objects: %s" %len(a)
+    print("Number of objects: %s" %len(a))
     #print a[0]
     #print a[50]
     #print a[-10]
@@ -123,20 +121,20 @@ if __debug__:
     """
 
     # force collection
-    print "\nGARBAGE:"
+    print("\nGARBAGE:")
     a = gc.collect()
-    print "%s objects collected" %a
+    print("%s objects collected" %a)
 
-    print "\nGARBAGE OBJECTS:"
+    print("\nGARBAGE OBJECTS:")
     for x in gc.garbage:
         s = str(x)
         if len(s) > 80: s = s[:80]
-        print type(x),"\n  ", s
+        print(type(x),"\n  ", s)
         if type(x).__name__ == 'function':
-          print x.func_code
+          print(x.__code__)
           #print x.func_name
 
-    print 'Size of garbage is: ',len(gc.garbage)
+    print('Size of garbage is: ',len(gc.garbage))
 
   # Recursively expand slist's objects
   # into olist, using seen to track
@@ -174,20 +172,20 @@ if __debug__:
     d = {}
     sys.modules
     # collect all classes
-    for m in sys.modules.values():
+    for m in list(sys.modules.values()):
       for sym in dir(m):
         o = getattr (m, sym)
-        if type(o) is types.ClassType:
+        if type(o) is type:
           d[o] = sys.getrefcount (o)
     # sort by refcount
-    pairs = map (lambda x: (x[1],x[0]), d.items())
+    pairs = [(x[1],x[0]) for x in list(d.items())]
     pairs.sort()
     pairs.reverse()
     return pairs
 
   def print_top_100():
     for n, c in get_refcounts()[:100]:
-      print '%10d %s' % (n, c.__name__)
+      print('%10d %s' % (n, c.__name__))
 
   OV.registerFunction(print_top_100)
 
@@ -440,7 +438,7 @@ class OlexRefinementModel(object):
           shuffle_ids=[i for i in range(len(i_seqs))]
           random.seed('Use of a fixed seed for a consistent set of indices')
           random.shuffle(shuffle_ids)
-          for i in xrange(len(i_seqs)-3):
+          for i in range(len(i_seqs)-3):
             yield 'chirality', dict(
               i_seqs=[i_seqs[j] for j in shuffle_ids[i:i+4]],
               sym_ops=[kwds['sym_ops'][j] for j in shuffle_ids[i:i+4]],
@@ -876,7 +874,7 @@ def onRefinementMethodChange(prg_name, method):
     programSettings.doProgramSettings(prg_name, method)
     OV.SetParam('user.refinement.default_method', method)
   else:
-    print "Please choose a valid method for the refinement program %s" %prg_name
+    print("Please choose a valid method for the refinement program %s" %prg_name)
 OV.registerFunction(onRefinementMethodChange)
 
 def onSolutionProgramChange(prg_name, method=None, scope='snum'):
@@ -902,7 +900,7 @@ def onSolutionMethodChange(prg_name, method):
     programSettings.doProgramSettings(prg_name, method)
     OV.SetParam('user.solution.default_method', method)
   else:
-    print "Please choose a valid method for the solution program %s" %prg_name
+    print("Please choose a valid method for the solution program %s" %prg_name)
   return
 OV.registerFunction(onSolutionMethodChange)
 
@@ -963,7 +961,7 @@ def which_program(prg):
     if a:
       break
   if 'wingx' in a.lower():
-    print "%s seems to be part of a WinGX installation. These ShelX executable cannot be used with Olex" %item
+    print("%s seems to be part of a WinGX installation. These ShelX executable cannot be used with Olex" %item)
     return False
   return a
 OV.registerFunction(which_program)
@@ -1065,7 +1063,7 @@ def install_plugin(plugin, args):
       olex.m("installplugin %s" %plugin)
       pass
     except:
-      print "The plugin %s does not exist"
+      print("The plugin %s does not exist")
     return
 
   if user_alert_uninstall_plugin[0] == 'R':
@@ -1126,8 +1124,8 @@ def check_for_recent_update():
     try:
       V = OV.FindValue('last_version','0')
       last_version = int(V)
-    except Exception, err:
-      print "Alert: Reset parameter 'last_version'"
+    except Exception as err:
+      print("Alert: Reset parameter 'last_version'")
       last_version = 0
       OV.SetVar('last_version','0')
 
@@ -1140,8 +1138,8 @@ def check_for_recent_update():
     return olx.has_recently_updated
 
 def GetOptionalHyphenString(txt):
-  txt = txt.replace ("/", "/" + u"\u200B")
-  txt = txt.replace ("\\", "\\" + u"\u200B")
+  txt = txt.replace ("/", "/" + "\u200B")
+  txt = txt.replace ("\\", "\\" + "\u200B")
   txt = txt.replace ("\\", "\\" + " ")
   return txt
 OV.registerFunction(GetOptionalHyphenString)
@@ -1153,7 +1151,7 @@ def GetTwinLawAndBASF(html=False):
   if not basf_list:
     basf_list = olex_refinement_model.get('twin', {}).get('basf', [])
   basf_count = len(basf_list)
-  if olex_refinement_model.has_key('twin'):
+  if 'twin' in olex_refinement_model:
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
     for row in c:
@@ -1342,11 +1340,10 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
     return rv
   try:
     import iotbx
-    fo = file(cf_name, "rUb")
-    reader = iotbx.cif.reader(file_object=fo)
-    fo.close()
+    with open(cf_name, "rUb") as fo:
+      reader = iotbx.cif.reader(file_object=fo)
     models = []
-    for k, v in reader.model().iteritems():
+    for k, v in reader.model().items():
       if k.lower() != 'global':
         models.append(v)
     if len(models) > 1:
@@ -1357,10 +1354,10 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
         rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
           %(name_td_class,value_td_class,flack)
       else:
-        rv = r"Flack parameter & %s\\" % flack.replace('-', '@@-@@')
+        rv = "Flack parameter & %s\\" % flack.replace('-', '@@-@@')
 
-  except Exception, err:
-    print err
+  except Exception as err:
+    print(err)
     pass
   return rv
 OV.registerFunction(getReportExtraCIFItems)
@@ -1382,11 +1379,11 @@ OV.registerFunction(getReportPhilItem)
 def getReportImageData(size='w400', imageName=None):
   from PIL import Image
   from PIL import PngImagePlugin
-  import StringIO
+  import io
   import base64
   from PIL import ImageDraw
   from PIL import EpsImagePlugin
-  import StringIO
+  import io
   make_border = OV.GetParam('snum.report.image_border')
 
   size_type = size[:1]
@@ -1419,7 +1416,7 @@ def getReportImageData(size='w400', imageName=None):
         rv += "<script type='application/json' id='style'>%s</script>" %(
           olex.f("ExportColors('', 'current')"))
         return rv
-    except Exception, e:
+    except Exception as e:
       #print str(e)
       return err
 
@@ -1433,7 +1430,6 @@ def getReportImageData(size='w400', imageName=None):
   else:
     imagePath_l = imagePath
 
-  html = ""
   for imagePath in imagePath_l:
 
     IM = Image.open(imagePath)
@@ -1451,23 +1447,22 @@ def getReportImageData(size='w400', imageName=None):
 
     if make_border:
       from ImageTools import ImageTools
-      IT = ImageTools()
       draw = ImageDraw.Draw(IM)
       fill = '#ababab'
       width, height = IM.size
-      for i in xrange(make_border):
+      for i in range(make_border):
         draw.line((0,0,width-1,0), fill = fill)
         draw.line((0,height -1,width-1,height -1), fill = fill)
         draw.line((0,0,0,height - 1), fill = fill)
         draw.line((width -1,0,width-1,height -1), fill = fill)
 
-    out = StringIO.StringIO()
+    out = io.BytesIO()
     IM.save(out, "PNG")
     data = base64.b64encode(out.getvalue())
-    html +='''
-  <!--[if IE]><img width=%s src='%s'><![endif]-->
-  <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
-    '''%(int(size/2), os.path.split(imagePath)[1], int(size/2), data)
+    html = b'''
+  <!--[if IE]><img width='%s' src='%s'><![endif]-->
+  <![if !IE]><img width='%s' src='data:image/png;base64,%b'><![endif]>
+    '''%(bytes(size//2), os.path.split(imagePath)[1].encode(), bytes(size//2), data)
   return html
 OV.registerFunction(getReportImageData)
 
@@ -1571,7 +1566,7 @@ OV.registerFunction(StringsAreNotEqual)
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
-    print "\n++ This action requires a selection of atoms!"
+    print("\n++ This action requires a selection of atoms!")
     return False
   else:
     return True
@@ -1603,11 +1598,11 @@ def getCellHTML():
     'Cubic':('a',),
   }
 
-  cell_param_value_pairs = dict(zip(
+  cell_param_value_pairs = dict(list(zip(
     ('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
-    ('_cell_length_a','_cell_length_b','_cell_length_c','_cell_angle_alpha','_cell_angle_beta','_cell_angle_gamma')))
+    ('_cell_length_a','_cell_length_b','_cell_length_c','_cell_angle_alpha','_cell_angle_beta','_cell_angle_gamma'))))
   cell = {}
-  for param, value in cell_param_value_pairs.items():
+  for param, value in list(cell_param_value_pairs.items()):
     if param in ('a','b','c'):
       cell[param] = dict(
         value = '%%%s%%' %value,
@@ -1619,7 +1614,7 @@ def getCellHTML():
         unit = '&deg;'
       )
 
-  cell_html = dict((param, '<i>%s</i>&nbsp;= %s%s, ' %(param,cell[param]['value'],cell[param]['unit'])) for param in cell.keys())
+  cell_html = dict((param, '<i>%s</i>&nbsp;= %s%s, ' %(param,cell[param]['value'],cell[param]['unit'])) for param in list(cell.keys()))
 
   crystal_system = OV.olex_function('sg(%s)')
 
@@ -1657,11 +1652,9 @@ OV.registerFunction(formatted_date_from_timestamp)
 
 if not haveGUI:
   def tbxs(name):
-    print "This is not available in Headless Olex"
+    print("This is not available in Headless Olex")
     return ""
   #OV.registerFunction(tbxs)
-OV.registerFunction(OV.IsPluginInstalled)
-OV.registerFunction(OV.GetTag)
 
 def SetMasking(v):
   if v == 'true':
@@ -1684,16 +1677,16 @@ def GetHttpFile(f, force=False, fullURL = False):
         url = "%s/%s" %(URL, f.replace(" ",r"%20"))
       else:
         url = f
-      if verbose: print "--> Getting %s" %url,
+      if verbose: print("--> Getting %s" %url, end=' ')
       response = HttpTools.make_url_call(url,"")
       content = response.read()
-      if verbose: print "OK"
+      if verbose: print("OK")
       retVal = content
-    except Exception, err:
+    except Exception as err:
       _is_online = False
       retVal = None
-      print "Olex2 can not reach the update server: %s" %err
-      print url
+      print("Olex2 can not reach the update server: %s" %err)
+      print(url)
   else:
     retVal = None
   return retVal
@@ -1707,19 +1700,32 @@ def EditIns():
   olx.html.Update()
 OV.registerFunction(EditIns)
 
+def Cleanup(file_ext):
+  def cleanup_dir(dir):
+    for f in os.listdir(dir):
+      full_path = os.path.join(dir, f)
+      if os.path.isfile(full_path) and f.endswith(file_ext):
+        os.remove(full_path)
+      elif os.path.isdir(full_path):
+        cleanup_dir(full_path)
+  try:
+    cleanup_dir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
+  except:
+    pass
+olex.registerFunction(Cleanup, False, "util")
+
 def FixMACQuotes(text):
   if text:
-    return text.replace(u"\u2018", u"'")\
-      .replace(u"\u2014", u"-")\
-      .replace(u"\u2019", u"'")\
-      .replace(u"\u201c", u"\"")\
-      .replace(u"\u201d", u"\"")\
-     .encode("utf8")
+    return text.replace("\u2018", "'")\
+      .replace("\u2014", "-")\
+      .replace("\u2019", "'")\
+      .replace("\u201c", "\"")\
+      .replace("\u201d", "\"")
   return text
 
 def debugInVSC():
+  cd = os.getcwd()
   try:
-    cd = os.getcwd()
     os.chdir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
     import ptvsd
     sys.argv = [olx.app.GetArg(0)]

@@ -1,4 +1,4 @@
-from urllib import urlopen
+from urllib.request import urlopen
 import os
 import glob
 import pickle
@@ -48,22 +48,22 @@ class access_log_stats:
 
     for log in logFiles:
       logName = os.path.basename(log)
-      if search_cache.has_key(logName) and 0:
+      if logName in search_cache and 0:
         users = search_cache[logName]
       else:
         a = reader(open(log, 'r'), filterString=self.filterString, write_directory=self.write_directory)
         users = a.users
         if not logName.endswith('access_log'):
           search_cache.setdefault(logName, users)
-      for user, info in users.items():
-        if self.olex_users.has_key(user):
+      for user, info in list(users.items()):
+        if user in self.olex_users:
           self.olex_users[user].update(info)
         else:
           self.olex_users.setdefault(user,info)
     search_caches[self.filterString] = search_cache
     self.save_search_cache(search_caches)
 
-    print self.html_hit_stats()
+    print(self.html_hit_stats())
 
     #print self.user_stats()
 
@@ -84,7 +84,7 @@ class access_log_stats:
     pickle.dump(cache, pickle_file)
 
   def geocodeIP(self, addr):
-    if self.geocodeIP_cache.has_key(addr):
+    if addr in self.geocodeIP_cache:
       return self.geocodeIP_cache[addr]
     elif 0:
       url = "http://freegeoip.appspot.com/json/%s" % (addr)
@@ -139,7 +139,7 @@ class access_log_stats:
 
   def output_html_map(self, users):
     markers = []
-    for user, access_log in users.items():
+    for user, access_log in list(users.items()):
       geocode = self.geocodeIP(user)
       if not geocode:
         continue
@@ -184,12 +184,12 @@ class access_log_stats:
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
       <title>Olex2 User Map</title>
-      
+
       <STYLE type="text/css">
       H1 {text-align: center; color: #ff8f00; font-family: Courier}
       </STYLE>
-      
-      
+
+
       <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAWYsMNksHxyZ1nTR9cMAj-hQQSsONx3yoT9qajHkD6DdltYiy9BTKqloAGrfU9_zugGdfQzA1N91GhA"
         type="text/javascript"></script>
       <script type="text/javascript">
@@ -235,7 +235,7 @@ class access_log_stats:
     </head>
     <center>
     <body onload="load()" onunload="GUnload()" bgcolor='#000000'>
-    
+
       <h1>Olex2 Access Statistics</h1>
       <div class='body' id="map_canvas" style="width: 650px; height: 450px"></div>
       filterString=%s
@@ -266,7 +266,7 @@ class access_log_stats:
     total_num_hits = 0
     total_num_users = 0
     exclude_list = ['129.234.13.99', '81.157.18.58', '129.234.13.105', '86.136.54.118', '129.234.13.129', '86.151.228.39']
-    for user in self.olex_users.keys():
+    for user in list(self.olex_users.keys()):
       if user in exclude_list:
         continue
       num_hits, first_access, last_access = self.get_num_hits(user)
@@ -274,7 +274,7 @@ class access_log_stats:
         total_num_users += 1
       else:
         continue
-      
+
       stats_list.append((num_hits, user, first_access, last_access))
       total_num_hits += num_hits
     stats_list.sort()
@@ -326,7 +326,7 @@ class access_log_stats:
     out = []
     txt =  "Number of users: %s" %len(self.olex_users)
     out.append(txt)
-    for olex_user in self.olex_users.values():
+    for olex_user in list(self.olex_users.values()):
       ip = olex_user.ip
       location = olex_user.geocodeIP['Country'] + ' ' + olex_user.geocodeIP['City']
       num_visits = str(len(olex_user.user_access_log))
@@ -341,7 +341,7 @@ def searchString(string, regex):
   match = re.match(regex, string)
 
   if match:
-    print
+    print()
 
   return match
 
@@ -360,7 +360,7 @@ class reader(object):
     users = {}
     self.write_directory = write_directory
     gets = ['.zip', '1.0', 'installer']
-    
+
     for line in file_object:
       for get in gets:
         if get in filterString:
@@ -373,11 +373,11 @@ class reader(object):
         url = self.get_url(line)
         if url:
           keywords = self.get_url_keywords(url)
-          if 'google' in url and keywords.has_key('q'):
-            print '%s\t%s' %(ip,keywords['q'])
+          if 'google' in url and 'q' in keywords:
+            print('%s\t%s' %(ip,keywords['q']))
         access_time = self.get_access_time(line)
 
-        if not users.has_key(ip):
+        if ip not in users:
           users.setdefault(ip, {})
         users[ip].setdefault(access_time)
           #users.setdefault(ip,Olex_user(ip))

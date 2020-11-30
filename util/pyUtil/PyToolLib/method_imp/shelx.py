@@ -16,15 +16,15 @@ class Method_shelx(Method):
   def do_run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
     """
-    print 'STARTING SHELX %s with %s' %(
-      RunPrgObject.program.program_type, self.name)
+    print('STARTING SHELX %s with %s' %(
+      RunPrgObject.program.program_type, self.name))
     prgName = olx.file.GetName(RunPrgObject.shelx)
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("%s" %RunPrgObject.tempPath)
     xl_ins_filename = RunPrgObject.shelx_alias
 # This is an ugly fix - but good start
     if 'shelxs86' in prgName:
-      print 'STARTING SHELX86 modifications'
+      print('STARTING SHELX86 modifications')
       import fileinput, string, sys
       for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
         if 'REM' in line:
@@ -112,7 +112,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           f_mask = olx.current_mask.f_mask()
         else:
           _ = "There are no voids!"
-          print _
+          print(_)
           OV.SetParam("snum.refinement.use_solvent_mask", False)
           olex.m('delins ABIN')
           OlexVFS.write_to_olex('mask_notification.htm',_,1)
@@ -153,7 +153,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       'snum.refinement.flack_str' : 'flack',
       'snum.refinement.goof' : "s",
     }
-    for k,v in params.iteritems():
+    for k,v in params.items():
       v = olx.Lst(v)
       if v == 'n/a':  v = 0
       OV.SetParam(k, v)
@@ -217,7 +217,7 @@ class Method_shelxt(Method_shelx_solution):
       if "Rweak" not in line:
         i += 1
         continue
-      for j in xrange(len(f) -i):
+      for j in range(len(f) -i):
         if "Assign" not in f[i+j]:
           res_l.append(f[i+j])
         else:
@@ -380,7 +380,7 @@ class Method_shelxd(Method_shelx_solution):
     """
     olex.m("stop listen")
     Method_shelx_solution.post_solution(self, RunPrgObject)
-    for i in xrange(int(olx.xf.au.GetAtomCount())):
+    for i in range(int(olx.xf.au.GetAtomCount())):
       olx.xf.au.SetAtomU(i, "0.06")
 
 

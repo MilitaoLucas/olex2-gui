@@ -1,4 +1,3 @@
-from __future__ import division
 import sys
 
 from scitbx.array_family import flex
@@ -90,12 +89,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       self.max_shift_esd_item = max_shift_esd_item
 
     except Exception as s:
-      print s
+      print(s)
 
     print_tabular = True
 
     if print_tabular:
-      print >>log, "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.2f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
+      print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.2f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
         self.n_current_cycle,
         self.r1_factor(cutoff_factor=2)[0]*100,
         self.wR2()*100,
@@ -106,37 +105,37 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         '('+max_shift_site[1].label+')',
         max_shift_u[0],
         '('+max_shift_u[1].label+')',
-      )
+      ), file=log)
 
     else:
-      print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
+      print("wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
         self.wR2(),
         self.goof(),
         self.observations.fo_sq.size(),
         self.reparametrisation.n_independents + 1,
-      )
+      ), file=log)
 
-      print >> log, "Max shifts: ",
+      print("Max shifts: ", end=' ', file=log)
 
-      print >> log, "Site: %.4f A for %s |" %(
+      print("Site: %.4f A for %s |" %(
         max_shift_site[0],
         max_shift_site[1].label
-      ),
-      print >> log, "dU = %.4f for %s" %(
+      ), end=' ', file=log)
+      print("dU = %.4f for %s" %(
         max_shift_u[0],
         max_shift_u[1].label,
-      )
+      ), file=log)
 
 
   def max_shift_site(self):
-    return self.iter_shifts_sites(max_items=1).next()
+    return next(self.iter_shifts_sites(max_items=1))
 
   def max_shift_u(self):
-    return self.iter_shifts_u(max_items=1).next()
+    return next(self.iter_shifts_u(max_items=1))
 
   def max_shift_esd(self):
     self.get_shifts()
-    return self.iter_shifts_u(max_items=1).next()
+    return next(self.iter_shifts_u(max_items=1))
 
 
   def iter_shifts_sites(self, max_items=None):
@@ -167,30 +166,30 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     import sys
     if self.log is sys.stdout: return
     if f is None: f = sys.stdout
-    print >> f, self.log.getvalue()
+    print(self.log.getvalue(), file=f)
 
   def show_sorted_shifts(self, max_items=None, log=None):
     import sys
     if log is None: log = sys.stdout
-    print >> log, "Sorted site shifts in Angstrom:"
-    print >> log, "shift scatterer"
+    print("Sorted site shifts in Angstrom:", file=log)
+    print("shift scatterer", file=log)
     n_not_shown = self.xray_structure.scatterers().size()
     for distance, scatterer in self.iter_shifts_sites(max_items=max_items):
       n_not_shown -= 1
-      print >> log, "%5.3f %s" %(distance, scatterer.label)
+      print("%5.3f %s" %(distance, scatterer.label), file=log)
       if round(distance, 3) == 0: break
     if n_not_shown != 0:
-      print >> log, "... (remaining %d not shown)" % n_not_shown
+      print("... (remaining %d not shown)" % n_not_shown, file=log)
     #
-    print >> log, "Sorted adp shift norms:"
-    print >> log, "dU scatterer"
+    print("Sorted adp shift norms:", file=log)
+    print("dU scatterer", file=log)
     n_not_shown = self.xray_structure.scatterers().size()
     for norm, scatterer in self.iter_shifts_u(max_items=max_items):
       n_not_shown -= 1
-      print >> log, "%5.3f %s" %(norm, scatterer.label)
+      print("%5.3f %s" %(norm, scatterer.label), file=log)
       if round(norm, 3) == 0: break
     if n_not_shown != 0:
-      print >> log, "... (remaining %d not shown)" % n_not_shown
+      print("... (remaining %d not shown)" % n_not_shown, file=log)
 
   def show_shifts(self, log=None):
     import sys
@@ -199,32 +198,32 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     i=0
     for i_sc, sc in enumerate(self.xray_structure.scatterers()):
       op = site_symmetry_table.get(i_sc)
-      print >> log, "%-4s" % sc.label
+      print("%-4s" % sc.label, file=log)
       if sc.flags.grad_site():
         n = op.site_constraints().n_independent_params()
         if n != 0:
-          print >> log, ("site:" + "%7.4f, "*(n-1) + "%7.4f")\
-                % tuple(self.shifts[-1][i:i+n])
+          print(("site:" + "%7.4f, "*(n-1) + "%7.4f")\
+                % tuple(self.shifts[-1][i:i+n]), file=log)
         i += n
       if sc.flags.grad_u_iso() and sc.flags.use_u_iso():
         if not(sc.flags.tan_u_iso() and sc.flags.param > 0):
-          print >> log, "u_iso: %6.4f" % self.shifts[i]
+          print("u_iso: %6.4f" % self.shifts[i], file=log)
           i += 1
       if sc.flags.grad_u_aniso() and sc.flags.use_u_aniso():
         n = op.adp_constraints().n_independent_params()
-        print >> log, (("u_aniso:" + "%6.3f, "*(n-1) + "%6.3f")
-                       % tuple(self.shifts[-1][i:i+n]))
+        print((("u_aniso:" + "%6.3f, "*(n-1) + "%6.3f")
+                       % tuple(self.shifts[-1][i:i+n])), file=log)
         i += n
       if sc.flags.grad_occupancy():
-        print >> log, "occ: %4.2f" % self.shifts[-1][i]
+        print("occ: %4.2f" % self.shifts[-1][i], file=log)
         i += 1
       if sc.flags.grad_fp():
-        print >> log, "f': %6.4f" % self.shifts[-1][i]
+        print("f': %6.4f" % self.shifts[-1][i], file=log)
         i += 1
       if sc.flags.grad_fdp():
-        print >> log, "f'': %6.4f" % self.shifts[-1][i]
+        print("f'': %6.4f" % self.shifts[-1][i], file=log)
         i += 1
-      print >> log
+      print(file=log)
 
   def feed_olex(self):
     ## Feed Model

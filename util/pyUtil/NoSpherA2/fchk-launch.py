@@ -17,22 +17,22 @@ err_fn = None
 out_fn = None
 if "orca" in args[0]:
   out_fn = fchk_file + "_orca.log"
-  log = open(out_fn, 'w')
 elif "elmo" in args[2]:
   out_fn = fchk_file + '.out'
-  log = open(out_fn, 'w')
 elif "python" in args[2]:
   out_fn = fchk_file + "_pyscf.log"
+
+if out_fn:
   log = open(out_fn, 'w')
-  
-print (out_fn)
-  
+  print (out_fn)
+
 p = subprocess.Popen(args, stdout=log)
 
 if "ubuntu" in args[0]:
-  print ("Starting Ubuntu and running %s, please be patient for start"%args[2])
-    
-if out_fn == None:
+  print("Starting Ubuntu and running pySCF, please be patient for start")
+if "ubuntu" in args[0]:
+  out_fn = fchk_file + "_pyscf.log"
+elif out_fn == None:
   out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
@@ -51,5 +51,5 @@ with open(out_fn, "rU") as stdout:
       sys.stdout.write(x)
       sys.stdout.flush()
     time.sleep(0.5)
-  
-print ("Finished")
+
+print("Finished")

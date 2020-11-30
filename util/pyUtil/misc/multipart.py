@@ -2,19 +2,21 @@
 # After importing this, urllib2.HTTPHandler and urllib2.HTTPSHandler
 # will be overwritten with classes of this file
 # Inspired by:
-#   urllib2_file, 
+#   urllib2_file,
 #   http://stackoverflow.com/questions/4434170/
 #   http://code.activestate.com/recipes/146306/
 
-import mimetools
+from email.generator import Generator
+import uuid
 import mimetypes
 import os
+import io
 import stat
-import urllib
-import urllib2
-import httplib
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
+import http.client
 import socket
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 class Multipart:
   """ A component of form-data - multipart request """
@@ -23,9 +25,9 @@ class Multipart:
     self.file_size = None
     header = []
     header.append('--%s' %boundary)
-    if isinstance(item, file):
+    if isinstance(item, io.IOBase):
       # not everyone is keen in providing normalised paths
-      file_name = item.name.replace('\\', '/').split('/')[-1].encode('UTF-8')
+      file_name = item.name.replace('\\', '/').split('/')[-1]
       header.append('Content-Disposition: form-data; name="%s"; filename="%s"'
                          %(name, file_name))
       mime_type = mimetypes.guess_type(file_name)[0]
@@ -36,11 +38,11 @@ class Multipart:
       header.append('Content-Length: %i' %self.file_size)
     else:
       header.append('Content-Disposition: form-data; name="%s"' %name)
-      if not isinstance(self.item, str):
-        self.item = str(self.item)
+      if isinstance(self.item, str):
+        self.item = self.item.encode("utf-8")
     header.append('')
     header.append('')
-    self.header = '\r\n'.join(header)
+    self.header = '\r\n'.join(header).encode("utf-8")
 
 
   def send(self, sock):
@@ -54,7 +56,7 @@ class Multipart:
         bf = self.item.read(sz)
     else:
       sock.send(self.item)
-    sock.send('\r\n')
+    sock.send(b'\r\n')
 
   def calc_size(self):
     if self.file_size is not None:
@@ -63,7 +65,7 @@ class Multipart:
 
 class MultipartRequest:
   def __init__(self, items):
-    self.boundary = mimetools.choose_boundary()
+    self.boundary = '--%s--' %uuid.uuid4().hex
     self.parts = []
     self.length = 0
     if isinstance(items, dict):
@@ -73,7 +75,7 @@ class MultipartRequest:
       mp = Multipart(value, key, self.boundary)
       self.parts.append(mp)
       self.length += mp.calc_size()
-    self.header_ending = '\r\n--%s--\r\n\r\n' %self.boundary
+    self.header_ending = ('\r\n--%s--\r\n\r\n' %self.boundary).encode("utf-8")
     self.length += len(self.header_ending)
 
   def do_request(self, connection):
@@ -92,7 +94,7 @@ class EncodedURLRequest:
   def __init__(self, items=None):
     self.data = None
     if items:
-      self.data = urllib.urlencode(items)
+      self.data = urllib.parse.urlencode(items).encode()
 
   def do_request(self, connection):
     if self.data:
@@ -125,7 +127,7 @@ class DirectRequest:
         dt = self.data
       if dt is not None:
         for (k,v) in dt:
-          if isinstance(v, file):
+          if isinstance(v, io.IOBase):
             has_file = True
             break
       if has_file:
@@ -138,30 +140,29 @@ class DirectRequest:
       u = urlparse(proxy)
     else:
       u = urlparse(url)
-    hc = httplib.HTTPConnection(u.hostname, u.port)
+    hc = http.client.HTTPConnection(u.hostname, u.port)
     hc.connect()
     if proxy:
-      hc.putrequest(self.get_method(), urllib.quote(url))
+      hc.putrequest(self.get_method(), urllib.parse.quote(url))
     else:
-      hc.putrequest(self.get_method(), urllib.quote(u.path))
+      hc.putrequest(self.get_method(), urllib.parse.quote(u.path))
     self.do_request(hc)
     return hc.getresponse()
 
 #below are to be used with urllib2
 class RequestHandler():
   def do_open(self, sender, http_class, request):
-    host = request.get_host()
+    host = request.host
     if not host:
-      raise urllib2.URLError('no host given')
-    handler = DirectRequest(request.get_data()).select_handler()
+      raise urllib.error.URLError('no host given')
+    handler = DirectRequest(request.data).select_handler()
     h = http_class(host)
-    h._conn.timeout = request.timeout
-    h.putrequest(handler.get_method(), request.get_selector())
+    h.timeout = request.timeout
+    h.putrequest(handler.get_method(), request.selector)
     # set request-host
-    scheme, sel = urllib.splittype(request.get_selector())
-    sel_host, sel_path = urllib.splithost(sel)
-    h.putheader('Host', sel_host or host)
-    # add any inherited headers    
+    scheme, sel = urllib.parse.splittype(request.selector)
+    sel_host, sel_path = urllib.parse.splithost(sel)
+    # add any inherited headers
     for name, value in sender.parent.addheaders:
       name = name.capitalize()
       if name not in request.headers:
@@ -170,33 +171,30 @@ class RequestHandler():
         h.putheader(k, v)
     try:
       handler.do_request(h)
-    except socket.error, e:
-      raise urllib2.URLError(e)
-    code, msg, hdrs = h.getreply()
-    fp = h.getfile()
-    if code == 200: #HTTP OK
-      response = urllib.addinfourl(fp, hdrs, request.get_full_url())
-      response.code = code
-      response.msg = msg
+    except socket.error as e:
+      raise urllib.error.URLError(e)
+    response = h.getresponse()
+    if response.getcode() == 200: #HTTP OK
       return response
     else:
-      return sender.parent.error('http', request, fp, code, msg, hdrs)
+      return sender.parent.error('http', request, response,
+        response.getcode(), response.msg, response.getheaders())
 
-class HTTPHandler(urllib2.HTTPHandler):
+class HTTPHandler(urllib.request.HTTPHandler):
   def http_open(self, request):
-    return RequestHandler().do_open(self, httplib.HTTP, request)
+    return RequestHandler().do_open(self, http.client.HTTPConnection, request)
 
-urllib2.HTTPHandler = HTTPHandler
+urllib.request.HTTPHandler = HTTPHandler
 
 try:
-  class HTTPSHandler(urllib2.HTTPSHandler):
+  class HTTPSHandler(urllib.request.HTTPSHandler):
     def https_open(self, request):
-      return RequestHandler().do_open(self, httplib.HTTPS, request)
+      return RequestHandler().do_open(self, http.client.HTTPSConnection, request)
 
-  urllib2.HTTPSHandler = HTTPSHandler
+  urllib.request.HTTPSHandler = HTTPSHandler
   import sys
   if sys.platform == 'darwin':
     import ssl
     ssl._https_verify_certificates(False)
 except:
-  print 'HTTPS handler is not installed'
+  print('HTTPS handler is not installed')

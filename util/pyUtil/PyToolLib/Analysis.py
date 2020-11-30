@@ -675,7 +675,7 @@ class Graph(ArgumentParser):
       try:
         self.test_plotly()
       except Exception as err:
-        print(("Plotly failed: %s" %err))
+        print("Plotly failed: %s" %err)
         print("Olex2 built-in plots will be made instead.")
 
     self.ax_marker_length = int(self.imX * 0.006)
@@ -3105,7 +3105,7 @@ class HealthOfStructure():
         self.hkl_stats['Completeness_laue_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,True))
         self.hkl_stats['Completeness_point_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,False))
     except Exception as err:
-      print(("Could not get info from hkl_stats: %s" %err))
+      print("Could not get info from hkl_stats: %s" %err)
 
   def get_info_from_cif(self):
     from cctbx import uctbx
