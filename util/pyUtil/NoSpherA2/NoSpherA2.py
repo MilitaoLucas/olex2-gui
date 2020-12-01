@@ -74,7 +74,7 @@ class NoSpherA2(PT):
     self.setup_g16_executables()
     self.setup_orca_executables()
     self.setup_wfn_2_fchk()
-
+    
     import platform
     if platform.architecture()[0] != "64bit":
       print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
@@ -193,9 +193,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     tsc_exists = False
     f_time = None
 
-    if (wfn_code != "DICAMB") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
+    if (wfn_code != "DISCAMB") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       from cctbx_olex_adapter import OlexCctbxAdapter
-      ne = 0
+      ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
       for sc in OlexCctbxAdapter().xray_structure().scatterers():
         Z = sc.electron_count()
         if (Z > 36) and ("x2c" not in basis) and ("jorge" not in basis):
@@ -216,7 +216,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print ("Error! Multiplicity is not 1. This is currently not supported in ELMOdb. Consider using QM-ELMO instead!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
-
+        
 
     if OV.GetParam('snum.NoSpherA2.no_backup') == False:
       for file in os.listdir(olx.FilePath()):
@@ -891,7 +891,7 @@ class wfn_Job(object):
     if tail == True:
       for i in range(0,maxtail):
         control = ""
-        control = control + str(resnames[i])  + ' ' + str(nat[i]) + ' ' + str(nfrag[i]) + ' '
+        control = control + str(resnames[i])  + ' ' + str(nat[i]) + ' ' + str(nfrag[i]) + ' ' 
         if specac[i] == "True":
            control += ".t. "
         else:
@@ -907,7 +907,7 @@ class wfn_Job(object):
       if spect == True:
         inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.specinp') + '\n' + ' ' + '\n')
     if ssbond == True:
-      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n')
+      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n') 
     inp.close()
 
 
@@ -1609,7 +1609,8 @@ mf.kernel()"""
       uc = cctbx_adaptor.reflections.f_obs.unit_cell()
       cm = uc.metrical_matrix()
       from math import sqrt
-      inp.write("#!/usr/bin/env python\n\nfrom pyscf.pbc import gto, scf, dft\nfrom pyscf import lib\n")
+      import numpy as np
+      inp.write("#!/usr/bin/env python\n\nfrom pyscf.pbc import gto, scf, dft, df\nfrom pyscf import lib\n")
       inp.write("lib.num_threads(%s)\ncell = gto.M(\n  atom = '''"%ncpus)
       atom_list = []
       i = 0
@@ -1621,8 +1622,11 @@ mf.kernel()"""
           if not atom[0] in atom_list:
             atom_list.append(atom[0])
       xyz.close()
+      print(cm)
       inp.write("''',\n  verbose = 5,\n)\ncell.output = '%s_pyscf.log'\n"%self.name)
-      inp.write("cell.a = '''%.5f %.5f %.5f\n            %.5f %.5f %.5f\n            %.5f %.5f %.5f'''\n"%(sqrt(cm[0]),sqrt(cm[3]),sqrt(cm[4]),sqrt(cm[3]),sqrt(cm[1]),sqrt(cm[5]),sqrt(cm[4]),sqrt(cm[5]),sqrt(cm[2])))
+      inp.write("cell.a = '''%.5f %.5f %.5f\n")%(np.sign(cm[0])*sqrt(abs(cm[0])),np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[4])*sqrt(abs(cm[4])))
+      inp.write("%.5f %.5f %.5f\n")%(np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[1])*sqrt(abs(cm[1])),np.sign(cm[5])*sqrt(abs(cm[5])))
+      inp.write("%.5f %.5f %.5f'''\n")%(np.sign(cm[4])*sqrt(abs(cm[4])),np.sign(cm[5])*sqrt(abs(cm[5])),np.sign(cm[2])*sqrt(abs(cm[2])))
       inp.write("cell.charge = %s\n"%charge)
       inp.write("cell.spin = %s\n"%str(int(mult)-1))
       inp.write("cell.max_memory = %s\n"%str(mem_value))
@@ -1712,7 +1716,9 @@ mf.kernel()"""
         grid = 9
       #rest = "cf = cf.mix_density_fit()\ncf.grids.radi_method = dft.gauss_chebyshev\ncf.grids.level = "+str(grid)+"\n"
       rest = "cf = cf.mix_density_fit()\ncf.grids.level = "+str(grid)+"\n"
-      rest += """cf.with_df.auxbasis = 'def2-tzvp-jkfit'
+      rest += """
+gdf = df.GDF(cell)
+cf.with_df = gdf
 cf.diis_space = 19
 cf.conv_tol = 0.0033
 cf.conv_tol_grad = 1e-2
@@ -1727,7 +1733,7 @@ cf.damp = 0.0
 cf = scf.newton(cf)
 ener = mf.kernel()"""
       rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,cf.mo_coeff,cf.mo_energy,cf.mo_occ,ener)"%self.name
-      inp.write(rest)
+      inp.write(rest)        
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
 
@@ -1768,7 +1774,7 @@ ener = mf.kernel()"""
         temp = self.parent.elmodb_exe
         drive = temp[0].lower()
         folder = temp[2:]
-        elmodb_exe = "/mnt/"+drive+folder.replace('\\' , r'/')
+        elmodb_exe = "/mnt/"+drive+folder.replace('\\' , r'/')        
         args.append(elmodb_exe)
       elif self.parent.ubuntu_exe == None:
         args.append(self.parent.elmodb_exe)
@@ -1778,10 +1784,10 @@ ener = mf.kernel()"""
       args.append(self.name + ".out")
       if os.path.exists(os.path.join(self.origin_folder,self.name + ".pdb")):
         shutil.copy(os.path.join(self.origin_folder,self.name + ".pdb"),os.path.join(self.full_dir,self.name + ".pdb"))
-      else:
+      else: 
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
         raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
-      if basis_name == "extrabasis":
+      if basis_name == "extrabasis":  
         if os.path.exists(os.path.join(self.origin_folder,"extrabasis")):
           shutil.copy(os.path.join(self.origin_folder,"extrabasis"),os.path.join(self.full_dir,"extrabasis"))
         else:
@@ -2351,7 +2357,7 @@ def combine_tscs():
       d[name].setdefault('sfc', sfc_l)
 
   if debug:
-    print("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
+    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
 
   value_lines = []
   for i in range(nr_data_lines):
@@ -2495,7 +2501,7 @@ def get_ntail_list():
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
     if maxtail == 1:
       ntail_list_str = "1;"
-    else:
+    else: 
       for n in range(1,maxtail):
         ntail_list.append(str(n+1))
         ntail_list_str = ';'.join(ntail_list)
@@ -2518,19 +2524,19 @@ def get_resname():
 OV.registerFunction(get_resname,True,'NoSpherA2')
 
 def get_nat():
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
+  if tail == True:                                                                                                                       
     nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
     nat = nat.split(';')
-    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
-    if len(nat) < maxtail:
-      diff = maxtail - len(nat)
-      for i in range(diff):
-        nat.append(0)
-    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
-    n = ntail - 1
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
+    if len(nat) < maxtail:                                                                                                               
+      diff = maxtail - len(nat)                                                                                                          
+      for i in range(diff):                                                                                                              
+        nat.append(0)                                                                                                                   
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1                                                                                                                        
     return nat[n]
-OV.registerFunction(get_nat,True,'NoSpherA2')
+OV.registerFunction(get_nat,True,'NoSpherA2')   
 
 def get_nfrag():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
@@ -2648,44 +2654,44 @@ def change_nat(input):
 OV.registerFunction(change_nat,True,'NoSpherA2')
 
 def change_nfrag(input):
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
   if tail == True:
-    nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')
+    nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')                                                                          
     nfrag = nfrag.split(';')
-
-    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
     if len(nfrag) < maxtail:
-      diff = maxtail - len(nfrag)
-      for i in range(diff):
+      diff = maxtail - len(nfrag)                                                                                                     
+      for i in range(diff):                                                                                                              
         nfrag.append(1)
-    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
-    n = ntail - 1
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1 
     nfrag[n] = input
     str_nfrag = nfrag
     str_nfrag = ";".join([str(i) for i in nfrag])
-    OV.SetParam('snum.NoSpherA2.ELMOdb.str_nfrag', str_nfrag)
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_nfrag', str_nfrag)                                                                        
     return nfrag[n]
-OV.registerFunction(change_nfrag,True,'NoSpherA2')
+OV.registerFunction(change_nfrag,True,'NoSpherA2')      
 
 def change_ncltd(input):
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
   if tail == True:
-    ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')
+    ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')                                                                          
     ncltd = ncltd.split(';')
-
-    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
     if len(ncltd) < maxtail:
-      diff = maxtail - len(ncltd)
-      for i in range(diff):
+      diff = maxtail - len(ncltd)                                                                                                     
+      for i in range(diff):                                                                                                              
         ncltd.append(False)
-    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
-    n = ntail - 1
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
+    n = ntail - 1 
     ncltd[n] = input
     str_ncltd = ncltd
     str_ncltd = ";".join([str(i) for i in ncltd])
-    OV.SetParam('snum.NoSpherA2.ELMOdb.str_ncltd', str_ncltd)
+    OV.SetParam('snum.NoSpherA2.ELMOdb.str_ncltd', str_ncltd)                                                                        
     return ncltd[n]
-OV.registerFunction(change_ncltd,True,'NoSpherA2')
+OV.registerFunction(change_ncltd,True,'NoSpherA2')  
 
 def change_specac(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
@@ -2708,11 +2714,11 @@ def change_specac(input):
 OV.registerFunction(change_specac,True,'NoSpherA2')
 
 def change_exbsinp(input):
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
   if tail == True:
-    exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')
-    exbsinp = exbsinp.split(';')
-
+    exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')                                                                                   
+    exbsinp = exbsinp.split(';')                                                                                                                 
+  
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
     if len(exbsinp) < maxtail:
       diff = maxtail - len(exbsinp)
@@ -2728,11 +2734,11 @@ def change_exbsinp(input):
 OV.registerFunction(change_exbsinp,True,'NoSpherA2')
 
 def change_fraginp(input):
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
   if tail == True:
-    fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
-    fraginp = fraginp.split(';')
-
+    fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')                                                                                   
+    fraginp = fraginp.split(';')                                                                                                                 
+  
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
     if len(fraginp) < maxtail:
       diff = maxtail - len(fraginp)
@@ -2787,7 +2793,7 @@ def check_for_pyscf(loud=True):
   if sys.platform[:3] == 'win':
     ubuntu_exe = olx.file.Which("ubuntu.exe")
   else:
-    ubuntu_exe = None
+    ubuntu_exe = None    
   if ubuntu_exe != None and os.path.exists(ubuntu_exe):
     import subprocess
     try:
@@ -2822,7 +2828,7 @@ def check_for_pyscf(loud=True):
         print ("To use pySCF please install the ubuntu and linux subprocess framework for windows 10 and afterwords run:\nsudo apt update\nsudo apt install python python-numpy python-scipy python-h5py python-pip\nsudo -H pip install pyscf")
     else:
       if loud == True:
-        print ("To use pySCF please install python, pip and pyscf\n")
+        print ("To use pySCF please install python, pip and pyscf\n")    
     return False
 
 def change_tsc_generator(input):
@@ -2856,7 +2862,7 @@ It can be enabled in the settings of Windows.
 5) Check the Windows Subsystem for Linux option.
 6) Click the OK button
 7) Click the 'Restart Now' button
-Your computer will restart and next time you select "Get pySCF the next
+Your computer will restart and next time you select "Get pySCF the next 
 step of installation will be shown if the installation was succesfull""", "O", False)
             return
 
@@ -2865,7 +2871,7 @@ step of installation will be shown if the installation was succesfull""", "O", F
           if ubuntu_exe == None or os.path.exists(ubuntu_exe) == False:
             olx.Alert("Please install Ubuntu",\
 """pySCF requires Ubuntu to be installed on your system.
-It is reletively easy to do that.
+It is reletively easy to do that. 
 You can go to the Microsoft store and install it by searching for 'ubuntu' in clicking the install button.
 Once it is downloaded click the 'Launch' button and set up a username and password.
 After this setup is completed you can close the Ubuntu window and continue with this guide.
@@ -2879,7 +2885,7 @@ Please do this now and klick 'Ok' once everything is done!""", "O", False)
                   return
                 olx.Alert("Could not find Ubuntu",\
 """pySCF requires Ubuntu to be installed on your system.
-It is reletively easy to do that.
+It is reletively easy to do that. 
 You can go to the Microsoft store and install it by searching for 'ubuntu' in clicking the install button.
 Once it is downloaded click the 'Launch' button and set up a username and password.
 After this setup is completed you can close the Ubuntu window and continue with this guide.
@@ -2887,7 +2893,7 @@ Please do this now and klick 'Ok' once everything is done!""", "O", False)
               else:
                 cont = True
                 break
-
+              
 #Check for pySCF
           cont = False
           tries = 0
@@ -2897,7 +2903,7 @@ Please do this now and klick 'Ok' once everything is done!""", "O", False)
               tries += 1
               if tries == 4:
                 print ("Something seems wrong, aborting installation guide after 3 unsuccesfull attempts!")
-                return
+                return                
               olx.Alert("Please install Python and pySCF in Ubuntu",\
 """Almost done! Now we need to install Python and pySCF in your Ubuntu environment.
 Please open a Ubuntu terminal by starting Ubuntu.
@@ -2911,15 +2917,15 @@ There please type the following commands, each line followed by the Enter key:
 Please do this now and klick 'Ok' once everything is done!""", "O", False)
               cont = check_for_pyscf(False)
               if cont == True:
-                print ("PySCF installed sucessfully!")
+                print ("PySCF installed sucessfully!")              
           else:
             olx.Alert("Installation sucessful",\
 """Installation Sucessfull!
 In order to load the new functionality Olex2 will need to restart!
-Once you click 'Ok' Olex2 will do so automatically!""", "O", False)
+Once you click 'Ok' Olex2 will do so automatically!""", "O", False)            
             print ("PySCF installed sucessfully!")
             olx.m('restart')
-
+          
         else:
             olx.Alert("Please install pySCF",\
 """Please install pySCF in your python distribution.
@@ -2928,8 +2934,8 @@ On Ubuntu this can be done by typing in a command line:
 2) sudo pip install pyscf
 if that worked try to execute the following in a terminal:
 python -c 'import pyscf'
-If that does not throw an error message you were succesfull.""", "O", False)
-
+If that does not throw an error message you were succesfull.""", "O", False)           
+            
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DICAMB":
@@ -3441,7 +3447,7 @@ def plot_cube_single(name):
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
-
+    
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
 def plot_map_cube(map_type,resolution):
@@ -3532,7 +3538,7 @@ def plot_map_cube(map_type,resolution):
         cube.write(string)
       if(x != (size[0] -1)):
         cube.write('\n')
-
+        
     cube.close()
 
   print("Saved Fourier map successfully")
