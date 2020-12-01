@@ -2406,6 +2406,30 @@ class Normal_probability_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
+    
+class Fractal_Dimension(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "Fractal_Dimension_Plot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Fractal Dimension Plot")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
+    self.auto_axes = True
+    self.draw_origin = True
+    self.make_fractal_dimension_plot()
+    self.popout()
+
+  def make_fractal_dimension_plot(self):
+    from reflection_statistics import fractal_dimension
+    xy_plot = fractal_dimension().xy_plot_info()
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    data = Dataset(xy_plot.x, xy_plot.y)
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs()    
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -2942,6 +2966,7 @@ def makeReflectionGraphGui():
              "Fobs over Fcalc;" +\
              "Completeness%;" +\
              "Normal Probability;" +\
+             "Fractal Dimension;" +\
              "Scale factor vs resolution;" +\
              "R1 factor vs resolution;" +\
              "Bijvoet Differences %Probability Plot%;" +\
@@ -3001,6 +3026,7 @@ def make_reflection_graph(name):
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
+           'fractal_dimension': Fractal_Dimension,
            'r1_factor_vs_resolution': (item_vs_resolution_plot, "r1_factor_vs_resolution"),
            'i/sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'i_over_sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),

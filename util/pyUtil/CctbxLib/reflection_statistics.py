@@ -125,7 +125,17 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.cc_one_half(use_binning=True)
     elif self.item == "r1_factor_vs_resolution":
-      fo2, fc = self.get_fo_sq_fc()
+      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+      fo2 = None
+      fc = None
+      if NoSpherA2:
+        from refinement import FullMatrixRefine
+        fmr = FullMatrixRefine()
+        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+        fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+      else:
+        fo2, fc = self.get_fo_sq_fc()    
       weights = self.compute_weights(fo2, fc)
       scale_factor = fo2.scale_factor(fc, weights=weights)
       fo = fo2.f_sq_as_f()
@@ -181,7 +191,17 @@ class r1_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
-    fo2, fc = self.get_fo_sq_fc()
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    fo2 = None
+    fc = None
+    if NoSpherA2:
+      from refinement import FullMatrixRefine
+      fmr = FullMatrixRefine()
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+    else:
+      fo2, fc = self.get_fo_sq_fc()    
     weights = self.compute_weights(fo2, fc)
     scale_factor = fo2.scale_factor(fc, weights=weights)
     fo = fo2.f_sq_as_f()
@@ -218,7 +238,17 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta", normalize=True):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
-    fo2, fc = self.get_fo_sq_fc()
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    fo2 = None
+    fc = None
+    if NoSpherA2:
+      from refinement import FullMatrixRefine
+      fmr = FullMatrixRefine()
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+    else:
+      fo2, fc = self.get_fo_sq_fc()    
     fo2.setup_binner(n_bins=n_bins)
     self.info = fo2.info()
     weights = self.compute_weights(fo2, fc)
@@ -261,7 +291,17 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
     if self.hklf_code == 5:
-      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
+      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+      f_sq_obs_filtered = None
+      f_calc_filtered = None
+      if NoSpherA2:
+        from refinement import FullMatrixRefine
+        fmr = FullMatrixRefine()
+        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+        f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+      else:
+        f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
       f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
       f_obs_omitted = None
       f_calc_omitted = None
@@ -328,7 +368,17 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
                resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
 
-    f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    f_sq_obs_filtered = None
+    f_calc_filtered = None
+    if NoSpherA2:
+      from refinement import FullMatrixRefine
+      fmr = FullMatrixRefine()
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+    else:
+      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
 
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
@@ -377,7 +427,17 @@ class normal_probability_plot(OlexCctbxAdapter):
                distribution=None):
     OlexCctbxAdapter.__init__(self)
     from scitbx.math import distributions
-    f_sq_obs, f_calc = self.get_fo_sq_fc()
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    f_sq_obs = None
+    f_calc = None
+    if NoSpherA2:
+      from refinement import FullMatrixRefine
+      fmr = FullMatrixRefine()
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+      f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+    else:
+      f_sq_obs, f_calc = self.get_fo_sq_fc()
     f_obs = f_sq_obs.f_sq_as_f()
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
@@ -418,6 +478,85 @@ class normal_probability_plot(OlexCctbxAdapter):
     r.R = self.correlation
     return r
 
+class fractal_dimension(OlexCctbxAdapter):
+  def __init__(self,
+               resolution=0.1,
+               stepsize=0.01):
+    import olex
+    olex.m('CalcFourier -fcf -%s -r=%s'%("diff",resolution))
+    import olex_xgrid
+    
+    print ("Made residual density map")
+    assert olex_xgrid.IsVisible()
+    
+    from math import log
+    
+    temp = olex_xgrid.GetSize()
+    size = [int(temp[0]),int(temp[1]),int(temp[2])]
+    self.info = OV.ModelSrc()
+    
+    print ("start analyzing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
+    
+    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 3 * stepsize
+    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 3 * stepsize
+    steps = int(2 * max(abs(minimal),abs(maximum)) / stepsize) + 2
+    bins = [0] * steps
+    df = [0.0] * steps
+    iso = [0.0] * steps
+    
+    self.x = flex.double(steps)
+    self.y = flex.double(steps)
+    
+    for rho in range(steps):
+      iso[rho] = round(minimal + rho * stepsize,3)
+      self.x[rho] = iso[rho]
+    
+    value = [[[float(0.0) for k in xrange(size[2])] for j in xrange(size[1])] for i in xrange(size[0])]
+
+    for x in range(size[0]):
+      for y in range(size[1]):
+        for z in range(size[2]):    
+          value[x][y][z] = olex_xgrid.GetValue(x,y,z)
+    
+    run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
+    for x in range(size[0]):
+      for y in range(size[1]):
+        for z in range(size[2]-1):
+          for rho in range(steps):
+            if (value[x][y][z] < iso[rho] and value[x][y][z+1] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x][y][z+1] < iso[rho]):
+              bins[rho] += 1
+    for y in range(size[1]):
+      for z in range(size[2]):
+        for x in range(size[0]-1):
+          for rho in range(steps):
+            if (value[x][y][z] < iso[rho] and value[x+1][y][z] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x+1][y][z] < iso[rho]):
+              bins[rho] += 1   
+    for z in range(size[2]):
+      for x in range(size[0]):
+        for y in range(size[1]-1):
+          for rho in range(steps):
+            if (value[x][y][z] < iso[rho] and value[x][y+1][z] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x][y+1][z] < iso[rho]):
+              bins[rho] += 1
+              
+    epsilon = log(1/(run)**(-1/3))
+    for rho in range(steps):
+      if bins[rho] == 0:
+        df[rho] = 0
+      else:
+        df[rho] = log(bins[rho])/epsilon
+      self.y[rho] = df[rho]
+    print ("Done!")
+    
+  def xy_plot_info(self):
+    r = empty()
+    r.title = "Fractal Dimension Plot"
+    if (self.info != 0):
+      r.title += ": " + str(self.info)
+    r.x = self.x
+    r.y = self.y
+    r.xLegend = "rho_0 / eA^-3"
+    r.yLegend = "df(rho_0)"
+    return r
 
 class bijvoet_differences_NPP:
   def __init__(self, hooft_analysis=None, use_students_t=False,
