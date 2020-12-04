@@ -2938,7 +2938,7 @@ If that does not throw an error message you were succesfull.""", "O", False)
             
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
-    if input != "DICAMB":
+    if input != "DISCAMB":
       F000 = olx.xf.GetF000()
       Z = olx.xf.au.GetZ()
       nr_electrons= int(float(F000) / float(Z))
