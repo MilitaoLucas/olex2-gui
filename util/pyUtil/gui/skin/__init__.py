@@ -402,6 +402,10 @@ class Skin():
     self.adjust_font_size_for_ppi()
 
   def run_skin(self, f):
+    try:
+      f = f.decode()
+    except:
+      pass
     new_width = OV.GetParam('gui.htmlpanelwidth')
     if new_width < 350:
       OV.SetParam('gui.skin.extension', 'small')
