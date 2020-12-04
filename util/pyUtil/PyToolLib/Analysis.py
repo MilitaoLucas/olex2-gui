@@ -680,8 +680,6 @@ class Graph(ArgumentParser):
 
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
-    self.draw_x_axis()
-    self.draw_y_axis()
     for dataset in list(self.data.values()):
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
@@ -690,12 +688,15 @@ class Graph(ArgumentParser):
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
         marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives)
+    self.draw_x_axis()
+    self.draw_y_axis()
 
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
   map_txt = property(map_txt)
 
   def get_division_spacings_and_scale(self):
+    log = self.use_log
     min_xs = []
     min_ys = []
     max_xs = []
@@ -737,6 +738,13 @@ class Graph(ArgumentParser):
       min_y = 0.0
     max_x = max(max_xs)
     max_y = max(max_ys)
+    
+    if self.use_log:
+      if max_x != 0:
+        max_x = math.log(max_x,log)
+      if min_x != 0:
+        min_x = math.log(min_x,log)
+    
     self.max_y = max_y + .05*abs(max_y - min_y)
     self.max_x = max_x + .05*abs(max_x - min_x)
     if min_x != 0.0:
@@ -745,6 +753,12 @@ class Graph(ArgumentParser):
     if min_y != 0.0:
       self.min_y = min_y - .05*abs(max_y - min_y)
     else: self.min_y = 0.0
+
+    #if log:
+      #if log:
+        #self.max_x = math.log(self.max_x,log)
+        #if self.min_x != 0:
+          #self.min_x = math.log(self.min_x,log)
 
     delta_x = self.max_x - self.min_x
     delta_y = self.max_y - self.min_y
@@ -1074,6 +1088,7 @@ class Graph(ArgumentParser):
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, no_negatives=False):
+    log = self.use_log
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -1123,6 +1138,8 @@ class Graph(ArgumentParser):
     map_txt_list = self.map_txt_list
     if sigmas is not None:
       for i, (xr, yr) in enumerate(xy_pairs):
+        if log:
+          xr = math.log(xr,log)
         x = x_constant + xr * scale_x
         y = y_constant + yr * scale_y
         dy = sigmas[i]*scale_y
@@ -1158,7 +1175,9 @@ class Graph(ArgumentParser):
         print("%s: I can't plot that (%.2f, %.2f). Maybe change the binning?" %(msg, xr, yr))
         msg = ""
         continue
-
+      
+      if log:
+        xr = math.log(xr,self.use_log)
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
 
@@ -1170,6 +1189,7 @@ class Graph(ArgumentParser):
 
       if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
         continue # avoid wasting time drawing points that overlap too much
+        
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
 
@@ -1303,7 +1323,11 @@ class Graph(ArgumentParser):
     format_string = "%%.%if" %precision
     for item in x_axis:
       val = float(item)
-      txt = format_string %item
+      if self.use_log:
+        _ = self.use_log**val
+      else:
+        _ = val
+      txt = format_string %_
 
       wX, wY = self.draw.textsize(txt, font=self.font_small)
       y = self.graph_bottom + self.imX * 0.01
@@ -1335,7 +1359,7 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
-    y = self.boxY  + self.imY * 0.01
+    y = self.boxY  + self.imY * 0.005
 
     box = (x, y, x+wX, y+wY)
     fill = (256, 256, 256)
@@ -1407,6 +1431,7 @@ class Analysis(Graph):
       self.param = param.split(';')
     self.fl = []
     self.item = None
+    self.use_log = False
     guiParams = OV.GuiParams()
     self.model = olexex.OlexRefinementModel().model
 
@@ -2195,8 +2220,13 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
-    self.auto_axes = False
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
+    if self.params.completeness.resolution_as == "d_spacing":
+      self.use_log=10
+      self.auto_axes=True
+    else:
+      self.use_log=0
+      self.auto_axes=False
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
     self.draw_fitlines()
@@ -2219,6 +2249,7 @@ class CompletenessPlot(Analysis):
       text_full += ", Point: %s%%" %(compl_full_point) 
       compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
       text_max += ", Point: %s%%" %(compl_max_point)
+
     try:
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineleft")
@@ -3220,10 +3251,16 @@ class HealthOfStructure():
 
       ttheta = IT.get_unicode_characters(u"2\u0398")
 
+      try:
+        min_d = "%.4f" %self.hkl_stats['MinD']
+      except:
+        min_d = 0
+
       self.completeness_info_text['Point Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[0] }
       self.completeness_info_text['Laue Full'] = {'2Theta': self.theta_full*2, 'completeness': completnesses[1] }
-      self.completeness_info_text['Point Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[2] }
-      self.completeness_info_text['Laue Max'] = {'2Theta': self.theta_max*2, 'completeness': completnesses[3] }
+      self.completeness_info_text['Point Max'] = {'2Theta': self.theta_max*2, 'd_min': min_d, 'completeness': completnesses[2] }
+      self.completeness_info_text['Laue Max'] = {'2Theta': self.theta_max*2, 'd_min': min_d, 'completeness': completnesses[3] }
+
 
       l = ["- Laue Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_full*2, completnesses[1])]
       if self.theta_full != self.theta_max:
@@ -3256,7 +3293,6 @@ class HealthOfStructure():
           return (False, True)
       except:
         return (False, True)
-
     return (True, None)
 
   def get_cctbx_reflection_statistics_html(self):
