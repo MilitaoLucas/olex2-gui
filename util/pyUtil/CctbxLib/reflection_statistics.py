@@ -1,3 +1,5 @@
+from __future__ import division
+
 from cctbx_olex_adapter import OlexCctbxAdapter
 
 from olexFunctions import OlexFunctions
@@ -61,7 +63,7 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
       import iotbx.command_line.reflection_statistics
       import sys
       saveout = sys.stdout
-      from io import StringIO
+      from cStringIO import StringIO
       s = StringIO()
       sys.stdout = s
       self.cctbx_stats = iotbx.command_line.reflection_statistics.array_cache(self.reflections.f_obs, 10, 3)
@@ -497,9 +499,9 @@ class fractal_dimension(OlexCctbxAdapter):
     
     print ("start analyzing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
     
-    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 3 * stepsize
-    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 3 * stepsize
-    steps = int(2 * max(abs(minimal),abs(maximum)) / stepsize) + 2
+    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 1 * stepsize
+    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 1 * stepsize
+    steps = int((maximum - minimal) / stepsize) + 2
     bins = [0] * steps
     df = [0.0] * steps
     iso = [0.0] * steps
@@ -511,7 +513,7 @@ class fractal_dimension(OlexCctbxAdapter):
       iso[rho] = round(minimal + rho * stepsize,3)
       self.x[rho] = iso[rho]
     
-    value = [[[float(0.0) for k in xrange(size[2])] for j in xrange(size[1])] for i in xrange(size[0])]
+    value = [[[float(0.0) for z in range(size[2])] for y in range(size[1])] for x in range(size[0])]
 
     for x in range(size[0]):
       for y in range(size[1]):
@@ -519,6 +521,7 @@ class fractal_dimension(OlexCctbxAdapter):
           value[x][y][z] = olex_xgrid.GetValue(x,y,z)
     
     run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
+    
     for x in range(size[0]):
       for y in range(size[1]):
         for z in range(size[2]-1):
@@ -545,7 +548,7 @@ class fractal_dimension(OlexCctbxAdapter):
       else:
         df[rho] = log(bins[rho])/epsilon
       self.y[rho] = df[rho]
-    print ("Done!")
+    print("Done!")
     
   def xy_plot_info(self):
     r = empty()
