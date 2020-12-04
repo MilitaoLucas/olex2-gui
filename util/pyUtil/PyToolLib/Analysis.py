@@ -736,8 +736,13 @@ class Graph(ArgumentParser):
     else:
       min_x = 0.0
       min_y = 0.0
-    max_x = max(max_xs)
-    max_y = max(max_ys)
+    
+    
+    if not self.max_x:
+      max_x = max(max_xs)
+      self.max_x = max_x + .05*abs(max_x - min_x)
+    if not self.max_y:
+      max_y = max(max_ys)
     
     if self.use_log:
       if max_x != 0:
@@ -745,14 +750,14 @@ class Graph(ArgumentParser):
       if min_x != 0:
         min_x = math.log(min_x,log)
     
-    self.max_y = max_y + .05*abs(max_y - min_y)
-    self.max_x = max_x + .05*abs(max_x - min_x)
-    if min_x != 0.0:
+      self.max_y = max_y + .05*abs(max_y - min_y)
+    
+    if min_x != 0.0 and self.min_x == None:
       self.min_x = min_x - .05*abs(max_x - min_x)
-    else: self.min_x = 0.0
-    if min_y != 0.0:
+    elif self.min_x == None: self.min_x = 0.0
+    if min_y != 0.0 and self.min_y == None:
       self.min_y = min_y - .05*abs(max_y - min_y)
-    else: self.min_y = 0.0
+    elif self.min_y == None: self.min_y = 0.0
 
     #if log:
       #if log:
@@ -1175,7 +1180,7 @@ class Graph(ArgumentParser):
         print("%s: I can't plot that (%.2f, %.2f). Maybe change the binning?" %(msg, xr, yr))
         msg = ""
         continue
-      
+
       if log:
         xr = math.log(xr,self.use_log)
       x = x_constant + xr * scale_x
@@ -2226,7 +2231,7 @@ class CompletenessPlot(Analysis):
       self.auto_axes=True
     else:
       self.use_log=0
-      self.auto_axes=False
+    self.auto_axes = False
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
     self.draw_fitlines()
@@ -2446,8 +2451,13 @@ class Fractal_Dimension(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
-
-    self.auto_axes = True
+    
+    self.auto_axes = False
+    self.max_y = 3.05
+    self.min_y = 0.00
+    self.min_x = -1.0
+    self.max_x = 1.0    
+    
     self.draw_origin = True
     self.make_fractal_dimension_plot()
     self.popout()
@@ -2459,6 +2469,7 @@ class Fractal_Dimension(Analysis):
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     data = Dataset(xy_plot.x, xy_plot.y)
     self.data.setdefault('dataset1', data)
+ 
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()    
 
