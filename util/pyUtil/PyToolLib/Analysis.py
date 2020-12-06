@@ -743,14 +743,13 @@ class Graph(ArgumentParser):
       self.max_x = max_x + .05*abs(max_x - min_x)
     if not self.max_y:
       max_y = max(max_ys)
+      self.max_y = max_y + .05*abs(max_y - min_y)
     
     if self.use_log:
       if max_x != 0:
         max_x = math.log(max_x,log)
       if min_x != 0:
         min_x = math.log(min_x,log)
-    
-      self.max_y = max_y + .05*abs(max_y - min_y)
     
     if min_x != 0.0 and self.min_x == None:
       self.min_x = min_x - .05*abs(max_x - min_x)
