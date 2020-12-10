@@ -1077,9 +1077,11 @@ The following options were used:
       for ref in refs:
         if(ref['id'] not in idslist):
           if ref['index'] == 4 and ref['relation'] == "var":
-            as_var.append((ref['id'], ref['k']))
+            #as_var.append((ref['id'], ref['k']))
+            as_var.append((ref['id'], 1.0))
           if ref['index'] == 4 and ref['relation'] == "one_minus_var":
-            as_var_minus_one.append((ref['id'], ref['k']))
+            as_var_minus_one#.append((ref['id'], ref['k']))
+            as_var_minus_one.append((ref['id'], 1.0))
         if ref['index'] == 5 and ref['relation'] == "var":
           eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
