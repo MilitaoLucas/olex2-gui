@@ -393,11 +393,23 @@ class Graph(ArgumentParser):
       else:
         x1 = (y1-y_intercept)/slope
 
+    #if self.use_log:
+      #self.max_x = self.use_log**self.max_x
+      #self.min_x = self.use_log**self.max_x
+
+    if self.reverse_x:
+      scale_x = -self.scale_x
+    else:
+      scale_x = self.scale_x
+
+    if self.use_log:
+      if x1 != 0:
+        x1 = math.log(x1,self.use_log)
 
     x1 = self.graph_left \
-       + ((float(x1) * self.scale_x)) \
-       + ((0 - self.max_x) * self.scale_x) \
-       + (self.delta_x * self.scale_x)
+       + ((float(x1)) * scale_x) \
+       + ((0 - self.max_x) * scale_x) \
+       + (self.delta_x * scale_x)
 
     if y2 > self.max_y:
       y2 = self.max_y
@@ -1191,8 +1203,11 @@ class Graph(ArgumentParser):
         else:
           fill = self.guiParams.green.hexadecimal
 
-      if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
-        continue # avoid wasting time drawing points that overlap too much
+      try:
+        if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
+          continue # avoid wasting time drawing points that overlap too much
+      except Exception as err:
+        pass
         
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
@@ -2678,6 +2693,11 @@ class item_vs_resolution_plot(Analysis):
 
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
+
+    if params.resolution_as == "d_spacing":
+      self.use_log=10
+      self.auto_axes=True
+
     try:
       xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
     except Exception as err:
@@ -2722,8 +2742,10 @@ class item_vs_resolution_plot(Analysis):
     iucr = 135
     if olx.xf.exptl.Radiation().startswith('0.710'):
       iucr = 50
-
     if self.item == "i_over_sigma_vs_resolution":
+      if self.use_log:
+        iucr = 0.37 # and I have no idea why!
+        iucr = 0.84
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution", rotate_text="top_lineleft")
 
@@ -3371,7 +3393,8 @@ class HealthOfStructure():
           l.remove("flack_str")
     else:
       self.scope = "hkl"
-      if not self.hkl_stats:
+      ## If there is no CIF information and no hkl file, we don't have stats, but still have {'IsCentrosymmetric} as a single item
+      if not self.hkl_stats or len(self.hkl_stats) == 1:
         return
       l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
 
