@@ -5,13 +5,15 @@
 #password=false
 #multiline=false
 #disabled=false
+#bgcolor="GetVar('HtmlInputBgColour')"
+#fgcolor="GetVar(HtmlFontColour)"
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="text"
   height="#height"
-  bgcolor="GetVar('HtmlInputBgColour')"
-  fgcolor="GetVar(HtmlFontColour)"
+  bgcolor="#bgcolor"
+  fgcolor="#fgcolor"
   valign="center"
   name="#name"
   width="#width"
