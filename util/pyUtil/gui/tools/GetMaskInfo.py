@@ -93,11 +93,11 @@ def get_mask_info():
   else:
     try:
       sqf_f = get_sqf_name()
-      rFile = open(sqf_f, 'rb').read()
+      rFile = open(sqf_f, 'r').read()
       if not rFile.startswith("data_"):
         rFile = "data_%s\n"%str(current_sNum) + rFile
       sqf = iotbx.cif.fast_reader(input_string=rFile).model()
-    except:
+    except Exception as err:
       return return_note(note = "No masking info yet!", col=gui_green)
     if sqf:
       olx.cif_model[current_sNum].update(sqf[current_sNum])
@@ -479,7 +479,7 @@ def split_entity(entry):
 cleaned_formulae = {}
 def formula_cleaner(formula):
   formula = formula.replace(" ", "").replace(" ", "")
-  formula = unicode(formula) #py3HP
+  #formula = unicode(formula) #py3HP
   if formula in cleaned_formulae:
     return cleaned_formulae[formula]
   retVal = ""
@@ -566,7 +566,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
   if os.path.exists(sqf_file):
     with open(sqf_file, 'r') as original: data = original.read()
     with open(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
-    with open(sqf_file, 'rb') as f:
+    with open(sqf_file, 'r') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
     if not scope2:
