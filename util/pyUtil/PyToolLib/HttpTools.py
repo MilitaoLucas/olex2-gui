@@ -27,7 +27,11 @@ def make_url_call(url, values=None, http_timeout = 5):
   global proxy
   localhost = False
   if isinstance(url, urllib.request.Request):
-    localhost = 'localhost' in url.get_host().lower()
+    try:
+      localhost = 'localhost' in url.get_host().lower()
+    except:
+      localhost = 'localhost' in url.host.lower() #py23
+      
   elif isinstance(url, str):
     localhost = 'localhost' in url
   if use_proxy_settings and not localhost:
