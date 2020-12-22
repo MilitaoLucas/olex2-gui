@@ -53,7 +53,6 @@ global twin_laws_d
 twin_laws_d = {}
 
 from scitbx.math import continued_fraction
-from boost import rational
 from cctbx import sgtbx, xray
 from cctbx.array_family import flex
 import smtbx.utils
