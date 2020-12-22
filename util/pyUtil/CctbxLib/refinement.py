@@ -3,8 +3,8 @@
 import math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
 import cctbx_olex_adapter as COA
-import boost.python
-ext = boost.python.import_ext("smtbx_refinement_least_squares_ext")
+from boost_adaptbx.boost import python
+ext = python.import_ext("smtbx_refinement_least_squares_ext")
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
