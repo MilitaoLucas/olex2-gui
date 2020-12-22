@@ -1,4 +1,4 @@
-import boost.python
+import boost_adaptbx.boost as boost
 from warnings import catch_warnings
 ext = boost.python.import_ext("smtbx_refinement_least_squares_ext")
 from smtbx_refinement_least_squares_ext import *
@@ -207,11 +207,11 @@ def calculate(self, threshold, params, max_reflections, output_to):
     Ts_ = [(xn, x) for xn, x in enumerate(t_mat[:,j])]
     Ts_.sort(key=lambda x: x[1],reverse=True)
     if Ts_[0][1] > maxT:
-      maxT = Ts_[0][1] 
+      maxT = Ts_[0][1]
     Ts.append((j, Ts_[:min(max_reflections, len(Ts_))]))
   fm_header = "#%3s%4s%4s%8s%10s%10s\n"
 
-  try:  
+  try:
     if olx.HasGUI() == 'true':
       olx.Freeze(True)
     if not output_to:
