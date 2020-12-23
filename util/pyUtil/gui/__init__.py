@@ -184,8 +184,8 @@ olex.registerFunction(GetFolderList, False, "gui")
 
 def GetBoxPosition(w, h):
   sz = [int(x) for x in olx.GetWindowSize().split(',')]
-  y = (sz[3]-sz[1]-w)/2
-  x = (sz[2]-sz[0]-w)/2
+  y = (sz[3]-sz[1]-w)//2
+  x = (sz[2]-sz[0]-w)//2
   if x < 0: x = 0
   if y < 0: y = 0
   return x,y

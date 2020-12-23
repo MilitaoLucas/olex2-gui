@@ -1029,15 +1029,8 @@ class OlexFunctions(inheritFunctions):
       height = number_of_lines * auto_height_line + auto_height_constant
       #print "Number of lines: %s; Height: %s" %(number_of_lines, height)
     if position == "center":
-      ws = olx.GetWindowSize('gl')
-      ws = [int(i) for i in ws.split(",")]
-      if width < ws[2]:
-        x = int(ws[2])/2 - width/2
-      else: x = 0
-      if height < ws[3]:
-        y = int(ws[3])/2 - height/2
-      else:
-        y = 0
+      import gui
+      x,y = gui.GetBoxPosition(width, height)
     pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
     OV.cmd(pstr)
     olx.html.SetBorders(pop_name,border)
