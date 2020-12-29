@@ -220,7 +220,7 @@ parser.add_option('-f', '--file',
       help='whether to use update any particluare file only')
 parser.add_option('-p', '--platform',
       dest='release_platform',
-      default='win32-sse,win32,win64,mac32,mac64,lin32,lin64',
+      default='win32-sse,win32,win64,mac64,lin64',
       action='store',
       help='modify the platform list to release')
 option, args = parser.parse_args()
@@ -244,7 +244,7 @@ if not os.path.isdir(bin_directory):
 def update_tags_file(dir):
   up_dir = '/'.join(dir.split('/')[:-1])
   #tags = os.listdir(up_dir)
-  tags = ['1.3', '1.2', '1.3-beta', '1.3-alpha', '1.1', '1.0']
+  tags = ['1.5-alpha', '1.3', '1.2', '1.3-beta', '1.3-alpha', '1.1', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
@@ -360,9 +360,7 @@ platforms = {
   "win32-sse": False,
   "win32": True,
   "win64": True,
-  "mac32": True,
   "mac64": True,
-  "lin32": True,
   "lin64": True,
 }
 try:
@@ -707,18 +705,6 @@ if platforms.get("win64"):
     }
   )
 #create linux and mac distro only in releases
-if platforms.get("lin32"):
-  create_portable_distro(
-    port_props=set([linux32_port_name]),
-    zip_name=linux32_port_zip_name,
-    port_zips=linux32_zip_files,
-    prefix=linux32_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/linux-distro/start' : 'olex2/start',
-      bin_directory + '/linux-distro/usettings32.dat' : 'olex2/usettings.dat'
-    }
-  )
 if platforms.get("lin64"):
   create_portable_distro(
     port_props=set([linux64_port_name]),
@@ -729,20 +715,6 @@ if platforms.get("lin64"):
     {
       bin_directory + '/linux-distro/start' : 'olex2/start',
       bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
-    }
-  )
-if platforms.get("mac32"):
-  create_portable_distro(
-    port_props=set([mac32_port_name]),
-    zip_name=mac32_port_zip_name,
-    port_zips=mac32_zip_files,
-    prefix=mac32_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
-      bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-      bin_directory + '/mac-distro/usettings32.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
-      bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
     }
   )
 if platforms.get("mac64"):
