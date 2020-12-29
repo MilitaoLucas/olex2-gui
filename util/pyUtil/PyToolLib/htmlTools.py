@@ -39,7 +39,7 @@ hover_buttons = OV.GetParam('olex2.hover_buttons')
 import gui
 
 
-def makeHtmlTable(list):
+def makeHtmlTable(dlist):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
   In each dictionary set at least the 'varName':(the name of the variable) and 'itemName':(the text to go in the first column).
@@ -51,7 +51,7 @@ def makeHtmlTable(list):
   """
   text = ''
 
-  for input_d in list:
+  for input_d in dlist:
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -62,7 +62,7 @@ def makeHtmlTable(list):
     boxText = ''
     i = 0
     for box in ['box1','box2','box3','box4']:
-      if box in list(input_d.keys()):
+      if box in input_d:
         i += 1
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
