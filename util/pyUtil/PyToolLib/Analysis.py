@@ -3303,7 +3303,7 @@ class HealthOfStructure():
           l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
       target = "&#013;- ".join(l)
 
-      OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
+      OV.SetParam('snum.refinement.completeness.target', target)
 
     except Exception as err:
       print(err)
@@ -3605,7 +3605,11 @@ class HealthOfStructure():
     targetHeight = round(OV.GetParam('gui.timage.hos.height'))
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    if item == "Completeness":
+      target = OV.GetParam('snum.refinement.completeness.target')
+    else:
+      target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    
     txt = ""
     ref_open = ''
     ref_close = ''

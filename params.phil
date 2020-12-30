@@ -213,6 +213,12 @@ routines requiring structure refinement
   refinement
     .short_caption = Structure Refinement
     {
+
+    completeness{
+      target = ""
+        .type = str
+      }
+
     ata = 0
       .type = float
     data_parameter_ratio = None
