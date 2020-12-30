@@ -178,9 +178,8 @@ class phil_handler(index):
         return # diff is empty -> write empty file
       else:
         output_phil = scope_output_phil
-    f = open(file_name, "w")
-    output_phil.show(out=f)
-    f.close()
+    with open(file_name, "w", encoding="utf-8") as f:
+      output_phil.show(out=f)
 
   def show_diff(self, out=None):
     self.get_diff().show(out=out)

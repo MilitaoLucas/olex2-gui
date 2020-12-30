@@ -507,7 +507,7 @@ class Graph(ArgumentParser):
         if len(ins) > 2:
           colour=ins[2]
         else: colour=self.axislabelColour
-          
+
         new = Image.new('RGB', (wX+1, wY+1), self.fillColour)
         draw = ImageDraw.Draw(new)
         draw.text((0, 0), text, font=self.font_tiny, fill=colour)
@@ -748,21 +748,21 @@ class Graph(ArgumentParser):
     else:
       min_x = 0.0
       min_y = 0.0
-    
-    
+
+
     if not self.max_x:
       max_x = max(max_xs)
       self.max_x = max_x + .05*abs(max_x - min_x)
     if not self.max_y:
       max_y = max(max_ys)
       self.max_y = max_y + .05*abs(max_y - min_y)
-    
+
     if self.use_log:
       if max_x != 0:
         max_x = math.log(max_x,log)
       if min_x != 0:
         min_x = math.log(min_x,log)
-    
+
     if min_x != 0.0 and self.min_x == None:
       self.min_x = min_x - .05*abs(max_x - min_x)
     elif self.min_x == None: self.min_x = 0.0
@@ -1208,7 +1208,7 @@ class Graph(ArgumentParser):
           continue # avoid wasting time drawing points that overlap too much
       except Exception as err:
         pass
-        
+
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
 
@@ -2252,20 +2252,20 @@ class CompletenessPlot(Analysis):
     self.popout()
     if self.params.completeness.output_csv_file:
       self.output_data_as_csv()
-      
+
   def draw_fitlines(self):
     # ALL LAUE Info
     deg = u"\u00B0"
     completeness_info_text = HOS_instance.completeness_info_text
     ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
     compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
-    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full) 
+    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full)
     ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
     compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
-    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max) 
+    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max)
     if not HOS_instance.hkl_stats['IsCentrosymmetric']:
       compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
-      text_full += ", Point: %s%%" %(compl_full_point) 
+      text_full += ", Point: %s%%" %(compl_full_point)
       compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
       text_max += ", Point: %s%%" %(compl_max_point)
 
@@ -2456,7 +2456,7 @@ class Normal_probability_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
-    
+
 class Fractal_Dimension(Analysis):
   def __init__(self):
     Analysis.__init__(self)
@@ -2465,13 +2465,13 @@ class Fractal_Dimension(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
-    
+
     self.auto_axes = False
     self.max_y = 3.05
     self.min_y = 0.00
     self.min_x = -1.0
-    self.max_x = 1.0    
-    
+    self.max_x = 1.0
+
     self.draw_origin = True
     self.make_fractal_dimension_plot()
     self.popout()
@@ -2483,9 +2483,9 @@ class Fractal_Dimension(Analysis):
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     data = Dataset(xy_plot.x, xy_plot.y)
     self.data.setdefault('dataset1', data)
- 
+
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs()    
+    self.draw_pairs()
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -3302,7 +3302,7 @@ class HealthOfStructure():
         if self.theta_full != self.theta_max:
           l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
       target = "&#013;- ".join(l)
-      
+
       OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
 
     except Exception as err:
@@ -3705,7 +3705,7 @@ class HealthOfStructure():
       # Laue bar
       laue = self.hkl_stats[laue_name]
       laue_col = self.get_bg_colour(item, laue)
-      
+
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
