@@ -666,6 +666,8 @@ def compressFile(filePath):
   return zlib.compress(open(filePath, "rb").read(), 9)
 
 def decompressFile(fileData):
+  if not isinstance(fileData, (bytes, bytearray)):
+    fileData = fileData.encode('latin1')
   return zlib.decompress(fileData)
 
 def digestHKLData(fileData):
