@@ -1029,7 +1029,7 @@ class wfn_Job(object):
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
-    control = "! NoPop NoFinalGrid 3-21G AIM "
+    control = "! NoPop NoFinalGrid MiniPrint 3-21G AIM "
     method = OV.GetParam('snum.NoSpherA2.method')
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
@@ -1741,6 +1741,10 @@ ener = mf.kernel()"""
     args = []
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     software = OV.GetParam('snum.NoSpherA2.source')
+    
+    gui.get_default_notification(
+          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=$GetVar(gui.red_text)><b>%s</b></font>..."%(self.name,software),
+          txt_col='black_text')    
 
     if software == "ORCA":
       args.append(self.parent.orca_exe)
@@ -1799,15 +1803,66 @@ ener = mf.kernel()"""
     os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
 
     import subprocess
-    import time
-    pyl = OV.getPYLPath()
-    if not pyl:
-      print("A problem with pyl is encountered, aborting.")
-      return
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "fchk-launch.py")])
-    while p.poll() is None:
-      time.sleep(3)
+    p = None
+    if sys.platform[:3] == 'win':
+      startinfo = subprocess.STARTUPINFO()
+      startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      startinfo.wShowWindow = 7
+      pyl = OV.getPYLPath()
+      if not pyl:
+        print("A problem with pyl is encountered, aborting.")
+        return
+      p = subprocess.Popen([pyl,
+                            os.path.join(p_path, "fchk-launch.py")],
+                            startupinfo=startinfo)
+    else:
+      pyl = OV.getPYLPath()
+      if not pyl:
+        print("A problem with pyl is encountered, aborting.")
+        return
+      p = subprocess.Popen([pyl,
+                            os.path.join(p_path, "fchk-launch.py")])
+    
+    out_fn = None
+    if "orca" in args[0]:
+      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_orca.log")
+    elif "elmo" in args[2]:
+      out_fn = os.path.join("olex2","Wfn_Job",self.name + ".out")
+    elif "python" in args[2]:
+      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_pyscf.log")
+    if "ubuntu" in args[0]:
+      print("Starting Ubuntu and running pySCF, please be patient for start")
+    if "ubuntu" in args[0]:
+      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_pyscf.log")
+    elif out_fn == None:
+      out_fn = os.path.join("olex2","Wfn_Job",self.name + ".log")  
+      
+    tries = 0
+    while not os.path.exists(out_fn):
+      time.sleep(1)
+      tries += 1
+      if tries >= 5:
+        if "python" in args[2] and tries <=10:
+          continue
+        print("Failed to locate the output file")
+        OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
+        raise NameError('Wfn-Output not found!')          
+      
+    with open(out_fn, "rU") as stdout:
+      while p.poll() is None:
+        x = stdout.read()
+        if x:
+          print(x,end='')
+          olx.xf.EndUpdate()
+          if OV.HasGUI():
+            olx.Refresh()
+        else:
+          olx.xf.EndUpdate()
+          if OV.HasGUI():
+            olx.Refresh()
+        time.sleep(0.1)
+    
+    print("\nWavefunction calculation ended!")
 
     if software == "ORCA":
       if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+"_orca.log")).read():
@@ -1905,6 +1960,9 @@ ener = mf.kernel()"""
 
 def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
   folder = OV.FilePath()
+  gui.get_default_notification(
+        txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
+        txt_col='black_text')  
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, "NoSpherA2.log")):
     shutil.move(os.path.join(folder, "NoSpherA2.log"), os.path.join(folder, "NoSpherA2.log_org"))
@@ -1945,16 +2003,56 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
       move_args.append(str(groups[i]))
   os.environ['cuqct_cmd'] = '+&-'.join(move_args)
   os.environ['cuqct_dir'] = folder
-  pyl = OV.getPYLPath()
-  if not pyl:
-    print("A problem with pyl is encountered, aborting.")
-    return
   import subprocess
-  p = subprocess.Popen([pyl,
-                        os.path.join(p_path, "cuqct-launch.py")])
-  while p.poll() is None:
-    time.sleep(5)
-    olx.html.Update()
+  
+  p = None
+  if sys.platform[:3] == 'win':
+    startinfo = subprocess.STARTUPINFO()
+    startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = 7
+    pyl = OV.getPYLPath()
+    if not pyl:
+      print("A problem with pyl is encountered, aborting.")
+      return
+    p = subprocess.Popen([pyl,
+                          os.path.join(p_path, "cuqct-launch.py")],
+                          startupinfo=startinfo)
+  else:
+    pyl = OV.getPYLPath()
+    if not pyl:
+      print("A problem with pyl is encountered, aborting.")
+      return
+    p = subprocess.Popen([pyl,
+                          os.path.join(p_path, "cuqct-launch.py")])
+  
+  out_fn = "NoSpherA2.log"
+    
+  tries = 0
+  while not os.path.exists(out_fn):
+    time.sleep(1)
+    tries += 1
+    if tries >= 5:
+      if "python" in args[2] and tries <=10:
+        continue
+      print("Failed to locate the output file")
+      OV.SetVar('NoSpherA2-Error',"NoSpherA2-Output not found!")
+      raise NameError('NoSpherA2-Output not found!')          
+    
+  with open(out_fn, "rU") as stdout:
+    while p.poll() is None:
+      x = stdout.read()
+      if x:
+        print(x,end='')
+        olx.xf.EndUpdate()
+        if OV.HasGUI():
+          olx.Refresh()
+      else:
+        olx.xf.EndUpdate()
+        if OV.HasGUI():
+          olx.Refresh()
+      time.sleep(0.1)
+  
+  print("\n.tsc calculation ended!")
 
 def discamb(folder, name, discamb_exe):
   move_args = []
