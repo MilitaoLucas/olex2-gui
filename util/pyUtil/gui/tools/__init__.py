@@ -22,6 +22,9 @@ last_element_html = ""
 global current_sNum
 current_sNum = ""
 
+global custom_scripts_d
+custom_scripts_d = {}
+
 haveGUI = OV.HasGUI()
 
 import olexex
@@ -1110,8 +1113,9 @@ class Templates():
 
     if template_file:
       g = []
-      p = os.path.join(path, template_file)
-      g.append(p)
+      if not os.path.exists(template_file):
+        template_file = os.path.join(path, template_file)
+      g.append(template_file)
 
     else:
       if not path:
@@ -1671,3 +1675,77 @@ class DisorderDisplayTools(object):
       olex.m('sel part %s' %parts)
 
 DisorderDisplayTools_instance = DisorderDisplayTools()
+
+
+def get_custom_scripts_combo():
+  global custom_scripts_d
+  if not custom_scripts_d:
+    get_custom_scripts()
+  t_l = []
+  for script in custom_scripts_d:
+    t_l.append(script)
+  t_l.sort()
+  return ";".join(t_l)
+OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
+  
+def get_custom_scripts(file_name, globule, scope):
+  global custom_scripts_d
+  import gui
+  gui_t = "<b>%s</b>: Please select a script from the above choices." %scope
+  OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
+
+  with open(file_name, 'r') as rFile:
+    _ = rFile.readlines()
+  for line in _:
+    line = line.rstrip()
+    if line:
+      if line.startswith("s:"):
+        script=line[2:]
+        if "<-" in script:
+          script = script.split("<-")[1]
+        try:
+          script_obj = globule[script]
+          custom_scripts_d.setdefault(script,{})
+          custom_scripts_d[script].setdefault('obj', script_obj)
+        except:
+          print("Could not obtain script object for %s" %script)
+          continue
+        try:
+          custom_scripts_d[script].setdefault('docstring', script_obj.__doc__)
+        except:
+          print("Could not evaluate script docstring for %s" %script)
+        try:
+          gui_t = gui.tools.TemplateProvider.get_template(script + "_gui", template_file=file_name, force=debug)
+          custom_scripts_d[script].setdefault('gui', gui_t)
+          custom_scripts_d[script]['gui']=gui_t
+        except:
+          print("Could not create gui for scipt %s" %script)
+
+def set_custom_gui(f, scope):
+  global custom_scripts_d
+  f in custom_scripts_d
+  
+  try:
+    doc = custom_scripts_d[f].get('docstring')
+    gui_t = custom_scripts_d[f].get('gui')
+    if "has not been found" in gui_t:
+      gui_t = "<b>%s</b>: %s" %(scope, doc)
+    OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
+    OV.SetVar("active_custom_function_%s"%scope, f)
+  except:
+    _ = "--> %s is missing" %f
+
+  #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
+OV.registerFunction(set_custom_gui,False,'gui.tools')
+  
+def run_custom_script(*args):
+  global custom_scripts_d
+  script = args[0]
+  if script in custom_scripts_d:
+    custom_scripts_d[script]['obj']()
+
+OV.registerFunction(run_custom_script,False,'gui.tools')
+
+
+
+
