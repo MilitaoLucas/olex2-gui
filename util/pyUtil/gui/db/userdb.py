@@ -21,6 +21,7 @@ class UsersDB:
     w, h = 650, 700
     x, y = gui.GetBoxPosition(w, h)
     path = "%s/etc/gui/tools/users-db.htm" % (olx.BaseDir())
+    path = os.path.join(olx.BaseDir(), "etc", "gui", "tools", "users-db.htm")
     olx.Popup(self.pop_name, path, s=True, b="tc", t="Manage users and sites",
            w=w, h=h, x=x, y=y)
     self.setSite(None)

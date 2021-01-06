@@ -253,7 +253,7 @@ class Graph(ArgumentParser):
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
     fontscale = f * self.imX
-    font_name = "Vera"
+    font_name = "DefaultFont"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
     self.font_size_normal = int(1.0 * fontscale)
@@ -262,7 +262,7 @@ class Graph(ArgumentParser):
     self.font_small = IT.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
     self.font_tiny = IT.registerFontInstance(font_name, self.font_size_tiny)
-    font_name = "Vera Bold"
+    font_name = "DefaultFont Bold"
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
@@ -298,7 +298,7 @@ class Graph(ArgumentParser):
       x = 0 + self.bSides+self.xSpace
       y = self.bTop
       top_left = (x,y)
-      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
+      IT.write_text_to_draw(draw, txt, font_name=font_name, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
       currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
       # Write something in the right-hand top spot on the graph
       txt = OV.correct_rendered_text(self.graphInfo.get("TopRightTitle", ""))
@@ -758,8 +758,8 @@ class Graph(ArgumentParser):
       self.max_y = max_y + .05*abs(max_y - min_y)
 
     if self.use_log:
-      if max_x != 0:
-        max_x = math.log(max_x,log)
+      if self.max_x != 0:
+        max_x = math.log(self.max_x,log)
       if min_x != 0:
         min_x = math.log(min_x,log)
 
@@ -1290,7 +1290,7 @@ class Graph(ArgumentParser):
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
-        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
+        #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
         x = self.graph_left
         y = y + int(wY/2)
@@ -2093,10 +2093,10 @@ class ChargeFlippingPlot(PrgAnalysis):
     if solving.state is solving.guessing_delta:
       if previous_state is not solving.guessing_delta:
         txt = "%s" %self.attempt
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "Vera Bold")
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "DefaultFont Bold")
         x = self.counter + marker_width + 5
         top_left = (x, self.graph_bottom -wY -3)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "Vera Bold", font_colour=self.light_grey)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "DefaultFont Bold", font_colour=self.light_grey)
         self.attempt += 1
         if self.counter != 0:
           self.counter += 1
@@ -2136,7 +2136,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       R1 = height*(1-R1) + top
       box = (x,R1,x+marker_width,R1+2)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
-      font_name = "Vera"
+      font_name = "DefaultFont"
       font_size = 10
       font = IT.registerFontInstance(font_name, font_size)
 
@@ -2739,15 +2739,29 @@ class item_vs_resolution_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
 
-    iucr = 135
-    if olx.xf.exptl.Radiation().startswith('0.710'):
+    alpha = IT.get_unicode_characters("alpha")
+    beta = IT.get_unicode_characters("beta")
+    iucr = 0
+    rad_name = "?"
+    if olx.xf.exptl.Radiation().startswith('1.54'): # Cu alpha radiation
+      iucr = 135
+      rad_name = "CuK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('1.39'): # Ga radiation
+      iucr = 40
+      rad_name = "GaK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('1.34'): # Cu beta radiation
+      iucr = 40
+      rad_name = "CuK" + beta
+    elif olx.xf.exptl.Radiation().startswith('0.71'): # Mo radiation
       iucr = 50
+      rad_name = "MoK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('0.56'): # Ag radiation
+      iucr = 33
+      rad_name = "AgK" + alpha
+
     if self.item == "i_over_sigma_vs_resolution":
-      if self.use_log:
-        iucr = 0.37 # and I have no idea why!
-        iucr = 0.84
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution", rotate_text="top_lineleft")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft")
 
     #if self.item == "cc_half_vs_resolution":
       #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
@@ -3599,7 +3613,7 @@ class HealthOfStructure():
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
     width = self.width
     scale = self.scale
-    font_name = 'Vera'
+    font_name = "DefaultFont"
     value_display_extra = ""
     targetWidth = round(width/n)
     targetHeight = round(OV.GetParam('gui.timage.hos.height'))
@@ -3662,7 +3676,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
 
 
-    font_l = IT.registerFontInstance("Vera", int(8 * scale))
+    font_l = IT.registerFontInstance("DefaultFont", int(8 * scale))
     if self.is_CIF:
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
@@ -3749,8 +3763,8 @@ class HealthOfStructure():
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
-    font = IT.registerFontInstance("Vera", int(font_size * scale))
-    font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
+    font = IT.registerFontInstance("DefaultFont", int(font_size * scale))
+    font_s = IT.registerFontInstance("DefaultFont", int(font_size_s * scale))
 
     ## ADD THE Key
 

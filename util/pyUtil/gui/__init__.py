@@ -476,3 +476,4 @@ def file_open(path, base="", mode='r', readlines=False, binary=False):
   return retVal
 
 olex.registerFunction(file_open, False, "tools")
+
