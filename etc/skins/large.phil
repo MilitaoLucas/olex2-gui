@@ -31,7 +31,7 @@ gui {
   }
 
     timage{
-    font_name = Vera
+    font_name = DefaultFont
     font_size = 15
     adval = 13
     info_size_scale = 4
@@ -39,7 +39,7 @@ gui {
     snumtitle{
       scale = 2
       height = 65
-      font_name = Vera Bold
+      font_name = DefaultFont Bold
       font_size = 30
       top = 1
       left = 5
@@ -55,7 +55,7 @@ gui {
       scale = 2
       height = 45
       corner_rad = 5
-      font_name = Vera
+      font_name = DefaultFont
       font_size = 26
       top = 10
       left = 6
@@ -67,7 +67,7 @@ gui {
       scale = 1
       height = 30
       corner_rad = 2
-      font_name = Vera Bold
+      font_name = DefaultFont Bold
       font_size = 22
       top = 3
       left = 3
@@ -88,7 +88,7 @@ gui {
       height = 26
       corner_rad = 3
       rounded = 0000
-      font_name = Vera
+      font_name = DefaultFont
       font_size = 16
       top = 3
       left = 4
@@ -111,7 +111,7 @@ gui {
       corner_rad = 0
       rounded = 0000
       font_size = 26
-      font_name = Vera
+      font_name = DefaultFont
       top = 1
       left = 0
       border = 1
@@ -124,7 +124,7 @@ gui {
       height = 32
       corner_rad = 3
       rounded = 1111
-      font_name = Vera
+      font_name = DefaultFont
       font_size = 23
       top = 2
       left = 14
@@ -137,7 +137,7 @@ gui {
       scale = 2
       height = 25
       width_adjust = 4
-      font_name = Vera
+      font_name = DefaultFont
       corner_rad = 3
       rounded = 1111
       font_size = 18

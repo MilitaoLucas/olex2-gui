@@ -346,9 +346,9 @@ if timer:
   t = time.time()
   tt.append("IMPORTING PLUGINS...")
 
+get_wing()
 set_plugins_paths()
 
-get_wing()
 
 if timer:
   tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))

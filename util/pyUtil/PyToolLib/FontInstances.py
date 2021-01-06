@@ -36,6 +36,10 @@ class FontInstances(ArgumentParser):
     pFile.close()
 
   def defineFonts(self):
+    from olexFunctions import OlexFunctions
+    OV = OlexFunctions()
+    default_font_name = OV.GetParam("gui.default_font_name")
+    default_font_name_bold = OV.GetParam("gui.default_font_name_bold")
     self.fonts = {
       ##################################################### texgyretermes
       "Serif":{
@@ -180,6 +184,30 @@ class FontInstances(ArgumentParser):
         "font_src":(
           r"GILI____.ttf",
           r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+
+      ##################################################### Default
+      "DefaultFont":{
+        "font_src":(
+          r"%s/etc/gui/fonts/%s" %(self.basedir,default_font_name),
+          default_font_name
+          ),
+        "fontInstance":{}
+          },
+      "DefaultFont Bold":{
+        "font_src":(
+          r"%s/etc/gui/fonts/%s" %(self.basedir,default_font_name_bold),
+          default_font_name_bold,
+          ),
+        "fontInstance":{}
+          },
+      "DefaultFont Light":{
+        "font_src":(
+          r"%s/etc/gui/fonts/Signika-Light.ttf" %self.basedir,
+          "Signika-Light.ttf",
           ),
         "fontInstance":{}
           },
