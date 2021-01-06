@@ -158,6 +158,7 @@ class OlexCctbxAdapter(object):
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+      null_disp = table == "electron" or table == "neutron"
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
@@ -168,7 +169,13 @@ class OlexCctbxAdapter(object):
         self._xray_structure.set_inelastic_form_factors(
           self.wavelength, inelastic_table)
         for sc in self._xray_structure.scatterers():
-          custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+          if null_disp:
+            custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+          else:
+            custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+      if null_disp:
+        self._xray_structure.set_custom_inelastic_form_factors(
+          custom_fp_fdps)
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
