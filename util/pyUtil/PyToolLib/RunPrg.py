@@ -394,7 +394,7 @@ class RunSolutionPrg(RunPrg):
             'YNIR', "(Don't show this warning again)")
           if "R" in r:
             OV.SetParam('user.alert_solve_anyway', 'N')
-          if "N" in r:
+          if "Y" not in r: # N/C
             self.terminate = True
             return
 
