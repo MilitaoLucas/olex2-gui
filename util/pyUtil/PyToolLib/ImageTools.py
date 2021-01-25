@@ -293,8 +293,19 @@ class ImageTools(FontInstances):
     return retVal
 
   def decimalColorToHTMLcolor(self, dec_colour):
-    retVal = "#%s%s%s" %(hex(dec_colour&255)[2:],
-      hex((dec_colour>>8)&255)[2:], hex((dec_colour>>16)&255)[2:])
+    
+    r = hex(dec_colour&255)[2:]
+    g = hex((dec_colour>>8)&255)[2:]
+    b = hex((dec_colour>>16)&255)[2:]
+
+    if r == '0':
+      r = '00'
+    if g == "0":
+      g = "00"
+    if b == "0":
+      b = "00"
+      
+    retVal = "#%s%s%s" %(r, g, b)
     return retVal
 
   def getOlexVariables(self):
