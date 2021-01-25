@@ -231,7 +231,7 @@ class Graph(ArgumentParser):
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 40
+      left = 50
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
@@ -1715,7 +1715,7 @@ class Analysis(Graph):
     if filename is None:
       filename = '%s-%s.csv' %(self.filename,self.item)
     filefull = '%s/%s' %(self.filepath,filename)
-    f = open(filefull, 'wb')
+    f = open(filefull, 'w')
     for dataset in list(self.data.values()):
       fieldnames = (dataset.metadata().get('x_label', 'x'),
                     dataset.metadata().get('y_label', 'y'))
@@ -3425,7 +3425,13 @@ class HealthOfStructure():
           except:
             pass
         else:
-          value = float(self.hkl_stats[item])
+          try:
+            value = float(self.hkl_stats[item])
+          except:
+            print('Something has gone wrong')
+            self.scope = 'cif'
+            return
+            
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]
