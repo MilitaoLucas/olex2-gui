@@ -106,9 +106,13 @@ class MultipleDataset:
       if i == current:
         bgcolour=OV.GetVar('HtmlBgColour')
         if OV.FileExt() == "cif":
-          action = "refine"
+          reapfile = "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".res")
+          if not os.path.exists(reapfile):
+            action = "export>>reap '%s'" %reapfile
+          else:
+            action = "reap '%s'" %reapfile
           highlight = olx.GetVar('HtmlHighlightColour')
-          display = "** Refine **"
+          display = "** LOAD **"
         else:
           action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(index)
           highlight = OV.GetParam('gui.green')
