@@ -108,7 +108,7 @@ class CifTools(ArgumentParser):
 
   def __init__(self):
     super(CifTools, self).__init__()
-    model_src = OV.ModelSrc()
+    model_src = OV.ModelSrc(force_cif_data=True)
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
     self.data_name = model_src.replace(' ', '')
     just_loaded = False
