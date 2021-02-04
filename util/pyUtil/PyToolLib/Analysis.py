@@ -3424,14 +3424,10 @@ class HealthOfStructure():
             value = float(value)
           except:
             pass
+        elif item in self.hkl_stats:
+          value = float(self.hkl_stats[item])
         else:
-          try:
-            value = float(self.hkl_stats[item])
-          except:
-            print('Something has gone wrong')
-            self.scope = 'cif'
-            return
-            
+          value=None
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]
@@ -3606,7 +3602,7 @@ class HealthOfStructure():
 '''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
-    if self.scope == "hkl":
+    if self.scope == "hkl" and 'Completeness' in self.hkl_stats:
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
         txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
