@@ -608,8 +608,9 @@ class HistoryTree(Node):
       for k,v in self.hklFiles.iteritems():
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
-        for hkl_d in r_index[k]:
-          self.hklFilesMap[hkl_d] = md
+        if k in r_index: # unbound HKL file?
+          for hkl_d in r_index[k]:
+            self.hklFilesMap[hkl_d] = md
       self.hklFiles = new_index
     self.version = current_version
     print("History has been upgraded in: %.2f ms" %((time.time() - start_time)*1000))

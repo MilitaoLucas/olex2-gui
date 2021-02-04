@@ -3054,7 +3054,7 @@ class HealthOfStructure():
         self.hkl_stats['Completeness_laue_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,True))
         self.hkl_stats['Completeness_point_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,False))
     except Exception as err:
-      print(("Could not get info from hkl_stats: %s" %err))
+      print("Could not get info from hkl_stats: %s" %err)
 
   def get_info_from_cif(self):
     from cctbx import uctbx
@@ -3256,8 +3256,10 @@ class HealthOfStructure():
             value = float(value)
           except:
             pass
-        else:
+        elif item in self.hkl_stats:
           value = float(self.hkl_stats[item])
+        else:
+          value=None
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]
@@ -3432,7 +3434,7 @@ class HealthOfStructure():
 '''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
-    if self.scope == "hkl":
+    if self.scope == "hkl" and 'Completeness' in self.hkl_stats:
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
         txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>

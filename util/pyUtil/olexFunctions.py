@@ -467,12 +467,13 @@ class OlexFunctions(inheritFunctions):
     try:
       olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
+      ires = olx.IsFileType('IRES') == 'true'
       finalise_value = None
       if finalise == 'Include':
         finalise_value = True
       elif finalise == 'Exclude':
         finalise_value = False
-      elif olex2_refine:
+      elif olex2_refine and ires:
         acta = olx.Ins("ACTA").strip()
         if acta and "NOHKL" == acta.split()[-1].upper():
           finalise_value = False
@@ -482,7 +483,7 @@ class OlexFunctions(inheritFunctions):
       if update_atoms_loop is None:
         update_atoms_loop = olex2_refine
       #create FAB if needed
-      if olx.Ins("ABIN") != 'n/a':
+      if ires and olx.Ins("ABIN") != 'n/a':
         fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
         if not os.path.exists(fab_path):
           try:
@@ -756,12 +757,12 @@ class OlexFunctions(inheritFunctions):
         return True
     return False
 
-  def ModelSrc(self):
+  def ModelSrc(self, force_cif_data=False):
     try: #remove later!!HP
       model_src = olx.xf.rm.ModelSrc()
       if not model_src:
         i = int(olx.xf.CurrentData())
-        if i != 0:
+        if i != 0 or force_cif_data:
           return olx.xf.DataName(i)
         else:
           return self.FileName()
