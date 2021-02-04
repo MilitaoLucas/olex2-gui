@@ -320,7 +320,7 @@ def OnStructureLoaded(previous):
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
-    olx.CifExtract(cif_name)
+    olx.CifExtract(cif_name, mf_name)
 
   LoadStructureParams()
 
