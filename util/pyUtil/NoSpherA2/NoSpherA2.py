@@ -213,7 +213,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
       if (wfn_code == "ELMOdb") and (mult > 1):
-        print ("Error! Multiplicity is not 1. This is currently not supported in ELMOdb. Consider using QM-ELMO instead!\n")
+        print ("Error! Multiplicity is not 1. This is currently not supported in ELMOdb. Consider using QM/ELMO instead!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
         return False
         
@@ -363,9 +363,23 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         else:
           if wfn_code != "Tonto":
             shutil.move("%s_part_%s.xyz" %(OV.ModelSrc(), parts[i]),os.path.join(self.wfn_job_dir,"%s.xyz"%(OV.ModelSrc())))
+            
+            if wfn_code == "ELMOdb":
+              mutation = OV.GetParam('snum.NoSpherA2.ELMOdb.mutation')
+              pdb_name = job.name + ".pdb"
+              if mutation == True:
+                pdb_name += "_mut"+str(parts[i])
+              if os.path.exists(os.path.join(OV.FilePath(),pdb_name)):
+                shutil.copy(os.path.join(OV.FilePath(),pdb_name),os.path.join(self.wfn_job_dir,job.name + ".pdb"))
+              else: 
+                OV.SetVar('NoSpherA2-Error',"ELMOdb")
+                if mutation == True:
+                  raise NameError('No pdb_name file available for mutation!')
+                else:
+                  raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
             OV.SetParam('snum.NoSpherA2.fchk_file',olx.FileName() + ".fchk")
             try:
-              self.wfn(folder=self.wfn_job_dir,xyz=False) # Produces Fchk file in all cases that are not fchk or tonto directly
+              self.wfn(folder=self.wfn_job_dir,xyz=False,part=parts[i]) # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
               print ("Aborted due to: ",error)
               OV.SetVar('NoSpherA2-Error',error)
@@ -480,6 +494,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), self.discamb_exe)
         shutil.copy(os.path.join(OV.FilePath(),job.full_dir,job.name+".tsc"),job.name+".tsc")
         OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
+      elif wfn_code == "ELMOdb":
+        if os.path.exists(os.path.join(OV.FilePath(),job.name + ".pdb")):
+          shutil.copy(os.path.join(OV.FilePath(),job.name + ".pdb"),os.path.join(self.wfn_job_dir,job.name + ".pdb"))
+        else: 
+          OV.SetVar('NoSpherA2-Error',"ELMOdb")
+          raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
       else:
         if wfn_code.lower().endswith(".wfn"):
           pass
@@ -554,7 +574,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
     #add_info_to_tsc()
 
-  def wfn(self,folder='',xyz=True):
+  def wfn(self,folder='',xyz=True,part=0):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
@@ -575,7 +595,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_elmodb_input(xyz)
 
     try:
-      wfn_object.run()
+      wfn_object.run(part)
     except NameError as error:
       print("The following error occured during QM Calculation: ",error)
       OV.SetVar('NoSpherA2-Error',error)
@@ -906,6 +926,12 @@ class wfn_Job(object):
         inp.write(" " + '\n' + str(fraginp[i])+ '\n' + ' ' + '\n')
       if spect == True:
         inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.specinp') + '\n' + ' ' + '\n')
+      if basis_name == "extrabasis":  
+        if os.path.exists(os.path.join(self.origin_folder,"extrabasis")):
+          shutil.copy(os.path.join(self.origin_folder,"extrabasis"),os.path.join(self.full_dir,"extrabasis"))
+        else:
+          OV.SetVar('NoSpherA2-Error',"ELMOdb")
+          raise NameError('No extrabasis file available!')
     if ssbond == True:
       inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n') 
     inp.close()
@@ -935,10 +961,13 @@ class wfn_Job(object):
       method = "RHF"
     else:
       method = OV.GetParam('snum.NoSpherA2.method')
-      control += method
-      if method == "BP86" or method == "PBE":
-        control += " DensityFit"
+      if control == "PBE":
+        control += "PBEPBE"
+      else:
+        control += method
     control += "/gen NoSymm 6D 10F IOp(3/32=2) formcheck output=wfn"
+    if method == "BP86" or method == "PBE":
+      control += " DensityFit "
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if relativistic == True:
       control = control + " Integral=DKH2"
@@ -1737,7 +1766,7 @@ ener = mf.kernel()"""
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
 
-  def run(self):
+  def run(self,part=0):
     args = []
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     software = OV.GetParam('snum.NoSpherA2.source')
@@ -1786,17 +1815,6 @@ ener = mf.kernel()"""
       args.append(self.name + ".inp")
       args.append(">")
       args.append(self.name + ".out")
-      if os.path.exists(os.path.join(self.origin_folder,self.name + ".pdb")):
-        shutil.copy(os.path.join(self.origin_folder,self.name + ".pdb"),os.path.join(self.full_dir,self.name + ".pdb"))
-      else: 
-        OV.SetVar('NoSpherA2-Error',"ELMOdb")
-        raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
-      if basis_name == "extrabasis":  
-        if os.path.exists(os.path.join(self.origin_folder,"extrabasis")):
-          shutil.copy(os.path.join(self.origin_folder,"extrabasis"),os.path.join(self.full_dir,"extrabasis"))
-        else:
-          OV.SetVar('NoSpherA2-Error',"ELMOdb")
-          raise NameError('No extrabasis file available!')
 
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
@@ -1824,20 +1842,24 @@ ener = mf.kernel()"""
                             os.path.join(p_path, "fchk-launch.py")])
     
     out_fn = None
+    path = os.path.join("olex2","Wfn_Job")
+    if part != 0:
+      path = os.path.join(path,"Part_"+str(part))
     if "orca" in args[0]:
-      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_orca.log")
+      out_fn = os.path.join(path,self.name + "_orca.log")
     elif "elmo" in args[2]:
-      out_fn = os.path.join("olex2","Wfn_Job",self.name + ".out")
+      out_fn = os.path.join(path,self.name + ".out")
     elif "python" in args[2]:
-      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_pyscf.log")
+      out_fn = os.path.join(path,self.name + "_pyscf.log")
     if "ubuntu" in args[0]:
       print("Starting Ubuntu and running pySCF, please be patient for start")
     if "ubuntu" in args[0]:
-      out_fn = os.path.join("olex2","Wfn_Job",self.name + "_pyscf.log")
-    elif out_fn == None:
-      out_fn = os.path.join("olex2","Wfn_Job",self.name + ".log")  
+      out_fn = os.path.join(path,self.name + "_pyscf.log")
+    if out_fn == None:
+      out_fn = os.path.join(path,self.name + ".log")  
       
     tries = 0
+    time.sleep(0.5)
     while not os.path.exists(out_fn):
       time.sleep(1)
       tries += 1

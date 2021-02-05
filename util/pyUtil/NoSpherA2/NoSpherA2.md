@@ -8,7 +8,7 @@
 * Capelli et al., IUCrJ. 2014, 1, 361
 &nbsp; URL[http://journals.iucr.org/m/issues/2014/05/00/fc5002/index.html,PAPER]
 
-* Kleemiss et al., to be published
+* Kleemiss et al., Chem. Sci., 2021
 &nbsp; URL[http://journals.iucr.org/m/issues/2018/01/00/lc5093/lc5093.pdf,PAPER]
 
 When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
