@@ -29,6 +29,8 @@ snum{
     ELMOdb{
       maxtail = 10
         .type = int
+      mutation = False
+        .type = bool
       nspect = 1
         .type = str
       ntail = 1
