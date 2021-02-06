@@ -867,16 +867,39 @@ The following options were used:
     cif_block.sort(key=sort_key)
     return cif_block
 
+  def get_fcf_data(self, anomalous_flag, use_fc_sq=False):
+    if self.hklf_code == 5 or\
+      (self.twin_components is not None
+        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+      if self.use_tsc:
+        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+      else:
+        fo_sq, fc = self.get_fo_sq_fc()
+      fo_sq = fo_sq.customized_copy(
+        data=fo_sq.data()*(1/self.scale_factor),
+        sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+        anomalous_flag=anomalous_flag)
+      if use_fc_sq:
+        fc = fc.as_intensity_array()
+      return fo_sq, fc
+    else:
+      if use_fc_sq:
+        fc = self.normal_eqns.fc_sq.customized_copy(anomalous_flag=anomalous_flag)
+      else:
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=anomalous_flag)
+      fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+        data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+        sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
+        anomalous_flag=anomalous_flag)
+      fc = fc.sort(by_value="packed_indices")
+      fo_sq = fo_sq.sort(by_value="packed_indices")
+      return fo_sq, fc
+
   def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
     anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
     list_code = abs(list_code)
     if list_code == 4:
-      fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
-      fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
-      fo_sq = fo_sq.customized_copy(
-        data=fo_sq.data()*(1/self.scale_factor),
-        sigmas=fo_sq.sigmas()*(1/self.scale_factor))
-
+      fo_sq, fc_sq = self.get_fcf_data(anomalous_flag=False, use_fc_sq=True)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc', format="coreCIF")
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
@@ -901,22 +924,8 @@ The following options were used:
         _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
 
     elif list_code == 3:
-      if self.hklf_code == 5:
-        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
-        fo_sq = fo_sq.customized_copy(
-          data=fo_sq.data()*(1/self.scale_factor),
-          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=anomalous_flag)
-        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
-      else:
-        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=anomalous_flag)
-        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
-          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
-          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=anomalous_flag)
-        fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
-        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
-        fc, fo = fc.map_to_asu().common_sets(fo)
+      fo_sq, fc = self.get_fcf_data(anomalous_flag)
+      fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       if fo_sq.space_group().is_origin_centric():
         for i in range(0, fc.size()):
           fc.data()[i] = complex(math.copysign(abs(fc.data()[i]), fc.data()[i].real), 0.0)
@@ -929,24 +938,7 @@ The following options were used:
       else:
         fmt_str = "%i %i %i %f %f %f %f"
     elif list_code == 6:
-      if self.hklf_code == 5:
-        if self.use_tsc:
-          fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
-        else:
-          fo_sq, fc = self.get_fo_sq_fc()
-        fo_sq = fo_sq.customized_copy(
-          data=fo_sq.data()*(1/self.scale_factor),
-          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=anomalous_flag)
-      else:
-        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=anomalous_flag)
-        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
-          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
-          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
-          anomalous_flag=anomalous_flag)
-        fc = fc.sort(by_value="packed_indices")
-        fo_sq = fo_sq.sort(by_value="packed_indices")
-        #fc, fo_sq = fo_sq.common_sets(fc)
+      fo_sq, fc = self.get_fcf_data(anomalous_flag)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo_sq, column_names=['_refln_F_squared_meas', '_refln_F_squared_sigma'],
         format="coreCIF")
@@ -960,7 +952,7 @@ The following options were used:
 
     cif = iotbx.cif.model.cif()
     cif_block = iotbx.cif.model.block()
-    cif_block['_computing_structure_refinement'] = OV.get_cif_item('_computing_structure_refinement')
+    cif_block['_computing_structure_refinement'] = OV.get_refienment_program_refrerence()
     cif_block['_shelx_refln_list_code'] = list_code
     cif_block.update(mas_as_cif_block.cif_block)
 

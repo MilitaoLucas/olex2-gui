@@ -284,6 +284,19 @@ class OlexFunctions(inheritFunctions):
       print("Program %s could not be set" %(program), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  def get_refienment_program_refrerence(self, pname=None):
+    try:
+      import ExternalPrgParameters
+      if pname is None:
+        pname = self.GetParam('snum.refinement.program')
+      prg = ExternalPrgParameters.defineExternalPrograms()[1].programs[pname]
+      version = self.GetProgramVersionByName(pname)
+      if pname.lower().startswith("shelx") or pname.lower().startswith('x'):
+        pname = pname.upper()
+      return "%s %s (%s)" %(pname, version, prg.brief_reference)
+    except:
+      return '?'
+
   def have_nsff(self):
     retVal = False
     if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
@@ -793,7 +806,7 @@ class OlexFunctions(inheritFunctions):
     return olx.xf.GetFormula()
 
   def GetCellVolume(self):
-    return olx.xf.au.GetCell()
+    return olx.xf.au.GetCellVolume()
 
   def AddIns(self, instruction, quiet=False):
     olx.AddIns(*instruction.split(), q=quiet)
