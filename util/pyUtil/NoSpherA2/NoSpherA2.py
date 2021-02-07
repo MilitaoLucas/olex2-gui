@@ -1988,11 +1988,11 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, "NoSpherA2.log")):
     shutil.move(os.path.join(folder, "NoSpherA2.log"), os.path.join(folder, "NoSpherA2.log_org"))
-  move_args = []
+  args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
-  move_args.append(wfn_2_fchk)
-  move_args.append("-wfn")
-  move_args.append(wfn_file)
+  args.append(wfn_2_fchk)
+  args.append("-wfn")
+  args.append(wfn_file)
   if not os.path.exists(hkl_file):
     from cctbx_olex_adapter import OlexCctbxAdapter
     from iotbx.shelx import hklf
@@ -2000,30 +2000,46 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
     with open(hkl_file, "w") as out:
       f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-  move_args.append("-hkl")
-  move_args.append(hkl_file)
-  move_args.append("-cif")
-  move_args.append(cif)
-  move_args.append("-asym_cif")
-  move_args.append(wfn_cif)
+  args.append("-hkl")
+  args.append(hkl_file)
+  args.append("-cif")
+  args.append(cif)
+  args.append("-asym_cif")
+  args.append(wfn_cif)
   if (int(ncpus) > 1):
-    move_args.append('-cpus')
-    move_args.append(ncpus)
+    args.append('-cpus')
+    args.append(ncpus)
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
-    move_args.append('-v')
+    args.append('-v')
   if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
-    move_args.append('-acc')
+    args.append('-acc')
     if (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
-      move_args.append('1')
+      args.append('1')
     elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "High"):
-      move_args.append('3')
+      args.append('3')
     elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Max"):
-      move_args.append('4')
+      args.append('4')
   if(groups[0] != -1000):
-    move_args.append('-group')
+    args.append('-group')
     for i in range(len(groups)):
-      move_args.append(str(groups[i]))
-  os.environ['cuqct_cmd'] = '+&-'.join(move_args)
+      args.append(str(groups[i]))
+  olex_refinement_model = OV.GetRefinementModel(False)
+  curr_law = None
+  if 'twin' in olex_refinement_model:
+    c = olex_refinement_model['twin']['matrix']
+    curr_law = []
+    for row in c:
+      for el in row:
+        curr_law.append(el)
+    curr_law = tuple(curr_law)
+    txt = ""
+    if curr_law:
+      txt = repr(curr_law)
+    args.append("-twin")
+    for i in curr_law:
+      args.append(str(int(i)))
+
+  os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
   import subprocess
   
@@ -2188,15 +2204,9 @@ class Job(object):
       if rel == True:
         args.append("-dkh")
         args.append("t")
-#      if(run > 1):
-#        args.append("-restart-scf")
-#        args.append("t")
-
-
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
-#      shutil.copy(fchk_file,os.path.join(self.full_dir,self.name+".fchk"))
       args = [self.name+".cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]
@@ -2369,47 +2379,44 @@ def combine_tscs():
 
   parts = list(OV.ListParts())
   nr_parts = len(parts)
+  print("Combinging the .tsc files of disorder parts... please wait...")
 
   if debug:
     t_beg = time.time()
   sfc_name = OV.ModelSrc()
-  tsc_modular = OV.GetParam('snum.NoSpherA2.modular')
   tsc_source = OV.GetParam('snum.NoSpherA2.source')
-  tsc_file = OV.GetParam('snum.NoSpherA2.file')
 
   if tsc_source.lower().endswith("fchk"):
     tsc_source = os.path.basename(tsc_source)
 
-  _mod = ""
-  if not tsc_modular == "direct":
-    _mod = "_%s"%tsc_modular
-
-  tsc_dst = os.path.join(OV.FilePath(), sfc_name + _mod + "_total.tsc")
+  tsc_dst = os.path.join(OV.FilePath(), sfc_name + "_total.tsc")
   if os.path.exists(tsc_dst):
     backup = os.path.join(OV.FilePath(), "tsc_backup")
     if not os.path.exists(backup):
       os.mkdir(backup)
     i = 1
-    while (os.path.exists(os.path.join(backup,sfc_name + _mod + ".tsc") + "_%d"%i)):
+    while (os.path.exists(os.path.join(backup,sfc_name + ".tsc") + "_%d"%i)):
       i = i + 1
     try:
-      shutil.move(tsc_dst,os.path.join(backup,sfc_name + _mod + ".tsc") + "_%d"%i)
+      shutil.move(tsc_dst,os.path.join(backup,sfc_name + ".tsc") + "_%d"%i)
     except:
       pass
 
   d = {}
-  sfs_fp = None
-  symops_fp = None
   nr_atoms = 0
   atom_list = []
+  atom_count = []
   nr_data_lines = 0
+  mode = OV.GetParam('snum.NoSpherA2.tsc_mode')
 
   for part in range(int(nr_parts)):
     if parts[part] == 0:
       continue
-    print("Working on Part %d of %d\n"%(parts[part],int(nr_parts)-1))
-    #print "looking for: "+os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
-    tsc_fn = os.path.join(OV.FilePath(), sfc_name + _mod + "_part_%d.tsc"%parts[part])
+    print("Working on .tsc of Part %d of %d"%(parts[part],int(nr_parts)-1))
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()    
+    tsc_fn = os.path.join(OV.FilePath(), sfc_name + "_part_%d.tsc"%parts[part])
     if not os.path.isfile(tsc_fn):
       print("Error finding tsc Files!\n")
       return False
@@ -2424,30 +2431,38 @@ def combine_tscs():
     header = []
     data = False
     for line in tsc:
-      if data == False:
+      if data == True:
+        values.append(line)
+        if part == 1:
+          nr_data_lines += 1
+        continue
+      else:
         header.append(line.replace('\n',''))
       if 'SCATTERERS' in line:
         part_atom_list = line[12: ].replace('\n','').split(' ')
-        #print part_atom_list
       elif 'data:' in line:
         data = True
         continue
       elif 'DATA:' in line:
         data = True
         continue
-      if data == True:
-        values.append(line)
-        if part == 1:
-          nr_data_lines += 1
+      elif 'Data:' in line:
+        data = True
+        continue
 
     for atom in range(len(part_atom_list)):
       name = part_atom_list[atom]
       if name in atom_list:
-        continue
+        if mode == "First":
+          continue
+        else:
+          nr = atom_list.index(name)
+          atom_count[nr] += 1
       else:
         nr_atoms += 1
-        #print "Appending: %s\n"%name
+        #print ("Appending: %s\n" %name)
         atom_list.append(name)
+        atom_count.append(1)
       d.setdefault(name,{})
       sfc_l = []
       hkl_l = []
@@ -2459,34 +2474,39 @@ def combine_tscs():
             hkl_l.append([digest[0],digest[1],digest[2]])
         if atom == 0 and part == 1:
           hkl_l.append([digest[0],digest[1],digest[2]])
-        if tsc_modular == "modulus":
-          _ = digest[2+atom].split(",")
-          a = float(_[0])
-          b = float(_[1])
-          v = math.sqrt(a*a + b*b)
-          sfc_l.append("%.6f" %v)
-        elif tsc_modular == "absolute":
-          _ = digest[2+atom].split(",")
-          a = abs(float(_[0]))
-          b = abs(float(_[1]))
-          sfc_l.append(",".join(["%.5f" %a, "%.5f" %b]))
-        elif tsc_modular == "direct":
-          sfc_l.append(digest[3+atom].replace('\n',''))
+        sfc_l.append(digest[3+atom].replace('\n',''))
       if atom == 0:
         d.setdefault('hkl', hkl_l)
-      d[name].setdefault('sfc', sfc_l)
+      if name in d and d[name] != {}:
+        old_values_r = d[name]['sfc_r']
+        old_values_i = d[name]['sfc_i']
+        new_values_r = [float(x.split(',')[0])+y for x,y in zip(sfc_l, old_values_r)]
+        new_values_i = [float(x.split(',')[1])+y for x,y in zip(sfc_l, old_values_i)]
+        d[name]['sfc_r'] = new_values_r
+        d[name]['sfc_i'] = new_values_i
+      else:
+        d[name]['sfc_r'] = [float(x.split(',')[0]) for x in sfc_l]
+        d[name]['sfc_i'] = [float(x.split(',')[1]) for x in sfc_l]
 
   if debug:
     print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
-
-  value_lines = []
-  for i in range(nr_data_lines):
+  
+  if mode == "Average":
+    for j in range(nr_atoms):
+      if atom_count[j] > 1:
+        name = atom_list[j]
+        old_values_r = d[name]['sfc_r']
+        old_values_i = d[name]['sfc_i']        
+        d[name]['sfc_r'] = [x/atom_count[j] for x in old_values_r]
+        d[name]['sfc_i'] = [x/atom_count[j] for x in old_values_i]
+  value_lines = ""
+  for i in range(len(values)):
     temp_string = ""
     for j in range(3):
       temp_string += d['hkl'][i][j]+' '
     for j in range(nr_atoms):
-      temp_string += d[atom_list[j]]['sfc'][i]+' '
-    value_lines.append(temp_string)
+      temp_string += "{:.8e}".format(d[atom_list[j]]['sfc_r'][i])+','+"{:.8e}".format(d[atom_list[j]]['sfc_i'][i])+' '
+    value_lines += temp_string + '\n'
 
   ol = []
   _d = {'anomalous':'false',
@@ -2509,7 +2529,7 @@ def combine_tscs():
     elif 'BASIS SET' in header[i]:
       ol.append('   BASIS SET:      %(basis_set)s'%_d)
     elif 'DATA:' in header[i]:
-      f_time = os.path.getctime(os.path.join(OV.FilePath(),sfc_name + _mod + "_part_1.tsc"))
+      f_time = os.path.getctime(os.path.join(OV.FilePath(),sfc_name + "_part_1.tsc"))
       import datetime
       f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
       ol.append('   DATE:           %s'%f_date)
@@ -2524,8 +2544,7 @@ def combine_tscs():
   t = "\n".join(ol)
   with open(tsc_dst, 'w') as wFile:
     wFile.write(t)
-    for line in value_lines:
-      wFile.write(line+'\n')
+    wFile.write(value_lines)
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
@@ -3800,6 +3819,136 @@ def sample_folder(input_name):
   load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
   olex.m(load_input_cif)
 OV.registerFunction(sample_folder, False, "NoSpherA2")
+
+def org_min():
+  OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(org_min, False, "NoSpherA2")
+def org_small():
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NormalSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(org_small, False, "NoSpherA2")
+def org_final():
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVPP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+  olex.m("html.Update()")
+OV.registerFunction(org_final, False, "NoSpherA2")
+
+def light_min():
+  OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(light_min, False, "NoSpherA2")
+def light_small():
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NormalSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(light_small, False, "NoSpherA2")
+def light_final():
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVPP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+  olex.m("html.Update()")
+OV.registerFunction(light_final, False, "NoSpherA2")
+
+def heavy_min():
+  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-SVP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',True)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(heavy_min, False, "NoSpherA2")
+def heavy_small():
+  OV.SetParam('snum.NoSpherA2.basis_name',"jorge-TZP-DKH")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NormalSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',True)
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  olex.m("html.Update()")
+OV.registerFunction(heavy_small, False, "NoSpherA2")
+def heavy_final():
+  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVPP")
+  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',True)
+  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+  olex.m("html.Update()")
+OV.registerFunction(heavy_final, False, "NoSpherA2")
+  
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

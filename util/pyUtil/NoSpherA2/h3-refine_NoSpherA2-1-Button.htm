@@ -1,0 +1,165 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<td width="10%" align='left'>
+  <b>CPUs</b>
+</td>
+<td width="10%" align='center'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_cpus@refine",
+    "items=spy.NoSpherA2.getCPUListStr()",
+    "value=spy.GetParam('snum.NoSpherA2.ncpus')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))>>html.Update()")
+   $-
+</td>
+<td width="8%" align='right'>
+  <b>Mem(Gb) </b>
+</td>
+<td width="9%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_mem",
+    "value=spy.GetParam('snum.NoSpherA2.mem')",
+    "onchange=spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="9%"> </td>
+<td width="12%" align='left'>
+  <b>Charge </b>
+</td>
+<td width='8%' align='left'>
+  <input
+    type="spin"
+    name="SET_CHARGE"
+    width="50"
+    height="17"
+    max='1000'
+    min='-1000'
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    value='$spy.GetParam(snum.NoSpherA2.charge)'
+    onchange='spy.SetParam(snum.NoSpherA2.charge,html.GetValue(~name~))'
+  >
+</td>
+<td width="16%" align='right'>
+  <b>Multiplicity </b>
+</td>
+<td width='8%'>
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_MULTIPLICITY',
+    value='$spy.GetParam(snum.NoSpherA2.multiplicity)', 
+    onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))"
+  > 
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="40%" align='left'>
+  <b>Organic Molecules </b>
+</td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Test ",
+    "onclick=spy.NoSpherA2.org_min()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Work ",
+    "onclick=spy.NoSpherA2.org_small()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Final ",
+    "onclick=spy.NoSpherA2.org_final()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="40%" align='left'>
+  <b>Metal Complex (Z&lt;36) </b>
+</td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Test ",
+    "onclick=spy.NoSpherA2.light_min()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Work ",
+    "onclick=spy.NoSpherA2.light_small()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Final ",
+    "onclick=spy.NoSpherA2.light_final()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="40%" align='left'>
+  <b>Heavy Metal (Z&gt;36)</b>
+</td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Test ",
+    "onclick=spy.NoSpherA2.heavy_min()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Work ",
+    "onclick=spy.NoSpherA2.heavy_small()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Final ",
+    "onclick=spy.NoSpherA2.heavy_final()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+#ignoreif -->
+#ignoreif -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'DISCAMB')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+No pre-defined settings available for this Generator
+#ignoreif -->
+#ignoreif -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
