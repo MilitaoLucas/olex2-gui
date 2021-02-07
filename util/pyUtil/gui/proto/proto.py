@@ -34,6 +34,13 @@ def drop_proto():
   sql = """DROP TABLE proto"""
   return sql
 
+def cp(number):
+  number = int(number)
+  cmd = "split -r=SAME -p1=%i -p2=%i -s1=A -s2=B" %(number, number+1)
+  olex.m(cmd)
+OV.registerFunction(cp,False,'proto')
+
+
 def cleanup_proto_disorder(min_occu=0.03):
   cmd = "sel atoms where occu < %s" %min_occu
   olex.m(cmd)
@@ -63,16 +70,24 @@ def cleanup_proto_disorder(min_occu=0.03):
   olex.m("sel %s" %t)
   olex.m("PART 0 11")
 
-def solve_with_proto(new_ins):
+def solve_with_proto(new_ins, sg=None):
   ins_fn = OV.FileFull()
   with open(ins_fn,'r') as wFile:
     ins = wFile.readlines()
-  CELL = ZERR = None
+  if sg:
+    if sg == "C2/c":
+      FVAR_line = "FVAR 0.05 0.5 0.5 0.5"
+  CELL = ZERR = FVAR = None
   for line in ins:
     if line.startswith("CELL"):
       CELL = line
     elif line.startswith("ZERR"):
       ZERR = line
+    elif line.startswith("FVAR"):
+      if FVAR_line:
+        FVAR = FVAR_line
+      else:
+        FVAR = line
     if CELL and ZERR:
       break
   new_ins_l = new_ins.split("\n")
@@ -85,7 +100,7 @@ def solve_with_proto(new_ins):
     t += line + "\n"
   with open(ins_fn,'w') as wFile:
     wFile.write(t)
-  print("< Switching to this proto structure >")
+  print("< Switching to %s >" %ins_fn)
   olx.Atreap(ins_fn)
   
 
@@ -161,7 +176,7 @@ def find_in_proto(volume=None, tol=None, group=None, sg=None):
     for re in res:
       msg = "%s | %s | %.0f A^3: %s" %(re[3], re[4], re[5], re[1] )
       print(msg)
-      retVal.append((re[2],msg))
+      retVal.append((re[2],msg,sg))
   else:
     print("Nothing found in proto!")
   print("= END PROTO ================\n")
@@ -185,9 +200,9 @@ def add_to_proto(p_class):
   with open(_, 'r') as t:
     t = t.read()
   cell = olx.xf.au.GetCell()
+  cell_l = OV.GetCell_l()
   formula = olx.xf.au.GetFormula()
   space_group = olx.xf.au.GetCellSymm()
-  cell_l = cell.split(",")
   cell_a = float(cell_l[0])
   cell_b = float(cell_l[1])
   cell_c = float(cell_l[2])
