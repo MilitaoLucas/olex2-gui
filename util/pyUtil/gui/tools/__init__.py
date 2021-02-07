@@ -1174,8 +1174,8 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
     val = 0
 
   mindfac = 1
-  if item == 'MinD':
-    mindfac = float(olx.xf.exptl.Radiation())/0.71
+  #if item == 'MinD':
+    #mindfac = float(olx.xf.exptl.Radiation())/0.71
 
   op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
   if op == "between":
