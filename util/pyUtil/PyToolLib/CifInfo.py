@@ -118,6 +118,13 @@ class CifTools(ArgumentParser):
       if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
+      # fix for the data name if it comes differet from CifExtract...
+      elif self.data_name.lower() not in olx.cif_model.keys_lower.keys()\
+           and len(olx.cif_model.keys_lower) == 1:
+        sk = list(olx.cif_model.keys())[0]
+        olx.cif_model[self.data_name] = olx.cif_model[sk]
+        del olx.cif_model[sk]
+
       just_loaded = True
     self.cif_model = olx.cif_model
     if not olx.cif_model:
