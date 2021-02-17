@@ -318,8 +318,10 @@ def OnStructureLoaded(previous):
     if os.path.exists(oxvf):
       olex.m("load gview '%s'" %oxvf)
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc(force_cif_data=True))
-  cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
+  cif_name = "%s%s%s.cif" % (OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
+    if olx.IsFileType('cif') == 'true':
+      cif_name = cif_name + "#" + olx.xf.CurrentData()
     olx.CifExtract(cif_name, mf_name)
 
   LoadStructureParams()
