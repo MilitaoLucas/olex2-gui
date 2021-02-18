@@ -1044,7 +1044,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     if afile:
       break
   rv = []
-  if afile:
+  if afile and "auto" == table_name:
     with open(afile, 'r') as disp:
       for l in disp.readlines():
         l = l.strip()
