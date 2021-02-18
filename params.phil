@@ -864,7 +864,8 @@ olex2
       }
   network = True
     .type = bool
-
+  auto_gen_disp = True
+    .type = bool
   samples{
     url = https://secure.opencryst.org/samples
       .type = str
