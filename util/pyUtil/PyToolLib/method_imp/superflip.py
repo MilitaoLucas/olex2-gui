@@ -159,7 +159,7 @@ class Method_Superflip(Method_solution):
     from cctbx_olex_adapter import OlexCctbxAdapter
     from iotbx import shelx
     cctbx_adaptor = OlexCctbxAdapter()
-    with open(self.tmp_hkl, "wb") as x:
+    with open(self.tmp_hkl, "w") as x:
       shelx.hklf.miller_array_export_as_shelx_hklf(cctbx_adaptor.reflections.f_sq_obs, x)
     input.append('fbegin %s' %olx.file.GetName(self.tmp_hkl))
     input.append('endf')

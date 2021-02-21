@@ -84,7 +84,7 @@ class ValidateCif(object):
     if not filepath:
       filepath = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.isfile(filepath):
-      with open(filepath, 'rb') as f:
+      with open(filepath, 'r') as f:
         cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       print("Validating %s" %filepath)
       cif_dic = validation.smart_load_dictionary(cif_dic)
@@ -188,7 +188,7 @@ class CifTools(ArgumentParser):
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
       try:
-        with open(self.metacif_path, 'rb') as file_object:
+        with open(self.metacif_path, 'r') as file_object:
           reader = iotbx.cif.reader(file_object=file_object)
           return reader.model()
       except:
@@ -485,7 +485,7 @@ class ExtractCifInfo(CifTools):
     str_solstion_from_cif = None
     if os.path.exists(curr_cif_p):
       try:
-        with open(curr_cif_p, 'rb') as f:
+        with open(curr_cif_p, 'r') as f:
           current_cif = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
           all_sources_d[curr_cif_p] = current_cif
         try:
@@ -721,7 +721,7 @@ class ExtractCifInfo(CifTools):
       p,pp  = self.sort_out_path(path, manu_cif)
       if p:
         try:
-          with open(p, 'rb') as f:
+          with open(p, 'r') as f:
             cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(cif_s)
             self.update_cif_block(cif_s, force=False)
@@ -742,7 +742,7 @@ class ExtractCifInfo(CifTools):
             import gui
             gui.report.publication.add_cif_to_merge_list.__func__(p)
         else:
-          with open(p, 'rb') as f:
+          with open(p, 'r') as f:
             crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(crystal_clear)
           self.update_cif_block(crystal_clear, force=False)
@@ -758,7 +758,7 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      with open(p, 'rb') as f:
+      with open(p, 'r') as f:
         content = "data_diffractometer_def\n" + f.read()
         content = content.replace("\xe2\x80\x98", "'")\
           .replace("\xe2\x80\x99", "'")\
@@ -784,7 +784,7 @@ class ExtractCifInfo(CifTools):
           writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
           writeFile.write(f)
 
-      with open(mask_cif_path + add, 'rb') as f:
+      with open(mask_cif_path + add, 'r') as f:
         cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       if add: #i.e. we have a PLATON file
         os.remove(mask_cif_path + add)
@@ -895,7 +895,7 @@ Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C."""
           continue
         if item not in self.all_sources_d:
           try:
-            with open(item, 'rb') as f:
+            with open(item, 'r') as f:
               _ = f.read()
               if not _.startswith("data"):
                 _ = str("data_%s\r\n" %OV.ModelSrc() + _)
@@ -1329,7 +1329,7 @@ def reloadMetadata(force=False):
     if dataName != fileName and not force:
       return
     if os.path.exists(metacif_path):
-      with open(metacif_path, 'rb') as file_object:
+      with open(metacif_path, 'r') as file_object:
         reader = iotbx.cif.reader(file_object=file_object)
         olx.cif_model = reader.model()
   except Exception as e:
