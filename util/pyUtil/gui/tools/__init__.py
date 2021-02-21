@@ -1677,13 +1677,31 @@ class DisorderDisplayTools(object):
 DisorderDisplayTools_instance = DisorderDisplayTools()
 
 
-def get_custom_scripts_combo():
+def get_custom_scripts_combo(phil_scope):
   global custom_scripts_d
   if not custom_scripts_d:
     get_custom_scripts()
-  t_l = []
+
+  _ = "%s.classes.filter" % phil_scope
+  filter_s = OV.GetParam(_.lower(), None)
+
+  control = phil_scope + "_SCRIPTS"
+
+  if OV.IsControl(control):
+    filter_s=olx.html.GetValue(control + "_FILTER")
+  scopes=[]
+  t_l=[]
   for script in custom_scripts_d:
+    scope=custom_scripts_d[script].get('scope')
+    if scope not in scopes:
+      scopes.append(scope)
+    if filter_s != 'ALL':
+      if not scope == filter_s:
+        continue
     t_l.append(script)
+    
+  s_l = ";".join(scopes)
+
   t_l.sort()
   return ";".join(t_l)
 OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
@@ -1700,7 +1718,8 @@ def get_custom_scripts(file_name, globule, scope):
     line = line.rstrip()
     if line:
       if line.startswith("s:"):
-        script=line[2:]
+        script = line[2:]
+        script_s = scope + ":" + line[2:]
         if "<-" in script:
           script = script.split("<-")[1]
         try:
@@ -1708,16 +1727,18 @@ def get_custom_scripts(file_name, globule, scope):
           custom_scripts_d.setdefault(script,{})
           custom_scripts_d[script].setdefault('obj', script_obj)
         except:
-          print("Could not obtain script object for %s" %script)
+          print("Could not obtain script object for %s" % script_s)
           continue
         try:
           custom_scripts_d[script].setdefault('docstring', script_obj.__doc__)
         except:
-          print("Could not evaluate script docstring for %s" %script)
+          print("Could not evaluate script docstring for %s" % script)
+        custom_scripts_d[script].setdefault('display', script_s)
+        custom_scripts_d[script].setdefault('scope', scope)
         try:
           gui_t = gui.tools.TemplateProvider.get_template(script + "_gui", template_file=file_name, force=debug)
           custom_scripts_d[script].setdefault('gui', gui_t)
-          custom_scripts_d[script]['gui']=gui_t
+          custom_scripts_d[script]['gui'] = gui_t
         except:
           print("Could not create gui for scipt %s" %script)
 
