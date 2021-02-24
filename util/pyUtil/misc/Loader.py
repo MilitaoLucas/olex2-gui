@@ -101,7 +101,7 @@ def getModule(name, email=None):
     import re
     email = email.strip()
     if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", email):
-      olex.writeImage(info_file_name, "<font color='%s'><b>Failed to validate e-mail address</b></font>" %red, 0)
+      olex.writeImage(info_file_name, ("<font color='%s'><b>Failed to validate e-mail address</b></font>" %red).encode(), 0)
       return False
   if email:
     try:
@@ -124,7 +124,7 @@ def getModule(name, email=None):
 ''' %(red, str(e))
       if debug:
         sys.stdout.formatExceptionInfo()
-      olex.writeImage(info_file_name, msg, 0)
+      olex.writeImage(info_file_name, msg.encode(), 0)
       return False
 
   if etoken is None:
@@ -133,7 +133,7 @@ def getModule(name, email=None):
 
   if etoken is None:
     if not email:
-      olex.writeImage(info_file_name, "Please provide your e-mail", 0)
+      olex.writeImage(info_file_name, b"Please provide your e-mail", 0)
     return False
 
   try:
@@ -156,7 +156,7 @@ def getModule(name, email=None):
       #if "expired" in txt:
         #expired_pop(name)
 
-      olex.writeImage(info_file_name, txt, 0)
+      olex.writeImage(info_file_name, txt.encode(), 0)
     else:
       _ = os.path.join(m_dir, "%s.update" %name)
       with open(_,'wb') as wFile:
@@ -164,13 +164,13 @@ def getModule(name, email=None):
 
       if not update_or_install(name):
         msg = "<font color='%s'>Module <b>%s</b> update failed.</font><br>" %(red, name)
-        olex.writeImage(info_file_name, msg, 0)
+        olex.writeImage(info_file_name, msg.encode(), 0)
         return
 
       msg = "<font color='%s'>Module <b>%s</b> has been successfully installed or updated.</font><br>" %(green, name)
       msg += "<br>This module will expire at some point. If that happens, please contact us for further information."
       msg += "<br><font color='%s'><b><Restart Olex2 to load the new extension module.</b></font>" %orange
-      olex.writeImage(info_file_name, msg, 0)
+      olex.writeImage(info_file_name, msg.encode(), 0)
 
 
       global available_modules
@@ -185,7 +185,7 @@ def getModule(name, email=None):
 <font color='%s'><b>An error occurred while installing the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
 ''' %(red, str(e))
-    olex.writeImage(info_file_name, msg, 0)
+    olex.writeImage(info_file_name, msg.encode(), 0)
     return False
 
 
@@ -653,7 +653,7 @@ def update(idx):
       return
   current_module = available_modules[idx]
   olx.html.SetItems('available_modules', getModuleList())
-  olex.writeImage(info_file_name, "", 0)
+  olex.writeImage(info_file_name, b"", 0)
   #except:
     #getModule(idx, OV.GetParam('user.email'))
   olx.html.Update()
@@ -798,7 +798,7 @@ def offlineInstall():
     h = int(sz[3]*2/3)
     olex.writeImage("module_licence_content", lic)
     olex.writeImage("module_licence",
-"""
+b"""
  <html><body>
   <table width='100%%'>
     <tr><td colspan='2'>
@@ -818,8 +818,8 @@ def offlineInstall():
        x=sz[0] + sz[2]/2 - w/2, y=sz[1] + sz[3]/2 - h/2,
        w=w, h=h, s=False)
     res = olx.html.ShowModal("module_licence", True)
-    olex.writeImage("module_licence_content", "", 0)
-    olex.writeImage("module_licence", "", 0)
+    olex.writeImage("module_licence_content", b"", 0)
+    olex.writeImage("module_licence", b"", 0)
     if int(res) != 1:
       zip.close()
       return
