@@ -1104,6 +1104,11 @@ class OlexFunctions(inheritFunctions):
           return None
     return pyl
 
+  def GetChoices(self, variable):
+    _ = olx.phil_handler.get_values_by_name(variable)
+    _ = _[0].strip("*")
+    return _.split()
+
   def createFileLock(self, fileName):
     lockName = olx.file.ChangeExt(fileName, "lock")
     if sys.platform[:3] == 'win':
@@ -1148,6 +1153,10 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
+  
+  
+
+
 def GetFormattedCompilationInfo():
   t = "<font size='2'><table width='100%%' cellpadding='0' cellspacing='0'>"
   d = {}
@@ -1179,6 +1188,7 @@ def GetFormattedCompilationInfo():
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
+OV.registerFunction(OV.GetChoices)
 OV.registerFunction(OV.SetParam)
 OV.registerFunction(OV.HtmlGetValue)
 OV.registerFunction(OV.set_bond_thicknes)
