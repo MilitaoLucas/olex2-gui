@@ -134,6 +134,14 @@ def GetPathParam(variable, default=None):
   return OV.standardizePath(retVal).replace("\\\\", "\\")
 olex.registerFunction(GetPathParam, False, "gui")
 
+def GetItemsFromPhilChoices(param):
+  _ = OV.GetChoices(param)
+  t = ""
+  for choice in _:
+    t += choice.lstrip('*') + ";"
+  return t
+OV.registerFunction(GetItemsFromPhilChoices, False, 'gui')
+  
 def GetFileList(root, extensions):
   import ntpath
   l = []
