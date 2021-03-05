@@ -1,5 +1,3 @@
-
-
 import math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
 import cctbx_olex_adapter as COA
@@ -172,7 +170,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       connectivity_table=self.connectivity_table,
       twin_fractions=self.get_twin_fractions(),
       temperature=temp,
-      extinction = self.extinction,
+      extinction=self.extinction,
       directions=self.directions
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
@@ -225,9 +223,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.print_table_header(self.log)
 
       class refinementWrapper(iterations):
-        def __init__(self, parent, *args, **kwds):
+        def __init__(self, parent, normal_eqs, *args, **kwds):
           parent.cycles = self
-          super(iterations, self).__init__(*args, **kwds)
+          normal_eqs.iterations_object = self
+          super(iterations, self).__init__(normal_eqs, *args, **kwds)
 
       try:
         if(method=='Levenberg-Marquardt'):
