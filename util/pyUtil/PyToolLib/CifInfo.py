@@ -8,6 +8,7 @@ import math
 import olx
 import olex
 import re
+import gui
 
 from ArgumentParser import ArgumentParser
 import userDictionaries
@@ -1187,28 +1188,10 @@ If more than one file is present, the path of the most recent file is returned b
         return None, None
 
     elif tool == "od_crystal_images":
-      name = OV.FileName()
-      extension = "*.jpg"
-      i = 1
-      while not os.path.exists(directory + os.sep + "movie"):
-        directory = os.sep.join(directory_l[:-(i)])
-        i += 1
-        if i == 5:
-          return None, None
-      directory = directory + os.sep + "movie"
-      if OV.FileName() not in directory:
-        print("Crystal images found, but crystal name not in path!")
-#        return None, None
-      from gui import report
-      l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+      l0, l = gui.tools.find_movie_folder(directory, directory_l)
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
-      if not l:
-        OV.SetParam("snum.metacif.list_crystal_images_files", "")
-        return None, None
-      OV.SetParam("snum.metacif.list_crystal_images_files", (l))
-      return l[0], l
-
-
+      return l0, l
+    
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"

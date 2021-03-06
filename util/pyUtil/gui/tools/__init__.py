@@ -874,7 +874,7 @@ def weightGuiDisplay():
       sugg = (_ %sugg).lstrip('0')
 
       dd = {'curr_%i' %i:curr,
-           'sugg_%i' %i:sugg,
+            'sugg_%i' %i:sugg,
            'col_%i' %i:colour,
            }
       d.update(dd)
@@ -1213,12 +1213,12 @@ def get_battery_image(colour, colourize=True):
   if OlexVFS.exists(name):
     return name
   d_col = {'green':gui_green,
-       'yellow':gui_yellow,
+           'yellow':gui_yellow,
        'orange':gui_orange,
        'red':gui_red}
   max_dots = 4
   d_dots = {'green':4,
-       'yellow':3,
+            'yellow':3,
        'orange':2,
        'red':1}
 
@@ -1270,7 +1270,7 @@ def get_data_number():
     return data
   except Exception as err:
     print("An error occured: %s" %err)
-    
+
 def get_Z_prime_from_fraction(string):
   val = string
   if "/" in val:
@@ -1278,7 +1278,7 @@ def get_Z_prime_from_fraction(string):
     val = int(_[0])/int(_[1])
   olx.xf.au.SetZprime(val)
 olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
-    
+
 def get_parameter_number():
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
@@ -1303,7 +1303,7 @@ def GetDPRInfo():
 
   else:
     return
-    
+
   dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
   text_output= ["Data/Parameter ratio is very good",
                 "Data/Parameter ratio is adequate",
@@ -1314,7 +1314,7 @@ def GetDPRInfo():
                "orange",
                "red"]
 
-  
+
   idx = 4 - dpr_col_number
   colour = colour_txt[idx]
   name = "battery_%s.png" %colour
@@ -1341,12 +1341,12 @@ def GetDPRInfo():
     disp_dpr = "%.2f"%dpr
   else:
     disp_dpr = "%.1f"%dpr
-  
+
   d = {
     'dpr':disp_dpr,
     'image':image,
   }
-  
+
   t = """
   <table border="0" cellpadding="0" cellspacing="0" align='center'>
     <tr align='center'>
@@ -1462,10 +1462,10 @@ def FormatRInfo(R1, wR2,d_format):
 
 
 def launchWithoutConsole(command, args):
-    """Launches 'command' windowless and waits until finished"""
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
+  """Launches 'command' windowless and waits until finished"""
+  startupinfo = subprocess.STARTUPINFO()
+  startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+  return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
 
 
 def resize_pdf(f_in, setting='printer'):
@@ -1699,13 +1699,13 @@ def get_custom_scripts_combo(phil_scope):
       if not scope == filter_s:
         continue
     t_l.append(script)
-    
+
   s_l = ";".join(scopes)
 
   t_l.sort()
   return ";".join(t_l)
 OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
-  
+
 def get_custom_scripts(file_name, globule, scope):
   global custom_scripts_d
   import gui
@@ -1745,7 +1745,7 @@ def get_custom_scripts(file_name, globule, scope):
 def set_custom_gui(f, scope):
   global custom_scripts_d
   f in custom_scripts_d
-  
+
   try:
     doc = custom_scripts_d[f].get('docstring')
     gui_t = custom_scripts_d[f].get('gui')
@@ -1758,7 +1758,7 @@ def set_custom_gui(f, scope):
 
   #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
 OV.registerFunction(set_custom_gui,False,'gui.tools')
-  
+
 def run_custom_script(*args):
   global custom_scripts_d
   script = args[0]
@@ -1766,6 +1766,34 @@ def run_custom_script(*args):
     custom_scripts_d[script]['obj']()
 
 OV.registerFunction(run_custom_script,False,'gui.tools')
+
+def find_movie_folder(directory=None, diretory_l=None):
+  from gui import report
+  if not directory:
+    directory = OV.FilePath()
+  if not diretory_l:
+    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
+  name = OV.FileName()
+  extension = "*.jpg"
+  i = 1
+  while not os.path.exists(directory + os.sep + "movie"):
+    directory = os.sep.join(directory_l[:-(i)])
+    i += 1
+    if i == 5:
+      return None, None
+  directory = directory + os.sep + "movie"
+  if OV.FileName() not in directory:
+    print("Crystal images found, but crystal name not in path!")
+  l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+  if not l:
+    OV.SetParam("snum.metacif.list_crystal_images_files", "")
+    return None, None
+  OV.SetParam("snum.metacif.list_crystal_images_files", (l))
+  OV.SetParam('snum.report.crystal_image', l[0])
+  return l[0], l
+
+OV.registerFunction(find_movie_folder, False, 'gui.tools')
+
 
 
 
