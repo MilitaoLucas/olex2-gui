@@ -1767,12 +1767,14 @@ def run_custom_script(*args):
 
 OV.registerFunction(run_custom_script,False,'gui.tools')
 
-def find_movie_folder(directory=None, diretory_l=None):
+def find_movie_folder(directory=None, directory_l=None):
   from gui import report
   if not directory:
     directory = OV.FilePath()
-  if not diretory_l:
+  if not directory_l:
     directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
+  if not directory or not directory_l:
+    return
   name = OV.FileName()
   extension = "*.jpg"
   i = 1
