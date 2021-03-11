@@ -231,7 +231,7 @@ class Graph(ArgumentParser):
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 40
+      left = 50
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
@@ -253,7 +253,7 @@ class Graph(ArgumentParser):
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
     fontscale = f * self.imX
-    font_name = "Vera"
+    font_name = "DefaultFont"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
     self.font_size_normal = int(1.0 * fontscale)
@@ -262,7 +262,7 @@ class Graph(ArgumentParser):
     self.font_small = IT.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
     self.font_tiny = IT.registerFontInstance(font_name, self.font_size_tiny)
-    font_name = "Vera Bold"
+    font_name = "DefaultFont Bold"
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
@@ -298,7 +298,7 @@ class Graph(ArgumentParser):
       x = 0 + self.bSides+self.xSpace
       y = self.bTop
       top_left = (x,y)
-      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
+      IT.write_text_to_draw(draw, txt, font_name=font_name, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
       currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
       # Write something in the right-hand top spot on the graph
       txt = OV.correct_rendered_text(self.graphInfo.get("TopRightTitle", ""))
@@ -507,7 +507,7 @@ class Graph(ArgumentParser):
         if len(ins) > 2:
           colour=ins[2]
         else: colour=self.axislabelColour
-          
+
         new = Image.new('RGB', (wX+1, wY+1), self.fillColour)
         draw = ImageDraw.Draw(new)
         draw.text((0, 0), text, font=self.font_tiny, fill=colour)
@@ -748,21 +748,21 @@ class Graph(ArgumentParser):
     else:
       min_x = 0.0
       min_y = 0.0
-    
-    
+
+
     if not self.max_x:
       max_x = max(max_xs)
       self.max_x = max_x + .05*abs(max_x - min_x)
     if not self.max_y:
       max_y = max(max_ys)
       self.max_y = max_y + .05*abs(max_y - min_y)
-    
+
     if self.use_log:
-      if max_x != 0:
-        max_x = math.log(max_x,log)
+      if self.max_x != 0:
+        max_x = math.log(self.max_x,log)
       if min_x != 0:
         min_x = math.log(min_x,log)
-    
+
     if min_x != 0.0 and self.min_x == None:
       self.min_x = min_x - .05*abs(max_x - min_x)
     elif self.min_x == None: self.min_x = 0.0
@@ -1208,7 +1208,7 @@ class Graph(ArgumentParser):
           continue # avoid wasting time drawing points that overlap too much
       except Exception as err:
         pass
-        
+
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
 
@@ -1290,7 +1290,7 @@ class Graph(ArgumentParser):
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
-        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
+        #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
         x = self.graph_left
         y = y + int(wY/2)
@@ -1715,7 +1715,7 @@ class Analysis(Graph):
     if filename is None:
       filename = '%s-%s.csv' %(self.filename,self.item)
     filefull = '%s/%s' %(self.filepath,filename)
-    f = open(filefull, 'wb')
+    f = open(filefull, 'w')
     for dataset in list(self.data.values()):
       fieldnames = (dataset.metadata().get('x_label', 'x'),
                     dataset.metadata().get('y_label', 'y'))
@@ -2093,10 +2093,10 @@ class ChargeFlippingPlot(PrgAnalysis):
     if solving.state is solving.guessing_delta:
       if previous_state is not solving.guessing_delta:
         txt = "%s" %self.attempt
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "Vera Bold")
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "DefaultFont Bold")
         x = self.counter + marker_width + 5
         top_left = (x, self.graph_bottom -wY -3)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "Vera Bold", font_colour=self.light_grey)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "DefaultFont Bold", font_colour=self.light_grey)
         self.attempt += 1
         if self.counter != 0:
           self.counter += 1
@@ -2136,7 +2136,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       R1 = height*(1-R1) + top
       box = (x,R1,x+marker_width,R1+2)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
-      font_name = "Vera"
+      font_name = "DefaultFont"
       font_size = 10
       font = IT.registerFontInstance(font_name, font_size)
 
@@ -2252,20 +2252,20 @@ class CompletenessPlot(Analysis):
     self.popout()
     if self.params.completeness.output_csv_file:
       self.output_data_as_csv()
-      
+
   def draw_fitlines(self):
     # ALL LAUE Info
     deg = u"\u00B0"
     completeness_info_text = HOS_instance.completeness_info_text
     ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
     compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
-    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full) 
+    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full)
     ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
     compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
-    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max) 
+    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max)
     if not HOS_instance.hkl_stats['IsCentrosymmetric']:
       compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
-      text_full += ", Point: %s%%" %(compl_full_point) 
+      text_full += ", Point: %s%%" %(compl_full_point)
       compl_max_point = round(completeness_info_text["Point Max"]["completeness"],2)
       text_max += ", Point: %s%%" %(compl_max_point)
 
@@ -2456,7 +2456,7 @@ class Normal_probability_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
-    
+
 class Fractal_Dimension(Analysis):
   def __init__(self):
     Analysis.__init__(self)
@@ -2465,13 +2465,13 @@ class Fractal_Dimension(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
-    
+
     self.auto_axes = False
     self.max_y = 3.05
     self.min_y = 0.00
     self.min_x = -1.0
-    self.max_x = 1.0    
-    
+    self.max_x = 1.0
+
     self.draw_origin = True
     self.make_fractal_dimension_plot()
     self.popout()
@@ -2483,9 +2483,9 @@ class Fractal_Dimension(Analysis):
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     data = Dataset(xy_plot.x, xy_plot.y)
     self.data.setdefault('dataset1', data)
- 
+
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs()    
+    self.draw_pairs()
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -2739,15 +2739,29 @@ class item_vs_resolution_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
 
-    iucr = 135
-    if olx.xf.exptl.Radiation().startswith('0.710'):
+    alpha = IT.get_unicode_characters("alpha")
+    beta = IT.get_unicode_characters("beta")
+    iucr = 0
+    rad_name = "?"
+    if olx.xf.exptl.Radiation().startswith('1.54'): # Cu alpha radiation
+      iucr = 135
+      rad_name = "CuK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('1.39'): # Ga radiation
+      iucr = 40
+      rad_name = "GaK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('1.34'): # Cu beta radiation
+      iucr = 40
+      rad_name = "CuK" + beta
+    elif olx.xf.exptl.Radiation().startswith('0.71'): # Mo radiation
       iucr = 50
+      rad_name = "MoK" + alpha
+    elif olx.xf.exptl.Radiation().startswith('0.56'): # Ag radiation
+      iucr = 33
+      rad_name = "AgK" + alpha
+
     if self.item == "i_over_sigma_vs_resolution":
-      if self.use_log:
-        iucr = 0.37 # and I have no idea why!
-        iucr = 0.84
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution", rotate_text="top_lineleft")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft")
 
     #if self.item == "cc_half_vs_resolution":
       #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
@@ -3302,8 +3316,8 @@ class HealthOfStructure():
         if self.theta_full != self.theta_max:
           l.append("Point Group Completeness to %s=%.1f: %.1f%%%%" %(ttheta, self.theta_max*2, completnesses[2]))
       target = "&#013;- ".join(l)
-      
-      OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
+
+      OV.SetParam('snum.refinement.completeness.target', target)
 
     except Exception as err:
       print(err)
@@ -3410,8 +3424,10 @@ class HealthOfStructure():
             value = float(value)
           except:
             pass
-        else:
+        elif item in self.hkl_stats:
           value = float(self.hkl_stats[item])
+        else:
+          value=None
 
         if type(value) == tuple and len(value) > 0:
           value = value[0]
@@ -3586,7 +3602,7 @@ class HealthOfStructure():
 '''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
-    if self.scope == "hkl":
+    if self.scope == "hkl" and 'Completeness' in self.hkl_stats:
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
         txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
@@ -3599,13 +3615,17 @@ class HealthOfStructure():
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
     width = self.width
     scale = self.scale
-    font_name = 'Vera'
+    font_name = "DefaultFont"
     value_display_extra = ""
     targetWidth = round(width/n)
     targetHeight = round(OV.GetParam('gui.timage.hos.height'))
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    if item == "Completeness":
+      target = OV.GetParam('snum.refinement.completeness.target')
+    else:
+      target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    
     txt = ""
     ref_open = ''
     ref_close = ''
@@ -3658,7 +3678,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
 
 
-    font_l = IT.registerFontInstance("Vera", int(8 * scale))
+    font_l = IT.registerFontInstance("DefaultFont", int(8 * scale))
     if self.is_CIF:
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
@@ -3705,7 +3725,7 @@ class HealthOfStructure():
       # Laue bar
       laue = self.hkl_stats[laue_name]
       laue_col = self.get_bg_colour(item, laue)
-      
+
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
@@ -3745,8 +3765,8 @@ class HealthOfStructure():
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
-    font = IT.registerFontInstance("Vera", int(font_size * scale))
-    font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
+    font = IT.registerFontInstance("DefaultFont", int(font_size * scale))
+    font_s = IT.registerFontInstance("DefaultFont", int(font_size_s * scale))
 
     ## ADD THE Key
 

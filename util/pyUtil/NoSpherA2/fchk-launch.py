@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import subprocess
+import shutil
 
 fchk_dir = os.getenv("fchk_dir", "")
 fchk_file = os.getenv("fchk_file", "")
@@ -15,18 +16,34 @@ print("Running: '" + ' '.join(args) + "'")
 log = None
 err_fn = None
 out_fn = None
+inp = None
+nr = 0
+if sys.platform[:3] == 'win':
+    nr = 2
 if "orca" in args[0]:
   out_fn = fchk_file + "_orca.log"
-elif "elmo" in args[2]:
+elif "elmo" in args[nr]:
+  if sys.platform[:3] == 'win':
+    inp = open(args[2],'r')
   out_fn = fchk_file + '.out'
 elif "python" in args[2]:
   out_fn = fchk_file + "_pyscf.log"
 
+if os.path.exists(out_fn):
+  shutil.move(out_fn,out_fn+'_old')
 if out_fn:
   log = open(out_fn, 'w')
-  print (out_fn)
+  print(out_fn)
 
-p = subprocess.Popen(args, stdout=log)
+p = None
+
+if any("elmo" in x for x in args):
+  if sys.platform[:3] != 'win':
+    p = subprocess.Popen(args, stdin=inp, stdout=log)
+  else:
+    p = subprocess.Popen(args, stdout=log)
+else:
+  p = subprocess.Popen(args, stdout=log)
 
 if "ubuntu" in args[0]:
   print("Starting Ubuntu and running pySCF, please be patient for start")

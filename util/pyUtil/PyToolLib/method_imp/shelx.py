@@ -157,7 +157,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       v = olx.Lst(v)
       if v == 'n/a':  v = 0
       OV.SetParam(k, v)
-    try: 
+    try:
       parameters = float(olx.Lst('param_n'))
       data = float(olx.Lst('ref_4sig'))
       ratio = data/parameters
@@ -165,8 +165,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.parameters', parameters)
     except:
       OV.SetParam('snum.refinement.data_parameter_ratio', None)
-      
-    
+
+
   def gather_refinement_information(self):
     cif = {}
     cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1all'))
@@ -247,7 +247,7 @@ class Method_shelxt(Method_shelx_solution):
 
       sg = "<b>%s</b>" %(res_l[i+1][37:50].strip())
       href = '''
-<a href="file.copy('%s','%s.res')>>file.copy('%s','%s.hkl')>>reap %s">%s</a>''' %(item, OV.FileName(), hkl, OV.FileName(), OV.FileFull(), sg)
+<a href="file.copy('%s','%s.res')>>file.copy('%s','%s.hkl')>>reap '%s'">%s</a>''' %(item, OV.FileName(), hkl, OV.FileName(), OV.FileFull(), sg)
 
       orientation = res_l[i+1][21:37].strip()
       flack = res_l[i+1][50:58].strip()
@@ -285,7 +285,7 @@ class Method_shelxt(Method_shelx_solution):
     olex.m('addins list 4')
 
 class Method_shelx_direct_methods(Method_shelx_solution):
-  
+
   def post_solution(self, RunPrgObject):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     self.get_XS_TREF_solution_indicators(RunPrgObject)

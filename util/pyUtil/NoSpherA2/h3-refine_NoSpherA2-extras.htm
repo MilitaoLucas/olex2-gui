@@ -50,7 +50,7 @@
   $-
 </td>
 
- <td width="8%" align='right'>
+<td width="8%" align='right'>
   <b>Mem(Gb) </b>
 </td>
 <td width="9%" align='center'>
@@ -653,6 +653,24 @@ $-
 #ignoreif -->
 <!-- ============ END TAILOR MADE RESIDUES====================-->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ START MUTATIONS ====================-->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=mutation",
+    "label=Mutations",
+    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.mutation')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','True') >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','False') >> html.Update()"
+    )
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ END MUTATIONS ====================-->                                                         
 #ignoreif -->
 <!-- ============ ELMO SPECIFIC END ====================-->
 

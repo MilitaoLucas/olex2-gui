@@ -33,7 +33,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def step_forward(self):
     try:
-      a = self.cycles.shifts_over_su
+      self.shifts_over_su = self.iterations_object.shifts_over_su
     except:
       self.shifts_over_su = None
     self.n_current_cycle += 1
@@ -54,7 +54,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
   #compatibility...
   def get_shifts(self):
     try:
-      return self.cycles.shifts_over_su
+      return self.iterations_object.shifts_over_su
     except:
       if not self.shifts_over_su:
         shifts_over_su = flex.abs(self.step() /
@@ -227,9 +227,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def feed_olex(self):
     ## Feed Model
-    u_atoms = []
-    i = 1
-
     def iter_scatterers():
       n_equiv_positions = self.xray_structure.space_group().n_equivalent_positions()
       for a in self.xray_structure.scatterers():

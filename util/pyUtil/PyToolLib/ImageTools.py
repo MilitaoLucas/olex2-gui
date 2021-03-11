@@ -9,8 +9,8 @@ import OlexVFS
 import RoundedCorners
 import colorsys
 from olexFunctions import OlexFunctions
-from FontInstances import FontInstances
 OV = OlexFunctions()
+from FontInstances import FontInstances
 import os
 global sizedraw
 sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
@@ -245,15 +245,20 @@ class ImageTools(FontInstances):
 
 
   def get_unicode_characters(self, txt):
+    if not txt:
+      return txt
+
     txt = txt.replace("two_theta", "2theta")
     txt = txt.replace("stol", "(sin(theta)/lambda)")
     txt = txt.replace("_sq", "^2")
     txt = txt.replace("_star", "*")
     txt = txt.replace("_", " ")
-    txt = txt.replace("lambda", chr(61548))
-    txt = txt.replace("theta", chr(61553))
-    txt = txt.replace("Theta", chr(61553))
-    txt = txt.replace("sigma", chr(61555))
+    txt = txt.replace("alpha", chr(945))
+    txt = txt.replace("beta", chr(946))
+    txt = txt.replace("lambda", chr(955))
+    txt = txt.replace("theta", chr(952))
+    txt = txt.replace("Theta", chr(920))
+    txt = txt.replace("sigma", chr(963))
     txt = txt.replace("^2", chr(178))
     txt = txt.replace("^3", chr(179))
     txt = txt.replace(">", chr(61681))
@@ -288,8 +293,19 @@ class ImageTools(FontInstances):
     return retVal
 
   def decimalColorToHTMLcolor(self, dec_colour):
-    retVal = "#%s%s%s" %(hex(dec_colour&255)[2:],
-      hex((dec_colour>>8)&255)[2:], hex((dec_colour>>16)&255)[2:])
+    
+    r = hex(dec_colour&255)[2:]
+    g = hex((dec_colour>>8)&255)[2:]
+    b = hex((dec_colour>>16)&255)[2:]
+
+    if r == '0':
+      r = '00'
+    if g == "0":
+      g = "00"
+    if b == "0":
+      b = "00"
+      
+    retVal = "#%s%s%s" %(r, g, b)
     return retVal
 
   def getOlexVariables(self):
@@ -767,7 +783,7 @@ class ImageTools(FontInstances):
                    draw,
                    txt,
                    font_size,
-                   font_name='Vera',
+                   font_name="DefaultFont",
                    titleCase=False,
                    lowerCase=False,
                    translate=True):
@@ -835,14 +851,14 @@ class ImageTools(FontInstances):
       else:
         self.font_name = 'Arial UTF'
       if not self.translate:
-        self.font_name = 'Vera'
+        self.font_name = "DefaultFont"
         self.font_size = original_font_size
 
     try:
       self.txt.encode('ascii')
     except:
       if self.gui_current_language != "Chinese":
-        self.font_name = 'Arial UTF'
+        self.font_name = 'DefaultFont'
         # self.top -= 3
       else:
         pass
@@ -872,9 +888,12 @@ class ImageTools(FontInstances):
                     "rel_adjust":+0.1},
       "Vera":{"top_adjust":0,
                     "rel_adjust":-0.1},
+      "Signika":{"top_adjust":0,
+                    "rel_adjust":-0.1},
       "Simhei TTF":{"top_adjust":-0.2,
                     "rel_adjust":+0.3},
       }
+    self.font_peculiarities.setdefault("DefaultFont", self.font_peculiarities["Signika"])
 
   def get_text_modifications(self):
     if self.translate:
@@ -933,7 +952,7 @@ class ImageTools(FontInstances):
                          draw,
                          txt,
                          top_left=(1, 0),
-                         font_name='Vera',
+                         font_name="DefaultFont",
                          font_size=11,
                          font_colour="#000000",
                          align="left",
@@ -1113,7 +1132,7 @@ class ImageTools(FontInstances):
     im = Image.composite(im, white, a)  # Create a composite
     return im
 
-  def getTxtWidthAndHeight(self, txt, font_name='Vera', font_size=12):
+  def getTxtWidthAndHeight(self, txt, font_name="DefaultFont", font_size=12):
     global sizedraw_dummy_draw
     font = self.fonts[font_name]["fontInstance"].get(font_size, None)
     if not font:
@@ -1394,7 +1413,7 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
+  def make_simple_text_to_image(self, width, height, txt, font_name="DefaultFont", font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
     draw = ImageDraw.Draw(IM)
     txt = txt.strip()
@@ -1537,7 +1556,7 @@ class ImageTools(FontInstances):
     IM = Image.new('RGBA', im_size, colour)
     draw = ImageDraw.Draw(IM)
     font_size = int(size[0] / 8)
-    font_name = 'Vera Bold'
+    font_name = "DefaultFont Bold"
     font = self.get_font(font_size=font_size, font_name=font_name)
     font_colour = '#ababab'
     border_colour = "#ffffff"

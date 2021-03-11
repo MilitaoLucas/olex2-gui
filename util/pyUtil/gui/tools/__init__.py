@@ -22,6 +22,9 @@ last_element_html = ""
 global current_sNum
 current_sNum = ""
 
+global custom_scripts_d
+custom_scripts_d = {}
+
 haveGUI = OV.HasGUI()
 
 import olexex
@@ -871,7 +874,7 @@ def weightGuiDisplay():
       sugg = (_ %sugg).lstrip('0')
 
       dd = {'curr_%i' %i:curr,
-           'sugg_%i' %i:sugg,
+            'sugg_%i' %i:sugg,
            'col_%i' %i:colour,
            }
       d.update(dd)
@@ -1110,8 +1113,9 @@ class Templates():
 
     if template_file:
       g = []
-      p = os.path.join(path, template_file)
-      g.append(p)
+      if not os.path.exists(template_file):
+        template_file = os.path.join(path, template_file)
+      g.append(template_file)
 
     else:
       if not path:
@@ -1170,8 +1174,8 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
     val = 0
 
   mindfac = 1
-  if item == 'MinD':
-    mindfac = float(olx.xf.exptl.Radiation())/0.71
+  #if item == 'MinD':
+    #mindfac = float(olx.xf.exptl.Radiation())/0.71
 
   op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
   if op == "between":
@@ -1209,12 +1213,12 @@ def get_battery_image(colour, colourize=True):
   if OlexVFS.exists(name):
     return name
   d_col = {'green':gui_green,
-       'yellow':gui_yellow,
+           'yellow':gui_yellow,
        'orange':gui_orange,
        'red':gui_red}
   max_dots = 4
   d_dots = {'green':4,
-       'yellow':3,
+            'yellow':3,
        'orange':2,
        'red':1}
 
@@ -1266,7 +1270,7 @@ def get_data_number():
     return data
   except Exception as err:
     print("An error occured: %s" %err)
-    
+
 def get_Z_prime_from_fraction(string):
   val = string
   if "/" in val:
@@ -1274,7 +1278,7 @@ def get_Z_prime_from_fraction(string):
     val = int(_[0])/int(_[1])
   olx.xf.au.SetZprime(val)
 olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
-    
+
 def get_parameter_number():
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
@@ -1299,7 +1303,7 @@ def GetDPRInfo():
 
   else:
     return
-    
+
   dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
   text_output= ["Data/Parameter ratio is very good",
                 "Data/Parameter ratio is adequate",
@@ -1310,7 +1314,7 @@ def GetDPRInfo():
                "orange",
                "red"]
 
-  
+
   idx = 4 - dpr_col_number
   colour = colour_txt[idx]
   name = "battery_%s.png" %colour
@@ -1337,12 +1341,12 @@ def GetDPRInfo():
     disp_dpr = "%.2f"%dpr
   else:
     disp_dpr = "%.1f"%dpr
-  
+
   d = {
     'dpr':disp_dpr,
     'image':image,
   }
-  
+
   t = """
   <table border="0" cellpadding="0" cellspacing="0" align='center'>
     <tr align='center'>
@@ -1458,10 +1462,10 @@ def FormatRInfo(R1, wR2,d_format):
 
 
 def launchWithoutConsole(command, args):
-    """Launches 'command' windowless and waits until finished"""
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
+  """Launches 'command' windowless and waits until finished"""
+  startupinfo = subprocess.STARTUPINFO()
+  startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+  return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
 
 
 def resize_pdf(f_in, setting='printer'):
@@ -1671,3 +1675,128 @@ class DisorderDisplayTools(object):
       olex.m('sel part %s' %parts)
 
 DisorderDisplayTools_instance = DisorderDisplayTools()
+
+
+def get_custom_scripts_combo(phil_scope):
+  global custom_scripts_d
+  if not custom_scripts_d:
+    get_custom_scripts()
+
+  _ = "%s.classes.filter" % phil_scope
+  filter_s = OV.GetParam(_.lower(), None)
+
+  control = phil_scope + "_SCRIPTS"
+
+  if OV.IsControl(control):
+    filter_s=olx.html.GetValue(control + "_FILTER")
+  scopes=[]
+  t_l=[]
+  for script in custom_scripts_d:
+    scope=custom_scripts_d[script].get('scope')
+    if scope not in scopes:
+      scopes.append(scope)
+    if filter_s != 'ALL':
+      if not scope == filter_s:
+        continue
+    t_l.append(script)
+
+  s_l = ";".join(scopes)
+
+  t_l.sort()
+  return ";".join(t_l)
+OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
+
+def get_custom_scripts(file_name, globule, scope):
+  global custom_scripts_d
+  import gui
+  gui_t = "<b>%s</b>: Please select a script from the above choices." %scope
+  OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
+
+  with open(file_name, 'r') as rFile:
+    _ = rFile.readlines()
+  for line in _:
+    line = line.rstrip()
+    if line:
+      if line.startswith("s:"):
+        script = line[2:]
+        script_s = scope + ":" + line[2:]
+        if "<-" in script:
+          script = script.split("<-")[1]
+        try:
+          script_obj = globule[script]
+          custom_scripts_d.setdefault(script,{})
+          custom_scripts_d[script].setdefault('obj', script_obj)
+        except:
+          print("Could not obtain script object for %s" % script_s)
+          continue
+        try:
+          custom_scripts_d[script].setdefault('docstring', script_obj.__doc__)
+        except:
+          print("Could not evaluate script docstring for %s" % script)
+        custom_scripts_d[script].setdefault('display', script_s)
+        custom_scripts_d[script].setdefault('scope', scope)
+        try:
+          gui_t = gui.tools.TemplateProvider.get_template(script + "_gui", template_file=file_name, force=debug)
+          custom_scripts_d[script].setdefault('gui', gui_t)
+          custom_scripts_d[script]['gui'] = gui_t
+        except:
+          print("Could not create gui for scipt %s" %script)
+
+def set_custom_gui(f, scope):
+  global custom_scripts_d
+  f in custom_scripts_d
+
+  try:
+    doc = custom_scripts_d[f].get('docstring')
+    gui_t = custom_scripts_d[f].get('gui')
+    if "has not been found" in gui_t:
+      gui_t = "<b>%s</b>: %s" %(scope, doc)
+    OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
+    OV.SetVar("active_custom_function_%s"%scope, f)
+  except:
+    _ = "--> %s is missing" %f
+
+  #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
+OV.registerFunction(set_custom_gui,False,'gui.tools')
+
+def run_custom_script(*args):
+  global custom_scripts_d
+  script = args[0]
+  if script in custom_scripts_d:
+    custom_scripts_d[script]['obj']()
+
+OV.registerFunction(run_custom_script,False,'gui.tools')
+
+def find_movie_folder(directory=None, directory_l=None):
+  from gui import report
+  if not directory:
+    directory = OV.FilePath()
+  if not directory_l:
+    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
+  if not directory or not directory_l:
+    return
+  name = OV.FileName()
+  extension = "*.jpg"
+  i = 1
+  while not os.path.exists(directory + os.sep + "movie"):
+    directory = os.sep.join(directory_l[:-(i)])
+    i += 1
+    if i == 5:
+      return None, None
+  directory = directory + os.sep + "movie"
+  if OV.FileName() not in directory:
+    print("Crystal images found, but crystal name not in path!")
+  l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+  if not l:
+    OV.SetParam("snum.metacif.list_crystal_images_files", "")
+    return None, None
+  OV.SetParam("snum.metacif.list_crystal_images_files", (l))
+  OV.SetParam('snum.report.crystal_image', l[0])
+  return l[0], l
+
+OV.registerFunction(find_movie_folder, False, 'gui.tools')
+
+
+
+
+

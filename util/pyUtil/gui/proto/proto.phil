@@ -1,0 +1,8 @@
+proto{
+    tolerance = 10
+        .type = int
+    class = ""
+        .type = str
+    sg = ""
+        .type = str
+}

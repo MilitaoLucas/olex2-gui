@@ -8,6 +8,7 @@ import math
 import olx
 import olex
 import re
+import gui
 
 from ArgumentParser import ArgumentParser
 import userDictionaries
@@ -84,7 +85,7 @@ class ValidateCif(object):
     if not filepath:
       filepath = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.isfile(filepath):
-      with open(filepath, 'rb') as f:
+      with open(filepath, 'r') as f:
         cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       print("Validating %s" %filepath)
       cif_dic = validation.smart_load_dictionary(cif_dic)
@@ -108,7 +109,7 @@ class CifTools(ArgumentParser):
 
   def __init__(self):
     super(CifTools, self).__init__()
-    model_src = OV.ModelSrc()
+    model_src = OV.ModelSrc(force_cif_data=True)
     self.metacif_path = os.path.join(OV.StrDir(), model_src + ".metacif")
     self.data_name = model_src.replace(' ', '')
     just_loaded = False
@@ -118,6 +119,13 @@ class CifTools(ArgumentParser):
       if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
+      # fix for the data name if it comes differet from CifExtract...
+      elif self.data_name.lower() not in olx.cif_model.keys_lower.keys()\
+           and len(olx.cif_model.keys_lower) == 1:
+        sk = list(olx.cif_model.keys())[0]
+        olx.cif_model[self.data_name] = olx.cif_model[sk]
+        del olx.cif_model[sk]
+
       just_loaded = True
     self.cif_model = olx.cif_model
     if not olx.cif_model:
@@ -181,7 +189,7 @@ class CifTools(ArgumentParser):
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
       try:
-        with open(self.metacif_path, 'rb') as file_object:
+        with open(self.metacif_path, 'r') as file_object:
           reader = iotbx.cif.reader(file_object=file_object)
           return reader.model()
       except:
@@ -387,7 +395,7 @@ class MergeCif(CifTools):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
         if prg == 'olex2.refine':
-          OV.set_refinement_program(prg, 'Gauss-Newton')
+          OV.set_refinement_program(prg)
         else:
           if method == 'CGLS':
             OV.set_refinement_program(prg, 'Least Squares')
@@ -478,7 +486,7 @@ class ExtractCifInfo(CifTools):
     str_solstion_from_cif = None
     if os.path.exists(curr_cif_p):
       try:
-        with open(curr_cif_p, 'rb') as f:
+        with open(curr_cif_p, 'r') as f:
           current_cif = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
           all_sources_d[curr_cif_p] = current_cif
         try:
@@ -714,7 +722,7 @@ class ExtractCifInfo(CifTools):
       p,pp  = self.sort_out_path(path, manu_cif)
       if p:
         try:
-          with open(p, 'rb') as f:
+          with open(p, 'r') as f:
             cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(cif_s)
             self.update_cif_block(cif_s, force=False)
@@ -735,7 +743,7 @@ class ExtractCifInfo(CifTools):
             import gui
             gui.report.publication.add_cif_to_merge_list.__func__(p)
         else:
-          with open(p, 'rb') as f:
+          with open(p, 'r') as f:
             crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
             self.exclude_cif_items(crystal_clear)
           self.update_cif_block(crystal_clear, force=False)
@@ -751,7 +759,7 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      with open(p, 'rb') as f:
+      with open(p, 'r') as f:
         content = "data_diffractometer_def\n" + f.read()
         content = content.replace("\xe2\x80\x98", "'")\
           .replace("\xe2\x80\x99", "'")\
@@ -777,7 +785,7 @@ class ExtractCifInfo(CifTools):
           writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
           writeFile.write(f)
 
-      with open(mask_cif_path + add, 'rb') as f:
+      with open(mask_cif_path + add, 'r') as f:
         cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       if add: #i.e. we have a PLATON file
         os.remove(mask_cif_path + add)
@@ -888,7 +896,7 @@ Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C."""
           continue
         if item not in self.all_sources_d:
           try:
-            with open(item, 'rb') as f:
+            with open(item, 'r') as f:
               _ = f.read()
               if not _.startswith("data"):
                 _ = str("data_%s\r\n" %OV.ModelSrc() + _)
@@ -1180,28 +1188,10 @@ If more than one file is present, the path of the most recent file is returned b
         return None, None
 
     elif tool == "od_crystal_images":
-      name = OV.FileName()
-      extension = "*.jpg"
-      i = 1
-      while not os.path.exists(directory + os.sep + "movie"):
-        directory = os.sep.join(directory_l[:-(i)])
-        i += 1
-        if i == 5:
-          return None, None
-      directory = directory + os.sep + "movie"
-      if OV.FileName() not in directory:
-        print("Crystal images found, but crystal name not in path!")
-#        return None, None
-      from gui import report
-      l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+      l0, l = gui.tools.find_movie_folder(directory, directory_l)
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
-      if not l:
-        OV.SetParam("snum.metacif.list_crystal_images_files", "")
-        return None, None
-      OV.SetParam("snum.metacif.list_crystal_images_files", (l))
-      return l[0], l
-
-
+      return l0, l
+    
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"
@@ -1322,7 +1312,7 @@ def reloadMetadata(force=False):
     if dataName != fileName and not force:
       return
     if os.path.exists(metacif_path):
-      with open(metacif_path, 'rb') as file_object:
+      with open(metacif_path, 'r') as file_object:
         reader = iotbx.cif.reader(file_object=file_object)
         olx.cif_model = reader.model()
   except Exception as e:

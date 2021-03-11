@@ -173,11 +173,15 @@ def LoadParams():
   scopes = ['olex2', 'user', 'custom', 'snum']
   for scope in scopes:
     phil_p = get_phil_file_path(scope)
-    if phil_p:
+    if phil_p and os.path.exists(phil_p):
       try:
         phil_handler.update(phil_file=phil_p)
       except:
         print("Failed to read %s.phil" %scope)
+        try:
+          os.rename(phil_p, phil_p + ".bad")
+        except:
+          pass
   olx.phil_handler = phil_handler
 
   # GUI Phil
@@ -188,8 +192,12 @@ def LoadParams():
         master_phil=master_gui_phil,
         parse=phil_interface.parse)
       olx.gui_phil_handler = gui_phil_handler
-    except:
+    except Exception as e:
       print("Failed to read gui.phil")
+      try:
+        os.rename(phil_p, phil_p + ".bad")
+      except:
+        pass
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
@@ -309,10 +317,12 @@ def OnStructureLoaded(previous):
     oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
     if os.path.exists(oxvf):
       olex.m("load gview '%s'" %oxvf)
-  mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
-  cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
+  mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc(force_cif_data=True))
+  cif_name = "%s%s%s.cif" % (OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
-    olx.CifExtract(cif_name)
+    if olx.IsFileType('cif') == 'true':
+      cif_name = cif_name + "#" + olx.xf.CurrentData()
+    olx.CifExtract(cif_name, mf_name)
 
   LoadStructureParams()
 
