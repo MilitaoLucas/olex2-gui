@@ -495,12 +495,20 @@ class fractal_dimension(OlexCctbxAdapter):
     
     temp = olex_xgrid.GetSize()
     size = [int(temp[0]),int(temp[1]),int(temp[2])]
+    value = [[[float(0.0) for z in range(size[2])] for y in range(size[1])] for x in range(size[0])]
+    for x in range(size[0]):
+      for y in range(size[1]):
+        for z in range(size[2]):    
+          value[x][y][z] = olex_xgrid.GetValue(x,y,z)
     self.info = OV.ModelSrc()
     
-    print ("start analyzing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
+    print ("start analyzing a %4d x%4d x%4d cube..."%(size[0],size[1],size[2]))
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()    
     
-    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 1 * stepsize
-    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 1 * stepsize
+    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 2 * stepsize
+    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 2 * stepsize
     steps = int((maximum - minimal) / stepsize) + 2
     bins = [0] * steps
     df = [0.0] * steps
@@ -513,34 +521,51 @@ class fractal_dimension(OlexCctbxAdapter):
       iso[rho] = round(minimal + rho * stepsize,3)
       self.x[rho] = iso[rho]
     
-    value = [[[float(0.0) for z in range(size[2])] for y in range(size[1])] for x in range(size[0])]
+    run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
+    print ("Analyzing %d surface intersections..."%run)
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()    
 
     for x in range(size[0]):
       for y in range(size[1]):
-        for z in range(size[2]):    
-          value[x][y][z] = olex_xgrid.GetValue(x,y,z)
-    
-    run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
-    
-    for x in range(size[0]):
-      for y in range(size[1]):
         for z in range(size[2]-1):
+          lv1 = value[x][y][z]
+          lv2 = value[x][y][z+1]
           for rho in range(steps):
-            if (value[x][y][z] < iso[rho] and value[x][y][z+1] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x][y][z+1] < iso[rho]):
+            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
               bins[rho] += 1
-    for y in range(size[1]):
-      for z in range(size[2]):
-        for x in range(size[0]-1):
-          for rho in range(steps):
-            if (value[x][y][z] < iso[rho] and value[x+1][y][z] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x+1][y][z] < iso[rho]):
-              bins[rho] += 1   
+    print ("Z-Dimension done!")
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()
+      
     for z in range(size[2]):
       for x in range(size[0]):
         for y in range(size[1]-1):
+          lv1 = value[x][y][z]
+          lv2 = value[x][y+1][z]          
           for rho in range(steps):
-            if (value[x][y][z] < iso[rho] and value[x][y+1][z] > iso[rho]) or (value[x][y][z] > iso[rho] and value[x][y+1][z] < iso[rho]):
-              bins[rho] += 1
+            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
+              bins[rho] += 1    
+    print ("Y-Dimension done!")
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()      
               
+    for y in range(size[1]):
+      for z in range(size[2]):
+        for x in range(size[0]-1):
+          lv1 = value[x][y][z]
+          lv2 = value[x+1][y][z]          
+          for rho in range(steps):
+            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
+              bins[rho] += 1    
+    print ("X-Dimension done!")
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()      
+    
     epsilon = log(1/(run)**(-1/3))
     for rho in range(steps):
       if bins[rho] == 0:
@@ -557,8 +582,8 @@ class fractal_dimension(OlexCctbxAdapter):
       r.title += ": " + str(self.info)
     r.x = self.x
     r.y = self.y
-    r.xLegend = "rho_0 / eA^-3"
-    r.yLegend = "df(rho_0)"
+    r.xLegend = "rho /eA^(-3)"
+    r.yLegend = "df(rho)"
     return r
 
 class bijvoet_differences_NPP:

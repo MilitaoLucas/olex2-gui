@@ -72,7 +72,6 @@ def compile(_platform):
       if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
         print('Failed to create a distribution...')
         return False
-      shutil.copytree(src_dir + "boost", "cctbx_sources/boost")
 
       zip_name = tmp_dir + d[3]
       print('Creating ' +  zip_name + ':')

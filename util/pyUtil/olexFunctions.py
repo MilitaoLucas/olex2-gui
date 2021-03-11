@@ -284,6 +284,19 @@ class OlexFunctions(inheritFunctions):
       print("Program %s could not be set" %(program), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  def get_refienment_program_refrerence(self, pname=None):
+    try:
+      import ExternalPrgParameters
+      if pname is None:
+        pname = self.GetParam('snum.refinement.program')
+      prg = ExternalPrgParameters.defineExternalPrograms()[1].programs[pname]
+      version = self.GetProgramVersionByName(pname)
+      if pname.lower().startswith("shelx") or pname.lower().startswith('x'):
+        pname = pname.upper()
+      return "%s %s (%s)" %(pname, version, prg.brief_reference)
+    except:
+      return '?'
+
   def have_nsff(self):
     retVal = False
     if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
@@ -463,12 +476,13 @@ class OlexFunctions(inheritFunctions):
     try:
       olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
+      ires = olx.IsFileType('IRES') == 'true'
       finalise_value = None
       if finalise == 'Include':
         finalise_value = True
       elif finalise == 'Exclude':
         finalise_value = False
-      elif olex2_refine:
+      elif olex2_refine and ires:
         acta = olx.Ins("ACTA").strip()
         if acta and "NOHKL" == acta.split()[-1].upper():
           finalise_value = False
@@ -478,7 +492,7 @@ class OlexFunctions(inheritFunctions):
       if update_atoms_loop is None:
         update_atoms_loop = olex2_refine
       #create FAB if needed
-      if olx.Ins("ABIN") != 'n/a':
+      if ires and olx.Ins("ABIN") != 'n/a':
         fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
         if not os.path.exists(fab_path):
           try:
@@ -748,12 +762,12 @@ class OlexFunctions(inheritFunctions):
         return True
     return False
 
-  def ModelSrc(self):
+  def ModelSrc(self, force_cif_data=False):
     try: #remove later!!HP
       model_src = olx.xf.rm.ModelSrc()
       if not model_src:
         i = int(olx.xf.CurrentData())
-        if i != 0:
+        if i != 0 or force_cif_data:
           return olx.xf.DataName(i)
         else:
           return self.FileName()
@@ -792,7 +806,7 @@ class OlexFunctions(inheritFunctions):
     return olx.xf.GetFormula()
 
   def GetCellVolume(self):
-    return olx.xf.au.GetCell()
+    return olx.xf.au.GetCellVolume()
 
   def AddIns(self, instruction, quiet=False):
     olx.AddIns(*instruction.split(), q=quiet)
@@ -1090,6 +1104,11 @@ class OlexFunctions(inheritFunctions):
           return None
     return pyl
 
+  def GetChoices(self, variable):
+    _ = olx.phil_handler.get_values_by_name(variable)
+    _ = _[0].strip("*")
+    return _.split()
+
   def createFileLock(self, fileName):
     lockName = olx.file.ChangeExt(fileName, "lock")
     if sys.platform[:3] == 'win':
@@ -1134,6 +1153,10 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
+  
+  
+
+
 def GetFormattedCompilationInfo():
   t = "<font size='2'><table width='100%%' cellpadding='0' cellspacing='0'>"
   d = {}
@@ -1165,6 +1188,7 @@ def GetFormattedCompilationInfo():
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
+OV.registerFunction(OV.GetChoices)
 OV.registerFunction(OV.SetParam)
 OV.registerFunction(OV.HtmlGetValue)
 OV.registerFunction(OV.set_bond_thicknes)

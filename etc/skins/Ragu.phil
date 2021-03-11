@@ -63,7 +63,7 @@ gui {
       bg_colour_L = 1.5
       grad_colour_L = 1.0
       font_colour_L = 1.8
-      font_name = Vera Bold
+      font_name = DefaultFont Bold
       font_size = 14
       top = 7
       left = 8
@@ -133,7 +133,7 @@ gui {
     bg_colour_L = 1.6
     grad_colour_L = 1.8
     font_colour_L = 0.8
-    font_name = Vera
+    font_name = DefaultFont
   }  
 
   image_font_name = Vera

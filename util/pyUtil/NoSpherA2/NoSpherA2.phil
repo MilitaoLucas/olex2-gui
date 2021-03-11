@@ -29,6 +29,8 @@ snum{
     ELMOdb{
       maxtail = 10
         .type = int
+      mutation = False
+        .type = bool
       nspect = 1
         .type = str
       ntail = 1
@@ -78,8 +80,6 @@ snum{
       .type = str
     method = "B3LYP"
       .type = str
-    modular = "direct"
-      .type = str
     multiplicity = 0
       .type = str
     ORCA_SCF_Conv = "NormalSCF"
@@ -123,6 +123,8 @@ snum{
     run_refine = True
       .type = bool
     source = "'Please Select'"
+      .type = str
+    tsc_mode = "First"
       .type = str
     wfn2fchk_SF = True
       .type = bool

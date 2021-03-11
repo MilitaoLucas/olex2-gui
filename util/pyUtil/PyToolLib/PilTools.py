@@ -89,7 +89,7 @@ class ButtonMaker(ImageTools):
     if self.type == "cbtn":
       im = self.cbtn()
 
-  def GenericButtonMaker(self,  font_name = "Vera", font_size = 14):
+  def GenericButtonMaker(self,  font_name="DefaultFont", font_size = 14):
     if self.params.image_font_name:
       font_name = self.params.image_font_name
     if self.params.button_font_name:
@@ -119,7 +119,7 @@ class ButtonMaker(ImageTools):
       vline = d.get('vline', False)
       align = d.get('align', 'centre')
       valign = d.get('valign', ("middle", 0.8))
-      font_name = d.get('font_name', 'Vera')
+      font_name = d.get('font_name', "DefaultFont")
       top_left = d.get('top_left', (0,0))
       titleCase = d.get('titleCase', False)
       lowerCase = d.get('lowerCase', False)
@@ -698,7 +698,7 @@ class MakeAllRBars(BarGenerator):
     draw = ImageDraw.Draw(image)
     draw.line(((width-2, 0) ,(width-2, height)), fill='#666666')
 
-    font_name = "Vera Bold"
+    font_name = "DefaultFont Bold"
     font_size = 10
     font = IT.registerFontInstance(font_name, font_size)
 
@@ -706,7 +706,7 @@ class MakeAllRBars(BarGenerator):
     hStart = self.centre_text(draw, txt, font, text_width)
     draw.text((hStart, -1), "%s" %txt, font=font, fill='#666666')
 
-    font_name = "Vera"
+    font_name = "DefaultFont"
     font_size = 10
     font = IT.registerFontInstance(font_name, font_size)
 
@@ -860,7 +860,7 @@ class timage(ArgumentParser):
     timage_blanks.setdefault(self.params.skin.name,{})
     self.abort = False
 
-    self.font_name = "Vera"
+    self.font_name = "DefaultFont"
     self.timer = False
     self.debug = False
     if self.timer:
@@ -982,7 +982,7 @@ class timage(ArgumentParser):
       IT.write_text_to_draw(draw,
                  "%s" %txt,
                  top_left=(440, 32),
-                 font_name = 'Vera',
+                 font_name = "DefaultFont",
                  font_size=42,
                  titleCase=False,
                  font_colour="#525252",
@@ -1028,7 +1028,7 @@ class timage(ArgumentParser):
     IT.write_text_to_draw(draw,
                  "iX",
                  top_left=(2, 1),
-                 font_name = 'Vera',
+                 font_name = "DefaultFont",
                  font_size=10,
                  font_colour="#ffffff")
     name = "info_tiny_fc.png"
@@ -1137,7 +1137,7 @@ class timage(ArgumentParser):
     IT.write_text_to_draw(draw,
                  "You are in a Mode",
                  top_left=(5, 1),
-                 font_name = 'Vera Bold',
+                 font_name = "DefaultFont Bold",
                  font_size=90,
                  font_colour=self.params.html.font_colour.rgb,
                  align='centre',
@@ -1159,7 +1159,7 @@ class timage(ArgumentParser):
     IT.write_text_to_draw(draw,
                  "You are in a Mode",
                  top_left=(5, 1),
-                 font_name = 'Vera Bold',
+                 font_name = "DefaultFont Bold",
                  font_size=90,
                  font_colour=self.params.html.font_colour.rgb,
                  align='centre',
@@ -1178,7 +1178,7 @@ class timage(ArgumentParser):
 
     t_default = {
       'top_left':(1,1),
-      'font_name':'Vera',
+      'font_name':"DefaultFont",
       'font_size':6,
       'font_colour':self.params.html.font_colour.rgb,
     }
@@ -1214,7 +1214,7 @@ class timage(ArgumentParser):
        'text':{
          'txt':IT.get_unicode_characters('info'),
          'top_left':(1,1),
-         'font_name':"Vera",
+         'font_name':"DefaultFont",
          'font_size':6,
          'font_colour':(self.params.html.font_colour.rgb),
          },
@@ -1450,7 +1450,7 @@ class timage(ArgumentParser):
     col_1 = IT.adjust_colour(bannerbg,luminosity=1.7)
     cmd_col = "#fff600"
     font_size_l = [42, 13, 13]
-    font_l = ["Vera Bold", "Vera", "Vera"]
+    font_l = ["DefaultFont Bold", "DefaultFont", "DefaultFont"]
 
     txt_items = {"Olex2":{'name':'olex2','pix':0,'row':0,'colour':col_0,
                           'itemstate':"aio-olex2* 1 "},
@@ -1593,7 +1593,7 @@ class timage(ArgumentParser):
 
       margin_top_l = [-3, 8, 24]
       font_size_l = [42, 13, 13]
-      font_l = ["Vera Bold", "Vera", "Vera"]
+      font_l = ["DefaultFont Bold", "DefaultFont", "DefaultFont"]
       title_l = [True, False, False]
       lower_l = [False, True, True]
 
@@ -1787,7 +1787,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IT.write_text_to_draw(draw,
                  "%s" %(character),
                  top_left=top_left,
-                 font_name = 'Vera Bold',
+                 font_name = "DefaultFont Bold",
                  font_size=70,
                  font_colour=self.params.html.font_colour.rgb)
     name = "circle_%s.png" %character
@@ -1869,7 +1869,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IT.write_text_to_draw(draw,
                  "%s" %(txt),
                  top_left=(5, 5),
-                 font_name = 'Vera',
+                 font_name = "DefaultFont",
                  font_size=38,
                  font_colour=IT.adjust_colour(self.params.html.font_colour.rgb, luminosity = 0.8))
 #                 font_colour='#ffffff')
@@ -1879,7 +1879,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IT.write_text_to_draw(draw,
                  "%s" %(txt),
                  top_left=(5, 45),
-                 font_name = 'Vera Bold',
+                 font_name = "DefaultFont Bold",
                  font_size=43,
                  font_colour='#ffffff')
 
@@ -2151,7 +2151,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       OlexVFS.save_image_to_olex(image, name, 2)
       #image.save(r"%s\etc\$label-%s.png" %(datadir, item[0]), "PNG")
 
-  def make_cbtn_items(self, font_name = 'Vera'):
+  def make_cbtn_items(self, font_name = "DefaultFont"):
     new_style = True
     if new_style:
       buttons = ['Solve', 'Refine', 'Draw', 'Report']
@@ -2535,11 +2535,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     size = (width,height)
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
-    font_name = "Vera"
+    font_name = "DefaultFont"
     if self.params.image_font_name:
       font_name = self.params.image_font_name
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None,outside_name=None, force=False):
+  def make_timage(self, item_type, item, state, font_name="DefaultFont", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None,outside_name=None, force=False):
 
     self.params = OV.GuiParams()
     if not self.width:
@@ -3099,7 +3099,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
-  def drawFileFullInfo(self, draw, size, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):
+  def drawFileFullInfo(self, draw, size, colour='#ff0000', right_margin=0, height=10, font_name="DefaultFont", font_size=8, left_start = 0):
 
     height = size[1]
     width = size[0]
@@ -3249,7 +3249,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #sg.show()
       return sg, sg.size
 
-  def tab_items(self, item, state, font_name = "Vera", font_size=13):
+  def tab_items(self, item, state, font_name = "DefaultFont", font_size=13):
     if self.params.image_font_name:
       font_name = self.params.image_font_name
       font_name = "%s Bold" %font_name
@@ -3371,7 +3371,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #font_name = "Arial UTF"
       font_name = self.params.chinese_font_name
     else:
-      font_name = "Vera"
+      font_name = "DefaultFont"
       if self.params.image_font_name:
         font_name = self.params.image_font_name
 
@@ -3447,7 +3447,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
-  def label_items(self, item, font_name = 'Vera'):
+  def label_items(self, item, font_name = "DefaultFont"):
     text = item[0]
     width = item[1]
     base_colour = self.params.html.base_colour.rgb
@@ -3491,7 +3491,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #image = ImageChops.blend(image, dup, 0.05)
     return image
 
-  def label_items_control(self, item, font_name="Vera"):
+  def label_items_control(self, item, font_name="DefaultFont"):
     #cs = self.cs
     base_colour = self.params.html.base_colour.rgb
     text = item[0]
@@ -3531,7 +3531,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = ImageChops.blend(image, dup, 0.05)
     return image
 
-  def cbtn_items(self, item, state, font_name = "Vera"):
+  def cbtn_items(self, item, state, font_name = "DefaultFont"):
     if self.params.image_font_name:
       font_name = self.params.image_font_name
 
@@ -3577,7 +3577,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
-  def button_items(self, item, state, font_name = 'Vera'):
+  def button_items(self, item, state, font_name = "DefaultFont"):
     if self.params.image_font_name:
       font_name = self.params.image_font_name
     width = 50
@@ -3708,7 +3708,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_size = 24
       top = -1
 
-    info_bitmap_font = "Vera"
+    info_bitmap_font = "DefaultFont"
     info_bitmaps = {
       'refine':{'label':'Refining',
                 'name':'refine',

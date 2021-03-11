@@ -612,8 +612,9 @@ class HistoryTree(Node):
           v = v.encode('latin1')
         md = digestHKLData(decompressFile(v))
         new_index.setdefault(md, v)
-        for hkl_d in r_index[k]:
-          self.hklFilesMap[hkl_d] = md
+        if k in r_index: # unbound HKL file?
+          for hkl_d in r_index[k]:
+            self.hklFilesMap[hkl_d] = md
       self.hklFiles = new_index
     self.version = current_version
     print("History has been upgraded in: %.2f ms" %((time.time() - start_time)*1000))
@@ -666,6 +667,8 @@ def compressFile(filePath):
   return zlib.compress(open(filePath, "rb").read(), 9)
 
 def decompressFile(fileData):
+  if not isinstance(fileData, (bytes, bytearray)):
+    fileData = fileData.encode('latin1')
   return zlib.decompress(fileData)
 
 def digestHKLData(fileData):

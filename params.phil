@@ -131,7 +131,7 @@ routines requiring structure refinement
     {
     inelastic_form_factor_table = *henke sasaki
       .type = choice
-    atomic_form_factor_table = *it1992 wk1995 n_gaussian
+    atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
     secondary_ch2_angle = idealise refine *shelxl
       .type = choice
@@ -213,6 +213,12 @@ routines requiring structure refinement
   refinement
     .short_caption = Structure Refinement
     {
+
+    completeness{
+      target = ""
+        .type = str
+      }
+
     ata = 0
       .type = float
     data_parameter_ratio = None
@@ -864,7 +870,8 @@ olex2
       }
   network = True
     .type = bool
-
+  auto_gen_disp = True
+    .type = bool
   samples{
     url = https://secure.opencryst.org/samples
       .type = str

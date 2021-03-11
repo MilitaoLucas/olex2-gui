@@ -371,7 +371,7 @@ def sort_images_with_integer_names(image_list, ending=None):
 
 def remove_from_citation_list(item):
   try:
-    current_refs = OV.get_cif_item('_publ_section_references', []).split('\n\n')
+    current_refs = OV.get_cif_item('_publ_section_references', '').split('\n\n')
     idx = current_refs.index(item)
     if idx != -1:
       del current_refs[idx]
@@ -384,7 +384,7 @@ OV.registerFunction(remove_from_citation_list, False, "report")
 
 def add_to_citation_list(item):
   try:
-    current_refs = OV.get_cif_item('_publ_section_references', []).split('\n\n')
+    current_refs = OV.get_cif_item('_publ_section_references', '').split('\n\n')
     if item in current_refs:
       return
     new_list = [item]

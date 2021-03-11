@@ -158,6 +158,7 @@ class OlexCctbxAdapter(object):
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+      null_disp = table == "electron" or table == "neutron"
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
@@ -168,7 +169,13 @@ class OlexCctbxAdapter(object):
         self._xray_structure.set_inelastic_form_factors(
           self.wavelength, inelastic_table)
         for sc in self._xray_structure.scatterers():
-          custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+          if null_disp:
+            custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+          else:
+            custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+      if null_disp:
+        self._xray_structure.set_custom_inelastic_form_factors(
+          custom_fp_fdps)
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -274,7 +281,8 @@ class OlexCctbxAdapter(object):
              apply_twin_law=True,
              ignore_inversion_twin=False,
              one_h_function=None,
-             algorithm="direct"):
+             algorithm="direct",
+             twin_data=True):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
       miller_set_ = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
@@ -302,17 +310,18 @@ class OlexCctbxAdapter(object):
           self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
         fc.as_intensity_array(), twin_component.value)
-      if miller_set:
-        fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
-      else:
-        fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
+      if twin_data:
+        if miller_set:
+          fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
+        else:
+          fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
     else:
       if one_h_function:
         data = []
         for mi in miller_set_.indices():
           one_h_function.evaluate(mi)
           data.append(one_h_function.f_calc)
-        fc = miller_set.array(data=flex.complex_double(data), sigmas=None)
+        fc = miller_set_.array(data=flex.complex_double(data), sigmas=None)
       else:
         fc = miller_set_.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
@@ -363,9 +372,11 @@ class OlexCctbxAdapter(object):
     fo2 = self.reflections.f_sq_obs_filtered
     if one_h_function:
       fc = self.f_calc(fo2, self.exti is not None, True, True,
-                       one_h_function=one_h_function)
+                       one_h_function=one_h_function, twin_data=False)
     else:
-      fc = self.f_calc(None, self.exti is not None, True, ignore_inversion_twin=False)
+      fc = self.f_calc(None, self.exti is not None, True,
+       ignore_inversion_twin=False,
+       twin_data=False)
     obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
@@ -1004,10 +1015,17 @@ def generate_sf_table():
 
     def generate(self):
       from smtbx.structure_factors import direct
+      miller_set = self.reflections.f_sq_obs_merged
+      if (self.twin_components is not None
+          and self.twin_components[0].value > 0):
+        twin_component = self.twin_components[0]
+        twinning = cctbx_controller.hemihedral_twinning(
+          twin_component.twin_law.as_double(), miller_set)
+        miller_set = twinning.twin_complete_set
       table_file_name = os.path.join(OV.FilePath(), OV.FileName()) + ".tsc"
       direct.generate_isc_table_file(table_file_name,
                                      self.xray_structure(),
-                                     self.observations.indices)
+                                     miller_set.indices())
   SF_TableGenerator()
 
 OV.registerFunction(generate_sf_table, False, "test")
@@ -1041,7 +1059,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     if afile:
       break
   rv = []
-  if afile:
+  if afile and "auto" == table_name:
     with open(afile, 'r') as disp:
       for l in disp.readlines():
         l = l.strip()
@@ -1078,3 +1096,30 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   return ';'.join(rv)
 
 OV.registerFunction(generate_DISP, False, "sfac")
+
+def generate_ED_SFAC(table_file_name=None, force = False):
+  import olexex
+  if not table_file_name:
+    table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
+  sfac = olexex.OlexRefinementModel().model.get('sfac')
+  if sfac and not force:
+    return
+  formula = olx.xf.GetFormula('list')
+  elms = set([x.split(':')[0] for x in formula.split(',')])
+  sfac_toks = []
+  with open(table_file_name, 'r') as disp:
+    for l in disp.readlines():
+      l = l.strip()
+      if not l or l.startswith('#'):
+        continue
+      toks = l.split()
+      if len(toks) != 16:
+        continue
+      if toks[1] in elms:
+        sfac_toks.append(toks)
+        if len(sfac_toks) == len(elms):
+          break
+  for st in sfac_toks:
+    olx.AddIns(*st)
+
+OV.registerFunction(generate_ED_SFAC, False, "sfac")

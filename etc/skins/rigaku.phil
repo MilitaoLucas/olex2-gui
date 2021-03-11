@@ -46,7 +46,7 @@ gui {
     bg_colour_L = 1.6
     grad_colour_L = 1.8
     font_colour_L = 0.8
-    font_name = Vera
+    font_name = DefaultFont
 
     snumtitle {
       grad_colour = #4f6ca6
@@ -62,7 +62,7 @@ gui {
 
     h1{
       base_colour = #4f6ca6
-      font_name = Vera
+      font_name = DefaultFont
       grad = True
       grad_colour = #4f6ca6
       grad_step = 0.1
@@ -115,7 +115,7 @@ gui {
       bg_colour_L = 1.8
       grad_colour_L = 1.8
       font_colour = #ffffff
-      font_name = Vera Bold
+      font_name = DefaultFont Bold
       font_size = 17
       top = 3
       left = 3
