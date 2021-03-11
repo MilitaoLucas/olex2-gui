@@ -1096,3 +1096,30 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   return ';'.join(rv)
 
 OV.registerFunction(generate_DISP, False, "sfac")
+
+def generate_ED_SFAC(table_file_name=None, force = False):
+  import olexex
+  if not table_file_name:
+    table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
+  sfac = olexex.OlexRefinementModel().model.get('sfac')
+  if sfac and not force:
+    return
+  formula = olx.xf.GetFormula('list')
+  elms = set([x.split(':')[0] for x in formula.split(',')])
+  sfac_toks = []
+  with open(table_file_name, 'r') as disp:
+    for l in disp.readlines():
+      l = l.strip()
+      if not l or l.startswith('#'):
+        continue
+      toks = l.split()
+      if len(toks) != 16:
+        continue
+      if toks[1] in elms:
+        sfac_toks.append(toks)
+        if len(sfac_toks) == len(elms):
+          break
+  for st in sfac_toks:
+    olx.AddIns(*st)
+
+OV.registerFunction(generate_ED_SFAC, False, "sfac")
