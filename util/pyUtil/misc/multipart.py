@@ -193,15 +193,15 @@ try:
 
   urllib.request.HTTPSHandler = HTTPSHandler
   import sys
-  if sys.platform == 'darwin' or sys.platform == 'linux2':
-    ssl_certs = os.environ.get("SSL_CERT_FILE", None)
+  if sys.platform == 'darwin' or sys.platform[:3] == 'lin':
+    ssl_certs = os.environ.get('SSL_CERT_FILE', None)
     if not ssl_certs or not os.path.exists(ssl_certs):
       ca_paths = ['/etc/ssl/certs/ca-certificates.crt', # ubuntu
         '/etc/ssl/certs/ca-bundle.crt', #centos
         '/etc/ssl/cert.pem'] #mac
       for p in ca_paths:
         if os.path.exists(p):
-          os.environ["SSL_CERT_FILE"] = p
+          os.environ['SSL_CERT_FILE'] = p
           break
 except:
   print('HTTPS handler is not installed')
