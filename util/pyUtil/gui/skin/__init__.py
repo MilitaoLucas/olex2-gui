@@ -100,9 +100,7 @@ def SetMaterials():
 def load_user_gui_phil():
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   if os.path.exists(gui_phil_path):
-    gui_phil_file = open(gui_phil_path, 'r')
-    gui_phil = gui_phil_file.read()
-    gui_phil_file.close()
+    gui_phil = open(gui_phil_path, 'r', encoding="utf-8").read()
     olx.gui_phil_handler.update(phil_string=gui_phil)
 
 def check_os():
@@ -150,17 +148,13 @@ def deal_with_gui_phil(action):
     if not os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
     if os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-      gui_skin_phil = gui_skin_phil_file.read()
-      gui_skin_phil_file.close()
+      gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
     if skin_extension:
       gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
-        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-        gui_skin_phil = gui_skin_phil_file.read()
-        gui_skin_phil_file.close()
+        gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
   else:
     olx.gui_phil_handler.save_param_file(
