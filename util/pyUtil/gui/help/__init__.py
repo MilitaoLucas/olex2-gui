@@ -6,6 +6,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam("olex2.debug", False))
 have_help = True
+from htmlTools import *
 
 global helpIsInitialised
 helpIsInitialised = False
@@ -49,8 +50,7 @@ class GetHelp(VFSDependent):
     olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
     self.load_ressources()
-    ws = olx.GetWindowSize('gl')
-    ws = ws.split(',')
+    ws = olx.GetWindowSize('gl').split(',')
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
     self.p_path = p_path
     self.get_templates()
@@ -285,7 +285,6 @@ class GetHelp(VFSDependent):
 if have_help:
   gh = GetHelp()
 
-from htmlTools import *
 def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
   global tutorial_box_initialised
   if not helpIsInitialised:
@@ -406,17 +405,16 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
 
   if box_type == 'help':
     if md_box:
-      ws = olx.GetWindowSize('gl')
-      ws = ws.split(',')
+      ws = olx.GetWindowSize('gl').split(',')
       boxWidth = int(int(ws[2])*OV.GetParam('gui.help.width_fraction',0.3))
       if boxWidth < 500:
         boxWidth = 500
       boxHeight = int(ws[3]) - 30
-      x = int(ws[2]) - boxWidth -2
+      ws = olx.GetWindowSize().split(',')
+      x = int(ws[0]) + int(ws[2])//2 - boxWidth - 2
       y = int(ws[1]) + 50
 
     else:
-
       boxWidth = OV.GetParam('gui.help_box.width')
       length = len(helpTxt)
       tr = helpTxt.count('<br>')
@@ -438,15 +436,14 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
           x = mouseX + 10 - boxWidth
         else:
           x = mouseX - 10
-
   else:
     if box_type == 'tutorial' and tutorial_box_initialised:
       pass
     else:
-      ws = olx.GetWindowSize('gl')
-      ws = ws.split(',')
+      ws = olx.GetWindowSize().split(',')
       x = int(ws[0])
       y = int(ws[1]) + 50
+      ws = olx.GetWindowSize('gl').split(',')
       boxWidth = int(400)
       boxHeight = int(ws[3]) - 90
 
@@ -561,10 +558,15 @@ class AutoDemoTemp(AutoDemo):
         txt = gui.tools.TemplateProvider.get_template('pop_tutorials_loop')%d
 
       OV.write_to_olex("%s.htm" %self.pop_name.lower(), txt)
-      boxWidth = 450
-      boxHeight = 320
-      x = OV.GetHtmlPanelX() - boxWidth - 40
-      y = 70
+      if self.interactive:
+        boxWidth = 450
+        boxHeight = 320
+      else:
+        boxWidth = 450
+        boxHeight = 250
+      ws = olx.GetWindowSize().split(',')
+      x = int(ws[0])
+      y = int(ws[1]) + 75
       if self.have_box_already:
         olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), t=self.pop_name)
       else:
@@ -573,23 +575,15 @@ class AutoDemoTemp(AutoDemo):
            b='t', t=self.pop_name, w=boxWidth, h=boxHeight, x=x, y=y)
           olx.html.SetFocus(self.pop_name + '.TUTORIAL_NEXT')
         else:
-          boxWidth = 400
-          boxHeight = 250
-          x = OV.GetHtmlPanelX() - boxWidth - 40
-          y = 75
           olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), **{'b':'t', 't':self.pop_name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
         self.have_box_already = True
-        #olx.html.Show(self.pop_name)
       OV.Refresh()
       if not self.interactive:
         sleep = len(self.cmd_content) * self.reading_speed
         olx.Wait(sleep)
       return
 
-
-
   def run_autodemo(self, name, other_popup_name=""):
-
     try:
       self.user_structure = OV.FileFull()
       self.set_box_bg_colour()
@@ -602,13 +596,9 @@ class AutoDemoTemp(AutoDemo):
         self.name = name
 
       self.read_tutorial_definitions()
-
       olx.Clear()
-
       self.get_demo_item()
       cmd_type = self.run_demo_item()
-
-
     except Exception as err:
       print("+++ ERROR IN TUTORIALS: %s" %err)
       sys.stderr.formatExceptionInfo()
