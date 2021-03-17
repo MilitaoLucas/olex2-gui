@@ -872,7 +872,7 @@ class OlexFunctions(inheritFunctions):
     elif "xt" in name:
       try:
         marker = "_computing_structure_solution"
-        with open(self.HKLSrc(), "rb") as hkl:
+        with open(self.HKLSrc(), "r") as hkl:
           for line in hkl:
             if line.startswith(marker):
               version = line[len(marker):].strip().strip("'")
@@ -1153,8 +1153,8 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
-  
-  
+
+
 
 
 def GetFormattedCompilationInfo():
