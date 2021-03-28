@@ -9,8 +9,6 @@ OV = OlexFunctions()
 p_path = os.path.dirname(os.path.abspath(__file__))
 import sqlite3
 
-DEFAULT_PATH = os.path.join(OV.DataDir(), "proto.sqlite")
-
 def _deal_with_phil(operation='read'):
   user_phil_file = os.path.join(OV.DataDir(), "proto_user.phil")
   phil_file = os.path.join(p_path, "proto.phil")
@@ -26,8 +24,14 @@ def _deal_with_phil(operation='read'):
         file_name=phil, scope_name='proto', diff_only=True)
 
 
-def db_connect(db_path=DEFAULT_PATH):
-  con = sqlite3.connect(db_path)
+def db_connect():
+  db_location = OV.GetParam('proto.db_location', None)
+  db_name = OV.GetParam('proto.db_name', None)
+  db_path = os.path.join(db_location, db_name)
+  if not os.path.exists(db_path):
+    print("There is no proto db")
+    return
+  con=sqlite3.connect(db_path)
   return con
 
 def drop_proto():
@@ -192,10 +196,10 @@ def add_to_proto(p_class):
     #cur.execute(drop_proto())
   #except:
     #pass
-  try:
-    cur.execute(create_proto_db())
-  except:
-    pass
+  #try:
+    #cur.execute(create_proto_db())
+  #except:
+    #pass
   _ = os.path.join(OV.FilePath(), OV.FileName() + ".ins")
   with open(_, 'r') as t:
     t = t.read()
