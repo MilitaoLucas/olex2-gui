@@ -1797,9 +1797,3 @@ def load_res_from_cif():
     olex.m("export")
   olex.m("reap %s" % reapfile)
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
-
-
-
-
-
-
