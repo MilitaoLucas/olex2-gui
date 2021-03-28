@@ -51,10 +51,7 @@ class OlexFunctions(inheritFunctions):
 
   def GetVar(self,variable,def_val=""):
     try:
-      _ = olex_core.FindValue(variable, def_val)
-      if not _:
-        _ = def_val
-      return _
+      return olex_core.FindValue(variable, def_val)
     except Exception as ex:
       print("Variable %s could not be retrieved" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
