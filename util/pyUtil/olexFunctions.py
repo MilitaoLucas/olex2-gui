@@ -51,7 +51,10 @@ class OlexFunctions(inheritFunctions):
 
   def GetVar(self,variable,def_val=""):
     try:
-      return olex_core.FindValue(variable,def_val)
+      _ = olex_core.FindValue(variable, def_val)
+      if not _:
+        _ = def_val
+      return _
     except Exception as ex:
       print("Variable %s could not be retrieved" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
@@ -333,10 +336,10 @@ class OlexFunctions(inheritFunctions):
         olx.html.SetValue(ctrl_name,0)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
-      OV.SetVar('snum.refinement.manual_q_peak_override',max_peaks)
+      OV.SetVar('snum.refinement.manual_q_peak_override', max_peaks)
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
-        olx.html.SetFG(ctrl_name,'#ffffff')
+        olx.html.SetFG(ctrl_name, '#ffffff')
         olx.html.SetValue(ctrl_name,max_peaks)
 
     try:

@@ -152,7 +152,7 @@ class NewsImageRetrivalThread(ThreadEx):
       return ""
     import gui
     from gui import help
-    cont = _.read()
+    cont = _.read().decode()
     help.make_help_box(helpTxt=cont, name="Sample_list")
 
   def get_structure_from_url(self, name, url=None):
@@ -167,7 +167,7 @@ class NewsImageRetrivalThread(ThreadEx):
       os.makedirs(p)
     pp = os.path.join(p, name + '.cif')
     if not os.path.exists(pp):
-      cont = _.read()
+      cont = _.read().decode()
       with open(pp, 'w') as wFile:
         wFile.write(cont)
     else:
