@@ -74,7 +74,6 @@ if timer:
 
 
 def get_wing():
-  print("If OLEX2_ATTACHED_WITH_PYDEBUGGER is set...")
   debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
   if debug == True:
     print("Trying to connect to WING.")
@@ -122,7 +121,7 @@ class StreamRedirection:
       olex.post( '\'' + Str + '\'')
       if self.refresh and olx.HasGUI() == 'true':
         t1 = time.time()
-        if t1 - self.t0 > 0.5:
+        if t1 - self.t0 > 25:
           olex.m("refresh")
           self.t0 = t1
       if self.graph!=False:
