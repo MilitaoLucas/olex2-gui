@@ -988,17 +988,13 @@ def deal_with_gui_phil(action):
     if not os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
     if os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-      gui_skin_phil = gui_skin_phil_file.read()
-      gui_skin_phil_file.close()
+      gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
     if skin_extension:
       gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
-        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-        gui_skin_phil = gui_skin_phil_file.read()
-        gui_skin_phil_file.close()
+        gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
   else:
     olx.gui_phil_handler.save_param_file(
@@ -1793,8 +1789,15 @@ def find_movie_folder(directory=None, directory_l=None):
   OV.SetParam("snum.metacif.list_crystal_images_files", (l))
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
-
 OV.registerFunction(find_movie_folder, False, 'gui.tools')
+
+def load_res_from_cif():
+  reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
+  if not os.path.exists(reapfile):
+    olex.m("export")
+  olex.m("reap %s" % reapfile)
+OV.registerFunction(load_res_from_cif, False, 'gui.tools')
+
 
 
 

@@ -38,29 +38,11 @@ olex.registerFunction(FileSave, False, "gui.dialog")
 olex.registerFunction(SaveModel, False, "gui.dialog")
 
 def About():
-  sz = [int(i) for i in olx.GetWindowSize().split(',')]
-  w = int(olx.html.ClientWidth('gl'))
-  h = int(olx.html.ClientHeight('gl'))
-
-  window = olx.GetWindowSize('gl').split(',')
-
   sw = 650+2*10+2
   sh = 400+2*15+60
-
-
-  x = int(window[0]) + int(int(window[2])/2) - int(sw/2)
-  y = int(window[1]) + int(int(window[3])/2) - int(sh/2)
-
-  if sz[0] > 600:
-    x += sz[0]
-
-
-  #olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
-            #x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
+  x,y = GetBoxPosition(sw, sh)
   olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
             x=x, y=y, w=sw, h=sh)
-
-
 
 olex.registerFunction(About, False, "gui")
 
@@ -141,7 +123,7 @@ def GetItemsFromPhilChoices(param):
     t += choice.lstrip('*') + ";"
   return t
 OV.registerFunction(GetItemsFromPhilChoices, False, 'gui')
-  
+
 def GetFileList(root, extensions):
   import ntpath
   l = []
@@ -192,10 +174,8 @@ olex.registerFunction(GetFolderList, False, "gui")
 
 def GetBoxPosition(w, h):
   sz = [int(x) for x in olx.GetWindowSize().split(',')]
-  y = (sz[3]-sz[1]-w)//2
-  x = (sz[2]-sz[0]-w)//2
-  if x < 0: x = 0
-  if y < 0: y = 0
+  y = sz[1] + (sz[3]-h)//2
+  x = sz[0] + (sz[2]-w)//2
   return x,y
 
 #'static' class

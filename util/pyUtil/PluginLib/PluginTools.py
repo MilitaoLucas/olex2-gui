@@ -59,9 +59,7 @@ class PluginTools(VFSDependent):
       olx.phil_handler.rebuild_index()
 
       if os.path.exists(gui_phil_file_p):
-        gui_phil_file = open(gui_phil_file_p, 'r')
-        gui_phil = gui_phil_file.read()
-        gui_phil_file.close()
+        gui_phil = open(gui_phil_file_p, 'r', encoding="utf-8").read()
 
         olx.gui_phil_handler.adopt_phil(phil_string=gui_phil)
         olx.gui_phil_handler.merge_phil(phil_string=gui_phil)
