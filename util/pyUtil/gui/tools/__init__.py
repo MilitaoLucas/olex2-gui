@@ -1794,7 +1794,7 @@ OV.registerFunction(find_movie_folder, False, 'gui.tools')
 def load_res_from_cif():
   reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
   if not os.path.exists(reapfile):
-    olx.Export() 
+    olex.m("export")
   olex.m("reap %s" % reapfile)
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
 
