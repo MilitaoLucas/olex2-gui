@@ -1789,8 +1789,15 @@ def find_movie_folder(directory=None, directory_l=None):
   OV.SetParam("snum.metacif.list_crystal_images_files", (l))
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
-
 OV.registerFunction(find_movie_folder, False, 'gui.tools')
+
+def load_res_from_cif():
+  reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
+  if not os.path.exists(reapfile):
+    olx.Export() 
+  olex.m("reap %s" % reapfile)
+OV.registerFunction(load_res_from_cif, False, 'gui.tools')
+
 
 
 
