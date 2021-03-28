@@ -219,9 +219,7 @@ def LoadStructureParams():
   model_src = OV.ModelSrc()
   structure_phil_path = "%s/%s.phil" %(OV.StrDir(), model_src)
   if os.path.isfile(structure_phil_path):
-    structure_phil_file = open(structure_phil_path, 'r')
-    structure_phil = structure_phil_file.read()
-    structure_phil_file.close()
+    structure_phil = open(structure_phil_path, 'r', encoding="utf-8").read()
     if """\"[\" \"[',\"""" in structure_phil:
       return # to get around any problems caused by bug that was fixed in r2585
   else:
@@ -267,7 +265,7 @@ def LoadStructureParams():
       for key, value in cif_items:
         cif_block[key] = value
       cif_model = model.cif({model_src: cif_block})
-      with open(metacif_path, 'wb') as f:
+      with open(metacif_path, 'w') as f:
         print(cif_model, file=f)
   #
   # End backwards compatibility

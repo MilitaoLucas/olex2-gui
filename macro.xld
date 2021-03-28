@@ -1422,6 +1422,17 @@
   \>
 \>
 
+<gst help="Get sample structure, specifically, a sponge"
+  <body
+    <args
+      <arg1 name="structureID", def="guaiazulene">
+    \>
+    <cmd
+      <cmd10 "spy.internal.get_structure_from_url(%1)">
+      <cmd10 "spy.gui.tools.load_res_from_cif()">
+    >
+  >
+>
 
 
 <user_onstartup help="dummy definition" <body > >
