@@ -1,8 +1,12 @@
 proto{
-    tolerance = 10
-        .type = int
-    class = ""
-        .type = str
-    sg = ""
-        .type = str
+  db_location = OV.DataDir()
+    .type = str
+  db_name = proto.sqlite
+    .type = str
+  tolerance = 10
+    .type = int
+  class = ""
+    .type = str
+  sg = ""
+   .type = str
 }
