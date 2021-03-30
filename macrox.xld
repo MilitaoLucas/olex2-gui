@@ -322,7 +322,7 @@
     >
     <cmd
       <cmd1 "reap %1.ins">
-      <cmd2 "spy.ac4.auto()">
+      <cmd2 "spy.ac5.auto()">
     >
   >
 >
@@ -334,7 +334,7 @@
     >
     <cmd
       <cmd1 "reap %1.ins">
-      <cmd2 "spy.ac4.create_report()">
+      <cmd2 "spy.ac5.create_report()">
     >
   >
 >
