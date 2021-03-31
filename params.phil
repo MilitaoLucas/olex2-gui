@@ -854,6 +854,8 @@ olex2
     .type = str
   debug = False
     .type = bool
+  dev_mode = False
+    .type = bool
   force_images = False
     .type = bool
   sNum_id_string = None
