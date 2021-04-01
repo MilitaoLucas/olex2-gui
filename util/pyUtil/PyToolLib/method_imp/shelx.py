@@ -82,9 +82,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from smtbx import masks
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
-      filepath = OV.StrDir()
-      modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+      fab_path = ""
       if OV.HKLSrc():
         fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
       method = "smbtx"
