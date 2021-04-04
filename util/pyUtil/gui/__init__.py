@@ -460,6 +460,9 @@ def file_open(path, base="", mode='r', readlines=False, binary=False):
       print("gui.file_open malfunctioned with getting %s" %path)
 
     if readlines:
+      if retVal is None:
+        print("Failed to fetch %s" %path)
+        return ""
       retVal = retVal.splitlines()
   return retVal
 

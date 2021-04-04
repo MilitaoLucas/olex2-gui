@@ -1719,11 +1719,18 @@ def get_custom_scripts(file_name, globule, scope):
         if "<-" in script:
           script = script.split("<-")[1]
         try:
-          script_obj = globule[script]
+          if '.' in script:
+            toks = script.split('.')
+            script_src = globule[toks[0]]
+            script_obj = getattr(script_src, toks[1])
+          else:
+            script_obj = globule[script]
           custom_scripts_d.setdefault(script,{})
           custom_scripts_d[script].setdefault('obj', script_obj)
         except:
           print("Could not obtain script object for %s" % script_s)
+          if debug:
+            sys.stderr.formatExceptionInfo()
           continue
         try:
           custom_scripts_d[script].setdefault('docstring', script_obj.__doc__)
@@ -1736,7 +1743,7 @@ def get_custom_scripts(file_name, globule, scope):
           custom_scripts_d[script].setdefault('gui', gui_t)
           custom_scripts_d[script]['gui'] = gui_t
         except:
-          print("Could not create gui for scipt %s" %script)
+          print("Could not create gui for script %s" %script)
 
 def set_custom_gui(f, scope):
   global custom_scripts_d
