@@ -855,7 +855,7 @@ if haveGUI:
 
 def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == 'Auto':
-    OV.SetParam('autochem.refinement.method','Auto')
+    OV.SetParam('%s.refinement.method' %scope, 'Auto')
     return
   prg = RPD.programs[prg_name]
   if method is None or not method:
@@ -944,8 +944,6 @@ def get_solution_methods(prg, scope='snum'):
   p.sort()
   for item in p:
     retval += "%s;" %item
-  if scope != 'snum':
-    retval = 'Auto;' + retval
   return retval
 OV.registerFunction(get_solution_methods)
 
@@ -1009,8 +1007,6 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
-  if scope != 'snum':
-    retval = 'Auto;' + retval
   return retval
 OV.registerFunction(get_refinement_methods)
 
