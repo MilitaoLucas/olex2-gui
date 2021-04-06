@@ -956,14 +956,16 @@ def which_program(prg):
     exec_l = prg.execs
   else:
     exec_l = ["%s.exe" %prg, "%s" %prg, "%s" %prg.lower()]
+  prg = None
   for item in exec_l:
-    a = olx.file.Which('%s' %item)
-    if a:
+    a = olx.file.Which(item)
+    if a and os.path.isfile(a):
+      prg = a
       break
   if 'wingx' in a.lower():
     print("%s seems to be part of a WinGX installation. These ShelX executable cannot be used with Olex" %item)
-    return False
-  return a
+    return None
+  return prg
 OV.registerFunction(which_program)
 
 def getmap(mapName):
