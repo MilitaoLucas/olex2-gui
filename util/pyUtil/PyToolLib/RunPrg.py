@@ -15,7 +15,7 @@ from olexex import OlexRefinementModel
 
 from olexFunctions import OlexFunctions, SilentException
 OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug',False))
+debug = OV.IsDebugging()
 timer = debug
 
 green = OV.GetParam('gui.green')
@@ -186,7 +186,7 @@ class RunPrg(ArgumentParser):
   def doFileResInsMagic(self):
     file_lock = OV.createFileLock(os.path.join(self.filePath, self.original_filename))
     try:
-      extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
+      extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb', 'lxt']
       if "xt" in self.program.name.lower():
         extensions.append('hkl')
       if self.broadcast_mode:
@@ -194,7 +194,7 @@ class RunPrg(ArgumentParser):
       for ext in extensions:
         if timer:
           t = time.time()
-        if "xt" in self.program.name.lower() and ext != 'lst':
+        if "xt" in self.program.name.lower() and ext != 'lst' and ext != 'lxt':
           copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
         else:
           copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
@@ -353,7 +353,6 @@ class RunPrg(ArgumentParser):
     if not OV.HasGUI():
       return
     import gui.tools
-    debug = bool(OV.GetParam('olex2.debug',False))
 
     typ = self.prgType.lower()
 

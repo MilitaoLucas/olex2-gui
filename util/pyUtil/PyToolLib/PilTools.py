@@ -18,11 +18,14 @@ import gui
 import olexex
 from ImageTools import ImageTools
 from ImageTools import IT
-from olexFunctions import OlexFunctions
 from ArgumentParser import ArgumentParser
 from ImageTools import IT
 
+from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+#debug = OV.IsDebugging()
+debug = False
+
 import olex_fs
 
 global dpi_scale
@@ -37,10 +40,6 @@ import time
 global isPro
 global timage_blanks
 timage_blanks = {}
-
-#debug = bool(OV.GetParam('olex2.debug',False))
-debug = False
-
 
 global dpi_scaling
 dpi_scaling = OV.GetParam('gui.dpi_scaling')

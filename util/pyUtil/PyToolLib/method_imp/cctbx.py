@@ -52,7 +52,7 @@ class Method_cctbx_refinement(Method_refinement):
     from smtbx.refinement.constraints import InvalidConstraint
     import gui
 
-    timer = debug = bool(OV.GetParam('olex2.debug',False))
+    timer = debug = OV.IsDebugging()
     self.failure = True
     print('\n+++ STARTING olex2.refine +++++ %s' %self.version)
 
