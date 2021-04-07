@@ -4,7 +4,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import os
 
-debug = bool(OV.GetParam("olex2.debug", False))
+debug = OV.IsDebugging()
 
 class MapUtil:
 

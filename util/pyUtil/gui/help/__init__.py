@@ -4,7 +4,7 @@ import re
 import glob
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam("olex2.debug", False))
+debug = OV.IsDebugging()
 have_help = True
 from htmlTools import *
 

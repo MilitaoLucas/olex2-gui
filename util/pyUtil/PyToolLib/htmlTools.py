@@ -1,5 +1,3 @@
-#-*- coding:utf8 -*-
-
 """
 Various generic tools for creating and using HTML.
 """
@@ -20,7 +18,7 @@ from datetime import date
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam("olex2.debug", False))
+debug = OV.IsDebugging()
 
 last_mode = None
 last_mode_options = None
@@ -943,7 +941,6 @@ OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Botto
 
 def OnModeChange(*args):
   global last_mode, last_mode_options
-  debug = OV.GetParam("olex2.debug")
   d = {
     'move sel':'three-Move_Near',
     'move sel -c=':'three-Copy_Near',

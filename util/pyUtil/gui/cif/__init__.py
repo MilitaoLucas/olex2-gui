@@ -1,5 +1,3 @@
-# py 2to3 compatibility
-
 import olex
 import olx
 import os
@@ -7,7 +5,7 @@ import time
 import gui
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug',False))
+debug = OV.IsDebugging()
 
 def threadPrint(str):
   olx.Schedule(1, "post \"%s\"" %str)

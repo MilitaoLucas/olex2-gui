@@ -15,8 +15,7 @@ import userDictionaries
 import variableFunctions
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug', False))
-timer = debug
+imer = debug = OV.IsDebugging()
 
 import ExternalPrgParameters
 

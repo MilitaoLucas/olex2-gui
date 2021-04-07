@@ -17,7 +17,7 @@ sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
 import math
 
-#debug = bool(OV.GetParam('olex2.debug',False))
+#debug = OV.IsDebugging()
 debug = False
 
 

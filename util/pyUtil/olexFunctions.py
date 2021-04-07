@@ -817,6 +817,9 @@ class OlexFunctions(inheritFunctions):
   def HasGUI(self):
     return HasGUI
 
+  def IsDebugging(self):
+    return self.GetParam("olex2.debug", False)
+
   def ListParts(self):
     import olexex
     parts = set(olexex.OlexRefinementModel().disorder_parts())
@@ -1205,3 +1208,5 @@ OV.registerFunction(OV.runCommands)
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
 OV.registerFunction(OV.GetBaseTag)
+OV.registerFunction(OV.set_refinement_program)
+OV.registerFunction(OV.set_solution_program)

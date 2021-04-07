@@ -867,7 +867,6 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   OV.SetParam('user.refinement.default_program', prg_name)
   OV.SetParam("%s.refinement.method" %scope, method)
   onRefinementMethodChange(prg_name, method)
-OV.registerFunction(OV.set_refinement_program)
 
 def onRefinementMethodChange(prg_name, method):
   if method in RPD.programs[prg_name].methods:
@@ -880,7 +879,6 @@ OV.registerFunction(onRefinementMethodChange)
 def onSolutionProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == "Auto":
     OV.SetParam('%s.solution.method' %scope, 'Auto')
-    #olx.html.SetValue('SET_autochem_solution_METHOD', 'Auto')
     return
 
   if prg_name != 'Unknown':
@@ -893,7 +891,6 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     OV.SetParam("%s.solution.method" %scope, method)
     OV.SetParam('user.solution.default_program', prg_name)
     onSolutionMethodChange(prg_name, method)
-OV.registerFunction(OV.set_solution_program)
 
 def onSolutionMethodChange(prg_name, method):
   if method in SPD.programs[prg_name].methods:
