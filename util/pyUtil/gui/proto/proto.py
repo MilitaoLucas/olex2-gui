@@ -146,11 +146,14 @@ def find_in_proto(volume=None, tol=None, group=None, sg=None):
       if "I" in formula:
         group = "ZnI"
       elif "Br" in formula:
-          group = "ZnBr"
+        group = "ZnBr"
       elif "Cl" in formula:
-          group = "ZnCl"
+        group = "ZnCl"
+      else:
+        group = ""
     elif group == "any":
       group = ""
+
   if not sg:
     sg = OV.GetParam('proto.sg')
     if not sg:
