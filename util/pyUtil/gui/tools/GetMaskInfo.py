@@ -17,7 +17,7 @@ import olex
 import iotbx.cif.model
 import CifInfo
 
-debug = bool(OV.GetParam("olex2.debug", False))
+debug = OV.IsDebugging()
 
 global mask_info_has_updated
 mask_info_has_updated = False

@@ -18,7 +18,7 @@ green = OV.GetParam('gui.green')
 orange = OV.GetParam('gui.orange')
 red = OV.GetParam('gui.red')
 at = None
-debug = (olx.app.IsDebugBuild() == 'true') or bool(OV.GetParam("olex2.debug", False))
+debug = (olx.app.IsDebugBuild() == 'true' or OV.IsDebugging())
 
 class Module:
   def __init__(self, name, folder_name, description, url, release_date, action):

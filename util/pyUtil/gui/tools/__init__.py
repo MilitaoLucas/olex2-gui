@@ -7,7 +7,7 @@ import OlexVFS
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-debug = bool(OV.GetParam('olex2.debug',False))
+debug = OV.IsDebugging()
 timer = debug
 import glob
 global have_found_python_error
