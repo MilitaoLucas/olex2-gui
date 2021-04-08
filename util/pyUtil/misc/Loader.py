@@ -6,8 +6,7 @@ import shutil
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 available_modules = None #list of Module
 avaialbaleModulesRetrieved = False
@@ -86,8 +85,6 @@ def getAuthenticationToken(force=False):
 
 def getModule(name, email=None):
   import HttpTools
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   url_base = OV.GetParam('user.modules.provider_url')
   m_dir = getModulesDir()
   if not os.path.exists(m_dir):
@@ -282,8 +279,6 @@ def loadAll():
 
 def updateKey(module):
   import HttpTools
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   if isinstance(module, str):
     found = False
     if available_modules:
@@ -480,8 +475,6 @@ def getAvailableModules_():
   current_module = None
   available_modules = []
   import HttpTools
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   if not OV.canNetwork(show_msg=False):
     return
   url_base = OV.GetParam('user.modules.provider_url')
@@ -615,8 +608,6 @@ def getInfo():
     except:
       pass
     return _
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   preambula = ""
   if current_module.action == 3:
     t = "<a href='shell(mailto:enquiries@olexsys.org?"+\
@@ -641,8 +632,6 @@ def get_module_idx(name):
 def update(idx):
   global current_module
   global available_modules
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   try:
     idx = int(idx)
   except:
@@ -723,8 +712,6 @@ def getCurrentModuleName():
 def AskToUpdate():
   import HttpTools
   global avaialbaleModulesRetrieved
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   if not OV.canNetwork(show_msg=False):
     return
   if not avaialbaleModulesRetrieved:

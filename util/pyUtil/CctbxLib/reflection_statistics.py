@@ -1,12 +1,7 @@
 from __future__ import division
-
 from cctbx_olex_adapter import OlexCctbxAdapter
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import olx
-
 
 from cctbx import statistics
 from cctbx.array_family import flex

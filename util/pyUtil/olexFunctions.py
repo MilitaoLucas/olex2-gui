@@ -37,6 +37,7 @@ class OlexFunctions(inheritFunctions):
     if HasGUI:
       import olex_gui
       self.olex_gui = olex_gui
+    self.paramStack = ParamStack()
 
   def GetValue(self, control_name):
     retVal = olx.html.GetValue(control_name)
@@ -909,13 +910,6 @@ class OlexFunctions(inheritFunctions):
   def GetBaseTag(self):
     return self.GetTag().split('-')[0]
 
-  def GetKeyname(self):
-    import glob
-    g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
-    for item in g:
-      keyname = item.split("\\")[-1:][0]
-      return keyname.split(".")[0]
-
   def ListFiles(self, dir_name, mask=None):
     import glob
     rv = []
@@ -999,7 +993,6 @@ class OlexFunctions(inheritFunctions):
     OV.SetVar('HtmlFontSizeControls', size)
     return size
 
-
   def GetHtmlPanelX(self):
     screen_width = int(olx.GetWindowSize().split(',')[2])
     html_panelwidth = int(olx.html.ClientWidth('self'))
@@ -1064,7 +1057,6 @@ class OlexFunctions(inheritFunctions):
             'smtbx-refine' : 'olex2.refine'
             }
     return prgs.get(name, name)
-
 
   def runCommands(self,cmds):
     """
@@ -1156,10 +1148,6 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
-
-
-
-
 def GetFormattedCompilationInfo():
   t = "<font size='2'><table width='100%%' cellpadding='0' cellspacing='0'>"
   d = {}
@@ -1186,6 +1174,33 @@ def GetFormattedCompilationInfo():
     t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   t += "</table></font>"
   return t
+
+# helper class to preserve user settings
+class ParamStack():
+  programs = []
+  def __init__(self):
+      pass
+
+  def push_program(self, name, program_name=None, method_name=None, scope="snum"):
+    if len(self.programs) > 10:
+      raise("Please check that you have popped all the settings, you pushed in, out!")
+    prg_param = "%s.%s.program" %(scope, name)
+    mtd_param = "%s.%s.method" %(scope, name)
+    self.programs.append(
+      (prg_param, OV.GetParam(prg_param),
+       mtd_param, OV.GetParam(mtd_param)))
+    if program_name:
+      OV.SetParam(prg_param, program_name)
+    if method_name:
+      OV.SetParam(mtd_param, method_name)
+
+  def pop_program(self, number=1):
+    if len(self.programs) < number:
+      raise("Push setting in before popping out")
+    for i in range(0, number):
+      v = self.programs.pop()
+      OV.SetParam(v[0], v[1])
+      OV.SetParam(v[2], v[3])
 
 
 OV = OlexFunctions()

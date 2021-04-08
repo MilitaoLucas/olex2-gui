@@ -1,7 +1,6 @@
 from Method import Method_refinement, Method_solution
 import phil_interface
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import olx
 import olex
 import os

@@ -5,10 +5,7 @@ import OlexVFS
 import gui
 import inspect
 
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import userDictionaries
 
 current_py_file_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

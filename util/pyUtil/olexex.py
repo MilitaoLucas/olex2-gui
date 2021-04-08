@@ -24,8 +24,7 @@ import History
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import variableFunctions
 
 import MakeMovie

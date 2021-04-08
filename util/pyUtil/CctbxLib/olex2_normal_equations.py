@@ -5,8 +5,7 @@ from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
 from cctbx import adptbx
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 import olx
 import olex

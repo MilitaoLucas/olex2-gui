@@ -8,9 +8,7 @@ import gui
 import shutil
 import time
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 debug = OV.IsDebugging()
 
 if OV.HasGUI():
