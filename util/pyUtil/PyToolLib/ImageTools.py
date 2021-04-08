@@ -8,8 +8,7 @@ from io import StringIO
 import OlexVFS
 import RoundedCorners
 import colorsys
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from FontInstances import FontInstances
 import os
 global sizedraw
@@ -19,7 +18,6 @@ import math
 
 #debug = OV.IsDebugging()
 debug = False
-
 
 global dpi_scale
 global dpi_scaling

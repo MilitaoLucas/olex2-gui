@@ -2,8 +2,7 @@
 from ArgumentParser import ArgumentParser
 import os
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 class MakeMovie():
   def __init__(self):

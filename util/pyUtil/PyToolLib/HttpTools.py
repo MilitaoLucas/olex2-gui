@@ -1,16 +1,12 @@
-#from __future__ import division
-# -*- coding: latin-1 -*-
+import urllib.request, urllib.error, urllib.parse
+import os
+import olx
+from olexFunctions import OV
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
 settings_read = False
 auto_update = True
 use_proxy_settings = True
 proxy = None
-
-import urllib.request, urllib.error, urllib.parse
-import os
-import olx
 
 def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
   if proxy:

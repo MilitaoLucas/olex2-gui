@@ -3,8 +3,7 @@ import olx
 import os
 import time
 import gui
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 debug = OV.IsDebugging()
 
 def threadPrint(str):

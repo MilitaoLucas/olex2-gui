@@ -5,10 +5,7 @@ import olex
 #import subprocess
 import shutil
 import time
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 
 class Job(object):
   def __init__(self, parent, name):

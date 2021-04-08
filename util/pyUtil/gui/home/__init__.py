@@ -2,9 +2,7 @@ import olex
 import olx
 import OlexVFS
 import os
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 global CURR_CIF_FILE_NAME
 CURR_CIF_FILE_NAME = None

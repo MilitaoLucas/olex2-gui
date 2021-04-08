@@ -1,11 +1,9 @@
 import olex
 import olx
 import os
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import gui.tools
+
 gett = gui.tools.TemplateProvider.get_template
 
 def sources():

@@ -1,4 +1,3 @@
-
 #import PngImagePlugin
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
@@ -20,9 +19,7 @@ from ImageTools import ImageTools
 from ImageTools import IT
 from ArgumentParser import ArgumentParser
 from ImageTools import IT
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 #debug = OV.IsDebugging()
 debug = False
 

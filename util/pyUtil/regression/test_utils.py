@@ -31,8 +31,7 @@ path_utils.setup_cctbx()
 import olx
 olx.phil_handler = setup_phil_handler()
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import variableFunctions
 
 class TestCaseBase(unittest.TestCase):

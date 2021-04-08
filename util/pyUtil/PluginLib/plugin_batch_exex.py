@@ -4,9 +4,7 @@ import olex
 import glob
 from olexex import SpyVar
 import OlexVFS
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 def BatchMatch(dirStr, t='cif'):
   OV.SetVar("batch_dir" ,"%s" %dirStr)

@@ -1,7 +1,6 @@
 # spy_CProfile.py
 import sys
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import cProfile
 
 class Spy(object):

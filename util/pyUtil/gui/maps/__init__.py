@@ -1,7 +1,6 @@
 import olex
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import os
 
 debug = OV.IsDebugging()
