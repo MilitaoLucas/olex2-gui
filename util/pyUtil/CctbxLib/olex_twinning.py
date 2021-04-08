@@ -43,8 +43,7 @@ from cctbx import maptbx, miller, uctbx, crystal
 import iotbx
 from libtbx import easy_pickle, utils
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from scitbx.math import distributions
 
 from History import hist
@@ -1608,8 +1607,6 @@ def format_twin_string_from_law(twin_law):
 
 def get_twinning_result_filename():
   import ntpath
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   import os
 
   _ = ntpath.basename(OV.HKLSrc())

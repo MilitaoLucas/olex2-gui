@@ -12,12 +12,7 @@ import gui
 import time
 from datetime import date
 
-
-#import sys
-#sys.path.append(r".\src")
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 debug = OV.IsDebugging()
 
 last_mode = None

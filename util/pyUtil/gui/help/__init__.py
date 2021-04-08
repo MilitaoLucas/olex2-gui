@@ -2,8 +2,7 @@ import os
 import fnmatch
 import re
 import glob
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 debug = OV.IsDebugging()
 have_help = True
 from htmlTools import *

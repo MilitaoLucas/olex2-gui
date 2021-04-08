@@ -13,8 +13,7 @@ import gui
 from ArgumentParser import ArgumentParser
 import userDictionaries
 import variableFunctions
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 imer = debug = OV.IsDebugging()
 
 import ExternalPrgParameters

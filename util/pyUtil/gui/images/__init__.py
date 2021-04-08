@@ -1,9 +1,6 @@
-
 import olex
 import olx
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 import inspect, os
 curr_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

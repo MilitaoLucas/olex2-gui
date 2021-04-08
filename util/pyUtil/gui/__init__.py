@@ -3,8 +3,7 @@ import olx
 import os
 import glob
 import sys
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from ImageTools import IT
 import htmlTools
 

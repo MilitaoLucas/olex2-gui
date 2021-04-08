@@ -4,8 +4,7 @@ import olexex
 import os
 import sys
 import OlexVFS
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 debug = OV.IsDebugging()
 timer = debug

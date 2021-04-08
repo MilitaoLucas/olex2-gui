@@ -5,9 +5,7 @@ import sys
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
@@ -23,8 +21,6 @@ class NewsImageRetrivalThread(ThreadEx):
     olex.registerFunction(self.get_structure_from_url, False, 'internal')
 
   def run(self):
-    from olexFunctions import OlexFunctions
-    OV = OlexFunctions()
     import copy
     import random
     import olex_fs
@@ -69,8 +65,6 @@ class NewsImageRetrivalThread(ThreadEx):
       NewsImageRetrivalThread.instance = None
 
   def get_image_from_list(self):
-    from olexFunctions import OlexFunctions
-    OV = OlexFunctions()
     img_url = None
     img_list = NewsImageRetrivalThread.active_image_list.get(self.name,None)
     if not img_list:
@@ -223,7 +217,7 @@ class CheckCifRetrivalThread(ThreadEx):
 
 def get_news_image_from_server(name=""):
   from olexFunctions import OlexFunctions
-  if not OlexFunctions().canNetwork(show_msg=False):
+  if not OV.canNetwork(show_msg=False):
     return
   if NewsImageRetrivalThread.instance is None:
     NewsImageRetrivalThread(name).start()
@@ -234,8 +228,6 @@ def resizeNewsImage():
   TI.resize_news_image(vfs=True)
   img_url = olx.GetVar('olex2.news_img_link_url', '')
   if img_url:
-    from olexFunctions import OlexFunctions
-    OV = OlexFunctions()
     OV.SetParam('olex2.news_img_link_url', img_url)
     olx.UnsetVar('olex2.news_img_link_url')
 olex.registerFunction(resizeNewsImage, False, 'internal')
@@ -243,7 +235,7 @@ olex.registerFunction(resizeNewsImage, False, 'internal')
 
 def GetCheckcifReport(send_fcf=False):
   from olexFunctions import OlexFunctions
-  if not OlexFunctions().canNetwork():
+  if not OV.canNetwork():
     return
   if CheckCifRetrivalThread.instance is None:
     CheckCifRetrivalThread(send_fcf in [True, 'true']).start()

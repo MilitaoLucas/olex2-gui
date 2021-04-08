@@ -1,8 +1,7 @@
 import os
 from Method import Method_solution
 import phil_interface
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import olx
 
 class Method_SIR(Method_solution):

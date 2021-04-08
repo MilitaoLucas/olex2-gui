@@ -13,8 +13,7 @@ from History import hist
 
 from olexex import OlexRefinementModel
 
-from olexFunctions import OlexFunctions, SilentException
-OV = OlexFunctions()
+from olexFunctions import OV, SilentException
 debug = OV.IsDebugging()
 timer = debug
 

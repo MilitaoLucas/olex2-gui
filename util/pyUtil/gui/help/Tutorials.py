@@ -6,11 +6,8 @@ import olexex
 import gui
 import time
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 from ImageTools import IT
-
 import OlexVFS
 
 class AutoDemo(object):

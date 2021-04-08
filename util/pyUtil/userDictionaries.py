@@ -5,9 +5,8 @@ import pickle
 import olex
 import olx
 
-from olexFunctions import OlexFunctions
 import copy
-OV = OlexFunctions()
+from olexFunctions import OV
 
 people = None
 persons = None

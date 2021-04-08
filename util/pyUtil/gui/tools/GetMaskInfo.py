@@ -1,8 +1,7 @@
 import os
 import re
 from fractions import Fraction
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import OlexVFS
 
 try:

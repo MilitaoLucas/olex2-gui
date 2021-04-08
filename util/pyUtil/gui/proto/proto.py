@@ -4,8 +4,7 @@ import os
 import gui
 import olex
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 p_path = os.path.dirname(os.path.abspath(__file__))
 import sqlite3
 

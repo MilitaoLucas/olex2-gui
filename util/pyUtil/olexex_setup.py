@@ -1,9 +1,5 @@
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import htmlTools
-
-
 import olex
 import olx
 import htmlTools

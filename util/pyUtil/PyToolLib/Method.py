@@ -1,8 +1,6 @@
 import phil_interface
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 
 definedControls = []
 

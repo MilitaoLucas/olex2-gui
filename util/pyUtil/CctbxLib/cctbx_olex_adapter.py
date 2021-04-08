@@ -25,8 +25,7 @@ import cctbx_controller as cctbx_controller
 from cctbx import maptbx, miller, uctbx
 from libtbx import easy_pickle, utils
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from scitbx.math import distributions
 
 from History import hist

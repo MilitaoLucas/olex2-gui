@@ -31,8 +31,7 @@ import time
 
 from ImageTools import IT
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 #debug = OV.IsDebugging()
 debug = False
 

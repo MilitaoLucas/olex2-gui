@@ -1,12 +1,8 @@
-# ExternalPrgParameters.py
-# -*- coding: latin-1 -*-
-
 import os, sys
 import olx
 import olex
 import olex_core
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import phil_interface
 import libtbx.utils
 
