@@ -22,8 +22,10 @@ if sys.platform[:3] == 'win':
     nr = 2
 if "orca" in args[0]:
   out_fn = fchk_file + "_orca.log"
+elif "g" in args[0]:
+  out_fn = fchk_file + ".out"
 elif "elmo" in args[nr]:
-  if sys.platform[:3] == 'win':
+  if sys.platform[:3] != 'win':
     inp = open(args[2],'r')
   out_fn = fchk_file + '.out'
 elif "python" in args[2]:
@@ -47,10 +49,11 @@ else:
 
 if "ubuntu" in args[0]:
   print("Starting Ubuntu and running pySCF, please be patient for start")
-if "ubuntu" in args[0]:
-  out_fn = fchk_file + "_pyscf.log"
-elif out_fn == None:
-  out_fn = fchk_file + ".log"
+if out_fn == None:
+  if "ubuntu" in args[0]:
+    out_fn = fchk_file + "_pyscf.log"
+  elif out_fn == None:
+    out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)
