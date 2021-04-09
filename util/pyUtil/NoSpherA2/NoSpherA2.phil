@@ -27,10 +27,16 @@ snum{
     Disorder_Groups = ""
       .type = str
     ELMOdb{
+      cycl = False
+        .type = bool
+      cyclinp = " 1 9"
+        .type = str
       maxtail = 10
         .type = int
       mutation = False
         .type = bool
+      ncycl = 1
+        .type = str
       nspect = 1
         .type = str
       ntail = 1
@@ -47,7 +53,7 @@ snum{
         .type = str
       str_nfrag = 1
         .type = str
-      str_resname = "ALE; GLY; URI; FLO"
+      str_resname = "ALE"
         .type = str
       str_specac = False
         .type = str
@@ -126,6 +132,8 @@ snum{
       .type = str
     tsc_mode = "First"
       .type = str
+    wfn2fchk_ED = False
+      .type = bool
     wfn2fchk_SF = True
       .type = bool
     wfn2fchk_debug = False

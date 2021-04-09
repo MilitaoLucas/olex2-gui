@@ -879,7 +879,7 @@ class RunRefinementPrg(RunPrg):
                   energy = None
               else:
                 try:
-                  energy = float(line.split()[4])
+                  energy = float(line[17:38])
                 except:
                   energy = None
     if energy == None:

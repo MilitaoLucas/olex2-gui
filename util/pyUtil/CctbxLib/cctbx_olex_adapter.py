@@ -1079,6 +1079,17 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   elif "henke" == table_name:
     from cctbx.eltbx import henke
     tables = henke
+  elif "brennan" == table_name:
+    from brennan import brennan
+    for e in elements:
+      e = str(e)
+      try:
+        brenn = brennan()
+        f = brenn.at_angstrom(wavelength,e)
+        rv.append(e + ',' + ','.join([str(f[0]), str(f[1])]))
+      except ValueError:
+        rv.append(e + ',0.0, 0.0')
+    return ';'.join(rv)
   else:
     print("Invalid table name %s, resetting to Sasaki" %table_name_)
     from cctbx.eltbx import sasaki
@@ -1122,3 +1133,45 @@ def generate_ED_SFAC(table_file_name=None, force = False):
     olx.AddIns(*st)
 
 OV.registerFunction(generate_ED_SFAC, False, "sfac")
+
+def generate_DISP_all(table_name_, wavelength=None):
+  elements = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca"
+              ,"Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr"
+                ,"Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe"
+                ,"Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn"
+                ,"Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
+
+  table_name = table_name_.lower()
+  if not wavelength:
+    wavelength = olx.xf.exptl.Radiation()
+  wavelength = float(wavelength)
+  if "sasaki" == table_name:
+    from cctbx.eltbx import sasaki
+    tables = sasaki
+  elif "henke" == table_name:
+    from cctbx.eltbx import henke
+    tables = henke
+  elif "brennan" == table_name:
+    from brennan import brennan
+    for e in elements:
+      e = str(e)
+      try:
+        brenn = brennan()
+        f = brenn.at_angstrom(wavelength,e)
+        file.write(e + ' ' + str(f[0]) + ' ' + str(f[1]))
+      except ValueError:
+        file.write(e + ' 0.0 0.0\n')
+    return
+  else:
+    raise Exception("Invalid table name")
+  with open("disp.lst",'w') as file:
+    for e in elements:
+      e = str(e)
+      try:
+        table = tables.table(e)
+        f = table.at_angstrom(wavelength)
+        file.write(e + ' ' + str(f.fp()) + ' ' + str(f.fdp()) + '\n')
+      except ValueError:
+        file.write(e + ' 0.0 0.0\n')
+
+OV.registerFunction(generate_DISP_all, False, "sfac")
