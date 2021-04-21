@@ -14,11 +14,11 @@ class Worker(OlexCctbxAdapter):
     filepath = OV.StrDir()
     modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
 
-    f_mask = cctbx_olex_adapter.OlexCctbxAdapter().load_mask()
+    cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
+    f_mask = cctbx_adapter.load_mask()
     if not f_mask:
       print("Could not locate mask information")
       return
-    cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
     fo2, f_calc = cctbx_adapter.get_fo_sq_fc()
     if f_mask.size() < fo2.size():
       f_mask = f_mask.generate_bijvoet_mates().customized_copy(
