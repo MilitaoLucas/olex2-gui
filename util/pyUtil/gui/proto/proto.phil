@@ -1,7 +1,7 @@
 proto{
-  db_location = OV.DataDir()
+  db_location = DataDir()
     .type = str
-  db_name = proto.sqlite
+  db_name = sponge.sqlite
     .type = str
   tolerance = 10
     .type = int

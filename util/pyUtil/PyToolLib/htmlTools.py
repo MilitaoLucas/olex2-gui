@@ -814,7 +814,7 @@ def path_from_phil(p):
     base = p.split('()')
     _ = getattr(OV, base[0])
     path = _()
-    p = "%s/%s" %(path, base[1])
+    p = os.path.join(path, base[1])
   return p
 
 def getStylesList():
