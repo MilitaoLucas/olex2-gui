@@ -25,12 +25,19 @@ def _deal_with_phil(operation='read'):
 
 def db_connect():
   db_location = OV.GetParam('proto.db_location', None)
+  if "()" in db_location:
+    base = db_location.split('()')
+    _ = getattr(OV, base[0])
+    path = _()
+    db_location = os.path.join(path, base[1])
+
   db_name = OV.GetParam('proto.db_name', None)
   db_path = os.path.join(db_location, db_name)
   if not os.path.exists(db_path):
     print("There is no proto db")
     return
-  con=sqlite3.connect(db_path)
+  con = sqlite3.connect(db_path)
+  print("Connected to %s." % db_path)
   return con
 
 def drop_proto():
@@ -206,7 +213,7 @@ def add_to_proto(p_class):
   with open(_, 'r') as t:
     t = t.read()
   cell = olx.xf.au.GetCell()
-  cell_l = OV.GetCell_l()
+  cell_l = cell.split(",")
   formula = olx.xf.au.GetFormula()
   space_group = olx.xf.au.GetCellSymm()
   cell_a = float(cell_l[0])
