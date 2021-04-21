@@ -7,29 +7,27 @@ from cctbx.array_family import flex
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks
 from smtbx import masks
 import cctbx_olex_adapter
+from cctbx_olex_adapter import OlexCctbxAdapter
 
 class Worker(OlexCctbxAdapter):
   def run(self):
     filepath = OV.StrDir()
-    if not os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
+    modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+
+    f_mask = cctbx_olex_adapter.OlexCctbxAdapter().load_mask()
+    if not f_mask:
       print("Could not locate mask information")
       return
-    modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
-    f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
-    f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
     cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
-    fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
+    fo2, f_calc = cctbx_adapter.get_fo_sq_fc()
     if f_mask.size() < fo2.size():
-      f_model = f_model.generate_bijvoet_mates().customized_copy(
-        anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
       f_mask = f_mask.generate_bijvoet_mates().customized_copy(
         anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
     elif f_mask.size() > fo2.size():
       f_mask = f_mask.common_set(fo2)
-      f_model = f_model.common_set(fo2)
       if f_mask.size() != fo2.size():
         raise RuntimeError("f_mask array doesn't match hkl file")
-    modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
+    modified_intensities = masks.modified_intensities(fo2, f_calc, f_mask)
     if modified_intensities is not None:
       with open(modified_hkl_path, 'w') as file_out:
         modified_intensities.export_as_shelx_hklf(file_out,
