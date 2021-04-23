@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import olx
 import olex_hkl
 import OlexVFS
@@ -1590,12 +1591,17 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       twin_law.rbasf=basf
       return twin_law
 
-
 def format_twin_string_from_law(twin_law):
   twin_str_l = []
   twin_str = "Could not get twin string"
   try:
     twin_law = twin_law.tolist()
+    if len(twin_law) == 3:
+      l = []
+      for row in twin_law:
+        for item in row:
+          l.append(item)
+    twin_law = l
   except:
     pass
   for ele in twin_law:
@@ -1641,8 +1647,10 @@ def on_twin_image_click(run_number):
   try:
     twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
     twin_law_rnd = numpy.rint(twin_law)
-    twin_law_disp = format_twin_string_from_law(twin_law_rnd)
+    twin_law_disp_rnd = format_twin_string_from_law(twin_law_rnd)
+    twin_law_disp = format_twin_string_from_law(twin_law)
     basf = float(twin_laws_d[int(run_number)]['BASF'])
+    hklf5name = twin_laws_d[int(run_number)].get('hklf5name', None)
   except:
     twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
 
@@ -1654,9 +1662,11 @@ def on_twin_image_click(run_number):
     OV.DelIns("TWIN")
     olx.HKLF(2)
     OV.DelIns("BASF")
-    OV.AddIns("BASF %f"%basf)
-    hklname="%s_twin%02d.hkl"%(OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl"), int(run_number))
-    OV.HKLSrc(hklname)
+    OV.AddIns("BASF %f" % basf)
+    if not hklf5name:
+      hklf5name = "%s_twin%02d.hkl" % (OV.HKLSrc().rsplit('\\', 1)[-1].rstrip(".hkl"), int(run_number))
+    _ = os.path.join(OV.FilePath(), hklf5name)
+    OV.HKLSrc(_)
   else:
     print("Using twin law: %s" %twin_law_disp)
     print("This is an integral twin law, and twinning will be handled by the refinement program.")
@@ -1664,7 +1674,7 @@ def on_twin_image_click(run_number):
     olx.HKLF(0)
     OV.DelIns("BASF")
     OV.AddIns("BASF %f"%basf)
-    OV.AddIns("TWIN %s"%twin_law_disp)
+    OV.AddIns("TWIN %s" % twin_law_disp_rnd)
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 
@@ -1775,6 +1785,7 @@ def find_2_fold_olex2():
   d[1]['r_diff'] = r_diff
   d[1]['name'] = "law%s" % 1
   d[1]['HKLSrc'] = OV.HKLSrc()
+  d[1]['hklf5name'] = "%s.olex2_hklf5.hkl" % OV.FileName()
 
   make_twinning_gui(d)
 OV.registerFunction(find_2_fold_olex2)
@@ -1871,7 +1882,7 @@ def make_twinning_gui(laws):
     img_src = "%s.png" %image_name
     name = twin_laws_d[run].get('name', "XX")
     #href = 'spy.on_twin_image_click(%s)'
-    href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
+    href = 'spy.on_twin_image_click(%s)>>html.Update' % (i,)
     law_txt = "<a href='%s'><img src=%s></a>&nbsp;" %(href, use_image)
 
     d = {'name':image_name,
