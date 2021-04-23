@@ -158,7 +158,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       r=twin_law.rbasf[1]
       r_diff=twin_law.rbasf[2]
       lawcount += 1
-      filename="%s_twin%02d.hkl"%(self.hklfile, lawcount)
+      name = " %s_twin%02d" % (self.hklfile, lawcount)
+      filename = "%s.hkl" % (name)
       #self.make_hklf5(filename, twin_law, hkl, f_obs,f_uncertainty)
 
       self.make_hklf5_from_file(twin_law,new_file=filename) #ZZZZ
@@ -176,6 +177,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       self.twin_laws_d[lawcount]['r'] = r
       self.twin_laws_d[lawcount]['r_diff'] = r_diff
       self.twin_laws_d[lawcount]['matrix'] = twin_law.hkl_rotation.flatten()
+      self.twin_laws_d[lawcount]['name'] = name
+      self.twin_laws_d[lawcount]['HKLSrc'] = OV.HKLSrc()
     make_twinning_gui(self.twin_laws_d)
 
 
@@ -384,12 +387,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       twin_laws+=self.get_integral_twin_laws()
 
 
-
       if twin_laws:
         twin_laws=self.purge_duplicates(twin_laws)
         print ("Found Integral Twins")
-
-
 
       if len(twin_laws)<number_laws:
         twin_laws+=self.find_twofold_axes_sphere(hkl, 0.01)
@@ -1593,17 +1593,23 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
 def format_twin_string_from_law(twin_law):
   twin_str_l = []
-  for row in twin_law:
-    for ele in row:
-      ele = str(ele)
-      if ele == "0.0":
-        ele = "0"
-      elif ele == "-1.0":
-        ele = "-1"
-      elif ele == "1.0":
-        ele = "1"
-      twin_str_l.append("%s" %ele)
-  return " ".join(twin_str_l)
+  twin_str = "Could not get twin string"
+  try:
+    twin_law = twin_law.tolist()
+  except:
+    pass
+  for ele in twin_law:
+    if str(ele) == "0.0":
+      ele = "0"
+    elif str(ele) == "-1.0":
+      ele = "-1"
+    elif str(ele) == "1.0":
+      ele = "1"
+    else:
+      ele = round(ele, 4)
+    twin_str_l.append("%s" % ele)
+  twin_str = " ".join(twin_str_l)
+  return twin_str
 
 def get_twinning_result_filename():
   import ntpath
@@ -1619,27 +1625,31 @@ OV.registerFunction(get_twinning_result_filename)
 
 def on_twin_image_click(run_number):
   global twin_laws_d
-  if not twin_laws_d:
-    import pickle as pickle
-    p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
-    with open (p, "rb") as infile:
-      twin_laws_d = pickle.load(infile)
-    for number in twin_laws_d:
-      law = twin_laws_d[number]
-      im = law.get('law_image')
-      OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
+
+  init_twin_gui()
+  #if not twin_laws_d:
+    #import pickle as pickle
+    #p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+    #with open(p, "rb") as infile:
+      #twin_laws_d = pickle.load(infile)
+    #make_law_images(twin_law_d, len(twin_laws_d))
+    #for number in twin_laws_d:
+      #law = twin_laws_d[number]
+      #im = law.get('law_image')
+      #OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
+
   try:
     twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
-    twin_law_disp = format_twin_string_from_law(twin_law)
     twin_law_rnd = numpy.rint(twin_law)
-    basf=float(twin_laws_d[int(run_number)]['BASF'])
+    twin_law_disp = format_twin_string_from_law(twin_law_rnd)
+    basf = float(twin_laws_d[int(run_number)]['BASF'])
   except:
     twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
 
 
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
     print("Using twin law: %s" %twin_law_disp)
-    print("This is a non-integral twin law, and a corresponding hklf 5 fomrat file has been made.")
+    print("This is a non-integral twin law, and a corresponding hklf 5 format file has been made.")
     # non integral twin law, need hklf5
     OV.DelIns("TWIN")
     olx.HKLF(2)
@@ -1685,7 +1695,7 @@ def reset_twin_law_img():
     curr_law = (1, 0, 0, 0, 1, 0, 0, 0, 1)
   for law in twin_laws_d:
     name = twin_laws_d[law]['name']
-    matrix = twin_laws_d[law]['law']
+    matrix = twin_laws_d[law]['matrix']
     if curr_law == matrix:
       OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
     else:
@@ -1745,11 +1755,9 @@ def find_2_fold_olex2():
   cmd = "TestR"
   res = [_f for _f in gui.tools.scrub(cmd) if _f]
 
-  if "batch" not in " ".join(res).lower():
+  if "matrix" not in " ".join(res).lower():
     return
-
   matrix = res[-3:]
-
   i = 0
   for line in res:
     if line.startswith('wR2'):
@@ -1765,13 +1773,16 @@ def find_2_fold_olex2():
   d[1]['BASF'] = basf
   d[1]['r'] = r
   d[1]['r_diff'] = r_diff
+  d[1]['name'] = "law%s" % 1
+  d[1]['HKLSrc'] = OV.HKLSrc()
+
   make_twinning_gui(d)
 OV.registerFunction(find_2_fold_olex2)
 
 def make_law_images(twin_law, lawcount):
   global twin_laws_d
   from ImageTools import IT
-  IT = ImageTools()
+#  IT = ImageTools()
   from PilTools import MatrixMaker
   MM = MatrixMaker()
 
@@ -1804,7 +1815,29 @@ def make_law_images(twin_law, lawcount):
     image_name, img  = MM.make_3x3_matrix_image(name, rounded_matrix, txt, state, bar_col=font_col_basf, bgcolor=bg_col_img)
     twin_laws_d[lawcount].setdefault('law_image_name', image_name)
 
+def init_twin_gui():
+  global twin_laws_d
+  if twin_laws_d:
+    if not twin_laws_d[1]['HKLSrc'] == OV.HKLSrc():
+      twin_laws_d = {}
 
+  if not twin_laws_d:
+    import pickle as pickle
+    p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+    if os.path.exists(p):
+      with open(p, "rb") as infile:
+        twin_laws_d = pickle.load(infile)
+    else:
+      twin_laws_d = {}
+
+  if twin_laws_d:
+    for idx in twin_laws_d:
+      make_law_images(twin_laws_d[idx], len(twin_laws_d))
+    #for number in twin_laws_d:
+      #law = twin_laws_d[number]
+      #im = law.get('law_image')
+      #OlexVFS.save_image_to_olex(im, "IMG_LAW%s" % number)
+OV.registerFunction(init_twin_gui, False, 'twin')
 
 def make_twinning_gui(laws):
   font_col = "#444444"
@@ -1813,6 +1846,9 @@ def make_twinning_gui(laws):
 
   global twin_laws_d
   twin_laws_d = laws
+  p = os.path.join(OV.StrDir(), 'twin_laws_d.pickle')
+  import pickle as pickle
+  pickle.dump(twin_laws_d, open(p, "wb"))
 
   r_list = []
   for count in laws:
@@ -1830,7 +1866,7 @@ def make_twinning_gui(laws):
   for r, run, basf in r_list:
     i += 1
     image_name = twin_laws_d[run].get('law_image_name', "XX")
-    write_twin_images_to_disk(image_name, fn_base)
+    #write_twin_images_to_disk(image_name, fn_base)
     use_image = "%s%soff.png" %(fn_base, image_name)
     img_src = "%s.png" %image_name
     name = twin_laws_d[run].get('name', "XX")
