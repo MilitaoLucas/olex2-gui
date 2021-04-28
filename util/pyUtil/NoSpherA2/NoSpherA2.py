@@ -1,6 +1,3 @@
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
 import os
 import sys
 import htmlTools
@@ -8,11 +5,11 @@ import olex
 import olx
 import olex_core
 import gui
-
-
 import shutil
 import time
-debug = bool(OV.GetParam("olex2.debug", False))
+
+from olexFunctions import OV
+debug = OV.IsDebugging()
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -494,12 +491,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         discamb(os.path.join(OV.FilePath(),job.full_dir), olx.FileName(), self.discamb_exe)
         shutil.copy(os.path.join(OV.FilePath(),job.full_dir,job.name+".tsc"),job.name+".tsc")
         OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
-      elif wfn_code == "ELMOdb":
-        if os.path.exists(os.path.join(OV.FilePath(),job.name + ".pdb")):
-          shutil.copy(os.path.join(OV.FilePath(),job.name + ".pdb"),os.path.join(self.wfn_job_dir,job.name + ".pdb"))
-        else: 
-          OV.SetVar('NoSpherA2-Error',"ELMOdb")
-          raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
       else:
         if wfn_code.lower().endswith(".wfn"):
           pass
@@ -526,6 +517,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
         else:
+          if wfn_code == "ELMOdb":
+            # copy the pdb
+            if os.path.exists(os.path.join(OV.FilePath(),job.name + ".pdb")):
+              shutil.copy(os.path.join(OV.FilePath(),job.name + ".pdb"),os.path.join(job.full_dir,job.name + ".pdb"))
+            else: 
+              OV.SetVar('NoSpherA2-Error',"ELMOdb")
+              raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
           try:
             self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
           except NameError as error:
@@ -879,6 +877,10 @@ class wfn_Job(object):
     if ssbond == True:
       nssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.nssbond')
       inp.write("   nssbond=" + nssbond + '\n')
+    cycl = OV.GetParam('snum.NoSpherA2.ELMOdb.cycl')
+    if cycl == True:
+      ncycl = OV.GetParam('snum.NoSpherA2.ELMOdb.ncycl')
+      inp.write("   ncycl=" + ncycl + '\n')
     tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
     if tail == True:
       maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -909,17 +911,47 @@ class wfn_Job(object):
     inp.write(" " + '\n')
 
     if tail == True:
+      # use default values if lists are too short
+      if len(resnames) < maxtail:
+        diff = maxtail - len(resnames)
+        for i in range(diff):
+          resnames.append('???')
+      if len(nat) < maxtail:
+        diff = maxtail - len(nat)
+        for i in range(diff):
+          nat.append('0')
+      if len(nfrag) < maxtail:
+        diff = maxtail - len(nfrag)
+        for i in range(diff):
+          nfrag.append('1')
+      if len(ncltd) < maxtail:
+        diff = maxtail - len(ncltd)
+        for i in range(diff):
+          ncltd.append(False)
+      if len(specac) < maxtail:
+        diff = maxtail - len(specac)
+        for i in range(diff):
+          specac.append(False)
+      if len(exbsinp) < maxtail:
+        diff = maxtail - len(exbsinp)
+        for i in range(diff):
+          exbsinp.append('')
+      if len(fraginp) < maxtail:
+        diff = maxtail - len(fraginp)
+        for i in range(diff):
+          fraginp.append('0')
+
       for i in range(0,maxtail):
         control = ""
         control = control + str(resnames[i])  + ' ' + str(nat[i]) + ' ' + str(nfrag[i]) + ' ' 
         if specac[i] == "True":
-           control += ".t. "
+          control += ".t. "
         else:
-           control += ".f. "
+          control += ".f. "
         if ncltd[i] == "True":
-           control += ".t. "
+          control += ".t. "
         else:
-           control += ".f. "
+          control += ".f. "
         inp.write('  ' + control + '\n' + ' ' + '\n' )
         if nat[i] != "0":
           inp.write( str(exbsinp[i]) + ' ' + '\n')
@@ -934,6 +966,8 @@ class wfn_Job(object):
           raise NameError('No extrabasis file available!')
     if ssbond == True:
       inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n') 
+    if cycl == True:
+      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.cyclinp') + '\n' + ' ' + '\n') 
     inp.close()
 
 
@@ -961,7 +995,7 @@ class wfn_Job(object):
       method = "RHF"
     else:
       method = OV.GetParam('snum.NoSpherA2.method')
-      if control == "PBE":
+      if method == "PBE":
         control += "PBEPBE"
       else:
         control += method
@@ -1128,6 +1162,8 @@ class wfn_Job(object):
       basis.seek(0,0)
       while True:
         line = basis.readline()
+        if line == '':
+          continue
         if line[0] == "!":
           continue
         if "keys=" in line:
@@ -1842,12 +1878,15 @@ ener = mf.kernel()"""
                             os.path.join(p_path, "fchk-launch.py")])
     
     out_fn = None
-    path = os.path.join("olex2","Wfn_Job")
+    path = os.path.join("olex2","Wfn_job")
+    nr = 0
+    if sys.platform[:3] == 'win':
+      nr = 2
     if part != 0:
       path = os.path.join(path,"Part_"+str(part))
     if "orca" in args[0]:
       out_fn = os.path.join(path,self.name + "_orca.log")
-    elif "elmo" in args[2]:
+    elif "elmo" in args[nr]:
       out_fn = os.path.join(path,self.name + ".out")
     elif "python" in args[2]:
       out_fn = os.path.join(path,self.name + "_pyscf.log")
@@ -1898,12 +1937,13 @@ ener = mf.kernel()"""
             print(line)
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in software:
-      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
+      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".out")).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
     elif software == "ELMOdb":
+      print(os.path.join(self.full_dir, self.name+".out"))
       if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(os.path.join(self.full_dir, self.name+".out")).read():
         pass
       else:
@@ -2011,6 +2051,8 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
     args.append(ncpus)
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
     args.append('-v')
+  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_ED') == True):
+    args.append('-ED')    
   if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
     args.append('-acc')
     if (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
@@ -2025,7 +2067,8 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
       args.append(str(groups[i]))
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
-  if 'twin' in olex_refinement_model:
+  
+  if 'twin' in olex_refinement_model: 
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
     for row in c:
@@ -2097,8 +2140,8 @@ def discamb(folder, name, discamb_exe):
   move_args.append(discamb_exe)
   hkl_file = os.path.join(folder,name+".hkl")
   cif = os.path.join(folder,name+".cif")
-  move_args.append(cif)
-  move_args.append(hkl_file)
+#  move_args.append(cif)
+#  move_args.append(hkl_file)
   if not os.path.exists(hkl_file):
     from cctbx_olex_adapter import OlexCctbxAdapter
     from iotbx.shelx import hklf
@@ -2107,7 +2150,7 @@ def discamb(folder, name, discamb_exe):
       f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
-  os.environ['discamb_cmd'] = '+&-'.join(move_args)
+  os.environ['discamb_cmd'] = discamb_exe#'+&-'.join(move_args)
   os.environ['discamb_file'] = folder
   pyl = OV.getPYLPath()
   if not pyl:
@@ -2405,9 +2448,6 @@ def combine_tscs():
   d = {}
   nr_atoms = 0
   atom_list = []
-  atom_count = []
-  nr_data_lines = 0
-  mode = OV.GetParam('snum.NoSpherA2.tsc_mode')
 
   for part in range(int(nr_parts)):
     if parts[part] == 0:
@@ -2433,8 +2473,6 @@ def combine_tscs():
     for line in tsc:
       if data == True:
         values.append(line)
-        if part == 1:
-          nr_data_lines += 1
         continue
       else:
         header.append(line.replace('\n',''))
@@ -2453,16 +2491,11 @@ def combine_tscs():
     for atom in range(len(part_atom_list)):
       name = part_atom_list[atom]
       if name in atom_list:
-        if mode == "First":
-          continue
-        else:
-          nr = atom_list.index(name)
-          atom_count[nr] += 1
+        continue
       else:
         nr_atoms += 1
         #print ("Appending: %s\n" %name)
         atom_list.append(name)
-        atom_count.append(1)
       d.setdefault(name,{})
       sfc_l = []
       hkl_l = []
@@ -2477,35 +2510,18 @@ def combine_tscs():
         sfc_l.append(digest[3+atom].replace('\n',''))
       if atom == 0:
         d.setdefault('hkl', hkl_l)
-      if name in d and d[name] != {}:
-        old_values_r = d[name]['sfc_r']
-        old_values_i = d[name]['sfc_i']
-        new_values_r = [float(x.split(',')[0])+y for x,y in zip(sfc_l, old_values_r)]
-        new_values_i = [float(x.split(',')[1])+y for x,y in zip(sfc_l, old_values_i)]
-        d[name]['sfc_r'] = new_values_r
-        d[name]['sfc_i'] = new_values_i
-      else:
-        d[name]['sfc_r'] = [float(x.split(',')[0]) for x in sfc_l]
-        d[name]['sfc_i'] = [float(x.split(',')[1]) for x in sfc_l]
+      d[name].setdefault('sfc',sfc_l)
 
   if debug:
     print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
   
-  if mode == "Average":
-    for j in range(nr_atoms):
-      if atom_count[j] > 1:
-        name = atom_list[j]
-        old_values_r = d[name]['sfc_r']
-        old_values_i = d[name]['sfc_i']        
-        d[name]['sfc_r'] = [x/atom_count[j] for x in old_values_r]
-        d[name]['sfc_i'] = [x/atom_count[j] for x in old_values_i]
   value_lines = ""
   for i in range(len(values)):
     temp_string = ""
     for j in range(3):
       temp_string += d['hkl'][i][j]+' '
     for j in range(nr_atoms):
-      temp_string += "{:.8e}".format(d[atom_list[j]]['sfc_r'][i])+','+"{:.8e}".format(d[atom_list[j]]['sfc_i'][i])+' '
+      temp_string += d[atom_list[j]]['sfc'][i]+' '
     value_lines += temp_string + '\n'
 
   ol = []
@@ -2656,24 +2672,24 @@ def get_resname():
     if len(resnames) < maxtail:
       diff = maxtail - len(resnames)
       for i in range(diff):
-        resnames.append([])
+        resnames.append('???')
     ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
     n = ntail - 1
     return resnames[n]
 OV.registerFunction(get_resname,True,'NoSpherA2')
 
 def get_nat():
-  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')                                                                                       
-  if tail == True:                                                                                                                       
+  tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+  if tail == True:
     nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
     nat = nat.split(';')
-    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')                                                                               
-    if len(nat) < maxtail:                                                                                                               
-      diff = maxtail - len(nat)                                                                                                          
-      for i in range(diff):                                                                                                              
-        nat.append(0)                                                                                                                   
-    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')                                                                                   
-    n = ntail - 1                                                                                                                        
+    maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+    if len(nat) < maxtail:
+      diff = maxtail - len(nat)
+      for i in range(diff):
+        nat.append('0')
+    ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
+    n = ntail - 1
     return nat[n]
 OV.registerFunction(get_nat,True,'NoSpherA2')   
 
@@ -2686,7 +2702,7 @@ def get_nfrag():
     if len(nfrag) < maxtail:
       diff = maxtail - len(nfrag)
       for i in range(diff):
-        nfrag.append(1)
+        nfrag.append('1')
     ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
     n = ntail - 1
     return nfrag[n]
@@ -2731,7 +2747,7 @@ def get_exbsinp():
     if len(exbsinp) < maxtail:
       diff = maxtail - len(exbsinp)
       for i in range(diff):
-        exbsinp.append(0)
+        exbsinp.append('')
     ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
     n = ntail - 1
     return exbsinp[n]
@@ -2746,7 +2762,7 @@ def get_fraginp():
     if len(fraginp) < maxtail:
       diff = maxtail - len(fraginp)
       for i in range(diff):
-        fraginp.append(0)
+        fraginp.append('0')
     ntail = OV.GetParam('snum.NoSpherA2.ELMOdb.ntail')
     n = ntail - 1
     return fraginp[n]
@@ -3599,9 +3615,9 @@ def plot_map_cube(map_type,resolution):
   name = OV.ModelSrc()
 
   n_atoms = int(olx.xf.au.GetAtomCount())
-  positions = [[float(0.0) for k in xrange(3)] for l in xrange(n_atoms)]
-  cm = [[float(0.0) for k in xrange(3)] for l in xrange(3)]
-  cm_inv = [[float(0.0) for k in xrange(3)] for l in xrange(3)]
+  positions = [[float(0.0) for k in range(3)] for l in range(n_atoms)]
+  cm = [[float(0.0) for k in range(3)] for l in range(3)]
+  cm_inv = [[float(0.0) for k in range(3)] for l in range(3)]
   temp = olx.xf.au.GetCell().split(',')
   cell = [float(temp[0]),float(temp[1]),float(temp[2]),float(temp[3]),float(temp[4]),float(temp[5])]
   a2b = 0.52917749

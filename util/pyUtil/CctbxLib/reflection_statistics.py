@@ -1,12 +1,7 @@
 from __future__ import division
-
 from cctbx_olex_adapter import OlexCctbxAdapter
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import olx
-
 
 from cctbx import statistics
 from cctbx.array_family import flex
@@ -485,8 +480,10 @@ class fractal_dimension(OlexCctbxAdapter):
                resolution=0.1,
                stepsize=0.01):
     import olex
-    olex.m('CalcFourier -fcf -%s -r=%s'%("diff",resolution))
+    #olex.m('CalcFourier -fcf -%s -r=%s'%("diff",resolution))
     import olex_xgrid
+    map_type = "diff"
+    olex.m("spy.NoSpherA2.plot_map_cube(%s,%s)"%(map_type,str(resolution)))
     
     print ("Made residual density map")
     assert olex_xgrid.IsVisible()
@@ -495,84 +492,41 @@ class fractal_dimension(OlexCctbxAdapter):
     
     temp = olex_xgrid.GetSize()
     size = [int(temp[0]),int(temp[1]),int(temp[2])]
-    value = [[[float(0.0) for z in range(size[2])] for y in range(size[1])] for x in range(size[0])]
-    for x in range(size[0]):
-      for y in range(size[1]):
-        for z in range(size[2]):    
-          value[x][y][z] = olex_xgrid.GetValue(x,y,z)
     self.info = OV.ModelSrc()
-    
-    print ("start analyzing a %4d x%4d x%4d cube..."%(size[0],size[1],size[2]))
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()    
-    
-    minimal = round(float(OV.GetParam('snum.refinement.max_hole')),1) - 2 * stepsize
-    maximum = round(float(OV.GetParam('snum.refinement.max_peak')),1) + 2 * stepsize
-    steps = int((maximum - minimal) / stepsize) + 2
-    bins = [0] * steps
-    df = [0.0] * steps
-    iso = [0.0] * steps
-    
-    self.x = flex.double(steps)
-    self.y = flex.double(steps)
-    
-    for rho in range(steps):
-      iso[rho] = round(minimal + rho * stepsize,3)
-      self.x[rho] = iso[rho]
-    
+
     run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
     print ("Analyzing %d surface intersections..."%run)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()    
-
-    for x in range(size[0]):
-      for y in range(size[1]):
-        for z in range(size[2]-1):
-          lv1 = value[x][y][z]
-          lv2 = value[x][y][z+1]
-          for rho in range(steps):
-            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
-              bins[rho] += 1
-    print ("Z-Dimension done!")
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()
-      
-    for z in range(size[2]):
-      for x in range(size[0]):
-        for y in range(size[1]-1):
-          lv1 = value[x][y][z]
-          lv2 = value[x][y+1][z]          
-          for rho in range(steps):
-            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
-              bins[rho] += 1    
-    print ("Y-Dimension done!")
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()      
-              
-    for y in range(size[1]):
-      for z in range(size[2]):
-        for x in range(size[0]-1):
-          lv1 = value[x][y][z]
-          lv2 = value[x+1][y][z]          
-          for rho in range(steps):
-            if (lv1 < iso[rho] and lv2 > iso[rho]) or (lv1 > iso[rho] and lv2 < iso[rho]):
-              bins[rho] += 1    
-    print ("X-Dimension done!")
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()      
+       
+    name = OV.ModelSrc()
+    wfn_2_fchk = OV.GetVar("Wfn2Fchk")
+    args = [wfn_2_fchk]
+    args.append("-fractal")
+    args.append("%s_%s.cube"%(name,map_type))
+    import subprocess
+    result = None
+    if sys.platform[:3] == 'win':
+      startinfo = subprocess.STARTUPINFO()
+      startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      startinfo.wShowWindow = 7
+      result = subprocess.run(args=args,capture_output=True,startupinfo=startinfo)
+    else:
+      result = subprocess.run(args=args,capture_output=True)
+    print(result.stdout)
     
-    epsilon = log(1/(run)**(-1/3))
-    for rho in range(steps):
-      if bins[rho] == 0:
-        df[rho] = 0
-      else:
-        df[rho] = log(bins[rho])/epsilon
-      self.y[rho] = df[rho]
+    with open("%s_%s.cube_fractal_plot"%(name,map_type),'r') as file:
+      lines = file.readlines()
+    info = lines[0].split()
+    steps = int(info[0])
+    self.x = flex.double(steps)
+    self.y = flex.double(steps)      
+    for i in range(steps):
+      temp = lines[i+1].split()
+      self.x[i],self.y[i] = float(temp[0]),float(temp[1])
+      
+    
     print("Done!")
     
   def xy_plot_info(self):

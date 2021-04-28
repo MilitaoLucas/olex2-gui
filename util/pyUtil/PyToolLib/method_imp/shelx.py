@@ -1,8 +1,7 @@
 import os
 from Method import Method, Method_refinement, Method_solution
 import phil_interface
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import olex
 import olx
 import glob
@@ -204,7 +203,7 @@ class Method_shelxt(Method_shelx_solution):
     if not OV.HasGUI():
       return
     import gui.tools
-    debug = bool(OV.GetParam('olex2.debug',False))
+    debug = OV.IsDebugging()
     f = os.path.join(OV.StrDir(), "temp", OV.FileName() + '.lxt')
     if os.path.exists(f):
       f = open(f, 'r').readlines()
@@ -292,7 +291,6 @@ class Method_shelx_direct_methods(Method_shelx_solution):
     if not OV.HasGUI():
       return
     import gui.tools
-    debug = bool(OV.GetParam('olex2.debug',False))
     RunPrgObject.post_prg_output_html_message = "Ralpha=%s, Nqual=%s, CFOM=%s" %(RunPrgObject.Ralpha,RunPrgObject.Nqual,RunPrgObject.CFOM)
     if OV.GetParam('user.solution.run_auto_vss'):
       RunPrgObject.please_run_auto_vss = True
@@ -863,7 +861,7 @@ def post_solution_html(d):
   if not OV.HasGUI():
     return
   import gui.tools
-  debug = bool(OV.GetParam('olex2.debug',False))
+  debug = OV.IsDebugging()
   t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
   f_name = OV.FileName() + "_solution_output.html"
   OlexVFS.write_to_olex(f_name, t)

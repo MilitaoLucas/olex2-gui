@@ -290,8 +290,7 @@ if timer:
   tt.append("%.3f s == CifInfo" %(time.time() - t))
   t = time.time()
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 if timer:
   tt.append("%.3f s == olxFunctions" %(time.time() - t))

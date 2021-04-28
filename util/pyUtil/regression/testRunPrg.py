@@ -5,9 +5,7 @@ import sys
 from io import StringIO
 
 import test_utils
-
-import olexFunctions
-OV = olexFunctions.OlexFunctions()
+from olexFunctions import OV
 
 import olx
 import RunPrg

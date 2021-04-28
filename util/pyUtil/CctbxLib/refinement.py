@@ -4,8 +4,7 @@ import cctbx_olex_adapter as COA
 from boost_adaptbx.boost import python
 ext = python.import_ext("smtbx_refinement_least_squares_ext")
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 import olx
 import olex

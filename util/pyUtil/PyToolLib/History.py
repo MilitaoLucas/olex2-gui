@@ -14,9 +14,7 @@ try:
 except:
   pass
 import variableFunctions
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 import time
 import zlib

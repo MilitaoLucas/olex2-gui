@@ -5,8 +5,7 @@ sys.path.append(r".\src")
 import userDictionaries
 ## This used to be in in init.py. Why?
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import htmlTools
 import olexex_setup
 import variableFunctions
@@ -16,7 +15,6 @@ from gui.images import GI
 gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
-
 
 class GeneratedGuiMaker(object):
   def __init__(self):

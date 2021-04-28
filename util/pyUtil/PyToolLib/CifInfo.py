@@ -13,10 +13,8 @@ import gui
 from ArgumentParser import ArgumentParser
 import userDictionaries
 import variableFunctions
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug', False))
-timer = debug
+from olexFunctions import OV
+imer = debug = OV.IsDebugging()
 
 import ExternalPrgParameters
 

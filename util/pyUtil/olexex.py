@@ -24,8 +24,7 @@ import History
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import variableFunctions
 
 import MakeMovie
@@ -855,7 +854,7 @@ if haveGUI:
 
 def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == 'Auto':
-    OV.SetParam('autochem.refinement.method','Auto')
+    OV.SetParam('%s.refinement.method' %scope, 'Auto')
     return
   prg = RPD.programs[prg_name]
   if method is None or not method:
@@ -867,7 +866,6 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   OV.SetParam('user.refinement.default_program', prg_name)
   OV.SetParam("%s.refinement.method" %scope, method)
   onRefinementMethodChange(prg_name, method)
-OV.registerFunction(OV.set_refinement_program)
 
 def onRefinementMethodChange(prg_name, method):
   if method in RPD.programs[prg_name].methods:
@@ -880,7 +878,6 @@ OV.registerFunction(onRefinementMethodChange)
 def onSolutionProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == "Auto":
     OV.SetParam('%s.solution.method' %scope, 'Auto')
-    #olx.html.SetValue('SET_autochem_solution_METHOD', 'Auto')
     return
 
   if prg_name != 'Unknown':
@@ -893,7 +890,6 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     OV.SetParam("%s.solution.method" %scope, method)
     OV.SetParam('user.solution.default_program', prg_name)
     onSolutionMethodChange(prg_name, method)
-OV.registerFunction(OV.set_solution_program)
 
 def onSolutionMethodChange(prg_name, method):
   if method in SPD.programs[prg_name].methods:
@@ -944,8 +940,6 @@ def get_solution_methods(prg, scope='snum'):
   p.sort()
   for item in p:
     retval += "%s;" %item
-  if scope != 'snum':
-    retval = 'Auto;' + retval
   return retval
 OV.registerFunction(get_solution_methods)
 
@@ -956,14 +950,16 @@ def which_program(prg):
     exec_l = prg.execs
   else:
     exec_l = ["%s.exe" %prg, "%s" %prg, "%s" %prg.lower()]
+  prg = None
   for item in exec_l:
-    a = olx.file.Which('%s' %item)
-    if a:
+    a = olx.file.Which(item)
+    if a and os.path.isfile(a):
+      prg = a
       break
   if 'wingx' in a.lower():
     print("%s seems to be part of a WinGX installation. These ShelX executable cannot be used with Olex" %item)
-    return False
-  return a
+    return None
+  return prg
 OV.registerFunction(which_program)
 
 def getmap(mapName):
@@ -1007,8 +1003,6 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
-  if scope != 'snum':
-    retval = 'Auto;' + retval
   return retval
 OV.registerFunction(get_refinement_methods)
 

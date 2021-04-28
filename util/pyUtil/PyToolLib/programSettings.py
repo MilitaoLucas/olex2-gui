@@ -4,9 +4,7 @@ import os
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 import olx
 import olex_core
 import OlexVFS

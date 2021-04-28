@@ -1,4 +1,3 @@
-
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
 import glob, os
@@ -7,18 +6,15 @@ import string
 import OlexVFS
 #import olex_core
 import time
+from olexFunctions import OV
 
 try:
   import olx
   import olex
   datadir = olx.DataDir()
   basedir = olx.BaseDir()
-
 except:
   pass
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
 
 class MakeGuiTools(object):
   def __init__(self, tool_fun=None, tool_param=None):

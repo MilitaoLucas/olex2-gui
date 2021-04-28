@@ -1,7 +1,3 @@
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
 import os
 import sys
 import htmlTools
@@ -9,10 +5,10 @@ import olex
 import olx
 import olex_core
 import gui
-
-
 import time
-debug = bool(OV.GetParam("olex2.debug", False))
+
+from olexFunctions import OV
+debug = OV.IsDebugging()
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
