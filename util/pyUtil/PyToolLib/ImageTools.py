@@ -8,8 +8,7 @@ from io import StringIO
 import OlexVFS
 import RoundedCorners
 import colorsys
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from FontInstances import FontInstances
 import os
 global sizedraw
@@ -17,9 +16,8 @@ sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
 import math
 
-#debug = bool(OV.GetParam('olex2.debug',False))
+#debug = OV.IsDebugging()
 debug = False
-
 
 global dpi_scale
 global dpi_scaling

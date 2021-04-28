@@ -1,10 +1,9 @@
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
 import sys
 import olx
 import olex
 import olex_fs
 import os
+from olexFunctions import OV
 from ImageTools import IT
 import gui
 

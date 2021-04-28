@@ -1,10 +1,9 @@
 import olex
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import os
 
-debug = bool(OV.GetParam("olex2.debug", False))
+debug = OV.IsDebugging()
 
 class MapUtil:
 

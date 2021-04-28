@@ -9,8 +9,7 @@ import olex
 import olx
 import userDictionaries
 import ExternalPrgParameters
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from io import StringIO
 
 import phil_interface

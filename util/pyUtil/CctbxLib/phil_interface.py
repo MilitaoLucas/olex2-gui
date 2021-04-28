@@ -311,8 +311,7 @@ def words_as_string (words, strip_quotes=False) :
   return value_string
 
 def coerce_value(e):
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
+  from olexFunctions import OV
   if "as an integer expression" in e:
     _ = e.split("Error interpreting ")[1].split(" ")[0].split("=")
   try:

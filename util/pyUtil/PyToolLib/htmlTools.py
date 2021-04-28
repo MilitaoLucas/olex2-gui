@@ -1,5 +1,3 @@
-#-*- coding:utf8 -*-
-
 """
 Various generic tools for creating and using HTML.
 """
@@ -14,13 +12,8 @@ import gui
 import time
 from datetime import date
 
-
-#import sys
-#sys.path.append(r".\src")
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-debug = bool(OV.GetParam("olex2.debug", False))
+from olexFunctions import OV
+debug = OV.IsDebugging()
 
 last_mode = None
 last_mode_options = None
@@ -821,7 +814,7 @@ def path_from_phil(p):
     base = p.split('()')
     _ = getattr(OV, base[0])
     path = _()
-    p = "%s/%s" %(path, base[1])
+    p = os.path.join(path, base[1])
   return p
 
 def getStylesList():
@@ -943,7 +936,6 @@ OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Botto
 
 def OnModeChange(*args):
   global last_mode, last_mode_options
-  debug = OV.GetParam("olex2.debug")
   d = {
     'move sel':'three-Move_Near',
     'move sel -c=':'three-Copy_Near',

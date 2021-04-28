@@ -3,9 +3,6 @@ import future
 import builtins
 
 from builtins import bytes, chr #works in 2 and 3
-# END
-
-# -*- coding: latin-1 -*-
 
 import math
 
@@ -34,9 +31,8 @@ import time
 
 from ImageTools import IT
 
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-#debug = bool(OV.GetParam('olex2.debug',False))
+from olexFunctions import OV
+#debug = OV.IsDebugging()
 debug = False
 
 timing = debug

@@ -5,11 +5,11 @@ import OlexVFS
 import time
 import glob
 import shutil
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
 import gui
-debug = bool(OV.GetParam("olex2.debug", False))
 import HttpTools
+
+from olexFunctions import OV
+debug = OV.IsDebugging()
 
 class VFSDependent(object):
   def __init__(self):

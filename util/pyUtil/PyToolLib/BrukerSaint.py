@@ -16,8 +16,7 @@ import CifInfo
 import OlexVFS
 from ImageTools import ImageTools
 from threading import Thread
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 metacif = CifInfo.MetaCif
 

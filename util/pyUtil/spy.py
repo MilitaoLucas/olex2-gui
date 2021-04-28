@@ -1,7 +1,6 @@
 # spy.py
 import sys
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 class SpyException:
   def __init__(self, spy_exception):

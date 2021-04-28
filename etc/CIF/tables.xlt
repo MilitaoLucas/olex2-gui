@@ -102,7 +102,7 @@
   <_atom_site_type_symbol caption="Symbol" mustequal="H" visible="false" >
 >
 
-<acrd caption="Fractional Atomic Coordinates (&times;10<SUP>4</SUP>) and Equivalent Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). U<sub>eq</sub> is defined as 1/3 of of the trace of the orthogonalised  U<sub>IJ</sub> tensor."
+<acrd caption="Fractional Atomic Coordinates (&times;10<SUP>4</SUP>) and Equivalent Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). U<sub>eq</sub> is defined as 1/3 of the trace of the orthogonalised  U<sub>IJ</sub> tensor."
  tita="class=cifTableHeadline"
  tha="class=cifTableFirst"
  taba="class=CifTable"

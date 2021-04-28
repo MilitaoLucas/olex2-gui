@@ -1,8 +1,6 @@
 import phil_interface
 import olx
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
+from olexFunctions import OV
 
 definedControls = []
 
@@ -35,7 +33,7 @@ class Method(object):
     assert 0, 'do_run must be defined!'
 
   def run(self, RunPrgObject):
-    debug = bool(OV.GetParam('olex2.debug',False))
+    debug = OV.IsDebugging()
     timer = debug
     import time
     if Method.running:

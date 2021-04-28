@@ -36,8 +36,7 @@ class FontInstances(ArgumentParser):
     pFile.close()
 
   def defineFonts(self):
-    from olexFunctions import OlexFunctions
-    OV = OlexFunctions()
+    from olexFunctions import OV
     default_font_name = OV.GetParam("gui.default_font_name")
     default_font_name_bold = OV.GetParam("gui.default_font_name_bold")
     self.fonts = {

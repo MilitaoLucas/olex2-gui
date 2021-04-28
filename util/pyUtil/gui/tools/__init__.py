@@ -4,10 +4,9 @@ import olexex
 import os
 import sys
 import OlexVFS
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
-debug = bool(OV.GetParam('olex2.debug',False))
+debug = OV.IsDebugging()
 timer = debug
 import glob
 global have_found_python_error
@@ -1705,6 +1704,7 @@ OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
 def get_custom_scripts(file_name, globule, scope):
   global custom_scripts_d
   import gui
+  dev_mode = OV.GetParam("olex2.dev_mode", False)
   gui_t = "<b>%s</b>: Please select a script from the above choices." %scope
   OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
 
@@ -1739,16 +1739,15 @@ def get_custom_scripts(file_name, globule, scope):
         custom_scripts_d[script].setdefault('display', script_s)
         custom_scripts_d[script].setdefault('scope', scope)
         try:
-          gui_t = gui.tools.TemplateProvider.get_template(script + "_gui", template_file=file_name, force=debug)
+          gui_t = gui.tools.TemplateProvider.get_template(script + "_gui", template_file=file_name, force=dev_mode)
           custom_scripts_d[script].setdefault('gui', gui_t)
           custom_scripts_d[script]['gui'] = gui_t
         except:
-          print("Could not create gui for script %s" %script)
+          print("Could not create gui for script %s" % script)
 
 def set_custom_gui(f, scope):
   global custom_scripts_d
   f in custom_scripts_d
-
   try:
     doc = custom_scripts_d[f].get('docstring')
     gui_t = custom_scripts_d[f].get('gui')
@@ -1765,8 +1764,11 @@ OV.registerFunction(set_custom_gui,False,'gui.tools')
 def run_custom_script(*args):
   global custom_scripts_d
   script = args[0]
-  if script in custom_scripts_d:
-    custom_scripts_d[script]['obj']()
+  # This doesn't work unless these scripts are standalone (as they used to be) so now calling with spy.
+  #if script in custom_scripts_d:
+    # custom_scripts_d[script]['obj']()
+  olex.m("spy.%s()" %script)
+  
 
 OV.registerFunction(run_custom_script,False,'gui.tools')
 

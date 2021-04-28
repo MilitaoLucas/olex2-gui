@@ -9,9 +9,7 @@ from libtbx.test_utils import show_diff
 
 import History
 from History import hist
-
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 
 class HistoryTestCase(test_utils.TestCaseBase):
 

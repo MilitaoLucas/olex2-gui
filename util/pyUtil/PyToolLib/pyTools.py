@@ -1,8 +1,7 @@
 import sys
 import olx
 #import olex_core
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 from ArgumentParser import ArgumentParser
 
 class pyTools(ArgumentParser):
