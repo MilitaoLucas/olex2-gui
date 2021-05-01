@@ -74,6 +74,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.failure = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
+    self.hooft = None
     self.on_completion = on_completion
     # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
@@ -266,11 +267,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       try:
-        self.check_flack()
-        if self.flack:
-          OV.SetParam('snum.refinement.flack_str', self.flack)
+        self.check_hooft()
+        if self.hooft:
+          OV.SetParam('snum.refinement.flack_str', self.hooft)
         else:
           OV.SetParam('snum.refinement.flack_str', "")
+        self.check_flack()
+        #if self.flack:
+        #  OV.SetParam('snum.refinement.flack_str', self.flack)
+        #else:
+        #  OV.SetParam('snum.refinement.flack_str', "")
       except:
         OV.SetParam('snum.refinement.flack_str', "")
         print("Failed to evaluate Flack parameter")
@@ -402,6 +408,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
         )
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
+
+  def check_hooft(self):
+    from cctbx_olex_adapter import hooft_analysis
+
+    hooft_display = ""
+
+    try:
+      hooft = hooft_analysis()
+    except utils.Sorry as e:
+      print(e)
+    else:
+      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+        hooft_display = utils.format_float_with_standard_uncertainty(
+          hooft.hooft_y, hooft.sigma_y)
+        self.hooft = hooft_display
 
   def get_radiation_type(self):
     from cctbx.eltbx import wavelengths
@@ -726,10 +747,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
-    if self.flack is not None:
+    if self.hooft is not None:
         cif_block['_refine_ls_abs_structure_details'] = \
-                 'Flack, H. D. (1983). Acta Cryst. A39, 876-881.'
-        cif_block['_refine_ls_abs_structure_Flack'] = self.flack
+                 'Hooft, R.W.W., Straver, L.H., Spek, A.L. (2010). J. Appl. Cryst., 43, 665-668.'
+        cif_block['_refine_ls_abs_structure_Flack'] = self.hooft
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.extinction.expression:

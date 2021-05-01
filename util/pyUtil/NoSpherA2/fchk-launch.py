@@ -63,7 +63,7 @@ while not os.path.exists(out_fn):
       continue
     print("Failed to locate the output file")
     exit(1)
-with open(out_fn, "rU") as stdout:
+with open(out_fn, "r") as stdout:
   import sys
   while p.poll() is None:
     x = stdout.read()
