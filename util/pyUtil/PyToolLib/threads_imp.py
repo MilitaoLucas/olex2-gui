@@ -1,4 +1,5 @@
 import olex
+import olex_core
 import olx
 import os
 import sys
@@ -25,6 +26,7 @@ class NewsImageRetrivalThread(ThreadEx):
     import random
     import olex_fs
     try:
+      olex_core.IncRunningThreadsCount()
       if not NewsImageRetrivalThread.image_list.get(self.name,None):
         NewsImageRetrivalThread.image_list[self.name] = self.get_list_from_server(list_name=self.name)
         if NewsImageRetrivalThread.image_list[self.name]:
@@ -62,6 +64,7 @@ class NewsImageRetrivalThread(ThreadEx):
       sys.stdout.formatExceptionInfo()
       pass
     finally:
+      olex_core.DecRunningThreadsCount()
       NewsImageRetrivalThread.instance = None
 
   def get_image_from_list(self):
@@ -208,11 +211,12 @@ class CheckCifRetrivalThread(ThreadEx):
   def run(self):
     import gui.cif as cif
     try:
+      olex_core.IncRunningThreadsCount()
       cif.GetCheckcifReport(send_fcf=self.send_fcf)
     except Exception as e:
-      #print e
       pass
     finally:
+      olex_core.DecRunningThreadsCount()
       CheckCifRetrivalThread.instance = None
 
 def get_news_image_from_server(name=""):
