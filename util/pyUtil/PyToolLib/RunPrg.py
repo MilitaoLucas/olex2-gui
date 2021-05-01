@@ -739,7 +739,12 @@ class RunRefinementPrg(RunPrg):
       flack_display = "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
-      if flack_val > 0.8:
+      flack_error = float(fs[1][:-1])
+      temp = flack_val
+      while abs(temp) < 1.0:
+        temp *= 10
+        flack_error /= 10
+      if flack_val > 0.8 and flack_val-flack_error > 0.5:
         inversion_needed = True
 
     print("%s, %s" %(hooft_display, flack_display))
