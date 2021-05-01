@@ -1689,9 +1689,9 @@ mf.kernel()"""
       xyz.close()
       print(cm)
       inp.write("''',\n  verbose = 5,\n)\ncell.output = '%s_pyscf.log'\n"%self.name)
-      inp.write("cell.a = '''%.5f %.5f %.5f\n")%(np.sign(cm[0])*sqrt(abs(cm[0])),np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[4])*sqrt(abs(cm[4])))
-      inp.write("%.5f %.5f %.5f\n")%(np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[1])*sqrt(abs(cm[1])),np.sign(cm[5])*sqrt(abs(cm[5])))
-      inp.write("%.5f %.5f %.5f'''\n")%(np.sign(cm[4])*sqrt(abs(cm[4])),np.sign(cm[5])*sqrt(abs(cm[5])),np.sign(cm[2])*sqrt(abs(cm[2])))
+      inp.write("cell.a = '''%.5f %.5f %.5f\n"%(np.sign(cm[0])*sqrt(abs(cm[0])),np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[4])*sqrt(abs(cm[4]))))
+      inp.write("%.5f %.5f %.5f\n"%(np.sign(cm[3])*sqrt(abs(cm[3])),np.sign(cm[1])*sqrt(abs(cm[1])),np.sign(cm[5])*sqrt(abs(cm[5]))))
+      inp.write("%.5f %.5f %.5f'''\n"%(np.sign(cm[4])*sqrt(abs(cm[4])),np.sign(cm[5])*sqrt(abs(cm[5])),np.sign(cm[2])*sqrt(abs(cm[2]))))
       inp.write("cell.charge = %s\n"%charge)
       inp.write("cell.spin = %s\n"%str(int(mult)-1))
       inp.write("cell.max_memory = %s\n"%str(mem_value))
@@ -1796,7 +1796,7 @@ cf.conv_tol_grad = 1e-5
 cf.level_shift = 0.0
 cf.damp = 0.0
 cf = scf.newton(cf)
-ener = mf.kernel()"""
+ener = cf.kernel()"""
       rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,cf.mo_coeff,cf.mo_energy,cf.mo_occ,ener)"%self.name
       inp.write(rest)        
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
