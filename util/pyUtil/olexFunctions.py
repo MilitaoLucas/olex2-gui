@@ -1130,6 +1130,7 @@ class OlexFunctions(inheritFunctions):
     lock[1].close()
     os.remove(lock[0])
 
+  #https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
   # constructs an object from dict
   def dict_obj(self, d):
     class d_o:
