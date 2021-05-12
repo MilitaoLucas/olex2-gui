@@ -287,8 +287,8 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     from cctbx.array_family import flex
     from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
     if self.hklf_code == 5:
-      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
       f_sq_obs_filtered = None
       f_calc_filtered = None
       if NoSpherA2:
@@ -313,12 +313,24 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       else:
         f_obs_merged = self.reflections.f_sq_obs_merged.f_sq_as_f()
         f_obs_filtered = f_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
-
-      f_calc_merged = self.f_calc(miller_set=f_obs_merged)
-      f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+      f_calc_merged = None
+      f_calc_filtered = None
+      if NoSpherA2:
+        from refinement import FullMatrixRefine
+        fmr = FullMatrixRefine()
+        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)        
+        junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+        f_calc_merged = f_calc_temp.common_set(f_obs_filtered)  
+        f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+        # Currently i have to stick to ignoring omitted reflections, since they have no calculated value in the .tsc file
+        f_calc_omitted = None
+      else:
+        f_calc_merged = self.f_calc(miller_set=f_obs_merged)
+        f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+        f_calc_omitted = f_calc_merged.common_set(
+          f_obs_merged).lone_set(f_calc_filtered)        
       f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
-      f_calc_omitted = f_calc_merged.common_set(
-        f_obs_merged).lone_set(f_calc_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
     if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -343,14 +355,16 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.f_calc = fc
     if f_calc_omitted:
       plot.f_calc_omitted = flex.abs(f_calc_omitted.data()) * k
+      if f_obs_omitted:
+        plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
+        plot.indices_omitted = f_obs_omitted.indices()
+      else:
+        plot.f_obs_omitted = None
+        plot.indices_omitted = None      
     else:
       plot.f_calc_omitted = None
-    if f_obs_omitted:
-      plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
-      plot.indices_omitted = f_obs_omitted.indices()
-    else:
       plot.f_obs_omitted = None
-      plot.indices_omitted = None
+      plot.indices_omitted = None      
     plot.fit_slope = fit.slope()
     plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "F calc"
@@ -477,6 +491,7 @@ class normal_probability_plot(OlexCctbxAdapter):
 
 class fractal_dimension(OlexCctbxAdapter):
   def __init__(self,
+               parent = None,
                resolution=0.1,
                stepsize=0.01):
     import olex
@@ -488,7 +503,7 @@ class fractal_dimension(OlexCctbxAdapter):
     print ("Made residual density map")
     assert olex_xgrid.IsVisible()
     
-    from math import log
+    #from math import log
     
     temp = olex_xgrid.GetSize()
     size = [int(temp[0]),int(temp[1]),int(temp[2])]
@@ -506,26 +521,52 @@ class fractal_dimension(OlexCctbxAdapter):
     args.append("-fractal")
     args.append("%s_%s.cube"%(name,map_type))
     import subprocess
-    result = None
+    startinfo = None
     if sys.platform[:3] == 'win':
       startinfo = subprocess.STARTUPINFO()
       startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      startinfo.wShowWindow = 7
-      result = subprocess.run(args=args,capture_output=True,startupinfo=startinfo)
+      startinfo.wShowWindow = subprocess.SW_HIDE
+    if startinfo == None:
+      with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
+        for c in iter(lambda: p.stdout.read(1), b''): 
+          string = c.decode()
+          sys.stdout.write(string)
+          sys.stdout.flush()
+          if '\r' in string or '\n' in string:
+            olx.xf.EndUpdate()
+            if OV.HasGUI():
+              olx.Refresh()     
     else:
-      result = subprocess.run(args=args,capture_output=True)
-    print(result.stdout)
+      with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
+        for c in iter(lambda: p.stdout.read(1), b''): 
+          string = c.decode()
+          sys.stdout.write(string)
+          sys.stdout.flush()
+          if '\r' in string or '\n' in string:
+            olx.xf.EndUpdate()
+            if OV.HasGUI():
+              olx.Refresh()
     
     with open("%s_%s.cube_fractal_plot"%(name,map_type),'r') as file:
       lines = file.readlines()
     info = lines[0].split()
     steps = int(info[0])
     self.x = flex.double(steps)
-    self.y = flex.double(steps)      
+    self.y = flex.double(steps)
+    min_max = None
+    if parent != None:
+      min_max = [parent.min_x,parent.max_x]
+    else:
+      min_max = [-1.0,1.0]
     for i in range(steps):
       temp = lines[i+1].split()
       self.x[i],self.y[i] = float(temp[0]),float(temp[1])
-      
+      if i == 0:
+        if self.x[i] < min_max[0]+0.5:
+          min_max[0] = self.x[i] - 0.5
+      if i == steps-1:
+        if self.x[i] < min_max[1]+0.5:
+          min_max[1] = self.x[i] - 0.5      
     
     print("Done!")
     
