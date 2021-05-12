@@ -1043,6 +1043,9 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
+  if wavelength < 0.1:
+    generate_ED_SFAC(table_name_)
+    return
   afile = None
   for d in anom_dirs:
     if not os.path.exists(d):
@@ -1109,13 +1112,20 @@ OV.registerFunction(generate_DISP, False, "sfac")
 
 def generate_ED_SFAC(table_file_name=None, force = False):
   import olexex
-  if not table_file_name:
-    table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
   sfac = olexex.OlexRefinementModel().model.get('sfac')
   if sfac and not force:
     return
+  def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
+  if not table_file_name or table_file_name == "auto":
+    table_file_name = def_table_file_name
+  else:
+    if not os.path.exists(table_file_name):
+      table_file_name = os.path.join(olx.DataDir(), "ED", table_file_name)
+      if not os.path.exists(table_file_name):
+        table_file_name = def_table_file_name
+
   formula = olx.xf.GetFormula('list')
-  elms = set([x.split(':')[0] for x in formula.split(',')])
+  elms = set([x.split(':')[0].lower() for x in formula.split(',')])
   sfac_toks = []
   with open(table_file_name, 'r') as disp:
     for l in disp.readlines():
@@ -1125,7 +1135,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
       toks = l.split()
       if len(toks) != 16:
         continue
-      if toks[1] in elms:
+      if toks[1].lower() in elms:
         sfac_toks.append(toks)
         if len(sfac_toks) == len(elms):
           break
@@ -1135,12 +1145,8 @@ def generate_ED_SFAC(table_file_name=None, force = False):
 OV.registerFunction(generate_ED_SFAC, False, "sfac")
 
 def generate_DISP_all(table_name_, wavelength=None):
-  elements = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca"
-              ,"Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr"
-                ,"Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe"
-                ,"Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn"
-                ,"Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
-
+  from cctbx.eltbx.chemical_elements import proper_caps_list
+  elements = proper_caps_list()
   table_name = table_name_.lower()
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
@@ -1153,15 +1159,7 @@ def generate_DISP_all(table_name_, wavelength=None):
     tables = henke
   elif "brennan" == table_name:
     from brennan import brennan
-    for e in elements:
-      e = str(e)
-      try:
-        brenn = brennan()
-        f = brenn.at_angstrom(wavelength,e)
-        file.write(e + ' ' + str(f[0]) + ' ' + str(f[1]))
-      except ValueError:
-        file.write(e + ' 0.0 0.0\n')
-    return
+    tables = brennan()
   else:
     raise Exception("Invalid table name")
   with open("disp.lst",'w') as file:
@@ -1170,8 +1168,8 @@ def generate_DISP_all(table_name_, wavelength=None):
       try:
         table = tables.table(e)
         f = table.at_angstrom(wavelength)
-        file.write(e + ' ' + str(f.fp()) + ' ' + str(f.fdp()) + '\n')
-      except ValueError:
-        file.write(e + ' 0.0 0.0\n')
+        file.write("%-4s %8.4f %8.4f\n" %(e, f.fp(), f.fdp()))
+      except Exception as e:
+        pass
 
 OV.registerFunction(generate_DISP_all, False, "sfac")
