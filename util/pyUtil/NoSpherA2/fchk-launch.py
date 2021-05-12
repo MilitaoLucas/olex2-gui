@@ -48,7 +48,7 @@ else:
   p = subprocess.Popen(args, stdout=log)
 
 if "ubuntu" in args[0]:
-  print("Starting Ubuntu and running pySCF, please be patient for start")
+  print("Starting Ubuntu for wavefunction calculation, please be patient for start")
 if out_fn == None:
   if "ubuntu" in args[0]:
     out_fn = fchk_file + "_pyscf.log"

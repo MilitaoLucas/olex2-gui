@@ -1084,15 +1084,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     tables = henke
   elif "brennan" == table_name:
     from brennan import brennan
-    for e in elements:
-      e = str(e)
-      try:
-        brenn = brennan()
-        f = brenn.at_angstrom(wavelength,e)
-        rv.append(e + ',' + ','.join([str(f[0]), str(f[1])]))
-      except ValueError:
-        rv.append(e + ',0.0, 0.0')
-    return ';'.join(rv)
+    tables = brennan()
   else:
     print("Invalid table name %s, resetting to Sasaki" %table_name_)
     from cctbx.eltbx import sasaki
@@ -1102,7 +1094,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     try:
       table = tables.table(e)
       f = table.at_angstrom(wavelength)
-      m_table = attc.get_table(nist_elements.atomic_number(e))
+      #m_table = attc.get_table(nist_elements.atomic_number(e))
       rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
     except ValueError:
       rv.append(e + ',0.0, 0.0')

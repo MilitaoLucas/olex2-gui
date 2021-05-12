@@ -20,7 +20,7 @@ while not os.path.exists('discamb2tsc.log'):
     print("Failed to locate the output file")
     time.sleep(10)
     exit(1)
-with open('discamb2tsc.log', "rU") as stdout:
+with open('discamb2tsc.log', "r") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:

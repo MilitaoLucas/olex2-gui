@@ -417,7 +417,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move(file,file + "_part%d"%parts[i])
             if file.endswith(".fchk"):
               shutil.move(file,file + "_part%d"%parts[i])
-      print ("Writing combined tsc file\n")
       combine_tscs()
     else:
       # Check if job folder already exists and (if needed) make the backup folders
@@ -1809,7 +1808,7 @@ ener = cf.kernel()"""
     
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=$GetVar(gui.red_text)><b>%s</b></font>..."%(self.name,software),
-          txt_col='black_text')    
+          txt_col='black_text')
 
     if software == "ORCA":
       args.append(self.parent.orca_exe)
@@ -1888,14 +1887,15 @@ ener = cf.kernel()"""
       out_fn = os.path.join(path,self.name + "_orca.log")
     elif "elmo" in args[nr]:
       out_fn = os.path.join(path,self.name + ".out")
-    elif "python" in args[2]:
+    elif "python" in args[nr]:
       out_fn = os.path.join(path,self.name + "_pyscf.log")
     if "ubuntu" in args[0]:
-      print("Starting Ubuntu and running pySCF, please be patient for start")
-    if "ubuntu" in args[0]:
-      out_fn = os.path.join(path,self.name + "_pyscf.log")
+      print("Starting Ubuntu for wavefunction calculation, please be patient for start")
     if out_fn == None:
-      out_fn = os.path.join(path,self.name + ".log")  
+      if "ubuntu" in args[0]:
+        out_fn = os.path.join(path,self.name + "_pyscf.log")
+      else:
+        out_fn = os.path.join(path,self.name + ".log")  
       
     tries = 0
     time.sleep(0.5)
@@ -1903,7 +1903,7 @@ ener = cf.kernel()"""
       time.sleep(1)
       tries += 1
       if tries >= 5:
-        if "python" in args[2] and tries <=10:
+        if "python" in args[nr] and tries <=10:
           continue
         print("Failed to locate the output file")
         OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
@@ -2390,7 +2390,7 @@ The following options were used:
   details_text = details_text + ":CIF"
   details_text += str(hash(details_text)) + '\n'
   cif_block_present = False
-  data_block = False
+  #data_block = False
   for line in tsc:
     if ("CIF:" not in line) and ("DATA:" not in line) and ("data:" not in line):
       write_file.write(line)
@@ -2398,14 +2398,14 @@ The following options were used:
       cif_block_present = True
       write_file.write(line)
     elif ("DATA:" in line):
-      data_block = True
+      #data_block = True
       if cif_block_present == False:
         write_file.write(details_text)
         write_file.write(line)
       else:
         write_file.write(line)
     elif ("data:" in line):
-      data_block = True
+      #data_block = True
       if cif_block_present == False:
         write_file.write(details_text)
         write_file.write(line)
@@ -2417,21 +2417,18 @@ The following options were used:
 OV.registerFunction(add_info_to_tsc,True,'NoSpherA2')
 
 def combine_tscs():
-  import glob
-  import math
+  gui.get_default_notification(txt="Combining .tsc files", txt_col='black_text')
+  args = []
+  NSP2_exe = OV.GetVar("Wfn2Fchk")
+  args.append(NSP2_exe)
+  args.append("-merge")
 
-  parts = list(OV.ListParts())
-  nr_parts = len(parts)
-  print("Combinging the .tsc files of disorder parts... please wait...")
+  print("Combinging the .tsc files of disorder parts... Please wait...")
 
   if debug:
     t_beg = time.time()
   sfc_name = OV.ModelSrc()
-  tsc_source = OV.GetParam('snum.NoSpherA2.source')
-
-  if tsc_source.lower().endswith("fchk"):
-    tsc_source = os.path.basename(tsc_source)
-
+  
   tsc_dst = os.path.join(OV.FilePath(), sfc_name + "_total.tsc")
   if os.path.exists(tsc_dst):
     backup = os.path.join(OV.FilePath(), "tsc_backup")
@@ -2443,125 +2440,48 @@ def combine_tscs():
     try:
       shutil.move(tsc_dst,os.path.join(backup,sfc_name + ".tsc") + "_%d"%i)
     except:
-      pass
-
-  d = {}
-  nr_atoms = 0
-  atom_list = []
-
-  for part in range(int(nr_parts)):
-    if parts[part] == 0:
-      continue
-    print("Working on .tsc of Part %d of %d"%(parts[part],int(nr_parts)-1))
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()    
-    tsc_fn = os.path.join(OV.FilePath(), sfc_name + "_part_%d.tsc"%parts[part])
-    if not os.path.isfile(tsc_fn):
-      print("Error finding tsc Files!\n")
-      return False
-
-    if debug:
-      t1 = time.time()
-
-    with open(tsc_fn) as f:
-      tsc = f.readlines()
-    part_atom_list = None
-    values = []
-    header = []
-    data = False
-    for line in tsc:
-      if data == True:
-        values.append(line)
-        continue
-      else:
-        header.append(line.replace('\n',''))
-      if 'SCATTERERS' in line:
-        part_atom_list = line[12: ].replace('\n','').split(' ')
-      elif 'data:' in line:
-        data = True
-        continue
-      elif 'DATA:' in line:
-        data = True
-        continue
-      elif 'Data:' in line:
-        data = True
-        continue
-
-    for atom in range(len(part_atom_list)):
-      name = part_atom_list[atom]
-      if name in atom_list:
-        continue
-      else:
-        nr_atoms += 1
-        #print ("Appending: %s\n" %name)
-        atom_list.append(name)
-      d.setdefault(name,{})
-      sfc_l = []
-      hkl_l = []
-
-      for line in range(len(values)):
-        digest = values[line].split(" ")
-        if parts[0] != 0:
-          if atom == 0 and part == 0:
-            hkl_l.append([digest[0],digest[1],digest[2]])
-        if atom == 0 and part == 1:
-          hkl_l.append([digest[0],digest[1],digest[2]])
-        sfc_l.append(digest[3+atom].replace('\n',''))
-      if atom == 0:
-        d.setdefault('hkl', hkl_l)
-      d[name].setdefault('sfc',sfc_l)
-
-  if debug:
-    print ("Time for reading and processing the separate files: %.2f" %(time.time() - t1))
+      pass  
+    
+  from os import walk
+    
+  _, _, filenames = next(walk(OV.FilePath()))
   
-  value_lines = ""
-  for i in range(len(values)):
-    temp_string = ""
-    for j in range(3):
-      temp_string += d['hkl'][i][j]+' '
-    for j in range(nr_atoms):
-      temp_string += d[atom_list[j]]['sfc'][i]+' '
-    value_lines += temp_string + '\n'
-
-  ol = []
-  _d = {'anomalous':'false',
-        'title': OV.FileName(),
-        'scatterers': " ".join(atom_list),
-        'software': OV.GetParam('snum.NoSpherA2.source'),
-        'method': OV.GetParam('snum.NoSpherA2.method'),
-        'basis_set': OV.GetParam('snum.NoSpherA2.basis_name'),
-        'charge': OV.GetParam('snum.NoSpherA2.charge'),
-        'mult': OV.GetParam('snum.NoSpherA2.multiplicity'),
-        'relativistic': OV.GetParam('snum.NoSpherA2.Relativistic'),
-        'radius': OV.GetParam('snum.NoSpherA2.cluster_radius'),
-        'DIIS': OV.GetParam('snum.NoSpherA2.DIIS')
-        }
-  for i in range(len(header)):
-    if 'SCATTERERS' in header[i]:
-      ol.append('SCATTERERS: %(scatterers)s'%_d)
-    elif 'SOFTWARE' in header[i]:
-      ol.append('   SOFTWARE:       %(software)s'%_d)
-    elif 'BASIS SET' in header[i]:
-      ol.append('   BASIS SET:      %(basis_set)s'%_d)
-    elif 'DATA:' in header[i]:
-      f_time = os.path.getctime(os.path.join(OV.FilePath(),sfc_name + "_part_1.tsc"))
-      import datetime
-      f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-      ol.append('   DATE:           %s'%f_date)
-      ol.append('   PARTS:          %d'%(int(nr_parts)-1))
-      if tsc_source == "Tonto":
-        ol.append('   CLUSTER RADIUS: %(radius)s'%_d)
-        ol.append('   DIIS CONV.:     %(DIIS)s'%_d)
-      ol.append('DATA:\n')
-    else:
-      ol.append(header[i].replace('\n',''))
-
-  t = "\n".join(ol)
-  with open(tsc_dst, 'w') as wFile:
-    wFile.write(t)
-    wFile.write(value_lines)
-
+  for f in filenames:
+    if "_part_" in f and ".tsc" in f:
+      args.append(os.path.join(OV.FilePath(), f))
+  startinfo = None
+  
+  from subprocess import Popen, PIPE, STARTUPINFO, STARTF_USESHOWWINDOW, SW_HIDE
+  from sys import stdout
+  if sys.platform[:3] == 'win':
+    startinfo = STARTUPINFO()
+    startinfo.dwFlags |= STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = SW_HIDE
+  
+  if startinfo == None:
+    with Popen(args, stdout=PIPE) as p:
+      for c in iter(lambda: p.stdout.read(1), b''): 
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+        if '\r' in string or '\n' in string:
+          olx.xf.EndUpdate()
+          if OV.HasGUI():
+            olx.Refresh()     
+  else:
+    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+      for c in iter(lambda: p.stdout.read(1), b''): 
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+        if '\r' in string or '\n' in string:
+          olx.xf.EndUpdate()
+          if OV.HasGUI():
+            olx.Refresh()
+  
+  tsc_dst = os.path.join(OV.FilePath(),sfc_name + "_total.tsc")
+  shutil.move(os.path.join(OV.FilePath(),"combined.tsc"),tsc_dst)
+  
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
     olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
@@ -3964,6 +3884,75 @@ def heavy_final():
   OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(heavy_final, False, "NoSpherA2")
+
+def psi4():
+  import psi4
+  psi4.geometry("""
+O  2.7063023580 5.1528084960 8.7720795339
+O  3.3917574233 4.6987620000 6.5946475188
+O  3.3951198906 7.3446337920 8.3358309397
+O  3.5584508738 5.4011996640 11.3644823059
+H  3.9006607840 4.8830494080 11.1073486405
+O  0.0777075174 4.3750162080 8.1552339725
+H  -0.8348749233 5.0153560800 7.5389177106
+O  0.5790341980 6.1209060960 10.2647039402
+H  0.5199558750 5.2261571520 9.6673365980
+O  5.9710316304 7.3284116160 10.8122112756
+H  7.0596333792 6.6514410240 10.7672208236
+O  5.8122422037 6.1015441440 7.1287106485
+H  4.6869574832 6.3973808160 6.7212559436
+O  4.5348713625 3.4297692000 4.4283307918
+H  4.4649589816 4.3055922720 4.3947732076
+O  0.6221059176 1.6562318400 7.3208463434
+H  0.0542246615 1.4387151360 8.4539705735
+O  3.4196014307 1.0813039680 6.8952895978
+H  2.6365932773 0.2366170080 7.1116672067
+C  2.2907529119 5.0602723200 7.4142147637
+H  1.9724426610 6.0465980640 7.0040077017
+C  3.6799020526 6.5094533760 10.5130512350
+H  3.4079286655 7.4494674240 11.1040669840
+C  2.7674469766 6.5041332000 9.2667627857
+C  5.0653480467 6.7215626880 9.9006517889
+H  5.4745713694 5.7394233120 9.5440098297
+C  2.8085932626 2.3223876480 6.6235472679
+H  2.4041473554 2.3378248800 5.5971298038
+C  1.1531809098 4.0439442720 7.2764910508
+H  0.7962560402 4.0444675680 6.2010604590
+C  1.6368850964 2.6190964800 7.5673940202
+H  2.0163570849 2.5153966560 8.6195354368
+C  4.7613582222 7.6483199040 8.7213726480
+H  4.7945236343 8.7079943040 9.0026423677
+C  1.3504633130 7.0304817600 9.5008189958
+H  0.8884059681 7.2729422400 8.4842465012
+H  1.4228497713 8.0140165920 9.9861865776
+C  3.9116136622 3.3699390240 6.7894297108
+H  4.3812157993 3.2453073600 7.8100248811
+C  5.0179353755 3.1993445280 5.7475567032
+H  5.3801952506 2.1660093600 5.8059913608
+H  5.8953563191 3.9488788320 5.9985504952
+C  5.6803463582 7.4588867520 7.5271672631
+H  6.6956267802 7.8106288800 7.8564973715
+H  5.3388863094 8.1423113280 6.6742541538
+""")
+
+  psi4.set_num_threads(6)
+  sfc_name = OV.ModelSrc()
+  psi4.set_memory('15000 MB')
+  out = os.path.join(OV.FilePath(), sfc_name + "_psi4.log")
+  psi4.core.set_output_file(out)
+  psi4.set_options({'scf_type': 'DF',
+  'dft_pruning_scheme': 'treutler',
+  'dft_radial_points': 20,
+  'dft_spherical_points': 110,
+  'dft_basis_tolerance': 1E-10,
+  'dft_density_tolerance': 1.0E-10,
+  'ints_tolerance': 1.0E-8,
+  'df_basis_scf': 'def2-universal-jkfit',
+  })
+  E, wfn = psi4.energy('pbe/cc-pVTZ', return_wfn=True)
+  psi4.fchk(wfn, os.path.join(OV.FilePath(), sfc_name + ".fchk"))
+  return None
+OV.registerFunction(psi4, False, "NoSpherA2")
   
 
 NoSpherA2_instance = NoSpherA2()

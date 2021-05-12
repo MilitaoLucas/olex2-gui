@@ -739,13 +739,14 @@ class RunRefinementPrg(RunPrg):
       flack_display = "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
-      flack_error = float(fs[1][:-1])
-      temp = flack_val
-      while abs(temp) < 1.0:
-        temp *= 10
-        flack_error /= 10
-      if flack_val > 0.8 and flack_val-flack_error > 0.5:
-        inversion_needed = True
+      if flack_val != 0:
+        flack_error = float(fs[1][:-1])
+        temp = flack_val        
+        while abs(temp) < 1.0:
+          temp *= 10
+          flack_error /= 10
+        if flack_val > 0.8 and flack_val-flack_error > 0.5:
+          inversion_needed = True
 
     print("%s, %s" %(hooft_display, flack_display))
 
@@ -872,21 +873,22 @@ class RunRefinementPrg(RunPrg):
     energy = None
     for file in os.listdir(olx.FilePath()):
       if file.endswith(".wfn"):
-        with open(file) as f:
-          fread = f.readlines()
-          for line in fread:
-            if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                try:
-                  energy = float(line.split()[3])
-                except:
-                  energy = None
-              else:
-                try:
-                  energy = float(line[17:38])
-                except:
-                  energy = None
+        with open(file, "rb") as f:
+          f.seek(-2000,os.SEEK_END)
+          fread = f.readlines()[-1].decode()
+          if "THE VIRIAL" in fread:
+            source = OV.GetParam('snum.NoSpherA2.source')
+            if "Gaussian" in source:
+              try:
+                energy = float(fread.split()[3])
+              except:
+                energy = None
+            else:
+              try:
+                energy = float(fread[17:38])
+              except:
+                energy = None
+        fread = None
     if energy == None:
       HAR_log.write("{:^24.10}".format(" "))
     else:
@@ -940,7 +942,6 @@ class RunRefinementPrg(RunPrg):
       if Error_Status != "None":
         print("Error in NoSpherA2: %s" %Error_Status)
         return False
-      dir = olx.FilePath()
       tsc_exists = False
       wfn_file = None
       for file in os.listdir(olx.FilePath()):
@@ -954,27 +955,30 @@ class RunRefinementPrg(RunPrg):
         return False
 
       # get energy from wfn file
+      #TODO Check if WFN is new, otherwise skip this!
       energy = None
       if (wfn_file != None) and (calculate == True):
-        with open(wfn_file) as f:
-          fread = f.readlines()
-          for line in fread:
-            if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                energy = float(line.split()[3])
-              elif "ORCA" in source:
-                energy = float(line.split()[4])
-              elif "pySCF" in source:
-                energy = float(line.split()[4])
-              elif ".wfn" in source:
-                energy = 0.0
-              elif "Tonto" in source:
-                energy = float(line.split()[4])
-              else:
-                energy = 0.0
+        with open(wfn_file, "rb") as f:
+          f.seek(-2000,os.SEEK_END)
+          fread = f.readlines()[-1].decode()
+          if "THE VIRIAL" in fread:
+            source = OV.GetParam('snum.NoSpherA2.source')
+            if "Gaussian" in source:
+              energy = float(fread.split()[3])
+            elif "ORCA" in source:
+              energy = float(fread.split()[4])
+            elif "pySCF" in source:
+              energy = float(fread.split()[4])
+            elif ".wfn" in source:
+              energy = float(fread[17:38])
+            elif "Tonto" in source:
+              energy = float(fread.split()[4])
+            else:
+              energy = 0.0
         if energy is not None:
           HAR_log.write("{:^24.10f}".format(energy))
+        else:
+          HAR_log.write("{:24}".format(" "))
         fread = None
       else:
         HAR_log.write("{:24}".format(" "))
@@ -1004,10 +1008,6 @@ class RunRefinementPrg(RunPrg):
 
       max_dxyz = 0
       max_duij = 0
-      max_shift_atom_xyz = 0
-      matrix_run_max_shift_xyz = 0
-      max_shift_atom_uij = 0
-      matrix_run_max_shift_uij = 0
 
       try:
         jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
@@ -1022,6 +1022,11 @@ class RunRefinementPrg(RunPrg):
       matrix_run = 0
       label_uij = None
       label_xyz = None
+      print("Analyzing NoSpherA2 shifts...")
+      olx.xf.EndUpdate()
+      if OV.HasGUI():
+        olx.Refresh()      
+      uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
       for i, atom in enumerate(new_model._atoms):
         xyz = atom['crd'][0]
         xyz2 = old_model._atoms[i]['crd'][0]
@@ -1031,42 +1036,53 @@ class RunRefinementPrg(RunPrg):
             if abs(xyz[x] - xyz2[x])/esds[matrix_run] > max_dxyz:
               max_dxyz = abs(xyz[x] - xyz2[x])/esds[matrix_run]
               label_xyz = annotations[matrix_run]
-              max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
-              matrix_run_max_shift_xyz = matrix_run
+              #max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
+              #matrix_run_max_shift_xyz = matrix_run
           matrix_run += 1
         has_adp_new = new_model._atoms[i].get('adp')
         has_adp_old = old_model._atoms[i].get('adp')
         if has_adp_new != None and has_adp_old != None:
           adp = atom['adp'][0]
           adp2 = old_model._atoms[i]['adp'][0]
-          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
-          adp2 = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp2)
+          adp = adptbx.u_cart_as_u_cif(uc, adp)
+          adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
           adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
+          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
           for u in range(6):
             # if parameter is fixed and therefore has 0 esd
             if esds[matrix_run] > 0:
-              if abs(adp[u] - adp2[u])/adp_esds[u] > max_duij:
-                max_duij = abs(adp[u] - adp2[u])/adp_esds[u]
+              res = abs(adp[u] - adp2[u])/adp_esds[u]
+              if res > max_duij:
+                max_duij = res
                 label_uij = annotations[matrix_run]
-                max_shift_atom_uij = abs(adp[u] - adp2[u])
-                matrix_run_max_shift_uij = matrix_run
-            matrix_run += 1
-          if matrix_run < len(annotations):
-            if "C111" in annotations[matrix_run]:
-              matrix_run += 25
-        elif has_adp_new != None:
           matrix_run += 6
-        elif has_adp_old == None:
+          if matrix_run < len(annotations):
+            if ".C111" in annotations[matrix_run]:
+              matrix_run += 25
+        elif has_adp_new != None and has_adp_old == None:
+          adp = atom['uiso'][0]
+          adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
+          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
+          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+          for u in range(6):
+            if esds[matrix_run] > 0:
+              res = abs(adp - adp2[u])/adp_esds[u]
+              if res > max_duij:
+                max_duij = res
+                label_uij = annotations[matrix_run]              
+          matrix_run += 6
+          if matrix_run < len(annotations):
+            if ".C111" in annotations[matrix_run]:
+              matrix_run += 25          
+        elif has_adp_old == None and has_adp_new == None:
           adp = atom['uiso'][0]
           adp2 = old_model._atoms[i]['uiso'][0]
           adp_esd = esds[matrix_run]
           if esds[matrix_run] > 0:
-            if abs(adp - adp2)/adp_esd > max_duij:
-              max_duij = abs(adp - adp2)/adp_esd
+            res = abs(adp - adp2)/adp_esd
+            if res > max_duij:
+              max_duij = res
               label_uij = annotations[matrix_run]
-              max_shift_atom_uij = abs(adp - adp2)
-              matrix_run_max_shift_uij = matrix_run
           matrix_run += 1
         if matrix_run < len(annotations):
           if 'occ' in annotations[matrix_run]:
@@ -1115,7 +1131,7 @@ class RunRefinementPrg(RunPrg):
     # Done with the while !Converged
     OV.SetParam('snum.NoSpherA2.Calculate',False)
     if converged == False:
-      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!!\n")
+      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
       self.refinement_has_failed= "Warning: Unconverged Model!"
     if "DISCAMB" in source:
       unknown_sources = False
@@ -1234,7 +1250,7 @@ def delete_stale_fcf():
   fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
   res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
   if os.path.exists(fcf) and os.path.exists(fcf):
-    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
+    if round(os.path.getmtime(fcf)*0.05) == round(os.path.getmtime(res)*0.05):
       return True
     else:
       print("Deleting stale fcf: %s" %fcf)
