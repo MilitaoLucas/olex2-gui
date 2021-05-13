@@ -73,8 +73,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.scale_factor = None
     self.failure = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
-    self.flack = None
     self.hooft = None
+    self.hooft_str = ""
     self.on_completion = on_completion
     # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
@@ -268,18 +268,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1_all_data = self.normal_eqns.r1_factor()
       try:
         self.check_hooft()
-        if self.hooft:
-          OV.SetParam('snum.refinement.flack_str', self.hooft)
-        else:
-          OV.SetParam('snum.refinement.flack_str', "")
-        self.check_flack()
-        #if self.flack:
-        #  OV.SetParam('snum.refinement.flack_str', self.flack)
-        #else:
-        #  OV.SetParam('snum.refinement.flack_str', "")
       except:
-        OV.SetParam('snum.refinement.flack_str', "")
-        print("Failed to evaluate Flack parameter")
+        print("Failed to evaluate Hooft parameter")
+      OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
@@ -381,7 +372,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         rv += self.twin_components
     return rv
 
-  def check_flack(self):
+  def calc_flack(self):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
@@ -389,7 +380,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
-          self.flack = utils.format_float_with_standard_uncertainty(flack, su)
+          return utils.format_float_with_standard_uncertainty(flack, su)
       else:
         if self.observations.merohedral_components or self.observations.twin_fractions:
           if self.use_tsc:
@@ -406,23 +397,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.extinction,
           connectivity_table=self.connectivity_table
         )
-        self.flack = utils.format_float_with_standard_uncertainty(
+        return utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
+      return None
 
   def check_hooft(self):
-    from cctbx_olex_adapter import hooft_analysis
-
-    hooft_display = ""
-
-    try:
-      hooft = hooft_analysis()
-    except utils.Sorry as e:
-      print(e)
-    else:
-      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-        hooft_display = utils.format_float_with_standard_uncertainty(
-          hooft.hooft_y, hooft.sigma_y)
-        self.hooft = hooft_display
+    if self.hooft:
+      return self.hooft
+    if (not self.xray_structure().space_group().is_centric()
+        and self.normal_eqns.observations.fo_sq.anomalous_flag()):
+      from cctbx_olex_adapter import hooft_analysis
+      try:
+        self.hooft = hooft_analysis()
+        self.hooft_str = utils.format_float_with_standard_uncertainty(
+          self.hooft.hooft_y, self.hooft.sigma_y)
+      except utils.Sorry as e:
+        print(e)
+      # people still would want to see this...
+      flack = self.calc_flack()
+      OV.SetParam('snum.refinement.flack_str', flack)
 
   def get_radiation_type(self):
     from cctbx.eltbx import wavelengths
@@ -750,7 +743,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.hooft is not None:
         cif_block['_refine_ls_abs_structure_details'] = \
                  'Hooft, R.W.W., Straver, L.H., Spek, A.L. (2010). J. Appl. Cryst., 43, 665-668.'
-        cif_block['_refine_ls_abs_structure_Flack'] = self.hooft
+        cif_block['_refine_ls_abs_structure_Flack'] = self.hooft_str
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.extinction.expression:
