@@ -282,7 +282,7 @@ def LoadStructureParams():
       'Peak': 'snum.refinement.max_peak',
       'Hole': 'snum.refinement.max_hole',
       'Shift_max': 'snum.refinement.max_shift_over_esd',
-      'Flack': 'snum.refinement.flack_str',
+      'Flack': 'snum.refinement.hooft_str',
       'GOOF': 'snum.refinement.goof',
     }
     for p in olx.xf.RefinementInfo().split(';'):

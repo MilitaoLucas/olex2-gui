@@ -149,11 +149,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       'snum.refinement.max_shift_u' : 'max_dU',
       'snum.refinement.max_shift_u_atom' : 'max_dU_object',
       'snum.refinement.flack_str' : 'flack',
+      'snum.refinement.parson_str' : 'parson',
       'snum.refinement.goof' : "s",
     }
     for k,v in params.items():
       v = olx.Lst(v)
-      if v == 'n/a':  v = 0
+      if v == 'n/a':  v = ""
       OV.SetParam(k, v)
     try:
       parameters = float(olx.Lst('param_n'))
@@ -163,7 +164,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.parameters', parameters)
     except:
       OV.SetParam('snum.refinement.data_parameter_ratio', None)
-
 
   def gather_refinement_information(self):
     cif = {}
@@ -177,7 +177,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     cif.setdefault('_reflns_number_gt', olx.Lst('ref_4sig'))
     cif.setdefault('_refine_ls_number_parameters', olx.Lst('param_n'))
     cif.setdefault('_refine_ls_number_restraints', olx.Lst('restraints_n'))
-    cif.setdefault('_refine_ls_abs_structure_Flack', olx.Lst('flack'))
+    parsons_q = olx.Lst('parson')
+    if parsons_q == "n/a":
+      cif['_refine_ls_abs_structure_Flack'] = olx.Lst('flack')
+    else:
+      cif['_refine_ls_abs_structure_Flack'] = parsons_q
     cif.setdefault('_refine_diff_density_max', olx.Lst('peak'))
     cif.setdefault('_refine_diff_density_min', olx.Lst('hole'))
     self.cif = cif
@@ -186,13 +190,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     import Analysis
     self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
     OV.registerCallback("procout", self.observer.observe)
-
-  def getFlack(self):
-    flack = olx.Lst('flack')
-    if flack == "n/a":
-      flack = None
-
-    return flack
 
 class Method_shelxt(Method_shelx_solution):
   def pre_solution(self, RunPrgObject):
