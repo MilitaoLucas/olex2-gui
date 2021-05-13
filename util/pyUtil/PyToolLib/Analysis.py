@@ -3398,9 +3398,9 @@ class HealthOfStructure():
           l.remove("_refine_ls_abs_structure_Flack")
 
       else:
-        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','flack_str']
-        if OV.GetParam('snum.refinement.flack_str')== "0" or not OV.GetParam('snum.refinement.flack_str'):
-          l.remove("flack_str")
+        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','hooft_str']
+        if not OV.GetParam('snum.refinement.hooft_str'):
+          l.remove("hooft_str")
     else:
       self.scope = "hkl"
       ## If there is no CIF information and no hkl file, we don't have stats, but still have {'IsCentrosymmetric} as a single item
@@ -3446,7 +3446,7 @@ class HealthOfStructure():
       elif item == "_refine_ls_shift_over_su_max":
         item = 'max_shift_over_esd'
       elif item == "_refine_ls_abs_structure_Flack":
-        item = 'flack_str'
+        item = 'hooft_str'
 
       display = OV.GetParam('user.diagnostics.%s.%s.display' %(self.scope,item))
 
@@ -3471,7 +3471,7 @@ class HealthOfStructure():
       raw_val = value
       bg_colour = None
       flack_esd_f = 0
-      if item == "flack_str":
+      if item == "hooft_str":
         if "(" not in str(value):
           value = str(value) + "()"
         flack_val = value.split("(")[0]
@@ -3681,7 +3681,7 @@ class HealthOfStructure():
 
     top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
 
-    if item == "flack_str":
+    if item == "hooft_str":
       x = boxWidth * second_colour_begin
       box = (x,0,boxWidth,boxHeight)
       fill = second_colour
