@@ -62,16 +62,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         self.shifts_over_su = jac_tr.transpose() * shifts_over_su
     return self.shifts_over_su
 
-  def show_cycle_summary(self, log=None):
-    if log is None: log = sys.stdout
-    # self.reparametrisation.n_independents + OSF
-    max_shift_site = self.max_shift_site()
-    OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
-    OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
-    max_shift_u = self.max_shift_u()
-    OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
-    OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
-
+  def analyse_shifts(self):
     shifts = self.get_shifts()
     max_shift_esd = 0
     max_shift_esd_item = "n/a"
@@ -86,10 +77,19 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       max_shift_esd_item = self.reparametrisation.component_annotations[max_shift_idx]
       self.max_shift_esd = max_shift_esd
       self.max_shift_esd_item = max_shift_esd_item
-
     except Exception as s:
       print(s)
 
+  def show_cycle_summary(self, log=None):
+    if log is None: log = sys.stdout
+    # self.reparametrisation.n_independents + OSF
+    max_shift_site = self.max_shift_site()
+    OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
+    OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
+    max_shift_u = self.max_shift_u()
+    OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
+    OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
+    self.analyse_shifts()
     print_tabular = True
 
     if print_tabular:
@@ -98,8 +98,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         self.r1_factor(cutoff_factor=2)[0]*100,
         self.wR2()*100,
         self.goof(),
-        max_shift_esd,
-        '('+max_shift_esd_item+')',
+        self.max_shift_esd,
+        '('+self.max_shift_esd_item+')',
         max_shift_site[0],
         '('+max_shift_site[1].label+')',
         max_shift_u[0],
@@ -280,7 +280,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if OV.HasGUI():
       olx.Refresh()
     if OV.isInterruptSet():
-      raise RuntimeError('external_interrupt')
+      self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
+      self.iterations_object.interrupted = True
 
 
 from scitbx.lstbx import normal_eqns_solving
@@ -301,10 +302,21 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
   def check_shift_over_esd(self):
     return self.do_scale_shifts(1e16)
 
+  def do_naive(self):
+    while self.n_iterations < self.n_max_iterations:
+      self.non_linear_ls.build_up()
+      if self.has_gradient_converged_to_zero(): break
+      self.non_linear_ls.solve()
+      self.non_linear_ls.step_forward()
+      self.n_iterations += 1
+      if self.check_shift_over_esd() or self.had_too_small_a_step():
+        break
+    self.non_linear_ls.build_up()
+
   def do(self):
     self.mu_history = flex.double()
     self.non_linear_ls.build_up()
-    if self.has_gradient_converged_to_zero():
+    if self.has_gradient_converged_to_zero() or self.n_max_iterations == 0:
       return
     self.n_iterations = 0
     nu = 2
@@ -315,31 +327,29 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
       objective = self.non_linear_ls.objective()
       g = -self.non_linear_ls.opposite_of_gradient()
       self.non_linear_ls.solve()
-      self.n_iterations += 1
       h = self.non_linear_ls.step()
       expected_decrease = 0.5*h.dot(self.mu*h - g)
-      if OV.GetParam('snum.NoSpherA2.make_fcf_only') == True:
+      if self.check_shift_over_esd() or self.max_ls_shift_over_su < 1e-2:
+        self.do_naive()
         return
       self.non_linear_ls.step_forward()
-      if self.check_shift_over_esd():
-        # not sure why but without this esds become very small!
-        self.non_linear_ls.build_up()
-        break
+      self.n_iterations += 1
       self.non_linear_ls.build_up(objective_only=True)
       objective_new = self.non_linear_ls.objective()
       actual_decrease = objective - objective_new
       rho = actual_decrease/expected_decrease
       if rho > 0:
+        if self.has_gradient_converged_to_zero(): break
         self.mu *= max(1/3, 1 - (2*rho - 1)**3)
         nu = 2
       else:
-        if self.n_iterations + 1 < self.n_max_iterations:
-          self.non_linear_ls.step_backward()
+        self.non_linear_ls.step_backward()
         self.mu *= nu
         nu *= 2
       self.non_linear_ls.build_up()
+    # get proper s.u.
+    self.non_linear_ls.build_up()
 
   def __str__(self):
     return "Levenberg-Marquardt"
-
 
