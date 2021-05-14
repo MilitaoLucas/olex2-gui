@@ -207,14 +207,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if build_only:
       return self.normal_eqns
     method = OV.GetParam('snum.refinement.method')
-    iterations = FullMatrixRefine.solvers.get(method)
-    if iterations == None:
+    iterations_class = FullMatrixRefine.solvers.get(method)
+    if iterations_class == None:
       method = solvers_default_method
-      iterations = FullMatrixRefine.solvers.get(method)
+      iterations_class = FullMatrixRefine.solvers.get(method)
       print("WARNING: unsupported method: '%s' is replaced by '%s'"\
         %(method, solvers_default_method))
-    assert iterations is not None
+    assert iterations_class is not None
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+    if fcf_only:
+      self.max_cycles = 0
     try:
       damping = OV.GetDampingParams()
       self.data_to_parameter_watch()
@@ -222,11 +224,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.print_table_header()
         self.print_table_header(self.log)
 
-      class refinementWrapper(iterations):
+      class refinementWrapper(iterations_class):
         def __init__(self, parent, normal_eqs, *args, **kwds):
+          self.parent = parent
           parent.cycles = self
           normal_eqs.iterations_object = self
-          super(iterations, self).__init__(normal_eqs, *args, **kwds)
+          super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
+        def do(self):
+          if self.n_max_iterations == 0:
+            self.n_iterations = 0
+            self.non_linear_ls.build_up()
+          else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
+            iterations_class.do(self)
+        @property
+        def interrupted(self):
+          return self.parent.interrupted
+        @interrupted.setter
+        def interrupted(self, val):
+          self.parent.interrupted = val
 
       try:
         if(method=='Levenberg-Marquardt'):
@@ -1393,24 +1408,20 @@ The following options were used:
       max_shift_esd = self.normal_eqns.max_shift_esd
       max_shift_esd_item = self.normal_eqns.max_shift_esd_item
       print("  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
-      max_shift_site[0],
-      max_shift_site[1].label,
-      max_shift_u[0],
-      max_shift_u[1].label,
-      max_shift_esd,
-      max_shift_esd_item
-      ), file=log)
+        max_shift_site[0],
+        max_shift_site[1].label,
+        max_shift_u[0],
+        max_shift_u[1].label,
+        max_shift_esd,
+        max_shift_esd_item
+        ), file=log)
     else:
-      max_shift_site = 99
-      max_shift_u = 99
-      max_shift_esd = 99
-      max_shift_esd_item = 99
-      print("NO CYCLES!", file=log)
+      self.normal_eqns.analyse_shifts()
+      max_shift_esd = self.normal_eqns.max_shift_esd
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
-
 
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)
