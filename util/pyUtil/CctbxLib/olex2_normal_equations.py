@@ -316,16 +316,13 @@ class naive_iterations_with_damping_and_shift_limit(
       self.reset_shifts()
       self.non_linear_ls.build_up()
       grad_norm = self.non_linear_ls.opposite_of_gradient().norm_inf()
-      if self.has_gradient_converged_to_zero():
-        do_last = True
+      if self.has_gradient_converged_to_zero(): break
       self.do_damping(self.damping_value)
       self.non_linear_ls.solve()
-      step_too_small = self.had_too_small_a_step()
-      if not step_too_small:
-        step_too_small = self.analyse_shifts(self.max_shift_over_esd)
+      if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+        break
       self.non_linear_ls.step_forward()
       self.n_iterations += 1
-      if do_last or step_too_small: break
 
   def __str__(self):
     return "Gauss-Newton with damping and shift scaling"
