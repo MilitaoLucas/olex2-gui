@@ -89,8 +89,15 @@ class item_vs_resolution(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
     self.item = item
+    
+    if self.item == "refln_vs_resolution":
+      fo2 = self.reflections.f_sq_obs_merged
+      fo2.setup_binner(n_bins=n_bins)
+      self.info = fo2.info()
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = fo2.mean(use_binning=True)
 
-    if self.item == "rmerge_vs_resolution":
+    elif self.item == "rmerge_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       self.info = fo2.info()
       stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
@@ -103,8 +110,8 @@ class item_vs_resolution(OlexCctbxAdapter):
       self.binned_data.show = stats.show
       #for b in result.bins:
         #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
-
-    if self.item == "i_over_sigma_vs_resolution":
+        
+    elif self.item == "i_over_sigma_vs_resolution":
       fo2 = self.reflections.f_sq_obs_merged
       fo2.setup_binner(n_bins=n_bins)
       self.info = fo2.info()
@@ -113,6 +120,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.mean(use_binning=True)
       print("CC 1/2 = %.3f" %fo2.cc_one_half())
+      
     elif self.item == "cc_half_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -146,7 +154,8 @@ class item_vs_resolution(OlexCctbxAdapter):
 
   def xy_plot_info(self):
     r = empty()
-    r.title = self.item
+    if hasattr(self,'item'):
+      r.title = self.item
     if (self.info is not None):
       r.title += ": " + str(self.info)
     try:
@@ -169,7 +178,14 @@ class item_vs_resolution(OlexCctbxAdapter):
       resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
     r.x = resolution
 
-    r.y = self.binned_data.data[1:-1]
+    if self.item == "refln_vs_resolution":
+      temp = self.binned_data.binner._counts_complete[1:-1]
+      for i in range(len(temp)):
+        if(i>0):
+          temp[i] = temp[i] + temp[i - 1]
+      r.y = temp
+    else:
+      r.y = self.binned_data.data[1:-1]
     r.xLegend = self.resolution_as
     legend_y = "Y-Axis"
     if "r1" in self.item:
@@ -180,6 +196,8 @@ class item_vs_resolution(OlexCctbxAdapter):
       legend_y = "CC 1/2"
     elif "rmerge_vs_resolution" in self.item:
       legend_y = "R_merge"
+    elif "refln_vs_resolution" in self.item:
+      legend_y = "# of refln."
     r.yLegend = legend_y
     return r
 

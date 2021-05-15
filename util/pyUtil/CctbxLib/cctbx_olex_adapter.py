@@ -130,7 +130,8 @@ class OlexCctbxAdapter(object):
     self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
 
   def __del__(self):
-    sys.stdout.refresh = False
+    #sys.stdout.refresh = False
+    return
 
   def xray_structure(self, construct_restraints=False):
     if self._xray_structure is None or construct_restraints:

@@ -395,9 +395,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             #combine_sfs(force=True,part=i)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
           else:
-            if wfn_code == "ELMOdb":
-              wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfx")
-            else:
+            wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfx")
+            if(not os.path.exists(wfn_fn)):
               wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
             hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
