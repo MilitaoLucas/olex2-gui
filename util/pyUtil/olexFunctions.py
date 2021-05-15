@@ -383,12 +383,14 @@ class OlexFunctions(inheritFunctions):
       return False
 
   def GetDampingParams(self):
-    default = (0.7/1000, 15)
+    default = [0.7/1000, 15]
     try:
       v = olx.Ins('DAMP').split()
-      if len(v) != 2:
-        return default
-      return (float(v[0])/1000, float(v[1]))
+      if len(v) > 0:
+         default[0] = float(v[0])/1000
+      if len(v) > 1:
+         default[1] = float(v[1])
+      return default
     except:
       return default
 

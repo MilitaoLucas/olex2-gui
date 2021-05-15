@@ -857,7 +857,7 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
     OV.SetParam('%s.refinement.method' %scope, 'Auto')
     return
   prg = RPD.programs[prg_name]
-  if method is None or not method:
+  if not method:
     method = sortDefaultMethod(prg)
     if not OV.IsFileType('cif'):
       if method == 'Least Squares' and olx.LSM() == 'CGLS':
