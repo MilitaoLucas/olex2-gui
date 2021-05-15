@@ -268,7 +268,7 @@ routines requiring structure refinement
     program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine' \
       Unknown 
       .type = choice
-    method = 'Least Squares' CGLS 'Gauss-Newton' '*Levenberg-Marquardt' \
+    method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix' Unknown
       .type = choice
     sg_list = None
