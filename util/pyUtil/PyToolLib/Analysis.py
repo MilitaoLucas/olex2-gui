@@ -1634,6 +1634,8 @@ class Analysis(Graph):
         var = li.split("=")[0].strip("#")
         var = var.strip()
         val = li.split("=")[1].strip()
+        if "x_label" in var:
+           val = "ln(<mFo^2>m)/(Fexp^2)"
         metadata.setdefault(var, val)
       else:
         xy = li.split(",")
@@ -1996,19 +1998,21 @@ class WilsonPlot(Analysis):
     text = []
     text.append("B = %.3f" %float(metadata.get("B")))
     text.append("K = %.3f" %float(metadata.get("K")))
-    text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
-    text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
+    text.append("<m|E^2-1|>m = %.3f" % float(metadata.get("<|E^2-1|>", 0)))
+    text.append(r"|E| > 2 = %.2f%%"%float(metadata.get(r"%|E| > 2", 0)))
 
 #    left = grad.size[0] + self.xSpace + imX * 0.04
 #    top = self.im.size[1] - imY * 0.02
     left = grad.size[0] + self.xSpace + imX * 0.04
-    top = self.im.size[1] - grad.size[1] + 18
+    top = self.im.size[1] - grad.size[1] + 22
     top_original = top
     i = 0
     for txt in text:
-      unicode_txt = IT.get_unicode_characters(txt)
+      txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
+      #unicode_txt = IT.get_unicode_characters(txt)
       wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
-
+      if i == 0:
+        first_wX = wX
       colour = "#444444"
       if "E^2" in txt:
         if float(estats) < float(self.wilson_grad_begin):
@@ -2017,11 +2021,12 @@ class WilsonPlot(Analysis):
           colour = "#ff0000"
       top_left = (left, top)
       IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
-      top += wY +2
+      
+      top += 13
       i += 1
       if i == 2:
         top = top_original
-        left = int(grad.size[0] + self.xSpace + imX * 0.14)
+        left += first_wX * 2
     self.im = new
 
   def cctbx_wilson_statistics(self):
@@ -2032,7 +2037,7 @@ class WilsonPlot(Analysis):
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
     metadata.setdefault("B", wp.wilson_b)
     metadata.setdefault("y_label", "sin^2(theta)/lambda^2")
-    metadata.setdefault("x_label", "ln(<Fo2>).Fexp2)")
+    metadata.setdefault("x_label", "ln(<mFo2>m).Fexp2)")
     # convert axes in formula
     metadata.setdefault("fit_slope", 1/wp.fit_slope)
     metadata.setdefault("fit_y_intercept", -wp.fit_y_intercept/wp.fit_slope)
@@ -2102,11 +2107,11 @@ class WilsonPlot(Analysis):
         txt = "acentric"
         txt = OV.TranslatePhrase(txt)
         wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
-        top_left = (i-int(wX/2), 0)
+        top_left = (i - int(wX / 2), 0)
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
         txt = "0.736"
         wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
+        draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       if i == (margin_right):
         txt = "centric"
         txt = OV.TranslatePhrase(txt)
@@ -2115,7 +2120,7 @@ class WilsonPlot(Analysis):
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
         txt = "0.968"
         wX, wY = draw.textsize(txt, font=self.font_small)
-        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
+        draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       top =  int(boxTopOffset+1)
       bottom = int(boxTopOffset+boxHeight-2)
       if i < margin_left:
@@ -3276,7 +3281,10 @@ def make_reflection_graph(name):
     fun(arg)
   else:
     if func:
-      func()
+      try:
+        func()
+      except Exception as e:
+        print(e)
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
@@ -3976,3 +3984,5 @@ def title_replace(title):
   title = title.replace(" vs ", " <i>vs</i>")
   title = title.replace("_", "-")
   return title
+
+
