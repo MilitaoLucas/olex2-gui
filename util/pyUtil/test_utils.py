@@ -10,8 +10,9 @@ from olexFunctions import OV
 class TestUtils():
   def __init__(self):
     pass
-  def calc_R_as_function_of_BASF(self, start=0, end = 1.0):
+  def calc_R_as_function_of_BASF(self, start=0, end = 1.0, update_scale=False):
     start, end = float(start), float(end)
+    update_scale = bool(update_scale)
     coa = OlexCctbxAdapter()
     weight = coa.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
@@ -21,15 +22,29 @@ class TestUtils():
       params[param] = value
     weighting = least_squares.mainstream_shelx_weighting(**params)
     fo2 = coa.reflections.f_sq_obs_filtered
-    fc = coa.f_calc(None, coa.exti is not None, False,
-      ignore_inversion_twin=False,
-      twin_data=False)
+
     if coa.twin_components and len(coa.twin_components) == 1:
       twc = coa.twin_components[0]
     elif coa.twin_fractions and len(coa.twin_fractions) == 1:
       twc = coa.twin_fractions[0]
     else:
       print("One BASF parameter is expected, aborting")
+    indices = set()
+    for i, m in enumerate(coa.observations.indices):
+      indices.add(m)
+      itr = coa.observations.iterator(i)
+      while itr.has_next():
+        indices.add(itr.next().h)
+
+    miller_set = miller.set(
+      crystal_symmetry=coa.xray_structure().crystal_symmetry(),
+        indices=flex.miller_index(list(indices))).auto_anomalous().map_to_asu()
+    fc = coa.f_calc(miller_set,
+      coa.exti is not None,
+      False,
+      ignore_inversion_twin=False,
+      twin_data=False)
+
     print("BASF->wR2")
     for v in range(0, 100):
       twc.value = start + (end-start)*v/100
@@ -39,8 +54,11 @@ class TestUtils():
         fc.indices(),
         fc.as_intensity_array().data())
 
-      den = flex.sum(o_tw.data*o_tw.data)
-      scale_factor = flex.sum(fo2.data()*o_tw.data)/den
+      if update_scale:
+        den = flex.sum(o_tw.data*o_tw.data)
+        scale_factor = flex.sum(fo2.data()*o_tw.data)/den
+      else:
+        scale_factor = OV.GetOSF()
 
       wght = []
       for i, fo_sq in enumerate(fo2.data()):
