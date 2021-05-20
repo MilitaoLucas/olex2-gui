@@ -580,11 +580,11 @@ class fractal_dimension(OlexCctbxAdapter):
       temp = lines[i+1].split()
       self.x[i],self.y[i] = float(temp[0]),float(temp[1])
       if i == 0:
-        if self.x[i] < min_max[0]+0.5:
-          min_max[0] = self.x[i] - 0.5
+        if self.x[i] < min_max[0]+0.2:
+          min_max[0] = self.x[i] - 0.2
       if i == steps-1:
-        if self.x[i] < min_max[1]+0.5:
-          min_max[1] = self.x[i] - 0.5      
+        if self.x[i] > min_max[1]-0.2:
+          min_max[1] = self.x[i] + 0.2     
     
     print("Done!")
     

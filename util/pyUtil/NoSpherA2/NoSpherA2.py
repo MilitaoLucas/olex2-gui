@@ -1806,7 +1806,7 @@ ener = cf.kernel()"""
     software = OV.GetParam('snum.NoSpherA2.source')
     
     gui.get_default_notification(
-          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=$GetVar(gui.red_text)><b>%s</b></font>..."%(self.name,software),
+          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
           txt_col='black_text')
 
     if software == "ORCA":
