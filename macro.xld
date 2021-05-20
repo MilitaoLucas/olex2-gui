@@ -1248,6 +1248,14 @@
   >
 >
 
+<fractal_dimnesion help="Calculates and displays a Fractal Dimnesion Plot after Meindl and Henn"
+  <body
+    <cmd
+      <cmd1 "spy.make_reflection_graph('fractal_dimnesion')">
+    >
+  >
+>
+
 <normal_probability help="Calculates and displays a Normal Probability plot"
   <body
     <args

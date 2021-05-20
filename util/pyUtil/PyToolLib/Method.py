@@ -256,10 +256,12 @@ class Method_refinement(Method):
 
   #cctbx refine will have hooft after the refinement
   def getHooft(self):
+    from libtbx.utils import format_float_with_standard_uncertainty
     if self.hooft:
+      s = format_float_with_standard_uncertainty(self.hooft.hooft_y, self.hooft.sigma_y)      
+      OV.SetParam('snum.refinement.hooft_str', s)
       return self.hooft
     from cctbx_olex_adapter import hooft_analysis
-    from libtbx.utils import format_float_with_standard_uncertainty
     try:
       # odd place for this?
       OV.SetParam('snum.refinement.hooft_str', "")

@@ -1405,7 +1405,7 @@ class Graph(ArgumentParser):
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))  
 
-  def draw_x_axis(self):
+  def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -1418,6 +1418,9 @@ class Graph(ArgumentParser):
       precision = 0
     else:
       precision = len(str(modulo).split('.')[-1])
+      
+    if add_precision is not None:
+      precision += add_precision
 
     if min_x < 0 and max_x > 0: # axis are in range to be drawn
       div_val = 0.0
@@ -2568,10 +2571,12 @@ class Fractal_Dimension(Analysis):
     self.min_y = 0.00
     self.min_x = -1.0
     self.max_x = 1.0
+    self.delta_x = 0.1
+    self.delta_y = 0.5
+    self.params.n_divisions = 10
 
     self.draw_origin = True
     self.make_fractal_dimension_plot()
-    self.scale_x
     self.popout()
 
   def make_fractal_dimension_plot(self):
@@ -2583,7 +2588,12 @@ class Fractal_Dimension(Analysis):
     self.data.setdefault('dataset1', data)
 
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs()
+    self.ax_marker_length = int(self.imX * 0.006)
+    self.get_division_spacings_and_scale()
+    for dataset in list(self.data.values()):
+      self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
+    self.draw_x_axis()
+    self.draw_y_axis()
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -2856,18 +2866,34 @@ class item_vs_resolution_plot(Analysis):
     elif olx.xf.exptl.Radiation().startswith('0.56'): # Ag radiation
       iucr = 33
       rad_name = "AgK" + alpha
+    else:
+      iucr = 0.84
+      rad_name = str(olx.xf.exptl.Radiation()) + "Angstrom"
     
     from cctbx import uctbx
     
     if params.resolution_as == "d_spacing":
-      iucr = uctbx.two_theta_as_d(iucr,float(olx.xf.exptl.Radiation()),deg=True)
+      if iucr != 0.84:
+        iucr = uctbx.two_theta_as_d(iucr,float(olx.xf.exptl.Radiation()),deg=True)
     elif params.resolution_as == "d_star_sq":
-      iucr = uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True)
+      if iucr != 0.84:
+        iucr = uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True)
+      else:
+        iucr = uctbx.d_as_d_star_sq(iucr)
     elif params.resolution_as == "stol":
-      iucr = uctbx.d_star_sq_as_stol(uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True))
+      if iucr != 0.84:
+        iucr = uctbx.d_star_sq_as_stol(uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True))
+      else:
+        iucr = uctbx.d_star_sq_as_stol(uctbx.d_as_d_star_sq(iucr))
     elif params.resolution_as == "stol_sq":
-      iucr = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True))
-
+      if iucr != 0.84:
+        iucr = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(iucr,float(olx.xf.exptl.Radiation()),deg=True))
+      else:
+        iucr = uctbx.d_star_sq_as_stol_sq(uctbx.d_as_d_star_sq(iucr))
+    elif params.resolution_as == "two_theta":
+      if iucr == 0.84:
+        iucr = uctbx.d_star_sq_as_two_theta(uctbx.d_as_d_star_sq(iucr),float(olx.xf.exptl.Radiation()),deg=True)
+      
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     plot_reflection_count = False
     if self.item == "i_over_sigma_vs_resolution":

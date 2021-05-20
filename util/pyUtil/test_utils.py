@@ -29,6 +29,7 @@ class TestUtils():
       twc = coa.twin_fractions[0]
     else:
       print("One BASF parameter is expected, aborting")
+      return
     indices = set()
     for i, m in enumerate(coa.observations.indices):
       indices.add(m)
