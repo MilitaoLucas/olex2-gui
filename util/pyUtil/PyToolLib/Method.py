@@ -256,15 +256,13 @@ class Method_refinement(Method):
 
   #cctbx refine will have hooft after the refinement
   def getHooft(self):
-    from libtbx.utils import format_float_with_standard_uncertainty
     if self.hooft:
-      s = format_float_with_standard_uncertainty(self.hooft.hooft_y, self.hooft.sigma_y)      
-      OV.SetParam('snum.refinement.hooft_str', s)
       return self.hooft
     from cctbx_olex_adapter import hooft_analysis
     try:
-      # odd place for this?
       OV.SetParam('snum.refinement.hooft_str', "")
+      from libtbx.utils import format_float_with_standard_uncertainty
+      # odd place for this?
       self.hooft = hooft = hooft_analysis()
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
         s = format_float_with_standard_uncertainty(
@@ -284,6 +282,7 @@ class Method_refinement(Method):
       OV.AddIns(arg)
 
   def pre_refinement(self, RunPrgObject):
+    self.hooft = None
     RunPrgObject.isAllQ = True
     for i in range(int(olx.xf.au.GetAtomCount())):
       ret = olx.xf.au.IsPeak(i)
