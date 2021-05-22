@@ -716,7 +716,7 @@ class RunRefinementPrg(RunPrg):
     parson = OV.GetParam('snum.refinement.parson_str')
 
     hooft = self.method.getHooft()
-    if hooft:
+    if hooft and hasattr(hooft, 'p3_racemic_twin'):
       if (hooft.p3_racemic_twin is not None and
           round(hooft.p3_racemic_twin, 3) == 1):
         possible_racemic_twin = True
@@ -1043,7 +1043,7 @@ class RunRefinementPrg(RunPrg):
           adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
           for u in range(6):
             # if parameter is fixed and therefore has 0 esd
-            if esds[matrix_run] > 0:
+            if adp_esds[u] > 0:
               res = abs(adp[u] - adp2[u])/adp_esds[u]
               if res > max_duij:
                 max_duij = res
