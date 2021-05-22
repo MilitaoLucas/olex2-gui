@@ -196,10 +196,23 @@ class OlexCctbxAdapter(object):
 
     r_disp = self.olx_atoms.model.get('refine_disp')
     if r_disp:
+      disp = {}
+      for t in r_disp:
+        t = t.lower()
+        if '.' in t:
+          t = t.split('.')
+          if t[1] == 'fp':
+            disp[t[0]] = (True, False)
+          elif t[1] == 'fdp':
+            disp[t[0]] = (False, True)
+        else:
+          disp[t] = (True, True)
+
       for sc in self._xray_structure.scatterers():
-        if sc.scattering_type in r_disp:
-          sc.flags.set_grad_fp(True)
-          sc.flags.set_grad_fdp(True)
+        d = disp.get(sc.scattering_type.lower(), None)
+        if d:
+          sc.flags.set_grad_fp(d[0])
+          sc.flags.set_grad_fdp(d[1])
 
     return self._xray_structure
 
