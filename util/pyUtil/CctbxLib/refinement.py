@@ -56,12 +56,13 @@ except Exception as e:
 
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
-    'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
+    #'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
+    'Gauss-Newton': olex2_normal_equations.naive_iterations_with_damping_and_shift_limit,
     #'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
     'Levenberg-Marquardt': olex2_normal_equations.levenberg_marquardt_iterations,
     'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
   }
-  solvers_default_method = 'Levenberg-Marquardt'
+  solvers_default_method = 'Gauss-Newton'
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     OlexCctbxAdapter.__init__(self)
@@ -73,7 +74,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.scale_factor = None
     self.failure = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
-    self.flack = None
+    self.hooft = None
+    self.hooft_str = ""
     self.on_completion = on_completion
     # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
@@ -206,14 +208,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if build_only:
       return self.normal_eqns
     method = OV.GetParam('snum.refinement.method')
-    iterations = FullMatrixRefine.solvers.get(method)
-    if iterations == None:
+    iterations_class = FullMatrixRefine.solvers.get(method)
+    if iterations_class == None:
       method = solvers_default_method
-      iterations = FullMatrixRefine.solvers.get(method)
+      iterations_class = FullMatrixRefine.solvers.get(method)
       print("WARNING: unsupported method: '%s' is replaced by '%s'"\
         %(method, solvers_default_method))
-    assert iterations is not None
+    assert iterations_class is not None
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+    if fcf_only:
+      self.max_cycles = 0
     try:
       damping = OV.GetDampingParams()
       self.data_to_parameter_watch()
@@ -221,11 +225,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.print_table_header()
         self.print_table_header(self.log)
 
-      class refinementWrapper(iterations):
+      class refinementWrapper(iterations_class):
         def __init__(self, parent, normal_eqs, *args, **kwds):
+          self.parent = parent
           parent.cycles = self
           normal_eqs.iterations_object = self
-          super(iterations, self).__init__(normal_eqs, *args, **kwds)
+          super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
+        def do(self):
+          if self.n_max_iterations == 0:
+            self.n_iterations = 0
+            self.non_linear_ls.build_up()
+          else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
+            iterations_class.do(self)
+        @property
+        def interrupted(self):
+          return self.parent.interrupted
+        @interrupted.setter
+        def interrupted(self, val):
+          self.parent.interrupted = val
 
       try:
         if(method=='Levenberg-Marquardt'):
@@ -255,6 +272,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         else:
           raise e
 
+      # get the final shifts
+      self.normal_eqns.analyse_shifts()
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
@@ -266,14 +285,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       try:
-        self.check_flack()
-        if self.flack:
-          OV.SetParam('snum.refinement.flack_str', self.flack)
-        else:
-          OV.SetParam('snum.refinement.flack_str', "")
+        self.check_hooft()
       except:
-        OV.SetParam('snum.refinement.flack_str', "")
-        print("Failed to evaluate Flack parameter")
+        print("Failed to evaluate Hooft parameter")
+      OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
@@ -375,7 +390,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         rv += self.twin_components
     return rv
 
-  def check_flack(self):
+  def calc_flack(self):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
@@ -383,7 +398,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
-          self.flack = utils.format_float_with_standard_uncertainty(flack, su)
+          return utils.format_float_with_standard_uncertainty(flack, su)
       else:
         if self.observations.merohedral_components or self.observations.twin_fractions:
           if self.use_tsc:
@@ -400,8 +415,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.extinction,
           connectivity_table=self.connectivity_table
         )
-        self.flack = utils.format_float_with_standard_uncertainty(
+        return utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
+      return None
+
+  def check_hooft(self):
+    if self.hooft:
+      return self.hooft
+    if (not self.xray_structure().space_group().is_centric()
+        and self.normal_eqns.observations.fo_sq.anomalous_flag()):
+      from cctbx_olex_adapter import hooft_analysis
+      try:
+        self.hooft = hooft_analysis()
+        self.hooft_str = utils.format_float_with_standard_uncertainty(
+          self.hooft.hooft_y, self.hooft.sigma_y)
+      except utils.Sorry as e:
+        print(e)
+      # people still would want to see this...
+      flack = self.calc_flack()
+      OV.SetParam('snum.refinement.flack_str', flack)
 
   def get_radiation_type(self):
     from cctbx.eltbx import wavelengths
@@ -492,24 +524,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # not sure why we need to duplicate these in the CIF but for now some
     # things rely on to it!
       completeness_full_a, completeness_theta_max_a = completeness_full, completeness_theta_max
-    #OV.SetParam("snum.refinement.max_shift_over_esd", None)
-    #OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
-    shifts = self.normal_eqns.get_shifts()
-    try:
-      max_shift_idx = 0
-      for i, s in enumerate(shifts):
-        if (shifts[max_shift_idx] < s):
-          max_shift_idx = i
-      #print("Largest shift/esd is %.4f for %s" %(
-            #shifts[max_shift_idx],
-            #self.covariance_matrix_and_annotations.annotations[max_shift_idx]))
-      #OV.SetParam("snum.refinement.max_shift_over_esd",
-        #shifts[max_shift_idx])
-      #OV.SetParam("snum.refinement.max_shift_over_esd_atom",
-        #self.covariance_matrix_and_annotations.annotations[max_shift_idx].split('.')[0])
-    except:
-      pass
     # cell parameters and errors
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
@@ -726,10 +741,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
-    if self.flack is not None:
+    if self.hooft is not None:
         cif_block['_refine_ls_abs_structure_details'] = \
-                 'Flack, H. D. (1983). Acta Cryst. A39, 876-881.'
-        cif_block['_refine_ls_abs_structure_Flack'] = self.flack
+                 'Hooft, R.W.W., Straver, L.H., Spek, A.L. (2010). J. Appl. Cryst., 43, 665-668.'
+        cif_block['_refine_ls_abs_structure_Flack'] = self.hooft_str
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.extinction.expression:
@@ -749,8 +764,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
-    cif_block['_refine_ls_shift/su_max'] = "%.4f" % flex.max(shifts)
-    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % flex.mean(shifts)
+    self.normal_eqns.analyse_shifts()
+    cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
+    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     cif_block['_refine_ls_weighting_details'] = str(
       self.normal_eqns.weighting_scheme)
@@ -1379,24 +1395,24 @@ The following options were used:
       max_shift_esd = self.normal_eqns.max_shift_esd
       max_shift_esd_item = self.normal_eqns.max_shift_esd_item
       print("  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
-      max_shift_site[0],
-      max_shift_site[1].label,
-      max_shift_u[0],
-      max_shift_u[1].label,
-      max_shift_esd,
-      max_shift_esd_item
-      ), file=log)
+        max_shift_site[0],
+        max_shift_site[1].label,
+        max_shift_u[0],
+        max_shift_u[1].label,
+        max_shift_esd,
+        max_shift_esd_item
+        ), file=log)
     else:
-      max_shift_site = 99
-      max_shift_u = 99
-      max_shift_esd = 99
-      max_shift_esd_item = 99
-      print("NO CYCLES!", file=log)
+      self.normal_eqns.analyse_shifts()
+      max_shift_esd = self.normal_eqns.max_shift_esd
+      print("  +  Shifts:   Max/esd = %.4f for %s" %(
+        self.normal_eqns.max_shift_esd,
+        self.normal_eqns.max_shift_esd_item
+        ), file=log)
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
       %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
-
 
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)

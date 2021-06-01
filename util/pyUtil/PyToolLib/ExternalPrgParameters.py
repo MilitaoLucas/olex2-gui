@@ -350,14 +350,14 @@ Palatinus et al., 2012""",
     prg.addMethod(cgls)
     RPD.addProgram(prg)
 
-  smtbx_refine.addMethod(levenberg_marquardt)
   smtbx_refine.addMethod(gauss_newton)
+  smtbx_refine.addMethod(levenberg_marquardt)
   RPD.addProgram(smtbx_refine)
 
   tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
-  #RPD.addProgram(tonto_refine) 
+  #RPD.addProgram(tonto_refine)
   #HP don't add tonto_refine for the moment; it's not working as it stands
- 
+
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXT, ShelXD, ShelXD97, XM,

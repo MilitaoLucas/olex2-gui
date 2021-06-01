@@ -69,7 +69,10 @@ class Method_cctbx_refinement(Method_refinement):
         print("-- do_run(): %.3f" %(time.time() - t1))
       if timer:
         t1 = time.time()
-      self.flack = cctbx.flack
+      try:
+        self.flack = cctbx.calc_flack()
+      except:
+        pass
       if timer:
         print("-- cctbx.flack: %.3f" %(time.time() - t1))
 
@@ -87,9 +90,6 @@ class Method_cctbx_refinement(Method_refinement):
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       OV.DeleteBitmap('refine')
       self.interrupted = cctbx.interrupted
-
-  def getFlack(self):
-    return self.flack
 
   def post_refinement(self, RunPrgObject):
     OV.SetParam('snum.refinement.max_cycles',self.cycles)

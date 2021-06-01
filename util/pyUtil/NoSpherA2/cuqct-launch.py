@@ -21,7 +21,7 @@ while not os.path.exists('NoSpherA2.log'):
     print("Failed to locate the output file")
     time.sleep(10)
     exit(1)
-with open('NoSpherA2.log', "rU") as stdout:
+with open('NoSpherA2.log', "r") as stdout:
   import sys
   while p.poll() is None:
     x = stdout.read()

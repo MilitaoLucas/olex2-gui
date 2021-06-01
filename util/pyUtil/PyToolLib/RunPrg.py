@@ -257,18 +257,6 @@ class RunPrg(ArgumentParser):
     if os.path.exists(copy_from) and not os.path.exists(copy_to):
       shutil.copyfile(copy_from, copy_to)
 
-  def runCctbxAutoChem(self):
-    from AutoChem import OlexSetupRefineCctbxAuto
-    print('+++ STARTING olex2.refine ++++++++++++++++++++++++++++++++++++')
-    OV.reloadStructureAtreap(self.filePath, self.curr_file)
-    cctbx = OlexSetupRefineCctbxAuto('refine', self.params.snum.refinement.max_cycles)
-    try:
-      cctbx.run()
-    except Exception as err:
-      print(err)
-    olex.f('GetVar(cctbx_R1)')
-    print('+++ END olex2.refine +++++++++++++++++++++++++++++++++++++++++')
-
   def runAfterProcess(self):
     if 'olex2' not in self.program.name:
       if timer:
@@ -455,7 +443,6 @@ class RunSolutionPrg(RunPrg):
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
 
-
 class RunRefinementPrg(RunPrg):
   running = None
   def __init__(self):
@@ -484,15 +471,20 @@ class RunRefinementPrg(RunPrg):
       else:
         gui.get_default_notification(
           txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
-          txt_col='green_text')
+            txt_col='green_text')
+
+  def reset_params(self):
+    OV.SetParam('snum.refinement.hooft_str', "")
+    OV.SetParam('snum.refinement.flack_str', "")
+    OV.SetParam('snum.refinement.parson_str', "")
 
   def run(self):
     if RunRefinementPrg.running:
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
+    self.reset_params()
     use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
-    calculate_aspherical = OV.GetParam('snum.NoSpherA2.Calculate')
     result = False
     try:
       if use_aspherical == True:
@@ -529,7 +521,6 @@ class RunRefinementPrg(RunPrg):
           else:
             self.refinement_has_failed = "Error during NoSpherA2 causing an exception!"
       RunRefinementPrg.running = None
-
 
   def setupRefine(self):
     self.method.pre_refinement(self)
@@ -659,17 +650,14 @@ class RunRefinementPrg(RunPrg):
       if m:
         self.refinement_has_failed = m[0].strip()
 
-
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
-
     if olx.IsVar('cctbx_R1') == 'true':
       R1 = float(olx.GetVar('cctbx_R1'))
       olx.UnsetVar('cctbx_R1')
       wR2 = float(olx.GetVar('cctbx_wR2'))
       olx.UnsetVar('cctbx_wR2')
-
     else:
       try:
         R1 = float(olx.Lst('R1'))
@@ -703,46 +691,60 @@ class RunRefinementPrg(RunPrg):
       print ("Skipping absolute structure validation")
       return
     if olex_core.SGInfo()['Centrosymmetric'] == 1: return
-    from cctbx_olex_adapter import hooft_analysis
     from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
-    from libtbx.utils import Sorry
     if debug:
       print("Checking absolute structure...")
     inversion_needed = False
     possible_racemic_twin = False
     inversion_warning = "WARNING: Structure should be inverted (inv -f), unless there is a good reason not to do so."
     racemic_twin_warning = "WARNING: Structure may be an inversion twin"
-    flack = self.method.getFlack()
+    output = []
+    flack = OV.GetParam('snum.refinement.flack_str')
+    # check if the nversion twin refinement...
+    if not flack:
+      from cctbx.array_family import flex
+      rm = olexex.OlexRefinementModel()
+      twinning = rm.model.get('twin')
+      if twinning is not None:
+        twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
+                    for i in range(3) for j in range(3)])
+        if twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
+          flack = olx.xf.rm.BASF(0)
+          OV.SetParam('snum.refinement.flack_str', flack)
 
-    hooft_display = flack_display = ""
+    parson = OV.GetParam('snum.refinement.parson_str')
 
-    try:
-      hooft = hooft_analysis()
-    except Sorry as e:
-      print(e)
-    else:
-      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-        s = format_float_with_standard_uncertainty(
-          hooft.hooft_y, hooft.sigma_y)
-        hooft_display = "Hooft y: %s" %s
-        OV.SetParam('snum.refinement.hooft_str', s)
-        if (hooft.p3_racemic_twin is not None and
-            round(hooft.p3_racemic_twin, 3) == 1):
-          possible_racemic_twin = True
-        elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
-          inversion_needed = True
-      else:
-        OV.SetParam('snum.refinement.hooft_str', None)
-
-    if flack:
-      flack_display = "Flack x: %s" %flack
-      fs = flack.split("(")
-      flack_val = float(fs[0])
-      if flack_val > 0.8:
+    hooft = self.method.getHooft()
+    if hooft and hasattr(hooft, 'p3_racemic_twin'):
+      if (hooft.p3_racemic_twin is not None and
+          round(hooft.p3_racemic_twin, 3) == 1):
+        possible_racemic_twin = True
+      elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
         inversion_needed = True
+      s = format_float_with_standard_uncertainty(
+        hooft.hooft_y, hooft.sigma_y)
+      output.append("Hooft y: %s" %s)
+    elif flack or parson:
+      value = parson
+      if not value:
+        value = flack
+      fs = value.split("(")
+      val = float(fs[0])
+      if val != 0:
+        error = float(fs[1][:-1])
+        temp = val
+        while abs(temp) < 1.0:
+          temp *= 10
+          error /= 10
+        if val > 0.8 and val-error > 0.5:
+          inversion_needed = True
+    if parson:
+      output.append("Parson's q: %s" %parson)
+    if flack:
+      output.append("Flack x: %s" %flack)
 
-    print("%s, %s" %(hooft_display, flack_display))
+    print(', '.join(output))
 
     if force and inversion_needed:
       olex.m('Inv -f')
@@ -755,9 +757,6 @@ class RunRefinementPrg(RunPrg):
       if (hooft.twin_components is not None and
           hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print(racemic_twin_warning)
-    if not inversion_needed and not possible_racemic_twin:
-      #print "OK"
-      pass
 
   def mask_and_fab(self):
     if not OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -867,21 +866,22 @@ class RunRefinementPrg(RunPrg):
     energy = None
     for file in os.listdir(olx.FilePath()):
       if file.endswith(".wfn"):
-        with open(file) as f:
-          fread = f.readlines()
-          for line in fread:
-            if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                try:
-                  energy = float(line.split()[3])
-                except:
-                  energy = None
-              else:
-                try:
-                  energy = float(line[17:38])
-                except:
-                  energy = None
+        with open(file, "rb") as f:
+          f.seek(-2000,os.SEEK_END)
+          fread = f.readlines()[-1].decode()
+          if "THE VIRIAL" in fread:
+            source = OV.GetParam('snum.NoSpherA2.source')
+            if "Gaussian" in source:
+              try:
+                energy = float(fread.split()[3])
+              except:
+                energy = None
+            else:
+              try:
+                energy = float(fread[17:38])
+              except:
+                energy = None
+        fread = None
     if energy == None:
       HAR_log.write("{:^24.10}".format(" "))
     else:
@@ -935,7 +935,6 @@ class RunRefinementPrg(RunPrg):
       if Error_Status != "None":
         print("Error in NoSpherA2: %s" %Error_Status)
         return False
-      dir = olx.FilePath()
       tsc_exists = False
       wfn_file = None
       for file in os.listdir(olx.FilePath()):
@@ -949,27 +948,30 @@ class RunRefinementPrg(RunPrg):
         return False
 
       # get energy from wfn file
+      #TODO Check if WFN is new, otherwise skip this!
       energy = None
       if (wfn_file != None) and (calculate == True):
-        with open(wfn_file) as f:
-          fread = f.readlines()
-          for line in fread:
-            if "THE VIRIAL" in line:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                energy = float(line.split()[3])
-              elif "ORCA" in source:
-                energy = float(line.split()[4])
-              elif "pySCF" in source:
-                energy = float(line.split()[4])
-              elif ".wfn" in source:
-                energy = 0.0
-              elif "Tonto" in source:
-                energy = float(line.split()[4])
-              else:
-                energy = 0.0
+        with open(wfn_file, "rb") as f:
+          f.seek(-2000,os.SEEK_END)
+          fread = f.readlines()[-1].decode()
+          if "THE VIRIAL" in fread:
+            source = OV.GetParam('snum.NoSpherA2.source')
+            if "Gaussian" in source:
+              energy = float(fread.split()[3])
+            elif "ORCA" in source:
+              energy = float(fread.split()[4])
+            elif "pySCF" in source:
+              energy = float(fread.split()[4])
+            elif ".wfn" in source:
+              energy = float(fread[17:38])
+            elif "Tonto" in source:
+              energy = float(fread.split()[4])
+            else:
+              energy = 0.0
         if energy is not None:
           HAR_log.write("{:^24.10f}".format(energy))
+        else:
+          HAR_log.write("{:24}".format(" "))
         fread = None
       else:
         HAR_log.write("{:24}".format(" "))
@@ -999,10 +1001,6 @@ class RunRefinementPrg(RunPrg):
 
       max_dxyz = 0
       max_duij = 0
-      max_shift_atom_xyz = 0
-      matrix_run_max_shift_xyz = 0
-      max_shift_atom_uij = 0
-      matrix_run_max_shift_uij = 0
 
       try:
         jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
@@ -1017,6 +1015,11 @@ class RunRefinementPrg(RunPrg):
       matrix_run = 0
       label_uij = None
       label_xyz = None
+      print("Analyzing NoSpherA2 shifts...")
+      olx.xf.EndUpdate()
+      if OV.HasGUI():
+        olx.Refresh()
+      uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
       for i, atom in enumerate(new_model._atoms):
         xyz = atom['crd'][0]
         xyz2 = old_model._atoms[i]['crd'][0]
@@ -1026,42 +1029,53 @@ class RunRefinementPrg(RunPrg):
             if abs(xyz[x] - xyz2[x])/esds[matrix_run] > max_dxyz:
               max_dxyz = abs(xyz[x] - xyz2[x])/esds[matrix_run]
               label_xyz = annotations[matrix_run]
-              max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
-              matrix_run_max_shift_xyz = matrix_run
+              #max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
+              #matrix_run_max_shift_xyz = matrix_run
           matrix_run += 1
         has_adp_new = new_model._atoms[i].get('adp')
         has_adp_old = old_model._atoms[i].get('adp')
         if has_adp_new != None and has_adp_old != None:
           adp = atom['adp'][0]
           adp2 = old_model._atoms[i]['adp'][0]
-          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
-          adp2 = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp2)
+          adp = adptbx.u_cart_as_u_cif(uc, adp)
+          adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
           adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
+          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
           for u in range(6):
             # if parameter is fixed and therefore has 0 esd
-            if esds[matrix_run] > 0:
-              if abs(adp[u] - adp2[u])/adp_esds[u] > max_duij:
-                max_duij = abs(adp[u] - adp2[u])/adp_esds[u]
+            if adp_esds[u] > 0:
+              res = abs(adp[u] - adp2[u])/adp_esds[u]
+              if res > max_duij:
+                max_duij = res
                 label_uij = annotations[matrix_run]
-                max_shift_atom_uij = abs(adp[u] - adp2[u])
-                matrix_run_max_shift_uij = matrix_run
-            matrix_run += 1
-          if matrix_run < len(annotations):
-            if "C111" in annotations[matrix_run]:
-              matrix_run += 25
-        elif has_adp_new != None:
           matrix_run += 6
-        elif has_adp_old == None:
+          if matrix_run < len(annotations):
+            if ".C111" in annotations[matrix_run]:
+              matrix_run += 25
+        elif has_adp_new != None and has_adp_old == None:
+          adp = atom['uiso'][0]
+          adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
+          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
+          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+          for u in range(6):
+            if esds[matrix_run] > 0:
+              res = abs(adp - adp2[u])/adp_esds[u]
+              if res > max_duij:
+                max_duij = res
+                label_uij = annotations[matrix_run]
+          matrix_run += 6
+          if matrix_run < len(annotations):
+            if ".C111" in annotations[matrix_run]:
+              matrix_run += 25
+        elif has_adp_old == None and has_adp_new == None:
           adp = atom['uiso'][0]
           adp2 = old_model._atoms[i]['uiso'][0]
           adp_esd = esds[matrix_run]
           if esds[matrix_run] > 0:
-            if abs(adp - adp2)/adp_esd > max_duij:
-              max_duij = abs(adp - adp2)/adp_esd
+            res = abs(adp - adp2)/adp_esd
+            if res > max_duij:
+              max_duij = res
               label_uij = annotations[matrix_run]
-              max_shift_atom_uij = abs(adp - adp2)
-              matrix_run_max_shift_uij = matrix_run
           matrix_run += 1
         if matrix_run < len(annotations):
           if 'occ' in annotations[matrix_run]:
@@ -1110,7 +1124,7 @@ class RunRefinementPrg(RunPrg):
     # Done with the while !Converged
     OV.SetParam('snum.NoSpherA2.Calculate',False)
     if converged == False:
-      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES IN INPUT !!!\n")
+      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
       self.refinement_has_failed= "Warning: Unconverged Model!"
     if "DISCAMB" in source:
       unknown_sources = False
@@ -1228,12 +1242,15 @@ OV.registerFunction(RunSolutionPrg)
 def delete_stale_fcf():
   fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
   res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
-  if os.path.exists(fcf) and os.path.exists(fcf):
-    if round(os.path.getmtime(fcf)*0.1) == round(os.path.getmtime(res)*0.1):
-      return True
+  if os.path.exists(res) and os.path.exists(fcf):
+    # modified within 1 second
+    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 1:
+      return False
     else:
+      print(abs(os.path.getmtime(fcf) - os.path.getmtime(res)))
       print("Deleting stale fcf: %s" %fcf)
       os.remove(fcf)
       if OV.HasGUI():
         import gui
         gui.set_notification("Stale<font color=$GetVar(gui.red)><b>fcf file</b></font>has been deleted.")
+      return True

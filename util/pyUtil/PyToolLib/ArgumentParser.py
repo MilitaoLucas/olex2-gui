@@ -1,8 +1,8 @@
 try:
+  import olex
   from olexFunctions import OV
   import variableFunctions as VF
 except:
-  import olex
   from olexFunctions import OV
   import variableFunctions as VF
 

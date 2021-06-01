@@ -130,7 +130,8 @@ class OlexCctbxAdapter(object):
     self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
 
   def __del__(self):
-    sys.stdout.refresh = False
+    #sys.stdout.refresh = False
+    return
 
   def xray_structure(self, construct_restraints=False):
     if self._xray_structure is None or construct_restraints:
@@ -195,10 +196,23 @@ class OlexCctbxAdapter(object):
 
     r_disp = self.olx_atoms.model.get('refine_disp')
     if r_disp:
+      disp = {}
+      for t in r_disp:
+        t = t.lower()
+        if '.' in t:
+          t = t.split('.')
+          if t[1] == 'fp':
+            disp[t[0]] = (True, False)
+          elif t[1] == 'fdp':
+            disp[t[0]] = (False, True)
+        else:
+          disp[t] = (True, True)
+
       for sc in self._xray_structure.scatterers():
-        if sc.scattering_type in r_disp:
-          sc.flags.set_grad_fp(True)
-          sc.flags.set_grad_fdp(True)
+        d = disp.get(sc.scattering_type.lower(), None)
+        if d:
+          sc.flags.set_grad_fp(d[0])
+          sc.flags.set_grad_fdp(d[1])
 
     return self._xray_structure
 
@@ -1043,6 +1057,9 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
+  if wavelength < 0.1:
+    generate_ED_SFAC(table_name_)
+    return
   afile = None
   for d in anom_dirs:
     if not os.path.exists(d):
@@ -1081,15 +1098,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     tables = henke
   elif "brennan" == table_name:
     from brennan import brennan
-    for e in elements:
-      e = str(e)
-      try:
-        brenn = brennan()
-        f = brenn.at_angstrom(wavelength,e)
-        rv.append(e + ',' + ','.join([str(f[0]), str(f[1])]))
-      except ValueError:
-        rv.append(e + ',0.0, 0.0')
-    return ';'.join(rv)
+    tables = brennan()
   else:
     print("Invalid table name %s, resetting to Sasaki" %table_name_)
     from cctbx.eltbx import sasaki
@@ -1099,7 +1108,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     try:
       table = tables.table(e)
       f = table.at_angstrom(wavelength)
-      m_table = attc.get_table(nist_elements.atomic_number(e))
+      #m_table = attc.get_table(nist_elements.atomic_number(e))
       rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
     except ValueError:
       rv.append(e + ',0.0, 0.0')
@@ -1109,13 +1118,20 @@ OV.registerFunction(generate_DISP, False, "sfac")
 
 def generate_ED_SFAC(table_file_name=None, force = False):
   import olexex
-  if not table_file_name:
-    table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
   sfac = olexex.OlexRefinementModel().model.get('sfac')
   if sfac and not force:
     return
+  def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
+  if not table_file_name or table_file_name == "auto":
+    table_file_name = def_table_file_name
+  else:
+    if not os.path.exists(table_file_name):
+      table_file_name = os.path.join(olx.DataDir(), "ED", table_file_name)
+      if not os.path.exists(table_file_name):
+        table_file_name = def_table_file_name
+
   formula = olx.xf.GetFormula('list')
-  elms = set([x.split(':')[0] for x in formula.split(',')])
+  elms = set([x.split(':')[0].lower() for x in formula.split(',')])
   sfac_toks = []
   with open(table_file_name, 'r') as disp:
     for l in disp.readlines():
@@ -1125,7 +1141,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
       toks = l.split()
       if len(toks) != 16:
         continue
-      if toks[1] in elms:
+      if toks[1].lower() in elms:
         sfac_toks.append(toks)
         if len(sfac_toks) == len(elms):
           break
@@ -1135,12 +1151,8 @@ def generate_ED_SFAC(table_file_name=None, force = False):
 OV.registerFunction(generate_ED_SFAC, False, "sfac")
 
 def generate_DISP_all(table_name_, wavelength=None):
-  elements = ["H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca"
-              ,"Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr"
-                ,"Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe"
-                ,"Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn"
-                ,"Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
-
+  from cctbx.eltbx.chemical_elements import proper_caps_list
+  elements = proper_caps_list()
   table_name = table_name_.lower()
   if not wavelength:
     wavelength = olx.xf.exptl.Radiation()
@@ -1153,15 +1165,7 @@ def generate_DISP_all(table_name_, wavelength=None):
     tables = henke
   elif "brennan" == table_name:
     from brennan import brennan
-    for e in elements:
-      e = str(e)
-      try:
-        brenn = brennan()
-        f = brenn.at_angstrom(wavelength,e)
-        file.write(e + ' ' + str(f[0]) + ' ' + str(f[1]))
-      except ValueError:
-        file.write(e + ' 0.0 0.0\n')
-    return
+    tables = brennan()
   else:
     raise Exception("Invalid table name")
   with open("disp.lst",'w') as file:
@@ -1170,8 +1174,8 @@ def generate_DISP_all(table_name_, wavelength=None):
       try:
         table = tables.table(e)
         f = table.at_angstrom(wavelength)
-        file.write(e + ' ' + str(f.fp()) + ' ' + str(f.fdp()) + '\n')
-      except ValueError:
-        file.write(e + ' 0.0 0.0\n')
+        file.write("%-4s %8.4f %8.4f\n" %(e, f.fp(), f.fdp()))
+      except Exception as e:
+        pass
 
 OV.registerFunction(generate_DISP_all, False, "sfac")

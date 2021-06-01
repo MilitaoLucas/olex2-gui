@@ -252,9 +252,25 @@ class Method_solution(Method):
     return d
 
 class Method_refinement(Method):
+  hooft = None
 
-  def getFlack(self):
-    return None
+  #cctbx refine will have hooft after the refinement
+  def getHooft(self):
+    if self.hooft:
+      return self.hooft
+    from cctbx_olex_adapter import hooft_analysis
+    try:
+      OV.SetParam('snum.refinement.hooft_str', "")
+      from libtbx.utils import format_float_with_standard_uncertainty
+      # odd place for this?
+      self.hooft = hooft = hooft_analysis()
+      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+        s = format_float_with_standard_uncertainty(
+          hooft.hooft_y, hooft.sigma_y)
+        OV.SetParam('snum.refinement.hooft_str', s)
+    except Exception as e:
+      print(e)
+    return self.hooft
 
   def addInstructions(self):
     """Adds instructions to the .ins file so that the file reflects what is selected in the GUI.
@@ -266,6 +282,7 @@ class Method_refinement(Method):
       OV.AddIns(arg)
 
   def pre_refinement(self, RunPrgObject):
+    self.hooft = None
     RunPrgObject.isAllQ = True
     for i in range(int(olx.xf.au.GetAtomCount())):
       ret = olx.xf.au.IsPeak(i)
