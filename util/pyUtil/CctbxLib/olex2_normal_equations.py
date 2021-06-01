@@ -4,7 +4,7 @@ from scitbx.array_family import flex
 from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
 from cctbx import adptbx
-
+import math
 from olexFunctions import OV
 
 import olx
@@ -28,13 +28,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
-    self.shifts_over_su = None
 
   def step_forward(self):
-    try:
-      self.shifts_over_su = self.iterations_object.shifts_over_su
-    except:
-      self.shifts_over_su = None
     self.n_current_cycle += 1
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
     super(normal_eqns, self).step_forward()
@@ -50,17 +45,17 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     super(normal_eqns, self).step_backward()
     return self
 
-  #compatibility...
-  def get_shifts(self):
+  def analyse_shifts(self):
+    self.max_shift_esd = None
+    self.max_shift_esd_item = None
+    self.mean_shift_esd = None
     try:
-      return self.iterations_object.shifts_over_su
-    except:
-      if not self.shifts_over_su:
-        shifts_over_su = flex.abs(self.step() /
-          flex.sqrt(self.covariance_matrix().matrix_packed_u_diagonal()))
-        jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc()
-        self.shifts_over_su = jac_tr.transpose() * shifts_over_su
-    return self.shifts_over_su
+      self.iterations_object.analyse_shifts()
+      self.mean_shift_esd = self.iterations_object.mean_ls_shift_over_su
+      self.max_shift_esd = self.iterations_object.max_ls_shift_over_su
+      self.max_shift_esd_item = self.iterations_object.max_shift_for
+    except Exception as s:
+      print(s)
 
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
@@ -71,35 +66,17 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     max_shift_u = self.max_shift_u()
     OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
     OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
-
-    shifts = self.get_shifts()
-    max_shift_esd = 0
-    max_shift_esd_item = "n/a"
-    self.max_shift_esd = None
-    self.max_shift_esd_item = None
-    try:
-      max_shift_idx = 0
-      for i, s in enumerate(shifts):
-        if (shifts[max_shift_idx] < s):
-          max_shift_idx = i
-      max_shift_esd = shifts[max_shift_idx]
-      max_shift_esd_item = self.reparametrisation.component_annotations[max_shift_idx]
-      self.max_shift_esd = max_shift_esd
-      self.max_shift_esd_item = max_shift_esd_item
-
-    except Exception as s:
-      print(s)
-
+    self.analyse_shifts()
     print_tabular = True
 
     if print_tabular:
-      print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.2f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
+      print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
         self.n_current_cycle,
         self.r1_factor(cutoff_factor=2)[0]*100,
         self.wR2()*100,
         self.goof(),
-        max_shift_esd,
-        '('+max_shift_esd_item+')',
+        self.max_shift_esd,
+        '('+self.max_shift_esd_item+')',
         max_shift_site[0],
         '('+max_shift_site[1].label+')',
         max_shift_u[0],
@@ -143,7 +120,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                  self.xray_structure_pre_cycle.sites_cart()
     distances = sites_shifts.norms()
     i_distances_sorted = flex.sort_permutation(data=distances, reverse=True)
-    mean = flex.mean(distances)
     if max_items is not None:
       i_distances_sorted = i_distances_sorted[:max_items]
     for i_seq in iter(i_distances_sorted):
@@ -154,7 +130,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     adp_shifts = self.xray_structure.extract_u_cart_plus_u_iso() \
                - self.xray_structure_pre_cycle.extract_u_cart_plus_u_iso()
     norms = adp_shifts.norms()
-    mean = flex.mean(norms)
     i_adp_shifts_sorted = flex.sort_permutation(data=norms, reverse=True)
     if max_items is not None:
       i_adp_shifts_sorted = i_adp_shifts_sorted[:max_items]
@@ -280,14 +255,81 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if OV.HasGUI():
       olx.Refresh()
     if OV.isInterruptSet():
-      raise RuntimeError('external_interrupt')
+      self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
+      self.iterations_object.interrupted = True
 
 
 from scitbx.lstbx import normal_eqns_solving
-class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
 
+class iterations_with_shift_analysis(normal_eqns_solving.iterations):
+  convergence_as_shift_over_esd = 1e-3
+
+  def analyse_shifts(self, limit_shift_over_su=None):
+    if self.max_ls_shift_over_su is not None:
+      return
+    x = self.non_linear_ls.step()
+    esd = self.non_linear_ls.covariance_matrix().matrix_packed_u_diagonal()
+    ls_shifts_over_su = x/flex.sqrt(esd)
+    max_shift_i = 0
+    s_sum = 0
+    for i,s in enumerate(ls_shifts_over_su):
+      s_sum += abs(s)
+      if abs(ls_shifts_over_su[max_shift_i]) < abs(s):
+        max_shift_i = i
+    #max shift for the LS
+    self.mean_ls_shift_over_su = s_sum/len(ls_shifts_over_su)
+    self.max_ls_shift_over_su = ls_shifts_over_su[max_shift_i]
+    r = self.non_linear_ls.actual.reparametrisation
+    J = r.jacobian_transpose_matching_grad_fc().transpose()
+    spc = len(r.independent_scalar_parameters)
+    if max_shift_i >= J.n_cols-spc:
+      if r.extinction.grad and max_shift_i == J.n_cols - 1:
+        self.max_shift_for = "EXTI"
+      else:
+        self.max_shift_for = "BASF%s" %(max_shift_i - (J.n_cols - spc) + 1)
+    else:
+      for e in J.col(max_shift_i):
+        self.max_shift_for = r.component_annotations[e[0]]
+        break
+    #self.shifts_over_su = J * self.ls_shifts_over_su
+    #self.max_shift_over_su = flex.max(self.shifts_over_su)
+    if abs(self.max_ls_shift_over_su) < self.convergence_as_shift_over_esd:
+      return True
+    if limit_shift_over_su is not None and abs(self.max_ls_shift_over_su) > limit_shift_over_su:
+      shift_scale = limit_shift_over_su/self.max_ls_shift_over_su
+      x *= shift_scale
+    return False
+
+  def reset_shifts(self):
+    self.max_ls_shift_over_su = None
+    self.max_shift_for = None
+
+class naive_iterations_with_damping_and_shift_limit(
+    normal_eqns_solving.naive_iterations_with_damping,
+    iterations_with_shift_analysis):
+  max_shift_over_esd = 15
+
+  def do(self):
+    self.n_iterations = 0
+    do_last = False
+    while self.n_iterations < self.n_max_iterations:
+      self.reset_shifts()
+      self.non_linear_ls.build_up()
+      grad_norm = self.non_linear_ls.opposite_of_gradient().norm_inf()
+      if self.has_gradient_converged_to_zero(): break
+      self.do_damping(self.damping_value)
+      self.non_linear_ls.solve()
+      if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+        break
+      self.non_linear_ls.step_forward()
+      self.n_iterations += 1
+
+  def __str__(self):
+    return "Gauss-Newton with damping and shift scaling"
+
+
+class levenberg_marquardt_iterations(iterations_with_shift_analysis):
   tau = 1e-3
-  convergence_as_shift_over_esd = 1e-5
 
   @property
   def mu(self):
@@ -298,48 +340,54 @@ class levenberg_marquardt_iterations(normal_eqns_solving.iterations):
     self.mu_history.append(value)
     self._mu = value
 
-  def check_shift_over_esd(self):
-    return self.do_scale_shifts(1e16)
+  def do_naive(self):
+    normal_eqns_solving.naive_iterations_with_damping_and_shift_limit.do(self)
+    self.non_linear_ls.build_up()
 
   def do(self):
     self.mu_history = flex.double()
     self.non_linear_ls.build_up()
-    if self.has_gradient_converged_to_zero():
+    if self.has_gradient_converged_to_zero() or self.n_max_iterations == 0:
       return
     self.n_iterations = 0
     nu = 2
     a = self.non_linear_ls.normal_matrix_packed_u()
     self.mu = self.tau*flex.max(a.matrix_packed_u_diagonal())
     while self.n_iterations < self.n_max_iterations:
+      self.reset_shifts()
       a.matrix_packed_u_diagonal_add_in_place(self.mu)
       objective = self.non_linear_ls.objective()
       g = -self.non_linear_ls.opposite_of_gradient()
       self.non_linear_ls.solve()
-      self.n_iterations += 1
+      if self.had_too_small_a_step() or self.analyse_shifts(15):
+        break
       h = self.non_linear_ls.step()
       expected_decrease = 0.5*h.dot(self.mu*h - g)
-      if OV.GetParam('snum.NoSpherA2.make_fcf_only') == True:
-        return
       self.non_linear_ls.step_forward()
-      if self.check_shift_over_esd():
-        # not sure why but without this esds become very small!
-        self.non_linear_ls.build_up()
-        break
+      self.n_iterations += 1
       self.non_linear_ls.build_up(objective_only=True)
       objective_new = self.non_linear_ls.objective()
       actual_decrease = objective - objective_new
       rho = actual_decrease/expected_decrease
       if rho > 0:
+        if self.has_gradient_converged_to_zero(): break
         self.mu *= max(1/3, 1 - (2*rho - 1)**3)
         nu = 2
+        if OV.IsDebugging():
+          print("Updating mu to %.3e and applying shifts" %self.mu)
       else:
-        if self.n_iterations + 1 < self.n_max_iterations:
+        if self.mu < 1e16:
           self.non_linear_ls.step_backward()
-        self.mu *= nu
-        nu *= 2
+          self.mu *= nu
+          nu *= 2
+          if OV.IsDebugging():
+            print("Increasing mu to %.3e and recalculating" %self.mu)
+        elif OV.IsDebugging():
+          print("Mu is too big, skip increase")
       self.non_linear_ls.build_up()
+    # get proper s.u.
+    self.non_linear_ls.build_up()
 
   def __str__(self):
     return "Levenberg-Marquardt"
-
 

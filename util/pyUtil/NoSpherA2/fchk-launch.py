@@ -48,7 +48,7 @@ else:
   p = subprocess.Popen(args, stdout=log)
 
 if "ubuntu" in args[0]:
-  print("Starting Ubuntu and running pySCF, please be patient for start")
+  print("Starting Ubuntu for wavefunction calculation, please be patient for start")
 if out_fn == None:
   if "ubuntu" in args[0]:
     out_fn = fchk_file + "_pyscf.log"
@@ -63,7 +63,7 @@ while not os.path.exists(out_fn):
       continue
     print("Failed to locate the output file")
     exit(1)
-with open(out_fn, "rU") as stdout:
+with open(out_fn, "r") as stdout:
   import sys
   while p.poll() is None:
     x = stdout.read()
