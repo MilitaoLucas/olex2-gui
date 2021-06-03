@@ -368,8 +368,11 @@ class Graph(ArgumentParser):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
     if not x_intercept:
-      y1 = (slope * self.min_x + y_intercept)
-      y2 = (slope * self.max_x + y_intercept)
+      y1 = slope * self.min_x + y_intercept
+      y2 = slope * self.max_x + y_intercept
+      if slope == 0:
+        y1 -= self.min_y
+        y2 -= self.min_y
 
       if y1 > self.max_y:
         y1 = self.max_y
@@ -426,26 +429,30 @@ class Graph(ArgumentParser):
          + ((float(x1)) * scale_x) \
          + ((0 - self.max_x) * scale_x) \
          + (self.delta_x * scale_x)   
-
+    
+    lower_bound = 0
+    if self.min_y < 0 and slope==0:
+      lower_bound = self.min_y
+      
     if self.reverse_y:
       y1 = (self.graph_top
             + (float(y1) * self.scale_y)
-            + (0 - self.max_y) * self.scale_y
+            + (lower_bound - self.max_y) * self.scale_y
             + (self.delta_y * self.scale_y))
       y2 = (self.graph_top
             + (float(y2) * self.scale_y)
-            + (0 - self.max_y) * self.scale_y
+            + (lower_bound - self.max_y) * self.scale_y
             + (self.delta_y * self.scale_y))
     else:
       y1 = self.bY \
          - (self.boxYoffset
             + ((float(y1) * self.scale_y))
-            + ((0 - self.max_y) * self.scale_y)
+            + ((lower_bound - self.max_y) * self.scale_y)
             + (self.delta_y * self.scale_y))
       y2 = self.bY \
          - (self.boxYoffset
             + ((float(y2) * self.scale_y))
-            + ((0 - self.max_y) * self.scale_y)
+            + ((lower_bound - self.max_y) * self.scale_y)
             + (self.delta_y * self.scale_y))
 
     if slope == 0.0:
@@ -1329,11 +1336,9 @@ class Graph(ArgumentParser):
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
     
-  def draw_y_axis_2(self,y_min_label=None,y_max_label=None,scale=None):
-    max_y = self.max_y
-    min_y = self.min_y
-    scale_y = self.scale_y
-    delta_y = self.delta_y
+  def draw_y_axis_2(self,y_min,y_max, label):
+    delta_y = y_max - y_min
+    scale = ((self.graph_bottom - self.graph_top)/delta_y)
     dv_y = self.get_divisions(delta_y)
     y_axis = []
 
@@ -1343,57 +1348,57 @@ class Graph(ArgumentParser):
     else:
       precision = len(str(modulo).split('.')[-1])
 
-    if min_y < 0 and max_y > 0: # axis are in range to be drawn
+    if y_min < 0 and y_max > 0: # axis are in range to be drawn
       div_val = 0.0
-      while div_val > min_y:
+      while div_val > y_min:
         div_val -= dv_y
     else:
-      #if dv_y <= 10:
-        #div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
-      #else:
-        #div_val = round(min_y-dv_y, precision)
-      div_val = round(min_y-dv_y, precision)
+      div_val = round(y_min-dv_y, precision)
     if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
     y_axis.append(div_val)
-    while div_val < max_y:
+    while div_val < y_max:
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
 
     format_string = "%%.%if" %precision
+    temp_txt = format_string %y_axis[-1]
+    temp_wX, temp_wY = self.draw.textsize(temp_txt, font=self.font_small)
+    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX,colour='#ffffff')
     for item in y_axis:
       val = float(item)
+      if val ==0:
+        continue
       txt = format_string %item
 
       wX, wY = self.draw.textsize(txt, font=self.font_small)
-      x = self.graph_left - wX - self.imX * 0.01
+      x = self.graph_right + self.imX * 0.01
       if self.reverse_y:
         y = (self.boxYoffset + wY/2
-             + ((val * scale_y))
-             + ((0 - max_y) * scale_y)
-             + (delta_y * scale_y))
+             + ((val * scale))
+             + ((0 - y_max) * scale)
+             + (delta_y * scale))
       else:
         y = self.bY \
           - (self.boxYoffset + wY/2
-             + ((val * scale_y))
-             + ((0 - max_y) * scale_y)
-             + (delta_y * scale_y))
+             + ((val * scale))
+             + ((0 - y_max) * scale)
+             + (delta_y * scale))
 
       y = round(y,1)
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
-        #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
-        x = self.graph_left
-        y = y + int(wY/2)
-        self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=self.outlineColour)
+        size = (wX,wY)
+        new = Image.new('RGB', size, self.fillColour)
+        draw = ImageDraw.Draw(new)
+        draw.text((0,0),txt,font=self.font_small, fill=self.axislabelColour)
+        self.im.paste(new, (int(x),int(y)))
+        #CURRENTLY TICKS ON SECOND AXIS ARE DISABLED... cant get them working...
+        #x = self.graph_right
+        #y = y + int(wY/2)
+        #self.draw.line(((int(x), int(y)),(int(x-self.ax_marker_length), int(y))), width=self.line_width, fill=self.outlineColour)
 
-    if self.draw_origin:
-      line = (self.graph_left - self.min_x * self.scale_x, self.graph_bottom,
-              self.graph_left - self.min_x * self.scale_x, self.graph_top)
-      self.draw.line(line, fill=self.outlineColour, width=self.line_width)
-
-    txt = self.metadata.get("y_label", "y Axis Label")
+    txt = label
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     size = (wX, wY)
@@ -1403,7 +1408,7 @@ class Graph(ArgumentParser):
     y = 0
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))  
+    self.im.paste(new, (int(self.graph_right-1.1*wY), int(self.graph_top+wY/2)))  
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -2896,6 +2901,8 @@ class item_vs_resolution_plot(Analysis):
       
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     plot_reflection_count = False
+    scale = None
+    max_y = None
     if self.item == "i_over_sigma_vs_resolution":
       plot_reflection_count = True
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
@@ -2921,11 +2928,12 @@ class item_vs_resolution_plot(Analysis):
         xy_plot2 = item_vs_resolution(item="refln_vs_resolution", n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
       self.item = item_save #BECAUSE THIS IS SOMEHOW BEYOND ME!
       metadata2 = dict(metadata)
-      max_y = max(xy_plot.y)
-      min_y = min(xy_plot.y)
-      scale = (max_y)/max(xy_plot2.y)
+      max_y1 = max(xy_plot.y)
+      min_y1 = min(xy_plot.y)
+      max_y = max(xy_plot2.y)      
+      scale = (max_y1)/max(xy_plot2.y)
       metadata2["y_label"] = xy_plot2.yLegend
-      data2 = Dataset(xy_plot2.x, [y*scale + min_y for y in xy_plot2.y], metadata=metadata2)
+      data2 = Dataset(xy_plot2.x, [y*scale + min_y1 for y in xy_plot2.y], metadata=metadata2)
       self.data.setdefault('dataset2', data2)
   
     self.ax_marker_length = int(self.imX * 0.006)
@@ -2955,6 +2963,8 @@ class item_vs_resolution_plot(Analysis):
     
     self.draw_x_axis()
     self.draw_y_axis()
+    if plot_reflection_count:
+      self.draw_y_axis_2(0,max_y,"Nr. uniq. Refln.")
     #self.draw_legend("test")
     
     #self.draw_pairs(reverse_x=reverse_x, lt=3)
