@@ -66,6 +66,7 @@ class NoSpherA2(PT):
     self.setup_pyscf()
     self.setup_discamb()
     self.setup_elmodb()
+    self.setup_psi4()
     self.setup_g03_executables()
     self.setup_g09_executables()
     self.setup_g16_executables()
@@ -532,15 +533,20 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         # make the tsc file
 
         if (experimental_SF == True):
+          path_base = os.path.join(OV.FilePath(),job.full_dir, job.name)
           if wfn_code.lower().endswith(".wfn"):
             wfn_fn = wfn_code
-          elif wfn_code == "ELMOdb":
-            wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfx")
+          elif os.path.exists(path_base+".wfx"):
+            wfn_fn = path_base+".wfx"
+          elif os.path.exists(path_base+".fchk"):
+            wfn_fn = path_base+".fchk"
+          elif os.path.exists(path_base+".wfn"):
+            wfn_fn = path_base+".wfn"
           else:
-            wfn_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".wfn")
-          hkl_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".hkl")
+            return False
+          hkl_fn = path_base+".hkl"
           cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-          wfn_cif_fn = os.path.join(OV.FilePath(),job.full_dir, job.name+".cif")
+          wfn_cif_fn = path_base+".cif"
           olx.Kill("$Q")
           olx.File(wfn_cif_fn)
           cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn,[-1000])
@@ -589,6 +595,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_pyscf_script(xyz)
     elif software == "ELMOdb":
       wfn_object.write_elmodb_input(xyz)
+    elif software == "Psi4":
+      wfn_object.write_psi4_input(xyz)
 
     try:
       wfn_object.run(part)
@@ -631,6 +639,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if self.has_pyscf == True:
       if "pySCF" not in self.softwares:
         self.softwares = self.softwares + ";pySCF"
+        
+  def setup_psi4(self):
+    import importlib
+    test = importlib.util.find_spec("psi4")
+    found = test is not None
+    if(found):
+      self.softwares += ";Psi4"
 
   def setup_elmodb(self):
     self.elmodb_exe = ""
@@ -1198,7 +1213,14 @@ class wfn_Job(object):
       if run > 1:
         inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
     inp.close()
-
+  
+  def write_psi4_input(self,xyz):
+    
+    coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    olx.Kill("$Q")
+    if xyz:
+      olx.File(coordinates_fn,p=10)
+  
   def write_pyscf_script(self,xyz):
     solv_epsilon = {
       "Water"                                  :78.3553,
@@ -1808,7 +1830,8 @@ ener = cf.kernel()"""
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
           txt_col='black_text')
-
+    python_script = "fchk-launch.py"
+    
     if software == "ORCA":
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
@@ -1825,6 +1848,21 @@ ener = cf.kernel()"""
       args.append(self.parent.g16_exe)
       input_fn = self.name + ".com"
       args.append(input_fn)
+    elif software == "Psi4":
+      basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
+      ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+      charge = OV.GetParam('snum.NoSpherA2.charge')
+      mem = OV.GetParam('snum.NoSpherA2.mem')
+      method = OV.GetParam('snum.NoSpherA2.method')
+      args.append(basis_name)
+      args.append(basis_set_fn)
+      args.append(ncpus)
+      args.append(mult)
+      args.append(charge)
+      args.append(mem)
+      args.append(method)      
+      python_script = "psi4-launch.py"
     elif software == "pySCF":
       input_fn = self.name + ".py"
       if self.parent.ubuntu_exe != None and os.path.exists(self.parent.ubuntu_exe):
@@ -1865,7 +1903,7 @@ ener = cf.kernel()"""
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, "fchk-launch.py")],
+                            os.path.join(p_path, python_script)],
                             startupinfo=startinfo)
     else:
       pyl = OV.getPYLPath()
@@ -1873,7 +1911,7 @@ ener = cf.kernel()"""
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, "fchk-launch.py")])
+                            os.path.join(p_path, python_script)])
     
     out_fn = None
     path = os.path.join("olex2","Wfn_job")
@@ -1882,19 +1920,22 @@ ener = cf.kernel()"""
       nr = 2
     if part != 0:
       path = os.path.join(path,"Part_"+str(part))
-    if "orca" in args[0]:
-      out_fn = os.path.join(path,self.name + "_orca.log")
-    elif "elmo" in args[nr]:
-      out_fn = os.path.join(path,self.name + ".out")
-    elif "python" in args[nr]:
-      out_fn = os.path.join(path,self.name + "_pyscf.log")
-    if "ubuntu" in args[0]:
-      print("Starting Ubuntu for wavefunction calculation, please be patient for start")
-    if out_fn == None:
-      if "ubuntu" in args[0]:
+    if software =="Psi4":
+          out_fn = os.path.join(path,self.name + "_psi4.log")         
+    else:
+      if "orca" in args[0]:
+        out_fn = os.path.join(path,self.name + "_orca.log")
+      elif "elmo" in args[nr]:
+        out_fn = os.path.join(path,self.name + ".out")
+      elif "python" in args[nr]:
         out_fn = os.path.join(path,self.name + "_pyscf.log")
-      else:
-        out_fn = os.path.join(path,self.name + ".log")  
+      if "ubuntu" in args[0]:
+        print("Starting Ubuntu for wavefunction calculation, please be patient for start")
+      if out_fn == None:
+        if "ubuntu" in args[0]:
+          out_fn = os.path.join(path,self.name + "_pyscf.log")
+        else:
+          out_fn = os.path.join(path,self.name + ".log")  
       
     tries = 0
     time.sleep(0.5)
@@ -1904,11 +1945,11 @@ ener = cf.kernel()"""
       if tries >= 5:
         if "python" in args[nr] and tries <=10:
           continue
-        print("Failed to locate the output file")
+        print("Failed to locate the output file at "+str(out_fn))
         OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
         raise NameError('Wfn-Output not found!')          
       
-    with open(out_fn, "rU") as stdout:
+    with open(out_fn, "r") as stdout:
       while p.poll() is None:
         x = stdout.read()
         if x:
@@ -1977,6 +2018,9 @@ ener = cf.kernel()"""
     elif("elmodb" in args[0]):
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+    elif(software == "Psi4"):
+      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".fchk"))):
+        shutil.copy(os.path.join(self.full_dir,self.name + ".fchk"), self.name+".fchk")      
     elif software == "pySCF":
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
@@ -2562,6 +2606,8 @@ OV.registerFunction(is_disordered,True,'NoSpherA2')
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
   if "x2c" in input:
+    OV.SetParam('snum.NoSpherA2.Relativistic',True)
+  elif "DKH" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic',True)
   else:
     OV.SetParam('snum.NoSpherA2.Relativistic',False)
@@ -3886,7 +3932,9 @@ OV.registerFunction(heavy_final, False, "NoSpherA2")
 
 def psi4():
   import psi4
-  psi4.geometry("""
+  geom = """
+nocom
+noreorient  
 O  2.7063023580 5.1528084960 8.7720795339
 O  3.3917574233 4.6987620000 6.5946475188
 O  3.3951198906 7.3446337920 8.3358309397
@@ -3932,23 +3980,23 @@ H  5.8953563191 3.9488788320 5.9985504952
 C  5.6803463582 7.4588867520 7.5271672631
 H  6.6956267802 7.8106288800 7.8564973715
 H  5.3388863094 8.1423113280 6.6742541538
-""")
-
-  psi4.set_num_threads(6)
+"""
   sfc_name = OV.ModelSrc()
-  psi4.set_memory('15000 MB')
   out = os.path.join(OV.FilePath(), sfc_name + "_psi4.log")
   psi4.core.set_output_file(out)
+  psi4.geometry(geom)
+  psi4.set_num_threads(6)
+  psi4.set_memory('15000 MB')
   psi4.set_options({'scf_type': 'DF',
   'dft_pruning_scheme': 'treutler',
   'dft_radial_points': 20,
   'dft_spherical_points': 110,
   'dft_basis_tolerance': 1E-10,
-  'dft_density_tolerance': 1.0E-10,
+  'dft_density_tolerance': 1.0E-8,
   'ints_tolerance': 1.0E-8,
   'df_basis_scf': 'def2-universal-jkfit',
   })
-  E, wfn = psi4.energy('pbe/cc-pVTZ', return_wfn=True)
+  E, wfn = psi4.energy('pbe/cc-pVDZ', return_wfn=True)
   psi4.fchk(wfn, os.path.join(OV.FilePath(), sfc_name + ".fchk"))
   return None
 OV.registerFunction(psi4, False, "NoSpherA2")

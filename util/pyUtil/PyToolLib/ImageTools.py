@@ -586,8 +586,8 @@ class ImageTools(FontInstances):
     elif side == "right":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
       canvas = Image.new('RGBA', (width + weight_add, height), colour)
-      canvas.paste(image, (0, 0))
       canvas.paste(whitespace, (width - weight + weight_add, margin_top))
+      canvas.paste(image, (0, 0))
     elif side == "left":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
       canvas = Image.new('RGBA', (width + weight_add, height), colour)
