@@ -865,15 +865,18 @@ class ExtractCifInfo(CifTools):
         full_references_set.add(ref_t)
 
     NoSpherA2 = OV.GetParam('snum.NoSpherA2.use_aspherical')
-    if NoSpherA2:
-      ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
+    NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
 Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
 White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., DOI:10.1039/D0SC05526C."""
-      ref_t = ref.replace('\r', '').replace('\n', '').replace(' ', '')
+Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
+    NoSpherA2_ref_t = NoSpherA2_ref.replace('\r', '').replace('\n', '').replace(' ', '')
+    if NoSpherA2:
       if ref_t not in full_references_set:
-        full_references.append(ref)
-        full_references_set.add(ref_t)
+        full_references.append(NoSpherA2_ref)
+        full_references_set.add(NoSpherA2_ref_t)
+    else:
+      if any("1675-1692" in x for x in full_references):
+        full_references.remove(NoSpherA2_ref)
 
     full_references.sort()
     self.update_cif_block({
