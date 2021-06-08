@@ -370,9 +370,6 @@ class Graph(ArgumentParser):
     if not x_intercept:
       y1 = slope * self.min_x + y_intercept
       y2 = slope * self.max_x + y_intercept
-      if slope == 0:
-        y1 -= self.min_y
-        y2 -= self.min_y
 
       if y1 > self.max_y:
         y1 = self.max_y
@@ -382,8 +379,6 @@ class Graph(ArgumentParser):
         y2 = self.max_y
       elif y2 < self.min_y:
         y2 = self.min_y
-      #y1 = y1 - self.min_y
-      #y2 = y2 - self.min_y
 
     else:
       y1 = self.max_y
@@ -411,49 +406,28 @@ class Graph(ArgumentParser):
 
     if self.reverse_x or reverse_x:
       scale_x = -self.scale_x
-      x1 = self.bX - self.boxXoffset \
-         + ((float(x1)) * scale_x) \
-         - ((0 - self.max_x) * -scale_x) \
-         - (self.delta_x * -scale_x)
-      x2 = self.bX - self.boxXoffset\
-         + ((float(x2)) * scale_x) \
-         - ((0 - self.max_x) * -scale_x) \
-         - (self.delta_x * -scale_x)
+      offset_x = self.bX - self.boxXoffset + (self.delta_x - self.max_x) * scale_x
+      x1 = offset_x + (float(x1) * scale_x)
+      x2 = offset_x + (float(x2) * scale_x)
     else:
       scale_x = self.scale_x
-      x2 = self.graph_left \
-         + ((float(x2) * scale_x)) \
-         + ((0 - self.max_x) * scale_x) \
-         + (self.delta_x * scale_x)
-      x1 = self.graph_left \
-         + ((float(x1)) * scale_x) \
-         + ((0 - self.max_x) * scale_x) \
-         + (self.delta_x * scale_x)
+      offset_x = self.graph_left + (self.delta_x - self.max_x) * scale_x
+      x2 = offset_x + (float(x2) * scale_x)
+      x1 = offset_x + (float(x1) * scale_x)
 
     lower_bound = 0
     if self.min_y < 0 and slope==0:
       lower_bound = self.min_y
-
+    
+    y1 = (float(y1) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
+    y2 = (float(y2) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
+    
     if self.reverse_y:
-      y1 = (self.graph_top
-            + (float(y1) * self.scale_y)
-            + (lower_bound - self.max_y) * self.scale_y
-            + (self.delta_y * self.scale_y))
-      y2 = (self.graph_top
-            + (float(y2) * self.scale_y)
-            + (lower_bound - self.max_y) * self.scale_y
-            + (self.delta_y * self.scale_y))
+      y1 += self.graph_top
+      y2 += self.graph_top
     else:
-      y1 = self.bY \
-         - (self.boxYoffset
-            + ((float(y1) * self.scale_y))
-            + ((lower_bound - self.max_y) * self.scale_y)
-            + (self.delta_y * self.scale_y))
-      y2 = self.bY \
-         - (self.boxYoffset
-            + ((float(y2) * self.scale_y))
-            + ((lower_bound - self.max_y) * self.scale_y)
-            + (self.delta_y * self.scale_y))
+      y1 = self.graph_bottom - float(y1)
+      y2 = self.graph_bottom - float(y2)
 
     if slope == 0.0:
       width = 2
@@ -489,6 +463,9 @@ class Graph(ArgumentParser):
           self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
     if write_text:
+      txt = self.metadata.get("y_label", "y Axis Label")
+      txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
+      wX_axis, wY_axis = self.draw.textsize(txt, font=self.font_small)      
       text = OV.correct_rendered_text(write_text)
       wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
@@ -518,7 +495,7 @@ class Graph(ArgumentParser):
         new = new.rotate(90, expand=1)
         self.im.paste(new, (x, y))
       else:
-        adj_x = 7
+        adj_x = 1.55 * wY_axis
         adj_y = 7
         if x1 > self.max_x*self.scale_x/2:
           adj_x = -wX - 7
@@ -748,7 +725,10 @@ class Graph(ArgumentParser):
 
     if self.auto_axes:
       min_x = min(min_xs)
-      min_y = min(min_ys)
+      if min(min_ys) >= 0:
+        min_y = 0.0
+      else:
+        min_y = min(min_ys)
     else:
       min_x = 0.0
       min_y = 0.0
@@ -758,13 +738,14 @@ class Graph(ArgumentParser):
 
     if not self.max_x:
       if self.use_log:
-        if max_x != 0: self.max_x = math.log(max_x,log)
+        if max_x != 0: self.max_x = math.log(max_x+.1*abs(max_x - min_x),log)
         else: self.max_x = math.log(0.0001,log)
       else:
-        self.max_x = max_x
+        self.max_x = max_x+.1*abs(max_x - min_x)
     else:
-      if self.use_log: max_x = math.log(max_x,log)
+      if self.use_log: max_x = math.log(self.max_x+.1*abs(self.max_x - min_x),log)
       if(max_x + .1*abs(max_x - min_x) > self.max_x): self.max_x = max_x + .1*abs(max_x - min_x)
+
     if not self.max_y:
       self.max_y = max_y + .05*abs(max_y - min_y)
     elif self.max_y < max_y + .05*abs(max_y - min_y):
@@ -774,14 +755,15 @@ class Graph(ArgumentParser):
       if min_x != 0:
         min_x = math.log(min_x,log)
       if min_x != 0.0 and self.min_x == None:
-        self.min_x = min_x - .02*abs(max_x - min_x)
+        self.min_x = min_x - .01*abs(self.max_x - min_x)
       elif self.min_x == None: self.min_x = 0.0
     else:
       if min_x != 0.0 and self.min_x == None:
-        self.min_x = min_x - .05*abs(max_x - min_x)
+        self.min_x = min_x - .1*abs(self.max_x - min_x)
       elif self.min_x == None: self.min_x = 0.0
+
     if min_y != 0.0 and self.min_y == None:
-      self.min_y = min_y - .05*abs(max_y - min_y)
+      self.min_y = min_y - .1*abs(self.max_y - min_y)
     elif self.min_y == None: self.min_y = 0.0
 
     #if log:
@@ -1117,7 +1099,7 @@ class Graph(ArgumentParser):
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
-  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False, scale=None):
     log = self.use_log
     min_x = self.min_x
     max_x = self.max_x
@@ -1144,25 +1126,21 @@ class Graph(ArgumentParser):
     if self.reverse_x:
       x_constant = self.bX \
                  - (half_marker_width + self.boxXoffset
-                    + ((0 - max_x) * self.scale_x)
-                    + (delta_x * self.scale_x))
+                    + ((delta_x - max_x) * self.scale_x))
       scale_x = -self.scale_x
     else:
       x_constant = (self.graph_left - half_marker_width
-                    + ((0 - max_x) * self.scale_x)
-                    + (delta_x * self.scale_x))
+                    + ((delta_x - max_x) * self.scale_x))
       scale_x = self.scale_x
 
     if self.reverse_y:
       y_constant = (self.graph_top - half_marker_width
-                    + ((0 - max_y) * scale_y)
-                    + (delta_y * scale_y))
+                    + ((delta_y - max_y) * scale_y))
       scale_y = self.scale_y
     else:
       y_constant = self.bY \
           - (half_marker_width + self.boxYoffset
-             + ((0 - max_y) * scale_y)
-             + (delta_y * scale_y))
+             + ((delta_y - max_y) * scale_y))
       scale_y = -self.scale_y
 
     map_txt_list = self.map_txt_list
@@ -1238,16 +1216,18 @@ class Graph(ArgumentParser):
 
       if hrefs:
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (box + (hrefs[i], targets[i])))
+                            % (box + (hrefs[i], targets[i])))          
 
       else:
         href="UpdateHtml"
         href=""
+        if scale == None:
+          scale = 1
         if indices is None:
           if self.use_log:
-            target = '(%.3f,%.3f)' %(self.use_log**xr, yr)
+            target = '(%.3f,%.3f)' %(self.use_log**xr, yr*scale)
           else:
-            target = '(%.3f,%.3f)' %(xr, yr)
+            target = '(%.3f,%.3f)' %(xr, yr*scale)
         else:
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           href = "OMIT %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
@@ -1260,7 +1240,7 @@ class Graph(ArgumentParser):
                             % (box + (href, target)))
 
 
-  def draw_y_axis(self):
+  def draw_y_axis(self, percent=False):
     max_y = self.max_y
     min_y = self.min_y
     scale_y = self.scale_y
@@ -1289,11 +1269,21 @@ class Graph(ArgumentParser):
     while div_val < max_y:
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
-
-    format_string = "%%.%if" %precision
+    
+    format_string = None
+    if percent==False:
+      format_string = "%%.%if" %precision
+    else:
+      if precision >= 2:
+        format_string = "%%.%if" %(precision-2)
+      else:
+        format_string = "%d"
     for item in y_axis:
       val = float(item)
-      txt = format_string %item
+      if percent==False:
+        txt = format_string %item
+      else:
+        txt = format_string %(item*100)
 
       wX, wY = self.draw.textsize(txt, font=self.font_small)
       x = self.graph_left - wX - self.imX * 0.01
@@ -1360,7 +1350,7 @@ class Graph(ArgumentParser):
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
 
-    format_string = "%%.%if" %precision
+    format_string = "%5d"
     temp_txt = format_string %y_axis[-1]
     temp_wX, temp_wY = self.draw.textsize(temp_txt, font=self.font_small)
     self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX,colour='#ffffff')
@@ -1408,7 +1398,7 @@ class Graph(ArgumentParser):
     y = 0
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.graph_right-1.1*wY), int(self.graph_top+wY/2)))
+    self.im.paste(new, (int(self.graph_right-1.1*wY), int((self.graph_bottom-self.graph_top)/3)))
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -2903,18 +2893,8 @@ class item_vs_resolution_plot(Analysis):
     plot_reflection_count = False
     scale = None
     max_y = None
-    if self.item == "i_over_sigma_vs_resolution":
+    if self.item == "i_over_sigma_vs_resolution" or self.item == "rmerge_vs_resolution":
       plot_reflection_count = True
-      self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
-    elif self.item == "rmerge_vs_resolution":
-      plot_reflection_count = True
-      self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="15 %% line (noise above, data below)", reverse_x=reverse_x)
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
-    if self.item == "cc_half_vs_resolution":
-      self.draw_fit_line(slope=0, y_intercept=0.95, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
-    if plot_reflection_count:
       item_save = self.item
       try:
         xy_plot2 = item_vs_resolution(item="refln_vs_resolution", n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
@@ -2933,7 +2913,7 @@ class item_vs_resolution_plot(Analysis):
       max_y = max(xy_plot2.y)
       scale = (max_y1)/max(xy_plot2.y)
       metadata2["y_label"] = xy_plot2.yLegend
-      data2 = Dataset(xy_plot2.x, [y*scale + min_y1 for y in xy_plot2.y], metadata=metadata2)
+      data2 = Dataset(xy_plot2.x, [y*scale for y in xy_plot2.y], metadata=metadata2)
       self.data.setdefault('dataset2', data2)
 
     self.ax_marker_length = int(self.imX * 0.006)
@@ -2948,21 +2928,35 @@ class item_vs_resolution_plot(Analysis):
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
-      elif dataset.metadata().get('y_label') == "R_merge":
+        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
+      elif dataset.metadata().get('y_label') == "R_merge /%":
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, gt=0.15)
+        self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="15 %% line (troublesome data above, good data below)", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
       elif dataset.metadata().get('y_label') == "CC 1/2":
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)
+        self.draw_fit_line(slope=0, y_intercept=0.95, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
       else:
-        self.draw_data_points(
-          dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-          hrefs=dataset.hrefs, targets=dataset.targets)
+        if plot_reflection_count:
+          self.draw_data_points(
+            dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
+            hrefs=dataset.hrefs, targets=dataset.targets, scale=1/scale)          
+        else:
+          self.draw_data_points(
+            dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
+            hrefs=dataset.hrefs, targets=dataset.targets)
 
     self.draw_x_axis()
-    self.draw_y_axis()
+    if list(self.data.values())[0].metadata().get('y_label') == "R_merge /%":
+      self.draw_y_axis(percent=True)
+    else:
+      self.draw_y_axis()
     if plot_reflection_count:
       self.draw_y_axis_2(0,max_y,"Nr. uniq. Refln.")
     #self.draw_legend("test")
