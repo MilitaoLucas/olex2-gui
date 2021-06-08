@@ -1509,7 +1509,7 @@ def get_twin_law_from_hklf5():
     global twinlawsfromhklsrc
     src = OV.HKLSrc()
     if src not in twinlawsfromhklsrc:
-      cmd = "HKLF5 %s" %src
+      cmd = "HKLF5 -e %s" %src
       res = scrub(cmd)
       if "HKLF5 file is expected" in " ".join(res):
         htm = "This is not an HKLF5 format hkl file."

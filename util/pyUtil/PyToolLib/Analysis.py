@@ -388,14 +388,14 @@ class Graph(ArgumentParser):
     else:
       y1 = self.max_y
       y2 = self.min_y
-    
+
     if slope == 0.0 and not x_intercept:
       if self.reverse_x or reverse_x:
         x1 = self.max_x
         x2 = self.min_x
       else:
         x1 = self.min_x
-        x2 = self.max_x 
+        x2 = self.max_x
     else:
       if x_intercept:
         x1 = x_intercept
@@ -408,7 +408,7 @@ class Graph(ArgumentParser):
           x1 = math.log(x1,self.use_log)
         if x2 != 0:
           x2 = math.log(x2,self.use_log)
-    
+
     if self.reverse_x or reverse_x:
       scale_x = -self.scale_x
       x1 = self.bX - self.boxXoffset \
@@ -418,22 +418,22 @@ class Graph(ArgumentParser):
       x2 = self.bX - self.boxXoffset\
          + ((float(x2)) * scale_x) \
          - ((0 - self.max_x) * -scale_x) \
-         - (self.delta_x * -scale_x)      
+         - (self.delta_x * -scale_x)
     else:
       scale_x = self.scale_x
       x2 = self.graph_left \
          + ((float(x2) * scale_x)) \
          + ((0 - self.max_x) * scale_x) \
-         + (self.delta_x * scale_x)      
+         + (self.delta_x * scale_x)
       x1 = self.graph_left \
          + ((float(x1)) * scale_x) \
          + ((0 - self.max_x) * scale_x) \
-         + (self.delta_x * scale_x)   
-    
+         + (self.delta_x * scale_x)
+
     lower_bound = 0
     if self.min_y < 0 and slope==0:
       lower_bound = self.min_y
-      
+
     if self.reverse_y:
       y1 = (self.graph_top
             + (float(y1) * self.scale_y)
@@ -755,7 +755,7 @@ class Graph(ArgumentParser):
 
     max_x = max(max_xs)
     max_y = max(max_ys)
-    
+
     if not self.max_x:
       if self.use_log:
         if max_x != 0: self.max_x = math.log(max_x,log)
@@ -770,7 +770,7 @@ class Graph(ArgumentParser):
     elif self.max_y < max_y + .05*abs(max_y - min_y):
       self.max_y = max_y + .05*abs(max_y - min_y)
 
-    if self.use_log:      
+    if self.use_log:
       if min_x != 0:
         min_x = math.log(min_x,log)
       if min_x != 0.0 and self.min_x == None:
@@ -1216,12 +1216,12 @@ class Graph(ArgumentParser):
           fill = self.guiParams.red.hexadecimal
         else:
           fill = self.guiParams.green.hexadecimal
-          
+
       if gt:
         if float(yr) > float(gt):
           fill = self.guiParams.red.hexadecimal
         else:
-          fill = self.guiParams.green.hexadecimal        
+          fill = self.guiParams.green.hexadecimal
 
       try:
         if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
@@ -1335,7 +1335,7 @@ class Graph(ArgumentParser):
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
-    
+
   def draw_y_axis_2(self,y_min,y_max, label):
     delta_y = y_max - y_min
     scale = ((self.graph_bottom - self.graph_top)/delta_y)
@@ -1408,7 +1408,7 @@ class Graph(ArgumentParser):
     y = 0
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.graph_right-1.1*wY), int(self.graph_top+wY/2)))  
+    self.im.paste(new, (int(self.graph_right-1.1*wY), int(self.graph_top+wY/2)))
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -1423,7 +1423,7 @@ class Graph(ArgumentParser):
       precision = 0
     else:
       precision = len(str(modulo).split('.')[-1])
-      
+
     if add_precision is not None:
       precision += add_precision
 
@@ -2029,7 +2029,7 @@ class WilsonPlot(Analysis):
           colour = "#ff0000"
       top_left = (left, top)
       IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
-      
+
       top += 13
       i += 1
       if i == 2:
@@ -2874,9 +2874,9 @@ class item_vs_resolution_plot(Analysis):
     else:
       iucr = 0.84
       rad_name = str(olx.xf.exptl.Radiation()) + "Angstrom"
-    
+
     from cctbx import uctbx
-    
+
     if params.resolution_as == "d_spacing":
       if iucr != 0.84:
         iucr = uctbx.two_theta_as_d(iucr,float(olx.xf.exptl.Radiation()),deg=True)
@@ -2898,7 +2898,7 @@ class item_vs_resolution_plot(Analysis):
     elif params.resolution_as == "two_theta":
       if iucr == 0.84:
         iucr = uctbx.d_star_sq_as_two_theta(uctbx.d_as_d_star_sq(iucr),float(olx.xf.exptl.Radiation()),deg=True)
-      
+
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     plot_reflection_count = False
     scale = None
@@ -2906,7 +2906,7 @@ class item_vs_resolution_plot(Analysis):
     if self.item == "i_over_sigma_vs_resolution":
       plot_reflection_count = True
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x) 
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
     elif self.item == "rmerge_vs_resolution":
       plot_reflection_count = True
       self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="15 %% line (noise above, data below)", reverse_x=reverse_x)
@@ -2930,12 +2930,12 @@ class item_vs_resolution_plot(Analysis):
       metadata2 = dict(metadata)
       max_y1 = max(xy_plot.y)
       min_y1 = min(xy_plot.y)
-      max_y = max(xy_plot2.y)      
+      max_y = max(xy_plot2.y)
       scale = (max_y1)/max(xy_plot2.y)
       metadata2["y_label"] = xy_plot2.yLegend
       data2 = Dataset(xy_plot2.x, [y*scale + min_y1 for y in xy_plot2.y], metadata=metadata2)
       self.data.setdefault('dataset2', data2)
-  
+
     self.ax_marker_length = int(self.imX * 0.006)
     self.reverse_x = reverse_x
     self.get_division_spacings_and_scale()
@@ -2955,18 +2955,18 @@ class item_vs_resolution_plot(Analysis):
       elif dataset.metadata().get('y_label') == "CC 1/2":
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-          hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)        
+          hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)
       else:
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets)
-    
+
     self.draw_x_axis()
     self.draw_y_axis()
     if plot_reflection_count:
       self.draw_y_axis_2(0,max_y,"Nr. uniq. Refln.")
     #self.draw_legend("test")
-    
+
     #self.draw_pairs(reverse_x=reverse_x, lt=3)
 
 
@@ -3824,7 +3824,7 @@ class HealthOfStructure():
       target = OV.GetParam('snum.refinement.completeness.target')
     else:
       target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
-    
+
     txt = ""
     ref_open = ''
     ref_close = ''
