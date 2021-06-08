@@ -1921,7 +1921,7 @@ ener = cf.kernel()"""
     if part != 0:
       path = os.path.join(path,"Part_"+str(part))
     if software =="Psi4":
-          out_fn = os.path.join(path,self.name + "_psi4.log")         
+      out_fn = os.path.join(path,self.name + "_psi4.log")
     else:
       if "orca" in args[0]:
         out_fn = os.path.join(path,self.name + "_orca.log")
