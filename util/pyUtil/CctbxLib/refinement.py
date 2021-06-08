@@ -409,10 +409,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         else:
           obs_ = self.observations
         from smtbx import absolute_structure
+        exti_ = None
+        if self.extinction.grad:
+          exti_ = xray.shelx_extinction_correction(
+            self.xray_structure().unit_cell(), self.wavelength, self.extinction.value)
+          exti_.grad = False
         flack = absolute_structure.flack_analysis(
           self.normal_eqns.xray_structure,
           obs_,
-          self.extinction,
+          exti_,
           connectivity_table=self.connectivity_table
         )
         return utils.format_float_with_standard_uncertainty(

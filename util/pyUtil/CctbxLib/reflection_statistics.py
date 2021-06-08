@@ -195,7 +195,7 @@ class item_vs_resolution(OlexCctbxAdapter):
     elif "cc_half_vs_resolution" in self.item:
       legend_y = "CC 1/2"
     elif "rmerge_vs_resolution" in self.item:
-      legend_y = "R_merge"
+      legend_y = "R_merge /%"
     elif "refln_vs_resolution" in self.item:
       legend_y = "# of refln."
     r.yLegend = legend_y
