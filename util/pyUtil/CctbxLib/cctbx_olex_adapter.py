@@ -298,7 +298,18 @@ class OlexCctbxAdapter(object):
              twin_data=True):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
-      miller_set_ = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
+      if self.hklf_code >= 5:
+        indices = set()
+        for i, m in enumerate(self.observations.indices):
+          indices.add(m)
+          itr = self.observations.iterator(i)
+          while itr.has_next():
+            indices.add(itr.next().h)
+        miller_set_ = miller.set(
+          crystal_symmetry=self.xray_structure().crystal_symmetry(),
+            indices=flex.miller_index(list(indices))).auto_anomalous().map_to_asu()
+      else:
+        miller_set_ = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
     else:
       miller_set_ = miller_set
     if (ignore_inversion_twin
@@ -384,7 +395,7 @@ class OlexCctbxAdapter(object):
   def get_fo_sq_fc(self, one_h_function=None):
     fo2 = self.reflections.f_sq_obs_filtered
     if one_h_function:
-      fc = self.f_calc(fo2, self.exti is not None, True, True,
+      fc = self.f_calc(None, self.exti is not None, True, False,
                        one_h_function=one_h_function, twin_data=False)
     else:
       fc = self.f_calc(None, self.exti is not None, True,
