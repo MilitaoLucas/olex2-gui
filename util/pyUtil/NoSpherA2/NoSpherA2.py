@@ -41,6 +41,11 @@ from PluginTools import PluginTools as PT
 from gui.images import GuiImages
 GI=GuiImages()
 
+def scrub(cmd):
+  log = gui.tools.LogListen()
+  olex.m(cmd)
+  return log.endListen()
+
 class NoSpherA2(PT):
   def __init__(self):
     super(NoSpherA2, self).__init__()
@@ -2081,7 +2086,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
     from iotbx.shelx import hklf
     cctbx_adaptor = OlexCctbxAdapter()
     with open(hkl_file, "w") as out:
-      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   args.append("-hkl")
   args.append(hkl_file)
@@ -2110,6 +2115,29 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
       args.append(str(groups[i]))
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
+
+  try:
+    src = OV.HKLSrc()
+    cmd = "HKLF5 -e %s" %src
+    res = scrub(cmd)
+    if "HKLF5 file is expected" in " ".join(res):
+      pass
+    elif "negative batch numbers" in " ".join(res):
+      pass
+    else:
+      curr_law = []
+      for i in res[4].split():
+        curr_law.append(i)
+      for i in res[6].split():
+        curr_law.append(i)
+      for i in res[8].split():
+        curr_law.append(i)
+      curr_law = tuple(curr_law)
+      args.append("-twin")
+      for i in curr_law:
+        args.append(str(int(i)))
+  except:
+    print("I had a problem with HKLF5 here...")
   
   if 'twin' in olex_refinement_model: 
     c = olex_refinement_model['twin']['matrix']
@@ -2118,9 +2146,9 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
       for el in row:
         curr_law.append(el)
     curr_law = tuple(curr_law)
-    txt = ""
-    if curr_law:
-      txt = repr(curr_law)
+    #txt = ""
+    #if curr_law:
+    #  txt = repr(curr_law)
     args.append("-twin")
     for i in curr_law:
       args.append(str(int(i)))
