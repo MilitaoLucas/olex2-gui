@@ -238,6 +238,11 @@ class reflections(object):
         self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size()), file=log)
 
   def get_observations(self, twin_fractions, twin_components):
+    miller_set = miller.set(
+      crystal_symmetry=self.f_sq_obs_filtered,
+      indices=self.f_sq_obs_filtered.indices(),
+      anomalous_flag=self.f_sq_obs_filtered.anomalous_flag())\
+        .unique_under_symmetry().map_to_asu()
     if self.hklf_code == 5:
       rv = self.f_sq_obs_filtered.as_xray_observations(
         scale_indices=self.batch_numbers,
@@ -248,6 +253,7 @@ class reflections(object):
     else:
       rv = self.f_sq_obs_filtered.as_xray_observations(
         twin_components=twin_components)
+    rv.unique_mapped_miller_set = miller_set
     return rv
 
 

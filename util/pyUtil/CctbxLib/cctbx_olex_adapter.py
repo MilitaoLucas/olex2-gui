@@ -298,18 +298,7 @@ class OlexCctbxAdapter(object):
              twin_data=True):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
-      if self.hklf_code >= 5:
-        indices = set()
-        for i, m in enumerate(self.observations.indices):
-          indices.add(m)
-          itr = self.observations.iterator(i)
-          while itr.has_next():
-            indices.add(itr.next().h)
-        miller_set_ = miller.set(
-          crystal_symmetry=self.xray_structure().crystal_symmetry(),
-            indices=flex.miller_index(list(indices))).auto_anomalous().map_to_asu()
-      else:
-        miller_set_ = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
+        miller_set_ = self.observations.unique_mapped_miller_set
     else:
       miller_set_ = miller_set
     if (ignore_inversion_twin
