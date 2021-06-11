@@ -1181,8 +1181,21 @@ def GetFormattedCompilationInfo():
 # helper class to preserve user settings
 class ParamStack():
   programs = []
+  params = []
   def __init__(self):
       pass
+
+  def push(self, param_name, value=None, set_none=False):
+    self.params.append((param_name, OV.GetParam(param_name)))
+    if value or set_none:
+      OV.SetParam(param_name, value)
+
+  def pop(self, number=1):
+    if len(self.params) < number:
+      raise("Push setting in before popping out")
+    for i in range(0, number):
+      v = self.params.pop()
+      OV.SetParam(v[0], v[1])
 
   def push_program(self, name, program_name=None, method_name=None, scope="snum"):
     if len(self.programs) > 10:
