@@ -155,16 +155,21 @@ class RunPrg(ArgumentParser):
         raise SilentException(caught_exception)
 
   def run_auto_vss(self):
+    OV.paramStack.push('snum.refinement.max_cycles')
+    OV.paramStack.push('snum.refinement.max_peaks')
     olx.Freeze(True)
-    olex.m('compaq')
-    olex.m('compaq -a')
-    olx.VSS(True)
-    olex.m('compaq')
-    olex.m('refine 2 10')
-    olex.m('compaq')
-    olx.ATA()
-    olex.m('refine 2 10')
-    olx.Freeze(False)
+    try:
+      olex.m('compaq')
+      olex.m('compaq -a')
+      olx.VSS(True)
+      olex.m('compaq')
+      olex.m('refine 2 10')
+      olex.m('compaq')
+      olx.ATA()
+      olex.m('refine 2 10')
+    finally:
+      olx.Freeze(False)
+      OV.paramStack.pop(2)
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)

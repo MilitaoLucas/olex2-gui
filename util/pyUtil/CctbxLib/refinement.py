@@ -918,13 +918,24 @@ The following options were used:
     anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
     list_code = abs(list_code)
     if list_code == 4:
-      fo_sq, fc_sq = self.get_fcf_data(anomalous_flag=False, use_fc_sq=True)
+      weights = None
+      need_Fc = False
+      if add_weights and self.reflections._merge == 0:
+        need_Fc = True
+      fo_sq, fc_ = self.get_fcf_data(anomalous_flag=False, use_fc_sq=not need_Fc)
+      if need_Fc:
+        weights = self.compute_weights(fo_sq, fc_)
+        fc_sq = fc_.as_intensity_array()
+      else:
+        fc_sq = fc_
+
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc', format="coreCIF")
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
 
       if add_weights:
-        weights = self.normal_eqns.weights
+        if weights is None:
+          weights = self.normal_eqns.weights
         _refln_F_squared_weight = fc_sq.array(data=weights*len(weights)*100/sum(weights))
         mas_as_cif_block.add_miller_array(
           _refln_F_squared_weight, column_name='_refln_F_squared_weight')
