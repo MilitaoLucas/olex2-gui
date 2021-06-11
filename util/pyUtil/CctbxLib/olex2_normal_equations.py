@@ -297,7 +297,7 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
       return True
     if limit_shift_over_su is not None and abs(self.max_ls_shift_over_su) > limit_shift_over_su:
       shift_scale = limit_shift_over_su/self.max_ls_shift_over_su
-      x *= shift_scale
+      x *= abs(shift_scale)
     return False
 
   def reset_shifts(self):
