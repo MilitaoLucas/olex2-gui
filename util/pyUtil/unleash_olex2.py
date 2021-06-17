@@ -286,7 +286,7 @@ def promote_distro(src, dest, forward=True):
   with open(tag_file_name, 'w+b') as tag_file:
     print(tag, file=tag_file)
   #note that tag for release will be empty
-  splash_file = os.path.join(working_directory, "splash.jpg-", tag)
+  splash_file = os.path.join(working_directory, "splash-" + tag + ".jpg")
   if not os.path.exists(splash_file):
     splash_file = ''
   #end creating the tag file
