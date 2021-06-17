@@ -282,9 +282,13 @@ def promote_distro(src, dest, forward=True):
   dest = dest.replace('\\','/')
   if dest.endswith('/'):  dest = dest[:-1]
   tag_file_name = dest+'/'+'olex2.tag'
-  tag_file = open(tag_file_name, 'w+b')
-  print(dest.split('/')[-1], file=tag_file)
-  tag_file.close()
+  tag = dest.split('/')[-1]
+  with open(tag_file_name, 'w+b') as tag_file:
+    print(tag, file=tag_file)
+  #note that tag for release will be empty
+  splash_file = os.path.join(working_directory, "splash.jpg-", tag)
+  if not os.path.exists(splash_file):
+    splash_file = ''
   #end creating the tag file
   for zipfi in distro_zips:
     full_zn = dest + '/' + zipfi[0]
@@ -298,9 +302,13 @@ def promote_distro(src, dest, forward=True):
     prefix = zipfi[1]
     if not prefix:  prefix = ''
     zip_tag_name = prefix + 'olex2.tag'
+    splash_file_name = prefix + 'splash.jpg'
     for zi in src_zfile.infolist():
       if zi.filename == zip_tag_name:
         dest_zfile.write(tag_file_name, zip_tag_name)
+      elif zi.filename == splash_file_name and splash_file:
+        print("Updating splash...")
+        dest_zfile.writestr(zi, open(splash_file, 'rb').read())
       else:
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
