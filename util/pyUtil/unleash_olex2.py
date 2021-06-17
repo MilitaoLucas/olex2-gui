@@ -7,6 +7,8 @@ from __future__ import print_function
 # win - portable to windows disregarding the architecture
 # 32 - runs only on 32 bit
 
+# this is to be used for the DEV splash below
+current_release_tag = "1.5"
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac64_port_name = 'port-mac64'
@@ -285,7 +287,6 @@ def promote_distro(src, dest, forward=True):
   tag = dest.split('/')[-1]
   with open(tag_file_name, 'w+b') as tag_file:
     print(tag, file=tag_file)
-  #note that tag for release will be empty
   splash_file = os.path.join(working_directory, "splash-" + tag + ".jpg")
   if not os.path.exists(splash_file):
     splash_file = ''
@@ -302,13 +303,13 @@ def promote_distro(src, dest, forward=True):
     prefix = zipfi[1]
     if not prefix:  prefix = ''
     zip_tag_name = prefix + 'olex2.tag'
-    splash_file_name = prefix + 'splash.jpg'
+    zip_splash_file_name = prefix + 'splash.jpg'
     for zi in src_zfile.infolist():
       if zi.filename == zip_tag_name:
         dest_zfile.write(tag_file_name, zip_tag_name)
-      elif zi.filename == splash_file_name and splash_file:
+      elif zi.filename == zip_splash_file_name and splash_file:
         print("Updating splash...")
-        dest_zfile.writestr(zi, open(splash_file, 'rb').read())
+        dest_zfile.write(splash_file, zip_splash_file_name)
       else:
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
@@ -453,7 +454,7 @@ for val, key in external_files.items():
     if option.dev:
       if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
         continue
-    print("Specified binary file does not exist '" + val + "' check..")
+    print("Specified binary file does not exist '" + val + "' check...")
     continue
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
@@ -656,13 +657,21 @@ olex2_tag_file.close()
 ####################################################################################################
 # create portable distro
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
-  port_files = create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
+  create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
   inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
   print('Creating portable zip: ' + zip_name)
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
   for f in inst_files:
-    dest_zip.write(f, zip_destination(f, prefix))
+    fi = os.path.split(f)
+    processed = False
+    if fi[1] == 'splash.jpg':
+      splash_file = os.path.join(working_directory, "splash-" + current_release_tag + "-dev.jpg")
+      if os.path.exists(splash_file):
+        dest_zip.write(splash_file, zip_destination(f, prefix))
+        processed = True
+    if not processed:
+      dest_zip.write(f, zip_destination(f, prefix))
   if prefix is None:  prefix = ''
   dest_zip.write(zip_index_file_name, prefix + 'index.ind')
   dest_zip.write(olex2_tag_file_name, prefix + 'olex2.tag')
@@ -683,13 +692,6 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 ####################################################################################################
-  create_portable_distro(
-    port_props=None,
-    zip_name=portable_zip_name,
-    port_zips=portable_zip_files,
-    prefix=portable_prefix,
-    extra_files = None
-  )
 if platforms.get("win32"):
   create_portable_distro(
     port_props=set([win32_sse2_port_name,win32_port_name]),
