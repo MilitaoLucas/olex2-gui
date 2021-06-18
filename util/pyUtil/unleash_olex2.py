@@ -2,6 +2,15 @@
 from __future__ import print_function
 """ Olex 2 distro management """
 
+if __name__ == '__main__':
+  import sys
+  if len(sys.argv) == 1:
+    sys.argv.append('--web_directory=' + "D:/tmp/www/1.5")
+    sys.argv.append('--working_directory=' + "D:/tmp/test-gui-trunk")
+    sys.argv.append('--bin_directory=' + "D:/devel/bin_dir-1.5")
+    #sys.argv.append('--platform' + "=win32")
+    sys.argv.append('--beta')
+
 # plugin properties name-platform-architecture, like Headless-win-32
 # Headless - portables
 # win - portable to windows disregarding the architecture
@@ -189,11 +198,11 @@ parser = OptionParser(usage='unleash_olex2.py [options]')
 parser.add_option('--web_directory',
       dest='web_directory',
       help='the path to the directory that Apache will expose'
-           'the distro from')
+          'the distro from')
 parser.add_option('--working_directory',
       dest='working_directory',
       help='the path to the svn working directory to build'
-           'the distro from')
+          'the distro from')
 parser.add_option('--bin_directory',
       dest='bin_directory',
       help='the path where the binary files, not icnlcuded to svn reside')
@@ -223,22 +232,28 @@ parser.add_option('-p', '--platform',
       default='win32-sse,win32,win64,mac64,lin64',
       action='store',
       help='modify the platform list to release')
-option, args = parser.parse_args()
 
-working_directory = os.path.expanduser(option.working_directory
-               or 'e:/tmp/test-svn')
+option = parser.parse_args()[0]
+
+working_directory = os.path.expanduser(option.working_directory)
 if not os.path.isdir(working_directory):
   print("ERROR: '%s' is not a directory" % working_directory)
   parser.print_help()
 
-web_directory = os.path.expanduser(option.web_directory
-           or 'e:/tmp/1.0')
-bin_directory = os.path.expanduser(option.bin_directory
-                                   or 'e:/tmp/bin_dir')
+web_directory = os.path.expanduser(option.web_directory)
+bin_directory = os.path.expanduser(option.bin_directory)
+current_release_tag = "1.5"
+if option.dev:
+  current_release_tag += "-dev"
+elif option.alpha:
+  current_release_tag += "-alpha"
+elif option.beta:
+  current_release_tag += "-beta"
+
 if not os.path.isdir(bin_directory):
   print("ERROR: '%s' is not a directory" % bin_directory)
   parser.print_help()
-  #os.abort()
+  sys.exit(1)
 
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 def update_tags_file(dir):
@@ -282,9 +297,12 @@ def promote_distro(src, dest, forward=True):
   dest = dest.replace('\\','/')
   if dest.endswith('/'):  dest = dest[:-1]
   tag_file_name = dest+'/'+'olex2.tag'
-  tag_file = open(tag_file_name, 'w+b')
-  print(dest.split('/')[-1], file=tag_file)
-  tag_file.close()
+  with open(tag_file_name, 'w+') as tag_file:
+    print(current_release_tag, file=tag_file)
+  splash_file = os.path.join(bin_directory, "splash-" + current_release_tag + ".png")
+  if os.path.exists(splash_file):
+    dest_splash_file = os.path.join(dest, "update", "splash.jpg")
+    shutil.copy2(splash_file, dest_splash_file)
   #end creating the tag file
   for zipfi in distro_zips:
     full_zn = dest + '/' + zipfi[0]
@@ -298,9 +316,12 @@ def promote_distro(src, dest, forward=True):
     prefix = zipfi[1]
     if not prefix:  prefix = ''
     zip_tag_name = prefix + 'olex2.tag'
+    zip_splash_name = prefix + 'splash.jpg'
     for zi in src_zfile.infolist():
       if zi.filename == zip_tag_name:
         dest_zfile.write(tag_file_name, zip_tag_name)
+      elif zi.filename == zip_splash_name:
+        dest_zfile.write(splash_file, zip_splash_name)
       else:
         dest_zfile.writestr(zi, src_zfile.read(zi.filename))
     src_zfile.close()
@@ -310,6 +331,7 @@ def promote_distro(src, dest, forward=True):
   update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
+
 if option.beta:
   if option.revert:
     print('Reverting release distro to beta')
@@ -333,10 +355,6 @@ else:
     sys.exit(0)
   print('Promoting beta distro to release')
   promote_distro(web_directory + '-beta', web_directory)
-
-if not os.path.isdir(os.path.dirname(web_directory)):
-  print("ERROR: '%s' is not a directory" % working_directory)
-  parser.print_help()
 
 # remove the files from the repository: helps to find collisions
 for val, key in external_files.items():
@@ -388,13 +406,12 @@ try:
       ev_line = ev_file.readline()
       same_version = (ev_line == nv_line)
     if not same_version:
-      wFile = open("%s/version.txt" %bin_directory, 'w')
-      wFile.write(nv_line)
-      wFile.close()
+      with open("%s/version.txt" %bin_directory, 'w') as wFile:
+        wFile.write(nv_line)
 #  revnum = pysvn.Revision( pysvn.opt_revision_kind.working )
 #  print revnum.number
-except pysvn.ClientError as err:
-  if str(err).find('locked'):
+except Exception as err:
+  if 'locked' in str(err):
     client.cleanup(working_directory)
     if option.update_file:
       client.update(working_directory + '/' + option.update_file)
@@ -403,6 +420,7 @@ except pysvn.ClientError as err:
   else:
     print("ERROR: %s" % err)
     parser.print_help()
+    #sys.exit(1)
 
 # gather files and put them in different groups
 top_files = filter_out_directories(
@@ -445,7 +463,7 @@ for val, key in external_files.items():
     if option.dev:
       if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
         continue
-    print("Specified binary file does not exist '" + val + "' check..")
+    print("Specified binary file does not exist '" + val + "' check...")
     continue
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
@@ -485,6 +503,12 @@ for d in directories_to_create:
 update_directory = web_directory + '/update'
 update_directory_pat = re.compile(update_directory + '/?')
 
+#copy the splash
+splash_file = os.path.join(bin_directory, "splash-" + current_release_tag + ".png")
+def_splash_file = os.path.join(working_directory, "splash.jpg")
+if os.path.exists(splash_file):
+  shutil.copy2(splash_file, def_splash_file)
+
 # copy files into the web directory
 for f in top_files:
   shutil.copy2(f, destination(f))
@@ -495,6 +519,7 @@ for f in itertools.chain(update_files,
     shutil.copy2(f, destination(f, 'update'))
   else:
     print("Invalid file '" + f + "' skipping")
+
 
 # create the index file
 def info(web_file_name, working_file_name):
@@ -626,7 +651,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
         toks = d.split('/')
       else:
         toks = []
-      toks.append(f);
+      toks.append(f)
       root_entry.FromStrList(toks, props, stats, False)
   root_entry.SaveToFile(idx_file)
   idx_file.close()
@@ -641,14 +666,13 @@ web_directory = web_directory.replace('\\','/')
 if web_directory.endswith('/'):
   web_directory = web_directory[:-1]
 olex2_tag_file_name = web_directory+'/'+'olex2.tag'
-olex2_tag_file = open(olex2_tag_file_name, 'w+b')
-print(web_directory.split('/')[-1], file=olex2_tag_file)
-olex2_tag_file.close()
+with open(olex2_tag_file_name, 'w+') as olex2_tag_file :
+  print(web_directory.split('/')[-1], file=olex2_tag_file)
 #end creating the tag file
 ####################################################################################################
 # create portable distro
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
-  port_files = create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
+  create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
   inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
   print('Creating portable zip: ' + zip_name)
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
@@ -664,7 +688,7 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
     src_zip = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
     for zip_info in src_zip.infolist():
       zi = zipfile.ZipInfo(prefix + zip_info.filename)
-      zi.date_time = zip_info.date_time;
+      zi.date_time = zip_info.date_time
       zi.compress_type = zipfile.ZIP_DEFLATED
       zi.external_attr = 0o775 << 16 # it is NEEDED on Linux and Mac
       dest_zip.writestr(zi, src_zip.read(zip_info.filename) )
@@ -675,13 +699,6 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 ####################################################################################################
-  create_portable_distro(
-    port_props=None,
-    zip_name=portable_zip_name,
-    port_zips=portable_zip_files,
-    prefix=portable_prefix,
-    extra_files = None
-  )
 if platforms.get("win32"):
   create_portable_distro(
     port_props=set([win32_sse2_port_name,win32_port_name]),
@@ -774,7 +791,3 @@ os.unlink(zip_index_file_name)
 update_tags_file(web_directory)
 
 print('Done')
-
-if __name__ == '__main__':
-  import sys
-  sys.argv.append('--beta')
