@@ -68,7 +68,7 @@ class Leverage(object):
 
     if refine:
       it = xray.twin_component(sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)), 0.2, True)
-      fmr.observations = observations.customized_copy(obs, [], (it,))
+      fmr.observations = observations.customized_copy(obs, obs.fo_sq.crystal_symmetry().space_group(), [], (it,))
       fmr.twin_components = (it,)
       fmr.twin_fractions = ()
 
