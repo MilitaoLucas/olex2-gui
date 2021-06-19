@@ -353,7 +353,7 @@ class OlexRefinementModel(object):
             kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
                                        for i in range(int(len(sym_ops)/2))]
         if restraint_type in ('adp_similarity', 'isotropic_adp', 'rigid_bond', 'rigu'):
-          kwds['pair_sym_table'] = pair_sym_table
+          kwds['connectivity'] = pair_sym_table.full_simple_connectivity()
         if 'weights' in kwds:
           del kwds['weight']
         if restraint_type in ('bond', ):
