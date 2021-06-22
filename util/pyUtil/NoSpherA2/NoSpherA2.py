@@ -401,9 +401,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             #combine_sfs(force=True,part=i)
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+"_part_"+str(parts[i])+".tsc")
           else:
-            wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfx")
-            if(not os.path.exists(wfn_fn)):
-              wfn_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".wfn")
+            path_base = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name)
+            if os.path.exists(path_base+".wfx"):
+              wfn_fn = path_base+".wfx"
+            elif os.path.exists(path_base+".fchk"):
+              wfn_fn = path_base+".fchk"
+            elif os.path.exists(path_base+".wfn"):
+              wfn_fn = path_base+".wfn"
+            else:
+              return False
             hkl_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".hkl")
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
             asym_fn = os.path.join(OV.FilePath(),self.wfn_job_dir, job.name+".cif")
