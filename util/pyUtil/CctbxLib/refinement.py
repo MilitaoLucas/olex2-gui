@@ -141,12 +141,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("The mask is out of date. Please update.")
           self.failure = True
           return
+    shared_parameter_constraints = self.setup_shared_parameters_constraints()
+    # pre-build structure taking shared parameters into account
+    self.xray_structure(construct_restraints=True,
+      shared_parameters=shared_parameter_constraints)
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     self.fixed_distances = {}
     self.fixed_angles = {}
-    self.constraints = self.setup_shared_parameters_constraints() + self.constraints
+    self.constraints = shared_parameter_constraints + self.constraints
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
