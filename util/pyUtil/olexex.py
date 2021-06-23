@@ -292,6 +292,17 @@ class OlexRefinementModel(object):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     from smtbx.refinement.constraints import adp, site
+    redundant_adp = {}
+    if shared_parameters: # filter out shared ADP
+      for sp in shared_parameters:
+        if isinstance(sp, adp.shared_u):
+          for i in sp.indices[1:]:
+            redundant_adp[i] = sp.indices[0]
+    # for k,v in redundant_adp.items():
+    #   if v in redundant_adp:
+    #     raise Exception("Cyclic constraint located for: %s and %s" \
+    #        %(self._atoms[k]['label'], self._atoms[v]['label']))
+
     for shelxl_restraint in self.restraint_types:
       for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
@@ -301,9 +312,8 @@ class OlexRefinementModel(object):
           # removed isotropic atoms from RIGU restraint
           i_seqs = []
           for atom_restraint in restraint['atoms']:
-            for residue in self.model['aunit']['residues']:
-              if 'adp' in self._atoms[atom_restraint[0]]:
-                i_seqs.append(atom_restraint[0])
+            if 'adp' in self._atoms[atom_restraint[0]]:
+              i_seqs.append(atom_restraint[0])
         else:
           i_seqs = [i[0] for i in restraint['atoms']]
 
@@ -319,12 +329,9 @@ class OlexRefinementModel(object):
           else:
             esd_val = restraint['esd1']
           kwds['weight'] = 1/math.pow(esd_val,2)
-        elif shared_parameters: # filter out shared ADP
-          for sp in shared_parameters:
-            if isinstance(sp, adp.shared_u):
-              redundant = set(sp.indices[1:])
-              i_seqs = [i for i in i_seqs if i not in redundant]
-          kwds['i_seqs'] = i_seqs
+        elif redundant_adp: # filter out shared ADP
+          i_seqs = [redundant_adp.get(i, i) for i in i_seqs]
+          kwds['i_seqs'] =list(set(i_seqs))
 
         value = restraint['value']
         if restraint_type in ('adp_similarity', 'adp_u_eq_similarity',
