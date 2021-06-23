@@ -1013,15 +1013,51 @@ The following options were used:
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
 
   def setup_shared_parameters_constraints(self):
+    shared_adps = {}
+    shared_sites = {}
     constraints = []
     constraints_itr = self.olx_atoms.constraints_iterator()
     for constraint_type, kwds in constraints_itr:
+      i_seqs = kwds["i_seqs"]
       if constraint_type == "adp":
-        current = adp.shared_u(kwds["i_seqs"])
-        constraints.append(current)
+        skip = False
+        for i in i_seqs[1:]:
+          if i_seqs[0] in shared_adps:
+            skip = True
+            break
+          shared_adps[i] = i_seqs[0]
+        if skip:
+          print("Cyclic U constraint located for: %s" \
+            %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
+          continue
       elif constraint_type == "site":
-        current = site.shared_site(kwds["i_seqs"])
-        constraints.append(current)
+        skip = False
+        for i in i_seqs[1:]:
+          if i_seqs[0] in shared_sites:
+            skip = True
+            break
+          shared_sites[i] = i_seqs[0]
+        if skip:
+          print("Cyclic site constraint located for: %s" \
+            %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
+          continue
+    # merge constrains
+    reverse_map = {}
+    for k,v in shared_adps.items():
+      if v not in reverse_map:
+        reverse_map[v] = set()
+      reverse_map[v].add(k)
+    for k,v in reverse_map.items():
+      current = adp.shared_u([k] + list(v))
+      constraints.append(current)
+    reverse_map = {}
+    for k,v in shared_sites.items():
+      if v not in reverse_map:
+        reverse_map[v] = set()
+      reverse_map[v].add(k)
+    for k,v in reverse_map.items():
+      current = site.shared_site([k] + list(v))
+      constraints.append(current)
 
     directions = self.olx_atoms.model.get('olex2.direction', ())
     self.directions = [d for d in directions]
