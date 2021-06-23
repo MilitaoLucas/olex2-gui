@@ -134,7 +134,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
-        if not fo_sq.space_group().is_centric():
+        if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
         if self.f_mask.size() != fo_sq.size():
