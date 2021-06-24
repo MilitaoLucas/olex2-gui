@@ -761,6 +761,8 @@ class Graph(ArgumentParser):
       if min_x != 0.0 and self.min_x == None:
         self.min_x = min_x - .1*abs(self.max_x - min_x)
       elif self.min_x == None: self.min_x = 0.0
+      elif self.min_x > min_x:
+        self.min_x = min_x - .1*abs(self.max_x - min_x)
 
     if min_y != 0.0 and self.min_y == None:
       self.min_y = min_y - .1*abs(self.max_y - min_y)
@@ -1098,7 +1100,23 @@ class Graph(ArgumentParser):
     x = width - wX - self.bSides
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
-
+  
+  def draw_info(self, txt, font_size=None):
+    #Draws text into top right corner of the plot
+    if not font_size:
+      font_size = self.font_size_large
+    #height = self.graph_bottom - self.graph_top
+    width = self.params.size_x
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+    legend_top = self.graph_top + 20
+    legend_bottom = legend_top + 1.2*wY
+    x = width - 1.5*wX - self.bSides
+    top_left = (x, legend_top)
+    box = (x-0.5*wX,legend_top,x+wX,legend_bottom)
+    ## Wipe the legend area
+    self.draw.rectangle(box, fill=self.pageColour)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
+  
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False, scale=None):
     log = self.use_log
     min_x = self.min_x
@@ -2589,6 +2607,7 @@ class Fractal_Dimension(Analysis):
       self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
+    self.draw_info("e_gross: %8.4f electrons\ne_net: %10.4f electrons"%(xy_plot.e_gross,xy_plot.e_net),font_size=self.font_size_small)
 
 
 class Fobs_Fcalc_plot(Analysis):

@@ -513,22 +513,13 @@ class fractal_dimension(OlexCctbxAdapter):
                resolution=0.1,
                stepsize=0.01):
     import olex
-    #olex.m('CalcFourier -fcf -%s -r=%s'%("diff",resolution))
-    import olex_xgrid
     map_type = "diff"
-    olex.m("spy.NoSpherA2.plot_map_cube(%s,%s)"%(map_type,str(resolution)))
+    olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
     
     print ("Made residual density map")
-    assert olex_xgrid.IsVisible()
     
-    #from math import log
-    
-    temp = olex_xgrid.GetSize()
-    size = [int(temp[0]),int(temp[1]),int(temp[2])]
     self.info = OV.ModelSrc()
 
-    run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
-    print ("Analyzing %d surface intersections..."%run)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()    
@@ -569,22 +560,16 @@ class fractal_dimension(OlexCctbxAdapter):
       lines = file.readlines()
     info = lines[0].split()
     steps = int(info[0])
+    e_gross = float(info[3])
+    e_net = float(info[4])
+    self.e_net = e_net
+    self.e_gross = e_gross
+    print("Min: " + str(float(info[1])) + " Max: " + str(float(info[2])) + " e_gross: " + str(e_gross) + " e_net: " + str(e_net))
     self.x = flex.double(steps)
     self.y = flex.double(steps)
-    min_max = None
-    if parent != None:
-      min_max = [parent.min_x,parent.max_x]
-    else:
-      min_max = [-1.0,1.0]
     for i in range(steps):
       temp = lines[i+1].split()
-      self.x[i],self.y[i] = float(temp[0]),float(temp[1])
-      if i == 0:
-        if self.x[i] < min_max[0]+0.2:
-          min_max[0] = self.x[i] - 0.2
-      if i == steps-1:
-        if self.x[i] > min_max[1]-0.2:
-          min_max[1] = self.x[i] + 0.2     
+      self.x[i],self.y[i] = float(temp[0]),float(temp[1])  
     
     print("Done!")
     
@@ -595,6 +580,8 @@ class fractal_dimension(OlexCctbxAdapter):
       r.title += ": " + str(self.info)
     r.x = self.x
     r.y = self.y
+    r.e_net = self.e_net
+    r.e_gross = self.e_gross
     r.xLegend = "rho /eA^(-3)"
     r.yLegend = "df(rho)"
     return r

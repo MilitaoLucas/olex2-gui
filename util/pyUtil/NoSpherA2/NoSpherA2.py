@@ -2422,7 +2422,7 @@ def add_info_to_tsc():
 
   details_text = """CIF:
 Refinement using NoSpherA2, an implementation of NOn-SPHERical Atom-form-factors in Olex2.
-Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky - to be published - 2020
+Please cite:\n\nF. Kleemiss, H. Puschmann, O. Dolomanov, S.Grabowsky Chem. Sci. 2021
 NoSpherA2 implementation of HAR makes use of tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
@@ -3217,9 +3217,7 @@ OV.registerFunction(calculate_cubes,True,'NoSpherA2')
 def get_map_types():
   name = OV.ModelSrc()
   folder = OV.FilePath()
-  list = ""
-  if os.path.isfile(os.path.join(folder,name+".fcf")):
-    list = "Residual<-diff;Deformation<-fcfmc;"
+  list = ";Residual<-diff;Deformation<-fcfmc;2Fo-Fc<-tomc;Fobs<-fobs;Fcalc<-fcalc;"
   if os.path.isfile(os.path.join(folder,name+"_eli.cube")):
     list += "ELI-D;"
   if os.path.isfile(os.path.join(folder,name+"_lap.cube")):
@@ -3280,13 +3278,12 @@ def change_map():
   elif Type == "Rho + ESP":
     OV.SetParam('snum.NoSpherA2.map_scale_name',"BWR")
     plot_cube(name+"_rho.cube",name+"_esp.cube")
-  elif Type == "fcfmc" or Type == "diff":
+  elif Type == "fcfmc" or Type == "diff" or Type == "tomc" or Type == "fobs" or Type == "fcalc":
     OV.SetVar('map_slider_scale',50)
     OV.SetParam('snum.map.type',Type)
-    olex.m("calcFourier -fcf -%s -r=%s -m" %(Type,OV.GetParam('snum.NoSpherA2.map_resolution')))
+    show_fft_map(float(OV.GetParam('snum.NoSpherA2.map_resolution')),map_type=Type)
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
-    #olex.m("html.Update()")
     minimal = float(olx.xgrid.GetMin())
     maximal = float(olx.xgrid.GetMax())
     if -minimal > maximal:
@@ -3963,6 +3960,275 @@ def heavy_final():
   OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(heavy_final, False, "NoSpherA2")
+
+def plot_fft_map(fft_map):
+  import olex_xgrid
+  olex.m("html.Update()")
+
+  data = None
+
+  min_v = 100000
+  max_v = 0
+  data = fft_map.real_map_unpadded()
+  gridding = data.accessor()
+  from cctbx.array_family import flex
+  type = isinstance(data, flex.int)
+  olex_xgrid.Import(
+    gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
+  min_v = flex.min(data)
+  max_v = flex.max(data)  
+  data = None
+  olex_xgrid.SetMinMax(min_v, max_v)
+  olex_xgrid.SetVisible(True)
+  olex_xgrid.InitSurface(True,1)
+
+OV.registerFunction(plot_fft_map,True,'NoSpherA2')
+
+def plot_fft_map_cube(fft_map,map_name):
+  import math
+
+  temp = fft_map.n_real()
+  size = [int(temp[0]),int(temp[1]),int(temp[2])]
+  name = OV.ModelSrc()
+
+  n_atoms = int(olx.xf.au.GetAtomCount())
+  positions = [[float(0.0) for k in range(3)] for l in range(n_atoms)]
+  cm = [[float(0.0) for k in range(3)] for l in range(3)]
+  cm_inv = [[float(0.0) for k in range(3)] for l in range(3)]
+  temp = olx.xf.au.GetCell().split(',')
+  cell = [float(temp[0]),float(temp[1]),float(temp[2]),float(temp[3]),float(temp[4]),float(temp[5])]
+  a2b = 0.52917749
+  fac = 0.0174532925199432944444444444444
+
+  types = ["Q","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
+
+  ca = math.cos(fac * cell[3])
+  cb = math.cos(fac * cell[4])
+  cg = math.cos(fac * cell[5])
+  sg = math.sin(fac * cell[5])
+  cm[0][0] = cell[0] / a2b
+  cm[0][1] = cell[1] * cg / a2b
+  cm[1][1] = cell[1] * sg / a2b
+  cm[0][2] = cell[2] * cb / a2b
+  cm[1][2] = (cell[2] * (ca - cb * cg) / sg) / a2b
+  cm[2][2] = float(olx.xf.au.GetCellVolume())/(cell[0] * cell[1] * sg * a2b)
+
+  cm_inv[0][0] = 1/cm[0][0] / a2b
+  cm_inv[1][1] = 1/cm[1][1] / a2b
+  cm_inv[2][2] = 1/cm[2][2] / a2b
+  cm_inv[0][1] = -cm[0][1]/(cm[0][0]*cm[1][1]) / a2b
+  cm_inv[0][2] = ((cm[0][1]*cm[1][2])-(cm[0][2]*cm[1][1]))/(cm[0][0]*cm[1][1]*cm[2][2]) / a2b
+  cm_inv[1][2] = -cm[1][2]/(cm[1][1]*cm[2][2]) / a2b
+  cm_inv[1][0] = cm[0][1]/(cm[0][0]*cm[1][1]) /a2b
+  cm_inv[2][0] = (-cm[0][1]*cm[1][2]+cm[0][2]*cm[1][1])/(cm[0][0]*cm[1][1]*cm[2][2]) /a2b
+  cm_inv[2][1] = cm[1][2]/(cm[1][1]*cm[2][2]) /a2b
+
+  cmnorm = [
+    math.sqrt(cm_inv[0][0]*cm_inv[0][0] + cm_inv[0][1]*cm_inv[0][1] + cm_inv[0][2]*cm_inv[0][2]),
+    math.sqrt(cm_inv[1][0]*cm_inv[1][0] + cm_inv[1][1]*cm_inv[1][1] + cm_inv[1][2]*cm_inv[2][2]),
+    math.sqrt(cm_inv[2][0]*cm_inv[2][0] + cm_inv[2][1]*cm_inv[2][1] + cm_inv[2][2]*cm_inv[2][2])]
+
+  for a in range(n_atoms):
+    pos = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+
+    positions[a] = [
+      (float(pos[0])*cm_inv[0][0]+float(pos[1])*cm_inv[0][1]+float(pos[2])*cm_inv[0][2])/cmnorm[0],
+      (float(pos[0])*cm_inv[1][0]+float(pos[1])*cm_inv[1][1]+float(pos[2])*cm_inv[1][2])/cmnorm[1],
+      (float(pos[0])*cm_inv[2][0]+float(pos[1])*cm_inv[2][1]+float(pos[2])*cm_inv[2][2])/cmnorm[2]]
+
+  print ("start writing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
+  values = fft_map.real_map_unpadded()
+
+  with open("%s_%s.cube"%(name,map_name),'w') as cube:
+    cube.write("Fourier synthesis map created by Olex2\n")
+    cube.write("Model name: %s\n"%name)
+    #Origin of cube
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(n_atoms,0.0,0.0,0.0))
+    # need to write vectors!
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[0],cm[0][0]/(size[0]-1),cm[0][1]/(size[0]-1),cm[0][2]/(size[0]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[1],cm[1][0]/(size[1]-1),cm[1][1]/(size[1]-1),cm[1][2]/(size[1]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[2],cm[2][0]/(size[2]-1),cm[2][1]/(size[2]-1),cm[2][2]/(size[2]-1)))
+    for i in range(n_atoms):
+      atom_type = olx.xf.au.GetAtomType(i)
+      charge = 200
+      for j in range(104):
+        if types[j] == atom_type:
+          charge = j
+          break
+      if charge == 200:
+        print("ATOM NOT FOUND!")
+      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n"%(charge,charge,positions[i][0]/a2b,positions[i][1]/a2b,positions[i][2]/a2b))
+    for x in range(size[0]):
+      for y in range(size[1]):
+        string = ""
+        for z in range(size[2]):
+          #value = fft_map.real_map_unpadded()[(x*size[1]+y)*size[2]+z]
+          string += ("%15.7e"%values[(x*size[1]+y)*size[2]+z])
+          if (z+1) % 6 == 0 and (z+1) != size[2]:
+            string += '\n'
+        if (y != (size[1] - 1)):
+          string += '\n'
+        cube.write(string)
+      if(x != (size[0] -1)):
+        cube.write('\n')
+
+    cube.close()
+
+  print("Saved Fourier map successfully")
+
+def residual_map(resolution=0.1,return_map=False):
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adapter = OlexCctbxAdapter()
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use_tsc == True:
+    from refinement import FullMatrixRefine
+    fmr = FullMatrixRefine()  
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+  else:
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    from smtbx import masks
+    from cctbx_olex_adapter import OlexCctbxMasks
+    OlexCctbxMasks()
+    f_mask = olx.current_mask.f_mask()
+    if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+      f_mask = f_mask.generate_bijvoet_mates()
+    f_mask = f_mask.common_set(f_sq_obs)    
+    f_sq_obs = masks.modified_intensities(f_sq_obs, f_calc, f_mask)  
+  f_obs = f_sq_obs.f_sq_as_f()
+  k = f_obs.scale_factor(f_calc)
+  f_diff = f_obs.f_obs_minus_f_calc(1./k, f_calc)  
+  from cctbx.maptbx import crystal_gridding
+  from cctbx import miller
+  cg = crystal_gridding(f_diff._unit_cell,space_group_info=f_diff._space_group_info,resolution_factor=1,step=float(resolution))
+  diff_map = miller.fft_map(cg,f_diff).apply_volume_scaling()
+  if return_map==True:
+    return diff_map
+  plot_fft_map_cube(diff_map,"diff")
+
+OV.registerFunction(residual_map, False, "NoSpherA2")
+
+def tomc_map(resolution=0.1,return_map=False):
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adapter = OlexCctbxAdapter()
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use_tsc == True:
+    from refinement import FullMatrixRefine
+    fmr = FullMatrixRefine()  
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+  else:
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    from smtbx import masks
+    from cctbx_olex_adapter import OlexCctbxMasks
+    OlexCctbxMasks()
+    f_mask = olx.current_mask.f_mask()
+    if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+      f_mask = f_mask.generate_bijvoet_mates()
+    f_mask = f_mask.common_set(f_sq_obs)
+    f_sq_obs = masks.modified_intensities(f_sq_obs, f_calc, f_mask)
+  f_obs = f_sq_obs.f_sq_as_f()
+  k = f_obs.scale_factor(f_calc)
+  f_diff = f_obs.f_obs_minus_f_calc(2./k, f_calc)
+  from cctbx.maptbx import crystal_gridding
+  from cctbx import miller
+  cg = crystal_gridding(f_diff._unit_cell,space_group_info=f_diff._space_group_info,resolution_factor=1,step=float(resolution))
+  tomc_map = miller.fft_map(cg,f_diff).apply_volume_scaling()
+  if return_map==True:
+    return tomc_map
+  plot_fft_map_cube(tomc_map,"diff")
+
+OV.registerFunction(tomc_map, False, "NoSpherA2")
+
+def deformation_map(resolution=0.1, return_map=False):
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use_tsc == False:
+    print("Deformation is only available when using a .tsc file!")
+    return
+  from refinement import FullMatrixRefine
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adapter = OlexCctbxAdapter()
+  fmr = FullMatrixRefine()  
+  table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+  f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
+  f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
+  from cctbx.maptbx import crystal_gridding
+  from cctbx import miller
+  cg = crystal_gridding(f_diff._unit_cell,space_group_info=f_sq_obs._space_group_info,resolution_factor=1,step=float(resolution))
+  def_map = miller.fft_map(cg,f_diff).apply_volume_scaling()
+  if return_map==True:
+    return def_map
+  plot_fft_map_cube(def_map,"deform")
+
+OV.registerFunction(deformation_map, False, "NoSpherA2")
+
+def obs_map(resolution=0.1, return_map=False):
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adapter = OlexCctbxAdapter()  
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use_tsc == True:
+    from refinement import FullMatrixRefine
+    fmr = FullMatrixRefine()  
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)    
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+  else:
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()  
+  f_obs = f_sq_obs.f_sq_as_f()
+  k = f_obs.scale_factor(f_calc)
+  f_obs.apply_scaling(factor=1./k)
+  f_obs = f_obs.phase_transfer(f_calc)
+  from cctbx.maptbx import crystal_gridding
+  from cctbx import miller
+  cg = crystal_gridding(f_obs._unit_cell,space_group_info=f_obs._space_group_info,resolution_factor=1,step=float(resolution))
+  obs_map = miller.fft_map(cg,f_obs).apply_volume_scaling()
+  if return_map==True:
+    return obs_map  
+  plot_fft_map_cube(obs_map,"obs")
+
+OV.registerFunction(obs_map, False, "NoSpherA2")
+
+def calc_map(resolution=0.1,return_map=False):
+  from refinement import FullMatrixRefine
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adapter = OlexCctbxAdapter()
+  fmr = FullMatrixRefine()
+  table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  if use_tsc == True:
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+  else:
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  from cctbx.maptbx import crystal_gridding
+  from cctbx import miller
+  cg = crystal_gridding(f_calc._unit_cell,space_group_info=f_calc._space_group_info,resolution_factor=1,step=float(resolution))
+  calc_map = miller.fft_map(cg,f_calc).apply_volume_scaling()
+  if return_map==True:
+    return calc_map
+  plot_fft_map_cube(calc_map,"calc")
+
+OV.registerFunction(calc_map, False, "NoSpherA2")
+
+def show_fft_map(resolution=0.1,map_type="diff"):
+  if map_type == "diff":
+    plot_fft_map(residual_map(resolution, return_map=True))
+  elif map_type == "fcfmc":
+    plot_fft_map(deformation_map(resolution, return_map=True))
+  elif map_type == "obs":
+    plot_fft_map(obs_map(resolution,return_map=True))
+  elif map_type == "calc":
+    plot_fft_map(calc_map(resolution,return_map=True))
+  elif map_type == "tomc":
+    plot_fft_map(tomc_map(resolution,return_map=True))
+
+OV.registerFunction(show_fft_map, False, "NoSpherA2")
 
 def psi4():
   import psi4
