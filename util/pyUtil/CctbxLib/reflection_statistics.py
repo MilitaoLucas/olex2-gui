@@ -346,8 +346,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       else:
         f_calc_merged = self.f_calc(miller_set=f_obs_merged)
         f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
-        f_calc_omitted = f_calc_merged.common_set(
-          f_obs_merged).lone_set(f_calc_filtered)        
+        f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
       f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
@@ -358,6 +357,15 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_mask = f_mask.common_set(f_obs_filtered)
         f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask)
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+        if f_calc_omitted != None and f_obs_omitted.size() > 0:
+          f_obs_temp = f_sq_obs_filtered.as_amplitude_array()
+          if f_obs_temp.sigmas() is not None:
+            weights = weights=1/flex.pow2(f_obs_temp.sigmas())
+          else:
+            weights = None          
+          k = f_obs_temp.scale_factor(f_calc_filtered, weights=weights)
+          f_mask_omit = self.load_mask().common_set(f_obs_omitted)
+          f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))
