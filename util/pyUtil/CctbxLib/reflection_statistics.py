@@ -524,7 +524,7 @@ class fractal_dimension(OlexCctbxAdapter):
     map_type = "diff"
     olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
     
-    print ("Made residual density map")
+    print ("Made residual density map\nAnalyzing...")
     
     self.info = OV.ModelSrc()
 
@@ -579,7 +579,7 @@ class fractal_dimension(OlexCctbxAdapter):
       temp = lines[i+1].split()
       self.x[i],self.y[i] = float(temp[0]),float(temp[1])  
     
-    print("Done!")
+    print("Done!\nFractal Dimension plot according to K. Meindl and J. Henn (2008), Acta Cryst. A64, 404-418.")
     
   def xy_plot_info(self):
     r = empty()
