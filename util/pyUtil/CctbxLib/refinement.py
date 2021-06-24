@@ -817,18 +817,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
             tsc_info = tsc_info + line
         if not cif_block_found:
           details_text = """Refinement using NoSpherA2, an implementation of
- NOn-SPHERical Atom-form-factors in Olex2.
+NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
-F. Kleemiss et al. DOI 10.1039/D0SC05526C - 2020
+F. Kleemiss et al. Chem. Sci. DOI 10.1039/D0SC05526C - 2021
 NoSpherA2 implementation of HAR makes use of
- tailor-made aspherical atomic form factors calculated
+tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
 The ED is calculated from a gaussian basis set single determinant SCF
 wavefunction - either Hartree-Fock or DFT using selected funtionals
  - for a fragment of the crystal.
-This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
+This fragment can be embedded in an electrostatic crystal field by employing cluster charges 
+or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
           software = OV.GetParam('snum.NoSpherA2.source')
