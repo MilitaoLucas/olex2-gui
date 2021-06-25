@@ -288,9 +288,21 @@ class OlexRefinementModel(object):
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
-  def restraints_iterator(self, pair_sym_table=None):
+  def restraints_iterator(self, pair_sym_table=None, shared_parameters=None):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
+    from smtbx.refinement.constraints import adp, site
+    redundant_adp = {}
+    if shared_parameters: # filter out shared ADP
+      for sp in shared_parameters:
+        if isinstance(sp, adp.shared_u):
+          for i in sp.indices[1:]:
+            redundant_adp[i] = sp.indices[0]
+    # for k,v in redundant_adp.items():
+    #   if v in redundant_adp:
+    #     raise Exception("Cyclic constraint located for: %s and %s" \
+    #        %(self._atoms[k]['label'], self._atoms[v]['label']))
+
     for shelxl_restraint in self.restraint_types:
       for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
@@ -300,14 +312,8 @@ class OlexRefinementModel(object):
           # removed isotropic atoms from RIGU restraint
           i_seqs = []
           for atom_restraint in restraint['atoms']:
-            for residue in self.model['aunit']['residues']:
-              for atom in residue['atoms']:
-                if(atom['aunit_id']==atom_restraint[0]):
-                  if 'adp' in atom:
-                    i_seqs.append(atom_restraint[0])
-                  break
-          if(len(i_seqs)==0):
-            continue
+            if 'adp' in self._atoms[atom_restraint[0]]:
+              i_seqs.append(atom_restraint[0])
         else:
           i_seqs = [i[0] for i in restraint['atoms']]
 
@@ -323,6 +329,10 @@ class OlexRefinementModel(object):
           else:
             esd_val = restraint['esd1']
           kwds['weight'] = 1/math.pow(esd_val,2)
+        elif redundant_adp: # filter out shared ADP
+          i_seqs = [redundant_adp.get(i, i) for i in i_seqs]
+          kwds['i_seqs'] =list(set(i_seqs))
+
         value = restraint['value']
         if restraint_type in ('adp_similarity', 'adp_u_eq_similarity',
                               'adp_volume_similarity',
@@ -353,7 +363,7 @@ class OlexRefinementModel(object):
             kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
                                        for i in range(int(len(sym_ops)/2))]
         if restraint_type in ('adp_similarity', 'isotropic_adp', 'rigid_bond', 'rigu'):
-          kwds['pair_sym_table'] = pair_sym_table
+          kwds['connectivity'] = pair_sym_table.full_simple_connectivity()
         if 'weights' in kwds:
           del kwds['weight']
         if restraint_type in ('bond', ):
