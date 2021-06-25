@@ -871,7 +871,7 @@ White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
 Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
     NoSpherA2_ref_t = NoSpherA2_ref.replace('\r', '').replace('\n', '').replace(' ', '')
     if NoSpherA2:
-      if ref_t not in full_references_set:
+      if NoSpherA2_ref_t not in full_references_set:
         full_references.append(NoSpherA2_ref)
         full_references_set.add(NoSpherA2_ref_t)
     else:

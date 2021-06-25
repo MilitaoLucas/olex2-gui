@@ -913,8 +913,8 @@ class RunRefinementPrg(RunPrg):
         olx.Anis("$H", h=True)
       if OV.GetParam('snum.NoSpherA2.h_afix') == True:
         olex.m("Afix 0 $H")
-    olex.m('delins list')
-    olex.m('addins LIST -6')
+    #olex.m('delins list')
+    #olex.m('addins LIST -6')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
     if add_disp is True:
       olex.m('gendisp -source=sasaki')

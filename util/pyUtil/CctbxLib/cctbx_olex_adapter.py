@@ -133,11 +133,12 @@ class OlexCctbxAdapter(object):
     #sys.stdout.refresh = False
     return
 
-  def xray_structure(self, construct_restraints=False):
+  def xray_structure(self, construct_restraints=False, shared_parameters=None):
     if self._xray_structure is None or construct_restraints:
       if construct_restraints:
         restraints_iter=self.olx_atoms.restraints_iterator(
-          self.connectivity_table.pair_sym_table)
+          self.connectivity_table.pair_sym_table,
+          shared_parameters=shared_parameters)
         same_iter = self.olx_atoms.same_iterator()
       else:
          restraints_iter = None

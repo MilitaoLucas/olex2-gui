@@ -346,8 +346,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       else:
         f_calc_merged = self.f_calc(miller_set=f_obs_merged)
         f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
-        f_calc_omitted = f_calc_merged.common_set(
-          f_obs_merged).lone_set(f_calc_filtered)        
+        f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
       f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
@@ -358,6 +357,15 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_mask = f_mask.common_set(f_obs_filtered)
         f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask)
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+        if f_calc_omitted != None and f_obs_omitted.size() > 0:
+          f_obs_temp = f_sq_obs_filtered.as_amplitude_array()
+          if f_obs_temp.sigmas() is not None:
+            weights = weights=1/flex.pow2(f_obs_temp.sigmas())
+          else:
+            weights = None          
+          k = f_obs_temp.scale_factor(f_calc_filtered, weights=weights)
+          f_mask_omit = self.load_mask().common_set(f_obs_omitted)
+          f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))
@@ -513,22 +521,13 @@ class fractal_dimension(OlexCctbxAdapter):
                resolution=0.1,
                stepsize=0.01):
     import olex
-    #olex.m('CalcFourier -fcf -%s -r=%s'%("diff",resolution))
-    import olex_xgrid
     map_type = "diff"
-    olex.m("spy.NoSpherA2.plot_map_cube(%s,%s)"%(map_type,str(resolution)))
+    olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
     
-    print ("Made residual density map")
-    assert olex_xgrid.IsVisible()
+    print ("Made residual density map\nAnalyzing...")
     
-    #from math import log
-    
-    temp = olex_xgrid.GetSize()
-    size = [int(temp[0]),int(temp[1]),int(temp[2])]
     self.info = OV.ModelSrc()
 
-    run = size[0]*size[1]*(size[2]-1) + size[0]*size[2]*(size[1]-1) + size[2]*size[1]*(size[0]-1)
-    print ("Analyzing %d surface intersections..."%run)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()    
@@ -569,24 +568,18 @@ class fractal_dimension(OlexCctbxAdapter):
       lines = file.readlines()
     info = lines[0].split()
     steps = int(info[0])
+    e_gross = float(info[3])
+    e_net = float(info[4])
+    self.e_net = e_net
+    self.e_gross = e_gross
+    print("Min: " + str(float(info[1])) + " Max: " + str(float(info[2])) + " e_gross: " + str(e_gross) + " e_net: " + str(e_net))
     self.x = flex.double(steps)
     self.y = flex.double(steps)
-    min_max = None
-    if parent != None:
-      min_max = [parent.min_x,parent.max_x]
-    else:
-      min_max = [-1.0,1.0]
     for i in range(steps):
       temp = lines[i+1].split()
-      self.x[i],self.y[i] = float(temp[0]),float(temp[1])
-      if i == 0:
-        if self.x[i] < min_max[0]+0.2:
-          min_max[0] = self.x[i] - 0.2
-      if i == steps-1:
-        if self.x[i] > min_max[1]-0.2:
-          min_max[1] = self.x[i] + 0.2     
+      self.x[i],self.y[i] = float(temp[0]),float(temp[1])  
     
-    print("Done!")
+    print("Done!\nFractal Dimension plot according to K. Meindl and J. Henn (2008), Acta Cryst. A64, 404-418.")
     
   def xy_plot_info(self):
     r = empty()
@@ -595,6 +588,8 @@ class fractal_dimension(OlexCctbxAdapter):
       r.title += ": " + str(self.info)
     r.x = self.x
     r.y = self.y
+    r.e_net = self.e_net
+    r.e_gross = self.e_gross
     r.xLegend = "rho /eA^(-3)"
     r.yLegend = "df(rho)"
     return r

@@ -134,19 +134,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
-        if not fo_sq.space_group().is_centric():
+        if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
         if self.f_mask.size() != fo_sq.size():
           print("The mask is out of date. Please update.")
           self.failure = True
           return
+    shared_parameter_constraints = self.setup_shared_parameters_constraints()
+    # pre-build structure taking shared parameters into account
+    self.xray_structure(construct_restraints=True,
+      shared_parameters=shared_parameter_constraints)
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     self.fixed_distances = {}
     self.fixed_angles = {}
-    self.constraints = self.setup_shared_parameters_constraints() + self.constraints
+    self.constraints = shared_parameter_constraints + self.constraints
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
@@ -813,18 +817,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
             tsc_info = tsc_info + line
         if not cif_block_found:
           details_text = """Refinement using NoSpherA2, an implementation of
- NOn-SPHERical Atom-form-factors in Olex2.
+NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
-F. Kleemiss et al. DOI 10.1039/D0SC05526C - 2020
+F. Kleemiss et al. Chem. Sci. DOI 10.1039/D0SC05526C - 2021
 NoSpherA2 implementation of HAR makes use of
- tailor-made aspherical atomic form factors calculated
+tailor-made aspherical atomic form factors calculated
 on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
 spherical-atom form factors.
 
 The ED is calculated from a gaussian basis set single determinant SCF
 wavefunction - either Hartree-Fock or DFT using selected funtionals
  - for a fragment of the crystal.
-This fregment can be embedded in an electrostatic crystal field by employing cluster charges.
+This fragment can be embedded in an electrostatic crystal field by employing cluster charges 
+or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
           software = OV.GetParam('snum.NoSpherA2.source')
@@ -1009,15 +1014,51 @@ The following options were used:
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
 
   def setup_shared_parameters_constraints(self):
+    shared_adps = {}
+    shared_sites = {}
     constraints = []
     constraints_itr = self.olx_atoms.constraints_iterator()
     for constraint_type, kwds in constraints_itr:
+      i_seqs = kwds["i_seqs"]
       if constraint_type == "adp":
-        current = adp.shared_u(kwds["i_seqs"])
-        constraints.append(current)
+        skip = False
+        for i in i_seqs[1:]:
+          if i_seqs[0] in shared_adps:
+            skip = True
+            break
+          shared_adps[i] = i_seqs[0]
+        if skip:
+          print("Cyclic U constraint located for: %s" \
+            %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
+          continue
       elif constraint_type == "site":
-        current = site.shared_site(kwds["i_seqs"])
-        constraints.append(current)
+        skip = False
+        for i in i_seqs[1:]:
+          if i_seqs[0] in shared_sites:
+            skip = True
+            break
+          shared_sites[i] = i_seqs[0]
+        if skip:
+          print("Cyclic site constraint located for: %s" \
+            %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
+          continue
+    # merge constrains
+    reverse_map = {}
+    for k,v in shared_adps.items():
+      if v not in reverse_map:
+        reverse_map[v] = set()
+      reverse_map[v].add(k)
+    for k,v in reverse_map.items():
+      current = adp.shared_u([k] + list(v))
+      constraints.append(current)
+    reverse_map = {}
+    for k,v in shared_sites.items():
+      if v not in reverse_map:
+        reverse_map[v] = set()
+      reverse_map[v].add(k)
+    for k,v in reverse_map.items():
+      current = site.shared_site([k] + list(v))
+      constraints.append(current)
 
     directions = self.olx_atoms.model.get('olex2.direction', ())
     self.directions = [d for d in directions]
