@@ -4302,10 +4302,69 @@ H  5.3388863094 8.1423113280 6.6742541538
 OV.registerFunction(psi4, False, "NoSpherA2")
   
 
+
+def make_quick_button_gui():
+  import olexex
+  from ImageTools import IT
+
+  max_Z, heaviest_element_in_formula = olexex.FindZOfHeaviestAtomInFormula()
+  d = {}
+  if max_Z < 10:
+    d.setdefault('type', 'org')
+    d.setdefault('description', 'Organic Molecule (Z &lt; 10) ')
+  elif max_Z < 36:
+    d.setdefault('type', 'light')
+    d.setdefault('description', 'Light metal (Z &lt; 35) ')
+  else:
+    d.setdefault('type', 'heavy')
+    d.setdefault('description', 'Heavy metal (Z  &gt; 35) ')
+
+  buttons = ""
+  base_col = OV.GetParam("gui.action_colour")
+  for item in [("min", IT.adjust_colour(base_col, luminosity=1.0, as_format='hex'), "Test"),
+               ("small", IT.adjust_colour(base_col, luminosity=0.9, as_format='hex'), "Work"),
+               ("final", IT.adjust_colour(base_col, luminosity=0.8, as_format='hex'), "Fianal")]:
+    d["qual"]=item[0]
+    d["col"]=item[1]
+    d["value"]=item[2]
+    buttons += '''
+    <td width="20%%">
+      <input
+        type="button"
+        name="nosphera2_quick_button_%(type)s_%(qual)s"
+        value="%(value)s"
+        height="GetVar(HtmlComboHeight)"
+        onclick="spy.SetParam('snum.NoSpherA2.Calculate',True)>>spy.NoSpherA2.%(type)s_%(qual)s()"
+        bgcolor="%(col)s"
+        fgcolor="#ffffff"
+        fit="false"
+        flat="GetVar(linkButton.flat)"
+        hint=""
+        disabled="false"
+        custom="GetVar(custom_button)"
+      >
+    </td>''' % d
+
+  d["buttons"]=buttons
+
+  t='''
+<td width="40%%" align='left'>
+<b>%(description)s</b>
+</td>
+%(buttons)s
+''' % d
+  return t
+    
+  
+  
+  
+
+
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.launch, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getBasisListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getCPUListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
+OV.registerFunction(make_quick_button_gui, False, "NoSpherA2")
 #print "OK."

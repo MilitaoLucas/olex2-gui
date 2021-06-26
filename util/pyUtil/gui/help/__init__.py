@@ -199,12 +199,13 @@ class GetHelp(VFSDependent):
     for var,md_path in matches:
       if debug:
         print(md_path)
-      fc = open(md_path,'rb').read().decode("utf-8")
+      with open(md_path, encoding="utf8", errors='ignore') as f:
+        fc = f.read()
       fc = fc.replace("####", "@@@@")
       fc = fc.replace("###", "@@@")
       fc = fc.replace("##", "@@")
 
-      l = fc.split("#")
+      l = fc.split("\n#")
 
       help_type = ""
       target_marker = "-target\n"
@@ -227,7 +228,7 @@ class GetHelp(VFSDependent):
         else:
           help_type = 'help'
           val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
-          html = markdown2.markdown(val, extras=["wiki-tables"])
+          html = markdown2.markdown(val, extras=["wiki-tables", "fenced-code-blocks"])
           if "img" in html:
             #src = os.sep.join(md_path.split("\\")[:-1])
             #img_src = os.path.join(builtin_help_location, 'images')
@@ -619,4 +620,26 @@ class AutoDemoTemp(AutoDemo):
 
 if have_help:
   AutoDemoTemp_instance = AutoDemoTemp()
+  
+  
+def pandoc(kind='pdf', md_path=None, out_path=None):
+  ac_path = "D:\\Users\\Horst\\Documents\\Olex2-1.5-dev\\util\\pyUtil\\AC5d\\"
+  out_tex = os.path.join(ac_path, 'fred.tex')
+  out_pdf = os.path.join(ac_path, 'fred.pdf')
+  md = os.path.join(ac_path, 'AC5_classes.md')
+  if kind == "tex":
+    os.system('pandoc -o %s -f markdown -t latex %s' % (out_tex, md))
+    # temp_p = "D: \Users\Horst\Documents\Olex2-1.5-dev\util\pyUtil\PluginLib\plugin -StructureChecking"
+    #t_file = os.path.join(temp_p, "template.tex")
+    #tex = open(t_file, 'r').read() % d
+    #wFile = open(outfile, 'w')
+    # wFile.write(tex)
+    # wFile.close()
+
+  else:
+    os.system('pandoc %s -o %s' % (md, out_pdf))
+    #log = "C:/Users/Horst/AppData/Local/MiKTeX/2.9/miktex/log"
+
+OV.registerFunction(pandoc, False, 'help')
+
 
