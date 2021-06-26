@@ -47,8 +47,24 @@ In case you want to make sure it is the best possible fit you can try finishing 
 ### Update Table
 After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **Tonto**. The most benchmarked and recommended software is **ORCA**. There is also an option to use **Gaussian** [HIGHLY UNTESTED]. A present **.wfn** file can also be used but **must** agree to the geometry currtly used in Olex2. These options will appear, depending on whether they are properly installed and Olex2 knows about them -> Settings and PATH). Once a program has been chosen, please also adjust the Extras according to your needs if you do not want to use minimal settings.<br>If Update Table is deactivated a Dropdown of all found .tsc files in the current folder is given to be used for refinement, without updating the files.
 
-# NoSpherA2 Refinement
+
+# NoSpherA2 Quick Buttons
+Depending on the molecule (Organic, lighter heavy elements, heavy metals), different set of defaults settings are required. And within these sets, there are different levels, too. Of course, you can also change any of the settings from the tools provided in the rest of this options panel.
+
+## Test
+These settings allow for a quick NoSpherA2 test run of your structure. You can quickly see what happens and eliminate basic errors before getting into the other, more time-consuming runs
+
+## Work
+This is where you will work on your structure. With these settings you can evaluate whether constraints or restraints are necessary, for example.
+
+## Final
+When you are happy with everything being ok, you can then run your final NoSpherA2 job, which can take a long time, since it will run until everything is completely settled.
+
+# NoSpherA2 Options
 This tool provides all the settings required for the calculation of the .tsc file.
+
+
+# NoSpherA2 Options 1
 
 ## Basis
 This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
@@ -65,6 +81,8 @@ The number of CPUs to use during the waverfunction calculation. It is usually a 
 ## Memory
 The maximum memory that NoSpherA2 is allowed to use. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
 
+# NoSpherA2 Options 2
+
 ## Charge
 The charge of the molecule used for the wavefunction calculation. This **must** be properly assigned.
 
@@ -79,6 +97,8 @@ This defines a criteria for the abortion of HAR, if convergence is not achieved.
 
 ## Update .tsc & .wfn
 This button will only generate a new .tsc and .wfn file, without running a least squares refinement. This is usefull after a converged model was found to get the most up-to-date wavefunction for property plotting or to test things before submitting a bigger calculation.
+
+# NoSpherA2 Options 3
 
 ## Integr.(ation) Accuracy
 Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. If you have high symmetry or very heavy elements and high resolution data it might improv results. Low can be used, if the number of electrons after integration is sill correct. Mostly fine for organic molecules. Please check in the log files, whether this is the case!
@@ -109,6 +129,8 @@ This option allows you to adjust the convergence criteria for your SCF in ORCA. 
 
 ## SCF Conv. Strategy (For ORCA)
 Selects which mechanism to use for the SCF to converge to the minmum. Refers to the stepsize in applying calculated gradients fo the wavefunction.
+
+# NoSpherA2 Options Grouped Parts
 
 ## Grouped Parts (For disordered structures)
 Since there might be different regions in your molecules containing disorder modelling you need to specify which disorders form a group for the calculation of Wavefunctions. A Group in this sense refers to PARTs, that resemble the same functional space. E.g. a disorder of a sodium atom with other singly charged ions around this position form a group (Let's say PARTs 1, 2 and 3 are PARTs describing three possibilities of this disorder), where these different PARTs are not interacting within the same molecular input structure, while at a second position there is a carboxylate in a disordered state, where one of the PARTs interacts with this disordered ion (PART 4), while the second PART (Nr. 5 in this case) does not.<br>
