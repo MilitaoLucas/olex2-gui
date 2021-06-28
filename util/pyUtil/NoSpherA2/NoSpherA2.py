@@ -3450,8 +3450,6 @@ def plot_cube(name,color_cube):
 
     value = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
     i=None
-    j=None
-    k=None
     if x_size == x_size2 and y_size == y_size2 and z_size == z_size2:
       for x in range(x_size):
         for y in range(y_size):
@@ -3525,6 +3523,9 @@ def plot_cube(name,color_cube):
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
+  iso = float((abs(min)+abs(max))*2/3)
+  olex_xgrid.SetSurfaceScale(iso)
+  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
 OV.registerFunction(plot_cube,True,'NoSpherA2')
 
@@ -3564,7 +3565,7 @@ def plot_cube_single(name):
     if (run==6):
       values = line.split()
       z_size = int(values[0])
-      data = [[[float(0.0) for k in xrange(z_size)] for j in xrange(y_size)] for i in xrange(x_size)]
+      data = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
     if (run > na + 6):
       values = line.split()
       for i in range(len(values)):
@@ -3598,6 +3599,9 @@ def plot_cube_single(name):
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
+  iso = float((abs(min)+abs(max))*2/3)
+  olex_xgrid.SetSurfaceScale(iso)
+  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
     
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
@@ -3981,6 +3985,9 @@ def plot_fft_map(fft_map):
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
+  iso = float((abs(min_v)+abs(max_v))*2/3)
+  olex_xgrid.SetSurfaceScale(iso)
+  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
 OV.registerFunction(plot_fft_map,True,'NoSpherA2')
 
