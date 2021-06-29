@@ -5,7 +5,7 @@
       "bgcolor=GetVar(HtmlTableRowBgColour)",
       "td1=<td align='left' width="22%">",
       "checked=spy.GetParam('snum.NoSpherA2.Calculate')",
-      "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>html.Update()")
+      "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>if strcmp(spy.GetParam('snum.NoSpherA2.Calculate'),True) then 'html.ItemState h3-NoSpherA2-extras 1' else 'html.ItemState h3-NoSpherA2-extras 2'")
     $-
 
 <!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
@@ -50,8 +50,7 @@
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
-<!-- #include h3-NoSpherA2-1-Button ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-1-Button.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Quick_Button_Settings;onclick=;colspan=1;2; -->
-<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Advanced_Options;onclick=;colspan=1;2; -->
+<!-- #include h3-NoSpherA2-extras ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-extras.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Options;onclick=;colspan=1;2; -->
 <!-- #include h3-NoSpherA2-Properties ..\util\pyUtil\NoSpherA2\h3-refine_NoSpherA2-Properties.htm;gui\blocks\tool-h3-off.htm;image=h3-NoSpherA2_Properties;onclick=;colspan=1;2; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->

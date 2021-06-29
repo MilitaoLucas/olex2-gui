@@ -685,7 +685,7 @@ class ImageTools(FontInstances):
       if begin:
         draw.polygon((begin, middle, end), colour)
 
-  def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
+  def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1, as_format='rgb'):
     '''
     Adjusts the colour of a color value. It can be either a pre-defined value
     like "highlight" or a rgb value. Hue, luminosity and saturation can be
@@ -739,7 +739,11 @@ class ImageTools(FontInstances):
       if value <= 0:
         value = 0
       l.append(value)
-    nc = tuple(l)
+      
+    if as_format.lower() == "rgb":
+      nc = tuple(l)
+    elif as_format.lower() == "hex" or as_format.lower() == "html":
+      nc = IT.RGBToHTMLColor(tuple(l))
     return nc
 
 
