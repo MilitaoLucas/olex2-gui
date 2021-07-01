@@ -5,7 +5,7 @@
       "bgcolor=GetVar(HtmlTableRowBgColour)",
       "td1=<td align='left' width="22%">",
       "checked=spy.GetParam('snum.NoSpherA2.Calculate')",
-      "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>if strcmp(spy.GetParam('snum.NoSpherA2.Calculate'),True) then 'html.ItemState h3-NoSpherA2-extras 1' else 'html.ItemState h3-NoSpherA2-extras 2'")
+      "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>if strcmp(spy.GetParam('snum.NoSpherA2.Calculate'),True) then 'html.ItemState h3-NoSpherA2-extras 1' else 'html.ItemState h3-NoSpherA2-extras 2'>>html.Update()")
     $-
 
 <!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
