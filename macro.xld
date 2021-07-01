@@ -1442,6 +1442,16 @@
   >
 >
 
+<mbacif help="Add bonds and angles around all metals to the CIF as 'selected'"
+  <body
+    <cmd
+      <cmd10 "sel cif bonds $M">
+      <cmd10 "sel cif angles $* $M $*">
+    >
+  >
+>
+
+
 
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >
