@@ -23,6 +23,7 @@
   <shortcut key="Shift+F11" macro="HtmlPanelVisible">
   <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="Ctrl+M" macro="spy.gui.maps.MapView()">
+  <shortcut key="Ctrl+P" macro="spy.gui.images.MakeBitmapImage()">
   <shortcut key="Ctrl+S" macro="file">
   <shortcut key="Ctrl+Shift+S" macro="spy.gui.dialog.SaveModel">
   <shortcut key="Ctrl+0" macro="showP 0">
