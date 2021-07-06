@@ -63,17 +63,6 @@ class GetHelp(VFSDependent):
     help_id = help_id.upper()
     return olx.GetVar(help_id,"No Help Here!")
 
-  def format_html(self, txt):
-    while "\n" in txt:
-      txt = txt.replace("\n", "")
-    regex_source = os.path.join(self.p_path, "regex_format_help.txt")
-    if os.path.exists(regex_source):
-      txt = gui.tools.run_regular_expressions(txt, regex_source)
-    #gui_link = os.path.join(p_path, 'gui-link')
-    txt = txt.replace("GetVar(gui_link)","GetVar(gui.skin.link_type")
-    return txt
-
-
   def make_call(self, url):
     import HttpTools
     try:
@@ -136,7 +125,6 @@ class GetHelp(VFSDependent):
   def format_html(self, txt):
     while "\n" in txt:
       txt = txt.replace("\n", "")
-    #regex_source = os.path.join(self.source_dir, "regex_format_help.txt")
     regex_source = os.path.join(self.p_path, "regex_format_help.txt")
     if os.path.exists(regex_source):
       txt = gui.tools.run_regular_expressions(txt, regex_source, base=self.p_path)
