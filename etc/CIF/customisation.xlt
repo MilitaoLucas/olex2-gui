@@ -53,7 +53,7 @@
     <_diffrn_radiation_wavelength>
     <_refine_ls_*>
     <_refine_diff_*>
-    <_diffrn_reflns_*>
+    <_reflns_*>  <_diffrn_reflns_*>
     <_diffrn_measured_fraction_*>
     <_exptl_crystal_density_diffrn>
     <_exptl_crystal_F_000>
