@@ -890,7 +890,7 @@ Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
     if self.evaluate_conflicts or force:
       ## Check for external CIF files that may want to be merged in as well.
       ## These may not start with the 'data_' identifier, so add it when required.
-      l = OV.GetParam('snum.report.merge_these_cifs')
+      l = OV.GetCifMergeFilesList()
       for item in l:
         item = item.strip()
         if not item:
@@ -901,8 +901,9 @@ Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
               _ = f.read()
               if not _.startswith("data"):
                 _ = str("data_%s\r\n" %OV.ModelSrc() + _)
-              _ = list(iotbx.cif.reader(input_string=_).model().values())[0]
-              self.all_sources_d.setdefault(item, _)
+              cif_block = list(iotbx.cif.reader(input_string=_).model().values())[0]
+              self.exclude_cif_items(cif_block)
+              self.all_sources_d.setdefault(item, cif_block)
           except:
             pass
       self.sort_out_conflicting_sources()
@@ -997,7 +998,7 @@ Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length',
-                    '_audit', # This is only here because of STOE files
+                    '_audit', '_reflns', # These is only here because of STOE files
                     '_cell_angle',
                     '_cell_volume',
                     '_cell_formula',
@@ -1192,7 +1193,7 @@ If more than one file is present, the path of the most recent file is returned b
       l0, l = gui.tools.find_movie_folder(directory, directory_l)
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
       return l0, l
-    
+
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"
