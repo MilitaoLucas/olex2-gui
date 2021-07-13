@@ -76,8 +76,8 @@ class OlexCctbxAdapter(object):
     self.hklf_code = self.olx_atoms.model['hklf']['value']
     if twinning is not None:
       twin_fractions = flex.double(twinning['basf'])
-      twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
-                  for i in range(3) for j in range(3)])
+      twin_law = sgtbx.rot_mx([int(float(twinning['matrix'][j][i])*1000)
+                  for i in range(3) for j in range(3)], 1000)
       twin_multiplicity = twinning.get('n', 2)
       twin_laws = [twin_law]
       if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
