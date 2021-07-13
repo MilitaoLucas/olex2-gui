@@ -596,6 +596,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     software = OV.GetParam('snum.NoSpherA2.source')
     if software == "ORCA":
       wfn_object.write_orca_input(xyz)
+    if software == "ORCA 5.0":
+      wfn_object.write_orca_input(xyz)
     elif software == "Gaussian03":
       wfn_object.write_gX_input(xyz)
     elif software == "Gaussian09":
@@ -778,7 +780,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if os.path.exists(self.orca_exe):
       OV.SetParam('snum.NoSpherA2.source',"ORCA")
       if "ORCA" not in self.softwares:
-        self.softwares = self.softwares + ";ORCA"
+        self.softwares = self.softwares + ";ORCA;ORCA 5.0"
     else:
       self.softwares = self.softwares + ";Get ORCA"
 
@@ -1096,8 +1098,62 @@ class wfn_Job(object):
     basis.close()
     com.write(" \n./%s.wfn\n\n" %self.name)
     com.close()
-
+        
   def write_orca_input(self,xyz):
+    def write_grids_4(method,grid):
+      res = ""
+      if method == "M062X":
+        if grid == "Normal":
+          res += "Grid6 "
+        elif grid == "Low":
+          res += "Grid5 "
+        elif grid == "High":
+          res += "Grid7 "
+        elif grid == "Max":
+          res += "Grid7 "
+      else:
+        if grid == "Low":
+          res += "Grid1 "
+        elif grid == "High":
+          res += "Grid4 "
+        elif grid == "Max":
+          res += "Grid7 "
+      if method == "BP86" or method == "PBE" or method == "PWLDA":
+        return res
+      else:
+        if grid == "Normal":
+          res += " NoFinalGridX "
+        elif grid == "Low":
+          res += " GridX2 NoFinalGridX "
+        elif grid == "High":
+          res += " GridX5 NoFinalGridX "
+        elif grid == "Max":
+          res += " GridX9 NoFinalGridX "
+        return res
+          
+    def write_grids_5(method,grid):
+      res = ""
+      if method == "M062X":
+        if grid == "Normal":
+          res += "DefGrid3 "
+        elif grid == "Low":
+          res += "DefGrid2 "
+        elif grid == "High":
+          res += "DefGrid3 "
+        elif grid == "Max":
+          res += "DefGrid3 "
+      else:
+        if grid == "Low":
+          res += "DefGrid1 "
+        elif grid == "High":
+          res += "DefGrid2 "
+        elif grid == "Max":
+          res += "DefGrid3 "
+      if method == "BP86" or method == "PBE" or method == "PWLDA":
+        return res
+      else:
+        res += " NoFinalGridX "
+        return res    
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
@@ -1116,30 +1172,19 @@ class wfn_Job(object):
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
-    control = "! NoPop NoFinalGrid MiniPrint 3-21G AIM "
+    control = "! NoPop MiniPrint 3-21G AIM "
     method = OV.GetParam('snum.NoSpherA2.method')
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
       control += "rhf "
     else:
       control += method + ' '
-      if method == "M062X":
-        if grid == "Normal":
-          control += "Grid6 "
-        elif grid == "Low":
-          control += "Grid5 "
-        elif grid == "High":
-          control += "Grid7 "
-        elif grid == "Max":
-          control += "Grid7 "
+      software = OV.GetParam("snum.NoSpherA2.source")
+      if software == "ORCA 5.0":
+        grids = write_grids_5(method,grid)
       else:
-        if grid == "Low":
-          control += "Grid1 "
-        elif grid == "High":
-          control += "Grid4 "
-        elif grid == "Max":
-          control += "Grid7 "
-    control = control + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+        grids = write_grids_4(method,grid)
+    control = control + grids + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if method == "BP86" or method == "PBE" or method == "PWLDA":
       if relativistic == True:
@@ -1151,17 +1196,6 @@ class wfn_Job(object):
         control = control + " DKH2 SARC/J RIJCOSX"
       else:
         control = control + " def2/J RIJCOSX"
-      if grid == "Normal":
-        control += " NoFinalGridX "
-      elif grid == "Low":
-        control += " GridX2 NoFinalGridX "
-      elif grid == "High":
-        control += " GridX5 NoFinalGridX "
-      elif grid == "Max":
-        control += " GridX9 NoFinalGridX "
-    FrozenCore = OV.GetParam('snum.NoSpherA2.ORCA_FC')
-    if FrozenCore == True:
-      control += " FrozenCore"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM("+Solvation+") "
@@ -1844,6 +1878,10 @@ ener = cf.kernel()"""
     python_script = "fchk-launch.py"
 
     if software == "ORCA":
+      args.append(self.parent.orca_exe)
+      input_fn = self.name + ".inp"
+      args.append(input_fn)
+    if software == "ORCA 5.0":
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
       args.append(input_fn)

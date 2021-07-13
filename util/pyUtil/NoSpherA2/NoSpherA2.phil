@@ -94,8 +94,6 @@ snum{
       .type = str
     ORCA_Solvation = "Vacuum"
       .type = str
-    ORCA_FC = False
-      .type = bool
     precise_output = False
       .type = bool
     Property_Elf = False

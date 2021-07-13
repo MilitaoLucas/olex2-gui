@@ -347,6 +347,49 @@ N/A
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),ORCA 5.0)
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="17%" align='left'>
+    <b>SCF Thresh. </b>
+</td>
+<td width="20%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Conv@refine",
+    "items='SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_SCF_Conv', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="17%" align='right'>
+    <b>SCF Strategy </b>
+</td>
+<td width="20%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_SCF_Strategy@refine",
+    "items='EasyConv;NormalConv;SlowConv;VerySlowConv'",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy', html.GetValue('~name~'))")
+  $-
+</td> 
+<td width="13%" align='right'>
+    <b>Solvation </b>
+</td>
+<td width="20%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_Solvation@refine",
+    "items='Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene'",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 <!-- ======= pySCF SPECIFIC START ===================== -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)
