@@ -89,7 +89,7 @@ class item_vs_resolution(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
     self.item = item
-    
+
     if self.item == "refln_vs_resolution":
       fo2 = self.reflections.f_sq_obs_merged
       fo2.setup_binner(n_bins=n_bins)
@@ -110,7 +110,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       self.binned_data.show = stats.show
       #for b in result.bins:
         #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
-        
+
     elif self.item == "i_over_sigma_vs_resolution":
       fo2 = self.reflections.f_sq_obs_merged
       fo2.setup_binner(n_bins=n_bins)
@@ -120,7 +120,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.mean(use_binning=True)
       print("CC 1/2 = %.3f" %fo2.cc_one_half())
-      
+
     elif self.item == "cc_half_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -140,7 +140,7 @@ class item_vs_resolution(OlexCctbxAdapter):
         nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
         fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
       else:
-        fo2, fc = self.get_fo_sq_fc()    
+        fo2, fc = self.get_fo_sq_fc()
       weights = self.compute_weights(fo2, fc)
       scale_factor = fo2.scale_factor(fc, weights=weights)
       fo = fo2.f_sq_as_f()
@@ -216,7 +216,7 @@ class r1_factor_vs_resolution(OlexCctbxAdapter):
       nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
       fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
     else:
-      fo2, fc = self.get_fo_sq_fc()    
+      fo2, fc = self.get_fo_sq_fc()
     weights = self.compute_weights(fo2, fc)
     scale_factor = fo2.scale_factor(fc, weights=weights)
     fo = fo2.f_sq_as_f()
@@ -263,7 +263,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
       nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
       fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
     else:
-      fo2, fc = self.get_fo_sq_fc()    
+      fo2, fc = self.get_fo_sq_fc()
     fo2.setup_binner(n_bins=n_bins)
     self.info = fo2.info()
     weights = self.compute_weights(fo2, fc)
@@ -337,9 +337,9 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         from refinement import FullMatrixRefine
         fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)        
+        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
         junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
-        f_calc_merged = f_calc_temp.common_set(f_obs_filtered)  
+        f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
         f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
         # Currently i have to stick to ignoring omitted reflections, since they have no calculated value in the .tsc file
         f_calc_omitted = None
@@ -354,17 +354,20 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       from smtbx import masks
       f_mask = self.load_mask()
       if f_mask:
-        f_mask = f_mask.common_set(f_obs_filtered)
-        f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask)
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(f_obs_filtered)
+        f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask_cs)
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
         if f_calc_omitted != None and f_obs_omitted.size() > 0:
           f_obs_temp = f_sq_obs_filtered.as_amplitude_array()
           if f_obs_temp.sigmas() is not None:
             weights = weights=1/flex.pow2(f_obs_temp.sigmas())
           else:
-            weights = None          
+            weights = None
           k = f_obs_temp.scale_factor(f_calc_filtered, weights=weights)
-          f_mask_omit = self.load_mask().common_set(f_obs_omitted)
+          f_mask_omit = f_mask.common_set(f_obs_omitted)
           f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
@@ -386,11 +389,11 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         plot.indices_omitted = f_obs_omitted.indices()
       else:
         plot.f_obs_omitted = None
-        plot.indices_omitted = None      
+        plot.indices_omitted = None
     else:
       plot.f_calc_omitted = None
       plot.f_obs_omitted = None
-      plot.indices_omitted = None      
+      plot.indices_omitted = None
     plot.fit_slope = fit.slope()
     plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "F calc"
@@ -523,15 +526,15 @@ class fractal_dimension(OlexCctbxAdapter):
     import olex
     map_type = "diff"
     olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
-    
+
     print ("Made residual density map\nAnalyzing...")
-    
+
     self.info = OV.ModelSrc()
 
     olx.xf.EndUpdate()
     if OV.HasGUI():
-      olx.Refresh()    
-       
+      olx.Refresh()
+
     name = OV.ModelSrc()
     wfn_2_fchk = OV.GetVar("Wfn2Fchk")
     args = [wfn_2_fchk]
@@ -545,17 +548,7 @@ class fractal_dimension(OlexCctbxAdapter):
       startinfo.wShowWindow = subprocess.SW_HIDE
     if startinfo == None:
       with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
-        for c in iter(lambda: p.stdout.read(1), b''): 
-          string = c.decode()
-          sys.stdout.write(string)
-          sys.stdout.flush()
-          if '\r' in string or '\n' in string:
-            olx.xf.EndUpdate()
-            if OV.HasGUI():
-              olx.Refresh()     
-    else:
-      with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
-        for c in iter(lambda: p.stdout.read(1), b''): 
+        for c in iter(lambda: p.stdout.read(1), b''):
           string = c.decode()
           sys.stdout.write(string)
           sys.stdout.flush()
@@ -563,7 +556,17 @@ class fractal_dimension(OlexCctbxAdapter):
             olx.xf.EndUpdate()
             if OV.HasGUI():
               olx.Refresh()
-    
+    else:
+      with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
+        for c in iter(lambda: p.stdout.read(1), b''):
+          string = c.decode()
+          sys.stdout.write(string)
+          sys.stdout.flush()
+          if '\r' in string or '\n' in string:
+            olx.xf.EndUpdate()
+            if OV.HasGUI():
+              olx.Refresh()
+
     with open("%s_%s.cube_fractal_plot"%(name,map_type),'r') as file:
       lines = file.readlines()
     info = lines[0].split()
@@ -577,10 +580,10 @@ class fractal_dimension(OlexCctbxAdapter):
     self.y = flex.double(steps)
     for i in range(steps):
       temp = lines[i+1].split()
-      self.x[i],self.y[i] = float(temp[0]),float(temp[1])  
-    
+      self.x[i],self.y[i] = float(temp[0]),float(temp[1])
+
     print("Done!\nFractal Dimension plot according to K. Meindl and J. Henn (2008), Acta Cryst. A64, 404-418.")
-    
+
   def xy_plot_info(self):
     r = empty()
     r.title = "Fractal Dimension Plot"
