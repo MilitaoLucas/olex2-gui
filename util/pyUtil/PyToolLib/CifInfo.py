@@ -642,7 +642,7 @@ class ExtractCifInfo(CifTools):
         import bruker_saint_listing
         integ = bruker_saint_listing.reader(p).cifItems()
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
-        computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
+        computing_data_reduction = computing_data_reduction.split("=")[0].strip()
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
         integ.setdefault("_computing_cell_refinement", computing_data_reduction)
         integ["computing_data_reduction"] = computing_data_reduction
@@ -674,7 +674,7 @@ class ExtractCifInfo(CifTools):
           sad = abs_reader.reader(p).cifItems()
           sad.setdefault('abs_file', p)
           version = self.prepare_computing(sad, versions, "sad")
-          version = string.strip((string.split(version, "="))[0])
+          version = version.split("=")[0].strip()
           sad.setdefault('version', version)
           t = self.prepare_exptl_absorpt_process_details(sad, version)
           sad.setdefault("_exptl_absorpt_process_details", t)
@@ -684,7 +684,7 @@ class ExtractCifInfo(CifTools):
           twin = abs_reader.reader(p).twin_cifItems()
           twin.setdefault('abs_file', p)
           version = self.prepare_computing(twin, versions, "twin")
-          version = string.strip((string.split(version, "="))[0])
+          version = version.split("=")[0].strip()
           twin.setdefault('version', version)
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
@@ -1030,20 +1030,16 @@ Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
     if ABS["abs_type"] == "TWINABS":
       t = ["%s was used for absorption correction.\n" %ABS['version']]
       txt = ""
-      for component in ABS:
-        if type(component) is not dict:
-          continue
+      for component in range(1, int(ABS["number_twin_components"])+1):
+        comp_d = ABS.get(str(component), None)
         # is single parameter set refined?
-        if str(component) not in ABS: continue
-        comp_d = ABS[str(component)]
+        if comp_d is None: continue
         t.append("\nFor component %s:\n" %(component))
         t.append("%s was %s before and %s after correction.\n"
                  %(comp_d["R_name"], comp_d["Rint_before"], comp_d["Rint_after"]))
         ratiominmax = comp_d.setdefault("ratiominmax", None)
         if ratiominmax != None:
           t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
-        #else:
-          #t.append("The Ratio of minimum to maximum transmission not present.\n")
         if "Not present" not in ABS["lambda_correction"]:
           t.append("The \l/2 correction factor is %s\n" %(ABS["lambda_correction"]))
       for me in t:
