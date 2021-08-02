@@ -139,10 +139,10 @@ $+
     "name=HDEF",
     "label=HDEF",
     "checked=spy.GetParam('snum.NoSpherA2.Property_ATOM')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','True')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
     "td1=<td align='center'>",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','False')"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','False') >> html.Update()"
     )
   $-
 <!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_ATOM)
@@ -452,7 +452,7 @@ No map loaded!
   <td width="15%" align='center'><b>Contours</b></td>
 
   $+
-    html.Snippet("gui/snippets/input-slider-NoSpherA2",
+    html.Snippet("gui/snippets/input-slider",
     "param=snum.xgrid.contours",
     "name=SNUM_XGRID_CONTOUR",
     "min=3",
