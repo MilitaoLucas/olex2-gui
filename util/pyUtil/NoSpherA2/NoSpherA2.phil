@@ -88,6 +88,16 @@ snum{
       .type = str
     multiplicity = 0
       .type = str
+    ORCA_USE_CRYSTAL_QMMM = False
+      .type = bool
+    ORCA_CRYSTAL_QMMM_TYPE = "Molecule"
+      .type = str
+    ORCA_CRYSTAL_QMMM_RADIUS = "12.0"
+      .type = str
+    ORCA_CRYSTAL_QMMM_CONV = "0.05"
+      .type = str
+    ORCA_CRYSTAL_QMMM_HF_LAYERS = 0
+      .type = int
     ORCA_SCF_Conv = "NormalSCF"
       .type = str
     ORCA_SCF_Strategy = "NormalConv"
