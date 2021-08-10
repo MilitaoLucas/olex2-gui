@@ -1664,7 +1664,7 @@ TYPE_MAP = [
 
 def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
   from pyscf.x2c import x2c
-  from pyscf import gto
+  from pyscf import gto, lib
 """
     if mult != 1:
       fixed_wfn_function +="""  total_nmo = 0
@@ -1707,29 +1707,29 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
     exps = numpy.hstack(exps)
     nprim, nmo = mo_cart.shape
     if s == 0:
-      fout.write('From PySCF\n')
-      fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\n'%(total_nmo, mo_cart.shape[0], mol.natm))
+      fout.write('From PySCF\\n')
+      fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\\n'%(total_nmo, mo_cart.shape[0], mol.natm))
       for ia in range(mol.natm):
         x, y, z = temp_mol.atom_coord(ia)
-        fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
+        fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
       for i0, i1 in lib.prange(0, nprim, 20):
-        fout.write('CENTRE ASSIGNMENTS  %s\n'% ''.join('%3d'%x for x in centers[i0:i1]))
+        fout.write('CENTRE ASSIGNMENTS  %s\\n'% ''.join('%3d'%x for x in centers[i0:i1]))
       for i0, i1 in lib.prange(0, nprim, 20):
-        fout.write('TYPE ASSIGNMENTS    %s\n'% ''.join('%3d'%x for x in types[i0:i1]))
+        fout.write('TYPE ASSIGNMENTS    %s\\n'% ''.join('%3d'%x for x in types[i0:i1]))
       for i0, i1 in lib.prange(0, nprim, 5):
-        fout.write('EXPONENTS  %s\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
+        fout.write('EXPONENTS  %s\\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
 
     for k in range(nmo):
       if mo_occ[s][k] != 0.0:
         mo = mo_cart[:,k]
-        fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\n'%(k+1+MO_offset, mo_occ[s][k], mo_energy[s][k]))
+        fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\\n'%(k+1+MO_offset, mo_occ[s][k], mo_energy[s][k]))
         if s == 0:
           MO_offset += 1
         for i0, i1 in lib.prange(0, nprim, 5):
-          fout.write(' %s\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
+          fout.write(' %s\\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
     if s == 1:
-      fout.write('END DATA\n')
-      fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\n'%tot_ener)"""
+      fout.write('END DATA\\n')
+      fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\\n'%tot_ener)"""
     else:
       fixed_wfn_function +="""  mol, ctr = x2c._uncontract_mol(mol, True, 0.)
   mo_coeff = numpy.dot(ctr, mo_coeff)
