@@ -1123,8 +1123,12 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   if sfac and not force:
     return
   def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
+  custom_table_file_name = os.path.join(olx.DataDir(), "ED", "SF.txt")
   if not table_file_name or table_file_name == "auto":
-    table_file_name = def_table_file_name
+    if os.path.exists(custom_table_file_name):
+      table_file_name = custom_table_file_name
+    else:
+      table_file_name = def_table_file_name
   else:
     if not os.path.exists(table_file_name):
       table_file_name = os.path.join(olx.DataDir(), "ED", table_file_name)
