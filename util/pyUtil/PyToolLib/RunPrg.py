@@ -229,13 +229,14 @@ class RunPrg(ArgumentParser):
       os.mkdir(self.tempPath)
 
     ## clear temp folder to avoid problems
-    old_temp_files = os.listdir(self.tempPath)
-    for file_n in old_temp_files:
-      try:
-        if "_.res" or "_.hkl" not in file_n:
-          os.remove(r'%s/%s' %(self.tempPath,file_n))
-      except OSError:
-        continue
+    if 'olex2' not in self.program.name:
+      old_temp_files = os.listdir(self.tempPath)
+      for file_n in old_temp_files:
+        try:
+          if "_.res" or "_.hkl" not in file_n:
+            os.remove(r'%s/%s' %(self.tempPath,file_n))
+        except OSError:
+          continue
 
     self.hkl_src = OV.HKLSrc()
     if not os.path.exists(self.hkl_src):
@@ -247,20 +248,16 @@ class RunPrg(ArgumentParser):
         raise Exception("Please choose a reflection file")
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     self.curr_file = OV.FileName()
-    copy_from = "%s" %(self.hkl_src)
-    ## All files will be copied to the temp directory in lower case. This is to be compatible with the Linux incarnations of ShelX
-    copy_to = "%s%s%s.hkl" %(self.tempPath, os.sep, self.shelx_alias)
-    if not os.path.exists(copy_to):
-      shutil.copyfile(copy_from, copy_to)
-    copy_from = "%s%s%s.ins" %(self.filePath, os.sep, self.curr_file)
-    copy_to = "%s%s%s.ins" %(self.tempPath, os.sep, self.shelx_alias)
-    if not os.path.exists(copy_to):
-      shutil.copyfile(copy_from, copy_to)
-    #fab file...
-    copy_from = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
-    copy_to = os.path.join(self.tempPath, self.shelx_alias) + ".fab"
-    if os.path.exists(copy_from) and not os.path.exists(copy_to):
-      shutil.copyfile(copy_from, copy_to)
+    if 'olex2' in self.program.name:
+      return
+    files = [os.path.join(self.filePath, x) for x in olx.xf.GetIncludedFiles().split('\n')]
+    files.append(self.hkl_src)
+    files.append(os.path.join(self.filePath, self.curr_file) + ".ins")
+    files.append(os.path.join(self.filePath, self.curr_file) + ".fab")
+    for copy_from in files:
+      copy_to = os.path.join(self.tempPath, os.path.split(copy_from)[1])
+      if os.path.exists(copy_from) and not os.path.exists(copy_to):
+        shutil.copyfile(copy_from, copy_to)
 
   def runAfterProcess(self):
     if 'olex2' not in self.program.name:
