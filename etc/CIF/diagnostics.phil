@@ -10,6 +10,12 @@ diagnostics {
     .type = int
   scopes = hkl refinement
     .type = strings
+
+  rad_minD_adjust{
+    Cu_a = 0.9
+    .type = float
+  }
+
   refinement{
 
     flack_str{
@@ -321,11 +327,11 @@ diagnostics {
         .type = str
       grade1  = 0.75
         .type = float
-      grade2 = 0.82
+      grade2 = 0.841
         .type = float
-      grade3 = 0.86
+      grade3 = 0.881
         .type = float
-      grade4 = 0.88
+      grade4 = 0.899
         .type = float
       top = 1.0
         .type = float

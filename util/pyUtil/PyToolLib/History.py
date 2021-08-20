@@ -109,7 +109,7 @@ class History(ArgumentParser):
     destination = resFile
     destination = "%s" %destination.strip('"').strip("'")
     sg = olex.f("sg()")
-    olex.m("reap %s" % destination)
+    olex.m("reap '%s'" % destination)
 
     if revert_hkl is None:
       revert_hkl = OV.GetParam("snum.history.revert_hkl")
