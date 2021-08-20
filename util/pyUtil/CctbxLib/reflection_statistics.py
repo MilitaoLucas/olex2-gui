@@ -368,7 +368,11 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
             weights = None
           k = f_obs_temp.scale_factor(f_calc_filtered, weights=weights)
           f_mask_omit = f_mask.common_set(f_obs_omitted)
-          f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
+          if f_mask_omit.data().size() < f_obs_omitted.data().size():
+            print("WARNING!\nMissing Information in the Mask about omitted reflections,\nomitted reflections will only display those where information\nabout the map is available!")
+            f_obs_omitted = masks.modified_intensities(f_obs_omitted.common_set(f_mask_omit), f_calc_omitted.common_set(f_mask_omit), f_mask_omit, scale_factor=k).f_sq_as_f()
+          else:
+            f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))

@@ -307,6 +307,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     shutil.move(f_work,f_dest)
                   else:
                     shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))
+                elif wfn_code == "ORCA 5.0":
+                  if ".gbw" not in f:
+                    f_work = os.path.join(self.wfn_job_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+                  else:
+                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))                
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
                     f_work = os.path.join(self.wfn_job_dir,f)
@@ -463,6 +470,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     shutil.move(f_work,f_dest)
                   else:
                     shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))
+                elif wfn_code == "ORCA 5.0":
+                  if ".gbw" not in f:
+                    f_work = os.path.join(self.jobs_dir,f)
+                    f_dest = os.path.join(self.backup,f)
+                    shutil.move(f_work,f_dest)
+                  else:
+                    shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))                  
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
                     f_work = os.path.join(self.jobs_dir,f)
@@ -558,8 +572,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           hkl_fn = path_base+".hkl"
           cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
           wfn_cif_fn = path_base+".cif"
-          olx.Kill("$Q")
-          olx.File(wfn_cif_fn)
+          if OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM') == False:
+            olx.Kill("$Q")
+            olx.File(wfn_cif_fn)
           cuqct_tsc(wfn_fn,hkl_fn,cif_fn,wfn_cif_fn,[-1000])
           shutil.move("experimental.tsc",job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
@@ -597,7 +612,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if software == "ORCA":
       wfn_object.write_orca_input(xyz)
     if software == "ORCA 5.0":
-      wfn_object.write_orca_input(xyz)
+      embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+      if embedding == True:
+        wfn_object.write_orca_crystal_input(xyz)
+      else:
+        wfn_object.write_orca_input(xyz)
     elif software == "Gaussian03":
       wfn_object.write_gX_input(xyz)
     elif software == "Gaussian09":
@@ -1098,7 +1117,178 @@ class wfn_Job(object):
     basis.close()
     com.write(" \n./%s.wfn\n\n" %self.name)
     com.close()
-        
+
+  def write_orca_crystal_input(self,xyz):
+    def write_grids_5(method,grid):
+      res = ""
+      if method == "M062X":
+        if grid == "Normal":
+          res += "DefGrid3 "
+        elif grid == "Low":
+          res += "DefGrid2 "
+        elif grid == "High":
+          res += "DefGrid3 "
+        elif grid == "Max":
+          res += "DefGrid3 "
+      else:
+        if grid == "Low":
+          res += "DefGrid1 "
+        elif grid == "High":
+          res += "DefGrid2 "
+        elif grid == "Max":
+          res += "DefGrid3 "
+      if method == "BP86" or method == "PBE" or method == "PWLDA":
+        return res
+      else:
+        res += " NoFinalGridX "
+        return res    
+    coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
+    olx.Kill("$Q")
+    if xyz:
+      olx.File(coordinates_fn1,p=10)
+    olx.File(os.path.join(self.full_dir, self.name + ".cif"))
+    xyz1 = open(coordinates_fn1,"r")
+    coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
+    radius = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS")
+    olex.m("pack %s -c"%radius)
+    if xyz:
+      olx.File(coordinates_fn2,p=10)
+    xyz2 = open(coordinates_fn2,"r")
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
+    inp = open(self.input_fn,"w")
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+    basis = open(basis_set_fn,"r")
+    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
+      cpu = "nprocs " + ncpus
+    else:
+      cpu = "nprocs 1"
+    mem = OV.GetParam('snum.NoSpherA2.mem')
+    mem_value = float(mem) * 1024 / int(ncpus)
+    mem = "%maxcore " + str(mem_value)
+    qmmmtype = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE")
+    control = "! NoPop MiniPrint 3-21G AIM "
+    if qmmmtype == "Mol":
+      control += "MOL-CRYSTAL-QMMM "
+    else:
+      control += "IONIC-CRYSTAL-QMMM"
+    method = OV.GetParam('snum.NoSpherA2.method')
+    grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    if method == "HF":
+      control += "rhf "
+    else:
+      control += method + ' '
+      software = OV.GetParam("snum.NoSpherA2.source")
+      if software == "ORCA 5.0":
+        grids = write_grids_5(method,grid)
+      else:
+        print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
+    control = control + grids + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
+      if relativistic == True:
+        control = control + " DKH2 SARC/J RI"
+      else:
+        control = control + " def2/J RI"
+    else:
+      if relativistic == True:
+        control = control + " DKH2 SARC/J RIJCOSX"
+      else:
+        control = control + " def2/J RIJCOSX"
+    Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+    if Solvation != "Vacuum" and Solvation != None:
+      control += " CPCM("+Solvation+") "
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    atom_list = []
+    i = 0
+    for line in xyz2:
+      i = i+1
+      if i > 2:
+        atom = line.split()
+        inp.write(line)
+        if not atom[0] in atom_list:
+          atom_list.append(atom[0])
+    #xyz2.close()
+    inp.write("   end\nend\n%basis\n")
+    for i in range(0,len(atom_list)):
+      atom_type = "newgto " +atom_list[i] + '\n'
+      inp.write(atom_type)
+      temp_atom = atom_list[i] + ":" + basis_name
+      basis.seek(0,0)
+      while True:
+        line = basis.readline()
+        if line == '':
+          continue
+        if line[0] == "!":
+          continue
+        if "keys=" in line:
+          key_line = line.split(" ")
+          type = key_line[key_line.index("keys=")+2]
+        if temp_atom in line:
+          break
+      line_run = basis.readline()
+      if "{"  in line_run:
+        line_run = basis.readline()
+      while (not "}" in line_run):
+        shell_line = line_run.split()
+        if type == "turbomole=":
+          n_primitives = shell_line[0]
+          shell_type = shell_line[1]
+        elif type == "gamess-us=":
+          n_primitives = shell_line[1]
+          shell_type = shell_line[0]
+        shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
+        inp.write(shell_gaussian)
+        for n in range(0,int(n_primitives)):
+          if type == "turbomole=":
+            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
+          else:
+            inp.write(basis.readline().replace("D","E"))
+        line_run = basis.readline()
+      inp.write("end\n")
+    basis.close()
+    inp.write("end\n")
+    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
+    hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
+    inp.write("%qmmm\n  Conv_Charges true\n")
+    asu_lines = xyz1.readlines()
+    natoms = int(asu_lines[0])
+    xyz2.seek(0)
+    all_lines = xyz2.readlines()
+    atom_list = []
+    i = 0
+    for line in asu_lines:
+      i += 1
+      if i < 3:
+        continue
+      j = 0
+      for line2 in all_lines:
+        j += 1
+        if j < 3:
+          continue
+        if line == line2:
+          atom_list.append(j-3)
+          break
+    if len(atom_list) != natoms:
+      print("Did not find all atoms in the big XYZ-file! Make sure the ASU is in included when running 'pack %f -c'"%radius)
+      return
+    inp.write("  NUnitCellAtoms %d\n"%natoms)
+    qm_atoms = ""
+    for atom in atom_list:
+      qm_atoms += " %d"%atom
+    inp.write("  QMAtoms {%s } end\n"%qm_atoms)
+    inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))
+    run = None
+    if Full_HAR == True:
+      run = OV.GetVar('Run_number')
+      if run > 1:
+        inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
+    inp.close()
+
   def write_orca_input(self,xyz):
     def write_grids_4(method,grid):
       res = ""
@@ -1164,6 +1354,7 @@ class wfn_Job(object):
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
     basis = open(basis_set_fn,"r")
+    method = OV.GetParam('snum.NoSpherA2.method')
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       cpu = "nprocs " + ncpus
@@ -1173,16 +1364,20 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
     control = "! NoPop MiniPrint 3-21G AIM "
-    method = OV.GetParam('snum.NoSpherA2.method')
+    
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
       control += "rhf "
     else:
-      control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "ORCA 5.0":
+        if method != "wB97" and method != "wB97X":
+          control += method + ' SCNL '
+        else:
+          control += method + '-V SCNL '
         grids = write_grids_5(method,grid)
       else:
+        control += method + ' '
         grids = write_grids_4(method,grid)
     control = control + grids + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv') + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
@@ -1469,6 +1664,7 @@ TYPE_MAP = [
 
 def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
   from pyscf.x2c import x2c
+  from pyscf import gto, lib
 """
     if mult != 1:
       fixed_wfn_function +="""  total_nmo = 0
@@ -1511,29 +1707,29 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
     exps = numpy.hstack(exps)
     nprim, nmo = mo_cart.shape
     if s == 0:
-      fout.write('From PySCF\n')
-      fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\n'%(total_nmo, mo_cart.shape[0], mol.natm))
+      fout.write('From PySCF\\n')
+      fout.write('GAUSSIAN %14d MOL ORBITALS %6d PRIMITIVES %8d NUCLEI\\n'%(total_nmo, mo_cart.shape[0], mol.natm))
       for ia in range(mol.natm):
         x, y, z = temp_mol.atom_coord(ia)
-        fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
+        fout.write('%3s%8d (CENTRE%3d) %12.8f%12.8f%12.8f  CHARGE = %4.1f\\n'%(mol.atom_pure_symbol(ia), ia+1, ia+1, x, y, z, mol.atom_charge(ia)))
       for i0, i1 in lib.prange(0, nprim, 20):
-        fout.write('CENTRE ASSIGNMENTS  %s\n'% ''.join('%3d'%x for x in centers[i0:i1]))
+        fout.write('CENTRE ASSIGNMENTS  %s\\n'% ''.join('%3d'%x for x in centers[i0:i1]))
       for i0, i1 in lib.prange(0, nprim, 20):
-        fout.write('TYPE ASSIGNMENTS    %s\n'% ''.join('%3d'%x for x in types[i0:i1]))
+        fout.write('TYPE ASSIGNMENTS    %s\\n'% ''.join('%3d'%x for x in types[i0:i1]))
       for i0, i1 in lib.prange(0, nprim, 5):
-        fout.write('EXPONENTS  %s\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
+        fout.write('EXPONENTS  %s\\n'% ' '.join('%13.7E'%x for x in exps[i0:i1]))
 
     for k in range(nmo):
       if mo_occ[s][k] != 0.0:
         mo = mo_cart[:,k]
-        fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\n'%(k+1+MO_offset, mo_occ[s][k], mo_energy[s][k]))
+        fout.write('MO  %-12d          OCC NO = %12.8f ORB. ENERGY = %12.8f\\n'%(k+1+MO_offset, mo_occ[s][k], mo_energy[s][k]))
         if s == 0:
           MO_offset += 1
         for i0, i1 in lib.prange(0, nprim, 5):
-          fout.write(' %s\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
+          fout.write(' %s\\n' % ' '.join('%15.8E'%x for x in mo[i0:i1]))
     if s == 1:
-      fout.write('END DATA\n')
-      fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\n'%tot_ener)"""
+      fout.write('END DATA\\n')
+      fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\\n'%tot_ener)"""
     else:
       fixed_wfn_function +="""  mol, ctr = x2c._uncontract_mol(mol, True, 0.)
   mo_coeff = numpy.dot(ctr, mo_coeff)
@@ -1589,6 +1785,9 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
   fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\\n'%tot_ener)"""
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
+    pbc = OV.GetParam('snum.NoSpherA2.pySCF_PBC')
+    if pbc == True:
+      olex.m("pack cell")
     if xyz:
       olx.File(coordinates_fn,p=10)
     xyz = open(coordinates_fn,"r")
@@ -1601,7 +1800,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
     charge = int(OV.GetParam('snum.NoSpherA2.charge'))
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024
-    if OV.GetParam('snum.NoSpherA2.pySCF_PBC') == False:
+    if pbc == False:
       inp.write("#!/usr/bin/env python\n%s\n\nfrom pyscf import gto, scf, dft, lib\n"%fixed_wfn_function)
       inp.write("lib.num_threads(%s)\nmol = gto.M(\n  atom = '''"%ncpus)
       atom_list = []
@@ -1807,20 +2006,20 @@ mf.kernel()"""
           line_run = basis.readline()
         inp.write("],\n")
       basis.close()
-      inp.write("\n}\ncell.build()\n")
+      inp.write("\n}\ncell.build()\nnk=[1,1,1]\nkpts = cell.make_kpts(nk)\n")
 
       model_line = None
       method = OV.GetParam('snum.NoSpherA2.method')
       if method == "HF":
         if mult == 1:
-          model_line = "scf.RHF(cell)"
+          model_line = "scf.KRHF(cell,kpts)"
         else:
-          model_line = "scf.UHF(cell)"
+          model_line = "scf.KUHF(cell,kpts)"
       else:
         if mult == 1:
-          model_line = "dft.RKS(cell)"
+          model_line = "dft.KRKS(cell,kpts)"
         else:
-          model_line = "dft.UKS(cell)"
+          model_line = "dft.KUKS(cell,kpts)"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
       inp.write("cf = %s\n"%model_line)
       if method == "B3LYP":
@@ -1847,9 +2046,10 @@ mf.kernel()"""
       #rest = "cf = cf.mix_density_fit()\ncf.grids.radi_method = dft.gauss_chebyshev\ncf.grids.level = "+str(grid)+"\n"
       rest = "cf = cf.mix_density_fit()\ncf.grids.level = "+str(grid)+"\n"
       rest += """
-gdf = df.GDF(cell)
-cf.with_df = gdf
-cf.diis_space = 19
+cf.with_df.auxbasis = 'def2-universal-jkfit'
+cf.diis_space = 10
+cf.with_df.linear_dep_threshold = 1e-6
+cf.with_df.mesh = [21,21,21]
 cf.conv_tol = 0.0033
 cf.conv_tol_grad = 1e-2
 cf.level_shift = 0.25
@@ -1862,7 +2062,7 @@ cf.level_shift = 0.0
 cf.damp = 0.0
 cf = scf.newton(cf)
 ener = cf.kernel()"""
-      rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,cf.mo_coeff,cf.mo_energy,cf.mo_occ,ener)"%self.name
+      rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,cell,cf.mo_coeff[0],cf.mo_energy[0],cf.mo_occ[0],ener)"%self.name
       inp.write(rest)
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
@@ -3116,7 +3316,7 @@ Please do this now and klick 'Ok' once everything is done!""", "O", False)
 In order to load the new functionality Olex2 will need to restart!
 Once you click 'Ok' Olex2 will do so automatically!""", "O", False)
             print ("PySCF installed sucessfully!")
-            olx.m('restart')
+            olex.m('restart')
 
         else:
             olx.Alert("Please install pySCF",\
@@ -4368,7 +4568,7 @@ def make_quick_button_gui():
   base_col = OV.GetParam("gui.action_colour")
   for item in [("min", IT.adjust_colour(base_col, luminosity=1.0, as_format='hex'), "Test"),
                ("small", IT.adjust_colour(base_col, luminosity=0.9, as_format='hex'), "Work"),
-               ("final", IT.adjust_colour(base_col, luminosity=0.8, as_format='hex'), "Fianal")]:
+               ("final", IT.adjust_colour(base_col, luminosity=0.8, as_format='hex'), "Final")]:
     d["qual"]=item[0]
     d["col"]=item[1]
     d["value"]=item[2]
