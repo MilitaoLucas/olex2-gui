@@ -623,7 +623,7 @@ def restraint_builder(cmd):
   controls.append('$spy.MakeHoverButton("button_small-go@%s","%s")' %(name, onclick))
 
   html = ""
-  colw = 100/len(controls)
+  colw = int(100/len(controls))
   for i, td in enumerate(controls):
     if (i+1) == len(controls):
       align = "right"
