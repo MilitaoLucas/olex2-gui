@@ -104,11 +104,13 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     l = response.readlines()
     for line in l:
       if b"checkcif.pdf" in line:
-        href = line.split(b'"')[1]
+        href = line.decode('utf-8').split('"')[1]
+        if href.startswith("//"):
+          href = "https:" + href
         threadPrint('Downloading PDF report')
         response = None
         try:
-          response = HttpTools.make_url_call(href.decode('utf-8'))
+          response = HttpTools.make_url_call(href)
           threadPrint('Done')
         except Exception as e:
           threadPrint('Failed to download PDF report...')
