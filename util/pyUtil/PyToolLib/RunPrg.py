@@ -250,12 +250,19 @@ class RunPrg(ArgumentParser):
     self.curr_file = OV.FileName()
     if 'olex2' in self.program.name:
       return
-    files = [os.path.join(self.filePath, x) for x in olx.xf.GetIncludedFiles().split('\n')]
-    files.append(self.hkl_src)
+    if olx.xf.GetIncludedFiles():
+      files = [os.path.join(self.filePath, x) for x in olx.xf.GetIncludedFiles().split('\n')]
+    else:
+      files = []
+    files.append((self.hkl_src, os.path.join(self.tempPath, self.curr_file) + ".hkl"))
     files.append(os.path.join(self.filePath, self.curr_file) + ".ins")
     files.append(os.path.join(self.filePath, self.curr_file) + ".fab")
     for copy_from in files:
-      copy_to = os.path.join(self.tempPath, os.path.split(copy_from)[1])
+      if type(copy_from) == tuple:
+        copy_to = copy_from[1]
+        copy_from = copy_from[0]
+      else:
+        copy_to = os.path.join(self.tempPath, os.path.split(copy_from)[1])
       if os.path.exists(copy_from) and not os.path.exists(copy_to):
         shutil.copyfile(copy_from, copy_to)
 
