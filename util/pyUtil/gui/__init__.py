@@ -427,7 +427,7 @@ olex.registerFunction(get_default_notification, False, "gui")
 olex.registerFunction(set_notification, False, "gui")
 olex.registerFunction(get_notification, False, "gui")
 
-def file_open(path, base="", mode='r', readlines=False, binary=False):
+def file_open(path, base="", mode='r', readlines=False, binary=False, encoding=None):
   ''' Open a file, either from a real file, or, if that is not found, from the OlexVFS.
       -- path: the FULL path to the file
       -- base: the everything up to where the directory lives
@@ -436,9 +436,9 @@ def file_open(path, base="", mode='r', readlines=False, binary=False):
   retVal = None
   if os.path.exists(path):
     if readlines:
-      retVal = open(path, mode).readlines()
+      retVal = open(path, mode, encoding=encoding).readlines()
     else:
-      retVal = open(path, mode).read()
+      retVal = open(path, mode, encoding=encoding).read()
   else:
     paths = []
     if base:

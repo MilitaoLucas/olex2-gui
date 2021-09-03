@@ -51,7 +51,7 @@ class PluginTools(VFSDependent):
     gui_phil_file_p = os.path.join(self.p_path, "%s.phil" %self.p_name.lower())
     ###
     if operation == "read":
-      phil_file = open(phil_file_p, 'r')
+      phil_file = open(phil_file_p, 'r', encoding="utf-8")
       phil = phil_file.read()
       phil_file.close()
 
