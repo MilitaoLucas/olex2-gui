@@ -7,9 +7,20 @@
     "value=Find 2-fold",
     "name=TWINNING_Olex2",
     "onclick=spy.find_2_fold_olex2()",
-    "td1=<td width='50%'>"
+    "td1=<td width='33%'>"
     )
   $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Find all Twinning",
+    "name=TWINNING_General",
+    "onclick=spy.twin.run_from_gui()",
+    "td1=<td width='33%'>"
+    )
+  $-
+
+
   
   $+
     html.Snippet(GetVar(default_link),
@@ -56,43 +67,19 @@
   $-
   </td>
   
-  <td width='14%' align='right'>
-    Threshold
+  <td width='40%' align='right'>
+    Threshold for all searches
   </td>
 
   <td width='10%' align='left'>
   $+
-    html.Snippet("gui/snippets/input-combo",
+    html.Snippet("gui/snippets/input-text",
     "name=TWINNING_OVERLAP_THRESHOLD",
-    "items=0.1",
     "value=spy.GetParam(snum.twinning.olex2.overlap_threshold)",
     "onchange=spy.SetParam(snum.twinning.olex2.overlap_threshold, html.GetValue(~name~))",
     "readonly=false",
     )
   $-
-  </td>
-  
-  <td width='12%'>
-    &nbsp;
-  </td>
-  
-     
-  <td width='15%' align='right'>
-    <input
-      type="button"
-      name="TWIN_DEFAULT_SEARCH"
-      value="General Search"
-      width="100%"
-      height="GetVar(HtmlComboHeight)"
-      onclick="spy.twin.run_from_gui()"
-      bgcolor="GetVar(gui.action_colour)"
-      fgcolor="#ffffff"
-      fit="false"
-      flat="GetVar(linkButton.flat)"
-      hint=""
-      disabled="false"
-      custom="GetVar(custom_button)"
-    >
   </td>
   
   
@@ -116,29 +103,11 @@
   </td>
 
 
-  <td width='14%' align='right'>
-    Threshold
-  </td>
-  <td width='15%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=THRESHOLD_SPHERE",
-    "items=0.001;0.002;0.01;0.1",
-    "value=spy.GetParam(snum.twinning.olex2.threshold_sphere)",
-    "onchange=spy.SetParam(snum.twinning.olex2.threshold_sphere, html.GetValue(~name~))",
-    "readonly=false",
-    )
-  $-
-  </td>
-  <td width='22%'>
-    &nbsp;
-  </td>
-
   <td align='right'>
     <input
       type="button"
       name="TWIN_SPHERICAL_SEARCH"
-      value="Spherical Search"
+      value="Spherical"
       width="100%"
       height="GetVar(HtmlComboHeight)"
       onclick="spy.twin.run_from_gui(2)"
@@ -152,11 +121,6 @@
     >
   </td>
 
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING_ANGLE_AXIS';help_ext=Angle-Axis;1 -->
- 
 
   <td width='14%' align='left'>
     Max Index
@@ -188,27 +152,11 @@
   $-
   </td>
   
-  <td width='14%' align='right'>
-    Threshold
-  </td>
-  <td width='14%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=TWIN_THRESHOLD",
-    "items=0.001;0.002;0.01;0.1",
-    "lable=Max Index",
-    "value=spy.GetParam(snum.twinning.olex2.threshold)",
-    "onchange=spy.SetParam(snum.twinning.olex2.threshold, html.GetValue(~name~))",
-    "readonly=false",
-    )
-  $-
-  </td>    
-
   <td align='right'>
     <input
       type="button"
       name="TWIN_ANGLE-AXIS_SEARCH"
-      value="Angle-Axis Search"
+      value="Angle-Axis"
       width="100%"
       height="GetVar(HtmlComboHeight)"
       onclick="spy.twin.run_from_gui(1)"
