@@ -372,7 +372,7 @@ routines requiring structure refinement
         .type = bool 
       number_laws = 1
         .type = int
-      overlap_threshold=0.1
+      overlap_threshold=0.004
         .type = float
       max_index = 5
         .type = int 
@@ -1704,7 +1704,7 @@ user
           .type = str
         grade1  = 0.75
           .type = float
-        grade2 = 0.82
+        grade2 = 0.841
           .type = float
         grade3 = 0.86
           .type = float
