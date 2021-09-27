@@ -70,7 +70,6 @@ external_files = {
   'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'lib-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
-  'hart-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
   #linux32
   'olex2-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
                         'action:extract', 'action:delete'),
@@ -88,8 +87,6 @@ external_files = {
   'cctbx-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                         'action:extract', 'action:delete'),
   'lib-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
-                      'action:extract', 'action:delete'),
-  'hart-lin64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                       'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
@@ -133,13 +130,6 @@ external_files = {
   'plgl-win32-sse.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   'plgl-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
 
-  'hart-win64.zip': ('olex-port', win64_port_name,
-              'action:extract', 'action:delete'),
-
-  'hart-win32.zip': ('olex-port', win32_sse_port_name,
-               win32_sse2_port_name,
-              'action:extract', 'action:delete'),
-
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -161,8 +151,7 @@ set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
       'python27-win32.zip',    #Pyhton27/..., ..., + python27.dll!!!
       'launch-win32.zip',  #olex2.exe
       'plgl-win32-sse2.zip',
-      'olex2-win32-sse2.zip',   #olex2.dll, it will be veryfied first of all
-      'hart-win32.zip'
+      'olex2-win32-sse2.zip'   #olex2.dll, it will be veryfied first of all
       ]
    ) | portable_zip_files
 win32_sse_zip_files = \
@@ -170,8 +159,7 @@ set(  ['cctbx-win32-sse.zip',    #cctbx/cctb_sources,...
       'python27-win32.zip',      #Pyhton27/..., ..., + python27.dll!!!
       'launch-win32.zip',    #olex2.exe
       'plgl-win32-sse.zip',
-      'olex2-win32-sse.zip',  #olex2.dll
-      'hart-win32.zip'
+      'olex2-win32-sse.zip'  #olex2.dll
       ]
    ) | portable_zip_files
 win64_zip_files = \
@@ -179,8 +167,7 @@ set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
       'python27-win64.zip',   #Pyhton27/..., ..., + python27.dll!!!
       'plgl-win64.zip',
       'olex2-win64.zip',  #olex2.dll
-      'launch-win64.zip',  #olex2.exe
-      'hart-win64.zip'
+      'launch-win64.zip'  #olex2.exe
       ]
    ) | portable_zip_files
 mac32_zip_files = \
@@ -197,8 +184,7 @@ set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
       'olex2-mac64.zip',    #olex2 executable
       'unirun-mac64.zip',
       'plgl-mac64.zip',
-      'lib-mac64.zip',
-      'hart-mac64.zip',
+      'lib-mac64.zip'
       ]
    ) | portable_zip_files
 
@@ -215,8 +201,7 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'lib-linux64.zip',     #lib/dlls
       'olex2-linux64.zip',    #olex2 executable
       'plgl-linux64.zip',
-      'unirun-linux64.zip',
-      'hart-lin64.zip'
+      'unirun-linux64.zip'
       ]
    ) | portable_zip_files
 

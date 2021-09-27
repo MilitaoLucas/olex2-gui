@@ -181,7 +181,6 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
   sys.path.append("%s/util/pyUtil/HAR" %basedir)
-  sys.path.append("%s/util/pyUtil/NoSpherA2" %basedir)
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.VFSDependent = set()
 
@@ -418,4 +417,3 @@ from RunPrg import RunPrg
 
 if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
   from HAR import HARp
-  from NoSpherA2 import NoSpherA2
