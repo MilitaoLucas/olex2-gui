@@ -58,11 +58,11 @@ class %(name)s(PT):
     formula = {}
     for element in str(olx.xf.GetFormula('list')).split(','):
       element_type, n = element.split(':')
-      print "%%s: %%s" %%(element_type, n)
+      print("%%s: %%s" %%(element_type, n))
       formula.setdefault(element_type, float(n))
 
 %(name)s_instance = %(name)s()
-print "OK."
+print("OK.")
 @
 
 t:plugin_skeleton_phil@

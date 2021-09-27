@@ -31,7 +31,7 @@ class SetupWizard(object):
 
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 
-'''% (self.previous, self.__next__)
+'''% (self.previous, self.next)
 
     t = OV.TranslatePhrase('setup-txt-%s' %name)
     t, d = htmlTools.format_help(t)
