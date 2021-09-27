@@ -1,0 +1,45 @@
+def cleanup():
+  print("Removing NoSpherA2
+  base_dir = OV.BaseDir()
+  import shutil
+  import os
+  exe_pre ="NoSpherA2"
+  wfn_2_fchk = None
+  if sys.platform[:3] == 'win':
+    _ = os.path.join(base_dir, "%s.exe" %exe_pre)
+    if os.path.exists(_):
+      wfn_2_fchk = _
+    else:
+      wfn_2_fchk = olx.file.Which("%s.exe" %exe_pre)
+  else:
+    if os.path.exists(os.path.join(base_dir,exe_pre)):
+      wfn_2_fchk = os.path.join(base_dir,exe_pre)
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        wfn_2_fchk = _
+      else:
+        wfn_2_fchk = olx.file.Which("%s" %exe_pre)
+    print ("NoSpherA2 executable is:")
+    print (wfn_2_fchk)
+  os.remove(wfn_2_fchk)
+  nosphera2_dir = os.path.join(base_dir,"util","pyUtil","NoSpherA2")
+  files = os.listdir(nosphera2_dir)
+  for file in files:
+    path = os.path.join(nosphera2_dir,file)
+    print(path )
+    if os.path.isdir(path):
+      shutil.rmtree(path)
+    else:
+      os.remove(path)
+  text = '''
+  <td width='100%' align='center'>
+<b>NoSpherA2 is no longer supported in Version 1.3<br>Please use Olex2 version 1.5!</b>
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+'''
+  f = open(os.path.join(nosphera2_dir,"NoSpherA2_refine_interface.htm"),'w')
+  f.write(text)
+  f.close()
+  return
+cleanup()
