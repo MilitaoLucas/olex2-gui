@@ -931,24 +931,6 @@ def cleanup():
     print (wfn_2_fchk)
   if os.path.exists(wfn_2_fchk):
     os.remove(wfn_2_fchk)
-  nosphera2_dir = os.path.join(base_dir,"util","pyUtil","NoSpherA2")
-  files = os.listdir(nosphera2_dir)
-  for file in files:
-    path = os.path.join(nosphera2_dir,file)
-    print(path )
-    if os.path.isdir(path):
-      shutil.rmtree(path)
-    else:
-      os.remove(path)
-  text = '''
-  <td width='100%' align='center'>
-<b>NoSpherA2 is no longer supported in Version 1.3<br>Please use Olex2 version 1.5!</b>
-</td>
-<!-- #include row_table_off gui\\blocks\\row_table_off.htm;1; -->
-'''
-  f = open(os.path.join(nosphera2_dir,"NoSpherA2_refine_interface.htm"),'w')
-  f.write(text)
-  f.close()
   return
 OV.registerFunction(cleanup, False, "HAR")
 #print "OK."
