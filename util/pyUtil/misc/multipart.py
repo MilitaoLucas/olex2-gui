@@ -21,6 +21,8 @@ from urllib.parse import urlparse
 class Multipart:
   """ A component of form-data - multipart request """
   def __init__(self, item, name, boundary):
+    if item is None:
+      item = ""
     self.item = item
     self.file_size = None
     header = []
