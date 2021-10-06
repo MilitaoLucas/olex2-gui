@@ -12,7 +12,7 @@ people = None
 persons = None
 localList = None
 affiliations = None
-experimantal = None
+experimental = None
 
 def sql_update_str(table_name, d):
   sql = ["UPDATE %s SET" %table_name]
