@@ -256,7 +256,8 @@ class RunPrg(ArgumentParser):
       files = []
     files.append((self.hkl_src, os.path.join(self.tempPath, self.curr_file) + ".hkl"))
     files.append(os.path.join(self.filePath, self.curr_file) + ".ins")
-    files.append(os.path.join(self.filePath, self.curr_file) + ".fab")
+    files.append((os.path.splitext(self.hkl_src)[0] + ".fab",
+      os.path.join(self.tempPath, self.curr_file) + ".fab"))
     for copy_from in files:
       if type(copy_from) == tuple:
         copy_to = copy_from[1]
