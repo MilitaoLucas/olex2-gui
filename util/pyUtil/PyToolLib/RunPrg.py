@@ -480,7 +480,7 @@ class RunRefinementPrg(RunPrg):
         if "warning" in self.refinement_has_failed.lower():
           bg = orange
         gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
-      elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
+      elif not OV.GetParam('snum.NoSpherA2.use_aspherical'):
         gui.get_default_notification(txt="Refinement Finished",
           txt_col='green_text')
       else:

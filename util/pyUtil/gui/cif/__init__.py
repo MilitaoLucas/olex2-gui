@@ -109,6 +109,8 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     for line in l:
       if "checkcif.pdf" in line:
         href = line.split('"')[1]
+        if href.startswith("//"):
+          href = "https:" + href
         threadPrint('Downloading PDF report')
         response = None
         try:
