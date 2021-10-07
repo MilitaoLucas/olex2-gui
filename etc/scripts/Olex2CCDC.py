@@ -6,8 +6,7 @@ import olex
 import olexex
 import olx
 import olex_core
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
+from olexFunctions import OV
 import userDictionaries
 
 import zipfile
@@ -76,7 +75,7 @@ class CcdcSubmit():
         return False
 
       msg = response.read()
-      if 'successfully' in msg:
+      if b'successfully' in msg:
         print("The structure has been submitted. Please check your e-mail for further information")
         return True
       else:
