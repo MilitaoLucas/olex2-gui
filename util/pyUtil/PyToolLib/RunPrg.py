@@ -494,7 +494,7 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     self.reset_params()
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical') and 'olex2' in self.program.name
     result = False
     try:
       if use_aspherical == True:
