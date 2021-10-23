@@ -1254,7 +1254,7 @@ def delete_stale_fcf():
   res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
   if os.path.exists(res) and os.path.exists(fcf):
     # modified within 1 second
-    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 1:
+    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 10:
       return False
     else:
       print(abs(os.path.getmtime(fcf) - os.path.getmtime(res)))
