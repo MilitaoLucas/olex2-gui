@@ -349,7 +349,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
       f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
-
+    k = math.sqrt(OV.GetOSF())
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       from smtbx import masks
       f_mask = self.load_mask()
@@ -358,27 +358,19 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
            self.reflections.f_sq_obs.anomalous_flag():
           f_mask = f_mask.generate_bijvoet_mates()
         f_mask_cs = f_mask.common_set(f_obs_filtered)
-        f_sq_obs_filtered = masks.modified_intensities(f_sq_obs_filtered, f_calc_filtered, f_mask_cs)
+        f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data()+f_mask_cs.data())
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
         if f_calc_omitted != None and f_obs_omitted.size() > 0:
-          f_obs_temp = f_sq_obs_filtered.as_amplitude_array()
-          if f_obs_temp.sigmas() is not None:
-            weights = weights=1/flex.pow2(f_obs_temp.sigmas())
-          else:
-            weights = None
-          k = f_obs_temp.scale_factor(f_calc_filtered, weights=weights)
           f_mask_omit = f_mask.common_set(f_obs_omitted)
           if f_mask_omit.data().size() < f_obs_omitted.data().size():
             print("WARNING!\nMissing Information in the Mask about omitted reflections,\nomitted reflections will only display those where information\nabout the map is available!")
-            f_obs_omitted = masks.modified_intensities(f_obs_omitted.common_set(f_mask_omit), f_calc_omitted.common_set(f_mask_omit), f_mask_omit, scale_factor=k).f_sq_as_f()
+            f_calc_omitted = f_calc_omitted.array(f_calc_omitted.data()+f_mask_omit.data())
+            f_obs_omitted = f_obs_omitted.common_set(f_mask_omit)
           else:
-            f_obs_omitted = masks.modified_intensities(f_obs_omitted, f_calc_omitted, f_mask_omit,scale_factor=k).f_sq_as_f()
-    weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
-    k = math.sqrt(f_sq_obs_filtered.scale_factor(
-      f_calc_filtered, weights=weights))
+            f_calc_omitted = f_calc_omitted.array(f_calc_omitted.data()+f_mask_omit.data())
     fo = flex.abs(f_obs_filtered.data())
     fc = flex.abs(f_calc_filtered.data())
-    fc *= k
+    fo /= k
     fit = flex.linear_regression(fc, fo)
     ShowFitSummary(fit)
 
@@ -387,9 +379,9 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.f_obs = fo
     plot.f_calc = fc
     if f_calc_omitted:
-      plot.f_calc_omitted = flex.abs(f_calc_omitted.data()) * k
+      plot.f_calc_omitted = flex.abs(f_calc_omitted.data())
       if f_obs_omitted:
-        plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
+        plot.f_obs_omitted = flex.abs(f_obs_omitted.data()) / k
         plot.indices_omitted = f_obs_omitted.indices()
       else:
         plot.f_obs_omitted = None
@@ -528,22 +520,19 @@ class fractal_dimension(OlexCctbxAdapter):
                resolution=0.1,
                stepsize=0.01):
     import olex
+    self.info = OV.ModelSrc()
     map_type = "diff"
     olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
-
     print ("Made residual density map\nAnalyzing...")
-
-    self.info = OV.ModelSrc()
 
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
 
-    name = OV.ModelSrc()
     wfn_2_fchk = OV.GetVar("Wfn2Fchk")
     args = [wfn_2_fchk]
     args.append("-fractal")
-    args.append("%s_%s.cube"%(name,map_type))
+    args.append("%s_%s.cube"%(self.info,map_type))
     import subprocess
     startinfo = None
     if sys.platform[:3] == 'win':
@@ -571,7 +560,7 @@ class fractal_dimension(OlexCctbxAdapter):
             if OV.HasGUI():
               olx.Refresh()
 
-    with open("%s_%s.cube_fractal_plot"%(name,map_type),'r') as file:
+    with open("%s_%s.cube_fractal_plot"%(self.info,map_type),'r') as file:
       lines = file.readlines()
     info = lines[0].split()
     steps = int(info[0])
