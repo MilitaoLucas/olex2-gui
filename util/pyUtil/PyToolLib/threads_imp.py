@@ -7,6 +7,10 @@ from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
 from olexFunctions import OV
+global olex2_tag
+olex2_tag = OV.GetTag()
+global img_list
+img_list = ""
 
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
@@ -27,16 +31,17 @@ class NewsImageRetrivalThread(ThreadEx):
     import olex_fs
     try:
       olex_core.IncRunningThreadsCount()
-      if not NewsImageRetrivalThread.image_list.get(self.name,None):
+      if not NewsImageRetrivalThread.image_list.get(self.name, None):
         NewsImageRetrivalThread.image_list[self.name] = self.get_list_from_server(list_name=self.name)
         if NewsImageRetrivalThread.image_list[self.name]:
            NewsImageRetrivalThread.image_list[self.name] = [l.strip() for l in NewsImageRetrivalThread.image_list[self.name]]
 
-      if NewsImageRetrivalThread.image_list.get(self.name,None):
-        if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
+      if NewsImageRetrivalThread.image_list.get(self.name, None):
+        if not NewsImageRetrivalThread.active_image_list.get(self.name, None):
           NewsImageRetrivalThread.active_image_list[self.name] = copy.copy(NewsImageRetrivalThread.image_list[self.name])
 
         img_url, url = self.get_image_from_list()
+
         if not img_url:
           return
         img_data = None
@@ -47,17 +52,17 @@ class NewsImageRetrivalThread(ThreadEx):
           if img:
             img_data = img.read()
             if self.name == "splash":
-              with open(os.path.join(olx.app.SharedDir(), 'splash.jpg'),'wb') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.jpg'), 'wb') as wFile:
                 wFile.write(img_data)
-              with open(os.path.join(olx.app.SharedDir(), 'splash.url'),'w') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.url'), 'w') as wFile:
                 wFile.write(url)
-              with open(os.path.join(olx.app.SharedDir(), 'splash.id'),'w') as wFile:
+              with open(os.path.join(olx.app.SharedDir(), 'splash.id'), 'w') as wFile:
                 wFile.write(img_url)
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
-        tag = OV.GetTag().split('-')[0]
+        tag = olex2_tag.split('-')[0]
         if img_data and self.name == "news":
-          olex.writeImage("news/news-%s_tmp" %tag, img_data)
+          olex.writeImage("news/news-%s_tmp" % tag, img_data)
           olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
@@ -68,28 +73,43 @@ class NewsImageRetrivalThread(ThreadEx):
       NewsImageRetrivalThread.instance = None
 
   def get_image_from_list(self):
+    global img_list
     img_url = None
-    img_list = NewsImageRetrivalThread.active_image_list.get(self.name,None)
+    if not img_list:
+      img_list = NewsImageRetrivalThread.active_image_list.get(self.name, None)
     if not img_list:
       return
     img_id = ""
     tags = None
     res_idx = -1
+
+    if "-ac" in olex2_tag:
+      new_list = []
+      for item in img_list:
+        _ = item.split(",")
+        if len(_) < 3:
+          continue
+        else:
+          if "-ac" in _[2]:
+            new_list.append(item)
+      if not new_list:
+        return None, None
+      else:
+        img_list = new_list
+
     if self.name == 'splash':
-      if "-ac" in OV.GetTag():
-        return None,None
       _ = os.path.join(olx.app.SharedDir(), 'splash.id')
-      if not os.path.exists(_):
-        with open(_,'w') as wFile:
+      if not os.path.exists(_): 
+        with open(_, 'w') as wFile:
           img_id = "splash.jpg"
           wFile.write(img_id)
       else:
-        img_id = open(_,'r').read().strip().replace("http://", "")
+        img_id = open(_, 'r').read().strip().replace("http://", "")
       for idx, l in enumerate(img_list):
         if img_id in l:
           _ = l.split(',')
-          if len(_) == 2 or (len(_) > 2 and OV.GetTag() in _[2:]):
-            if (idx +1) < len(img_list):
+          if len(_) == 2 or (len(_) > 2 and olex2_tag in _[2:][0]):
+            if (idx + 1) < len(img_list):
               res_idx = idx
               break
 
@@ -102,19 +122,21 @@ class NewsImageRetrivalThread(ThreadEx):
           _ = res.split(',')
           if len(_) == 2:
             img_url, url = _
-            tags = None
+            img_tag = None
           elif len(_) > 2:
             img_url, url = _[:2]
-            tags = _[2:]
+            img_tag = _[2:][0]
         else:
           img_url = res
           url = "www.olex2.org"
-
-        if tags and OV.GetTag() not in tags:
+        if img_tag and not img_tag in olex2_tag:
           img_url = None
           continue
         else:
-          break
+          if img_id in res:
+            continue
+          else:
+            break
     else:
       while img_list:
         res = img_list.pop(0)
@@ -122,14 +144,14 @@ class NewsImageRetrivalThread(ThreadEx):
           _ = res.split(',')
           if len(_) == 2:
             img_url, url = _
-            tags = None
+            img_tag = None
           elif len(_) > 2:
             img_url, url = _[:2]
-            tags = _[2:]
+            img_tag = _[2:][0]
         else:
           img_url = res
           url = "www.olex2.org"
-        if tags and OV.GetTag() not in tags:
+        if img_tag and not img_tag in olex2_tag:
           img_url = None
           continue
         else:
@@ -139,11 +161,11 @@ class NewsImageRetrivalThread(ThreadEx):
       return None, None
 
     if "://" not in img_url:
-      return "http://%s" %(img_url.strip()), url.strip()
+      return "http://%s" % (img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
 
   def get_sample_list(self, which='samples'):
-    url = OV.GetParam('olex2.samples.url') + r"/%s"%which + ".html"
+    url = OV.GetParam('olex2.samples.url') + r"/%s" % which + ".html"
     _ = self.make_call(url)
     if _ is None:
       return ""
@@ -155,7 +177,7 @@ class NewsImageRetrivalThread(ThreadEx):
   def get_structure_from_url(self, name, url=None):
     if not url:
       url = OV.GetParam('olex2.samples.url')
-    url = '%s/%s.cif' %(url, name)
+    url = '%s/%s.cif' % (url, name)
     _ = self.make_call(url)
     if _ is None:
       return ""
@@ -169,8 +191,7 @@ class NewsImageRetrivalThread(ThreadEx):
         wFile.write(cont)
     else:
       print("Loading the existing structure; please delete this structure (cif file) if you want to get it again!")
-    olex.m("reap '%s'" %pp)
-
+    olex.m("reap '%s'" % pp)
 
   def get_list_from_server(self, list_name='news'):
     if list_name == "news":
@@ -200,8 +221,10 @@ class NewsImageRetrivalThread(ThreadEx):
       return None
     return res
 
+
 class CheckCifRetrivalThread(ThreadEx):
   instance = None
+
   def __init__(self, send_fcf):
     ThreadRegistry().register(CheckCifRetrivalThread)
     Thread.__init__(self)
@@ -219,13 +242,17 @@ class CheckCifRetrivalThread(ThreadEx):
       olex_core.DecRunningThreadsCount()
       CheckCifRetrivalThread.instance = None
 
+
 def get_news_image_from_server(name=""):
   from olexFunctions import OlexFunctions
   if not OV.canNetwork(show_msg=False):
     return
   if NewsImageRetrivalThread.instance is None:
     NewsImageRetrivalThread(name).start()
+
+
 olex.registerFunction(get_news_image_from_server)
+
 
 def resizeNewsImage():
   from PilTools import TI
@@ -234,6 +261,8 @@ def resizeNewsImage():
   if img_url:
     OV.SetParam('olex2.news_img_link_url', img_url)
     olx.UnsetVar('olex2.news_img_link_url')
+
+
 olex.registerFunction(resizeNewsImage, False, 'internal')
 
 
@@ -245,4 +274,6 @@ def GetCheckcifReport(send_fcf=False):
     CheckCifRetrivalThread(send_fcf in [True, 'true']).start()
   else:
     olx.Alert("Please wait", "The Checkcif request is in progress", "IO")
+
+
 olex.registerFunction(GetCheckcifReport, False, 'cif')
