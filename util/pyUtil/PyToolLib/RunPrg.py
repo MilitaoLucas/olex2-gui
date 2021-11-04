@@ -254,18 +254,15 @@ class RunPrg(ArgumentParser):
       files = [os.path.join(self.filePath, x) for x in olx.xf.GetIncludedFiles().split('\n')]
     else:
       files = []
-    files.append((self.hkl_src, os.path.join(self.tempPath, self.curr_file) + ".hkl"))
-    files.append(os.path.join(self.filePath, self.curr_file) + ".ins")
+    files.append((self.hkl_src,
+      os.path.join(self.tempPath, self.shelx_alias) + ".hkl"))
+    files.append((os.path.join(self.filePath, self.curr_file) + ".ins",
+      os.path.join(self.tempPath, self.shelx_alias) + ".ins"))
     files.append((os.path.splitext(self.hkl_src)[0] + ".fab",
       os.path.join(self.tempPath, self.curr_file) + ".fab"))
-    for copy_from in files:
-      if type(copy_from) == tuple:
-        copy_to = copy_from[1]
-        copy_from = copy_from[0]
-      else:
-        copy_to = os.path.join(self.tempPath, os.path.split(copy_from)[1])
-      if os.path.exists(copy_from) and not os.path.exists(copy_to):
-        shutil.copyfile(copy_from, copy_to)
+    for f in files:
+      if os.path.exists(f[0]) and not os.path.exists(f[1]):
+        shutil.copyfile(f[0], f[1])
 
   def runAfterProcess(self):
     if 'olex2' not in self.program.name:
@@ -494,7 +491,7 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     self.reset_params()
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical') and 'olex2' in self.program.name
     result = False
     try:
       if use_aspherical == True:
@@ -1254,7 +1251,7 @@ def delete_stale_fcf():
   res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
   if os.path.exists(res) and os.path.exists(fcf):
     # modified within 1 second
-    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 1:
+    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 10:
       return False
     else:
       print(abs(os.path.getmtime(fcf) - os.path.getmtime(res)))

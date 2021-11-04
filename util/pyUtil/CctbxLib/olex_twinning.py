@@ -597,7 +597,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     for i in small_indices[0]:
       #rotated_hkl=hkl_new[i]
       hkl_new_i=hkl_rint[i]
-      twin_component[i]=hkl_grid[int(hkl_new_i[0]),int(hkl_new_i[1]),int(hkl_new_i[2])]
+      try:
+        twin_component[i]=hkl_grid[int(hkl_new_i[0]),int(hkl_new_i[1]),int(hkl_new_i[2])]
+      except:
+        pass #I am sorry but the fact is 'if there isn't a value retrievable just say 0' is the current process, and doing the check in advance is a time waste. Time is vital here.
+      #sometimes we are just missing a hkl, which gets set as 0 but sometimes we manage to go outside the range of the generated grid which is a problem
 
     if numpy.max(twin_component)==0:
       return [0,0.5,0] #basf 0, rmin=0.5, rdiff=0 - this mostly just indicates a bad twin law, although it should never reach here as laws without overlap should be ignored earlier.
@@ -1766,6 +1770,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       viable_rotation_points+=[self.find_same_distance_points(vec0,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
       v=vec0
+      v_size=self.size_of_3d_vector(numpy.dot(recip_orth,v))
       #all_v_minus_w=v-viable_rotation_points_0
       v_euclid=numpy.dot(recip_orth,v)
       j=-1
@@ -1776,10 +1781,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           continue
         viable_rotation_points_1=viable_rotation_points[j]
         p=vec1
+        p_size=self.size_of_3d_vector(numpy.dot(recip_orth,p))
         p_euclid=numpy.dot(recip_orth,p)
         for w in viable_rotation_points_0:
+          w_scaled=numpy.array(w)*v_size/self.size_of_3d_vector(numpy.dot(recip_orth,w))
           for q in viable_rotation_points_1:
-            cross=self.cross_product((v-w),(p-q))
+            q_scaled=numpy.array(q)*p_size/self.size_of_3d_vector(numpy.dot(recip_orth,q))
+            cross=self.cross_product((v-w_scaled),(p-q_scaled))
             axis=cross[0]*b_star_cross_c_star+cross[1]*c_star_cross_a_star+cross[2]*a_star_cross_b_star
             if self.size_of_3d_vector(axis)<1e-16:
               continue
@@ -1787,10 +1795,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
             #parallel and perpendicular components to the axis. Theoretically v_par and w_par are the same.
             v_par=numpy.dot(unit_axis,v_euclid)*unit_axis
             v_per=v_euclid-v_par
-            w_per=numpy.dot(recip_orth,w)-v_par
+            w_per=numpy.dot(recip_orth,w_scaled)-v_par
             p_par=numpy.dot(unit_axis,p_euclid)*unit_axis
             p_per=p_euclid-p_par
-            q_per=numpy.dot(recip_orth,q)-p_par
+            q_per=numpy.dot(recip_orth,q_scaled)-p_par
 
             cosvw_angle=numpy.dot(v_per,w_per)/(self.size_of_3d_vector(v_per)*self.size_of_3d_vector(w_per))
             cospq_angle=numpy.dot(p_per,q_per)/(self.size_of_3d_vector(p_per)*self.size_of_3d_vector(q_per))
@@ -1802,7 +1810,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
             pq_angle=numpy.arccos(cospq_angle)
             #take positive as anticlockwise and negative as clockwise
 
-            if abs(vw_angle-pq_angle)<0.0175: #needs to be larger  than 0.012 so put at 1 degree for now
+            if abs(vw_angle-pq_angle)<0.10472: #needs to be larger  than 0.012 so put at 1 degree (0.0175) for now - changed to 6 degrees ()
               v_w_dir=self.cross_product(v_per,w_per)
               p_q_dir=self.cross_product(p_per,q_per)
               if numpy.dot(v_w_dir,p_q_dir)<0:
@@ -1817,11 +1825,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
               rotation_lattice=numpy.dot(orthogonalization_inverse,numpy.dot(rotation,recip_orth))
               prot=numpy.dot(rotation_lattice,p)
               vrot=numpy.dot(rotation_lattice,v)
-              if any(prot-q>0.1) or any(vrot-w>0.1):
+              if any(prot-q_scaled>0.1) or any(vrot-w_scaled>0.1):
                 rotation_lattice=numpy.linalg.inv(rotation_lattice)
                 prot=numpy.dot(rotation_lattice,p)
                 vrot=numpy.dot(rotation_lattice,v)
-                if any(prot-q>0.1) or any(vrot-w>0.1):
+                if any(prot-q_scaled>0.1) or any(vrot-w_scaled>0.1):
                     continue
 
               duplicate=False
@@ -1883,12 +1891,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         twin_laws=self.purge_duplicates(twin_laws)
         if len(twin_laws)>=number_laws:
           break
+      v_size=self.size_of_3d_vector(numpy.dot(recip_orth,v))
       viable_rotation_points+=[self.find_same_distance_points(v,threshold)]
       viable_rotation_points_0=viable_rotation_points[i]
       for w in viable_rotation_points_0:
         if all(w==-v):
           continue
-        axis=v+w
+        w_scaled=numpy.array(w)*v_size/self.size_of_3d_vector(numpy.dot(recip_orth,w))
+        axis=v+w_scaled
         axis_euclid=numpy.dot(recip_orth,axis)
         axis_unit=axis_euclid/self.size_of_3d_vector(axis_euclid)
         k=numpy.array([[0,-axis_unit[2],axis_unit[1]],[axis_unit[2],0,-axis_unit[0]],[-axis_unit[1],axis_unit[0],0]])
@@ -1913,7 +1923,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         if (hkl_displacement<threshold):
           rbasf=self.basf_estimate(rotation_lattice)
           if rbasf[0]>1e-10 and rbasf[2]>maxRdrop/2:
-            twin_laws+=[twin_rules("Alt",v+w,rotation_lattice,numpy.pi,hkl_displacement,threshold,rbasf)]
+            twin_laws+=[twin_rules("Alt",v+w_scaled,rotation_lattice,numpy.pi,hkl_displacement,threshold,rbasf)]
             maxRdrop=max(maxRdrop,rbasf[2])
 
 
@@ -1934,7 +1944,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     model=self.model
     rec_metrical=model.unit_cell().reciprocal_metrical_matrix()
     metrical=model.unit_cell().metrical_matrix()
-    orthogonalization=numpy.linalg.inv(numpy.reshape(numpy.array(model.unit_cell().orthogonalization_matrix()),(3,3)))
+    orthogonalization=self.recip_orth
     a_star=orthogonalization[0]
     b_star=orthogonalization[1]
     c_star=orthogonalization[2]
@@ -1959,7 +1969,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       threshold=self.cartesian_threshold    
     
 
-    size_hkl=self.size_of_3d_vector(numpy.dot(orthogonalization.T,hkl))
+    size_hkl=self.size_of_3d_vector(numpy.dot(orthogonalization,hkl))
     max_distance=size_hkl+threshold
     min_distance=size_hkl-threshold
     same_distance_points=[]
@@ -1973,9 +1983,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #k_lambda=[a_dot_b,mod_b_square,b_dot_c]
     #l_lambda=[a_dot_c,b_dot_c,mod_c_square]
 
-    #lambda_h=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,h_lambda))**2)
-    #lambda_k=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,k_lambda))**2)
-    #lambda_l=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization.T,l_lambda))**2)
+    #lambda_h=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization,h_lambda))**2)
+    #lambda_k=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization,k_lambda))**2)
+    #lambda_l=1/max_distance*(self.size_of_3d_vector(numpy.dot(orthogonalization,l_lambda))**2)
 
     #try to get the maximum h-value
 
@@ -2016,7 +2026,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           else:
             possible_l=list(range(int(math.ceil(l_U_min)),int(math.floor(l_L_min))+1))+list(range(int(math.ceil(l_L_max)),int(math.floor(l_U_max))+1))
         for l in possible_l:
-          size_h=self.size_of_3d_vector(numpy.dot(orthogonalization.T,[h,k,l]))
+          size_h=self.size_of_3d_vector(numpy.dot(orthogonalization,[h,k,l]))
           if hkl[0]==h and hkl[1]==k and hkl[2]==l:
             continue
           if abs(size_hkl-size_h)<threshold:
