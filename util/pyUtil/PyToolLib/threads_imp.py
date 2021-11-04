@@ -17,9 +17,11 @@ class NewsImageRetrivalThread(ThreadEx):
     ThreadRegistry().register(NewsImageRetrivalThread)
     Thread.__init__(self)
     self.name = name
+    self.olex2tag = get_tag()
     NewsImageRetrivalThread.instance = self
     olex.registerFunction(self.get_sample_list, False, 'internal')
     olex.registerFunction(self.get_structure_from_url, False, 'internal')
+    
 
   def run(self):
     import copy
@@ -55,7 +57,7 @@ class NewsImageRetrivalThread(ThreadEx):
                 wFile.write(img_url)
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
-        tag = OV.GetTag().split('-')[0]
+        tag = self.olex2tag.split('-')[0]
         if img_data and self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
           olx.SetVar('olex2.news_img_link_url', url)
@@ -76,8 +78,8 @@ class NewsImageRetrivalThread(ThreadEx):
     tags = None
     res_idx = -1
     if self.name == 'splash':
-      if "-ac" in OV.GetTag():
-        return None,None
+      #if "-ac" in self.olex2tag:
+        #return None,None
       _ = os.path.join(olx.app.SharedDir(), 'splash.id')
       if not os.path.exists(_):
         with open(_,'w') as wFile:
@@ -88,7 +90,7 @@ class NewsImageRetrivalThread(ThreadEx):
       for idx, l in enumerate(img_list):
         if img_id in l:
           _ = l.split(',')
-          if len(_) == 2 or (len(_) > 2 and OV.GetTag() in _[2:]):
+          if len(_) == 2 or (len(_) > 2 and self.olex2tag in _[2:]):
             if (idx +1) < len(img_list):
               res_idx = idx
               break
@@ -101,6 +103,8 @@ class NewsImageRetrivalThread(ThreadEx):
         if "," in res:
           _ = res.split(',')
           if len(_) == 2:
+            if "-ac" in self.olex2tag:
+              continue 
             img_url, url = _
             tags = None
           elif len(_) > 2:
@@ -110,7 +114,7 @@ class NewsImageRetrivalThread(ThreadEx):
           img_url = res
           url = "www.olex2.org"
 
-        if tags and OV.GetTag() not in tags:
+        if tags and self.olex2tag not in tags:
           img_url = None
           continue
         else:
@@ -129,7 +133,7 @@ class NewsImageRetrivalThread(ThreadEx):
         else:
           img_url = res
           url = "www.olex2.org"
-        if tags and OV.GetTag() not in tags:
+        if tags and self.olex2tag not in tags:
           img_url = None
           continue
         else:
@@ -246,3 +250,11 @@ def GetCheckcifReport(send_fcf=False):
   else:
     olx.Alert("Please wait", "The Checkcif request is in progress", "IO")
 olex.registerFunction(GetCheckcifReport, False, 'cif')
+
+def get_tag():
+  tag = OV.GetTag()
+  if "-ac" in tag:
+    t = tag.split("-")
+    return "-".join(t[:2])
+  else:
+    return tag
