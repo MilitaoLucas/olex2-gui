@@ -103,6 +103,8 @@ class NewsImageRetrivalThread(ThreadEx):
         if "," in res:
           _ = res.split(',')
           if len(_) == 2:
+            if "-ac" in self.olex2tag:
+              continue 
             img_url, url = _
             tags = None
           elif len(_) > 2:
