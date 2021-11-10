@@ -1410,6 +1410,15 @@
   >
 >
 
+<getIDs help="Get the machine IDs and copy it to the clipboard."
+  <body
+    <cmd
+      <cmd '@py "import Loader\nimport olx\nolx.Echo(Loader.getIDs(), c=True)"'>
+      <cmd 'echo "The machine ID has been copied to your clipboard."'>
+    >
+  >
+>
+
 <lookAt help="Centres and zooms on the selection."
   <body
     <cmd
