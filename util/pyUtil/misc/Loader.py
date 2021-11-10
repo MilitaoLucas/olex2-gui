@@ -83,6 +83,9 @@ def getAuthenticationToken(force=False):
       raise Exception("Could not retrieve authentication token")
   return at
 
+def getIDs():
+  return _plgl.createAuthenticationTokens1()
+
 def getModule(name, email=None):
   import HttpTools
   url_base = OV.GetParam('user.modules.provider_url')
