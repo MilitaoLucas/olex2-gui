@@ -728,7 +728,7 @@ class completeness_statistics_value(object):
     f_sq_obs = reflections.f_sq_obs_merged
     f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
     f_obs = f_sq_obs.f_sq_as_f()
-    missing_set = f_obs.complete_set().lone_set(f_obs).sort()
+    #missing_set = f_obs.complete_set().lone_set(f_obs).sort()
     self.completeness_value = f_obs.completeness(use_binning=False)
 
 class completeness_statistics(object):
@@ -754,18 +754,18 @@ class completeness_statistics(object):
     if bin_range_as == "two_theta":
       assert wavelength is not None
       self.x = uctbx.d_star_sq_as_two_theta(self.x, wavelength,deg=True)
-      resolutions = missing_set.two_theta(wavelength=wavelength, deg=True).data()
+      #resolutions = missing_set.two_theta(wavelength=wavelength, deg=True).data()
     elif bin_range_as == "d_spacing":
       self.x = uctbx.d_star_sq_as_d(self.x)
-      resolutions = missing_set.d_spacings().data()
-    elif bin_range_as == "d_star_sq":
-      resolutions = missing_set.d_star_sq().data()
+      #resolutions = missing_set.d_spacings().data()
+    #elif bin_range_as == "d_star_sq":
+      #resolutions = missing_set.d_star_sq().data()
     elif bin_range_as == "stol":
       self.x = uctbx.d_star_sq_as_stol(self.x)
-      resolutions = flex.sqrt(missing_set.sin_theta_over_lambda_sq().data())
+      #resolutions = flex.sqrt(missing_set.sin_theta_over_lambda_sq().data())
     elif bin_range_as == "stol_sq":
       self.x = uctbx.d_star_sq_as_stol_sq(self.x)
-      resolutions = missing_set.sin_theta_over_lambda_sq().data()
+      #resolutions = missing_set.sin_theta_over_lambda_sq().data()
     self.missing_set = missing_set
     if missing_set.size() > 0:
       print("Missing data: %s" %missing_set.size())
