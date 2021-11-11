@@ -2353,12 +2353,12 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
+    self.auto_axes = False
     if self.params.completeness.resolution_as == "d_spacing":
       self.use_log=10
       self.auto_axes=True
     else:
       self.use_log=0
-    self.auto_axes = False
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
     self.draw_fitlines()
