@@ -467,7 +467,7 @@ class Graph(ArgumentParser):
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
       wX_axis, wY_axis = self.draw.textsize(txt, font=self.font_small)      
       text = OV.correct_rendered_text(write_text)
-      wX, wY = IT.textsize(self.draw, text, font_size=self.font_tiny)
+      wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
         gap = 6
         x = 0
@@ -503,7 +503,7 @@ class Graph(ArgumentParser):
           adj_y = -20
         top_left = (x1 + adj_x,y1 + adj_y)
         IT.write_text_to_draw(
-          self.draw, text, top_left=top_left, font_size=self.font_tiny, font_colour=self.grey)
+          self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
 
 
   def test_plotly(self):
@@ -2392,7 +2392,7 @@ class CompletenessPlot(Analysis):
         res_max = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(ttheta_max,temp.wavelength,deg=True))
         res_full = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(ttheta_full,temp.wavelength,deg=True))
       text_full = "Full %s | Laue: %s%%" %(round(res_full,2), compl_full)
-      text_max = "Max %s | Laue: %s%%" %(round(res_max,2), compl_max)      
+      text_max = "Max %s | Laue: %s%%" %(round(res_max,2), compl_max)
     else:
       res_full = ttheta_full
       res_max = ttheta_max
