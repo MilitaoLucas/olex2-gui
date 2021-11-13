@@ -29,6 +29,15 @@ class Module:
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
     self.interbal = False
 
+# special treatment of the AC tags
+def get_tag():
+  tag = OV.GetTag()
+  if "-ac" in tag:
+    t = tag.split("-")
+    return "-".join(t[:2])
+  else:
+    return tag
+
 def getModulesDir():
   from olexFunctions import OlexFunctions
   base = olex.f(OV.GetParam('user.modules.location'))
@@ -141,7 +150,7 @@ def getModule(name, email=None):
       'at': getAuthenticationToken(),
       'et': etoken,
       'ref': OV.GetParam("user.modules.reference", ""),
-      't' : OV.GetTag()
+      't' : get_tag()
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read()
@@ -349,7 +358,7 @@ def expired_pop(m):
   d['full_name'] = full_name
   d['email'] = OV.GetParam('user.email')
   d['token'] = getAuthenticationToken()
-  d['tag'] = OV.GetTag()
+  d['tag'] = get_tag()
 
   _ = os.path.join(OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html")
   t = open(_,'r').read()%d
@@ -484,7 +493,7 @@ def getAvailableModules_():
   try:
     url = url_base + "available"
     values = {
-     't' : OV.GetTag()
+     't' : get_tag()
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read().decode("utf-8").strip()
