@@ -2353,12 +2353,12 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
+    self.auto_axes = False
     if self.params.completeness.resolution_as == "d_spacing":
       self.use_log=10
       self.auto_axes=True
     else:
       self.use_log=0
-    self.auto_axes = False
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
     self.draw_fitlines()
@@ -2370,12 +2370,34 @@ class CompletenessPlot(Analysis):
     # ALL LAUE Info
     deg = u"\u00B0"
     completeness_info_text = HOS_instance.completeness_info_text
+    resolution_as = self.params.completeness.resolution_as
     ttheta_full = round(completeness_info_text["Laue Full"]["2Theta"],2)
     compl_full = round(completeness_info_text["Laue Full"]["completeness"],2)
-    text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full)
     ttheta_max = round(completeness_info_text["Laue Max"]["2Theta"],2)
     compl_max = round(completeness_info_text["Laue Max"]["completeness"],2)
-    text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max)
+    if resolution_as != "two_theta":
+      from cctbx import uctbx
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      temp = OlexCctbxAdapter()
+      if resolution_as == "d_spacing":
+        res_max = uctbx.two_theta_as_d(ttheta_max,temp.wavelength,deg=True)
+        res_full = uctbx.two_theta_as_d(ttheta_full,temp.wavelength,deg=True)
+      elif resolution_as == "d_star_sq":
+        res_max = uctbx.two_theta_as_d_star_sq(ttheta_max,temp.wavelength,deg=True)
+        res_full = uctbx.two_theta_as_d_star_sq(ttheta_full,temp.wavelength,deg=True)
+      elif resolution_as == "stol":
+        res_max = uctbx.d_star_sq_as_stol(uctbx.two_theta_as_d_star_sq(ttheta_max,temp.wavelength,deg=True))
+        res_full = uctbx.d_star_sq_as_stol(uctbx.two_theta_as_d_star_sq(ttheta_full,temp.wavelength,deg=True))
+      elif resolution_as == "stol_sq":
+        res_max = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(ttheta_max,temp.wavelength,deg=True))
+        res_full = uctbx.d_star_sq_as_stol_sq(uctbx.two_theta_as_d_star_sq(ttheta_full,temp.wavelength,deg=True))
+      text_full = "Full %s | Laue: %s%%" %(round(res_full,2), compl_full)
+      text_max = "Max %s | Laue: %s%%" %(round(res_max,2), compl_max)
+    else:
+      res_full = ttheta_full
+      res_max = ttheta_max
+      text_full = "Full %s%s | Laue: %s%%" %(ttheta_full, deg, compl_full)
+      text_max = "Max %s%s | Laue: %s%%" %(ttheta_max, deg, compl_max)
     if not HOS_instance.hkl_stats['IsCentrosymmetric']:
       compl_full_point = round(completeness_info_text["Point Full"]["completeness"],2)
       text_full += ", Point: %s%%" %(compl_full_point)
@@ -2383,8 +2405,8 @@ class CompletenessPlot(Analysis):
       text_max += ", Point: %s%%" %(compl_max_point)
 
     try:
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=ttheta_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineleft")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=res_max, write_equation=False, write_text=text_max, rotate_text="top_lineright")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=res_full, write_equation=False, write_text=text_full, rotate_text="bottom_lineleft")
     except:
       pass
 
