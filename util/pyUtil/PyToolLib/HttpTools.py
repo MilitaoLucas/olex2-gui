@@ -27,9 +27,15 @@ def make_url_call(url, values=None, http_timeout = 5):
       localhost = 'localhost' in url.get_host().lower()
     except:
       localhost = 'localhost' in url.host.lower() #py23
-      
+
   elif isinstance(url, str):
     localhost = 'localhost' in url
+  try:
+    read_usettings()
+    if not proxy:
+      use_proxy_settings = False
+  except:
+    use_proxy_settings = False
   if use_proxy_settings and not localhost:
     try:
       read_usettings()
@@ -41,15 +47,7 @@ def make_url_call(url, values=None, http_timeout = 5):
       except Exception:
         raise
   else:
-    try:
-      res = urllib.request.urlopen(url,values, http_timeout)
-    except urllib.error.URLError: #try setting file
-      try:
-        read_usettings()
-        res = make_url_call_with_proxy(url, proxy, values, http_timeout)
-        use_proxy_settings = True
-      except Exception:
-        raise
+    res = urllib.request.urlopen(url,values, http_timeout)
   return res
 
 def read_usettings():
