@@ -7,6 +7,7 @@
 #   http://code.activestate.com/recipes/146306/
 
 from email.generator import Generator
+from ssl import SSLCertVerificationError
 import uuid
 import mimetypes
 import os
@@ -153,26 +154,33 @@ class DirectRequest:
 
 #below are to be used with urllib2
 class RequestHandler():
-  def do_open(self, sender, http_class, request):
-    host = request.host
-    if not host:
-      raise urllib.error.URLError('no host given')
+  def set_connection(self, sender, request, fall_back=False):
     handler = DirectRequest(request.data).select_handler()
-    h = http_class(host)
-    h.timeout = request.timeout
-    h.putrequest(handler.get_method(), request.selector)
-    # set request-host
-    scheme, sel = urllib.parse.splittype(request.selector)
-    sel_host, sel_path = urllib.parse.splithost(sel)
-    # add any inherited headers
+    conn = sender.create(request.host, fall_back)
+    conn.putrequest(handler.get_method(), request.selector)
+    conn.timeout = request.timeout
     for name, value in sender.parent.addheaders:
       name = name.capitalize()
       if name not in request.headers:
-        h.putheader(name, value)
+        conn.putheader(name, value)
       for k, v in request.headers.items():
-        h.putheader(k, v)
+        conn.putheader(k, v)
+    return (handler, conn)
+
+  def do_open(self, sender, request):
+    host = request.host
+    if not host:
+      raise urllib.error.URLError('no host given')
+    handler, h = self.set_connection(sender, request)
     try:
       handler.do_request(h)
+    except SSLCertVerificationError as ssle:
+      try:
+        handler, h = self.set_connection(sender, request, fall_back=True)
+        handler.do_request(h)
+      except Exception as exc:
+        print("Failed to process SSL request: %s" %str(exc))
+        raise urllib.error.URLError(ssle)
     except socket.error as e:
       raise urllib.error.URLError(e)
     response = h.getresponse()
@@ -184,14 +192,35 @@ class RequestHandler():
 
 class HTTPHandler(urllib.request.HTTPHandler):
   def http_open(self, request):
-    return RequestHandler().do_open(self, http.client.HTTPConnection, request)
+    return RequestHandler().do_open(self, request)
+
+  def create(self, host):
+    return http.client.HTTPConnection(host)
 
 urllib.request.HTTPHandler = HTTPHandler
 
 try:
+  import ssl
+  fs_ssl_context = ssl.create_default_context()
+  fs_ssl_context.check_hostname = False
+  fs_ssl_context.verify_mode = ssl.CERT_NONE
+  ssl_warning_printed = False
+
   class HTTPSHandler(urllib.request.HTTPSHandler):
     def https_open(self, request):
-      return RequestHandler().do_open(self, http.client.HTTPSConnection, request)
+      return RequestHandler().do_open(self, request)
+
+    def create(self, host, fall_back=False):
+      if fall_back:
+        global ssl_warning_printed
+        if not ssl_warning_printed:
+          print("!!! DISABLING SSL CERTIFICATE VALIDATION FOR %s" %host)
+          print("!!! CHECK THAT YOUR ROOT CA CERTIFICATES ARE UP-TO-DATE !!!")
+          # print every time for now
+          #ssl_warning_printed = True
+        return http.client.HTTPSConnection(host, context=fs_ssl_context)
+      return http.client.HTTPSConnection(host)
+
 
   urllib.request.HTTPSHandler = HTTPSHandler
   import sys
