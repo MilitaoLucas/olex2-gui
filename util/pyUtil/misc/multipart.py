@@ -194,7 +194,7 @@ class HTTPHandler(urllib.request.HTTPHandler):
   def http_open(self, request):
     return RequestHandler().do_open(self, request)
 
-  def create(self, host):
+  def create(self, host, fall_back):
     return http.client.HTTPConnection(host)
 
 urllib.request.HTTPHandler = HTTPHandler
