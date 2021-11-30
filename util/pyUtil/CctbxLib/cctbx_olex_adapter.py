@@ -1120,7 +1120,10 @@ OV.registerFunction(generate_DISP, False, "sfac")
 def generate_ED_SFAC(table_file_name=None, force = False):
   import olexex
   sfac = olexex.OlexRefinementModel().model.get('sfac')
-  if sfac and not force:
+  formula = olx.xf.GetFormula('list')
+  elms = set([x.split(':')[0].lower() for x in formula.split(',')])
+  sfac_elms = set([x.lower() for x in sfac.keys()])
+  if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
     return
   def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
   custom_table_file_name = os.path.join(olx.DataDir(), "ED", "SF.txt")
@@ -1135,8 +1138,6 @@ def generate_ED_SFAC(table_file_name=None, force = False):
       if not os.path.exists(table_file_name):
         table_file_name = def_table_file_name
 
-  formula = olx.xf.GetFormula('list')
-  elms = set([x.split(':')[0].lower() for x in formula.split(',')])
   sfac_toks = []
   with open(table_file_name, 'r') as disp:
     for l in disp.readlines():
@@ -1147,6 +1148,8 @@ def generate_ED_SFAC(table_file_name=None, force = False):
       if len(toks) != 16:
         continue
       if toks[1].lower() in elms:
+        if not force and toks[1].lower() in sfac_elms:
+          continue
         sfac_toks.append(toks)
         if len(sfac_toks) == len(elms):
           break
