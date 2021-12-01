@@ -1050,7 +1050,6 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   if not elements:
     formula = olx.xf.GetFormula('list')
     elements = [x.split(':')[0] for x in formula.split(',')]
-  nist_elements = attc.nist_elements()
   table_name = table_name_.lower()
   # user dir first
   anom_dirs = [os.path.join(olx.DataDir(), "anom"),
@@ -1120,9 +1119,12 @@ OV.registerFunction(generate_DISP, False, "sfac")
 def generate_ED_SFAC(table_file_name=None, force = False):
   import olexex
   sfac = olexex.OlexRefinementModel().model.get('sfac')
+  if sfac:
+    sfac_elms = set([x.lower() for x in sfac.keys()])
+  else:
+    sfac_elms = set()
   formula = olx.xf.GetFormula('list')
   elms = set([x.split(':')[0].lower() for x in formula.split(',')])
-  sfac_elms = set([x.lower() for x in sfac.keys()])
   if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
     return
   def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
