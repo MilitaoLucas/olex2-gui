@@ -564,7 +564,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       # geometry loops
       cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
       connectivity_full = self.reparametrisation.connectivity_table
-      bond_h = '$H' in olx.Ins('bond').upper()
+      bond_h = olx.Ins('bond $h') == 'true'
       distances = iotbx.cif.geometry.distances_as_cif_loop(
         connectivity_full.pair_asu_table,
         site_labels=xs.scatterers().extract_labels(),
@@ -828,7 +828,7 @@ spherical-atom form factors.
 The ED is calculated from a gaussian basis set single determinant SCF
 wavefunction - either Hartree-Fock or DFT using selected funtionals
  - for a fragment of the crystal.
-This fragment can be embedded in an electrostatic crystal field by employing cluster charges 
+This fragment can be embedded in an electrostatic crystal field by employing cluster charges
 or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
