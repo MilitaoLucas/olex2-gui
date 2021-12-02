@@ -1,4 +1,5 @@
 import sys
+import time
 
 from scitbx.array_family import flex
 from smtbx.refinement import least_squares
@@ -311,11 +312,10 @@ class naive_iterations_with_damping_and_shift_limit(
 
   def do(self):
     self.n_iterations = 0
-    do_last = False
+    start_t = time.time()
     while self.n_iterations < self.n_max_iterations:
       self.reset_shifts()
       self.non_linear_ls.build_up()
-      grad_norm = self.non_linear_ls.opposite_of_gradient().norm_inf()
       if self.has_gradient_converged_to_zero(): break
       self.do_damping(self.damping_value)
       self.non_linear_ls.solve()
@@ -323,6 +323,9 @@ class naive_iterations_with_damping_and_shift_limit(
         break
       self.non_linear_ls.step_forward()
       self.n_iterations += 1
+    if OV.IsDebugging():
+      print("Timing for building-up: %.3fs, iterations: %.3fs" %(
+        self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
 
   def __str__(self):
     return "Gauss-Newton with damping and shift scaling"
@@ -349,6 +352,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
     self.non_linear_ls.build_up()
     if self.has_gradient_converged_to_zero() or self.n_max_iterations == 0:
       return
+    start_t = time.time()
     self.n_iterations = 0
     nu = 2
     a = self.non_linear_ls.normal_matrix_packed_u()
@@ -387,6 +391,9 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       self.non_linear_ls.build_up()
     # get proper s.u.
     self.non_linear_ls.build_up()
+    if OV.IsDebugging():
+      print("Timing for building-up: %.3fs, iterations: %.3fs" %(
+        self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
 
   def __str__(self):
     return "Levenberg-Marquardt"
