@@ -1044,6 +1044,8 @@ user
     hide_nsff = False
       .type = bool
       .expert_level = 2
+    refln_loop = False
+      .type = bool
   }
 
   masks{
