@@ -464,11 +464,7 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
         fc = fc.common_set(fo2)
       scale = 1
     else:
-      if self.hklf_code == 5:
-        fo2, fc = self.get_fo_sq_fc()
-      else:
-        fo2 = self.reflections.f_sq_obs_filtered
-        fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
+      fo2, fc = self.get_fo_sq_fc()
       weights = self.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
