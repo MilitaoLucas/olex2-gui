@@ -701,7 +701,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if OV.GetParam('user.cif.finalise') != 'Exclude':
       if not acta:
         write_fcf = True
-      elif acta.upper() != "n/a" and "NOHKL" not in acta.upper():
+      elif acta != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
     if write_fcf:
       fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)

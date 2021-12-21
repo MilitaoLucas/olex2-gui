@@ -105,7 +105,7 @@ class StreamRedirection:
     self.t0 = time.time()
 
     if self.isErrorStream:
-      self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w')
+      self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w', encoding="utf8")
       self.version = olex.f("GetCompilationInfo()")
       try:
         self.GUIversion = open(os.path.join(basedir, "version.txt"), 'r').readline()
