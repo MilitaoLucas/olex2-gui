@@ -1414,7 +1414,7 @@ def getReportImageData(size='w400', imageName=None):
         return err
       base = os.path.join(olex.f(OV.GetParam('user.modules.location')), "modules")
       dp_base = os.path.join(base, "DrawPlus")
-      with open(os.path.join(dp_base, "template.lip"), 'rb') as rFile:
+      with open(os.path.join(dp_base, "template.lip"), 'r') as rFile:
         rv = rFile.read()
         rv += "<script type='application/json' id='model'>%s</script>" %(model)
         rv += "<script type='application/json' id='style'>%s</script>" %(
@@ -1740,6 +1740,7 @@ def debugInVSC():
     breakpoint()
   except Exception as x:
     print(x)
+    sys.stdout.formatExceptionInfo()
   finally:
     os.chdir(cd)
 OV.registerFunction(debugInVSC)
