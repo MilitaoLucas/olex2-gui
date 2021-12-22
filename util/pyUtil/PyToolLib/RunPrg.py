@@ -251,7 +251,8 @@ class RunPrg(ArgumentParser):
     if 'olex2' in self.program.name:
       return
     if olx.xf.GetIncludedFiles():
-      files = [os.path.join(self.filePath, x) for x in olx.xf.GetIncludedFiles().split('\n')]
+      files = [(os.path.join(self.filePath, x),os.path.join(self.tempPath, x))
+        for x in olx.xf.GetIncludedFiles().split('\n')]
     else:
       files = []
     files.append((self.hkl_src,
