@@ -107,7 +107,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       max_threads = int(OV.GetVar("refine.max_threads", 0))
       if max_threads == 0:
-        max_threads = env.physical_cores
+        max_threads = env.physical_cores // 2
       if max_threads is not None:
         ext.build_normal_equations.available_threads = max_threads
         env.threads = max_threads
