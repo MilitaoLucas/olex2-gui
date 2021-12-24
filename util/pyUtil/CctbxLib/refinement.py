@@ -205,7 +205,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=self.weighting,
       log=self.log,
-      may_parallelise=True
+      may_parallelise=True,
+      use_openmp=olx.GetVar("use_openmp", "false")=="true"
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -801,7 +802,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
-    
+
     ## Florian's new fcf iucr loop
     if OV.GetParam('user.refinement.refln_loop') == True:
       f_obs_sq, f_calc = self.get_fcf_data(False,False)
@@ -816,13 +817,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refln_loop.add_miller_array(f_calc, array_type='calc')
       if OV.GetParam("snum.refinement.use_solvent_mask"):
         from cctbx_olex_adapter import OlexCctbxAdapter
-        cctbx_adapter = OlexCctbxAdapter()        
+        cctbx_adapter = OlexCctbxAdapter()
         f_mask = cctbx_adapter.load_mask()
         if not f_mask:
           from cctbx_olex_adapter import OlexCctbxMasks
           OlexCctbxMasks()
           if olx.current_mask.flood_fill.n_voids() > 0:
-            f_mask = olx.current_mask.f_mask()      
+            f_mask = olx.current_mask.f_mask()
         if f_mask:
           if not f_obs_sq.space_group().is_centric() and f_obs_sq.anomalous_flag():
             f_mask = f_mask.generate_bijvoet_mates()
@@ -830,11 +831,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         refln_loop.add_miller_array(f_mask, column_names=['_refln_A_mask','_refln_B_mask'])
       refln_loop.add_miller_array(f_calc.d_spacings(), column_name="_refln_d_spacing")
       refln_loop.add_miller_array(include_status, column_name="_refln_observed_status")
-      
-      cif_block.add_loop(refln_loop.refln_loop)    
+
+      cif_block.add_loop(refln_loop.refln_loop)
       ## END Florian's new fcf iucr loop
-    
-    
+
+
     if self.use_tsc and use_aspherical == True:
       tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
       if os.path.exists(tsc_file_name):
