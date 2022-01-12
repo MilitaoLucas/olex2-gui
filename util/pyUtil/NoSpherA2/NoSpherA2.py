@@ -2362,7 +2362,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
 
   try:
     src = OV.HKLSrc()
-    cmd = "HKLF5 -e %s" %src
+    cmd = "HKLF5 -e '%s'" %src
     res = scrub(cmd)
     if "HKLF5 file is expected" in " ".join(res):
       pass
