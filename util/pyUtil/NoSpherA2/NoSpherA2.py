@@ -313,7 +313,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                   else:
-                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))                
+                    shutil.move(os.path.join(self.wfn_job_dir,f),os.path.join(self.wfn_job_dir,job.name+"2.gbw"))
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
                     f_work = os.path.join(self.wfn_job_dir,f)
@@ -476,7 +476,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     f_dest = os.path.join(self.backup,f)
                     shutil.move(f_work,f_dest)
                   else:
-                    shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))                  
+                    shutil.move(os.path.join(self.jobs_dir,f),os.path.join(self.jobs_dir,job.name+"2.gbw"))
                 elif "Gaussian" in wfn_code:
                   if ".chk" not in f:
                     f_work = os.path.join(self.jobs_dir,f)
@@ -1141,7 +1141,7 @@ class wfn_Job(object):
         return res
       else:
         res += " NoFinalGridX "
-        return res    
+        return res
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
     olx.Kill("$Q")
     if xyz:
@@ -1320,7 +1320,7 @@ class wfn_Job(object):
         elif grid == "Max":
           res += " GridX9 NoFinalGridX "
         return res
-          
+
     def write_grids_5(method,grid):
       res = ""
       if method == "M062X":
@@ -1343,7 +1343,7 @@ class wfn_Job(object):
         return res
       else:
         res += " NoFinalGridX "
-        return res    
+        return res
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     if xyz:
@@ -1364,7 +1364,7 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
     control = "! NoPop MiniPrint 3-21G AIM "
-    
+
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
       control += "rhf "
@@ -2360,42 +2360,29 @@ def cuqct_tsc(wfn_file, hkl_file, cif, wfn_cif, groups):
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
 
-  try:
-    src = OV.HKLSrc()
-    cmd = "HKLF5 -e '%s'" %src
-    res = scrub(cmd)
-    if "HKLF5 file is expected" in " ".join(res):
-      pass
-    elif "negative batch numbers" in " ".join(res):
-      pass
-    else:
-      curr_law = []
-      for i in res[4].split():
-        curr_law.append(i)
-      for i in res[6].split():
-        curr_law.append(i)
-      for i in res[8].split():
-        curr_law.append(i)
-      curr_law = tuple(curr_law)
-      args.append("-twin")
-      for i in curr_law:
-        args.append(str(int(i)))
-  except:
-    print("I had a problem with HKLF5 here...")
-
-  if 'twin' in olex_refinement_model:
+  # are only integral twin laws supported here? could use a more comprehensive
+  # reporting then if non-integral occurs.
+  if olex_refinement_model['hklf']['value'] >= 5:
+    try:
+      src = OV.HKLSrc()
+      cmd = "HKLF5 -e '%s'" %src
+      res = scrub(cmd)
+      if "HKLF5 file is expected" in " ".join(res):
+        pass
+      elif "negative batch numbers" in " ".join(res):
+        pass
+      else:
+        args.append("-twin")
+        for i in res[4].split() + res[6].split() + res[8].split():
+          args.append(str(int(i)))
+    except:
+      print("There is a problem with the HKLF5 file...")
+  elif 'twin' in olex_refinement_model:
     c = olex_refinement_model['twin']['matrix']
-    curr_law = []
+    args.append("-twin")
     for row in c:
       for el in row:
-        curr_law.append(el)
-    curr_law = tuple(curr_law)
-    #txt = ""
-    #if curr_law:
-    #  txt = repr(curr_law)
-    args.append("-twin")
-    for i in curr_law:
-      args.append(str(int(i)))
+        args.append(str(int(el)))
 
   os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
