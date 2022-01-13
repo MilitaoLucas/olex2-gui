@@ -103,7 +103,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
+    timer = OV.IsDebugging()
+    import time
     try:
+      if timer:
+        t1 = time.time()
       from fast_linalg import env
       max_threads = int(OV.GetVar("refine.max_threads", 0))
       if max_threads == 0:
@@ -114,6 +118,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
       pass
     print("Using %s threads" %ext.build_normal_equations.available_threads)
+    fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
@@ -156,6 +161,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
+    if timer:
+      t2 = time.time()    
 
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
@@ -180,7 +187,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
-
+    if timer:
+      t3 = time.time()    
+      olx.SetVar("use_openmp", "true")
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
     #  label = ""
@@ -196,6 +205,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
+      
     self.normal_eqns = normal_equations_class(
       self.observations,
       self.reparametrisation,
@@ -212,6 +222,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
     if build_only:
       return self.normal_eqns
+    if timer:
+      t4 = time.time()
     method = OV.GetParam('snum.refinement.method')
     iterations_class = FullMatrixRefine.solvers.get(method)
     if iterations_class == None:
@@ -220,7 +232,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print("WARNING: unsupported method: '%s' is replaced by '%s'"\
         %(method, solvers_default_method))
     assert iterations_class is not None
-    fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     if fcf_only:
       self.max_cycles = 0
     try:
@@ -276,7 +287,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.interrupted = True
         else:
           raise e
-
+      if timer:
+        t5 = time.time()    
       # get the final shifts
       self.normal_eqns.analyse_shifts()
       self.scale_factor = self.cycles.scale_factor_history[-1]
@@ -302,6 +314,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         su = math.sqrt(diag[dlen-1])
         OV.SetExtinction(self.reparametrisation.extinction.value, su)
         dlen -= 1
+      if timer:
+        t6 = time.time()
       try:
         for i in range(dlen):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
@@ -329,13 +343,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
         traceback.print_exc()
       self.failure = True
     else:
-      fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
+      fo_minus_fc = self.f_obs_minus_f_calc_map(0.3)
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       if not fcf_only:
         self.show_summary()
         self.show_comprehensive_summary(log=self.log)
+      else:    
+        return
+      if timer:
+        t7 = time.time()      
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()
@@ -346,6 +364,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         inc_hkl = acta and "NOHKL" != acta.split()[-1].upper()
         if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
           olx.CifMerge(f=inc_hkl, u=True)
+      if timer:
+        t8 = time.time()
 
       self.output_fcf()
       new_weighting = self.weighting.optimise_parameters(
@@ -355,8 +375,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.reparametrisation.n_independents)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      if timer:
+        t9 = time.time()
+        print("-- " + "{:8.3f}".format(t2-t1) + " for constraints")
+        print("-- " + "{:8.3f}".format(t3-t2) + " for reparam")
+        print("-- " + "{:8.3f}".format(t4-t3) + " for build_norm_eq")
+        print("-- " + "{:8.3f}".format(t5-t4) + " for refinement")
+        print("-- " + "{:8.3f}".format(t6-t5) + " for shift analysis")
+        print("-- " + "{:8.3f}".format(t7-t6) + " for FFT")
+        print("-- " + "{:8.3f}".format(t8-t7) + " for CIF")
+        print("-- " + "{:8.3f}".format(t9-t8) + " for FCF & weights")
       if self.on_completion:
         self.on_completion(cif[block_name])
+        if timer:
+          t10 = time.time()
+          print("-- " + "{:8.3f}".format(t10-t9) + " for on_completion")        
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
     finally:
@@ -839,19 +872,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.use_tsc and use_aspherical == True:
       tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
       if os.path.exists(tsc_file_name):
-        tsc = open(tsc_file_name, 'r').readlines()
-        cif_block_found = False
+        #tsc = open(tsc_file_name, 'r').readlines()
+        #cif_block_found = False
         tsc_info = """;\n"""
-        for line in tsc:
-          if "CIF:" in line:
-            cif_block_found = True
-            continue
-          if ":CIF" in line:
-            break
-          if cif_block_found == True:
-            tsc_info = tsc_info + line
-        if not cif_block_found:
-          details_text = """Refinement using NoSpherA2, an implementation of
+        #for line in tsc:
+        #  if "CIF:" in line:
+        #    cif_block_found = True
+        #    continue
+        #  if ":CIF" in line:
+        #    break
+        #  if cif_block_found == True:
+        #    tsc_info = tsc_info + line
+        #if not cif_block_found:
+        details_text = """Refinement using NoSpherA2, an implementation of
 NOn-SPHERical Atom-form-factors in Olex2.
 Please cite:
 F. Kleemiss et al. Chem. Sci. DOI 10.1039/D0SC05526C - 2021
@@ -867,40 +900,40 @@ This fragment can be embedded in an electrostatic crystal field by employing clu
 or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
-          software = OV.GetParam('snum.NoSpherA2.source')
-          details_text = details_text + "   SOFTWARE:       %s\n"%software
-          if software != "DISCAMB":
-            method = OV.GetParam('snum.NoSpherA2.method')
-            basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
-            charge = OV.GetParam('snum.NoSpherA2.charge')
-            mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-            relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-            partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-            accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
-            if partitioning == True:
-              details_text = details_text + "   PARTITIONING:   NoSpherA2\n"
-              details_text = details_text + "   INT ACCURACY:   %s\n"%accuracy
-            else:
-              details_text = details_text + "   PARTITIONING:   Tonto\n"
-            details_text = details_text + "   METHOD:         %s\n"%method
-            details_text = details_text + "   BASIS SET:      %s\n"%basis_set
-            details_text = details_text + "   CHARGE:         %s\n"%charge
-            details_text = details_text + "   MULTIPLICITY:   %s\n"%mult
-            if relativistic == True:
-              details_text = details_text + "   RELATIVISTIC:   DKH2\n"
-            if software == "Tonto":
-              radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
-              details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-          tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
-          if os.path.exists(tsc_file_name):
-            f_time = os.path.getctime(tsc_file_name)
+        software = OV.GetParam('snum.NoSpherA2.source')
+        details_text = details_text + "   SOFTWARE:       %s\n"%software
+        if software != "DISCAMB":
+          method = OV.GetParam('snum.NoSpherA2.method')
+          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+          charge = OV.GetParam('snum.NoSpherA2.charge')
+          mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+          partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+          accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+          if partitioning == True:
+            details_text += "   PARTITIONING:   NoSpherA2\n"
+            details_text += "   INT ACCURACY:   %s\n"%accuracy
           else:
-            f_time = os.path.getctime(file)
-          import datetime
-          f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-          details_text = details_text + "   DATE:           %s\n"%f_date
-          tsc_info = tsc_info + details_text
-        tsc_info = tsc_info + ";\n"
+            details_text += "   PARTITIONING:   Tonto\n"
+          details_text += "   METHOD:         %s\n"%method
+          details_text += "   BASIS SET:      %s\n"%basis_set
+          details_text += "   CHARGE:         %s\n"%charge
+          details_text += "   MULTIPLICITY:   %s\n"%mult
+          solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+          if solv != "Vacuum":
+            details_text += "   SOLVATION:      %s\n"%solv
+          if relativistic == True:
+            details_text = details_text + "   RELATIVISTIC:   DKH2\n"
+          if software == "Tonto":
+            radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
+        tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+        if os.path.exists(tsc_file_name):
+          f_time = os.path.getctime(tsc_file_name)
+        import datetime
+        f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+        details_text = details_text + "   DATE:           %s\n"%f_date
+        tsc_info = tsc_info + details_text + ";\n"
         cif_block['_refine_special_details'] = tsc_info
         if acta_stuff:
           # remove IAM scatterer reference
@@ -1389,8 +1422,8 @@ The following options were used:
       else:
         fo2, f_calc = self.get_fo_sq_fc()
       if self.f_mask:
-        from smtbx import masks
-        fo2 = masks.modified_intensities(fo2, f_calc, self.f_mask)
+        f_mask = self.f_mask.common_set(f_calc)
+        f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       f_calc = self.normal_eqns.f_calc
@@ -1399,11 +1432,16 @@ The following options were used:
       k = f_obs.scale_factor(f_calc)
     else:
       k = math.sqrt(scale_factor)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
-    return f_obs_minus_f_calc.fft_map(
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc).expand_to_p1()
+    print("%d Reflections for Fourier Analysis"%f_obs_minus_f_calc.size())
+    temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
-      resolution_factor=resolution,
+      resolution_factor=1,
+      grid_step=resolution,
     )
+    print("Size of Fourier grid: %d x %d x %d"%(temp.n_real()[0],temp.n_real()[1],temp.n_real()[2]))
+    #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
+    return temp
 
   def post_peaks(self, fft_map, max_peaks=5):
 

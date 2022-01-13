@@ -656,7 +656,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
                    use_space_group_symmetry=True)
       self.time_compute.stop()
       self.time_f_mask = time_log("f_mask calculation").start()
-      f_mask = self.structure_factors(mask)
+      self.structure_factors(mask)
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
@@ -668,9 +668,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      merging = self.reflections.merging
-      min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-      (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
+      #merging = self.reflections.merging
+      #min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+      #(h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
       with open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w') as f:
         print(out.getvalue(), file=f)
       print(out.getvalue())
@@ -689,7 +689,6 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
       if _ and '_smtbx_masks_void_content' in list(mdict.keys()) and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
-
 
       cif_block.update(mdict)
       cif = model.cif()

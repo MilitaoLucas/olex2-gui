@@ -661,6 +661,7 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
+    wR2 = 0
     if olx.IsVar('cctbx_R1') == 'true':
       R1 = float(olx.GetVar('cctbx_R1'))
       olx.UnsetVar('cctbx_R1')
@@ -920,7 +921,7 @@ class RunRefinementPrg(RunPrg):
     #olex.m('addins LIST -6')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
     if add_disp is True:
-      olex.m('gendisp -source=sasaki')
+      olex.m('gendisp -source=brennan')
 
     while converged == False:
       run += 1
@@ -1002,6 +1003,8 @@ class RunRefinementPrg(RunPrg):
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
         RunPrg.run(self)
+        f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
+        nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
       else:
         break
 

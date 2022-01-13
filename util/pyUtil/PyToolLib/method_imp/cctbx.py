@@ -105,12 +105,12 @@ class Method_cctbx_refinement(Method_refinement):
       pass
 
   def writeRefinementInfoForGui(self, cif):
-    for key, value in cif.items():
-      if "." in value:
-        try:
-          cif[key] = "%.4f" %float(value)
-        except:
-          pass
+    #for key, value in cif.items():
+    #  if "." in value:
+    #    try:
+    #      cif[key] = "%.4f" %float(value)
+    #    except:
+    #      pass
     f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
     t = f.read() %cif
     f.close()

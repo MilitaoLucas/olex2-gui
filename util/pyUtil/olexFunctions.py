@@ -387,9 +387,9 @@ class OlexFunctions(inheritFunctions):
     try:
       v = olx.Ins('DAMP').split()
       if len(v) > 0:
-         default[0] = float(v[0])/1000
+        default[0] = float(v[0])/1000
       if len(v) > 1:
-         default[1] = float(v[1])
+        default[1] = float(v[1])
       return default
     except:
       return default
