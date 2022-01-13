@@ -116,12 +116,14 @@ class MapUtil:
 
     NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
     if map_source == "fcf":
-      olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-    else:
+      olex.m("CalcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
+    elif map_source == "olex":
       if NoSpherA2 == True:
-        olex.m("spy.NoSpherA2.show_fft_map(%s,%s)"%(map_resolution,map_type))
+        print("NoSpherA2 maps only possible with .fcf or cctbx")
       elif map_source == "olex":
-        olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
+        olex.m("CalcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
+    else:
+      olex.m("spy.NoSpherA2.show_fft_map(%s,%s)"%(map_resolution,map_type))
 
     self.SetXgridView(update_controls)
 

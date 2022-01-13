@@ -335,14 +335,14 @@ Palatinus et al., 2012""",
     brief_reference=smtbx_solve.brief_reference,
     phil_entry_name="cctbx"
   )
-  tonto_refine = Program(
-    name='Tonto',
-    program_type='refinement',
-    author="D. Jayatilaka and D. J. Grimwood",
-    reference="D. Jayatilaka and D. J. Grimwood (2003). Computational Science - ICCS, 4, 142-151",
-    brief_reference="Jayatilaka & Grimwood, 2003",
-    execs=["hart.exe", "hart"],
-  )
+  #tonto_refine = Program(
+  #  name='Tonto',
+  #  program_type='refinement',
+  #  author="D. Jayatilaka and D. J. Grimwood",
+  #  reference="D. Jayatilaka and D. J. Grimwood (2003). Computational Science - ICCS, 4, 142-151",
+  #  brief_reference="Jayatilaka & Grimwood, 2003",
+  #  execs=["hart.exe", "hart"],
+  #)
 
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, ShelXL97, XL, XLMP, ShelXH97, XH, ShelXL_ifc):
@@ -354,7 +354,7 @@ Palatinus et al., 2012""",
   smtbx_refine.addMethod(levenberg_marquardt)
   RPD.addProgram(smtbx_refine)
 
-  tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
+  #tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
   #RPD.addProgram(tonto_refine)
   #HP don't add tonto_refine for the moment; it's not working as it stands
 

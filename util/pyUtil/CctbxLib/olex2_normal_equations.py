@@ -312,17 +312,37 @@ class naive_iterations_with_damping_and_shift_limit(
 
   def do(self):
     self.n_iterations = 0
-    start_t = time.time()
-    while self.n_iterations < self.n_max_iterations:
-      self.reset_shifts()
-      self.non_linear_ls.build_up()
-      if self.has_gradient_converged_to_zero(): break
-      self.do_damping(self.damping_value)
-      self.non_linear_ls.solve()
-      if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
-        break
-      self.non_linear_ls.step_forward()
-      self.n_iterations += 1
+    timer = OV.IsDebugging()
+    if timer:
+      import time
+      start_t = time.time()
+      while self.n_iterations < self.n_max_iterations:
+        t1 = time.time()
+        self.reset_shifts()
+        self.non_linear_ls.build_up()
+        t2 = time.time()
+        if self.has_gradient_converged_to_zero(): break
+        self.do_damping(self.damping_value)
+        self.non_linear_ls.solve()
+        if self.n_iterations%3==0:
+          if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+            break
+        self.non_linear_ls.step_forward()
+        t3 = time.time()
+        print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
+        print("-- " + "{:10.5f}".format(t3-t2) + " for damping+ls_solve+step_forward")
+        self.n_iterations += 1
+    else:
+      while self.n_iterations < self.n_max_iterations:
+        self.reset_shifts()
+        self.non_linear_ls.build_up()
+        if self.has_gradient_converged_to_zero(): break
+        self.do_damping(self.damping_value)
+        self.non_linear_ls.solve()
+        if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+          break
+        self.non_linear_ls.step_forward()
+        self.n_iterations += 1
     if OV.IsDebugging():
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
