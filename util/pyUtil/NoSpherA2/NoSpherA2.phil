@@ -74,6 +74,12 @@ snum{
       .type = str
     full_HAR = False
       .type = bool
+    frag_HAR{
+      H_box_ex = False
+        .type = bool
+      min_H_bond = False
+        .type = bool
+    }
     gl_pointsize = "1"
       .type = str
     h_afix = True
