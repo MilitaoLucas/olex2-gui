@@ -5,8 +5,8 @@
 #password=false
 #multiline=false
 #disabled=false
-#bgcolor="GetVar('HtmlInputBgColour')"
-#fgcolor="GetVar(HtmlFontColour)"
+#bgcolor=GetVar('HtmlInputBgColour')
+#fgcolor=GetVar(HtmlFontColour)
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
