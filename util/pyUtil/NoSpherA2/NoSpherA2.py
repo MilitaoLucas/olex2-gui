@@ -2622,7 +2622,7 @@ def multi_CIF_NoSpherA2_tsc(cif_fns,hkl_fn,groups,wfn_files):
     curr_law = tuple(curr_law)
     args.append("-twin")
     for i in curr_law:
-      args.append(str(int(i)))
+      args.append(str(float(i)))
 
   args.append("-cmtc")
   if len(wfn_files) != len(groups):
@@ -2685,8 +2685,18 @@ def multi_CIF_NoSpherA2_tsc(cif_fns,hkl_fn,groups,wfn_files):
         if OV.HasGUI():
           olx.Refresh()
       time.sleep(0.1)
-
-  print("\n.tsc calculation ended!")
+  
+  sucess = False
+  with open(out_fn,"r") as f:
+    l = f.readlines()
+    if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
+      sucess = True
+  
+  if sucess == True:
+    print("\n.tsc calculation ended!")
+  else:
+    print ("\nERROR during tsc calculation!")
+    raise NameError('NoSpherA2-Output not complete!')
 
 def combined_NoSpherA2_tsc(cif_fn,hkl_fn,groups,wfn_files):
   folder = OV.FilePath()
@@ -2747,7 +2757,7 @@ def combined_NoSpherA2_tsc(cif_fn,hkl_fn,groups,wfn_files):
       curr_law = tuple(curr_law)
       args.append("-twin")
       for i in curr_law:
-        args.append(str(int(i)))
+        args.append(str(float(i)))
   except:
     print("I think this is not an HKLF5...")
 
@@ -2760,7 +2770,7 @@ def combined_NoSpherA2_tsc(cif_fn,hkl_fn,groups,wfn_files):
     curr_law = tuple(curr_law)
     args.append("-twin")
     for i in curr_law:
-      args.append(str(int(i)))
+      args.append(str(float(i)))
 
   args.append("-mtc")
   if len(wfn_files) != len(groups):
@@ -2823,7 +2833,17 @@ def combined_NoSpherA2_tsc(cif_fn,hkl_fn,groups,wfn_files):
           olx.Refresh()
       time.sleep(0.1)
 
-  print("\n.tsc calculation ended!")
+  sucess = False
+  with open(out_fn,"r") as f:
+    l = f.readlines()
+    if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
+      sucess = True
+  
+  if sucess == True:
+    print("\n.tsc calculation ended!")
+  else:
+    print ("\nERROR during tsc calculation!")
+    raise NameError('NoSpherA2-Output not complete!')
 
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
   folder = OV.FilePath()
@@ -2889,7 +2909,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       else:
         args.append("-twin")
         for i in res[4].split() + res[6].split() + res[8].split():
-          args.append(str(int(i)))
+          args.append(str(float(i)))
     except:
       print("There is a problem with the HKLF5 file...")
   elif 'twin' in olex_refinement_model:
@@ -2897,7 +2917,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     args.append("-twin")
     for row in c:
       for el in row:
-        args.append(str(int(el)))
+        args.append(str(float(el)))
 
   os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
@@ -2950,7 +2970,17 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
           olx.Refresh()
       time.sleep(0.1)
 
-  print("\n.tsc calculation ended!")
+  sucess = False
+  with open(out_fn,"r") as f:
+    l = f.readlines()
+    if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
+      sucess = True
+  
+  if sucess == True:
+    print("\n.tsc calculation ended!")
+  else:
+    print ("\nERROR during tsc calculation!")
+    raise NameError('NoSpherA2-Output not complete!')
 
 def discamb(folder, name, discamb_exe):
   move_args = []
@@ -4634,9 +4664,9 @@ def org_min():
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
 def org_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP")
+  OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
@@ -4648,9 +4678,9 @@ def org_small():
   olex.m("html.Update()")
 OV.registerFunction(org_small, False, "NoSpherA2")
 def org_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVPP")
+  OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
@@ -4679,7 +4709,7 @@ OV.registerFunction(light_min, False, "NoSpherA2")
 def light_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
@@ -4691,9 +4721,9 @@ def light_small():
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
 def light_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVPP")
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
@@ -4720,9 +4750,9 @@ def heavy_min():
   olex.m("html.Update()")
 OV.registerFunction(heavy_min, False, "NoSpherA2")
 def heavy_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"jorge-TZP-DKH")
+  OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
@@ -4734,9 +4764,9 @@ def heavy_small():
   olex.m("html.Update()")
 OV.registerFunction(heavy_small, False, "NoSpherA2")
 def heavy_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVPP")
+  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
   OV.SetParam('snum.NoSpherA2.method',"PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"High")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)

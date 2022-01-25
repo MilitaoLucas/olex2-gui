@@ -79,6 +79,10 @@ snum{
         .type = bool
       min_H_bond = False
         .type = bool
+      H_test = False
+        .type = bool
+      radius_tolerance = 0.45
+        .type = str
     }
     gl_pointsize = "1"
       .type = str
