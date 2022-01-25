@@ -1,4 +1,4 @@
-#frag HAR script from Justin Bergmann, adapted by Florian Kleemiss for NoSpherA2 comaptibility
+#fragHAR script from Justin Bergmann, adapted by Florian Kleemiss for NoSpherA2 comaptibility
 #fragHAR assumes ORCA 5.0 as the wfn software!
 
 import numpy as np
@@ -313,7 +313,7 @@ class Atom:
         self.EN=ele_to_EN(sfac[int(line[1])-1])
         self.resi_f=resi_f
         self.cap=False
-        self.part=part
+        self.part=abs(part)
 #        print(len(line))
         if len(line)==9:
             self.iso="Uani"
@@ -344,95 +344,6 @@ class Res:
         self.atoms_4=[]
         self.q=0
         self.S=1
-
-def read_res(res_in):
-    #read in res file from shelxl
-    mol=[]
-    sfac=[]
-    cell=[]
-    res=[]
-    a_num=0
-    res_num=-1
-    coord=False
-    read_res = open(res_in, "r")
-    count=-1
-    part=str(0)
-    for line in read_res:
-       # print(line)
-        count = count +1
-        l_split=line.split()
-        idef = line[0:4].strip()
-        
-        if idef=="CELL":
-            for i in range(2,8):
-                cell.append(float(l_split[i]))
-            print("cell",cell)
-        if idef=="SFAC":
-            for i in range(len(l_split)-1):
-                sfac.append((l_split[i+1]))
-            print("sfac",sfac)
-        if idef == "RESI" or idef == "resi":
-            if coord==True:
-#                res=res_to_class(res_e,res)
-                if res.alter != True:
-                        mol.append(res)
-                else:
-                    for k in range(len(res.part)):    
-                        part_name="atoms_"+str(res.part[k])
-                        print(res.part,"res.part")
-                        if "0" in res.part:
-                            if res.part[k]=="0":
-                                continue
-#                            print("TEST7¤¤¤¤¤¤¤¤¤¤¤¤")
-                            l_frag=res.atoms_0 + getattr(res,part_name)
-                            setattr(res,part_name,l_frag) 
-                    mol.append(res)
-#            res_e=Res(l_split)
-            coord=True
-            res_num=res_num+1
-            res=Res(l_split)
-            resi_f=int(l_split[2])
-        if idef=="PART" or idef=="part":
-            part = l_split[1]
-
-        if coord==True:
-            if len(l_split)==9 or len(l_split)==10 or len(l_split)==7:
-                if l_split[1].isdigit()==True and int(l_split[1])<= len(sfac):
-                    a_num=a_num+1
-                    if int(part)>=0:
-                        a_list="atoms_"+str(part)
-                    else:
-                        a_list="atoms_m"+str(abs(part))
-             #       print(a_list,res.atoms_0)   
-                    getattr(res,a_list).append(Atom(l_split,a_num,res_num,sfac,cell,resi_f,part))
-                    if part not in res.part:
-                        if part != "0":
-                            res.alter=True
-                        if int(part)>=0:
-                            res.part.append(str(part))
-                        else:
-                            p_nam="m"+str(abs(part))
-                            res.part.append(str(p_nam))
-
-        
-#    res=res_to_class(res_e,res)   
-    if res.alter != True:
-        mol.append(res)
-    else:
-        for k in range(len(res.part)):    
-            part_name="atoms_"+str(res.part[k])
-            print(res.part,"res.part", part_name)
-            if "0" in res.part:
-                if res.part[k]=="0":
-                    continue
-                l_frag=res.atoms_0 + getattr(res,part_name)
-                setattr(res,part_name,l_frag)             
-        mol.append(res)
-    read_res.close()
-    
-    for i in range(len(mol)):
-        print("len of residues 0,1,2 as part:", len(mol[i].atoms_0), len(mol[i].atoms_1), len(mol[i].atoms_2))
-    return mol,cell
 
 def check_if_atom(line):
     #checks if line is not startet with _
@@ -476,87 +387,10 @@ class Cif_atom:
         self.cap=False        
         try: 
             int(line[disorder_group])
-            part=int(line[disorder_group])
+            part=abs(int(line[disorder_group]))
         except:
             part=0
-        self.part=part
-
-def read_cif_old(cif_name,cell):
-#read CIF file in
-    cif_head=[]
-    cif_coord=[]
-    cif_aniso=[]
-    cif_sym=[]
-    read_cif = open(cif_name, "r")
-    count=-1
-    loop=False
-    coord=False
-    aniso=False
-    bonds=False
-    angle=False
-    sym=False
-    count = -1
-    for line in read_cif:
-        count +=1
-        l_split=line.split()
-        if len(l_split)==0:
-            coord=False
-            aniso=False
-            bonds=False
-            angle=False
-            loop = False
-            sym=False
-        if len(l_split)>0:
-            if l_split[0]=="loop_":
-#              print("ENTER loop !!!!!!!!!!!!!!!!!")
-                count=-1
-                loop = True
-           
-        if loop==False:
-            cif_head.append(line)
-        if loop == True:
-            if len(l_split)>0:
-#              print(l_split[0])
-                if l_split[0]=="_atom_site_fract_x":
-                    coord=True
-                    x=count
-                if l_split[0]=="_atom_site_fract_y":
-                    y=count
-                if l_split[0]=="_atom_site_fract_z":
-                    z=count
-                if l_split[0]=="_atom_site_label":
-                    label=count
-                if l_split[0]=="_atom_site_type_symbol":
-                    type_symbol=count
-                if l_split[0]=="_atom_site_U_iso_or_equiv":
-                    Uiso=count
-                if l_split[0]=="_atom_site_adp_type":
-                    adp_type=count
-                if l_split[0]=="_atom_site_occupancy":
-                    occ=count
-                if l_split[0]=="_atom_site_refinement_flags_posn":
-                    flags=count
-                if l_split[0]=="_atom_site_site_symmetry_order":
-                    symmetry=count
-                if l_split[0]=="_atom_site_disorder_group":
-                    disorder_group=count
-                    
-                if l_split[0]=="_space_group_symop_id":
-                    sym=True
-                if coord==True:
-                    check_atom=check_if_atom(l_split[0])
- #                   print("check_atom",check_atom)
-                    if check_atom ==True:
-                        atom=Cif_atom(l_split,x,y,z,label,type_symbol,Uiso,adp_type,occ,flags,symmetry,disorder_group,cell)
-#                        print("atom.res_num",atom.res_num)
-                        cif_coord.append(atom)
-                if sym==True:
-                    check_atom=check_if_atom(l_split[0])
- #                   print("check_atom",check_atom)
-                    if check_atom ==True:
-                        cif_sym.append(line)
-            
-    return cif_head,cif_coord,cif_aniso,cif_sym
+        self.part=abs(part)
 
 class Cell:
 #defines one residue
@@ -719,7 +553,7 @@ def cif_coord_to_mol(atom_l):
         res=Res_c(res_l[i][0].res_num)
         res.part=part_l[i]
         for j in range(len(res_l[i])):              
-            part_name="atoms_"+str(res_l[i][j].part)
+            part_name="atoms_"+str(abs(res_l[i][j].part))
             part_list=getattr(res,part_name)
             part_list.append(res_l[i][j])
 #            print("type(",part_name,type(part_list))
@@ -736,7 +570,7 @@ def cif_coord_to_mol(atom_l):
                 if mol[i].part[k]==0:
                     continue
  #            print("TEST8¤¤¤¤¤¤¤¤¤¤¤¤")
-                part_name="atoms_"+str(mol[i].part[k])
+                part_name="atoms_"+str(abs(mol[i].part[k]))
                 l_frag=mol[i].atoms_0 + getattr(mol[i],part_name)
                 setattr(mol[i],part_name,l_frag)
             
@@ -930,7 +764,7 @@ def find_first_shell(mol,res,anum,part,l_frag,cap1):
 #    finds first bonded atoms from neighbouring residues
     anums=[]
     count=0
-    
+    radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
 #   A1=[mol[res][anum].x,mol[res][i].y,mol[res][i].z]
     for i in range(len(mol)):
         if i != res:
@@ -947,7 +781,7 @@ def find_first_shell(mol,res,anum,part,l_frag,cap1):
 #            print_atom(l_frag[anum])
             for k in range(len(l_res)):
                 dist=atom_dist(l_frag[anum],l_res[k])
-                if dist <= (l_frag[anum].cov+l_res[k].cov+0.4):
+                if dist <= (l_frag[anum].cov+l_res[k].cov+radius_tolerance):
 #                    print("A_NAM", mol[i][k].a_nam, "addet to res",mol[res][anum].res_num)
                     atom_ex=False
                     for l in range(len(cap1)):
@@ -976,6 +810,7 @@ def find_second_shell(mol,cap1,res,part,cap2,hbond_ex, minHbond):
  #   print("cap1cap1cap1",cap1)
  #   A1=[mol[res][anum].x,mol[res][i].y,mol[res][i].z]
     count=0
+    radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
     for j in range(len(cap1)):
         for i in range(len(mol)):
 
@@ -989,13 +824,14 @@ def find_second_shell(mol,cap1,res,part,cap2,hbond_ex, minHbond):
                     part_name = "atoms_"+str(part)
                     l_res = getattr(mol[i],part_name)  
             else:
+                ### I THINK THIS IS WHERE THINGS ARE GOING WRONG; BUT IF I DO NOT CONTINUE I HAVE DOUBLED ATOMS
                 continue
                 l_res = mol[i].atoms_0 + mol[i].atoms_1 + mol[i].atoms_m1
             for k in range(len(l_res)):
 #                if cap1[j].res_num == l_res[k].res_num:
 #                  if l_res[k].part=="0" or l_res[k].part==part:  
                 dist = atom_dist(cap1[j],l_res[k])
-                if 0.5 < dist <= (cap1[j].cov+l_res[k].cov+0.4):
+                if 0.5 < dist <= (cap1[j].cov+l_res[k].cov+radius_tolerance):
                     atom_ex=False
                     for l in range(len(cap1)):
                         if are_atoms_eaqual(l_res[k],cap1[l]) == True:
@@ -1033,9 +869,10 @@ def check_if_plan(atom,res):
     
     plan=False
     n_atom=[]
+    radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
     for i in range(len(res)):
         dist=atom_dist(atom,res[i])
-        if 0.5 <  dist <= (atom.cov + res[i].cov+0.4):
+        if 0.5 <  dist <= (atom.cov + res[i].cov+radius_tolerance):
 #            if are_atoms_eaqual(cap1,res[i]) == False:
                 n_atom.append(res[i])
     if len(n_atom)==3:
@@ -1066,7 +903,7 @@ def find_junction(mol,cap2,cap1,cell,res,part):
     j_num=1
     elongate = []
     atom_j=[]
-
+    radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
     for j in range(len(cap2)):
  #     continue
         if cap2[j].ele!= "H":  ##NEW
@@ -1090,7 +927,7 @@ def find_junction(mol,cap2,cap1,cell,res,part):
                      
                     for k in range(len(l_res)):         
                         dist=atom_dist(cap2[j],l_res[k])
-                        if 0.5 <  dist <= (cap2[j].cov + l_res[k].cov+0.4):
+                        if 0.5 <  dist <= (cap2[j].cov + l_res[k].cov+radius_tolerance):
                             real1=False
                             real2=False
                             for l in range(len(cap1)):
@@ -1185,13 +1022,14 @@ def build_cap(mol,res,cell,part):
     cap2=[]
     frag_core=[]
     hbond_ex=OV.GetParam('snum.NoSpherA2.frag_HAR.H_box_ex')
-    minHbond=OV.GetParam('snum.NoSpherA2.frag_HAR.min_Hbond') #we need a tick box for it
-#    hbond_ex=True ;    minHbond=False #we need a tick box for it
-#    hbond_ex=False ;   minHbond=True #we need a tick box for it
+    minHbond=OV.GetParam('snum.NoSpherA2.frag_HAR.min_H_bond')
+    print("minHbond!!!!!!!!!!!!!!!!!!!!!",minHbond)
+    print("hbond_ex!!!!!!!!!!!!!!!!!!!!!",hbond_ex)
     l_frag=[]
-    part_name="atoms_"+str(part)
+    part_name="atoms_"+str(abs(part))
     l_frag=getattr(mol[res],part_name)
     for i in range(len(l_frag)):
+
         atom=copy.deepcopy(l_frag[i])
         frag.append(atom)
         frag_core.append(copy.deepcopy(l_frag[i]))
@@ -1200,7 +1038,7 @@ def build_cap(mol,res,cell,part):
             if len(bond_l) >=1:
                 for k in range(len(bond_l)):
                     cap1.append(bond_l[k])
-            print("Hydrogen bonds are getting cappend",mol[i].res_num,len(cap1))
+            print("Hydrogen bonds are getting cappend",l_frag[i].res_num,len(cap1))
         shell1=find_first_shell(mol,res,i,part,l_frag,cap1)
 #        print("number of atoms in the fist shell for fragment",mol[res].res_num,len(shell1))
         if len(shell1)>=1:
@@ -1277,6 +1115,7 @@ def build_fragments(mol,cell):
     frag_l=[]
     for i in range(len(mol)):
         mol[i].part.sort()
+        
         if mol[i].alter != True :
             p0=0
         elif  0 not in mol[i].part:
@@ -1294,7 +1133,7 @@ class Frag:
     def __init__(self,res_nam,res_num,part,atoms,cap,core,q,s):    
         self.res_nam=res_nam
         self.res_num=res_num
-        self.part=part
+        self.part=abs(part)
         self.atoms_core=core
         self.atoms=atoms
         self.cap=cap
@@ -1319,17 +1158,14 @@ def write_xyz(res,path="",part=0,name=""):
 
 def read_qS(file,mol):
     #read in file with charge and multiplisity
-    qS=[]
-      
-    for i in range(len(mol)):
-        in_list=False
-        if os.path.exists(file):
-            read_qS_f = open(file, "r")
-            for line in read_qS_f:
-                l_split=line.split()
-                if l_split == []:
-                    pass
-                if len(l_split)>0:
+    #in_list=False
+    if os.path.exists(file):
+        for line in open(file, "r"):
+            l_split=line.split()
+            if l_split == []:
+                pass
+            if len(l_split)>0:
+                for i in range(len(mol)):
                     if int(l_split[0])==mol[i].res_num:
                         q=l_split[1]
                         mol[i].q=q
@@ -1338,23 +1174,12 @@ def read_qS(file,mol):
                         else:
                             s=l_split[2]
                         mol[i].S=s
-                        in_list=True
-            read_qS_f.close()
-        if in_list==False:
-            q=0
-            s=1
-        qS.append(res_qs(i,mol[i].res_num,q,s))
-
-    return qS,mol
-
-class res_qs:
-    def __init__(self,res_num,resi_f,q,s):
-#   defines charge and multiplisity for each residue
-        self.res_num=res_num
-        self.resi_f=resi_f
-        self.q=q
-        self.s=s
+                        #in_list=True
         
+    for i in range(len(mol)):
+        print("mol %d resnum %d: q=%d S=%d"%(i,mol[i].res_num,int(mol[i].q),int(mol[i].S)))
+    return mol
+
 def are_atoms_match_cif(A1,A2):
 #   checks if atoms are qual
     equal=False
@@ -1378,26 +1203,30 @@ def add_cif_atoms(frag,cif,cell):
             print("cif atoms are missingin residue ",frag[i].res_num,len(frag[i].atoms_core),len(frag[i].cif_atoms))
         
     return frag
-    
-def get_nr_residues(res_file):
-    mol,cell=read_res(res_file)
-    return len(mol)
 
 def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
     import shutil
-    test_frag=False
-    
+    test_frag=OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
+    #print("test_frag",test_frag)
+ #   test_frag=False
+#    print_frag=True
+    import time
+    t1 = time.time()
     cif_head,cif_coord,cif_aniso,cif_sym,cell,mol=read_cif(input_cif)
-    qS,mol=read_qS(input_qS,mol)
+    mol = read_qS(input_qS,mol)
     print("size of mol: ",len(mol))
    
     frag = build_fragments(mol,cell) 
+#    if print_frag==True:
+#       print("fragmenttation test is running")
+#       return
     
     work_folder = wfn_object.full_dir
     wfns = []
     cifs = []
     groups = []
     hkl_fn = os.path.join(work_folder,wfn_object.name+".hkl")
+    t2 = time.time()
     for i in range(len(frag)):
         path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
         if os.path.exists(path) == False:
@@ -1405,6 +1234,7 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         write_xyz(frag[i],path=path,name=wfn_object.name)
         write_cif(frag[i],cif_head,cif_sym,path=path,name=wfn_object.name)
         if test_frag==True:
+            print("no furhter calculation")
             continue
         
         wfn_object.full_dir = path
@@ -1428,6 +1258,15 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
             groups.append([0])
         cifs.append(os.path.join(path,wfn_object.name+".cif"))
     from .NoSpherA2 import multi_CIF_NoSpherA2_tsc
+    t3 = time.time()
     multi_CIF_NoSpherA2_tsc(cifs,hkl_fn,groups,wfns)
-    shutil.move("experimental.tsc",wfn_object.name+".tsc")
+    try:
+        shutil.move("experimental.tsc",wfn_object.name+".tsc")
+    except:
+        print("Error trying to move the tsc file! Make sure the calculation worked!")
+        return
     OV.SetParam('snum.NoSpherA2.file',wfn_object.name+".tsc")
+    t4 = time.time()
+    print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")
+    print("-- " + "{:8.3f}".format(t3-t2) + " for wavefunctions")
+    print("-- " + "{:8.3f}".format(t4-t3) + " for partitioning")       

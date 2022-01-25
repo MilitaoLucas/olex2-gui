@@ -155,6 +155,13 @@ class item_vs_resolution(OlexCctbxAdapter):
       self.binned_data.show()
     except:
       pass
+    something = False
+    for i in self.binned_data.data:
+      if i != None and i != 0.0:
+        something = True
+    if something == False:
+      print("There appears to be no data to display")
+      raise Exception("No data to display!")    
 
   def xy_plot_info(self):
     r = empty()
