@@ -385,8 +385,12 @@ class OlexCctbxAdapter(object):
   def get_fo_sq_fc(self, one_h_function=None):
     fo2 = self.reflections.f_sq_obs_filtered
     if one_h_function:
-      fc = self.f_calc(None, self.exti is not None, True, False,
+      try:
+        fc = self.f_calc(None, self.exti is not None, True, False,
                        one_h_function=one_h_function, twin_data=False)
+      except Exception as e:
+        print("Error during calculation of F_calcs: %s"%(str(e)))
+        return None, None
     else:
       fc = self.f_calc(None, self.exti is not None, True,
        ignore_inversion_twin=False,
