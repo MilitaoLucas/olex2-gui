@@ -117,7 +117,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         env.threads = max_threads
     except:
       pass
-    print("Using %s threads" %ext.build_normal_equations.available_threads)
+    print("Using %s threads. Using OpenMP: %s." %(
+      ext.build_normal_equations.available_threads,
+      olx.GetVar("use_openmp", "false")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None
@@ -162,7 +164,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
     if timer:
-      t2 = time.time()    
+      t2 = time.time()
 
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
@@ -188,8 +190,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
     if timer:
-      t3 = time.time()    
-      olx.SetVar("use_openmp", "true")
+      t3 = time.time()
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
     #  label = ""
@@ -205,7 +206,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
-      
+
     self.normal_eqns = normal_equations_class(
       self.observations,
       self.reparametrisation,
@@ -215,7 +216,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=self.weighting,
       log=self.log,
-      may_parallelise=True,
+      may_parallelise=env.threads > 1,
       use_openmp=olx.GetVar("use_openmp", "false")=="true"
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
@@ -288,7 +289,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         else:
           raise e
       if timer:
-        t5 = time.time()    
+        t5 = time.time()
       # get the final shifts
       self.normal_eqns.analyse_shifts()
       self.scale_factor = self.cycles.scale_factor_history[-1]
@@ -350,10 +351,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not fcf_only:
         self.show_summary()
         self.show_comprehensive_summary(log=self.log)
-      else:    
+      else:
         return
       if timer:
-        t7 = time.time()      
+        t7 = time.time()
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()
@@ -389,7 +390,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.on_completion(cif[block_name])
         if timer:
           t10 = time.time()
-          print("-- " + "{:8.3f}".format(t10-t9) + " for on_completion")        
+          print("-- " + "{:8.3f}".format(t10-t9) + " for on_completion")
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
     finally:

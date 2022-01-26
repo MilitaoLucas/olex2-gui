@@ -5,6 +5,9 @@ from scitbx.array_family import flex
 from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
 from cctbx import adptbx
+#ext = bp.import_ext("smtbx_refinement_least_squares_ext")
+from smtbx_refinement_least_squares_ext import *
+
 import math
 from olexFunctions import OV
 
@@ -26,9 +29,40 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     else:
       self.one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, reflections=self.observations)
-
+    self.one_h_linearisation = f_calc_function_default(self.one_h_linearisation)
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
+
+  def build_up(self, objective_only):
+    if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false":
+      super(normal_eqns, self).build_up(objective_only)
+      return
+    old_func = self.one_h_linearisation
+    try:
+      if self.f_mask is not None:
+        f_mask = self.f_mask.data()
+      else:
+        f_mask = flex.complex_double()
+      extinction_correction = self.reparametrisation.extinction
+      cl = least_squares.crystallographic_ls_class()
+      self.reparametrisation.linearise()
+      self.reparametrisation.store()
+      xx = cl(self.observations, self.reparametrisation)
+      def args():
+        args = (xx,
+                self.observations,
+                f_mask,
+                self.weighting_scheme,
+                OV.GetOSF(),
+                self.one_h_linearisation,
+                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
+                extinction_correction, False, True, False)
+        return args
+      self.data = build_design_matrix(*args())
+      self.one_h_linearisation = f_calc_function_ed(self.data, (1,1,1, 2,2,2, 3,3,3))
+      super(normal_eqns, self).build_up()
+    finally:
+      self.one_h_linearisation = old_func
 
   def step_forward(self):
     self.n_current_cycle += 1
@@ -313,37 +347,23 @@ class naive_iterations_with_damping_and_shift_limit(
   def do(self):
     self.n_iterations = 0
     timer = OV.IsDebugging()
-    if timer:
-      import time
-      start_t = time.time()
-      while self.n_iterations < self.n_max_iterations:
-        t1 = time.time()
-        self.reset_shifts()
-        self.non_linear_ls.build_up()
-        t2 = time.time()
-        if self.has_gradient_converged_to_zero(): break
-        self.do_damping(self.damping_value)
-        self.non_linear_ls.solve()
-        if self.n_iterations%3==0:
-          if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
-            break
-        self.non_linear_ls.step_forward()
-        t3 = time.time()
+    start_t = time.time()
+    while self.n_iterations < self.n_max_iterations:
+      t1 = time.time()
+      self.reset_shifts()
+      self.non_linear_ls.build_up()
+      t2 = time.time()
+      if self.has_gradient_converged_to_zero(): break
+      self.do_damping(self.damping_value)
+      self.non_linear_ls.solve()
+      if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+        break
+      self.non_linear_ls.step_forward()
+      if timer:
         print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
-        print("-- " + "{:10.5f}".format(t3-t2) + " for damping+ls_solve+step_forward")
-        self.n_iterations += 1
-    else:
-      while self.n_iterations < self.n_max_iterations:
-        self.reset_shifts()
-        self.non_linear_ls.build_up()
-        if self.has_gradient_converged_to_zero(): break
-        self.do_damping(self.damping_value)
-        self.non_linear_ls.solve()
-        if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
-          break
-        self.non_linear_ls.step_forward()
-        self.n_iterations += 1
-    if OV.IsDebugging():
+        print("-- " + "{:10.5f}".format(time.time()-t2) + " for damping+ls_solve+step_forward")
+      self.n_iterations += 1
+    if timer:
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
 
