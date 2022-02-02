@@ -190,7 +190,7 @@ class reflections(object):
     if hkl is None: hkl = ()
     if self._shel is None:
       self._shel = {'high' : self.d_min, 'low': -1}
-    elif self._shel['high'] < self._shel['low']:
+    elif self._shel['high'] > self._shel['low']:
       self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
 
     filter = observations.filter(
