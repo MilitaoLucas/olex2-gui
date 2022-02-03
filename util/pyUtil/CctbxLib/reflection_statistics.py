@@ -492,7 +492,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.info = None
     weights = self.compute_weights(f_sq_obs, f_calc)
     #
-    scale_factor = math.sqrt(OV.GetOSF())
+    scale_factor = OV.GetOSF()
     observed_deviations = flex.sqrt(weights) * (
       f_sq_obs.data() - scale_factor * f_sq_calc.data())
     selection = flex.sort_permutation(observed_deviations)
