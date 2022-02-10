@@ -24,12 +24,19 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       observations, reparametrisation, initial_scale_factor=OV.GetOSF(),
        **kwds)
     if table_file_name:
-      self.one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, table_file_name=table_file_name)
+      try:
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, table_file_name=table_file_name)
+      except Exception as e:
+        if "stoks.size() == scatterer" in str(e):
+          print("Number of atoms in model and table are not matching!")
+        elif "Error during building of normal equations using OpenMP" in str(e):
+          print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
+        raise e
     else:
-      self.one_h_linearisation = direct.f_calc_modulus_squared(
+      one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, reflections=self.observations)
-    self.one_h_linearisation = f_calc_function_default(self.one_h_linearisation)
+    self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 

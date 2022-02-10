@@ -211,6 +211,8 @@ class OlexCctbxAdapter(object):
 
       for sc in self._xray_structure.scatterers():
         d = disp.get(sc.scattering_type.lower(), None)
+        if d == None:
+          d = disp.get(sc.label.lower(), None)
         if d:
           sc.flags.set_grad_fp(d[0])
           sc.flags.set_grad_fdp(d[1])
@@ -350,7 +352,8 @@ class OlexCctbxAdapter(object):
       params[i] = v
     weighting = xray.weighting_schemes.shelx_weighting(*params,
       wavelength=self.wavelength)
-    scale_factor = fo2.scale_factor(fc)
+    #scale_factor = fo2.scale_factor(fc)
+    scale_factor = OV.GetOSF()
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights

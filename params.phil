@@ -1046,6 +1046,10 @@ user
       .expert_level = 2
     refln_loop = False
       .type = bool
+    use_openmp = False
+      .type = bool
+    openmp_mem = 300
+      .type = int
   }
 
   masks{
