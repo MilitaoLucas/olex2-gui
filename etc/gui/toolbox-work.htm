@@ -89,23 +89,14 @@ $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>
 
 
 
-<!-- #ignoreif not(spy.gui.tools.hasDisorder())
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PART_LINKS; help_ext=Part-Links;1; -->
-
-$spy.gui.tools.make_disorder_quicktools()
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FIT_GROUP';help_ext=Fit-Group;1 -->
-<!-- #include fit-group gui\snippets\snippet-fit-group.htm;1; -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!--INSERT DRAWPLUS-->
 
 <!-- #includeif IsFileType('ires') tool-row-help gui\blocks\tool-row-help.htm;name='ELECTRON_DENSITY';help_ext=Electron-Density;1 -->
 <!-- #includeif IsFileType('ires') calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
 <!-- #includeif IsFileType('ires') row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include h3-disorder-tools gui\h3-disorder-tools.htm;gui\blocks\tool-h3-off.htm;image=h3-Disorder-Tools;onclick=;colspan=1;2; -->
 
 <!-- #include h3-peak-and-uiso-sliders gui\h3-peak-and-uiso-sliders.htm;gui\blocks\tool-h3-off.htm;image=h3-Peak-&-Uiso-Sliders;onclick=;colspan=1;2; -->
 
