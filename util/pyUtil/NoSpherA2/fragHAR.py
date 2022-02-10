@@ -825,8 +825,8 @@ def find_second_shell(mol,cap1,res,part,cap2,hbond_ex, minHbond):
                     l_res = getattr(mol[i],part_name)  
             else:
                 ### I THINK THIS IS WHERE THINGS ARE GOING WRONG; BUT IF I DO NOT CONTINUE I HAVE DOUBLED ATOMS
-                continue
                 l_res = mol[i].atoms_0 + mol[i].atoms_1 + mol[i].atoms_m1
+                continue
             for k in range(len(l_res)):
 #                if cap1[j].res_num == l_res[k].res_num:
 #                  if l_res[k].part=="0" or l_res[k].part==part:  
@@ -1227,7 +1227,11 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
     groups = []
     hkl_fn = os.path.join(work_folder,wfn_object.name+".hkl")
     t2 = time.time()
+    current_message = ""
     for i in range(len(frag)):
+        current_message = "Calculating WFN %d/%d" %(i+1,len(frag))
+        OV.CreateBitmap('%s' %current_message)
+                
         path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
         if os.path.exists(path) == False:
             os.mkdir(path)
@@ -1257,9 +1261,13 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         else:
             groups.append([0])
         cifs.append(os.path.join(path,wfn_object.name+".cif"))
-    from .NoSpherA2 import multi_CIF_NoSpherA2_tsc
+        OV.DeleteBitmap('%s' %current_message)
+    from .NoSpherA2 import cuqct_tsc
     t3 = time.time()
-    multi_CIF_NoSpherA2_tsc(cifs,hkl_fn,groups,wfns)
+    current_message = "Partitioning"
+    OV.CreateBitmap('%s' %current_message)
+    cuqct_tsc(wfns,hkl_fn,cifs,groups)
+    OV.DeleteBitmap('%s' %current_message)
     try:
         shutil.move("experimental.tsc",wfn_object.name+".tsc")
     except:
