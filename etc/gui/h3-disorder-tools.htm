@@ -1,0 +1,40 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<!-- FIRST ROW -->
+<!-- #ignoreif not(spy.gui.tools.hasDisorder())
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PART_LINKS; help_ext=Part-Links;1; -->
+
+$spy.gui.tools.make_disorder_quicktools()
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FIT_GROUP';help_ext=Fit-Group;1 -->
+<!-- #include fit-group gui\snippets\snippet-fit-group.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm; help_ext=Results;1; -->
+  <tr>
+    <td align='left' width="76%"><b>List of most disagreeable restraints:</b></td>
+    $+
+      html.Snippet(GetVar(default_link),
+      "value=Short",
+      "name=SHORT_BUTTON",
+      "onclick=delins more>>addins more -1>>refine 4",
+      "td1=<td width='12%' align='right'>"
+      )
+    $-
+    $+
+      html.Snippet(GetVar(default_link),
+      "value=Full",
+      "name=FULL_BUTTON",
+      "onclick=delins more>>addins more -4>>refine 4",
+      "td1=<td width='12%' align='right'>"
+      )
+    $-
+  </tr>
+  $spy.FragmentDB.results()
+
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+
