@@ -189,6 +189,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
+    use_openmp = OV.GetParam("user.refinement.use_openmp")
+    max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
     if timer:
       t3 = time.time()
     #===========================================================================
@@ -217,7 +219,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       weighting_scheme=self.weighting,
       log=self.log,
       may_parallelise=env.threads > 1,
-      use_openmp=olx.GetVar("use_openmp", "false")=="true"
+      use_openmp=use_openmp,
+      max_memory=max_mem
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -323,9 +326,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       except:
         pass
     except RuntimeError as e:
-      if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
+      e_string = str(e)
+      if e_string.startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print("Refinement failed to converge")
-      elif "SCITBX_ASSERT(!cholesky.failure) failure" in str(e):
+      elif "SCITBX_ASSERT(!cholesky.failure) failure" in e_string:
         print("Cholesky failure")
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
@@ -338,6 +342,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
             param_name = self.reparametrisation.component_annotations[index]
           print("the leading minor of order %i for %s is not positive definite"\
            %(index, param_name))
+      elif "SMTBX_ASSERT(l != mi_lookup.end()) failure" in e_string:
+        lines = e_string.split("\n")
+        indices = lines[1].split("(")[2].split(")")[0].split(',')
+        print("Did not find values for reflection (%s,%s,%s) in scattering table!"%(indices[0],indices[1],indices[2]))
+        print("Try recalculating the .tsc file!")
       else:
         print("Refinement failed")
         import traceback
