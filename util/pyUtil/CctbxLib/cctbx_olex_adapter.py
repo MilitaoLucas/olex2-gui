@@ -194,28 +194,13 @@ class OlexCctbxAdapter(object):
         custom_dict=custom_gaussians,
         table=str(table),
         d_min=self.reflections.f_sq_obs.d_min())
-
-    r_disp = self.olx_atoms.model.get('refine_disp')
-    if r_disp:
-      disp = {}
-      for t in r_disp:
-        t = t.lower()
-        if '.' in t:
-          t = t.split('.')
-          if t[1] == 'fp':
-            disp[t[0]] = (True, False)
-          elif t[1] == 'fdp':
-            disp[t[0]] = (False, True)
-        else:
-          disp[t] = (True, True)
-
-      for sc in self._xray_structure.scatterers():
-        d = disp.get(sc.scattering_type.lower(), None)
-        if d == None:
-          d = disp.get(sc.label.lower(), None)
-        if d:
-          sc.flags.set_grad_fp(d[0])
-          sc.flags.set_grad_fdp(d[1])
+    # init disp
+    for i, disp in self.olx_atoms.disp_iterator():
+      sc = self._xray_structure.scatterers()[i]
+      sc.fp = disp[0]
+      sc.fdp = disp[1]
+      sc.flags.set_grad_fp(True)
+      sc.flags.set_grad_fdp(True)
 
     return self._xray_structure
 
