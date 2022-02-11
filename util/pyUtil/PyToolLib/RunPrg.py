@@ -875,24 +875,28 @@ class RunRefinementPrg(RunPrg):
 
     HAR_log.write("{:3d}".format(run))
     energy = None
-    for file in os.listdir(olx.FilePath()):
-      if file.endswith(".wfn"):
-        with open(file, "rb") as f:
-          f.seek(-2000,os.SEEK_END)
-          fread = f.readlines()[-1].decode()
-          if "THE VIRIAL" in fread:
-            source = OV.GetParam('snum.NoSpherA2.source')
-            if "Gaussian" in source:
-              try:
-                energy = float(fread.split()[3])
-              except:
-                energy = None
-            else:
-              try:
-                energy = float(fread[17:38])
-              except:
-                energy = None
-        fread = None
+    source = OV.GetParam('snum.NoSpherA2.source')
+    if source == "fragHAR" or source == "Hybrid" or source == "DISCAMB":
+      pass
+    else:
+      for file in os.listdir(olx.FilePath()):
+        if file.endswith(".wfn"):
+          with open(file, "rb") as f:
+            f.seek(-2000,os.SEEK_END)
+            fread = f.readlines()[-1].decode()
+            if "THE VIRIAL" in fread:
+              source = OV.GetParam('snum.NoSpherA2.source')
+              if "Gaussian" in source:
+                try:
+                  energy = float(fread.split()[3])
+                except:
+                  energy = None
+              else:
+                try:
+                  energy = float(fread[17:38])
+                except:
+                  energy = None
+          fread = None
     if energy == None:
       HAR_log.write("{:^24.10}".format(" "))
     else:
@@ -913,7 +917,6 @@ class RunRefinementPrg(RunPrg):
 
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
-    source = OV.GetParam('snum.NoSpherA2.source')
     if calculate == True:
       if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
         olx.Anis("$H", h=True)
@@ -961,31 +964,34 @@ class RunRefinementPrg(RunPrg):
       # get energy from wfn file
       #TODO Check if WFN is new, otherwise skip this!
       energy = None
-      if (wfn_file != None) and (calculate == True):
-        with open(wfn_file, "rb") as f:
-          f.seek(-2000,os.SEEK_END)
-          fread = f.readlines()[-1].decode()
-          if "THE VIRIAL" in fread:
-            source = OV.GetParam('snum.NoSpherA2.source')
-            if "Gaussian" in source:
-              energy = float(fread.split()[3])
-            elif "ORCA" in source:
-              energy = float(fread.split()[4])
-            elif "pySCF" in source:
-              energy = float(fread.split()[4])
-            elif ".wfn" in source:
-              energy = float(fread[17:38])
-            elif "Tonto" in source:
-              energy = float(fread.split()[4])
-            else:
-              energy = 0.0
-        if energy is not None:
-          HAR_log.write("{:^24.10f}".format(energy))
+      if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB":
+        HAR_log.write("{:24}".format(" "))
+      else:      
+        if (wfn_file != None) and (calculate == True):
+          with open(wfn_file, "rb") as f:
+            f.seek(-2000,os.SEEK_END)
+            fread = f.readlines()[-1].decode()
+            if "THE VIRIAL" in fread:
+              source = OV.GetParam('snum.NoSpherA2.source')
+              if "Gaussian" in source:
+                energy = float(fread.split()[3])
+              elif "ORCA" in source:
+                energy = float(fread.split()[4])
+              elif "pySCF" in source:
+                energy = float(fread.split()[4])
+              elif ".wfn" in source:
+                energy = float(fread[17:38])
+              elif "Tonto" in source:
+                energy = float(fread.split()[4])
+              else:
+                energy = 0.0
+          if energy is not None:
+            HAR_log.write("{:^24.10f}".format(energy))
+          else:
+            HAR_log.write("{:24}".format(" "))
+          fread = None
         else:
           HAR_log.write("{:24}".format(" "))
-        fread = None
-      else:
-        HAR_log.write("{:24}".format(" "))
 
       if OV.GetParam('snum.NoSpherA2.run_refine') == True:
         # Run Least-Squares

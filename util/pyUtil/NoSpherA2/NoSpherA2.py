@@ -965,7 +965,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
   folder = OV.FilePath()
-  gui.get_default_notification(
+  if type([]) != type(wfn_file):
+    gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
@@ -998,10 +999,6 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       args.append('3')
     elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Max"):
       args.append('4')
-  if(groups[0] != -1000):
-    args.append('-group')
-    for i in range(len(groups)):
-      args.append(groups[i])
   if(save_k_pts):
     args.append('-skpts')
   if(read_k_pts):
@@ -1059,6 +1056,10 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     args.append(wfn_file)  
     args.append("-cif")
     args.append(cif)
+    if(groups[0] != -1000):
+      args.append('-group')
+      for i in range(len(groups)):
+        args.append(groups[i])    
 
   os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
