@@ -1120,7 +1120,7 @@ The following options were used:
           print("Cyclic site constraint located for: %s" \
             %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
           continue
-    # merge constrains
+    # merge constrains, adp
     reverse_map = {}
     for k,v in shared_adps.items():
       if v not in reverse_map:
@@ -1129,6 +1129,7 @@ The following options were used:
     for k,v in reverse_map.items():
       current = adp.shared_u([k] + list(v))
       constraints.append(current)
+    # site
     reverse_map = {}
     for k,v in shared_sites.items():
       if v not in reverse_map:
@@ -1246,27 +1247,10 @@ The following options were used:
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
       constraints.append(rigid.same_group(sg))
-    fps = {}
-    fdps = {}
-    for idx, xs in enumerate(self._xray_structure.scatterers()):
-      if xs.flags.grad_fp():
-        fpl = fps.get(xs.scattering_type)
-        if fpl is None:
-          fps[xs.scattering_type] = [idx]
-        else:
-          fpl.append(idx)
-      if xs.flags.grad_fdp():
-        fdpl = fdps.get(xs.scattering_type)
-        if fdpl is None:
-          fdps[xs.scattering_type] = [idx]
-        else:
-          fdpl.append(idx)
-    for t, l in fps.items():
-      if len(l) > 1:
-        constraints.append(fpfdp.shared_fp(l))
-    for t, l in fdps.items():
-      if len(l) > 1:
-        constraints.append(fpfdp.shared_fdp(l))
+    same_disp = self.olx_atoms.model.get('olex2.constraint.same_disp', ())
+    for sd in same_disp:
+      constraints.append(fpfdp.shared_fp(sd))
+      constraints.append(fpfdp.shared_fdp(sd))
     return constraints
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
