@@ -272,6 +272,12 @@ class OlexRefinementModel(object):
       if name[:1] != "Q":
         yield name, xyz, occu, u, anharmonic_adp, uiso_owner, element_type, self._fixed_variables.get(i)
 
+  def disp_iterator(self):
+    for i, atom in enumerate(self._atoms):
+      disp = atom.get('disp', None)
+      if disp:
+        yield i, disp
+
   def afix_iterator(self):
     for afix in self._afix:
       mn = afix['afix']
