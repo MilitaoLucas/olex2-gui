@@ -5,70 +5,112 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 from ImageTools import ImageTools
 IT = ImageTools()
+import re
+import sys
+green = OV.GetParam('gui.green')
+red = OV.GetParam('gui.red')
+
 
 def parse_bond_restraints(string):
   rows = []
   text = string.split('\n')
   number_restraints = int(text[0].split()[2])
   for i in range(number_restraints):
-    atom1 = text[2+4*i].split()[1]
-    atom2 = text[3+4*i].strip()
-    line = text[5+4*i].split()
+    atom1 = text[2 + 4 * i].split()[1]
+    atom2 = text[3 + 4 * i].strip()
+    line = text[5 + 4 * i].split()
     target = float(line[0])
     observed = float(line[1])
     delta = float(line[2])
     sigma = float(line[3])
-    rows.append([observed,target,delta,sigma,"DFIX","%s %s"%(atom1,atom2)])
+    rows.append([observed, target, delta, sigma, "DFIX", "%s %s" % (atom1, atom2)])
   return rows
 
-def parse_angle_restarints(string):
+
+def parse_bond_angle_restraints(string):
   rows = []
   text = string.split('\n')
-  number_restraints = int(text[0].split()[3])
+  number_restraints = int(text[0].split(":")[1])
   for i in range(number_restraints):
-    atom1 = text[2+5*i].split()[1]
-    atom2 = text[3+5*i].strip()
-    atom3 = text[4+5*i].strip()
-    line = text[6+5*i].split()
+    atom1 = text[2 + 5 * i].split()[1]
+    atom2 = text[3 + 5 * i].strip()
+    atom3 = text[4 + 5 * i].strip()
+    line = text[6 + 5 * i].split()
     target = float(line[0])
     observed = float(line[1])
     delta = float(line[2])
     sigma = float(line[3])
-    rows.append([observed,target,delta,sigma,"Angle","%s %s %s"%(atom1,atom2,atom3)])
+    rows.append([observed, target, delta, sigma, "Angle", "%s %s %s" % (atom1, atom2, atom3)])
   return rows
 
-def parse_ADP_similarity_restraints(string):
+
+def parse_adp_similarity_restraints(string):
   rows = []
+  if not string:
+    print("parse_ADP_similarity_restraints didn't receive a string. This is strange")
+    return rows
   text = string.split('\n')
-  number_restraints = int(text[0].split()[3])
+  number_restraints = int(text[0].split(":")[1])
   for i in range(number_restraints):
-    line = text[2+2*i]
+    line = text[2 + 2 * i]
     atoms = [line.split()[1]]
     count = 1
-    line = text[2+2*i+count]
-    while "delta" not in line: 
+    line = text[2 + 2 * i + count]
+    while "delta" not in line:
       atoms.append(line.strip())
       count += 1
-      line = text[2+2*i+count]
+      line = text[2 + 2 * i + count]
     atoms_string = ""
     for l in range(len(atoms)):
-      atoms_string += " %s"%atoms[l]
+      atoms_string += " %s" % atoms[l]
     for j in range(6):
-      line = text[5+i*6+j].split()
+      line = text[5 + i * 6 + j].split()
       name = line[0]
       target = "-"
       observed = "-"
       delta = float(line[1])
       sigma = float(line[2])
-      rows.append([observed,target,delta,sigma,"RIGU %s"%(name),"%s"%(atoms_string)])
+      rows.append([observed, target, delta, sigma, "RIGU %s" % (name), "%s" % (atoms_string)])
   return rows
 
-def parse_bond_sim_restraints(string):
+
+def parse_isotropic_adp_restraints(string):
+  rows = []
+  if not string:
+    print("parse_ADP_similarity_restraints didn't receive a string. This is strange")
+    return rows
+  text = string.split('\n')
+  number_restraints = int(text[0].split(":")[1])
+  for i in range(number_restraints):
+    line = text[2 + i * 8]
+    atoms = [line.split()[1]]
+    count = 1
+    line = text[2 + i * 8 + count]
+    while "delta" not in line:
+      atoms.append(line.strip())
+      count += 1
+      line = text[2 + i + count]
+    atoms_string = ""
+    for l in range(len(atoms)):
+      atoms_string += " %s" % atoms[l]
+    line = text[4 + i * 8].split()
+#      line = text[5 + i * 6 + j].split()
+    name = line[0]
+    target = "-"
+    observed = "-"
+    delta = float(line[1])
+    sigma = float(line[2])
+    rows.append([observed, target, delta, sigma, "ISOR %s" % (name), "%s" % (atoms_string)])
+    i += 1
+  return rows
+
+
+def parse_bond_similarity_restraints(string):
   rows = []
   text = string.split('\n')
-  number_restraints = int(text[0].split()[3])
+  number_restraints = int(text[0].split(":")[1])
   line = text[3]
-  for i in range(3,len(text)):
+  for i in range(3, len(text)):
     if "delta" in text[i]:
       continue
     line = text[i].split()
@@ -79,39 +121,49 @@ def parse_bond_sim_restraints(string):
     else:
       atoms = line[0].split('-')
     atoms_string = " ".join(atoms)
-    delta = float(line[1+add])
-    sigma = float(line[2+add])
+    delta = float(line[1 + add])
+    sigma = float(line[2 + add])
     observed = '-'
     target = '-'
     rows.append([observed,target,delta,sigma,"SADI","%s"%(atoms_string)])
+
   return rows
 
-def parse_rigu_restraints(string):
+
+def parse_rigu_bond_restraints(string):
   rows = []
   text = string.split('\n')
-  number_restraints = int(text[0].split()[3])
+  number_restraints = int(text[0].split(":")[1])
   for i in range(number_restraints):
-    atom1 = text[2+6*i].split()[1]
-    atom2 = text[3+6*i].strip()
-    line = text[5+6*i].split()
+    atom1 = text[2 + 6 * i].split()[1]
+    atom2 = text[3 + 6 * i].strip()
+    line = text[5 + 6 * i].split()
     target = "-"
     observed = "-"
     delta = float(line[0])
     sigma = float(line[1])
-    rows.append([observed,target,delta,sigma,"RIGU 1","%s %s"%(atom1,atom2)])
-    line = text[6+6*i].split()
+    rows.append([observed, target, delta, sigma, "RIGU 1", "%s %s" % (atom1, atom2)])
+    line = text[6 + 6 * i].split()
     target = "-"
     observed = "-"
     delta = float(line[0])
     sigma = float(line[1])
-    rows.append([observed,target,delta,sigma,"RIGU 2","%s %s"%(atom1,atom2)])
-    line = text[7+6*i].split()
+    rows.append([observed, target, delta, sigma, "RIGU 2", "%s %s" % (atom1, atom2)])
+    line = text[7 + 6 * i].split()
     target = "-"
     observed = "-"
     delta = float(line[0])
     sigma = float(line[1])
-    rows.append([observed,target,delta,sigma,"RIGU 3","%s %s"%(atom1,atom2)])    
+    rows.append([observed, target, delta, sigma, "RIGU 3", "%s %s" % (atom1, atom2)])
   return rows
+
+
+def mangle_fdb_data(tabledata):
+  new_l = []
+  for l in tabledata:
+    _ = l[-1:][0].split()
+    new_l.append(l[0:-1] + [_[0]] + [" ".join(_[1:])])
+  return new_l
 
 def make_Restraints_Table():
   software = OV.GetParam("snum.refinement.program")
@@ -123,42 +175,94 @@ def make_Restraints_Table():
     if not os.path.exists(lstfile):
       print(".lst File not found!")
       return
-    tabledata = Ref.fileparser(lstfile)
+    tabledata = mangle_fdb_data(Ref.fileparser(lstfile))
   else:
     from cctbx_olex_adapter import OlexCctbxAdapter
     cctbx_adaptor = OlexCctbxAdapter()
     temp = io.StringIO()
-    cctbx_adaptor.restraints_manager().show_sorted(cctbx_adaptor._xray_structure,f=temp)
+    cctbx_adaptor.restraints_manager().show_sorted(cctbx_adaptor._xray_structure, f=temp)
     output = temp.getvalue()
-    bonds = "Bond restraints" in output
-    angles = "Bond angle restraints" in output
-    adp_sim = "ADP similarity restraints" in output
-    bond_sim = "Bond similarity restraints" in output
-    rigu = "Rigu bond restraints" in output
-    if bonds:
-      bond_rows = parse_bond_restraints(output[output.find("Bond restraints"):output.find("\n\n")])
-      tabledata += bond_rows
-      output = output[output.find("\n\n")+2:]
-    if angles:
-      angle_rows = parse_angle_restarints(output[output.find("Bond angle restraints"):output.find("\n\n")])
-      tabledata += angle_rows
-      output = output[output.find("\n\n")+2:]
-    if bond_sim:
-      bond_sim_rows = parse_bond_sim_restraints(output[output.find("Bond similarity restraints"):output.find("\n\n")])
-      tabledata += bond_sim_rows
-      output = output[output.find("\n\n")+2:]
-    if rigu:
-      rigu_rows = parse_rigu_restraints(output[output.find("Rigu bond restraints"):output.find("\n\n")])
-      tabledata += rigu_rows
-      output = output[output.find("\n\n")+2:]
-    if adp_sim:
-      adp_sim_rows = parse_ADP_similarity_restraints(output[output.find("ADP similarity restraints"):output.find("\n\n")])
-      tabledata += adp_sim_rows
-      output = output[output.find("\n\n")+2:]
-  rest = output
+    
+    restraints_l = ["Bond restraints",
+                    "Bond similarity restraints",
+                    "Bond angle restraints",
+                    "ADP similarity restraints",
+                    "Rigu bond restraints",
+                    "Isotropic ADP restraints"
+                    ]
+    
+    for restraint in restraints_l:
+      if restraint in output:
+        try:
+          s = find_bits(output, restraint, "\n\n")
+          bond_rows = globals()["parse_" + restraint.lower().replace(" ", "_")](s)
+          tabledata += bond_rows
+        except Exception as err:
+          sys.stderr.formatExceptionInfo()          
+          _ = restraint.split()
+          tabledata += [[0, 0, 0, 0 , _[0].upper() + "_" + _[1].lower() + "_" + 'err', ""]]
+        
+    
+    #bonds = "Bond restraints" in output
+    #angles = "Bond angle restraints" in output
+    #adp_sim = "ADP similarity restraints" in output
+    #bond_sim = "Bond similarity restraints" in output
+    #rigu = C in output
+    #if bonds:
+      #try:
+        #s = find_bits(output, "Bond restraints", "\n\n")
+        #bond_rows = parse_bond_restraints(s)
+        ##bond_rows = parse_bond_restraints(output[output.find("Bond restraints"):output.find("\n\n")])
+        #tabledata += bond_rows
+      #except:
+        #tabledata += [[0, 0, 0, 0 , "BONDerr", "---"]]
+      
+      #output = output[output.find("\n\n") + 2:]
+    #if angles:
+      #try:
+        #s = find_bits(output, "Bond angle restraints", "\n\n")
+        #angle_rows = parse_angle_restarints(s)
+        ##angle_rows = parse_angle_restarints(output[output.find("Bond angle restraints"):output.find("\n\n")])
+        #tabledata += angle_rows
+      #except:
+        #tabledata += [[0, 0, 0, 0 , "BANGerr", "---"]]
+      #output = output[output.find("\n\n") + 2:]
+    #if bond_sim:
+      #try:
+        #s = find_bits(output, "Bond similarity restraints", "\n\n")
+        #bond_sim_rows = parse_bond_sim_restraints(s)
+        ##bond_sim_rows = parse_bond_sim_restraints(output[output.find("Bond similarity restraints"):output.find("\n\n")])
+        #tabledata += bond_sim_rows
+      #except:
+        #tabledata += [[0, 0, 0, 0 , "BSIMerr", "---"]]
+      #output = output[output.find("\n\n") + 2:]
+    #if rigu:
+      #try:
+        #s = find_bits(output, "Rigu bond restraints", "\n\n")
+        #rigu_rows = parse_rigu_restraints(s)
+        ##rigu_rows = parse_rigu_restraints(output[output.find("Rigu bond restraints"):output.find("\n\n")])
+        #tabledata += rigu_rows
+      #except:
+        #tabledata += [[0, 0, 0, 0 , "RIGUerr", "---"]]
+      
+      #output = output[output.find("\n\n") + 2:]
+    #if adp_sim:
+      #try:
+        #s = find_bits(output, "ADP similarity restraints", "\n\n")
+        #adp_sim_rows = parse_ADP_similarity_restraints(s)
+        ##adp_sim_rows = parse_ADP_similarity_restraints(output[output.find("ADP similarity restraints"):output.find("\n\n")]) #Original
+        #tabledata += adp_sim_rows
+      #except:
+        #tabledata += [[0, 0, 0, 0 , "ADPerr", "---"]]
+      #output = output[output.find("\n\n") + 2:]
+    #rest = output
   return h_t.table_maker(tabledata)
 
-OV.registerFunction(make_Restraints_Table,False,"gui")
+OV.registerFunction(make_Restraints_Table, False, "gui")
+
+def find_bits(text, front, back):
+  m = re.findall(r"%s(.*?)%s" %(front,back), text, re.DOTALL)
+  return front + m[0]
 
 class html_Table(object):
   """
@@ -194,32 +298,17 @@ class html_Table(object):
       table.append(self.row(line))
     footer = ""
     empty_data = """
-    <table width="100%" border="0" cellpadding="0" cellspacing="3" > 
-      <tr>
-         <td align='center'> Observed </td>
-         <td align='center'> Target   </td>
-         <td align='center'> Delta    </td>
-         <td align='center'> Sigma    </td>
-         <td align='right'> Restraint </td>
-         <td align='left'> Atoms </td> 
-      </tr>
-        <tr>
-         <td align='center'> -- </td>
-         <td align='center'> -- </td>
-         <td align='center'> -- </td>
-         <td align='center'> -- </td>
-         <td align='center'> -- </td> 
-      </tr>
-    </table>"""
+    <b>There are no restraints</b>
+    """
     html = r"""
     <table width="100%" border="0" cellpadding="0" cellspacing="3"> 
       <tr>
-         <td align='center'> Observed </td>
-         <td align='center'> Target   </td>
-         <td align='center'> Error    </td>
-         <td align='center'> Sigma    </td>
-         <td align='right'> Restraint </td> 
-         <td align='left'> Atoms </td> 
+         <td width='12%' align='left'><b>Observed </b></td>
+         <td width='12%'align='left'><b>Target   </b></td>
+         <td width='12%'align='center'><b>Error    </b></td>
+         <td width='12%'align='center'><b>Sigma    </b></td>
+         <td width='12%'align='left'><b>Restraint </b></td> 
+         <td align='left'><b>Atoms </b></td> 
       </tr>
 
       {0}
@@ -235,7 +324,9 @@ class html_Table(object):
     creates a table row for the restraints list.
     :type rowdata: list
     """
+    restraints = ["SADI", "DFIX", "RIGU", "ISOR"]
     td = []
+    error = False
     bgcolor = ''
     try:
       if abs(float(rowdata[2])) > 2.5 * float(rowdata[3]):
@@ -250,25 +341,35 @@ class html_Table(object):
         float(item)
         if num < 2:
           # do not colorize the first two columns:
-          td.append(r"""<td align='right'> {} </td>""".format(item))
+          td.append(r"""<td align='left'> {} </td>""".format(item))
         else:
-          td.append(r"""<td align='right' {0}> {1} </td>""".format(bgcolor, item))
+          td.append(r"""<td align='center' {0}> {1} </td>""".format(bgcolor, item))
       except:
         if item.startswith('-'):
           # only a minus sign
-          td.append(r"""<td align='center'> {} </td>""".format(item))
+          td.append(r"""<td align='left'> {} </td>""".format(item))
         else:
           if num < 5:
-            td.append(r"""<td align='right'> {} </td>""".format(item))
+            if "err" in item:
+              td.append(r"""<td align='left' bgcolor='%s' colspan='2' ><b><font color='white'> {} </font></b></td>""".format(item)  %(red))
+              error=True
+            else:
+              _ = item
+              if " " in item: _ = item.split()[0]
+              if _ in restraints:
+                td.append(r"""<td align='left'><b> {} </b></td>""".format(item))
+              else:
+                td.append(r"""<td align='left'><a href='sel {}'>{} </a></td>""".format(item, item))
             continue
           # align left for words:
-          td.append(r"""
-            <td align='left'>  
-              {}
-            </td>
-            <td align='right'>
-              <a href="spy.gui.edit_restraints({})"> Edit </a> 
-            </td>""".format(item, item))
+          if not error:
+            td.append(r"""
+              <td align='left'>  
+                <a href='sel {}'>{} </a>
+              </td>
+              <td align='right'>
+                <a href="spy.gui.edit_restraints({})">Edit </a> 
+              </td>""".format(item, item, item))
     if not td:
       row = "<tr> No (disagreeable) restraints found in .lst file. </tr>"
     else:
@@ -293,6 +394,7 @@ class html_Table(object):
         # atoms.append(remove_partsymbol(i))  # Have to remove this, because new names needed for 'edit'
         atoms.append(i)
     OV.cmd('editatom {}'.format(' '.join(atoms)))
-    
+
+
 h_t = html_Table()
-OV.registerFunction(h_t.edit_restraints,False,"gui")
+OV.registerFunction(h_t.edit_restraints, False, "gui")
