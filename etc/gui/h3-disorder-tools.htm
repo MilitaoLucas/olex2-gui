@@ -14,35 +14,7 @@ $spy.gui.tools.make_disorder_quicktools()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui/blocks/tool-row-help.htm; help_ext=Results;1; -->
-  <tr>
-    <td align='left' width="76%"><b>List of most disagreeable restraints:</b></td>
-    $+
-      html.Snippet(GetVar(default_link),
-      "value=Short",
-      "name=SHORT_BUTTON",
-      "onclick=delins more>>addins more -1>>refine 4",
-      "td1=<td width='12%' align='right'>"
-      )
-    $-
-    $+
-      html.Snippet(GetVar(default_link),
-      "value=Full",
-      "name=FULL_BUTTON",
-      "onclick=delins more>>addins more -4>>refine 4",
-      "td1=<td width='12%' align='right'>"
-      )
-    $-
-  </tr>
-  $spy.FragmentDB.results()
-
-<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
-
-<!-- #include tool-row-help gui/blocks/tool-row-help.htm; help_ext=Results;1; -->
-  <tr>
-    <td align='left' width="76%"><b>List of most disagreeable restraints:</b></td>
-  </tr>
-  $spy.gui.make_Restraints_Table()
-
+$spy.gui.make_Restraints_Table()
 <!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
 
 
