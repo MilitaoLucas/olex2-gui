@@ -870,8 +870,8 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Refinement startet at: ")
     HAR_log.write(str(datetime.datetime.now()))
     HAR_log.write("\n")
-    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
-    HAR_log.write("************************************************************************************\n")
+    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label     Uij/ESD     Label      R1    wR2\n")
+    HAR_log.write("*"*88+"\n")
 
     HAR_log.write("{:3d}".format(run))
     energy = None
@@ -901,7 +901,7 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:^24.10}".format(" "))
     else:
       HAR_log.write("{:^24.10f}".format(energy))
-    HAR_log.write("{:>44.4}".format(" "))
+    HAR_log.write("{:>48.4}".format(" "))
     r1_old  = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
     if r1_old != "n/a":
@@ -1024,6 +1024,8 @@ class RunRefinementPrg(RunPrg):
 
       max_dxyz = 0
       max_duij = 0
+      label_uij = None
+      label_xyz = None      
 
       try:
         jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
@@ -1035,96 +1037,104 @@ class RunRefinementPrg(RunPrg):
       except:
         print ("Could not obtain cctbx object and calculate ESDs!\n")
         return False
-      matrix_run = 0
-      label_uij = None
-      label_xyz = None
-      print("Analyzing NoSpherA2 shifts...")
-      olx.xf.EndUpdate()
-      if OV.HasGUI():
-        olx.Refresh()
-      uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
-      for i, atom in enumerate(new_model._atoms):
-        xyz = atom['crd'][0]
-        xyz2 = old_model._atoms[i]['crd'][0]
-        for x in range(3):
-          # if parameter is fixed and therefore has 0 esd
-          if esds[matrix_run] > 0:
-            if abs(xyz[x] - xyz2[x])/esds[matrix_run] > max_dxyz:
-              max_dxyz = abs(xyz[x] - xyz2[x])/esds[matrix_run]
-              label_xyz = annotations[matrix_run]
-              #max_shift_atom_xyz = abs(xyz[x] - xyz2[x])
-              #matrix_run_max_shift_xyz = matrix_run
-          matrix_run += 1
-        has_adp_new = new_model._atoms[i].get('adp')
-        has_adp_old = old_model._atoms[i].get('adp')
-        if has_adp_new != None and has_adp_old != None:
-          adp = atom['adp'][0]
-          adp2 = old_model._atoms[i]['adp'][0]
-          adp = adptbx.u_cart_as_u_cif(uc, adp)
-          adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
-          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-          for u in range(6):
-            # if parameter is fixed and therefore has 0 esd
-            if adp_esds[u] > 0:
-              res = abs(adp[u] - adp2[u])/adp_esds[u]
-              if res > max_duij:
-                max_duij = res
-                label_uij = annotations[matrix_run]
-          matrix_run += 6
-          if matrix_run < len(annotations):
-            if ".C111" in annotations[matrix_run]:
-              matrix_run += 25
-        elif has_adp_new != None and has_adp_old == None:
-          adp = atom['uiso'][0]
-          adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
-          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-          for u in range(6):
-            if esds[matrix_run] > 0:
-              res = abs(adp - adp2[u])/adp_esds[u]
-              if res > max_duij:
-                max_duij = res
-                label_uij = annotations[matrix_run]
-          matrix_run += 6
-          if matrix_run < len(annotations):
-            if ".C111" in annotations[matrix_run]:
-              matrix_run += 25
-        elif has_adp_old == None and has_adp_new == None:
-          adp = atom['uiso'][0]
-          adp2 = old_model._atoms[i]['uiso'][0]
-          adp_esd = esds[matrix_run]
-          if esds[matrix_run] > 0:
-            res = abs(adp - adp2)/adp_esd
-            if res > max_duij:
-              max_duij = res
-              label_uij = annotations[matrix_run]
-          matrix_run += 1
-        if matrix_run < len(annotations):
-          if 'occ' in annotations[matrix_run]:
-            matrix_run += 1
-      HAR_log.write("{:>16.4f}".format(max_dxyz))
-      if label_xyz != None:
-        HAR_log.write("{:>8}".format(label_xyz))
-      else:
-        HAR_log.write("{:>8}".format("N/A"))
+      from NoSpherA2.NoSpherA2 import run_with_bitmap
+      def analyze_shifts(max_dxyz, max_duij, label_xyz, label_uij):
+        try:
+          matrix_run = 0
+          matrix_size = len(esds)
+          olx.xf.EndUpdate()
+          if OV.HasGUI():
+            olx.Refresh()
+          uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
+          for i, atom in enumerate(new_model._atoms):
+            xyz = atom['crd'][0]
+            xyz2 = old_model._atoms[i]['crd'][0]
+            assert matrix_run + 3 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+            if ".x" in annotations[matrix_run]:
+              for x in range(3):
+                # if parameter is fixed and therefore has 0 esd
+                if esds[matrix_run] > 0:
+                  if abs(xyz[x] - xyz2[x]) / esds[matrix_run] > max_dxyz:
+                    max_dxyz = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
+                    label_xyz = annotations[matrix_run]
+                matrix_run += 1
+            has_adp_new = new_model._atoms[i].get('adp')
+            has_adp_old = old_model._atoms[i].get('adp')
+            if has_adp_new != None and has_adp_old != None:
+              assert matrix_run + 6 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              adp = atom['adp'][0]
+              adp2 = old_model._atoms[i]['adp'][0]
+              adp = adptbx.u_cart_as_u_cif(uc, adp)
+              adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
+              adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
+              adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+              for u in range(6):
+                # if parameter is fixed and therefore has 0 esd
+                if adp_esds[u] > 0:
+                  res = abs(adp[u] - adp2[u]) / adp_esds[u]
+                  if res > max_duij:
+                    max_duij = res
+                    label_uij = annotations[matrix_run]
+              matrix_run += 6
+              if matrix_run < len(annotations):
+                if ".C111" in annotations[matrix_run]:
+                  matrix_run += 25
+            elif has_adp_new != None and has_adp_old == None:
+              assert matrix_run + 6 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              adp = atom['uiso'][0]
+              adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
+              adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
+              adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+              for u in range(6):
+                if esds[matrix_run] > 0:
+                  res = abs(adp - adp2[u]) / adp_esds[u]
+                  if res > max_duij:
+                    max_duij = res
+                    label_uij = annotations[matrix_run]
+              matrix_run += 6
+              if matrix_run < len(annotations):
+                if ".C111" in annotations[matrix_run]:
+                  matrix_run += 25
+            elif has_adp_old == None and has_adp_new == None:
+              assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              adp = atom['uiso'][0]
+              adp2 = old_model._atoms[i]['uiso'][0]
+              adp_esd = esds[matrix_run]
+              if esds[matrix_run] > 0:
+                res = abs(adp - adp2) / adp_esd
+                if res > max_duij:
+                  max_duij = res
+                  label_uij = annotations[matrix_run]
+              matrix_run += 1
+            if matrix_run < len(annotations):
+              if 'occ' in annotations[matrix_run]:
+                matrix_run += 1
+          HAR_log.write("{:>16.4f}".format(max_dxyz))
+          if label_xyz != None:
+            HAR_log.write("{:>10}".format(label_xyz))
+          else:
+            HAR_log.write("{:>10}".format("N/A"))
 
-      HAR_log.write("{:>10.4f}".format(max_duij))
-      if label_uij != None:
-        HAR_log.write("{:>10}".format(label_uij))
-      else:
-        HAR_log.write("{:>10}".format("N/A"))
+          HAR_log.write("{:>10.4f}".format(max_duij))
+          if label_uij != None:
+            HAR_log.write("{:>12}".format(label_uij))
+          else:
+            HAR_log.write("{:>12}".format("N/A"))
 
-      r1  = OV.GetParam('snum.refinement.last_R1')
-      wr2 = OV.GetParam('snum.refinement.last_wR2')
+          r1 = OV.GetParam('snum.refinement.last_R1')
+          wr2 = OV.GetParam('snum.refinement.last_wR2')
 
-      HAR_log.write("{:>6.2f}".format(float(r1)*100))
-      HAR_log.write("{:>7.2f}".format(float(wr2)*100))
+          HAR_log.write("{:>6.2f}".format(float(r1) * 100))
+          HAR_log.write("{:>7.2f}".format(float(wr2) * 100))
 
-      HAR_log.write("\n")
-      HAR_log.flush()
+          HAR_log.write("\n")
+          HAR_log.flush()
+        except Exception as e:
+          HAR_log.write("!!!ERROR!!!\n")
+          print("Error during analysis of shifts!")
+          raise e
 
-
+      run_with_bitmap("Analyzing shifts", analyze_shifts, max_dxyz, max_duij, label_xyz, label_uij)
       if calculate == False:
         converged = True
         break
@@ -1163,7 +1173,7 @@ class RunRefinementPrg(RunPrg):
           self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
         else:
           self.refinement_has_failed = "Unassigned Atom Types!"
-    HAR_log.write("************************************************************************************\n")
+    HAR_log.write("*" * 88 + "\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))

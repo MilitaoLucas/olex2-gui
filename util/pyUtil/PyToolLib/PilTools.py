@@ -18,7 +18,6 @@ import olexex
 from ImageTools import ImageTools
 from ImageTools import IT
 from ArgumentParser import ArgumentParser
-from ImageTools import IT
 from olexFunctions import OV
 #debug = OV.IsDebugging()
 debug = False
