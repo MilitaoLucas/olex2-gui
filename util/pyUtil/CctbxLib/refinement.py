@@ -1426,7 +1426,11 @@ The following options were used:
       k = f_obs.scale_factor(f_calc)
     else:
       k = math.sqrt(scale_factor)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc).expand_to_p1()
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc).expand_to_p1().change_symmetry(
+      space_group_info=f_obs.space_group_info(),
+      remove_systematic_absences = False,
+      merge_non_unique = False,
+      )
     print("%d Reflections for Fourier Analysis"%f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
