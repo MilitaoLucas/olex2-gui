@@ -182,7 +182,7 @@ def make_Restraints_Table():
     temp = io.StringIO()
     cctbx_adaptor.restraints_manager().show_sorted(cctbx_adaptor._xray_structure, f=temp)
     output = temp.getvalue()
-    
+
     restraints_l = ["Bond restraints",
                     "Bond similarity restraints",
                     "Bond angle restraints",
@@ -190,7 +190,7 @@ def make_Restraints_Table():
                     "Rigu bond restraints",
                     "Isotropic ADP restraints"
                     ]
-    
+
     for restraint in restraints_l:
       if restraint in output:
         try:
@@ -198,11 +198,11 @@ def make_Restraints_Table():
           bond_rows = globals()["parse_" + restraint.lower().replace(" ", "_")](s)
           tabledata += bond_rows
         except Exception as err:
-          sys.stderr.formatExceptionInfo()          
+          sys.stderr.formatExceptionInfo()
           _ = restraint.split()
           tabledata += [[0, 0, 0, 0 , _[0].upper() + "_" + _[1].lower() + "_" + 'err', ""]]
-        
-    
+
+
     #bonds = "Bond restraints" in output
     #angles = "Bond angle restraints" in output
     #adp_sim = "ADP similarity restraints" in output
@@ -216,7 +216,7 @@ def make_Restraints_Table():
         #tabledata += bond_rows
       #except:
         #tabledata += [[0, 0, 0, 0 , "BONDerr", "---"]]
-      
+
       #output = output[output.find("\n\n") + 2:]
     #if angles:
       #try:
@@ -244,7 +244,7 @@ def make_Restraints_Table():
         #tabledata += rigu_rows
       #except:
         #tabledata += [[0, 0, 0, 0 , "RIGUerr", "---"]]
-      
+
       #output = output[output.find("\n\n") + 2:]
     #if adp_sim:
       #try:
@@ -301,14 +301,14 @@ class html_Table(object):
     <b>There are no restraints</b>
     """
     html = r"""
-    <table width="100%" border="0" cellpadding="0" cellspacing="3"> 
+    <table width="100%" border="0" cellpadding="0" cellspacing="3">
       <tr>
          <td width='12%' align='left'><b>Observed </b></td>
          <td width='12%'align='left'><b>Target   </b></td>
          <td width='12%'align='center'><b>Error    </b></td>
          <td width='12%'align='center'><b>Sigma    </b></td>
-         <td width='12%'align='left'><b>Restraint </b></td> 
-         <td align='left'><b>Atoms </b></td> 
+         <td width='12%'align='left'><b>Restraint </b></td>
+         <td align='left'><b>Atoms </b></td>
       </tr>
 
       {0}
@@ -364,11 +364,11 @@ class html_Table(object):
           # align left for words:
           if not error:
             td.append(r"""
-              <td align='left'>  
+              <td align='left'>
                 <a href='sel {}'>{} </a>
               </td>
               <td align='right'>
-                <a href="spy.gui.edit_restraints({})">Edit </a> 
+                <a href="spy.gui.edit_restraints({})">Edit </a>
               </td>""".format(item, item, item))
     if not td:
       row = "<tr> No (disagreeable) restraints found in .lst file. </tr>"

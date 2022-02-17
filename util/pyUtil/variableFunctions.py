@@ -331,6 +331,7 @@ def OnStructureLoaded(previous):
   if previous != OV.FileFull() and olx.FileExt() != "cif":
     import History
     History.hist.loadHistory()
+    OV.ResetMaskHKLWarning()
   if olx.IsFileType('ires') == 'true':
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   try:
@@ -345,6 +346,7 @@ def OnHKLChange(hkl):
   olx.HKLSrc(hkl)
   OV.SetParam('snum.current_process_diagnostics', 'data')
   olex.m("spy.make_HOS('True')")
+  OV.ResetMaskHKLWarning()
   try:
     for l in olx.FileChangeListeners:
       l('hkl')
