@@ -687,7 +687,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
 
-      mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
+      mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
       with open(mask_cif_path, 'w') as f:
         print(cif, file=f)
       OV.SetParam('snum.masks.update_cif', True)

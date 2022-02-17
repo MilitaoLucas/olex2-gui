@@ -38,11 +38,10 @@ template_path = os.path.join(OV.DataDir(), 'mask_output.htm')
 if not os.path.exists(template_path):
   template_path = os.path.join(p_path, 'mask_output.htm')
 
-
 def get_mask_info():
   global mask_info_has_updated
   import gui
-  
+
   output_fn = '%s_masking_info.htm'%OV.ModelSrc()
   get_template = gui.tools.TemplateProvider.get_template
 
@@ -50,14 +49,14 @@ def get_mask_info():
     return return_note("")
   if (olx.IsFileType('cif') == 'true'):
     return return_note("")
-   
+
   based_on = OV.GetParam('user.masks.based_on')
   based_on_display = "Asymmetric Unit"
   if based_on == "FU":
     based_on_display = "Formula Unit"
   elif based_on == "Cell":
     based_on_display = "Unit Cell"
-  
+
 #  print ".. %s .." %template_path
   global current_sNum
   current_sNum = OV.ModelSrc()
@@ -65,7 +64,7 @@ def get_mask_info():
     base = "platon_squeeze"
   else:
     base = "smtbx_masks"
-  
+
   d = {}
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
   d['based_on'] =  based_on
@@ -78,7 +77,7 @@ def get_mask_info():
 
   _ = escape_param_names(name=OV.ModelSrc())
   mask_special_details_vn = "%s_%s" %(_, "mask_special_details")
-    
+
   is_CIF = (olx.IsFileType('cif') == 'true')
   sqf = None
   if is_CIF:
@@ -99,7 +98,14 @@ def get_mask_info():
     except Exception as err:
       return return_note(note = "No masking info yet!", col=gui_green)
     if sqf:
-      olx.cif_model[current_sNum].update(sqf[current_sNum])
+      if current_sNum not in sqf:
+        sqf_block = sqf[sqf.keys()[0]]
+        OV.PrintMaskHKLWarning(
+          "Warning: mask data name (%s) does not match file name (%s) - check HKL file used for the refinement!"\
+            %(sqf.keys()[0], current_sNum))
+      else:
+        sqf_block = sqf[current_sNum]
+      olx.cif_model[current_sNum].update(sqf_block)
     volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
     if not volumes:
       return return_note(note = "No void has been found.", col=gui_orange)
@@ -141,7 +147,7 @@ def get_mask_info():
   sum_content = []
 
   sum_e = 0
-  
+
   total_void_volume = 0
   total_void_electrons = 0
   total_void_accounted_for_electrons = 0
@@ -202,7 +208,7 @@ def get_mask_info():
     d['moiety'] = moiety
     d['based_on'] = based_on
     d['based_on_display'] = based_on_display
-    
+
     total_void_electrons += electron
     total_void_volume += volume
     total_void_no += 1
@@ -210,9 +216,9 @@ def get_mask_info():
     content = content.strip("'")
 
     _ = content.split(",")
-    
+
     content_disp_l = []
-    
+
     for entry in _:
       if not entry or entry == "?":
         continue
@@ -291,7 +297,7 @@ def get_mask_info():
   t += get_template('mask_output_based_on', path=template_path, force=debug) %d
 
   #-- FINAL BLOCK ###############
-  
+
   total_formula = get_rounded_formula()
   total_electrons_accounted_for = 0
   add_to_formula = ""
@@ -303,7 +309,7 @@ def get_mask_info():
       continue
     multiplicity = float(entry[0])
     entity, multi = split_entity(entity)
-    multi = float(multi) 
+    multi = float(multi)
     ent = moieties.get(entity.lower(), entity)
     ent_disp = ent.replace(" ", "")
     ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
@@ -313,7 +319,7 @@ def get_mask_info():
       total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
     except:
       total_electrons_accounted_for += 0
-    f = number_of_symm_op * Zprime  
+    f = number_of_symm_op * Zprime
     add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
     add_to_moiety += "%s[%s], " %(format_number(multi  / f * multiplicity), ent_disp)
 
@@ -322,7 +328,7 @@ def get_mask_info():
   suggested_moiety = "%s, %s" %(olx.xf.latt.GetMoiety(), add_to_moiety)
   if "[+ solvents]" in suggested_moiety:
     olex.m("spy.set_cif_item(_chemical_formula_moiety,'%s')" %suggested_moiety)
-    
+
   total_void_no_plural = ""
   if total_void_no > 1:
     total_void_no_plural = "s"
@@ -344,7 +350,7 @@ def get_mask_info():
   if mask_special_details == "?" or mask_info_has_updated:
     OV.SetParam('snum.masks.special_detail_colour', gui_red)
     OV.SetParam('snum.masks.special_detail_button_text', 'Use & Edit')
-    
+
     if add_to_formula:
       mask_special_details = get_template('mask_special_detail_default', path=template_path, force=debug)%d
     else:
@@ -356,6 +362,8 @@ def get_mask_info():
     olx.cif_model[current_sNum]['_%s_special_details' %base] = mask_special_details
     update_sqf_file(current_sNum, '_%s_special_details' %base)
 
+  if mask_special_details is None:
+    mask_special_details = ''
   d['mask_special_details']= mask_special_details
   d['mask_special_details_vn']= mask_special_details_vn
   OV.SetVar(mask_special_details_vn, mask_special_details)
@@ -520,8 +528,8 @@ def update_metacif(sNum, file_name):
   ciflist = OV.GetCifMergeFilesList()
   if file_name not in ciflist:
     gui.report.publication.add_cif_to_merge_list.__func__(file_name)
-  
-  
+
+
   try:
     olex.m("spy.gui.report.publication.add_cif_to_merge_list(%s)" %file_name)
   except:
@@ -533,17 +541,17 @@ def update_metacif(sNum, file_name):
   CT = CifTools()
   CT.update_cif_block(olx.cif_model[sNum],force=True)
 
-  # ATTEMPT 1  
+  # ATTEMPT 1
   #metacif_path = '%s%s%s.metacif' %(OV.StrDir(), os.sep, sNum)
   #with open(metacif_path, 'wb') as f:
     #print >> f, olx.cif_model[sNum]
-  #olex.m('cifmerge')  
+  #olex.m('cifmerge')
 
 def get_sqf_name(full=True):
   if full:
-    retVal = OV.HKLSrc().replace(".hkl", ".sqf")
+    retVal = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
   else:
-    retVal = "%s.sqf" %(current_sNum)  
+    retVal = "%s.sqf" %(current_sNum)
   return retVal
 
 def edit_mask_special_details(txt,base,sNum):
@@ -552,7 +560,6 @@ def edit_mask_special_details(txt,base,sNum):
     return
   if user_value:
     olx.cif_model[current_sNum]['_%s_special_details' %base] = user_value
-    model_src = OV.ModelSrc()
     update_sqf_file(current_sNum, '_%s_special_details' %base)
     OV.SetParam('snum.masks.special_detail_colour', gui_green)
     OV.SetParam('snum.masks.special_detail_button_text', 'Edit')
@@ -564,7 +571,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
   sqf_file = get_sqf_name()
   if os.path.exists(sqf_file):
     with open(sqf_file, 'r') as original: data = original.read()
-    with open(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
+    with open(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)
     with open(sqf_file, 'r') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
@@ -575,7 +582,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
     with open(sqf_file, 'w') as f:
       print(cif_block, file=f)
-    
+
     if os.path.exists(sqf_file.replace(".sqf", ".cif")):
       CifInfo.MergeCif()
 
@@ -587,7 +594,7 @@ def add_mask_content(i,which):
     base = "platon_squeeze"
   else:
     base = "smtbx_masks"
-  
+
   is_CIF = (olx.IsFileType('cif') == 'true')
   if ":" not in i:
     i_l = [str(i)]
@@ -602,18 +609,18 @@ def add_mask_content(i,which):
     disp = ",".join(i_l)
   except:
     disp = "fix me!"
-    
+
   based_on = OV.GetParam('user.masks.based_on')
   based_on_display = "Asymmetric unit"
   if based_on == "FU":
     based_on_display = "Formula Unit"
   elif based_on == "Cell":
     based_on_display = "Unit Cell"
-  
+
   f = get_adjust_for_base_factor()
   c = contents[int(i_l[0].split("|")[0])-1]
   multiplicity = int(i_l[0].split("|")[1])
-  
+
   if c == "?":
     c = ""
   c = c.lstrip("'").rstrip("'")
@@ -627,20 +634,20 @@ def add_mask_content(i,which):
     if " " in c:
       n,m = c.split()
       n = format_number(multiplicity * float(n) / f)
-  
+
     if m != "?" and m !="":
       c = "%s %s" %(n, m)
     else:
       c = m
     c_new_l.append(c)
   c = ", ".join(c_new_l)
-  
+
   user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s based on %s"%(which, disp, based_on_display), c)).strip()
   if user_value == "None":
     return
   if not user_value:
     user_value = "?"
- 
+
   user_value_l = user_value.split(",")
   user_value_new_l = []
   for string in user_value_l:
@@ -651,24 +658,24 @@ def add_mask_content(i,which):
       val, entity = string.split("(")
       val = int(val)
       entity = entity.rstrip().rstrip(")")
-      
+
     else:
       entity = string
       val = "1"
     if "/" in val:
       _ = val.split("/")
       val = Fraction(int(_[0]),int(_[1]))
-    
+
     user_value_new_l.append("%s %s" %(format_number(float(val) * f / multiplicity), entity))
 #    user_value_new_l.append("%s %s" %(format_number(float(val) * f), entity))
 #    user_value_new_l.append("%s %s" %(float(val) / f, entity))
   user_value = ",".join(user_value_new_l)
-  
+
   _ = list(contents)
   for idx in i_l:
     idx = int(idx.split("|")[0]) - 1
     _[idx] = user_value
-    
+
   mask = OV.get_cif_item('_%s_void' %base)
   olx.cif_model[current_sNum]['_%s_void' %base]['_%s_void_content' %base] = _
   update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
@@ -733,7 +740,7 @@ def _add_formula(curr, new, multi = 1):
   for item in l:
     retVal += item
   return retVal
-  
+
 
 def status_bg(var, val, status='on'):
   var = OV.GetParam(var)
@@ -771,7 +778,7 @@ def change_based_on_button_states():
       state = "true"
     else:
       state = "false"
-    
+
     if state == "true":
       olx.html.SetBG(btn,'gui_green')
       l.remove(btn)
