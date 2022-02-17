@@ -870,8 +870,8 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Refinement startet at: ")
     HAR_log.write(str(datetime.datetime.now()))
     HAR_log.write("\n")
-    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label   Uij/ESD     Label    R1    wR2\n")
-    HAR_log.write("************************************************************************************\n")
+    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label     Uij/ESD     Label      R1    wR2\n")
+    HAR_log.write("*"*88+"\n")
 
     HAR_log.write("{:3d}".format(run))
     energy = None
@@ -901,7 +901,7 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:^24.10}".format(" "))
     else:
       HAR_log.write("{:^24.10f}".format(energy))
-    HAR_log.write("{:>44.4}".format(" "))
+    HAR_log.write("{:>48.4}".format(" "))
     r1_old  = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
     if r1_old != "n/a":
@@ -1105,15 +1105,15 @@ class RunRefinementPrg(RunPrg):
             matrix_run += 1
       HAR_log.write("{:>16.4f}".format(max_dxyz))
       if label_xyz != None:
-        HAR_log.write("{:>8}".format(label_xyz))
+        HAR_log.write("{:>10}".format(label_xyz))
       else:
-        HAR_log.write("{:>8}".format("N/A"))
+        HAR_log.write("{:>10}".format("N/A"))
 
       HAR_log.write("{:>10.4f}".format(max_duij))
       if label_uij != None:
-        HAR_log.write("{:>10}".format(label_uij))
+        HAR_log.write("{:>12}".format(label_uij))
       else:
-        HAR_log.write("{:>10}".format("N/A"))
+        HAR_log.write("{:>12}".format("N/A"))
 
       r1  = OV.GetParam('snum.refinement.last_R1')
       wr2 = OV.GetParam('snum.refinement.last_wR2')
@@ -1163,7 +1163,7 @@ class RunRefinementPrg(RunPrg):
           self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
         else:
           self.refinement_has_failed = "Unassigned Atom Types!"
-    HAR_log.write("************************************************************************************\n")
+    HAR_log.write("*"*88+"\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))

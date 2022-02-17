@@ -738,14 +738,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if software == "Hybrid":
       if software_part != "Thakkar IAM":
         try:
-          wfn_object.run(part,software_part,basis_part)
+          run_with_bitmap("Calculating WFN ",wfn_object.run,part,software_part,basis_part)
         except NameError as error:
           print("The following error occured during QM Calculation: ",error)
           OV.SetVar('NoSpherA2-Error',error)
           raise NameError('Unsuccesfull Wavefunction Calculation!')
     elif software != "Thakkar IAM":
       try:
-        wfn_object.run(part)
+        run_with_bitmap("Calculating WFN ",wfn_object.run,part)
       except NameError as error:
         print("The following error occured during QM Calculation: ",error)
         OV.SetVar('NoSpherA2-Error',error)
