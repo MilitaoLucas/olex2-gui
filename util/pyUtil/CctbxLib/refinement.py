@@ -1430,6 +1430,7 @@ The following options were used:
       space_group_info=f_obs.space_group_info(),
       remove_systematic_absences = False,
       merge_non_unique = False,
+      log = open(os.devnull,"w")
       )
     print("%d Reflections for Fourier Analysis"%f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
