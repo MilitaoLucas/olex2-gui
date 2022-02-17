@@ -831,6 +831,15 @@ class OlexFunctions(inheritFunctions):
     else:
       return parts
 
+  def PrintMaskHKLWarning(self, message):
+    if not self.GetVar("mask.warning_printed", False):
+      print(message)
+      self.SetVar("mask.warning_printed", True)
+    pass
+
+  def ResetMaskHKLWarning(self):
+    self.SetVar("mask.warning_printed", False)
+
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)
     if val:
