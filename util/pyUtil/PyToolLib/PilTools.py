@@ -18,6 +18,7 @@ import olexex
 from ImageTools import ImageTools
 from ImageTools import IT
 from ArgumentParser import ArgumentParser
+from ImageTools import IT
 from olexFunctions import OV
 #debug = OV.IsDebugging()
 debug = False
@@ -3721,18 +3722,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                 'name':'working',
                 'color':'#ff4444',
                 'size':(128, 32),
-                'font_colour':"#ffffff",
-                },
-      'partitioning':{'label':'Partitioning',
-                'name':'partitioning',
-                'color':'#ff4444',
-                'size':(250, 32),
-                'font_colour':"#ffffff",
-                },
-      'wfn':{'label':'Calculating WFN',
-                'name':'wfn',
-                'color':'#ff4444',
-                'size':(250, 32),
                 'font_colour':"#ffffff",
                 },
                 }
