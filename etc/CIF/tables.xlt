@@ -71,8 +71,8 @@
  taba="class=CifTable"
  rowa="class=cifTableRow"
  foota="class=cifTableFooter"
-  <_geom_bond_atom_site_label_1 caption="Atom" visible="true" cola="class='data'">
-  <_geom_bond_atom_site_label_2 caption="Atom" visible="true" cola="class='data'">
+  <_geom_bond_atom_site_label_1 caption="Atom" atypenotequal="H" visible="true" cola="class='data'">
+  <_geom_bond_atom_site_label_2 caption="Atom" atypenotequal="H" visible="true" cola="class='data'">
   <_geom_bond_distance caption="Length/&Aring;" visible="true" cola="class=decimal">
  >
 
