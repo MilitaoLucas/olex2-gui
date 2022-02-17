@@ -8,6 +8,9 @@ import gui
 import shutil
 import time
 import math
+import OlexVFS
+from PIL import ImageDraw, Image
+from ImageTools import IT
 
 from olexFunctions import OV
 debug = OV.IsDebugging()
@@ -503,7 +506,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if need_to_partition == True:
         cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
         hkl_fn = os.path.join(self.jobs_dir,job.name+".hkl")
-        cuqct_tsc(wfn_files,hkl_fn,cif_fn,groups)
+        run_with_bitmap("Partitioning",cuqct_tsc,wfn_files,hkl_fn,cif_fn,groups)
         shutil.move("experimental.tsc",job.name+".tsc")
         OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
       if need_to_combine == True:
@@ -637,7 +640,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               return False
             hkl_fn = path_base+".hkl"
             cif_fn = os.path.join(OV.FilePath(),job.name+".cif")
-            cuqct_tsc(wfn_fn,hkl_fn,cif_fn,[-1000])
+            run_with_bitmap("Partitioning",cuqct_tsc,wfn_fn,hkl_fn,cif_fn,[-1000])
             shutil.move("experimental.tsc",job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
 
@@ -2109,6 +2112,38 @@ def make_quick_button_gui():
 %(buttons)s
 ''' % d
   return t
+
+def run_with_bitmap(text, function, *args, **kwargs):
+  custom_bitmap(text)
+  OV.CreateBitmap(text)
+  function(*args,**kwargs)
+  OV.DeleteBitmap(text)
+
+def custom_bitmap(text):
+  bitmap_font = "DefaultFont"
+  bitmap = {
+    text:{'label':text,
+              'name':text,
+              'color':'#ff4444',
+              'size':(len(text)*12, 32),
+              'font_colour':"#ffffff",
+              }
+              }
+  map = bitmap[text]
+  colour = map.get('color', '#ffffff')
+  name = map.get('name','untitled')
+  txt = map.get('label', '')
+  size = map.get('size')
+  image = Image.new('RGB', size, colour)
+  draw = ImageDraw.Draw(image)
+  IT.write_text_to_draw(draw,
+                             txt,
+                             top_left = (5, -1),
+                             font_name=bitmap_font,
+                             font_size=24,
+                             font_colour = map.get('font_colour', '#000000')
+                           )
+  OlexVFS.save_image_to_olex(image, name, 2)
 
 
 NoSpherA2_instance = NoSpherA2()

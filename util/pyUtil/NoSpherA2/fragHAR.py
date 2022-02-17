@@ -1207,6 +1207,7 @@ def add_cif_atoms(frag,cif,cell):
 
 def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   import shutil
+  from .NoSpherA2 import custom_bitmap, run_with_bitmap, cuqct_tsc
   test_frag=OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
   #print("test_frag",test_frag)
   #   test_frag=False
@@ -1229,7 +1230,7 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   hkl_fn = os.path.join(work_folder,wfn_object.name+".hkl")
   t2 = time.time()
   if test_frag==True:
-    path = os.path.join(OV.FilePath(),work_folder,"framentation")
+    path = os.path.join(OV.FilePath(),work_folder,"fragmentation")
     if os.path.exists(path) == False:
       os.mkdir(path)
       print("no further calculation")
@@ -1241,47 +1242,40 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         frag[i].part
         name_frag="frag"+str(i)
         write_xyz(frag[i],path=path,name=name_frag)
-  current_message = ""
   for i in range(len(frag)):
     if test_frag==True:
       print("no further calculation")
-      continue
-    current_message = "Calculating WFN %d/%d" %(i+1,len(frag))
-    #OV.CreateBitmap('%s' %current_message)
-
-    path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
-    if os.path.exists(path) == False:
-      os.mkdir(path)
-    write_xyz(frag[i],path=path,name=wfn_object.name)
-    write_cif(frag[i],cif_head,cif_sym,path=path,name=wfn_object.name)
-    
-    wfn_object.full_dir = path
-    wfn_object.write_orca_input(False,charge=str(frag[i].q),mult=str(frag[i].s))
-    try:
-      wfn_object.run(part)
-    except NameError as error:
-      print("The following error occured during QM Calculation # %d: "%i,error)
-      OV.SetVar('NoSpherA2-Error',error)
-      raise NameError('Unsuccesfull Wavefunction Calculation!')
-
-    base_name = os.path.join(path,wfn_object.name)
-    if os.path.exists(base_name+".wfx"):
-      wfn_fn = base_name+".wfx"
-    elif os.path.exists(base_name+".wfn"):
-      wfn_fn = base_name+".wfn"
-    wfns.append(wfn_fn)
-    if int(frag[i].part) != 0:
-      groups.append([0,int(frag[i].part)])
-    else:
-      groups.append([0])
-    cifs.append(os.path.join(path,wfn_object.name+".cif"))
-    #OV.DeleteBitmap('%s' %current_message)
-  from .NoSpherA2 import cuqct_tsc
+      break
+    def make_wfn():
+      path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
+      if os.path.exists(path) == False:
+        os.mkdir(path)
+      write_xyz(frag[i],path=path,name=wfn_object.name)
+      write_cif(frag[i],cif_head,cif_sym,path=path,name=wfn_object.name)
+      
+      wfn_object.full_dir = path
+      wfn_object.write_orca_input(False,charge=str(frag[i].q),mult=str(frag[i].s))
+      try:
+        wfn_object.run(part)
+      except NameError as error:
+        print("The following error occured during QM Calculation # %d: "%i,error)
+        OV.SetVar('NoSpherA2-Error',error)
+        raise NameError('Unsuccesfull Wavefunction Calculation!')
+      
+      base_name = os.path.join(path,wfn_object.name)
+      if os.path.exists(base_name+".wfx"):
+        wfn_fn = base_name+".wfx"
+      elif os.path.exists(base_name+".wfn"):
+        wfn_fn = base_name+".wfn"
+      wfns.append(wfn_fn)
+      if int(frag[i].part) != 0:
+        groups.append([0,int(frag[i].part)])
+      else:
+        groups.append([0])
+      cifs.append(os.path.join(path,wfn_object.name+".cif"))
+    run_with_bitmap("Calculating WFN %d/%d" %(i+1,len(frag)),make_wfn)
   t3 = time.time()
-  current_message = "Partitioning"
-  #OV.CreateBitmap('%s' %current_message)
-  cuqct_tsc(wfns,hkl_fn,cifs,groups)
-  #OV.DeleteBitmap('%s' %current_message)
+  run_with_bitmap("Partitioning",cuqct_tsc,wfns,hkl_fn,cifs,groups)
   try:
     shutil.move("experimental.tsc",wfn_object.name+".tsc")
   except:
