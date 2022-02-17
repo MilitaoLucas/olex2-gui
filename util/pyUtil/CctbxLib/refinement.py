@@ -1423,23 +1423,17 @@ The following options were used:
       f_calc = self.normal_eqns.f_calc
     f_obs = fo2.f_sq_as_f()
     if scale_factor is None:
-      k = f_obs.scale_factor(f_calc)
+      k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc).expand_to_p1().change_symmetry(
-      space_group_info=f_obs.space_group_info(),
-      remove_systematic_absences = False,
-      merge_non_unique = False,
-      log = open(os.devnull,"w")
-      )
-    print("%d Reflections for Fourier Analysis"%f_obs_minus_f_calc.size())
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
       resolution_factor=1,
       grid_step=resolution,
     )
-    print("Size of Fourier grid: %d x %d x %d"%(temp.n_real()[0],temp.n_real()[1],temp.n_real()[2]))
-    #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
+    print("Size of Fourier grid: %d x %d x %d" % (temp.n_real()[0], temp.n_real()[1], temp.n_real()[2]))
     return temp
 
   def post_peaks(self, fft_map, max_peaks=5):
