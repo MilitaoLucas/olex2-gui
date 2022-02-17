@@ -390,21 +390,21 @@ N/A
     "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
   $-
 </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td width="8%" align='right'>
   <b>Rad. Tol. </b>
 </td>
 <td width="9%" align='center'>
   $+
     html.Snippet("gui/snippets/input-text",
-    "name=NoSpherA2_frag_HAR_",
-    "value=spy.GetParam('snum.NoSpherA2.mem')",
-    "onchange=spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))")
+    "name=NoSpherA2_frag_HAR_Radius",
+    "value=spy.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance')",
+    "onchange=spy.SetParam('snum.NoSpherA2.frag_HAR.radius_tolerance', html.GetValue('~name~'))")
   $-
 </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
