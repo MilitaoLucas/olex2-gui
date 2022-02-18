@@ -762,7 +762,7 @@ routines requiring structure refinement
   }
 
   map {
-    source = *olex fcf
+    source = *olex fcf cctbx
       .type = choice
     type = *diff fcalc tomc fobs fcfmc
       .type = choice
@@ -1046,6 +1046,10 @@ user
       .expert_level = 2
     refln_loop = False
       .type = bool
+    use_openmp = False
+      .type = bool
+    openmp_mem = 300
+      .type = int
   }
 
   masks{

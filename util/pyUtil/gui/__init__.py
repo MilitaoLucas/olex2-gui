@@ -6,6 +6,7 @@ import sys
 from olexFunctions import OV
 from ImageTools import IT
 import htmlTools
+from . import restraints
 
 table_col = OV.GetVar('HtmlTableFirstcolColour')
 green_text = OV.GetParam('gui.green_text')

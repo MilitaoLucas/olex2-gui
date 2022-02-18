@@ -194,26 +194,13 @@ class OlexCctbxAdapter(object):
         custom_dict=custom_gaussians,
         table=str(table),
         d_min=self.reflections.f_sq_obs.d_min())
-
-    r_disp = self.olx_atoms.model.get('refine_disp')
-    if r_disp:
-      disp = {}
-      for t in r_disp:
-        t = t.lower()
-        if '.' in t:
-          t = t.split('.')
-          if t[1] == 'fp':
-            disp[t[0]] = (True, False)
-          elif t[1] == 'fdp':
-            disp[t[0]] = (False, True)
-        else:
-          disp[t] = (True, True)
-
-      for sc in self._xray_structure.scatterers():
-        d = disp.get(sc.scattering_type.lower(), None)
-        if d:
-          sc.flags.set_grad_fp(d[0])
-          sc.flags.set_grad_fdp(d[1])
+    # init disp
+    for i, disp in self.olx_atoms.disp_iterator():
+      sc = self._xray_structure.scatterers()[i]
+      sc.fp = disp[0]
+      sc.fdp = disp[1]
+      sc.flags.set_grad_fp(True)
+      sc.flags.set_grad_fdp(True)
 
     return self._xray_structure
 
@@ -350,7 +337,8 @@ class OlexCctbxAdapter(object):
       params[i] = v
     weighting = xray.weighting_schemes.shelx_weighting(*params,
       wavelength=self.wavelength)
-    scale_factor = fo2.scale_factor(fc)
+    #scale_factor = fo2.scale_factor(fc)
+    scale_factor = OV.GetOSF()
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights
@@ -385,8 +373,12 @@ class OlexCctbxAdapter(object):
   def get_fo_sq_fc(self, one_h_function=None):
     fo2 = self.reflections.f_sq_obs_filtered
     if one_h_function:
-      fc = self.f_calc(None, self.exti is not None, True, False,
+      try:
+        fc = self.f_calc(None, self.exti is not None, True, False,
                        one_h_function=one_h_function, twin_data=False)
+      except Exception as e:
+        print("Error during calculation of F_calcs: %s"%(str(e)))
+        return None, None
     else:
       fc = self.f_calc(None, self.exti is not None, True,
        ignore_inversion_twin=False,
@@ -656,7 +648,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
                    use_space_group_symmetry=True)
       self.time_compute.stop()
       self.time_f_mask = time_log("f_mask calculation").start()
-      f_mask = self.structure_factors(mask)
+      self.structure_factors(mask)
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
@@ -668,9 +660,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      merging = self.reflections.merging
-      min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-      (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
+      #merging = self.reflections.merging
+      #min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+      #(h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
       with open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w') as f:
         print(out.getvalue(), file=f)
       print(out.getvalue())
@@ -690,13 +682,12 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       if _ and '_smtbx_masks_void_content' in list(mdict.keys()) and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
 
-
       cif_block.update(mdict)
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
 
-      mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
+      mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
       with open(mask_cif_path, 'w') as f:
         print(cif, file=f)
       OV.SetParam('snum.masks.update_cif', True)

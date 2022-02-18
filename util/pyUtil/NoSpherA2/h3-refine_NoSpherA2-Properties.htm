@@ -417,11 +417,10 @@ No map loaded!
     "min=\$GetVar(map_min)",
     "max=\$GetVar(map_max)",
     "scale=\$GetVar(map_slider_scale)",
-    "value=\$math.eval(spy.GetParam(snum.xgrid.scale)*\$GetVar(map_slider_scale))",
     "bgcolor=\$GetVar(HtmlTableFirstcolColour)",
     "cmd=xgrid.scale(math.eval(html.GetValue(SNUM_XGRID_SCALE_VALUE)*-1))",
     "td1=<td width='43%'>",
-    "invert=1",
+    "invert=-1",
     "swidth=90"
     )
   $-
