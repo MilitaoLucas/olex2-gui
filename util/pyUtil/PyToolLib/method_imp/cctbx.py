@@ -67,15 +67,6 @@ class Method_cctbx_refinement(Method_refinement):
       cctbx.run(table_file_name=self.table_file_name)
       if timer:
         print("-- do_run(): %.3f" %(time.time() - t1))
-      if timer:
-        t1 = time.time()
-      try:
-        self.flack = cctbx.calc_flack()
-      except:
-        pass
-      if timer:
-        print("-- cctbx.flack: %.3f" %(time.time() - t1))
-
     except InvalidConstraint as e:
       print(e)
     except NotImplementedError as e:
@@ -114,12 +105,12 @@ class Method_cctbx_refinement(Method_refinement):
       pass
 
   def writeRefinementInfoForGui(self, cif):
-    for key, value in cif.items():
-      if "." in value:
-        try:
-          cif[key] = "%.4f" %float(value)
-        except:
-          pass
+    #for key, value in cif.items():
+    #  if "." in value:
+    #    try:
+    #      cif[key] = "%.4f" %float(value)
+    #    except:
+    #      pass
     f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
     t = f.read() %cif
     f.close()

@@ -105,7 +105,7 @@ class StreamRedirection:
     self.t0 = time.time()
 
     if self.isErrorStream:
-      self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w')
+      self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w', encoding="utf8")
       self.version = olex.f("GetCompilationInfo()")
       try:
         self.GUIversion = open(os.path.join(basedir, "version.txt"), 'r').readline()
@@ -372,6 +372,8 @@ if timer:
 
 if OV.HasGUI():
   olexex.check_for_recent_update()
+if OV.IsDebugging():
+  olx.SetVar("use_openmp", "true")
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')

@@ -100,7 +100,11 @@ class item_vs_resolution(OlexCctbxAdapter):
     elif self.item == "rmerge_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       self.info = fo2.info()
-      stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      try:
+        stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      except Exception as err:
+        print("Failed to get merging statistics! Maybe the data is already merged?")
+        raise(err)
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = empty()
       self.binned_data.data = [x.r_merge for x in stats.bins]
@@ -151,6 +155,13 @@ class item_vs_resolution(OlexCctbxAdapter):
       self.binned_data.show()
     except:
       pass
+    something = False
+    for i in self.binned_data.data:
+      if i != None and i != 0.0:
+        something = True
+    if something == False:
+      print("There appears to be no data to display")
+      raise Exception("No data to display!")    
 
   def xy_plot_info(self):
     r = empty()
@@ -419,8 +430,7 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
 
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
-    k = math.sqrt(
-      f_sq_obs_filtered.scale_factor(f_calc_filtered, weights=weights))
+    k = math.sqrt(OV.GetOSF())
     if binning == True:
       assert n_bins is not None
       binner = f_obs_filtered.setup_binner(n_bins=n_bins)
@@ -482,7 +492,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.info = None
     weights = self.compute_weights(f_sq_obs, f_calc)
     #
-    scale_factor = f_sq_obs.scale_factor(f_calc, weights=weights)
+    scale_factor = OV.GetOSF()
     observed_deviations = flex.sqrt(weights) * (
       f_sq_obs.data() - scale_factor * f_sq_calc.data())
     selection = flex.sort_permutation(observed_deviations)

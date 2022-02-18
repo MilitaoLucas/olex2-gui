@@ -310,10 +310,9 @@ class Method_refinement(Method):
           if olx.Ins('MORE') == "n/a":
             OV.AddIns(i)
         elif i.startswith('BOND'):
-          bond = olx.Ins('BOND')
-          if bond == "n/a" or not bond:
-            if (int(olx.xf.au.GetAtomCount('H')) > 0):
-              OV.AddIns("BOND $H", quiet=True)
+          bonds = olx.Ins('BOND*').upper().split('\n')
+          if '$H' not in bonds and int(olx.xf.au.GetAtomCount('H')) > 0:
+            OV.AddIns("BOND $H", quiet=True)
         elif i.startswith('ACTA'):
           if olx.Ins('ACTA') == "n/a":
             if olx.GetVar('refinement_acta', None) != "No ACTA":

@@ -387,9 +387,9 @@ class OlexFunctions(inheritFunctions):
     try:
       v = olx.Ins('DAMP').split()
       if len(v) > 0:
-         default[0] = float(v[0])/1000
+        default[0] = float(v[0])/1000
       if len(v) > 1:
-         default[1] = float(v[1])
+        default[1] = float(v[1])
       return default
     except:
       return default
@@ -830,6 +830,15 @@ class OlexFunctions(inheritFunctions):
       return None
     else:
       return parts
+
+  def PrintMaskHKLWarning(self, message):
+    if not self.GetVar("mask.warning_printed", False):
+      print(message)
+      self.SetVar("mask.warning_printed", True)
+    pass
+
+  def ResetMaskHKLWarning(self):
+    self.SetVar("mask.warning_printed", False)
 
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)

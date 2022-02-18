@@ -768,51 +768,29 @@ class ExtractCifInfo(CifTools):
       self.update_cif_block(diffractometer_def, force=False)
       all_sources_d[p] = diffractometer_def
 
-
     # smtbx solvent masks output file
-    mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
-    if os.path.isfile(mask_cif_path)\
-        and OV.GetParam('snum.refinement.use_solvent_mask'):
+    mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
+    # cleanup any if masks are not in use
+    for i in ('_smtbx_masks_void', '_smtbx_masks_special_details',
+              '_smtbx_masks_void_probe_radius', '_smtbx_masks_void_truncation_radius',
+              '_platon_squeeze_void', '_platon_squeeze_details'):
+      if i in self.cif_block:
+        del self.cif_block[i]
+    if os.path.isfile(mask_cif_path) and OV.GetParam('snum.refinement.use_solvent_mask'):
       import iotbx.cif
-      f = open(mask_cif_path, 'r').read()
-      add = ""
-      if not f.strip().startswith("data"): # PLATON sqf files don't start with the data block line
-        add = "tmp"
-        with open(mask_cif_path + add, 'w') as writeFile:
-          writeFile.write("data_" + self.data_name + "\r\n")
-          writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
-          writeFile.write(f)
+      mask_data = open(mask_cif_path, 'r').read()
+      if not mask_data.strip().startswith("data"): # PLATON sqf files don't start with the data block line
+        new_mask_data = "data_" + self.data_name + "\r\n"
+        new_mask_data += "_platon_squeeze_special_details" + " ?" + "\r\n"
+        new_mask_data += mask_data
+        mask_f = StringIO(new_mask_data)
+      else:
+        mask_f = StringIO(mask_data)
 
-      with open(mask_cif_path + add, 'r') as f:
-        cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
-      if add: #i.e. we have a PLATON file
-        os.remove(mask_cif_path + add)
-        if '_smtbx_masks_void' in self.cif_block:
-          del self.cif_block['_smtbx_masks_void']
-        if '_smtbx_masks_special_details' in self.cif_block:
-          del self.cif_block['_smtbx_masks_special_details']
-      else: # i.e. we have an smbtx file
-        if '_platon_squeeze_void' in self.cif_block:
-          del self.cif_block['_platon_squeeze_void']
-        if '_platon_squeeze_details' in self.cif_block:
-          del self.cif_block['_platon_squeeze_details']
-      if cif_block is not None:
+      cif_block = iotbx.cif.reader(file_object=mask_f).model().get(self.data_name)
+      if cif_block is not None and len(cif_block.loops) > 0:
         self.cif_block.update(cif_block)
         OV.SetParam('snum.masks.update_cif', False)
-    elif (not OV.GetParam('snum.refinement.use_solvent_mask')
-          and '_smtbx_masks_void' in self.cif_block):
-      del self.cif_block['_smtbx_masks_void']
-      if '_smtbx_masks_special_details' in self.cif_block:
-        del self.cif_block['_smtbx_masks_special_details']
-      if '_smtbx_masks_void_probe_radius' in self.cif_block:
-        del self.cif_block['_smtbx_masks_void_probe_radius']
-      if '_smtbx_masks_void_truncation_radius' in self.cif_block:
-        del self.cif_block['_smtbx_masks_void_truncation_radius']
-    elif (not OV.GetParam('snum.refinement.use_solvent_mask')
-          and '_platon_squeeze_void' in self.cif_block):
-      del self.cif_block['_platon_squeeze_void']
-      if '_platon_squeeze_details' in self.cif_block:
-        del self.cif_block['_platon_squeeze_details']
 
     ## I introduced this condition in order NOT to overwrite the temperature value
     if '_diffrn_ambient_temperature' not in self.cif_block:

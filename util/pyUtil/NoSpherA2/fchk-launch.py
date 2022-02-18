@@ -28,7 +28,7 @@ elif "elmo" in args[nr]:
   if sys.platform[:3] != 'win':
     inp = open(args[2],'r')
   out_fn = fchk_file + '.out'
-elif "python" in args[2]:
+elif "python" in args[nr]:
   out_fn = fchk_file + "_pyscf.log"
 
 if os.path.exists(out_fn):
@@ -36,6 +36,7 @@ if os.path.exists(out_fn):
 if out_fn:
   log = open(out_fn, 'w')
   print(out_fn)
+  log.write("Command: " + ' '.join(args))
 
 p = None
 
