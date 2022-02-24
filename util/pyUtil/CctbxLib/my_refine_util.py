@@ -29,7 +29,7 @@ def print_thermal_axes(s0, s):
       u_cart = adptbx.u_star_as_u_cart(cs.unit_cell(), u)
       eigensys = adptbx.eigensystem(u_cart)
       for i in range(3):
-        print('v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i), end=' ') 
+        print('v=(%.5f, %.5f, %.5f)' % eigensys.vectors(i), end=' ')
         print('lambda=%.6f' % list(eigensys.values())[i])
       print('---')
 
@@ -169,11 +169,13 @@ class hydrogen_atom_constraints_customisation(object):
 
     self.hydrogens = tuple(
       [ scatterers[i_sc] for i_sc in self.src.constrained_site_indices ])
-    if not self.try_add(True) and special_sites:
-      for j, op in special_sites:
-        s = reparametrisation.add_new_site_parameter(j, op)
-        self.pivot_neighbour_site_params += (s,)
-        self.pivot_neighbour_sites += (op*scatterers[j].site,)
+    if not self.try_add(True):
+      if special_sites:
+        for j, op in special_sites:
+          s = reparametrisation.add_new_site_parameter(j, op)
+          self.pivot_neighbour_site_params += (s,)
+          self.pivot_neighbour_sites += (op*scatterers[j].site,)
+      # propagate the exception if thrown in either case
       self.try_add(False)
 
   def try_add(self, quiet):

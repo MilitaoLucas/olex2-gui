@@ -1067,9 +1067,9 @@ def build_cap(mol,res,cell,part):
       #print("cycle of elongate cap atoms########################################",res,u,len(elongate))
       for k in range(len(elongate)):##NEW
         cap2.append(elongate[k])##NEW
-        junc1, elongate = find_junction(mol,cap2,cap1,cell,res,part)##NEW
-        if len(elongate)==0 :
-          break
+      junc1, elongate = find_junction(mol,cap2,cap1,cell,res,part)##NEW
+      if len(elongate) == 0:
+        break
 
   for i in range(len(cap1)):
     frag.append(cap1[i])
@@ -1161,6 +1161,16 @@ def write_xyz(res,path="",part=0,name=""):
 def read_qS(file,mol):
   #read in file with charge and multiplisity
   #in_list=False
+  #set default to +1 to ARG and LYS and -1 to ASP and GLU
+  for i in range(len(mol)):
+    if mol[i].res_nam=="ARG" or mol[i].res_nam=="LYS":
+        mol[i].q=1
+        mol[i].S=1
+    if mol[i].res_nam=="ASP" or mol[i].res_nam=="GLU" : 
+        mol[i].q=-1
+        mol[i].S=1 
+
+  # read charges and multiplisity from file
   if os.path.exists(file):
     for line in open(file, "r"):
       l_split=line.split()
@@ -1240,8 +1250,9 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         if part!=0:
           name += "_"+str(frag[i].part)
         frag[i].part
-        name_frag="frag"+str(i)
+        name_frag="frag"+name
         write_xyz(frag[i],path=path,name=name_frag)
+        print("path",path)
   for i in range(len(frag)):
     if test_frag==True:
       print("no further calculation")
@@ -1285,4 +1296,4 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   t4 = time.time()
   print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")
   print("-- " + "{:8.3f}".format(t3-t2) + " for wavefunctions")
-  print("-- " + "{:8.3f}".format(t4-t3) + " for partitioning")       
+  print("-- " + "{:8.3f}".format(t4-t3) + " for partitioning")

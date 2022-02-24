@@ -816,6 +816,13 @@ class ExtractCifInfo(CifTools):
       })
 
     self.update_manageable()
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    if use_aspherical:
+      NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
+Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
+White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
+Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
+      full_references.append(NoSpherA2_ref)
     # merge references
     full_references = [x for x in set(full_references)] #make unique
     current_refs = self.cif_block.get('_publ_section_references', '')
@@ -842,20 +849,12 @@ class ExtractCifInfo(CifTools):
         full_references.append(ref)
         full_references_set.add(ref_t)
 
-    NoSpherA2 = OV.GetParam('snum.NoSpherA2.use_aspherical')
-    NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
-Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
-    NoSpherA2_ref_t = NoSpherA2_ref.replace('\r', '').replace('\n', '').replace(' ', '')
-    if NoSpherA2:
-      if NoSpherA2_ref_t not in full_references_set:
-        full_references.append(NoSpherA2_ref)
-        full_references_set.add(NoSpherA2_ref_t)
-    else:
-      if any("1675-1692" in x for x in full_references):
-        full_references.remove(NoSpherA2_ref)
-
+    # clean up if has been inserted previosly but also if added by the user
+    # through CifMerge or by hand...
+    if not use_aspherical:
+      for x in full_references:
+        if "1675-1692" in x and "2021" in x:
+          full_references.remove(x)
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
