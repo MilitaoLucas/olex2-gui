@@ -1049,7 +1049,7 @@ class RunRefinementPrg(RunPrg):
           for i, atom in enumerate(new_model._atoms):
             xyz = atom['crd'][0]
             xyz2 = old_model._atoms[i]['crd'][0]
-            assert matrix_run + 3 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+            assert matrix_run + 2 < matrix_size, "Inconsistent size of annotations and expected parameters!"
             if ".x" in annotations[matrix_run]:
               for x in range(3):
                 # if parameter is fixed and therefore has 0 esd
@@ -1061,7 +1061,7 @@ class RunRefinementPrg(RunPrg):
             has_adp_new = new_model._atoms[i].get('adp')
             has_adp_old = old_model._atoms[i].get('adp')
             if has_adp_new != None and has_adp_old != None:
-              assert matrix_run + 6 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
               adp = atom['adp'][0]
               adp2 = old_model._atoms[i]['adp'][0]
               adp = adptbx.u_cart_as_u_cif(uc, adp)
@@ -1080,7 +1080,7 @@ class RunRefinementPrg(RunPrg):
                 if ".C111" in annotations[matrix_run]:
                   matrix_run += 25
             elif has_adp_new != None and has_adp_old == None:
-              assert matrix_run + 6 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
               adp = atom['uiso'][0]
               adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
               adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])

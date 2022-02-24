@@ -105,7 +105,7 @@ def add_resolved_conflict_item_to_phil(item, value):
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
-  OV.set_cif_item(item, value.replace("<br>", "\n"))
+  OV.set_cif_item(item, value.replace("<br>", "\n").replace('\\"', '"'))
   global conflict_d
   del conflict_d[item]
   conflicts(d=conflict_d)
@@ -221,7 +221,7 @@ def conflicts(popout='auto', d=None):
           else:
             bg = col_odd
 
-          val = d[conflict].get(source,'n/a').replace("\n", "<br>")
+          val = d[conflict].get(source,'n/a').replace("\n", "<br>").replace('"', '\\"')
           colour = ""
           if not val:
             display = "--"
