@@ -1702,11 +1702,13 @@ def GetHttpFile(f, force=False, fullURL = False):
   return retVal
 
 def EditIns():
-  olx.EditIns()
+  if olx.EditIns() != "true":
+    return
   programSettings.doProgramSettings(
     OV.GetParam('snum.refinement.program'),
     OV.GetParam('snum.refinement.method'))
-  OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
+  if olx.IsFileType("ires") == "true":
+    OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   olx.html.Update()
 OV.registerFunction(EditIns)
 
