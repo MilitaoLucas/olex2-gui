@@ -1,4 +1,5 @@
 import olx
+import olex
 import io
 import os
 from olexFunctions import OlexFunctions
@@ -9,12 +10,17 @@ import re
 import sys
 green = OV.GetParam('gui.green')
 red = OV.GetParam('gui.red')
+import gui
+debug = bool(OV.GetParam("olex2.debug", False))
+olx.SetVar('show_restraints_table', "false")
+global cache_restraint_table
+cache_restraint_table = ""
 
 
 def parse_bond_restraints(string):
   rows = []
   text = string.split('\n')
-  number_restraints = int(text[0].split()[2])
+  number_restraints = int(text[0].split(":")[1])
   for i in range(number_restraints):
     atom1 = text[2 + 4 * i].split()[1]
     atom2 = text[3 + 4 * i].strip()
@@ -24,6 +30,17 @@ def parse_bond_restraints(string):
     delta = float(line[2])
     sigma = float(line[3])
     rows.append([observed, target, delta, sigma, "DFIX", "%s %s" % (atom1, atom2)])
+  return rows
+
+
+def parse_chirality_restraints(string):
+  rows = []
+  text = string.split('\n')
+  number_restraints = int(text[0].split(":")[1])
+  for i in range(number_restraints):
+    atoms = find_bits(string, "chirality", "both_signs").strip().split()
+    info = find_bits(string, "residual", "\n\n").strip().split()
+#    rows.append([observed, target, delta, sigma, "CHIV", "%s %s" % (atom1, atom2)])
   return rows
 
 
@@ -125,7 +142,7 @@ def parse_bond_similarity_restraints(string):
     sigma = float(line[2 + add])
     observed = '-'
     target = '-'
-    rows.append([observed,target,delta,sigma,"SADI","%s"%(atoms_string)])
+    rows.append([observed, target, delta, sigma, "SADI", "%s" % (atoms_string)])
 
   return rows
 
@@ -165,7 +182,18 @@ def mangle_fdb_data(tabledata):
     new_l.append(l[0:-1] + [_[0]] + [" ".join(_[1:])])
   return new_l
 
-def make_Restraints_Table():
+def make_restraints_table(*kwds):
+  global cache_restraint_table
+  top_line = gui.tools.TemplateProvider.get_template('restraints_top', force=debug)
+  if olx.GetVar('show_restraints_table').lower() == 'false':
+    return top_line
+  else:
+    retVal = top_line
+    if cache_restraint_table:
+      retVal = cache_restraint_table
+      cache_restraint_table = ""
+      return retVal
+
   software = OV.GetParam("snum.refinement.program")
   tabledata = []
   if "xl" in software.lower():
@@ -188,7 +216,8 @@ def make_Restraints_Table():
                     "Bond angle restraints",
                     "ADP similarity restraints",
                     "Rigu bond restraints",
-                    "Isotropic ADP restraints"
+                    "Isotropic ADP restraints",
+                    "Chirality restraints",
                     ]
 
     for restraint in restraints_l:
@@ -200,69 +229,19 @@ def make_Restraints_Table():
         except Exception as err:
           sys.stderr.formatExceptionInfo()
           _ = restraint.split()
-          tabledata += [[0, 0, 0, 0 , _[0].upper() + "_" + _[1].lower() + "_" + 'err', ""]]
+          tabledata += [[0, 0, 0, 0, _[0].upper() + "_" + _[1].lower() + "_" + 'err', ""]]
+
+  cache_restraint_table = top_line + h_t.table_maker(tabledata)
+  return cache_restraint_table
 
 
-    #bonds = "Bond restraints" in output
-    #angles = "Bond angle restraints" in output
-    #adp_sim = "ADP similarity restraints" in output
-    #bond_sim = "Bond similarity restraints" in output
-    #rigu = C in output
-    #if bonds:
-      #try:
-        #s = find_bits(output, "Bond restraints", "\n\n")
-        #bond_rows = parse_bond_restraints(s)
-        ##bond_rows = parse_bond_restraints(output[output.find("Bond restraints"):output.find("\n\n")])
-        #tabledata += bond_rows
-      #except:
-        #tabledata += [[0, 0, 0, 0 , "BONDerr", "---"]]
+OV.registerFunction(make_restraints_table, False, "gui.restraints")
 
-      #output = output[output.find("\n\n") + 2:]
-    #if angles:
-      #try:
-        #s = find_bits(output, "Bond angle restraints", "\n\n")
-        #angle_rows = parse_angle_restarints(s)
-        ##angle_rows = parse_angle_restarints(output[output.find("Bond angle restraints"):output.find("\n\n")])
-        #tabledata += angle_rows
-      #except:
-        #tabledata += [[0, 0, 0, 0 , "BANGerr", "---"]]
-      #output = output[output.find("\n\n") + 2:]
-    #if bond_sim:
-      #try:
-        #s = find_bits(output, "Bond similarity restraints", "\n\n")
-        #bond_sim_rows = parse_bond_sim_restraints(s)
-        ##bond_sim_rows = parse_bond_sim_restraints(output[output.find("Bond similarity restraints"):output.find("\n\n")])
-        #tabledata += bond_sim_rows
-      #except:
-        #tabledata += [[0, 0, 0, 0 , "BSIMerr", "---"]]
-      #output = output[output.find("\n\n") + 2:]
-    #if rigu:
-      #try:
-        #s = find_bits(output, "Rigu bond restraints", "\n\n")
-        #rigu_rows = parse_rigu_restraints(s)
-        ##rigu_rows = parse_rigu_restraints(output[output.find("Rigu bond restraints"):output.find("\n\n")])
-        #tabledata += rigu_rows
-      #except:
-        #tabledata += [[0, 0, 0, 0 , "RIGUerr", "---"]]
-
-      #output = output[output.find("\n\n") + 2:]
-    #if adp_sim:
-      #try:
-        #s = find_bits(output, "ADP similarity restraints", "\n\n")
-        #adp_sim_rows = parse_ADP_similarity_restraints(s)
-        ##adp_sim_rows = parse_ADP_similarity_restraints(output[output.find("ADP similarity restraints"):output.find("\n\n")]) #Original
-        #tabledata += adp_sim_rows
-      #except:
-        #tabledata += [[0, 0, 0, 0 , "ADPerr", "---"]]
-      #output = output[output.find("\n\n") + 2:]
-    #rest = output
-  return h_t.table_maker(tabledata)
-
-OV.registerFunction(make_Restraints_Table, False, "gui")
 
 def find_bits(text, front, back):
-  m = re.findall(r"%s(.*?)%s" %(front,back), text, re.DOTALL)
-  return front + m[0]
+  m = re.findall(r"%s(.*?)%s" % (front, back), text, re.DOTALL)
+  return m[0]
+
 
 class html_Table(object):
   """
@@ -351,11 +330,12 @@ class html_Table(object):
         else:
           if num < 5:
             if "err" in item:
-              td.append(r"""<td align='left' bgcolor='%s' colspan='2' ><b><font color='white'> {} </font></b></td>""".format(item)  %(red))
-              error=True
+              td.append(r"""<td align='left' bgcolor='%s' colspan='2' ><b><font color='white'> {} </font></b></td>""".format(item) % (red))
+              error = True
             else:
               _ = item
-              if " " in item: _ = item.split()[0]
+              if " " in item:
+                _ = item.split()[0]
               if _ in restraints:
                 td.append(r"""<td align='left'><b> {} </b></td>""".format(item))
               else:
@@ -395,6 +375,16 @@ class html_Table(object):
         atoms.append(i)
     OV.cmd('editatom {}'.format(' '.join(atoms)))
 
+def set_mode_fit():
+  val = olx.html.GetValue('SPLIT_PARTS', None)
+  if val == "auto":
+    olex.m("mode fit -s same")
+  else:
+    olex.m("mode fit -s same -p=%s" % val.split("/")[0].strip())
 
+OV.registerFunction(set_mode_fit, False, "gui.restraints")
+    
+    
+    
 h_t = html_Table()
 OV.registerFunction(h_t.edit_restraints, False, "gui")
