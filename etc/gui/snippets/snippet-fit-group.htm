@@ -1,35 +1,35 @@
-  <td width='30%'>
-    &nbsp;Select atom(s) and then
-  </td>
 
   $+
     html.Snippet(GetVar(default_link),
-    "value=mFit",
+    "value=Fit",
     "hint=Mode Fit. Select atom(s) and then rotate/move to fit.",
-    "onclick=if spy.check_for_selection() then 'mode fit -s=False'",
+    "onclick=if strcmp(sel(),'') then 'mode split -s' else 'mode fit -s=false'",
+    "td1=<td width='35%'>"
+    )
+  $-
+  
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Split",
+    "hint=Restrained Split. The selected group will be split and but restraints will be applied to the resulting PARTs",
+    "onclick=if spy.check_for_selection() then 'spy.gui.restraints.set_mode_fit()'",
+    "td1=<td width='35%'>"
     )
   $-
 
-  $+
-    html.Snippet(GetVar(default_link),
-    "value=mSplit",
-    "hint=Mode Split. Same as mFit, but the group will actually be split into two PARTs",
-    "onclick=if spy.check_for_selection() then 'mode fit -s=True'",
-    )
-  $-
+<td width='15%'>
+  with PARTs
+<td>
 
+<td width='20%' align='left'>
   $+
-    html.Snippet(GetVar(default_link),
-    "value=Split SAME",
-    "hint=Restrained Split. Same as mSplit, but restraints will be applied to the resulting PARTs",
-    "onclick=if spy.check_for_selection() then 'mode fit -s same'",
+    html.Snippet("gui/snippets/input-combo",
+    "name=SPLIT_PARTS",
+    "items=auto;1/2;3/4;5/6",
+    "value=auto",
+    "readonly=false",
+    "onchange=",
+    "onchangealways=true",
     )
   $-
-
-  $+
-    html.Snippet(GetVar(default_link),
-    "value=SHIFT+Move",
-    "hint=Hold down SHIFT and move the atom with the left mouse button pressed. Or Click an atom to split it.",
-    "onclick=mode split",
-    )
-  $-
+</td>
