@@ -449,3 +449,24 @@ t:weight_button{
   custom="border.lightness: 80;highlight.lightness: 110"
 >
 </b>}
+
+
+t:restraints_top{
+<b>
+
+  <td align='left'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SELECT_PARTS@%(scope)s'
+      checked="GetVar('show_restraints_table','false')"
+      oncheck="SetVar('show_restraints_table','true')>>spy.gui.restraints.make_restraints_table()>>html.update"
+      onuncheck="SetVar('show_restraints_table','false')>>spy.gui.restraints.make_restraints_table()>>html.update"
+      target="Show/Hide the list of restraints in this model"
+      value="Show/Hide the list of restraints in this model"
+    >
+
+    </font>
+  </td>
+</b>}
