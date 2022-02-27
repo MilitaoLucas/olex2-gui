@@ -3,14 +3,10 @@
 from my_refine_util import *
 import math
 import sys
-from cctbx import miller
-from cctbx import uctbx
-from iotbx import builders
 
-from iotbx import reflection_file_reader, reflection_file_utils
-
+from iotbx import builders, reflection_file_reader, reflection_file_utils
 from cctbx.eltbx import sasaki
-from cctbx import adptbx, crystal, miller, sgtbx, xray
+from cctbx import adptbx, crystal, miller, sgtbx, xray, uctbx
 from cctbx.array_family import flex
 from cctbx import xray
 from smtbx.refinement.constraints import rigid

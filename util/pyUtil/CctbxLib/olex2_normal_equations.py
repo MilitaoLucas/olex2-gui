@@ -5,7 +5,6 @@ from scitbx.array_family import flex
 from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
 from cctbx import adptbx
-#ext = bp.import_ext("smtbx_refinement_least_squares_ext")
 from smtbx_refinement_least_squares_ext import *
 
 import math
@@ -14,6 +13,14 @@ from olexFunctions import OV
 import olx
 import olex
 import olex_core
+
+import AC5ED
+import AC5 as ac5
+try:
+  _ = ac5.AC5_instance
+except:
+  _ = ac5.AC5.AC5_instance
+  ac5 = ac5.AC5
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
@@ -41,7 +48,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false":
+    if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false" or\
+        not ac5.AC5_instance.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
@@ -66,7 +74,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                 extinction_correction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
-      self.one_h_linearisation = f_calc_function_ed(self.data, (1,1,1, 2,2,2, 3,3,3))
+      self.one_h_linearisation = AC5ED.instance.build(self.data)
       super(normal_eqns, self).build_up()
     finally:
       self.one_h_linearisation = old_func
