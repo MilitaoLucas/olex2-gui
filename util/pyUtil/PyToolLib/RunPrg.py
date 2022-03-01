@@ -870,8 +870,8 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("Refinement startet at: ")
     HAR_log.write(str(datetime.datetime.now()))
     HAR_log.write("\n")
-    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD   Label     Uij/ESD     Label      R1    wR2\n")
-    HAR_log.write("*"*88+"\n")
+    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n")
+    HAR_log.write("*" * 110 + "\n")
 
     HAR_log.write("{:3d}".format(run))
     energy = None
@@ -898,10 +898,10 @@ class RunRefinementPrg(RunPrg):
                   energy = None
           fread = None
     if energy == None:
-      HAR_log.write("{:^24.10}".format(" "))
+      HAR_log.write("{:^24}".format(" "))
     else:
       HAR_log.write("{:^24.10f}".format(energy))
-    HAR_log.write("{:>48.4}".format(" "))
+    HAR_log.write("{:>70}".format(" "))
     r1_old  = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
     if r1_old != "n/a":
@@ -1021,11 +1021,34 @@ class RunRefinementPrg(RunPrg):
         break
 
       new_model=OlexRefinementModel()
-
-      max_dxyz = 0
-      max_duij = 0
-      label_uij = None
-      label_xyz = None      
+      class results():
+        def __init__(self):
+          self.max_dxyz = 0
+          self.max_duij = 0
+          self.label_uij = None
+          self.label_xyz = None
+          self.r1 = 0
+          self.wr2 = 0
+          self.max_overall = 0
+          self.label_overall = None
+        def update_xyz(self, dxyz, label):
+          if dxyz > self.max_dxyz:
+            self.max_dxyz = dxyz
+            self.label_xyz = label
+            if dxyz > self.max_overall:
+              self.max_overall = dxyz
+              self.label_overall = label
+        def update_uij(self, duij, label):
+          if duij > self.max_duij:
+            self.max_duij = duij
+            self.label_uij = label
+            if duij > self.max_overall:
+              self.max_overall = duij
+              self.label_overall = label
+        def update_overall(self, d, label):
+          if d > self.max_overall:
+            self.max_overall = d
+            self.label_overall = label
 
       try:
         jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
@@ -1038,7 +1061,7 @@ class RunRefinementPrg(RunPrg):
         print ("Could not obtain cctbx object and calculate ESDs!\n")
         return False
       from NoSpherA2.NoSpherA2 import run_with_bitmap
-      def analyze_shifts(max_dxyz, max_duij, label_xyz, label_uij):
+      def analyze_shifts(results):
         try:
           matrix_run = 0
           matrix_size = len(esds)
@@ -1054,12 +1077,14 @@ class RunRefinementPrg(RunPrg):
               for x in range(3):
                 # if parameter is fixed and therefore has 0 esd
                 if esds[matrix_run] > 0:
-                  if abs(xyz[x] - xyz2[x]) / esds[matrix_run] > max_dxyz:
-                    max_dxyz = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
-                    label_xyz = annotations[matrix_run]
+                  res = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
+                  if res > results.max_dxyz:
+                    results.update_xyz(res, annotations[matrix_run])
                 matrix_run += 1
             has_adp_new = new_model._atoms[i].get('adp')
             has_adp_old = old_model._atoms[i].get('adp')
+            has_anh_new = new_model._atoms[i].get('anharmonic_adp')
+            has_anh_old = old_model._atoms[i].get('anharmonic_adp')
             if has_adp_new != None and has_adp_old != None:
               assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
               adp = atom['adp'][0]
@@ -1072,12 +1097,30 @@ class RunRefinementPrg(RunPrg):
                 # if parameter is fixed and therefore has 0 esd
                 if adp_esds[u] > 0:
                   res = abs(adp[u] - adp2[u]) / adp_esds[u]
-                  if res > max_duij:
-                    max_duij = res
-                    label_uij = annotations[matrix_run]
+                  if res > results.max_duij:
+                    results.update_uij(res, annotations[matrix_run + u])
               matrix_run += 6
               if matrix_run < len(annotations):
-                if ".C111" in annotations[matrix_run]:
+                if has_anh_new != None and has_anh_old != None:
+                  assert matrix_run + 24 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                  adp_C = atom['anharmonic_adp']['C']
+                  adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
+                  adp_esds_C = (esds[matrix_run:matrix_run + 10])
+                  adp_D = atom['anharmonic_adp']['D']
+                  adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
+                  adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
+                  for u in range(10):
+                    # if parameter is fixed and therefore has 0 esd
+                    if adp_esds_C[u] > 0:
+                      res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
+                      if res > results.max_overall:
+                        results.update_overall(res, annotations[matrix_run + u])
+                  for u in range(14):
+                    # if parameter is fixed and therefore has 0 esd
+                    if adp_esds_D[u] > 0:
+                      res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
+                      if res > results.max_overall:
+                        results.update_overall(res, annotations[matrix_run + u + 10])
                   matrix_run += 25
             elif has_adp_new != None and has_adp_old == None:
               assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
@@ -1088,9 +1131,8 @@ class RunRefinementPrg(RunPrg):
               for u in range(6):
                 if esds[matrix_run] > 0:
                   res = abs(adp - adp2[u]) / adp_esds[u]
-                  if res > max_duij:
-                    max_duij = res
-                    label_uij = annotations[matrix_run]
+                  if res > results.max_duij:
+                    results.update_uij(res, annotations[matrix_run])
               matrix_run += 6
               if matrix_run < len(annotations):
                 if ".C111" in annotations[matrix_run]:
@@ -1102,30 +1144,35 @@ class RunRefinementPrg(RunPrg):
               adp_esd = esds[matrix_run]
               if esds[matrix_run] > 0:
                 res = abs(adp - adp2) / adp_esd
-                if res > max_duij:
-                  max_duij = res
-                  label_uij = annotations[matrix_run]
+                if res > results.max_duij:
+                  results.update_uij(res, annotations[matrix_run])
               matrix_run += 1
             if matrix_run < len(annotations):
               if 'occ' in annotations[matrix_run]:
                 matrix_run += 1
-          HAR_log.write("{:>16.4f}".format(max_dxyz))
-          if label_xyz != None:
-            HAR_log.write("{:>10}".format(label_xyz))
+          HAR_log.write("{:>16.4f}".format(results.max_dxyz))
+          if results.label_xyz != None:
+            HAR_log.write("{:>10}".format(results.label_xyz))
           else:
             HAR_log.write("{:>10}".format("N/A"))
 
-          HAR_log.write("{:>10.4f}".format(max_duij))
-          if label_uij != None:
-            HAR_log.write("{:>12}".format(label_uij))
+          HAR_log.write("{:>10.4f}".format(results.max_duij))
+          if results.label_uij != None:
+            HAR_log.write("{:>12}".format(results.label_uij))
+          else:
+            HAR_log.write("{:>12}".format("N/A"))
+            
+          HAR_log.write("{:>10.4f}".format(results.max_overall))
+          if results.label_overall != None:
+            HAR_log.write("{:>12}".format(results.label_overall))
           else:
             HAR_log.write("{:>12}".format("N/A"))
 
-          r1 = OV.GetParam('snum.refinement.last_R1')
-          wr2 = OV.GetParam('snum.refinement.last_wR2')
+          results.r1 = OV.GetParam('snum.refinement.last_R1')
+          results.wr2 = OV.GetParam('snum.refinement.last_wR2')
 
-          HAR_log.write("{:>6.2f}".format(float(r1) * 100))
-          HAR_log.write("{:>7.2f}".format(float(wr2) * 100))
+          HAR_log.write("{:>6.2f}".format(float(results.r1) * 100))
+          HAR_log.write("{:>7.2f}".format(float(results.wr2) * 100))
 
           HAR_log.write("\n")
           HAR_log.flush()
@@ -1133,26 +1180,26 @@ class RunRefinementPrg(RunPrg):
           HAR_log.write("!!!ERROR!!!\n")
           print("Error during analysis of shifts!")
           raise e
-
-      run_with_bitmap("Analyzing shifts", analyze_shifts, max_dxyz, max_duij, label_xyz, label_uij)
+      r = results()
+      run_with_bitmap("Analyzing shifts", analyze_shifts, r)
       if calculate == False:
         converged = True
         break
       elif Full_HAR == False:
         converged = True
         break
-      elif (max_duij <= 0.01) and (max_dxyz <= 0.01):
+      elif (r.max_overall <= 0.01):
         converged = True
         break
       elif run == max_cycles:
         break
       elif r1_old != "n/a":
-        if (float(r1) > float(r1_old) + 0.1) and (run > 1):
+        if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
           HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
           break
       else:
-        r1_old = r1
-        wr2_old = wr2
+        r1_old = r.r1
+        wr2_old = r.wr2
 
     # Done with the while !Converged
     OV.SetParam('snum.NoSpherA2.Calculate',False)
@@ -1173,7 +1220,7 @@ class RunRefinementPrg(RunPrg):
           self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
         else:
           self.refinement_has_failed = "Unassigned Atom Types!"
-    HAR_log.write("*" * 88 + "\n")
+    HAR_log.write("*" * 110 + "\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
