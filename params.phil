@@ -764,13 +764,12 @@ routines requiring structure refinement
   map {
     source = *olex fcf cctbx
       .type = choice
-    type = *diff fcalc tomc fobs fcfmc
+    type = *diff fcalc tomc fobs fcfmc PDF
       .type = choice
     mask = True
       .type = bool
     resolution = 0.1
       .type = float
-
   }
 
   calcvoid {

@@ -110,20 +110,25 @@ class MapUtil:
       mask_val = "-m"
     else:
       mask_val = ""
-
-    self.map_type = 'eden'
-    OV.SetVar('olex2.map_type', 'eden')
-
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
-    if map_source == "fcf":
-      olex.m("CalcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-    elif map_source == "olex":
-      if NoSpherA2 == True:
-        print("NoSpherA2 maps only possible with .fcf or cctbx")
-      elif map_source == "olex":
-        olex.m("CalcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
+    if map_type == "PDF":
+      second = OV.GetParam('snum.map.PDF_second_order')
+      third = OV.GetParam('snum.map.PDF_third_order')
+      fourth = OV.GetParam('snum.map.PDF_fourth_order')
+      olex.m("spy.NoSpherA2.PDF_map(%s,%f,%d,%d,%d)" % (map_resolution, 1.0, second, third, fourth))
     else:
-      olex.m("spy.NoSpherA2.show_fft_map(%s,%s)"%(map_resolution,map_type))
+      self.map_type = 'eden'
+      OV.SetVar('olex2.map_type', 'eden')
+
+      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+      if map_source == "fcf":
+        olex.m("CalcFourier -%s -%s -r=%s %s" % (map_type, map_source, map_resolution, mask_val))
+      elif map_source == "olex":
+        if NoSpherA2 == True:
+          print("NoSpherA2 maps only possible with .fcf or cctbx")
+        elif map_source == "olex":
+          olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
+      else:
+        olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
 
     self.SetXgridView(update_controls)
 
@@ -163,7 +168,6 @@ class MapUtil:
     maximum = float(olx.xgrid.GetMax())
     minimum = float(olx.xgrid.GetMin())
     contours = OV.GetParam('snum.xgrid.contours') - 1
-    difference = maximum + minimum * -1
 
     map_maximum = round(maximum*10,0)/10
     map_minimum = round(minimum*10,0)/10
@@ -220,11 +224,16 @@ class MapUtil:
     olx.SetVar('map_value',0)
     self.value = 0
     self.scale = 0
+    map_type = None
+    try:
+      map_type = self.map_type
+    except AttributeError:
+      map_type = None
     if olx.xgrid.Visible() == "false":
       return
 
-    val_min = float(olx.xgrid.GetMin()) * -1
-    val_max = float(olx.xgrid.GetMax()) * -1
+    val_min = float(olx.xgrid.GetMin())  #* -1
+    val_max = float(olx.xgrid.GetMax())  # * -1
 
     if abs(val_min) > abs(val_max):
       difference = val_min
@@ -239,8 +248,8 @@ class MapUtil:
     map_max = int(round((val_min * slider_scale * 0.1),0)) * 10
     map_max = int(round(difference * slider_scale))
 
-    if self.map_type == 'eden':
-      map_min =  abs(int(round(val_min/5 * slider_scale)))
+    if map_type == 'eden':
+      map_min = abs(int(round(val_min / 5 * slider_scale)))
     else:
       map_min = 0
 
