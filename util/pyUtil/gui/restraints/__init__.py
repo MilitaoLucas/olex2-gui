@@ -304,7 +304,7 @@ class html_Table(object):
       table.append(self.row(line))
     footer = ""
     empty_data = """
-    <b>There are no restraints</b>
+    <b>There may be no restraints, they have been filtered or can not be evaluated.</b>
     """
     html = r"""
     <table width="100%" border="0" cellpadding="0" cellspacing="3">
