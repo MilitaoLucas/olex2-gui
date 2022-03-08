@@ -119,7 +119,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       pass
     print("Using %s threads. Using OpenMP: %s." %(
       ext.build_normal_equations.available_threads,
-      olx.GetVar("use_openmp", "false")))
+      OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None

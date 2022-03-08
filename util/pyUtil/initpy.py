@@ -372,8 +372,6 @@ if timer:
 
 if OV.HasGUI():
   olexex.check_for_recent_update()
-if OV.IsDebugging():
-  olx.SetVar("use_openmp", "true")
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')
