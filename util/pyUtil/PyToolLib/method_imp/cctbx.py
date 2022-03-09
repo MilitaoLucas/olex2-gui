@@ -51,7 +51,7 @@ class Method_cctbx_refinement(Method_refinement):
     from smtbx.refinement.constraints import InvalidConstraint
     import gui
 
-    timer = debug = OV.IsDebugging()
+    timer = OV.IsDebugging()
     self.failure = True
     print('\n+++ STARTING olex2.refine +++++ %s' %self.version)
 
@@ -64,7 +64,8 @@ class Method_cctbx_refinement(Method_refinement):
     try:
       if timer:
         t1 = time.time()
-      cctbx.run(table_file_name=self.table_file_name)
+      cctbx.run(table_file_name=self.table_file_name,
+        ed_refinement=olx.GetVar("use_ed_wrapper", "false") == "true")
       if timer:
         print("-- do_run(): %.3f" %(time.time() - t1))
     except InvalidConstraint as e:
