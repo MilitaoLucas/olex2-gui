@@ -24,12 +24,14 @@ except:
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
+  std_reparametrisation = None
+  std_observations = None
 
-  def __init__(self, observations, reparametrisation, olx_atoms,
+  def __init__(self, observations, refinement, olx_atoms,
                table_file_name=None, **kwds):
     super(normal_eqns, self).__init__(
-      observations, reparametrisation, initial_scale_factor=OV.GetOSF(),
-       **kwds)
+      observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(),
+      **kwds)
     if table_file_name:
       try:
         one_h_linearisation = direct.f_calc_modulus_squared(
@@ -43,13 +45,15 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     else:
       one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, reflections=self.observations)
+    self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
     if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false" or\
-        not ac5.AC5_instance.IsMEDEnabled:
+        not ac5.AC5_instance.IsAC5Enabled:
+#        not ac5.AC5_instance.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
@@ -58,24 +62,30 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         f_mask = self.f_mask.data()
       else:
         f_mask = flex.complex_double()
-      extinction_correction = self.reparametrisation.extinction
       cl = least_squares.crystallographic_ls_class()
-      self.reparametrisation.linearise()
-      self.reparametrisation.store()
-      xx = cl(self.observations, self.reparametrisation)
+      self.std_reparametrisation.linearise()
+      xx = cl(self.observations, self.std_reparametrisation)
       def args():
         args = (xx,
-                self.observations,
+                self.std_observations,
                 f_mask,
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
-                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
-                extinction_correction, False, True, False)
+                self.std_reparametrisation.jacobian_transpose_matching_grad_fc(),
+                self.std_reparametrisation.extinction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
-      self.one_h_linearisation = AC5ED.instance.build(self.data)
+      self.one_h_linearisation = AC5ED.instance.build(self.data,
+        self.refinement.thickness,
+        self.xray_structure.crystal_symmetry(),
+        self.std_observations.fo_sq.anomalous_flag())
       super(normal_eqns, self).build_up()
+      AC5ED.instance.update_scales(old_func,
+        self.weighting_scheme,
+        self.xray_structure, f_mask,
+        self.refinement.thickness)
+      olx.SetVar("thickness", self.refinement.thickness.value)
     finally:
       self.one_h_linearisation = old_func
 
@@ -332,8 +342,12 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     r = self.non_linear_ls.actual.reparametrisation
     J = r.jacobian_transpose_matching_grad_fc().transpose()
     spc = len(r.independent_scalar_parameters)
+    offset = 1
     if max_shift_i >= J.n_cols-spc:
-      if r.extinction.grad and max_shift_i == J.n_cols - 1:
+      if r.thickness is not None and max_shift_i == J.n_cols - 1:
+        self.max_shift_for = "ED_Thickness"
+        offset += 1
+      elif r.extinction.grad and max_shift_i == J.n_cols - offset:
         self.max_shift_for = "EXTI"
       else:
         self.max_shift_for = "BASF%s" %(max_shift_i - (J.n_cols - spc) + 1)
