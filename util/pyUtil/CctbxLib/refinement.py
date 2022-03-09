@@ -3,6 +3,7 @@ from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
 import cctbx_olex_adapter as COA
 from boost_adaptbx.boost import python
 ext = python.import_ext("smtbx_refinement_least_squares_ext")
+constraints_ext = python.import_ext("smtbx_refinement_constraints_ext")
 
 from olexFunctions import OV
 
@@ -96,10 +97,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         params[param] = value
       self.weighting = least_squares.mainstream_shelx_weighting(**params)
 
-
   def run(self, build_only=False,
           table_file_name = None,
-          normal_equations_class=olex2_normal_equations.normal_eqns):
+          normal_equations_class=olex2_normal_equations.normal_eqns,
+          ed_refinement=False):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
@@ -119,7 +120,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       pass
     print("Using %s threads. Using OpenMP: %s." %(
       ext.build_normal_equations.available_threads,
-      olx.GetVar("use_openmp", "false")))
+      OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.use_tsc = table_file_name is not None
@@ -166,8 +167,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if timer:
       t2 = time.time()
 
-    temp = self.olx_atoms.exptl['temperature']
-    if temp < -274: temp = 20
+    self.temp = self.olx_atoms.exptl['temperature']
+    if self.temp < -274: self.temp = 20
     #set up extinction correction if defined
     exti = OV.GetExtinction()
     if exti is not None:
@@ -178,17 +179,49 @@ class FullMatrixRefine(OlexCctbxAdapter):
     else:
       self.extinction = xray.dummy_extinction_correction()
       self.extinction.expression = ''
+
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=self.connectivity_table,
       twin_fractions=self.get_twin_fractions(),
-      temperature=temp,
+      temperature=self.temp,
       extinction=self.extinction,
       directions=self.directions
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
+
+    def build_ed_reparametrisation(self, thickness, twin_fractions):
+      ed_reparametrisation = constraints.reparametrisation(
+        structure=self.xray_structure(),
+        constraints=self.constraints,
+        connectivity_table=self.connectivity_table,
+        twin_fractions=twin_fractions,
+        temperature=self.temp,
+        extinction=self.extinction,
+        directions=self.directions,
+        thickness=thickness
+      )
+      ed_reparametrisation.fixed_distances.update(self.fixed_distances)
+      ed_reparametrisation.fixed_angles.update(self.fixed_angles)
+      return ed_reparametrisation
+
+    self.std_reparametrisation = None
+    self.std_obserations = None
+    if ed_refinement:
+      import AC5ED
+      thickness = float(olx.GetVar("thickness", "1"))
+      print("Thickness: %s" %thickness)
+      self.thickness = xray.thickness(thickness, True)
+      self.std_obserations = self.observations
+      self.observations = AC5ED.instance.build_observations(
+        self.xray_structure().crystal_symmetry(),
+        anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
+      self.std_reparametrisation = self.reparametrisation
+      self.reparametrisation = build_ed_reparametrisation(
+        self, self.thickness, self.observations.twin_fractions)
+
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
     if timer:
@@ -211,7 +244,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.normal_eqns = normal_equations_class(
       self.observations,
-      self.reparametrisation,
+      self,
       self.olx_atoms,
       table_file_name=table_file_name,
       f_mask=self.f_mask,
@@ -220,7 +253,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       log=self.log,
       may_parallelise=env.threads > 1,
       use_openmp=use_openmp,
-      max_memory=max_mem
+      max_memory=max_mem,
+      std_reparametrisation=self.std_reparametrisation,
+      std_observations=self.std_obserations
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps

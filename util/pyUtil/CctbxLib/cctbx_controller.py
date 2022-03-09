@@ -238,7 +238,7 @@ class reflections(object):
 
   def get_observations(self, twin_fractions, twin_components):
     miller_set = miller.set(
-      crystal_symmetry=self.f_sq_obs_filtered,
+      crystal_symmetry=self.f_sq_obs_filtered.crystal_symmetry(),
       indices=self.f_sq_obs_filtered.indices(),
       anomalous_flag=self.f_sq_obs_filtered.anomalous_flag())\
         .unique_under_symmetry().map_to_asu()
