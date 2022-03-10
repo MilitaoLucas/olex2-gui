@@ -210,12 +210,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.std_reparametrisation = None
     self.std_obserations = None
     if ed_refinement:
-      import AC5ED
+      import AC5 as ac5
+      try:
+        ac5 = ac5.AC5_instance
+      except:
+        ac5 = ac5.AC5.AC5_instance
       thickness = float(olx.GetVar("thickness", "1"))
       print("Thickness: %s" %thickness)
       self.thickness = xray.thickness(thickness, True)
       self.std_obserations = self.observations
-      self.observations = AC5ED.instance.build_observations(
+      self.observations = ac5.EDI.build_observations(
         self.xray_structure().crystal_symmetry(),
         anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
       self.std_reparametrisation = self.reparametrisation
