@@ -10,17 +10,15 @@ from smtbx_refinement_least_squares_ext import *
 import math
 from olexFunctions import OV
 
+import AC5 as ac5
+try:
+  ac5 = ac5.AC5_instance
+except:
+  ac5 = ac5.AC5.AC5_instance
+
 import olx
 import olex
 import olex_core
-
-import AC5ED
-import AC5 as ac5
-try:
-  _ = ac5.AC5_instance
-except:
-  _ = ac5.AC5.AC5_instance
-  ac5 = ac5.AC5
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
@@ -51,9 +49,9 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false" or\
-        not ac5.AC5_instance.IsAC5Enabled:
-#        not ac5.AC5_instance.IsMEDEnabled:
+    if olx.GetVar("use_ed_wrapper", "false") == "false" or\
+        not ac5.IsAC5Enabled:
+#        not ac5.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
@@ -76,12 +74,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                 self.std_reparametrisation.extinction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
-      self.one_h_linearisation = AC5ED.instance.build(self.data,
+      self.one_h_linearisation = ac5.EDI.build(self.data,
         self.refinement.thickness,
         self.xray_structure.crystal_symmetry(),
         self.std_observations.fo_sq.anomalous_flag())
       super(normal_eqns, self).build_up()
-      AC5ED.instance.update_scales(old_func,
+      ac5.EDI.update_scales(old_func,
         self.weighting_scheme,
         self.xray_structure, f_mask,
         self.refinement.thickness)
