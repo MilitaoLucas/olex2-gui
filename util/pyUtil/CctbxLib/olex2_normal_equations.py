@@ -56,17 +56,18 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       return
     old_func = self.one_h_linearisation
     try:
-      if self.f_mask is not None:
-        f_mask = self.f_mask.data()
+      if self.f_mask is None:
+        f_mask_data = MaskData(flex.complex_double())
       else:
-        f_mask = flex.complex_double()
+        f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
+          self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
       cl = least_squares.crystallographic_ls_class()
       self.std_reparametrisation.linearise()
       xx = cl(self.observations, self.std_reparametrisation)
       def args():
         args = (xx,
                 self.std_observations,
-                f_mask,
+                f_mask_data,
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
@@ -81,9 +82,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       super(normal_eqns, self).build_up()
       ac5.EDI.update_scales(old_func,
         self.weighting_scheme,
-        self.xray_structure, f_mask,
+        self.xray_structure, f_mask_data,
         self.refinement.thickness)
-      olx.SetVar("thickness", self.refinement.thickness.value)
     finally:
       self.one_h_linearisation = old_func
 
@@ -309,6 +309,9 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+    #ED stuff
+    if self.std_observations:
+      olx.xf.rm.StoreParam('ED.thickness.value', self.refinement.thickness.value)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()

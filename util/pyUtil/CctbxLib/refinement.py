@@ -215,9 +215,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
         ac5 = ac5.AC5_instance
       except:
         ac5 = ac5.AC5.AC5_instance
-      thickness = float(olx.GetVar("thickness", "1"))
+
+      thickness = 400
+      grad_t = True
+      ed = self.olx_atoms.model['Generic'].get('ED', None)
+      if ed is not None:
+        st = ed.get('thickness', None)
+        if st:
+          thickness = float(st['value'])
+          grad_t = st['fields'].get('grad', 'true').lower() == 'true'
+
       print("Thickness: %s" %thickness)
-      self.thickness = xray.thickness(thickness, True)
+      self.thickness = xray.thickness(thickness, grad_t)
       self.std_obserations = self.observations
       self.observations = ac5.EDI.build_observations(
         self.xray_structure().crystal_symmetry(),
