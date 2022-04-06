@@ -817,7 +817,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_diffrn_reflns_point_group_measured_fraction_full'] = fmt % completeness_full_a
       cif_block['_diffrn_reflns_point_group_measured_fraction_max'] = fmt % completeness_theta_max_a
 
-    cif_block['_diffrn_radiation_wavelength'] = self.wavelength
+    cif_block['_diffrn_radiation_wavelength'] = "%.5f" %self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
     if self.hklf_code == 5:
       cif_block['_diffrn_reflns_number'] = refinement_refs.size()
