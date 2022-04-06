@@ -773,15 +773,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if not self.f_mask:
       cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
       cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    else:
-      _ = OV.GetParam('snum.masks.user_sum_formula')
-      if _:
-        olx.xf.SetFormula(_)
-        cif_block['_chemical_formula_sum'] = _
+    #else:
+      #_ = OV.GetParam('snum.masks.user_sum_formula')
+      #if _:
+        #olx.xf.SetFormula(_)
+        #cif_block['_chemical_formula_sum'] = _
 
-      _ = OV.GetParam('snum.masks.user_sum_formula')
-      if _:
-        cif_block['_chemical_formula_moiety'] = _
+      #_ = OV.GetParam('snum.masks.user_moiety_formula')
+      #if _:
+        #cif_block['_chemical_formula_moiety'] = _
 
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
