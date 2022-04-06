@@ -416,14 +416,33 @@ class html_Table(object):
         atoms.append(i)
     OV.cmd('editatom {}'.format(' '.join(atoms)))
 
+def get_existing_fvar_dropdown_items():
+  FvarNum=0
+  while OV.GetFVar(FvarNum) is not None:
+    FvarNum+=1
+  items = ""
+  for i in range(FvarNum):
+    i += 1
+    items += "%s;" %(i+1)
+  return items
+OV.registerFunction(get_existing_fvar_dropdown_items, False, "gui.restraints")
 
 def set_mode_fit():
-  val = olx.html.GetValue('SPLIT_PARTS', None)
-  if val == "auto":
-    olex.m("mode fit -s same")
-  else:
-    olex.m("mode fit -s same -p=%s" % val.split("/")[0].strip())
+  cmd = "mode fit -s"
+  val_parts = olx.html.GetValue('SPLIT_PARTS', None)
+  val_fvars = olx.html.GetValue('SPLIT_FVARS', None)
+  val_restraints = olx.html.GetValue('SPLIT_RESTRAINTS', None)
 
+  if val_restraints != "--":
+    cmd += " %s" %val_restraints
+  
+  if val_parts != "auto":
+    cmd += " -p=%s" % val_parts.split("/")[0].strip()
+
+  if val_fvars != "auto":
+    cmd += " -v=%s" % val_fvars
+
+  olex.m(cmd)
 
 OV.registerFunction(set_mode_fit, False, "gui.restraints")
 
