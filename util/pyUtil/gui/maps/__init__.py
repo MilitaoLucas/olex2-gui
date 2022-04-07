@@ -114,13 +114,14 @@ class MapUtil:
     self.map_type = 'eden'
     OV.SetVar('olex2.map_type', 'eden')
 
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical") and\
+      OV.GetParam("snum.refinement.program") == "olex2.refine"
     if map_source == "fcf":
       olex.m("CalcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
     elif map_source == "olex":
       if NoSpherA2 == True:
         print("NoSpherA2 maps only possible with .fcf or cctbx")
-      elif map_source == "olex":
+        else:
         olex.m("CalcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("spy.NoSpherA2.show_fft_map(%s,%s)"%(map_resolution,map_type))

@@ -816,7 +816,8 @@ class ExtractCifInfo(CifTools):
       })
 
     self.update_manageable()
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical') and\
+      OV.GetParam("snum.refinement.program") == "olex2.refine"
     if use_aspherical:
       NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
 Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
