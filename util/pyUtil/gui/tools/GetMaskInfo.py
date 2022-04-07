@@ -403,7 +403,8 @@ import decimal
 import random
 
 def get_rounded_formula(rnd=2, as_string_sep=""):
-  formula = olx.xf.GetFormula('list',rnd)
+  # get actual and not user formula
+  formula = olx.xf.GetFormula('list',rnd, True)
   if as_string_sep:
     formula = formula.split(",")
     formula = as_string_sep.join(formula).replace(":","")
