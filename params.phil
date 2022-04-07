@@ -1044,7 +1044,7 @@ user
       .type = bool
     use_openmp = True
       .type = bool
-    openmp_mem = 300
+    openmp_mem = 1000
       .type = int
   }
 
