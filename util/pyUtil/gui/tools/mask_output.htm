@@ -167,12 +167,12 @@ t:mask_output_end_rp{
         value="Formula +"
         bgcolor="GetVar('linkButton.bgcolor')"
         fgcolor="GetVar('linkButton.fgcolor')"
-        onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>spy.SetParam(snum.masks.user_sum_formula, '%(suggested_sum)s')>>html.Update()"
+        onclick="xf.SetFormula(%(suggested_sum)s)>>html.Update()"
         custom="#custom"
       >
     </td>
     <td>
-        %(formula)s
+        %(suggested_sum)s
     </td>
     <td align='right'>
         <b>%(add_to_formula)s</b>
@@ -186,7 +186,7 @@ t:mask_output_end_rp{
         bgcolor="GetVar('linkButton.bgcolor')"
         fgcolor="GetVar('linkButton.fgcolor')"
         value="Moiety +"
-        onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>spy.SetParam(snum.masks.user_moiety_formula, '%(suggested_moiety)s')>>html.Update()"
+        onclick="spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>html.Update()"
         custom="#custom"
       >
     </td>

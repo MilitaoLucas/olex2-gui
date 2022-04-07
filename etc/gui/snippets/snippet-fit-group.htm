@@ -4,28 +4,65 @@
     "value=Fit",
     "hint=Mode Fit. Select atom(s) and then rotate/move to fit.",
     "onclick=if strcmp(sel(),'') then 'mode split -s' else 'mode fit -s=false'",
-    "td1=<td width='35%'>"
+    "td1=<td width='15%'>"
     )
   $-
-  
+
+<td align='center'>|</td>
+
   $+
     html.Snippet(GetVar(default_link),
     "value=Split",
     "hint=Restrained Split. The selected group will be split and but restraints will be applied to the resulting PARTs",
     "onclick=if spy.check_for_selection() then 'spy.gui.restraints.set_mode_fit()'",
-    "td1=<td width='35%'>"
+    "td1=<td width='15%' align='left'>"
     )
   $-
 
-<td width='15%'>
-  with PARTs
+<td width='4%' align='center'>
+with
 <td>
 
 <td width='20%' align='left'>
   $+
     html.Snippet("gui/snippets/input-combo",
+    "name=SPLIT_RESTRAINTS",
+    "items=SAME;RIGU;SAME RIGU;--;",
+    "value=SAME",
+    "readonly=false",
+    "onchange=",
+    "onchangealways=true",
+    )
+  $-
+</td>
+
+
+<td width='6%'>
+  PART
+</td>
+
+<td width='14%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
     "name=SPLIT_PARTS",
     "items=auto;1/2;3/4;5/6",
+    "value=auto",
+    "readonly=false",
+    "onchange=",
+    "onchangealways=true",
+    )
+  $-
+</td>
+
+<td width='6%'>
+  FVAR
+</td>
+
+<td width='14%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SPLIT_FVARS",
+    "items=auto;spy.gui.restraints.get_existing_fvar_dropdown_items()",
     "value=auto",
     "readonly=false",
     "onchange=",

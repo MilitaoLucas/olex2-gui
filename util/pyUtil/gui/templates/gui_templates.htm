@@ -452,21 +452,30 @@ t:weight_button{
 
 
 t:restraints_top{
-<b>
-
   <td align='left'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type='checkbox'
       bgcolor="GetVar('HtmlTableBgColour')"
-      name='SELECT_PARTS@%(scope)s'
+      name='SHOW_RESTRAINTS'
       checked="GetVar('show_restraints_table','false')"
       oncheck="SetVar('show_restraints_table','true')>>spy.gui.restraints.make_restraints_table()>>html.update"
       onuncheck="SetVar('show_restraints_table','false')>>spy.gui.restraints.make_restraints_table()>>html.update"
       target="Show/Hide the list of restraints in this model"
-      value="Show/Hide the list of restraints in this model"
+      value="Show/Hide the list of restraints"
     >
-
     </font>
   </td>
-</b>}
+  <td>
+     %(filtered_off)s
+  </td>
+
+  <td width='10%%'>
+  <input
+    type="combo"
+    name="RESTRAINT_FILTER"
+    items="0.0;0.5;1.0;2.0;2.5;3.0;5.0"
+    value="GetVar(restraint_filter)"
+    onchange="SetVar(restraint_filter, html.GetValue(~name~))>>SetVar(restraint_filter_changed, True)>>html.update()>>SetVar(restraint_filter_changed, False)"
+>  </td>
+}
