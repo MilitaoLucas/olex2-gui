@@ -121,7 +121,7 @@ class MapUtil:
     elif map_source == "olex":
       if NoSpherA2 == True:
         print("NoSpherA2 maps only possible with .fcf or cctbx")
-        else:
+      else:
         olex.m("CalcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("spy.NoSpherA2.show_fft_map(%s,%s)"%(map_resolution,map_type))
