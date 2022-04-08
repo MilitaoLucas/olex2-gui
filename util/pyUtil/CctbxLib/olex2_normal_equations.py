@@ -10,11 +10,11 @@ from smtbx_refinement_least_squares_ext import *
 import math
 from olexFunctions import OV
 
-import AC5 as ac5
+import AC6 as ac6
 try:
-  ac5 = ac5.AC5_instance
+  aci = ac6.AC_instance
 except:
-  ac5 = ac5.AC5.AC5_instance
+  aci = ac6.AC6.AC_instance
 
 import olx
 import olex
@@ -50,8 +50,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
 
   def build_up(self, objective_only):
     if olx.GetVar("use_ed_wrapper", "false") == "false" or\
-        not ac5.IsAC5Enabled:
-#        not ac5.IsMEDEnabled:
+        not aci.IsACEnabled:
+#        not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
@@ -75,12 +75,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                 self.std_reparametrisation.extinction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
-      self.one_h_linearisation = ac5.EDI.build(self.data,
+      self.one_h_linearisation = aci.EDI.build(self.data,
         self.refinement.thickness,
         self.xray_structure.crystal_symmetry(),
         self.std_observations.fo_sq.anomalous_flag())
       super(normal_eqns, self).build_up()
-      ac5.EDI.update_scales(old_func,
+      aci.EDI.update_scales(old_func,
         self.weighting_scheme,
         self.xray_structure, f_mask_data,
         self.refinement.thickness)
@@ -311,7 +311,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     #ED stuff
     if self.std_observations:
-      olx.xf.rm.StoreParam('ED.thickness.value', self.refinement.thickness.value)
+      olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
