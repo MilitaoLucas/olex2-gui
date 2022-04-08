@@ -210,11 +210,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.std_reparametrisation = None
     self.std_obserations = None
     if ed_refinement:
-      import AC5 as ac5
+      import AC6 as ac6
       try:
-        ac5 = ac5.AC5_instance
+        aci = ac6.AC_instance
       except:
-        ac5 = ac5.AC5.AC5_instance
+        aci = ac6.AC6.AC_instance
 
       thickness = 400
       grad_t = True
@@ -228,7 +228,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print("Thickness: %s" %thickness)
       self.thickness = xray.thickness(thickness, grad_t)
       self.std_obserations = self.observations
-      self.observations = ac5.EDI.build_observations(
+      self.observations = aci.EDI.build_observations(
         self.xray_structure().crystal_symmetry(),
         anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
       self.std_reparametrisation = self.reparametrisation
@@ -773,15 +773,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if not self.f_mask:
       cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
       cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    #else:
-      #_ = OV.GetParam('snum.masks.user_sum_formula')
-      #if _:
-        #olx.xf.SetFormula(_)
-        #cif_block['_chemical_formula_sum'] = _
-
-      #_ = OV.GetParam('snum.masks.user_moiety_formula')
-      #if _:
-        #cif_block['_chemical_formula_moiety'] = _
 
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()

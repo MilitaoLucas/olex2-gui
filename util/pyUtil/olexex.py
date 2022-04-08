@@ -1,3 +1,4 @@
+import shutil
 import olex
 import olex_fs
 import glob
@@ -1711,20 +1712,6 @@ def EditIns():
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   olx.html.Update()
 OV.registerFunction(EditIns)
-
-def Cleanup(file_ext):
-  def cleanup_dir(dir):
-    for f in os.listdir(dir):
-      full_path = os.path.join(dir, f)
-      if os.path.isfile(full_path) and f.endswith(file_ext):
-        os.remove(full_path)
-      elif os.path.isdir(full_path):
-        cleanup_dir(full_path)
-  try:
-    cleanup_dir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
-  except:
-    pass
-olex.registerFunction(Cleanup, False, "util")
 
 def FixMACQuotes(text):
   if text:
