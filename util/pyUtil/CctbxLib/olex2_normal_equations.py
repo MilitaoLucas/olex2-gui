@@ -49,9 +49,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    if olx.GetVar("use_ed_wrapper", "false") == "false" or\
-        not aci.IsACEnabled:
-#        not aci.IsMEDEnabled:
+    ed_refinement = OV.GetParam("snum.refinement.ED.use_2_beam")
+    if not ed_refinement or not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
