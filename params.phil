@@ -364,6 +364,14 @@ routines requiring structure refinement
         .type = bool
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
       }
+      ED
+        .short_caption = ED parameters
+      {
+        maxSg = 0.01
+          .type = float
+        use_2_beam = False
+          .type = bool
+      }
   }
 
   twinning{
