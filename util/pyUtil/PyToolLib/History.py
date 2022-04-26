@@ -109,11 +109,13 @@ class History(ArgumentParser):
         os.remove(lstFile)
 
     cif_odFile = os.path.join(filepath, filename + ".cif_od")
-    if node.cif_od is not None:
-      cif_odFileData = decompressFile(node.cif_od)
-      with open(cif_odFile, 'wb') as wFile:
-        wFile.write(cif_odFileData)
-
+    try:
+      if node.cif_od is not None:
+        cif_odFileData = decompressFile(node.cif_od)
+        with open(cif_odFile, 'wb') as wFile:
+          wFile.write(cif_odFileData)
+    except AttributeError:
+      node.cif_od = None
     destination = resFile
     destination = "%s" %destination.strip('"').strip("'")
     sg = olex.f("sg()")
