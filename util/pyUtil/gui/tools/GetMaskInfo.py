@@ -733,10 +733,16 @@ def _add_formula(curr, new, multi = 1):
       updated_d[head] += tail
     i += 1
   l = []
+  l_beginning = []
   for item in updated_d:
-    l.append ("%s%s " %(item, format_number(updated_d[item])))
-
+    if item == "C" or item == "H":
+      l_beginning.append("%s%s " %(item, format_number(updated_d[item])))
+    else:
+      l.append ("%s%s " %(item, format_number(updated_d[item])))
   l.sort()
+  l_beginning.sort()
+  l = l_beginning + l
+  
   retVal = ""
   for item in l:
     retVal += item
