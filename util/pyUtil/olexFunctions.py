@@ -239,6 +239,11 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
+      try:
+        value.encode('ascii')
+      except:
+        print("Please use only ASCII characters")
+        return
       data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
       if isinstance(value, str):
