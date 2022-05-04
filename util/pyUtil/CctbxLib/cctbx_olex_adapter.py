@@ -125,6 +125,7 @@ class OlexCctbxAdapter(object):
       self.twin_components = None
 
     self.exti = self.olx_atoms.model.get('exti', None)
+    self.swat = self.olx_atoms.model.get('swat', None)
     self.initialise_reflections()
     from connectivity_table import connectivity_table
     self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
