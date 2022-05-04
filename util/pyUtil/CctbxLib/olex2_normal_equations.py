@@ -4,7 +4,7 @@ import time
 from scitbx.array_family import flex
 from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
-from cctbx import adptbx
+from cctbx import adptbx, xray
 from smtbx_refinement_least_squares_ext import *
 
 import math
@@ -303,8 +303,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           olx.xf.rm.BASF(idx, fraction.value)
           idx += 1
     #update EXTI
-    if self.reparametrisation.extinction.grad:
-      OV.SetExtinction(self.reparametrisation.extinction.value)
+    if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+        OV.SetExtinction(self.reparametrisation.fc_correction.value)
+      elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+        OV.SetSWAT(self.reparametrisation.fc_correction.g,
+          self.reparametrisation.fc_correction.U)
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
@@ -341,14 +345,17 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     self.max_ls_shift_over_su = ls_shifts_over_su[max_shift_i]
     r = self.non_linear_ls.actual.reparametrisation
     J = r.jacobian_transpose_matching_grad_fc().transpose()
-    spc = len(r.independent_scalar_parameters)
-    offset = 1
+    spc = 0
+    for ip in r.independent_scalar_parameters:
+      spc += ip.n_param
     if max_shift_i >= J.n_cols-spc:
-      if r.thickness is not None and max_shift_i == J.n_cols - 1:
+      if r.thickness is not None and r.thickness.grad_index == max_shift_i:
         self.max_shift_for = "ED_Thickness"
         offset += 1
-      elif r.extinction.grad and max_shift_i == J.n_cols - offset:
-        self.max_shift_for = "EXTI"
+      elif r.fc_correction and r.fc_correction.grad and\
+           max_shift_i >= r.fc_correction.grad_index and\
+           max_shift_i < r.fc_correction.grad_index + r.fc_correction.n_param:
+        self.max_shift_for = "EXTI/SWAT"
       else:
         self.max_shift_for = "BASF%s" %(max_shift_i - (J.n_cols - spc) + 1)
     else:

@@ -169,16 +169,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.temp = self.olx_atoms.exptl['temperature']
     if self.temp < -274: self.temp = 20
-    #set up extinction correction if defined
-    exti = OV.GetExtinction()
-    if exti is not None:
-      self.extinction = xray.shelx_extinction_correction(
-        self.xray_structure().unit_cell(), self.wavelength, exti)
-      self.extinction.grad = True
-      self.extinction.expression = r'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
+    self.fc_correction = None
+    #set up Fc  correction if defined
+    if self.exti is not None:
+      self.fc_correction = xray.shelx_extinction_correction(
+        self.xray_structure().unit_cell(), self.wavelength, self.exti)
+      self.fc_correction.grad = True
+      self.fc_correction.expression = r'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
+    elif self.swat is not None:
+      self.fc_correction = xray.shelx_SWAT_correction(
+        self.xray_structure().unit_cell(), self.swat[0], self.swat[1])
+      self.fc_correction.grad = True
+      self.fc_correction.expression = r'Fc^*^=kFc[1-g*exp(-8*\p^2^ U (sin(\q)/\l)^2^]^2^'
     else:
-      self.extinction = xray.dummy_extinction_correction()
-      self.extinction.expression = ''
+      self.fc_correction = xray.dummy_fc_correction()
+      self.fc_correction.expression = ''
 
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
@@ -186,7 +191,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       connectivity_table=self.connectivity_table,
       twin_fractions=self.get_twin_fractions(),
       temperature=self.temp,
-      extinction=self.extinction,
+      fc_correction=self.fc_correction,
       directions=self.directions
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
@@ -199,7 +204,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         connectivity_table=self.connectivity_table,
         twin_fractions=twin_fractions,
         temperature=self.temp,
-        extinction=self.extinction,
+        fc_correction=self.fc_correction,
         directions=self.directions,
         thickness=thickness
       )
@@ -361,11 +366,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
-      if self.reparametrisation.extinction.grad:
-        #extinction is the last parameter after the twin fractions
-        su = math.sqrt(diag[dlen-1])
-        OV.SetExtinction(self.reparametrisation.extinction.value, su)
+      if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
         dlen -= 1
+      if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+        if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+          su = math.sqrt(diag[dlen-1])
+          OV.SetExtinction(self.reparametrisation.fc_correction.value, su)
+          dlen -= 1
+        elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+          e_g = math.sqrt(diag[dlen-2])
+          e_U = math.sqrt(diag[dlen-1])
+          OV.SetSWAT(self.reparametrisation.fc_correction.g,
+            self.reparametrisation.fc_correction.U,
+          e_g, e_U)
+          dlen -= 2
       if timer:
         t6 = time.time()
       try:
@@ -505,15 +519,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         else:
           obs_ = self.observations
         from smtbx import absolute_structure
-        exti_ = None
-        if self.extinction.grad:
-          exti_ = xray.shelx_extinction_correction(
-            self.xray_structure().unit_cell(), self.wavelength, self.extinction.value)
-          exti_.grad = False
+        fc_cr = None
+        if self.fc_correction.grad:
+          fc_cr = self.fc_correction.fork()
+          fc_cr.grad = False
         flack = absolute_structure.flack_analysis(
           self.normal_eqns.xray_structure,
           obs_,
-          exti_,
+          fc_cr,
           connectivity_table=self.connectivity_table
         )
         return utils.format_float_with_standard_uncertainty(
@@ -839,9 +852,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_block['_refine_ls_abs_structure_Flack'] = self.hooft_str
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
-    if self.extinction.expression:
-      cif_block['_refine_ls_extinction_expression'] = self.extinction.expression
-      cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
+    if self.reparametrisation.fc_correction.expression:
+      cif_block['_refine_ls_extinction_expression'] = self.reparametrisation.fc_correction.expression
+      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+        cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.value
+      elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+        cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.g +\
+           '' + fmt % self.reparametrisation.fc_correction.U
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
