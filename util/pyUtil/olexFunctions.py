@@ -399,21 +399,22 @@ class OlexFunctions(inheritFunctions):
     except:
       return default
 
-  def GetExtinction(self):
-    try:
-      ev = olx.xf.rm.Exti()
-      if '(' in ev:
-        return float(ev.split('(')[0])
-      return float(ev)
-    except:
-      return None
-
   def SetExtinction(self, v, e=None):
     try:
       if e:
         olx.xf.rm.Exti(v, e)
       else:
         olx.xf.rm.Exti(v)
+      return True
+    except:
+      return False
+
+  def SetSWAT(self, g, U, e_g=None, e_U=None):
+    try:
+      if e_g and e_U:
+        olx.xf.rm.SWAT(g, U, e_g, e_U)
+      else:
+        olx.xf.rm.SWAT(g, U)
       return True
     except:
       return False
