@@ -1392,19 +1392,18 @@ The following options were used:
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
-      # AFIX mn : some of them use a pivot whose position is given wrt
-      #           the first constrained scatterer site
-      # m:    type                                    , pivot position
-      1:  ("tertiary_xh_site"                        , -1),
-      2:  ("secondary_xh2_sites"                     , -1),
-      3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
-      4:  ("secondary_planar_xh_site"                , -1),
-      8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
-      9:  ("terminal_planar_xh2_sites"               , -1),
-      13: ("terminal_tetrahedral_xh3_sites"          , -1),
-      14: ("terminal_tetrahedral_xh_site"            , -1),
-      15: ("polyhedral_bh_site"                      , -1),
-      16: ("terminal_linear_ch_site"                 , -1),
+      # AFIX mn :
+      # m:    type                                    , max # of pivot neigbours
+      1:  ("tertiary_xh_site"                        , 3),
+      2:  ("secondary_xh2_sites"                     , 2),
+      3:  ("staggered_terminal_tetrahedral_xh3_sites", 1),
+      4:  ("secondary_planar_xh_site"                , 2),
+      8:  ("staggered_terminal_tetrahedral_xh_site"  , 1),
+      9:  ("terminal_planar_xh2_sites"               , 1),
+      13: ("terminal_tetrahedral_xh3_sites"          , 1),
+      14: ("terminal_tetrahedral_xh_site"            , 1),
+      15: ("polyhedral_bh_site"                      , 5),
+      16: ("terminal_linear_ch_site"                 , 1),
     }
 
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
@@ -1434,7 +1433,7 @@ The following options were used:
         # overrdide the default h-atom placement as it is hard to adjust cctbx
         # connectivity to match Olex2's
         current.add_to = hydrogen_atom_constraints_customisation(
-          current, self.olx_atoms.atoms()).add_to
+          current, self.olx_atoms.atoms(), info[1]).add_to
         geometrical_constraints.append(current)
 
     return geometrical_constraints

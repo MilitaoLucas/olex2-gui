@@ -98,10 +98,11 @@ def create_xray_stucture_model(cell, spacegroup, atom_iter, reflections):
   return xs
 
 class hydrogen_atom_constraints_customisation(object):
-  def __init__(self, src, olx_atoms):
+  def __init__(self, src, olx_atoms, max_pivot_neigbours):
     self.src = src
     self._add_to = src.add_to
     self.olx_atoms = olx_atoms
+    self.max_pivot_neigbours = max_pivot_neigbours
 
   def j_rt_mx_from_olx(self, inp):
     if isinstance(inp, tuple):
@@ -121,6 +122,7 @@ class hydrogen_atom_constraints_customisation(object):
     self.pivot_neighbour_substituent_site_params = ()
     part = self.olx_atoms[self.src.constrained_site_indices[0]]['part']
     special_sites = []
+    neighbours = []
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
       if j in self.src.constrained_site_indices: continue
@@ -134,15 +136,9 @@ class hydrogen_atom_constraints_customisation(object):
       s = reparametrisation.add_new_site_parameter(j, op)
       self.pivot_neighbour_site_params += (s,)
       self.pivot_neighbour_sites += (op*scatterers[j].site,)
-      if (self.src.need_pivot_neighbour_substituents):
-        for c in self.olx_atoms[j]['neighbours']:
-          k, op_k = self.j_rt_mx_from_olx(c)
-          if k != i_pivot and scatterers[k].scattering_type != 'H':
-            k_part = self.olx_atoms[k]['part']
-            if part != 0 and k_part != 0 and k_part != part:
-              continue
-            s = reparametrisation.add_new_site_parameter(k, op.multiply(op_k))
-            self.pivot_neighbour_substituent_site_params += (s,)
+      neighbours.append(b)
+      # complete with need_pivot_neighbour_substituents after possibly shrinking
+      #  the list of the pivot neighbours
 
     length_value = self.src.bond_length
     if length_value is None:
@@ -166,6 +162,37 @@ class hydrogen_atom_constraints_customisation(object):
       for i in self.src.constrained_site_indices:
         reparametrisation.fixed_distances.setdefault(
           (i_pivot, i), self.bond_length.value)
+
+    #shrink the list of neigbours if needed
+    if len(self.pivot_neighbour_sites) > self.max_pivot_neigbours:
+      uc = reparametrisation.structure.unit_cell()
+      x_s = col(self.pivot_site)
+      d_s = sorted(
+          (uc.distance(s, x_s), i)
+          for i, s in enumerate(self.pivot_neighbour_sites)
+      )
+      new_sites = []
+      new_site_params = []
+      new_neighbours = []
+      for ni in range(self.max_pivot_neigbours):
+        new_sites.append(self.pivot_neighbour_sites[d_s[ni][1]])
+        new_site_params.append(self.pivot_neighbour_site_params[d_s[ni][1]])
+        new_neighbours.append(neighbours[d_s[ni][1]])
+      self.pivot_neighbour_sites = new_sites
+      self.pivot_neighbour_site_params = new_site_params
+      neighbours = new_neighbours
+    # complete
+    if (self.src.need_pivot_neighbour_substituents):
+      for b in neighbours:
+        j, op = self.j_rt_mx_from_olx(b)
+        for c in self.olx_atoms[j]['neighbours']:
+          k, op_k = self.j_rt_mx_from_olx(c)
+          if k != i_pivot and scatterers[k].scattering_type != 'H':
+            k_part = self.olx_atoms[k]['part']
+            if part != 0 and k_part != 0 and k_part != part:
+              continue
+            s = reparametrisation.add_new_site_parameter(k, op.multiply(op_k))
+            self.pivot_neighbour_substituent_site_params += (s,)
 
     self.hydrogens = tuple(
       [ scatterers[i_sc] for i_sc in self.src.constrained_site_indices ])
