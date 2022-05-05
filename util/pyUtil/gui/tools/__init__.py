@@ -670,21 +670,34 @@ def makeFormulaForsNumInfo():
   if font_size < 1:
     font_size = 1
 
-  if not isSame:
-    img_name = 'toolbar-refresh'
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
-  else:
-    img_name = 'toolbar-blank'
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
-    formula = present
-
   html_formula = olx.xf.GetFormula('html',1).replace("</sub>", "<font size='2'></font></sub>")
   formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-
   d = {}
-  d.setdefault('img_name', img_name)
   d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()>>html.Update")
-  d.setdefault('target', "Update Formula with current model")
+
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    if isSame:
+      img_name = 'toolbar-mask_same'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
+      d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
+      d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
+    else:
+      img_name = 'toolbar-mask_ok'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
+      d.setdefault('target', "A solvent mask has been used, and therefore the formula should differ from what is in the model. Nothing to do!")
+
+  else:
+    if not isSame:
+      img_name = 'toolbar-refresh'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
+      d.setdefault('target', "Update Formula with current model")
+    else:
+      img_name = 'toolbar-blank'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
+      formula = present
+      d.setdefault('target', "Everything is up-to-date")
+
+  d.setdefault('img_name', img_name)
   d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
   refresh_button = '''
   <input
@@ -703,6 +716,7 @@ def makeFormulaForsNumInfo():
   if debug:
     pass
     #print "Formula sNum (2): %.5f" %(time.time() - t1)
+
   return "<!-- #include snumformula %s;1 -->" %fn
   #return fn
 
