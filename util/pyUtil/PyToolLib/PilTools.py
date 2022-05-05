@@ -2430,6 +2430,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("polyhedra", (6, 9))
     iconIndex.setdefault("refresh", (7, 6))
     iconIndex.setdefault("anisH", (7, 7))
+    iconIndex.setdefault("mask_same", (8, 5, {'border':False, 'colourise':self.params.red.rgb } ))
+    iconIndex.setdefault("mask_ok", (8, 5, {'border':False, 'colourise':self.params.green.rgb } ))
 
     also_make_small_icons_l = ['open']
 
@@ -3632,7 +3634,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     height = 64
 
     size = (int(width), int(height))
-    colour = 255, 255, 255,
+    colour = (255, 255, 255, 0)
     image = Image.new('RGBA', size, colour)
     cut = idxY * width, idxX * height, idxY * width + width, idxX * height + height
 
@@ -3642,7 +3644,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       colourise = '#ff0000'
 
     if colourise:
-      crop_colourised = IT.colourize(crop, (0,0,0), colourise)
+      crop_colourised = IT.colourize(crop, (0,0,0,0), colourise)
       image.paste(crop_colourised, (0,0), crop)
     else:
       image.paste(crop)
@@ -3933,6 +3935,7 @@ class Boxplot(ImageTools):
 
 TI = timage()
 OV.registerFunction(TI.make_element_buttons, False, 'piltools')
+OV.registerFunction(TI.run_timage, False, 'piltools')
 
 
 
