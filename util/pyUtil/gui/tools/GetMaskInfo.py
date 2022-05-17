@@ -414,6 +414,9 @@ def get_rounded_formula(rnd=2, as_string_sep=""):
   #return round(num,3)
 
 def format_number(num):
+  if "." in str(num):
+    if str(num).split(".")[1].startswith('99'):
+      num = round(num,0)
   s = str(num)
   if s.endswith(".0"):
     retVal = int(num)
@@ -421,6 +424,7 @@ def format_number(num):
     retVal = round(num,1)
   elif s.endswith(".25") or s.endswith(".25"):
     retVal = round(num,2)
+
   else:
     retVal = round(num,3)
   return retVal
@@ -666,7 +670,7 @@ def add_mask_content(i,which):
     if "/" in val:
       _ = val.split("/")
       val = Fraction(int(_[0]),int(_[1]))
-
+    _ = format_number(float(val) * f / multiplicity)
     user_value_new_l.append("%s %s" %(format_number(float(val) * f / multiplicity), entity))
 #    user_value_new_l.append("%s %s" %(format_number(float(val) * f), entity))
 #    user_value_new_l.append("%s %s" %(float(val) / f, entity))
