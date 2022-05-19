@@ -1078,19 +1078,19 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
           ts[5].split(':')[1].strip()))
     return ';'.join(rv)
 
-  if "sasaki" == table_name or "auto" == table_name:
+  if "sasaki" == table_name:
     from cctbx.eltbx import sasaki
     tables = sasaki
   elif "henke" == table_name:
     from cctbx.eltbx import henke
     tables = henke
-  elif "brennan" == table_name:
+  elif "brennan" == table_name or "auto" == table_name:
     from brennan import brennan
     tables = brennan()
   else:
-    print("Invalid table name %s, resetting to Sasaki" %table_name_)
-    from cctbx.eltbx import sasaki
-    tables = sasaki
+    print("Invalid table name %s, resetting to Brennan & Cowan" % table_name_)
+    from brennan import brennan
+    tables = brennan()
   for e in elements:
     e = str(e)
     try:
