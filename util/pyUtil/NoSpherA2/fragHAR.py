@@ -523,6 +523,12 @@ class Res_c:
     self.atoms_4=[]
     self.q=0
     self.S=1 
+    self.q1=False
+    self.S1=False
+    self.q2=False
+    self.S2=False
+    self.q3=False
+    self.S3=False
 
 def cif_coord_to_mol(atom_l):
   #create molecule with residues from cif atoms
@@ -949,7 +955,7 @@ def find_junction(mol,cap2,cap1,cell,res,part):
                   abc=1
                 if BO > 1 :
                   print(j_atom.cif_nam, "is addet to cap 2")
-                  elongate.append(j_atom)
+#                  elongate.append(j_atom)
                 else:
                   j_nam="H_j"+str(j_num)
                   j_num += 1
@@ -1085,9 +1091,15 @@ def build_cap(mol,res,cell,part):
 
 def find_hbond(mol,res,anum,part,l_frag):##NEW
 #    finds first bondet atoms from naibouring residues
+  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
   anums=[]
   count=0
   if  l_frag[anum].ele == "H":
+    for i in range(len( l_frag)):
+        dist=atom_dist(l_frag[anum],l_frag[i])
+        if dist <= (l_frag[anum].cov+l_frag[i].cov+radius_tolerance):
+            if l_frag[i].ele=="C":
+                return anums 
     for i in range(len(mol)):
       if mol[i].alter != True:
         l_res= mol[i].atoms_0 +mol[i].atoms_1 + mol[i].atoms_m1
@@ -1125,8 +1137,34 @@ def build_fragments(mol,cell):
     else:
       p0=1
     for k in range(p0,len(mol[i].part)):
+      if mol[i].part[k] != 0:
+        if mol[i].part[k] ==1:
+          if mol[i].q1 != False:
+            q=mol[i].q1
+            S=mol[i].S1
+          else:
+            q=mol[i].q
+            S=mol[i].S
+        if mol[i].part[k] ==2:
+          if mol[i].q2 != False:
+            q=mol[i].q2
+            S=mol[i].S2
+          else:
+            q=mol[i].q
+            S=mol[i].S
+        if mol[i].part[k] ==3:
+          if mol[i].q3 != False:
+            q=mol[i].q3
+            S=mol[i].S3
+          else:
+            q=mol[i].q
+            S=mol[i].S
+      else:
+        q=mol[i].q
+        S=mol[i].S
+      print("PART=====================",mol[i].part[k], mol[i].res_num, q,S) 
       frag,cap,core=build_cap(mol,i,cell,mol[i].part[k])              
-      frag_l.append(Frag(mol[i].res_nam,mol[i].res_num,mol[i].part[k],frag,cap,core,mol[i].q,mol[i].S))
+      frag_l.append(Frag(mol[i].res_nam,mol[i].res_num,mol[i].part[k],frag,cap,core,q,S))
 
   return frag_l
 
@@ -1186,6 +1224,17 @@ def read_qS(file,mol):
             else:
               s=l_split[2]
             mol[i].S=s
+            if len(l_split) >3:
+              part = int(l_split[3])
+              if part ==1:
+                mol[i].q1=l_split[1] 
+                mol[i].S1=l_split[2]
+              if part ==2:
+                mol[i].q2=l_split[1] 
+                mol[i].S2=l_split[2]
+              if part ==3:
+                mol[i].q3=l_split[1] 
+                mol[i].S3=l_split[2]
             #in_list=True
 
   for i in range(len(mol)):
@@ -1217,11 +1266,9 @@ def add_cif_atoms(frag,cif,cell):
 
 def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   import shutil
-  from .NoSpherA2 import custom_bitmap, run_with_bitmap, cuqct_tsc
+  from .NoSpherA2 import run_with_bitmap, cuqct_tsc
   test_frag=OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
-  #print("test_frag",test_frag)
-  #   test_frag=False
-#    print_frag=True
+
   import time
   t1 = time.time()
   cif_head,cif_coord,cif_aniso,cif_sym,cell,mol=read_cif(input_cif)
@@ -1229,9 +1276,6 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   print("size of mol: ",len(mol))
 
   frag = build_fragments(mol,cell) 
-#    if print_frag==True:
-#       print("fragmenttation test is running")
-#       return
 
   work_folder = wfn_object.full_dir
   wfns = []
@@ -1288,11 +1332,22 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   t3 = time.time()
   run_with_bitmap("Partitioning",cuqct_tsc,wfns,hkl_fn,cifs,groups)
   try:
-    shutil.move("experimental.tsc",wfn_object.name+".tsc")
+    sucess = False
+    if os.path.exists("experimental.tsc"):
+      shutil.move("experimental.tsc", wfn_object.name + ".tsc")
+      sucess = True
+    if os.path.exists("experimental.tscb"):
+      shutil.move("experimental.tscb", wfn_object.name + ".tscb")
+      sucess = True
+    if sucess == False:
+      raise RuntimeError
   except:
     print("Error trying to move the tsc file! Make sure the calculation worked!")
     return
-  OV.SetParam('snum.NoSpherA2.file',wfn_object.name+".tsc")
+  if os.path.exists(wfn_object.name + ".tscb"):
+    OV.SetParam('snum.NoSpherA2.file', wfn_object.name + ".tscb")
+  else:
+    OV.SetParam('snum.NoSpherA2.file', wfn_object.name + ".tsc")
   t4 = time.time()
   print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")
   print("-- " + "{:8.3f}".format(t3-t2) + " for wavefunctions")

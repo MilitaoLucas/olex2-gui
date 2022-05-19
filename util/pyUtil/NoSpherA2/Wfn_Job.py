@@ -56,7 +56,6 @@ class wfn_Job(object):
     self.status = 0
     self.name = name
     self.parallel = parent.parallel
-#    self.ubuntu_exe = parent.ubuntu_exe
     if self.name.endswith('_HAR'):
       self.name = self.name[:-4]
     elif self.name.endswith('_input'):
@@ -709,9 +708,12 @@ class wfn_Job(object):
       if source == "Hybrid":
         run = 0
       if run > 1:
-        inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"")
-        if convergence == "NoSpherA2SCF":
-          inp.write("\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")        
+        if os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw")):
+          inp.write("%scf\n   Guess MORead\n   MOInp \"" + self.name + "2.gbw\"")
+          if convergence == "NoSpherA2SCF":
+            inp.write("\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
+        elif convergence == "NoSpherA2SCF":
+          inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
       else:
         if convergence == "NoSpherA2SCF":
           inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
@@ -719,7 +721,7 @@ class wfn_Job(object):
         inp.write("\nend\n")
     else:
       if convergence == "NoSpherA2SCF":
-        inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4\nend\n")      
+        inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4\nend\n")
     inp.close()
 
   def write_psi4_input(self,xyz):

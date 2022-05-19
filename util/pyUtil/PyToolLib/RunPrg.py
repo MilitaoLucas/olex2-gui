@@ -952,7 +952,7 @@ class RunRefinementPrg(RunPrg):
       tsc_exists = False
       wfn_file = None
       for file in os.listdir(olx.FilePath()):
-        if file.endswith(".tsc"):
+        if file == os.path.basename(OV.GetParam('snum.NoSpherA2.file')):
           tsc_exists = True
         elif file.endswith(".wfn"):
           wfn_file = file

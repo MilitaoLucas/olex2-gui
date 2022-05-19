@@ -1,9 +1,19 @@
 
 
-<td width='20%'>
+<td width='10%'>
   <b>&nbsp;MAP</b>
 </td>
-
+    <td width="15%">
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=SET_SNUM_MAP_TYPE_TOOLBOX",
+      "items=Diff<-diff;Fcalc<-fcalc;2Fo-Fc<-tomc;Fobs<-fobs;Deformation<-fcfmc;PDF",
+      "value=spy.GetParam('snum.map.type')",
+      "onchange=spy.SetParam('snum.map.type',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')>>html.Update()",
+      "onchangealways=True",
+      )
+    $-
+    </td>
     $+
     html.Snippet(GetVar(default_link),
     "value=Electron Density Map",

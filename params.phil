@@ -774,6 +774,12 @@ routines requiring structure refinement
       .type = choice
     type = *diff fcalc tomc fobs fcfmc PDF
       .type = choice
+    PDF_second_order = True
+      .type = bool
+    PDF_third_order = True
+      .type = bool
+    PDF_fourth_order = True
+      .type = bool
     mask = True
       .type = bool
     resolution = 0.1

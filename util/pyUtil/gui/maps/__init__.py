@@ -97,7 +97,7 @@ class MapUtil:
       olx.html.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
 
     map_type =  OV.GetParam("snum.map.type")
-    map_source =  OV.GetParam("snum.map.source")
+    map_source = OV.GetParam("snum.map.source")
     map_resolution = OV.GetParam("snum.map.resolution")
     mask = OV.GetParam("snum.map.mask")
 
@@ -126,7 +126,10 @@ class MapUtil:
       elif map_source == "olex":
         if NoSpherA2 == True:
           print("NoSpherA2 maps only possible with .fcf or cctbx")
-        else:
+          print("WARNING: Switching to cctbx maps!")
+          OV.SetParam("snum.map.source", "cctbx")
+          olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
+        elif map_source == "olex":
           olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
       else:
         olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
