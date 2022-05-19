@@ -13,7 +13,7 @@
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SNUM_REFINEMENT_NSFF_TSC_FILE",
-    "items=spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc')",
+    "items=spy.gui.GetFileListAsDropdownItems(FilePath(),'tsc;tscb')",
     "value=spy.GetParam('snum.NoSpherA2.file')",
     "onchange=spy.SetParam('snum.NoSpherA2.file',html.GetValue('~name~'))",
     "onchangealways=True"

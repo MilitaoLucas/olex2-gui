@@ -35,9 +35,10 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         one_h_linearisation = direct.f_calc_modulus_squared(
           self.xray_structure, table_file_name=table_file_name)
       except Exception as e:
-        if "stoks.size() == scatterer" in str(e):
+        e_str = str(e)
+        if "stoks.size() == scatterer" in e_str:
           print("Number of atoms in model and table are not matching!")
-        elif "Error during building of normal equations using OpenMP" in str(e):
+        elif "Error during building of normal equations using OpenMP" in e_str:
           print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
         raise e
     else:

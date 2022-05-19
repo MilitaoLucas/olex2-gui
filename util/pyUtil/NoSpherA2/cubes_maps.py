@@ -91,9 +91,11 @@ def z_slice(z, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, s, t, f):
          (x) * vecs[2][0] + (y) * vecs[2][1] + (z) * vecs[2][2]]
   result = 0.0
   for a in range(n_atoms):
+    if pre[a] < 0:
+      continue
     diff = [(pos[0] - posn[a][0]) * a2b, (pos[1] - posn[a][1]) * a2b, (pos[2] - posn[a][2]) * a2b]
     #dist = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
-    mhalfuTUu = -0.5 * (diff[0] * (diff[0] * sigmas[a][0] + diff[1] * sigmas[a][3] + diff[2] * sigmas[a][4]) + diff[1] * (diff[0] * sigmas[a][3] + diff[1] * sigmas[a][1] + diff[2] * sigmas[a][5]) + diff[2] * (diff[0] * sigmas[a][4] + diff[1] * sigmas[a][5] + diff[2] * sigmas[a][2]))
+    mhalfuTUu = np.fmin(-0.5 * (diff[0] * (diff[0] * sigmas[a][0] + diff[1] * sigmas[a][3] + diff[2] * sigmas[a][4]) + diff[1] * (diff[0] * sigmas[a][3] + diff[1] * sigmas[a][1] + diff[2] * sigmas[a][5]) + diff[2] * (diff[0] * sigmas[a][4] + diff[1] * sigmas[a][5] + diff[2] * sigmas[a][2])), np.full((z.size), 0))
     #uTUu = diff[0] * Uu[0] + diff[1] * Uu[1] + diff[2] * Uu[2]
     #exponent = -0.5 * uTUu
     P0 = pre[a] * np.exp(mhalfuTUu)
@@ -893,10 +895,16 @@ def U_to_sigma(U):
     result[i] /= fact
   return result
 
+def digest_boolinput(i):
+  if i == False or i == "False" or i == "0":
+    return False
+  else:
+    return True
+
 def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, do_plot=True, save_cube=False):
-  second = bool(second)
-  third = bool(third)
-  fourth = bool(fourth)
+  second = digest_boolinput(second)
+  third = digest_boolinput(third)
+  fourth = digest_boolinput(fourth)
   from cctbx import adptbx
   import numpy as np
   from cctbx.array_family import flex
@@ -908,8 +916,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
   try:
     distance = float(distance)
     cctbx_adapter = OlexCctbxAdapter()
-    xray_structure = cctbx_adapter.xray_structure()
-    uc = xray_structure.unit_cell()
+    uc = cctbx_adapter.xray_structure().unit_cell()
     fixed = math.pow(2 * math.pi, 1.5)
     name = OV.ModelSrc()
     Us = []
@@ -918,7 +925,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
     pre = []
     posn = []
     anharms = []
-    for atom in xray_structure._scatterers:
+    for atom in cctbx_adapter.xray_structure()._scatterers:
       temp = list(atom.site)
       coord = list(uc.orthogonalize(temp))
       coord[0] /= a2b
@@ -938,9 +945,14 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
         anharms.append(atom.anharmonic_adp.data())
       Us_cart.append(adp_cart)
       sigmas.append(U_to_sigma(adp_cart))
-      pre.append(math.sqrt(det(sigmas[-1])) / fixed)
+      pre_temp = det(sigmas[-1])
+      if pre_temp < 0:
+        pre_temp = -math.sqrt(-pre_temp) / fixed
+      else:
+        pre_temp = math.sqrt(pre_temp) / fixed
+      pre.append(pre_temp)
 
-    gridding = xray_structure.gridding(step=float(resolution))
+    gridding = cctbx_adapter.xray_structure().gridding(step=float(resolution))
     size = list(gridding.n_real())
     data = flex.double(size[0] * size[1] * size[2])
 
@@ -1039,7 +1051,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
         if dist < min_dist:
           min_dist = dist
           atom_nr = i
-      print("WARNING! Significant negative PDF for Atom: " + str(xray_structure._scatterers[atom_nr].label))
+      print("WARNING! Significant negative PDF for Atom: " + str(cctbx_adapter.xray_structure()._scatterers[atom_nr].label))
       print("WARNING! At a distance of {:8.3f} Angs".format(min_dist))
     data.reshape(flex.grid(size[0], size[1], size[2]))
     if save_cube:
@@ -1092,6 +1104,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
     raise(e)
 
   OV.DeleteBitmap("working")
+  print("WARNING: PDF Maps are at the moment just to be understood \nindicative and not benchmarked for numerical correctness!")
 OV.registerFunction(PDF_map, False, "NoSpherA2")
 
 def tomc_map(resolution=0.1, return_map=False, use_f000=False):
