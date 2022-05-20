@@ -224,6 +224,13 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
+  
+  def get_AC_digests(self):
+    acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
+    if not acd:
+      acd = self.get_cif_item("_diffrn_oxdiff_ac3_digest_hkl").strip("\r\n ")
+    acedd = self.get_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed").strip("\r\n ")
+    return (acd, acedd)
 
   def update_crystal_size(self):
     vals = [self.get_cif_item('_exptl_crystal_size_min'),
