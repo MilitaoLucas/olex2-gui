@@ -140,7 +140,7 @@ class RunPrg(ArgumentParser):
     except Exception as e:
       e_str = str(e)
       if ("stoks.size() == scatterer" not in e_str) and ("Error during building of normal equations using OpenMP" not in e_str):
-        sys.stdout.formatExceptionInfo()      
+        sys.stdout.formatExceptionInfo()
       caught_exception = e
     finally:
       self.endRun()
@@ -211,7 +211,7 @@ class RunPrg(ArgumentParser):
           digests = None
           if copy_from.endswith(".hkl"):
             digests = OV.get_AC_digests()
-            digests = _ac6util.onHKLChange(copy_to, copy_from, digests[0], digests[1])
+            digests = _ac6util.onHKLChange(OV.HKLSrc(), copy_from, digests[0], digests[1])
           shutil.copyfile(copy_from, copy_to)
           if digests:
             digests = digests.split(',')
@@ -978,7 +978,7 @@ class RunRefinementPrg(RunPrg):
       energy = None
       if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB":
         HAR_log.write("{:24}".format(" "))
-      else:      
+      else:
         if (wfn_file != None) and (calculate == True):
           with open(wfn_file, "rb") as f:
             f.seek(-2000,os.SEEK_END)
@@ -1173,7 +1173,7 @@ class RunRefinementPrg(RunPrg):
             HAR_log.write("{:>12}".format(results.label_uij))
           else:
             HAR_log.write("{:>12}".format("N/A"))
-            
+
           HAR_log.write("{:>10.4f}".format(results.max_overall))
           if results.label_overall != None:
             HAR_log.write("{:>12}".format(results.label_overall))
