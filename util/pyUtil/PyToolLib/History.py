@@ -114,6 +114,30 @@ class History(ArgumentParser):
         cif_odFileData = decompressFile(node.cif_od)
         with open(cif_odFile, 'wb') as wFile:
           wFile.write(cif_odFileData)
+        if revert_hkl: # revert the HKL digests, if any
+          try:
+            import iotbx
+            reader = iotbx.cif.reader(input_string=cif_odFileData)
+            model = reader.model()
+            data_name = "xcalibur"
+            if data_name in model:
+              rv_ac = model[data_name].get("_diffrn_oxdiff_digest_hkl", "").\
+                strip("\r\n ")
+              if not rv_ac:
+                rv_ac = model[data_name].get("_diffrn_oxdiff_ac3_digest_hkl", "").\
+                  strip("\r\n ")
+              rv_ed = model[data_name].get("_diffrn_oxdiff_ac6_digest_hkl_ed", "").\
+                strip("\r\n ")
+              if rv_ac:
+                OV.set_cif_item("_diffrn_oxdiff_ac3_digest_hkl", rv_ac)
+              if rv_ed:
+                OV.set_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed", rv_ed)
+              if rv_ac or rv_ed:
+                from CifInfo import SaveCifInfo
+                SaveCifInfo()
+          except Exception as e:
+            print("Error while reverting data digests: %s" %str(e))
+
     except AttributeError:
       node.cif_od = None
     destination = resFile
