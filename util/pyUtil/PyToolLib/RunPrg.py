@@ -190,6 +190,7 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(copy_from, copy_to)
 
   def doFileResInsMagic(self):
+    import _ac6util
     file_lock = OV.createFileLock(os.path.join(self.filePath, self.original_filename))
     try:
       extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb', 'lxt']
@@ -205,9 +206,20 @@ class RunPrg(ArgumentParser):
         else:
           copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
         copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
-        if os.path.isfile(copy_from):
-          if copy_from.lower() != copy_to.lower():
-            shutil.copyfile(copy_from, copy_to)
+        if os.path.isfile(copy_from) and\
+          copy_from.lower() != copy_to.lower(): # could this ever be true??
+          digests = None
+          if copy_from.endswith(".hkl"):
+            digests = OV.get_AC_digests()
+            digests = _ac6util.onHKLChange(copy_to, copy_from, digests[0], digests[1])
+          shutil.copyfile(copy_from, copy_to)
+          if digests:
+            digests = digests.split(',')
+            OV.set_cif_item("_diffrn_oxdiff_ac3_digest_hkl", digests[0])
+            if len(digests) > 1:
+              OV.set_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed", digests[1])
+            from CifInfo import SaveCifInfo
+            SaveCifInfo()
         if timer:
           pass
           #print "---- copying %s: %.3f" %(copy_from, time.time() -t)
