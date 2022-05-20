@@ -352,7 +352,6 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     if max_shift_i >= J.n_cols-spc:
       if r.thickness is not None and r.thickness.grad_index == max_shift_i:
         self.max_shift_for = "ED_Thickness"
-        offset += 1
       elif r.fc_correction and r.fc_correction.grad and\
            max_shift_i >= r.fc_correction.grad_index and\
            max_shift_i < r.fc_correction.grad_index + r.fc_correction.n_param:
