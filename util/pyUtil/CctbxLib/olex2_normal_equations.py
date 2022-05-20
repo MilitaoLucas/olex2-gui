@@ -72,7 +72,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                 OV.GetOSF(),
                 self.one_h_linearisation,
                 self.std_reparametrisation.jacobian_transpose_matching_grad_fc(),
-                self.std_reparametrisation.extinction, False, True, False)
+                self.std_reparametrisation.fc_correction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
       self.one_h_linearisation = aci.EDI.build(self.data,
