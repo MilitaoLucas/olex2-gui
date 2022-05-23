@@ -299,6 +299,10 @@ routines requiring structure refinement
       .type = int
     refine_extinction_tickbox = False
       .type = bool
+    refine_swat = 1
+      .type = int
+    refine_swat_tickbox = False
+      .type = bool
     original_formula = None
       .type = str
       .expert_level = 1
