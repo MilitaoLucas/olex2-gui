@@ -114,27 +114,10 @@ $spy.gui.cif.check_for_embedded_hkl()
     <td width='31%' align='left'>
       $spy.gui.tools.weightGuiDisplay()
     </td>
-    <td width='6%' align='right'>
-      <b>EXTI </b>
-    </td>
+    
+    $spy.gui.tools.make_exti_swat_gui()
 
-    <td width='5%'>
-      $+
-        html.Snippet("gui/snippets/input-checkbox",
-        "name=SNUM_REFINEMENT_EXTI",
-        "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
-        "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
-        "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-        "bgcolor=GetVar(HtmlTableFirstcolColour)",
-        )
-       $-
-    </td>
-
-    <td width='17%'>
-      $spy.gui.tools.refine_extinction()
-    </td>
-
-    <td width='22%'>
+    <td width='12%'>
       $+
         html.Snippet("gui/snippets/input-combo",
         "name=REFINEMENT_ACTA",

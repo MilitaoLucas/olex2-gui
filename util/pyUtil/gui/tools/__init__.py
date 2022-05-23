@@ -916,6 +916,54 @@ def getExpectedPeaks():
   orm = olexex.OlexRefinementModel()
   return orm.getExpectedPeaks()
 
+def make_exti_swat_gui():
+  html = ""
+  exti = olx.xf.rm.Exti()
+  if exti and exti != "n/a":
+    html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+  else:
+    swat = olx.xf.rm.SWAT()
+    if swat and swat != "n/a":
+      html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
+  if not html:
+    html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
+  return html
+OV.registerFunction(make_exti_swat_gui,True,"gui.tools")
+
+def refine_swat():
+  retVal = ""
+  _ = olx.xf.rm.SWAT()
+  if "n/a" not in _.lower() and _ != '0':
+    if " " in _:
+      l = _.split(" ")
+    else:
+      l = [_]
+    for item in l:
+      if "(" in item:
+        _ = item.split('(')
+        swat = _[0]
+        esd = _[1].rstrip(')')
+        #swat_f = float(swat)
+        #_ = len(swat) - len(esd) -2
+        #esd_f = float("0.%s%s" %(_*"0", esd))
+        #esd = "(%s)"
+      else:
+        swat = round(float(item),3)
+        esd = ""
+        OV.SetParam('snum.refinement.refine_swat',1)
+        OV.SetParam('snum.refinement.refine_swat_tickbox', True)
+      if esd:
+        retVal += "%s(%s) "%(swat,esd)
+      else:
+        retVal += "%s "%(swat)
+  else:
+    OV.SetParam('snum.refinement.refine_swat',0)
+    OV.SetParam('snum.refinement.refine_swat_tickbox', False)
+  return retVal
+
+OV.registerFunction(refine_swat,True,"gui.tools")
+
+
 def refine_extinction():
 
   retVal = ""
