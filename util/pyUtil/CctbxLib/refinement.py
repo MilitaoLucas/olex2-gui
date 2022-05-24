@@ -318,6 +318,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if self.n_max_iterations == 0:
             self.n_iterations = 0
             self.non_linear_ls.build_up()
+            self.non_linear_ls.solve()
+            self.analyse_shifts()
           else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
             iterations_class.do(self)
         @property
