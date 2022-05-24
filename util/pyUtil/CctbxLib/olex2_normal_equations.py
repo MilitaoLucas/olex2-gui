@@ -328,6 +328,7 @@ from scitbx.lstbx import normal_eqns_solving
 
 class iterations_with_shift_analysis(normal_eqns_solving.iterations):
   convergence_as_shift_over_esd = 1e-3
+  max_ls_shift_over_su = None
 
   def analyse_shifts(self, limit_shift_over_su=None):
     if self.max_ls_shift_over_su is not None:
