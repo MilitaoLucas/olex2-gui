@@ -243,6 +243,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.observations = aci.EDI.build_observations(
         self.xray_structure().crystal_symmetry(),
         anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
+      self.std_obserations = self.observations.fo_sq.select(
+        self.observations.fo_sq.unique_under_symmetry_selection())\
+        .as_xray_observations()
       self.std_reparametrisation = self.reparametrisation
       self.reparametrisation = build_ed_reparametrisation(
         self, self.thickness, self.observations.twin_fractions)
