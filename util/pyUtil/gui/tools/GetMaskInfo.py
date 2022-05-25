@@ -39,6 +39,10 @@ if not os.path.exists(template_path):
   template_path = os.path.join(p_path, 'mask_output.htm')
 
 def get_mask_info():
+  if not olx.cif_model:
+    import CifInfo
+    CifInfo.ExtractCifInfo()
+
   global mask_info_has_updated
   import gui
 
@@ -746,7 +750,7 @@ def _add_formula(curr, new, multi = 1):
   l.sort()
   l_beginning.sort()
   l = l_beginning + l
-  
+
   retVal = ""
   for item in l:
     retVal += item
