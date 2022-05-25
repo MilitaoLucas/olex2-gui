@@ -144,18 +144,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-        lone_set = self.f_mask.lone_set(fo_sq)
-        self.f_mask = self.f_mask.common_set(fo_sq)
-        if self.f_mask.size() != fo_sq.size():
-          print("The mask is out of date. Please update.")
-          self.failure = True
-          return
-        if len(lone_set.indices()) > 0:
-          indices = self.f_mask.indices()
-          data = self.f_mask.data()
-          for i, mi in enumerate(lone_set.indices()):
-            indices.append(mi)
-            data.append(lone_set.data()[i])
     shared_parameter_constraints = self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
