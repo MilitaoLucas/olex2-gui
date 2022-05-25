@@ -328,7 +328,8 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation, filtered=False)
       else:
         f_sq_obs, f_calc = self.get_fo_sq_fc(filtered=False)
-      f_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered).f_sq_as_f()
+      f_sq_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered)
+      f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
       f_obs_omitted = f_sq_obs.lone_set(f_obs_filtered).f_sq_as_f()
       f_calc_filtered = f_calc.common_set(self.reflections.f_sq_obs_filtered)
       f_calc_omitted = f_calc.lone_set(f_calc_filtered)
