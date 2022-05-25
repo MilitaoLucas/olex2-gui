@@ -371,8 +371,11 @@ class OlexCctbxAdapter(object):
       return easy_pickle.load(mask_fn)
     return None
 
-  def get_fo_sq_fc(self, one_h_function=None):
-    fo2 = self.reflections.f_sq_obs_filtered
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True):
+    if filtered:
+      fo2 = self.reflections.f_sq_obs_filtered
+    else:
+      fo2 = self.reflections.f_sq_obs_merged
     if one_h_function:
       try:
         fc = self.f_calc(None, self.exti is not None, True, False,
