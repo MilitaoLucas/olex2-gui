@@ -248,6 +248,8 @@ snum{
       .type = str
     wfn2fchk_ED = False
       .type = bool
+    wfn2fchk_ECP = 0
+      .type = int
     wfn2fchk_SF = True
       .type = bool
     wfn2fchk_debug = False

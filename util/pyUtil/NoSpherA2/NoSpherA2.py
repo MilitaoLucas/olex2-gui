@@ -292,8 +292,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
       for sc in OlexCctbxAdapter().xray_structure().scatterers():
         Z = sc.electron_count()
-        if (Z > 36) and ("x2c" not in basis) and ("jorge" not in basis):
-          print("Atoms with Z > 36 require x2c basis sets!")
+        if (Z > 36) and ("x2c" not in basis) and ("jorge" not in basis) and ("ECP" not in basis) \
+          and ("STO" not in basis) and ("3-21" not in basis):
+          print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
           OV.SetVar('NoSpherA2-Error',"Heavy Atom but no heavy atom basis set!")
           return False
         ne += Z
@@ -317,13 +318,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if file.endswith(".tsc"):
           tsc_exists = True
           f_time = os.path.getmtime(file)
+        if file.endswith(".tscb"):
+          tsc_exists = True
+          f_time = os.path.getmtime(file)
       if tsc_exists and ".wfn" not in wfn_code:
         import datetime
         timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
         if not os.path.exists(timestamp_dir):
           os.mkdir(timestamp_dir)
         for file in os.listdir('.'):
-          if file.endswith(".tsc") or (file.endswith(".wfn") and ("wfn" not in wfn_code)) or file.endswith(".wfx") or file.endswith(".ffn") or file.endswith(".fchk"):
+          if file.endswith(".tsc") or file.endswith(".tscb") or (file.endswith(".wfn") and ("wfn" not in wfn_code)) or file.endswith(".wfx") or file.endswith(".ffn") or file.endswith(".fchk"):
             shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
 
     olex.m("CifCreate")
@@ -484,12 +488,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           else:
             wfn_fn = None
             path_base = os.path.join(OV.FilePath(), self.wfn_job_dir, self.name)
-            if os.path.exists(path_base+".wfx"):
-              wfn_fn = path_base+".wfx"
-            elif os.path.exists(path_base+".fchk"):
-              wfn_fn = path_base+".fchk"
-            elif os.path.exists(path_base+".wfn"):
-              wfn_fn = path_base+".wfn"
+            if os.path.exists(path_base + ".wfx"):
+              wfn_fn = path_base + ".wfx"
+            elif os.path.exists(path_base + ".fchk"):
+              wfn_fn = path_base + ".fchk"
+            elif os.path.exists(path_base + ".wfn"):
+              wfn_fn = path_base + ".wfn"
+            elif os.path.exists(path_base + ".molden"):
+              wfn_fn = path_base + ".molden"
             else:
               return False
           for file in os.listdir(os.getcwd()):
@@ -500,7 +506,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfx"
               if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")): wfn_fn = temp
             elif file.endswith(".ffn"):
-              temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".ffn"
+              temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".ffn"
+            elif file.endswith(".molden"):
+              temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".molden"
             elif file.endswith(".fchk"):
               temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".fchk"
               if (wfn_fn == None): 
@@ -585,17 +593,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             path_base = os.path.join(self.jobs_dir, self.name)
             if wfn_code.lower().endswith(".wfn"):
               wfn_fn = wfn_code
-            elif os.path.exists(path_base+".wfx"):
-              wfn_fn = path_base+".wfx"
-            elif os.path.exists(path_base+".fchk"):
-              wfn_fn = path_base+".fchk"
-            elif os.path.exists(path_base+".wfn"):
-              wfn_fn = path_base+".wfn"
+            elif os.path.exists(path_base + ".wfx"):
+              wfn_fn = path_base + ".wfx"
+            elif os.path.exists(path_base + ".fchk"):
+              wfn_fn = path_base + ".fchk"
+            elif os.path.exists(path_base + ".wfn"):
+              wfn_fn = path_base + ".wfn"
+            elif os.path.exists(path_base + ".molden"):
+              wfn_fn = path_base + ".molden"
             elif wfn_code == "Thakkar IAM":
-              wfn_fn = path_base+".xyz"
+              wfn_fn = path_base + ".xyz"
             else:
               return False
-            hkl_fn = path_base+".hkl"
+            hkl_fn = path_base + ".hkl"
             cif_fn = os.path.join(OV.FilePath(), self.name + ".cif")
             run_with_bitmap("Partitioning", cuqct_tsc, wfn_fn, hkl_fn, cif_fn, [-1000])
             if os.path.exists("experimental.tsc"):
@@ -924,7 +934,33 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           self.softwares = self.softwares + ";Get DISCAMB"
 
   def getBasisListStr(self):
-    return self.basis_list_str
+    source = OV.GetParam('snum.NoSpherA2.source')
+    BL = self.basis_list_str.split(";")
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    XRS = OlexCctbxAdapter().xray_structure()
+    max_Z = 1
+    from cctbx import eltbx
+    elements = eltbx.tiny_pse
+    for sc in XRS.scatterers():
+      if sc.electron_count() > max_Z:
+        max_Z = sc.electron_count()
+    final_string = ""
+    for basis in BL:
+      if self.check_for_atom_in_basis_set(basis, XRS, elements):
+        final_string += basis + ";"
+    if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid":
+      if max_Z <= 86 and max_Z > 36:
+        return final_string + ";ECP-def2-SVP;ECP-def2-TZVP;ECP-def2-TZVPP;ECP-def2-QZVP;ECP-def2-QZVPP"
+    return final_string
+  
+  def disable_relativistics(self):
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    if "DKH" in basis_name:
+      return False
+    if "x2c" in basis_name:
+      return False
+    else:
+      return True
 
   def getCPUListStr(self):
     return self.cpu_list_str
@@ -946,7 +982,34 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def available(self):
     return os.path.exists(self.wfn_2_fchk)
 
+  def check_for_atom_in_basis_set(self, name, x_ray_struct, elements):
+    BD = self.basis_dir
+    basis_file = os.path.join(BD, name)
+    if not os.path.exists(basis_file):
+      return False
+    basis = open(basis_file, "r")
+    for sc in x_ray_struct.scatterers():
+      Z = sc.electron_count()
+      temp_atom = elements.table(Z).symbol() + ":" + name
+      basis.seek(0, 0)
+      found = False
+      while True:
+        line = basis.readline()
+        if not line:
+          break  # Check whether we ran into EOF
+        if line == '':
+          continue
+        if line[0] == "!":
+          continue
+        if temp_atom in line:
+          found = True
+          break
+      if found == False:
+        return False  # If any atoms are missing this basis set is not OK
+    return True  # Only true if all atom searches were succesfull
+
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
+  basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
   folder = OV.FilePath()
   if type([]) != type(wfn_file):
     gui.get_default_notification(
@@ -986,6 +1049,10 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     args.append('-skpts')
   if(read_k_pts):
     args.append('-rkpts')
+  if "ECP" in basis_name:
+    args.append("-ECP")
+    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
+    args.append(str(mode))
   olex_refinement_model = OV.GetRefinementModel(False)
 
   if olex_refinement_model['hklf']['value'] >= 5:
@@ -1814,7 +1881,7 @@ def set_default_cpu_and_mem():
   tf_cpu = math.floor(max_cpu/4*3)
   if update == False:
     OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
-  OV.SetParam('snum.NoSpherA2.mem',str(tf_mem))
+  OV.SetParam('snum.NoSpherA2.mem', str(tf_mem))
 OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
 
 def toggle_GUI():
@@ -2140,6 +2207,7 @@ OV.registerFunction(NoSpherA2_instance.delete_f_calc_f_obs_one_h, False, "NoSphe
 OV.registerFunction(NoSpherA2_instance.getBasisListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getCPUListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(make_quick_button_gui, False, "NoSpherA2")
 
 def hybrid_GUI():

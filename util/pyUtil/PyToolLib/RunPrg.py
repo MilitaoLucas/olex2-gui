@@ -938,7 +938,7 @@ class RunRefinementPrg(RunPrg):
     #olex.m('addins LIST -6')
     add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
     if add_disp is True:
-      olex.m('gendisp -source=brennan')
+      olex.m('gendisp -source=brennan -force')
 
     while converged == False:
       run += 1
