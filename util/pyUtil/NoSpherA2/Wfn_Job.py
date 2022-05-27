@@ -72,7 +72,6 @@ class wfn_Job(object):
     self.log_fn = os.path.join(full_dir, name) + ".log"
     self.fchk_fn = os.path.join(full_dir, name) + ".fchk"
     self.completed = os.path.exists(self.fchk_fn)
-    initialised = False
 
     try:
       os.mkdir(self.full_dir)
@@ -289,6 +288,8 @@ class wfn_Job(object):
       basis.seek(0,0)
       while True:
         line = basis.readline()
+        if not line:
+          raise RecursionError("Atom not found in the basis set!")        
         if line[0] == "!":
           continue
         if "keys=" in line:
@@ -437,6 +438,8 @@ class wfn_Job(object):
       basis.seek(0,0)
       while True:
         line = basis.readline()
+        if not line:
+          raise RecursionError("Atom not found in the basis set!")
         if line == '':
           continue
         if line[0] == "!":
@@ -562,15 +565,16 @@ class wfn_Job(object):
         res += " NoFinalGridX "
         return res
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    ECP = False
+    if basis_name == None:
+      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    if "ECP" in basis_name:
+      ECP = True
     if xyz:
       self.write_xyz_file()
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    if basis_name == None:
-      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
-    basis = open(basis_set_fn,"r")
     if method == None:
       method = OV.GetParam('snum.NoSpherA2.method')
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
@@ -581,7 +585,12 @@ class wfn_Job(object):
     mem = OV.GetParam('snum.NoSpherA2.mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
-    control = "! NoPop MiniPrint 3-21G AIM "
+    control = "! NoPop MiniPrint "
+
+    if ECP == False:
+      control += "AIM 3-21G "
+    else:
+      control += basis_name.replace("ECP-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
@@ -661,45 +670,51 @@ class wfn_Job(object):
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     xyz.close()
-    inp.write("   end\nend\n%basis\n")
-    for i in range(0,len(atom_list)):
-      atom_type = "newgto " +atom_list[i] + '\n'
-      inp.write(atom_type)
-      temp_atom = atom_list[i] + ":" + basis_name
-      basis.seek(0,0)
-      while True:
-        line = basis.readline()
-        if line == '':
-          continue
-        if line[0] == "!":
-          continue
-        if "keys=" in line:
-          key_line = line.split(" ")
-          type = key_line[key_line.index("keys=")+2]
-        if temp_atom in line:
-          break
-      line_run = basis.readline()
-      if "{"  in line_run:
+    inp.write("   end\nend\n")
+    if ECP == False:
+      basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
+      basis = open(basis_set_fn,"r")      
+      inp.write("%basis\n")
+      for i in range(0, len(atom_list)):
+        atom_type = "newgto " + atom_list[i] + '\n'
+        inp.write(atom_type)
+        temp_atom = atom_list[i] + ":" + basis_name
+        basis.seek(0, 0)
+        while True:
+          line = basis.readline()
+          if not line:
+            raise RecursionError("Atom not found in the basis set!")
+          if line == '':
+            continue
+          if line[0] == "!":
+            continue
+          if "keys=" in line:
+            key_line = line.split(" ")
+            type = key_line[key_line.index("keys=") + 2]
+          if temp_atom in line:
+            break
         line_run = basis.readline()
-      while (not "}" in line_run):
-        shell_line = line_run.split()
-        if type == "turbomole=":
-          n_primitives = shell_line[0]
-          shell_type = shell_line[1]
-        elif type == "gamess-us=":
-          n_primitives = shell_line[1]
-          shell_type = shell_line[0]
-        shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
-        inp.write(shell_gaussian)
-        for n in range(0,int(n_primitives)):
+        if "{" in line_run:
+          line_run = basis.readline()
+        while (not "}" in line_run):
+          shell_line = line_run.split()
           if type == "turbomole=":
-            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
-          else:
-            inp.write(basis.readline().replace("D","E"))
-        line_run = basis.readline()
+            n_primitives = shell_line[0]
+            shell_type = shell_line[1]
+          elif type == "gamess-us=":
+            n_primitives = shell_line[1]
+            shell_type = shell_line[0]
+          shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
+          inp.write(shell_gaussian)
+          for n in range(0, int(n_primitives)):
+            if type == "turbomole=":
+              inp.write("  " + str(n + 1) + "   " + basis.readline().replace("D", "E"))
+            else:
+              inp.write(basis.readline().replace("D", "E"))
+          line_run = basis.readline()
+        inp.write("end\n")
+      basis.close()
       inp.write("end\n")
-    basis.close()
-    inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
     if Full_HAR == True:
@@ -1092,6 +1107,8 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
         basis.seek(0,0)
         while True:
           line = basis.readline()
+          if not line:
+            raise RecursionError("Atom not found in the basis set!")          
           if line[0] == "!":
             continue
           if "keys=" in line:
@@ -1521,41 +1538,74 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
 
+    if "ECP" in basis_name and "orca" in args[0]:      
+      molden_args = []
+      molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
+      if sys.platform[:3] == 'win':
+        molden_args[0] += ".exe"
+      molden_args.append(self.name)
+      molden_args.append("-emolden")
+      if sys.platform[:3] == 'win':
+        startinfo = subprocess.STARTUPINFO()
+        startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startinfo.wShowWindow = 7
+        m = subprocess.Popen(molden_args, cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE,
+                             startupinfo=startinfo)
+      else:
+        m = subprocess.Popen(molden_args, 
+                             cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE)
+      while m.poll() is None:
+        time.sleep(1)
+      n = os.path.join(self.full_dir, self.name)
+      if os.path.exists(n + ".molden.input"):
+        shutil.move(n + ".molden.input", n + ".molden")
+      else:
+        OV.SetVar('NoSpherA2-Error', "NoMoldenFile")
+        raise NameError("No molden file generated generated!")
+
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
       shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
       if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("g09" in args[0]):
-      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
-      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g09.log"))
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g09.log"))
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("g16" in args[0]):
-      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
-      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g16.log"))
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g16.log"))
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
     elif("elmodb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfx"), self.name+".wfx")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif(software == "Psi4"):
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".fchk"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".fchk"), self.name+".fchk")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
     elif software == "pySCF":
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 
     experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
 
