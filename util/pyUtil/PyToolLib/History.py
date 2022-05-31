@@ -108,6 +108,9 @@ class History(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
 
+    if revert_hkl is None:
+      revert_hkl = OV.GetParam("snum.history.revert_hkl")
+
     cif_odFile = os.path.join(filepath, filename + ".cif_od")
     try:
       if node.cif_od is not None:
@@ -145,8 +148,6 @@ class History(ArgumentParser):
     sg = olex.f("sg()")
     olex.m("reap '%s'" % destination)
 
-    if revert_hkl is None:
-      revert_hkl = OV.GetParam("snum.history.revert_hkl")
     if revert_hkl:
       str_dir = OV.StrDir()
       if str_dir:
