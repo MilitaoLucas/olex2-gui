@@ -504,7 +504,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
-          and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+          and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
