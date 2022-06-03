@@ -16,21 +16,27 @@ from smtbx.refinement import least_squares
 import math
 import sys
 
+from olexFunctions import OV
+
 import olex
 import olex_core
 import olx
 
 class leverage_normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
-  def __init__(self, observations, reparametrisation, olx_atoms, table_file_name=None, **kwds):
+  std_reparametrisation = None
+  std_observations = None
+
+  def __init__(self, observations, refinement, olx_atoms, table_file_name=None, **kwds):
     super(leverage_normal_eqns, self).__init__(
-      observations, reparametrisation, initial_scale_factor=math.pow(float(olx.xf.rm.OSF()), 2), **kwds)
+      observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
     if table_file_name:
-      self.one_h_linearisation = direct.f_calc_modulus_squared(
+      one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, table_file_name=table_file_name)
     else:
-      self.one_h_linearisation = direct.f_calc_modulus_squared(
+      one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, reflections=self.observations)
+    self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
 
 
 class Leverage(object):
@@ -39,16 +45,21 @@ class Leverage(object):
 
   def for_flack(self, max_reflections=5, output_to=None):
     from refinement import FullMatrixRefine
+
+    fmr = FullMatrixRefine()
+    if fmr.xray_structure().space_group().is_centric():
+      print("Centric space group - nothing to do")
+      return
+
     from cctbx import sgtbx
     from cctbx.xray import observations
     from scitbx.lstbx import normal_eqns_solving
 
-    fmr = FullMatrixRefine()
     obs = None
     refine = True
     # BASF 1 in already?
     if fmr.twin_components is not None and len(fmr.twin_components):
-      if fmr.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
+      if fmr.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double():
         obs = fmr.observations
         refine = False
     elif fmr.twin_fractions and len(fmr.twin_fractions):
@@ -77,21 +88,8 @@ class Leverage(object):
 # need to refine if invertion twin has been added
     if refine:
       from libtbx import utils
-      def args(scale_factor, weighting_scheme):
-        args = (normal_eqns,
-                normal_eqns.observations,
-                fmr.f_mask,
-                weighting_scheme,
-                scale_factor,
-                normal_eqns.one_h_linearisation,
-                normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc(),
-                fmr.exti)
-        return args
-
-      scale_factor = float(olx.xf.rm.OSF())
-      scale_factor *= scale_factor
       print("Refining the structure...")
-      cycles = normal_eqns_solving.naive_iterations(
+      normal_eqns_solving.naive_iterations(
         normal_eqns, n_max_iterations=10,
         gradient_threshold=1e-7,
         step_threshold=1e-4)
@@ -114,7 +112,7 @@ class Leverage(object):
   def calculate_for(self, params, max_reflections=5, output_to=None):
     from refinement import FullMatrixRefine
     dmb = FullMatrixRefine().run(build_only=True)
-    calculate(dmb, None, params.split(' '), max_reflections=max_reflections, output_to=output_to)
+    calculate(dmb, None, params.decode().split(' '), max_reflections=max_reflections, output_to=output_to)
 
   # figure out the crystallographic parameter labels
 def parameter_labels(self, n_params):
@@ -128,8 +126,15 @@ def parameter_labels(self, n_params):
       if fraction.grad:
         annotations_1.append("BASF%s" %basf_n)
         basf_n += 1
-  if self.reparametrisation.extinction is not None and self.reparametrisation.extinction.grad:
-    annotations_1.append("EXTI")
+  if self.reparametrisation.fc_correction is not None and self.reparametrisation.fc_correction.grad:
+    if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+      annotations_1.append("EXTI")
+    else:
+      annotations_1.append("SWAT.U")
+      annotations_1.append("SWAT.G")
+  if self.reparametrisation.thickness is not None and self.reparametrisation.thickness.grad:
+    annotations_1.append("Thickness")
+
   Jt = self.reparametrisation.jacobian_transpose_matching_grad_fc()
   for j in range(0, n_params):
     label = []
@@ -147,24 +152,25 @@ def calculate(self, threshold, params, max_reflections, output_to):
   import numpy as np
   import scipy.linalg as scla
 
-  if self.f_mask is not None:
-    f_mask = self.f_mask.data()
+  if self.f_mask is None:
+    f_mask_data = MaskData(flex.complex_double())
   else:
-    f_mask = flex.complex_double()
+    f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
+      self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
 
-  extinction_correction = self.reparametrisation.extinction
-  if extinction_correction is None:
-    extinction_correction = xray.dummy_extinction_correction()
+  fc_correction = self.reparametrisation.fc_correction
+  if fc_correction is None:
+    fc_correction = xray.dummy_fc_correction()
 
   def args(scale_factor, weighting_scheme):
     args = (self,
             self.observations,
-            f_mask,
+            f_mask_data,
             weighting_scheme,
             scale_factor,
             self.one_h_linearisation,
             self.reparametrisation.jacobian_transpose_matching_grad_fc(),
-            extinction_correction)
+            fc_correction)
     return args
 
   self.reparametrisation.linearise()
@@ -172,7 +178,7 @@ def calculate(self, threshold, params, max_reflections, output_to):
   scale_factor = float(olx.xf.rm.OSF())
   scale_factor *= scale_factor
   result = ext.build_design_matrix(*args(scale_factor,
-                                            self.weighting_scheme))
+                                         self.weighting_scheme))
   ds_mat = result.design_matrix()
   ds_mat = ds_mat.as_numpy_array()
   for r in range(0, ds_mat.shape[0]):
