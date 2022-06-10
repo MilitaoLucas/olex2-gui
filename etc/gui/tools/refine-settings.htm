@@ -114,27 +114,10 @@ $spy.gui.cif.check_for_embedded_hkl()
     <td width='31%' align='left'>
       $spy.gui.tools.weightGuiDisplay()
     </td>
-    <td width='6%' align='right'>
-      <b>EXTI </b>
-    </td>
+    
+    $spy.gui.tools.make_exti_swat_gui()
 
-    <td width='5%'>
-      $+
-        html.Snippet("gui/snippets/input-checkbox",
-        "name=SNUM_REFINEMENT_EXTI",
-        "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
-        "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
-        "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-        "bgcolor=GetVar(HtmlTableFirstcolColour)",
-        )
-       $-
-    </td>
-
-    <td width='17%'>
-      $spy.gui.tools.refine_extinction()
-    </td>
-
-    <td width='22%'>
+    <td width='12%'>
       $+
         html.Snippet("gui/snippets/input-combo",
         "name=REFINEMENT_ACTA",
@@ -258,19 +241,27 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 
 #ignoreif -->
 <!-- ========================================== NOSPHERA2 INTERFACE END ==== -->
+
 #ignoreif --> <!-- Closes if not ires -->
 
 
 
 
 <!-- ================================== -->
-<!-- FOOTER BELOE      LEAVE UNTOUCHED! -->
-<!-- ================================== -->
+<!-- FOOTER BELOW      LEAVE UNTOUCHED! -->
+<!-- ================================= -->
 
 </table>
 
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
-<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;onclick=;2; -->
+<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;2; -->
 
 </table>
+
+<!-- #ignoreif not spy.ac6.isMEDEnabled()
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<!-- #includeif strcmp(GetVar(ACED_DEV),True) ed_gui basedir()/util/pyUtil/ACEDd/ED_refine_interface.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Settings;onclick=;2; -->
+<!-- #includeif not(strcmp(GetVar(ACED_DEV),True)) ed_gui basedir()/util/pyUtil/ACED/ED_refine_interface.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Settings;onclick=;2; -->
+</table>
+#ignoreif -->

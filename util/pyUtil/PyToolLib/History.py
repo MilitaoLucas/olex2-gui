@@ -55,9 +55,11 @@ class History(ArgumentParser):
     if os.path.splitext(self.filefull)[-1].lower() == '.cif':
       return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
+    filefull_cif_od = os.path.splitext(self.filefull)[0] + '.cif_od'
     if self.solve:
       tree.add_top_level_node(
-        OV.HKLSrc(), self.filefull, filefull_lst, is_solution=True, label=label)
+        OV.HKLSrc(), self.filefull, filefull_lst, cif_odPath=filefull_cif_od,
+          is_solution=True, label=label)
     else:
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
     self.his_file = tree.active_node.name
@@ -106,13 +108,46 @@ class History(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
 
+    if revert_hkl is None:
+      revert_hkl = OV.GetParam("snum.history.revert_hkl")
+
+    cif_odFile = os.path.join(filepath, filename + ".cif_od")
+    try:
+      if node.cif_od is not None:
+        cif_odFileData = decompressFile(node.cif_od)
+        with open(cif_odFile, 'wb') as wFile:
+          wFile.write(cif_odFileData)
+        if revert_hkl: # revert the HKL digests, if any
+          try:
+            import iotbx
+            reader = iotbx.cif.reader(input_string=cif_odFileData)
+            model = reader.model()
+            data_name = "xcalibur"
+            if data_name in model:
+              rv_ac = model[data_name].get("_diffrn_oxdiff_digest_hkl", "").\
+                strip("\r\n ")
+              if not rv_ac:
+                rv_ac = model[data_name].get("_diffrn_oxdiff_ac3_digest_hkl", "").\
+                  strip("\r\n ")
+              rv_ed = model[data_name].get("_diffrn_oxdiff_ac6_digest_hkl_ed", "").\
+                strip("\r\n ")
+              if rv_ac:
+                OV.set_cif_item("_diffrn_oxdiff_ac3_digest_hkl", rv_ac)
+              if rv_ed:
+                OV.set_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed", rv_ed)
+              if rv_ac or rv_ed:
+                from CifInfo import SaveCifInfo
+                SaveCifInfo()
+          except Exception as e:
+            print("Error while reverting data digests: %s" %str(e))
+
+    except AttributeError:
+      node.cif_od = None
     destination = resFile
     destination = "%s" %destination.strip('"').strip("'")
     sg = olex.f("sg()")
     olex.m("reap '%s'" % destination)
 
-    if revert_hkl is None:
-      revert_hkl = OV.GetParam("snum.history.revert_hkl")
     if revert_hkl:
       str_dir = OV.StrDir()
       if str_dir:
@@ -176,7 +211,7 @@ class History(ArgumentParser):
     backupFolder = '%s/originals' %OV.StrDir()
     resetFile = '%s.ins' %OV.FileName()
     if os.path.exists(backupFolder):
-      for ext in ('res','ins','lst'):
+      for ext in ('res','ins','lst', 'cif_od'):
         path = '%s/%s.%s' %(OV.FilePath(),OV.FileName(),ext)
         if os.path.exists(path):
           os.remove(path)
@@ -204,8 +239,10 @@ class History(ArgumentParser):
       tree = self._convertHistory(historyFolder)
     else:
       tree = HistoryTree()
+      file_base = os.path.splitext(OV.FileFull())[0]
       tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(),
-                              os.path.splitext(OV.FileFull())[0] + '.lst',
+                              file_base + '.lst',
+                              file_base + '.cif_od',
                               is_solution=True)
       tree.active_node.program = 'Unknown'
       tree.active_node.method = 'Unknown'
@@ -304,6 +341,7 @@ class Node(object):
                hklPath=None,
                resPath=None,
                lstPath=None,
+               cif_odPath=None,
                label=None,
                is_solution=False,
                primary_parent_node=None,
@@ -324,10 +362,14 @@ class Node(object):
     self.lst = None
     self.res = None
     self.hkl = None
+    self.cif_od = None
 
     if hklPath and os.path.exists(hklPath):
       self.hkl = hashlib.md5(
         b'%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
+
+    if cif_odPath and os.path.exists(cif_odPath):
+      self.cif_od = compressFile(cif_odPath)
 
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):
@@ -493,15 +535,15 @@ class HistoryTree(Node):
         self.hklFilesMap[node.hkl] = full_md
 
   def add_top_level_node(
-    self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
+    self, hklPath, resPath, lstPath=None, cif_odPath=None, is_solution=True, label=None):
     if len(self.children) == 0:
-      saveOriginals(resPath, lstPath)
+      saveOriginals(resPath, lstPath, cif_odPath)
 
     if label is None:
       label = 'Solution %s' %self.next_sol_num
       self.next_sol_num += 1
     name = hashlib.md5(time.asctime(time.localtime()).encode('utf-8')).hexdigest()
-    node = Node(self.link_table, name, hklPath, resPath, lstPath, label=label,
+    node = Node(self.link_table, name, hklPath, resPath, lstPath, cif_odPath, label=label,
                 is_solution=is_solution, primary_parent_node=self)
     self.children.append(node)
     self.active_child_node = node
@@ -649,11 +691,11 @@ def delete_history(node_name):
   hist._make_history_bars()
 
 
-def saveOriginals(resPath, lstPath):
+def saveOriginals(resPath, lstPath, cif_od_path):
   backupFolder = '%s/originals' %OV.StrDir()
   if not os.path.exists(backupFolder):
     os.mkdir(backupFolder)
-  for filePath in (resPath, lstPath):
+  for filePath in (resPath, lstPath, cif_od_path):
     if filePath and os.path.exists(filePath):
       filename = os.path.basename(filePath)
       backupFileFull = '%s/%s' %(backupFolder,filename)

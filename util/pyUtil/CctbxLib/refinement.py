@@ -3,6 +3,7 @@ from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
 import cctbx_olex_adapter as COA
 from boost_adaptbx.boost import python
 ext = python.import_ext("smtbx_refinement_least_squares_ext")
+constraints_ext = python.import_ext("smtbx_refinement_constraints_ext")
 
 from olexFunctions import OV
 
@@ -96,10 +97,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         params[param] = value
       self.weighting = least_squares.mainstream_shelx_weighting(**params)
 
-
   def run(self, build_only=False,
           table_file_name = None,
-          normal_equations_class=olex2_normal_equations.normal_eqns):
+          normal_equations_class=olex2_normal_equations.normal_eqns,
+          ed_refinement=False):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
@@ -143,11 +144,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-        self.f_mask = self.f_mask.common_set(fo_sq)
-        if self.f_mask.size() != fo_sq.size():
-          print("The mask is out of date. Please update.")
-          self.failure = True
-          return
     shared_parameter_constraints = self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
@@ -166,29 +162,82 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if timer:
       t2 = time.time()
 
-    temp = self.olx_atoms.exptl['temperature']
-    if temp < -274: temp = 20
-    #set up extinction correction if defined
-    exti = OV.GetExtinction()
-    if exti is not None:
-      self.extinction = xray.shelx_extinction_correction(
-        self.xray_structure().unit_cell(), self.wavelength, exti)
-      self.extinction.grad = True
-      self.extinction.expression = r'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
+    self.temp = self.olx_atoms.exptl['temperature']
+    if self.temp < -274: self.temp = 20
+    self.fc_correction = None
+    #set up Fc  correction if defined
+    if self.exti is not None:
+      self.fc_correction = xray.shelx_extinction_correction(
+        self.xray_structure().unit_cell(), self.wavelength, self.exti)
+      self.fc_correction.grad = True
+      self.fc_correction.expression = r'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
+    elif self.swat is not None:
+      self.fc_correction = xray.shelx_SWAT_correction(
+        self.xray_structure().unit_cell(), self.swat[0], self.swat[1])
+      self.fc_correction.grad = True
+      self.fc_correction.expression = r'Fc^*^=kFc[1-g*exp(-8*\p^2^ U (sin(\q)/\l)^2^]^2^'
     else:
-      self.extinction = xray.dummy_extinction_correction()
-      self.extinction.expression = ''
+      self.fc_correction = xray.dummy_fc_correction()
+      self.fc_correction.expression = ''
+
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=self.connectivity_table,
       twin_fractions=self.get_twin_fractions(),
-      temperature=temp,
-      extinction=self.extinction,
+      temperature=self.temp,
+      fc_correction=self.fc_correction,
       directions=self.directions
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
+
+    def build_ed_reparametrisation(self, thickness, twin_fractions):
+      ed_reparametrisation = constraints.reparametrisation(
+        structure=self.xray_structure(),
+        constraints=self.constraints,
+        connectivity_table=self.connectivity_table,
+        twin_fractions=twin_fractions,
+        temperature=self.temp,
+        fc_correction=self.fc_correction,
+        directions=self.directions,
+        thickness=thickness
+      )
+      ed_reparametrisation.fixed_distances.update(self.fixed_distances)
+      ed_reparametrisation.fixed_angles.update(self.fixed_angles)
+      return ed_reparametrisation
+
+    self.std_reparametrisation = None
+    self.std_obserations = None
+    if ed_refinement:
+      import AC6 as ac6
+      try:
+        aci = ac6.AC_instance
+      except:
+        aci = ac6.AC6.AC_instance
+
+      thickness = 400
+      grad_t = True
+      ed = self.olx_atoms.model['Generic'].get('ED', None)
+      if ed is not None:
+        st = ed.get('thickness', None)
+        if st:
+          thickness = float(st['value'])
+          grad_t = st['fields'].get('grad', 'true').lower() == 'true'
+
+      print("Thickness: %s" %thickness)
+      self.thickness = xray.thickness(thickness, grad_t)
+      self.std_obserations = self.observations
+      self.observations = aci.EDI.build_observations(
+        self.xray_structure().crystal_symmetry(),
+        anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
+      self.std_obserations = self.observations.fo_sq.select(
+        self.observations.fo_sq.unique_under_symmetry_selection())\
+        .as_xray_observations()
+      self.std_reparametrisation = self.reparametrisation
+      self.reparametrisation = build_ed_reparametrisation(
+        self, self.thickness, self.observations.twin_fractions)
+
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
     if timer:
@@ -211,7 +260,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.normal_eqns = normal_equations_class(
       self.observations,
-      self.reparametrisation,
+      self,
       self.olx_atoms,
       table_file_name=table_file_name,
       f_mask=self.f_mask,
@@ -220,7 +269,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       log=self.log,
       may_parallelise=env.threads > 1,
       use_openmp=use_openmp,
-      max_memory=max_mem
+      max_memory=max_mem,
+      std_reparametrisation=self.std_reparametrisation,
+      std_observations=self.std_obserations
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -255,6 +306,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if self.n_max_iterations == 0:
             self.n_iterations = 0
             self.non_linear_ls.build_up()
+            self.non_linear_ls.solve()
+            self.analyse_shifts()
           else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
             iterations_class.do(self)
         @property
@@ -313,11 +366,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #extract SU on BASF and extinction
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
-      if self.reparametrisation.extinction.grad:
-        #extinction is the last parameter after the twin fractions
-        su = math.sqrt(diag[dlen-1])
-        OV.SetExtinction(self.reparametrisation.extinction.value, su)
+      if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
         dlen -= 1
+      if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+        if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+          su = math.sqrt(diag[dlen-1])
+          OV.SetExtinction(self.reparametrisation.fc_correction.value, su)
+          dlen -= 1
+        elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+          e_g = math.sqrt(diag[dlen-2])
+          e_U = math.sqrt(diag[dlen-1])
+          OV.SetSWAT(self.reparametrisation.fc_correction.g,
+            self.reparametrisation.fc_correction.U,
+          e_g, e_U)
+          dlen -= 2
       if timer:
         t6 = time.time()
       try:
@@ -442,7 +504,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
-          and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+          and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
@@ -457,15 +519,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         else:
           obs_ = self.observations
         from smtbx import absolute_structure
-        exti_ = None
-        if self.extinction.grad:
-          exti_ = xray.shelx_extinction_correction(
-            self.xray_structure().unit_cell(), self.wavelength, self.extinction.value)
-          exti_.grad = False
+        fc_cr = None
+        if self.fc_correction.grad:
+          fc_cr = self.fc_correction.fork()
+          fc_cr.grad = False
         flack = absolute_structure.flack_analysis(
           self.normal_eqns.xray_structure,
           obs_,
-          exti_,
+          fc_cr,
           connectivity_table=self.connectivity_table
         )
         return utils.format_float_with_standard_uncertainty(
@@ -725,16 +786,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if not self.f_mask:
       cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
       cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
-    #else:
-      #_ = OV.GetParam('snum.masks.user_sum_formula')
-      #if _:
-        #olx.xf.SetFormula(_)
-        #cif_block['_chemical_formula_sum'] = _
-
-      #_ = OV.GetParam('snum.masks.user_moiety_formula')
-      #if _:
-        #cif_block['_chemical_formula_moiety'] = _
-
+    else:
+      cif_block['_chemical_formula_sum'] = olx.xf.GetFormula()
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
     cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
     cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
@@ -800,9 +853,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_block['_refine_ls_abs_structure_Flack'] = self.hooft_str
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
-    if self.extinction.expression:
-      cif_block['_refine_ls_extinction_expression'] = self.extinction.expression
-      cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
+    if self.reparametrisation.fc_correction.expression:
+      cif_block['_refine_ls_extinction_expression'] = self.reparametrisation.fc_correction.expression
+      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+        cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.value
+      elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+        cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.g +\
+           '' + fmt % self.reparametrisation.fc_correction.U
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
@@ -1353,19 +1410,18 @@ The following options were used:
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
-      # AFIX mn : some of them use a pivot whose position is given wrt
-      #           the first constrained scatterer site
-      # m:    type                                    , pivot position
-      1:  ("tertiary_xh_site"                        , -1),
-      2:  ("secondary_xh2_sites"                     , -1),
-      3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
-      4:  ("secondary_planar_xh_site"                , -1),
-      8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
-      9:  ("terminal_planar_xh2_sites"               , -1),
-      13: ("terminal_tetrahedral_xh3_sites"          , -1),
-      14: ("terminal_tetrahedral_xh_site"            , -1),
-      15: ("polyhedral_bh_site"                      , -1),
-      16: ("terminal_linear_ch_site"                 , -1),
+      # AFIX mn :
+      # m:    type                                    , max # of pivot neigbours
+      1:  ("tertiary_xh_site"                        , 3),
+      2:  ("secondary_xh2_sites"                     , 2),
+      3:  ("staggered_terminal_tetrahedral_xh3_sites", 1),
+      4:  ("secondary_planar_xh_site"                , 2),
+      8:  ("staggered_terminal_tetrahedral_xh_site"  , 1),
+      9:  ("terminal_planar_xh2_sites"               , 1),
+      13: ("terminal_tetrahedral_xh3_sites"          , 1),
+      14: ("terminal_tetrahedral_xh_site"            , 1),
+      15: ("polyhedral_bh_site"                      , 5),
+      16: ("terminal_linear_ch_site"                 , 1),
     }
 
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
@@ -1395,7 +1451,7 @@ The following options were used:
         # overrdide the default h-atom placement as it is hard to adjust cctbx
         # connectivity to match Olex2's
         current.add_to = hydrogen_atom_constraints_customisation(
-          current, self.olx_atoms.atoms()).add_to
+          current, self.olx_atoms.atoms(), info[1]).add_to
         geometrical_constraints.append(current)
 
     return geometrical_constraints

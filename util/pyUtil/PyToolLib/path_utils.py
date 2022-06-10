@@ -98,3 +98,40 @@ def cold_start(cctbx_sources, build_path):
   libtbx.configure.run()
   os.chdir(saved_cwd)
   import libtbx.load_env
+
+def cleanup_files(file_ext):
+  def cleanup_dir(dir):
+    for f in os.listdir(dir):
+      full_path = os.path.join(dir, f)
+      if os.path.isfile(full_path) and f.endswith(file_ext):
+        os.remove(full_path)
+      elif os.path.isdir(full_path):
+        cleanup_dir(full_path)
+  try:
+    cleanup_dir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
+  except:
+    pass
+
+def Cleanup():
+  cleanup_files(".tmp")
+  base_dir = olx.BaseDir()
+  ac5_dir = os.path.join(base_dir, "util", "pyUtil", "AC5")
+  if os.path.exists(ac5_dir):
+    try:
+      import shutil
+      shutil.rmtree(ac5_dir)
+      ac5_files = [
+        "lib/ac5util.so",
+        "_ac5util.so",
+        "_ac5util.pyd",
+        "ac5util.dll",
+      ]
+      for f in ac5_files:
+        f = os.path.join(base_dir, f)
+        print(f)
+        if os.path.exists(f):
+          print("->%s" %f)
+          os.remove(f)
+    except Exception as e:
+      print(e)
+      pass

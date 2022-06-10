@@ -1,29 +1,5 @@
 <xl_macro
 
-<AC5MM
-  <body
-    <args
-      <arg1 name='file' def='D:\Users\Horst\Documents\AC5_Scripts\AC5MM\AC5MM.py'>
-    >
-    <cmd
-      <cmd10 'spy.ac5.switch_flavour(%1)'>
-    >
-  >
->
-
-
-<s
-  <body
-    <args
-      <arg1 name='file' def='D:\DS\Sponges\All\1418974\guaiazulene.ins'>
-    >
-    <cmd
-      <cmd10 "reap %1">
-    >
-  >
->
-
-
 <a
   <body
     <args
@@ -292,28 +268,16 @@
 >
 
 
-<ac4 help="Launches ac_run"
+<ac6 help="Launches ac_run"
   <body
     <args
       <arg1 name="single" def="">
     >
     <cmd
-      <cmd6 "spy.ac4.auto()">
+      <cmd1 "spy.ac6.auto()">
     >
   >
 >
-
-<ac5 help="Launches ac_run"
-  <body
-    <args
-      <arg1 name="single" def="">
-    >
-    <cmd
-      <cmd6 "spy.ac5.auto()">
-    >
-  >
->
-
 
 <start_autochem help="Launches ac_run"
   <body
@@ -322,7 +286,7 @@
     >
     <cmd
       <cmd1 "reap %1.ins">
-      <cmd2 "spy.ac5.auto()">
+      <cmd2 "spy.ac6.auto()">
     >
   >
 >
@@ -334,7 +298,7 @@
     >
     <cmd
       <cmd1 "reap %1.ins">
-      <cmd2 "spy.ac5.create_report()">
+      <cmd2 "spy.ac6.create_report()">
     >
   >
 >

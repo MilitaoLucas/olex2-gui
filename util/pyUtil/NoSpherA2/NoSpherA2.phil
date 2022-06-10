@@ -200,6 +200,8 @@ snum{
       .type = str
     ORCA_CRYSTAL_QMMM_HF_LAYERS = 0
       .type = int
+    ORCA_Relativistic = "ZORA"
+      .type = str
     ORCA_SCNL = False
       .type = bool
     ORCA_SCF_Conv = "NoSpherA2SCF"
@@ -246,6 +248,8 @@ snum{
       .type = str
     wfn2fchk_ED = False
       .type = bool
+    wfn2fchk_ECP = 0
+      .type = int
     wfn2fchk_SF = True
       .type = bool
     wfn2fchk_debug = False

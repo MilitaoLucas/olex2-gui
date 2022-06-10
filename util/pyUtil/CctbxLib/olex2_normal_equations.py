@@ -4,12 +4,17 @@ import time
 from scitbx.array_family import flex
 from smtbx.refinement import least_squares
 from smtbx.structure_factors import direct
-from cctbx import adptbx
-#ext = bp.import_ext("smtbx_refinement_least_squares_ext")
+from cctbx import adptbx, xray
 from smtbx_refinement_least_squares_ext import *
 
 import math
 from olexFunctions import OV
+
+import AC6 as ac6
+try:
+  aci = ac6.AC_instance
+except:
+  aci = ac6.AC6.AC_instance
 
 import olx
 import olex
@@ -17,57 +22,68 @@ import olex_core
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
+  std_reparametrisation = None
+  std_observations = None
 
-  def __init__(self, observations, reparametrisation, olx_atoms,
+  def __init__(self, observations, refinement, olx_atoms,
                table_file_name=None, **kwds):
     super(normal_eqns, self).__init__(
-      observations, reparametrisation, initial_scale_factor=OV.GetOSF(),
-       **kwds)
+      observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(),
+      **kwds)
     if table_file_name:
       try:
         one_h_linearisation = direct.f_calc_modulus_squared(
           self.xray_structure, table_file_name=table_file_name)
       except Exception as e:
-        if "stoks.size() == scatterer" in str(e):
+        e_str = str(e)
+        if "stoks.size() == scatterer" in e_str:
           print("Number of atoms in model and table are not matching!")
-        elif "Error during building of normal equations using OpenMP" in str(e):
+        elif "Error during building of normal equations using OpenMP" in e_str:
           print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
         raise e
     else:
       one_h_linearisation = direct.f_calc_modulus_squared(
         self.xray_structure, reflections=self.observations)
+    self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    if objective_only or olx.GetVar("use_ed_wrapper", "false") == "false":
+    ed_refinement = OV.GetParam("snum.refinement.ED.use_2_beam")
+    if not ed_refinement or not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
     try:
-      if self.f_mask is not None:
-        f_mask = self.f_mask.data()
+      if self.f_mask is None:
+        f_mask_data = MaskData(flex.complex_double())
       else:
-        f_mask = flex.complex_double()
-      extinction_correction = self.reparametrisation.extinction
+        f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
+          self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
       cl = least_squares.crystallographic_ls_class()
-      self.reparametrisation.linearise()
-      self.reparametrisation.store()
-      xx = cl(self.observations, self.reparametrisation)
+      self.std_reparametrisation.linearise()
+      xx = cl(self.observations, self.std_reparametrisation)
       def args():
         args = (xx,
-                self.observations,
-                f_mask,
+                self.std_observations,
+                f_mask_data,
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
-                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
-                extinction_correction, False, True, False)
+                self.std_reparametrisation.jacobian_transpose_matching_grad_fc(),
+                self.std_reparametrisation.fc_correction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
-      self.one_h_linearisation = f_calc_function_ed(self.data, (1,1,1, 2,2,2, 3,3,3))
+      self.one_h_linearisation = aci.EDI.build(self.data,
+        self.refinement.thickness,
+        self.xray_structure.crystal_symmetry(),
+        self.std_observations.fo_sq.anomalous_flag())
       super(normal_eqns, self).build_up()
+      aci.EDI.update_scales(old_func,
+        self.weighting_scheme,
+        self.xray_structure, f_mask_data,
+        self.refinement.thickness)
     finally:
       self.one_h_linearisation = old_func
 
@@ -288,11 +304,18 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           olx.xf.rm.BASF(idx, fraction.value)
           idx += 1
     #update EXTI
-    if self.reparametrisation.extinction.grad:
-      OV.SetExtinction(self.reparametrisation.extinction.value)
+    if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+        OV.SetExtinction(self.reparametrisation.fc_correction.value)
+      elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+        OV.SetSWAT(self.reparametrisation.fc_correction.g,
+          self.reparametrisation.fc_correction.U)
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+    #ED stuff
+    if self.std_observations:
+      olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
@@ -305,6 +328,7 @@ from scitbx.lstbx import normal_eqns_solving
 
 class iterations_with_shift_analysis(normal_eqns_solving.iterations):
   convergence_as_shift_over_esd = 1e-3
+  max_ls_shift_over_su = None
 
   def analyse_shifts(self, limit_shift_over_su=None):
     if self.max_ls_shift_over_su is not None:
@@ -323,10 +347,16 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     self.max_ls_shift_over_su = ls_shifts_over_su[max_shift_i]
     r = self.non_linear_ls.actual.reparametrisation
     J = r.jacobian_transpose_matching_grad_fc().transpose()
-    spc = len(r.independent_scalar_parameters)
+    spc = 0
+    for ip in r.independent_scalar_parameters:
+      spc += ip.n_param
     if max_shift_i >= J.n_cols-spc:
-      if r.extinction.grad and max_shift_i == J.n_cols - 1:
-        self.max_shift_for = "EXTI"
+      if r.thickness is not None and r.thickness.grad_index == max_shift_i:
+        self.max_shift_for = "ED_Thickness"
+      elif r.fc_correction and r.fc_correction.grad and\
+           max_shift_i >= r.fc_correction.grad_index and\
+           max_shift_i < r.fc_correction.grad_index + r.fc_correction.n_param:
+        self.max_shift_for = "EXTI/SWAT"
       else:
         self.max_shift_for = "BASF%s" %(max_shift_i - (J.n_cols - spc) + 1)
     else:

@@ -224,6 +224,13 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
+  
+  def get_AC_digests(self):
+    acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
+    if not acd:
+      acd = self.get_cif_item("_diffrn_oxdiff_ac3_digest_hkl").strip("\r\n ")
+    acedd = self.get_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed").strip("\r\n ")
+    return (acd, acedd)
 
   def update_crystal_size(self):
     vals = [self.get_cif_item('_exptl_crystal_size_min'),
@@ -239,6 +246,11 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
+      try:
+        value.encode('ascii')
+      except:
+        print("Please use only ASCII characters")
+        return
       data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
       if isinstance(value, str):
@@ -394,21 +406,22 @@ class OlexFunctions(inheritFunctions):
     except:
       return default
 
-  def GetExtinction(self):
-    try:
-      ev = olx.xf.rm.Exti()
-      if '(' in ev:
-        return float(ev.split('(')[0])
-      return float(ev)
-    except:
-      return None
-
   def SetExtinction(self, v, e=None):
     try:
       if e:
         olx.xf.rm.Exti(v, e)
       else:
         olx.xf.rm.Exti(v)
+      return True
+    except:
+      return False
+
+  def SetSWAT(self, g, U, e_g=None, e_U=None):
+    try:
+      if e_g and e_U:
+        olx.xf.rm.SWAT(g, U, e_g, e_U)
+      else:
+        olx.xf.rm.SWAT(g, U)
       return True
     except:
       return False

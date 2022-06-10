@@ -3,18 +3,113 @@ import olex
 import olx
 import olex_core
 import math
+import numpy as np
 
 from olexFunctions import OV
 from cctbx_olex_adapter import OlexCctbxAdapter
 from smtbx.structure_factors import direct
 from cctbx import sgtbx
+from cctbx.array_family import flex
 from cctbx_olex_adapter import OlexCctbxMasks
 import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
 
-#NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
+types = [ "Q", "H",                                                                                                                                                 "He",
+         "Li","Be",                                                                                                                         "B", "C", "N", "O", "F","Ne",
+         "Na","Mg",                                                                                                                        "Al","Si", "P", "S","Cl","Ar",
+          "K","Ca",                                                                      "Sc","Ti", "V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr",
+         "Rb","Sr",                                                                       "Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te", "I","Xe",
+         "Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta", "W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
+         "Fr","Ra","Ac","Th","Pa", "U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
+
+Cs = [[0, 0, 0],
+      [0, 0, 1],
+      [0, 0, 2],
+      [0, 1, 1],
+      [0, 1, 2],
+      [0, 2, 2],
+      [1, 1, 1],
+      [1, 1, 2],
+      [1, 2, 2],
+      [2, 2, 2]]
+
+Ds = [[0, 0, 0, 0],
+      [0, 0, 0, 1],
+      [0, 0, 0, 2],
+      [0, 0, 1, 1],
+      [0, 0, 1, 2],
+      [0, 0, 2, 2],
+      [0, 1, 1, 1],
+      [0, 1, 1, 2],
+      [0, 1, 2, 2],
+      [0, 2, 2, 2],
+      [1, 1, 1, 1],
+      [1, 1, 1, 2],
+      [1, 1, 2, 2],
+      [1, 2, 2, 2],
+      [2, 2, 2, 2]]
+
+U_map = [[0, 3, 4],
+         [3, 1, 5],
+         [4, 5, 2]]
+
+a2b = 0.52917749
+fac = 0.0174532925199432944444444444444
+
+def Hjkl(jkl, diff, sigma):
+  wj = sigma[U_map[jkl[0]][jkl[1]]] * diff[jkl[1]]
+  wk = sigma[U_map[jkl[1]][jkl[2]]] * diff[jkl[2]]
+  wl = sigma[U_map[jkl[2]][jkl[0]]] * diff[jkl[0]]
+  result = wj * wl * wk \
+           - wj * sigma[U_map[jkl[1]][jkl[2]]] \
+           - wk * sigma[U_map[jkl[2]][jkl[0]]] \
+           - wl * sigma[U_map[jkl[0]][jkl[1]]]
+  return result
+
+def Hjklm(jklm, diff, sigma):
+  wj = sigma[U_map[jklm[0]][jklm[1]]] * diff[jklm[1]]
+  wk = sigma[U_map[jklm[1]][jklm[2]]] * diff[jklm[2]]
+  wl = sigma[U_map[jklm[2]][jklm[3]]] * diff[jklm[3]]
+  wm = sigma[U_map[jklm[3]][jklm[0]]] * diff[jklm[0]]
+  result = wj * wk * wl * wm \
+           - wj * wk * sigma[U_map[jklm[2]][jklm[3]]] \
+           - wj * wl * sigma[U_map[jklm[1]][jklm[3]]] \
+           - wj * wm * sigma[U_map[jklm[1]][jklm[2]]] \
+           - wk * wl * sigma[U_map[jklm[3]][jklm[0]]] \
+           - wk * wm * sigma[U_map[jklm[2]][jklm[0]]] \
+           - wl * wm * sigma[U_map[jklm[0]][jklm[1]]] \
+           + sigma[U_map[jklm[0]][jklm[1]]] * sigma[U_map[jklm[2]][jklm[3]]] \
+           + sigma[U_map[jklm[0]][jklm[2]]] * sigma[U_map[jklm[1]][jklm[3]]] \
+           + sigma[U_map[jklm[0]][jklm[3]]] * sigma[U_map[jklm[1]][jklm[2]]]
+  return result
+
+def z_slice(z, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, s, t, f):
+  pos = [(x) * vecs[0][0] + (y) * vecs[0][1] + (z) * vecs[0][2],
+         (x) * vecs[1][0] + (y) * vecs[1][1] + (z) * vecs[1][2],
+         (x) * vecs[2][0] + (y) * vecs[2][1] + (z) * vecs[2][2]]
+  result = 0.0
+  for a in range(n_atoms):
+    if pre[a] < 0:
+      continue
+    diff = [(pos[0] - posn[a][0]) * a2b, (pos[1] - posn[a][1]) * a2b, (pos[2] - posn[a][2]) * a2b]
+    #dist = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
+    mhalfuTUu = np.fmin(-0.5 * (diff[0] * (diff[0] * sigmas[a][0] + diff[1] * sigmas[a][3] + diff[2] * sigmas[a][4]) + diff[1] * (diff[0] * sigmas[a][3] + diff[1] * sigmas[a][1] + diff[2] * sigmas[a][5]) + diff[2] * (diff[0] * sigmas[a][4] + diff[1] * sigmas[a][5] + diff[2] * sigmas[a][2])), np.full((z.size), 0))
+    #uTUu = diff[0] * Uu[0] + diff[1] * Uu[1] + diff[2] * Uu[2]
+    #exponent = -0.5 * uTUu
+    P0 = pre[a] * np.exp(mhalfuTUu)
+    fact = float(s)
+    if anharms[a] != None:
+      if t == True:
+        for i in range(10):
+          fact += anharms[a][i] * Hjkl(Cs[i], diff, sigmas[a]) / 6
+      if f == True:
+        for i in range(10, 25):
+          fact += anharms[a][i] * Hjklm(Ds[i - 10], diff, sigmas[a]) / 24
+    atom_P = P0 * fact
+    result += atom_P
+  return result
 
 try:
   from_outside = False
@@ -223,15 +318,13 @@ def plot_cube(name,color_cube):
     if (run==6):
       values = line.split()
       z_size = int(values[0])
-      data = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
+      data = flex.double(x_size * y_size * z_size)
+      data.reshape(flex.grid(x_size, y_size, z_size))
     if (run > na + 6):
       values = line.split()
       for i in range(len(values)):
-        data[x_run][y_run][z_run] = float(values[i])
-        if data[x_run][y_run][z_run] > max:
-          max = data[x_run][y_run][z_run]
-        if data[x_run][y_run][z_run] < min:
-          min = data[x_run][y_run][z_run]
+        v = float(values[i])
+        data[(x_run * y_size + y_run) * z_size + z_run] = v
         z_run += 1
         if z_run == z_size:
           y_run += 1
@@ -274,7 +367,8 @@ def plot_cube(name,color_cube):
       if (run==6):
         values = line.split()
         z_size2 = int(values[0])
-        data2 = [[[float(0.0) for k in range(z_size2)] for j in range(y_size2)] for i in range(x_size2)]
+        data2 = flex.double(x_size2 * y_size2 * z_size2)
+        data2.reshape(flex.grid(x_size2, y_size2, z_size2))
       if (run > na + 6):
         values = line.split()
         for i in range(len(values)):
@@ -316,12 +410,12 @@ def plot_cube(name,color_cube):
       iy21 = iy2 + 1
       iz21 = iz2 + 1
       a_0 = data2[ix2][iy2][iz2]*ix21*iy21*iz21 - data2[ix2][iy2][iz21]*ix21*iy21*iz2 - data2[ix2][iy21][iz2]*ix21*iy2*iz21 + data2[ix2][iy21][iz21]*ix21*iy2*iz2 - data2[ix21][iy2][iz2]*ix2*iy21*iz21 + data2[ix21][iy2][iz21]*ix2*iy21*iz2 + data2[ix21][iy21][iz2]*ix2*iy2*iz21 - data2[ix21][iy21][iz21]*ix2*iy2*iz2
-      a_1 = - data2[ix2][iy2][iz2]*iy21*iz21 + data2[ix2][iy2][iz21]*iy21*iz2 + data2[ix2][iy21][iz2]*iy2*iz21 - data2[ix2][iy21][iz21]*iy2*iz2 + data2[ix21][iy2][iz2]*iy21*iz21 - data2[ix21][iy2][iz21]*iy21*iz2 - data2[ix21][iy21][iz2]*iy2*iz21 + data2[ix21][iy21][iz21]*iy2*iz2
-      a_2 = - data2[ix2][iy2][iz2]*ix21*iz21 + data2[ix2][iy2][iz21]*ix21*iz2 + data2[ix2][iy21][iz2]*ix2*iz21 - data2[ix2][iy21][iz21]*ix2*iz2 + data2[ix21][iy2][iz2]*ix21*iz21 - data2[ix21][iy2][iz21]*ix21*iz2 - data2[ix21][iy21][iz2]*ix2*iz21 + data2[ix21][iy21][iz21]*ix2*iz2
-      a_3 = - data2[ix2][iy2][iz2]*ix21*iy21 + data2[ix2][iy2][iz21]*ix21*iy2 + data2[ix2][iy21][iz2]*ix2*iy21 - data2[ix2][iy21][iz21]*ix2*iy2 + data2[ix21][iy2][iz2]*ix21*iy21 - data2[ix21][iy2][iz21]*ix21*iy2 - data2[ix21][iy21][iz2]*ix2*iy21 + data2[ix21][iy21][iz21]*ix2*iy2
-      a_4 = data2[ix2][iy2][iz2]*iz21 - data2[ix2][iy2][iz21]*iz2 - data2[ix2][iy21][iz2]*iz21 + data2[ix2][iy2][iz21]*iz2 - data2[ix21][iy2][iz2]*iz21 + data2[ix21][iy2][iz21]*iz2 + data2[ix21][iy21][iz2]*iz21 - data2[ix21][iy21][iz21]*iz2
-      a_5 = data2[ix2][iy2][iz2]*iy21 - data2[ix2][iy2][iz21]*iy2 - data2[ix2][iy21][iz2]*iy21 + data2[ix2][iy2][iz21]*iy2 - data2[ix21][iy2][iz2]*iy21 + data2[ix21][iy2][iz21]*iy2 + data2[ix21][iy21][iz2]*iy21 - data2[ix21][iy21][iz21]*iy2
-      a_6 = data2[ix2][iy2][iz2]*ix21 - data2[ix2][iy2][iz21]*ix2 - data2[ix2][iy21][iz2]*ix21 + data2[ix2][iy2][iz21]*ix2 - data2[ix21][iy2][iz2]*ix21 + data2[ix21][iy2][iz21]*ix2 + data2[ix21][iy21][iz2]*ix21 - data2[ix21][iy21][iz21]*ix2
+      a_1 = - data2[ix2][iy2][iz2] * iy21 * iz21 + data2[ix2][iy2][iz21] * iy21 * iz2 + data2[ix2][iy21][iz2] * iy2 * iz21 - data2[ix2][iy21][iz21] * iy2 * iz2 + data2[ix21][iy2][iz2] * iy21 * iz21 - data2[ix21][iy2][iz21] * iy21 * iz2 - data2[ix21][iy21][iz2] * iy2 * iz21 + data2[ix21][iy21][iz21] * iy2 * iz2
+      a_2 = - data2[ix2][iy2][iz2] * ix21 * iz21 + data2[ix2][iy2][iz21] * ix21 * iz2 + data2[ix2][iy21][iz2] * ix2 * iz21 - data2[ix2][iy21][iz21] * ix2 * iz2 + data2[ix21][iy2][iz2] * ix21 * iz21 - data2[ix21][iy2][iz21] * ix21 * iz2 - data2[ix21][iy21][iz2] * ix2 * iz21 + data2[ix21][iy21][iz21] * ix2 * iz2
+      a_3 = - data2[ix2][iy2][iz2] * ix21 * iy21 + data2[ix2][iy2][iz21] * ix21 * iy2 + data2[ix2][iy21][iz2] * ix2 * iy21 - data2[ix2][iy21][iz21] * ix2 * iy2 + data2[ix21][iy2][iz2] * ix21 * iy21 - data2[ix21][iy2][iz21] * ix21 * iy2 - data2[ix21][iy21][iz2] * ix2 * iy21 + data2[ix21][iy21][iz21] * ix2 * iy2
+      a_4 = data2[ix2][iy2][iz2] * iz21 - data2[ix2][iy2][iz21] * iz2 - data2[ix2][iy21][iz2] * iz21 + data2[ix2][iy2][iz21] * iz2 - data2[ix21][iy2][iz2] * iz21 + data2[ix21][iy2][iz21] * iz2 + data2[ix21][iy21][iz2] * iz21 - data2[ix21][iy21][iz21] * iz2
+      a_5 = data2[ix2][iy2][iz2] * iy21 - data2[ix2][iy2][iz21] * iy2 - data2[ix2][iy21][iz2] * iy21 + data2[ix2][iy2][iz21] * iy2 - data2[ix21][iy2][iz2] * iy21 + data2[ix21][iy2][iz21] * iy2 + data2[ix21][iy21][iz2] * iy21 - data2[ix21][iy21][iz21] * iy2
+      a_6 = data2[ix2][iy2][iz2] * ix21 - data2[ix2][iy2][iz21] * ix2 - data2[ix2][iy21][iz2] * ix21 + data2[ix2][iy2][iz21] * ix2 - data2[ix21][iy2][iz2] * ix21 + data2[ix21][iy2][iz21] * ix2 + data2[ix21][iy21][iz2] * ix21 - data2[ix21][iy21][iz21] * ix2
       a_7 = -(data2[ix2][iy2][iz2] - data2[ix2][iy2][iz21] - data2[ix2][iy21][iz2] + data2[ix2][iy2][iz21] - data2[ix21][iy2][iz2] + data2[ix21][iy2][iz21] + data2[ix21][iy21][iz2] - data2[ix21][iy21][iz21])
 
       return a_0 + a_1 * ix2 + a_2 * iy2 + a_3 * z_2 + a_4 * x_2 * y_2 + a_5 * x_2 * z_2 + a_6 * y_2 * z_2 + a_7 * x_2 * y_2 * z_2
@@ -352,16 +446,15 @@ def plot_cube(name,color_cube):
           colour = int(get_color(value[x][y][z]))
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
-    olex_xgrid.Init(x_size,y_size,z_size)
-    for x in range(x_size):
-      for y in range(y_size):
-        for z in range(z_size):
-          olex_xgrid.SetValue(x,y,z,data[x][y][z])
+    gridding = data.accessor()
+    type = isinstance(data, flex.int)
+    olex_xgrid.Import(
+      gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   data = None
   Type = OV.GetParam('snum.NoSpherA2.map_type')
   if Type == "Laplacian":
-    OV.SetVar('map_min',0)
-    OV.SetVar('map_max',40)
+    OV.SetVar('map_min', 0)
+    OV.SetVar('map_max', 40)
     OV.SetVar('map_slider_scale',40)
   elif Type == "ELI-D":
     OV.SetVar('map_min',0)
@@ -398,8 +491,9 @@ def plot_cube(name,color_cube):
   elif Type == "Stat. Def.":
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
-    OV.SetVar('map_slider_scale',100)
-  olex_xgrid.SetMinMax(min, max)
+    OV.SetVar('map_slider_scale', 100)
+  mmm = data.min_max_mean()
+  olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
   iso = float((abs(min)+abs(max))*2/3)
@@ -486,67 +580,39 @@ OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 def plot_map_cube(map_type,resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
   import math
-
+  cctbx_adapter = OlexCctbxAdapter()
+  xray_structure = cctbx_adapter.xray_structure()
+  uc = xray_structure.unit_cell()
   temp = olex_xgrid.GetSize()
   size = [int(temp[0]),int(temp[1]),int(temp[2])]
   name = OV.ModelSrc()
 
   n_atoms = int(olx.xf.au.GetAtomCount())
   positions = [[float(0.0) for k in range(3)] for l in range(n_atoms)]
-  cm = [[float(0.0) for k in range(3)] for l in range(3)]
-  cm_inv = [[float(0.0) for k in range(3)] for l in range(3)]
-  temp = olx.xf.au.GetCell().split(',')
-  cell = [float(temp[0]),float(temp[1]),float(temp[2]),float(temp[3]),float(temp[4]),float(temp[5])]
-  a2b = 0.52917749
-  fac = 0.0174532925199432944444444444444
-
-  types = ["Q","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
-
-  ca = math.cos(fac * cell[3])
-  cb = math.cos(fac * cell[4])
-  cg = math.cos(fac * cell[5])
-  sg = math.sin(fac * cell[5])
-  cm[0][0] = cell[0] / a2b
-  cm[0][1] = cell[1] * cg / a2b
-  cm[1][1] = cell[1] * sg / a2b
-  cm[0][2] = cell[2] * cb / a2b
-  cm[1][2] = (cell[2] * (ca - cb * cg) / sg) / a2b
-  cm[2][2] = float(olx.xf.au.GetCellVolume())/(cell[0] * cell[1] * sg * a2b)
-
-  cm_inv[0][0] = 1/cm[0][0] / a2b
-  cm_inv[1][1] = 1/cm[1][1] / a2b
-  cm_inv[2][2] = 1/cm[2][2] / a2b
-  cm_inv[0][1] = -cm[0][1]/(cm[0][0]*cm[1][1]) / a2b
-  cm_inv[0][2] = ((cm[0][1]*cm[1][2])-(cm[0][2]*cm[1][1]))/(cm[0][0]*cm[1][1]*cm[2][2]) / a2b
-  cm_inv[1][2] = -cm[1][2]/(cm[1][1]*cm[2][2]) / a2b
-  cm_inv[1][0] = cm[0][1]/(cm[0][0]*cm[1][1]) /a2b
-  cm_inv[2][0] = (-cm[0][1]*cm[1][2]+cm[0][2]*cm[1][1])/(cm[0][0]*cm[1][1]*cm[2][2]) /a2b
-  cm_inv[2][1] = cm[1][2]/(cm[1][1]*cm[2][2]) /a2b
-
-  cmnorm = [
-    math.sqrt(cm_inv[0][0]*cm_inv[0][0] + cm_inv[0][1]*cm_inv[0][1] + cm_inv[0][2]*cm_inv[0][2]),
-    math.sqrt(cm_inv[1][0]*cm_inv[1][0] + cm_inv[1][1]*cm_inv[1][1] + cm_inv[1][2]*cm_inv[2][2]),
-    math.sqrt(cm_inv[2][0]*cm_inv[2][0] + cm_inv[2][1]*cm_inv[2][1] + cm_inv[2][2]*cm_inv[2][2])]
-
+  cm = list(uc.orthogonalization_matrix())
+  for i in range(9):
+    cm[i] /= a2b
+  cm = tuple(cm)  
   for a in range(n_atoms):
-    pos = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+    coord = olx.xf.au.GetAtomCrd(a)
+    pos = olx.xf.au.Orthogonalise(coord).split(',')
+    positions[a] = [float(pos[0]) / a2b, float(pos[1]) / a2b, float(pos[2]) / a2b]
 
-    positions[a] = [
-      (float(pos[0])*cm_inv[0][0]+float(pos[1])*cm_inv[0][1]+float(pos[2])*cm_inv[0][2])/cmnorm[0],
-      (float(pos[0])*cm_inv[1][0]+float(pos[1])*cm_inv[1][1]+float(pos[2])*cm_inv[1][2])/cmnorm[1],
-      (float(pos[0])*cm_inv[2][0]+float(pos[1])*cm_inv[2][1]+float(pos[2])*cm_inv[2][2])/cmnorm[2]]
+  vecs = [(cm[0] / (size[0] - 1), cm[1] / (size[0] - 1), cm[2] / (size[0] - 1)),
+          (cm[3] / (size[1] - 1), cm[4] / (size[1] - 1), cm[5] / (size[1] - 1)),
+          (cm[6] / (size[2] - 1), cm[7] / (size[2] - 1), cm[8] / (size[2] - 1))]
 
-  print ("start writing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
+  print("start writing a %4d x %4d x %4d cube" % (size[0], size[1], size[2]))
 
-  with open("%s_%s.cube"%(name,map_type),'w') as cube:
-    cube.write("Fcalc fourier synthesis map created by Olex2\n")
-    cube.write("Model name: %s\n"%name)
-    #Origin of cube
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(n_atoms,0.0,0.0,0.0))
+  with open("%s_%s.cube" % (name, map_name), 'w') as cube:
+    cube.write("Fourier synthesis map created by Olex2\n")
+    cube.write("Model name: %s\n" % name)
+    # Origin of cube
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (n_atoms, 0.0, 0.0, 0.0))
     # need to write vectors!
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[0],cm[0][0]/(size[0]-1),cm[0][1]/(size[0]-1),cm[0][2]/(size[0]-1)))
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[1],cm[1][0]/(size[1]-1),cm[1][1]/(size[1]-1),cm[1][2]/(size[1]-1)))
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[2],cm[2][0]/(size[2]-1),cm[2][1]/(size[2]-1),cm[2][2]/(size[2]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[0], vecs[0][0], vecs[0][1], vecs[0][2]))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[1], vecs[1][0], vecs[1][1], vecs[1][2]))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[2], vecs[2][0], vecs[2][1], vecs[2][2]))
     for i in range(n_atoms):
       atom_type = olx.xf.au.GetAtomType(i)
       charge = 200
@@ -556,7 +622,7 @@ def plot_map_cube(map_type,resolution):
           break
       if charge == 200:
         print("ATOM NOT FOUND!")
-      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n"%(charge,charge,positions[i][0]/a2b,positions[i][1]/a2b,positions[i][2]/a2b))
+      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n" % (charge, charge, positions[i][0], positions[i][1], positions[i][2]))
     for x in range(size[0]):
       for y in range(size[1]):
         string = ""
@@ -649,64 +715,49 @@ def plot_fft_map(fft_map):
   data = None
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True,1)
+  olex_xgrid.InitSurface(False, 2.0)
   iso = float(-(abs(min_v)+abs(max_v))*1/3)
   olex_xgrid.SetSurfaceScale(iso)
   #OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
   print("Map size: %d x %d x %d"%(fft_map.n_real()[0],fft_map.n_real()[1],fft_map.n_real()[2]))
 
-OV.registerFunction(plot_fft_map,True,'NoSpherA2')
+OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
-def plot_fft_map_cube(fft_map,map_name):
+def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
+  gridding = data.accessor()
+  from cctbx.array_family import flex
+  type = isinstance(data, flex.int)
+  olex_xgrid.Import(
+    gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
+  olex_xgrid.SetMinMax(min_v, max_v)
+  olex_xgrid.InitSurface(True, dist)
+  olex.m("xgrid.RenderMode(line)")
+  olex_xgrid.SetSurfaceScale(iso)
+  olex_xgrid.SetVisible(True)
+
+def plot_fft_map_cube(fft_map, map_name):
+  cctbx_adapter = OlexCctbxAdapter()
+  xray_structure = cctbx_adapter.xray_structure()
+  uc = xray_structure.unit_cell()  
   temp = fft_map.n_real()
   size = [int(temp[0]),int(temp[1]),int(temp[2])]
   name = OV.ModelSrc()
 
   n_atoms = int(olx.xf.au.GetAtomCount())
   positions = [[float(0.0) for k in range(3)] for l in range(n_atoms)]
-  cm = [[float(0.0) for k in range(3)] for l in range(3)]
-  cm_inv = [[float(0.0) for k in range(3)] for l in range(3)]
-  temp = olx.xf.au.GetCell().split(',')
-  cell = [float(temp[0]),float(temp[1]),float(temp[2]),float(temp[3]),float(temp[4]),float(temp[5])]
-  a2b = 0.52917749
-  fac = 0.0174532925199432944444444444444
-
-  types = ["Q","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
-
-  ca = math.cos(fac * cell[3])
-  cb = math.cos(fac * cell[4])
-  cg = math.cos(fac * cell[5])
-  sg = math.sin(fac * cell[5])
-  cm[0][0] = cell[0] / a2b
-  cm[0][1] = cell[1] * cg / a2b
-  cm[1][1] = cell[1] * sg / a2b
-  cm[0][2] = cell[2] * cb / a2b
-  cm[1][2] = (cell[2] * (ca - cb * cg) / sg) / a2b
-  cm[2][2] = float(olx.xf.au.GetCellVolume())/(cell[0] * cell[1] * sg * a2b)
-
-  cm_inv[0][0] = 1/cm[0][0] / a2b
-  cm_inv[1][1] = 1/cm[1][1] / a2b
-  cm_inv[2][2] = 1/cm[2][2] / a2b
-  cm_inv[0][1] = -cm[0][1]/(cm[0][0]*cm[1][1]) / a2b
-  cm_inv[0][2] = ((cm[0][1]*cm[1][2])-(cm[0][2]*cm[1][1]))/(cm[0][0]*cm[1][1]*cm[2][2]) / a2b
-  cm_inv[1][2] = -cm[1][2]/(cm[1][1]*cm[2][2]) / a2b
-  cm_inv[1][0] = cm[0][1]/(cm[0][0]*cm[1][1]) /a2b
-  cm_inv[2][0] = (-cm[0][1]*cm[1][2]+cm[0][2]*cm[1][1])/(cm[0][0]*cm[1][1]*cm[2][2]) /a2b
-  cm_inv[2][1] = cm[1][2]/(cm[1][1]*cm[2][2]) /a2b
-
-  cmnorm = [
-    math.sqrt(cm_inv[0][0]*cm_inv[0][0] + cm_inv[0][1]*cm_inv[0][1] + cm_inv[0][2]*cm_inv[0][2]),
-    math.sqrt(cm_inv[1][0]*cm_inv[1][0] + cm_inv[1][1]*cm_inv[1][1] + cm_inv[1][2]*cm_inv[2][2]),
-    math.sqrt(cm_inv[2][0]*cm_inv[2][0] + cm_inv[2][1]*cm_inv[2][1] + cm_inv[2][2]*cm_inv[2][2])]
-
+  cm = list(uc.orthogonalization_matrix())
+  for i in range(9):
+    cm[i] /= a2b
+  cm = tuple(cm)  
   for a in range(n_atoms):
-    pos = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+      coord = olx.xf.au.GetAtomCrd(a)
+      pos = olx.xf.au.Orthogonalise(coord).split(',')
+      positions[a] = [float(pos[0]) / a2b, float(pos[1]) / a2b, float(pos[2]) / a2b]
 
-    positions[a] = [
-      (float(pos[0])*cm_inv[0][0]+float(pos[1])*cm_inv[0][1]+float(pos[2])*cm_inv[0][2])/cmnorm[0],
-      (float(pos[0])*cm_inv[1][0]+float(pos[1])*cm_inv[1][1]+float(pos[2])*cm_inv[1][2])/cmnorm[1],
-      (float(pos[0])*cm_inv[2][0]+float(pos[1])*cm_inv[2][1]+float(pos[2])*cm_inv[2][2])/cmnorm[2]]
+  vecs = [(cm[0] / (size[0]), cm[1] / (size[0]), cm[2] / (size[0])),
+          (cm[3] / (size[1]), cm[4] / (size[1]), cm[5] / (size[1])),
+          (cm[6] / (size[2]), cm[7] / (size[2]), cm[8] / (size[2]))]
 
   print ("start writing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
   values = fft_map.real_map_unpadded()
@@ -714,12 +765,12 @@ def plot_fft_map_cube(fft_map,map_name):
   with open("%s_%s.cube"%(name,map_name),'w') as cube:
     cube.write("Fourier synthesis map created by Olex2\n")
     cube.write("Model name: %s\n"%name)
-    #Origin of cube
+    # Origin of cube
     cube.write("%6d %12.8f %12.8f %12.8f\n"%(n_atoms,0.0,0.0,0.0))
     # need to write vectors!
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[0],cm[0][0]/(size[0]-1),cm[0][1]/(size[0]-1),cm[0][2]/(size[0]-1)))
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[1],cm[1][0]/(size[1]-1),cm[1][1]/(size[1]-1),cm[1][2]/(size[1]-1)))
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(size[2],cm[2][0]/(size[2]-1),cm[2][1]/(size[2]-1),cm[2][2]/(size[2]-1)))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[0], vecs[0][0], vecs[0][1], vecs[0][2]))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[1], vecs[1][0], vecs[1][1], vecs[1][2]))
+    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[2], vecs[2][0], vecs[2][1], vecs[2][2]))
     for i in range(n_atoms):
       atom_type = olx.xf.au.GetAtomType(i)
       charge = 200
@@ -729,12 +780,12 @@ def plot_fft_map_cube(fft_map,map_name):
           break
       if charge == 200:
         print("ATOM NOT FOUND!")
-      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n"%(charge,charge,positions[i][0]/a2b,positions[i][1]/a2b,positions[i][2]/a2b))
+      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n" % (charge, charge, positions[i][0], positions[i][1], positions[i][2]))
     for x in range(size[0]):
       for y in range(size[1]):
         string = ""
         for z in range(size[2]):
-          #value = fft_map.real_map_unpadded()[(x*size[1]+y)*size[2]+z]
+          # value = fft_map.real_map_unpadded()[(x*size[1]+y)*size[2]+z]
           string += ("%15.7e"%values[(x*size[1]+y)*size[2]+z])
           if (z+1) % 6 == 0 and (z+1) != size[2]:
             string += '\n'
@@ -828,7 +879,235 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
 
 OV.registerFunction(residual_map, False, "NoSpherA2")
 
-def tomc_map(resolution=0.1,return_map=False, use_f000=False):
+
+def det(U):
+  return U[0] * U[1] * U[2] + U[3] * U[4] * U[5] * 2 - U[1] * U[4] * U[4] - U[3] * U[2] * U[3] - U[5] * U[0] * U[5]
+def U_to_sigma(U):
+  # wich turns out to be a matrix inversion...
+  fact = det(U)
+  result = [U[1] * U[2] - U[5] * U[5],
+            U[0] * U[2] - U[4] * U[4],
+            U[0] * U[1] - U[3] * U[3],
+            U[4] * U[5] - U[2] * U[3],
+            U[5] * U[3] - U[1] * U[4],
+            U[3] * U[4] - U[0] * U[5]]
+  for i in range(6):
+    result[i] /= fact
+  return result
+
+def digest_boolinput(i):
+  if i == False or i == "False" or i == "0":
+    return False
+  else:
+    return True
+
+def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, do_plot=True, save_cube=False):
+  second = digest_boolinput(second)
+  third = digest_boolinput(third)
+  fourth = digest_boolinput(fourth)
+  from cctbx import adptbx
+  import numpy as np
+  from cctbx.array_family import flex
+  if second == False and third == False and fourth == False:
+    print("Well, what should I print then? Please decide what you want to see!")
+    return
+  olex.m("kill $Q")
+  OV.CreateBitmap("working")
+  try:
+    distance = float(distance)
+    cctbx_adapter = OlexCctbxAdapter()
+    uc = cctbx_adapter.xray_structure().unit_cell()
+    fixed = math.pow(2 * math.pi, 1.5)
+    name = OV.ModelSrc()
+    Us = []
+    Us_cart = []
+    sigmas = []
+    pre = []
+    posn = []
+    anharms = []
+    for atom in cctbx_adapter.xray_structure()._scatterers:
+      temp = list(atom.site)
+      coord = list(uc.orthogonalize(temp))
+      coord[0] /= a2b
+      coord[1] /= a2b
+      coord[2] /= a2b
+      posn.append(coord)
+      adp = atom.u_star
+      if adp != (-1., -1., -1., -1., -1., -1.):
+        Us.append(atom.u_star)
+        adp_cart = adptbx.u_star_as_u_cart(uc, atom.u_star)
+      else:
+        Us.append(atom.u_iso)
+        adp_cart = adptbx.u_iso_as_u_cart(atom.u_iso)
+      if atom.anharmonic_adp == None:
+        anharms.append(None)
+      else:
+        anharms.append(atom.anharmonic_adp.data())
+      Us_cart.append(adp_cart)
+      sigmas.append(U_to_sigma(adp_cart))
+      pre_temp = det(sigmas[-1])
+      if pre_temp < 0:
+        pre_temp = -math.sqrt(-pre_temp) / fixed
+      else:
+        pre_temp = math.sqrt(pre_temp) / fixed
+      pre.append(pre_temp)
+
+    gridding = cctbx_adapter.xray_structure().gridding(step=float(resolution))
+    size = list(gridding.n_real())
+    data = flex.double(size[0] * size[1] * size[2])
+
+    n_atoms = len(posn)
+    cm = list(uc.orthogonalization_matrix())
+    for i in range(9):
+      cm[i] /= a2b
+    cm = tuple(cm)
+    
+    vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
+            (cm[3] / (size[0]), cm[4] / (size[1]), cm[5] / (size[2])),
+            (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
+
+    vec_norm = [math.sqrt(vecs[0][0] * vecs[0][0] + vecs[0][1] * vecs[0][1] + vecs[0][2] * vecs[0][2]),
+                math.sqrt(vecs[1][0] * vecs[1][0] + vecs[1][1] * vecs[1][1] + vecs[1][2] * vecs[1][2]),
+                math.sqrt(vecs[2][0] * vecs[2][0] + vecs[2][1] * vecs[2][1] + vecs[2][2] * vecs[2][2])]
+
+    print("Calculating Grid...")
+    olx.xf.EndUpdate()
+    if OV.HasGUI():
+      olx.Refresh()
+
+    limits = [[size[0], 0],
+              [size[1], 0],
+              [size[2], 0]]
+
+# determine piece of grid that really needs evaluation
+    dist_bohr = distance / a2b
+    for a in range(n_atoms):
+      if second == False:
+        if anharms[a] == None:
+          continue
+      minmax = [math.floor((posn[a][0] - dist_bohr) / vec_norm[0]),
+                math.floor((posn[a][1] - dist_bohr) / vec_norm[1]),
+                math.floor((posn[a][2] - dist_bohr) / vec_norm[2]),
+                math.ceil((posn[a][0] + dist_bohr) / vec_norm[0]),
+                math.ceil((posn[a][1] + dist_bohr) / vec_norm[1]),
+                math.ceil((posn[a][2] + dist_bohr) / vec_norm[2])]
+      if minmax[0] < limits[0][0]:
+        limits[0][0] = minmax[0]
+      if minmax[1] < limits[1][0]:
+        limits[1][0] = minmax[1]
+      if minmax[2] < limits[2][0]:
+        limits[2][0] = minmax[2]
+      if minmax[3] > limits[0][1]:
+        limits[0][1] = minmax[3]
+      if minmax[4] > limits[1][1]:
+        limits[1][1] = minmax[4]
+      if minmax[5] > limits[2][1]:
+        limits[2][1] = minmax[5]
+    step = 5
+    last_percentage = step - 1
+    x_size = limits[0][1] - limits[0][0]
+    for x in range(limits[0][0], limits[0][1]):
+      for y in range(limits[1][0], limits[1][1]):
+        x_loc = x
+        if x < 0:
+          x_loc += size[0]
+        y_loc = y
+        if y < 0:
+          y_loc += size[1]
+        start = ((x_loc % size[0]) * size[1] + (y_loc % size[1])) * size[2]
+        zs = np.array(range(limits[2][0], limits[2][1]))
+        res = z_slice(zs, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, bool(second), bool(third), bool(fourth))
+        for i, val in enumerate(res):
+          z_loc = zs[i]
+          if z_loc < 0:
+            z_loc += size[2]
+          data[start + (z_loc % size[2])] += val
+      num = int(x / x_size * 100)
+      if num > last_percentage:
+        while last_percentage < num:
+          last_percentage += step
+        print("{:4d}%".format(num))
+        olx.xf.EndUpdate()
+        if OV.HasGUI():
+          olx.Refresh()
+    if second == False:
+      print("Multiplying grid values with 1000 to get on visible scale")
+      data = data * 1000
+    stats = data.min_max_mean()
+    if stats.min < -0.05:
+      index = (data == stats.min).iselection()[0]
+      x = math.floor(index / (size[2] * size[1]))
+      index -= x * size[2] * size[1]
+      y = math.floor(index / size[2])
+      z = index % size[2]
+      pos = [(x) * vecs[0][0] + (y) * vecs[0][1] + (z) * vecs[0][2],
+             (x) * vecs[1][0] + (y) * vecs[1][1] + (z) * vecs[1][2],
+             (x) * vecs[2][0] + (y) * vecs[2][1] + (z) * vecs[2][2]]
+      min_dist = cm[0] + cm[4] + cm[8]
+      atom_nr = 0
+      for i in range(n_atoms):
+        diff = [(pos[0] - posn[i][0]), (pos[1] - posn[i][1]), (pos[2] - posn[i][2])]
+        dist = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]) * a2b
+        if dist < min_dist:
+          min_dist = dist
+          atom_nr = i
+      print("WARNING! Significant negative PDF for Atom: " + str(cctbx_adapter.xray_structure()._scatterers[atom_nr].label))
+      print("WARNING! At a distance of {:8.3f} Angs".format(min_dist))
+    data.reshape(flex.grid(size[0], size[1], size[2]))
+    if save_cube:
+      print("start writing a %4d x %4d x %4d cube" % (size[0], size[1], size[2]))
+      olx.xf.EndUpdate()
+      if OV.HasGUI():
+        olx.Refresh()
+      with open("PDF.cube", 'w') as cube:
+        cube.write("PDF map created by Olex2\n")
+        cube.write("Model name: %s\n" % name)
+        # Origin of cube
+        cube.write("%6d %12.8f %12.8f %12.8f\n" % (n_atoms, 0.0, 0.0, 0.0))
+        # need to write vectors!
+        cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[0], vecs[0][0], vecs[0][1], vecs[0][2]))
+        cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[1], vecs[1][0], vecs[1][1], vecs[1][2]))
+        cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[2], vecs[2][0], vecs[2][1], vecs[2][2]))
+        for i in range(n_atoms):
+          atom_type=olx.xf.au.GetAtomType(i)
+          charge=200
+          for j in range(104):
+            if types[j] == atom_type:
+              charge=j
+              break
+          if charge == 200:
+            print("ATOM NOT FOUND!")
+          cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n" % (charge, charge, posn[i][0], posn[i][1], posn[i][2]))
+        for x in range(size[0]):
+          for y in range(size[1]):
+            string = ""
+            for z in range(size[2]):
+              string += ("%15.7e" % data[(x * size[1] + y) * size[2] + z])
+              if (z + 1) % 6 == 0 and (z + 1) != size[2]:
+                string += '\n'
+            if (y != (size[1] - 1)):
+              string += '\n'
+            cube.write(string)
+          if(x != (size[0] - 1)):
+            cube.write('\n')
+        cube.close()
+      print("Saved PDF map successfully")
+
+    if do_plot:
+      print("Grid Size: %4d x %4d x %4d" % (size[0] + 1, size[1] + 1, size[2] + 1))
+      iso = -3.1415
+      if second == False:
+        iso = -0.05
+      plot_map(data, iso, distance, min_v=stats.min, max_v=stats.max)
+  except Exception as e:
+    OV.DeleteBitmap("working")
+    raise(e)
+
+  OV.DeleteBitmap("working")
+  print("WARNING: PDF Maps are at the moment just to be understood \nindicative and not benchmarked for numerical correctness!")
+OV.registerFunction(PDF_map, False, "NoSpherA2")
+
+def tomc_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
   if use_tsc == True:
@@ -872,8 +1151,8 @@ def tomc_map(resolution=0.1,return_map=False, use_f000=False):
                               f_000=f000).apply_volume_scaling()
   else:
     tomc_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
-                              resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
-  if return_map==True:
+                              resolution_factor=1, grid_step=float(resolution)).apply_volume_scaling()
+  if return_map == True:
     return tomc_map
   plot_fft_map_cube(tomc_map,"tomc")
 

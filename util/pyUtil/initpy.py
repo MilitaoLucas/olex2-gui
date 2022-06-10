@@ -18,7 +18,7 @@ if sys.platform[:3] == 'win':
   if _:
     python_dir = _
   else:
-    python_dir = r"%s\Python27" %basedir
+    python_dir = r"%s\Python38" %basedir
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
@@ -31,11 +31,11 @@ else:
   set_sys_path = True
   try:
     import os
-    set_sys_path = os.path.exists(basedir + '/lib/python2.7')
+    set_sys_path = os.path.exists(basedir + '/lib/python3.8')
   except:
     pass
   if set_sys_path:
-    sys.prefix = basedir + '/lib/python2.7'
+    sys.prefix = basedir + '/lib/python3.8'
     sys.path = ['',
       sys.prefix,
       sys.prefix + '/lib-tk',
@@ -189,10 +189,9 @@ def set_olex_paths():
   olx.VFSDependent = set()
 
 def set_plugins_paths():
-
   plugins = olexex.InstalledPlugins()
   olx.InstalledPlugins = set()
-  import AC5
+  import AC6
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
 
@@ -231,6 +230,7 @@ def setup_cctbx():
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
 sys.stderr = StreamRedirection(sys.stderr, stderr_redirection)
+
 t = time.time()
 try:
   import olx
@@ -254,6 +254,10 @@ set_olex_paths()
 if timer:
   tt.append("%.3f s == set_olex_paths()" %(time.time() - t))
   t = time.time()
+
+if olx.app.IsBaseDirWritable() == "true":
+  import path_utils
+  path_utils.Cleanup()
 
 olx.Clear()
 
@@ -390,9 +394,6 @@ try:
   import userScripts
 except ImportError as err:
   print("Could not import userScripts: %s" %err)
-
-if olx.app.IsBaseDirWritable() == "true":
-  olexex.Cleanup(".tmp")
 
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
