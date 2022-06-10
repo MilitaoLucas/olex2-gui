@@ -28,10 +28,11 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
 
 else:
+  #it looks like we do not want to set the sys PATH on Linux or Mac!
   set_sys_path = True
   try:
     import os
-    set_sys_path = os.path.exists(basedir + '/lib/python3.8')
+    set_sys_path = os.path.exists(basedir + '/lib/python3.8_')
   except:
     pass
   if set_sys_path:
