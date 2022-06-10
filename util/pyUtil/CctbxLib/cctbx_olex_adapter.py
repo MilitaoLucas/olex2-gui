@@ -125,6 +125,7 @@ class OlexCctbxAdapter(object):
       self.twin_components = None
 
     self.exti = self.olx_atoms.model.get('exti', None)
+    self.swat = self.olx_atoms.model.get('swat', None)
     self.initialise_reflections()
     from connectivity_table import connectivity_table
     self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
@@ -294,8 +295,7 @@ class OlexCctbxAdapter(object):
         and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
     if (apply_twin_law
-        and self.twin_components is not None
-        and self.twin_components[0].value > 0):
+        and self.twin_components is not None):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set_)
@@ -309,9 +309,12 @@ class OlexCctbxAdapter(object):
       else:
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
-      twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(), twin_component.value)
       if twin_data:
+        value = twin_component.value
+        if value < 0: value = 0
+        elif value > 1: value = 1
+        twinned_fc2 = twinning.twin_with_twin_fraction(
+          fc.as_intensity_array(), value)
         if miller_set:
           fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
         else:
@@ -370,8 +373,11 @@ class OlexCctbxAdapter(object):
       return easy_pickle.load(mask_fn)
     return None
 
-  def get_fo_sq_fc(self, one_h_function=None):
-    fo2 = self.reflections.f_sq_obs_filtered
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True):
+    if filtered:
+      fo2 = self.reflections.f_sq_obs_filtered
+    else:
+      fo2 = self.reflections.f_sq_obs_merged
     if one_h_function:
       try:
         fc = self.f_calc(None, self.exti is not None, True, False,
@@ -1077,19 +1083,19 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
           ts[5].split(':')[1].strip()))
     return ';'.join(rv)
 
-  if "sasaki" == table_name or "auto" == table_name:
+  if "sasaki" == table_name:
     from cctbx.eltbx import sasaki
     tables = sasaki
   elif "henke" == table_name:
     from cctbx.eltbx import henke
     tables = henke
-  elif "brennan" == table_name:
+  elif "brennan" == table_name or "auto" == table_name:
     from brennan import brennan
     tables = brennan()
   else:
-    print("Invalid table name %s, resetting to Sasaki" %table_name_)
-    from cctbx.eltbx import sasaki
-    tables = sasaki
+    print("Invalid table name %s, resetting to Brennan & Cowan" % table_name_)
+    from brennan import brennan
+    tables = brennan()
   for e in elements:
     e = str(e)
     try:

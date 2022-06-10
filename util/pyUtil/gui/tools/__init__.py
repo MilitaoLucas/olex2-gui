@@ -670,21 +670,34 @@ def makeFormulaForsNumInfo():
   if font_size < 1:
     font_size = 1
 
-  if not isSame:
-    img_name = 'toolbar-refresh'
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
-  else:
-    img_name = 'toolbar-blank'
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
-    formula = present
-
   html_formula = olx.xf.GetFormula('html',1).replace("</sub>", "<font size='2'></font></sub>")
   formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-
   d = {}
-  d.setdefault('img_name', img_name)
   d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()>>html.Update")
-  d.setdefault('target', "Update Formula with current model")
+
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    if isSame:
+      img_name = 'toolbar-mask_same'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
+      d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
+      d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
+    else:
+      img_name = 'toolbar-mask_ok'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
+      d.setdefault('target', "A solvent mask has been used, and therefore the formula should differ from what is in the model. Nothing to do!")
+
+  else:
+    if not isSame:
+      img_name = 'toolbar-refresh'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
+      d.setdefault('target', "Update Formula with current model")
+    else:
+      img_name = 'toolbar-blank'
+      OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
+      formula = present
+      d.setdefault('target', "Everything is up-to-date")
+
+  d.setdefault('img_name', img_name)
   d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
   refresh_button = '''
   <input
@@ -703,6 +716,7 @@ def makeFormulaForsNumInfo():
   if debug:
     pass
     #print "Formula sNum (2): %.5f" %(time.time() - t1)
+
   return "<!-- #include snumformula %s;1 -->" %fn
   #return fn
 
@@ -901,6 +915,54 @@ def number_non_hydrogen_atoms():
 def getExpectedPeaks():
   orm = olexex.OlexRefinementModel()
   return orm.getExpectedPeaks()
+
+def make_exti_swat_gui():
+  html = ""
+  exti = olx.xf.rm.Exti()
+  if exti and exti != "n/a":
+    html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+  else:
+    swat = olx.xf.rm.SWAT()
+    if swat and swat != "n/a":
+      html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
+  if not html:
+    html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
+  return html
+OV.registerFunction(make_exti_swat_gui,True,"gui.tools")
+
+def refine_swat():
+  retVal = ""
+  _ = olx.xf.rm.SWAT()
+  if "n/a" not in _.lower() and _ != '0':
+    if " " in _:
+      l = _.split(" ")
+    else:
+      l = [_]
+    for item in l:
+      if "(" in item:
+        _ = item.split('(')
+        swat = _[0]
+        esd = _[1].rstrip(')')
+        #swat_f = float(swat)
+        #_ = len(swat) - len(esd) -2
+        #esd_f = float("0.%s%s" %(_*"0", esd))
+        #esd = "(%s)"
+      else:
+        swat = round(float(item),3)
+        esd = ""
+        OV.SetParam('snum.refinement.refine_swat',1)
+        OV.SetParam('snum.refinement.refine_swat_tickbox', True)
+      if esd:
+        retVal += "%s(%s) "%(swat,esd)
+      else:
+        retVal += "%s "%(swat)
+  else:
+    OV.SetParam('snum.refinement.refine_swat',0)
+    OV.SetParam('snum.refinement.refine_swat_tickbox', False)
+  return retVal
+
+OV.registerFunction(refine_swat,True,"gui.tools")
+
 
 def refine_extinction():
 

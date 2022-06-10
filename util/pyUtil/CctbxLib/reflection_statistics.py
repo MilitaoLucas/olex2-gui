@@ -161,7 +161,7 @@ class item_vs_resolution(OlexCctbxAdapter):
         something = True
     if something == False:
       print("There appears to be no data to display")
-      raise Exception("No data to display!")    
+      raise Exception("No data to display!")
 
   def xy_plot_info(self):
     r = empty()
@@ -325,12 +325,14 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-        f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+        f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation, filtered=False)
       else:
-        f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
+        f_sq_obs, f_calc = self.get_fo_sq_fc(filtered=False)
+      f_sq_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered)
       f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
-      f_obs_omitted = None
-      f_calc_omitted = None
+      f_obs_omitted = f_sq_obs.lone_set(f_obs_filtered).f_sq_as_f()
+      f_calc_filtered = f_calc.common_set(self.reflections.f_sq_obs_filtered)
+      f_calc_omitted = f_calc.lone_set(f_calc_filtered)
     else:
       if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
         assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"

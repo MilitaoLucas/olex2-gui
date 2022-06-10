@@ -479,3 +479,77 @@ t:restraints_top{
     onchange="SetVar(restraint_filter, html.GetValue(~name~))>>SetVar(restraint_filter_changed, True)>>html.update()>>SetVar(restraint_filter_changed, False)"
 >  </td>
 }
+
+t:exti_gui{
+    <td width='5%' align='right'>
+      <b>EXTI </b>
+    </td>
+
+    <td width='4%'>
+      <input
+        type='checkbox'
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name='SNUM_REFINEMENT_EXTI'
+        checked="not(strcmp(xf.rm.Exti(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+      >
+    </td>
+
+    <td width='18%'>
+      <b>$spy.gui.tools.refine_extinction()<b>
+    </td>
+}
+
+t:swat_gui{
+    <td width='5%' align='right'>
+      <b>SWAT </b>
+    </td>
+
+    <td width='4%'>
+      <input
+        type='checkbox'
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name='SNUM_REFINEMENT_SWAT'
+        checked="not(strcmp(xf.rm.Swat(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
+        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT"
+      >
+    </td>
+
+    <td width='20%'>
+      <b>$spy.gui.tools.refine_swat()<b>
+    </td>
+}
+
+t:exti_or_swat_gui{
+    <td width='6%' align='right'>
+      <b>EXTI </b>
+    </td>
+
+    <td width='5%'>
+      <input
+        type='checkbox'
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name='SNUM_REFINEMENT_EXTI'
+        checked="not(strcmp(xf.rm.Exti(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+      >
+    </td>
+
+    <td width='6%' align='right'>
+      <b>SWAT </b>
+    </td>
+
+    <td width='5%'>
+      <input
+        type='checkbox'
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name='SNUM_REFINEMENT_SWAT'
+        checked="not(strcmp(xf.rm.Swat(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
+        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT"
+      >
+    </td>
+}

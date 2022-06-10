@@ -3,14 +3,10 @@
 from my_refine_util import *
 import math
 import sys
-from cctbx import miller
-from cctbx import uctbx
-from iotbx import builders
 
-from iotbx import reflection_file_reader, reflection_file_utils
-
+from iotbx import builders, reflection_file_reader, reflection_file_utils
 from cctbx.eltbx import sasaki
-from cctbx import adptbx, crystal, miller, sgtbx, xray
+from cctbx import adptbx, crystal, miller, sgtbx, xray, uctbx
 from cctbx.array_family import flex
 from cctbx import xray
 from smtbx.refinement.constraints import rigid
@@ -242,7 +238,7 @@ class reflections(object):
 
   def get_observations(self, twin_fractions, twin_components):
     miller_set = miller.set(
-      crystal_symmetry=self.f_sq_obs_filtered,
+      crystal_symmetry=self.f_sq_obs_filtered.crystal_symmetry(),
       indices=self.f_sq_obs_filtered.indices(),
       anomalous_flag=self.f_sq_obs_filtered.anomalous_flag())\
         .unique_under_symmetry().map_to_asu()

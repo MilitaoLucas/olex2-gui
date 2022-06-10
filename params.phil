@@ -299,6 +299,10 @@ routines requiring structure refinement
       .type = int
     refine_extinction_tickbox = False
       .type = bool
+    refine_swat = 1
+      .type = int
+    refine_swat_tickbox = False
+      .type = bool
     original_formula = None
       .type = str
       .expert_level = 1
@@ -363,6 +367,14 @@ routines requiring structure refinement
       invert = True
         .type = bool
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+      }
+      ED
+        .short_caption = ED parameters
+      {
+        maxSg = 0.01
+          .type = float
+        use_2_beam = False
+          .type = bool
       }
   }
 
@@ -764,13 +776,18 @@ routines requiring structure refinement
   map {
     source = *olex fcf cctbx
       .type = choice
-    type = *diff fcalc tomc fobs fcfmc
+    type = *diff fcalc tomc fobs fcfmc PDF
       .type = choice
+    PDF_second_order = True
+      .type = bool
+    PDF_third_order = True
+      .type = bool
+    PDF_fourth_order = True
+      .type = bool
     mask = True
       .type = bool
     resolution = 0.1
       .type = float
-
   }
 
   calcvoid {
@@ -1042,7 +1059,7 @@ user
       .expert_level = 2
     refln_loop = False
       .type = bool
-    use_openmp = False
+    use_openmp = True
       .type = bool
     openmp_mem = 1000
       .type = int
