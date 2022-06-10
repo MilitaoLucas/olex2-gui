@@ -295,8 +295,7 @@ class OlexCctbxAdapter(object):
         and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
     if (apply_twin_law
-        and self.twin_components is not None
-        and self.twin_components[0].value > 0):
+        and self.twin_components is not None):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set_)
@@ -310,9 +309,12 @@ class OlexCctbxAdapter(object):
       else:
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
-      twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(), twin_component.value)
       if twin_data:
+        value = twin_component.value
+        if value < 0: value = 0
+        elif value > 1: value = 1
+        twinned_fc2 = twinning.twin_with_twin_fraction(
+          fc.as_intensity_array(), value)
         if miller_set:
           fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
         else:
