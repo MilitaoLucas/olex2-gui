@@ -1059,9 +1059,9 @@ user
       .expert_level = 2
     refln_loop = False
       .type = bool
-    use_openmp = True
+    use_openmp = False
       .type = bool
-    openmp_mem = 300
+    openmp_mem = 2000
       .type = int
   }
 
