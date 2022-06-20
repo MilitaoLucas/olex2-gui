@@ -347,7 +347,21 @@ class wfn_Job(object):
       else:
         res += " NoFinalGridX "
         return res
+    known_charges = {
+      "Ca" :  2.0,
+      "F"  : -1.0,
+      "Na" :  1.0,
+      "Cl" : -1.0,
+      "Mg" :  2.0,
+      "Br" : -1.0,
+      "K"  :  1.0,
+      "Li" :  1.0,
+      "Be" :  2.0,
+      "O"  : -2.0
+    }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1,p=10)
@@ -363,8 +377,6 @@ class wfn_Job(object):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
-    basis = open(basis_set_fn,"r")
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       cpu = "nprocs " + ncpus
@@ -374,9 +386,17 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
     qmmmtype = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE")
-    control = "! NoPop MiniPrint 3-21G AIM "
+    control = "! NoPop MiniPrint 3-21G "
+    ECP = False
+    if "ECP" in basis_name:
+      ECP = True
+    if ECP == False:
+      control += " 3-21G "
+    else:
+      control += basis_name.replace("ECP-", "") + ' '
+    
     if qmmmtype == "Mol":
-      control += "MOL-CRYSTAL-QMMM "
+      control += "MOL-CRYSTAL-QMMM AIM "
     else:
       control += "IONIC-CRYSTAL-QMMM "
     method = OV.GetParam('snum.NoSpherA2.method')
@@ -385,6 +405,8 @@ class wfn_Job(object):
       control += "rhf "
       grids = ""
     else:
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROKS "      
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
         if method != "wB97" and method != "wB97X":
@@ -418,8 +440,6 @@ class wfn_Job(object):
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM("+Solvation+") "
-    charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
@@ -430,51 +450,57 @@ class wfn_Job(object):
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
-    inp.write("   end\nend\n%basis\n")
-    for i in range(0,len(atom_list)):
-      atom_type = "newgto " +atom_list[i] + '\n'
-      inp.write(atom_type)
-      temp_atom = atom_list[i] + ":" + basis_name
-      basis.seek(0,0)
-      while True:
-        line = basis.readline()
-        if not line:
-          raise RecursionError("Atom not found in the basis set!")
-        if line == '':
-          continue
-        if line[0] == "!":
-          continue
-        if "keys=" in line:
-          key_line = line.split(" ")
-          type = key_line[key_line.index("keys=")+2]
-        if temp_atom in line:
-          break
-      line_run = basis.readline()
-      if "{"  in line_run:
+    inp.write("   end\nend\n")
+    el_list = atom_list
+    if ECP == False:
+      basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+      basis = open(basis_set_fn,"r")
+      inp.write("%basis\n")
+      for i in range(0,len(atom_list)):
+        atom_type = "newgto " +atom_list[i] + '\n'
+        inp.write(atom_type)
+        temp_atom = atom_list[i] + ":" + basis_name
+        basis.seek(0,0)
+        while True:
+          line = basis.readline()
+          if not line:
+            raise RecursionError("Atom not found in the basis set!")
+          if line == '':
+            continue
+          if line[0] == "!":
+            continue
+          if "keys=" in line:
+            key_line = line.split(" ")
+            type = key_line[key_line.index("keys=")+2]
+          if temp_atom in line:
+            break
         line_run = basis.readline()
-      while (not "}" in line_run):
-        shell_line = line_run.split()
-        if type == "turbomole=":
-          n_primitives = shell_line[0]
-          shell_type = shell_line[1]
-        elif type == "gamess-us=":
-          n_primitives = shell_line[1]
-          shell_type = shell_line[0]
-        shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
-        inp.write(shell_gaussian)
-        for n in range(0,int(n_primitives)):
+        if "{"  in line_run:
+          line_run = basis.readline()
+        while (not "}" in line_run):
+          shell_line = line_run.split()
           if type == "turbomole=":
-            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
-          else:
-            inp.write(basis.readline().replace("D","E"))
-        line_run = basis.readline()
+            n_primitives = shell_line[0]
+            shell_type = shell_line[1]
+          elif type == "gamess-us=":
+            n_primitives = shell_line[1]
+            shell_type = shell_line[0]
+          shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
+          inp.write(shell_gaussian)
+          for n in range(0,int(n_primitives)):
+            if type == "turbomole=":
+              inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
+            else:
+              inp.write(basis.readline().replace("D","E"))
+          line_run = basis.readline()
+        inp.write("end\n")
+      basis.close()
       inp.write("end\n")
-    basis.close()
-    inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
     hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
-    inp.write("%qmmm\n  Conv_Charges true\n")
+    ecplayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')
+    inp.write("%qmmm\n")
     asu_lines = xyz1.readlines()
     natoms = int(asu_lines[0])
     xyz2.seek(0)
@@ -500,14 +526,65 @@ class wfn_Job(object):
     qm_atoms = ""
     for atom in atom_list:
       qm_atoms += " %d"%atom
-    inp.write("  QMAtoms {%s } end\n"%qm_atoms)
-    inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))
+    inp.write("  QMAtoms {%s } end"%qm_atoms)
+    params_filename = self.name + ".ORCAFF.prms"
+    if qmmmtype == "Ion":
+      inp.write("""
+  Conv_Charges true
+  Conv_Charges_MaxNCycles 30
+  Conv_Charges_ConvThresh %f
+  ECPLayers %d
+  HFLayers %d
+  HFLayerGTO "3-21G"
+  Charge_Total 0
+  EnforceTotalCharge true
+  OuterPCLayers 1
+  ORCAFFFilename "%s"
+end"""%(float(conv),ecplayer,hflayer,params_filename))
+    else:
+      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))      
     run = None
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
       if run > 1:
         inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
     inp.close()
+    if qmmmtype == "Ion":
+      import subprocess
+      mm_prep_args = []
+      mm_prep_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_mm"))
+      if sys.platform[:3] == 'win':
+        mm_prep_args[0] += ".exe"
+      mm_prep_args.append("-makeff")
+      mm_prep_args.append(self.name+".xyz")
+      for t in el_list:
+        mm_prep_args.append("-CEL")
+        mm_prep_args.append(t)
+        if t in known_charges:
+          mm_prep_args.append(str(known_charges[t]))
+        else:
+          mm_prep_args.append("0.0")
+      if sys.platform[:3] == 'win':
+        startinfo = subprocess.STARTUPINFO()
+        startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startinfo.wShowWindow = 7
+        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE,
+                             startupinfo=startinfo)
+      else:
+        m = subprocess.Popen(mm_prep_args, 
+                             cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE)
+      while m.poll() is None:
+        time.sleep(1)
+      n = os.path.join(self.full_dir, self.name)
+      if not os.path.exists(os.path.join(self.full_dir,params_filename)):
+        OV.SetVar('NoSpherA2-Error', "NoORCAMMFile")
+        raise NameError("No MM File for ORCA file generated!")
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None):
     def write_grids_4(method,grid):
@@ -597,6 +674,8 @@ class wfn_Job(object):
       control += "rhf "
       grids = ""
     else:
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROKS "
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "Hybrid":
         software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
@@ -1537,8 +1616,8 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
-
-    if "ECP" in basis_name and "orca" in args[0]:      
+    embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+    if ("ECP" in basis_name and "orca" in args[0]) or embedding == True:      
       molden_args = []
       molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
       if sys.platform[:3] == 'win':

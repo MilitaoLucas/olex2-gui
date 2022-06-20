@@ -550,6 +550,25 @@ N/A
     onchange="spy.SetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS,html.GetValue(~name~))"
   > 
 </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="13%" align="left">
+  <b>ECP Layers </b>
+</td>
+<td width='6%'>
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='0'
+    name='ORCA_CRYSTAL_QMMM_ECP_LAYERS',
+    value='$spy.GetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS)', 
+    onchange="spy.SetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS,html.GetValue(~name~))"
+  > 
+</td>
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
