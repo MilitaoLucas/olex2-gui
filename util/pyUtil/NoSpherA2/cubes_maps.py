@@ -154,21 +154,18 @@ def calculate_cubes():
     args.append("-rdg")
   if ESP == True:
     args.append("-esp")
-  if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
-    args.append("-v")
-
+  if ATOM == True:
+    args.append("-HDEF")
+  if DEF == True:
+    args.append("-def")
   if MO == True:
     args.append("-MO")
     if all_MOs == True:
       args.append("all")
     else:
       args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
-
-  if ATOM == True:
-    args.append("-HDEF")
-
-  if DEF == True:
-    args.append("-def")
+  if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
+    args.append("-v")
 
   radius = OV.GetParam('snum.NoSpherA2.map_radius')
   res = OV.GetParam('snum.NoSpherA2.map_resolution')
@@ -287,7 +284,7 @@ def plot_cube(name,color_cube):
   if not os.path.isfile(name):
     print("Cube file does not exist!")
     return
-  olex.m("html.Update()")
+  # olex.m("html.Update()")
   with open(name) as cub:
     cube = cub.readlines()
 
@@ -301,8 +298,8 @@ def plot_cube(name,color_cube):
   z_run = 0
   data = None
 
-  min = 100000
-  max = 0
+  #min = 100000
+  #max = 0
 
   for line in cube:
     run += 1
@@ -447,10 +444,10 @@ def plot_cube(name,color_cube):
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
     gridding = data.accessor()
-    type = isinstance(data, flex.int)
-    olex_xgrid.Import(
-      gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
-  data = None
+    isint = isinstance(data, flex.int)
+    a1 = gridding.all()
+    a2 = gridding.focus()
+    olex_xgrid.Import(a1, a2, data.copy_to_byte_str(), isint)
   Type = OV.GetParam('snum.NoSpherA2.map_type')
   if Type == "Laplacian":
     OV.SetVar('map_min', 0)
@@ -492,11 +489,13 @@ def plot_cube(name,color_cube):
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale', 100)
-  mmm = data.min_max_mean()
+  mmm = data.as_1d().min_max_mean()
+  mi = mmm.min
+  ma = mmm.max
   olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True,1)
-  iso = float((abs(min)+abs(max))*2/3)
+  iso = float((abs(mi)+abs(ma))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
@@ -814,6 +813,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
       f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
       NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
     else:
+      print("Calculating Structure Factors from memory...")
       f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
   else:
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
