@@ -200,6 +200,10 @@ snum{
       .type = str
     ORCA_CRYSTAL_QMMM_HF_LAYERS = 0
       .type = int
+    ORCA_CRYSTAL_QMMM_ECP_LAYERS = 2
+      .type = int
+    ORCA_FORCE_ROKS = False
+      .type = bool
     ORCA_Relativistic = "ZORA"
       .type = str
     ORCA_SCNL = False

@@ -968,8 +968,10 @@ class RunRefinementPrg(RunPrg):
           tsc_exists = True
         elif file.endswith(".wfn"):
           wfn_file = file
+        elif file.endswith(".tscb"):
+          tsc_exists = True
       if tsc_exists == False:
-        print("Error during NoSpherA2")
+        print("Error during NoSpherA2: No .tsc file found")
         RunRefinementPrg.running = None
         return False
 
