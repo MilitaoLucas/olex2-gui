@@ -215,23 +215,24 @@ def calculate(self, threshold, params, max_reflections, output_to):
     if Ts_[0][1] > maxT:
       maxT = Ts_[0][1]
     Ts.append((j, Ts_[:min(max_reflections, len(Ts_))]))
-  fm_header = "#%3s%4s%4s%8s%10s%10s\n"
+  fm_header = "#%3s%4s%4s%10s%10s%10s%10s\n"
 
   try:
     if olx.HasGUI() == 'true':
       olx.Freeze(True)
     if not output_to:
       output_to = sys.stdout
-      fm_hkl = "%4i%4i%4i%8.2f%10.3f%10.3f\n"
+      fm_hkl = "%4i%4i%4i%10.4f%10.4f%10.4f%10.4f\n"
     else:
-      fm_hkl = "%i %i %i %.2f %.3f %.3f\n"
-    output_to.write(fm_header %("H", "K", "L", "V", "Fo_sq", "Fc_sq"))
+      fm_hkl = "%i %i %i %.4f %.4f %.4f %.4f\n"
+    output_to.write(fm_header %("H", "K", "L", "d-spacing", "V", "Fo_sq", "Fc_sq"))
     for j, Ts_ in Ts:
       output_to.write("#%s\n" %(labels[j]))
       for i in range(0, len(Ts_)):
         idx = self.observations.indices[Ts_[i][0]]
         val = Ts_[i][1]*100/maxT
         output_to.write(fm_hkl %(idx[0], idx[1], idx[2],\
+          self.xray_structure.unit_cell().d(idx),\
           val, self.observations.data[Ts_[i][0]]/scale_factor, result.observables()[Ts_[i][0]]))
   finally:
     if olx.HasGUI() == 'true':
