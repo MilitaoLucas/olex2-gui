@@ -313,6 +313,10 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+    for (i,r) in enumerate(self.shared_rotating_adps):
+      if r.refine_angle:
+        olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
+          r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
     #ED stuff
     if self.std_observations:
       olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)

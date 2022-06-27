@@ -115,13 +115,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           olex.m('delins ABIN')
           OlexVFS.write_to_olex('mask_notification.htm',_,1)
       if f_mask is not None:
-        cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
-        fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
-        if f_mask.size() != fo2.size():
-          f_mask = f_mask.generate_bijvoet_mates().customized_copy(
-            anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
-          if f_mask.size() != fo2.size():
-            raise RuntimeError("f_mask array doesn't match hkl file")
         COA.write_fab(f_mask, fab_path)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
