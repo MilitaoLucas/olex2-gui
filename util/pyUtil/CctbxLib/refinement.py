@@ -275,6 +275,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
+    self.normal_eqns.shared_rotating_adps = self.shared_rotating_adps
     if build_only:
       return self.normal_eqns
     if timer:
@@ -1205,6 +1206,13 @@ The following options were used:
       current = adp.shared_rotated_u(c[0], c[1], c[2], c[3], c[4])
       constraints.append(current)
       self.shared_rotated_adps.append(current)
+
+    shared_rotating_adp = self.olx_atoms.model.get('olex2.constraint.rotating_adp', ())
+    self.shared_rotating_adps = []
+    for c in shared_rotating_adp:
+      current = adp.shared_rotating_u(*c)
+      constraints.append(current)
+      self.shared_rotating_adps.append(current)
 
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
