@@ -13,9 +13,9 @@ parser.add_option('--dest',
 option, args = parser.parse_args()
 
 if option.dest == 'trunk':
-  destination = 'distro@www2.olex2.org:/var/distro/bin_dir_trunk/'
+  destination = 'distro@10.8.0.1:/var/distro/bin_dir_trunk/'
 else:
-  destination = 'distro@www2.olex2.org:/var/distro/bin_dir-1.5/'
+  destination = 'distro@10.8.0.1:/var/distro/bin_dir-1.5/'
 
 tmp_folder = '~/tmp/cctbx/'
 if sys.platform[:3] == 'win':
