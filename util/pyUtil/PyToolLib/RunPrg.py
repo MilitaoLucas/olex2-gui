@@ -950,7 +950,9 @@ class RunRefinementPrg(RunPrg):
       #Calculate Wavefunction
       try:
         from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
-        nsp2.launch()
+        v = nsp2.launch()
+        if v == False:
+          print("Error during NoSpherA2! Abnormal Ending of program!")
       except NameError as error:
         print("Error during NoSpherA2:")
         print(error)
@@ -968,6 +970,10 @@ class RunRefinementPrg(RunPrg):
           tsc_exists = True
         elif file.endswith(".wfn"):
           wfn_file = file
+        elif file.endswith(".wfx"):
+          wfn_file = file
+        elif file.endswith(".gbw"):
+          wfn_file = file          
         elif file.endswith(".tscb"):
           tsc_exists = True
       if tsc_exists == False:
