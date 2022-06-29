@@ -323,41 +323,73 @@ class wfn_Job(object):
     com.write(" \n./%s.wfx\n\n" %self.name)
     com.close()
 
-  def write_orca_crystal_input(self,xyz):
-    def write_grids_5(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "DefGrid3 "
-        elif grid == "Low":
-          res += "DefGrid2 "
-        elif grid == "High":
-          res += "DefGrid3 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      else:
-        if grid == "Low":
-          res += "DefGrid1 "
-        elif grid == "High":
-          res += "DefGrid2 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
+  def write_grids_4(self, method, grid):
+    res = ""
+    if method == "M062X":
+      if grid == "Normal":
+        res += "Grid6 "
+      elif grid == "Low":
+        res += "Grid5 "
+      elif grid == "High":
+        res += "Grid7 "
+      elif grid == "Max":
+        res += "Grid7 "
+    else:
+      if grid == "Low":
+        res += "Grid1 "
+      elif grid == "High":
+        res += "Grid4 "
+      elif grid == "Max":
+        res += "Grid7 "
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
+      return res
+    else:
+      if grid == "Normal":
         res += " NoFinalGridX "
-        return res
+      elif grid == "Low":
+        res += " GridX2 NoFinalGridX "
+      elif grid == "High":
+        res += " GridX5 NoFinalGridX "
+      elif grid == "Max":
+        res += " GridX9 NoFinalGridX "
+      return res
+
+  def write_grids_5(self, method, grid):
+    res = ""
+    if method == "M062X":
+      if grid == "Normal":
+        res += "DefGrid3 "
+      elif grid == "Low":
+        res += "DefGrid2 "
+      elif grid == "High":
+        res += "DefGrid3 "
+      elif grid == "Max":
+        res += "DefGrid3 "
+    else:
+      if grid == "Low":
+        res += "DefGrid1 "
+      elif grid == "High":
+        res += "DefGrid2 "
+      elif grid == "Max":
+        res += "DefGrid3 "
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
+      return res
+    else:
+      res += " NoFinalGridX "
+      return res
+
+  def write_orca_crystal_input(self,xyz):
     known_charges = {
-      "Ca" :  2.0,
-      "F"  : -1.0,
-      "Na" :  1.0,
-      "Cl" : -1.0,
-      "Mg" :  2.0,
-      "Br" : -1.0,
-      "K"  :  1.0,
-      "Li" :  1.0,
-      "Be" :  2.0,
-      "O"  : -2.0
+      "Ca": 2.0,
+      "F": -1.0,
+      "Na": 1.0,
+      "Cl": -1.0,
+      "Mg": 2.0,
+      "Br": -1.0,
+      "K": 1.0,
+      "Li": 1.0,
+      "Be": 2.0,
+      "O": -2.0
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
     charge = OV.GetParam('snum.NoSpherA2.charge')
@@ -396,7 +428,7 @@ class wfn_Job(object):
       control += basis_name.replace("ECP-", "") + ' '
     
     if qmmmtype == "Mol":
-      control += "MOL-CRYSTAL-QMMM AIM "
+      control += "MOL-CRYSTAL-QMMM "
     else:
       control += "IONIC-CRYSTAL-QMMM "
     method = OV.GetParam('snum.NoSpherA2.method')
@@ -417,7 +449,7 @@ class wfn_Job(object):
         control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "ORCA 5.0":
-        grids = write_grids_5(method,grid)
+        grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
     convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
@@ -587,60 +619,6 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         raise NameError("No MM File for ORCA file generated!")
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None):
-    def write_grids_4(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "Grid6 "
-        elif grid == "Low":
-          res += "Grid5 "
-        elif grid == "High":
-          res += "Grid7 "
-        elif grid == "Max":
-          res += "Grid7 "
-      else:
-        if grid == "Low":
-          res += "Grid1 "
-        elif grid == "High":
-          res += "Grid4 "
-        elif grid == "Max":
-          res += "Grid7 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
-        if grid == "Normal":
-          res += " NoFinalGridX "
-        elif grid == "Low":
-          res += " GridX2 NoFinalGridX "
-        elif grid == "High":
-          res += " GridX5 NoFinalGridX "
-        elif grid == "Max":
-          res += " GridX9 NoFinalGridX "
-        return res
-
-    def write_grids_5(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "DefGrid3 "
-        elif grid == "Low":
-          res += "DefGrid2 "
-        elif grid == "High":
-          res += "DefGrid3 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      else:
-        if grid == "Low":
-          res += "DefGrid1 "
-        elif grid == "High":
-          res += "DefGrid2 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
-        res += " NoFinalGridX "
-        return res
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     ECP = False
     if basis_name == None:
@@ -665,7 +643,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     control = "! NoPop MiniPrint "
 
     if ECP == False:
-      control += "AIM 3-21G "
+      control += "3-21G "
     else:
       control += basis_name.replace("ECP-", "") + ' '
 
@@ -690,10 +668,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             control += method + '-V SCNL '
         else:
           control += method + ' '
-        grids = write_grids_5(method,grid)
+        grids = self.write_grids_5(method, grid)
       else:
         control += method + ' '
-        grids = write_grids_4(method,grid)
+        grids = self.write_grids_4(method, grid)
     if convergence == None:
       convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
     if convergence == "NoSpherA2SCF":
@@ -1526,14 +1504,14 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)],
-                            startupinfo=startinfo)
+                            startupinfo=startinfo, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
       pyl = OV.getPYLPath()
       if not pyl:
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, python_script)])
+                            os.path.join(p_path, python_script)], creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
     out_fn = None
     path = self.full_dir
@@ -1575,7 +1553,7 @@ ener = cf.kernel()"""
       while p.poll() is None:
         x = stdout.read()
         if x:
-          print(x,end='')
+          print(x, end='')
           olx.xf.EndUpdate()
           if OV.HasGUI():
             olx.Refresh()
@@ -1583,7 +1561,13 @@ ener = cf.kernel()"""
           olx.xf.EndUpdate()
           if OV.HasGUI():
             olx.Refresh()
-        time.sleep(0.5)
+        if OV.GetVar("stop_current_process"):
+          import signal
+          p.send_signal(signal.SIGTERM)
+          print("Calculation aborted by INTERRUPT!")
+          OV.SetVar("stop_current_process", False)
+        else:
+          time.sleep(0.5)
 
     print("\nWavefunction calculation ended!")
 
@@ -1670,6 +1654,8 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
+      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
+        shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):

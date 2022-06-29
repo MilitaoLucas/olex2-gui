@@ -321,13 +321,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if file.endswith(".tscb"):
           tsc_exists = True
           f_time = os.path.getmtime(file)
-      if tsc_exists and ".wfn" not in wfn_code:
+      if tsc_exists and not any(x in wfn_code for x in [".wfn", ".wfx", ".molden", ".gbw"]):
         import datetime
         timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
         if not os.path.exists(timestamp_dir):
           os.mkdir(timestamp_dir)
         for file in os.listdir('.'):
-          if file.endswith(".tsc") or file.endswith(".tscb") or (file.endswith(".wfn") and ("wfn" not in wfn_code)) or file.endswith(".wfx") or file.endswith(".ffn") or file.endswith(".fchk"):
+          if file.endswith(".tsc") or file.endswith(".tscb") or file.endswith(".wfn") or file.endswith(".wfx") or file.endswith(".ffn") or file.endswith(".gbw") or file.endswith(".fchk"):
             shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
 
     olex.m("CifCreate")
@@ -418,12 +418,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               OV.SetVar('NoSpherA2-Error',error)
               return False         
             path_base = os.path.join(OV.FilePath(), self.wfn_job_dir, self.name)
-            if os.path.exists(path_base+".wfx"):
-              wfn_fn = path_base+".wfx"
+            if os.path.exists(path_base + ".gbw"):
+              wfn_fn = path_base + ".gbw"
+            elif os.path.exists(path_base+".wfx"):
+              wfn_fn = path_base + ".wfx"
             elif os.path.exists(path_base+".fchk"):
-              wfn_fn = path_base+".fchk"
+              wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base+".wfn"):
-              wfn_fn = path_base+".wfn"
+              wfn_fn = path_base + ".wfn"
             else:
               return False
             wfn_fn = None
@@ -435,7 +437,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfn"
               elif file.endswith(".wfx"):
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfx"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")): wfn_fn = temp
+                if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
+                  wfn_fn = temp
+              elif file.endswith(".gbw"):
+                temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".gbw"
+                if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".fchk")):
+                  wfn_fn = temp
               elif file.endswith(".ffn"):
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".ffn"
               elif file.endswith(".fchk"):
@@ -494,6 +501,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base + ".wfn"):
               wfn_fn = path_base + ".wfn"
+            elif os.path.exists(path_base + ".gbw"):
+              wfn_fn = path_base + ".gbw"
             elif os.path.exists(path_base + ".molden"):
               wfn_fn = path_base + ".molden"
             else:
@@ -504,7 +513,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfn"
             elif file.endswith(".wfx"):
               temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfx"
-              if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")): wfn_fn = temp
+              if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
+                wfn_fn = temp
+            elif file.endswith(".gbw"):
+              temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".gbw"
+              if (wfn_fn == None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
+                wfn_fn = temp
             elif file.endswith(".ffn"):
               temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".ffn"
             elif file.endswith(".molden"):
@@ -546,7 +560,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         shutil.copy(os.path.join(OV.FilePath(), self.jobs_dir, self.name + ".tsc"), self.name + ".tsc")
         OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
       else:
-        if wfn_code.lower().endswith(".wfn"):
+        if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
+           wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
           pass
         elif wfn_code == "Tonto":
           job = Job(self, self.name)
@@ -591,7 +606,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if (experimental_SF == True):
           if wfn_code != "fragHAR":
             path_base = os.path.join(self.jobs_dir, self.name)
-            if wfn_code.lower().endswith(".wfn"):
+            if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
+               wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
             elif os.path.exists(path_base + ".wfx"):
               wfn_fn = path_base + ".wfx"
@@ -599,11 +615,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base + ".wfn"):
               wfn_fn = path_base + ".wfn"
+            elif os.path.exists(path_base + ".gbw"):
+              wfn_fn = path_base + ".gbw"
             elif os.path.exists(path_base + ".molden"):
               wfn_fn = path_base + ".molden"
             elif wfn_code == "Thakkar IAM":
               wfn_fn = path_base + ".xyz"
             else:
+              print("No usefull wavefunction found!")
               return False
             hkl_fn = path_base + ".hkl"
             cif_fn = os.path.join(OV.FilePath(), self.name + ".cif")
@@ -1028,8 +1047,6 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
       f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_max_min()[1], d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-  args.append("-hkl")
-  args.append(hkl_file)
   if (int(ncpus) > 1):
     args.append('-cpus')
     args.append(ncpus)
@@ -1109,7 +1126,9 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
-        args.append(groups[i])    
+        args.append(groups[i])
+  args.append("-hkl")
+  args.append(hkl_file)
 
   os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
@@ -1152,12 +1171,11 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       print("process ended before the output file was found")
       OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
       raise NameError('NoSpherA2 ended unexpectedly!')
-
   with open(out_fn, "rU") as stdout:
     while p.poll() is None:
       x = stdout.read()
       if x:
-        print(x,end='')
+        print(x, end='')
         olx.xf.EndUpdate()
         if OV.HasGUI():
           olx.Refresh()
@@ -1165,7 +1183,12 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
         olx.xf.EndUpdate()
         if OV.HasGUI():
           olx.Refresh()
-      time.sleep(0.1)
+      # if OV.GetVar("stop_current_process"):
+      #  p.terminate()
+      #  print("Calculation aborted by INTERRUPT!")
+      #  OV.SetVar("stop_current_process", False)
+      # else:
+      #  time.sleep(0.1)
 
   sucess = False
   with open(out_fn,"r") as f:

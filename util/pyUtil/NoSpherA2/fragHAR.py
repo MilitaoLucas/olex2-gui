@@ -1318,10 +1318,12 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         raise NameError('Unsuccesfull Wavefunction Calculation!')
       
       base_name = os.path.join(path,wfn_object.name)
-      if os.path.exists(base_name+".wfx"):
-        wfn_fn = base_name+".wfx"
-      elif os.path.exists(base_name+".wfn"):
-        wfn_fn = base_name+".wfn"
+      if os.path.exists(base_name + ".gbw"):
+        wfn_fn = base_name + ".gbw"
+      elif os.path.exists(base_name + ".wfx"):
+        wfn_fn = base_name + ".wfx"
+      elif os.path.exists(base_name + ".wfn"):
+        wfn_fn = base_name + ".wfn"
       wfns.append(wfn_fn)
       if int(frag[i].part) != 0:
         groups.append([0,int(frag[i].part)])

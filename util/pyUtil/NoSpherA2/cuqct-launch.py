@@ -22,7 +22,6 @@ while not os.path.exists('NoSpherA2.log'):
     time.sleep(10)
     exit(1)
 with open('NoSpherA2.log', "r") as stdout:
-  import sys
   while p.poll() is None:
     x = stdout.read()
     if x:
