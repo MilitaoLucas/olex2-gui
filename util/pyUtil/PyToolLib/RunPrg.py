@@ -869,357 +869,364 @@ class RunRefinementPrg(RunPrg):
     return
 
   def deal_with_AAFF(self):
-    from cctbx import adptbx
-
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
-    old_model = OlexRefinementModel()
-    converged = False
-    run = 0
-    HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
-    HAR_log.write("NoSpherA2 in Olex2 for structure %s\n" %(OV.ModelSrc()))
-    HAR_log.write("\n")
-    import datetime
-    HAR_log.write("Refinement startet at: ")
-    HAR_log.write(str(datetime.datetime.now()))
-    HAR_log.write("\n")
-    HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n")
-    HAR_log.write("*" * 110 + "\n")
-
-    HAR_log.write("{:3d}".format(run))
-    energy = None
-    source = OV.GetParam('snum.NoSpherA2.source')
-    if source == "fragHAR" or source == "Hybrid" or source == "DISCAMB":
-      pass
-    else:
-      for file in os.listdir(olx.FilePath()):
-        if file.endswith(".wfn"):
-          with open(file, "rb") as f:
-            f.seek(-2000,os.SEEK_END)
-            fread = f.readlines()[-1].decode()
-            if "THE VIRIAL" in fread:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                try:
-                  energy = float(fread.split()[3])
-                except:
-                  energy = None
-              else:
-                try:
-                  energy = float(fread[17:38])
-                except:
-                  energy = None
-          fread = None
-    if energy == None:
-      HAR_log.write("{:^24}".format(" "))
-    else:
-      HAR_log.write("{:^24.10f}".format(energy))
-    HAR_log.write("{:>70}".format(" "))
-    r1_old  = OV.GetParam('snum.refinement.last_R1')
-    wr2_old = OV.GetParam('snum.refinement.last_wR2')
-    if r1_old != "n/a":
-      HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
-    else:
-      HAR_log.write("{:>6}".format("N/A"))
-    if wr2_old != "n/a":
-      HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
-    else:
-      HAR_log.write("{:>7}".format("N/A"))
-    HAR_log.write("\n")
-    HAR_log.flush()
-
-    max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
-    calculate = OV.GetParam('snum.NoSpherA2.Calculate')
-    if calculate == True:
-      if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
-        olx.Anis("$H", h=True)
-      if OV.GetParam('snum.NoSpherA2.h_afix') == True:
-        olex.m("Afix 0 $H")
-    #olex.m('delins list')
-    #olex.m('addins LIST -6')
-    add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
-    if add_disp is True:
-      olex.m('gendisp -source=brennan -force')
-
-    while converged == False:
-      run += 1
-      HAR_log.write("{:3d}".format(run))
-
+    HAR_log = None
+    try:
+      from cctbx import adptbx
+      
+      Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
       old_model = OlexRefinementModel()
-      OV.SetVar('Run_number',run)
-
-      #Calculate Wavefunction
-      try:
-        from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
-        v = nsp2.launch()
-        if v == False:
-          print("Error during NoSpherA2! Abnormal Ending of program!")
-      except NameError as error:
-        print("Error during NoSpherA2:")
-        print(error)
-        RunRefinementPrg.running = None
-        RunRefinementPrg.Terminate = True
-        return False
-      Error_Status = OV.GetVar('NoSpherA2-Error')
-      if Error_Status != "None":
-        print("Error in NoSpherA2: %s" %Error_Status)
-        return False
-      tsc_exists = False
-      wfn_file = None
-      for file in os.listdir(olx.FilePath()):
-        if file == os.path.basename(OV.GetParam('snum.NoSpherA2.file')):
-          tsc_exists = True
-        elif file.endswith(".wfn"):
-          wfn_file = file
-        elif file.endswith(".wfx"):
-          wfn_file = file
-        elif file.endswith(".gbw"):
-          wfn_file = file          
-        elif file.endswith(".tscb"):
-          tsc_exists = True
-      if tsc_exists == False:
-        print("Error during NoSpherA2: No .tsc file found")
-        RunRefinementPrg.running = None
-        return False
-
-      # get energy from wfn file
-      #TODO Check if WFN is new, otherwise skip this!
+      converged = False
+      run = 0
+      HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
+      HAR_log.write("NoSpherA2 in Olex2 for structure %s\n\n" %(OV.ModelSrc()))
+      import datetime
+      HAR_log.write("Refinement startet at: ")
+      HAR_log.write(str(datetime.datetime.now())+"\n")
+      HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n"+"*" * 110 + "\n")
+      HAR_log.write("{:3d}".format(run))
       energy = None
-      if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB":
-        HAR_log.write("{:24}".format(" "))
+      source = OV.GetParam('snum.NoSpherA2.source')
+      if source == "fragHAR" or source == "Hybrid" or source == "DISCAMB":
+        pass
       else:
-        if (wfn_file != None) and (calculate == True):
-          with open(wfn_file, "rb") as f:
-            f.seek(-2000,os.SEEK_END)
-            fread = f.readlines()[-1].decode()
-            if "THE VIRIAL" in fread:
-              source = OV.GetParam('snum.NoSpherA2.source')
-              if "Gaussian" in source:
-                energy = float(fread.split()[3])
-              elif "ORCA" in source:
-                energy = float(fread.split()[4])
-              elif "pySCF" in source:
-                energy = float(fread.split()[4])
-              elif ".wfn" in source:
-                energy = float(fread[17:38])
-              elif "Tonto" in source:
-                energy = float(fread.split()[4])
-              else:
-                energy = 0.0
-          if energy is not None:
-            HAR_log.write("{:^24.10f}".format(energy))
+        for file in os.listdir(olx.FilePath()):
+          if file.endswith(".wfn"):
+            with open(file, "rb") as f:
+              f.seek(-2000,os.SEEK_END)
+              fread = f.readlines()[-1].decode()
+              if "THE VIRIAL" in fread:
+                source = OV.GetParam('snum.NoSpherA2.source')
+                if "Gaussian" in source:
+                  try:
+                    energy = float(fread.split()[3])
+                  except:
+                    energy = None
+                else:
+                  try:
+                    energy = float(fread[17:38])
+                  except:
+                    energy = None
+            fread = None
+      if energy == None:
+        HAR_log.write("{:^24}".format(" "))
+      else:
+        HAR_log.write("{:^24.10f}".format(energy))
+      HAR_log.write("{:>70}".format(" "))
+      r1_old  = OV.GetParam('snum.refinement.last_R1')
+      wr2_old = OV.GetParam('snum.refinement.last_wR2')
+      if r1_old != "n/a":
+        HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
+      else:
+        HAR_log.write("{:>6}".format("N/A"))
+      if wr2_old != "n/a":
+        HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+      else:
+        HAR_log.write("{:>7}".format("N/A"))
+      HAR_log.write("\n")
+      HAR_log.flush()
+      
+      max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
+      calculate = OV.GetParam('snum.NoSpherA2.Calculate')
+      if calculate == True:
+        if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+          olx.Anis("$H", h=True)
+        if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+          olex.m("Afix 0 $H")
+      add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
+      if add_disp is True:
+        olex.m('gendisp -source=brennan -force')
+      
+      while converged == False:
+        run += 1
+        HAR_log.write("{:3d}".format(run))
+      
+        old_model = OlexRefinementModel()
+        OV.SetVar('Run_number',run)
+      
+        #Calculate Wavefunction
+        try:
+          from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+          v = nsp2.launch()
+          if v == False:
+            print("Error during NoSpherA2! Abnormal Ending of program!")
+            HAR_log.close()
+            return False
+        except NameError as error:
+          print("Error during NoSpherA2:")
+          print(error)
+          RunRefinementPrg.running = None
+          RunRefinementPrg.Terminate = True
+          HAR_log.close()
+          return False
+        Error_Status = OV.GetVar('NoSpherA2-Error')
+        if Error_Status != "None":
+          print("Error in NoSpherA2: %s" %Error_Status)
+          return False
+        tsc_exists = False
+        wfn_file = None
+        for file in os.listdir(olx.FilePath()):
+          if file == os.path.basename(OV.GetParam('snum.NoSpherA2.file')):
+            tsc_exists = True
+          elif file.endswith(".wfn"):
+            wfn_file = file
+          elif file.endswith(".wfx"):
+            wfn_file = file
+          elif file.endswith(".gbw"):
+            wfn_file = file          
+          elif file.endswith(".tscb"):
+            tsc_exists = True
+        if tsc_exists == False:
+          print("Error during NoSpherA2: No .tsc file found")
+          RunRefinementPrg.running = None
+          HAR_log.close()
+          return False
+      
+        # get energy from wfn file
+        #TODO Check if WFN is new, otherwise skip this!
+        energy = None
+        if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB":
+          HAR_log.write("{:24}".format(" "))
+        else:
+          if (wfn_file != None) and (calculate == True):
+            with open(wfn_file, "rb") as f:
+              f.seek(-2000,os.SEEK_END)
+              fread = f.readlines()[-1].decode()
+              if "THE VIRIAL" in fread:
+                source = OV.GetParam('snum.NoSpherA2.source')
+                if "Gaussian" in source:
+                  energy = float(fread.split()[3])
+                elif "ORCA" in source:
+                  energy = float(fread.split()[4])
+                elif "pySCF" in source:
+                  energy = float(fread.split()[4])
+                elif ".wfn" in source:
+                  energy = float(fread[17:38])
+                elif "Tonto" in source:
+                  energy = float(fread.split()[4])
+                else:
+                  energy = 0.0
+            if energy is not None:
+              HAR_log.write("{:^24.10f}".format(energy))
+            else:
+              HAR_log.write("{:24}".format(" "))
+            fread = None
           else:
             HAR_log.write("{:24}".format(" "))
-          fread = None
+      
+        if OV.GetParam('snum.NoSpherA2.run_refine') == True:
+          # Run Least-Squares
+          self.startRun()
+          try:
+            self.setupRefine()
+            OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
+            self.setupFiles()
+          except Exception as err:
+            sys.stderr.formatExceptionInfo()
+            print(err)
+            self.endRun()
+            HAR_log.close()
+            return False
+          if self.terminate:
+            self.endRun()
+            return
+          if self.params.snum.refinement.graphical_output and self.HasGUI:
+            self.method.observe(self)
+          try:
+            RunPrg.run(self)
+          except:
+            return
+          f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
+          if f_obs_sq != None and f_calc != None:
+            nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
-          HAR_log.write("{:24}".format(" "))
-
-      if OV.GetParam('snum.NoSpherA2.run_refine') == True:
-        # Run Least-Squares
-        self.startRun()
+          break
+      
+        new_model=OlexRefinementModel()
+        class results():
+          def __init__(self):
+            self.max_dxyz = 0
+            self.max_duij = 0
+            self.label_uij = None
+            self.label_xyz = None
+            self.r1 = 0
+            self.wr2 = 0
+            self.max_overall = 0
+            self.label_overall = None
+          def update_xyz(self, dxyz, label):
+            if dxyz > self.max_dxyz:
+              self.max_dxyz = dxyz
+              self.label_xyz = label
+              if dxyz > self.max_overall:
+                self.max_overall = dxyz
+                self.label_overall = label
+          def update_uij(self, duij, label):
+            if duij > self.max_duij:
+              self.max_duij = duij
+              self.label_uij = label
+              if duij > self.max_overall:
+                self.max_overall = duij
+                self.label_overall = label
+          def update_overall(self, d, label):
+            if d > self.max_overall:
+              self.max_overall = d
+              self.label_overall = label
+      
         try:
-          self.setupRefine()
-          OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
-          self.setupFiles()
-        except Exception as err:
-          sys.stderr.formatExceptionInfo()
-          print(err)
-          self.endRun()
-          return False
-        if self.terminate:
-          self.endRun()
-          return
-        if self.params.snum.refinement.graphical_output and self.HasGUI:
-          self.method.observe(self)
-        try:
-          RunPrg.run(self)
+          jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
+          from scitbx.array_family import flex
+          cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+          esds = jac_tr.transpose() * flex.double(cov_matrix)
+          jac_tr = None
+          annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
         except:
-          return
-        f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
-        if f_obs_sq != None and f_calc != None:
-          nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
-      else:
-        break
-
-      new_model=OlexRefinementModel()
-      class results():
-        def __init__(self):
-          self.max_dxyz = 0
-          self.max_duij = 0
-          self.label_uij = None
-          self.label_xyz = None
-          self.r1 = 0
-          self.wr2 = 0
-          self.max_overall = 0
-          self.label_overall = None
-        def update_xyz(self, dxyz, label):
-          if dxyz > self.max_dxyz:
-            self.max_dxyz = dxyz
-            self.label_xyz = label
-            if dxyz > self.max_overall:
-              self.max_overall = dxyz
-              self.label_overall = label
-        def update_uij(self, duij, label):
-          if duij > self.max_duij:
-            self.max_duij = duij
-            self.label_uij = label
-            if duij > self.max_overall:
-              self.max_overall = duij
-              self.label_overall = label
-        def update_overall(self, d, label):
-          if d > self.max_overall:
-            self.max_overall = d
-            self.label_overall = label
-
-      try:
-        jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-        from scitbx.array_family import flex
-        cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
-        esds = jac_tr.transpose() * flex.double(cov_matrix)
-        jac_tr = None
-        annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
-      except:
-        print ("Could not obtain cctbx object and calculate ESDs!\n")
-        return False
-      from NoSpherA2.NoSpherA2 import run_with_bitmap
-      def analyze_shifts(results):
-        try:
-          matrix_run = 0
-          matrix_size = len(esds)
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
-          uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
-          for i, atom in enumerate(new_model._atoms):
-            xyz = atom['crd'][0]
-            xyz2 = old_model._atoms[i]['crd'][0]
-            assert matrix_run + 2 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-            if ".x" in annotations[matrix_run]:
-              for x in range(3):
-                # if parameter is fixed and therefore has 0 esd
+          HAR_log.close()
+          print ("Could not obtain cctbx object and calculate ESDs!\n")
+          return False
+        from NoSpherA2.NoSpherA2 import run_with_bitmap
+        def analyze_shifts(results):
+          try:
+            matrix_run = 0
+            matrix_size = len(esds)
+            olx.xf.EndUpdate()
+            if OV.HasGUI():
+              olx.Refresh()
+            uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
+            for i, atom in enumerate(new_model._atoms):
+              xyz = atom['crd'][0]
+              xyz2 = old_model._atoms[i]['crd'][0]
+              assert matrix_run + 2 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+              if ".x" in annotations[matrix_run]:
+                for x in range(3):
+                  # if parameter is fixed and therefore has 0 esd
+                  if esds[matrix_run] > 0:
+                    res = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
+                    if res > results.max_dxyz:
+                      results.update_xyz(res, annotations[matrix_run])
+                  matrix_run += 1
+              has_adp_new = new_model._atoms[i].get('adp')
+              has_adp_old = old_model._atoms[i].get('adp')
+              has_anh_new = new_model._atoms[i].get('anharmonic_adp')
+              has_anh_old = old_model._atoms[i].get('anharmonic_adp')
+              if has_adp_new != None and has_adp_old != None:
+                assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                adp = atom['adp'][0]
+                adp2 = old_model._atoms[i]['adp'][0]
+                adp = adptbx.u_cart_as_u_cif(uc, adp)
+                adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
+                adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
+                adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+                for u in range(6):
+                  # if parameter is fixed and therefore has 0 esd
+                  if adp_esds[u] > 0:
+                    res = abs(adp[u] - adp2[u]) / adp_esds[u]
+                    if res > results.max_duij:
+                      results.update_uij(res, annotations[matrix_run + u])
+                matrix_run += 6
+                if matrix_run < len(annotations):
+                  if has_anh_new != None and has_anh_old != None:
+                    assert matrix_run + 24 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                    adp_C = atom['anharmonic_adp']['C']
+                    adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
+                    adp_esds_C = (esds[matrix_run:matrix_run + 10])
+                    adp_D = atom['anharmonic_adp']['D']
+                    adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
+                    adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
+                    for u in range(10):
+                      # if parameter is fixed and therefore has 0 esd
+                      if adp_esds_C[u] > 0:
+                        res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
+                        if res > results.max_overall:
+                          results.update_overall(res, annotations[matrix_run + u])
+                    for u in range(14):
+                      # if parameter is fixed and therefore has 0 esd
+                      if adp_esds_D[u] > 0:
+                        res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
+                        if res > results.max_overall:
+                          results.update_overall(res, annotations[matrix_run + u + 10])
+                    matrix_run += 25
+              elif has_adp_new != None and has_adp_old == None:
+                assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                adp = atom['uiso'][0]
+                adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
+                adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
+                adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
+                for u in range(6):
+                  if esds[matrix_run] > 0:
+                    res = abs(adp - adp2[u]) / adp_esds[u]
+                    if res > results.max_duij:
+                      results.update_uij(res, annotations[matrix_run])
+                matrix_run += 6
+                if matrix_run < len(annotations):
+                  if ".C111" in annotations[matrix_run]:
+                    matrix_run += 25
+              elif has_adp_old == None and has_adp_new == None:
+                assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                adp = atom['uiso'][0]
+                adp2 = old_model._atoms[i]['uiso'][0]
+                adp_esd = esds[matrix_run]
                 if esds[matrix_run] > 0:
-                  res = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
-                  if res > results.max_dxyz:
-                    results.update_xyz(res, annotations[matrix_run])
-                matrix_run += 1
-            has_adp_new = new_model._atoms[i].get('adp')
-            has_adp_old = old_model._atoms[i].get('adp')
-            has_anh_new = new_model._atoms[i].get('anharmonic_adp')
-            has_anh_old = old_model._atoms[i].get('anharmonic_adp')
-            if has_adp_new != None and has_adp_old != None:
-              assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-              adp = atom['adp'][0]
-              adp2 = old_model._atoms[i]['adp'][0]
-              adp = adptbx.u_cart_as_u_cif(uc, adp)
-              adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
-              adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
-              adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-              for u in range(6):
-                # if parameter is fixed and therefore has 0 esd
-                if adp_esds[u] > 0:
-                  res = abs(adp[u] - adp2[u]) / adp_esds[u]
-                  if res > results.max_duij:
-                    results.update_uij(res, annotations[matrix_run + u])
-              matrix_run += 6
-              if matrix_run < len(annotations):
-                if has_anh_new != None and has_anh_old != None:
-                  assert matrix_run + 24 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                  adp_C = atom['anharmonic_adp']['C']
-                  adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
-                  adp_esds_C = (esds[matrix_run:matrix_run + 10])
-                  adp_D = atom['anharmonic_adp']['D']
-                  adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
-                  adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
-                  for u in range(10):
-                    # if parameter is fixed and therefore has 0 esd
-                    if adp_esds_C[u] > 0:
-                      res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
-                      if res > results.max_overall:
-                        results.update_overall(res, annotations[matrix_run + u])
-                  for u in range(14):
-                    # if parameter is fixed and therefore has 0 esd
-                    if adp_esds_D[u] > 0:
-                      res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
-                      if res > results.max_overall:
-                        results.update_overall(res, annotations[matrix_run + u + 10])
-                  matrix_run += 25
-            elif has_adp_new != None and has_adp_old == None:
-              assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-              adp = atom['uiso'][0]
-              adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
-              adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
-              adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-              for u in range(6):
-                if esds[matrix_run] > 0:
-                  res = abs(adp - adp2[u]) / adp_esds[u]
+                  res = abs(adp - adp2) / adp_esd
                   if res > results.max_duij:
                     results.update_uij(res, annotations[matrix_run])
-              matrix_run += 6
-              if matrix_run < len(annotations):
-                if ".C111" in annotations[matrix_run]:
-                  matrix_run += 25
-            elif has_adp_old == None and has_adp_new == None:
-              assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
-              adp = atom['uiso'][0]
-              adp2 = old_model._atoms[i]['uiso'][0]
-              adp_esd = esds[matrix_run]
-              if esds[matrix_run] > 0:
-                res = abs(adp - adp2) / adp_esd
-                if res > results.max_duij:
-                  results.update_uij(res, annotations[matrix_run])
-              matrix_run += 1
-            if matrix_run < len(annotations):
-              if 'occ' in annotations[matrix_run]:
                 matrix_run += 1
-          HAR_log.write("{:>16.4f}".format(results.max_dxyz))
-          if results.label_xyz != None:
-            HAR_log.write("{:>10}".format(results.label_xyz))
-          else:
-            HAR_log.write("{:>10}".format("N/A"))
-
-          HAR_log.write("{:>10.4f}".format(results.max_duij))
-          if results.label_uij != None:
-            HAR_log.write("{:>12}".format(results.label_uij))
-          else:
-            HAR_log.write("{:>12}".format("N/A"))
-
-          HAR_log.write("{:>10.4f}".format(results.max_overall))
-          if results.label_overall != None:
-            HAR_log.write("{:>12}".format(results.label_overall))
-          else:
-            HAR_log.write("{:>12}".format("N/A"))
-
-          results.r1 = OV.GetParam('snum.refinement.last_R1')
-          results.wr2 = OV.GetParam('snum.refinement.last_wR2')
-
-          HAR_log.write("{:>6.2f}".format(float(results.r1) * 100))
-          HAR_log.write("{:>7.2f}".format(float(results.wr2) * 100))
-
-          HAR_log.write("\n")
-          HAR_log.flush()
-        except Exception as e:
-          HAR_log.write("!!!ERROR!!!\n")
-          print("Error during analysis of shifts!")
-          raise e
-      r = results()
-      run_with_bitmap("Analyzing shifts", analyze_shifts, r)
-      if calculate == False:
-        converged = True
-        break
-      elif Full_HAR == False:
-        converged = True
-        break
-      elif (r.max_overall <= 0.01):
-        converged = True
-        break
-      elif run == max_cycles:
-        break
-      elif r1_old != "n/a":
-        if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
-          HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
+              if matrix_run < len(annotations):
+                if 'occ' in annotations[matrix_run]:
+                  matrix_run += 1
+            HAR_log.write("{:>16.4f}".format(results.max_dxyz))
+            if results.label_xyz != None:
+              HAR_log.write("{:>10}".format(results.label_xyz))
+            else:
+              HAR_log.write("{:>10}".format("N/A"))
+      
+            HAR_log.write("{:>10.4f}".format(results.max_duij))
+            if results.label_uij != None:
+              HAR_log.write("{:>12}".format(results.label_uij))
+            else:
+              HAR_log.write("{:>12}".format("N/A"))
+      
+            HAR_log.write("{:>10.4f}".format(results.max_overall))
+            if results.label_overall != None:
+              HAR_log.write("{:>12}".format(results.label_overall))
+            else:
+              HAR_log.write("{:>12}".format("N/A"))
+      
+            results.r1 = OV.GetParam('snum.refinement.last_R1')
+            results.wr2 = OV.GetParam('snum.refinement.last_wR2')
+      
+            HAR_log.write("{:>6.2f}".format(float(results.r1) * 100))
+            HAR_log.write("{:>7.2f}".format(float(results.wr2) * 100))
+      
+            HAR_log.write("\n")
+            HAR_log.flush()
+          except Exception as e:
+            HAR_log.write("!!!ERROR!!!\n")
+            HAR_log.close()
+            print("Error during analysis of shifts!")
+            raise e
+        r = results()
+        run_with_bitmap("Analyzing shifts", analyze_shifts, r)
+        if calculate == False:
+          converged = True
           break
-      else:
-        r1_old = r.r1
-        wr2_old = r.wr2
+        elif Full_HAR == False:
+          converged = True
+          break
+        elif (r.max_overall <= 0.01):
+          converged = True
+          break
+        elif run == max_cycles:
+          break
+        elif r1_old != "n/a":
+          if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
+            HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
+            break
+        else:
+          r1_old = r.r1
+          wr2_old = r.wr2
+    except Exception as e :
+      if HAR_log != None:
+        HAR_log.close()
+      raise e
 
     # Done with the while !Converged
     OV.SetParam('snum.NoSpherA2.Calculate',False)
