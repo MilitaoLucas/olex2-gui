@@ -905,6 +905,8 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
   second = digest_boolinput(second)
   third = digest_boolinput(third)
   fourth = digest_boolinput(fourth)
+  do_plot = digest_boolinput(do_plot)
+  save_cube = digest_boolinput(save_cube)
   from cctbx import adptbx
   import numpy as np
   from cctbx.array_family import flex
@@ -962,6 +964,8 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
       cm[i] /= a2b
     cm = tuple(cm)
     
+    fm = list(uc.fractionalization_matrix())
+    
     vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
             (cm[3] / (size[0]), cm[4] / (size[1]), cm[5] / (size[2])),
             (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
@@ -975,9 +979,9 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
     if OV.HasGUI():
       olx.Refresh()
 
-    limits = [[size[0], 0],
-              [size[1], 0],
-              [size[2], 0]]
+    limits = [[cm[0], 0],
+              [cm[4], 0],
+              [cm[8], 0]]
 
 # determine piece of grid that really needs evaluation
     dist_bohr = distance / a2b
@@ -985,12 +989,17 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
       if second == False:
         if anharms[a] == None:
           continue
-      minmax = [math.floor((posn[a][0] - dist_bohr) / vec_norm[0]),
-                math.floor((posn[a][1] - dist_bohr) / vec_norm[1]),
-                math.floor((posn[a][2] - dist_bohr) / vec_norm[2]),
-                math.ceil((posn[a][0] + dist_bohr) / vec_norm[0]),
-                math.ceil((posn[a][1] + dist_bohr) / vec_norm[1]),
-                math.ceil((posn[a][2] + dist_bohr) / vec_norm[2])]
+      cart_minmax = [posn[a][0] - dist_bohr,
+                posn[a][1] - dist_bohr,
+                posn[a][2] - dist_bohr,
+                posn[a][0] + dist_bohr,
+                posn[a][1] + dist_bohr,
+                posn[a][2] + dist_bohr]
+      minmax = [0 for x in range(6)]
+      for i in range(3):
+        for j in range(3):
+          for k in range(2):
+            minmax[i+k*3] += cart_minmax[j+k*3] * fm[i*3+j] * size[i] * a2b      
       if minmax[0] < limits[0][0]:
         limits[0][0] = minmax[0]
       if minmax[1] < limits[1][0]:
@@ -1003,6 +1012,9 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
         limits[1][1] = minmax[4]
       if minmax[5] > limits[2][1]:
         limits[2][1] = minmax[5]
+    for i in range(3):
+      limits[i][0] = math.floor(limits[i][0])
+      limits[i][1] = math.ceil(limits[i][1])
     step = 5
     last_percentage = step - 1
     x_size = limits[0][1] - limits[0][0]
@@ -1022,7 +1034,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
           if z_loc < 0:
             z_loc += size[2]
           data[start + (z_loc % size[2])] += val
-      num = int(x / x_size * 100)
+      num = int((x-limits[0][0]) / x_size * 100)
       if num > last_percentage:
         while last_percentage < num:
           last_percentage += step
@@ -1082,7 +1094,11 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
           for y in range(size[1]):
             string = ""
             for z in range(size[2]):
-              string += ("%15.7e" % data[(x * size[1] + y) * size[2] + z])
+              v = data[(x * size[1] + y) * size[2] + z]
+              if abs(v) > 1E-99:
+                string += ("%15.5e" % data[(x * size[1] + y) * size[2] + z])
+              else:
+                string += ("%15.5e" % 0)
               if (z + 1) % 6 == 0 and (z + 1) != size[2]:
                 string += '\n'
             if (y != (size[1] - 1)):
@@ -1094,7 +1110,7 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
       print("Saved PDF map successfully")
 
     if do_plot:
-      print("Grid Size: %4d x %4d x %4d" % (size[0] + 1, size[1] + 1, size[2] + 1))
+      print("Grid Size: %4d x %4d x %4d" % (size[0], size[1], size[2]))
       iso = -3.1415
       if second == False:
         iso = -0.05
