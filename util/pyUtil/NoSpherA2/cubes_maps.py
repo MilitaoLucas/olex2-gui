@@ -4,6 +4,7 @@ import olx
 import olex_core
 import math
 import numpy as np
+from scipy import linalg
 
 from olexFunctions import OV
 from cctbx_olex_adapter import OlexCctbxAdapter
@@ -56,16 +57,15 @@ U_map = [[0, 3, 4],
          [4, 5, 2]]
 
 a2b = 0.52917749
-fac = 0.0174532925199432944444444444444
 
 def Hjkl(jkl, diff, sigma):
   wj = sigma[U_map[jkl[0]][jkl[1]]] * diff[jkl[1]]
   wk = sigma[U_map[jkl[1]][jkl[2]]] * diff[jkl[2]]
   wl = sigma[U_map[jkl[2]][jkl[0]]] * diff[jkl[0]]
   result = wj * wl * wk \
-           - wj * sigma[U_map[jkl[1]][jkl[2]]] \
-           - wk * sigma[U_map[jkl[2]][jkl[0]]] \
-           - wl * sigma[U_map[jkl[0]][jkl[1]]]
+         - wj * sigma[U_map[jkl[1]][jkl[2]]] \
+         - wk * sigma[U_map[jkl[2]][jkl[0]]] \
+         - wl * sigma[U_map[jkl[0]][jkl[1]]]
   return result
 
 def Hjklm(jklm, diff, sigma):
@@ -74,15 +74,15 @@ def Hjklm(jklm, diff, sigma):
   wl = sigma[U_map[jklm[2]][jklm[3]]] * diff[jklm[3]]
   wm = sigma[U_map[jklm[3]][jklm[0]]] * diff[jklm[0]]
   result = wj * wk * wl * wm \
-           - wj * wk * sigma[U_map[jklm[2]][jklm[3]]] \
-           - wj * wl * sigma[U_map[jklm[1]][jklm[3]]] \
-           - wj * wm * sigma[U_map[jklm[1]][jklm[2]]] \
-           - wk * wl * sigma[U_map[jklm[3]][jklm[0]]] \
-           - wk * wm * sigma[U_map[jklm[2]][jklm[0]]] \
-           - wl * wm * sigma[U_map[jklm[0]][jklm[1]]] \
-           + sigma[U_map[jklm[0]][jklm[1]]] * sigma[U_map[jklm[2]][jklm[3]]] \
-           + sigma[U_map[jklm[0]][jklm[2]]] * sigma[U_map[jklm[1]][jklm[3]]] \
-           + sigma[U_map[jklm[0]][jklm[3]]] * sigma[U_map[jklm[1]][jklm[2]]]
+         - wj * wk * sigma[U_map[jklm[2]][jklm[3]]] \
+         - wj * wl * sigma[U_map[jklm[1]][jklm[3]]] \
+         - wj * wm * sigma[U_map[jklm[1]][jklm[2]]] \
+         - wk * wl * sigma[U_map[jklm[3]][jklm[0]]] \
+         - wk * wm * sigma[U_map[jklm[2]][jklm[0]]] \
+         - wl * wm * sigma[U_map[jklm[0]][jklm[1]]] \
+         + sigma[U_map[jklm[0]][jklm[1]]] * sigma[U_map[jklm[2]][jklm[3]]] \
+         + sigma[U_map[jklm[0]][jklm[2]]] * sigma[U_map[jklm[1]][jklm[3]]] \
+         + sigma[U_map[jklm[0]][jklm[3]]] * sigma[U_map[jklm[1]][jklm[2]]]
   return result
 
 def z_slice(z, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, s, t, f):
@@ -94,11 +94,17 @@ def z_slice(z, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, s, t, f):
     if pre[a] < 0:
       continue
     diff = [(pos[0] - posn[a][0]) * a2b, (pos[1] - posn[a][1]) * a2b, (pos[2] - posn[a][2]) * a2b]
-    #dist = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
-    mhalfuTUu = np.fmin(-0.5 * (diff[0] * (diff[0] * sigmas[a][0] + diff[1] * sigmas[a][3] + diff[2] * sigmas[a][4]) + diff[1] * (diff[0] * sigmas[a][3] + diff[1] * sigmas[a][1] + diff[2] * sigmas[a][5]) + diff[2] * (diff[0] * sigmas[a][4] + diff[1] * sigmas[a][5] + diff[2] * sigmas[a][2])), np.full((z.size), 0))
-    #uTUu = diff[0] * Uu[0] + diff[1] * Uu[1] + diff[2] * Uu[2]
-    #exponent = -0.5 * uTUu
+    mhalfuTUu = np.fmin(-0.5 * (diff[0] * (diff[0] * sigmas[a][0] \
+                                         + diff[1] * sigmas[a][3] \
+                                         + diff[2] * sigmas[a][4]) \
+                              + diff[1] * (diff[0] * sigmas[a][3] \
+                                         + diff[1] * sigmas[a][1] \
+                                         + diff[2] * sigmas[a][5]) \
+                              + diff[2] * (diff[0] * sigmas[a][4] \
+                                         + diff[1] * sigmas[a][5] \
+                                         + diff[2] * sigmas[a][2])), np.full((z.size), 0))
     P0 = pre[a] * np.exp(mhalfuTUu)
+    P0[abs(P0) < 1E-30] = 0
     fact = float(s)
     if anharms[a] != None:
       if t == True:
@@ -715,7 +721,7 @@ def plot_fft_map(fft_map):
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(False, 2.0)
-  iso = float(-(abs(min_v)+abs(max_v))*1/3)
+  iso = float(-sigma*3.3)
   olex_xgrid.SetSurfaceScale(iso)
   #OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
@@ -884,16 +890,8 @@ def det(U):
   return U[0] * U[1] * U[2] + U[3] * U[4] * U[5] * 2 - U[1] * U[4] * U[4] - U[3] * U[2] * U[3] - U[5] * U[0] * U[5]
 def U_to_sigma(U):
   # wich turns out to be a matrix inversion...
-  fact = det(U)
-  result = [U[1] * U[2] - U[5] * U[5],
-            U[0] * U[2] - U[4] * U[4],
-            U[0] * U[1] - U[3] * U[3],
-            U[4] * U[5] - U[2] * U[3],
-            U[5] * U[3] - U[1] * U[4],
-            U[3] * U[4] - U[0] * U[5]]
-  for i in range(6):
-    result[i] /= fact
-  return result
+  U_loc = linalg.inv(np.array([U[0],U[3],U[4],U[3],U[1],U[5],U[4],U[5],U[2]]).reshape(3,3))
+  return [U_loc[0][0],U_loc[1][1],U_loc[2][2],U_loc[0][1],U_loc[0][2],U_loc[1][2]]
 
 def digest_boolinput(i):
   if i == False or i == "False" or i == "0":
@@ -969,10 +967,6 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
     vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
             (cm[3] / (size[0]), cm[4] / (size[1]), cm[5] / (size[2])),
             (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
-
-    vec_norm = [math.sqrt(vecs[0][0] * vecs[0][0] + vecs[0][1] * vecs[0][1] + vecs[0][2] * vecs[0][2]),
-                math.sqrt(vecs[1][0] * vecs[1][0] + vecs[1][1] * vecs[1][1] + vecs[1][2] * vecs[1][2]),
-                math.sqrt(vecs[2][0] * vecs[2][0] + vecs[2][1] * vecs[2][1] + vecs[2][2] * vecs[2][2])]
 
     print("Calculating Grid...")
     olx.xf.EndUpdate()
