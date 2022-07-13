@@ -725,7 +725,7 @@ def plot_fft_map(fft_map):
   data = None
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(False, 2.0)
+  olex_xgrid.InitSurface(True, 2.0)
   iso = float(-sigma*3.3)
   olex_xgrid.SetSurfaceScale(iso)
   #OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
