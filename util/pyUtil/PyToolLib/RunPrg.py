@@ -872,7 +872,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log = None
     try:
       from cctbx import adptbx
-      
+
       Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
       old_model = OlexRefinementModel()
       converged = False
@@ -924,7 +924,7 @@ class RunRefinementPrg(RunPrg):
         HAR_log.write("{:>7}".format("N/A"))
       HAR_log.write("\n")
       HAR_log.flush()
-      
+
       max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
       calculate = OV.GetParam('snum.NoSpherA2.Calculate')
       if calculate == True:
@@ -935,14 +935,14 @@ class RunRefinementPrg(RunPrg):
       add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
       if add_disp is True:
         olex.m('gendisp -source=brennan -force')
-      
+
       while converged == False:
         run += 1
         HAR_log.write("{:3d}".format(run))
-      
+
         old_model = OlexRefinementModel()
         OV.SetVar('Run_number',run)
-      
+
         #Calculate Wavefunction
         try:
           from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
@@ -972,7 +972,7 @@ class RunRefinementPrg(RunPrg):
           elif file.endswith(".wfx"):
             wfn_file = file
           elif file.endswith(".gbw"):
-            wfn_file = file          
+            wfn_file = file
           elif file.endswith(".tscb"):
             tsc_exists = True
         if tsc_exists == False:
@@ -980,7 +980,7 @@ class RunRefinementPrg(RunPrg):
           RunRefinementPrg.running = None
           HAR_log.close()
           return False
-      
+
         # get energy from wfn file
         #TODO Check if WFN is new, otherwise skip this!
         energy = None
@@ -1012,7 +1012,7 @@ class RunRefinementPrg(RunPrg):
             fread = None
           else:
             HAR_log.write("{:24}".format(" "))
-      
+
         if OV.GetParam('snum.NoSpherA2.run_refine') == True:
           # Run Least-Squares
           self.startRun()
@@ -1040,7 +1040,7 @@ class RunRefinementPrg(RunPrg):
             nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
-      
+
         new_model=OlexRefinementModel()
         class results():
           def __init__(self):
@@ -1070,7 +1070,7 @@ class RunRefinementPrg(RunPrg):
             if d > self.max_overall:
               self.max_overall = d
               self.label_overall = label
-      
+
         try:
           jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
           from scitbx.array_family import flex
@@ -1177,25 +1177,25 @@ class RunRefinementPrg(RunPrg):
               HAR_log.write("{:>10}".format(results.label_xyz))
             else:
               HAR_log.write("{:>10}".format("N/A"))
-      
+
             HAR_log.write("{:>10.4f}".format(results.max_duij))
             if results.label_uij != None:
               HAR_log.write("{:>12}".format(results.label_uij))
             else:
               HAR_log.write("{:>12}".format("N/A"))
-      
+
             HAR_log.write("{:>10.4f}".format(results.max_overall))
             if results.label_overall != None:
               HAR_log.write("{:>12}".format(results.label_overall))
             else:
               HAR_log.write("{:>12}".format("N/A"))
-      
+
             results.r1 = OV.GetParam('snum.refinement.last_R1')
             results.wr2 = OV.GetParam('snum.refinement.last_wR2')
-      
+
             HAR_log.write("{:>6.2f}".format(float(results.r1) * 100))
             HAR_log.write("{:>7.2f}".format(float(results.wr2) * 100))
-      
+
             HAR_log.write("\n")
             HAR_log.flush()
           except Exception as e:
