@@ -261,6 +261,27 @@
   >
 >
 
+<PDF help="Calculates (P)robability (D)ensity (F)unction from the ADPs of your atom.\n
+ Syntax: refine [res=0.1] [dist=1.0] [2nd_order=True] [3rd_order=True] [4th_order=True] [only_anh=True]"
+  <body
+    <args
+      <arg1 name="res" def='0.1'>
+      <arg2 name="dist" def='1.0'>
+      <arg3 name="2nd_order" def='True'>
+      <arg4 name="3rd_order" def='True'>
+      <arg5 name="4th_order" def='True'>
+      <arg6 name="only_anh" def='True'>
+    >
+    <cmd
+      <cmd0 "xgrid.Visible(false)">
+      <cmd1 "spy.gui.maps.MapView(off)">
+      <cmd2 "spy.NoSpherA2.PDF_map(%1,%2,%3,%4,%5,%6)">
+    >
+    <onabort
+      <cmd "echo lasterror()">
+    >
+  >
+>
 
 <solve help="Launches solution program XS"
   <body
