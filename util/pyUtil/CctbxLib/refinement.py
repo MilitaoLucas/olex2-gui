@@ -1232,6 +1232,7 @@ The following options were used:
       nextfree = -1
       ignored = False
       idslist = []
+      scatterers = self.xray_structure().scatterers()
       for equation in equations:
         ignored = False
         row = numpy.zeros((FvarNum))
@@ -1272,6 +1273,8 @@ The following options were used:
           raise Exception("One or more equations are not independent")
         else:
           a = numpy.copy(row[:-1])
+          for idx, si in enumerate(idslist):
+            a[idx] *= scatterers[si].weight_without_occupancy()
           current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
           #a = ((row[-3], row[-2]), row[-1])
           #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
