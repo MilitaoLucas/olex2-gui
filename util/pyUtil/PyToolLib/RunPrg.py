@@ -637,7 +637,12 @@ class RunRefinementPrg(RunPrg):
       try:
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
-        print("Could not determine whether structure inversion is needed: %s" %e)
+        print("Could not determine whether structure inversion is needed: %s" % e)
+    if OV.GetParam('snum.refinement.check_PDF'):
+      try:
+        self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
+      except Exception as e:
+        print("Could not check PDF: %s" % e)
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
@@ -780,6 +785,26 @@ class RunRefinementPrg(RunPrg):
       if (hooft.twin_components is not None and
           hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print(racemic_twin_warning)
+
+  def check_PDF(self, force=False):
+    RM = OlexRefinementModel()
+    any_have_anh = False
+    label_list = []
+    for i, atom in enumerate(RM._atoms):
+      anh_adp = atom.get('anharmonic_adp')
+      if anh_adp == None:
+        continue
+      any_have_anh = True
+      label_list.append(atom['label'])
+    if any_have_anh == True:
+      olex.m("PDF")
+      problem = OV.GetVar("Negative_PDF")
+      if problem == True and force == True:
+        print("Making all anharmonic atoms hamrnoic again!")
+        for label in label_list:
+          print(label)
+          olex.m("anis %s" % label)
+
 
   def mask_and_fab(self):
     if not OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -1082,7 +1107,8 @@ class RunRefinementPrg(RunPrg):
           HAR_log.close()
           print ("Could not obtain cctbx object and calculate ESDs!\n")
           return False
-        from NoSpherA2.NoSpherA2 import run_with_bitmap
+        from NoSpherA2.utilities import run_with_bitmap
+        @run_with_bitmap('Analyzing shifts')
         def analyze_shifts(results):
           try:
             matrix_run = 0
@@ -1204,7 +1230,7 @@ class RunRefinementPrg(RunPrg):
             print("Error during analysis of shifts!")
             raise e
         r = results()
-        run_with_bitmap("Analyzing shifts", analyze_shifts, r)
+        analyze_shifts(r)
         if calculate == False:
           converged = True
           break

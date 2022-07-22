@@ -4,124 +4,25 @@ import olx
 import olex_core
 import math
 import numpy as np
+import itertools
 from scipy import linalg
+import textwrap
+from typing import List, Sequence, Union
 
 from olexFunctions import OV
 from cctbx_olex_adapter import OlexCctbxAdapter
 from smtbx.structure_factors import direct
 from cctbx import sgtbx
+from cctbx import adptbx
 from cctbx.array_family import flex
 from cctbx_olex_adapter import OlexCctbxMasks
+from cctbx.eltbx import tiny_pse
 import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
 
-types = [ "Q", "H",                                                                                                                                                 "He",
-         "Li","Be",                                                                                                                         "B", "C", "N", "O", "F","Ne",
-         "Na","Mg",                                                                                                                        "Al","Si", "P", "S","Cl","Ar",
-          "K","Ca",                                                                      "Sc","Ti", "V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr",
-         "Rb","Sr",                                                                       "Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te", "I","Xe",
-         "Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta", "W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
-         "Fr","Ra","Ac","Th","Pa", "U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"]
-
-Cs = [[0, 0, 0],
-      [0, 0, 1],
-      [0, 0, 2],
-      [0, 1, 1],
-      [0, 1, 2],
-      [0, 2, 2],
-      [1, 1, 1],
-      [1, 1, 2],
-      [1, 2, 2],
-      [2, 2, 2]]
-
-Ds = [[0, 0, 0, 0],
-      [0, 0, 0, 1],
-      [0, 0, 0, 2],
-      [0, 0, 1, 1],
-      [0, 0, 1, 2],
-      [0, 0, 2, 2],
-      [0, 1, 1, 1],
-      [0, 1, 1, 2],
-      [0, 1, 2, 2],
-      [0, 2, 2, 2],
-      [1, 1, 1, 1],
-      [1, 1, 1, 2],
-      [1, 1, 2, 2],
-      [1, 2, 2, 2],
-      [2, 2, 2, 2]]
-
-U_map = [[0, 3, 4],
-         [3, 1, 5],
-         [4, 5, 2]]
-
 a2b = 0.529177210903
-def unique_permutations(v):
-  f = np.math.factorial
-  return f(len(v)) / np.prod([f(v.count(i)) for i in range(max(v) + 1)])
-
-def Hjkl(jkl, diff, sigma):
-  wj = sum(sigma[U_map[jkl[0]][i]] * diff[i] for i in range(3))
-  wk = sum(sigma[U_map[jkl[1]][i]] * diff[i] for i in range(3))
-  wl = sum(sigma[U_map[jkl[2]][i]] * diff[i] for i in range(3))
-  result = unique_permutations(jkl) * (wj * wl * wk \
-         - wj * sigma[U_map[jkl[1]][jkl[2]]] \
-         - wk * sigma[U_map[jkl[2]][jkl[0]]] \
-         - wl * sigma[U_map[jkl[0]][jkl[1]]])
-  return result
-
-def Hjklm(jklm, diff, sigma):
-  wj = sum(sigma[U_map[jklm[0]][i]] * diff[i] for i in range(3))
-  wk = sum(sigma[U_map[jklm[1]][i]] * diff[i] for i in range(3))
-  wl = sum(sigma[U_map[jklm[2]][i]] * diff[i] for i in range(3))
-  wm = sum(sigma[U_map[jklm[3]][i]] * diff[i] for i in range(3))
-  result = unique_permutations(jklm) * (wj * wk * wl * wm \
-         - wj * wk * sigma[U_map[jklm[2]][jklm[3]]] \
-         - wj * wl * sigma[U_map[jklm[1]][jklm[3]]] \
-         - wj * wm * sigma[U_map[jklm[1]][jklm[2]]] \
-         - wk * wl * sigma[U_map[jklm[3]][jklm[0]]] \
-         - wk * wm * sigma[U_map[jklm[2]][jklm[0]]] \
-         - wl * wm * sigma[U_map[jklm[0]][jklm[1]]] \
-         + sigma[U_map[jklm[0]][jklm[1]]] * sigma[U_map[jklm[2]][jklm[3]]] \
-         + sigma[U_map[jklm[0]][jklm[2]]] * sigma[U_map[jklm[1]][jklm[3]]] \
-         + sigma[U_map[jklm[0]][jklm[3]]] * sigma[U_map[jklm[1]][jklm[2]]])
-  return result
-
-def z_slice(z, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, s, t, f, only_anh):
-  pos = [(x) * vecs[0][0] + (y) * vecs[0][1] + (z) * vecs[0][2],
-         (x) * vecs[1][0] + (y) * vecs[1][1] + (z) * vecs[1][2],
-         (x) * vecs[2][0] + (y) * vecs[2][1] + (z) * vecs[2][2]]
-  result = 0.0
-  for a in range(n_atoms):
-    if only_anh == True and anharms[a] == None:
-      continue
-    #Skips NPD atoms
-    if pre[a] < 0: 
-      continue
-    diff = [(pos[0] - posn[a][0]) * a2b, (pos[1] - posn[a][1]) * a2b, (pos[2] - posn[a][2]) * a2b]
-    mhalfuTUu = np.fmin(-0.5 * (diff[0] * (diff[0] * sigmas[a][0] \
-                                         + diff[1] * sigmas[a][3] \
-                                         + diff[2] * sigmas[a][4]) \
-                              + diff[1] * (diff[0] * sigmas[a][3] \
-                                         + diff[1] * sigmas[a][1] \
-                                         + diff[2] * sigmas[a][5]) \
-                              + diff[2] * (diff[0] * sigmas[a][4] \
-                                         + diff[1] * sigmas[a][5] \
-                                         + diff[2] * sigmas[a][2])), np.full((z.size), 0))
-    P0 = pre[a] * np.exp(mhalfuTUu)
-    P0[abs(P0) < 1E-30] = 0
-    fact = float(s)
-    if anharms[a] != None:
-      if t == True:
-        for i in range(10):
-          fact += anharms[a][i] * Hjkl(Cs[i], diff, sigmas[a]) / 6
-      if f == True:
-        for i in range(10, 25):
-          fact += anharms[a][i] * Hjklm(Ds[i - 10], diff, sigmas[a]) / 24
-    atom_P = P0 * fact
-    result += atom_P
-  return result
 
 try:
   from_outside = False
@@ -129,6 +30,77 @@ try:
 except:
   from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
+
+class HermitePolynomial:
+  THIRD_ORDER_COEFFICIENTS = ([0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 1, 1],
+                              [0, 1, 2], [0, 2, 2], [1, 1, 1], [1, 1, 2],
+                              [1, 2, 2], [2, 2, 2])
+  FOURTH_ORDER_COEFFICIENTS = ([0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 0, 2],
+                               [0, 0, 1, 1], [0, 0, 1, 2], [0, 0, 2, 2],
+                               [0, 1, 1, 1], [0, 1, 1, 2], [0, 1, 2, 2],
+                               [0, 2, 2, 2], [1, 1, 1, 1], [1, 1, 1, 2],
+                               [1, 1, 2, 2], [1, 2, 2, 2], [2, 2, 2, 2])
+
+  def __init__(self, coefficients: Sequence[int]):
+    self.c = coefficients
+    self.order = len(coefficients)
+    if self.order == 3:
+      self._call = self._call_for_order_3
+    elif self.order == 4:
+      self._call = self._call_for_order_4
+    else:
+      raise NotImplementedError(f'Order {self.order} is not implemented')
+
+  def __call__(self, u: np.ndarray, si_inv: np.ndarray) -> np.ndarray:
+    return self._call(u, si_inv)
+
+  def __str__(self) -> str:
+    return 'H' + ''.join([str(c + 1) for c in self.c])
+
+  def _call(self, u: np.ndarray, si_inv: np.ndarray) -> np.ndarray:
+    """This method is abstract, to be overwritten by `self._call_for_order_*`"""
+
+  def _call_for_order_3(self, u: np.ndarray, si_inv: np.ndarray) -> np.ndarray:
+    wj, wk, wl = self.w(u, si_inv)
+    r = wj * wl * wk - wj * si_inv[self.c[1], self.c[2]]\
+      - wk * si_inv[self.c[2], self.c[0]] - wl * si_inv[self.c[0], self.c[1]]
+    return r * self.unique_indexing_permutations
+
+  def _call_for_order_4(self, u: np.ndarray, si_inv: np.ndarray) -> np.ndarray:
+    wj, wk, wl, wm = self.w(u, si_inv)
+    r = (wj * wk * wl * wm
+         - wj * wk * si_inv[self.c[2], self.c[3]]
+         - wj * wl * si_inv[self.c[1], self.c[3]]
+         - wj * wm * si_inv[self.c[1], self.c[2]]
+         - wk * wl * si_inv[self.c[3], self.c[0]]
+         - wk * wm * si_inv[self.c[2], self.c[0]]
+         - wl * wm * si_inv[self.c[0], self.c[1]]
+         + si_inv[self.c[0], self.c[1]] * si_inv[self.c[2], self.c[3]]
+         + si_inv[self.c[0], self.c[2]] * si_inv[self.c[3], self.c[1]]
+         + si_inv[self.c[0], self.c[3]] * si_inv[self.c[1], self.c[2]])
+    return r * self.unique_indexing_permutations
+
+  @property
+  def order_factorial(self) -> int:
+    return math.factorial(self.order)
+
+  @property
+  def unique_indexing_permutations(self) -> int:
+    return self.order_factorial / \
+        np.prod([math.factorial(self.c.count(i)) for i in range(self.order)])
+
+  def w(self, u: np.ndarray, si_inv: np.ndarray) -> List[np.ndarray]:
+    return [sum(si_inv[c, i] * u[:, i] for i in range(3)) for c in self.c]
+
+
+hermite_polynomials_of_3rd_and_4th_order = \
+  [HermitePolynomial(c) for c in HermitePolynomial.THIRD_ORDER_COEFFICIENTS] +\
+  [HermitePolynomial(c) for c in HermitePolynomial.FOURTH_ORDER_COEFFICIENTS]
+
+
+def kuhs_limit(order: int, adp: np.ndarray) -> float:
+  """Resolution required to model anharmonic ADP; see doi: 10.1071/PH880369"""
+  return (2 * np.pi) ** -1.5 * (2 * order * np.log(2) / adp) ** 0.5
 
 def calculate_cubes():
   if NoSpherA2.is_disordered == True:
@@ -152,7 +124,7 @@ def calculate_cubes():
   Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
   RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
   ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
-  MO  = OV.GetParam('snum.NoSpherA2.Property_MO')
+  MO = OV.GetParam('snum.NoSpherA2.Property_MO')
   ATOM = OV.GetParam('snum.NoSpherA2.Property_ATOM')
   DEF = OV.GetParam('snum.NoSpherA2.Property_DEF')
   all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
@@ -175,7 +147,7 @@ def calculate_cubes():
     if all_MOs == True:
       args.append("all")
     else:
-      args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number'))-1))
+      args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) - 1))
   if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
     args.append("-v")
 
@@ -198,7 +170,6 @@ def calculate_cubes():
     print("A problem with pyl is encountered, aborting.")
     return
   subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
-
 OV.registerFunction(calculate_cubes,True,'NoSpherA2')
 
 def get_map_types():
@@ -292,7 +263,7 @@ def change_pointsize():
   olex.m('gl.PointSize ' + PS)
 OV.registerFunction(change_pointsize,True,'NoSpherA2')
 
-def plot_cube(name,color_cube):
+def plot_cube(name, color_cube):
   if not os.path.isfile(name):
     print("Cube file does not exist!")
     return
@@ -502,7 +473,7 @@ def plot_cube(name,color_cube):
   ma = mmm.max
   olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True,1)
+  olex_xgrid.InitSurface(True, 1.1)
   iso = float((abs(mi)+abs(ma))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
@@ -577,7 +548,7 @@ def plot_cube_single(name):
   OV.SetVar('map_slider_scale',100)
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True,1)
+  olex_xgrid.InitSurface(True, 1.1)
   iso = float((abs(min)+abs(max))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
@@ -623,8 +594,8 @@ def plot_map_cube(map_type,resolution):
     for i in range(n_atoms):
       atom_type = olx.xf.au.GetAtomType(i)
       charge = 200
-      for j in range(104):
-        if types[j] == atom_type:
+      for j in range(1, 104):
+        if tiny_pse.table(j).symbol() == atom_type:
           charge = j
           break
       if charge == 200:
@@ -742,7 +713,8 @@ def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   olex_xgrid.SetSurfaceScale(iso)
   olex_xgrid.SetVisible(True)
 
-def plot_fft_map_cube(fft_map, map_name, size=[]):
+
+def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
   uc = xray_structure.unit_cell()
@@ -752,61 +724,55 @@ def plot_fft_map_cube(fft_map, map_name, size=[]):
   except:
     values = fft_map
     temp = size
-  size = [int(temp[0]),int(temp[1]),int(temp[2])]
-  name = OV.ModelSrc()
+  size = [int(t) for t in temp[0:3]]
+  model_name = OV.ModelSrc()
 
   n_atoms = int(olx.xf.au.GetAtomCount())
-  positions = [[float(0.0) for k in range(3)] for l in range(n_atoms)]
+  positions = [[0., 0., 0.] for _ in range(n_atoms)]
   cm = list(uc.orthogonalization_matrix())
   for i in range(9):
     cm[i] /= a2b
   cm = tuple(cm)  
   for a in range(n_atoms):
-      pos = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
-      positions[a] = [float(pos[0]) / a2b, float(pos[1]) / a2b, float(pos[2]) / a2b]
+    position = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+    positions[a] = [float(position[i]) / a2b for i in range(3)]
 
   vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
           (cm[3] / (size[0]), cm[4] / (size[1]), cm[5] / (size[2])),
           (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
 
-  print ("start writing a %4d x %4d x %4d cube"%(size[0],size[1],size[2]))
-  
+  print(f'Started writing a {size[0]:4d} x {size[1]:4d} x {size[2]:4d} cube')
+  with open(f'{model_name}_{map_name}.cube', 'w') as cube:
+    cube_header = textwrap.dedent(f"""\
+      {map_name}-type map created by Olex2
+      Model name: {model_name}
+      {n_atoms:5d} {0:11.6f} {0:11.6f} {0:11.6f}
+      {size[0]:5d} {vecs[0][0]:11.6f} {vecs[1][0]:11.6f} {vecs[2][0]:11.6f}
+      {size[1]:5d} {vecs[0][1]:11.6f} {vecs[1][1]:11.6f} {vecs[2][1]:11.6f}
+      {size[2]:5d} {vecs[0][2]:11.6f} {vecs[1][2]:11.6f} {vecs[2][2]:11.6f}""")
+    cube.write(cube_header)
 
-  with open("%s_%s.cube"%(name,map_name),'w') as cube:
-    cube.write("Fourier synthesis map created by Olex2\n")
-    cube.write("Model name: %s\n"%name)
-    # Origin of cube
-    cube.write("%6d %12.8f %12.8f %12.8f\n"%(n_atoms,0.0,0.0,0.0))
-    # need to write vectors!
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[0], vecs[0][0], vecs[1][0], vecs[2][0]))
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[1], vecs[0][1], vecs[1][1], vecs[2][1]))
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[2], vecs[0][2], vecs[1][2], vecs[2][2]))
     for i in range(n_atoms):
       atom_type = olx.xf.au.GetAtomType(i)
       charge = 200
-      for j in range(104):
-        if types[j] == atom_type:
+      for j in range(1, 104):
+        if tiny_pse.table(j).symbol() == atom_type:
           charge = j
           break
       if charge == 200:
         print("ATOM NOT FOUND!")
-      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n" % (charge, charge, positions[i][0], positions[i][1], positions[i][2]))
+      cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
+                 f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
+
     for x in range(size[0]):
       for y in range(size[1]):
-        string = ""
-        for z in range(size[2]):
-          string += ("%15.7e"%values[(x*size[1]+y)*size[2]+z])
-          if (z+1) % 6 == 0 and (z+1) != size[2]:
-            string += '\n'
-        if (y != (size[1] - 1)):
-          string += '\n'
-        cube.write(string)
-      if(x != (size[0] -1)):
-        cube.write('\n')
+        slice_values = values[(x*size[1]+y)*size[2]:(x*size[1]+y+1)*size[2]]
+        slice_list = [f'{v:13.5e}' for v in slice_values]
+        slice_text = '\n'.join([''.join(s for s in slice_list[6*n:6*n+6])
+                                for n in range(-(-len(slice_values) // 6))])
+        cube.write('\n' + slice_text)
+    print(f'Saved {map_name}-type map as {os.path.realpath(cube.name)}')
 
-    cube.close()
-
-  print("Saved Fourier map successfully")
 
 def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   cctbx_adapter = OlexCctbxAdapter()
@@ -885,71 +851,66 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
       OV.Refresh()
   if return_map==True:
     return diff_map
-  plot_fft_map_cube(diff_map,"diff")
+  write_map_to_cube(diff_map, "diff")
 
 OV.registerFunction(residual_map, False, "NoSpherA2")
 
+def adp_list_to_array(a: Sequence) -> np.ndarray:
+  return np.array([(a[0], a[3], a[4]), (a[3], a[1], a[5]), (a[4], a[5], a[2])])
 
-def det(U):
-  return U[0] * U[1] * U[2] + U[3] * U[4] * U[5] * 2 - U[1] * U[4] * U[4] - U[3] * U[2] * U[3] - U[5] * U[0] * U[5]
-def U_to_sigma(U):
-  U_loc = linalg.inv(np.array([U[0],U[3],U[4],U[3],U[1],U[5],U[4],U[5],U[2]]).reshape(3,3))
-  return [U_loc[0][0],U_loc[1][1],U_loc[2][2],U_loc[0][1],U_loc[0][2],U_loc[1][2]]
+def adp_list_to_sigma_inv(adp: Sequence) -> np.ndarray:
+  return linalg.inv(adp_list_to_array(adp))
 
-def digest_boolinput(i):
-  if i == False or i == "False" or i == "0":
-    return False
-  else:
-    return True
 
-def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, only_anh=True, do_plot=True, save_cube=False):
+def digest_boolinput(i: Union[str, bool]) -> bool:
+  if isinstance(i, bool):
+    return i
+  elif isinstance(i, str):
+    if i.lower() in {'f', 'false', '0'}:
+      return False
+    elif i.lower() in {'t', 'true', '1'}:
+      return True
+  raise ValueError(f'Parameter {i!r} cannot be interpreted as boolean. '
+                   f'Use "True" / "T" / "1" or "False" / "F" / "0" instead.')
+
+
+def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only_anh=True, do_plot=True, save_cube=False):
   second = digest_boolinput(second)
   third = digest_boolinput(third)
   fourth = digest_boolinput(fourth)
   do_plot = digest_boolinput(do_plot)
   save_cube = digest_boolinput(save_cube)
   only_anh = digest_boolinput(only_anh)
-  from cctbx import adptbx
-  import numpy as np
-  from cctbx.array_family import flex
+  print("PDF Maps implemented and tested by Florian Kleemiss and Daniel Tchon")
   if second == False and third == False and fourth == False:
     print("Well, what should I print then? Please decide what you want to see!")
     return
   olex.m("kill $Q")
   OV.CreateBitmap("working")
   try:
-    distance = float(distance)
+    dist = float(dist)
     cctbx_adapter = OlexCctbxAdapter()
     uc = cctbx_adapter.xray_structure().unit_cell()
     fixed = math.pow(2 * math.pi, 1.5)
-    name = OV.ModelSrc()
-    Us = []
-    Us_cart = []
-    sigmas = []
-    pre = []
-    posn = []
-    anharms = []
+    cm = tuple(list(uc.orthogonalization_matrix()))
+    fm = list(uc.fractionalization_matrix())
+    adp_stars, anharms, labels, posn, pre, sigmas = [], [], [], [], [], []
     for atom in cctbx_adapter.xray_structure()._scatterers:
-      temp = list(atom.site)
-      coord = list(uc.orthogonalize(temp))
-      coord[0] /= a2b
-      coord[1] /= a2b
-      coord[2] /= a2b
-      posn.append(coord)
-      adp = atom.u_star
-      if adp != (-1., -1., -1., -1., -1., -1.):
-        Us.append(atom.u_star)
-        adp_cart = adptbx.u_star_as_u_cart(uc, atom.u_star)
+      labels.append(atom.label)
+      posn.append([coord % 1 for coord in atom.site])
+      if atom.u_star != (-1., -1., -1., -1., -1., -1.):
+        adp_star = atom.u_star
       else:
-        Us.append(atom.u_iso)
-        adp_cart = adptbx.u_iso_as_u_cart(atom.u_iso)
+        adp_star = adptbx.u_iso_as_u_star(uc, atom.u_iso)
+      adp_stars.append(adp_star)
       if atom.anharmonic_adp == None:
         anharms.append(None)
       else:
-        anharms.append(atom.anharmonic_adp.data())
-      Us_cart.append(adp_cart)
-      sigmas.append(U_to_sigma(adp_cart))
-      pre_temp = det(sigmas[-1])
+        anharmonic_values = np.array(atom.anharmonic_adp.data())
+        anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
+        anharms.append(anharmonic_use * anharmonic_values)
+      sigmas.append(adp_list_to_sigma_inv(adp_star))
+      pre_temp = linalg.det(sigmas[-1])
       if pre_temp < 0:
         print("Skipping NPD Atom %s"%atom.label)
         pre_temp = -math.sqrt(-pre_temp) / fixed
@@ -958,125 +919,151 @@ def PDF_map(resolution=0.1, distance=1.0, second=True, third=True, fourth=True, 
       pre.append(pre_temp)
 
     gridding = cctbx_adapter.xray_structure().gridding(step=float(resolution))
-    size = list(gridding.n_real())
-    data = flex.double(size[0] * size[1] * size[2])
-
+    size = tuple(gridding.n_real())
     n_atoms = len(posn)
-    cm = list(uc.orthogonalization_matrix())
-    for i in range(9):
-      cm[i] /= a2b
-    cm = tuple(cm)
-    
-    fm = list(uc.fractionalization_matrix())
-    
+
     vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
             (cm[3] / (size[0]), cm[4] / (size[1]), cm[5] / (size[2])),
             (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
 
-    print("Calculating Grid...")
+    print("Calculating Grid %4d x %4d x %4d..." % (size[0], size[1], size[2]))
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
 
-    limits = [[size[0], 0],
-              [size[1], 0],
-              [size[2], 0]]
+    def index_limits(center: np.ndarray,
+                     radius: float,
+                     fractionization_array: np.ndarray,
+                     size_array: np.ndarray) -> Sequence[np.ndarray]:
+      """Calculate evaluation range based on radius and center"""
+      plus_minus_ones = np.array(list(itertools.product([-1, +1], repeat=3)))
+      corners_cart = center + plus_minus_ones * radius
+      corners_frac = (fractionization_array @ corners_cart.T).T
+      return np.floor(np.min(corners_frac, axis=0) * size_array).astype(int), \
+             np.ceil(np.max(corners_frac, axis=0) * size_array).astype(int)
 
-# determine piece of grid that really needs evaluation
-    dist_bohr = distance / a2b
+    # determine grid index limits for every atom in asymmetric unit
+    corner1_indices = np.full(shape=(n_atoms, 3), fill_value= np.inf)
+    corner2_indices = np.full(shape=(n_atoms, 3), fill_value=-np.inf)
+    frac_arr = np.array(fm, dtype=float).reshape(3, 3)
+    size_arr = np.array(size)
     for a in range(n_atoms):
-      if second == False or only_anh == True:
-        if anharms[a] == None:
+      if second is False or only_anh is True:
+        if anharms[a] is None:
           continue
-      cart_minmax = [posn[a][0] - dist_bohr, posn[a][1] - dist_bohr, posn[a][2] - dist_bohr,
-                     posn[a][0] + dist_bohr, posn[a][1] + dist_bohr, posn[a][2] + dist_bohr,
-                     posn[a][0] - dist_bohr, posn[a][1] + dist_bohr, posn[a][2] + dist_bohr,
-                     posn[a][0] - dist_bohr, posn[a][1] - dist_bohr, posn[a][2] + dist_bohr,
-                     posn[a][0] + dist_bohr, posn[a][1] - dist_bohr, posn[a][2] - dist_bohr,
-                     posn[a][0] + dist_bohr, posn[a][1] + dist_bohr, posn[a][2] - dist_bohr,
-                     posn[a][0] - dist_bohr, posn[a][1] + dist_bohr, posn[a][2] - dist_bohr,
-                     posn[a][0] + dist_bohr, posn[a][1] - dist_bohr, posn[a][2] + dist_bohr,
-                     ]
-      minmax = [0 for x in range(24)]
-      for i in range(3):
-        for j in range(3):
-          for k in range(8):
-            minmax[i+k*3] += cart_minmax[j+k*3] * fm[i*3+j] * size[i] * a2b
-      for c in range(8):
-        for i in range(3):
-          if minmax[i+c*3] < limits[i][0]:
-            limits[i][0] = minmax[i+c*3]
-          if minmax[i+c*3] > limits[i][1]:
-            limits[i][1] = minmax[i+c*3]
-    for i in range(3):
-      limits[i][0] = math.floor(limits[i][0])
-      limits[i][1] = math.ceil(limits[i][1])
-    step = 5
-    last_percentage = step - 1
-    x_size = limits[0][1] - limits[0][0]
-    for x in range(limits[0][0], limits[0][1]):
-      for y in range(limits[1][0], limits[1][1]):
-        x_loc = x
-        if x < 0:
-          x_loc += size[0]
-        y_loc = y
-        if y < 0:
-          y_loc += size[1]
-        start = ((x_loc % size[0]) * size[1] + (y_loc % size[1])) * size[2]
-        zs = np.array(range(limits[2][0], limits[2][1]))
-        res = z_slice(zs, x, y, vecs, posn, sigmas, pre, n_atoms, anharms, bool(second), bool(third), bool(fourth), only_anh)
-        for i, val in enumerate(res):
-          z_loc = zs[i]
-          if z_loc < 0:
-            z_loc += size[2]
-          data[start + (z_loc % size[2])] += val
-      num = int((x-limits[0][0]) / x_size * 100)
-      if num > last_percentage:
-        while last_percentage < num:
-          last_percentage += step
-        print("{:4d}%".format(num))
-        olx.xf.EndUpdate()
-        if OV.HasGUI():
-          olx.Refresh()
-    if second == False:
-      print("Multiplying grid values with 1000 to get on visible scale")
-      data = data * 1000
+      atom_coords_cart = np.array(uc.orthogonalize(posn[a]))
+      corner1_indices[a], corner2_indices[a] = \
+          index_limits(atom_coords_cart, dist, frac_arr, size_arr)
+
+    # generate a whole grid to be evaluated
+    if np.isinf(corner1_indices).all() or np.isinf(corner2_indices).all():
+      xi_min = yi_min = zi_min = xi_max = yi_max = zi_max = 0
+    else:
+      xi_min, yi_min, zi_min = np.min(corner1_indices, axis=0).astype(int)
+      xi_max, yi_max, zi_max = np.max(corner2_indices, axis=0).astype(int)
+    xyz_grid = np.array(np.mgrid[xi_min:xi_max, yi_min:yi_max, zi_min:zi_max])
+    xi, yi, zi = map(np.ravel, xyz_grid)
+
+    # determine pieces of grid around atoms that really need evaluation
+    masks = []
+    for a in range(n_atoms):
+      corner1_ind = corner1_indices[a]
+      corner2_ind = corner2_indices[a]
+      x_mask = (xi >= corner1_ind[0]) & (xi <= corner2_ind[0])
+      y_mask = (yi >= corner1_ind[1]) & (yi <= corner2_ind[1])
+      z_mask = (zi >= corner1_ind[2]) & (zi <= corner2_ind[2])
+      masks.append(x_mask & y_mask & z_mask)
+
+    # prepare lists for integration and evaluate the PDF on the grid
+    positive_integrals, negative_integrals, negative_volumes = [], [], []
+    volume_scale_factor = linalg.det(np.array(vecs)) / uc.volume()
+    pdfs = np.zeros_like(xi, dtype=np.float)
+    for a in range(n_atoms):
+      if (second is False or only_anh is True) and anharms[a] is None:
+        pdf = np.zeros(1)
+      elif pre[a] < 0:  # Skip NPD atoms
+        pdf = np.zeros(1)
+      else:
+        u = np.vstack([xi[masks[a]] / size[0] - posn[a][0],
+                       yi[masks[a]] / size[1] - posn[a][1],
+                       zi[masks[a]] / size[2] - posn[a][2]]).T
+        mhalfuTUu = np.clip(-0.5 * np.sum(u * (u @ sigmas[a]), axis=1),
+                            a_min=None, a_max=0)
+        p0 = pre[a] * np.exp(mhalfuTUu)
+        p0[abs(p0) < 1E-30] = 0
+        fact = float(second)
+        if anharms[a] is not None:
+          for i, h in enumerate(hermite_polynomials_of_3rd_and_4th_order):
+            if anharms[a][i] != 0:
+              fact += anharms[a][i] * h(u, sigmas[a]) / h.order_factorial
+        pdf = p0 * fact
+        pdfs[masks[a]] += pdf
+      positive_integrals.append(np.sum(pdf[pdf > 0]) * volume_scale_factor)
+      negative_integrals.append(np.sum(pdf[pdf < 0]) * volume_scale_factor)
+      negative_volumes.append(pdf[pdf < 0].size * volume_scale_factor)
+
+    # wrap the results back to the unit cell and assign them to the data flex
+    data_array = np.zeros(shape=(size[0], size[1], size[2], ))
+    x_cases = (xi < 0, (xi >= 0) & (xi < size[0]), xi >= size[0])
+    y_cases = (yi < 0, (yi >= 0) & (yi < size[1]), yi >= size[1])
+    z_cases = (zi < 0, (zi >= 0) & (zi < size[2]), zi >= size[2])
+    cases = (c[0] & c[1] & c[2] for c in itertools.product(x_cases, y_cases, z_cases))
+    for c in cases:
+      data_array[xi[c] % size[0], yi[c] % size[1], zi[c] % size[2]] += pdfs[c]
+    data = flex.double(data_array.flatten())
+    data /= uc.volume()
+
+    # plot and save the map
     stats = data.min_max_mean()
+    OV.SetVar("Negative_PDF", False)
     if stats.min < -0.05:
       index = (data == stats.min).iselection()[0]
-      x = math.floor(index / (size[2] * size[1]))
-      index -= x * size[2] * size[1]
-      y = math.floor(index / size[2])
-      z = index % size[2]
+      x = index // (size[2] * size[1])
+      y = (index - x * size[2] * size[1]) // size[2]
+      z = (index - x * size[2] * size[1]) % size[2]
       pos = [(x) * vecs[0][0] + (y) * vecs[0][1] + (z) * vecs[0][2],
              (x) * vecs[1][0] + (y) * vecs[1][1] + (z) * vecs[1][2],
              (x) * vecs[2][0] + (y) * vecs[2][1] + (z) * vecs[2][2]]
       min_dist = cm[0] + cm[4] + cm[8]
       atom_nr = 0
       for i in range(n_atoms):
-        diff = [(pos[0] - posn[i][0]), (pos[1] - posn[i][1]), (pos[2] - posn[i][2])]
-        dist = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]) * a2b
-        if dist < min_dist:
-          min_dist = dist
+        pos_cart = uc.orthogonalize(posn[i])
+        diff = [(pos[0] - pos_cart[0]), (pos[1] - pos_cart[1]), (pos[2] - pos_cart[2])]
+        dist_ = np.sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2])
+        if dist_ < min_dist:
+          min_dist = dist_
           atom_nr = i
-      print("WARNING! Significant negative PDF for Atom: " + str(cctbx_adapter.xray_structure()._scatterers[atom_nr].label))
-      print("WARNING! At a distance of {:8.3f} Angs".format(min_dist))
+      print(f"WARNING! Significant negative PDF for Atom: {labels[atom_nr]}"
+            f" at a distance of {min_dist:8.3f} Angs")
+      OV.SetVar("Negative_PDF", True)
+      for a in range(n_atoms):
+        if negative_integrals[a] < -0.0001:
+          label = str(cctbx_adapter.xray_structure()._scatterers[a].label)
+          print(f"WARNING! Integrated negative probability of "
+                f"{-negative_integrals[a]:.2%} to find atom {label} "
+                f"in a {1e6 * negative_volumes[a]:.0f} pm^3 volume")
+    for a in range(n_atoms):
+      order = 0 if anharms[a] is None else 4 if any(_ for _ in anharms[a][10:]) \
+        else 3 if any(_ for _ in anharms[a][:10]) else 0
+      if order:
+        adp = adptbx.u_star_as_u_iso(uc, adp_stars[a])
+        if (k := 0.5 / kuhs_limit(order, adp)) <= olex_core.GetHklStat()['MinD']:
+          order_str = '3rd order' if order == 3 else '4th order'
+          label = str(cctbx_adapter.xray_structure()._scatterers[a].label)
+          print(f"WARNING! Kuhs' rule: d_min < {k:.2f}A required"
+                f" for {order_str} for atom {label} (Ueq {adp:.2e})")
     data.reshape(flex.grid(size[0], size[1], size[2]))
     if save_cube:
-      plot_fft_map_cube(data, "PDF", size)
+      write_map_to_cube(data, "PDF", size)
 
     if do_plot:
-      print("Grid Size: %4d x %4d x %4d" % (size[0], size[1], size[2]))
-      iso = -3.1415
-      if second == False:
-        iso = -0.05
-      plot_map(data, iso, distance, min_v=stats.min, max_v=stats.max)
+      iso = -0.05 if second is False else -3.1415
+      plot_map(data, iso, dist, min_v=stats.min, max_v=stats.max)
   except Exception as e:
     OV.DeleteBitmap("working")
     raise(e)
 
   OV.DeleteBitmap("working")
-  print("PDF Maps as implemented and tested by Florian Kleemiss and Daniel Tchon!")
 OV.registerFunction(PDF_map, False, "NoSpherA2")
 
 def tomc_map(resolution=0.1, return_map=False, use_f000=False):
@@ -1126,7 +1113,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
                               resolution_factor=1, grid_step=float(resolution)).apply_volume_scaling()
   if return_map == True:
     return tomc_map
-  plot_fft_map_cube(tomc_map,"tomc")
+  write_map_to_cube(tomc_map, "tomc")
 
 OV.registerFunction(tomc_map, False, "NoSpherA2")
 
@@ -1154,7 +1141,7 @@ def deformation_map(resolution=0.1, return_map=False):
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
   if return_map==True:
     return def_map
-  plot_fft_map_cube(def_map,"deform")
+  write_map_to_cube(def_map, "deform")
 
 OV.registerFunction(deformation_map, False, "NoSpherA2")
 
@@ -1191,7 +1178,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
                               resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
   if return_map==True:
     return obs_map
-  plot_fft_map_cube(obs_map,"obs")
+  write_map_to_cube(obs_map, "obs")
 
 OV.registerFunction(obs_map, False, "NoSpherA2")
 
@@ -1222,7 +1209,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
                               resolution_factor=1, grid_step=float(resolution)).apply_volume_scaling()
   if return_map==True:
     return calc_map
-  plot_fft_map_cube(calc_map,"calc")
+  write_map_to_cube(calc_map, "calc")
 
 OV.registerFunction(calc_map, False, "NoSpherA2")
 
