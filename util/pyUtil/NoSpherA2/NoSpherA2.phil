@@ -192,6 +192,8 @@ snum{
       .type = str
     ORCA_USE_CRYSTAL_QMMM = False
       .type = bool
+    ORCA_USE_GBW = True
+      .type = bool
     ORCA_CRYSTAL_QMMM_TYPE = "Molecule"
       .type = str
     ORCA_CRYSTAL_QMMM_RADIUS = "12.0"

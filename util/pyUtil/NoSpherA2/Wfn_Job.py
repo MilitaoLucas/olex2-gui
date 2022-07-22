@@ -9,6 +9,7 @@ import time
 import math
 
 from olexFunctions import OV
+from utilities import run_with_bitmap
 
 try:
   from_outside = False
@@ -16,29 +17,6 @@ try:
 except:
   from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
-
-def get_nmo():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
-  line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[1]
-
-def get_ncen():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
-  line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[6]
-
-OV.registerFunction(get_nmo,True,'NoSpherA2')
-OV.registerFunction(get_ncen,True,'NoSpherA2')
 
 class wfn_Job(object):
   origin_folder = " "
@@ -649,7 +627,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
-      control += "rhf "
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROHF "
+      else:
+        control += " rhf "
       grids = ""
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
@@ -680,38 +661,44 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       conv = convergence
     if strategy == None:
       strategy = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
-    control = control + grids + conv + ' ' + strategy
+    control += grids + conv + ' ' + strategy
     if relativistic == None:
       relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if method == "BP86" or method == "PBE" or method == "PWLDA":
       if relativistic == True:
         t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
         if t == "DKH2":
-          control = control + " DKH2 SARC/J RI"
+          control += " DKH2 SARC/J RI"
         elif t == "ZORA":
-          control = control + " ZORA SARC/J RI"
+          control += " ZORA SARC/J RI"
         elif t == "ZORA/RI":
-          control = control + " ZORA/RI SARC/J RI"
+          control += " ZORA/RI SARC/J RI"
         else:
-          control = control + " IORA/RI SARC/J RI"
+          control += " IORA/RI SARC/J RI"
       else:
-        control = control + " def2/J RI"
+        control += " def2/J RI"
     else:
       if relativistic == True:
         t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
         if t == "DKH2":
-          control = control + " DKH2 SARC/J RIJCOSX"
+          control += " DKH2 SARC/J RIJCOSX"
         elif t == "ZORA":
-          control = control + " ZORA SARC/J RIJCOSX"
+          control += " ZORA SARC/J RIJCOSX"
         elif t == "ZORA/RI":
-          control = control + " ZORA/RI SARC/J RIJCOSX"
+          control += " ZORA/RI SARC/J RIJCOSX"
+        elif t == "IORA/RI":
+          control += " IORA/RI SARC/J RIJCOSX"
         else:
-          control = control + " IORA/RI SARC/J RIJCOSX"
+          print("============= Relativity kind not known! Will use ZORA! =================")
+          control += " ZORA SARC/J RIJCOSX"
       else:
-        control = control + " def2/J RIJCOSX"
+        control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
-      control += " CPCM("+Solvation+") "
+      control += " CPCM(" + Solvation + ") "
+    GBW_file = OV.GetParam("snum.NoSpehrA2.ORCA_USE_GBW")
+    if GBW_file == False:
+      control += " AIM "
     if charge == None:
       charge = OV.GetParam('snum.NoSpherA2.charge')
     if mult == None:
@@ -1415,7 +1402,7 @@ ener = cf.kernel()"""
       inp.write(rest)
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
-
+  @run_with_bitmap('Calculating WFN')
   def run(self,part=0,software=None,basis_name=None):
     args = []
     if basis_name == None:
@@ -1654,8 +1641,9 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
+      if OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW") == True:
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
