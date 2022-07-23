@@ -144,10 +144,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-    shared_parameter_constraints = self.setup_shared_parameters_constraints()
+    shared_parameter_constraints, fix_occupancy_for = self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
       shared_parameters=shared_parameter_constraints)
+    # some of the SUMP got reduced to fixed occupancy
+    if fix_occupancy_for:
+      msg = "Consider updatign your model - occupancy has got reduced for:"
+      for sc_i, occu in fix_occupancy_for:
+        sc = self.xray_structure().scatterers()[sc_i]
+        sc.flags.set_grad_occupancy(False)
+        sc.occupancy = occu
+        msg += " %s.occu=%.3f" %(sc.label, occu)
+      print(msg)
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
@@ -1218,8 +1227,7 @@ The following options were used:
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
-
-    idslist = []
+    fix_occupancy_for = []
     if(len(equations)>0):
       # number of free variables
       FvarNum=0
@@ -1237,18 +1245,19 @@ The following options were used:
         ignored = False
         row = numpy.zeros((FvarNum))
         for variable in equation['variables']:
-          label = "%s %d %d"%(variable[0]['references'][-1]['name'],
-                              variable[0]['references'][-1]['id'],
-                              variable[0]['references'][-1]['index'])
-          if(variable[0]['references'][-1]['index']==4):
+          ref = variable[0]['references'][-1]
+          sc_id = ref['id']
+          label = "%s %d %d"%(ref['name'], sc_id, ref['index'])
+          if(ref['index']==4): #occupancy
             if(label not in rowheader):
               nextfree+=1
               rowheader[label]=nextfree
-              idslist += [variable[0]['references'][-1]['id']]
+              idslist.append(sc_id)
               key=nextfree
             else:
               key=rowheader[label]
-            row[key]=variable[1]
+            row[key]=variable[1]*scatterers[sc_id].weight_without_occupancy()/\
+              ref['k']
           else:
             ignored = True
         row[FvarNum-1]=equation['value']
@@ -1261,24 +1270,28 @@ The following options were used:
       if numpy.shape(u)[0] > 1:
         previous = u[-2,:]
         for row in numpy.flipud(u):
-          if(numpy.all(row[0:-1]==0.0) and row[-1]!=0):
-            raise Exception("One or more equations are not independent")
-          if(numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1]):
+          if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
+            (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
             raise Exception("One or more equations are not independent")
           previous = row
 
       # setting up constraints
       for row in numpy.flipud(u):
-        if(numpy.all(row==0.0)):
+        nn_cnt = 0
+        nn_idx = -1
+        a = numpy.copy(row[:-1])
+        for idx, v in enumerate(a):
+          if v != 0.0:
+            nn_cnt+=1
+            nn_idx = idx
+        if(nn_cnt == 0):
           raise Exception("One or more equations are not independent")
         else:
-          a = numpy.copy(row[:-1])
-          for idx, si in enumerate(idslist):
-            a[idx] *= scatterers[si].weight_without_occupancy()
-          current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
-          #a = ((row[-3], row[-2]), row[-1])
-          #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
-          constraints.append(current)
+          if nn_cnt == 1: # reduced
+            fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
+          else:
+            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+            constraints.append(current)
 
     for i, var in enumerate(vars):
       refs = var['references']
@@ -1320,7 +1333,7 @@ The following options were used:
     for sd in same_disp:
       constraints.append(fpfdp.shared_fp(sd))
       constraints.append(fpfdp.shared_fdp(sd))
-    return constraints
+    return constraints, fix_occupancy_for
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
