@@ -1228,6 +1228,7 @@ The following options were used:
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
     fix_occupancy_for = []
+    idslist = []
     if(len(equations)>0):
       # number of free variables
       FvarNum=0
@@ -1239,7 +1240,6 @@ The following options were used:
       rowheader = {}
       nextfree = -1
       ignored = False
-      idslist = []
       scatterers = self.xray_structure().scatterers()
       for equation in equations:
         ignored = False
