@@ -398,8 +398,14 @@ OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
 def check_for_matching_wfn():
   p = OV.FilePath()
   name = OV.ModelSrc()
-  wfn = os.path.join(p,name + '.wfn')
+  wfn = os.path.join(p, name + '.wfn')
+  wfx = os.path.join(p, name + '.wfx')
+  gbw = os.path.join(p, name + '.gbw')
   if os.path.exists(wfn):
+    return True
+  elif os.path.exists(wfx):
+    return True
+  elif os.path.exists(gbw):
     return True
   else:
     return False
