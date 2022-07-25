@@ -115,7 +115,9 @@ def calculate_cubes():
   args.append("-cpus")
   args.append(cpus)
   args.append("-wfn")
-  if os.path.exists(OV.ModelSrc() + ".wfx"):
+  if os.path.exists(OV.ModelSrc() + ".gbw"):
+    args.append(OV.ModelSrc() + ".gbw")
+  elif os.path.exists(OV.ModelSrc() + ".wfx"):
     args.append(OV.ModelSrc() + ".wfx")
   else:
     args.append(OV.ModelSrc() + ".wfn")
@@ -151,8 +153,8 @@ def calculate_cubes():
   if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
     args.append("-v")
 
-  radius = OV.GetParam('snum.NoSpherA2.map_radius')
-  res = OV.GetParam('snum.NoSpherA2.map_resolution')
+  radius = OV.GetParam('snum.NoSpherA2.map.radius')
+  res = OV.GetParam('snum.NoSpherA2.map.resolution')
   args.append("-resolution")
   args.append(res)
   args.append("-radius")
@@ -176,35 +178,36 @@ def get_map_types():
   name = OV.ModelSrc()
   folder = OV.FilePath()
   list = ";Residual<-diff;Deformation<-fcfmc;2Fo-Fc<-tomc;Fobs<-fobs;Fcalc<-fcalc;"
-  if os.path.isfile(os.path.join(folder,name+"_eli.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_eli.cube")):
     list += "ELI-D;"
-  if os.path.isfile(os.path.join(folder,name+"_lap.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_lap.cube")):
     list += "Laplacian;"
-  if os.path.isfile(os.path.join(folder,name+"_elf.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_elf.cube")):
     list += "ELF;"
   if os.path.isfile(os.path.join(folder,name+"_esp.cube")):
     list += "ESP;"
-  if os.path.isfile(os.path.join(folder,name+"_rdg.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_rdg.cube")):
     list += "RDG;"
-  if os.path.isfile(os.path.join(folder,name+"_def.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_def.cube")):
     list += "Stat. Def.;"
-  if os.path.isfile(os.path.join(folder,name+"_rdg.cube")) and os.path.isfile(os.path.join(folder,name+"_signed_rho.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_rdg.cube")) and os.path.isfile(os.path.join(folder, name + "_signed_rho.cube")):
     list += "NCI;"
-  if os.path.isfile(os.path.join(folder,name+"_rho.cube")) and os.path.isfile(os.path.join(folder,name+"_esp.cube")):
+  if os.path.isfile(os.path.join(folder, name + "_rho.cube")) and os.path.isfile(os.path.join(folder, name + "_esp.cube")):
     list += "Rho + ESP;"
-  nmo = Wfn_Job.get_nmo()
+  from utilities import get_nmo, get_ncen
+  nmo = get_nmo()
   if nmo != -1:
     exists = False
-    for i in range(int(nmo)+1):
+    for i in range(int(nmo) + 1):
       if os.path.isfile(os.path.join(folder,name+"_MO_"+str(i)+".cube")):
         exists = True
     if exists == True:
       list += "MO;"
-  ncen = Wfn_Job.get_ncen()
+  ncen = get_ncen()
   if ncen != -1:
     exists = False
     for i in range(int(ncen)+1):
-      if os.path.isfile(os.path.join(folder,name+"_HDEF_"+str(i)+".cube")):
+      if os.path.isfile(os.path.join(folder, name + "_HDEF_" + str(i) + ".cube")):
         exists = True
     if exists == True:
       list += "HDEF;"
@@ -214,7 +217,7 @@ def get_map_types():
 OV.registerFunction(get_map_types,True,'NoSpherA2')
 
 def change_map():
-  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  Type = OV.GetParam('snum.NoSpherA2.map.type')
   if Type == "None" or Type == "":
     return
   name = OV.ModelSrc()
@@ -229,17 +232,17 @@ def change_map():
   elif Type == "Stat. Def.":
     plot_cube(name+"_def.cube",None)
   elif Type == "NCI":
-    OV.SetParam('snum.NoSpherA2.map_scale_name',"RGB")
+    OV.SetParam('snum.NoSpherA2.map.scale_name', "RGB")
     plot_cube(name+"_rdg.cube",name+"_signed_rho.cube")
   elif Type == "RDG":
     plot_cube(name+"_rdg.cube",None)
   elif Type == "Rho + ESP":
-    OV.SetParam('snum.NoSpherA2.map_scale_name',"BWR")
+    OV.SetParam('snum.NoSpherA2.map.scale_name', "BWR")
     plot_cube(name+"_rho.cube",name+"_esp.cube")
   elif Type == "fcfmc" or Type == "diff" or Type == "tomc" or Type == "fobs" or Type == "fcalc":
     OV.SetVar('map_slider_scale',-50)
     OV.SetParam('snum.map.type',Type)
-    show_fft_map(float(OV.GetParam('snum.NoSpherA2.map_resolution')),map_type=Type)
+    show_fft_map(float(OV.GetParam('snum.NoSpherA2.map.resolution')), map_type=Type)
     minimal = float(olx.xgrid.GetMin())
     maximal = float(olx.xgrid.GetMax())
     if -minimal > maximal:
@@ -427,7 +430,7 @@ def plot_cube(name, color_cube):
     a1 = gridding.all()
     a2 = gridding.focus()
     olex_xgrid.Import(a1, a2, data.copy_to_byte_str(), isint)
-  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  Type = OV.GetParam('snum.NoSpherA2.map.type')
   if Type == "Laplacian":
     OV.SetVar('map_min', 0)
     OV.SetVar('map_max', 40)
@@ -626,9 +629,9 @@ def get_color(value):
   b = 0
   g = 0
   r = 0
-  scale_min = OV.GetParam('snum.NoSpherA2.map_scale_min')
-  scale_max = OV.GetParam('snum.NoSpherA2.map_scale_max')
-  scale = OV.GetParam('snum.NoSpherA2.map_scale_name') #BWR = Blue White Red; RGB = Red Green Blue
+  scale_min = OV.GetParam('snum.NoSpherA2.map.scale_min')
+  scale_max = OV.GetParam('snum.NoSpherA2.map.scale_max')
+  scale = OV.GetParam('snum.NoSpherA2.map.scale_name')  # BWR = Blue White Red; RGB = Red Green Blue
   x = 0
   if value <= float(scale_min):
     x = 0
@@ -670,7 +673,7 @@ def get_color(value):
 OV.registerFunction(get_color,True,'NoSpherA2')
 
 def is_colored():
-  Type = OV.GetParam('snum.NoSpherA2.map_type')
+  Type = OV.GetParam('snum.NoSpherA2.map.type')
   if Type == "NCI":
     return True
   elif Type == "Rho + ESP":
