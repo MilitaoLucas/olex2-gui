@@ -314,6 +314,8 @@ routines requiring structure refinement
       .type = bool
     cifmerge_after_refinement = True
       .type = bool
+    check_PDF = True
+      .type = bool
 
     ShelXL
       .short_caption = 'Program specific command line'
@@ -367,6 +369,9 @@ routines requiring structure refinement
       invert = True
         .type = bool
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+      remove_anharm = False
+        .type = bool
+        .help = If set to TRUE, the structure will be automatically harmonized in case of bad PDF
       }
       ED
         .short_caption = ED parameters
