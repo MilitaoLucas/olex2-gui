@@ -21,22 +21,36 @@ class Method_shelx(Method):
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("%s" %RunPrgObject.tempPath)
     xl_ins_filename = RunPrgObject.shelx_alias
-# This is an ugly fix - but good start
-    if 'shelxs86' in prgName:
-      print('STARTING SHELX86 modifications')
-      import fileinput, string, sys
-      for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
-        if 'REM' in line:
-          continue
-        sys.stdout.write(line)
 # This is super ugly but what can I do?
 # This really be a function rather than a separate file but I can not get it to work yet?
-    if prgName in ('shelxs', 'xs', 'shelxs86', 'shelxs13'):
-      import fileinput, string, sys
-      for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
-        if 'DISP' in line:
+    if prgName.split('.')[0].lower() in ('shelxs', 'xs', 'shelxs86', 'shelxs13', 'shelxd', 'xm'):
+      lines_in = None
+      with open(xl_ins_filename.lower()+'.ins', 'r') as x:
+        lines_in = x.readlines()
+      lines_out = []
+      sfac = []
+      unit_idx = None
+      for line in lines_in:
+        l = line.upper()
+        if l.startswith('DISP') or l.startswith('REM'):
           continue
-        sys.stdout.write(line)
+        if l.startswith('SFAC'):
+          toks = l.split()
+          if len(toks) > 2:
+            try: # is expanded SFAC?
+              float(toks[2])
+              sfac.append(toks[1])
+            except:
+              sfac += toks[1:]
+            continue
+        elif l.startswith('UNIT'):
+          unit_idx = len(lines_out)
+        lines_out.append(line)
+      if unit_idx is not None:
+        lines_out.insert(unit_idx, 'SFAC ' + ' '.join(sfac) + '\n')
+      with open(xl_ins_filename.lower()+'.ins', 'w') as x:
+        for l in lines_out:
+          x.write(l)
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     if self.command_line_options:
