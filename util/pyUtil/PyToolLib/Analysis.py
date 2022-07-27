@@ -507,7 +507,6 @@ class Graph(ArgumentParser):
 
 
   def test_plotly(self):
-
     import plotly
     print(plotly.__version__)  # version >1.9.4 required
     from plotly.graph_objs import Scatter, Layout
@@ -1110,9 +1109,9 @@ class Graph(ArgumentParser):
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     legend_top = self.graph_top + 20
     legend_bottom = legend_top + 1.2*wY
-    x = width - 1.5*wX - self.bSides
+    x = width - 1.1*wX - self.bSides
     top_left = (x, legend_top)
-    box = (x-0.5*wX,legend_top,x+wX,legend_bottom)
+    box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
     self.draw.rectangle(box, fill=self.pageColour)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
@@ -2629,7 +2628,7 @@ class Fractal_Dimension(Analysis):
       self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
-    self.draw_info("e_gross: %8.4f electrons\ne_net: %10.4f electrons"%(xy_plot.e_gross,xy_plot.e_net),font_size=self.font_size_small)
+    self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-"%(xy_plot.e_gross,xy_plot.e_net),font_size=self.font_size_small)
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -3666,6 +3665,22 @@ class HealthOfStructure():
         if type(value) == tuple and len(value) > 0:
           value = value[0]
       elif self.scope == "refinement":
+        if item == "hooft_str":
+          hooft_src = "Flack"
+          if item == 'hooft_str':
+            try:
+              value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
+              value = olx.Cif('_refine_ls_abs_structure_Flack')
+              _ = olx.Cif('_refine_ls_abs_structure_details')
+              
+              if "parsons" in _.lower():
+                hooft_src = "Parsons"
+              elif "hooft" in _.lower():
+                hooft_src = "Hooft"
+              OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src) 
+            except:
+              value = OV.GetParam('snum.refinement.%s' %item)
+        
         if self.is_CIF:
           try:
             value = float(olx.Cif(item))
