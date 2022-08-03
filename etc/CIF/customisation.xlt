@@ -62,6 +62,8 @@
     <_diffrn_oxdiff_ac3_digest_frames>
     <_diffrn_oxdiff_digest_hkl>
     <_diffrn_oxdiff_digest_frames>
+    <_olex2_refinement_description>
+    <_olex2_refine_details>
   >
   <do_merge
    <_*_details>
@@ -88,6 +90,7 @@
     <_geom_special_details skip="true">
     <_reflns_special_details skip="true">
     <_olex2_refinement_description skip="true">
+    <_olex2_refine_details skip="true">
     <_iucr_refine_instructions_details skip="true">
     <_iucr_refine_reflections_details skip="true">
     <_iucr_refine_fcf_details skip="true">
