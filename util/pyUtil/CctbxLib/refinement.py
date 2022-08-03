@@ -1012,7 +1012,7 @@ The following options were used:
         f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
         details_text = details_text + "   DATE:           %s\n"%f_date
         tsc_info = tsc_info + details_text + ";\n"
-        cif_block['_refine_special_details'] = tsc_info
+        cif_block['_olex2_refine_details'] = tsc_info
         if acta_stuff:
           # remove IAM scatterer reference
           for sl in ['a', 'b']:
