@@ -50,8 +50,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    ed_refinement = OV.GetParam("snum.refinement.ED.use_2_beam")
-    if not ed_refinement or not aci.IsMEDEnabled:
+    ed_refinement = OV.GetParam("snum.refinement.ED.method")
+    if not ed_refinement or "Kinematic" == ed_refinement or not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
@@ -76,9 +76,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         return args
       self.data = build_design_matrix(*args())
       self.one_h_linearisation = aci.EDI.build(self.data,
+        self.reparametrisation,
+        old_func,
         self.refinement.thickness,
         self.xray_structure.crystal_symmetry(),
-        self.std_observations.fo_sq.anomalous_flag())
+        self.std_observations.fo_sq.anomalous_flag(),
+        objective_only)
       super(normal_eqns, self).build_up()
       aci.EDI.update_scales(old_func,
         self.weighting_scheme,
