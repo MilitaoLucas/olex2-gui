@@ -64,9 +64,9 @@ class Method_cctbx_refinement(Method_refinement):
     try:
       if timer:
         t1 = time.time()
-      ed_refinement = OV.GetParam("snum.refinement.ED.use_2_beam")
+      ed_refinement = OV.GetParam("snum.refinement.ED.method")
       cctbx.run(table_file_name=self.table_file_name,
-        ed_refinement=ed_refinement)
+        ed_refinement=ed_refinement != "Kinematic")
       if timer:
         print("-- do_run(): %.3f" %(time.time() - t1))
     except InvalidConstraint as e:

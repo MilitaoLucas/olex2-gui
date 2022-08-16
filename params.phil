@@ -378,8 +378,8 @@ routines requiring structure refinement
       {
         maxSg = 0.01
           .type = float
-        use_2_beam = False
-          .type = bool
+        method = *Kinematic 2-Beam Full-diff Full
+          .type = choice
       }
   }
 

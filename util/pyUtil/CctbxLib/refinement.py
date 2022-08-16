@@ -100,7 +100,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def run(self, build_only=False,
           table_file_name = None,
           normal_equations_class=olex2_normal_equations.normal_eqns,
-          ed_refinement=False):
+          ed_refinement=None):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
