@@ -42,8 +42,13 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
         raise e
     else:
-      one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, reflections=self.observations)
+      ed_refinement = OV.GetParam("snum.refinement.ED.method")
+      if ed_refinement != "Kinematic":
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure)
+      else:
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, reflections=self.observations)
     self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
     self.olx_atoms = olx_atoms
