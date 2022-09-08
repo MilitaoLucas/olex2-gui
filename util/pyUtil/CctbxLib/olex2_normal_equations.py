@@ -45,8 +45,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       ed_refinement = OV.GetParam("snum.refinement.ED.method")
       if ed_refinement != "Kinematic":
         one_h_linearisation = direct.f_calc_modulus_squared(
-          self.xray_structure)
-      else:
+          self.xray_structure)#, reflections=self.observations)
+      else: # make use of caching
         one_h_linearisation = direct.f_calc_modulus_squared(
           self.xray_structure, reflections=self.observations)
     self.refinement = refinement
