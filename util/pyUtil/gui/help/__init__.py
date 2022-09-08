@@ -277,7 +277,7 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
   global tutorial_box_initialised
   if not helpIsInitialised:
     gh.get_help()
-  name = getGenericSwitchName(name).lstrip("h3-")
+  name = getGenericSwitchName(name).replace("h3-", "")
   OV.SetVar('last_help_box', name)
   _= ""
   md_box = True
@@ -592,7 +592,14 @@ class AutoDemoTemp(AutoDemo):
       sys.stderr.formatExceptionInfo()
       self.end_tutorial()
 
-  def read_tutorial_definitions(self):
+  def read_tutorial_definitions(self, specific=None):
+    if specific:
+      self.source_dir = specific
+    else:
+      specific = OV.GetVar('githelp_tutorial_src', None)
+      if specific:
+        self.source_dir = specific
+
     ## First read in the commands that preceeds all tutorials
     self.items = gui.tools.TemplateProvider.get_template('all_tutorials_preamble').split("\n")
 
