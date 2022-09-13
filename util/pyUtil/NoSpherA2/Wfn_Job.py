@@ -696,7 +696,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM(" + Solvation + ") "
-    GBW_file = OV.GetParam("snum.NoSpehrA2.ORCA_USE_GBW")
+    GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
+    if "5.0" not in OV.GetParam("snum.NoSpherA2.source"):
+      GBW_file = False
     if GBW_file == False:
       control += " AIM "
     if charge == None:

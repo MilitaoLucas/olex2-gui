@@ -1013,23 +1013,24 @@ class RunRefinementPrg(RunPrg):
           HAR_log.write("{:24}".format(" "))
         else:
           if (wfn_file != None) and (calculate == True):
-            with open(wfn_file, "rb") as f:
-              f.seek(-2000,os.SEEK_END)
-              fread = f.readlines()[-1].decode()
-              if "THE VIRIAL" in fread:
-                source = OV.GetParam('snum.NoSpherA2.source')
-                if "Gaussian" in source:
-                  energy = float(fread.split()[3])
-                elif "ORCA" in source:
-                  energy = float(fread.split()[4])
-                elif "pySCF" in source:
-                  energy = float(fread.split()[4])
-                elif ".wfn" in source:
-                  energy = float(fread[17:38])
-                elif "Tonto" in source:
-                  energy = float(fread.split()[4])
-                else:
-                  energy = 0.0
+            if ".gbw" not in wfn_file:
+              with open(wfn_file, "rb") as f:
+                f.seek(-2000, os.SEEK_END)
+                fread = f.readlines()[-1].decode()
+                if "THE VIRIAL" in fread:
+                  source = OV.GetParam('snum.NoSpherA2.source')
+                  if "Gaussian" in source:
+                    energy = float(fread.split()[3])
+                  elif "ORCA" in source:
+                    energy = float(fread.split()[4])
+                  elif "pySCF" in source:
+                    energy = float(fread.split()[4])
+                  elif ".wfn" in source:
+                    energy = float(fread[17:38])
+                  elif "Tonto" in source:
+                    energy = float(fread.split()[4])
+                  else:
+                    energy = 0.0
             if energy is not None:
               HAR_log.write("{:^24.10f}".format(energy))
             else:
