@@ -68,13 +68,15 @@ def custom_bitmap(text):
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
   basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
   folder = OV.FilePath()
+  name = OV.ModelSrc()
+  final_log_name = name + ".partitionlog"
   if type([]) != type(wfn_file):
     gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-  if os.path.isfile(os.path.join(folder, "NoSpherA2.log")):
-    shutil.move(os.path.join(folder, "NoSpherA2.log"), os.path.join(folder, "NoSpherA2.log_org"))
+  if os.path.isfile(os.path.join(folder, final_log_name)):
+    shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
   args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   args.append(wfn_2_fchk)
@@ -229,7 +231,8 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       #  time.sleep(0.1)
 
   sucess = False
-  with open(out_fn,"r") as f:
+  shutil.move(out_fn, final_log_name)
+  with open(final_log_name, "r") as f:
     l = f.readlines()
     if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
       sucess = True

@@ -1559,9 +1559,11 @@ ener = cf.kernel()"""
           time.sleep(0.5)
 
     print("\nWavefunction calculation ended!")
+    wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
+    shutil.copy(out_fn, wfnlog)
 
     if software == "ORCA" or software == "ORCA 5.0":
-      if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+"_orca.log")).read():
+      if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
@@ -1571,15 +1573,14 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('Orca did not terminate normally!')
-    elif "Gaussian" in software:
-      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
+    elif "Gaussian" in software:   
+      if 'Normal termination of Gaussian' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-    elif software == "ELMOdb":
-      print(os.path.join(self.full_dir, self.name+".out"))
-      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(os.path.join(self.full_dir, self.name+".out")).read():
+    elif software == "ELMOdb":     
+      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
