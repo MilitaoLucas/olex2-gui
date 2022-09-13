@@ -911,40 +911,19 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:3d}".format(run))
       energy = None
       source = OV.GetParam('snum.NoSpherA2.source')
-      if source == "fragHAR" or source == "Hybrid" or source == "DISCAMB":
-        pass
-      else:
-        for file in os.listdir(olx.FilePath()):
-          if file.endswith(".wfn"):
-            with open(file, "rb") as f:
-              f.seek(-2000,os.SEEK_END)
-              fread = f.readlines()[-1].decode()
-              if "THE VIRIAL" in fread:
-                source = OV.GetParam('snum.NoSpherA2.source')
-                if "Gaussian" in source:
-                  try:
-                    energy = float(fread.split()[3])
-                  except:
-                    energy = None
-                else:
-                  try:
-                    energy = float(fread[17:38])
-                  except:
-                    energy = None
-            fread = None
       if energy == None:
         HAR_log.write("{:^24}".format(" "))
       else:
         HAR_log.write("{:^24.10f}".format(energy))
       HAR_log.write("{:>70}".format(" "))
-      r1_old  = OV.GetParam('snum.refinement.last_R1')
+      r1_old = OV.GetParam('snum.refinement.last_R1')
       wr2_old = OV.GetParam('snum.refinement.last_wR2')
       if r1_old != "n/a":
-        HAR_log.write("{:>6.2f}".format(float(r1_old)*100))
+        HAR_log.write("{:>6.2f}".format(float(r1_old) * 100))
       else:
         HAR_log.write("{:>6}".format("N/A"))
       if wr2_old != "n/a":
-        HAR_log.write("{:>7.2f}".format(float(wr2_old)*100))
+        HAR_log.write("{:>7.2f}".format(float(wr2_old) * 100))
       else:
         HAR_log.write("{:>7}".format("N/A"))
       HAR_log.write("\n")

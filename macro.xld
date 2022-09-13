@@ -262,7 +262,7 @@
 >
 
 <PDF help="Calculates (P)robability (D)ensity (F)unction from the ADPs of your atom.\n
- Syntax: refine [res=0.1] [dist=1.0] [2nd_order=True] [3rd_order=True] [4th_order=True] [only_anh=True]"
+ Syntax: PDF [res=0.1] [dist=1.0] [2nd_order=True] [3rd_order=True] [4th_order=True] [only_anh=True]"
   <body
     <args
       <arg1 name="res" def='0.1'>
@@ -1015,6 +1015,24 @@
     <cmd
       <cmd1 "flush log">
       <cmd2 "exec -o getvar(defeditor) app.GetLogName()">
+    >
+  >
+>
+
+<wfnlog help='Shows the most recent log file of a NoSpherA2 wavefunction calculation'
+  <body
+    <args>
+    <cmd
+      <cmd1 "edit wfnlog">
+    >
+  >
+>
+
+<partitionlog help='Shows the most recent log file of a NoSpherA2 partitioning'
+  <body
+    <args>
+    <cmd
+      <cmd1 "edit partitionlog">
     >
   >
 >
