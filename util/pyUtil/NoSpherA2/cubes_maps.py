@@ -560,7 +560,6 @@ OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
 def plot_map_cube(map_type,resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
-  import math
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
   uc = xray_structure.unit_cell()
@@ -586,14 +585,14 @@ def plot_map_cube(map_type,resolution):
   print("start writing a %4d x %4d x %4d cube" % (size[0], size[1], size[2]))
 
   with open("%s_%s.cube" % (name, map_type), 'w') as cube:
-    cube.write("Fourier synthesis map created by Olex2\n")
-    cube.write("Model name: %s\n" % name)
-    # Origin of cube
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (n_atoms, 0.0, 0.0, 0.0))
-    # need to write vectors!
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[0], vecs[0][0], vecs[0][1], vecs[0][2]))
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[1], vecs[1][0], vecs[1][1], vecs[1][2]))
-    cube.write("%6d %12.8f %12.8f %12.8f\n" % (size[2], vecs[2][0], vecs[2][1], vecs[2][2]))
+    cube_header = textwrap.dedent(f"""\
+      {map_type}-type map created by Olex2
+      Model name: {name}
+      {n_atoms:5d} {0:11.6f} {0:11.6f} {0:11.6f}
+      {size[0]:5d} {vecs[0][0]:11.6f} {vecs[1][0]:11.6f} {vecs[2][0]:11.6f}
+      {size[1]:5d} {vecs[0][1]:11.6f} {vecs[1][1]:11.6f} {vecs[2][1]:11.6f}
+      {size[2]:5d} {vecs[0][2]:11.6f} {vecs[1][2]:11.6f} {vecs[2][2]:11.6f}""")
+    cube.write(cube_header)
     for i in range(n_atoms):
       atom_type = olx.xf.au.GetAtomType(i)
       charge = 200
@@ -603,13 +602,14 @@ def plot_map_cube(map_type,resolution):
           break
       if charge == 200:
         print("ATOM NOT FOUND!")
-      cube.write("%6d %6d.00000 %12.8f %12.8f %12.8f\n" % (charge, charge, positions[i][0], positions[i][1], positions[i][2]))
+      cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
+                 f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
     for x in range(size[0]):
       for y in range(size[1]):
         string = ""
         for z in range(size[2]):
           value = olex_xgrid.GetValue(x,y,z)
-          string += ("%15.7e"%value)
+          string += ("%13.5e" % value)
           if (z+1) % 6 == 0 and (z+1) != size[2]:
             string += '\n'
         if (y != (size[1] - 1)):
@@ -696,7 +696,7 @@ def plot_fft_map(fft_map):
   data = None
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 0)
+  olex_xgrid.InitSurface(True, 1.1)
   iso = float(-sigma*3.3)
   olex_xgrid.SetSurfaceScale(iso)
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
@@ -1040,7 +1040,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
             f" at a distance of {min_dist:8.3f} Angs")
       OV.SetVar("Negative_PDF", True)
       for a in range(n_atoms):
-        if negative_integrals[a] < -0.0001:
+        if negative_integrals[a] < -0.001:
           label = str(cctbx_adapter.xray_structure()._scatterers[a].label)
           print(f"WARNING! Integrated negative probability of "
                 f"{-negative_integrals[a]:.2%} to find atom {label} "
@@ -1061,6 +1061,8 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
 
     if do_plot:
       iso = -0.05 if second is False else -3.1415
+      if OV.GetVar("Negative_PDF") == True:
+        iso = stats.min * 0.6
       plot_map(data, iso, dist, min_v=stats.min, max_v=stats.max)
   except Exception as e:
     OV.DeleteBitmap("working")
