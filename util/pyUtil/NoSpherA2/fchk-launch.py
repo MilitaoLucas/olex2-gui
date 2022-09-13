@@ -52,7 +52,7 @@ if any("elmo" in x for x in args):
   else:
     p = subprocess.Popen(args, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 else:
-  p = subprocess.Popen(args, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+  p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
 print("Setting signal handler!")
 signal.signal(signal.SIGTERM, abort_please)
@@ -65,7 +65,7 @@ if "ubuntu" in args[0]:
 if out_fn == None:
   if "ubuntu" in args[0]:
     out_fn = fchk_file + "_pyscf.log"
-  elif out_fn == None:
+  else:
     out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
