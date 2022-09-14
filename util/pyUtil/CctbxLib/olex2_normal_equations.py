@@ -87,7 +87,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         self.xray_structure.crystal_symmetry(),
         self.std_observations.fo_sq.anomalous_flag(),
         objective_only)
-      super(normal_eqns, self).build_up()
+      super(normal_eqns, self).build_up(objective_only)
       aci.EDI.update_scales(old_func,
         self.weighting_scheme,
         self.xray_structure, f_mask_data,
@@ -405,8 +405,8 @@ class naive_iterations_with_damping_and_shift_limit(
       if self.has_gradient_converged_to_zero(): break
       self.do_damping(self.damping_value)
       self.non_linear_ls.solve()
-      if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
-        break
+      #if self.had_too_small_a_step() or self.analyse_shifts(self.max_shift_over_esd):
+      #  break
       self.non_linear_ls.step_forward()
       if timer:
         print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
