@@ -35,13 +35,12 @@
     >
     </font>
   </td>
-  <td align="right" width="20%">
-    $+
-      html.Snippet("gui/snippets/input-button",
-      "name=MAKE_ACCESSIBLE_VOID_MAP",
-      "value='\$spy.gui.maps.getActionString(Void,MAKE_ACCESSIBLE_VOID_MAP)'",
-      "onclick=spy.CalcSolv()>>spy.gui.maps.getActionString(Void,MAKE_ACCESSIBLE_VOID_MAP)",
-      )
-    $-
-  </td>
+  <td width="15%"> </td>
+  $+
+  html.Snippet(GetVar(default_link),
+    "name=MAKE_ACCESSIBLE_VOID_MAP",
+    "value='\$spy.gui.maps.getActionString(Info,MAKE_ACCESSIBLE_VOID_MAP)'",
+    "onclick=spy.CalcSolv()>>spy.gui.maps.getActionString(Void,MAKE_ACCESSIBLE_VOID_MAP)",
+    )
+  $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
