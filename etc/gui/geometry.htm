@@ -13,7 +13,7 @@
     $+
     html.Snippet(GetVar(default_link),
     "value=Best Line",
-    "hint=Select any number of atoms to calculate the best line",
+    "hint=Select two or more atoms to calculate best-fit line",
     "onclick=line sel",
     )$-
 
@@ -33,7 +33,7 @@
     $+
     html.Snippet(GetVar(default_link),
     "value=Refine and Save e.s.d info",
-    "hint=Select any number of atoms to calculate the best line",
+    "hint=Refine model and save e.s.d.'s",
     "onclick=delins more>>addins more -3>>refine",
     )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -43,14 +43,14 @@
     $+
     html.Snippet(GetVar(default_link),
     "value=Analyse &pi;-&pi; Interactions",
-    "hint=Select objects to calculate distances and angles",
+    "hint=Examine &pi-&pi bonding",
     "onclick=fuse>>pipi -g",
     )$-
 
     $+
     html.Snippet(GetVar(default_link),
     "value=Analyse Hydrogen Bonds",
-    "hint=Select any number of atoms to calculate the best line",
+    "hint=Examine H-bonding interactions",
     "onclick=fuse>>htab -g",
     )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
