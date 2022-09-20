@@ -1461,7 +1461,11 @@
 
 <lookAt help="Centres and zooms on the selection."
   <body
+    <args
+      <arg1 name="cmd" value="">
+    >
     <cmd
+      <cmd "if not(strcmp(%1,'')) then 'sel %1'">
       <cmd 'gl.Zoom -a gl.CalcZoom(true)'>
       <cmd 'center'>
     >
