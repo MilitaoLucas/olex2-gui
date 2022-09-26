@@ -94,6 +94,10 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     args.append('-v')
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_ED') == True):
     args.append('-ED')
+  else:
+    wavelength = float(olx.xf.exptl.Radiation())
+    if wavelength < 0.1:
+      args.append("-ED")
   if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
     args.append('-acc')
     if (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
@@ -133,7 +137,8 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  
+  args.append("-hkl")
+  args.append(hkl_file)
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
@@ -157,18 +162,34 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
         args.append(wfn_file[i])
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
-        args.append(','.join(groups[i]))      
+        args.append(','.join(groups[i]))
+    if ".xyz" in any(wfn_file):
+      Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+      if Cations != "" and Cations != None:
+        args.append("-Cations")
+        args.append(Cations)
+      Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      if Anions != "" and Anions != None:
+        args.append("-Anions")
+        args.append(Anions)
   else:
     args.append("-wfn")
-    args.append(wfn_file)  
+    args.append(wfn_file)
     args.append("-cif")
     args.append(cif)
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
         args.append(groups[i])
-  args.append("-hkl")
-  args.append(hkl_file)
+    if ".xyz" in wfn_file:
+      Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+      if Cations != "" and Cations != None:
+        args.append("-Cations")
+        args.append(Cations)
+      Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      if Anions != "" and Anions != None:
+        args.append("-Anions")
+        args.append(Anions)
 
   os.environ['cuqct_cmd'] = '+&-'.join(args)
   os.environ['cuqct_dir'] = folder
