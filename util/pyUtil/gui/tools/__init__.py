@@ -180,6 +180,9 @@ def flash_gui_control(control, wait=300):
     elif control.endswith('_bg'):
       cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
+    elif 'cbtn' in control:
+      new_image = "up=%son.png" % control_image
+      olx.html.SetImage(control_name, new_image)
     else:
       new_image = "up=%shighlight.png" %control_image
       olx.html.SetImage(control_name,new_image)
