@@ -250,6 +250,10 @@ snum{
       .type = bool
     source = "'Please Select'"
       .type = str
+    Thakkar_Cations = ""
+      .type = str
+    Thakkar_Anions = ""
+      .type = str
     tsc_mode = "First"
       .type = str
     wfn2fchk_ED = False
