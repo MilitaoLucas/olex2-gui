@@ -1016,11 +1016,15 @@ The following options were used:
         if acta_stuff:
           # remove IAM scatterer reference
           for sl in ['a', 'b']:
-            for sn in range(1,5):
-              cif_block.pop('_atom_type_scat_Cromer_Mann_%s%s' %(sl, sn))
-          cif_block.pop('_atom_type_scat_Cromer_Mann_c')
-          for i in range(cif_block['_atom_type_scat_source'].size()):
-            cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
+            for sn in range(1, 5):
+              key = '_atom_type_scat_Cromer_Mann_%s%s' % (sl, sn)
+              if key in cif_block:
+                cif_block.pop(key)
+          if '_atom_type_scat_Cromer_Mann_c' in cif_block:
+            cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          if '_atom_type_scat_source' in cif_block:
+            for i in range(cif_block['_atom_type_scat_source'].size()):
+              cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return "a"

@@ -279,7 +279,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     tsc_exists = False
     f_time = None
 
-    if (wfn_code != "DISCAMB") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
+    if (wfn_code != "DISCAMB") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       from cctbx_olex_adapter import OlexCctbxAdapter
       ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
       for sc in OlexCctbxAdapter().xray_structure().scatterers():
@@ -1481,7 +1481,7 @@ If that does not throw an error message you were succesfull.""", "O", False)
 
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
-    if input != "DISCAMB":
+    if input != "DISCAMB" and input != "Thakkar IAM":
       OV.SetParam('snum.NoSpherA2.h_aniso',True)
       F000 = olx.xf.GetF000()
       Z = olx.xf.au.GetZ()
@@ -1493,7 +1493,8 @@ If that does not throw an error message you were succesfull.""", "O", False)
         elif (nr_electrons % 2 != 0):
           OV.SetParam('snum.NoSpherA2.multiplicity',2)
     else:
-      OV.SetParam('snum.NoSpherA2.h_aniso',False)
+      OV.SetParam('snum.NoSpherA2.h_aniso', False)
+      OV.SetParam('snum.NoSpherA2.h_afix', False)
 OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
 
 def set_default_cpu_and_mem():

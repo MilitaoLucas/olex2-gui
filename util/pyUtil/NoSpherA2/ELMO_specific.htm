@@ -1,0 +1,350 @@
+<!-- ======= ELMO SPECIFIC START ===================== -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=tail",
+    "label=Tailor made residues",
+    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.tail')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.tail','True') >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.tail','False') >> html.Update()"
+    )
+  $-
+</td>
+
+<!-- ============ START TAILOR MADE RESIDUES====================-->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.tail'),'True')
+<td width="50%" align='right'>
+    <b># of tailor made residues </b>
+</td>
+<td width="1%">
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_ELMODB_MAXTAIL',
+    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.maxtail)', 
+    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.maxtail,html.GetValue(~name~)) >> html.Update()"
+  > 
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="42%" align='left'>
+  <b>Information on tailor made residue </b>
+  <td width="10%" align='left'>
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=SET_SNUM_ELMODB_NTAIL",
+      "items=spy.NoSpherA2.get_ntail_list()",
+      "value=spy.GetParam('snum.NoSpherA2.ELMOdb.ntail')",
+      "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.ntail', html.GetValue('~name~'))>>html.Update()")
+    $-
+  </td>
+</td>
+<td width="38%" align='right'>
+  <b>residue name </b>
+</td>
+<td width="10%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=ELMOdb_RESNAME",
+    "value=spy.NoSpherA2.get_resname()",
+    "onchange=spy.NoSpherA2.change_resname(html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="10%" align='left'>
+    <b> # of extrabasis atoms </b>
+</td>
+<td width='15%' align='left'>
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='0'
+    name='SET_SNUM_ELMODB_NAT',
+    value='$spy.NoSpherA2.get_nat()', 
+    onchange="spy.NoSpherA2.change_nat(html.GetValue('~name~'))"
+  > 
+</td>
+<td width="10%" align='right'>
+    <b> # of fragments </b>
+</td>
+<td width='10%'>
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_ELMODB_NFRAG',
+    value='$spy.NoSpherA2.get_nfrag()', 
+    onchange="spy.NoSpherA2.change_nfrag(html.GetValue('~name~'))"
+  > 
+</td>
+<td width='5%' align="left">
+  $+
+  html.Snippet("gui/snippets/input-checkbox-td",
+  "name=specac",
+  "label=Special Amino Acid",
+  "checked=spy.NoSpherA2.get_specac()",
+  "bgcolor=GetVar(HtmlTableRowBgColour)",
+  "oncheck=spy.NoSpherA2.change_specac('True')",
+  "onuncheck=spy.NoSpherA2.change_specac('False')"
+  )
+$-
+</td>
+<td width='5%' align='right'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=ncltd",
+  "label=Nucleotide",
+  "checked=spy.NoSpherA2.get_ncltd()",
+  "bgcolor=GetVar(HtmlTableRowBgColour)",
+  "oncheck=spy.NoSpherA2.change_ncltd('True')",
+  "onuncheck=spy.NoSpherA2.change_ncltd('False')"
+  )
+$-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='left'>
+    <b>Extrabasis input </b>
+</td>
+<td width="80%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "multiline=true",
+    "height=40",
+    "name=ELMOdb_NT1_EXBSINP",
+    "value=spy.NoSpherA2.get_exbsinp()",
+    "onchange=spy.NoSpherA2.change_exbsinp(html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='left'>
+    <b>Fragments input </b>
+</td>
+<td width="80%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "multiline=true",
+    "height=40",
+    "name=ELMOdb_NT1_FRAGINP",
+    "value=spy.NoSpherA2.get_fraginp()",
+    "onchange=spy.NoSpherA2.change_fraginp(html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+  html.Snippet("gui/snippets/input-checkbox-td",
+  "name=spect",
+  "label=Special triad",
+  "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.spect')",
+  "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.spect','True') >> html.Update()",
+  "bgcolor=GetVar(HtmlTableRowBgColour)",
+  "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.spect','False') >> html.Update()")
+  $-
+</td>
+
+<!-- ============ START SPECIAL TRIAD====================-->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.spect'),'False')
+<td width="30%" align='right'>
+    <b> # of special triads  </b>
+</td>
+<td width="1%">
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_ELMODB_NSPECT',
+    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.nspect)', 
+    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.nspect,html.GetValue(~name~))"
+  > 
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='left'>
+    <b>Special triad input </b>
+</td>
+<td width="80%" align='center'>
+  $+
+  html.Snippet("gui/snippets/input-text",
+  "multiline=true",
+  "height=40",
+  "name=ELMOdb_NT1_SPECINP",
+  "value=spy.GetParam('snum.NoSpherA2.ELMOdb.specinp')",
+  "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.specinp', html.GetValue('~name~'))")
+  $-
+</td>
+#ignoreif -->
+<!-- ============ END SPECIAL TRIAD====================-->
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ END TAILOR MADE RESIDUES====================-->
+
+<!-- ============ START DISULFIDE BOND====================-->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=tail",
+    "label=Disulfide bonds",
+    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.ssbond')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbond','True') >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbond','False') >> html.Update()"
+    )
+  $-
+</td>
+
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.ssbond'),'True')
+<td width="40%" align='right'>
+    <b> # of disulfide bonds </b>
+</td>
+<td width="1%">
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_ELMODB_NSSBOND',
+    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.nssbond)', 
+    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.nssbond,html.GetValue(~name~))"
+  > 
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='left'>
+    <b>Disulfide bond input </b>
+</td>
+<td width="80%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "multiline=true",
+    "height=40",
+    "name=ELMOdb_SSBONDINP",
+    "value=spy.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbondinp', html.GetValue('~name~'))")
+  $-
+</td>
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ END DISULFIDE BOND====================-->
+
+<!-- ============ START CYCLIC POLYPEPTIDE====================-->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=tail",
+    "label=Cyclic polypeptide",
+    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.cycl')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.cycl','True') >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.cycl','False') >> html.Update()"
+    )
+  $-
+</td>
+
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.cycl'),'True')
+<td width="40%" align='right'>
+    <b> # of cyclic polypeptides </b>
+</td>
+<td width="1%">
+  <input 
+    type='spin', 
+    width='50', 
+    height="17"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+    min='1'
+    name='SET_SNUM_ELMODB_NCYPEP',
+    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.ncycl)', 
+    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.ncycl,html.GetValue(~name~))"
+  > 
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="20%" align='left'>
+    <b>Starting and terminal residues for the cyclic polypeptides </b>
+</td>
+<td width="80%" align='center'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "multiline=true",
+    "height=40",
+    "name=ELMOdb_CYPEPINP",
+    "value=spy.GetParam('snum.NoSpherA2.ELMOdb.cyclinp')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.cyclinp', html.GetValue('~name~'))")
+  $-
+</td>
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ END CYCLIC POLYPEPTIDE====================-->
+
+<!-- ============ START MUTATIONS ====================-->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=mutation",
+    "label=Mutations",
+    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.mutation')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','True') >> html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','False') >> html.Update()"
+    )
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ============ END MUTATIONS ====================-->                                                         
+#ignoreif -->
+<!-- ============ ELMO SPECIFIC END ====================-->
