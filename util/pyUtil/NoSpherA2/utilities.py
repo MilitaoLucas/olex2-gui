@@ -463,9 +463,17 @@ def is_disordered():
     return True
 OV.registerFunction(is_disordered, True, 'NoSpherA2')
 
+def software():
+  return OV.GetParam('snum.NoSpherA2.source')
+
 def org_min():
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
@@ -479,7 +487,12 @@ def org_min():
 OV.registerFunction(org_min, False, "NoSpherA2")
 def org_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
@@ -493,7 +506,12 @@ def org_small():
 OV.registerFunction(org_small, False, "NoSpherA2")
 def org_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
@@ -508,7 +526,12 @@ OV.registerFunction(org_final, False, "NoSpherA2")
 
 def light_min():
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
@@ -522,7 +545,12 @@ def light_min():
 OV.registerFunction(light_min, False, "NoSpherA2")
 def light_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
@@ -536,7 +564,12 @@ def light_small():
 OV.registerFunction(light_small, False, "NoSpherA2")
 def light_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
@@ -551,7 +584,12 @@ OV.registerFunction(light_final, False, "NoSpherA2")
 
 def heavy_min():
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-SVP")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software() or "pySCF" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
@@ -565,7 +603,12 @@ def heavy_min():
 OV.registerFunction(heavy_min, False, "NoSpherA2")
 def heavy_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
@@ -579,7 +622,12 @@ def heavy_small():
 OV.registerFunction(heavy_small, False, "NoSpherA2")
 def heavy_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
-  OV.SetParam('snum.NoSpherA2.method',"PBE")
+  if "Tonto" in software():
+    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+  elif "ORCA" in software():
+    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+  else:
+    OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
   OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
