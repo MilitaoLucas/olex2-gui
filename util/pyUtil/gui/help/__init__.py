@@ -553,8 +553,10 @@ class AutoDemoTemp(AutoDemo):
         boxWidth = 450
         boxHeight = 250
       ws = olx.GetWindowSize().split(',')
-      x = int(ws[0])
-      y = int(ws[1]) + 75
+      #x = int(ws[2])/2 - boxWidth/2
+      #y = int(ws[3])/2 - boxHeight/2
+      x = 50
+      y = 50
       if self.have_box_already:
         olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), t=self.pop_name)
       else:

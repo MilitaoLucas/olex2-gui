@@ -141,14 +141,30 @@ def start_where():
 
 olex.registerFunction(start_where, False, "gui.tools")
 
+def flash_def_button(control, wait, n):
+  highlight_c = OV.GetParam('gui.html.highlight_colour','##ff0000')
+  off_colour = OV.GetParam('gui.action_colour')
+
+  for i in range(n):
+    olx.html.SetBG(control, highlight_c)
+    OV.Refresh()
+    olx.Wait(wait)
+    olx.html.SetBG(control, off_colour)
+    OV.Refresh()
+    olx.Wait(wait)
 
 def flash_gui_control(control, wait=300):
   ''' Flashes a control on the GUI in order to highlight it's position '''
+  highlight_c = OV.GetParam('gui.html.highlight_colour','##ff0000')
   if ';' in control:
     n = int(control.split(';')[1])
     control = control.split(';')[0]
   else:
     n = 2
+    
+  if 'DEFBTN' in control:
+      flash_def_button(control, wait, n)
+      return
 
   control_name = "IMG_%s" %control.upper()
   if '@' in control:
@@ -160,13 +176,13 @@ def flash_gui_control(control, wait=300):
   if not olx.fs.Exists("%son.png" %control_image):
     print("This image %s does not exist. So I can't make it blink" %control_image)
     return
-
+  
   for i in range(n):
     if "element" in control:
       new_image = "up=%son.png" %control_image
       olx.html.SetImage(control_name,new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), OV.GetParam('gui.html.highlight_colour','##ff0000'))
+      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), highlight_c)
       olex.m(cmd)
     else:
       new_image = "up=%soff.png" %control_image
