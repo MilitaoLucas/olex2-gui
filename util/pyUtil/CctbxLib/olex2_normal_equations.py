@@ -22,7 +22,6 @@ import olex_core
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
-  std_reparametrisation = None
   std_observations = None
 
   def __init__(self, observations, refinement, olx_atoms,
@@ -67,8 +66,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
           self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
       cl = least_squares.crystallographic_ls_class()
-      self.std_reparametrisation.linearise()
-      xx = cl(self.observations, self.std_reparametrisation)
+      self.reparametrisation.linearise()
+      xx = cl(self.observations, self.reparametrisation)
       def args():
         args = (xx,
                 self.std_observations,
@@ -76,8 +75,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
-                self.std_reparametrisation.jacobian_transpose_matching_grad_fc(),
-                self.std_reparametrisation.fc_correction, False, True, False)
+                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
+                self.reparametrisation.fc_correction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
       self.one_h_linearisation = aci.EDI.build(self.data,

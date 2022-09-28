@@ -216,7 +216,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       ed_reparametrisation.fixed_angles.update(self.fixed_angles)
       return ed_reparametrisation
 
-    self.std_reparametrisation = None
     self.std_obserations = None
     if ed_refinement:
       import AC6 as ac6
@@ -243,7 +242,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.std_obserations = self.observations.fo_sq.select(
         self.observations.fo_sq.unique_under_symmetry_selection())\
         .as_xray_observations()
-      self.std_reparametrisation = self.reparametrisation
       self.reparametrisation = build_ed_reparametrisation(
         self, self.thickness, self.observations.twin_fractions)
 
@@ -279,7 +277,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       may_parallelise=env.threads > 1,
       use_openmp=use_openmp,
       max_memory=max_mem,
-      std_reparametrisation=self.std_reparametrisation,
       std_observations=self.std_obserations
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
