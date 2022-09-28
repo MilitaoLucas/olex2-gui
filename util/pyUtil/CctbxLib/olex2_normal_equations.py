@@ -50,6 +50,12 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           self.xray_structure, reflections=self.observations)
     self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
+    self.f_mask_data = None
+    if self.f_mask is None:
+      self.f_mask_data = MaskData(flex.complex_double())
+    else:
+      self.f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
+        self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
@@ -60,18 +66,13 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       return
     old_func = self.one_h_linearisation
     try:
-      if self.f_mask is None:
-        f_mask_data = MaskData(flex.complex_double())
-      else:
-        f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
-          self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
       cl = least_squares.crystallographic_ls_class()
       self.reparametrisation.linearise()
       xx = cl(self.observations, self.reparametrisation)
       def args():
         args = (xx,
                 self.std_observations,
-                f_mask_data,
+                self.f_mask_data,
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
@@ -87,10 +88,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
         self.std_observations.fo_sq.anomalous_flag(),
         objective_only)
       super(normal_eqns, self).build_up(objective_only)
-      aci.EDI.update_scales(old_func,
-        self.weighting_scheme,
-        self.xray_structure, f_mask_data,
-        self.refinement.thickness)
     finally:
       self.one_h_linearisation = old_func
 
@@ -327,6 +324,10 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     #ED stuff
     if self.std_observations:
       olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
+      aci.EDI.update_scales(self.one_h_linearisation,
+        self.weighting_scheme,
+        self.xray_structure, self.f_mask_data,
+        self.refinement.thickness)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
