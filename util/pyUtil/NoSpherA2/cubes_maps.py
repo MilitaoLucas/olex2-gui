@@ -600,7 +600,7 @@ def plot_map_cube(map_type,resolution):
         if tiny_pse.table(j).symbol() == atom_type:
           charge = j
           break
-      if charge == 200:
+      if charge == 200 and atom_type != "Q":
         print("ATOM NOT FOUND!")
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
