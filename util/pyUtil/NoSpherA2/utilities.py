@@ -163,7 +163,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
-    if ".xyz" in any(wfn_file):
+    if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:
         args.append("-Cations")
