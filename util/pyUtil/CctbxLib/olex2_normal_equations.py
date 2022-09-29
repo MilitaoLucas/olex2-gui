@@ -54,8 +54,11 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if self.f_mask is None:
       self.f_mask_data = MaskData(flex.complex_double())
     else:
-      self.f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
-        self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
+      self.f_mask_data = MaskData(self.observations, 
+                                  self.xray_structure.space_group(),
+                                  self.observations.fo_sq.anomalous_flag(), 
+                                  self.f_mask.indices(),
+                                  self.f_mask.data())
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
@@ -400,6 +403,7 @@ class naive_iterations_with_damping_and_shift_limit(
     while self.n_iterations < self.n_max_iterations:
       t1 = time.time()
       self.reset_shifts()
+      self.non_linear_ls.actual.xray_structure.wavelength = self.parent.wavelength
       self.non_linear_ls.build_up()
       t2 = time.time()
       if self.has_gradient_converged_to_zero(): break
