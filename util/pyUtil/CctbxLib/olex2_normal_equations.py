@@ -54,9 +54,9 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if self.f_mask is None:
       self.f_mask_data = MaskData(flex.complex_double())
     else:
-      self.f_mask_data = MaskData(self.observations, 
+      self.f_mask_data = MaskData(self.observations,
                                   self.xray_structure.space_group(),
-                                  self.observations.fo_sq.anomalous_flag(), 
+                                  self.observations.fo_sq.anomalous_flag(),
                                   self.f_mask.indices(),
                                   self.f_mask.data())
     self.olx_atoms = olx_atoms

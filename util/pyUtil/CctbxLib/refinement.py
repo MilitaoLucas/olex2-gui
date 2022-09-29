@@ -1509,6 +1509,9 @@ The following options were used:
     else:
       k = math.sqrt(scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    wavelength = float(olx.xf.exptl.Radiation())
+    if wavelength < 0.1:
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
