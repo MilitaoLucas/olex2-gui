@@ -815,6 +815,9 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     k = math.sqrt(OV.GetOSF())
     f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
   f_diff = f_diff.expand_to_p1()
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   print("Using %d reflections for Fourier synthesis"%f_diff.size())
   diff_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                             resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
@@ -1108,6 +1111,9 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
   
   f_diff = f_diff.expand_to_p1()
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1  
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
     tomc_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -1142,6 +1148,9 @@ def deformation_map(resolution=0.1, return_map=False):
   f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
   f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
   f_diff = f_diff.expand_to_p1()
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1  
   def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
   if return_map==True:
@@ -1172,6 +1181,9 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   k = math.sqrt(OV.GetOSF())
   f_obs.apply_scaling(factor=1./k)
   f_obs = f_obs.phase_transfer(f_calc)
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_obs = f_obs.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
     obs_map = f_obs.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -1204,6 +1216,9 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
       f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
   else:
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_calc = f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
     calc_map = f_calc.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
