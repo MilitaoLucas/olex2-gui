@@ -923,6 +923,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refln_loop.add_miller_array(f_obs_sq.f_sq_as_f(), array_type="meas")
       refln_loop.add_miller_array(f_calc, column_names=['_refln_A_calc','_refln_B_calc'])
       refln_loop.add_miller_array(f_calc, array_type='calc')
+
+      if OV.GetParam('user.refinement.diagnostics'):
+        a = f_calc.data()
+        txt = ""
+        name = str(OV.GetUserInput(0, "Save the F_calcs with this name", txt))
+        import pickle
+        out = open( '%s.pickle' %name, 'wb')
+        pickle.dump(a.as_numpy_array(), out)
+        out.close()
+        indices = []
+        for hkl in f_calc.indices():
+          indices.append(hkl)
+        out = open( '%s.pickle_hkl' %name, 'wb')
+        pickle.dump(indices, out)
+        out.close()
+     
       if OV.GetParam("snum.refinement.use_solvent_mask"):
         from cctbx_olex_adapter import OlexCctbxAdapter
         cctbx_adapter = OlexCctbxAdapter()

@@ -1068,6 +1068,8 @@ user
       .type = bool
     openmp_mem = 2000
       .type = int
+    diagnostics = False
+      .type = bool
   }
 
   masks{
