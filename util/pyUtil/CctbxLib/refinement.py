@@ -925,18 +925,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refln_loop.add_miller_array(f_calc, array_type='calc')
 
       if OV.GetParam('user.refinement.diagnostics'):
-        a = f_calc.data()
+        d = {}
         txt = ""
         name = str(OV.GetUserInput(0, "Save the F_calcs with this name", txt))
+        if not name:
+          return
         import pickle
+        method = OV.GetParam('snum.refinement.ED.method', 'kinematic')
+        a = f_calc.expand_to_p1()
+        indices = a.indices()
+        b = a.as_amplitude_array().data().as_numpy_array()
+        d.setdefault('values', b)
+        d.setdefault('indices', indices)
+        d.setdefault('method', method)
+        d.setdefault('structure', OV.FileName())
         out = open( '%s.pickle' %name, 'wb')
-        pickle.dump(a.as_numpy_array(), out)
-        out.close()
-        indices = []
-        for hkl in f_calc.indices():
-          indices.append(hkl)
-        out = open( '%s.pickle_hkl' %name, 'wb')
-        pickle.dump(indices, out)
+        pickle.dump(d, out)
         out.close()
      
       if OV.GetParam("snum.refinement.use_solvent_mask"):
