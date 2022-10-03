@@ -925,23 +925,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refln_loop.add_miller_array(f_calc, array_type='calc')
 
       if OV.GetParam('user.refinement.diagnostics'):
-        d = {}
-        txt = ""
-        name = str(OV.GetUserInput(0, "Save the F_calcs with this name", txt))
-        if not name:
-          return
-        import pickle
-        method = OV.GetParam('snum.refinement.ED.method', 'kinematic')
-        a = f_calc.expand_to_p1()
-        indices = a.indices()
-        b = a.as_amplitude_array().data().as_numpy_array()
-        d.setdefault('values', b)
-        d.setdefault('indices', indices)
-        d.setdefault('method', method)
-        d.setdefault('structure', OV.FileName())
-        out = open( '%s.pickle' %name, 'wb')
-        pickle.dump(d, out)
-        out.close()
+        write_diagnostics_stuff(f_calc)
      
       if OV.GetParam("snum.refinement.use_solvent_mask"):
         from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1683,4 +1667,23 @@ The following options were used:
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
+
+
+def write_diagnostics_stuff(f_calc):
+  txt = ""
+  name = str(OV.GetUserInput(0, "Save the F_calcs with this name", txt))
+  if name and name != 'None':
+    d = {}
+    import pickle
+    method = OV.GetParam('snum.refinement.ED.method', 'kinematic')
+    a = f_calc.expand_to_p1()
+    indices = a.indices()
+    b = a.as_amplitude_array().data().as_numpy_array()
+    d.setdefault('values', b)
+    d.setdefault('indices', indices)
+    d.setdefault('method', method)
+    d.setdefault('structure', OV.FileName())
+    out = open( '%s.pickle' %name, 'wb')
+    pickle.dump(d, out)
+    out.close()
 
