@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_MASS; help_ext=Molecular_Mass;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_MASS; help_ext=Elemental-Analysis;1; -->
 
     $+
     html.Snippet(GetVar(default_link),
@@ -18,7 +18,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_VOLUME; help_ext=Molecular_Volume;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_VOLUME; help_ext=Molecular-Volume;1; -->
 
     $+
     html.Snippet(GetVar(default_link),
@@ -34,7 +34,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular_Bounding_Box;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular-Bounding_Box;1; -->
     $+
     html.Snippet(GetVar(default_link),
     "value=Molecular Bounding Box",
@@ -44,6 +44,9 @@
 
 $+ html.Snippet(GetVar(default_link),"value=name \$Q C","onclick=name \$Q C",)
 $-
+
+%tidy-target%
+
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
