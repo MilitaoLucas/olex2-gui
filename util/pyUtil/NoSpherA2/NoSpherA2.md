@@ -1,51 +1,56 @@
 # NoSpherA2
+<font color='red'>**This is a new and highly experimental procedure in Olex2, requiring considerable computing resources. Testing was performed using the Quantum Mechanics packages ORCA and Tonto as .tsc sources.**</font>
+<br>
+<br>
+The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is ticked, **non-spherical form factors** will be used in the refinement of the structure.
 
 ## Literature
-
-* Jayatilaka & Dittrich., Acta Cryst. 2008, A64, 383
+* Jayatilaka & Dittrich, Acta Cryst. 2008, A64, 383
 &nbsp; URL[http://scripts.iucr.org/cgi-bin/paper?s0108767308005709,PAPER]
 
-* Capelli et al., IUCrJ. 2014, 1, 361
+* Capelli et al., IUCr J. 2014, 1, 361
 &nbsp; URL[http://journals.iucr.org/m/issues/2014/05/00/fc5002/index.html,PAPER]
 
 * Kleemiss et al., Chem. Sci., 2021, 12, 1675
 &nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER]
 
-When ticked, **non-spherical form factors**  will be used in the refinement of the structure.
-
-n^<font color='red'>**This is a new and highly experimental procedure inside Olex2, which requires intensive computing ressources. Testing was performed using ORCA and Tonto as .tsc sources.**</font>^n
-
-<br>
-<br>
-
-For **Hirshfeld Atom Refinement** There are three steps to this procedure:
+## Hirshfeld Atom Refinement
+There are three steps to the **Hirshfeld Atom Refinement** procedure:
 <ol>
-<li>The molecular wavefunction is obtained for your input model using Quantum Mechanical calculations using:</li>
+<li>The molecular wavefunction is obtained for the input model using Quantum Mechanical calculations using:</li>
   <ul>
     <li>TONTO (shipped)</li>
     <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,WEB])</li>
     <li>pySCF</li>
-    <li>Gaussian of various versions (implemented but not maintained)</li>
+    <li>Gaussian (various versions; implemented but not maintained)</li>
   </ul>
-<li>The atomic non-spherical form factors are extracted from the molecular wavefunction by Hirshfeld partitioning of the atoms in the molecule.</li>
-<li>olex2.refine now uses these non-spherical form factors for the next refinement cycles. All normal commands for your refinement can be used, including restraints and contraints.</li>
+<li>The non-spherical atomic form factors are extracted from the molecular wavefunction by Hirshfeld partitioning of the atoms in the molecule.</li>
+<li>olex2.refine uses these non-spherical form factors for the next refinement cycles. All normal commands for refinement can be used as usual, including restraints and contraints.</li>
 </ol>
 <br>
 <br>
-At this point, a new model will be obtained, and this **will** require the re-calculation of the molecular wavefunction -- and the above three steps need to be repeated until there is no more change and the model is completely settled. This process can be autmoatized by using the **Iterative** switch. Otherwise this procedure is called a *rigid body fit*.
+
+After the refinement cycles have completed, a new model will be obtained, which **will** require re-calculation of the molecular wavefunction. The three steps above need to be repeated until there is no more change and the model has completely settled. This process can be automatized with the **Iterative** switch. This procedure is called *rigid body fitting*.
 <br>
-If you want to use more CPUs make sure the proper MPI Installation is found on your computer. For Windows user install MS-MPI of at least Version 10, for Linux Users openMPI version 4 or up is required. MacOS users please refer to homebrew and install apropiate versions of openMPI. The mpiexec(.exe) is needed to be found in the PATH, either through Settings or Environment Variables.
 <br>
-A recommended strategy for efficient refinements using ORCA is:
+If multiple CPUs are to be used, the proper MPI must be installed. For Windows users, MS-MPI version 10 or higher is needed, while for Linux users, openMPI version 4 or higher is required. MacOS users will need to refer to Homebrew and install the appropriate versions of openMPI. The mpiexec(.exe) must be found in the PATH, either through Settings or Environment Variables.
+<br>
+<br>
+Some recommended strategies for efficient refinement using ORCA are:
 <ol>
   <li>PBE/SVP and Normal Grids</li>
   <li>PBE/TZVPP and Normal Grids</li>
   <li>PBE/TZVPP and High Grids</li>
 </ol>
-In case you want to make sure it is the best possible fit you can try finishing up with meta or hybrid functionals. In case of all atoms lighter than Kr it is best to use def2- familiy of basis sets. In case of any heavy element or significant relativistic effects use x2c- with relativistics on.
 
-### Update Table
-After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is **Tonto**. The most benchmarked and recommended software is **ORCA**. Other softwares, as long as installed, include **pySCF** and **Psi4** (pySCF will require WSL-Ubuntu on windows) and there is also an option to use **Gaussian** [HIGHLY UNTESTED]. A present **.wfn** file can also be used but **must** agree to the geometry currtly used in Olex2. These options will appear, depending on whether they are properly installed and Olex2 knows about them -> Settings and PATH). Once a program has been chosen, please also adjust the Extras according to your needs if you do not want to use minimal settings.<br>If Update Table is deactivated a Dropdown of all found .tsc files in the current folder is given to be used for refinement, without updating the files.
+To ensure that the fit is is optimal, it may be advantageous to try finishing up with meta or hybrid functionals. For all atoms lighter than Kr it is best to use the **def2-** family of basis sets. If heavy elements are present, significant relativistic effects come into play, and it is recommended to use the **x2c-** family of basis sets and turn **Relativistics** on.
+
+## Update Table
+After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is the Quantum Mechanics software package **Tonto**, which is shipped with Olex2. The recommended software is **ORCA**, which has been thoroughly benchmarked. Other software packages include **pySCF** and **Psi4**, which will need to be installed (pySCF will require WSL-Ubuntu on windows). There is also an option to use the **Gaussian** software, but this has not been tested thoroughly. A **.wfn** file imported from elsewhere can also be used but **must** match the current geometry in Olex2. These options will appear if they have been properly installed and Olex2 will about them (check Settings and PATH). Once a Quantum Mechanics program has been chosen, the Extras have to be adjusted accordingly, in order not to use minimal settings.
+<br>
+<br>
+
+If **Update Table** is deactivated, a drop-down menu appears showing all .tsc files available in the current folder for refinement, without updating the files.
 
 
 # NoSpherA2 Quick Buttons
@@ -151,6 +156,8 @@ It is easily understandible that having interactions between PART 1 and 2 in thi
 
 # NoSpherA2 Properties
 Utility for plotting and visualizing the results of NoSpherA2. Select desired reolustion of the grid to be calculated and properties to evaluate and click calcualte to start the beackground generation of grids. When done the calcualted fields will become available from the dropdown to show maps.<br>
+
+# NoSpherA2 Properties Details
 The reading of maps might take some time and olex might become irresponsive, please be patient.<br>
 So far the calculation can only happen in the unit cell adn on the wavefunction in the folder. If you need an updated wavefunction (e.g. due to moved atoms or different spin state) hit the update tsc file button.<br>
 n^<font color='red'>**The obtainable plots depend on your wavefunction calculated. Please make sure it is reasonbale. Also: If you use multiple CPUs the progress bar *might* behave in non-linear ways, this is due to the computations being executed in parallel and all CPUs being able to report progress. Some parts of the calculation might be faster than others.**</font>^n
