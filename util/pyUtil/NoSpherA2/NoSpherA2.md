@@ -61,10 +61,10 @@ Depending on whether the molecule contains only light atoms (e.g., organics), or
 This allows for a quick test run of NoSpherA2 on a structure, to obtain a rapid assessment of what happens and eliminate basic errors before setting up more time-consuming runs.
 
 ## Work
-This is where one works on a structure; with these settings, it is possible to evaluate, for example, whether constraints or restraints are necessary.
+This button is used when working on a structure with NoSpherA2; with these settings, it is possible to evaluate, for example, whether constraints or restraints are necessary.
 
 ## Final
-When all settings are finalized, a final NoSpherA2 job is run, which can take a long time, since it will continue until everything is completely settled.
+When all settings are finalized, a final NoSpherA2 job is run by clicking this button. The final job can take a long time, since it is generally run with a large basis set and continues until everything is completely settled.
 
 # NoSpherA2 Options
 All the settings required for the calculation of the .tsc file are found under this tool tab.
@@ -73,7 +73,7 @@ All the settings required for the calculation of the .tsc file are found under t
 # NoSpherA2 Options 1
 
 ## Basis
-This specifies the basis set for the calculation of the theoretical electron density and wavefunction. The basis sets in this drop-down menu are arranged in approximte order of size from small (top) to large (bottom). Smaller basis sets will yield rapid but approximate results, whereas calculations with the larger bases will be slower but more accurate. The default basis set is **def2-SVP**. The small basis **STO-3G** is recommended only for test purposes.
+This specifies a basis set to be used for calculating the theoretical electron density and wavefunction. The basis sets in this drop-down menu are arranged in approximte order of size from small (top) to large (bottom). Smaller basis sets will yield rapid but approximate results, whereas calculations with the larger bases will be slower but more accurate. The default basis set is **def2-SVP**. The small basis **STO-3G** is recommended only for test purposes.
 <br>
 <br>
 
@@ -98,7 +98,7 @@ The maximum memory that NoSpherA2 is allowed to use is entered here. This **must
 The charge on the molecule or ion used in the wavefunction calculation. This **must** be properly assigned.
 
 ## Multiplicity
-The multiplicity (2*S*+1) of the wavefunction, where *S* is the total spin angular momentum quantum number of the configuration. A closed-shell species, i.e., a molecule or ion with no unpaired electrons has *S* = 0, for a multiplicity of 1. Most organic molecules in their ground states fall into this category. However, a species with one unpaired electron (*S* = 1/2) will have a multiplicity of 2, a species with two unpaired electrons (*S* = 1/2 + 1/2 = 1) will have a multiplicity of 3, and so forth. It can be seen from the formula that the multiplicity has to be at least 1.
+The multiplicity (2*S*+1) of the wavefunction, where *S* is the total spin angular momentum quantum number of the configuration. It is important to assign this multiplicity correctly. A closed-shell species, i.e., a molecule or ion with no unpaired electrons, has *S* = 0, for a multiplicity of 1. Most organic molecules in their ground states fall into this category. However, a species with one unpaired electron (*S* = 1/2) will have a multiplicity of 2, a species with two unpaired electrons (*S* = 1/2 + 1/2 = 1) will have a multiplicity of 3, and so forth. It can be seen from the formula that the multiplicity has to be at least 1.
 
 ## Iterative
 Check this box to continue full cycles of alternating wavefunction and least squares refinement calculations until final convergence is achieved. Convergence criteria are as defined in the options. This is a time-consuming option! If using ORCA, however, the last calculated wavefunction is used as the initial guess for the next calculation, which saves a lot of time in the consecutive steps.
@@ -111,8 +111,8 @@ Clicking this button will only generate a new **.tsc** and **.wfn** file, withou
 
 # NoSpherA2 Options 3
 
-## Integr.(ation) Accuracy
-Select an accuracy level for the integration of electron density. This affects the time needed for calculating .tsc files. **Normal** should generally be sufficient. **Extreme** is mainly for benchmarking and testing purposes; if you have high symmetry or very heavy elements and high resolution data it might improve results. **Low** can be used if the number of electrons after integration is still correct, and will usually suffice for organic molecules. However, always check that the number of electrons is correct in the log files!
+## Integr. Accuracy
+Select the level of accuracy to be used for the integration of electron density. This affects the time needed for calculating .tsc files. **Normal** should generally be sufficient. **Extreme** is mainly for benchmarking and testing purposes; if you have high symmetry or very heavy elements and high resolution data it might improve results. **Low** can be used if the number of electrons after integration is still correct, and will usually suffice for organic molecules. However, always check that the number of electrons is correct in the log files!
 
 ## Use Relativistics
 Use the DKH2 relativistic Hamiltonian (important when heavy elements are present in the structure). This option should only be used with **x2c-** family of basis sets, but for them it is highly recommended.
@@ -120,7 +120,7 @@ Use the DKH2 relativistic Hamiltonian (important when heavy elements are present
 ## H Aniso
 Refine hydrogen atoms anisotropically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
 
-## No Afix
+## No AFIX
 Remove any AFIX constraints from the current model. Use with caution, but highly useful for starting from the independent atom model.
 
 ## DISP
@@ -165,69 +165,80 @@ In this example, interactions between PARTs 1 and 2 would be unphysical, each PA
 <font color='red'>**IMPORTANT: Superposition of two atoms with partial occupancy freely refined without assignment to PARTs will lead to SEVERE problems during the wavefunction calculation, as this will involves two overlapping atoms. In such cases, the SCF wavefunction calculation will most probably fail, but in any case, it will NEVER give reasonable results!**</font>
 
 # NoSpherA2 Properties
-The utilities in this tool tab are for plotting and visualizing the results of NoSpherA2. Select the desired resolution of the grid to be calculated and the properties to be evaluated, then click **Calculate** to start the background generation of grids. When done the calculated maps will become available from the **Plot** drop-down menu. Select the desired map from the **Plot** menu, choose *wire* from the **View** drop-down menu, and drag the **Level** slider to view the map.
+The utilities in this tool tab are for plotting and visualizing the results of NoSpherA2. A calculated wavefunction must be present in the main work folder for the structure (all calculated .wfn files are stored within the olex2 folder). Select the desired resolution of the grid to be calculated and the properties to be evaluated, then click **Calculate** to start the background generation of grids. When done the calculated maps will become available from the **Plot** drop-down menu. Choose *wire* from the **View** drop-down menu and select the desired map from the **Plot** menu. It may be necessary to drag the **Level** slider to view the map.
 
 # NoSpherA2 Properties Details
-The calculation of maps might take some time and olex might become irresponsive, please be patient.<br>
-So far the calculation can only happen in the unit cell adn on the wavefunction in the folder. If you need an updated wavefunction (e.g. due to moved atoms or different spin state) hit the update tsc file button.<br>
-n^<font color='red'>**The obtainable plots depend on your wavefunction calculated. Please make sure it is reasonbale. Also: If you use multiple CPUs the progress bar *might* behave in non-linear ways, this is due to the computations being executed in parallel and all CPUs being able to report progress. Some parts of the calculation might be faster than others.**</font>^n
+The calculation of maps can be time-consuming and Olex2 might become unresponsive, so please be patient.
+<br>
+<br>
+So far the calculation can only happen in the unit cell and on the wavefunction in the folder. If an updated wavefunction is needed (e.g., due to moved atoms or a different spin state) click the **Update .tsc & .wfn** button.
+<br>
+<br>
+n^<font color='red'>**The available plots depend on the calculated wavefunction, so it is critical that the wavefunction is reasonably accurate. If multiple CPUs are in use, the progress bar *might* behave in non-linear ways as all CPUs report progress while the computations are executed in parallel. Some parts of the calculation might be completed faster than others.**</font>^n
 
 ## Lap
-Laplacian of the electron density. This Grid shows regions of electron accumulation (negative values) and elecrton depletion (positive values), as it is the curvature of the density. Usefull to understand polrisation of bonds, position of lone-pairs etc.
+Takes the Laplacian of the electron density. This map shows regions of electron accumulation (negative values) and electron depletion (positive values), as it is the calculated curvature of the electron density function. This may be used to gain insight into the polarisation of bonds, positions of lone-pairs, etc.
 
 ## ELI
-Calculates the Electron Localizability indicater. This function in summary describes the volume needed to find a different electron to the one at position <b>r</b>. This measure of localization very well correpsonods with chemically intuitive feautures like lone-pairs, bonds etc. The shape of isosurfaces is usually a nice indicator for bonding situations. In Olex2 the ELI-D of same spin electrons is used.<br>
-A nice overview of all kinds of indicators developed by the original authors is given on this website:<br>
+Calculates the Electron Localizability Indicator. In brief, this estimates the volume needed to find a different electron from the one at position *r*. This measure of localization corresponds closely to chemically intuitive feautures such as lone-pairs and bonds. The shape of isosurfaces is usually a useful indicator of bonding. In Olex2 the ELI-D of same-spin electrons is used.<br>
+A nice collection of papers about these types of indicators by the original authors is available at this website:<br>
 * URL[https://www.cpfs.mpg.de/2019352/eli,PAPER] &nbsp; 
 
 ## ELF
-Calcuales the arbitrarily scaled Electron Localisation Function. This function is scaled between 0 and 1. There is no general rule how to select isovalues. Only included for legacy reasons. In general it is recommended to use ELI.
+Calculates the Electron Localisation Function, arbitrarily scaled between 0 and 1. There is no general rule for how to select isovalues. It is only included here for legacy reasons; in general, it is recommended to use ELI instead.
 
 ## ESP
-Calculation of the total electrostatic potential. This is a complex caluclations, since the Potential V is an integral over the whole wavefunction:<br>
+Calculation of the total electrostatic potential. This is a complex calculation, since the potential *V* involves an integral over the whole wavefunction:<br>
 * <math>
 	V<sub>tot</sub>(<b>r</b>) = V<sub>nuc</sub>(<b>r</b>) + V<sub>tot</sub>(<b>r</b>) = Σ<sub>A</sub> (Z<sub>A</sub> / |<b>r</b>-<b>R</b><sub>A</sub>|) - ∫ ρ(<b>r</b>') / |<b>r</b>-<b>r</b>'| <i>d<b>r</b>'</i>
 </math> &nbsp; 
-<br>This integral is the potential at each point in space due to all other electrons in the wavefunction, therefore the calculation of ESP does not scale with the thirs power of resolution of the grid, but rather the 9th power, which makes it really time consuming.<br>If you decide to cancel the job all cubes of the other calculations will be saved before starting ESP calculation, so you can restart only the ESP step.
+<br>
+The ESP represents the potential at each point in space due to all other electrons in the wavefunction. The calculation of the ESP does not scale with the third power of the grid resolution, but rather the 9th power, which makes it really time consuming.
+<br>
+<br>
+If multiple maps, including ESP, are selected from this menu, the .cube output files of all other calculations are saved before the ESP calculation is started. Thus, if the job is cancelled during the ESP calculation, those output files will be available and it will only be necessary to restart the ESP calculation.
 
 ## Res
-Defines the resolution the calculated grid should have. Keep in mind that the complexity of teh calculation rises cubically.
+Defines the resolution of the grid used for map calculations. Note that the time required for a calculation grows cubically as resolution increases, so caution must be exercised when going to very high resolution.
 
 ## Calculate
-Start the Calculaton of selected fields using NoSpherA2.
+Calculates the maps of the selected fields using NoSpherA2. Simply clicking this button does not display the calculated map - a map has to be selected for display from the **Plot** menu.
 
-## Map
-Selects which map is to be displayed. Only shows maps, which are already available. If there is none available try to calculate a new wavefunction of check for LIST 3 or 6 in the .ins file, as a fcf file with phases is needed.
+## Plot
+Select a map to be displayed from this drop-down menu. Only maps that have already been calculated will be shown. If none are available, calculate a new wavefunction (or copy an existing .wfn file from the olex2 subfolder to the main working folder for the structure) and check for LIST 3 or 6 in the .ins file, as a .fcf file with phases is needed.
 
-## Toggle Map
-Shows/Hides Map
+## Disable Map
+Clears the map display.
 
 ## View
-
-Selects what type of map is to be displayed. Choices include:<br>
+Selects the map display format. Choices include:<br>
   <ul>
     <li>plane - 2D</li>
-    <li>plane + contour - 2D</li>
+    <li>contour + plane - 2D</li>
     <li>wire - 3D</li>
     <li>surface - 3D</li>
     <li>points - 3D</li>
   </ul>
-  
+The wire, surface, and points display are well-suited to many of the 3D types of maps calculated here (LAP, ELI, ESP, etc.).
+
 ## Edit Style
-Edits the colour of the various map surfaces.
+Click this button to edit the colours of the various map surfaces displayed.
 
 ## Level
-When a 3D map is displayed the slider bar enables you to adjust the detail shown in the map.
+When a 3D map is displayed, this slider bar adjusts the level of detail shown in the map. If no map is on the screen, move this slider to check whether the level setting is too low or too high. Specific values of the level can also be typed into the text box next to the slider.
 
 ## Min
-This will define the minimum value of your 2D map. The slider works in quarter-integer values but also accepts manual input in the text-box next to it.
+This sets the minimum value of the displayed parameter on a 2D map (plane and contour + plane formats). The slider increments or decrements this minimum in quarter-integer steps, but a specific value can be entered manually in the text box next to it.
 
 ## Step
-This will define the step size of your 2D map between two contours/colours. As with **Min** this slider has pre-defined slider values (difference 0.02), but also manual input will work.
+This defines the step size of a 2D map between two adjacent contours/colours. As with **Min**, this slider has pre-defined increments/decrements (0.02), but specific values of the step size can also be manually entered in the box next to the slider.
 
 ## Depth
-This slider controls the depth of the plane "into" the screen. If the value is negative the map will go "behind" the model, positive will move it to the front.<br>
-If you select atoms and click on the **Depth** button the map will be aligned so the map is in plane with these selected atoms.
+This slider moves a displayed 2D map into or out of the screen. At very negative values of the depth, the map moves 'behind' the model (away from the viewer) and at very positive values the map moves in front of the model (towards the viewer).
+<br>
+<br>
+
+Select three or more atoms and click the **Depth** button to display a map that lies in the mean plane (also displayed) through these atoms. To delete the mean plane itself, click on it and press the '<c>Delete</c>' key.
 
 ## Size
-Size will control the size of the plotted plane. Bigger values will decrease the visual size, but will increase the resultion of the map.
+This slider controls the size of the plotted 2D map. Larger values decrease the size of the map on the screen, but increase the resolution of the map. Again, specific values of the map size can be manually entered in the text box next to the slider.
