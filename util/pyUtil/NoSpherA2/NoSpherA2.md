@@ -112,41 +112,46 @@ Clicking this button will only generate a new **.tsc** and **.wfn** file, withou
 # NoSpherA2 Options 3
 
 ## Integr.(ation) Accuracy
-Select which accuracy level is requested for the integration of electron density. This affects time needed for calcualtion of .tsc files. Normal should be sufficient in all cases. Extreme is mainly for benchmark and test purposes. If you have high symmetry or very heavy elements and high resolution data it might improv results. Low can be used, if the number of electrons after integration is sill correct. Mostly fine for organic molecules. Please check in the log files, whether this is the case!
+Select an accuracy level for the integration of electron density. This affects the time needed for calculating .tsc files. **Normal** should generally be sufficient. **Extreme** is mainly for benchmarking and testing purposes; if you have high symmetry or very heavy elements and high resolution data it might improve results. **Low** can be used if the number of electrons after integration is still correct, and will usually suffice for organic molecules. However, always check that the number of electrons is correct in the log files!
 
 ## Use Relativistics
-Use DKH2 relativistic Hamiltonian. This should only be used with x2c-family basis sets. But for them it is highly recommended.
+Use the DKH2 relativistic Hamiltonian (important when heavy elements are present in the structure). This option should only be used with **x2c-** family of basis sets, but for them it is highly recommended.
 
 ## H Aniso
-Refine hydrogen atoms anisotrpically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
+Refine hydrogen atoms anisotropically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
 
 ## No Afix
-Remove any AFIX constraints from the current model. Use with caution, but highly usefull for starting from IAM.
+Remove any AFIX constraints from the current model. Use with caution, but highly useful for starting from the independent atom model.
 
 ## DISP
-Add DISP Instructuion to your .ins file based on sasaki table as implemented in olex2. DISP instructions are needed for correct maps and refinements in case of non metal-based wavelengths.
+Add a DISP instruction to your .ins file based on Sasaki tables of anomalous scattering factors as implemented in Olex2. DISP instructions are needed for correct maps and refinements in case of uncommon X-ray wavelengths (e.g., synchrotron radiation).
 
-## Cluster Radius (For Tonto)
-If Tonto is used for a wavefunction calculation a clsuter of **explicit charges** calcualted in a self consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius until no further charges are included.
+## Cluster *r* (For Tonto)
+If Tonto is used for wavefunction calculations a cluster of **explicit charges** calculated in a self-consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius *r* beyond which no charges are included.
 
 ## Complete Cluster (For Tonto)
-In case of a molecular structure this switch will try to complete the molecules for the charges calcualtion bsaed on distances of atoms. If the refined structrue is a network compound where no molecular boundary can easily be found (e.g. there is no way to grow the structure without having dangling bonds) this procedure will fail in a sense, that the computer will run out of memory. Therefore this option is highly recommended for molecular crystals but crucial to be deactivated for network compounds.
+For refinement of molecular structures, this switch will try to complete molecular fragments for the charges calculation (see **Cluster r** above) based on reasonable interatomic distances. If the structure being refined is a network compound whose molecular boundary cannot be simply defined, i.e., there is no way to grow the structure without having dangling bonds, this procedure will fail when the computer runs out of memory. Therefore, this option is highly recommended for molecular crystals but must be turned off for network compounds.
 
 ## DIIS Conv. (For Tonto)
-This option defines the convergence criterion the wavefunction calculation needs to achieve in order to be considered converged. A lower value will finish faster but drastically increases the chance for unreasonable wavefunctions, especially in complicated calculations.
+This option defines the convergence criterion for the wavefunction calculations. A lower value will cause the calculations to finish faster but will also drastically increase the likelihood of generating unreasonable wavefunctions, especially with complicated structures.
 
 ## SCF Conv. Thresh. (For ORCA)
-This option allows you to adjust the convergence criteria for your SCF in ORCA. NormalSCF for default calculations, Tight or very Tight for very precise high level calculations. Extreme is basically the numerical limit of the computer and strongly discouraged, as practically unreachable for big (>3 atoms) systems.
+This option sets the convergence criterion for the self-consistent field (SCF) wavefunction calculation in ORCA. Use **NormalSCF** for default calculations, and **Tight** or **Very Tight** for very precise high-level calculations. **Extreme** is basically the numerical limit of the computer; its use is strongly discouraged, as this convergence criterion is practically unreachable except for tiny systems (<3 atoms).
 
 ## SCF Conv. Strategy (For ORCA)
-Selects which mechanism to use for the SCF to converge to the minmum. Refers to the stepsize in applying calculated gradients fo the wavefunction.
+Selects the mechanism by which the SCF calculation converges to the energy minimum. Refers to the step size used in applying calculated gradients to the wavefunction.
 
 # NoSpherA2 Options Grouped Parts
 
-## Grouped Parts (For disordered structures)
-Since there might be different regions in your molecules containing disorder modelling you need to specify which disorders form a group for the calculation of Wavefunctions. A Group in this sense refers to PARTs, that resemble the same functional space. E.g. a disorder of a sodium atom with other singly charged ions around this position form a group (Let's say PARTs 1, 2 and 3 are PARTs describing three possibilities of this disorder), where these different PARTs are not interacting within the same molecular input structure, while at a second position there is a carboxylate in a disordered state, where one of the PARTs interacts with this disordered ion (PART 4), while the second PART (Nr. 5 in this case) does not.<br>
-For the given example a reasonable grouping would be: 1-3;4,5 <br>
-This would mean 1-3 are not to be interacting with each other, but each of them both with 4 and 5, respectively, leading to calcualtions:<br>
+## Grouped Parts (for disordered structures with PART instructions)
+If the structure model contains disorder, it is necessary to specify which disordered atoms form a *group* in the wavefunction calculations. A group in this sense refers to PARTs, that resemble the same functional space. For example, consider disorder resulting from a sodium ion and two other singly charged ions in a certain position in the structure - these form a group. Let's say PARTs 1, 2 and 3 describe the three possibilities of this disorder. These different PARTs do not interact with one another in this molecular structure. Now suppose that at a second position in this structure there is a carboxylate in a disordered state consisting in turn of two PARTs, of which one (PART 4) interacts with these disordered ions, but the second (PART 5) does not.
+<br>
+Note: Groups are specified using the following syntax: 1-4,9,10;5-7;8 would mean Group1=[1,2,3,4,9,10], Group2=[5,6,7], and Group3=[8]).
+<br>
+<br>
+For this example a reasonable grouping would be: 1-3;4,5. This means PARTS 1-3 do not interact with one other, but each of them interacts individually with both 4 and 5, leading to calculations:
+<br>
+<br>
 PART 1 & 4<br>
 PART 1 & 5<br>
 PART 2 & 4<br>
@@ -154,17 +159,16 @@ PART 2 & 5<br>
 PART 3 & 4<br>
 PART 3 & 5<br>
 <br>
-Groups are given by syntax: 1-4,9,10;5-7;8 (Group1=[1,2,3,4,9,10] Group2=[5,6,7] Group3=[8])<br>
+In this example, interactions between PARTs 1 and 2 would be unphysical, each PART represents an ion occupying a position *by itself*.Thus, the correct definition of disorder groups is crucial for occurrences of disorder at one or more positions.
 <br>
-It is easily understandible that having interactions between PART 1 and 2 in this example would be highly unphysical, which is why definition of disorder groups is crucial for occurances of disorder at more than one position.<br>
 <br>
-<font color='red'>**IMPORTANT: Superposition of two atoms with partial occupation freely refined without assignment to PARTs will lead to SEVERE problems during the wavefunction calcualtion, as there will be two atoms at 0 separation. Most likeley the SCF code will give up, but will NEVER give reasonable results!**</font>
+<font color='red'>**IMPORTANT: Superposition of two atoms with partial occupancy freely refined without assignment to PARTs will lead to SEVERE problems during the wavefunction calculation, as this will involves two overlapping atoms. In such cases, the SCF wavefunction calculation will most probably fail, but in any case, it will NEVER give reasonable results!**</font>
 
 # NoSpherA2 Properties
-Utility for plotting and visualizing the results of NoSpherA2. Select desired reolustion of the grid to be calculated and properties to evaluate and click calcualte to start the beackground generation of grids. When done the calcualted fields will become available from the dropdown to show maps.<br>
+The utilities in this tool tab are for plotting and visualizing the results of NoSpherA2. Select the desired resolution of the grid to be calculated and the properties to be evaluated, then click **Calculate** to start the background generation of grids. When done the calculated maps will become available from the **Plot** drop-down menu. Select the desired map from the **Plot** menu, choose *wire* from the **View** drop-down menu, and drag the **Level** slider to view the map.
 
 # NoSpherA2 Properties Details
-The reading of maps might take some time and olex might become irresponsive, please be patient.<br>
+The calculation of maps might take some time and olex might become irresponsive, please be patient.<br>
 So far the calculation can only happen in the unit cell adn on the wavefunction in the folder. If you need an updated wavefunction (e.g. due to moved atoms or different spin state) hit the update tsc file button.<br>
 n^<font color='red'>**The obtainable plots depend on your wavefunction calculated. Please make sure it is reasonbale. Also: If you use multiple CPUs the progress bar *might* behave in non-linear ways, this is due to the computations being executed in parallel and all CPUs being able to report progress. Some parts of the calculation might be faster than others.**</font>^n
 
