@@ -1,8 +1,9 @@
 # NoSpherA2
-<font color='red'>**This is a new and highly experimental procedure in Olex2, requiring considerable computing resources. Testing was performed using the Quantum Mechanics packages ORCA and Tonto as .tsc sources.**</font>
+<font color='red'>**This is a new and highly experimental procedure in Olex2, requiring considerable computing resources. During testing, the ORCA and Tonto software packages were used for the calculation of non-spherical atomic form factors.**</font>
 <br>
 <br>
-The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is ticked, **non-spherical form factors** will be used in the refinement of the structure.
+
+The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is ticked, **non-spherical atomic form factors** (stored in a **.tsc** file) will be used during refinement. It is more sophisticated than the spherical independent atom model used in ordinary refinement, leading to significantly more accurate crystal structures, especially hydrogen atom positions. See **Literature** section below for more information and computational details.
 
 ## Literature
 * Jayatilaka & Dittrich, Acta Cryst. 2008, A64, 383
@@ -15,9 +16,9 @@ The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is 
 &nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER]
 
 ## Hirshfeld Atom Refinement
-There are three steps to the **Hirshfeld Atom Refinement** procedure:
+The term **Hirshfeld Atom Refinement** (HAR), which is the principle underlying NoSpherA2, refers to X-ray crystal structure refinement using atomic electron density fragments derived from so-called Hirshfeld partitioning of the quantum mechanically calculated electron density of the whole structure. There are three steps to this procedure:
 <ol>
-<li>The molecular wavefunction is obtained for the input model using Quantum Mechanical calculations using:</li>
+<li>The molecular wavefunction is obtained for the input model using quantum mechanical calculations using:</li>
   <ul>
     <li>TONTO (shipped)</li>
     <li>ORCA (Versions 4.1.0 and up, obtainable from URL[https://orcaforum.kofo.mpg.de/index.php,WEB])</li>
@@ -30,7 +31,7 @@ There are three steps to the **Hirshfeld Atom Refinement** procedure:
 <br>
 <br>
 
-After the refinement cycles have completed, a new model will be obtained, which **will** require re-calculation of the molecular wavefunction. The three steps above need to be repeated until there is no more change and the model has completely settled. This process can be automatized with the **Iterative** switch. This procedure is called *rigid body fitting*.
+After the refinement cycles have completed, a new structure model will be obtained. This **will** require re-calculation of the molecular wavefunction before proceeding to further refinement because the geometry of the structure will have changed, affecting the electron density distribution. The three steps above need to be repeated until there is no more change and the model has completely settled. This process can be automated with the **Iterative** switch. This procedure is called *rigid body fitting*.
 <br>
 <br>
 If multiple CPUs are to be used, the proper MPI must be installed. For Windows users, MS-MPI version 10 or higher is needed, while for Linux users, openMPI version 4 or higher is required. MacOS users will need to refer to Homebrew and install the appropriate versions of openMPI. The mpiexec(.exe) must be found in the PATH, either through Settings or Environment Variables.
@@ -43,10 +44,10 @@ Some recommended strategies for efficient refinement using ORCA are:
   <li>PBE/TZVPP and High Grids</li>
 </ol>
 
-To ensure that the fit is is optimal, it may be advantageous to try finishing up with meta or hybrid functionals. For all atoms lighter than Kr it is best to use the **def2-** family of basis sets. If heavy elements are present, significant relativistic effects come into play, and it is recommended to use the **x2c-** family of basis sets and turn **Relativistics** on.
+To ensure that the fit is optimal, it may be advantageous to try finishing up with meta or hybrid functionals. For atoms lighter than Kr it is best to use the **def2-** family of basis sets. If heavy elements are present, significant relativistic effects come into play, and it is recommended to use the **x2c-** family of basis sets and turn **Relativistics** on.
 
 ## Update Table
-After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is the Quantum Mechanics software package **Tonto**, which is shipped with Olex2. The recommended software is **ORCA**, which has been thoroughly benchmarked. Other software packages include **pySCF** and **Psi4**, which will need to be installed (pySCF will require WSL-Ubuntu on windows). There is also an option to use the **Gaussian** software, but this has not been tested thoroughly. A **.wfn** file imported from elsewhere can also be used but **must** match the current geometry in Olex2. These options will appear if they have been properly installed and Olex2 will about them (check Settings and PATH). Once a Quantum Mechanics program has been chosen, the Extras have to be adjusted accordingly, in order not to use minimal settings.
+After ticking the 'NoSpherA2' box, the option **Update Table** will appear. The default method to calculate the wavefunction is the Quantum Mechanics software package **Tonto**, which is shipped with Olex2. The *recommended* software package is **ORCA**, which has been thoroughly benchmarked. Other software packages include **pySCF** and **Psi4**, which will need to be installed separately (pySCF will require WSL-Ubuntu on Windows). It is also possible to calculate wavefunctions with the widely used **Gaussian** software package, but this has not been tested thoroughly. These software options will appear automatically in Olex2 if the packages have been properly installed (check Settings and PATH). Once a Quantum Mechanics program has been chosen, the Extras have to be adjusted accordingly, in order not to use minimal settings. An imported **.wfn** file can also be used but care must be take to ensure that the geometry of the calculated structure **exactly** matches the geometry of the structure at the current stage of refinement in Olex2.
 <br>
 <br>
 
@@ -54,37 +55,42 @@ If **Update Table** is deactivated, a drop-down menu appears showing all .tsc fi
 
 
 # NoSpherA2 Quick Buttons
-Depending on the molecule (Organic, lighter heavy elements, heavy metals), different set of defaults settings are required. And within these sets, there are different levels, too. Of course, you can also change any of the settings from the tools provided in the rest of this options panel.
+Depending on whether the molecule contains only light atoms (e.g., organics), or contains any intermediate or heavy elements, different settings are required. Further, there are different levels of options within these settings, all of which can be adjusted in this options panel.
 
 ## Test
-These settings allow for a quick NoSpherA2 test run of your structure. You can quickly see what happens and eliminate basic errors before getting into the other, more time-consuming runs
+This allows for a quick test run of NoSpherA2 on a structure, to obtain a rapid assessment of what happens and eliminate basic errors before setting up more time-consuming runs.
 
 ## Work
-This is where you will work on your structure. With these settings you can evaluate whether constraints or restraints are necessary, for example.
+This is where one works on a structure; with these settings, it is possible to evaluate, for example, whether constraints or restraints are necessary.
 
 ## Final
-When you are happy with everything being ok, you can then run your final NoSpherA2 job, which can take a long time, since it will run until everything is completely settled.
+When all settings are finalized, a final NoSpherA2 job is run, which can take a long time, since it will continue until everything is completely settled.
 
 # NoSpherA2 Options
-This tool provides all the settings required for the calculation of the .tsc file.
+All the settings required for the calculation of the .tsc file are found under this tool tab.
 
 
 # NoSpherA2 Options 1
 
 ## Basis
-This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
-The **def2**- and **cc-** series of basis sets is only defined for atoms up to Kr. Afterword ECPs (Effective core potentials) would be needed to use these basis sets, which are by the nature of the method not compatible. 
-Then the **x2c**-basis sets are usefull, as they are defined up to Rn without any ECPs.
-It is **highly** recommended to run basic first iterations using single valence basis sets and finish the structure with a higher basis.
+This specifies the basis set for the calculation of the theoretical electron density and wavefunction. The basis sets in this drop-down menu are arranged in approximte order of size from small (top) to large (bottom). Smaller basis sets will yield rapid but approximate results, whereas calculations with the larger bases will be slower but more accurate. The default basis set is **def2-SVP**. The small basis **STO-3G** is recommended only for test purposes.
+<br>
+<br>
+
+The **def2-** and **cc-** series of basis sets are only defined for atoms up to Kr. For atoms beyond Kr, ECPs (Effective Core Potentials) would be needed to use these basis sets, which are by the nature of the HAR method not compatible.
+<br>
+<br>
+
+The **x2c-** basis sets are useful, as they are defined up to Rn without any ECPs. However, due to their size, calculations using the **x2c-** series are slow. It is **highly** recommended to run trial calculations using the smaller single valence basis sets mentioned above before proceeding to finalize the structure with a larger basis.
 
 ## Method
-The default method used for the calculation of the theoretical MOs/Density is **Hartee-Fock**. **B3LYP** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable inside Tonto in some cases. Both can be used in ORCA and are perfectly fine here.
+The default quantum mechanical method for the calculation of the theoretical wavefunction/electron density is **Hartee-Fock**. The density functional theory method **B3LYP** may be superior in some cases (especially for the treatment of hydrogen atoms), but tends to be unstable in Tonto in some cases. Both can be used in ORCA without such problems.
 
 ## CPUs
-The number of CPUs to use during the waverfunction calculation. It is usually a good idea to *not* use *all* of them -- unless you don't want to use the computer for anything else while it runs NoSpherA2! Olex2 will be locked during the calculation to prevent inconsitencies of files. Mostly copying files etc needs overhead CPU capacity, so please leave 1 CPU for these kinds of things. Also note: It is not recommended to run jobs in a Dropbox Folder... They tend to break.
+This specifies the number of CPUs to use during the wavefunction calculation. It is usually a good idea *not* to use *all* of them -- unless the computer is not used for anything else while it runs NoSpherA2! One CPU is needed for copying files and other such overhead tasks, so make sure one is available for these purposes. Olex2 will be locked during the calculation to prevent file inconsistencies. Also note: It is not recommended to run NoSpherA2 jobs in a Dropbox folder ... they tend to misbehave.
 
 ## Memory
-The maximum memory that NoSpherA2 is allowed to use. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calcualted automatically, this input is the **total** memory.
+The maximum memory that NoSpherA2 is allowed to use is entered here. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calculated automatically; this input is the **total** memory used in the NoSpherA2 computations.
 
 # NoSpherA2 Options 2
 
