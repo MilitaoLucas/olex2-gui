@@ -90,24 +90,24 @@ The default quantum mechanical method for the calculation of the theoretical wav
 This specifies the number of CPUs to use during the wavefunction calculation. It is usually a good idea *not* to use *all* of them -- unless the computer is not used for anything else while it runs NoSpherA2! One CPU is needed for copying files and other such overhead tasks, so make sure one is available for these purposes. Olex2 will be locked during the calculation to prevent file inconsistencies. Also note: It is not recommended to run NoSpherA2 jobs in a Dropbox folder ... they tend to misbehave.
 
 ## Memory
-The maximum memory that NoSpherA2 is allowed to use is entered here. This **must not** exceed the capabilities of the computer. If ORCA is used the memory needs per core are calculated automatically; this input is the **total** memory used in the NoSpherA2 computations.
+The maximum memory that NoSpherA2 is allowed to use is entered here. This **must not** exceed the capabilities of the computer. If ORCA is used, the memory needs per core are calculated automatically; this input is the **total** memory used in the NoSpherA2 computations.
 
 # NoSpherA2 Options 2
 
 ## Charge
-The charge of the molecule used for the wavefunction calculation. This **must** be properly assigned.
+The charge on the molecule or ion used in the wavefunction calculation. This **must** be properly assigned.
 
 ## Multiplicity
-The multiplicity (2*S*+1) of the wavefunction, where S is the total spin angular momentum of the configuration. E.g. a closed shell wavefunction in it's ground-state usually has multiplicity 1, one unpaired electron has multiplicity 2. Must be positive above 0.
+The multiplicity (2*S*+1) of the wavefunction, where *S* is the total spin angular momentum quantum number of the configuration. A closed-shell species, i.e., a molecule or ion with no unpaired electrons has *S* = 0, for a multiplicity of 1. Most organic molecules in their ground states fall into this category. However, a species with one unpaired electron (*S* = 1/2) will have a multiplicity of 2, a species with two unpaired electrons (*S* = 1/2 + 1/2 = 1) will have a multiplicity of 3, and so forth. It can be seen from the formula that the multiplicity has to be at least 1.
 
-## HAR // Iterative
-Continue calculations until final convergence is achieved over a full cycle of WFN and Least Squares refinement. Criteria as per definiton of HAR in tonto. This will need much more time. But in case you use ORCA the last wavefunction is used as initial guess, which will save a lot of time on the consecutive steps.
+## Iterative
+Check this box to continue full cycles of alternating wavefunction and least squares refinement calculations until final convergence is achieved. Convergence criteria are as defined in the options. This is a time-consuming option! If using ORCA, however, the last calculated wavefunction is used as the initial guess for the next calculation, which saves a lot of time in the consecutive steps.
 
 ## Max Cycles
-This defines a criteria for the abortion of HAR, if convergence is not achieved. Maybe restraints or better parameters, resolution cutoffs or other improvements to your model might help with convergence.
+This defines a criterion for the NoSpherA2 process to halt if convergence is not achieved. In such cases, it may be necessary to use restraints or constraints, better parameters, resolution cutoffs or other improvements to the model to achieve convergence.
 
 ## Update .tsc & .wfn
-This button will only generate a new .tsc and .wfn file, without running a least squares refinement. This is usefull after a converged model was found to get the most up-to-date wavefunction for property plotting or to test things before submitting a bigger calculation.
+Clicking this button will only generate a new **.tsc** and **.wfn** file, without running a least squares refinement. This is useful after a converged model has been found, to get the most up-to-date wavefunction for property plotting or to test things before submitting a more time-consuming calculation.
 
 # NoSpherA2 Options 3
 
