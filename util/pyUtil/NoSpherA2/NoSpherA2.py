@@ -216,41 +216,42 @@ class NoSpherA2(PT):
       run = None
       if Full_HAR == True:
         run = OV.GetVar('Run_number')
-      files = (file for file in os.listdir(self.wfn_job_dir)
+      if os.path.exists(self.wfn_job_dir):
+        files = (file for file in os.listdir(self.wfn_job_dir)
               if os.path.isfile(os.path.join(self.wfn_job_dir, file)))
-      for f in files:
-        f_work = os.path.join(self.wfn_job_dir,f)
-        f_dest = os.path.join(self.backup,f)
-        if Full_HAR == True:
-          if run > 0:
-            if self.wfn_code == "Tonto":
-              if "restricted" not in f:
-                shutil.move(f_work,f_dest)
-            elif self.wfn_code == "ORCA":
-              if ".gbw" not in f:
-                shutil.move(f_work, f_dest)
+        for f in files:
+          f_work = os.path.join(self.wfn_job_dir, f)
+          f_dest = os.path.join(self.backup, f)
+          if Full_HAR == True:
+            if run > 0:
+              if self.wfn_code == "Tonto":
+                if "restricted" not in f:
+                  shutil.move(f_work, f_dest)
+              elif self.wfn_code == "ORCA":
+                if ".gbw" not in f:
+                  shutil.move(f_work, f_dest)
+                else:
+                  shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
+              elif self.wfn_code == "ORCA 5.0":
+                if ".gbw" not in f:
+                  shutil.move(f_work, f_dest)
+                else:
+                  shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
+              elif "Gaussian" in self.wfn_code:
+                if ".chk" not in f:
+                  shutil.move(f_work, f_dest)
+              elif "ELMOdb" in self.wfn_code:
+                if ".wfx" not in f:
+                  shutil.move(f_work, f_dest)
+              elif "pySCF" in self.wfn_code:
+                if ".chk" not in f:
+                  shutil.move(f_work, f_dest)
               else:
-                shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
-            elif self.wfn_code == "ORCA 5.0":
-              if ".gbw" not in f:
-                shutil.move(f_work,f_dest)
-              else:
-                shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
-            elif "Gaussian" in self.wfn_code:
-              if ".chk" not in f:
-                shutil.move(f_work,f_dest)
-            elif "ELMOdb" in self.wfn_code:
-              if ".wfx" not in f:
-                shutil.move(f_work,f_dest)
-            elif "pySCF" in self.wfn_code:
-              if ".chk" not in f:
-                shutil.move(f_work,f_dest)
+                  shutil.move(f_work, f_dest)
             else:
-                shutil.move(f_work,f_dest)
+              shutil.move(f_work, f_dest)
           else:
-            shutil.move(f_work,f_dest)
-        else:
-          shutil.move(f_work,f_dest)    
+            shutil.move(f_work, f_dest)
   def launch(self):
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
