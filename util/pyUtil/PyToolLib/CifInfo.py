@@ -393,7 +393,7 @@ class MergeCif(CifTools):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
         if prg == 'olex2.refine':
-          OV.set_refinement_program(prg)
+          OV.set_refinement_program(prg, method)
         else:
           if method == 'CGLS':
             OV.set_refinement_program(prg, 'Least Squares')
