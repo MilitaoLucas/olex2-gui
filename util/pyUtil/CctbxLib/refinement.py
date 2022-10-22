@@ -237,7 +237,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.thickness = xray.thickness(thickness, grad_t)
       self.std_obserations = self.observations
       self.observations = aci.EDI.build_observations(
-        self.xray_structure().crystal_symmetry(),
+        self.xray_structure(),
         anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
       self.std_obserations = self.observations.fo_sq.select(
         self.observations.fo_sq.unique_under_symmetry_selection())\
@@ -926,7 +926,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       if OV.GetParam('user.refinement.diagnostics'):
         write_diagnostics_stuff(f_calc)
-     
+
       if OV.GetParam("snum.refinement.use_solvent_mask"):
         from cctbx_olex_adapter import OlexCctbxAdapter
         cctbx_adapter = OlexCctbxAdapter()
