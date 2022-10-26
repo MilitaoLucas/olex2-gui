@@ -378,7 +378,11 @@ routines requiring structure refinement
       {
         maxSg = 0.01
           .type = float
+        maxG = 2
+          .type = float
         method = *Kinematic 2-Beam Full-diff Full
+          .type = choice
+        matrix = Palatinus-2013 *Palatinus-2015 ReciPro
           .type = choice
       }
   }
