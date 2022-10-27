@@ -41,14 +41,11 @@
     "onclick=wbox>>sfil",
     )$-
 
-
-$+ html.Snippet(GetVar(default_link),"value=name \$Q C","onclick=name \$Q C",)
-$-
-
-%tidy-target%
-
-
-
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=List R/S designations of chiral carbons",
+    "onclick=rsa",
+    )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
