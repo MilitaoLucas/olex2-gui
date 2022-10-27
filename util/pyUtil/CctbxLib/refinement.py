@@ -36,25 +36,6 @@ import scipy.linalg
 import olex2_normal_equations
 from my_refine_util import hydrogen_atom_constraints_customisation
 
-# try to initialise openblas
-try:
-  import fast_linalg
-  from fast_linalg import env
-  if not env.initialised:
-    if sys.platform[:3] == "win":
-      ob_path = olx.BaseDir()
-      files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.dll' in x]
-    else:
-      ob_path = os.path.join(olx.BaseDir(), 'lib')
-      files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
-    if files:
-      env.initialise(os.path.join(ob_path, files[0]))
-      if env.initialised:
-        print("Successfully initialised SciPy OpenBlas:")
-        print(env.build_config)
-except Exception as e:
-  print("Could not initialise OpenBlas: %s" %e)
-
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     #'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
@@ -67,6 +48,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     OlexCctbxAdapter.__init__(self)
+    # try to initialise openblas
+    OV.init_fast_linalg()
     self.interrupted = False
     self.max_cycles = max_cycles
     self.max_peaks = max_peaks
