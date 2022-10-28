@@ -12,13 +12,13 @@
   <td width='100%'>
     <b>%Link% %Selected%:</b> 
       <a href="fvar sel">Occupancies</a> | 
-      <a href="part -p=2 -lo sel>>fuse">Parts & Occupancies</a>
+      <a href="part -p=2 -lo sel>>fuse">PARTs & Occupancies</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LINK_CONSTRAINTS';help_ext=Link-Constraints;1 -->
   <td width='100%'>
-    <b>Link Parts & Occupanies + </b> &nbsp;
+    <b>Link PARTs & Occupanies + </b> &nbsp;
       <a href="if strcmp(sel(),'') then none else 'link_parts_occupancies_with EADP'">EADP</a>&nbsp;
       <a href="if strcmp(sel(),'') then none else 'link_parts_occupancies_with ISOR'">ISOR</a>
   </td>
@@ -26,7 +26,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LINK_PARTS_2';help_ext=Link-Parts-1;1 -->
   <td width='100%'>
-    <a href="part sel html.GetValue(part)"><b>%Assign% <i>selection</i> to Part</b></a>
+    <a href="part sel html.GetValue(part)"><b>%Assign% <i>selection</i> to PART</b></a>
   </td>
   <td VALIGN='center'>
     <font size='2'>
@@ -38,7 +38,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LINK_PARTS_1';help_ext=Link-Parts-2;1 -->
   <td width='100%'>
-    <a href="part sel html.GetValue(part)"><b>%Assign% <i>selection</i> %to 2 parts in order%</b></a>&nbsp
+    <a href="part sel html.GetValue(part)"><b>%Assign% <i>selection</i> to 2 PARTs in order</b></a>&nbsp
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
