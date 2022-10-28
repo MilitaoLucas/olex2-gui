@@ -673,8 +673,12 @@ if haveGUI:
   OV.registerFunction(SetFormulaFromInput)
 
 def ChooseLabelContent(cmd):
-  olx.Labels(**dict([(k, True) for k in cmd.split()]))
-  return ""
+  x = dict([(k, True) for k in cmd.split()])
+  if olx.GetVar('olex2.label_h', 'false') == 'true':
+    if not x:
+      x['l'] = True
+    x['h'] = True
+  olx.Labels(**x)
 OV.registerFunction(ChooseLabelContent)
 
 def FindZOfHeaviestAtomInFormula():

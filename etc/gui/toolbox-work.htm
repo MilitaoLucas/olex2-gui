@@ -4,12 +4,12 @@
   <td width='13%'>
     <b>Labels</b>
   </td>
-  <td width='87%' align='left' name=COMBO_LABEL_COMBO_BOX>
+  <td width='50%' align='left' name=COMBO_LABEL_COMBO_BOX>
 $+
     html.Snippet(
       "gui/snippets/input-combo",
       "name='set_label_content'",
-      "items=%Labels OFF/ON%<-;
+      "items=
 %Atom Names%<-l;
 %Crystallographic Occupancy%<-o;
 %Chemical Occupancy%<-co;
@@ -24,12 +24,24 @@ Label + residue number<-l rn;
 Residue numbers<-rn;
 Residue class<-rc;
 ",
-      "value='Labels OFF/ON",
+      "value=",
       "onchange=spy.ChooseLabelContent(html.GetValue('~name~'))",
-      "manage=True",
       "onchangealways=true",
     )
 $-
+  </td>
+  <td width="10%">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=label_h",
+     "value='Label H'",
+     "checked=GetVar('olex2.label_h','false')",
+     "onclick=SetVar('olex2.label_h',html.GetState(~name~))")
+   $-
+  </td>
+  <td>$+
+    html.Snippet(GetVar(default_link),
+    "value=Hide",
+    "onclick=labels false"
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
