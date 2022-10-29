@@ -16,7 +16,7 @@ Legend
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
       checked="spy.GetParam(user.show_legend)"
-      onclick="spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend)"
+      onclick="spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend) -r"
       target="Show or hide the atom type legend"
     >
     </font>
@@ -24,19 +24,27 @@ Legend
 
 $+
   html.Snippet(GetVar(default_link),
-    "value=Default",
+    "value=Def",
     "onclick=default",
-    "td1=<td width='15%'>"
+    "td1=<td width='12%'>"
   )
 $-
 
 $+
   html.Snippet(GetVar(default_link),
     "value=Light",
-    "onclick=load style basedir()\etc\styles\uranus.glds",
-    "td1=<td width='15%'>"
+    "onclick=load style basedir()\etc\styles\uranus.glds>>load scene basedir()\etc\styles\uranus.glsp",
+    "td1=<td width='12%'>"
   )
 $-
+
+$+
+    html.Snippet(GetVar(default_link),
+    "value=...",
+    "onclick=spy.internal.get_sample_list(styles)",
+    "hint=More examples",
+)$-
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
