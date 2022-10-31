@@ -642,6 +642,7 @@ class RunRefinementPrg(RunPrg):
       except Exception as e:
         print("Could not check PDF: %s" % e)
     self.check_disp()
+    self.check_mu()
 
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
@@ -845,6 +846,14 @@ class RunRefinementPrg(RunPrg):
       if unreasonable_fp != "":
         self.refinement_has_failed.append("%s has unreasonable f'" % unreasonable_fp)
 
+  def check_mu(self):
+    try:
+      mu = self.cctbx.normal_eqns.iterations_object.mu
+      if mu > 1E1:
+        self.refinement_has_failed.append("Mu of LM is very large!")
+    except AttributeError:
+      return
+
   def mask_and_fab(self):
     if not OV.GetParam("snum.refinement.use_solvent_mask"):
       return None
@@ -984,7 +993,8 @@ class RunRefinementPrg(RunPrg):
         HAR_log.write("{:3d}".format(run))
 
         old_model = OlexRefinementModel()
-        OV.SetVar('Run_number',run)
+        OV.SetVar('Run_number', run)
+        self.refinement_has_failed = []
 
         #Calculate Wavefunction
         try:
@@ -1264,6 +1274,7 @@ class RunRefinementPrg(RunPrg):
         elif r1_old != "n/a":
           if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
             HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
+            self.refinement_has_failed.append("Error: R1 is not behaving nicely! Stopping!")
             break
         else:
           r1_old = r.r1
