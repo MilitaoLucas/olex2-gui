@@ -1048,6 +1048,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
           print(f"WARNING! Integrated negative probability of "
                 f"{-negative_integrals[a]:.2%} to find atom {label} "
                 f"in a {1e6 * negative_volumes[a]:.0f} pm^3 volume")
+    OV.SetVar("Kuhs_Rule", False)
     for a in range(n_atoms):
       order = 0 if anharms[a] is None else 4 if any(_ for _ in anharms[a][10:]) \
         else 3 if any(_ for _ in anharms[a][:10]) else 0
@@ -1056,6 +1057,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
         if (k := 0.5 / kuhs_limit(order, adp)) <= olex_core.GetHklStat()['MinD']:
           order_str = '3rd order' if order == 3 else '4th order'
           label = str(cctbx_adapter.xray_structure()._scatterers[a].label)
+          OV.SetVar("Kuhs_Rule", True)
           print(f"WARNING! Kuhs' rule: d_min < {k:.2f}A required"
                 f" for {order_str} for atom {label} (Ueq {adp:.2e})")
     data.reshape(flex.grid(size[0], size[1], size[2]))

@@ -475,7 +475,7 @@ class RunRefinementPrg(RunPrg):
       return
 
     self.refinement_observer_timer = 0
-    self.refinement_has_failed = None
+    self.refinement_has_failed = []
 
     OV.registerCallback("procout", self.refinement_observer)
     self.run()
@@ -484,9 +484,10 @@ class RunRefinementPrg(RunPrg):
       if self.refinement_has_failed:
         bg = red
         fg = white
-        if "warning" in self.refinement_has_failed.lower():
+        msg = " | ".join(self.refinement_has_failed)
+        if "warning" in msg.lower():
           bg = orange
-        gui.set_notification("%s;%s;%s" %(self.refinement_has_failed,bg,fg))
+        gui.set_notification("%s;%s;%s" % (msg, bg, fg))
       elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
         gui.get_default_notification(txt="Refinement Finished",
           txt_col='green_text')
@@ -538,10 +539,7 @@ class RunRefinementPrg(RunPrg):
       if result == False:
         self.terminate = True
         if use_aspherical == True:
-          if self.refinement_has_failed != None:
-            self.refinement_has_failed = self.refinement_has_failed + " and Error during NoSpherA2!"
-          else:
-            self.refinement_has_failed = "Error during NoSpherA2 causing an exception!"
+          self.refinement_has_failed.append("Error during NoSpherA2")
       RunRefinementPrg.running = None
 
   def setupRefine(self):
@@ -643,6 +641,8 @@ class RunRefinementPrg(RunPrg):
         self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
       except Exception as e:
         print("Could not check PDF: %s" % e)
+    self.check_disp()
+
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
@@ -665,17 +665,17 @@ class RunRefinementPrg(RunPrg):
     #if time.time() - self.refinement_observer_timer  < 2:
       #return
     if "BAD AFIX CONNECTIVITY" in msg or "ATOM FOR AFIX" in msg:
-      self.refinement_has_failed = "Hydrogens"
+      self.refinement_has_failed.append("Hydrogens")
     elif "REFINEMNET UNSTABLE" in msg:
-      self.refinement_has_failed = "Unstable"
+      self.refinement_has_failed.append("Unstable")
     elif "???????" in msg:
-      self.refinement_has_failed = "ShelXL Crashed!"
+      self.refinement_has_failed.append("ShelXL Crashed!")
     elif "** " in msg:
       import re
       regex = re.compile(r"\*\*(.*?)\*\*")
       m = regex.findall(msg)
       if m:
-        self.refinement_has_failed = m[0].strip()
+        self.refinement_has_failed.append(m[0].strip())
 
   def doHistoryCreation(self):
     R1 = 0
@@ -799,12 +799,51 @@ class RunRefinementPrg(RunPrg):
     if any_have_anh == True:
       olex.m("PDF")
       problem = OV.GetVar("Negative_PDF")
-      if problem == True and force == True:
-        print("Making all anharmonic atoms hamrnoic again!")
-        for label in label_list:
-          print(label)
-          olex.m("anis %s" % label)
+      Kuhs = OV.GetVar("Kuhs_Rule")
+      err_list = []
+      if problem == True:
+        err_list.append("Negative PDF found")
+        if force == True:
+          print("Making all anharmonic atoms hamrnoic again!")
+          for label in label_list:
+            print(label)
+            olex.m("anis %s" % label)
+      if Kuhs == True:
+        err_list.append("Kuhs' rule not fulfilled")
+      if err_list:
+        self.refinement_has_failed.extend(err_list)
 
+  def check_disp(self):
+    scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
+    refined_disp = []
+    for sc in scatterers:
+      if sc.flags.grad_fp() or sc.flags.grad_fdp():
+        fp, fdp = sc.fp, sc.fdp
+        refined_disp.append((sc, fp, fdp))
+    if refined_disp != []:
+      wavelength = float(olx.xf.exptl.Radiation())
+      from cctbx.eltbx import sasaki
+      tables = sasaki
+      unreasonable_fp = ""
+      unreasonable_fdp = ""
+      for sc, fp, fdp in refined_disp:
+        e = str(sc.element_symbol())
+        table = tables.table(e)
+        factor = table.at_angstrom(wavelength)
+        if factor.fp() > 1.2 * fp or factor.fp() < 0.8 * fp:
+          if unreasonable_fp == "":
+            unreasonable_fp += sc.label
+          else:
+            unreasonable_fp += "," + sc.label
+        if factor.fdp() > 1.2 * fdp or factor.fdp() < 0.8 * fdp:
+          if unreasonable_fdp == "":
+            unreasonable_fdp += sc.label
+          else:
+            unreasonable_fdp += "," + sc.label
+      if unreasonable_fdp != "":
+        self.refinement_has_failed.append("%s has unreasonable f''" % unreasonable_fdp)
+      if unreasonable_fp != "":
+        self.refinement_has_failed.append("%s has unreasonable f'" % unreasonable_fp)
 
   def mask_and_fab(self):
     if not OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -1238,7 +1277,7 @@ class RunRefinementPrg(RunPrg):
     OV.SetParam('snum.NoSpherA2.Calculate',False)
     if converged == False:
       HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
-      self.refinement_has_failed= "Warning: Unconverged Model!"
+      self.refinement_has_failed.append("Warning: Unconverged Model!")
     if "DISCAMB" in source:
       unknown_sources = False
       with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
@@ -1249,10 +1288,7 @@ class RunRefinementPrg(RunPrg):
             HAR_log.write(i)
       if unknown_sources == True:
         HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
-        if self.refinement_has_failed != None:
-          self.refinement_has_failed = self.refinement_has_failed + " and unassigned Atom Types!"
-        else:
-          self.refinement_has_failed = "Unassigned Atom Types!"
+        self.refinement_has_failed.append("Unassigned Atom Types!")
     HAR_log.write("*" * 110 + "\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
