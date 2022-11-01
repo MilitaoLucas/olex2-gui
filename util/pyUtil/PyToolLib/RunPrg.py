@@ -636,13 +636,14 @@ class RunRefinementPrg(RunPrg):
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
         print("Could not determine whether structure inversion is needed: %s" % e)
-    if OV.GetParam('snum.refinement.check_PDF'):
-      try:
-        self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
-      except Exception as e:
-        print("Could not check PDF: %s" % e)
-    self.check_disp()
-    self.check_mu()
+    if self.program.name == 'olex2.refine':
+      if OV.GetParam('snum.refinement.check_PDF'):
+        try:
+          self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
+        except Exception as e:
+          print("Could not check PDF: %s" % e)
+      self.check_disp()
+      self.check_mu() #This is the L-M mu!
 
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
