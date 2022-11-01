@@ -26,8 +26,8 @@
   <td align='right' width="25%">
   </td>
 
-  <td align='right' width="15%">
-  Write file?
+  <td align='right' width="25%">
+  Write graphics file?
   </td>
 
   <td name=SAVE_FILE align='left' width="5%">
@@ -35,19 +35,6 @@
     html.Snippet("gui/snippets/input-checkbox", "name=SAVE_FILE",
     "checked=spy.GetParam('user.diagnostics.save_file')",
     "onclick=spy.SetParam('user.diagnostics.save_file', html.GetState('~name~'))")
-    $-
-  </td>
-
-
-  <td name=SHOW_DIAGNOSTICS align='right' width="20%">
-  Pin Summary
-  </td>
-
-  <td name=SHOW_DIAGNOSTICS align='right' width="5%">
-    $+
-    html.Snippet("gui/snippets/input-checkbox", "name=SHOW_DIAGNOSTICS",
-    "checked=spy.GetParam('user.diagnostics.pin_scopes')",
-    "onclick=spy.SetParam('user.diagnostics.pin_scopes', html.GetState('~name~'))>>spy.make_HOS(True)>>html.update")
     $-
   </td>
 
