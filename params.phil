@@ -314,6 +314,8 @@ routines requiring structure refinement
       .type = bool
     cifmerge_after_refinement = True
       .type = bool
+    check_PDF = True
+      .type = bool
 
     ShelXL
       .short_caption = 'Program specific command line'
@@ -367,14 +369,21 @@ routines requiring structure refinement
       invert = True
         .type = bool
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+      remove_anharm = False
+        .type = bool
+        .help = If set to TRUE, the structure will be automatically harmonized in case of bad PDF
       }
       ED
         .short_caption = ED parameters
       {
         maxSg = 0.01
           .type = float
-        use_2_beam = False
-          .type = bool
+        maxG = 2
+          .type = float
+        method = *Kinematic 2-Beam Full-diff Full
+          .type = choice
+        matrix = Palatinus-2013 *Palatinus-2015 ReciPro
+          .type = choice
       }
   }
 
@@ -1063,6 +1072,8 @@ user
       .type = bool
     openmp_mem = 2000
       .type = int
+    diagnostics = False
+      .type = bool
   }
 
   masks{

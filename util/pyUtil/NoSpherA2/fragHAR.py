@@ -1266,7 +1266,7 @@ def add_cif_atoms(frag,cif,cell):
 
 def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
   import shutil
-  from .NoSpherA2 import run_with_bitmap, cuqct_tsc
+  from utilities import run_with_bitmap, cuqct_tsc
   test_frag=OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
 
   import time
@@ -1301,6 +1301,7 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
     if test_frag==True:
       print("no further calculation")
       break
+    @run_with_bitmap('WFN %d/%d' % (i + 1, len(frag)))
     def make_wfn():
       path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
       if os.path.exists(path) == False:
@@ -1318,19 +1319,21 @@ def run_frag_HAR_wfn(input_res,input_cif,input_qS, wfn_object, part):
         raise NameError('Unsuccesfull Wavefunction Calculation!')
       
       base_name = os.path.join(path,wfn_object.name)
-      if os.path.exists(base_name+".wfx"):
-        wfn_fn = base_name+".wfx"
-      elif os.path.exists(base_name+".wfn"):
-        wfn_fn = base_name+".wfn"
+      if os.path.exists(base_name + ".gbw"):
+        wfn_fn = base_name + ".gbw"
+      elif os.path.exists(base_name + ".wfx"):
+        wfn_fn = base_name + ".wfx"
+      elif os.path.exists(base_name + ".wfn"):
+        wfn_fn = base_name + ".wfn"
       wfns.append(wfn_fn)
       if int(frag[i].part) != 0:
         groups.append([0,int(frag[i].part)])
       else:
         groups.append([0])
       cifs.append(os.path.join(path,wfn_object.name+".cif"))
-    run_with_bitmap("Calculating WFN %d/%d" %(i+1,len(frag)),make_wfn)
+    make_wfn()
   t3 = time.time()
-  run_with_bitmap("Partitioning",cuqct_tsc,wfns,hkl_fn,cifs,groups)
+  cuqct_tsc(wfns, hkl_fn, cifs, groups)
   try:
     sucess = False
     if os.path.exists("experimental.tsc"):

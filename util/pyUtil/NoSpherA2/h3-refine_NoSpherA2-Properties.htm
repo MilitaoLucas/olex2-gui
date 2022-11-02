@@ -1,6 +1,6 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2-Properties-Details;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #ignoreif not spy.NoSpherA2.check_for_matching_wfn()
 <td width="13%" align='left'>
@@ -177,8 +177,8 @@ $+
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_RADIUS_NoSpherA2",
-      "value=spy.GetParam('snum.NoSpherA2.map_radius')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_radius',html.GetValue(~name~))",
+      "value=spy.GetParam('snum.NoSpherA2.map.radius')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.radius',html.GetValue(~name~))",
       "onchangealways=True",
       )
     $-
@@ -206,8 +206,8 @@ $+
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_RESOLUTION_NoSpherA2",
-      "value=spy.GetParam('snum.NoSpherA2.map_resolution')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_resolution',html.GetValue(~name~))>>spy.SetParam('snum.map.resolution',html.GetValue(~name~))",
+      "value=spy.GetParam('snum.NoSpherA2.map.resolution')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.resolution',html.GetValue(~name~))>>spy.SetParam('snum.map.resolution',html.GetValue(~name~))",
       "onchangealways=True",
       )
     $-
@@ -218,8 +218,8 @@ $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_NoSpherA2_MAP_TYPE",
       "items=spy.NoSpherA2.get_map_types()",
-      "value=spy.GetParam('snum.NoSpherA2.map_type')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_type',html.GetValue('~name~')) >> spy.NoSpherA2.change_map() >> html.Update()",
+      "value=spy.GetParam('snum.NoSpherA2.map.type')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.type',html.GetValue('~name~')) >> spy.NoSpherA2.change_map() >> html.Update()",
       "onchangealways=True",
       )
     $-
@@ -236,8 +236,8 @@ $+
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_SCALE_MIN",
-      "value=spy.GetParam('snum.NoSpherA2.map_scale_min')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_scale_min',html.GetValue(~name~))",
+      "value=spy.GetParam('snum.NoSpherA2.map.scale_min')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.scale_min',html.GetValue(~name~))",
       "onchangealways=True",
       )
     $-
@@ -247,8 +247,8 @@ $+
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_SCALE_MAX",
-      "value=spy.GetParam('snum.NoSpherA2.map_scale_max')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_scale_max',html.GetValue(~name~))",
+      "value=spy.GetParam('snum.NoSpherA2.map.scale_max')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.scale_max',html.GetValue(~name~))",
       "onchangealways=True",
       "onleave=spy.NoSpherA2.change_map()",
       )
@@ -260,8 +260,8 @@ $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_NoSpherA2_MAP_SCALE_NAME",
       "items=BWR;BGR;RWB;RGB;",
-      "value=spy.GetParam('snum.NoSpherA2.map_scale_name')",
-      "onchange=spy.SetParam('snum.NoSpherA2.map_scale_name',html.GetValue('~name~')) >> spy.NoSpherA2.change_map()",
+      "value=spy.GetParam('snum.NoSpherA2.map.scale_name')",
+      "onchange=spy.SetParam('snum.NoSpherA2.map.scale_name',html.GetValue('~name~')) >> spy.NoSpherA2.change_map()",
       "onchangealways=True",
       )
     $-
@@ -324,14 +324,14 @@ $+
     <td width='16%' align='center'>
       min:
       <b>
-      \$spy.SetParam('snum.NoSpherA2.map_min',$spy.gui.maps.Round(xgrid.GetMin(),2))
+      \$spy.SetParam('snum.NoSpherA2.map.min',$spy.gui.maps.Round(xgrid.GetMin(),2))
       </b>
     </td>
     
     <td width='18%' align='center'>
       max:
       <b>
-      \$spy.SetParam('snum.NoSpherA2.map_max',$spy.gui.maps.Round(xgrid.GetMax(),2))
+      \$spy.SetParam('snum.NoSpherA2.map.max',$spy.gui.maps.Round(xgrid.GetMax(),2))
       </b>
     </td>
 #ignoreif -->
@@ -342,14 +342,14 @@ $+
   <td width='23%' align='center'>
     min:
     <b>
-    \$spy.SetParam('snum.NoSpherA2.map_min',$spy.gui.maps.Round(xgrid.GetMin(),2))
+    \$spy.SetParam('snum.NoSpherA2.map.min',$spy.gui.maps.Round(xgrid.GetMin(),2))
     </b>
   </td>
   
   <td width='23%' align='center'>
     max:
     <b>
-    \$spy.SetParam('snum.NoSpherA2.map_max',$spy.gui.maps.Round(xgrid.GetMax(),2))
+    \$spy.SetParam('snum.NoSpherA2.map.max',$spy.gui.maps.Round(xgrid.GetMax(),2))
     </b>
   </td>
 #ignoreif -->

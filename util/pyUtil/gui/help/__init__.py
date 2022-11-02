@@ -277,7 +277,7 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
   global tutorial_box_initialised
   if not helpIsInitialised:
     gh.get_help()
-  name = getGenericSwitchName(name).lstrip("h3-")
+  name = getGenericSwitchName(name).replace("h3-", "")
   OV.SetVar('last_help_box', name)
   _= ""
   md_box = True
@@ -553,8 +553,10 @@ class AutoDemoTemp(AutoDemo):
         boxWidth = 450
         boxHeight = 250
       ws = olx.GetWindowSize().split(',')
-      x = int(ws[0])
-      y = int(ws[1]) + 75
+      #x = int(ws[2])/2 - boxWidth/2
+      #y = int(ws[3])/2 - boxHeight/2
+      x = 50
+      y = 50
       if self.have_box_already:
         olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), t=self.pop_name)
       else:
@@ -592,7 +594,14 @@ class AutoDemoTemp(AutoDemo):
       sys.stderr.formatExceptionInfo()
       self.end_tutorial()
 
-  def read_tutorial_definitions(self):
+  def read_tutorial_definitions(self, specific=None):
+    if specific:
+      self.source_dir = specific
+    else:
+      specific = OV.GetVar('githelp_tutorial_src', None)
+      if specific:
+        self.source_dir = specific
+
     ## First read in the commands that preceeds all tutorials
     self.items = gui.tools.TemplateProvider.get_template('all_tutorials_preamble').split("\n")
 

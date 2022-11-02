@@ -3,7 +3,15 @@ import sys
 import time
 import subprocess
 import shutil
+import signal
 
+p = None
+def abort_please(signum, frame):
+  print("Killing " + str(p.pid) + " in 2 seconds")
+  time.sleep(2)
+  p.send_signal(signal.CTRL_C_EVENT)
+  p.kill()
+  
 fchk_dir = os.getenv("fchk_dir", "")
 fchk_file = os.getenv("fchk_file", "")
 if not os.path.exists(fchk_dir):
@@ -38,22 +46,26 @@ if out_fn:
   print(out_fn)
   log.write("Command: " + ' '.join(args))
 
-p = None
-
 if any("elmo" in x for x in args):
   if sys.platform[:3] != 'win':
-    p = subprocess.Popen(args, stdin=inp, stdout=log)
+    p = subprocess.Popen(args, stdin=inp, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
   else:
-    p = subprocess.Popen(args, stdout=log)
+    p = subprocess.Popen(args, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 else:
-  p = subprocess.Popen(args, stdout=log)
+  p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+
+print("Setting signal handler!")
+signal.signal(signal.SIGTERM, abort_please)
+signal.signal(signal.SIGINT, abort_please)
+if sys.platform[:3] != 'win':
+  signal.signal(signal.SIGKILL, abort_please)
 
 if "ubuntu" in args[0]:
   print("Starting Ubuntu for wavefunction calculation, please be patient for start")
 if out_fn == None:
   if "ubuntu" in args[0]:
     out_fn = fchk_file + "_pyscf.log"
-  elif out_fn == None:
+  else:
     out_fn = fchk_file + ".log"
 tries = 0
 while not os.path.exists(out_fn):
@@ -65,7 +77,6 @@ while not os.path.exists(out_fn):
     print("Failed to locate the output file")
     exit(1)
 with open(out_fn, "r") as stdout:
-  import sys
   while p.poll() is None:
     x = stdout.read()
     if x:

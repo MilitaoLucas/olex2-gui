@@ -211,7 +211,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       r=twin_law.rbasf[1]
       r_diff=twin_law.rbasf[2]
       lawcount += 1
-      name = "%s_twin%02d" % (self.hklfile, lawcount)
+      name = " %s_twin%02d" % (self.hklfile, lawcount)
       filename = "%s.hkl" % (name)
       #self.make_hklf5(filename, twin_law, hkl, f_obs,f_uncertainty)
 
@@ -986,11 +986,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       #difference=hkl_new_rounded-hkl_new
       #distance=numpy.sqrt(numpy.dot(difference,numpy.dot(metrical_inv,difference)))
       #if distance<threshold:
-      if not (numpy.any(numpy.abs(self.closest_points(hkl_new)-hkl_new)>0.1)):
+      #if not (numpy.any(numpy.abs(self.closest_points(hkl_new)-hkl_new)>0.1)):
         #diff = numpy.sum(numpy.abs(self.closest_points(hkl_new)-hkl_new))
-        diff = numpy.linalg.norm(numpy.dot(self.recip_orth,(self.closest_points(hkl_new)-hkl_new)))
-        if diff<twin_law_full.threshold:
-          hkl_file_new+=[(hkl_new_rounded[0],hkl_new_rounded[1],hkl_new_rounded[2],fo,sig,-2)]
+      diff = numpy.linalg.norm(numpy.dot(self.recip_orth,(hkl_new_rounded-hkl_new)))
+      if diff<twin_law_full.threshold:
+        hkl_file_new+=[(hkl_new_rounded[0],hkl_new_rounded[1],hkl_new_rounded[2],fo,sig,-2)]
       hkl_file_new+=[(h,k,l,fo,sig,1)]
     try:
       olex_hkl.Write(new_file,hkl_file_new)
@@ -2003,20 +2003,21 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         min_k=max(0,min_k)
       for k in range(int(math.ceil(min_k)),int(math.floor(max_k))+1):
         discriminant_addition=-(h**2*mod_a_star**2+k**2*mod_b_star**2+2*h*k*a_star_dot_b_star)+(h*a_star_dot_c_star+k*b_star_dot_c_star)**2/mod_c_star**2
+        constant_l=(h*a_star_dot_c_star+k*b_star_dot_c_star)/mod_c_star**2
         upper_discriminant=max_distance**2+discriminant_addition
         lower_discriminant=min_distance**2+discriminant_addition
         #still sometimes has upper <0 even when a twin laws is there. Needs work
         if upper_discriminant<0:
           continue
-        l_U_max=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star+math.sqrt(upper_discriminant))/mod_c_star)
-        l_U_min=numpy.trunc((-h*a_star_dot_c_star-k*b_star_dot_c_star-math.sqrt(upper_discriminant))/mod_c_star)
+        l_U_max=-constant_l+math.sqrt(upper_discriminant)/mod_c_star#numpy.trunc(-constant_l+math.sqrt(upper_discriminant)/mod_c_star)
+        l_U_min=-constant_l-math.sqrt(upper_discriminant)/mod_c_star#numpy.trunc(-constant_l-math.sqrt(upper_discriminant)/mod_c_star)
         if k==0:
           l_U_min=max(0,l_U_min)
         if lower_discriminant<0:
           possible_l=list(range(int(math.ceil(l_U_min)),int(math.floor(l_U_max)+1)))
         else:
-          l_L_max=numpy.trunc(-(h*a_star_dot_c_star+k*b_star_dot_c_star)/mod_c_star**2+math.sqrt(lower_discriminant)/mod_c_star)
-          l_L_min=numpy.trunc(-(h*a_star_dot_c_star+k*b_star_dot_c_star)/mod_c_star**2-math.sqrt(lower_discriminant)/mod_c_star)
+          l_L_max=-constant_l+math.sqrt(lower_discriminant)/mod_c_star#numpy.trunc(-constant_l+math.sqrt(lower_discriminant)/mod_c_star)
+          l_L_min=-constant_l-math.sqrt(lower_discriminant)/mod_c_star#numpy.trunc(-constant_l-math.sqrt(lower_discriminant)/mod_c_star)
           if k==0:
             l_L_min=max(0,l_L_min)
             if l_L_min==0:

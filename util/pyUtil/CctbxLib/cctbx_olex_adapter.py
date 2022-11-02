@@ -168,8 +168,13 @@ class OlexCctbxAdapter(object):
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        self._xray_structure.set_inelastic_form_factors(
-          self.wavelength, inelastic_table)
+        try:
+          self._xray_structure.set_inelastic_form_factors(
+            self.wavelength, inelastic_table)
+        except Exception as e:
+          if OV.IsDebugging():
+            print("Failed to retrieve some inelastic scattering factors")
+            print(e)
         for sc in self._xray_structure.scatterers():
           if null_disp:
             custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))

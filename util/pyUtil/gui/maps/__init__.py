@@ -79,6 +79,7 @@ class MapUtil:
   def MaskView(self, onoff=None):
     img_bases = ['small-Mask']
     if self.deal_with_map_buttons(onoff, img_bases, 'mask'):
+      self.SetXgridView(True)
       return
     self.SetXgridView(False)
     self.map_type = 'mask'
@@ -89,6 +90,7 @@ class MapUtil:
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
     if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
+      self.SetXgridView(True)
       return
     update_controls = True
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):

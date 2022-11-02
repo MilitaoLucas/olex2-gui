@@ -1,3 +1,2 @@
 # Hirshfeld Atom Refinement
-The <b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement employs aspherical atomic scattering factors calculated from a theoretical density. This approach allows for an accurate localization of hydrogen atoms, an accurate determination of non-hydrogen ADPs and an anisotropic refinement of hydrogen atoms.
-Since the re-implementation of HAR inside NoSpherA2 this tool was removed. 
+<b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement (HARt) employs non-spherical atomic scattering factors calculated from a theoretical electron density obtained from ab initio quantum mechanical calculations. This approach enables: (1) accurate localization of hydrogen atoms (equivalent to neutron diffraction methods), (2) determination of non-hydrogen anisotropic displacement parameters (ADPs), and (3) the anisotropic refinement of hydrogen atoms. HARt has now been implemented within NoSpherA2 (under the Refine tool tab).
