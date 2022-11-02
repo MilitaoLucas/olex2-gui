@@ -36,25 +36,6 @@ import scipy.linalg
 import olex2_normal_equations
 from my_refine_util import hydrogen_atom_constraints_customisation
 
-# try to initialise openblas
-try:
-  import fast_linalg
-  from fast_linalg import env
-  if not env.initialised:
-    if sys.platform[:3] == "win":
-      ob_path = olx.BaseDir()
-      files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.dll' in x]
-    else:
-      ob_path = os.path.join(olx.BaseDir(), 'lib')
-      files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
-    if files:
-      env.initialise(os.path.join(ob_path, files[0]))
-      if env.initialised:
-        print("Successfully initialised SciPy OpenBlas:")
-        print(env.build_config)
-except Exception as e:
-  print("Could not initialise OpenBlas: %s" %e)
-
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     #'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
@@ -67,6 +48,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     OlexCctbxAdapter.__init__(self)
+    # try to initialise openblas
+    OV.init_fast_linalg()
     self.interrupted = False
     self.max_cycles = max_cycles
     self.max_peaks = max_peaks
@@ -100,7 +83,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def run(self, build_only=False,
           table_file_name = None,
           normal_equations_class=olex2_normal_equations.normal_eqns,
-          ed_refinement=False):
+          ed_refinement=None):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
@@ -144,10 +127,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-    shared_parameter_constraints = self.setup_shared_parameters_constraints()
+    shared_parameter_constraints, fix_occupancy_for = self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
       shared_parameters=shared_parameter_constraints)
+    # some of the SUMP got reduced to fixed occupancy
+    if fix_occupancy_for:
+      msg = "Consider updatign your model - occupancy has got reduced for:"
+      for sc_i, occu in fix_occupancy_for:
+        sc = self.xray_structure().scatterers()[sc_i]
+        sc.flags.set_grad_occupancy(False)
+        sc.occupancy = occu
+        msg += " %s.occu=%.3f" %(sc.label, occu)
+      print(msg)
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
@@ -207,7 +199,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       ed_reparametrisation.fixed_angles.update(self.fixed_angles)
       return ed_reparametrisation
 
-    self.std_reparametrisation = None
     self.std_obserations = None
     if ed_refinement:
       import AC6 as ac6
@@ -229,12 +220,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.thickness = xray.thickness(thickness, grad_t)
       self.std_obserations = self.observations
       self.observations = aci.EDI.build_observations(
-        self.xray_structure().crystal_symmetry(),
+        self.xray_structure(),
         anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
       self.std_obserations = self.observations.fo_sq.select(
         self.observations.fo_sq.unique_under_symmetry_selection())\
         .as_xray_observations()
-      self.std_reparametrisation = self.reparametrisation
       self.reparametrisation = build_ed_reparametrisation(
         self, self.thickness, self.observations.twin_fractions)
 
@@ -270,11 +260,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       may_parallelise=env.threads > 1,
       use_openmp=use_openmp,
       max_memory=max_mem,
-      std_reparametrisation=self.std_reparametrisation,
       std_observations=self.std_obserations
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
+    self.normal_eqns.shared_rotating_adps = self.shared_rotating_adps
     if build_only:
       return self.normal_eqns
     if timer:
@@ -655,7 +645,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
 
-
+      if cif_block['_space_group_name_Hall'].lower() == '-p 2ybc (x-z,y,z)':
+        cif_block['_space_group_name_Hall'] = '-P 2yn'
       for i in range(3):
         for j in range(i+1,3):
           if (cell_params[i] == cell_params[j] and
@@ -915,6 +906,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refln_loop.add_miller_array(f_obs_sq.f_sq_as_f(), array_type="meas")
       refln_loop.add_miller_array(f_calc, column_names=['_refln_A_calc','_refln_B_calc'])
       refln_loop.add_miller_array(f_calc, array_type='calc')
+
+      if OV.GetParam('user.refinement.diagnostics'):
+        write_diagnostics_stuff(f_calc)
+
       if OV.GetParam("snum.refinement.use_solvent_mask"):
         from cctbx_olex_adapter import OlexCctbxAdapter
         cctbx_adapter = OlexCctbxAdapter()
@@ -1001,15 +996,19 @@ The following options were used:
         f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
         details_text = details_text + "   DATE:           %s\n"%f_date
         tsc_info = tsc_info + details_text + ";\n"
-        cif_block['_refine_special_details'] = tsc_info
+        cif_block['_olex2_refine_details'] = tsc_info
         if acta_stuff:
           # remove IAM scatterer reference
           for sl in ['a', 'b']:
-            for sn in range(1,5):
-              cif_block.pop('_atom_type_scat_Cromer_Mann_%s%s' %(sl, sn))
-          cif_block.pop('_atom_type_scat_Cromer_Mann_c')
-          for i in range(cif_block['_atom_type_scat_source'].size()):
-            cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
+            for sn in range(1, 5):
+              key = '_atom_type_scat_Cromer_Mann_%s%s' % (sl, sn)
+              if key in cif_block:
+                cif_block.pop(key)
+          if '_atom_type_scat_Cromer_Mann_c' in cif_block:
+            cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          if '_atom_type_scat_source' in cif_block:
+            for i in range(cif_block['_atom_type_scat_source'].size()):
+              cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return "a"
@@ -1206,10 +1205,17 @@ The following options were used:
       constraints.append(current)
       self.shared_rotated_adps.append(current)
 
+    shared_rotating_adp = self.olx_atoms.model.get('olex2.constraint.rotating_adp', ())
+    self.shared_rotating_adps = []
+    for c in shared_rotating_adp:
+      current = adp.shared_rotating_u(*c)
+      constraints.append(current)
+      self.shared_rotating_adps.append(current)
+
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
-
+    fix_occupancy_for = []
     idslist = []
     if(len(equations)>0):
       # number of free variables
@@ -1222,23 +1228,24 @@ The following options were used:
       rowheader = {}
       nextfree = -1
       ignored = False
-      idslist = []
+      scatterers = self.xray_structure().scatterers()
       for equation in equations:
         ignored = False
         row = numpy.zeros((FvarNum))
         for variable in equation['variables']:
-          label = "%s %d %d"%(variable[0]['references'][-1]['name'],
-                              variable[0]['references'][-1]['id'],
-                              variable[0]['references'][-1]['index'])
-          if(variable[0]['references'][-1]['index']==4):
+          ref = variable[0]['references'][-1]
+          sc_id = ref['id']
+          label = "%s %d %d"%(ref['name'], sc_id, ref['index'])
+          if(ref['index']==4): #occupancy
             if(label not in rowheader):
               nextfree+=1
               rowheader[label]=nextfree
-              idslist += [variable[0]['references'][-1]['id']]
+              idslist.append(sc_id)
               key=nextfree
             else:
               key=rowheader[label]
-            row[key]=variable[1]
+            row[key]=variable[1]*scatterers[sc_id].weight_without_occupancy()/\
+              ref['k']
           else:
             ignored = True
         row[FvarNum-1]=equation['value']
@@ -1251,22 +1258,28 @@ The following options were used:
       if numpy.shape(u)[0] > 1:
         previous = u[-2,:]
         for row in numpy.flipud(u):
-          if(numpy.all(row[0:-1]==0.0) and row[-1]!=0):
-            raise Exception("One or more equations are not independent")
-          if(numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1]):
+          if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
+            (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
             raise Exception("One or more equations are not independent")
           previous = row
 
       # setting up constraints
       for row in numpy.flipud(u):
-        if(numpy.all(row==0.0)):
+        nn_cnt = 0
+        nn_idx = -1
+        a = numpy.copy(row[:-1])
+        for idx, v in enumerate(a):
+          if v != 0.0:
+            nn_cnt+=1
+            nn_idx = idx
+        if(nn_cnt == 0):
           raise Exception("One or more equations are not independent")
         else:
-          a = numpy.copy(row[:-1])
-          current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
-          #a = ((row[-3], row[-2]), row[-1])
-          #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
-          constraints.append(current)
+          if nn_cnt == 1: # reduced
+            fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
+          else:
+            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+            constraints.append(current)
 
     for i, var in enumerate(vars):
       refs = var['references']
@@ -1279,7 +1292,7 @@ The following options were used:
             #as_var.append((ref['id'], ref['k']))
             as_var.append((ref['id'], 1.0))
           if ref['index'] == 4 and ref['relation'] == "one_minus_var":
-            as_var_minus_one#.append((ref['id'], ref['k']))
+            #as_var_minus_one.append((ref['id'], ref['k']))
             as_var_minus_one.append((ref['id'], 1.0))
         if ref['index'] == 5 and ref['relation'] == "var":
           eadp.append(ref['id'])
@@ -1308,7 +1321,7 @@ The following options were used:
     for sd in same_disp:
       constraints.append(fpfdp.shared_fp(sd))
       constraints.append(fpfdp.shared_fdp(sd))
-    return constraints
+    return constraints, fix_occupancy_for
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
@@ -1483,6 +1496,9 @@ The following options were used:
     else:
       k = math.sqrt(scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    wavelength = float(olx.xf.exptl.Radiation())
+    if wavelength < 0.1:
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -1634,4 +1650,23 @@ The following options were used:
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
+
+
+def write_diagnostics_stuff(f_calc):
+  txt = ""
+  name = str(OV.GetUserInput(0, "Save the F_calcs with this name", txt))
+  if name and name != 'None':
+    d = {}
+    import pickle
+    method = OV.GetParam('snum.refinement.ED.method', 'kinematic')
+    a = f_calc.expand_to_p1()
+    indices = a.indices()
+    b = a.as_amplitude_array().data().as_numpy_array()
+    d.setdefault('values', b)
+    d.setdefault('indices', indices)
+    d.setdefault('method', method)
+    d.setdefault('structure', OV.FileName())
+    out = open( '%s.pickle' %name, 'wb')
+    pickle.dump(d, out)
+    out.close()
 

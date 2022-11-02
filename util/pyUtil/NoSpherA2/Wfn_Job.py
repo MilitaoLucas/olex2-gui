@@ -9,6 +9,7 @@ import time
 import math
 
 from olexFunctions import OV
+from utilities import run_with_bitmap
 
 try:
   from_outside = False
@@ -16,29 +17,6 @@ try:
 except:
   from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
-
-def get_nmo():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
-  line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[1]
-
-def get_ncen():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
-  line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[6]
-
-OV.registerFunction(get_nmo,True,'NoSpherA2')
-OV.registerFunction(get_ncen,True,'NoSpherA2')
 
 class wfn_Job(object):
   origin_folder = " "
@@ -323,31 +301,77 @@ class wfn_Job(object):
     com.write(" \n./%s.wfx\n\n" %self.name)
     com.close()
 
-  def write_orca_crystal_input(self,xyz):
-    def write_grids_5(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "DefGrid3 "
-        elif grid == "Low":
-          res += "DefGrid2 "
-        elif grid == "High":
-          res += "DefGrid3 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      else:
-        if grid == "Low":
-          res += "DefGrid1 "
-        elif grid == "High":
-          res += "DefGrid2 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
+  def write_grids_4(self, method, grid):
+    res = ""
+    if method == "M062X":
+      if grid == "Normal":
+        res += "Grid6 "
+      elif grid == "Low":
+        res += "Grid5 "
+      elif grid == "High":
+        res += "Grid7 "
+      elif grid == "Max":
+        res += "Grid7 "
+    else:
+      if grid == "Low":
+        res += "Grid1 "
+      elif grid == "High":
+        res += "Grid4 "
+      elif grid == "Max":
+        res += "Grid7 "
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
+      return res
+    else:
+      if grid == "Normal":
         res += " NoFinalGridX "
-        return res
+      elif grid == "Low":
+        res += " GridX2 NoFinalGridX "
+      elif grid == "High":
+        res += " GridX5 NoFinalGridX "
+      elif grid == "Max":
+        res += " GridX9 NoFinalGridX "
+      return res
+
+  def write_grids_5(self, method, grid):
+    res = ""
+    if method == "M062X":
+      if grid == "Normal":
+        res += "DefGrid3 "
+      elif grid == "Low":
+        res += "DefGrid2 "
+      elif grid == "High":
+        res += "DefGrid3 "
+      elif grid == "Max":
+        res += "DefGrid3 "
+    else:
+      if grid == "Low":
+        res += "DefGrid1 "
+      elif grid == "High":
+        res += "DefGrid2 "
+      elif grid == "Max":
+        res += "DefGrid3 "
+    if method == "BP86" or method == "PBE" or method == "PWLDA":
+      return res
+    else:
+      res += " NoFinalGridX "
+      return res
+
+  def write_orca_crystal_input(self,xyz):
+    known_charges = {
+      "Ca": 2.0,
+      "F": -1.0,
+      "Na": 1.0,
+      "Cl": -1.0,
+      "Mg": 2.0,
+      "Br": -1.0,
+      "K": 1.0,
+      "Li": 1.0,
+      "Be": 2.0,
+      "O": -2.0
+    }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
+    charge = OV.GetParam('snum.NoSpherA2.charge')
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1,p=10)
@@ -363,8 +387,6 @@ class wfn_Job(object):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
-    basis = open(basis_set_fn,"r")
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       cpu = "nprocs " + ncpus
@@ -374,7 +396,15 @@ class wfn_Job(object):
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
     qmmmtype = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE")
-    control = "! NoPop MiniPrint 3-21G AIM "
+    control = "! NoPop MiniPrint 3-21G "
+    ECP = False
+    if "ECP" in basis_name:
+      ECP = True
+    if ECP == False:
+      control += " 3-21G "
+    else:
+      control += basis_name.replace("ECP-", "") + ' '
+    
     if qmmmtype == "Mol":
       control += "MOL-CRYSTAL-QMMM "
     else:
@@ -385,6 +415,8 @@ class wfn_Job(object):
       control += "rhf "
       grids = ""
     else:
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROKS "      
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
         if method != "wB97" and method != "wB97X":
@@ -395,7 +427,7 @@ class wfn_Job(object):
         control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "ORCA 5.0":
-        grids = write_grids_5(method,grid)
+        grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
     convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
@@ -418,8 +450,6 @@ class wfn_Job(object):
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM("+Solvation+") "
-    charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
@@ -430,51 +460,57 @@ class wfn_Job(object):
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
-    inp.write("   end\nend\n%basis\n")
-    for i in range(0,len(atom_list)):
-      atom_type = "newgto " +atom_list[i] + '\n'
-      inp.write(atom_type)
-      temp_atom = atom_list[i] + ":" + basis_name
-      basis.seek(0,0)
-      while True:
-        line = basis.readline()
-        if not line:
-          raise RecursionError("Atom not found in the basis set!")
-        if line == '':
-          continue
-        if line[0] == "!":
-          continue
-        if "keys=" in line:
-          key_line = line.split(" ")
-          type = key_line[key_line.index("keys=")+2]
-        if temp_atom in line:
-          break
-      line_run = basis.readline()
-      if "{"  in line_run:
+    inp.write("   end\nend\n")
+    el_list = atom_list
+    if ECP == False:
+      basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+      basis = open(basis_set_fn,"r")
+      inp.write("%basis\n")
+      for i in range(0,len(atom_list)):
+        atom_type = "newgto " +atom_list[i] + '\n'
+        inp.write(atom_type)
+        temp_atom = atom_list[i] + ":" + basis_name
+        basis.seek(0,0)
+        while True:
+          line = basis.readline()
+          if not line:
+            raise RecursionError("Atom not found in the basis set!")
+          if line == '':
+            continue
+          if line[0] == "!":
+            continue
+          if "keys=" in line:
+            key_line = line.split(" ")
+            type = key_line[key_line.index("keys=")+2]
+          if temp_atom in line:
+            break
         line_run = basis.readline()
-      while (not "}" in line_run):
-        shell_line = line_run.split()
-        if type == "turbomole=":
-          n_primitives = shell_line[0]
-          shell_type = shell_line[1]
-        elif type == "gamess-us=":
-          n_primitives = shell_line[1]
-          shell_type = shell_line[0]
-        shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
-        inp.write(shell_gaussian)
-        for n in range(0,int(n_primitives)):
+        if "{"  in line_run:
+          line_run = basis.readline()
+        while (not "}" in line_run):
+          shell_line = line_run.split()
           if type == "turbomole=":
-            inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
-          else:
-            inp.write(basis.readline().replace("D","E"))
-        line_run = basis.readline()
+            n_primitives = shell_line[0]
+            shell_type = shell_line[1]
+          elif type == "gamess-us=":
+            n_primitives = shell_line[1]
+            shell_type = shell_line[0]
+          shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
+          inp.write(shell_gaussian)
+          for n in range(0,int(n_primitives)):
+            if type == "turbomole=":
+              inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
+            else:
+              inp.write(basis.readline().replace("D","E"))
+          line_run = basis.readline()
+        inp.write("end\n")
+      basis.close()
       inp.write("end\n")
-    basis.close()
-    inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
     hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
-    inp.write("%qmmm\n  Conv_Charges true\n")
+    ecplayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')
+    inp.write("%qmmm\n")
     asu_lines = xyz1.readlines()
     natoms = int(asu_lines[0])
     xyz2.seek(0)
@@ -500,70 +536,67 @@ class wfn_Job(object):
     qm_atoms = ""
     for atom in atom_list:
       qm_atoms += " %d"%atom
-    inp.write("  QMAtoms {%s } end\n"%qm_atoms)
-    inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))
+    inp.write("  QMAtoms {%s } end"%qm_atoms)
+    params_filename = self.name + ".ORCAFF.prms"
+    if qmmmtype == "Ion":
+      inp.write("""
+  Conv_Charges true
+  Conv_Charges_MaxNCycles 30
+  Conv_Charges_ConvThresh %f
+  ECPLayers %d
+  HFLayers %d
+  HFLayerGTO "3-21G"
+  Charge_Total 0
+  EnforceTotalCharge true
+  OuterPCLayers 1
+  ORCAFFFilename "%s"
+end"""%(float(conv),ecplayer,hflayer,params_filename))
+    else:
+      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))      
     run = None
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
       if run > 1:
         inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
     inp.close()
+    if qmmmtype == "Ion":
+      import subprocess
+      mm_prep_args = []
+      mm_prep_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_mm"))
+      if sys.platform[:3] == 'win':
+        mm_prep_args[0] += ".exe"
+      mm_prep_args.append("-makeff")
+      mm_prep_args.append(self.name+".xyz")
+      for t in el_list:
+        mm_prep_args.append("-CEL")
+        mm_prep_args.append(t)
+        if t in known_charges:
+          mm_prep_args.append(str(known_charges[t]))
+        else:
+          mm_prep_args.append("0.0")
+      if sys.platform[:3] == 'win':
+        startinfo = subprocess.STARTUPINFO()
+        startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startinfo.wShowWindow = 7
+        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE,
+                             startupinfo=startinfo)
+      else:
+        m = subprocess.Popen(mm_prep_args, 
+                             cwd=self.full_dir, 
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT, 
+                             stdin=subprocess.PIPE)
+      while m.poll() is None:
+        time.sleep(1)
+      n = os.path.join(self.full_dir, self.name)
+      if not os.path.exists(os.path.join(self.full_dir,params_filename)):
+        OV.SetVar('NoSpherA2-Error', "NoORCAMMFile")
+        raise NameError("No MM File for ORCA file generated!")
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None):
-    def write_grids_4(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "Grid6 "
-        elif grid == "Low":
-          res += "Grid5 "
-        elif grid == "High":
-          res += "Grid7 "
-        elif grid == "Max":
-          res += "Grid7 "
-      else:
-        if grid == "Low":
-          res += "Grid1 "
-        elif grid == "High":
-          res += "Grid4 "
-        elif grid == "Max":
-          res += "Grid7 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
-        if grid == "Normal":
-          res += " NoFinalGridX "
-        elif grid == "Low":
-          res += " GridX2 NoFinalGridX "
-        elif grid == "High":
-          res += " GridX5 NoFinalGridX "
-        elif grid == "Max":
-          res += " GridX9 NoFinalGridX "
-        return res
-
-    def write_grids_5(method,grid):
-      res = ""
-      if method == "M062X":
-        if grid == "Normal":
-          res += "DefGrid3 "
-        elif grid == "Low":
-          res += "DefGrid2 "
-        elif grid == "High":
-          res += "DefGrid3 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      else:
-        if grid == "Low":
-          res += "DefGrid1 "
-        elif grid == "High":
-          res += "DefGrid2 "
-        elif grid == "Max":
-          res += "DefGrid3 "
-      if method == "BP86" or method == "PBE" or method == "PWLDA":
-        return res
-      else:
-        res += " NoFinalGridX "
-        return res
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     ECP = False
     if basis_name == None:
@@ -588,15 +621,20 @@ class wfn_Job(object):
     control = "! NoPop MiniPrint "
 
     if ECP == False:
-      control += "AIM 3-21G "
+      control += "3-21G "
     else:
       control += basis_name.replace("ECP-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if method == "HF":
-      control += "rhf "
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROHF "
+      else:
+        control += " rhf "
       grids = ""
     else:
+      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
+        control += " ROKS "
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "Hybrid":
         software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
@@ -611,10 +649,10 @@ class wfn_Job(object):
             control += method + '-V SCNL '
         else:
           control += method + ' '
-        grids = write_grids_5(method,grid)
+        grids = self.write_grids_5(method, grid)
       else:
         control += method + ' '
-        grids = write_grids_4(method,grid)
+        grids = self.write_grids_4(method, grid)
     if convergence == None:
       convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
     if convergence == "NoSpherA2SCF":
@@ -623,38 +661,46 @@ class wfn_Job(object):
       conv = convergence
     if strategy == None:
       strategy = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
-    control = control + grids + conv + ' ' + strategy
+    control += grids + conv + ' ' + strategy
     if relativistic == None:
       relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if method == "BP86" or method == "PBE" or method == "PWLDA":
       if relativistic == True:
         t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
         if t == "DKH2":
-          control = control + " DKH2 SARC/J RI"
+          control += " DKH2 SARC/J RI"
         elif t == "ZORA":
-          control = control + " ZORA SARC/J RI"
+          control += " ZORA SARC/J RI"
         elif t == "ZORA/RI":
-          control = control + " ZORA/RI SARC/J RI"
+          control += " ZORA/RI SARC/J RI"
         else:
-          control = control + " IORA/RI SARC/J RI"
+          control += " IORA/RI SARC/J RI"
       else:
-        control = control + " def2/J RI"
+        control += " def2/J RI"
     else:
       if relativistic == True:
         t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
         if t == "DKH2":
-          control = control + " DKH2 SARC/J RIJCOSX"
+          control += " DKH2 SARC/J RIJCOSX"
         elif t == "ZORA":
-          control = control + " ZORA SARC/J RIJCOSX"
+          control += " ZORA SARC/J RIJCOSX"
         elif t == "ZORA/RI":
-          control = control + " ZORA/RI SARC/J RIJCOSX"
+          control += " ZORA/RI SARC/J RIJCOSX"
+        elif t == "IORA/RI":
+          control += " IORA/RI SARC/J RIJCOSX"
         else:
-          control = control + " IORA/RI SARC/J RIJCOSX"
+          print("============= Relativity kind not known! Will use ZORA! =================")
+          control += " ZORA SARC/J RIJCOSX"
       else:
-        control = control + " def2/J RIJCOSX"
+        control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
-      control += " CPCM("+Solvation+") "
+      control += " CPCM(" + Solvation + ") "
+    GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
+    if "5.0" not in OV.GetParam("snum.NoSpherA2.source"):
+      GBW_file = False
+    if GBW_file == False:
+      control += " AIM "
     if charge == None:
       charge = OV.GetParam('snum.NoSpherA2.charge')
     if mult == None:
@@ -1358,7 +1404,7 @@ ener = cf.kernel()"""
       inp.write(rest)
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
-
+  @run_with_bitmap('Calculating WFN')
   def run(self,part=0,software=None,basis_name=None):
     args = []
     if basis_name == None:
@@ -1447,14 +1493,14 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)],
-                            startupinfo=startinfo)
+                            startupinfo=startinfo, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
       pyl = OV.getPYLPath()
       if not pyl:
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, python_script)])
+                            os.path.join(p_path, python_script)], creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
     out_fn = None
     path = self.full_dir
@@ -1496,7 +1542,7 @@ ener = cf.kernel()"""
       while p.poll() is None:
         x = stdout.read()
         if x:
-          print(x,end='')
+          print(x, end='')
           olx.xf.EndUpdate()
           if OV.HasGUI():
             olx.Refresh()
@@ -1504,12 +1550,20 @@ ener = cf.kernel()"""
           olx.xf.EndUpdate()
           if OV.HasGUI():
             olx.Refresh()
-        time.sleep(0.5)
+        if OV.GetVar("stop_current_process"):
+          import signal
+          p.send_signal(signal.SIGTERM)
+          print("Calculation aborted by INTERRUPT!")
+          OV.SetVar("stop_current_process", False)
+        else:
+          time.sleep(0.5)
 
     print("\nWavefunction calculation ended!")
+    wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
+    shutil.copy(out_fn, wfnlog)
 
     if software == "ORCA" or software == "ORCA 5.0":
-      if '****ORCA TERMINATED NORMALLY****' in open(os.path.join(self.full_dir, self.name+"_orca.log")).read():
+      if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
@@ -1519,15 +1573,14 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('Orca did not terminate normally!')
-    elif "Gaussian" in software:
-      if 'Normal termination of Gaussian' in open(os.path.join(self.full_dir, self.name+".log")).read():
+    elif "Gaussian" in software:   
+      if 'Normal termination of Gaussian' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-    elif software == "ELMOdb":
-      print(os.path.join(self.full_dir, self.name+".out"))
-      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(os.path.join(self.full_dir, self.name+".out")).read():
+    elif software == "ELMOdb":     
+      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
@@ -1537,8 +1590,8 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
-
-    if "ECP" in basis_name and "orca" in args[0]:      
+    embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+    if ("ECP" in basis_name and "orca" in args[0]) or embedding == True:      
       molden_args = []
       molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
       if sys.platform[:3] == 'win':
@@ -1591,6 +1644,9 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
+      if OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW") == True:
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):

@@ -85,7 +85,8 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   if not filefull:
     return
   if output_folder:
-    _ = os.path.join(output_folder, "%s.%s" %(filename, fileext))
+    name = OV.HKLSrc()
+    _ = os.path.join(output_folder, "%s.%s" %(name, fileext))
     filefull = _
   if not filefull:
     return
@@ -212,9 +213,10 @@ def GetImageFilename(image_type):
     fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
   if not filename:
     try:
-      filename = OV.FileName()
+      current = int(olx.xf.CurrentData())
+      filename = olx.xf.DataName(current)
     except:
-      filename = None
+      filename = OV.FileName()
     if not filename:
       import gui
       filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())

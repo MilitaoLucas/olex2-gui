@@ -21,7 +21,7 @@ class NewsImageRetrivalThread(ThreadEx):
     NewsImageRetrivalThread.instance = self
     olex.registerFunction(self.get_sample_list, False, 'internal')
     olex.registerFunction(self.get_structure_from_url, False, 'internal')
-    
+    olex.registerFunction(self.get_styles_from_url, False, 'internal')
 
   def run(self):
     import copy
@@ -175,6 +175,24 @@ class NewsImageRetrivalThread(ThreadEx):
       print("Loading the existing structure; please delete this structure (cif file) if you want to get it again!")
     olex.m("reap '%s'" %pp)
 
+  def get_styles_from_url(self, name, url=None):
+    if not url:
+      url_base = OV.GetParam('olex2.samples.url')
+    l = [('style','glds'), ('scene','glsp')]
+    p = os.path.join(OV.DataDir(), 'styles')
+    if not os.path.exists(p):
+      os.makedirs(p)
+    for item in l:
+      url = '%s/%s.%s' %(url_base, name, item[1])
+      _ = self.make_call(url)
+      if _ is None:
+        return ""
+      pp = os.path.join(p, name + "." + item[1])
+      if not os.path.exists(pp):
+        cont = _.read().decode()
+        with open(pp, 'w') as wFile:
+          wFile.write(cont)
+        olex.m("load %s '%s'" %(item[0], pp))
 
   def get_list_from_server(self, list_name='news'):
     if list_name == "news":

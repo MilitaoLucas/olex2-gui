@@ -4,31 +4,43 @@
   <td width='13%'>
     <b>Labels</b>
   </td>
-  <td width='87%' align='left' name=COMBO_LABEL_COMBO_BOX>
+  <td width='50%' align='left' name=COMBO_LABEL_COMBO_BOX>
 $+
     html.Snippet(
       "gui/snippets/input-combo",
       "name='set_label_content'",
-      "items=%Labels OFF/ON%<-;
+      "items=
 %Atom Names%<-l;
 %Crystallographic Occupancy%<-o;
 %Chemical Occupancy%<-co;
 %Parts%<-p;%Link-Code%<-v;
-%H Atom Labels%<-h l;
 %Fixed Parameters%<-f;
 Variables<-v;
 AFIX Commands<-h a;
 Q Peak Intensities<-qi;
+Ueq<-u;
 Label + residue number<-l rn;
 Residue numbers<-rn;
 Residue class<-rc;
 ",
-      "value='Labels OFF/ON",
+      "value=",
       "onchange=spy.ChooseLabelContent(html.GetValue('~name~'))",
-      "manage=True",
       "onchangealways=true",
     )
 $-
+  </td>
+  <td width="10%">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=label_h",
+     "value='Label H'",
+     "checked=GetVar('olex2.label_h','false')",
+     "onclick=SetVar('olex2.label_h',html.GetState(~name~))")
+   $-
+  </td>
+  <td>$+
+    html.Snippet(GetVar(default_link),
+    "value=Hide",
+    "onclick=labels false"
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -92,7 +104,7 @@ $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>
 
 <!--INSERT DRAWPLUS-->
 
-<!-- #includeif IsFileType('ires') tool-row-help gui\blocks\tool-row-help.htm;name='ELECTRON_DENSITY';help_ext=Electron-Density;1 -->
+<!-- #includeif IsFileType('ires') tool-row-help gui\blocks\tool-row-help.htm;name='ELECTRON_DENSITY';help_ext=Electron-Density-Quick-Maps;1 -->
 <!-- #includeif IsFileType('ires') calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
 <!-- #includeif IsFileType('ires') row_table_off gui\blocks\row_table_off.htm;1; -->
 

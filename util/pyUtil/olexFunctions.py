@@ -1154,6 +1154,27 @@ class OlexFunctions(inheritFunctions):
     lock[1].close()
     os.remove(lock[0])
 
+  def init_fast_linalg(self):
+    try:
+      import fast_linalg
+      from fast_linalg import env
+      if not env.initialised:
+        if sys.platform[:3] == "win":
+          ob_path = olx.BaseDir()
+          files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.dll' in x]
+        else:
+          ob_path = os.path.join(olx.BaseDir(), 'lib')
+          files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
+        if files:
+          env.initialise(os.path.join(ob_path, files[0]))
+          if env.initialised:
+            print("Successfully initialised SciPy OpenBlas:")
+            print(env.build_config)
+            return True
+    except Exception as e:
+      print("Could not initialise OpenBlas: %s" %e)
+      return False
+
   #https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
   # constructs an object from dict
   def dict_obj(self, d):
@@ -1239,7 +1260,6 @@ class ParamStack():
       v = self.programs.pop()
       OV.SetParam(v[0], v[1])
       OV.SetParam(v[2], v[3])
-
 
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)

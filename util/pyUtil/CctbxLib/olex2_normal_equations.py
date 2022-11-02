@@ -22,7 +22,6 @@ import olex_core
 
 class normal_eqns(least_squares.crystallographic_ls_class()):
   log = None
-  std_reparametrisation = None
   std_observations = None
 
   def __init__(self, observations, refinement, olx_atoms,
@@ -42,48 +41,56 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
         raise e
     else:
-      one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, reflections=self.observations)
+      ed_refinement = OV.GetParam("snum.refinement.ED.method")
+      if ed_refinement != "Kinematic":
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure)#, reflections=self.observations)
+      else: # make use of caching
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, reflections=self.observations)
     self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
+    self.f_mask_data = None
+    if self.f_mask is None:
+      self.f_mask_data = MaskData(flex.complex_double())
+    else:
+      self.f_mask_data = MaskData(self.observations,
+                                  self.xray_structure.space_group(),
+                                  self.observations.fo_sq.anomalous_flag(),
+                                  self.f_mask.indices(),
+                                  self.f_mask.data())
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
   def build_up(self, objective_only):
-    ed_refinement = OV.GetParam("snum.refinement.ED.use_2_beam")
-    if not ed_refinement or not aci.IsMEDEnabled:
+    ed_refinement = OV.GetParam("snum.refinement.ED.method")
+    if not ed_refinement or "Kinematic" == ed_refinement or not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
     old_func = self.one_h_linearisation
     try:
-      if self.f_mask is None:
-        f_mask_data = MaskData(flex.complex_double())
-      else:
-        f_mask_data = MaskData(self.observations, self.xray_structure.space_group(),
-          self.observations.fo_sq.anomalous_flag(), self.f_mask.data())
       cl = least_squares.crystallographic_ls_class()
-      self.std_reparametrisation.linearise()
-      xx = cl(self.observations, self.std_reparametrisation)
+      self.reparametrisation.linearise()
+      xx = cl(self.observations, self.reparametrisation)
       def args():
         args = (xx,
                 self.std_observations,
-                f_mask_data,
+                self.f_mask_data,
                 self.weighting_scheme,
                 OV.GetOSF(),
                 self.one_h_linearisation,
-                self.std_reparametrisation.jacobian_transpose_matching_grad_fc(),
-                self.std_reparametrisation.fc_correction, False, True, False)
+                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
+                self.reparametrisation.fc_correction, False, True, False)
         return args
       self.data = build_design_matrix(*args())
       self.one_h_linearisation = aci.EDI.build(self.data,
+        self.reparametrisation,
+        old_func,
         self.refinement.thickness,
         self.xray_structure.crystal_symmetry(),
-        self.std_observations.fo_sq.anomalous_flag())
-      super(normal_eqns, self).build_up()
-      aci.EDI.update_scales(old_func,
-        self.weighting_scheme,
-        self.xray_structure, f_mask_data,
-        self.refinement.thickness)
+        self.std_observations.fo_sq.anomalous_flag(),
+        objective_only)
+      super(normal_eqns, self).build_up(objective_only)
     finally:
       self.one_h_linearisation = old_func
 
@@ -313,9 +320,17 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+    for (i,r) in enumerate(self.shared_rotating_adps):
+      if r.refine_angle:
+        olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
+          r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
     #ED stuff
     if self.std_observations:
       olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
+      aci.EDI.update_scales(self.one_h_linearisation,
+        self.weighting_scheme,
+        self.xray_structure, self.f_mask_data,
+        self.refinement.thickness)
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
@@ -388,6 +403,7 @@ class naive_iterations_with_damping_and_shift_limit(
     while self.n_iterations < self.n_max_iterations:
       t1 = time.time()
       self.reset_shifts()
+      self.non_linear_ls.actual.xray_structure.wavelength = self.parent.wavelength
       self.non_linear_ls.build_up()
       t2 = time.time()
       if self.has_gradient_converged_to_zero(): break

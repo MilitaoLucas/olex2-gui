@@ -321,6 +321,9 @@ class OlexRefinementModel(object):
           for atom_restraint in restraint['atoms']:
             if 'adp' in self._atoms[atom_restraint[0]]:
               i_seqs.append(atom_restraint[0])
+          if len( restraint['atoms']) > 0 and len(i_seqs) < 2:
+            print("Skipping invalid RIGU restraint - more than 2 anisotropic atoms expected")
+            continue
         else:
           i_seqs = [i[0] for i in restraint['atoms']]
 
@@ -670,8 +673,12 @@ if haveGUI:
   OV.registerFunction(SetFormulaFromInput)
 
 def ChooseLabelContent(cmd):
-  olx.Labels(**dict([(k, True) for k in cmd.split()]))
-  return ""
+  x = dict([(k, True) for k in cmd.split()])
+  if olx.GetVar('olex2.label_h', 'false') == 'true':
+    if not x:
+      x['l'] = True
+    x['h'] = True
+  olx.Labels(**x)
 OV.registerFunction(ChooseLabelContent)
 
 def FindZOfHeaviestAtomInFormula():

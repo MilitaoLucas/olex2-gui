@@ -71,7 +71,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIDE';help_ext=GUI_Side;1 -->
   <td width='23%'>
-    <b>GUI left/right</b>
+    <b>GUI Left/Right</b>
   </td>
     $+
     html.Snippet(GetVar(default_link),
@@ -194,7 +194,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Auto MORE';help_ext=Auto_MORE;1 -->
   <td width='23%'>
    <b>%Auto MORE%:</b>
   </td>
@@ -227,7 +227,7 @@
     <b>Start Olex2 in:</b>
   </td>
   <td width='55%'>
-     Where Olex2 will open after restart
+     Which tab Olex2 will open after restart
   </td>
   <td width='20%' align='right'>
      <input
@@ -251,7 +251,7 @@
     <b>%Solo Mode%:</b>
   </td>
   <td width='55%'>
-     Only one top-level tool open at a time
+     Only one top-level tool tab open at a time
   </td>
   <td width="22%" align='right'>
     $+
@@ -283,7 +283,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Modules-Update_Notification;1 -->
-  <td width='23%'><b>%Modules update%:</b></td>
+  <td width='23%'><b>%Modules Update%:</b></td>
   <td width='55%'>
     Display a notification dialogue when module updates available
   </td>
@@ -298,7 +298,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unit_Cell_Style;1 -->
-  <td width='23%'><b>%Unit cell style%:</b></td>
+  <td width='23%'><b>%Unit Cell Style%:</b></td>
     $+
     html.Snippet(GetVar(default_link),
       "value=Cylinder",
@@ -335,10 +335,10 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Enable-Network;1 -->
-  <td width='23%'><b>%Network operations%:</b></td>
+  <td width='23%'><b>%Network Operations%:</b></td>
   <td width='55%'>
-    Enable/Disable network operations including CheckCif, CSD deposition, modules installation and
-    updates, news banner. This does <b>not</b> control <a href="UpdateOptions">Olex2 update</a>.
+    Enable/Disable network operations including CheckCif, CSD deposition, module installation,
+    updates, and news banner. This does <b>not</b> control <a href="UpdateOptions">Olex2 update</a>.
   </td>
   <td width="22%" align='right'>$+
     html.Snippet("gui/snippets/input-checkbox", "name=settings_network",
@@ -371,16 +371,7 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX_DEBUG';help_ext=Diagnostics;1 -->
-  <td width='23%'>
-    <b>%Various%:</b>
-  </td>
-  <td align='left'>
-    <a href="spy.EditParams(user.diagnostics)">Diagnostics</a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=Diagnostics;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=OpenMP;1 -->
   <td width='23%'>
     <b>%OpenMP%:</b>
   </td>
@@ -393,7 +384,7 @@
    $-</td>
   </td>
   <td width='20%'>
-  Max. Memory(MB)
+  Max. Memory (MB)
   <td width="5%" align='right'>
     $+
     html.Snippet("gui/snippets/input-text", "name=openmp_mem",
