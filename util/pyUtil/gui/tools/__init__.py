@@ -1914,4 +1914,62 @@ def load_periodic_table():
   olex.m("legend false")
   olex.m('Freeze False')
 OV.registerFunction(load_periodic_table, False, 'gui.tools')
+
+
+def load_matplotlib():
+  try:
+    import matplotlib.pyplot as plt
+    return plt
+  except Exception as err:
+    if "No module named" in repr(err):
+      selection = olx.Alert("matplotlib not found",
+                            """Error: No working matplotlib installation found!.
+Do you want to install this now? Olex2 will restart.""", "YN", False)
+    if selection == 'Y':
+      pip("matplotlib==3.5.1")
+      olex.m("restart")
+    else:
+      print(err)
+    return
+
+def plot_xy(xy=[], filename= 'fred.png'):
+  filename = 'fred.png'
+  plt = load_matplotlib()
+  if not plt:
+    print("Matplotlib is not intalled, and the istallation attempt failed")
+    return  
+  
+  plt.style.use('seaborn-whitegrid')
+  xs = xy[0]
+  ys = xy[1]
+  #plt.xlabel(_format_mathplotlib_text(self.x_title), **afont)
+  #plt.ylabel(_format_mathplotlib_text(self.y_title), **afont)
+  #plt.title(_format_mathplotlib_text(self.title), **tfont, pad=40)
+  #if self.suptitle:
+  #  plt.suptitle(_format_mathplotlib_text(self.suptitle), **stfont, y=0.91)
+  plt.grid(True)
+  plt.plot(xs,
+           ys,
+           'o',
+           color='gray',
+           markersize=1, linewidth=0,
+           markerfacecolor='white',
+           markeredgecolor='gray',
+           markeredgewidth=1)
+  p = os.path.join(OV.FilePath(), filename)
+  plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+  olx.Shell(p)
+  plt.close()
+
+def pip(package):
+  import sys
+  sys.stdout.isatty = lambda: False
+  sys.stdout.encoding = sys.getdefaultencoding()
+  import pip
+  try:
+    from pip import main as pipmain
+  except:
+    from pip._internal import main as pipmain
+  pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
+OV.registerFunction(pip, False, "gui.tools.pip")
   
