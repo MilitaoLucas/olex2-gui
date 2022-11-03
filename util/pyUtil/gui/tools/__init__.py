@@ -1887,3 +1887,31 @@ def load_res_from_cif():
     olex.m("export")
   olex.m("reap %s" % reapfile)
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
+
+def set_style_and_scene(style=None, scene=None, src_dir=None, ):
+  if not src_dir:
+    src_dir = OV.GetParam('user.def_style_scene_src_dir')
+  if not style:  
+    style = OV.GetParam('user.def_style')
+  if not scene:  
+    scene = OV.GetParam('user.def_scene')
+  OV.SetParam('user.def_style', style)
+  OV.SetParam('user.def_scene', scene)
+  OV.SetParam('user.def_style_scene_src_dir', src_dir)
+  style_p = os.path.join(src_dir, style + ".glds")
+  scene_p = os.path.join(src_dir, scene + ".glsp")
+  olex.m("load style %s" %style_p)
+  olex.m("load scene %s" %scene_p)
+OV.registerFunction(set_style_and_scene, False, 'gui.tools')
+
+
+def load_periodic_table():
+  olex.m('Freeze True')
+  olx.Atreap(os.path.join(OV.DataDir(),'samples','Periodic Table', 'Periodic Table.cif'))
+  olex.m("mask bonds 0")
+  olex.m("rota 2 180")
+  olex.m("rota 3 90")
+  olex.m("legend false")
+  olex.m('Freeze False')
+OV.registerFunction(load_periodic_table, False, 'gui.tools')
+  
