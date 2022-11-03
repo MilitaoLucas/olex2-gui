@@ -993,6 +993,12 @@ user
     .type = str
   reference = ""
     .type = str
+  def_style_scene_src_dir = basedir()/etc/styles/
+    .type = str
+  def_style = 'default'
+    .type = str
+  def_scene = 'default'
+    .type = str
   brad = 10
     .type = int
   solo = True
@@ -1042,6 +1048,8 @@ user
     .type = str
   report_label_style = 0
     .type = int
+  edit_ins_atom_order = ins_atom
+    .type = str
   parts{
     keep_unique = True
       .type = bool
