@@ -1934,6 +1934,7 @@ Do you want to install this now? Olex2 will restart.""", "YN", False)
 
 def plot_xy(xy=[], filename= 'fred.png'):
   filename = 'fred.png'
+  sys.path.append(r"%s/site-packages" % OV.DataDir())
   plt = load_matplotlib()
   if not plt:
     print("Matplotlib is not intalled, and the istallation attempt failed")
