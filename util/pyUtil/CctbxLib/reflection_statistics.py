@@ -351,11 +351,15 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-        junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
-        f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
-        f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
-        # Currently i have to stick to ignoring omitted reflections, since they have no calculated value in the .tsc file
-        f_calc_omitted = None
+        try:
+          f_calc_merged = self.f_calc(miller_set=f_obs_merged, one_h_function=nrml_eqns.one_h_linearisation)
+          f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+          f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
+        except:
+          junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+          f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
+          print("WARNING! It was not possible to obtain all values of Fc values\n for the plot, so omitted values are skipped!")
+          f_calc_omitted = None
       else:
         f_calc_merged = self.f_calc(miller_set=f_obs_merged)
         f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
