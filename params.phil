@@ -785,7 +785,7 @@ routines requiring structure refinement
   map {
     source = *olex fcf cctbx
       .type = choice
-    type = *diff fcalc tomc fobs fcfmc PDF
+    type = *diff fcalc tomc fobs fcfmc PDF mask
       .type = choice
     PDF_second_order = True
       .type = bool

@@ -476,7 +476,11 @@ def plot_cube(name, color_cube):
   ma = mmm.max
   olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   iso = float((abs(mi)+abs(ma))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
@@ -551,7 +555,11 @@ def plot_cube_single(name):
   OV.SetVar('map_slider_scale',100)
   olex_xgrid.SetMinMax(min, max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   iso = float((abs(min)+abs(max))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
@@ -696,7 +704,11 @@ def plot_fft_map(fft_map):
   data = None
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   iso = float(-sigma*3.3)
   olex_xgrid.SetSurfaceScale(iso)
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
@@ -711,7 +723,11 @@ def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   olex_xgrid.SetMinMax(min_v, max_v)
-  olex_xgrid.InitSurface(True, dist)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, dist)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   olex.m("xgrid.RenderMode(line)")
   olex_xgrid.SetSurfaceScale(iso)
   olex_xgrid.SetVisible(True)
@@ -762,7 +778,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
         if tiny_pse.table(j).symbol() == atom_type:
           charge = j
           break
-      if charge == 200:
+      if charge == 200 and atom_type != "Q":
         print("ATOM NOT FOUND!")
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
@@ -854,8 +870,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     if OV.HasGUI():
       olx.gl.Basis(basis)
       olx.Freeze(frozen)
-      OV.Refresh()
-  if return_map==True:
+  if return_map == True:
     return diff_map
   write_map_to_cube(diff_map, "diff")
 
@@ -867,7 +882,6 @@ def adp_list_to_array(a: Sequence) -> np.ndarray:
 def adp_list_to_sigma_inv(adp: Sequence) -> np.ndarray:
   return linalg.inv(adp_list_to_array(adp))
 
-
 def digest_boolinput(i: Union[str, bool]) -> bool:
   if isinstance(i, bool):
     return i
@@ -878,7 +892,6 @@ def digest_boolinput(i: Union[str, bool]) -> bool:
       return True
   raise ValueError(f'Parameter {i!r} cannot be interpreted as boolean. '
                    f'Use "True" / "T" / "1" or "False" / "F" / "0" instead.')
-
 
 def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only_anh=True, do_plot=True, save_cube=False):
   second = digest_boolinput(second)
@@ -1235,6 +1248,36 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
 
 OV.registerFunction(calc_map, False, "NoSpherA2")
 
+def mask_map(resolution=0.1, return_map=False, use_f000=False):
+  cctbx_adapter = OlexCctbxAdapter()
+  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    f_mask = cctbx_adapter.load_mask()
+    if not f_mask:
+      OlexCctbxMasks()
+      if olx.current_mask.flood_fill.n_voids() > 0:
+        f_mask = olx.current_mask.f_mask()
+    if f_mask:
+      if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+        f_mask = f_mask.generate_bijvoet_mates()
+      f_mask = f_mask.common_set(f_sq_obs)
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
+  if use_f000 == True or use_f000 == "True":
+    f000 = float(olx.xf.GetF000())
+    mask_map = f_mask.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                              resolution_factor=1, grid_step=float(resolution),
+                              f_000=f000).apply_volume_scaling()
+  else:
+    mask_map = f_mask.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                              resolution_factor=1, grid_step=float(resolution)).apply_volume_scaling()
+  if return_map==True:
+    return mask_map
+  write_map_to_cube(mask_map, "mask")
+
+OV.registerFunction(mask_map, False, "NoSpherA2")
+
 def show_fft_map(resolution=0.1,map_type="diff",use_f000=False,print_peaks=False):
   if map_type == "diff":
     plot_fft_map(residual_map(resolution, return_map=True,print_peaks=print_peaks))
@@ -1245,6 +1288,8 @@ def show_fft_map(resolution=0.1,map_type="diff",use_f000=False,print_peaks=False
   elif map_type == "calc":
     plot_fft_map(calc_map(resolution,return_map=True,use_f000=use_f000))
   elif map_type == "tomc":
-    plot_fft_map(tomc_map(resolution,return_map=True,use_f000=use_f000))
+    plot_fft_map(tomc_map(resolution, return_map=True, use_f000=use_f000))
+  elif map_type == "mask":
+    plot_fft_map(mask_map(resolution, return_map=True, use_f000=use_f000))
 
 OV.registerFunction(show_fft_map, False, "NoSpherA2")
