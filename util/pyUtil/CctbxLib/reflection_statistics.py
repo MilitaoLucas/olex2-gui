@@ -25,7 +25,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     if self.reflections is None:
       raise RuntimeError("There was an error reading the reflection file.")
     self.graph = graph
-    twinning=self.olx_atoms.model.get('twin')
+    # twinning=self.olx_atoms.model.get('twin')
 
     bitmap = 'working'
     OV.CreateBitmap(bitmap)
@@ -53,7 +53,7 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     if self.reflections is None:
       raise RuntimeError("There was an error reading the reflection file.")
-    twinning=self.olx_atoms.model.get('twin')
+    #twinning=self.olx_atoms.model.get('twin')
     try:
       import iotbx.command_line.reflection_statistics
       import sys
@@ -450,8 +450,16 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
     else:
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(f_obs_filtered)
+        f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data() + f_mask_cs.data())
 
-    weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(OV.GetOSF())
     if binning == True:
       assert n_bins is not None
@@ -507,6 +515,16 @@ class normal_probability_plot(OlexCctbxAdapter):
       f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
     else:
       f_sq_obs, f_calc = self.get_fo_sq_fc()
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(f_sq_obs)
+        f_calc = f_calc.array(data=f_calc.data() + f_mask_cs.data())
+        
     f_obs = f_sq_obs.f_sq_as_f()
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
@@ -822,6 +840,5 @@ def cumulative_intensity_distribution(cctbx_adaptor,
   return statistics.cumulative_intensity_distribution(f_obs).xy_plot_info()
 
 def sys_absent_intensity_distribution(reflections):
-  f_obs = reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
   return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()
