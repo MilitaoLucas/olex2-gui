@@ -264,24 +264,6 @@
     $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CLOSE_SETTINGS';help_ext=Close_Settings;1 -->
-  <td width='23%'>
-    <b>%Close Settings%:</b>
-  </td>
-  <td width='55%'>
-     Solve, Refine and Report panels
-  </td>
-  <td width="22%" align='right'>
-    $+
-      html.Snippet("gui/snippets/input-checkbox",
-      "name=AUTO_CLOSE_SETTINGS_PANEL",
-      "checked=not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))",
-      "onclick=spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))",
-      )
-    $-
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Modules-Update_Notification;1 -->
   <td width='23%'><b>%Modules Update%:</b></td>
   <td width='55%'>
