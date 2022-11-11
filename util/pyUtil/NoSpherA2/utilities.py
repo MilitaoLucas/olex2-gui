@@ -10,6 +10,7 @@ from olexFunctions import OV
 import OlexVFS
 from PIL import ImageDraw, Image
 from ImageTools import IT
+from PilTools import timage
 
 try:
   from_outside = False
@@ -39,30 +40,33 @@ def run_with_bitmap(bitmap_text):
   return decorator
 
 def custom_bitmap(text):
-  bitmap_font = "DefaultFont"
-  bitmap = {
-    text: {'label': text,
-           'name': text,
-              'color': '#ff4444',
-              'size': (len(text) * 12, 32),
-              'font_colour': "#ffffff",
-              }
-  }
-  map = bitmap[text]
-  colour = map.get('color', '#ffffff')
-  name = map.get('name', 'untitled')
-  txt = map.get('label', '')
-  size = map.get('size')
-  image = Image.new('RGB', size, colour)
-  draw = ImageDraw.Draw(image)
-  IT.write_text_to_draw(draw,
-                        txt,
-                             top_left = (5, -1),
-                             font_name=bitmap_font,
-                             font_size=24,
-                             font_colour = map.get('font_colour', '#000000')
-                             )
-  OlexVFS.save_image_to_olex(image, name, 2)
+  
+  timage.info_bitmaps(timage, text, '#228822')
+  return
+  #bitmap_font = "DefaultFont"
+  #bitmap = {
+    #text: {'label': text,
+          #'name': text,
+          #'color': '#44ff44',
+          #'size': ((len(text) * 12)*2, 32*2),
+          #'font_colour': "#ffffff",
+          #}
+  #}
+  #map = bitmap[text]
+  #colour = map.get('color', '#ffffff')
+  #name = map.get('name', 'untitled')
+  #txt = map.get('label', '')
+  #size = map.get('size')
+  #image = Image.new('RGB', size, colour)
+  #draw = ImageDraw.Draw(image)
+  #IT.write_text_to_draw(draw,
+                        #txt,
+                             #top_left = (5, -1),
+                             #font_name=bitmap_font,
+                             #font_size=24,
+                             #font_colour = map.get('font_colour', '#000000')
+                             #)
+  #OlexVFS.save_image_to_olex(image, name, 2)
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
