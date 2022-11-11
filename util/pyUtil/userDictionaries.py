@@ -213,10 +213,11 @@ class LocalList:
         self.addToLocalList(diffractometer,'diffractometers')
       self.dictionary['diffractometers'].setdefault(diffractometer, {'cif_def':'?'})
       self.dictionary['diffractometers'][diffractometer]['cif_def'] = filepath
-      saveDict = {'diffractometers':self.dictionary['diffractometers']}
-      saveLocalDictionary(saveDict)
     else:
-      print("The file specified does not exist")
+      self.dictionary['diffractometers'].setdefault(diffractometer, {'cif_def':'?'})
+      self.dictionary['diffractometers'][diffractometer]['cif_def'] = "?"
+    saveDict = {'diffractometers':self.dictionary['diffractometers']}
+    saveLocalDictionary(saveDict)
     return ''
 
   def getDiffractometerDefinitionFile(self,diffractometer):
@@ -298,6 +299,8 @@ class Persons:
     if not id:
       return retStr
     person = self.get_person(id)
+    if not person:
+      return "No DB!"
     if item in ('phone','email','address', 'orchid_id'):
       if item == "address":
         retStr = person.get_affiliation().get_address()
@@ -337,6 +340,8 @@ class Persons:
       return person(1)
     else:
       cursor = DBConnection().conn.cursor()
+      if cursor.rowcount == -1:
+        return None
       sql = "SELECT * FROM person WHERE id = %s" %(id)
       cursor.execute(sql)
       return person(cursor.fetchone())
