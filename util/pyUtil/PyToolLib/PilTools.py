@@ -2432,6 +2432,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("anisH", (7, 7))
     iconIndex.setdefault("mask_same", (8, 5, {'border':False, 'colourise':self.params.red.rgb } ))
     iconIndex.setdefault("mask_ok", (8, 5, {'border':False, 'colourise':self.params.green.rgb } ))
+    #iconIndex.setdefault("mask_same", (3, 3, {'border':False, 'colourise':self.params.red.rgb } ))
+    #iconIndex.setdefault("mask_ok", (3, 3, {'border':False, 'colourise':self.params.green.rgb } ))
 
     also_make_small_icons_l = ['open']
 
@@ -3696,33 +3698,44 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IT.resize_skin_logo(self.width)
     return "Done"
 
-  def info_bitmaps(self):
-
+  def info_bitmaps(self, specific=None, colour='#ff4444'):
+    factor = 4
     if olx.CurrentLanguage() == "Chinese":
-      font_size = 24
-      top = 4
+      font_size = 24 * factor
+      top = 4  * factor
     else:
-      font_size = 24
-      top = -1
+      font_size = 24  * factor
+      top = -1  * factor
 
     info_bitmap_font = "DefaultFont"
-    info_bitmaps = {
+
+    if specific:
+      info_bitmaps = {
+        specific:{'label':'%s' %specific,
+                'name':'%s' %specific,
+                'color':'%s' %colour,
+                'size':((len(specific)*12 * factor, 32 * factor)),
+                'font_colour':"#ffffff",
+                }
+        }
+    else:
+      info_bitmaps = {
       'refine':{'label':'Refining',
                 'name':'refine',
                 'color':'#ff4444',
-                'size':(128, 32),
+                'size':(128 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                 },
       'solve':{'label':'Solving',
                'name':'solve',
                'color':'#ff4444',
-               'size':(128, 32),
+               'size':(128 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                },
       'working':{'label':'Working',
                 'name':'working',
                 'color':'#ff4444',
-                'size':(128, 32),
+                'size':(128 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                 },
                 }
@@ -3736,11 +3749,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw = ImageDraw.Draw(image)
       IT.write_text_to_draw(draw,
                                  txt,
-                                 top_left = (5, top),
+                                 top_left = (5 * factor, top),
                                  font_name=info_bitmap_font,
                                  font_size=font_size,
                                  font_colour = map.get('font_colour', '#000000')
                                )
+      image = IT.resize_image(image, (size[0]/factor, size[1]/factor), name=name)
       OlexVFS.save_image_to_olex(image, name, 2)
 
 
