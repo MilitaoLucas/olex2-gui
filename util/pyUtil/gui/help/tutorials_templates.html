@@ -4,10 +4,9 @@ END
 
 t:all_tutorials_preamble{
 BEGIN
-#set:bg_colour=gui.html.bg_colour
-#set:font_colour=gui.html.font_colour
-
-set:font_colour_code=#aaaaff
+set:bg_colour=#222222
+set:font_colour=#ffffff
+set:button_bar_colour=#22222
 set:font_colour_bold=gui.html.highlight_colour
 c:html.ItemState index* 0
 c:html.ItemState index-home 1
@@ -21,10 +20,8 @@ c:lines 10
 
 t:pop_tutorials_system{
 <body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
-
 <!--+++++++++ SYSTEM BUTTONS-->
 <table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
-
 <tr><td><a href="shell %(src)s">Edit</a></td></tr>
 
 
@@ -70,10 +67,9 @@ t:pop_tutorials_system{
 t:pop_tutorials{
 <body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
 
-
 <table width='100%%'>
-  <tr bgcolor='#004080'>
-    <td bgcolor='#004080'>
+  <tr bgcolor='%(bg_colour)s'>
+    <td bgcolor='%(bg_colour)s'>
       <font color='white' size='6' >
       <b>
       %(title)s
@@ -84,19 +80,23 @@ t:pop_tutorials{
 </table>
 
 
-<table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+<table bgcolor='%(bg_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="0" cellspacing="1">
 <tr align='center'>
 
     $+
     html.Snippet(GetVar(default_link),
     "value=Back",
     "onclick=spy.demo.back_demo_item()",
+    "bgcolor=GetVar(gui.orange)",
+    "fgcolor=#ffffff",
     "fit=True",
     )$-
 
     $+
     html.Snippet(GetVar(default_link),
     "value=Cancel",
+    "bgcolor=GetVar(gui.red)",
+    "fgcolor=#ffffff",
     "onclick=spy.demo.cancel_demo_item()",
     "fit=True",
     )$-
@@ -104,6 +104,8 @@ t:pop_tutorials{
     $+
     html.Snippet(GetVar(default_link),
     "value=Next",
+    "bgcolor=GetVar(gui.dark_green)",
+    "fgcolor=#ffffff",
     "onclick=spy.demo.next_demo_item()",
     "fit=True",
     )$-

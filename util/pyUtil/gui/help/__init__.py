@@ -375,7 +375,16 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
     return_items = ""
 
   if md_box:
-    d = {'title':titleTxt.replace("_", " "), 'body':helpTxt, 'font_size_base':OV.GetParam('gui.help.base_font_size','3')}
+    d = {'title':titleTxt.replace("_", " "),
+         'body':helpTxt,
+         'font_size_base':OV.GetParam('gui.help.base_font_size','3'),
+         'font_colour':OV.GetParam('gui.help.font_colour').hexadecimal,
+         'bg_colour':OV.GetParam('gui.help.bg_colour').hexadecimal,
+         'h1_colour':OV.GetParam('gui.help.h1_colour').hexadecimal,
+         'h2_colour':OV.GetParam('gui.help.h2_colour').hexadecimal,
+         'h3_colour':OV.GetParam('gui.help.h3_colour').hexadecimal,
+         'highlight_colour':OV.GetParam('gui.help.highlight_colour').hexadecimal,
+         }
     template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
     p = OV.GetParam('gui.help.src', os.path.join(OV.BaseDir(), 'etc', 'help', 'gui'))
     txt = get_template(template)%d
