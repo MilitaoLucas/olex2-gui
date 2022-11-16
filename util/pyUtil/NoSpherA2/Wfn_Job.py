@@ -254,12 +254,18 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")        
         com.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     xyz.close()
     com.write(" \n")
-    for i in range(0,len(atom_list)):
+    for i in range(0, len(atom_list)):
       atom_type = atom_list[i] + " 0\n"
       com.write(atom_type)
       temp_atom = atom_list[i] + ":" + basis_name
@@ -457,6 +463,12 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")        
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -712,6 +724,12 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])

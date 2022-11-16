@@ -3698,8 +3698,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IT.resize_skin_logo(self.width)
     return "Done"
 
-  def info_bitmaps(self, specific=None, colour='#ff4444'):
-    factor = 4
+  def info_bitmaps(self, specific=None, colour='#ff4444', factor = 4):
     if olx.CurrentLanguage() == "Chinese":
       font_size = 24 * factor
       top = 4  * factor
@@ -3714,7 +3713,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         specific:{'label':'%s' %specific,
                 'name':'%s' %specific,
                 'color':'%s' %colour,
-                'size':((len(specific)*12 * factor, 32 * factor)),
+                'size':((len(specific) * 12 * factor, 32 * factor)),
                 'font_colour':"#ffffff",
                 }
         }
