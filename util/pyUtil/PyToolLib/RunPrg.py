@@ -825,27 +825,44 @@ class RunRefinementPrg(RunPrg):
     if refined_disp != []:
       wavelength = float(olx.xf.exptl.Radiation())
       from cctbx.eltbx import sasaki
-      tables = sasaki
+      from cctbx.eltbx import henke
+      from brennan import brennan
+      tables = [sasaki, henke, brennan()]
       unreasonable_fp = ""
       unreasonable_fdp = ""
       for sc, fp, fdp in refined_disp:
         e = str(sc.element_symbol())
-        table = tables.table(e)
-        factor = table.at_angstrom(wavelength)
-        if factor.fp() > 1.2 * fp or factor.fp() < 0.8 * fp:
+        table = []
+        for t in tables:
+          table.append(t.table(e))
+        fp_min_max = [135.0, 0.0]
+        fdp_min_max = [135.0, 0.0]
+        fp_average = 0.0
+        fdp_average = 0.0
+        for t in table:
+          temp = t.at_angstrom(wavelength)
+          fp_average += temp.fp()
+          fdp_average += temp.fdp()
+          fp_min_max = [min(fp_min_max[0], temp.fp()), max(fp_min_max[1], temp.fp())]
+          fdp_min_max = [min(fdp_min_max[0], temp.fdp()), max(fdp_min_max[1], temp.fdp())]
+        fp_average /= len(tables)
+        fdp_average /= len(tables)
+        fpdiff = (fp_min_max[1] - fp_min_max[0])
+        fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
+        if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:
           if unreasonable_fp == "":
             unreasonable_fp += sc.label
           else:
             unreasonable_fp += "," + sc.label
-        if factor.fdp() > 1.2 * fdp or factor.fdp() < 0.8 * fdp:
+        if fdp_average + 2 * fdpdiff < fdp or fdp_average - 2 * fdpdiff > fdp:
           if unreasonable_fdp == "":
             unreasonable_fdp += sc.label
           else:
             unreasonable_fdp += "," + sc.label
       if unreasonable_fdp != "":
-        self.refinement_has_failed.append("%s has unreasonable f''" % unreasonable_fdp)
+        self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp)
       if unreasonable_fp != "":
-        self.refinement_has_failed.append("%s has unreasonable f'" % unreasonable_fp)
+        self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp)
 
   def check_mu(self):
     try:

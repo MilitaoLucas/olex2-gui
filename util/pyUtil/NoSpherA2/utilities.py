@@ -25,7 +25,7 @@ def scrub(cmd):
   return log.endListen()
 
 def run_with_bitmap(bitmap_text):
-  custom_bitmap(bitmap_text)
+  timage.info_bitmaps(timage, bitmap_text, '#ff4444')
   def decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -38,35 +38,6 @@ def run_with_bitmap(bitmap_text):
         OV.DeleteBitmap(bitmap_text)
     return wrapper
   return decorator
-
-def custom_bitmap(text):
-  
-  timage.info_bitmaps(timage, text, '#228822')
-  return
-  #bitmap_font = "DefaultFont"
-  #bitmap = {
-    #text: {'label': text,
-          #'name': text,
-          #'color': '#44ff44',
-          #'size': ((len(text) * 12)*2, 32*2),
-          #'font_colour': "#ffffff",
-          #}
-  #}
-  #map = bitmap[text]
-  #colour = map.get('color', '#ffffff')
-  #name = map.get('name', 'untitled')
-  #txt = map.get('label', '')
-  #size = map.get('size')
-  #image = Image.new('RGB', size, colour)
-  #draw = ImageDraw.Draw(image)
-  #IT.write_text_to_draw(draw,
-                        #txt,
-                             #top_left = (5, -1),
-                             #font_name=bitmap_font,
-                             #font_size=24,
-                             #font_colour = map.get('font_colour', '#000000')
-                             #)
-  #OlexVFS.save_image_to_olex(image, name, 2)
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
@@ -291,6 +262,7 @@ def get_ncen():
 OV.registerFunction(get_nmo,True,'NoSpherA2')
 OV.registerFunction(get_ncen, True, 'NoSpherA2')
 
+@run_with_bitmap("Combining .tsc")
 def combine_tscs(match_phrase="_part_", no_check=False):
   gui.get_default_notification(txt="Combining .tsc files", txt_col='black_text')
   args = []
@@ -321,7 +293,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     from os import walk
     _, _, filenames = next(walk(OV.FilePath()))
     for f in filenames:
-      if match_phrase in f and ".tsc" in f:
+      if match_phrase in f and (".tsc" in f or ".tscb" in f) :
         args.append(os.path.join(OV.FilePath(), f))
   else:
     print("ERROR! Please make sure threre is a match phrase to look for tscs!")
@@ -357,8 +329,12 @@ def combine_tscs(match_phrase="_part_", no_check=False):
           if OV.HasGUI():
             olx.Refresh()
 
-  tsc_dst = os.path.join(OV.FilePath(),sfc_name + "_total.tsc")
-  shutil.move(os.path.join(OV.FilePath(),"combined.tsc"),tsc_dst)
+  if os.path.exists("combined.tsc"):
+    tsc_dst = sfc_name + "_total.tsc"
+    shutil.move("combined.tsc", tsc_dst)
+  elif os.path.exists("combined.tscb"):
+    tsc_dst = sfc_name + "_total.tscb"
+    shutil.move("combined.tscb", tsc_dst)
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
