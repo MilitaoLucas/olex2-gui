@@ -323,8 +323,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if file.endswith(".tsc") or file.endswith(".tscb") or file.endswith(".wfn") or file.endswith(".wfx") or file.endswith(".ffn") or file.endswith(".gbw") or file.endswith(".fchk"):
             shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
 
-    olex.m("CifCreate")
-
     parts = OV.ListParts()
     if parts != None:
       parts = list(parts)
@@ -340,15 +338,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         cif = True
       elif wfn_code == "DISCAMB":
         cif = True
-      olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
 
     if nr_parts > 1:
-      #groups = []
-      #for x in range(nr_parts):
-      #  if (parts[x] != 0): 
-      #    groups.append([])
       wfn_files = []
       need_to_combine = False
       need_to_partition = False
@@ -356,6 +349,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print("Calcualtion from wfn with disorder not possible, sorry!\n")
         return
       groups_counter = 0
+      # olex.m("CifCreate")
+      olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))      
       for i in range(nr_parts):
         if parts[i] == 0:
           groups_counter+=1
@@ -370,7 +365,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           pass
         atom_loop_reached = False
         out_cif = open(os.path.join(self.wfn_job_dir,"%s.cif"%(OV.ModelSrc())),"w")
-        with open(os.path.join(OV.FilePath(),"%s.cif" %(OV.ModelSrc())),"r") as incif:
+        with open(os.path.join(self.jobs_dir, "%s.cif" % (OV.ModelSrc())), "r") as incif:
           for line in incif:
             if "_atom_site_disorder_group" in line:
               atom_loop_reached = True
@@ -524,7 +519,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move(file,temp)
           wfn_files.append(wfn_fn)
       if need_to_partition == True:
-        cif_fn = os.path.join(OV.FilePath(), self.name + ".cif")
+        cif_fn = os.path.join(self.jobs_dir, self.name + ".cif")
         hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
         cuqct_tsc(wfn_files, hkl_fn, cif_fn, groups)
         if os.path.exists("experimental.tsc"):
@@ -538,12 +533,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         #Too lazy to properly do it...
         if os.path.exists(self.name + ".tsc"):
           shutil.move(self.name + ".tsc", self.name + "_part_999.tsc")
+        if os.path.exists(self.name + ".tscb"):
+          shutil.move(self.name + ".tscb", self.name + "_part_999.tscb")
         combine_tscs()
       
     else:
       # Check if job folder already exists and (if needed) make the backup folders
       self.tidy_wfn_jobs_folder()
-
+      # olex.m("CifCreate")
+      olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
       if wfn_code == "DISCAMB":
@@ -618,7 +616,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               print("No usefull wavefunction found!")
               return False
             hkl_fn = path_base + ".hkl"
-            cif_fn = os.path.join(OV.FilePath(), self.name + ".cif")
+            cif_fn = path_base + ".cif"
             cuqct_tsc(wfn_fn, hkl_fn, cif_fn, [-1000])
             if os.path.exists("experimental.tsc"):
               shutil.move("experimental.tsc", self.name + ".tsc")
@@ -1020,6 +1018,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False  # If any atoms are missing this basis set is not OK
     return True  # Only true if all atom searches were succesfull
 
+@run_with_bitmap('Running DISCAMB')
 def discamb(folder, name, discamb_exe):
   move_args = []
   move_args.append(discamb_exe)
