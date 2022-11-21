@@ -349,8 +349,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print("Calcualtion from wfn with disorder not possible, sorry!\n")
         return
       groups_counter = 0
-      # olex.m("CifCreate")
-      olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))      
+      olex.m("CifCreate_4NoSpherA2")
+      shutil.move(self.name + ".cif_NoSpherA2", os.path.join(self.jobs_dir, self.name + ".cif"))
+      #olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
       for i in range(nr_parts):
         if parts[i] == 0:
           groups_counter+=1
@@ -540,8 +541,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       # Check if job folder already exists and (if needed) make the backup folders
       self.tidy_wfn_jobs_folder()
-      # olex.m("CifCreate")
-      olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
+      olex.m("CifCreate_4NoSpherA2")
+      shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
+      #olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
       if wfn_code == "DISCAMB":
