@@ -8,7 +8,7 @@
     %Type%
   </td>
   <td name=IMAGE_BITMAP_TYPE width='13%'>
-    <font size="$GetVar('HtmlFontSizeControls')">
+    <font 
     <input
       type="combo"
       height="GetVar('HtmlComboHeight')"
@@ -212,8 +212,8 @@
       items="'#aaaaaa;#bbbbbb;#5599ff;#000000'"
       valign='left'
       name="TRIM_BORDER_COLOUR"
-      value='spy.GetParam(snum.image.trim_border_colour)'
-      onchange='spy.changeBoxColour(TRIM_BORDER_COLOUR_SAMPLE,html.GetValue(~name~))>>spy.SetParam(snum.image.trim_border_colour,html.GetValue(~name~))'
+      value='spy.GetParam(user.image.trim_border_colour)'
+      onchange='spy.changeBoxColour(TRIM_BORDER_COLOUR_SAMPLE,html.GetValue(~name~))>>spy.SetParam(user.image.trim_border_colour,html.GetValue(~name~))'
       manage
     >
     </font>
@@ -222,7 +222,7 @@
       <input
         type="text"
         width='100%'
-        bgcolor='$spy.GetParam(snum.image.trim_border_colour)'
+        bgcolor='$spy.GetParam(user.image.trim_border_colour)'
         name='TRIM_BORDER_COLOUR_SAMPLE'
     >
 
