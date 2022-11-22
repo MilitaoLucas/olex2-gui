@@ -1644,8 +1644,15 @@ class ImageTools(FontInstances):
       retVal = False
     return retVal
 
-  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa', dry=False, target_size=None):
+  def trim_image(self, im, trimcolour=None, padding=None, border=None, border_col=None, dry=False, target_size=None):
     ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
+
+    if not padding:
+      padding = float(OV.GetParam('user.image.bitmap.trim_padding',1))
+    if not border:
+      border = float(OV.GetParam('user.image.bitmap.trim_border',1))
+    if not border_col:
+      border_col = OV.GetParam('user.image.trim_border_colour')
 
     from PIL import Image, ImageChops, ImageOps
     p = None

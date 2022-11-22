@@ -107,25 +107,21 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
 
   filesize = int(round(filesize,0))
-
+  
   if OV.GetParam('user.image.bitmap.trim'):
     temp_name = '%s_temp.bmp' %(filefull.strip("'"))
     temp_name = 'temp.bmp'
     try:
       olex.m('picta "%s" 1' %(temp_name))
-      padding = OV.GetParam('user.image.bitmap.trim_padding')
-      border = OV.GetParam('user.image.bitmap.trim_border')
-      colour = OV.GetParam('snum.image.trim_border_colour')
-      new_width, old_width = IT.trim_image(im=temp_name,  padding=padding, border=border, border_col=colour, dry=True)
+      new_width, old_width = IT.trim_image(im=temp_name, dry=True)
       target_size = filesize
       filesize = filesize * (old_width/new_width)
       olex.m('pict%s %s "%s" %s %s' %(pict, nbg, filefull, resolution, int(round(filesize,0))))
       if OV.GetParam('user.image.bitmap.transparent_background'):
-        trimcolor=(255,255,255,0)
+        trimcolour=(255,255,255,0)
       else:
-        trimcolor = None
-      IT.trim_image(im=filefull, trimcolour=trimcolor, padding=padding,
-                     border=border, border_col=colour, target_size=target_size)
+        trimcolour = None
+      IT.trim_image(im=filefull, trimcolour=trimcolour, target_size=target_size)
     finally:
       if os.path.exists(temp_name):
         os.unlink(temp_name)
