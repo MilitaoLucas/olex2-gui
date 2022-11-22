@@ -1,4 +1,4 @@
-﻿<LightModel Ambient="4278190080" ClearColor="4281413937" Flags="6"
+<LightModel Ambient="4278190080" ClearColor="4281413937" Flags="6"
  <Light0 Ambient="5723991" Attenuation="4278190335" Diffuse="15395562" Enabled="true" Position="-1.000,1.000,48.000,0.000" Specular="16777215" SpotCutoff="180" SpotDirection="4278190080" SpotExponent="0">
  <Light1 Ambient="0" Attenuation="4278190335" Diffuse="0" Enabled="false" Position="0.000,64.000,0.000,1.000" Specular="16777215" SpotCutoff="180" SpotDirection="4278190335" SpotExponent="0">
  <Light2 Ambient="2048292" Attenuation="4278190335" Diffuse="0" Enabled="false" Position="-1.000,-2.000,38.000,-2.000" Specular="4194304" SpotCutoff="56" SpotDirection="10.000,10.000,10.000,1.000" SpotExponent="0">
