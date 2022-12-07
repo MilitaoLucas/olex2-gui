@@ -196,6 +196,10 @@ class OlexCctbxAdapter(object):
           custom_fp_fdps[element] = sfac_dict['fpfdp']
         self._xray_structure.set_custom_inelastic_form_factors(
           custom_fp_fdps)
+      if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
+        if OV.GetParam("snum.refinement.program") == "olex2.refine":
+          custom_gaussians = {}
+          print("Custom gaussians will not be used for the refinement! Using 5-Gaussian Peng-1996")
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
         table=str(table),
@@ -1044,10 +1048,12 @@ OV.registerFunction(generate_sf_table, False, "test")
 
 def generate_DISP(table_name_, wavelength=None, elements=None):
   import olx
+  import olexex
+
   from cctbx.eltbx import attenuation_coefficient as attc
   if not elements:
-    formula = olx.xf.GetFormula('list')
-    elements = [x.split(':')[0] for x in formula.split(',')]
+    rm = olexex.OlexRefinementModel()
+    elements = rm.get_unique_types(use_charges=True)
   table_name = table_name_.lower()
   # user dir first
   anom_dirs = [os.path.join(olx.DataDir(), "anom"),
@@ -1114,31 +1120,59 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
 
 OV.registerFunction(generate_DISP, False, "sfac")
 
-def generate_ED_SFAC(table_file_name=None, force = False):
-  import olexex
-  sfac = olexex.OlexRefinementModel().model.get('sfac')
-  if sfac:
-    sfac_elms = set([x.lower() for x in sfac.keys()])
-  else:
-    sfac_elms = set()
-  formula = olx.xf.GetFormula('list')
-  elms = set([x.split(':')[0].lower() for x in formula.split(',')])
-  if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
-    return
-  def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SF.txt")
-  custom_table_file_name = os.path.join(olx.DataDir(), "ED", "SF.txt")
-  if not table_file_name or table_file_name == "auto":
-    if os.path.exists(custom_table_file_name):
-      table_file_name = custom_table_file_name
-    else:
-      table_file_name = def_table_file_name
-  else:
-    if not os.path.exists(table_file_name):
-      table_file_name = os.path.join(olx.DataDir(), "ED", table_file_name)
-      if not os.path.exists(table_file_name):
-        table_file_name = def_table_file_name
+def get_R_cov_Z_from_SFAC_file(table_file_name):
+  rv = {}
+  with open(table_file_name, 'r') as sfac:
+    for l in sfac.readlines():
+      l = l.strip()
+      if not l or l.startswith('#'):
+        continue
+      toks = l.split()
+      if len(toks) != 16:
+        continue
+      # normalise case
+      toks[1] = toks[1].upper()
+      if len(toks[1]) > 1:
+        toks[1] = toks[1][0] + toks[1][1].lower()
+      rv[toks[1]] = toks[-2:]
+  return rv
 
-  sfac_toks = []
+def convert_UCLA(ucla_in, sfac_out):
+  src_tab = os.path.join(olx.BaseDir(), "etc", "ED", "SFAC_Peng_1999.txt")
+  RZ = get_R_cov_Z_from_SFAC_file(src_tab)
+  with open(ucla_in, "r") as inp:
+    with open(sfac_out, "w") as out:
+      for l in inp.readlines():
+        if l.startswith('#'):
+          out.write(l)
+          continue
+        l = l.strip()
+        if not l: continue
+        toks = l.split(',')
+        if len(toks) < 14: continue
+        sfac = "SFAC" + " %s"*9
+        sfac = sfac %(toks[0],
+          toks[2], toks[7], toks[3], toks[8],
+          toks[4], toks[9], toks[5], toks[10])
+        sfac += " 0 0 0 0"
+        rz_key = toks[0]
+        if '-' in toks[0]:
+          rz_key = toks[0].split('-')[0]
+        elif toks[0].endswith('+'):
+          if len(toks[0]) == 3:
+            rz_key = toks[0][0:1]
+          if len(toks[0]) == 4:
+            rz_key = toks[0][0:2]
+        rz = RZ.get(rz_key, None)
+        if rz is None:
+          print("Could not locate covalent radius and Z for " + toks[0])
+          rz = [1, toks[1]]
+        sfac = sfac + " %s %s" %(rz[0], rz[1])
+        out.write(sfac + '\n')
+OV.registerFunction(convert_UCLA, False, "sfac")
+
+def read_SFAC_table(table_file_name):
+  rv = {}
   with open(table_file_name, 'r') as disp:
     for l in disp.readlines():
       l = l.strip()
@@ -1147,12 +1181,74 @@ def generate_ED_SFAC(table_file_name=None, force = False):
       toks = l.split()
       if len(toks) != 16:
         continue
-      if toks[1].lower() in elms:
-        if not force and toks[1].lower() in sfac_elms:
-          continue
-        sfac_toks.append(toks)
-        if len(sfac_toks) == len(elms):
-          break
+      el = toks[1]
+      if el.endswith('+'):
+        el = el[0:len(el)-2] + '+' + el[-2]
+      if el.endswith('1'): # Olex2 convention
+        el = el[0:-1]
+      toks[1] = el[0].upper() + el[1:]
+      rv[el.lower()] = toks
+  return rv
+
+def generate_ED_SFAC(table_file_name=None, force = False):
+  import olexex
+  rm = olexex.OlexRefinementModel()
+  sfac = rm.model.get('sfac')
+  if sfac:
+    sfac_elms = set([x.lower() for x in sfac.keys()])
+  else:
+    sfac_elms = set()
+  elms = set([x.lower() for x in rm.get_unique_types(use_charges=True)])
+  if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
+    return
+  def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SFAC_Peng_1999.txt")
+  custom_table_file_name = os.path.join(olx.DataDir(), "ED", "SFAC.txt")
+  if not table_file_name or table_file_name == "auto":
+    tn = OV.GetParam("snum.smtbx.electron_table_name")
+    if tn == "Custom":
+      if os.path.exists(custom_table_file_name):
+        table_file_name = custom_table_file_name
+      else:
+        table_file_name = def_table_file_name
+    else:
+      if tn == "Peng-1996":
+        return
+      if tn=="None" or tn == "Peng-1999":
+        table_file_name = "SFAC_Peng_1999.txt"
+      elif tn == "UCLA-2022":
+        table_file_name = "SFAC_UCLA_2022.txt"
+      elif tn == "CAP-2022":
+        table_file_name = "SFAC_CAP_2022.txt"
+  if table_file_name != custom_table_file_name:
+    table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", table_file_name)
+
+  sfac_toks = []
+  sfacs = read_SFAC_table(table_file_name)
+  if not force:
+    elms = elms.difference(sfac_elms)
+  for elm in elms:
+    sfac = sfacs.get(elm, None)
+    elmt = None
+    if sfac is None:
+      if '+' in elm:
+        elmt = elm.split('+')[0]
+      elif '-' in elm:
+        elmt = elm.split('-')[0]
+      else:
+        print("Failed to locate SFAC for " + elm)
+        continue
+      sfac = sfacs.get(elmt, None)
+    if sfac is None:
+      print("Failed to locate SFAC for " + elm)
+    else:
+      if elmt is None:
+        sfac_toks.append(sfac)
+      else:
+        sf = [sfac[0]]
+        sf.append(elm[0].upper() + elm[1:])
+        sf.extend(sfac[2:])
+        sfac_toks.append(sf)
+
   for st in sfac_toks:
     olx.AddIns(*st)
 
