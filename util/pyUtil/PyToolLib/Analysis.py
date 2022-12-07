@@ -3490,7 +3490,8 @@ class HealthOfStructure():
       self.hkl_stats['Rint'] = 0
       for item in l:
         _ = olx.Cif(item)
-        if _ != "n/a":
+        # ? is for HKLF 5
+        if _ != "n/a" and _ != '?':
           self.hkl_stats['Rint'] = float(_)
         else:
           self.hkl_stats['Rint'] = 1

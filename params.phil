@@ -133,6 +133,8 @@ routines requiring structure refinement
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
+    electron_table_name = *None Custom 'Peng-1996' 'Peng-1999' 'UCLA-2022' 'CAP-2022'
+      .type = choice
     secondary_ch2_angle = idealise refine *shelxl
       .type = choice
     }

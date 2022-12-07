@@ -257,6 +257,22 @@ class OlexRefinementModel(object):
   def disorder_parts(self):
     return [atom['part'] for atom in self._atoms]
 
+  #evaluates unique types, using charges if needed
+  def get_unique_types(self, use_charges=False):
+    rv = set()
+    for a in self._atoms:
+      et = str(a['type'])
+      if use_charges:
+        charge = a['charge']
+        if charge > 0:
+          et = et + '+'
+        if charge < 0:
+          et = et + '-'
+        if abs(charge) > 1:
+          et += str(abs(charge))
+      rv.add(et)
+    return rv
+
   def iterator(self):
     for i, atom in enumerate(self._atoms):
       name = str(atom['label'])
