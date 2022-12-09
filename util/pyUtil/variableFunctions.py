@@ -306,24 +306,6 @@ def SaveStructureParams():
       olex.m("save gview '%s'" %oxvf)
 OV.registerFunction(SaveStructureParams)
 
-def update_CAP_ED():
-  ed_table = OV.get_cif_item("_diffrn_oxdiff_scatteringfactors_ed", "")\
-    .strip("\r\n ").replace(" ", "")
-  cur_ed_table = OV.get_cif_item("snum.smtbx.electron_table_name")
-  if ed_table and 'None' == cur_ed_table:
-    OV.SetParam('snum.smtbx.atomic_form_factor_table', 'electron')
-    if 'Peng' in ed_table:
-      if '1999' in ed_table:
-        OV.SetParam('snum.smtbx.electron_table_name', 'Peng-1999')
-      elif '1996' in ed_table:
-        OV.SetParam('snum.smtbx.electron_table_name', 'Peng-1996')
-    elif 'CAP' in ed_table:
-      OV.SetParam('snum.smtbx.electron_table_name', 'CAP-2022')
-    elif 'UCLA' in ed_table:
-      OV.SetParam('snum.smtbx.electron_table_name', 'UCLA-2022')
-  if OV.get_cif_item("snum.smtbx.electron_table_name") == 'None':
-    OV.SetParam('snum.smtbx.electron_table_name', 'Peng-1999')
-
 def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
@@ -340,6 +322,14 @@ def OnStructureLoaded(previous):
     olx.CifExtract(cif_name, mf_name)
 
   LoadStructureParams()
+
+  # set default ED params if needed
+  if (float(olx.xf.exptl.Radiation()) < 0.1):
+    sft = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+    ed_table = OV.GetParam("snum.smtbx.electron_table_name")
+    if "electron" != sft or (not ed_table or ed_table == 'None'):
+      OV.SetParam("snum.smtbx.atomic_form_factor_table", "electron")
+      OV.SetParam("snum.smtbx.electron_table_name", "Peng-1999")
 
   # Disable this altogether until it works properly.
   #if olx.IsFileType('oxm') == 'false':
