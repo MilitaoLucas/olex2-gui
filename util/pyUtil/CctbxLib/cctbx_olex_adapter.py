@@ -147,7 +147,7 @@ class OlexCctbxAdapter(object):
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
-        self.olx_atoms.iterator(),
+        self.olx_atoms.iterator(use_charges=True),
         restraints_iter=restraints_iter,
         constraints_iter=None, #self.olx_atoms.constraints_iterator()
         same_iter=same_iter
@@ -1063,7 +1063,7 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
   wavelength = float(wavelength)
   if wavelength < 0.1:
     generate_ED_SFAC(table_name_)
-    return
+    return "OK" #instruct Olex2 to skip any further actions
   afile = None
   for d in anom_dirs:
     if not os.path.exists(d):

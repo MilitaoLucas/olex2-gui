@@ -273,10 +273,18 @@ class OlexRefinementModel(object):
       rv.add(et)
     return rv
 
-  def iterator(self):
+  def iterator(self, use_charges=False):
     for i, atom in enumerate(self._atoms):
       name = str(atom['label'])
       element_type = str(atom['type'])
+      if use_charges:
+        charge = atom['charge']
+        if charge > 0:
+          element_type += '+'
+        if charge < 0:
+          element_type += '-'
+        if abs(charge) > 1:
+          element_type += str(abs(charge))
       xyz = atom['crd'][0]
       occu = atom['occu'][0]
       adp = atom.get('adp')

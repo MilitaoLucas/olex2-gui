@@ -264,7 +264,6 @@ class create_cctbx_xray_structure(object):
     from cctbx import anharmonic
     builder = builders.weighted_constrained_restrained_crystal_structure_builder(
       min_distance_sym_equiv=0.2)
-    unit_cell = uctbx.unit_cell(cell)
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
     u_star = shelx_adp_converter(builder.crystal_symmetry)
