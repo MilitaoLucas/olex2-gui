@@ -1226,6 +1226,8 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   sfacs = read_SFAC_table(table_file_name)
   if not force:
     elms = elms.difference(sfac_elms)
+  if elms or force:
+    print("Updating SFAC using: %s" %table_file_name)
   for elm in elms:
     sfac = sfacs.get(elm, None)
     elmt = None
