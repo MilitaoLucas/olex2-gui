@@ -17,6 +17,7 @@
       <pivot "_publ">
       <pivot "_chemical_name">  <pivot "_chemical_formula">  <pivot "_chemical">
       <pivot "_atom_type">
+      <pivot "_diffrn_oxdiff_scatteringfactors_ed">
       <pivot "_shelx_space_group">
       <pivot "_space_group">  <pivot "_space_group_symop">
       <pivot "_symmetry">
