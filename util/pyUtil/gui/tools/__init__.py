@@ -1934,6 +1934,7 @@ Do you want to install this now? Olex2 will restart.""", "YN", False)
 
 def plot_xy(xy=[], filename= 'fred.png'):
   filename = 'fred.png'
+  import numpy as np
   sys.path.append(r"%s/site-packages" % OV.DataDir())
   plt = load_matplotlib()
   if not plt:
@@ -1941,8 +1942,10 @@ def plot_xy(xy=[], filename= 'fred.png'):
     return  
   
   plt.style.use('seaborn-whitegrid')
-  xs = xy[0]
-  ys = xy[1]
+  xs = np.array(xy[0][1:])
+#  xs = xs[~is_outlier(xs)]
+  ys = np.array(xy[1][1:])
+#  ys = ys[~is_outlier(ys)]
   #plt.xlabel(_format_mathplotlib_text(self.x_title), **afont)
   #plt.ylabel(_format_mathplotlib_text(self.y_title), **afont)
   #plt.title(_format_mathplotlib_text(self.title), **tfont, pad=40)
@@ -1962,6 +1965,41 @@ def plot_xy(xy=[], filename= 'fred.png'):
   olx.Shell(p)
   plt.close()
 
+def is_outlier(points, thresh=3.5):
+  import numpy as np
+  """
+  Returns a boolean array with True if points are outliers and False 
+  otherwise.
+
+  Parameters:
+  -----------
+      points : An numobservations by numdimensions array of observations
+      thresh : The modified z-score to use as a threshold. Observations with
+          a modified z-score (based on the median absolute deviation) greater
+          than this value will be classified as outliers.
+
+  Returns:
+  --------
+      mask : A numobservations-length boolean array.
+
+  References:
+  ----------
+      Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+      Handle Outliers", The ASQC Basic References in Quality Control:
+      Statistical Techniques, Edward F. Mykytka, Ph.D., Editor. 
+  """
+  if len(points.shape) == 1:
+    points = points[:,None]
+  median = np.median(points, axis=0)
+  diff = np.sum((points - median)**2, axis=-1)
+  diff = np.sqrt(diff)
+  med_abs_deviation = np.median(diff)
+
+  modified_z_score = 0.6745 * diff / med_abs_deviation
+
+  return modified_z_score > thresh
+
+
 def pip(package):
   import sys
   sys.stdout.isatty = lambda: False
@@ -1973,4 +2011,72 @@ def pip(package):
     from pip._internal import main as pipmain
   pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
 OV.registerFunction(pip, False, "gui.tools.pip")
+
+
+
+def _clean_scrub(scrub):
+  t = " ".join(scrub).strip()
+  while "  " in t:
+    t = t.replace("  ", " ")
+  return t
+
+
+def get_polyhedra_tau():
+  ## A very basic implementation of the Geometry Index, currently only for 4-coordinate atoms. https://en.wikipedia.org/wiki/Geometry_index
+
+  cmd = "sel"
+  _ = gui.tools.scrub(cmd)[1:]
+  t = _clean_scrub(_)
+  if not " " in t:
+    central_atom = t
+    cmd = "sel bonds where '((xbond.a.selected==true) || (xbond.b.selected==true))'"
+    olex.m(cmd)
+    cmd = "sel bond atoms -u"
+    olex.m(cmd)
+    cmd = "sel"
+    t = _clean_scrub(gui.tools.scrub(cmd)[1:])
+  l = t.split()
+  l = list(dict.fromkeys(l))
+  if l[0] != central_atom:
+    l.remove(central_atom)
+    l.insert(0, central_atom)
+    
+  angles = []
+  order = int(len(l) - 1)
+  
+  if order == 4:
+    ks = [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+  else:
+    print("Sorry, only 4-coordinate Geometry indices are currently implemented")
+    return
+    
+  for pair in ks:
+    cmd = "sel -u"
+    olex.m(cmd)
+    for idx in pair:
+      cmd = "sel  %s %s" % (l[0], l[idx])
+      olex.m(cmd)
+      cmd = "sel atom bonds"
+    olex.m(cmd)
+    cmd = "sel atoms -u"
+    olex.m(cmd)
+    cmd = "sel"
+    _ = gui.tools.scrub(cmd)[1:]
+    angle = float(_[3].split(":")[1].split("(")[1].split(")")[0])
+    angles.append(angle)
+
+  cmd = "sel -u"
+  olex.m(cmd)
+
+  angles.sort(reverse=True)
+  for item in angles:
+    print(item)
+
+  if order == 4:
+    tau = -0.00709 * float(angles[0]) - 0.00709 * float(angles[1]) + 2.55
+    tau_prime = -0.00399 * float(angles[0]) - 0.01019 * float(angles[1]) + 2.55
+    print("tau = %.4f" % tau)
+    print("tau' = %.4f" % tau_prime)
+
+OV.registerFunction(get_polyhedra_tau, False, "tools")
   
