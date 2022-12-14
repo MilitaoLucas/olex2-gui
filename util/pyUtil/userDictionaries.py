@@ -340,8 +340,9 @@ class Persons:
       return person(1)
     else:
       cursor = DBConnection().conn.cursor()
-      if cursor.rowcount == -1:
-        return None
+      ## This one somehow crept in when I tried to fix the diffractometer/definition files thing on 11/11/22. Comment out on 12/12/22. HP
+      #if cursor.rowcount == -1:
+        #return None
       sql = "SELECT * FROM person WHERE id = %s" %(id)
       cursor.execute(sql)
       return person(cursor.fetchone())
