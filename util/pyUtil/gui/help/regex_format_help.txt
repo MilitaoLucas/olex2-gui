@@ -7,24 +7,30 @@ n \^ (.*?)  \^ n :: <table width='%s' border='0' cellpadding='0' cellspacing='1'
 ~ (.*?)( [^\~\~]* ) ~  :: <p><b><font color=$spy.GetParam(gui.html.highlight_colour)>\2</font></b>&nbsp;
 @ (.*?)( [^\@\@]* ) @ :: <tr bgcolor=\"$GetVar(HtmlTableFirstcolColour)\"><hr><b>\2</b><br>
 (&&) (.*?) (&&)  :: \2
-<h1> (.*?) </h1> :: <br><br><font size='4' color='#004080'><b>\1</b></font><br>
-<h2> (.*?) </h2> :: <br><br><font size='4' color='#004080'><b>\1</b></font><br>
-<h3> (.*?) </h3> :: <br><br><font size='3' color='#004080'><b>\1</b></font>: &nbsp;
+<h1> (.*?) </h1> :: <br><br><font size='4' color='%(h1_colour)s'><b>\1</b></font><br>
+<h2> (.*?) </h2> :: <hr><font size='4' color='%(h2_colour)s'><b>\1</b></font><br>
+<h3> (.*?) </h3> :: <br><br><font size='3' color='%(h3_colour)s'><b>\1</b></font>: &nbsp;
 
-\+\+ (.*?) \+\+ :: <font size='+1' color='#004080'>\1</font>
+\+\+ (.*?) \+\+ :: <font size='+1' color='%(font_colour)s'>\1</font>
 
-Keyboard: :: <br><b>Keyboard Command: </b>
+Keyboard: :: <br><b>Keyboard Command: </b> 
 Options: :: <br><b>Command Options: </b>
-Note: :: <br><br><b><font color='$spy.GetParam(gui.red)'>Note: </font></b>
+Note: :: <br><br><b><font color='%(highlight_colour)s'>Note: </font></b>
 
 
-URL\[\s*(?P<URL>.*?),(?P<TXT>.*?)] :: <b><a href='shell \g<URL>'><font color='#205c90'>\g<TXT></font></a></b>
+URL\[\s*(?P<URL>.*?),(?P<TXT>.*?)] :: <b><a href='shell \g<URL>'><font color=%(highlight_colour)s>\g<TXT></font></a></b>
 
-YOUTUBE :: <zimg src='$GetVar(help_path)/images/youtube_s.png'>
-VIMEO :: <zimg src='$GetVar(help_path)/images/vimeo_s.png'>
+YOUTUBE :: <zimg src='images/2039_s.png' height='14'>
+VIMEO :: <zimg src='images/vimeo_s.png'>
+PAPER :: <zimg src='images/paper.png'>
+MOL :: <zimg src='images/mol.png'>
+WEB :: <zimg src='images/web.png'>
+WIKIPEDIA :: <zimg src='images/wikipedia_w.png' height='14'>
+
+DOLLAR :: $
+
 
 <code>(.*?)</code> :: $+ html.Snippet(GetVar(default_link),"value=\1","hint=\1","onclick=\1","flat=True",td1=, td2=, "fgcolor=#ffffff","bgcolor=GetVar(gui.action_colour)")
-
 
 >> :: &#013;-
 

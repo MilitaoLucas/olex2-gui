@@ -11,3 +11,5 @@ TT (.*?)  TT :: <tr><td align='right'>$spy.MakeHoverButton('button-tutorial','sp
 <h3> (.*?) </h3> :: <br><br><font size='3' color='#004080'><b>\1</b></font>: &nbsp;
 Keyboard: :: <br><b>Keyboard Command: </b>
 Options: :: <br><b>Command Options: </b>
+
+Get\sIt\sNow :: ""<font color='#afafaf'> LOAD </font>""
