@@ -1113,7 +1113,7 @@ class Graph(ArgumentParser):
     top_left = (x, legend_top)
     box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
-    self.draw.rectangle(box, fill=self.pageColour)
+    #self.draw.rectangle(box, fill=(255,255,255,0))
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
   
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False, scale=None):
@@ -1715,10 +1715,10 @@ class Analysis(Graph):
       #htm_location = "fred.htm"
       #OlexVFS.write_to_olex(htm_location, f)
 
-    extraX = 29
-    extraY = 48
+    #extraX = 29
+    #extraY = 48
 
-    window = olx.GetWindowSize().split(',')
+    #window = olx.GetWindowSize().split(',')
 
     mouseX = int(olx.GetMouseX())
     mouseY = int(olx.GetMouseY())
@@ -3552,6 +3552,17 @@ class HealthOfStructure():
       target = "&#013;- ".join(l)
 
       OV.SetParam('snum.refinement.completeness.target', target)
+      
+      try:
+        multi = self.hkl_stats['TotalReflections']/self.hkl_stats['UniqueReflections']
+        self.hkl_stats.setdefault('multiplicity', multi)
+        target = ["Internal R factors. Click to see the graph", "-- Multiplicity = %.2f" %multi]
+        target = "&#013;- ".join(target)
+        OV.SetParam('snum.refinement.Rint.target', target)
+      except:
+        pass
+      
+      
 
     except Exception as err:
       print(err)
@@ -3872,7 +3883,11 @@ class HealthOfStructure():
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
     if item == "Completeness":
-      target = OV.GetParam('snum.refinement.completeness.target')
+      target = OV.GetParam('snum.refinement.%s.target' %item.lower())
+    elif item == "Rint":
+      target = ["Internal R factors. Click to see the graph", " Multiplicity = %.2f" %self.hkl_stats.get('multiplicity', 'unk')]
+      target = "&#013;- ".join(target)
+      OV.SetParam('snum.refinement.Rint.target', target)
     else:
       target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
 
@@ -4019,6 +4034,14 @@ class HealthOfStructure():
     font_s = IT.registerFontInstance("DefaultFont", int(font_size_s * scale))
 
     ## ADD THE Key
+
+    if item == "Rint":
+      try:
+        multi = self.hkl_stats.get('multiplicity', None)
+        if multi:
+          value_display_extra = "m=%.2f" %(multi)
+      except:
+        pass
 
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)
