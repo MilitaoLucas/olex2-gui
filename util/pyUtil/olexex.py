@@ -1390,7 +1390,7 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
         models.append(v)
     if len(models) > 1:
       return rv
-    flack = models[0]["_refine_ls_abs_structure_Flack"]
+    flack = models[0].get("_refine_ls_abs_structure_Flack", None)
     if flack:
       if type == 'html':
         rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
@@ -1400,7 +1400,6 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
 
   except Exception as err:
     print(err)
-    pass
   return rv
 OV.registerFunction(getReportExtraCIFItems)
 
