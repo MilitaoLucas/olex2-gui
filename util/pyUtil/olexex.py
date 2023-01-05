@@ -1733,13 +1733,22 @@ def GetHttpFile(f, force=False, fullURL = False):
   return retVal
 
 def EditIns():
+  stats_var_name = "merge_stats_updated"
+  OV.SetVar(stats_var_name, "false")
   if olx.EditIns() != "true":
     return
+  import olex_core
+  olex_core.GetHklStat()
+
   programSettings.doProgramSettings(
     OV.GetParam('snum.refinement.program'),
     OV.GetParam('snum.refinement.method'))
   if olx.IsFileType("ires") == "true":
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
+
+  if OV.GetVar(stats_var_name) == "true":
+    from Analysis import HOS_instance
+    HOS_instance.make_HOS()
   olx.html.Update()
 OV.registerFunction(EditIns)
 
