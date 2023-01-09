@@ -281,16 +281,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     f_time = None
 
     if (wfn_code != "DISCAMB") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
-      from cctbx_olex_adapter import OlexCctbxAdapter
-      ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
-      for sc in OlexCctbxAdapter().xray_structure().scatterers():
-        Z = sc.electron_count()
-        if (Z > 36) and ("x2c" not in basis) and ("jorge" not in basis) and ("ECP" not in basis) \
-          and ("STO" not in basis) and ("3-21" not in basis):
-          print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
-          OV.SetVar('NoSpherA2-Error',"Heavy Atom but no heavy atom basis set!")
-          return False
-        ne += Z
+      ne, adapter = calculate_number_of_electrons()
+      heavy = False
+      for sc in adapter.xray_structure().scatterers():
+        if sc.electron_count() > 36:
+          heavy = True
+      if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ECP" not in basis) \
+        and ("STO" not in basis) and ("3-21" not in basis):
+        print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
+        OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
+        return False      
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
         print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
@@ -537,10 +537,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if os.path.exists(self.name + ".tscb"):
           shutil.move(self.name + ".tscb", self.name + "_part_999.tscb")
         combine_tscs()
-      
+
     else:
       # Check if job folder already exists and (if needed) make the backup folders
       self.tidy_wfn_jobs_folder()
+
       olex.m("CifCreate_4NoSpherA2")
       shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
       #olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
@@ -931,7 +932,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           self.discamb_exe = _
         else:
           self.discamb_exe = olx.file.Which("%s.exe" %exe_pre)
-  
+
       else:
         _ = os.path.join(self.p_path, "%s" %exe_pre)
         if os.path.exists(_):
@@ -964,7 +965,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if max_Z <= 86 and max_Z > 36:
         return final_string + ";ECP-def2-SVP;ECP-def2-TZVP;ECP-def2-TZVPP;ECP-def2-QZVP;ECP-def2-QZVPP"
     return final_string
-  
+
   def disable_relativistics(self):
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     if "DKH" in basis_name:
@@ -1484,15 +1485,13 @@ If that does not throw an error message you were succesfull.""", "O", False)
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "DISCAMB" and input != "Thakkar IAM":
-      OV.SetParam('snum.NoSpherA2.h_aniso',True)
-      F000 = olx.xf.GetF000()
-      Z = olx.xf.au.GetZ()
-      nr_electrons= int(float(F000) / float(Z))
+      OV.SetParam('snum.NoSpherA2.h_aniso', True)
+      ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if mult == 0:
-        if (nr_electrons % 2 == 0):
+        if (ne % 2 == 0):
           OV.SetParam('snum.NoSpherA2.multiplicity',1)
-        elif (nr_electrons % 2 != 0):
+        elif (ne % 2 != 0):
           OV.SetParam('snum.NoSpherA2.multiplicity',2)
     else:
       OV.SetParam('snum.NoSpherA2.h_aniso', False)

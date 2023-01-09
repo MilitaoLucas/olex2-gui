@@ -1,3 +1,4 @@
+import math
 def sort(n,a,b):
   for i in range(n):
     for j in range(i+1,n):
@@ -39,7 +40,6 @@ def sigma0(x,xsect_barns,bind_nrg_au,xsect_int,energy_au,icount):
     return [icount,(xsect_int[icount] * bind_nrg_au* bind_nrg_au* bind_nrg_au/(x*x)-bind_nrg_au*xsect_barns*energy_au*energy_au)/prod]
 
 def sigma1(x,bind_nrg_au,xsect_int,energy_au,icount):
-  import math
   icount -= 1
   return [icount,0.5*xsect_int[icount] * bind_nrg_au* bind_nrg_au* bind_nrg_au/ (math.sqrt(x)*(energy_au*energy_au*x*x-bind_nrg_au*bind_nrg_au*x))]
 
@@ -53,7 +53,6 @@ def sigma2(x,xsect_barns,bind_nrg_au,xsect_int,energy_au,icount):
   elif abs(xsect_int[icount]-xsect_barns) < 1E-31:
     result = -2.0*xsect_int[icount]*bind_nrg_au/(x*x*x)
   else:
-    import math
     x3 = math.pow(x,3)
     denom = x3*math.pow(energy_au,2)-(math.pow(bind_nrg_au,2)/x)
     if abs(denom) < 1E-31:
@@ -63,7 +62,6 @@ def sigma2(x,xsect_barns,bind_nrg_au,xsect_int,energy_au,icount):
   return[icount,result]
 
 def sigma3(x,bind_nrg_au,xsect_int,energy_au,xsect_edge_au,icount):
-  import math
   icount -= 1
   x2 = math.pow(x,2)
   return [icount,math.pow(bind_nrg_au,3) * (xsect_int[icount]-xsect_edge_au*x2)/ (x2*(x2*math.pow(energy_au,2)-math.pow(bind_nrg_au,2)))]
@@ -86,7 +84,6 @@ def gauss(sigma,xsect_barns,bind_nrg_au,xsect_int,energy_au,xsect_edge_au,icount
   return aa
 
 def mcm(z,energy):
-  import math
   barns2electron = 1.43110541E-8
   p1 = math.log(energy)
   p2 = p1*p1
@@ -113,7 +110,7 @@ def aknint(log_energy, n, log_nrg, log_xsect):
   d = log_nrg[1] - log_nrg[0]
   if d > 0.0:
     i=0
-    while (log_nrg[i] < log_energy and i <= n):
+    while (i <= n and log_nrg[i] < log_energy):
       index = i
       i += 1
   else:
@@ -139,7 +136,222 @@ def aknint(log_energy, n, log_nrg, log_xsect):
 
 class brennan:
   def __init__(self):
+    self.au = 2.80028520539078E+7 #Factor between barns to bohr
+    self.alpha = 7.2973525693E-3 #fine structure constant alpha
+    self.inv_fine_struct = 1/self.alpha
+    self.fine_pi = self.inv_fine_struct / (2*math.pow(math.pi,2)) #fine structure constant in pre calculated form for later
+    self.inv_fine_struct /= 4*math.pi #Modification to save time later
+    self.keV_per_hartree = 0.027211386245988
+    self.angstrom2eV = 1.23984193 * 10000 # eV*µm * µm/Angstrom
     #List of Element labels to be converted into Z
+    
+    self.f_to_mu = 4208.031548 #mu in millimeter
+    self.barns_to_electrons = 1.43110541E-8
+    
+    self.amu = [0,0,                                                                                                                                                                                                                                                                                                                                                                                                     0,
+                6.94099998, 9.01218033,                                                                                                                                                                                                                                                                                                             10.8100004, 12.0109997, 14.0066996, 15.9994001, 18.9983997, 20.1790009,
+                22.9897995, 24.3050003,                                                                                                                                                                                                                                                                                                             26.9815006, 28.0855007, 30.9738007, 32.0600014, 35.4529991, 39.9480019,
+                39.0983009, 40.0800018,                                                                                                                                                                                     44.9558983, 47.8800011, 50.9415016, 51.9959984, 54.9379997, 55.8470001, 58.9332008, 58.6899986, 63.5460014, 65.3799973, 69.7200012, 72.5899963, 74.9216003, 78.9599991, 79.9039993, 83.8000031,
+                85.4677963, 87.6200027,                                                                                                                                                                                     88.9058990, 91.2200012, 92.9064026, 95.9400024, 98.0000000, 101.070000, 102.905502, 106.419998, 107.868202, 112.410004, 114.820000, 118.690002, 121.750000, 127.599998, 126.904503, 131.289993,
+                132.905396, 137.330002, 138.905502, 140.119995, 140.907700, 144.240005, 145.000000, 150.360001, 151.960007, 157.250000, 158.925400, 162.500000, 164.930405, 167.259995, 168.934204, 173.039993, 174.966995, 178.490005, 180.947906, 183.850006, 186.207001, 190.199997, 192.220001, 195.080002, 196.966507, 200.589996, 204.382996, 207.199997, 208.980392, 209.000000, 210.000000, 222.000000, 223.000000, 
+                226.025406, 227.027802, 232.038101, 231.035904, 238.028900]
+    
+    self.rho = [0,0,                                                                                                                                                                                                                                                                                                                                                                                                                         0,
+                0.532999992,1.84500003,                                                                                                                                                                                                                                                                                                             2.33999991, 2.25999999, 1.165000023E-03, 1.331000007E-03, 1.695999992E-03, 8.390999865E-04,
+                0.968999982,1.73500001,                                                                                                                                                                                                                                                                                                             2.69409990, 2.31999993, 1.82000005,      2.06999993,      3.214000026E-03, 1.659999951E-03,
+                0.860000014,1.54999995,                                                                                                                                                                                     2.98000002, 4.53000021, 6.09999990, 7.17999983, 7.42999983, 7.86000013, 8.89999962, 8.87600040, 8.93999958, 7.11199999, 5.87699986, 5.30700016, 5.71999979,      4.78000021,      3.10999990,      3.483999986E-03,
+                1.52900004, 2.53999996,                                                                                                                                                                                     4.45599985, 6.49399996, 8.55000019, 10.1999998, 11.4799995, 12.3900003, 12.3900003, 12.0000000, 10.4799995, 8.63000011, 7.30000019, 7.30000019, 6.67899990,      6.23000002,      4.92000008,      5.458000116E-03,
+                1.87000000, 3.50000000, 6.12699986, 6.63700008, 6.76100016, 6.99399996, 7.19999981, 7.51000023, 5.22800016, 7.87699986, 8.21399975, 8.52499962, 8.76900005, 9.03899956, 9.29399967, 6.95300007, 9.81099987, 13.2900000, 16.6240005, 19.2999992, 20.9799995, 22.5300007, 22.3899994, 21.4099998, 18.8500004, 13.5220003, 11.8299999, 11.3299999, 9.72999954, 9.30000019,      1.00000000,      9.229999851E-03, 1.00000000,
+                5.00000000, 10.0500002, 11.6999998, 15.3400002, 18.9200001]
+    
+    self.ray = [
+  -0.11908000,-0.937089980    ,-0.200540006,1.065899990E-02,
+   1.04770005,-8.517999947E-02,-0.403530002,2.693999931E-02,
+   1.34370005, 0.181559995    ,-0.423979998,2.661900036E-02,
+   2.00860000,-4.619200155E-02,-0.337020010,1.869400032E-02,
+   2.61859989,-0.207920000    ,-0.286280006,1.449699979E-02,
+   3.10859990,-0.260580003    ,-0.271970004,1.351800002E-02,
+   3.47760010,-0.215759993    ,-0.288870007,1.513100043E-02,
+   3.77239990,-0.148540005    ,-0.307119995,1.672999933E-02,
+   4.00719976,-5.609099939E-02,-0.332020015,1.879299991E-02,
+   4.20149994, 4.162500054E-02,-0.356750011,2.075899951E-02,
+   4.26370001, 0.134660006    ,-0.370079994,2.144699916E-02,
+   4.39400005, 0.137860000    ,-0.359539986,2.023800090E-02,
+   4.51989985, 0.140550002    ,-0.352440000,1.936900057E-02,
+   4.64680004, 0.162780002    ,-0.358559996,1.969300024E-02,
+   4.78529978, 0.168709993    ,-0.360379994,1.971499994E-02,
+   4.92710018, 0.165749997    ,-0.359420002,1.955099963E-02,
+   5.07219982, 0.149130002    ,-0.352860004,1.894400083E-02,
+   5.21080017, 0.135619998    ,-0.347209990,1.843300089E-02,
+   5.25589991, 0.188040003    ,-0.359620005,1.930800080E-02,
+   5.32380009, 0.206689999    ,-0.361660004,1.933299936E-02,
+   5.43940020, 0.200169995    ,-0.359059989,1.910299994E-02,
+   5.55039978, 0.197699994    ,-0.357690006,1.898699999E-02,
+   5.65509987, 0.199530005    ,-0.357490003,1.896899939E-02,
+   5.77400017, 0.203860000    ,-0.359699994,1.922200061E-02,
+   5.84600019, 0.213809997    ,-0.359719992,1.914599910E-02,
+   5.93289995, 0.225040004    ,-0.361750007,1.930199936E-02,
+   6.01480007, 0.237959996    ,-0.364060014,1.947499998E-02,
+   6.09200001, 0.252279997    ,-0.366569996,1.965899952E-02,
+   6.17740011, 0.273119986    ,-0.372359991,2.016399987E-02,
+   6.23400021, 0.284310013    ,-0.372139990,2.005299926E-02,
+   6.28299999, 0.291330010    ,-0.369390011,1.970300078E-02,
+   6.33900023, 0.291509986    ,-0.365640014,1.929000020E-02,
+   6.39750004, 0.288870007    ,-0.361750007,1.887900010E-02,
+   6.45639992, 0.286740005    ,-0.358790010,1.856200024E-02,
+   6.51440001, 0.286320001    ,-0.357030004,1.835599914E-02,
+   6.57130003, 0.287710011    ,-0.356310010,1.824700087E-02,
+   6.59749985, 0.302390009    ,-0.356750011,1.817099936E-02,
+   6.62200022, 0.324559987    ,-0.361649990,1.847999915E-02,
+   6.67100000, 0.325080007    ,-0.360610008,1.833299920E-02,
+   6.72279978, 0.323960006    ,-0.359459996,1.818899997E-02,
+   6.79010010, 0.311280012    ,-0.355230004,1.782299951E-02,
+   6.84600019, 0.302800000    ,-0.351130009,1.744000055E-02,
+   6.87599993, 0.326160014    ,-0.358969986,1.804799959E-02,
+   6.93139982, 0.334789991    ,-0.363499999,1.844299957E-02,
+   6.97550011, 0.346390009    ,-0.367790014,1.878800057E-02,
+   7.03219986, 0.349839985    ,-0.370099992,1.899800077E-02,
+   7.06449986, 0.363460004    ,-0.373600006,1.924799941E-02,
+   7.09859991, 0.372200012    ,-0.375340015,1.934799924E-02,
+   7.12709999, 0.382079989    ,-0.376850009,1.941500045E-02,
+   7.16090012, 0.385509998    ,-0.376480013,1.933000050E-02,
+   7.19670010, 0.385540009    ,-0.375050008,1.916100085E-02,
+   7.23460007, 0.382490009    ,-0.372709990,1.891900040E-02,
+   7.27409983, 0.377220005    ,-0.369729996,1.862799935E-02,
+   7.31470013, 0.370310009    ,-0.366279989,1.830299944E-02,
+   7.33489990, 0.376830012    ,-0.365709990,1.818400063E-02,
+   7.35809994, 0.379359990    ,-0.364100009,1.798200049E-02,
+   7.39529991, 0.369899988    ,-0.359380007,1.754100062E-02,
+   7.44259977, 0.371329993    ,-0.359640002,1.758500002E-02,
+   7.48350000, 0.368429989    ,-0.357690006,1.741000079E-02,
+   7.52330017, 0.366459996    ,-0.356050014,1.726200059E-02,
+   7.56220007, 0.365049988    ,-0.354510009,1.712100022E-02,
+   7.60020018, 0.364129990    ,-0.353089988,1.698900014E-02,
+   7.63710022, 0.363959998    ,-0.351920009,1.687799953E-02,
+   7.66940022, 0.359750003    ,-0.348899990,1.658900082E-02,
+   7.70800018, 0.365350008    ,-0.350030005,1.669299975E-02,
+   7.74189997, 0.367110014    ,-0.349429995,1.662700064E-02,
+   7.77470016, 0.369720012    ,-0.349130005,1.658600010E-02,
+   7.80639982, 0.373230010    ,-0.349150002,1.657100022E-02,
+   7.83710003, 0.377550006    ,-0.349440008,1.657800004E-02,
+   7.86660004, 0.382930011    ,-0.350129992,1.661700010E-02,
+   7.89139986, 0.386029989    ,-0.349759996,1.654800028E-02,
+   7.91800022, 0.387019992    ,-0.348879993,1.644100063E-02,
+   7.94530010, 0.387300014    ,-0.347930014,1.633000001E-02,
+   7.97270012, 0.387699991    ,-0.347160012,1.623700000E-02,
+   7.99940014, 0.388740003    ,-0.346729994,1.617500000E-02,
+   8.02569962, 0.390460014    ,-0.346659988,1.614500023E-02,
+   8.05150032, 0.393139988    ,-0.347050011,1.615699939E-02,
+   8.08080006, 0.395790011    ,-0.348030001,1.623499952E-02,
+   8.10519981, 0.400579989    ,-0.349339992,1.632600091E-02,
+   8.12539959, 0.405860007    ,-0.350329995,1.637700014E-02,
+   8.14400005, 0.408690006    ,-0.349799991,1.628899947E-02,
+   8.15999985, 0.418029994    ,-0.352329999,1.646599919E-02,
+   8.17490005, 0.427920014    ,-0.355069995,1.665999927E-02,
+   8.19359970, 0.434500009    ,-0.357190013,1.683500037E-02,
+   8.20750046, 0.443300009    ,-0.359880000,1.698499918E-02,
+   8.22550011, 0.451480001    ,-0.362060010,1.715599932E-02,
+   8.23349953, 0.460599989    ,-0.364410013,1.727100089E-02,
+   8.24709988, 0.468199998    ,-0.365990013,1.738899946E-02,
+   8.26220036, 0.474400014    ,-0.367009997,1.747700013E-02,
+   8.27840042, 0.479059994    ,-0.367659986,1.746200025E-02,
+   8.30169964, 0.480199993    ,-0.367549986,1.751700044E-02,
+   8.33010006, 0.478309989    ,-0.367249995,1.741299964E-02]
+    
+    self.comp = [
+ -2.15770006    , 1.32690001,-0.305620015,1.850200072E-02,
+ -2.56360006    , 2.02539992,-0.448709995,2.796900086E-02,
+ -1.08739996    , 1.03369999,-0.190380007,7.799500134E-03,
+-0.690079987    ,0.946449995,-0.171140000,6.514099892E-03,
+-0.791180015    , 1.21609998,-0.239089996,1.176900044E-02,
+-0.982879996    , 1.46689999,-0.293740004,1.559999958E-02,
+ -1.23689997    , 1.74510002,-0.354660004,1.986999996E-02,
+ -1.73679996    , 2.17689991,-0.449050009,2.647300065E-02,
+ -1.87570000    , 2.32019997,-0.475410014,2.806800045E-02,
+ -1.75510001    , 2.24230003,-0.447640002,2.558000013E-02,
+-0.967719972    , 1.61790001,-0.287189990,1.315299980E-02,
+-0.571609974    , 1.35500002,-0.224910006,8.301399648E-03,
+-0.439319998    , 1.30869997,-0.211649999,7.542099804E-03,
+-0.414970011    , 1.34870005,-0.222310007,8.419600315E-03,
+-0.476900011    , 1.46029997,-0.251329988,1.071999967E-02,
+-0.656419992    , 1.65409994,-0.298619986,1.429800037E-02,
+-0.718630016    , 1.74290001,-0.319429994,1.584300026E-02,
+-0.682110012    , 1.74280000,-0.317649990,1.564699970E-02,
+-0.344009995    , 1.49240005,-0.254139990,1.076800004E-02,
+-9.824199975E-02, 1.32830000,-0.213750005,7.730599958E-03,
+-0.159830004    , 1.39059997,-0.225850001,8.519499563E-03,
+-0.230570003    , 1.45850003,-0.239160001,9.385299869E-03,
+-0.308099985    , 1.52880001,-0.252770007,1.025700010E-02,
+-0.387639999    , 1.59730005,-0.266240001,1.115200017E-02,
+-0.247060001    , 1.49720001,-0.238780007,8.932099678E-03,
+-0.342379987    , 1.57249999,-0.253199995,9.858200327E-03,
+-0.428799987    , 1.64129996,-0.266009986,1.065099984E-02,
+-0.504360020    , 1.70039999,-0.276439995,1.126299985E-02,
+-0.570209980    , 1.75039995,-0.284550011,1.169299986E-02,
+-0.420529991    , 1.63399994,-0.253650010,9.272299707E-03,
+-0.358220011    , 1.60049999,-0.244910002,8.619000204E-03,
+-0.334380001    , 1.60239995,-0.245550007,8.712399751E-03,
+-0.339190006    , 1.62530005,-0.250779986,9.091000073E-03,
+-0.432929993    , 1.72829998,-0.277139992,1.117299963E-02,
+-0.448000014    , 1.76080000,-0.285100013,1.178599987E-02,
+-0.391810000    , 1.73010004,-0.276820004,1.128000021E-02,
+-0.128040001    , 1.53040004,-0.227400005,7.390299812E-03,
+ 7.991600037E-02, 1.38399994,-0.192220002,4.786099773E-03,
+ 6.290599704E-02, 1.41579998,-0.199709997,5.333099980E-03,
+ 3.666999936E-02, 1.45210004,-0.208120003,5.951399915E-03,
+ 2.022900007E-04, 1.49349999,-0.217419997,6.622400135E-03,
+-5.628599972E-02, 1.55780005,-0.233339995,7.855099626E-03,
+ 7.576200366E-02, 1.44949996,-0.204889998,5.647500046E-03,
+-4.249799997E-02, 1.54639995,-0.226469994,7.183799986E-03,
+-0.160400003    , 1.64859998,-0.250239998,8.938199840E-03,
+-0.267560005    , 1.73740005,-0.269879997,1.032499969E-02,
+-0.166470006    , 1.65789998,-0.248740003,8.662199602E-03,
+-5.166999996E-02, 1.57430005,-0.227650002,7.056499831E-03,
+-8.172799833E-03, 1.55869997,-0.224490002,6.857799832E-03,
+ 1.421499997E-02, 1.55750000,-0.224739999,6.914000027E-03,
+ 1.563600078E-02, 1.57179999,-0.228750005,7.263899781E-03,
+-4.075799882E-02, 1.64269996,-0.247899994,8.805699646E-03,
+-4.044200107E-02, 1.65600002,-0.251069993,9.048700333E-03,
+-2.824099967E-03, 1.64040005,-0.247639999,8.821399882E-03,
+ 0.184860006    , 1.50030005,-0.213330001,6.242599804E-03,
+ 0.344379991    , 1.38740003,-0.186360002,4.249200225E-03,
+ 0.409099996    , 1.33070004,-0.170880005,3.041099990E-03,
+ 0.439880013    , 1.30920005,-0.164550006,2.526399912E-03,
+ 0.449119985    , 1.30350006,-0.161840007,2.273899969E-03,
+ 0.437279999    , 1.31369996,-0.162870005,2.293800004E-03,
+ 0.405820012    , 1.33840001,-0.167229995,2.555700019E-03,
+ 0.355379999    , 1.37730002,-0.174940005,3.062099917E-03,
+ 0.280319989    , 1.44019997,-0.188639998,4.012300167E-03,
+ 0.273130000    , 1.43840003,-0.186140001,3.752399934E-03,
+ 0.257539988    , 1.45060003,-0.187590003,3.799299942E-03,
+ 0.242689997    , 1.46270001,-0.189099997,3.856299911E-03,
+ 0.228489995    , 1.47440004,-0.190559998,3.909000196E-03,
+ 0.215230003    , 1.48549998,-0.191909999,3.956499975E-03,
+ 0.202659994    , 1.49629998,-0.193230003,4.002300091E-03,
+ 0.202250004    , 1.48800004,-0.189140007,3.622600110E-03,
+ 0.197180003    , 1.50259995,-0.192469999,3.857499920E-03,
+ 0.199469998    , 1.50230002,-0.191389993,3.740099957E-03,
+ 0.196869999    , 1.50619996,-0.191400006,3.708899952E-03,
+ 0.191019997    , 1.51240003,-0.191919997,3.714499995E-03,
+ 0.189640000    , 1.50870001,-0.189569995,3.495800076E-03,
+ 0.116449997    , 1.57609999,-0.205530003,4.667299800E-03,
+ 7.199099660E-02, 1.61199999,-0.213190004,5.204999819E-03,
+ 4.201899841E-02, 1.63610005,-0.217960000,5.526700057E-03,
+ 1.569199935E-02, 1.65409994,-0.220980003,5.707500037E-03,
+ 0.114589997    , 1.58080006,-0.202969998,4.356900230E-03,
+ 0.147049993    , 1.56690001,-0.200350001,4.209000152E-03,
+ 0.182170004    , 1.54659998,-0.195789993,3.907700069E-03,
+ 0.189860001    , 1.56120002,-0.200929999,4.367699847E-03,
+ 0.194100007    , 1.57790005,-0.205149993,4.707800224E-03,
+ 0.195850000    , 1.59249997,-0.209830001,5.121100228E-03,
+ 0.196620002    , 1.60080004,-0.213799998,5.517200101E-03,
+ 0.193220004    , 1.61670005,-0.217370003,5.795000121E-03,
+ 0.189150006    , 1.62730002,-0.220500007,6.078000180E-03,
+ 0.181580007    , 1.64059997,-0.224219993,6.406699773E-03,
+ 0.170890003    , 1.65559995,-0.229699999,6.925200112E-03,
+ 0.144180000    , 1.69449997,-0.239150003,7.667399943E-03,
+ 0.108280003    , 1.74160004,-0.254099995,8.950600401E-03]
+    
     self.elements = ["DUMMY","H",                                                                                                                                              "He",
                      "Li","Be",                                                                                                                        "B", "C", "N", "O", "F","Ne",
                      "Na","Mg",                                                                                                                       "Al","Si", "P", "S","Cl","Ar",
@@ -303,8 +515,8 @@ class brennan:
                     [0,0,0,0,2,2,2,2,2,2,2,2,2,2],#In
                     [0,0,0,0,2,2,2,2,2,2,2,2,2,2],#Sn
                     [0,0,0,0,2,2,2,2,2,2,2,2,2,2],#Sb
-                    [0,0,0,0,2,2,2,2,2,2,2,2,2,2],#Te
-                    [0,0,0,0,2,2,2,2,2,2,2,2,2,2],#I
+                    [0,0,0,0,0,2,2,2,2,2,2,2,2,2],#Te
+                    [0,0,0,0,0,2,2,2,2,2,2,2,2,2],#I
                     [0,0,0,0,0,2,2,2,2,2,2,2,2,2],#Xe
                     [0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2],#Cs
                     [0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2],#Ba
@@ -629,7 +841,7 @@ class brennan:
                     [40.3988914    , 1.66940069    ,0.355599999    ,0.150239483    ,9.786649048E-02],
                     [40.3988914    , 1.66940069    ,0.355599999    ,0.150239483    ,9.786649048E-02]]
     # RB
-    self.nrg[37] = [[324.017792    ,  65.8664780   ,  30.3993988   ,  19.7595100   ,  15.9478130   , 15.2148991],
+    self.nrg[37] = [[324.017792    , 65.8664780    , 30.3993988    , 19.7595100    , 15.9478130    , 15.2148991 ],
                     [44.0225258    ,  8.94891739   ,  4.13019991   ,  2.68461657   ,  2.16674209   ,  2.06716514],
                     [39.7334671    ,  8.07703590   ,  3.72779989   ,  2.42305779   ,  1.95563912   ,  1.86576390],
                     [38.4650841    ,  7.81919861   ,  3.60879993   ,  2.34570813   ,  1.89321065   ,  1.80620444],
@@ -1682,7 +1894,7 @@ class brennan:
                     [20.6577549    ,0.853638947    ,0.181834131    ,7.682414353E-02,5.004349723E-02],
                     [12.9717808    ,0.536032021    ,0.114180483    ,4.824076593E-02,3.142419457E-02],
                     [9.23429012    ,0.381587923    ,8.128226548E-02,3.434140980E-02,2.237010561E-02]]
-    # U  ELEMEN][ #][2  =
+    # U
     self.nrg[92] = [[533.762024    , 240.655319    , 163.491714    , 131.810898    , 118.416931    ],
                     [463.810791    , 94.2836533    , 43.5148010    , 28.2844772    , 22.8282757    , 21.7791576],
                     [446.547974    , 90.7744598    , 41.8951988    , 27.2317429    , 21.9786186    , 20.9685478],
@@ -3049,28 +3261,24 @@ class brennan:
                     [0.688192070    , 10.4296017    , 105.452431    , 653.458801    , 2669.10205    , 21.7011681    , 3465.78979    , 66133.5859    , 1070067.00    , 5223840.00    ],
                     [0.585494578    , 12.4282341    , 169.844070    , 1460.21033    , 8725.37793    , 54.2631149    , 17623.1504    , 145704.859    , 1739226.38    , 11441855.0    ]]
 
-  def table(self, element):
-    return brenan_element_table(self, element)
-
   def at_angstrom(self, wavelength, element):
-    import math
-    au = 2.80028520539078E+7 #Factor between barns to bohr
-    alpha = 7.2973525693E-3 #fine structure constant alpha
-    inv_fine_struct = 1/alpha
-    fine_pi = inv_fine_struct / (2*math.pow(math.pi,2)) #fine structure constant in pre calculated form for later
-    inv_fine_struct /= 4*math.pi #Modification to save time later
+    """Generates the dispersion correction coefficients f' and f'' at a given wavelength for a given elemnt symbol
+
+    Args:
+        wavelength (float): Wavelength for which computation shoudl be carried out in Angstrom
+        element (string): Element symbol of the periodic table
+
+    Returns:
+        [float,float]: f' and f'' values calculated 
+    """
     z = self.elements.index(element)
-    if z >= len(self.n_orb):
-      raise ValueError("%s is not in the list" %element)
     #print("Element number is: "+str(z))
-    keV_per_hartree = 0.027211386245988
-    angstrom2eV = 1.23984193 * 10000 # eV*µm * µm/Angstrom
-    energy = angstrom2eV / wavelength / 1000 #convert wavelength to keV(division by 1000)
+    energy = self.angstrom2eV / wavelength / 1000 #convert wavelength to keV(division by 1000)
     #print("Energy in keV: "+str(energy))
     log_energy = math.log(energy)
-    energy_au = energy / keV_per_hartree #convert energy to a.u. through divison of keV per hartree
+    energy_au = energy / self.keV_per_hartree #convert energy to a.u. through divison of keV per hartree
     #print("Energy in a.u.: "+str(energy_au))
-    result = [0.0,0.0]
+    result = [0.0, 0.0]
     if z<3:
       result = mcm(z,energy)
     else:
@@ -3089,14 +3297,14 @@ class brennan:
         nrg_s = [0] * 11
         log_nrg = [0] * 11
 
-        bind_nrg_au = self.bind_nrg[z][i]/keV_per_hartree
+        bind_nrg_au = self.bind_nrg[z][i]/self.keV_per_hartree
         if self.funtype[z][i] == 0:
-          xsect_edge_au = self.xsc[z][i][10]/au
+          xsect_edge_au = self.xsc[z][i][10]/self.au
           nparms = 11
         else:
           nparms = 10
         for j in range(5):
-          xsect_int[j] = self.xsc[z][i][j+5]/au
+          xsect_int[j] = self.xsc[z][i][j+5]/self.au
           nrg_int[j] = self.nrg[z][i][j]
           nrg_s[j] = self.nrg[0][0][j]
         for j in range(nparms):
@@ -3120,44 +3328,188 @@ class brennan:
             i_zero += 1
           i_nxsect = nparms - i_zero - 1
           xsect_barns = aknint(log_energy,i_nxsect,log_nrg[i_zero:],log_xsect[i_zero:])
-          xsect_barns = math.exp(xsect_barns)/au
+          xsect_barns = math.exp(xsect_barns)/self.au
 
-          fpp_orb = inv_fine_struct * xsect_barns * energy_au #took /4pi to the top in inv_fine_struct
+          fpp_orb = self.inv_fine_struct * xsect_barns * energy_au #took /4pi to the top in inv_fine_struct
 
           var = energy_au-bind_nrg_au
           if var == 0.0:
             var = 1.0
-          fp_corr = -0.5 * xsect_barns * energy_au * fine_pi * math.log((energy_au + bind_nrg_au)/var)
+          fp_corr = -0.5 * xsect_barns * energy_au * self.fine_pi * math.log((energy_au + bind_nrg_au)/var)
 
         if self.bind_nrg[z][i] > energy and self.funtype[z][i] == 0:
-
-            fp_orb = gauss(3,xsect_barns,bind_nrg_au,xsect_int,energy_au,xsect_edge_au,icount) * fine_pi
-            fp_corr = 0.5 * xsect_edge_au * bind_nrg_au * bind_nrg_au * math.log((-bind_nrg_au+energy_au)/(-bind_nrg_au-energy_au)) / energy_au * fine_pi
+          fp_orb = gauss(3,xsect_barns,bind_nrg_au,xsect_int,energy_au,xsect_edge_au,icount) * self.fine_pi
+          fp_corr = 0.5 * xsect_edge_au * bind_nrg_au * bind_nrg_au * math.log((-bind_nrg_au+energy_au)/(-bind_nrg_au-energy_au)) / energy_au * self.fine_pi
         else:
-          if self.funtype[z][i] == 0:
-            fp_orb = gauss(0,xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * fine_pi
-          elif self.funtype[z][i] == 1:
-            fp_orb = gauss(1,xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * fine_pi
-          elif self.funtype[z][i] == 2:
-            fp_orb = gauss(2,xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * fine_pi
+          fp_orb = gauss(self.funtype[z][i],xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * self.fine_pi         
 
         result[0] += fp_orb + fp_corr
         result[1] += fpp_orb
-        #print("Orbital: "+"{:6d}".format(i)+" fp,fdp: "+"{:16.8e}".format(result[0])+"{:16.8e}".format(result[1])+" new parts: "+"{:16.8e}".format(fp_orb + fp_corr)+','+"{:16.8e}".format(fpp_orb)+" ORB Part: "+"{:16.8e}".format(fp_orb)+"{:16.8e}".format(fp_corr))
+        #print("Orbital: "+"{:2d}".format(i)+'/'+"{:1d}".format(self.funtype[z][i])+" fp,fdp:"+"{:16.8e}".format(result[0])+"{:16.8e}".format(result[1])+" this Orbital:"+"{:16.8e}".format(fp_orb + fp_corr)+"{:16.8e}".format(fpp_orb)+" ORB/CORR Part:"+"{:16.8e}".format(fp_orb)+"{:16.8e}".format(fp_corr))
 
       result[0] += self.total_cor[z]
-      #print("correction: "+str(self.total_cor[z]))
+      #print("Fprime corr:"+"{:25.8e}".format(self.total_cor[z]))
 
     return result
+
+  def get_mu_at_angstrom(self, wavelength, element):
+    """Generates linear absorption coefficient mu at a given wavelength
+
+    Args:
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        element (string): Element symbol in the periodic table
+
+    Returns:
+        mu (float): Linear absorption coefficient in barns/Atom
+    """
+    fp, fdp = self.at_angstrom(wavelength, element)
+    mu = self.convert_fdp_to_mu(wavelength, fdp, element)
+    return mu
+
+  def get_mu_pure_at_angstrom(self, wavelength, element):
+    """Generates linear absorption coefficient mu at a given wavelength without ray and comp contributions
+
+    Args:
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        element (string): Element symbol in the periodic table
+
+    Returns:
+        mu (float): Linear absorption coefficient in barns/Atom
+    """
+    fp, fdp = self.at_angstrom(wavelength, element)
+    energy = self.angstrom2eV / wavelength
+    mu = (fdp / (energy * self.barns_to_electrons))
+    return mu
+
+  def fp_fdp_mu_at_angstrom(self, wavelength, element):
+    """Generates f' f'' and linear absorption coefficient � at a given wavelength
+
+    Args:
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        element (string): Element symbol in the periodic table
+
+    Returns:
+        [fp,fdp,mu] (float): f', f" in electrons and Linear absorption coefficient in barns/Atom
+    """
+    fp, fdp = self.at_angstrom(wavelength, element)
+    mu = self.convert_fdp_to_mu(wavelength, fdp, element)
+    return [fp, fdp, mu]
+
+  def print_at_angstrom(self, wavelength, element):
+    """Generates linear absorption coefficient mu at a given wavelength
+
+    Args:
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        element (string): Element symbol in the periodic table
+    """
+    fp, fdp = self.at_angstrom(wavelength, element)
+    mu = self.get_mu_at_angstrom(wavelength, fdp, element)
+    print(f"{fp:16.7f} {fdp:16.7f} {mu:16.7f}")
+
+  def get_ray_at_angstrom_in_electrons(self, wl, element):
+    """Generates Rayleigh Scattering contribution at given wavelength
+
+    Args:
+        wl (float): incoming wavelength in angstrom
+        element (string): element symbol
+
+    Returns:
+        ray: Rayghleigh scattering contribution in electrons
+    """
+    z = self.elements.index(element) - 1
+    energy = self.angstrom2eV / wl
+    l_energy = math.log(energy/1000)
+    l_energy2 = l_energy * l_energy
+    l_energy3 = l_energy2 * l_energy
+    ray = math.exp(\
+        self.ray[z*4] \
+        + self.ray[z*4+1] * l_energy \
+        + self.ray[z*4+2] * l_energy2 \
+        + self.ray[z*4+3] * l_energy3
+      )
+    return ray * energy * self.barns_to_electrons
+  
+  def get_comp_at_angstrom_in_electrons(self,wl,element):
+    """Generates Compton Scattering contribution at given wavelength
+
+    Args:
+        wl (float): incoming wavelength in angstrom
+        element (string): element symbol
+
+    Returns:
+        comp: compton scattering contribution in electrons
+    """
+    z = self.elements.index(element) - 1
+    energy = self.angstrom2eV / wl
+    l_energy = math.log(energy/1000)
+    l_energy2 = l_energy * l_energy
+    l_energy3 = l_energy2 * l_energy
+    comp = math.exp(\
+        self.comp[z*4] \
+        + self.comp[z*4+1] * l_energy \
+        + self.comp[z*4+2] * l_energy2 \
+        + self.comp[z*4+3] * l_energy3
+      )
+    return comp * energy * self.barns_to_electrons
+  
+  def get_raycomp_at_angstrom(self,wl,element):
+    """Generates a list of Rayleigh and Compton scattering contribution at a given wavelength in Angstrom for a given element
+
+    Args:
+        wl (float): Wavelength of incoming X-ray in Angstrom
+        element (string): Label of the element
+
+    Returns:
+        [ray,comp]: reayleigh and compton scattering power in barns/atom
+    """
+
+    z = self.elements.index(element) - 1
+    energy = self.angstrom2eV / wl
+    l_energy = math.log(energy/1000)
+    l_energy2 = l_energy * l_energy
+    l_energy3 = l_energy2 * l_energy
+    comp = math.exp(\
+        self.comp[z*4] \
+        + self.comp[z*4+1] * l_energy \
+        + self.comp[z*4+2] * l_energy2 \
+        + self.comp[z*4+3] * l_energy3
+      )
+    ray = math.exp(\
+        self.ray[z*4] \
+        + self.ray[z*4+1] * l_energy \
+        + self.ray[z*4+2] * l_energy2 \
+        + self.ray[z*4+3] * l_energy3
+      )
+    return [ray,comp]
+
+  def convert_fdp_to_mu(self, wavelength, fdp, element):
+    """Generates Mu from given fdp at given wavelength
+
+    Args:
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        fdp (float): value of f'' at the given wavelength
+        element (string): Element symbol in the periodic table
+        
+    Returns:
+        mu (float): Linear absorption coefficient in barns/Atom
+    """
+    energy = self.angstrom2eV / wavelength
+    ray, comp = self.get_raycomp_at_angstrom(wavelength,element)
+    mu = (fdp/(energy * self.barns_to_electrons) + ray + comp)
+    return mu
+
 ## cctbx-like interface
 class brenan_element_table():
   class adapter():
-    def __init__(self, fp_fdp):
+    def __init__(self, fp_fdp, mu):
       self.value = fp_fdp
+      self.mu = mu
     def fp(self):
       return self.value[0]
     def fdp(self):
       return self.value[1]
+    def mu(self):
+      return self.mu
 
   def __init__(self, brennan_inst, element):
     self.brennan_inst = brennan_inst
@@ -3165,3 +3517,9 @@ class brenan_element_table():
 
   def at_angstrom(self, wavelength):
     return brenan_element_table.adapter(self.brennan_inst.at_angstrom(wavelength, self.element))
+
+  def mu_at_angstrom(self, wavelength):
+    return brenan_element_table.adapter(self.brennan_inst.get_mu_at_angstrom(wavelength, self.element))
+
+  def fdp_to_mu(self, wavelength, fdp):
+    return brenan_element_table.adapter(self.brennan_inst.convert_fdp_to_mu(wavelength, fdp, self.element))
