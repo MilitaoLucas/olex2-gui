@@ -1518,7 +1518,7 @@ ener = cf.kernel()"""
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, python_script)], creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                            os.path.join(p_path, python_script)])
 
     out_fn = None
     path = self.full_dir
