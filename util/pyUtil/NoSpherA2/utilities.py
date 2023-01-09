@@ -671,3 +671,12 @@ def make_quick_button_gui():
 ''' % d
   return t
 OV.registerFunction(make_quick_button_gui, False, "NoSpherA2")
+
+def calculate_number_of_electrons():
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
+  adapter = OlexCctbxAdapter()
+  for sc in adapter.xray_structure().scatterers():
+    Z = sc.electron_count()
+    ne += Z
+  return ne, adapter
