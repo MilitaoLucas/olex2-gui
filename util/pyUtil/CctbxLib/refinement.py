@@ -461,7 +461,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def data_to_parameter_watch(self):
     #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
-    data_all = self.reflections.f_sq_obs_filtered.size()
+    #data_all = self.reflections.f_sq_obs_filtered.size()
     data = self.reflections.f_sq_obs_merged.size()
     dpr = "%.2f" %(data/parameters)
     OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
@@ -474,10 +474,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #if not restraints:
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
-     #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
-    print("   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      ", file=log)
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
+     # %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
+    ref_method = OV.GetParam("snum.refinement.method")
+    if ref_method != "Levenberg-Marquardt":
+      print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
+      print("   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      ", file=log)
+      print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
+    else:
+      print("  -------  --------  --------  --------  --------------------  --------------------  --------------------  --------------", file=log)
+      print("   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U           Mu of LM      ", file=log)
+      print("  -------  --------  --------  --------  --------------------  --------------------  --------------------  --------------", file=log)
 
   def get_twin_fractions(self):
     rv = None
@@ -1326,13 +1332,13 @@ The following options were used:
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
     if pivot_neighbour is not None:
-     for a in group:
-       self.fixed_angles.setdefault((pivot_neighbour, pivot, a), 1)
+      for a in group:
+        self.fixed_angles.setdefault((pivot_neighbour, pivot, a), 1)
 
     if pivot is not None:
-     for i, a in enumerate(group):
-       for j in range(i+1, len(group)):
-         self.fixed_angles.setdefault((a, pivot, group[j]), 1)
+      for i, a in enumerate(group):
+        for j in range(i + 1, len(group)):
+          self.fixed_angles.setdefault((a, pivot, group[j]), 1)
 
     for a in group:
       ns = self.olx_atoms._atoms[a]['neighbours']
