@@ -135,33 +135,22 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     print_tabular = True
 
     if print_tabular:
+      header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
+      params = (self.n_current_cycle,
+          self.r1_factor(cutoff_factor=2)[0] * 100,
+          self.wR2() * 100,
+          self.goof(),
+          self.max_shift_esd,
+          '(' + self.max_shift_esd_item + ')',
+          max_shift_site[0],
+          '(' + max_shift_site[1].label + ')',
+          max_shift_u[0],
+          '(' + max_shift_u[1].label + ')',
+      )
       if hasattr(self.iterations_object,'mu'):
-        print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s  % 8.2e" % (
-          self.n_current_cycle,
-          self.r1_factor(cutoff_factor=2)[0] * 100,
-          self.wR2() * 100,
-          self.goof(),
-          self.max_shift_esd,
-          '(' + self.max_shift_esd_item + ')',
-          max_shift_site[0],
-          '(' + max_shift_site[1].label + ')',
-          max_shift_u[0],
-          '(' + max_shift_u[1].label + ')',
-          self.iterations_object.mu
-        ), file=log)
-      else:
-        print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s" % (
-          self.n_current_cycle,
-          self.r1_factor(cutoff_factor=2)[0] * 100,
-          self.wR2() * 100,
-          self.goof(),
-          self.max_shift_esd,
-          '(' + self.max_shift_esd_item + ')',
-          max_shift_site[0],
-          '(' + max_shift_site[1].label + ')',
-          max_shift_u[0],
-          '(' + max_shift_u[1].label + ')',
-        ), file=log)
+        header += "  % 8.2e"
+        params += (self.iterations_object.mu,)
+      print(header %params, file=log)
 
     else:
       print("wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
