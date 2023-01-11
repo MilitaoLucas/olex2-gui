@@ -324,7 +324,7 @@ def OnStructureLoaded(previous):
   LoadStructureParams()
 
   # set default ED params if needed
-  if (float(olx.xf.exptl.Radiation()) < 0.1):
+  if OV.IsEDData():
     sft = OV.GetParam("snum.smtbx.atomic_form_factor_table")
     ed_table = OV.GetParam("snum.smtbx.electron_table_name")
     if "electron" != sft or (not ed_table or ed_table == 'None'):
