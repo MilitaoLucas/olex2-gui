@@ -835,6 +835,12 @@ class OlexFunctions(inheritFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsEDData(self):
+    try:
+      return float(olx.xf.exptl.Radiation()) < 0.1
+    except:
+      return False
+
   def ListParts(self):
     import olexex
     parts = set(olexex.OlexRefinementModel().disorder_parts())
@@ -1282,3 +1288,4 @@ OV.registerFunction(OV.GetTag)
 OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
+OV.registerFunction(OV.IsEDData)

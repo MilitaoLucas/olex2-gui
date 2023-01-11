@@ -1285,3 +1285,18 @@ def generate_DISP_all(table_name_, wavelength=None):
         pass
 
 OV.registerFunction(generate_DISP_all, False, "sfac")
+
+def set_ED_tables(tables_name):
+  OV.SetParam('snum.smtbx.electron_table_name', tables_name)
+  from cctbx_olex_adapter import generate_ED_SFAC
+  generate_ED_SFAC(force=True)
+  ref = "Custom"
+  if tables_name == 'Peng-1999':
+    ref = "Peng, L.M. (1999) Micron 30, 625-648"
+  elif tables_name == 'UCLA-2022':
+    ref = "UCLA (2022) https://srv.mbi.ucla.edu/faes/data"
+  elif tables_name == 'CAP-2022':
+    ref = "CAP prior to 43.51a"
+  OV.set_cif_item('_diffrn_oxdiff_scatteringfactors_ed', ref)
+OV.registerFunction(set_ED_tables, False, "sfac")
+
