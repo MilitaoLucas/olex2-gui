@@ -477,11 +477,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
      # %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
     ref_method = OV.GetParam("snum.refinement.method")
     header = "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      "
+    hr = "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
     if ref_method == "Levenberg-Marquardt":
       header += "     Mu of LM      "
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------  --------------", file=log)
+      hr +=   "  --------------"
+    print(hr, file=log)
     print(header, file=log)
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------  --------------", file=log)
+    print(hr, file=log)
 
   def get_twin_fractions(self):
     rv = None
