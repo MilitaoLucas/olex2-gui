@@ -4,7 +4,7 @@ import zipfile
 
 src_folder = 'distro@10.8.0.1:/var/distro/bin_dir_trunk/'
 
-if platform.architecture()[0][:2] == 64:
+if platform.architecture()[0][:2] == '64':
   fn = "olex2-win64.zip"
 else:
   fn = "olex2-win32-sse2.zip"
