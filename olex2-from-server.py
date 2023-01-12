@@ -18,7 +18,7 @@ else:
 
 if __name__ == '__main__':
   download_str = "%s %s%s %s" %(downloader, src_folder, fn, tmp_dir)
-  if not os.system(download_str):
+  if os.system(download_str):
     print("Failed to download new ZIP file")
     exit(1)
   with zipfile.ZipFile(os.path.join(tmp_dir, fn), "r") as zf:
