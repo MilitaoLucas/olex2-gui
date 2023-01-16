@@ -197,18 +197,18 @@ class NoSpherA2(PT):
 
   def tidy_wfn_jobs_folder(self, part=None):
     if part == None:
-      self.backup = os.path.join(self.jobs_dir, "backup")
+      backup = os.path.join(self.jobs_dir, "backup")
       to_backup = self.jobs_dir
-      self.wfn_job_dir = self.jobs_dir
+      wfn_job_dir = self.jobs_dir
     else:
-      self.backup = os.path.join(self.jobs_dir, "Part_%d" % part, "backup")
+      backup = os.path.join(self.jobs_dir, "Part_%d" % part, "backup")
       to_backup = os.path.join(self.jobs_dir, "Part_%d" % part)
-      self.wfn_job_dir = os.path.join(self.jobs_dir, "Part_%d" % part)
+      wfn_job_dir = os.path.join(self.jobs_dir, "Part_%d" % part)
     if os.path.exists(to_backup):
       l = 1
       while (os.path.exists(self.backup + "_%d"%l)):
         l = l + 1
-      self.backup = self.backup + "_%d"%l
+      backup = self.backup + "_%d" % l
       os.mkdir(self.backup)
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
 
@@ -216,12 +216,12 @@ class NoSpherA2(PT):
       run = None
       if Full_HAR == True:
         run = OV.GetVar('Run_number')
-      if os.path.exists(self.wfn_job_dir):
-        files = (file for file in os.listdir(self.wfn_job_dir)
-              if os.path.isfile(os.path.join(self.wfn_job_dir, file)))
+      if os.path.exists(wfn_job_dir):
+        files = (file for file in os.listdir(wfn_job_dir)
+              if os.path.isfile(os.path.join(wfn_job_dir, file)))
         for f in files:
-          f_work = os.path.join(self.wfn_job_dir, f)
-          f_dest = os.path.join(self.backup, f)
+          f_work = os.path.join(wfn_job_dir, f)
+          f_dest = os.path.join(backup, f)
           if Full_HAR == True:
             if run > 0:
               if self.wfn_code == "Tonto":
@@ -231,12 +231,12 @@ class NoSpherA2(PT):
                 if ".gbw" not in f:
                   shutil.move(f_work, f_dest)
                 else:
-                  shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
+                  shutil.move(os.path.join(wfn_job_dir, f), os.path.join(wfn_job_dir, self.name + "2.gbw"))
               elif self.wfn_code == "ORCA 5.0":
                 if ".gbw" not in f:
                   shutil.move(f_work, f_dest)
                 else:
-                  shutil.move(os.path.join(self.wfn_job_dir, f), os.path.join(self.wfn_job_dir, self.name + "2.gbw"))
+                  shutil.move(os.path.join(wfn_job_dir, f), os.path.join(wfn_job_dir, self.name + "2.gbw"))
               elif "Gaussian" in self.wfn_code:
                 if ".chk" not in f:
                   shutil.move(f_work, f_dest)
@@ -351,6 +351,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       groups_counter = 0
       olex.m("CifCreate_4NoSpherA2")
       shutil.move(self.name + ".cif_NoSpherA2", os.path.join(self.jobs_dir, self.name + ".cif"))
+      if wfn_code == "fragHAR":
+        # Special case for fragHAR, which will handle the CIF and partitioning itself.
+        try:
+          self.wfn(folder=self.jobs_dir, xyz=False)
+          return
+        except NameError as error:
+          print ("Aborted due to: ",error)
+          OV.SetVar('NoSpherA2-Error',error)
+          return False        
       #olx.File(os.path.join(self.jobs_dir, "%s.cif" % (self.name)))
       for i in range(nr_parts):
         if parts[i] == 0:
@@ -479,8 +488,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             shutil.copy(os.path.join(job.full_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
           elif wfn_code == "Thakkar IAM":
             wfn_fn = os.path.join(OV.FilePath(), self.wfn_job_dir, self.name + ".xyz")
-          elif wfn_code == "fragHAR":
-            return
           else:
             wfn_fn = None
             path_base = os.path.join(OV.FilePath(), self.wfn_job_dir, self.name)
@@ -653,7 +660,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
     #add_info_to_tsc()
 
-  def wfn(self,folder='',xyz=True,part=0):
+  def wfn(self, folder='', xyz=True, part=0):
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
@@ -664,7 +671,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       main_folder = OV.FilePath()
       fn = olx.FileName()
       res_file = os.path.join(main_folder, fn + ".res")
-      cif_file = os.path.join(main_folder, fn + ".cif")
+      cif_file = os.path.join(folder, fn + ".cif")
       qS_file = os.path.join(main_folder, fn + ".qS")
       run_frag_HAR_wfn(res_file, cif_file, qS_file, wfn_object, part)
       return
