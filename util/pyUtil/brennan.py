@@ -142,7 +142,7 @@ class brennan:
     self.fine_pi = self.inv_fine_struct / (2*math.pow(math.pi,2)) #fine structure constant in pre calculated form for later
     self.inv_fine_struct /= 4*math.pi #Modification to save time later
     self.keV_per_hartree = 0.027211386245988
-    self.angstrom2eV = 1.23984193 * 10000 # eV*µm * µm/Angstrom
+    self.angstrom2eV = 1.23984193 * 10000 # eV*micro meter * micro meter/Angstrom
     #List of Element labels to be converted into Z
     
     self.f_to_mu = 4208.031548 #mu in millimeter
@@ -3382,14 +3382,14 @@ class brennan:
     return mu
 
   def fp_fdp_mu_at_angstrom(self, wavelength, element):
-    """Generates f' f'' and linear absorption coefficient � at a given wavelength
+    """Generates f' f'' and linear absorption coefficient mu at a given wavelength
 
     Args:
         wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
         element (string): Element symbol in the periodic table
 
     Returns:
-        [fp,fdp,mu] (float): f', f" in electrons and Linear absorption coefficient in barns/Atom
+        [fp,fdp,mu] (float): f', f" in electrons and Linear absorption coefficient mu in barns/Atom
     """
     fp, fdp = self.at_angstrom(wavelength, element)
     mu = self.convert_fdp_to_mu(wavelength, fdp, element)
