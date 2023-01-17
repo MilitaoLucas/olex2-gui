@@ -1050,6 +1050,15 @@ user
     .type = str
   report_label_style = 0
     .type = int
+    
+  legend{
+    horizontal = *l r
+      .type = choice
+    vertical = *t b 
+      .type = choice
+    padding = 60
+      .type = str
+  }  
   edit_ins_atom_order = ins_atom
     .type = str
   parts{
