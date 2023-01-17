@@ -37,18 +37,25 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular-Bounding_Box;1; -->
     $+
     html.Snippet(GetVar(default_link),
-    "value=Molecular Bounding Box",
-    "onclick=wbox>>sfil",
+    "value=List R/S designations of chiral carbons",
+    "onclick=rsa",
     )$-
 
     $+
     html.Snippet(GetVar(default_link),
-    "value=List R/S designations of chiral carbons",
-    "onclick=rsa",
+    "value=Label chiral carbons as R/S",
+    "onclick=spy.tools.label_rsa()",
     )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=GEOMETRY_INDEX; help_ext=Geometry-Index;1; -->
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Molecular Bounding Box",
+    "onclick=wbox>>sfil",
+    )$-
+
+
     $+
     html.Snippet(GetVar(default_link),
     "value=Geometry Index [4- and 5-coordinate]",
