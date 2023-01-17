@@ -21,6 +21,7 @@ import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
+from utilities import run_with_bitmap
 
 a2b = 0.529177210903
 
@@ -893,6 +894,7 @@ def digest_boolinput(i: Union[str, bool]) -> bool:
   raise ValueError(f'Parameter {i!r} cannot be interpreted as boolean. '
                    f'Use "True" / "T" / "1" or "False" / "F" / "0" instead.')
 
+@run_with_bitmap("Calculating PDF")
 def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only_anh=True, do_plot=True, save_cube=False):
   second = digest_boolinput(second)
   third = digest_boolinput(third)
