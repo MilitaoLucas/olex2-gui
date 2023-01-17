@@ -2174,7 +2174,21 @@ def get_polyhedra_tau():
     print(">>> tau5 = %.4f <<<" % tau5)
     print("When tau5 is close to 0 the geometry is similar to square pyramidal, while if tau5 is close to 1 the geometry is similar to trigonal bipyramidal")
   print("Source: https://en.wikipedia.org/wiki/Geometry_index")
-  
+
 
 OV.registerFunction(get_polyhedra_tau, False, "tools")
+
+
+def label_rsa():
+  import olx
+  import olexex
+  olex.m("rsa")
+  args = []
+  for a in olexex.OlexRefinementModel()._atoms:
+    rsa = a.get('rsa', None)
+    if rsa:
+      args.append("%s=%s*%s" %(a['label'], a['label'], rsa))
+  if args:
+    olx.Label(*args, a=True)
+OV.registerFunction(label_rsa, False, "tools")
 
