@@ -144,18 +144,18 @@ class brennan:
     self.keV_per_hartree = 0.027211386245988
     self.angstrom2eV = 1.23984193 * 10000 # eV*micro meter * micro meter/Angstrom
     #List of Element labels to be converted into Z
-    
+
     self.f_to_mu = 4208.031548 #mu in millimeter
     self.barns_to_electrons = 1.43110541E-8
-    
+
     self.amu = [0,0,                                                                                                                                                                                                                                                                                                                                                                                                     0,
                 6.94099998, 9.01218033,                                                                                                                                                                                                                                                                                                             10.8100004, 12.0109997, 14.0066996, 15.9994001, 18.9983997, 20.1790009,
                 22.9897995, 24.3050003,                                                                                                                                                                                                                                                                                                             26.9815006, 28.0855007, 30.9738007, 32.0600014, 35.4529991, 39.9480019,
                 39.0983009, 40.0800018,                                                                                                                                                                                     44.9558983, 47.8800011, 50.9415016, 51.9959984, 54.9379997, 55.8470001, 58.9332008, 58.6899986, 63.5460014, 65.3799973, 69.7200012, 72.5899963, 74.9216003, 78.9599991, 79.9039993, 83.8000031,
                 85.4677963, 87.6200027,                                                                                                                                                                                     88.9058990, 91.2200012, 92.9064026, 95.9400024, 98.0000000, 101.070000, 102.905502, 106.419998, 107.868202, 112.410004, 114.820000, 118.690002, 121.750000, 127.599998, 126.904503, 131.289993,
-                132.905396, 137.330002, 138.905502, 140.119995, 140.907700, 144.240005, 145.000000, 150.360001, 151.960007, 157.250000, 158.925400, 162.500000, 164.930405, 167.259995, 168.934204, 173.039993, 174.966995, 178.490005, 180.947906, 183.850006, 186.207001, 190.199997, 192.220001, 195.080002, 196.966507, 200.589996, 204.382996, 207.199997, 208.980392, 209.000000, 210.000000, 222.000000, 223.000000, 
+                132.905396, 137.330002, 138.905502, 140.119995, 140.907700, 144.240005, 145.000000, 150.360001, 151.960007, 157.250000, 158.925400, 162.500000, 164.930405, 167.259995, 168.934204, 173.039993, 174.966995, 178.490005, 180.947906, 183.850006, 186.207001, 190.199997, 192.220001, 195.080002, 196.966507, 200.589996, 204.382996, 207.199997, 208.980392, 209.000000, 210.000000, 222.000000, 223.000000,
                 226.025406, 227.027802, 232.038101, 231.035904, 238.028900]
-    
+
     self.rho = [0,0,                                                                                                                                                                                                                                                                                                                                                                                                                         0,
                 0.532999992,1.84500003,                                                                                                                                                                                                                                                                                                             2.33999991, 2.25999999, 1.165000023E-03, 1.331000007E-03, 1.695999992E-03, 8.390999865E-04,
                 0.968999982,1.73500001,                                                                                                                                                                                                                                                                                                             2.69409990, 2.31999993, 1.82000005,      2.06999993,      3.214000026E-03, 1.659999951E-03,
@@ -163,7 +163,7 @@ class brennan:
                 1.52900004, 2.53999996,                                                                                                                                                                                     4.45599985, 6.49399996, 8.55000019, 10.1999998, 11.4799995, 12.3900003, 12.3900003, 12.0000000, 10.4799995, 8.63000011, 7.30000019, 7.30000019, 6.67899990,      6.23000002,      4.92000008,      5.458000116E-03,
                 1.87000000, 3.50000000, 6.12699986, 6.63700008, 6.76100016, 6.99399996, 7.19999981, 7.51000023, 5.22800016, 7.87699986, 8.21399975, 8.52499962, 8.76900005, 9.03899956, 9.29399967, 6.95300007, 9.81099987, 13.2900000, 16.6240005, 19.2999992, 20.9799995, 22.5300007, 22.3899994, 21.4099998, 18.8500004, 13.5220003, 11.8299999, 11.3299999, 9.72999954, 9.30000019,      1.00000000,      9.229999851E-03, 1.00000000,
                 5.00000000, 10.0500002, 11.6999998, 15.3400002, 18.9200001]
-    
+
     self.ray = [
   -0.11908000,-0.937089980    ,-0.200540006,1.065899990E-02,
    1.04770005,-8.517999947E-02,-0.403530002,2.693999931E-02,
@@ -257,7 +257,7 @@ class brennan:
    8.27840042, 0.479059994    ,-0.367659986,1.746200025E-02,
    8.30169964, 0.480199993    ,-0.367549986,1.751700044E-02,
    8.33010006, 0.478309989    ,-0.367249995,1.741299964E-02]
-    
+
     self.comp = [
  -2.15770006    , 1.32690001,-0.305620015,1.850200072E-02,
  -2.56360006    , 2.02539992,-0.448709995,2.796900086E-02,
@@ -351,7 +351,7 @@ class brennan:
  0.170890003    , 1.65559995,-0.229699999,6.925200112E-03,
  0.144180000    , 1.69449997,-0.239150003,7.667399943E-03,
  0.108280003    , 1.74160004,-0.254099995,8.950600401E-03]
-    
+
     self.elements = ["DUMMY","H",                                                                                                                                              "He",
                      "Li","Be",                                                                                                                        "B", "C", "N", "O", "F","Ne",
                      "Na","Mg",                                                                                                                       "Al","Si", "P", "S","Cl","Ar",
@@ -3261,6 +3261,9 @@ class brennan:
                     [0.688192070    , 10.4296017    , 105.452431    , 653.458801    , 2669.10205    , 21.7011681    , 3465.78979    , 66133.5859    , 1070067.00    , 5223840.00    ],
                     [0.585494578    , 12.4282341    , 169.844070    , 1460.21033    , 8725.37793    , 54.2631149    , 17623.1504    , 145704.859    , 1739226.38    , 11441855.0    ]]
 
+  def table(self, element):
+    return brenan_element_table(self, element)
+
   def at_angstrom(self, wavelength, element):
     """Generates the dispersion correction coefficients f' and f'' at a given wavelength for a given elemnt symbol
 
@@ -3269,7 +3272,7 @@ class brennan:
         element (string): Element symbol of the periodic table
 
     Returns:
-        [float,float]: f' and f'' values calculated 
+        [float,float]: f' and f'' values calculated
     """
     z = self.elements.index(element)
     #print("Element number is: "+str(z))
@@ -3341,7 +3344,7 @@ class brennan:
           fp_orb = gauss(3,xsect_barns,bind_nrg_au,xsect_int,energy_au,xsect_edge_au,icount) * self.fine_pi
           fp_corr = 0.5 * xsect_edge_au * bind_nrg_au * bind_nrg_au * math.log((-bind_nrg_au+energy_au)/(-bind_nrg_au-energy_au)) / energy_au * self.fine_pi
         else:
-          fp_orb = gauss(self.funtype[z][i],xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * self.fine_pi         
+          fp_orb = gauss(self.funtype[z][i],xsect_barns,bind_nrg_au,xsect_int,energy_au,0.0,icount) * self.fine_pi
 
         result[0] += fp_orb + fp_corr
         result[1] += fpp_orb
@@ -3356,7 +3359,7 @@ class brennan:
     """Generates linear absorption coefficient mu at a given wavelength
 
     Args:
-        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out
         element (string): Element symbol in the periodic table
 
     Returns:
@@ -3370,7 +3373,7 @@ class brennan:
     """Generates linear absorption coefficient mu at a given wavelength without ray and comp contributions
 
     Args:
-        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out
         element (string): Element symbol in the periodic table
 
     Returns:
@@ -3385,7 +3388,7 @@ class brennan:
     """Generates f' f'' and linear absorption coefficient mu at a given wavelength
 
     Args:
-        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out
         element (string): Element symbol in the periodic table
 
     Returns:
@@ -3399,7 +3402,7 @@ class brennan:
     """Generates linear absorption coefficient mu at a given wavelength
 
     Args:
-        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out
         element (string): Element symbol in the periodic table
     """
     fp, fdp = self.at_angstrom(wavelength, element)
@@ -3428,7 +3431,7 @@ class brennan:
         + self.ray[z*4+3] * l_energy3
       )
     return ray * energy * self.barns_to_electrons
-  
+
   def get_comp_at_angstrom_in_electrons(self,wl,element):
     """Generates Compton Scattering contribution at given wavelength
 
@@ -3451,7 +3454,7 @@ class brennan:
         + self.comp[z*4+3] * l_energy3
       )
     return comp * energy * self.barns_to_electrons
-  
+
   def get_raycomp_at_angstrom(self,wl,element):
     """Generates a list of Rayleigh and Compton scattering contribution at a given wavelength in Angstrom for a given element
 
@@ -3486,10 +3489,10 @@ class brennan:
     """Generates Mu from given fdp at given wavelength
 
     Args:
-        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out 
+        wavelength (float): wavlenegth in Angstrom of incident beam for which the calcualtion is carried out
         fdp (float): value of f'' at the given wavelength
         element (string): Element symbol in the periodic table
-        
+
     Returns:
         mu (float): Linear absorption coefficient in barns/Atom
     """
@@ -3516,10 +3519,11 @@ class brenan_element_table():
     self.element = element
 
   def at_angstrom(self, wavelength):
-    return brenan_element_table.adapter(self.brennan_inst.at_angstrom(wavelength, self.element))
+    return brenan_element_table.adapter(self.brennan_inst.at_angstrom(wavelength, self.element),
+      self.brennan_inst.get_mu_at_angstrom(wavelength, self.element))
 
   def mu_at_angstrom(self, wavelength):
-    return brenan_element_table.adapter(self.brennan_inst.get_mu_at_angstrom(wavelength, self.element))
+    return brenan_element_table.adapter((0,0), self.brennan_inst.get_mu_at_angstrom(wavelength, self.element))
 
   def fdp_to_mu(self, wavelength, fdp):
-    return brenan_element_table.adapter(self.brennan_inst.convert_fdp_to_mu(wavelength, fdp, self.element))
+    return brenan_element_table.adapter((0,0), self.brennan_inst.convert_fdp_to_mu(wavelength, fdp, self.element))
