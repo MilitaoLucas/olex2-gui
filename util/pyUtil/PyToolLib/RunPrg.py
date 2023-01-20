@@ -1332,47 +1332,7 @@ class RunRefinementPrg(RunPrg):
 
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
-      matrix_run = 0
-      old_model = OlexRefinementModel()
-      HAR_log.write("\n\n\nPositions:\n")
-      for i, atom in enumerate(old_model._atoms):
-        xyz = atom['crd'][0]
-        HAR_log.write("{:5}".format(atom['label'][0]))
-        for x in range(3):
-          HAR_log.write("{:12.8f}".format(xyz[x]))
-        HAR_log.write("\n")
-        HAR_log.write("{:5}".format(" "))
-        for x in range(3):
-          HAR_log.write("{:12.8f}".format(esds[matrix_run]))
-          matrix_run += 1
-        has_adp_old = old_model._atoms[i].get('adp')
-        if has_adp_old != None:
-          matrix_run += 6
-        else:
-          matrix_run += 1
-        HAR_log.write("\n")
-      matrix_run = 0
-      HAR_log.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)\n")
-      for i, atom in enumerate(old_model._atoms):
-        has_adp = old_model._atoms[i].get('adp')
-        HAR_log.write("{:5}".format(atom['label'][0]))
-        if has_adp != None:
-          adp = atom['adp'][0]
-          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
-          matrix_run += 3
-          for u in range(6):
-            HAR_log.write("{:12.8f}".format(adp[u]))
-          HAR_log.write("\n")
-          HAR_log.write("{:5}".format(" "))
-          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
-          for u in range(6):
-            HAR_log.write("{:12.8f}".format(adp_esds[u]))
-          matrix_run += 6
-        else:
-          HAR_log.write(" Isotropic atom")
-          matrix_run += 4
-        HAR_log.write("\n")
+      olex.m("spy.NoSpherA2.write_precise_model_file()")
 
     HAR_log.flush()
     HAR_log.close()
