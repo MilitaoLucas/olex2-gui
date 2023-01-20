@@ -280,50 +280,37 @@ def plot_cube(name, color_cube):
   x_size = 0
   y_size = 0
   z_size = 0
-  x_run = 0
-  y_run = 0
-  z_run = 0
+  total_size = 0
+  drun = 0
   data = None
-
-  #min = 100000
-  #max = 0
 
   for line in cube:
     run += 1
-    if (run==3):
-      values = line.split()
-      na = int(values[0])
-    if (run==4):
-      values = line.split()
-      x_size = int(values[0])
-    if (run==5):
-      values = line.split()
-      y_size = int(values[0])
-    if (run==6):
-      values = line.split()
-      z_size = int(values[0])
-      data = flex.double(x_size * y_size * z_size)
-      data.reshape(flex.grid(x_size, y_size, z_size))
+    values = line.split()
     if (run > na + 6):
-      values = line.split()
-      for i in range(len(values)):
-        v = float(values[i])
-        data[(x_run * y_size + y_run) * z_size + z_run] = v
-        z_run += 1
-        if z_run == z_size:
-          y_run += 1
-          z_run = 0
-          if y_run == y_size:
-            x_run += 1
-            y_run = 0
-        if x_run > x_size:
-          print("ERROR! Mismatched indices while reading!")
-          return
+      if drun + len(values) > total_size:
+        print("ERROR! Mismatched indices while reading!")
+        return
+      data.extend(flex.double(np.array(values, dtype=float).tolist()))
+      drun += len(values)
+      continue
+    elif (run == 3):
+      na = int(values[0])
+    elif (run == 4):
+      x_size = int(values[0])
+    elif (run == 5):
+      y_size = int(values[0])
+    elif (run == 6):
+      z_size = int(values[0])
+      total_size = x_size * y_size * z_size
+      data = flex.double()
 
+  data.reshape(flex.grid(x_size, y_size, z_size))
   cube = None
 
   make_colorfull = (color_cube != None)
   if make_colorfull == True:
+    print("WARNING! COLORED MAPS AURE CURRENTLY ONLY FOR TESTING PURPOSES!")
     with open(color_cube) as cub:
       cube2 = cub.readlines()
 
@@ -332,49 +319,31 @@ def plot_cube(name, color_cube):
     x_size2 = 0
     y_size2 = 0
     z_size2 = 0
-    x_run = 0
-    y_run = 0
-    z_run = 0
+    drun = 0
     data2 = None
 
     for line in cube2:
       run += 1
-      if (run==3):
-        values = line.split()
-        #na2 = int(values[0])
-      if (run==4):
-        values = line.split()
-        x_size2 = int(values[0])
-      if (run==5):
-        values = line.split()
-        y_size2 = int(values[0])
-      if (run==6):
-        values = line.split()
-        z_size2 = int(values[0])
-        data2 = flex.double(x_size2 * y_size2 * z_size2)
-        data2.reshape(flex.grid(x_size2, y_size2, z_size2))
+      values = line.split()
       if (run > na + 6):
-        values = line.split()
-        for i in range(len(values)):
-          data2[x_run][y_run][z_run] = float(values[i])
-          z_run += 1
-          if z_run == z_size2:
-            y_run += 1
-            z_run = 0
-            if y_run == y_size2:
-              x_run += 1
-              y_run = 0
-          if x_run > x_size2:
-            print("ERROR! Mismatched indices while reading!")
-            return
-
+        if drun + len(values) > total_size:
+          print("ERROR! Mismatched indices while reading!")
+          return
+        data2.extend(flex.double(np.array(values, dtype=float).tolist()))
+        drun += len(values)
+        continue
+      elif (run == 4):
+        x_size = int(values[0])
+      elif (run == 5):
+        y_size = int(values[0])
+      elif (run == 6):
+        z_size = int(values[0])
+        total_size = x_size * y_size * z_size
+        data2 = flex.double()
+    
+    data2.reshape(flex.grid(x_size, y_size, z_size))
     cube2 = None
     values = None
-    z_run = None
-    y_run = None
-    x_run = None
-    na = None
-    #na2 = None
     line = None
     run = None
     olex_xgrid.Init(x_size,y_size,z_size,True)
@@ -406,7 +375,6 @@ def plot_cube(name, color_cube):
 
 
     value = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
-    i=None
     if x_size == x_size2 and y_size == y_size2 and z_size == z_size2:
       for x in range(x_size):
         for y in range(y_size):
@@ -427,10 +395,9 @@ def plot_cube(name, color_cube):
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
     gridding = data.accessor()
-    isint = isinstance(data, flex.int)
-    a1 = gridding.all()
-    a2 = gridding.focus()
-    olex_xgrid.Import(a1, a2, data.copy_to_byte_str(), isint)
+    type = isinstance(data, flex.int)
+    olex_xgrid.Import(
+      gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   Type = OV.GetParam('snum.NoSpherA2.map.type')
   if Type == "Laplacian":
     OV.SetVar('map_min', 0)
@@ -492,7 +459,6 @@ def plot_cube_single(name):
   if not os.path.isfile(name):
     print("Cube file does not exist!")
     return
-  olex.m("html.Update()")
   with open(name) as cub:
     cube = cub.readlines()
 
@@ -501,69 +467,56 @@ def plot_cube_single(name):
   x_size = 0
   y_size = 0
   z_size = 0
-  x_run = 0
-  y_run = 0
-  z_run = 0
+  total_size = 0
+  drun = 0
   data = None
-
-  min = 100000
-  max = 0
 
   for line in cube:
     run += 1
-    if (run==3):
-      values = line.split()
-      na = int(values[0])
-    if (run==4):
-      values = line.split()
-      x_size = int(values[0])
-    if (run==5):
-      values = line.split()
-      y_size = int(values[0])
-    if (run==6):
-      values = line.split()
-      z_size = int(values[0])
-      data = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
+    values = line.split()
     if (run > na + 6):
-      values = line.split()
-      for i in range(len(values)):
-        data[x_run][y_run][z_run] = float(values[i])
-        if data[x_run][y_run][z_run] > max:
-          max = data[x_run][y_run][z_run]
-        if data[x_run][y_run][z_run] < min:
-          min = data[x_run][y_run][z_run]
-        z_run += 1
-        if z_run == z_size:
-          y_run += 1
-          z_run = 0
-          if y_run == y_size:
-            x_run += 1
-            y_run = 0
-        if x_run > x_size:
-          print("ERROR! Mismatched indices while reading!")
-          return
+      if drun + len(values) > total_size:
+        print("ERROR! Mismatched indices while reading!")
+        return      
+      data.extend(flex.double(np.array(values, dtype=float).tolist()))
+      drun += len(values)
+      continue
+    elif (run == 3):
+      na = int(values[0])
+    elif (run == 4):
+      x_size = int(values[0])
+    elif (run == 5):
+      y_size = int(values[0])
+    elif (run == 6):
+      z_size = int(values[0])
+      total_size = x_size * y_size * z_size
+      data = flex.double()
 
+  mmm = data.min_max_mean()
+  rms = data.rms()
+  data.reshape(flex.grid(x_size, y_size, z_size))
   cube = None
 
-  olex_xgrid.Init(x_size,y_size,z_size)
-  for x in range(x_size):
-    for y in range(y_size):
-      for z in range(z_size):
-        olex_xgrid.SetValue(x,y,z,data[x][y][z])
+  gridding = data.accessor()
+  type = isinstance(data, flex.int)
+  olex_xgrid.Import(
+    gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
+
+  OV.SetVar('map_min', 0)
+  OV.SetVar('map_max', 40)
+  OV.SetVar('map_slider_scale', 100)
   data = None
-  OV.SetVar('map_min',0)
-  OV.SetVar('map_max',40)
-  OV.SetVar('map_slider_scale',100)
-  olex_xgrid.SetMinMax(min, max)
+  print("Map Min = %.3f, Max = %.3f, RMS = %.3f"%(mmm.min,mmm.max,rms))
+  olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
-  mask = OV.GetParam('snum.map.mask')
-  if mask == True:
+  if OV.GetParam('snum.map.mask') == True:
     olex_xgrid.InitSurface(True, 1.1)
   else:
     olex_xgrid.InitSurface(True, -100)
-  iso = float((abs(min)+abs(max))*2/3)
-  olex_xgrid.SetSurfaceScale(iso)
-  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
+  iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
+  olex_xgrid.SetSurfaceScale(iso)  
+  OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
+  olex.m("html.Update()")
 
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
@@ -694,7 +647,6 @@ OV.registerFunction(is_colored,True,'NoSpherA2')
 def plot_fft_map(fft_map):
   data = fft_map.real_map_unpadded()
   gridding = data.accessor()
-  from cctbx.array_family import flex
   type = isinstance(data, flex.int)
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
@@ -719,7 +671,6 @@ OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   gridding = data.accessor()
-  from cctbx.array_family import flex
   type = isinstance(data, flex.int)
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
