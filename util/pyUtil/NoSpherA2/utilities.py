@@ -737,3 +737,4 @@ def write_precise_model_file():
       matrix_run += 4
     f.write("\n")
     f.close()
+OV.registerFunction(write_precise_model_file, False, "NoSpherA2")

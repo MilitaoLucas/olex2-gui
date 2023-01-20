@@ -243,6 +243,8 @@ routines requiring structure refinement
       .type = float
     max_hole = None
       .type = float
+    res_rms = None
+      .type = float
     goof = None
       .type = float
     flack_str = None
