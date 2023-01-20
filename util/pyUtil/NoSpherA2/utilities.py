@@ -11,6 +11,8 @@ import OlexVFS
 from PIL import ImageDraw, Image
 from ImageTools import IT
 from PilTools import timage
+from cctbx import adptbx
+from cctbx.array_family import flex
 
 try:
   from_outside = False
@@ -682,59 +684,100 @@ def calculate_number_of_electrons():
   return ne, adapter
 
 def write_precise_model_file():
+  from refinement import FullMatrixRefine
+  from olexex import OlexRefinementModel
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  table_name = ""
+  if use_tsc == True:
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
   try:
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter()
-    jac_tr = cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-    cov_matrix = flex.abs(flex.sqrt(cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+    fmr = FullMatrixRefine()
+    if table_name != "":
+      norm_eq = fmr.run(build_only=True, table_file_name=table_name)
+    else:
+      norm_eq = fmr.run(build_only=True)
+    norm_eq.build_up(False)
+    reparam = norm_eq.reparametrisation
+    reparam.linearise()
+    jac_tr = reparam.jacobian_transpose_matching_grad_fc()
+    cov_matrix = flex.abs(flex.sqrt(norm_eq.covariance_matrix().matrix_packed_u_diagonal()))
     esds = jac_tr.transpose() * flex.double(cov_matrix)
     jac_tr = None
-    annotations = cctbx.normal_eqns.reparametrisation.component_annotations
+    annotations = reparam.component_annotations
   except:
     print("Could not obtain cctbx object and calculate ESDs!\n")
     return False
-  f = open("precise.model", "w")
+  f = open(OV.ModelSrc() + ".precise_model", "w")
   matrix_run = 0
-  from olexex import OlexRefinementModel
-  old_model = OlexRefinementModel()
-  f.write("\n\n\nPositions:\n")
-  for i, atom in enumerate(old_model._atoms):
+  model = OlexRefinementModel()
+  UC = norm_eq.xray_structure.unit_cell()
+  f.write("Positions     a          b          c       and ESDs:\n")
+  for atom in model._atoms:
     xyz = atom['crd'][0]
-    f.write("{:5}".format(atom['label'][0]))
+    f.write("{:5}".format(atom['label']))
     for x in range(3):
       f.write("{:12.8f}".format(xyz[x]))
-    f.write("\n")
-    f.write("{:5}".format(" "))
     for x in range(3):
-      f.write("{:12.8f}".format(esds[matrix_run]))
-      matrix_run += 1
-    has_adp_old = old_model._atoms[i].get('adp')
-    if has_adp_old != None:
+      f.write("{:12.8f}".format(esds[matrix_run + x]))
+    matrix_run += 3
+    has_adp = atom.get('adp')
+    if has_adp != None:
       matrix_run += 6
     else:
       matrix_run += 1
+    if matrix_run < len(annotations):
+      if ".C111" in annotations[matrix_run]:
+        matrix_run += 25    
+    if matrix_run < len(annotations):
+      if 'occ' in annotations[matrix_run]:
+        matrix_run += 1
+    if matrix_run < len(annotations):
+      if 'fp' in annotations[matrix_run]:
+        matrix_run += 2
     f.write("\n")
   matrix_run = 0
-  f.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)\n")
-  for i, atom in enumerate(old_model._atoms):
-    has_adp = old_model._atoms[i].get('adp')
-    f.write("{:5}".format(atom['label'][0]))
+  f.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)        Ueq     And ESDs\n")
+  for atom in model._atoms:
+    has_adp = atom.get('adp')
+    f.write("{:5}".format(atom['label']))
+    matrix_run += 3
     if has_adp != None:
-      adp = atom['adp'][0]
-      adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
-      matrix_run += 3
+      adp = has_adp[0]
+      adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
+      uiso = adptbx.u_cart_as_u_iso(adp)
+      adp = adptbx.u_cart_as_u_cif(UC, adp)
       for u in range(6):
         f.write("{:12.8f}".format(adp[u]))
-      f.write("\n")
-      f.write("{:5}".format(" "))
-      adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-      adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
+      f.write("{:12.8f}".format(uiso))
+      adp_esds = (esds[matrix_run],
+                  esds[matrix_run + 1],
+                  esds[matrix_run + 2],
+                  esds[matrix_run + 3],
+                  esds[matrix_run + 4],
+                  esds[matrix_run + 5])
+      u_iso_esd = adptbx.u_star_as_u_iso(UC, adp_esds)
+      adp_esds = adptbx.u_star_as_u_cif(UC, adp_esds)
       for u in range(6):
         f.write("{:12.8f}".format(adp_esds[u]))
+      f.write("{:12.8f}".format(u_iso_esd))
       matrix_run += 6
     else:
-      f.write(" Isotropic atom")
-      matrix_run += 4
+      for u in range(6):
+        f.write("{:12s}".format(" ---"))
+      f.write("{:12.8f}".format(atom['uiso'][0]))
+      for u in range(6):
+        f.write("{:12s}".format(" ---"))
+      f.write("{:12.8f}".format(esds[matrix_run]))
+      matrix_run += 1
+    if matrix_run < len(annotations):
+      if ".C111" in annotations[matrix_run]:
+        matrix_run += 25
+    if matrix_run < len(annotations):
+      if 'occ' in annotations[matrix_run]:
+        matrix_run += 1
+    if matrix_run < len(annotations):
+      if 'fdp' in annotations[matrix_run]:
+        matrix_run += 2
     f.write("\n")
-    f.close()
+  f.close()
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
