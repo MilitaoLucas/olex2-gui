@@ -24,6 +24,7 @@ Ueq<-u;
 Label + residue number<-l rn;
 Residue numbers<-rn;
 Residue class<-rc;
+SAME group<-sm;
 ",
       "value=",
       "onchange=spy.ChooseLabelContent(html.GetValue('~name~'))",
@@ -36,6 +37,13 @@ $-
      "value='Label H'",
      "checked=GetVar('olex2.label_h','false')",
      "onclick=SetVar('olex2.label_h',html.GetState(~name~))")
+   $-
+  </td>
+  <td width="10%">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=labelih",
+     "value='No symm'",
+     "checked=GetVar('olex2.label_i','false')",
+     "onclick=SetVar('olex2.label_i',html.GetState(~name~))")
    $-
   </td>
   <td>$+
