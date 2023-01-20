@@ -702,6 +702,10 @@ def ChooseLabelContent(cmd):
     if not x:
       x['l'] = True
     x['h'] = True
+  if olx.GetVar('olex2.label_i', 'false') == 'true':
+    if not x:
+      x['l'] = True
+    x['i'] = True
   olx.Labels(**x)
 OV.registerFunction(ChooseLabelContent)
 
