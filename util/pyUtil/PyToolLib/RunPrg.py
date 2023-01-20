@@ -1277,6 +1277,9 @@ class RunRefinementPrg(RunPrg):
             print("Error during analysis of shifts!")
             raise e
         r = results()
+        if "Thakkar" in source:
+          HAR_log.close()
+          return True
         analyze_shifts(r)
         if calculate == False:
           converged = True
@@ -1321,6 +1324,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("*" * 110 + "\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
+    HAR_log.write("Residual density RMS:{:+8.3f}\n".format(OV.GetParam('snum.refinement.res_rms')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
     HAR_log.write("Refinement finished at: ")
     HAR_log.write(str(datetime.datetime.now()))
@@ -1329,8 +1333,6 @@ class RunRefinementPrg(RunPrg):
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
       matrix_run = 0
-      label_uij = None
-      label_xyz = None
       old_model = OlexRefinementModel()
       HAR_log.write("\n\n\nPositions:\n")
       for i, atom in enumerate(old_model._atoms):

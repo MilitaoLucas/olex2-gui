@@ -1584,9 +1584,10 @@ The following options were used:
       self.normal_eqns.goof()
     ), file=log)
 
-    print("  +  Diff:     max=%.2f, min=%.2f" %(
+    print("  +  Diff:     max=%.2f, min=%.2f, RMS=%.2f" % (
       self.diff_stats.max(),
-      self.diff_stats.min()
+      self.diff_stats.min(),
+      self.diff_stats.sigma()
     ), file=log)
 
     if(self.cycles.n_iterations>0):
@@ -1618,6 +1619,7 @@ The following options were used:
       max_shift_esd)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
+    OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
 
   def get_disagreeable_reflections(self, show_in_console=False):
