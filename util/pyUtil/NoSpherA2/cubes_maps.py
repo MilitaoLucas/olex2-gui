@@ -520,7 +520,7 @@ def plot_cube_single(name):
 
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
-def save_map_cube(map_type,resolution):
+def save_map_cube(map_type, resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
