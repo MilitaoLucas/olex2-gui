@@ -101,7 +101,7 @@ hermite_polynomials_of_3rd_and_4th_order = \
 
 def kuhs_limit(order: int, adp: np.ndarray) -> float:
   """Resolution required to model anharmonic ADP; see doi: 10.1071/PH880369"""
-  return (2 * np.pi) ** -1.5 * (2 * order * np.log(2) / adp) ** 0.5
+  return (2. * np.pi) ** -1.5 * (2. * order * np.log(2) / adp) ** 0.5
 
 def calculate_cubes():
   if NoSpherA2.is_disordered == True:
@@ -857,8 +857,6 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
   if second == False and third == False and fourth == False:
     print("Well, what should I print then? Please decide what you want to see!")
     return
-  olex.m("kill $Q")
-  OV.CreateBitmap("working")
   try:
     dist = float(dist)
     cctbx_adapter = OlexCctbxAdapter()
