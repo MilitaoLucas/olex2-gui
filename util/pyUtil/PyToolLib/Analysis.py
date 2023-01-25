@@ -418,10 +418,10 @@ class Graph(ArgumentParser):
     lower_bound = 0
     if self.min_y < 0 and slope==0:
       lower_bound = self.min_y
-    
+
     y1 = (float(y1) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
     y2 = (float(y2) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
-    
+
     if self.reverse_y:
       y1 += self.graph_top
       y2 += self.graph_top
@@ -465,7 +465,7 @@ class Graph(ArgumentParser):
     if write_text:
       txt = self.metadata.get("y_label", "y Axis Label")
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-      wX_axis, wY_axis = self.draw.textsize(txt, font=self.font_small)      
+      wX_axis, wY_axis = self.draw.textsize(txt, font=self.font_small)
       text = OV.correct_rendered_text(write_text)
       wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
@@ -1099,7 +1099,7 @@ class Graph(ArgumentParser):
     x = width - wX - self.bSides
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
-  
+
   def draw_info(self, txt, font_size=None):
     #Draws text into top right corner of the plot
     if not font_size:
@@ -1115,7 +1115,7 @@ class Graph(ArgumentParser):
     ## Wipe the legend area
     #self.draw.rectangle(box, fill=(255,255,255,0))
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
-  
+
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False, scale=None):
     log = self.use_log
     min_x = self.min_x
@@ -1233,7 +1233,7 @@ class Graph(ArgumentParser):
 
       if hrefs:
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (box + (hrefs[i], targets[i])))          
+                            % (box + (hrefs[i], targets[i])))
 
       else:
         href="UpdateHtml"
@@ -1286,7 +1286,7 @@ class Graph(ArgumentParser):
     while div_val < max_y:
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
-    
+
     format_string = None
     if percent==False:
       format_string = "%%.%if" %precision
@@ -2969,24 +2969,24 @@ class item_vs_resolution_plot(Analysis):
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
         self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "R_merge /%":
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, gt=0.15)
         self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="15 %% line (troublesome data above, good data below)", reverse_x=reverse_x)
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "CC 1/2":
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)
         self.draw_fit_line(slope=0, y_intercept=0.95, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)        
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       else:
         if plot_reflection_count:
           self.draw_data_points(
             dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-            hrefs=dataset.hrefs, targets=dataset.targets, scale=1/scale)          
+            hrefs=dataset.hrefs, targets=dataset.targets, scale=1/scale)
         else:
           self.draw_data_points(
             dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
@@ -3552,7 +3552,7 @@ class HealthOfStructure():
       target = "&#013;- ".join(l)
 
       OV.SetParam('snum.refinement.completeness.target', target)
-      
+
       try:
         multi = self.hkl_stats['TotalReflections']/self.hkl_stats['UniqueReflections']
         self.hkl_stats.setdefault('multiplicity', multi)
@@ -3561,8 +3561,8 @@ class HealthOfStructure():
         OV.SetParam('snum.refinement.Rint.target', target)
       except:
         pass
-      
-      
+
+
 
     except Exception as err:
       print(err)
@@ -3684,15 +3684,15 @@ class HealthOfStructure():
               value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
               value = olx.Cif('_refine_ls_abs_structure_Flack')
               _ = olx.Cif('_refine_ls_abs_structure_details')
-              
+
               if "parsons" in _.lower():
                 hooft_src = "Parsons"
               elif "hooft" in _.lower():
                 hooft_src = "Hooft"
-              OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src) 
+              OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
             except:
               value = OV.GetParam('snum.refinement.%s' %item)
-        
+
         if self.is_CIF:
           try:
             value = float(olx.Cif(item))
@@ -3885,7 +3885,7 @@ class HealthOfStructure():
     if item == "Completeness":
       target = OV.GetParam('snum.refinement.%s.target' %item.lower())
     elif item == "Rint":
-      target = ["Internal R factors. Click to see the graph", " Multiplicity = %.2f" %self.hkl_stats.get('multiplicity', 'unk')]
+      target = ["Internal R factors. Click to see the graph", " Multiplicity = %.2f" %self.hkl_stats.get('multiplicity', 0.0)]
       target = "&#013;- ".join(target)
       OV.SetParam('snum.refinement.Rint.target', target)
     else:
