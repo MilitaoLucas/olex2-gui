@@ -931,7 +931,7 @@ def weightGuiDisplay():
       else:
         colour = gui_red
 
-        _ = "%%.%sf" % prec
+      _ = "%%.%sf" % prec
       curr = (_ % curr).lstrip('0')
       sugg = (_ % sugg).lstrip('0')
 
@@ -2052,7 +2052,7 @@ def plot_xy(xy=[], filename='fred.png'):
 def is_outlier(points, thresh=3.5):
   import numpy as np
   """
-  Returns a boolean array with True if points are outliers and False 
+  Returns a boolean array with True if points are outliers and False
   otherwise.
 
   Parameters:
@@ -2070,7 +2070,7 @@ def is_outlier(points, thresh=3.5):
   ----------
       Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
       Handle Outliers", The ASQC Basic References in Quality Control:
-      Statistical Techniques, Edward F. Mykytka, Ph.D., Editor. 
+      Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
   """
   if len(points.shape) == 1:
     points = points[:, None]
