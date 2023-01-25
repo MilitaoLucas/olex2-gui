@@ -931,7 +931,7 @@ def weightGuiDisplay():
       else:
         colour = gui_red
 
-      _ = "%%.%sf" % prec
+        _ = "%%.%sf" % prec
       curr = (_ % curr).lstrip('0')
       sugg = (_ % sugg).lstrip('0')
 
@@ -1814,7 +1814,7 @@ class DisorderDisplayTools(object):
     olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" % parts)
     if OV.GetParam('user.parts.select'):
       olex.m('sel part %s' % parts)
-
+      olex.m('sel atom bonds -a')
 
 DisorderDisplayTools_instance = DisorderDisplayTools()
 
