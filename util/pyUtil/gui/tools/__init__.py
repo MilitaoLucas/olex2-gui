@@ -793,11 +793,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   t = '''
   <tr bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='32%%'>
+    <td width='37%%'>
       &nbsp;<b>a</b> = %(a)s
     </td>
 
-    <td width='35%%'>
+    <td width='30%%'>
       &nbsp;<b>&alpha;</b> = %(alpha)s&deg;
     </td>
 
@@ -808,11 +808,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
 
-    <td width='32%%'>
+    <td width='37%%'>
       &nbsp;<b>b</b> = %(b)s
     </td>
 
-    <td width='35%%'>
+    <td width='30%%'>
       &nbsp;<b>&beta;</b> = %(beta)s&deg;
     </td>
 
@@ -822,10 +822,10 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='32%%' >
+    <td width='37%%' >
       &nbsp;<b>c</b> = %(c)s
     </td>
-    <td width='35%%'>
+    <td width='30%%'>
       &nbsp;<b>&gamma;</b> = %(gamma)s&deg;
     </td>
     <td width='33%%'>
@@ -1719,17 +1719,22 @@ class DisorderDisplayTools(object):
     OV.registerFunction(self.make_disorder_quicktools, False, 'gui.tools')
     OV.registerFunction(self.set_part_display, False, 'gui.tools')
 
-  def hasDisorder(self):
+  def hasDisorder(self, num_return = False):
+    retVal = False
     olx_atoms = olexex.OlexRefinementModel()
     parts = olx_atoms.disorder_parts()
-    if not parts:
-      return False
-    else:
+    if parts:
       sp = set(parts)
       if len(sp) == 1 and 0 in sp:
-        return False
+        if not num_return:
+          retVal = False
       else:
-        return True
+        retVal = True
+    if num_return:
+      _ = {True:1, False:0}
+      return _[retVal] 
+    else:
+      return retVal
 
   def show_unique_only(self):
     if OV.GetParam('user.parts.keep_unique') == True:
@@ -1771,6 +1776,7 @@ class DisorderDisplayTools(object):
 
   def make_disorder_quicktools(self, scope='main', show_options=True):
     import olexex
+    
     if 'scope' in scope:
       scope = scope.split('scope=')[1]
     parts = set(olexex.OlexRefinementModel().disorder_parts())
