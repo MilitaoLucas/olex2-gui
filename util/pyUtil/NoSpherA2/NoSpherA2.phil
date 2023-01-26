@@ -91,6 +91,8 @@ snum{
     h_aniso = True
       .type = bool
     Hybrid{
+      software_Part0 = 'Please Select'
+        .type = str
       software_Part1 = 'Please Select'
         .type = str
       software_Part2 = 'Please Select'
@@ -100,6 +102,8 @@ snum{
       software_Part4 = 'Please Select'
         .type = str
       software_Part5 = 'Please Select'
+        .type = str
+      basis_name_Part0 = 'jorge-DZP'
         .type = str
       basis_name_Part1 = 'jorge-DZP'
         .type = str
@@ -111,6 +115,8 @@ snum{
         .type = str
       basis_name_Part5 = 'jorge-DZP'
         .type = str
+      method_Part0 = 'PBE'
+        .type = str
       method_Part1 = 'PBE'
         .type = str
       method_Part2 = 'PBE'
@@ -120,6 +126,8 @@ snum{
       method_Part4 = 'PBE'
         .type = str
       method_Part5 = 'PBE'
+        .type = str
+      charge_Part0 = '0'
         .type = str
       charge_Part1 = '0'
         .type = str
@@ -131,6 +139,8 @@ snum{
         .type = str
       charge_Part5 = '0'
         .type = str
+      multiplicity_Part0 = '0'
+        .type = str
       multiplicity_Part1 = '0'
         .type = str
       multiplicity_Part2 = '0'
@@ -141,6 +151,8 @@ snum{
         .type = str
       multiplicity_Part5 = '0'
         .type = str
+      Relativistic_Part0 = False
+        .type = bool
       Relativistic_Part1 = False
         .type = bool
       Relativistic_Part2 = False
@@ -151,6 +163,8 @@ snum{
         .type = bool
       Relativistic_Part5 = False
         .type = bool
+      ORCA_SCF_Conv_Part0 = "NoSpherA2SCF"
+        .type = str
       ORCA_SCF_Conv_Part1 = "NoSpherA2SCF"
         .type = str
       ORCA_SCF_Conv_Part2 = "NoSpherA2SCF"
@@ -161,6 +175,8 @@ snum{
         .type = str
       ORCA_SCF_Conv_Part5 = "NoSpherA2SCF"
         .type = str
+      ORCA_SCF_Strategy_Part0 = "NormalConv"
+        .type = str
       ORCA_SCF_Strategy_Part1 = "NormalConv"
         .type = str
       ORCA_SCF_Strategy_Part2 = "NormalConv"
@@ -170,6 +186,8 @@ snum{
       ORCA_SCF_Strategy_Part4 = "NormalConv"
         .type = str
       ORCA_SCF_Strategy_Part5 = "NormalConv"
+        .type = str
+      pySCF_Damping_Part0 = "0.6"
         .type = str
       pySCF_Damping_Part1 = "0.6"
         .type = str
