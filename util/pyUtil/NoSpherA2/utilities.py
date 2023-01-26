@@ -26,6 +26,15 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
+def update_GUI():
+  if not OV.HasGUI():
+    return
+  x = olx.LogLevel()
+  olx.LogLevel(0)
+  olx.xf.EndUpdate()
+  olex.m('refresh')
+  olx.LogLevel(x)
+
 def run_with_bitmap(bitmap_text):
   timage.info_bitmaps(timage, bitmap_text, '#ff4444')
   def decorator(func):
@@ -214,13 +223,9 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       x = stdout.read()
       if x:
         print(x, end='')
-        olx.xf.EndUpdate()
-        if OV.HasGUI():
-          olx.Refresh()
+        update_GUI()
       else:
-        olx.xf.EndUpdate()
-        if OV.HasGUI():
-          olx.Refresh()
+        update_GUI()
       # if OV.GetVar("stop_current_process"):
       #  p.terminate()
       #  print("Calculation aborted by INTERRUPT!")
@@ -316,10 +321,8 @@ def combine_tscs(match_phrase="_part_", no_check=False):
         string = c.decode()
         stdout.write(string)
         stdout.flush()
-        if '\r' in string or '\n' in string:
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
+        if '\r\n' in string or '\n' in string:
+          update_GUI()
   else:
     with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
@@ -327,9 +330,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
         stdout.write(string)
         stdout.flush()
         if '\r' in string or '\n' in string:
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
+          update_GUI()
 
   if os.path.exists("combined.tsc"):
     tsc_dst = sfc_name + "_total.tsc"

@@ -21,7 +21,7 @@ import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
-from utilities import run_with_bitmap
+from utilities import run_with_bitmap, update_GUI
 
 a2b = 0.529177210903
 
@@ -897,9 +897,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
             (cm[6] / (size[0]), cm[7] / (size[1]), cm[8] / (size[2]))]
 
     print("Calculating Grid %4d x %4d x %4d..." % (size[0], size[1], size[2]))
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()
+    update_GUI()
 
     def index_limits(center: np.ndarray,
                      radius: float,

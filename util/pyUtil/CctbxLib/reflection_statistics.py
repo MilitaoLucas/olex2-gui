@@ -574,11 +574,10 @@ class fractal_dimension(OlexCctbxAdapter):
     self.info = OV.ModelSrc()
     map_type = "diff"
     olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
-    print ("Made residual density map\nAnalyzing...")
+    print("Made residual density map\nAnalyzing...")
+    from NoSpherA2.utilities import update_GUI
 
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()
+    update_GUI()
 
     wfn_2_fchk = OV.GetVar("Wfn2Fchk")
     args = [wfn_2_fchk]
@@ -597,9 +596,7 @@ class fractal_dimension(OlexCctbxAdapter):
           sys.stdout.write(string)
           sys.stdout.flush()
           if '\r' in string or '\n' in string:
-            olx.xf.EndUpdate()
-            if OV.HasGUI():
-              olx.Refresh()
+            update_GUI()
     else:
       with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
         for c in iter(lambda: p.stdout.read(1), b''):
@@ -607,9 +604,7 @@ class fractal_dimension(OlexCctbxAdapter):
           sys.stdout.write(string)
           sys.stdout.flush()
           if '\r' in string or '\n' in string:
-            olx.xf.EndUpdate()
-            if OV.HasGUI():
-              olx.Refresh()
+            oupdate_GUI()
 
     with open("%s_%s.cube_fractal_plot"%(self.info,map_type),'r') as file:
       lines = file.readlines()
