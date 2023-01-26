@@ -461,7 +461,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def data_to_parameter_watch(self):
     #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
-    data_all = self.reflections.f_sq_obs_filtered.size()
+    #data_all = self.reflections.f_sq_obs_filtered.size()
     data = self.reflections.f_sq_obs_merged.size()
     dpr = "%.2f" %(data/parameters)
     OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
@@ -474,10 +474,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #if not restraints:
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
-     #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
-    print("   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      ", file=log)
-    print("  -------  --------  --------  --------  --------------------  --------------------  --------------------", file=log)
+     # %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
+    ref_method = OV.GetParam("snum.refinement.method")
+    header = "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      "
+    hr = "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
+    if ref_method == "Levenberg-Marquardt":
+      header += "     Mu of LM      "
+      hr +=   "  --------------"
+    print(hr, file=log)
+    print(header, file=log)
+    print(hr, file=log)
 
   def get_twin_fractions(self):
     rv = None
@@ -1326,13 +1332,13 @@ The following options were used:
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
     if pivot_neighbour is not None:
-     for a in group:
-       self.fixed_angles.setdefault((pivot_neighbour, pivot, a), 1)
+      for a in group:
+        self.fixed_angles.setdefault((pivot_neighbour, pivot, a), 1)
 
     if pivot is not None:
-     for i, a in enumerate(group):
-       for j in range(i+1, len(group)):
-         self.fixed_angles.setdefault((a, pivot, group[j]), 1)
+      for i, a in enumerate(group):
+        for j in range(i + 1, len(group)):
+          self.fixed_angles.setdefault((a, pivot, group[j]), 1)
 
     for a in group:
       ns = self.olx_atoms._atoms[a]['neighbours']
@@ -1496,8 +1502,7 @@ The following options were used:
     else:
       k = math.sqrt(scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
-    wavelength = float(olx.xf.exptl.Radiation())
-    if wavelength < 0.1:
+    if OV.IsEDData():
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
@@ -1579,9 +1584,10 @@ The following options were used:
       self.normal_eqns.goof()
     ), file=log)
 
-    print("  +  Diff:     max=%.2f, min=%.2f" %(
+    print("  +  Diff:     max=%.2f, min=%.2f, RMS=%.2f" % (
       self.diff_stats.max(),
-      self.diff_stats.min()
+      self.diff_stats.min(),
+      self.diff_stats.sigma()
     ), file=log)
 
     if(self.cycles.n_iterations>0):
@@ -1613,6 +1619,7 @@ The following options were used:
       max_shift_esd)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
+    OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
 
   def get_disagreeable_reflections(self, show_in_console=False):

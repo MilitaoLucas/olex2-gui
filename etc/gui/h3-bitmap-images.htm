@@ -212,8 +212,8 @@
       items="'#aaaaaa;#bbbbbb;#5599ff;#000000'"
       valign='left'
       name="TRIM_BORDER_COLOUR"
-      value='spy.GetParam(snum.image.trim_border_colour)'
-      onchange='spy.changeBoxColour(TRIM_BORDER_COLOUR_SAMPLE,html.GetValue(~name~))>>spy.SetParam(snum.image.trim_border_colour,html.GetValue(~name~))'
+      value='spy.GetParam(user.image.trim_border_colour)'
+      onchange='spy.changeBoxColour(TRIM_BORDER_COLOUR_SAMPLE,html.GetValue(~name~))>>spy.SetParam(user.image.trim_border_colour,html.GetValue(~name~))'
       manage
     >
     </font>
@@ -222,7 +222,7 @@
       <input
         type="text"
         width='100%'
-        bgcolor='$spy.GetParam(snum.image.trim_border_colour)'
+        bgcolor='$spy.GetParam(user.image.trim_border_colour)'
         name='TRIM_BORDER_COLOUR_SAMPLE'
     >
 
@@ -233,7 +233,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- FIRST ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=ADD_FOG; help_ext=Add-or-Remove-Fog;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=ADD_FOG; help_ext=Add-Fog;1; -->
 <!-- #include add-fog gui\snippets\snippet-add-fog.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

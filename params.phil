@@ -133,6 +133,8 @@ routines requiring structure refinement
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
+    electron_table_name = *None Custom 'Peng-1996' 'Peng-1999' 'UCLA-2022' 'CAP-2022'
+      .type = choice
     secondary_ch2_angle = idealise refine *shelxl
       .type = choice
     }
@@ -240,6 +242,8 @@ routines requiring structure refinement
     max_peak = None
       .type = float
     max_hole = None
+      .type = float
+    res_rms = None
       .type = float
     goof = None
       .type = float
@@ -785,7 +789,7 @@ routines requiring structure refinement
   map {
     source = *olex fcf cctbx
       .type = choice
-    type = *diff fcalc tomc fobs fcfmc PDF
+    type = *diff fcalc tomc fobs fcfmc PDF mask
       .type = choice
     PDF_second_order = True
       .type = bool
@@ -993,6 +997,12 @@ user
     .type = str
   reference = ""
     .type = str
+  def_style_scene_src_dir = basedir()/etc/styles/
+    .type = str
+  def_style = 'default'
+    .type = str
+  def_scene = 'default'
+    .type = str
   brad = 10
     .type = int
   solo = True
@@ -1042,6 +1052,17 @@ user
     .type = str
   report_label_style = 0
     .type = int
+    
+  legend{
+    horizontal = *l r
+      .type = choice
+    vertical = *t b 
+      .type = choice
+    padding = 60
+      .type = str
+  }  
+  edit_ins_atom_order = ins_atom
+    .type = str
   parts{
     keep_unique = True
       .type = bool

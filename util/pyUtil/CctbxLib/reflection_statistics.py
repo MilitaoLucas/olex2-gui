@@ -25,7 +25,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     if self.reflections is None:
       raise RuntimeError("There was an error reading the reflection file.")
     self.graph = graph
-    twinning=self.olx_atoms.model.get('twin')
+    # twinning=self.olx_atoms.model.get('twin')
 
     bitmap = 'working'
     OV.CreateBitmap(bitmap)
@@ -53,7 +53,7 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     if self.reflections is None:
       raise RuntimeError("There was an error reading the reflection file.")
-    twinning=self.olx_atoms.model.get('twin')
+    #twinning=self.olx_atoms.model.get('twin')
     try:
       import iotbx.command_line.reflection_statistics
       import sys
@@ -145,8 +145,16 @@ class item_vs_resolution(OlexCctbxAdapter):
         fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
       else:
         fo2, fc = self.get_fo_sq_fc()
-      weights = self.compute_weights(fo2, fc)
-      scale_factor = fo2.scale_factor(fc, weights=weights)
+      if OV.GetParam("snum.refinement.use_solvent_mask"):
+        from smtbx import masks
+        f_mask = self.load_mask()
+        if f_mask:
+          if not self.reflections.f_sq_obs.space_group().is_centric() and\
+             self.reflections.f_sq_obs.anomalous_flag():
+            f_mask = f_mask.generate_bijvoet_mates()
+          f_mask_cs = f_mask.common_set(fo2)
+          fc = fc.array(data=fc.data() + f_mask_cs.data())
+      scale_factor = OV.GetOSF()
       fo = fo2.f_sq_as_f()
       fo.setup_binner(n_bins=n_bins)
       self.info = fo.info()
@@ -213,51 +221,50 @@ class item_vs_resolution(OlexCctbxAdapter):
     return r
 
 
-class r1_factor_vs_resolution(OlexCctbxAdapter):
-  def __init__(self, n_bins=10, resolution_as="two_theta"):
-    OlexCctbxAdapter.__init__(self)
-    self.resolution_as = resolution_as
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
-    fo2 = None
-    fc = None
-    if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
-      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
-    else:
-      fo2, fc = self.get_fo_sq_fc()
-    weights = self.compute_weights(fo2, fc)
-    scale_factor = fo2.scale_factor(fc, weights=weights)
-    fo = fo2.f_sq_as_f()
-    fo.setup_binner(n_bins=n_bins)
-    self.info = fo.info()
-    self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
-    self.binned_data.show()
-
-  def xy_plot_info(self):
-    r = empty()
-    r.title = "R1 factor vs resolution"
-    if (self.info is not None):
-      r.title += ": " + str(self.info)
-    d_star_sq = self.binned_data.binner.bin_centers(2)
-    if self.resolution_as == "two_theta":
-      resolution = uctbx.d_star_sq_as_two_theta(
-        d_star_sq, self.wavelength, deg=True)
-    elif self.resolution_as == "d_spacing":
-      resolution = uctbx.d_star_sq_as_d(d_star_sq)
-    elif self.resolution_as == "d_star_sq":
-      resolution = d_star_sq
-    elif self.resolution_as == "stol":
-      resolution = uctbx.d_star_sq_as_stol(d_star_sq)
-    elif self.resolution_as == "stol_sq":
-      resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
-    r.x = resolution
-    r.y = self.binned_data.data[1:-1]
-    r.xLegend = self.resolution_as
-    r.yLegend = "R1 factor"
-    return r
+# class r1_factor_vs_resolution(OlexCctbxAdapter):
+#  def __init__(self, n_bins=10, resolution_as="two_theta"):
+#    OlexCctbxAdapter.__init__(self)
+#    self.resolution_as = resolution_as
+#    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+#    fo2 = None
+#    fc = None
+#    if NoSpherA2:
+#      from refinement import FullMatrixRefine
+#      fmr = FullMatrixRefine()
+#      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+#      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+#      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+#    else:
+#      fo2, fc = self.get_fo_sq_fc()
+#    scale_factor = OV.GetOSF()
+#    fo = fo2.f_sq_as_f()
+#    fo.setup_binner(n_bins=n_bins)
+#    self.info = fo.info()
+#    self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
+#    self.binned_data.show()
+#
+#  def xy_plot_info(self):
+#    r = empty()
+#    r.title = "R1 factor vs resolution"
+#    if (self.info is not None):
+#      r.title += ": " + str(self.info)
+#    d_star_sq = self.binned_data.binner.bin_centers(2)
+#    if self.resolution_as == "two_theta":
+#      resolution = uctbx.d_star_sq_as_two_theta(
+#        d_star_sq, self.wavelength, deg=True)
+#    elif self.resolution_as == "d_spacing":
+#      resolution = uctbx.d_star_sq_as_d(d_star_sq)
+#    elif self.resolution_as == "d_star_sq":
+#      resolution = d_star_sq
+#    elif self.resolution_as == "stol":
+#      resolution = uctbx.d_star_sq_as_stol(d_star_sq)
+#    elif self.resolution_as == "stol_sq":
+#      resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
+#    r.x = resolution
+#    r.y = self.binned_data.data[1:-1]
+#    r.xLegend = self.resolution_as
+#    r.yLegend = "R1 factor"
+#    return r
 
 
 class scale_factor_vs_resolution(OlexCctbxAdapter):
@@ -277,6 +284,15 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
       fo2, fc = self.get_fo_sq_fc()
     fo2.setup_binner(n_bins=n_bins)
     self.info = fo2.info()
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(fo2)
+        fc = fc.array(data=fc.data() + f_mask_cs.data())    
     weights = self.compute_weights(fo2, fc)
     self.binned_data = fo2.scale_factor(
       fc, weights=weights, use_binning=True)
@@ -351,11 +367,15 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-        junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
-        f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
-        f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
-        # Currently i have to stick to ignoring omitted reflections, since they have no calculated value in the .tsc file
-        f_calc_omitted = None
+        try:
+          f_calc_merged = self.f_calc(miller_set=f_obs_merged, one_h_function=nrml_eqns.one_h_linearisation)
+          f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+          f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
+        except:
+          junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+          f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
+          print("WARNING! It was not possible to obtain all values of Fc values\n for the plot, so omitted values are skipped!")
+          f_calc_omitted = None
       else:
         f_calc_merged = self.f_calc(miller_set=f_obs_merged)
         f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
@@ -430,8 +450,16 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
     else:
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(f_obs_filtered)
+        f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data() + f_mask_cs.data())
 
-    weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(OV.GetOSF())
     if binning == True:
       assert n_bins is not None
@@ -487,6 +515,16 @@ class normal_probability_plot(OlexCctbxAdapter):
       f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
     else:
       f_sq_obs, f_calc = self.get_fo_sq_fc()
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask_cs = f_mask.common_set(f_sq_obs)
+        f_calc = f_calc.array(data=f_calc.data() + f_mask_cs.data())
+        
     f_obs = f_sq_obs.f_sq_as_f()
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
@@ -802,6 +840,5 @@ def cumulative_intensity_distribution(cctbx_adaptor,
   return statistics.cumulative_intensity_distribution(f_obs).xy_plot_info()
 
 def sys_absent_intensity_distribution(reflections):
-  f_obs = reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
   return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()

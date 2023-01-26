@@ -135,18 +135,22 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     print_tabular = True
 
     if print_tabular:
-      print("  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
-        self.n_current_cycle,
-        self.r1_factor(cutoff_factor=2)[0]*100,
-        self.wR2()*100,
-        self.goof(),
-        self.max_shift_esd,
-        '('+self.max_shift_esd_item+')',
-        max_shift_site[0],
-        '('+max_shift_site[1].label+')',
-        max_shift_u[0],
-        '('+max_shift_u[1].label+')',
-      ), file=log)
+      header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
+      params = (self.n_current_cycle,
+          self.r1_factor(cutoff_factor=2)[0] * 100,
+          self.wR2() * 100,
+          self.goof(),
+          self.max_shift_esd,
+          '(' + self.max_shift_esd_item + ')',
+          max_shift_site[0],
+          '(' + max_shift_site[1].label + ')',
+          max_shift_u[0],
+          '(' + max_shift_u[1].label + ')',
+      )
+      if hasattr(self.iterations_object,'mu'):
+        header += "  % 8.2e"
+        params += (self.iterations_object.mu,)
+      print(header %params, file=log)
 
     else:
       print("wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
@@ -367,7 +371,7 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
       spc += ip.n_param
     if max_shift_i >= J.n_cols-spc:
       if r.thickness is not None and r.thickness.grad_index == max_shift_i:
-        self.max_shift_for = "ED_Thickness"
+        self.max_shift_for = "EDT"
       elif r.fc_correction and r.fc_correction.grad and\
            max_shift_i >= r.fc_correction.grad_index and\
            max_shift_i < r.fc_correction.grad_index + r.fc_correction.n_param:
@@ -478,7 +482,9 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
           self.mu *= nu
           nu *= 2
           if OV.IsDebugging():
-            print("Increasing mu to %.3e and recalculating" %self.mu)
+            print("Increasing mu to %.3e and recalculating" % self.mu)
+          else:
+            print("Refinement did not improve, no shifts applied!")
         elif OV.IsDebugging():
           print("Mu is too big, skip increase")
       self.non_linear_ls.build_up()

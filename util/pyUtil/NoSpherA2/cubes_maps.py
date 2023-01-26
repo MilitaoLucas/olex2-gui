@@ -21,6 +21,7 @@ import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
+from utilities import run_with_bitmap
 
 a2b = 0.529177210903
 
@@ -100,7 +101,7 @@ hermite_polynomials_of_3rd_and_4th_order = \
 
 def kuhs_limit(order: int, adp: np.ndarray) -> float:
   """Resolution required to model anharmonic ADP; see doi: 10.1071/PH880369"""
-  return (2 * np.pi) ** -1.5 * (2 * order * np.log(2) / adp) ** 0.5
+  return (2. * np.pi) ** -1.5 * (2. * order * np.log(2) / adp) ** 0.5
 
 def calculate_cubes():
   if NoSpherA2.is_disordered == True:
@@ -279,50 +280,37 @@ def plot_cube(name, color_cube):
   x_size = 0
   y_size = 0
   z_size = 0
-  x_run = 0
-  y_run = 0
-  z_run = 0
+  total_size = 0
+  drun = 0
   data = None
-
-  #min = 100000
-  #max = 0
 
   for line in cube:
     run += 1
-    if (run==3):
-      values = line.split()
-      na = int(values[0])
-    if (run==4):
-      values = line.split()
-      x_size = int(values[0])
-    if (run==5):
-      values = line.split()
-      y_size = int(values[0])
-    if (run==6):
-      values = line.split()
-      z_size = int(values[0])
-      data = flex.double(x_size * y_size * z_size)
-      data.reshape(flex.grid(x_size, y_size, z_size))
+    values = line.split()
     if (run > na + 6):
-      values = line.split()
-      for i in range(len(values)):
-        v = float(values[i])
-        data[(x_run * y_size + y_run) * z_size + z_run] = v
-        z_run += 1
-        if z_run == z_size:
-          y_run += 1
-          z_run = 0
-          if y_run == y_size:
-            x_run += 1
-            y_run = 0
-        if x_run > x_size:
-          print("ERROR! Mismatched indices while reading!")
-          return
+      if drun + len(values) > total_size:
+        print("ERROR! Mismatched indices while reading!")
+        return
+      data.extend(flex.double(np.array(values, dtype=float).tolist()))
+      drun += len(values)
+      continue
+    elif (run == 3):
+      na = int(values[0])
+    elif (run == 4):
+      x_size = int(values[0])
+    elif (run == 5):
+      y_size = int(values[0])
+    elif (run == 6):
+      z_size = int(values[0])
+      total_size = x_size * y_size * z_size
+      data = flex.double()
 
+  data.reshape(flex.grid(x_size, y_size, z_size))
   cube = None
 
   make_colorfull = (color_cube != None)
   if make_colorfull == True:
+    print("WARNING! COLORED MAPS AURE CURRENTLY ONLY FOR TESTING PURPOSES!")
     with open(color_cube) as cub:
       cube2 = cub.readlines()
 
@@ -331,49 +319,31 @@ def plot_cube(name, color_cube):
     x_size2 = 0
     y_size2 = 0
     z_size2 = 0
-    x_run = 0
-    y_run = 0
-    z_run = 0
+    drun = 0
     data2 = None
 
     for line in cube2:
       run += 1
-      if (run==3):
-        values = line.split()
-        #na2 = int(values[0])
-      if (run==4):
-        values = line.split()
-        x_size2 = int(values[0])
-      if (run==5):
-        values = line.split()
-        y_size2 = int(values[0])
-      if (run==6):
-        values = line.split()
-        z_size2 = int(values[0])
-        data2 = flex.double(x_size2 * y_size2 * z_size2)
-        data2.reshape(flex.grid(x_size2, y_size2, z_size2))
+      values = line.split()
       if (run > na + 6):
-        values = line.split()
-        for i in range(len(values)):
-          data2[x_run][y_run][z_run] = float(values[i])
-          z_run += 1
-          if z_run == z_size2:
-            y_run += 1
-            z_run = 0
-            if y_run == y_size2:
-              x_run += 1
-              y_run = 0
-          if x_run > x_size2:
-            print("ERROR! Mismatched indices while reading!")
-            return
-
+        if drun + len(values) > total_size:
+          print("ERROR! Mismatched indices while reading!")
+          return
+        data2.extend(flex.double(np.array(values, dtype=float).tolist()))
+        drun += len(values)
+        continue
+      elif (run == 4):
+        x_size = int(values[0])
+      elif (run == 5):
+        y_size = int(values[0])
+      elif (run == 6):
+        z_size = int(values[0])
+        total_size = x_size * y_size * z_size
+        data2 = flex.double()
+    
+    data2.reshape(flex.grid(x_size, y_size, z_size))
     cube2 = None
     values = None
-    z_run = None
-    y_run = None
-    x_run = None
-    na = None
-    #na2 = None
     line = None
     run = None
     olex_xgrid.Init(x_size,y_size,z_size,True)
@@ -405,7 +375,6 @@ def plot_cube(name, color_cube):
 
 
     value = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
-    i=None
     if x_size == x_size2 and y_size == y_size2 and z_size == z_size2:
       for x in range(x_size):
         for y in range(y_size):
@@ -426,10 +395,9 @@ def plot_cube(name, color_cube):
           olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
   else:
     gridding = data.accessor()
-    isint = isinstance(data, flex.int)
-    a1 = gridding.all()
-    a2 = gridding.focus()
-    olex_xgrid.Import(a1, a2, data.copy_to_byte_str(), isint)
+    type = isinstance(data, flex.int)
+    olex_xgrid.Import(
+      gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   Type = OV.GetParam('snum.NoSpherA2.map.type')
   if Type == "Laplacian":
     OV.SetVar('map_min', 0)
@@ -476,7 +444,11 @@ def plot_cube(name, color_cube):
   ma = mmm.max
   olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   iso = float((abs(mi)+abs(ma))*2/3)
   olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
@@ -487,7 +459,6 @@ def plot_cube_single(name):
   if not os.path.isfile(name):
     print("Cube file does not exist!")
     return
-  olex.m("html.Update()")
   with open(name) as cub:
     cube = cub.readlines()
 
@@ -496,69 +467,60 @@ def plot_cube_single(name):
   x_size = 0
   y_size = 0
   z_size = 0
-  x_run = 0
-  y_run = 0
-  z_run = 0
+  total_size = 0
+  drun = 0
   data = None
-
-  min = 100000
-  max = 0
 
   for line in cube:
     run += 1
-    if (run==3):
-      values = line.split()
-      na = int(values[0])
-    if (run==4):
-      values = line.split()
-      x_size = int(values[0])
-    if (run==5):
-      values = line.split()
-      y_size = int(values[0])
-    if (run==6):
-      values = line.split()
-      z_size = int(values[0])
-      data = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
+    values = line.split()
     if (run > na + 6):
-      values = line.split()
-      for i in range(len(values)):
-        data[x_run][y_run][z_run] = float(values[i])
-        if data[x_run][y_run][z_run] > max:
-          max = data[x_run][y_run][z_run]
-        if data[x_run][y_run][z_run] < min:
-          min = data[x_run][y_run][z_run]
-        z_run += 1
-        if z_run == z_size:
-          y_run += 1
-          z_run = 0
-          if y_run == y_size:
-            x_run += 1
-            y_run = 0
-        if x_run > x_size:
-          print("ERROR! Mismatched indices while reading!")
-          return
+      if drun + len(values) > total_size:
+        print("ERROR! Mismatched indices while reading!")
+        return      
+      data.extend(flex.double(np.array(values, dtype=float).tolist()))
+      drun += len(values)
+      continue
+    elif (run == 3):
+      na = int(values[0])
+    elif (run == 4):
+      x_size = int(values[0])
+    elif (run == 5):
+      y_size = int(values[0])
+    elif (run == 6):
+      z_size = int(values[0])
+      total_size = x_size * y_size * z_size
+      data = flex.double()
 
+  mmm = data.min_max_mean()
+  rms = data.rms()
+  data.reshape(flex.grid(x_size, y_size, z_size))
   cube = None
 
-  olex_xgrid.Init(x_size,y_size,z_size)
-  for x in range(x_size):
-    for y in range(y_size):
-      for z in range(z_size):
-        olex_xgrid.SetValue(x,y,z,data[x][y][z])
+  gridding = data.accessor()
+  type = isinstance(data, flex.int)
+  olex_xgrid.Import(
+    gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
+
+  OV.SetVar('map_min', 0)
+  OV.SetVar('map_max', 40)
+  OV.SetVar('map_slider_scale', 100)
   data = None
-  OV.SetVar('map_min',0)
-  OV.SetVar('map_max',40)
-  OV.SetVar('map_slider_scale',100)
-  olex_xgrid.SetMinMax(min, max)
+  print("Map Min = %.3f, Max = %.3f, RMS = %.3f"%(mmm.min,mmm.max,rms))
+  olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
-  iso = float((abs(min)+abs(max))*2/3)
-  olex_xgrid.SetSurfaceScale(iso)
-  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
+  if OV.GetParam('snum.map.mask') == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
+  iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
+  olex_xgrid.SetSurfaceScale(iso)  
+  OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
+  olex.m("html.Update()")
 
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
-def plot_map_cube(map_type,resolution):
+def save_map_cube(map_type, resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
@@ -622,7 +584,7 @@ def plot_map_cube(map_type,resolution):
 
   print("Saved Fourier map successfully")
 
-OV.registerFunction(plot_map_cube,True,'NoSpherA2')
+OV.registerFunction(save_map_cube, True, 'NoSpherA2')
 
 def get_color(value):
   a = 127
@@ -685,7 +647,6 @@ OV.registerFunction(is_colored,True,'NoSpherA2')
 def plot_fft_map(fft_map):
   data = fft_map.real_map_unpadded()
   gridding = data.accessor()
-  from cctbx.array_family import flex
   type = isinstance(data, flex.int)
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
@@ -696,7 +657,11 @@ def plot_fft_map(fft_map):
   data = None
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
-  olex_xgrid.InitSurface(True, 1.1)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, 1.1)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   iso = float(-sigma*3.3)
   olex_xgrid.SetSurfaceScale(iso)
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
@@ -706,12 +671,15 @@ OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   gridding = data.accessor()
-  from cctbx.array_family import flex
   type = isinstance(data, flex.int)
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   olex_xgrid.SetMinMax(min_v, max_v)
-  olex_xgrid.InitSurface(True, dist)
+  mask = OV.GetParam('snum.map.mask')
+  if mask == True:
+    olex_xgrid.InitSurface(True, dist)
+  else:
+    olex_xgrid.InitSurface(True, -100)
   olex.m("xgrid.RenderMode(line)")
   olex_xgrid.SetSurfaceScale(iso)
   olex_xgrid.SetVisible(True)
@@ -762,7 +730,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
         if tiny_pse.table(j).symbol() == atom_type:
           charge = j
           break
-      if charge == 200:
+      if charge == 200 and atom_type != "Q":
         print("ATOM NOT FOUND!")
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
@@ -854,8 +822,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     if OV.HasGUI():
       olx.gl.Basis(basis)
       olx.Freeze(frozen)
-      OV.Refresh()
-  if return_map==True:
+  if return_map == True:
     return diff_map
   write_map_to_cube(diff_map, "diff")
 
@@ -866,7 +833,6 @@ def adp_list_to_array(a: Sequence) -> np.ndarray:
 
 def adp_list_to_sigma_inv(adp: Sequence) -> np.ndarray:
   return linalg.inv(adp_list_to_array(adp))
-
 
 def digest_boolinput(i: Union[str, bool]) -> bool:
   if isinstance(i, bool):
@@ -879,7 +845,7 @@ def digest_boolinput(i: Union[str, bool]) -> bool:
   raise ValueError(f'Parameter {i!r} cannot be interpreted as boolean. '
                    f'Use "True" / "T" / "1" or "False" / "F" / "0" instead.')
 
-
+@run_with_bitmap("Calculating PDF")
 def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only_anh=True, do_plot=True, save_cube=False):
   second = digest_boolinput(second)
   third = digest_boolinput(third)
@@ -891,8 +857,6 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
   if second == False and third == False and fourth == False:
     print("Well, what should I print then? Please decide what you want to see!")
     return
-  olex.m("kill $Q")
-  OV.CreateBitmap("working")
   try:
     dist = float(dist)
     cctbx_adapter = OlexCctbxAdapter()
@@ -1235,6 +1199,36 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
 
 OV.registerFunction(calc_map, False, "NoSpherA2")
 
+def mask_map(resolution=0.1, return_map=False, use_f000=False):
+  cctbx_adapter = OlexCctbxAdapter()
+  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    f_mask = cctbx_adapter.load_mask()
+    if not f_mask:
+      OlexCctbxMasks()
+      if olx.current_mask.flood_fill.n_voids() > 0:
+        f_mask = olx.current_mask.f_mask()
+    if f_mask:
+      if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+        f_mask = f_mask.generate_bijvoet_mates()
+      f_mask = f_mask.common_set(f_sq_obs)
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
+  if use_f000 == True or use_f000 == "True":
+    f000 = float(olx.xf.GetF000())
+    mask_map = f_mask.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                              resolution_factor=1, grid_step=float(resolution),
+                              f_000=f000).apply_volume_scaling()
+  else:
+    mask_map = f_mask.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                              resolution_factor=1, grid_step=float(resolution)).apply_volume_scaling()
+  if return_map==True:
+    return mask_map
+  write_map_to_cube(mask_map, "mask")
+
+OV.registerFunction(mask_map, False, "NoSpherA2")
+
 def show_fft_map(resolution=0.1,map_type="diff",use_f000=False,print_peaks=False):
   if map_type == "diff":
     plot_fft_map(residual_map(resolution, return_map=True,print_peaks=print_peaks))
@@ -1245,6 +1239,8 @@ def show_fft_map(resolution=0.1,map_type="diff",use_f000=False,print_peaks=False
   elif map_type == "calc":
     plot_fft_map(calc_map(resolution,return_map=True,use_f000=use_f000))
   elif map_type == "tomc":
-    plot_fft_map(tomc_map(resolution,return_map=True,use_f000=use_f000))
+    plot_fft_map(tomc_map(resolution, return_map=True, use_f000=use_f000))
+  elif map_type == "mask":
+    plot_fft_map(mask_map(resolution, return_map=True, use_f000=use_f000))
 
 OV.registerFunction(show_fft_map, False, "NoSpherA2")

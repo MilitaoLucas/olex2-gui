@@ -24,7 +24,7 @@ def append_row(rows, observed, target, delta, sigma, restraint, atoms):
   global filtered_off
   filter_val = float(olx.GetVar('restraint_filter'))
   dos = round(delta / sigma, 1)
-  if abs(dos) > filter_val:
+  if abs(dos) >= filter_val:
     rows.append([observed, target, round(delta, 3), round(sigma, 3), dos, restraint, atoms])
   else:
     filtered_off += 1
@@ -249,7 +249,7 @@ def make_restraints_table(*kwds):
           _ = restraint.split()
           tabledata += [[0, 0, 0, 0, _[0].upper() + "_" + _[1].lower() + "_" + 'err', ""]]
 
-  filter_message = "%i Restraints have been filtered" % filtered_off
+  filter_message = "<b>%i</b> Restraints have been filtered" % filtered_off
   top_line = gui.tools.TemplateProvider.get_template('restraints_top', force=debug) % {'filtered_off': filter_message}
   cache_restraint_table = top_line + h_t.table_maker(tabledata)
   return cache_restraint_table

@@ -10,7 +10,7 @@ debug = OV.IsDebugging()
 timer = debug
 import glob
 global have_found_python_error
-have_found_python_error= False
+have_found_python_error = False
 
 global last_formula
 last_formula = ""
@@ -49,8 +49,10 @@ gui_yellow = OV.GetParam('gui.dark_yellow')
 
 import subprocess
 
+
 class FolderView:
   root = None
+
   class node:
     name = None
     full_name = None
@@ -65,12 +67,12 @@ class FolderView:
         self.full_name = name
 
     def toStr(self, prefix=""):
-      s = prefix+self.name
-      s += "\n%s" %(self.full_name)
+      s = prefix + self.name
+      s += "\n%s" % (self.full_name)
       if self.content:
         prefix += '\t'
         for c in self.content:
-          s += '\n%s%s' %(prefix,c.toStr(prefix))
+          s += '\n%s%s' % (prefix, c.toStr(prefix))
       return s
 
     def expand(self, mask, fname=""):
@@ -85,16 +87,15 @@ class FolderView:
           if len(dr.content):
             self.content.append(dr)
         else:
-          if( os.path.splitext(i)[1] in mask):
+          if(os.path.splitext(i)[1] in mask):
             self.content.append(FolderView.node(i, dn))
-
 
   def list(self, mask=".ins;.res;.cif;.oxm"):
     r = OV.GetParam('user.folder_view_root')
     if not r:
       r = "."
     try:
-      f = olx.ChooseDir('Select folder', '%s' %r)
+      f = olx.ChooseDir('Select folder', '%s' % r)
     except RuntimeError:
       f = None
     if f:
@@ -109,19 +110,19 @@ class FolderView:
     OV.SetParam('user.folder_view_root', self.root.name)
     data = self.root.toStr()
     OlexVFS.write_to_olex('folder_view.data', data.encode('utf-8'))
-    return "<input type='tree' manage noroot src='folder_view.data' name='fvt'"+\
-           " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\
-           " height=200 width=" + str(int(olx.html.ClientWidth('self'))-50) + ">"
+    return "<input type='tree' manage noroot src='folder_view.data' name='fvt'" +\
+           " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'" +\
+           " height=200 width=" + str(int(olx.html.ClientWidth('self')) - 50) + ">"
 
   def loadStructure(self, v):
     if os.path.isfile(v):
-      olex.m("reap '%s'" %v)
+      olex.m("reap '%s'" % v)
+
 
 fv = FolderView()
 olex.registerFunction(fv.list, False, "gui.tools.folder_view")
 olex.registerFunction(fv.generateHtml, False, "gui.tools.folder_view")
 olex.registerFunction(fv.loadStructure, False, "gui.tools.folder_view")
-
 
 
 def start_where():
@@ -137,12 +138,14 @@ def start_where():
   if olx.IsVar('start_where') == 'false':
     where = OV.GetParam('user.start_where').lower()
     SwitchPanel(where)
-    olx.SetVar('start_where',False)
+    olx.SetVar('start_where', False)
+
 
 olex.registerFunction(start_where, False, "gui.tools")
 
+
 def flash_def_button(control, wait, n):
-  highlight_c = OV.GetParam('gui.html.highlight_colour','##ff0000')
+  highlight_c = OV.GetParam('gui.html.highlight_colour', '##ff0000')
   off_colour = OV.GetParam('gui.action_colour')
 
   for i in range(n):
@@ -153,63 +156,66 @@ def flash_def_button(control, wait, n):
     OV.Refresh()
     olx.Wait(wait)
 
+
 def flash_gui_control(control, wait=300):
   ''' Flashes a control on the GUI in order to highlight it's position '''
-  highlight_c = OV.GetParam('gui.html.highlight_colour','##ff0000')
+  highlight_c = OV.GetParam('gui.html.highlight_colour', '##ff0000')
   if ';' in control:
     n = int(control.split(';')[1])
     control = control.split(';')[0]
   else:
     n = 2
-    
+
   if 'DEFBTN' in control:
       flash_def_button(control, wait, n)
       return
 
-  control_name = "IMG_%s" %control.upper()
+  control_name = "IMG_%s" % control.upper()
   if '@' in control:
     print("@ in control")
     control_image = control.lower().split('@')[0]
   else:
     control_image = control
 
-  if not olx.fs.Exists("%son.png" %control_image):
-    print("This image %s does not exist. So I can't make it blink" %control_image)
+  if not olx.fs.Exists("%son.png" % control_image):
+    print("This image %s does not exist. So I can't make it blink" % control_image)
     return
-  
+
   for i in range(n):
     if "element" in control:
-      new_image = "up=%son.png" %control_image
-      olx.html.SetImage(control_name,new_image)
+      new_image = "up=%son.png" % control_image
+      olx.html.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), highlight_c)
+      cmd = 'html.setBG(%s,%s)' % (control_image.rstrip('_bg'), highlight_c)
       olex.m(cmd)
     else:
-      new_image = "up=%soff.png" %control_image
-      olx.html.SetImage(control_name,new_image)
+      new_image = "up=%soff.png" % control_image
+      olx.html.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
     if "element" in control:
-      new_image = "up=%soff.png" %control
-      olx.html.SetImage(control_name,new_image)
+      new_image = "up=%soff.png" % control
+      olx.html.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffff')
+      cmd = 'html.setBG(%s,%s)' % (control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
     elif 'cbtn' in control:
       new_image = "up=%son.png" % control_image
       olx.html.SetImage(control_name, new_image)
     else:
-      new_image = "up=%shighlight.png" %control_image
-      olx.html.SetImage(control_name,new_image)
+      new_image = "up=%shighlight.png" % control_image
+      olx.html.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
   if not control.endswith('_bg'):
-    new_image = "up=%soff.png" %control_image
-    olx.html.SetImage(control_name,new_image)
+    new_image = "up=%soff.png" % control_image
+    olx.html.SetImage(control_name, new_image)
+
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
+
 
 def make_single_gui_image(img_txt="", img_type='h2', force=False):
   import PilTools
@@ -224,28 +230,28 @@ def make_single_gui_image(img_txt="", img_type='h2', force=False):
       alias = img_type
       img_type = "h2"
     image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False, force=force)
-    name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
+    name = "%s-%s%s.png" % (img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
 
 def inject_into_tool(tool, t, where, befaf='before'):
   import OlexVFS
-  txt = OlexVFS.read_from_olex('%s/%s' %(OV.BaseDir(),tool))
+  txt = OlexVFS.read_from_olex('%s/%s' % (OV.BaseDir(), tool))
   if befaf == 'before':
-    txt = txt.replace(where, "%s%s" %(t, where))
+    txt = txt.replace(where, "%s%s" % (t, where))
   else:
-    txt = txt.replace(where, "%s%s" %(where, t))
-  OlexVFS.write_to_olex('%s/%s' %(OV.BaseDir(), tool),txt)
+    txt = txt.replace(where, "%s%s" % (where, t))
+  OlexVFS.write_to_olex('%s/%s' % (OV.BaseDir(), tool), txt)
 
 
-def __inject_into_tool(tool, t, where,befaf='before'):
+def __inject_into_tool(tool, t, where, befaf='before'):
   import OlexVFS
-  txt = OlexVFS.read_from_olex('%s/%s' %(OV.BaseDir(),tool))
+  txt = OlexVFS.read_from_olex('%s/%s' % (OV.BaseDir(), tool))
   if befaf == 'before':
-    txt = txt.replace(where, "%s%s" %(t, where))
+    txt = txt.replace(where, "%s%s" % (t, where))
   else:
-    txt = txt.replace(where, "%s%s" %(where, t))
-  OlexVFS.write_to_olex('%s%s' %(OV.BaseDir(), tool), u, txt)
+    txt = txt.replace(where, "%s%s" % (where, t))
+  OlexVFS.write_to_olex('%s%s' % (OV.BaseDir(), tool), u, txt)
 
 
 def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2", image="", onclick=""):
@@ -264,55 +270,55 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   ''' Automatically add a link to GUI to an Olex2 index file. '''
   if not location:
-    location = OV.GetParam('%s.gui.location' %scope)
+    location = OV.GetParam('%s.gui.location' % scope)
   if not before:
-    before = OV.GetParam('%s.gui.before' %scope)
+    before = OV.GetParam('%s.gui.before' % scope)
   if not location:
     return
 
-  _ = r"%s/%s" %(OV.BaseDir(), location)
+  _ = r"%s/%s" % (OV.BaseDir(), location)
   if os.path.exists(_):
     file_to_write_to = _
   else:
-    file_to_write_to = r'%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), location)
+    file_to_write_to = r'%s/etc/gui/blocks/index-%s.htm' % (OV.BaseDir().replace(r"//", "/"), location)
   if not os.path.exists(file_to_write_to):
-    print("This location does not exist: %s" %file_to_write_to)
-    file_to_write_to = '%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), "tools")
+    print("This location does not exist: %s" % file_to_write_to)
+    file_to_write_to = '%s/etc/gui/blocks/index-%s.htm' % (OV.BaseDir().replace(r"//", "/"), "tools")
     before = "top"
 
-  file_to_write_to = file_to_write_to.replace(r"//","/")
+  file_to_write_to = file_to_write_to.replace(r"//", "/")
   txt = OlexVFS.read_from_olex(file_to_write_to).decode()
 
   if onclick:
-    OlexVFS.write_to_olex('%s/%s.htm' %(path, link), "")
+    OlexVFS.write_to_olex('%s/%s.htm' % (path, link), "")
 
   if not filetype:
     t = r'''
-<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=%s;%s; -->''' %(level, location, scope, link, path, link, image, onclick, state)
+<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=%s;%s; -->''' % (level, location, scope, link, path, link, image, onclick, state)
   else:
     t = r'''
-<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=%s;%s; -->''' %(filetype, level, location, scope, link, path, link, image, onclick, state)
-
+<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=%s;%s; -->''' % (filetype, level, location, scope, link, path, link, image, onclick, state)
 
   index_text = ""
   if t not in txt:
     if before.lower() == "top":
-      u = "%s\n%s" %(t, txt)
+      u = "%s\n%s" % (t, txt)
     elif before not in txt or before.lower() == "end":
-      u = "%s\n%s" %(txt, t)
+      u = "%s\n%s" % (txt, t)
     else:
       u = ""
       for line in txt.strip().split("\r\n"):
         if not line:
           continue
         li = line
-        if r"<!-- #include" not in line: li = ""
-        if "%s-%s" %(location, before) in line:
-          u += "%s\n%s\n" %(t, li)
+        if r"<!-- #include" not in line:
+          li = ""
+        if "%s-%s" % (location, before) in line:
+          u += "%s\n%s\n" % (t, li)
         elif before in line:
-          u += "%s\n%s\n" %(t, li)
+          u += "%s\n%s\n" % (t, li)
         else:
-          u += "%s\n" %line.strip()
+          u += "%s\n" % line.strip()
     OlexVFS.write_to_olex(file_to_write_to, u, 0)
     index_text = u
   else:
@@ -327,8 +333,9 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   make_single_gui_image(link, img_type=level)
 
+
 def checkErrLogFile():
-  logfile = "%s/PythonError.log" %OV.DataDir()
+  logfile = "%s/PythonError.log" % OV.DataDir()
   logfile = logfile.replace("\\\\", "\\")
   global have_found_python_error
   if not have_found_python_error:
@@ -340,9 +347,13 @@ def checkErrLogFile():
     return '''
     <a href='external_edit "%s"'>
     <zimg border='0' src='toolbar-stop.png'></a>
-    '''%(logfile)
-  else: return ""
-OV.registerFunction(checkErrLogFile,True,'gui.tools')
+    ''' % (logfile)
+  else:
+    return ""
+
+
+OV.registerFunction(checkErrLogFile, True, 'gui.tools')
+
 
 def checkPlaton():
   retVal = '''
@@ -365,21 +376,23 @@ def checkPlaton():
   else:
     olx.SetVar("HavePlaton", False)
     return ""
-OV.registerFunction(checkPlaton,True,'gui.tools')
 
 
-def MakeElementButtonsFromFormula(action='mode', scope = ""):
-  ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
+OV.registerFunction(checkPlaton, True, 'gui.tools')
+
+
+def MakeElementButtonsFromFormula(action='mode', scope=""):
+  # Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
 
   if debug:
-    #print "--- Making Element Formulae"
+    # print "--- Making Element Formulae"
     t1 = time.time()
 
   from PilTools import TI
   global last_formula
   global last_element_html
   model_formula = olexex.OlexRefinementModel().currentFormula()
-  mf = ["%s:%s" %(x, model_formula[x]) for x in model_formula.keys()]
+  mf = ["%s:%s" % (x, model_formula[x]) for x in model_formula.keys()]
   mf.sort()
 
   formula = olx.xf.GetFormula('list')
@@ -405,37 +418,37 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     symbol = element.split(':')[0]
     max_ele = float(element.split(':')[1])
     max_ele = round(max_ele, 2)
-    present = round(model_formula.get(symbol,0),2)
+    present = round(model_formula.get(symbol, 0), 2)
 
     if symbol != "H":
       totalcount += max_ele
 
-    max_ele = max_ele*Z_prime
+    max_ele = max_ele * Z_prime
     c = ""
     if present < max_ele:
-      bgcolour = (250,250,250)
+      bgcolour = (250, 250, 250)
       c = 'b'
       isSame = False
-    elif present ==  max_ele:
-      bgcolour = (210,255,210)
+    elif present == max_ele:
+      bgcolour = (210, 255, 210)
       c = 'g'
     else:
-      bgcolour = (255,210,210)
+      bgcolour = (255, 210, 210)
       c = 'r'
       isSame = False
 
     if c:
-      img_name = "btn-element%s_%s" %(symbol, c)
+      img_name = "btn-element%s_%s" % (symbol, c)
 
-    name = "btn-element%s#%s" %(symbol,action)
+    name = "btn-element%s#%s" % (symbol, action)
     if action == "mode":
       target = OV.TranslatePhrase('change_element-target')
-      command = 'spy.ElementButtonStates(%s)' %symbol
-      namelower = 'btn-element%s' %(name)
+      command = 'spy.ElementButtonStates(%s)' % symbol
+      namelower = 'btn-element%s' % (name)
     if action == "select":
       target = OV.TranslatePhrase('change_element-target')
-      command = 'spy.ElementButtonSelectStates(%s)' %symbol
-      namelower = 'btn-element%s' %(name)
+      command = 'spy.ElementButtonSelectStates(%s)' % symbol
+      namelower = 'btn-element%s' % (name)
 
     d = {}
     d.setdefault('name', name)
@@ -446,15 +459,15 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     d.setdefault('target', target + symbol)
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
 
-    control = "IMG_%s" %name.upper()
+    control = "IMG_%s" % name.upper()
     if debug:
       pass
-      #print "  EB1(%s): %.5f" %(control,(time.time() - t1))
-    if olx.fs.Exists("%s.png" %img_name) != "true":
+      # print "  EB1(%s): %.5f" %(control,(time.time() - t1))
+    if olx.fs.Exists("%s.png" % img_name) != "true":
       TI.make_element_buttons(symbol)
 
     if OV.IsControl(control):
-      olx.html.SetImage(control,"up=%soff.png,down=%son.png,hover=%shover.png" %(img_name,img_name,img_name))
+      olx.html.SetImage(control, "up=%soff.png,down=%son.png,hover=%shover.png" % (img_name, img_name, img_name))
 
     html += '''
 <input
@@ -465,11 +478,11 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >
-''' %d
+''' % d
 
   if action == "mode":
     d['namelower'] = 'Table'
-    html +=  '''
+    html += '''
   <input
     name=IMG_BTN-ELEMENT...%(scope)s
     type="button"
@@ -478,18 +491,18 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     onclick="spy.ElementButtonStates('')"
     bgcolor=%(bgcolor)s
   >
-  ''' %d
+  ''' % d
 
 
 #  OV.write_to_olex('element_buttons.htm', html, 0)
 
-  im_name='IMG_BTN-ELEMENT%s' %symbol
+  im_name = 'IMG_BTN-ELEMENT%s' % symbol
   OV.SetImage(im_name, name)
 
   if isSame:
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-blank.png,down=toolbar-blank.png,hover=toolbar-blank.png")
+    OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-blank.png,down=toolbar-blank.png,hover=toolbar-blank.png")
   else:
-    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
+    OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
 
   olexex.SetAtomicVolumeInSnumPhil(totalcount)
   last_element_html = html
@@ -497,69 +510,76 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   last_formula = f
   return html
 
+
 def ElementButtonStates(symbol):
   if not symbol:
     e = olx.ChooseElement()
-    if not e:  return
+    if not e:
+      return
     symbol = e
-  if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
+  if OV.GetParam('olex2.full_mode') == 'name -t=%s' % symbol:
     olex.m('mode off')
   else:
     if olex.f('Sel()') == '':
-      olex.m('mode name -t=%s' %symbol)
+      olex.m('mode name -t=%s' % symbol)
     else:
-      olex.m('name sel %s' %symbol)
+      olex.m('name sel %s' % symbol)
       olex.m('sel -u')
+
 
 global sel_element
 global sel_list
 sel_element = ""
 sel_list = []
 
+
 def ElementButtonSelectStates(symbol):
   global sel_element
   global sel_list
-  control = "IMG_BTN-ELEMENT%s" %symbol
-  img_name = "btn-element%s" %(symbol)
+  control = "IMG_BTN-ELEMENT%s" % symbol
+  img_name = "btn-element%s" % (symbol)
 
   if sel_element == symbol or symbol in sel_list:
-    olex.m('sel $%s -u' %symbol)
+    olex.m('sel $%s -u' % symbol)
     sel_element = ""
     sel_list.remove(symbol)
     onoff = "off"
   else:
-    olex.m('sel $%s' %symbol)
+    olex.m('sel $%s' % symbol)
     sel_element = symbol
     sel_list.append(symbol)
     onoff = "on"
   if OV.IsControl(control):
-    OV.SetImage(control,"up=%s%s.png,hover=%son.png" %(img_name,onoff, img_name))
+    OV.SetImage(control, "up=%s%s.png,hover=%son.png" % (img_name, onoff, img_name))
+
 
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
   OV.registerFunction(ElementButtonSelectStates)
   OV.registerFunction(MakeElementButtonsFromFormula)
 
-def add_mask_content(i,which):
+
+def add_mask_content(i, which):
   is_CIF = (olx.IsFileType('cif') == 'true')
   i = int(i)
   global current_sNum
   bases = ['smtbx', 'squeeze']
   base = bases[0]
   current_sNum = OV.ModelSrc()
-  contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+  contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' % (base, which))
   if not contents:
     base = bases[1]
-    contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+    contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' % (base, which))
     if not contents:
       if is_CIF:
-        contents = olx.Cif('_%s_void_nr' %base).split(",")
-  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s"%(which, i), contents[i-1]))
-  idx = i -1
+        contents = olx.Cif('_%s_void_nr' % base).split(",")
+  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s" % (which, i), contents[i - 1]))
+  idx = i - 1
   _ = list(contents)
   _[idx] = user_value
-  olx.cif_model[current_sNum]['_%s_masks_void_content' %base] = _
+  olx.cif_model[current_sNum]['_%s_masks_void_content' % base] = _
   olx.html.Update()
+
 
 OV.registerFunction(add_mask_content)
 
@@ -579,37 +599,36 @@ def get_mask_info_old():
   base = bases[0]
   is_CIF = (olx.IsFileType('cif') == 'true')
 
-  numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
+  numbers = olx.cif_model[current_sNum].get('_%s_void_nr' % base, None)
 
   if numbers == ['n/a']:
     return "no mask info"
 
   if not numbers:
     base = bases[1]
-    numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
+    numbers = olx.cif_model[current_sNum].get('_%s_void_nr' % base)
     if not numbers:
       if is_CIF:
-        numbers = olx.Cif('_%s_void_nr' %base).split(",")
+        numbers = olx.Cif('_%s_void_nr' % base).split(",")
         if not numbers:
           return "No mask information"
       else:
         return "No mask information"
 
   if is_CIF:
-    volumes = olx.Cif('_%s_void_volume' %base).split(",")
-    electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
-    contents = olx.Cif('_%s_void_content' %base).split(",")
-    details = olx.Cif('_%s_details' %base).split(",")
+    volumes = olx.Cif('_%s_void_volume' % base).split(",")
+    electrons = olx.Cif('_%s_void_count_electrons' % base).split(",")
+    contents = olx.Cif('_%s_void_content' % base).split(",")
+    details = olx.Cif('_%s_details' % base).split(",")
 
   else:
-    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
-    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
-    contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
-    details = olx.cif_model[current_sNum].get('_%s_details' %base)
+    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' % base)
+    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' % base)
+    contents = olx.cif_model[current_sNum].get('_%s_void_content' % base)
+    details = olx.cif_model[current_sNum].get('_%s_details' % base)
 
   t = "<table>"
   t += gui.tools.TemplateProvider.get_template('mask_output_table_header', force=debug)
-
 
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
     d = {}
@@ -624,26 +643,29 @@ def get_mask_info_old():
     if float(volume) < 20:
       continue
     if float(electron) != 0:
-      v_over_e  = float(volume)/float(electron)
+      v_over_e = float(volume) / float(electron)
       if v_over_e < 3:
-        v_over_e_html = "<font color='red'><b>%.2f</b></font>" %v_over_e
+        v_over_e_html = "<font color='red'><b>%.2f</b></font>" % v_over_e
       elif v_over_e > 7:
-        v_over_e_html = "<font color='red'><b>%.2f</b></font>" %v_over_e
+        v_over_e_html = "<font color='red'><b>%.2f</b></font>" % v_over_e
       else:
-        v_over_e_html = "<font color='green'><b>%.2f</b></font>" %v_over_e
-    else: v_over_e_html = "n/a"
+        v_over_e_html = "<font color='green'><b>%.2f</b></font>" % v_over_e
+    else:
+      v_over_e_html = "n/a"
 
     d['v_over_e'] = v_over_e_html
 
-    content = '%s <a target="Please enter the contents that are present in this void. After re-caluclating the mask, this information will get lost, so please enter it once all solvent masking work has been done." href="spy.add_mask_content(%s,content)">(Edit)</a>' %(content, number)
-    details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' %(number)
+    content = '%s <a target="Please enter the contents that are present in this void. After re-caluclating the mask, this information will get lost, so please enter it once all solvent masking work has been done." href="spy.add_mask_content(%s,content)">(Edit)</a>' % (content, number)
+    details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' % (number)
     d['content'] = content
     d['details'] = details
 
-    t += gui.tools.TemplateProvider.get_template('mask_output_table_row', force=debug) %d
+    t += gui.tools.TemplateProvider.get_template('mask_output_table_row', force=debug) % d
 #  t += "<tr><td>%(details)s</td></tr></table>" %d
   t += "</table>"
   return t
+
+
 OV.registerFunction(get_mask_info_old, False, 'gui.tools')
 
 
@@ -661,9 +683,9 @@ def makeFormulaForsNumInfo():
   if len(txt_formula) > 100:
     return "Too Much Stuff"
   present = olx.xf.au.GetFormula()
-  regex = re.compile(r"(?P<ele>[a-zA-Z]) (\s|\b)", re.X|re.M|re.S)
-  txt_formula = regex.sub(r'\g<ele>1 ',txt_formula).strip()
-  present = regex.sub(r'\g<ele>1 ',present).strip()
+  regex = re.compile(r"(?P<ele>[a-zA-Z]) (\s|\b)", re.X | re.M | re.S)
+  txt_formula = regex.sub(r'\g<ele>1 ', txt_formula).strip()
+  present = regex.sub(r'\g<ele>1 ', present).strip()
   if present == txt_formula:
     isSame = True
     if current_sNum != OV.FileName():
@@ -677,7 +699,7 @@ def makeFormulaForsNumInfo():
     colour = OV.GetParam('gui.html.formula_colour').hexadecimal
   font_size = OV.GetParam('gui.html.formula_size')
   panelwidth = int(olx.html.ClientWidth('self'))
-  q = len(txt_formula)/(panelwidth - (0.60*panelwidth))
+  q = len(txt_formula) / (panelwidth - (0.60 * panelwidth))
   if q > 0.26:
     font_size -= 4
   elif q > 0.23:
@@ -689,30 +711,30 @@ def makeFormulaForsNumInfo():
   if font_size < 1:
     font_size = 1
 
-  html_formula = olx.xf.GetFormula('html',1).replace("</sub>", "<font size='2'></font></sub>")
-  formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
+  html_formula = olx.xf.GetFormula('html', 1).replace("</sub>", "<font size='2'></font></sub>")
+  formula_string = "<font size=%s color=%s>%s</font>" % (font_size, colour, html_formula)
   d = {}
   d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()>>html.Update")
 
   if OV.GetParam("snum.refinement.use_solvent_mask"):
     if isSame:
       img_name = 'toolbar-mask_same'
-      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
+      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
       d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
       d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
     else:
       img_name = 'toolbar-mask_ok'
-      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
+      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
       d.setdefault('target', "A solvent mask has been used, and therefore the formula should differ from what is in the model. Nothing to do!")
 
   else:
     if not isSame:
       img_name = 'toolbar-refresh'
-      OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
+      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
       d.setdefault('target', "Update Formula with current model")
     else:
       img_name = 'toolbar-blank'
-      OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
+      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
       formula = present
       d.setdefault('target', "Everything is up-to-date")
 
@@ -726,18 +748,19 @@ def makeFormulaForsNumInfo():
     hint="%(target)s"
     onclick="%(cmds)s"
     bgcolor="%(bgcolor)s"
-  >''' %d
+  >''' % d
 
-  update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
+  update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>' % (formula_string, refresh_button)
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
   fn = "snumformula.htm"
   OV.write_to_olex(fn, update)
   if debug:
     pass
-    #print "Formula sNum (2): %.5f" %(time.time() - t1)
+    # print "Formula sNum (2): %.5f" %(time.time() - t1)
 
-  return "<!-- #include snumformula %s;1 -->" %fn
-  #return fn
+  return "<!-- #include snumformula %s;1 -->" % fn
+  # return fn
+
 
 OV.registerFunction(makeFormulaForsNumInfo)
 
@@ -746,8 +769,8 @@ def make_cell_dimensions_display():
   t1 = time.time()
 
   global current_sNum
-  #if OV.FileName() == current_sNum:
-    #return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
+  # if OV.FileName() == current_sNum:
+    # return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
   l = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
   d = {}
@@ -756,12 +779,12 @@ def make_cell_dimensions_display():
     if "90.0" in val and "(" in val or '90(' in val and not "." in val:
       help_txt = "Help from File does not exist. Apologies."
       help = '''
-$spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-90 -popout='False' -helpTxt='%s'")''' %(x, help_txt)
+$spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-90 -popout='False' -helpTxt='%s'")''' % (x, help_txt)
       _ = os.path.join(OV.BaseDir(), "etc", "gui", "help", "cell_angle_not_quite_90.htm")
       if os.path.exists(_):
-        help_txt = open(_,'r').read()
-      href = "spy.make_help_box -name=cell-angle-not-quite-90 -popout=False -helpTxt='%s'" %help_txt
-      val = '<a href="%s"><font color="%s"><b>%s</b></font></a>' %(href, OV.GetParam('gui.red').hexadecimal, val)
+        help_txt = open(_, 'r').read()
+      href = "spy.make_help_box -name=cell-angle-not-quite-90 -popout=False -helpTxt='%s'" % help_txt
+      val = '<a href="%s"><font color="%s"><b>%s</b></font></a>' % (href, OV.GetParam('gui.red').hexadecimal, val)
     d[x] = val
 
   d['volume'] = olx.xf.uc.VolumeEx()
@@ -809,13 +832,14 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
       &nbsp;<b>V</b> = %(volume)s
     </td>
   </tr>
-  ''' %d
+  ''' % d
   OV.write_to_olex('celldimensiondisplay.htm', t)
-  #if debug:
-    #print "Cell: %.5f" %(time.time() - t1)
+  # if debug:
+    # print "Cell: %.5f" %(time.time() - t1)
   return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
-OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
+
+OV.registerFunction(make_cell_dimensions_display, True, "gui.tools")
 
 
 def weightGuiDisplay_new():
@@ -824,43 +848,47 @@ def weightGuiDisplay_new():
   longest = 0
   retVal = ""
   current_weight = olx.Ins('weight')
-  if current_weight == "n/a": return ""
+  if current_weight == "n/a":
+    return ""
   current_weight = current_weight.split()
   if len(current_weight) == 1:
     current_weight = [current_weight[0], '0']
   length_current = len(current_weight)
   suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-  if suggested_weight is None: suggested_weight = []
+  if suggested_weight is None:
+    suggested_weight = []
   if len(suggested_weight) < length_current:
-    for i in range (length_current - len(suggested_weight)):
+    for i in range(length_current - len(suggested_weight)):
       suggested_weight.append(0)
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
       curr = float(curr)
-      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
+      if curr - curr * 0.01 <= sugg <= curr + curr * 0.01:
         colour = gui_green
-      elif curr-curr*0.1 < sugg < curr+curr*0.1:
+      elif curr - curr * 0.1 < sugg < curr + curr * 0.1:
         colour = gui_orange
       else:
         colour = gui_red
       sign = "&#9650;"
-      if curr-sugg == 0:
+      if curr - sugg == 0:
         sign = ""
         sugg = 0
-      elif curr-sugg > 0:
+      elif curr - sugg > 0:
         sign = "&#9660;"
-      retVal += "%.3f&nbsp;<font color='%s'><b>%s </b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s </b></font>&nbsp;|&nbsp;" % (curr, colour, sign)
     html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
 
   wght_str = ""
   for i in suggested_weight:
-    wght_str += " %.3f" %i
+    wght_str += " %.3f" % i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  html = "%s" %html_scheme
+  html = "%s" % html_scheme
   return html
-OV.registerFunction(weightGuiDisplay_new,True,"gui.tools")
+
+
+OV.registerFunction(weightGuiDisplay_new, True, "gui.tools")
 
 
 def weightGuiDisplay():
@@ -869,15 +897,17 @@ def weightGuiDisplay():
   html_scheme = ""
   tol_green, tol_orange = 0.01, 0.1
   current_weight = olx.Ins('weight')
-  if current_weight == "n/a": return ""
+  if current_weight == "n/a":
+    return ""
   current_weight = current_weight.split()
   if len(current_weight) == 1:
     current_weight = [current_weight[0], '0']
   length_current = len(current_weight)
   suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-  if suggested_weight is None: suggested_weight = []
+  if suggested_weight is None:
+    suggested_weight = []
   if len(suggested_weight) < length_current:
-    for i in range (length_current - len(suggested_weight)):
+    for i in range(length_current - len(suggested_weight)):
       suggested_weight.append(0)
   if suggested_weight:
     d = {}
@@ -894,46 +924,50 @@ def weightGuiDisplay():
       else:
         prec = 0
 
-      if sugg >= curr*(1-tol_green) and sugg <= curr*(1+tol_green):
+      if sugg >= curr * (1 - tol_green) and sugg <= curr * (1 + tol_green):
         colour = gui_green
-      elif sugg >= curr*(1-tol_orange) and sugg <= curr*(1+tol_orange):
+      elif sugg >= curr * (1 - tol_orange) and sugg <= curr * (1 + tol_orange):
         colour = gui_orange
       else:
         colour = gui_red
 
-      _ = "%%.%sf"%prec
-      curr = (_ %curr).lstrip('0')
-      sugg = (_ %sugg).lstrip('0')
+      _ = "%%.%sf" % prec
+      curr = (_ % curr).lstrip('0')
+      sugg = (_ % sugg).lstrip('0')
 
-      dd = {'curr_%i' %i:curr,
-            'sugg_%i' %i:sugg,
-           'col_%i' %i:colour,
-           }
+      dd = {'curr_%i' % i: curr,
+            'sugg_%i' % i: sugg,
+            'col_%i' % i: colour,
+            }
       d.update(dd)
       if html_scheme:
         html_scheme += "|&nbsp;"
-      html_scheme += "<font color='%s'>%s(%s)</font>" %(colour, curr, sugg)
+      html_scheme += "<font color='%s'>%s(%s)</font>" % (colour, curr, sugg)
   else:
     html_scheme = current_weight
-  html_scheme= "<b>%s</b>"%html_scheme
+  html_scheme = "<b>%s</b>" % html_scheme
 
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
     <a target="%s" href="UpdateWght>>html.Update">%s</a>
-    ''' %("Update Weighting Scheme", html_scheme)
+    ''' % ("Update Weighting Scheme", html_scheme)
 
-  weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug)%d
+  weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
   return weight_display
 
-OV.registerFunction(weightGuiDisplay,True,"gui.tools")
+
+OV.registerFunction(weightGuiDisplay, True, "gui.tools")
+
 
 def number_non_hydrogen_atoms():
-  return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H','Q'))
+  return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H', 'Q'))
+
 
 def getExpectedPeaks():
   orm = olexex.OlexRefinementModel()
   return orm.getExpectedPeaks()
+
 
 def make_exti_swat_gui():
   html = ""
@@ -947,7 +981,10 @@ def make_exti_swat_gui():
   if not html:
     html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
   return html
-OV.registerFunction(make_exti_swat_gui,True,"gui.tools")
+
+
+OV.registerFunction(make_exti_swat_gui, True, "gui.tools")
+
 
 def refine_swat():
   retVal = ""
@@ -967,20 +1004,21 @@ def refine_swat():
         #esd_f = float("0.%s%s" %(_*"0", esd))
         #esd = "(%s)"
       else:
-        swat = round(float(item),3)
+        swat = round(float(item), 3)
         esd = ""
-        OV.SetParam('snum.refinement.refine_swat',1)
+        OV.SetParam('snum.refinement.refine_swat', 1)
         OV.SetParam('snum.refinement.refine_swat_tickbox', True)
       if esd:
-        retVal += "%s(%s) "%(swat,esd)
+        retVal += "%s(%s) " % (swat, esd)
       else:
-        retVal += "%s "%(swat)
+        retVal += "%s " % (swat)
   else:
-    OV.SetParam('snum.refinement.refine_swat',0)
+    OV.SetParam('snum.refinement.refine_swat', 0)
     OV.SetParam('snum.refinement.refine_swat_tickbox', False)
   return retVal
 
-OV.registerFunction(refine_swat,True,"gui.tools")
+
+OV.registerFunction(refine_swat, True, "gui.tools")
 
 
 def refine_extinction():
@@ -994,33 +1032,32 @@ def refine_extinction():
       exti = _[0]
       esd = _[1].rstrip(')')
       exti_f = float(exti)
-      _ = len(exti) - len(esd) -2
-      esd_f = float("0.%s%s" %(_*"0", esd))
+      _ = len(exti) - len(esd) - 2
+      esd_f = float("0.%s%s" % (_ * "0", esd))
     else:
       exti = _
       esd = ""
-      OV.SetParam('snum.refinement.refine_extinction',1)
+      OV.SetParam('snum.refinement.refine_extinction', 1)
       OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-    retVal = "%s(%s)"%(exti,esd)
+    retVal = "%s(%s)" % (exti, esd)
   else:
-    OV.SetParam('snum.refinement.refine_extinction',0)
+    OV.SetParam('snum.refinement.refine_extinction', 0)
     OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
   return retVal
 
+  # The stuff below needs careful thinking about. For now, revert back to simple on/off operation. Sorry Guys!
 
-  ### The stuff below needs careful thinking about. For now, revert back to simple on/off operation. Sorry Guys!
+  # snmum.refine_extinction 0: DO NOT refine extinction AGAIN
+  # snmum.refine_extinction 1: Try and refine extinction
+  # snmum.refine_extinction 2: Refine in any case
 
-  ## snmum.refine_extinction 0: DO NOT refine extinction AGAIN
-  ## snmum.refine_extinction 1: Try and refine extinction
-  ## snmum.refine_extinction 2: Refine in any case
-
-  #if getExpectedPeaks() > 2:
-    #OV.SetParam('snum.refinement.refine_extinction',1)
-    #return "Not Tested"
+  # if getExpectedPeaks() > 2:
+    # OV.SetParam('snum.refinement.refine_extinction',1)
+    # return "Not Tested"
 
   #retVal = "n/a"
   #_ = olx.xf.rm.Exti()
-  #if "n/a" not in _.lower() and _ != '0':
+  # if "n/a" not in _.lower() and _ != '0':
     #_ = _.split('(')
     #exti = _[0]
     #esd = _[1].rstrip(')')
@@ -1028,51 +1065,51 @@ def refine_extinction():
     #_ = len(exti) - len(esd) -2
     #esd_f = float("0.%s%s" %(_*"0", esd))
 
-
     #_ = OV.GetParam('snum.refinement.refine_extinction',1)
-    #if _ == 3:
+    # if _ == 3:
       #retVal = "%s(%s)"%(exti,esd)
       #retVal += "<font color=%s><b>*&nbsp;</b></font>" %gui_green
-    #if _ == 0:
-      #OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
+    # if _ == 0:
+      # OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
       #retVal="not refined<font color=%s><b>*&nbsp;</b></font>" %gui_red
-    #else:
+    # else:
       #OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
 
-      #if exti_f/esd_f < 2:
-        #print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
-        #OV.SetParam('snum.refinement.refine_extinction',1)
+      # if exti_f/esd_f < 2:
+        # print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
+        # OV.SetParam('snum.refinement.refine_extinction',1)
         #olex.m("DelIns EXTI")
         #retVal = "%s(%s)"%(exti,esd)
-      #else:
+      # else:
         #retVal = "%s(%s)"%(exti,esd)
-  #else:
-    #if OV.GetParam('snum.refinement.refine_extinction_tickbox'):
+  # else:
+    # if OV.GetParam('snum.refinement.refine_extinction_tickbox'):
       #olex.m("AddIns EXTI")
 
-  #return retVal
+  # return retVal
 
-OV.registerFunction(refine_extinction,True,"gui.tools")
+
+OV.registerFunction(refine_extinction, True, "gui.tools")
 
 
 def deal_with_gui_phil(action):
   skin_name = OV.GetParam('gui.skin.name', 'default')
   skin_extension = OV.GetParam('gui.skin.extension', None)
 
-  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+  gui_phil_path = "%s/gui.phil" % (OV.DataDir())
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
     olx.gui_phil_handler.reset_scope('gui')
-    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_name)
     if not os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
+      gui_skin_phil_path = "%s/gui.params" % (OV.BaseDir())
     if os.path.isfile(gui_skin_phil_path):
       gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
     if skin_extension:
-      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
+      gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
@@ -1080,12 +1117,13 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
+
 def get_regex_l(src_file, base=None):
   global regex_l
   if not src_file:
     return False
 
-  #if not src_file in regex_l:
+  # if not src_file in regex_l:
   re_l = []
   l = None
   try:
@@ -1101,9 +1139,10 @@ def get_regex_l(src_file, base=None):
     item_l = item.split("::")
     find = item_l[0].strip().strip("%%")
     replace = item_l[1].strip()
-    re_l.append((find,replace))
-  regex_l.setdefault('%s'%src_file,re_l)
+    re_l.append((find, replace))
+  regex_l.setdefault('%s' % src_file, re_l)
   return regex_l[src_file]
+
 
 def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=None):
   try:
@@ -1112,16 +1151,16 @@ def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=Non
       re_l = get_regex_l(src_file, base=base)
 
     if timer:
-      t_timer=time.time()
+      t_timer = time.time()
     for pair in re_l:
       if specific:
         if pair[0] != specific:
           continue
-      regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S|re.U)
+      regex = re.compile(r"%s" % pair[0], re.X | re.M | re.S | re.U)
       replace = pair[1].strip("'")
       replace = pair[1].strip('"')
       try:
-        txt = regex.sub(r"%s" %replace, txt)
+        txt = regex.sub(r"%s" % replace, txt)
       except Exception as err:
         print(err)
     if timer:
@@ -1131,6 +1170,7 @@ def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=Non
       PrintException()
   finally:
     return txt
+
 
 class LogListen():
   def __init__(self):
@@ -1153,6 +1193,7 @@ class LogListen():
             l.append(em)
     return l
 
+
 class Templates():
   def __init__(self):
     self.templates = {}
@@ -1172,13 +1213,13 @@ class Templates():
     if not retVal or force:
       self.get_all_templates(path=path, mask=mask, marker=marker, template_file=template_file)
       retVal = self.templates.get(name, None)
-    #if not retVal:
+    # if not retVal:
       #import OlexVFS
       #path = os.path.join(path, name)
       #path = path.replace("\\","/")
       #retVal = OlexVFS.read_from_olex(path)
     if not retVal:
-      return "Template <b>%s</b> has not been found."%name
+      return "Template <b>%s</b> has not been found." % name
     else:
       return retVal
 
@@ -1196,13 +1237,13 @@ class Templates():
     else:
       if not path:
         path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates')
-      if path[-4:-3] != ".": #i.e. a specific template file has been provided
-        g = glob.glob("%s%s%s" %(path,os.sep,mask))
+      if path[-4:-3] != ".":  # i.e. a specific template file has been provided
+        g = glob.glob("%s%s%s" % (path, os.sep, mask))
       else:
         g = [path]
       _ = os.path.join(OV.DataDir(), 'custom_templates.html')
-      if os.path.exists(_): g.append(_)
-
+      if os.path.exists(_):
+        g.append(_)
 
     for f_path in g:
       include = ["txt", "html", "htm"]
@@ -1213,16 +1254,16 @@ class Templates():
       fc = gui.file_open(f_path, mode='r', base=path)
       if not fc:
         continue
-      if not self._extract_templates_from_text(fc,marker=marker):
+      if not self._extract_templates_from_text(fc, marker=marker):
         name = os.path.basename(os.path.normpath(f_path))
         self.templates[name] = fc
-    #for name in self.templates:
+    # for name in self.templates:
       #OlexVFS.write_to_olex(name, self.templates[name])
 
   def _extract_templates_from_text(self, t, marker):
     mark = marker.split('-')
-    regex = re.compile(r't:(.*?)\%s(.*?)\%s' %(mark[0], mark[1]),re.DOTALL)
-    m=regex.findall(t)
+    regex = re.compile(r't:(.*?)\%s(.*?)\%s' % (mark[0], mark[1]), re.DOTALL)
+    m = regex.findall(t)
     if m:
       for item in m:
         name = item[0]
@@ -1231,6 +1272,7 @@ class Templates():
       return True
     else:
       return False
+
 
 TemplateProvider = Templates()
 
@@ -1250,22 +1292,22 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
     val = 0
 
   mindfac = 1
-  #if item == 'MinD':
+  # if item == 'MinD':
     #mindfac = float(olx.xf.exptl.Radiation())/0.71
 
-  op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
+  op = OV.GetParam('user.diagnostics.%s.%s.op' % (scope, item))
   if op == "between":
-    soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(scope, item))
+    soll = OV.GetParam('user.diagnostics.%s.%s.soll' % (scope, item))
   for i in range(4):
     i += 1
     if op == "greater":
-      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'smaller':
-      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'between':
-      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac:
+      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac:
         break
 
   if number_only:
@@ -1282,21 +1324,22 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
 
   return retVal
 
+
 def get_battery_image(colour, colourize=True):
   from PIL import Image, ImageDraw
   from ImageTools import IT as IT
-  name = "battery_%s.png" %colour
+  name = "battery_%s.png" % colour
   if OlexVFS.exists(name):
     return name
-  d_col = {'green':gui_green,
-           'yellow':gui_yellow,
-       'orange':gui_orange,
-       'red':gui_red}
+  d_col = {'green': gui_green,
+           'yellow': gui_yellow,
+           'orange': gui_orange,
+           'red': gui_red}
   max_dots = 4
-  d_dots = {'green':4,
-            'yellow':3,
-       'orange':2,
-       'red':1}
+  d_dots = {'green': 4,
+            'yellow': 3,
+            'orange': 2,
+            'red': 1}
 
   n_dots = d_dots[colour]
 
@@ -1310,24 +1353,25 @@ def get_battery_image(colour, colourize=True):
   width, height = bg.size
 
   col = d_col[colour].rgb
-  top_gap = int(height*0.11)
-  bot_gap = int(height*0.04)
-  gaps = int(height*0.06)
+  top_gap = int(height * 0.11)
+  bot_gap = int(height * 0.04)
+  gaps = int(height * 0.06)
 
-  avail_height = height - top_gap - bot_gap - gaps*(max_dots+1)
-  boxHeight = int(avail_height/max_dots)
-  boxWidth = int(width*0.6)
+  avail_height = height - top_gap - bot_gap - gaps * (max_dots + 1)
+  boxHeight = int(avail_height / max_dots)
+  boxWidth = int(width * 0.6)
   for dot in range(n_dots):
-    i = max_dots-dot
-    top = height-bot_gap - (boxHeight+gaps)*(dot+1)
-    left = int((width - boxWidth)/2)
-    box = (left,top,boxWidth+left,boxHeight+top)
+    i = max_dots - dot
+    top = height - bot_gap - (boxHeight + gaps) * (dot + 1)
+    left = int((width - boxWidth) / 2)
+    box = (left, top, boxWidth + left, boxHeight + top)
     draw.rectangle(box, fill=col)
   new_width = 18
-  new_height = int(im.size[1]/im.size[0] * 18)
-  IM = im.resize((new_width,new_height), Image.ANTIALIAS)
+  new_height = int(im.size[1] / im.size[0] * 18)
+  IM = im.resize((new_width, new_height), Image.ANTIALIAS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
+
 
 def get_data_number():
   try:
@@ -1342,18 +1386,22 @@ def get_data_number():
         return data
     if OV.GetParam('user.diagnostics.refinement.dpr.halve_for_non_centro'):
       if not olex_core.SGInfo()['Centrosymmetric']:
-        data = int(data/2)
+        data = int(data / 2)
     return data
   except Exception as err:
-    print("An error occured: %s" %err)
+    print("An error occured: %s" % err)
+
 
 def get_Z_prime_from_fraction(string):
   val = string
   if "/" in val:
     _ = val.split("/")
-    val = int(_[0])/int(_[1])
+    val = int(_[0]) / int(_[1])
   olx.xf.au.SetZprime(val)
+
+
 olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
+
 
 def get_parameter_number():
   parameters = OV.GetParam('snum.refinement.parameters', None)
@@ -1364,14 +1412,15 @@ def get_parameter_number():
       pass
   return parameters
 
+
 def GetDPRInfo():
-  hklsrc=OV.HKLSrc()
+  hklsrc = OV.HKLSrc()
   retVal = ""
   data = get_data_number()
   parameters = get_parameter_number()
   dpr = None
   if data and parameters:
-    dpr = data/parameters
+    dpr = data / parameters
 
   if dpr:
     if dpr in cache:
@@ -1380,25 +1429,24 @@ def GetDPRInfo():
   else:
     return
 
-  dpr_col_number = gui.tools.get_diagnostics_colour('refinement','dpr', dpr, number_only=True)
-  text_output= ["Data/Parameter ratio is very good",
-                "Data/Parameter ratio is adequate",
-                "Data/Parameter ratio is low",
-                "Data/Parameter ratio is VERY LOW"]
-  colour_txt= ["green",
-               "yellow",
-               "orange",
-               "red"]
-
+  dpr_col_number = gui.tools.get_diagnostics_colour('refinement', 'dpr', dpr, number_only=True)
+  text_output = ["Data/Parameter ratio is very good",
+                 "Data/Parameter ratio is adequate",
+                 "Data/Parameter ratio is low",
+                 "Data/Parameter ratio is VERY LOW"]
+  colour_txt = ["green",
+                "yellow",
+                "orange",
+                "red"]
 
   idx = 4 - dpr_col_number
   colour = colour_txt[idx]
-  name = "battery_%s.png" %colour
+  name = "battery_%s.png" % colour
   if not OlexVFS.exists(name):
     try:
       name = get_battery_image(colour)
     except:
-      name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" %colour)
+      name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
   image = """
   <input
   name="BATTERY-EDIT"
@@ -1407,20 +1455,20 @@ def GetDPRInfo():
   image="%s"
   hint="%s"
   >
-  """%(name, text_output[idx])
+  """ % (name, text_output[idx])
 
   image = """
   <a target="%s" href="echo '%s'"><zimg src="%s"></a>
-  """%(text_output[idx],text_output[idx],name)
+  """ % (text_output[idx], text_output[idx], name)
 
   if dpr <= 10:
-    disp_dpr = "%.2f"%dpr
+    disp_dpr = "%.2f" % dpr
   else:
-    disp_dpr = "%.1f"%dpr
+    disp_dpr = "%.1f" % dpr
 
   d = {
-    'dpr':disp_dpr,
-    'image':image,
+    'dpr': disp_dpr,
+    'image': image,
   }
 
   t = """
@@ -1438,14 +1486,16 @@ def GetDPRInfo():
       </td>
     </tr>
   </table>
-  """ %d
+  """ % d
   retVal = t
   cache[dpr] = t
   return retVal
+
+
 OV.registerFunction(GetDPRInfo)
 
 
-def GetRInfo(txt="",d_format='html'):
+def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
     return
   t = "ERROR!"
@@ -1485,9 +1535,12 @@ def GetRInfo(txt="",d_format='html'):
     if d_format == 'html':
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
+
+
 OV.registerFunction(GetRInfo)
 
-def FormatRInfo(R1, wR2,d_format):
+
+def FormatRInfo(R1, wR2, d_format):
   cache['R1'] = R1
   cache['wR2'] = wR2
   font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
@@ -1495,34 +1548,33 @@ def FormatRInfo(R1, wR2,d_format):
   if 'html' in d_format:
     try:
       R1 = float(R1)
-      col_R1 = gui.tools.get_diagnostics_colour('refinement','R1', R1)
-      R1 = "%.2f" %(R1*100)
+      col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
+      R1 = "%.2f" % (R1 * 100)
 
       wR2 = float(wR2)
-      col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
-      wR2 = "%.2f" %(wR2*100)
-
+      col_wR2 = gui.tools.get_diagnostics_colour('refinement', 'wR2', wR2)
+      wR2 = "%.2f" % (wR2 * 100)
 
       d = {
-        'R1':R1,
-        'wR2':wR2,
-        'font_size_R1':font_size_R1,
-        'font_size_wR2':font_size_wR2,
-        'font_size_label':str(int(font_size_wR2) - 1),
-        'font_colour_R1':col_R1,
-        'font_colour_wR2':col_wR2,
-        'grey':gui_grey
+        'R1': R1,
+        'wR2': wR2,
+        'font_size_R1': font_size_R1,
+        'font_size_wR2': font_size_wR2,
+        'font_size_label': str(int(font_size_wR2) - 1),
+        'font_colour_R1': col_R1,
+        'font_colour_wR2': col_wR2,
+        'grey': gui_grey
       }
 
       if 'report' in d_format:
-        t =gett('R_factor_display_report')%d
+        t = gett('R_factor_display_report') % d
       else:
-        t =gett('R_factor_display')%d
+        t = gett('R_factor_display') % d
     except:
       disp = R1
       if not R1:
         disp = "No R factors!"
-      t = "<td colspan='2' align='center' rowspan='2' align='right'><font size='%s' color='%s'><b>%s</b></font></td>" %(font_size_wR2, gui_grey, disp)
+      t = "<td colspan='2' align='center' rowspan='2' align='right'><font size='%s' color='%s'><b>%s</b></font></td>" % (font_size_wR2, gui_grey, disp)
     finally:
       retVal = t
 
@@ -1552,27 +1604,31 @@ def resize_pdf(f_in, setting='printer'):
     small_file = f_in + "_small.pdf"
     big_file = f_in + ".pdf"
 
-  options = "-sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/%s -dNOPAUSE -dQUIET -dBATCH -sOutputFile=%s %s" %(setting, small_file, big_file)
+  options = "-sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/%s -dNOPAUSE -dQUIET -dBATCH -sOutputFile=%s %s" % (setting, small_file, big_file)
   cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
   os.system(cmd)
-OV.registerFunction(resize_pdf,False,'gui.tools')
+
+
+OV.registerFunction(resize_pdf, False, 'gui.tools')
 
 gett = TemplateProvider.get_template
 
 
 def make_input_html_tool(scope, tool):
-  fn = "%s_%s_tool.htm" %(scope, tool)
+  fn = "%s_%s_tool.htm" % (scope, tool)
   if OlexVFS.exists(fn) and not debug:
     return fn
-  name = "%s_%s" %(scope.upper(), tool.upper())
-  d = {'scope':scope,
-       'tool':tool,
+  name = "%s_%s" % (scope.upper(), tool.upper())
+  d = {'scope': scope,
+       'tool': tool,
        'image': tool,
        'name': name,
-       'onclick':"",}
-  OlexVFS.write_to_olex(fn, gett('input_html_tool')%d)
+       'onclick': "", }
+  OlexVFS.write_to_olex(fn, gett('input_html_tool') % d)
   return fn
-OV.registerFunction(make_input_html_tool,False,'gui.tools')
+
+
+OV.registerFunction(make_input_html_tool, False, 'gui.tools')
 
 
 def scrub(cmd):
@@ -1580,24 +1636,26 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
+
 from .GetMaskInfo import get_mask_info
 
 global twinlawsfromhklsrc
 twinlawsfromhklsrc = {}
+
 
 def get_twin_law_from_hklf5():
   try:
     global twinlawsfromhklsrc
     src = OV.HKLSrc()
     if src not in twinlawsfromhklsrc:
-      cmd = "HKLF5 -e '%s'" %src
+      cmd = "HKLF5 -e '%s'" % src
       res = scrub(cmd)
       if "HKLF5 file is expected" in " ".join(res):
         htm = "This is not an HKLF5 format hkl file."
       elif "negative batch numbers" in " ".join(res):
         htm = "This is not an HKLF5 format hkl file (no negative batch numbers)."
       else:
-        htm = "<b>Batch %s </b>: " %res[2][-1]
+        htm = "<b>Batch %s </b>: " % res[2][-1]
         htm += " | ".join([res[4], res[6], res[8]])
 
       twinlawsfromhklsrc.setdefault(src, htm)
@@ -1605,7 +1663,9 @@ def get_twin_law_from_hklf5():
   except:
     return "ERR: Please check 'tools.get_twin_law_from_hklf5'"
 
+
 OV.registerFunction(get_twin_law_from_hklf5, False, 'tools')
+
 
 def hklf_5_to_4(filename):
   '''
@@ -1616,19 +1676,21 @@ def hklf_5_to_4(filename):
   Need to seperate double-lines based on basf which is harder - making seperate function (Laura Midgely)
   '''
 
-  hklf4name="%s_hklf4.hkl"%filename
-  hklf4=open(hklf4name,"w")
-  #put in a thing to note 'you seem to have positive numbers which correlate to things not in the first component - maybe try with basfs'.
-  base_file=open("%s.hkl"%filename,"r")
+  hklf4name = "%s_hklf4.hkl" % filename
+  hklf4 = open(hklf4name, "w")
+  # put in a thing to note 'you seem to have positive numbers which correlate to things not in the first component - maybe try with basfs'.
+  base_file = open("%s.hkl" % filename, "r")
   for line in base_file:
-    line=line.rstrip()
-    right=line[-2:]
-    if (right==" 1" or right=="-1"):
-      hklf4.write(line[:-2]+"\n")
+    line = line.rstrip()
+    right = line[-2:]
+    if (right == " 1" or right == "-1"):
+      hklf4.write(line[:-2] + "\n")
   base_file.close()
   hklf4.close()
-  print("done. HKLF4 base file at %s"%hklf4name)
+  print("done. HKLF4 base file at %s" % hklf4name)
   return
+
+
 OV.registerFunction(hklf_5_to_4, False, 'tools')
 
 
@@ -1641,18 +1703,21 @@ def show_nsff():
   if OV.have_nsff():
     retVal = True
   return retVal
+
+
 OV.registerFunction(show_nsff, False, 'tools')
+
 
 class DisorderDisplayTools(object):
   def __init__(self):
     self.unique_selection = ""
     ##self.haveHighlights = False
-    OV.registerFunction(self.hasDisorder,False,'gui.tools')
-    OV.registerFunction(self.show_unique_only,False,'gui.tools')
-    OV.registerFunction(self.make_unique,False,'gui.tools')
-    OV.registerFunction(self.sel_part,False,'gui.tools')
-    OV.registerFunction(self.make_disorder_quicktools,False,'gui.tools')
-    OV.registerFunction(self.set_part_display,False,'gui.tools')
+    OV.registerFunction(self.hasDisorder, False, 'gui.tools')
+    OV.registerFunction(self.show_unique_only, False, 'gui.tools')
+    OV.registerFunction(self.make_unique, False, 'gui.tools')
+    OV.registerFunction(self.sel_part, False, 'gui.tools')
+    OV.registerFunction(self.make_disorder_quicktools, False, 'gui.tools')
+    OV.registerFunction(self.set_part_display, False, 'gui.tools')
 
   def hasDisorder(self):
     olx_atoms = olexex.OlexRefinementModel()
@@ -1681,7 +1746,7 @@ class DisorderDisplayTools(object):
     if add_to:
       olex.m('sel -a')
     _ = " ".join(scrub('Sel'))
-    _ = _.replace('Sel',' ')
+    _ = _.replace('Sel', ' ')
     while "  " in _:
       _ = _.replace("  ", " ").strip()
 
@@ -1695,12 +1760,12 @@ class DisorderDisplayTools(object):
     olx.Sel(self.unique_selection)
     olx.Uniq()
 
-  def sel_part(self, part,sel_bonds=True):
+  def sel_part(self, part, sel_bonds=True):
     select = OV.GetParam('user.parts.select')
     if not select:
       return
     else:
-      olex.m("sel part %s" %part)
+      olex.m("sel part %s" % part)
       if sel_bonds:
         olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
 
@@ -1724,31 +1789,32 @@ class DisorderDisplayTools(object):
       d['scope'] = scope
       d['show_options'] = show_options
       if select:
-        sel = ">>sel part %s" %item
-      parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
+        sel = ">>sel part %s" % item
+      parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug) % d
 
-    dd={'parts_display':parts_display, 'scope':scope, 'show_options':show_options}
+    dd = {'parts_display': parts_display, 'scope': scope, 'show_options': show_options}
     return self.load_disorder_tool_template(dd)
 
   def load_disorder_tool_template(self, d):
     if d['show_options']:
-      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
+      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug) % d
     else:
-      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
+      retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug) % d
     return retVal
 
-  #def clear_higlights(self):
-    #if self.haveHighlights:
+  # def clear_higlights(self):
+    # if self.haveHighlights:
       #olex.m("sel %s"%self.haveHighlights)
       #olex.m("mask 48")
-      #olex.m("Individualise")
+      # olex.m("Individualise")
       #self.haveHighlights = False
 
-  def set_part_display(self, parts,part):
+  def set_part_display(self, parts, part):
     self.show_unique_only()
-    olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" %parts)
+    olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" % parts)
     if OV.GetParam('user.parts.select'):
-      olex.m('sel part %s' %parts)
+      olex.m('sel part %s' % parts)
+      olex.m('sel atom bonds -a')
 
 DisorderDisplayTools_instance = DisorderDisplayTools()
 
@@ -1764,11 +1830,11 @@ def get_custom_scripts_combo(phil_scope):
   control = phil_scope + "_SCRIPTS"
 
   if OV.IsControl(control):
-    filter_s=olx.html.GetValue(control + "_FILTER")
-  scopes=[]
-  t_l=[]
+    filter_s = olx.html.GetValue(control + "_FILTER")
+  scopes = []
+  t_l = []
   for script in custom_scripts_d:
-    scope=custom_scripts_d[script].get('scope')
+    scope = custom_scripts_d[script].get('scope')
     if scope not in scopes:
       scopes.append(scope)
     if filter_s != 'ALL':
@@ -1780,14 +1846,17 @@ def get_custom_scripts_combo(phil_scope):
 
   t_l.sort()
   return ";".join(t_l)
-OV.registerFunction(get_custom_scripts_combo,False,'gui.tools')
+
+
+OV.registerFunction(get_custom_scripts_combo, False, 'gui.tools')
+
 
 def get_custom_scripts(file_name, globule, scope):
   global custom_scripts_d
   import gui
   dev_mode = OV.GetParam("olex2.dev_mode", False)
-  gui_t = "<b>%s</b>: Please select a script from the above choices." %scope
-  OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
+  gui_t = "<b>%s</b>: Please select a script from the above choices." % scope
+  OV.write_to_olex("%s_SCRIPT_GUI.htm" % scope, gui_t)
 
   with open(file_name, 'r') as rFile:
     _ = rFile.readlines()
@@ -1806,7 +1875,7 @@ def get_custom_scripts(file_name, globule, scope):
             script_obj = getattr(script_src, toks[1])
           else:
             script_obj = globule[script]
-          custom_scripts_d.setdefault(script,{})
+          custom_scripts_d.setdefault(script, {})
           custom_scripts_d[script].setdefault('obj', script_obj)
         except:
           print("Could not obtain script object for %s" % script_s)
@@ -1826,6 +1895,7 @@ def get_custom_scripts(file_name, globule, scope):
         except:
           print("Could not create gui for script %s" % script)
 
+
 def set_custom_gui(f, scope):
   global custom_scripts_d
   f in custom_scripts_d
@@ -1833,25 +1903,27 @@ def set_custom_gui(f, scope):
     doc = custom_scripts_d[f].get('docstring')
     gui_t = custom_scripts_d[f].get('gui')
     if "has not been found" in gui_t:
-      gui_t = "<b>%s</b>: %s" %(scope, doc)
-    OV.write_to_olex("%s_SCRIPT_GUI.htm" %scope, gui_t)
-    OV.SetVar("active_custom_function_%s"%scope, f)
+      gui_t = "<b>%s</b>: %s" % (scope, doc)
+    OV.write_to_olex("%s_SCRIPT_GUI.htm" % scope, gui_t)
+    OV.SetVar("active_custom_function_%s" % scope, f)
   except:
-    _ = "--> %s is missing" %f
+    _ = "--> %s is missing" % f
 
   #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
-OV.registerFunction(set_custom_gui,False,'gui.tools')
+OV.registerFunction(set_custom_gui, False, 'gui.tools')
+
 
 def run_custom_script(*args):
   global custom_scripts_d
   script = args[0]
   # This doesn't work unless these scripts are standalone (as they used to be) so now calling with spy.
-  #if script in custom_scripts_d:
+  # if script in custom_scripts_d:
     # custom_scripts_d[script]['obj']()
-  olex.m("spy.%s()" %script)
-  
+  olex.m("spy.%s()" % script)
 
-OV.registerFunction(run_custom_script,False,'gui.tools')
+
+OV.registerFunction(run_custom_script, False, 'gui.tools')
+
 
 def find_movie_folder(directory=None, directory_l=None):
   from gui import report
@@ -1879,11 +1951,244 @@ def find_movie_folder(directory=None, directory_l=None):
   OV.SetParam("snum.metacif.list_crystal_images_files", (l))
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
+
+
 OV.registerFunction(find_movie_folder, False, 'gui.tools')
+
 
 def load_res_from_cif():
   reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
   if not os.path.exists(reapfile):
     olex.m("export")
   olex.m("reap %s" % reapfile)
+
+
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
+
+
+def set_style_and_scene(style=None, scene=None, src_dir=None, ):
+  if not src_dir:
+    src_dir = OV.GetParam('user.def_style_scene_src_dir')
+  if not style:
+    style = OV.GetParam('user.def_style')
+  if not scene:
+    scene = OV.GetParam('user.def_scene')
+  OV.SetParam('user.def_style', style)
+  OV.SetParam('user.def_scene', scene)
+  OV.SetParam('user.def_style_scene_src_dir', src_dir)
+  style_p = os.path.join(src_dir, style + ".glds")
+  scene_p = os.path.join(src_dir, scene + ".glsp")
+  olex.m("load style %s" % style_p)
+  olex.m("load scene %s" % scene_p)
+
+
+OV.registerFunction(set_style_and_scene, False, 'gui.tools')
+
+
+def load_periodic_table():
+  olex.m('Freeze True')
+  olx.Atreap(os.path.join(OV.DataDir(), 'samples', 'Periodic Table', 'Periodic Table.cif'))
+  olex.m("mask bonds 0")
+  olex.m("rota 2 180")
+  olex.m("rota 3 90")
+  olex.m("legend false")
+  olex.m('Freeze False')
+
+
+OV.registerFunction(load_periodic_table, False, 'gui.tools')
+
+
+def load_matplotlib():
+  try:
+    import matplotlib.pyplot as plt
+    return plt
+  except Exception as err:
+    if "No module named" in repr(err):
+      selection = olx.Alert("matplotlib not found",
+                            """Error: No working matplotlib installation found!.
+Do you want to install this now? Olex2 will restart.""", "YN", False)
+    if selection == 'Y':
+      pip("matplotlib==3.5.1")
+      olex.m("restart")
+    else:
+      print(err)
+    return
+
+
+def plot_xy(xy=[], filename='fred.png'):
+  filename = 'fred.png'
+  import numpy as np
+  sys.path.append(r"%s/site-packages" % OV.DataDir())
+  plt = load_matplotlib()
+  if not plt:
+    print("Matplotlib is not intalled, and the istallation attempt failed")
+    return
+
+  plt.style.use('seaborn-whitegrid')
+  xs = np.array(xy[0][1:])
+#  xs = xs[~is_outlier(xs)]
+  ys = np.array(xy[1][1:])
+#  ys = ys[~is_outlier(ys)]
+  #plt.xlabel(_format_mathplotlib_text(self.x_title), **afont)
+  #plt.ylabel(_format_mathplotlib_text(self.y_title), **afont)
+  #plt.title(_format_mathplotlib_text(self.title), **tfont, pad=40)
+  # if self.suptitle:
+  #  plt.suptitle(_format_mathplotlib_text(self.suptitle), **stfont, y=0.91)
+  plt.grid(True)
+  plt.plot(xs,
+           ys,
+           'o',
+           color='gray',
+           markersize=1, linewidth=0,
+           markerfacecolor='white',
+           markeredgecolor='gray',
+           markeredgewidth=1)
+  p = os.path.join(OV.FilePath(), filename)
+  plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+  olx.Shell(p)
+  plt.close()
+
+
+def is_outlier(points, thresh=3.5):
+  import numpy as np
+  """
+  Returns a boolean array with True if points are outliers and False
+  otherwise.
+
+  Parameters:
+  -----------
+      points : An numobservations by numdimensions array of observations
+      thresh : The modified z-score to use as a threshold. Observations with
+          a modified z-score (based on the median absolute deviation) greater
+          than this value will be classified as outliers.
+
+  Returns:
+  --------
+      mask : A numobservations-length boolean array.
+
+  References:
+  ----------
+      Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+      Handle Outliers", The ASQC Basic References in Quality Control:
+      Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+  """
+  if len(points.shape) == 1:
+    points = points[:, None]
+  median = np.median(points, axis=0)
+  diff = np.sum((points - median)**2, axis=-1)
+  diff = np.sqrt(diff)
+  med_abs_deviation = np.median(diff)
+
+  modified_z_score = 0.6745 * diff / med_abs_deviation
+
+  return modified_z_score > thresh
+
+
+def pip(package):
+  import sys
+  sys.stdout.isatty = lambda: False
+  sys.stdout.encoding = sys.getdefaultencoding()
+  import pip
+  try:
+    from pip import main as pipmain
+  except:
+    from pip._internal import main as pipmain
+  pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
+
+
+OV.registerFunction(pip, False, "gui.tools.pip")
+
+
+def _clean_scrub(scrub):
+  t = " ".join(scrub).strip()
+  while "  " in t:
+    t = t.replace("  ", " ")
+  return t
+
+
+def get_polyhedra_tau():
+  # A very basic implementation of the Geometry Index, currently only for 4-coordinate atoms. https://en.wikipedia.org/wiki/Geometry_index
+
+  cmd = "sel"
+  _ = gui.tools.scrub(cmd)[1:]
+  t = _clean_scrub(_)
+  if not t:
+    print("Please select one central atom (usually a metal) or the bonds of interest")
+    return
+  if not " " in t:
+    central_atom = t
+    cmd = "sel bonds where '((xbond.a.selected==true) || (xbond.b.selected==true))'"
+    olex.m(cmd)
+    cmd = "sel bond atoms -u"
+    olex.m(cmd)
+    cmd = "sel"
+    t = _clean_scrub(gui.tools.scrub(cmd)[1:])
+  l = t.split()
+  l = list(dict.fromkeys(l))
+  if l[0] != central_atom:
+    l.remove(central_atom)
+    l.insert(0, central_atom)
+
+  angles = []
+  order = int(len(l) - 1)
+
+  if order == 4:
+    ks = [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+  elif order == 5:
+      ks = [(1, 2), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
+  else:
+    print("Sorry, only 4-coordinate or 5-coordinate Geometry indices are currently implemented")
+    return
+
+  for pair in ks:
+    cmd = "sel -u"
+    olex.m(cmd)
+    for idx in pair:
+      cmd = "sel  %s %s" % (l[0], l[idx])
+      olex.m(cmd)
+      cmd = "sel atom bonds"
+    olex.m(cmd)
+    cmd = "sel atoms -u"
+    olex.m(cmd)
+    cmd = "sel"
+    _ = gui.tools.scrub(cmd)[1:]
+    angle = float(_[3].split(":")[1].split("(")[1].split(")")[0])
+    angles.append(angle)
+
+  cmd = "sel -u"
+  olex.m(cmd)
+
+  angles.sort(reverse=True)
+  for item in angles:
+    print(item)
+
+  if order == 4:
+    tau = -0.00709 * float(angles[0]) - 0.00709 * float(angles[1]) + 2.55
+    tau_prime = -0.00399 * float(angles[0]) - 0.01019 * float(angles[1]) + 2.55
+    print(">>> tau = %.4f <<<" % tau)
+    print("When tau4 is close to 0 the geometry is similar to square planar, while if tau4 is close to 1 then the geometry is similar to tetrahedral.")
+    print(">>> tau' = %.4f <<<" % tau_prime)
+    print("Extreme values of tau4 and tau4′ denote exactly the same geometries, however tau4′ is always less or equal to tau4 so the deviation from ideal tetrahedral geometry is more visible. If for tetrahedral complex the value of tau4′ parameter is low, then one should check if there are some additional interactions within coordination sphere.")
+  elif order == 5:
+    tau5 = -0.01667 * float(angles[0]) + 0.01667 * float(angles[1])
+    print(">>> tau5 = %.4f <<<" % tau5)
+    print("When tau5 is close to 0 the geometry is similar to square pyramidal, while if tau5 is close to 1 the geometry is similar to trigonal bipyramidal")
+  print("Source: https://en.wikipedia.org/wiki/Geometry_index")
+
+
+OV.registerFunction(get_polyhedra_tau, False, "tools")
+
+
+def label_rsa():
+  import olx
+  import olexex
+  olex.m("rsa")
+  args = []
+  for a in olexex.OlexRefinementModel()._atoms:
+    rsa = a.get('rsa', None)
+    if rsa:
+      args.append("%s=%s*%s" %(a['label'], a['label'], rsa))
+  if args:
+    olx.Label(*args, a=True)
+OV.registerFunction(label_rsa, False, "tools")
+
