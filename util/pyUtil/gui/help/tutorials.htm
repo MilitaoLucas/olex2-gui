@@ -1,47 +1,119 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
+<!-- #include tool-row gui\blocks\tool-row-help.htm;name=TUTORIAL_HEADER;help_ext=Tutorial-header;1; -->
+  <td width='100%'><b>
+Self-paced tutorials introducing the main features of Olex2.
+  </b></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_1';1 -->
-   <td width='50%'>
-     <a target='Quick Demo' href='spy.demo.run_autodemo(QUICK_DEMO)'><b>%QUICK DEMO%</b></a>
-   </td>
-   <td width='50%'>
-    <a target="Packing Tutorial" href='spy.demo.run_autodemo(packing_tutorial)'><b>%Packing%</b></a>
-   </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Quick Demo",
+    "bgcolor=#539c2e",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(QUICK_DEMO)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Basic Commands",
+    "bgcolor=#539c2e",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(basic_movements)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Customise",
+    "bgcolor=#5083cd",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(customising_the_GUI)",
+    )$-
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_2';1 -->
-   <td width='50%'>
-      <a target='Basic Movements' href='spy.demo.run_autodemo(basic_movements)'><b>%Basic Commands%</b></a>
-    </td>
-   <td width='50%'>
-      <a target="Mapping & Masks" href="spy.demo.run_autodemo(mapping_and_masks)"><b>%Mapping & Masks%</b></a>
-    </td>
+
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Pack",
+    "bgcolor=#5083cd",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(packing_tutorial)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Grow",
+    "bgcolor=#5083cd",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(grow_tutorial)",
+    )$-
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_3';1 -->
-   <td width='50%'>
-      <a target="Grow Tutorial" href="spy.demo.run_autodemo(grow_tutorial)"><b>%Growing%</b></a></td>
-   <td width='50%'>
-      <a target="3D View Tutorial" href="spy.demo.run_autodemo(3D_view_tutorial)"><b>%3D View Tutorial%</b></a>
-   </td>
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Maps & Masks",
+    "bgcolor=#539c2e",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(mapping_and_masks)",
+    )$-
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_3';1 -->
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Measure",
+    "bgcolor=#c45a41",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(geometrical_measurements)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Images",
+    "bgcolor=#c45a41",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(image_tutorial)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Sort",
+    "bgcolor=#c45a41",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(sorting_tutorial)",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=3D View",
+    "bgcolor=#c45a41",
+    "fgcolor=#ffffff",
+    "onclick=spy.demo.run_autodemo(3D_view_tutorial)",
+    )$-
+
+
+
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_4';1 -->
-   <td width='50%'>
-      <a target="Measurements" href="spy.demo.run_autodemo(geometrical_measurements)"><b>%Measurements%</b></a>
-    </td>
-   <td width='50%'>
-      <a target="Image Tutorial" href="spy.demo.run_autodemo(image_tutorial)"><b>%Images%</b></a>
-   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name='TUTORIAL_5';1 -->
-   <td width='50%'>
-      <a target="Sorting Tutorial" href="spy.demo.run_autodemo(sorting_tutorial)"><b>%Sorting%</b></a>
-    </td>
-   <td width='50%'>
-      <a target="Customising the GUI" href="spy.demo.run_autodemo(customising_the_GUI)"><b>%Customising the GUI%</b></a>
-    </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

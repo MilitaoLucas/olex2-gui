@@ -91,7 +91,7 @@ gui
     h2{
       font_size = 12
         .type = int
-      font_name = Arial
+      font_name = "Signika-Regular.ttf"
         .type = str
       color = #ffffff
         .type = colour
@@ -170,7 +170,7 @@ gui
       .caption = "Background colour"
     font_colour = #442244
       .type = colour
-    font_name = Arial
+    font_name = "Signika-Regular.ttf"
       .type = str
     font_size = 2
       .type = int
@@ -689,6 +689,18 @@ gui
       .type = int
     pop_template = 'md_box'
       .type = str
+    bg_colour = '#222222'
+      .type = colour
+    font_colour = '#ffffff'
+      .type = colour
+    h1_colour = '#ffffff'
+      .type = colour
+    h2_colour = '#ffffff'
+      .type = colour
+    h3_colour = '#ffffff'
+      .type = colour
+    highlight_colour = '#ff8800'
+      .type = colour
     git_url = "https://github.com/Olex2/help/tree/master/gui/"
       .type = str
     language = "EN"

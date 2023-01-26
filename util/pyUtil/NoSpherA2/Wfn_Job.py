@@ -8,6 +8,8 @@ import shutil
 import time
 import math
 
+import subprocess
+
 from olexFunctions import OV
 from utilities import run_with_bitmap
 
@@ -254,12 +256,18 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")        
         com.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     xyz.close()
     com.write(" \n")
-    for i in range(0,len(atom_list)):
+    for i in range(0, len(atom_list)):
       atom_type = atom_list[i] + " 0\n"
       com.write(atom_type)
       temp_atom = atom_list[i] + ":" + basis_name
@@ -457,6 +465,12 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")        
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -712,6 +726,12 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       i = i+1
       if i > 2:
         atom = line.split()
+        if atom[0] == "D":
+          atom[0] = "H"
+          line = line.replace("D", "H")
+        if atom[0] == "T":
+          atom[0] = "H"
+          line = line.replace("T", "H")
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -1404,6 +1424,7 @@ ener = cf.kernel()"""
       inp.write(rest)
       #inp.write("cf = cf.mix_density_fit()\ncf.with_df.auxbasis = 'weigend'\ncf.kernel()\nwith open('%s.wfn', 'w') as f1:\n  from pyscf.tools import wfn_format\n  wfn_format.write_mo(f1,cell,cf.mo_coeff, mo_energy=cf.mo_energy, mo_occ=cf.mo_occ)\n"%self.name)
       inp.close()
+
   @run_with_bitmap('Calculating WFN')
   def run(self,part=0,software=None,basis_name=None):
     args = []
@@ -1500,7 +1521,7 @@ ener = cf.kernel()"""
         print("A problem with pyl is encountered, aborting.")
         return
       p = subprocess.Popen([pyl,
-                            os.path.join(p_path, python_script)], creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                            os.path.join(p_path, python_script)])
 
     out_fn = None
     path = self.full_dir
@@ -1644,7 +1665,7 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
-      if OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW") == True:
+      if software == "ORCA 5.0":
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
@@ -1666,37 +1687,39 @@ ener = cf.kernel()"""
     experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
 
     if (experimental_SF == False) and ("g" not in args[0]):
-      move_args = []
-      basis_dir = self.parent.basis_dir
-      mult = str(OV.GetParam('snum.NoSpherA2.multiplicity'))
-      move_args.append(self.parent.wfn_2_fchk)
-      move_args.append("-wfn")
-      move_args.append(self.name+".wfn")
-      move_args.append("-mult")
-      move_args.append(mult)
-      move_args.append("-b")
-      move_args.append(basis_name)
-      move_args.append("-d")
-      if sys.platform[:3] == 'win':
-        move_args.append(basis_dir.replace("/","\\"))
-      else:
-        move_args.append(basis_dir+'/')
-      move_args.append("-method")
-      method = OV.GetParam('snum.NoSpherA2.method')
-      if method == "HF":
-        move_args.append("rhf")
-      else:
-        move_args.append("rks")
-      m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
-      while m.poll() is None:
-        time.sleep(1)
-      with open("NoSpherA2.log", "r") as log:
-        x = log.read()
-        if x:
-          print(x)
-      if os.path.exists(self.name+".fchk"):
-        shutil.copy(self.name+".fchk",os.path.join(self.full_dir, self.name+".fchk"))
-      else:
-        OV.SetVar('NoSpherA2-Error',"NoFchk")
-        raise NameError("No fchk generated!")
-      shutil.move("NoSpherA2.log",os.path.join(self.full_dir, self.name+"_NoSpherA2.log"))
+      self.convert_to_fchk()
+  @run_with_bitmap("Converting to .fchk")
+  def convert_to_fchk(self):
+    move_args = []
+    basis_dir = self.parent.basis_dir
+    move_args.append(self.parent.wfn_2_fchk)
+    move_args.append("-wfn")
+    move_args.append(self.name + ".wfn")
+    move_args.append("-mult")
+    move_args.append(OV.GetParam('snum.NoSpherA2.multiplicity'))
+    move_args.append("-b")
+    move_args.append(OV.GetParam('snum.NoSpherA2.basis_name'))
+    move_args.append("-d")
+    if sys.platform[:3] == 'win':
+      move_args.append(basis_dir.replace("/", "\\"))
+    else:
+      move_args.append(basis_dir + '/')
+    move_args.append("-method")
+    method = OV.GetParam('snum.NoSpherA2.method')
+    if method == "HF":
+      move_args.append("rhf")
+    else:
+      move_args.append("rks")
+    m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+    while m.poll() is None:
+      time.sleep(1)
+    with open("NoSpherA2.log", "r") as log:
+      x = log.read()
+      if x:
+        print(x)
+    if os.path.exists(self.name + ".fchk"):
+      shutil.copy(self.name + ".fchk", os.path.join(self.full_dir, self.name + ".fchk"))
+    else:
+      OV.SetVar('NoSpherA2-Error', "NoFchk")
+      raise NameError("No fchk generated!")
+    shutil.move("NoSpherA2.log", os.path.join(self.full_dir, self.name + "_fchk.log"))

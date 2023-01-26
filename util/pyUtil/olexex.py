@@ -257,10 +257,34 @@ class OlexRefinementModel(object):
   def disorder_parts(self):
     return [atom['part'] for atom in self._atoms]
 
-  def iterator(self):
+  #evaluates unique types, using charges if needed
+  def get_unique_types(self, use_charges=False):
+    rv = set()
+    for a in self._atoms:
+      et = str(a['type'])
+      if use_charges:
+        charge = a['charge']
+        if charge > 0:
+          et = et + '+'
+        if charge < 0:
+          et = et + '-'
+        if abs(charge) > 1:
+          et += str(abs(charge))
+      rv.add(et)
+    return rv
+
+  def iterator(self, use_charges=False):
     for i, atom in enumerate(self._atoms):
       name = str(atom['label'])
       element_type = str(atom['type'])
+      if use_charges:
+        charge = atom['charge']
+        if charge > 0:
+          element_type += '+'
+        if charge < 0:
+          element_type += '-'
+        if abs(charge) > 1:
+          element_type += str(abs(charge))
       xyz = atom['crd'][0]
       occu = atom['occu'][0]
       adp = atom.get('adp')
@@ -678,6 +702,10 @@ def ChooseLabelContent(cmd):
     if not x:
       x['l'] = True
     x['h'] = True
+  if olx.GetVar('olex2.label_i', 'false') == 'true':
+    if not x:
+      x['l'] = True
+    x['i'] = True
   olx.Labels(**x)
 OV.registerFunction(ChooseLabelContent)
 
@@ -1366,7 +1394,7 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
         models.append(v)
     if len(models) > 1:
       return rv
-    flack = models[0]["_refine_ls_abs_structure_Flack"]
+    flack = models[0].get("_refine_ls_abs_structure_Flack", None)
     if flack:
       if type == 'html':
         rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
@@ -1376,7 +1404,6 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
 
   except Exception as err:
     print(err)
-    pass
   return rv
 OV.registerFunction(getReportExtraCIFItems)
 
@@ -1710,13 +1737,22 @@ def GetHttpFile(f, force=False, fullURL = False):
   return retVal
 
 def EditIns():
+  stats_var_name = "merge_stats_updated"
+  OV.SetVar(stats_var_name, "false")
   if olx.EditIns() != "true":
     return
+  import olex_core
+  olex_core.GetHklStat()
+
   programSettings.doProgramSettings(
     OV.GetParam('snum.refinement.program'),
     OV.GetParam('snum.refinement.method'))
   if olx.IsFileType("ires") == "true":
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
+
+  if OV.GetVar(stats_var_name) == "true":
+    from Analysis import HOS_instance
+    HOS_instance.make_HOS()
   olx.html.Update()
 OV.registerFunction(EditIns)
 

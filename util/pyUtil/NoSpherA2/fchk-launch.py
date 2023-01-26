@@ -47,12 +47,15 @@ if out_fn:
   log.write("Command: " + ' '.join(args))
 
 if any("elmo" in x for x in args):
-  if sys.platform[:3] != 'win':
+  if sys.platform[:3] == 'win':
     p = subprocess.Popen(args, stdin=inp, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
   else:
-    p = subprocess.Popen(args, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+    p = subprocess.Popen(args, stdout=log)
 else:
-  p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+  if sys.platform[:3] == 'win':
+    p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+  else:
+    p = subprocess.Popen(args, stdout=log, stderr=log)
 
 print("Setting signal handler!")
 signal.signal(signal.SIGTERM, abort_please)

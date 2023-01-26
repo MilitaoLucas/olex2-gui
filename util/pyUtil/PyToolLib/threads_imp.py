@@ -188,11 +188,11 @@ class NewsImageRetrivalThread(ThreadEx):
       if _ is None:
         return ""
       pp = os.path.join(p, name + "." + item[1])
-      if not os.path.exists(pp):
-        cont = _.read().decode()
-        with open(pp, 'w') as wFile:
-          wFile.write(cont)
-        olex.m("load %s '%s'" %(item[0], pp))
+      cont = _.read().decode()
+      with open(pp, 'w') as wFile:
+        wFile.write(cont)
+      import gui.tools
+    gui.tools.set_style_and_scene(style=name, scene=name, src_dir=p)
 
   def get_list_from_server(self, list_name='news'):
     if list_name == "news":

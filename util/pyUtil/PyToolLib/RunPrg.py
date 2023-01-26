@@ -825,27 +825,44 @@ class RunRefinementPrg(RunPrg):
     if refined_disp != []:
       wavelength = float(olx.xf.exptl.Radiation())
       from cctbx.eltbx import sasaki
-      tables = sasaki
+      from cctbx.eltbx import henke
+      from brennan import brennan
+      tables = [sasaki, henke, brennan()]
       unreasonable_fp = ""
       unreasonable_fdp = ""
       for sc, fp, fdp in refined_disp:
         e = str(sc.element_symbol())
-        table = tables.table(e)
-        factor = table.at_angstrom(wavelength)
-        if factor.fp() > 1.2 * fp or factor.fp() < 0.8 * fp:
+        table = []
+        for t in tables:
+          table.append(t.table(e))
+        fp_min_max = [135.0, 0.0]
+        fdp_min_max = [135.0, 0.0]
+        fp_average = 0.0
+        fdp_average = 0.0
+        for t in table:
+          temp = t.at_angstrom(wavelength)
+          fp_average += temp.fp()
+          fdp_average += temp.fdp()
+          fp_min_max = [min(fp_min_max[0], temp.fp()), max(fp_min_max[1], temp.fp())]
+          fdp_min_max = [min(fdp_min_max[0], temp.fdp()), max(fdp_min_max[1], temp.fdp())]
+        fp_average /= len(tables)
+        fdp_average /= len(tables)
+        fpdiff = (fp_min_max[1] - fp_min_max[0])
+        fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
+        if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:
           if unreasonable_fp == "":
             unreasonable_fp += sc.label
           else:
             unreasonable_fp += "," + sc.label
-        if factor.fdp() > 1.2 * fdp or factor.fdp() < 0.8 * fdp:
+        if fdp_average + 2 * fdpdiff < fdp or fdp_average - 2 * fdpdiff > fdp:
           if unreasonable_fdp == "":
             unreasonable_fdp += sc.label
           else:
             unreasonable_fdp += "," + sc.label
       if unreasonable_fdp != "":
-        self.refinement_has_failed.append("%s has unreasonable f''" % unreasonable_fdp)
+        self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp)
       if unreasonable_fp != "":
-        self.refinement_has_failed.append("%s has unreasonable f'" % unreasonable_fp)
+        self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp)
 
   def check_mu(self):
     try:
@@ -1260,6 +1277,9 @@ class RunRefinementPrg(RunPrg):
             print("Error during analysis of shifts!")
             raise e
         r = results()
+        if "Thakkar" in source:
+          HAR_log.close()
+          return True
         analyze_shifts(r)
         if calculate == False:
           converged = True
@@ -1304,6 +1324,7 @@ class RunRefinementPrg(RunPrg):
     HAR_log.write("*" * 110 + "\n")
     HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
     HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
+    HAR_log.write("Residual density RMS:{:+8.3f}\n".format(OV.GetParam('snum.refinement.res_rms')))
     HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
     HAR_log.write("Refinement finished at: ")
     HAR_log.write(str(datetime.datetime.now()))
@@ -1311,49 +1332,7 @@ class RunRefinementPrg(RunPrg):
 
     precise = OV.GetParam('snum.NoSpherA2.precise_output')
     if precise == True:
-      matrix_run = 0
-      label_uij = None
-      label_xyz = None
-      old_model = OlexRefinementModel()
-      HAR_log.write("\n\n\nPositions:\n")
-      for i, atom in enumerate(old_model._atoms):
-        xyz = atom['crd'][0]
-        HAR_log.write("{:5}".format(atom['label'][0]))
-        for x in range(3):
-          HAR_log.write("{:12.8f}".format(xyz[x]))
-        HAR_log.write("\n")
-        HAR_log.write("{:5}".format(" "))
-        for x in range(3):
-          HAR_log.write("{:12.8f}".format(esds[matrix_run]))
-          matrix_run += 1
-        has_adp_old = old_model._atoms[i].get('adp')
-        if has_adp_old != None:
-          matrix_run += 6
-        else:
-          matrix_run += 1
-        HAR_log.write("\n")
-      matrix_run = 0
-      HAR_log.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)\n")
-      for i, atom in enumerate(old_model._atoms):
-        has_adp = old_model._atoms[i].get('adp')
-        HAR_log.write("{:5}".format(atom['label'][0]))
-        if has_adp != None:
-          adp = atom['adp'][0]
-          adp = adptbx.u_cart_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp)
-          matrix_run += 3
-          for u in range(6):
-            HAR_log.write("{:12.8f}".format(adp[u]))
-          HAR_log.write("\n")
-          HAR_log.write("{:5}".format(" "))
-          adp_esds = (esds[matrix_run],esds[matrix_run+1],esds[matrix_run+2],esds[matrix_run+3],esds[matrix_run+4],esds[matrix_run+5])
-          adp_esds = adptbx.u_star_as_u_cif(self.cctbx.normal_eqns.xray_structure.unit_cell(), adp_esds)
-          for u in range(6):
-            HAR_log.write("{:12.8f}".format(adp_esds[u]))
-          matrix_run += 6
-        else:
-          HAR_log.write(" Isotropic atom")
-          matrix_run += 4
-        HAR_log.write("\n")
+      olex.m("spy.NoSpherA2.write_precise_model_file()")
 
     HAR_log.flush()
     HAR_log.close()

@@ -175,7 +175,6 @@ class OlexFunctions(inheritFunctions):
     else:
       return
 
-
   def GetParam_as_string(self,variable, default=None):
     retVal = self.GetParam(variable, default)
     if retVal is None:
@@ -224,7 +223,7 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
-  
+
   def get_AC_digests(self):
     acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
     if not acd:
@@ -836,6 +835,12 @@ class OlexFunctions(inheritFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsEDData(self):
+    try:
+      return float(olx.xf.exptl.Radiation()) < 0.1
+    except:
+      return False
+
   def ListParts(self):
     import olexex
     parts = set(olexex.OlexRefinementModel().disorder_parts())
@@ -1283,3 +1288,4 @@ OV.registerFunction(OV.GetTag)
 OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
+OV.registerFunction(OV.IsEDData)

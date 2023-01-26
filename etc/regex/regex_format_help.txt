@@ -7,7 +7,9 @@ TT (.*?)  TT :: <tr><td align='right'>$spy.MakeHoverButton('button-tutorial','sp
 ~ (.*?)( [^\~\~]* ) ~  :: <p><b><font color=$spy.GetParam(gui.html.highlight_colour)>\2</font></b>&nbsp;
 @ (.*?)( [^\@\@]* ) @ :: <tr bgcolor=\"$GetVar(HtmlTableFirstcolColour)\"><hr><b>\2</b><br>
 (&&) (.*?) (&&)  :: \2
-<h2> (.*?) </h2> :: <br><br><font size='4' color='#004080'><b>\1</b></font><br>
+<h2> (.*?) </h2> :: <br><br><font size='14' color='#004080'><b>\1</b></font><br>
 <h3> (.*?) </h3> :: <br><br><font size='3' color='#004080'><b>\1</b></font>: &nbsp;
 Keyboard: :: <br><b>Keyboard Command: </b>
 Options: :: <br><b>Command Options: </b>
+
+Get\sIt\sNow :: ""<font color='#afafaf'> LOAD </font>""

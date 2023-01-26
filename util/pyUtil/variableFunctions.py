@@ -323,6 +323,14 @@ def OnStructureLoaded(previous):
 
   LoadStructureParams()
 
+  # set default ED params if needed
+  if OV.IsEDData():
+    sft = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+    ed_table = OV.GetParam("snum.smtbx.electron_table_name")
+    if "electron" != sft or (not ed_table or ed_table == 'None'):
+      OV.SetParam("snum.smtbx.atomic_form_factor_table", "electron")
+      OV.SetParam("snum.smtbx.electron_table_name", "Peng-1999")
+
   # Disable this altogether until it works properly.
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin

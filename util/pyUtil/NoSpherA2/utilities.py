@@ -10,6 +10,9 @@ from olexFunctions import OV
 import OlexVFS
 from PIL import ImageDraw, Image
 from ImageTools import IT
+from PilTools import timage
+from cctbx import adptbx
+from cctbx.array_family import flex
 
 try:
   from_outside = False
@@ -24,7 +27,7 @@ def scrub(cmd):
   return log.endListen()
 
 def run_with_bitmap(bitmap_text):
-  custom_bitmap(bitmap_text)
+  timage.info_bitmaps(timage, bitmap_text, '#ff4444')
   def decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -37,32 +40,6 @@ def run_with_bitmap(bitmap_text):
         OV.DeleteBitmap(bitmap_text)
     return wrapper
   return decorator
-
-def custom_bitmap(text):
-  bitmap_font = "DefaultFont"
-  bitmap = {
-    text: {'label': text,
-           'name': text,
-              'color': '#ff4444',
-              'size': (len(text) * 12, 32),
-              'font_colour': "#ffffff",
-              }
-  }
-  map = bitmap[text]
-  colour = map.get('color', '#ffffff')
-  name = map.get('name', 'untitled')
-  txt = map.get('label', '')
-  size = map.get('size')
-  image = Image.new('RGB', size, colour)
-  draw = ImageDraw.Draw(image)
-  IT.write_text_to_draw(draw,
-                        txt,
-                             top_left = (5, -1),
-                             font_name=bitmap_font,
-                             font_size=24,
-                             font_colour = map.get('font_colour', '#000000')
-                             )
-  OlexVFS.save_image_to_olex(image, name, 2)
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
@@ -287,6 +264,7 @@ def get_ncen():
 OV.registerFunction(get_nmo,True,'NoSpherA2')
 OV.registerFunction(get_ncen, True, 'NoSpherA2')
 
+@run_with_bitmap("Combining .tsc")
 def combine_tscs(match_phrase="_part_", no_check=False):
   gui.get_default_notification(txt="Combining .tsc files", txt_col='black_text')
   args = []
@@ -317,7 +295,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     from os import walk
     _, _, filenames = next(walk(OV.FilePath()))
     for f in filenames:
-      if match_phrase in f and ".tsc" in f:
+      if match_phrase in f and (".tsc" in f or ".tscb" in f) :
         args.append(os.path.join(OV.FilePath(), f))
   else:
     print("ERROR! Please make sure threre is a match phrase to look for tscs!")
@@ -353,8 +331,12 @@ def combine_tscs(match_phrase="_part_", no_check=False):
           if OV.HasGUI():
             olx.Refresh()
 
-  tsc_dst = os.path.join(OV.FilePath(),sfc_name + "_total.tsc")
-  shutil.move(os.path.join(OV.FilePath(),"combined.tsc"),tsc_dst)
+  if os.path.exists("combined.tsc"):
+    tsc_dst = sfc_name + "_total.tsc"
+    shutil.move("combined.tsc", tsc_dst)
+  elif os.path.exists("combined.tscb"):
+    tsc_dst = sfc_name + "_total.tscb"
+    shutil.move("combined.tscb", tsc_dst)
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
@@ -691,3 +673,111 @@ def make_quick_button_gui():
 ''' % d
   return t
 OV.registerFunction(make_quick_button_gui, False, "NoSpherA2")
+
+def calculate_number_of_electrons():
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
+  adapter = OlexCctbxAdapter()
+  for sc in adapter.xray_structure().scatterers():
+    Z = sc.electron_count()
+    ne += Z
+  return ne, adapter
+
+def write_precise_model_file():
+  from refinement import FullMatrixRefine
+  from olexex import OlexRefinementModel
+  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  table_name = ""
+  if use_tsc == True:
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  try:
+    fmr = FullMatrixRefine()
+    if table_name != "":
+      norm_eq = fmr.run(build_only=True, table_file_name=table_name)
+    else:
+      norm_eq = fmr.run(build_only=True)
+    norm_eq.build_up(False)
+    reparam = norm_eq.reparametrisation
+    reparam.linearise()
+    jac_tr = reparam.jacobian_transpose_matching_grad_fc()
+    cov_matrix = flex.abs(flex.sqrt(norm_eq.covariance_matrix().matrix_packed_u_diagonal()))
+    esds = jac_tr.transpose() * flex.double(cov_matrix)
+    jac_tr = None
+    annotations = reparam.component_annotations
+  except:
+    print("Could not obtain cctbx object and calculate ESDs!\n")
+    return False
+  f = open(OV.ModelSrc() + ".precise_model", "w")
+  matrix_run = 0
+  model = OlexRefinementModel()
+  UC = norm_eq.xray_structure.unit_cell()
+  f.write("Positions     a          b          c       and ESDs:\n")
+  for atom in model._atoms:
+    xyz = atom['crd'][0]
+    f.write("{:5}".format(atom['label']))
+    for x in range(3):
+      f.write("{:12.8f}".format(xyz[x]))
+    for x in range(3):
+      f.write("{:12.8f}".format(esds[matrix_run + x]))
+    matrix_run += 3
+    has_adp = atom.get('adp')
+    if has_adp != None:
+      matrix_run += 6
+    else:
+      matrix_run += 1
+    if matrix_run < len(annotations):
+      if ".C111" in annotations[matrix_run]:
+        matrix_run += 25    
+    if matrix_run < len(annotations):
+      if 'occ' in annotations[matrix_run]:
+        matrix_run += 1
+    if matrix_run < len(annotations):
+      if 'fp' in annotations[matrix_run]:
+        matrix_run += 2
+    f.write("\n")
+  matrix_run = 0
+  f.write("\n\nADPs      (11)        (22)        (33)        (23)        (13)        (12)        Ueq     And ESDs\n")
+  for atom in model._atoms:
+    has_adp = atom.get('adp')
+    f.write("{:5}".format(atom['label']))
+    matrix_run += 3
+    if has_adp != None:
+      adp = has_adp[0]
+      adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
+      uiso = adptbx.u_cart_as_u_iso(adp)
+      adp = adptbx.u_cart_as_u_cif(UC, adp)
+      for u in range(6):
+        f.write("{:12.8f}".format(adp[u]))
+      f.write("{:12.8f}".format(uiso))
+      adp_esds = (esds[matrix_run],
+                  esds[matrix_run + 1],
+                  esds[matrix_run + 2],
+                  esds[matrix_run + 3],
+                  esds[matrix_run + 4],
+                  esds[matrix_run + 5])
+      u_iso_esd = adptbx.u_star_as_u_iso(UC, adp_esds)
+      adp_esds = adptbx.u_star_as_u_cif(UC, adp_esds)
+      for u in range(6):
+        f.write("{:12.8f}".format(adp_esds[u]))
+      f.write("{:12.8f}".format(u_iso_esd))
+      matrix_run += 6
+    else:
+      for u in range(6):
+        f.write("{:12s}".format(" ---"))
+      f.write("{:12.8f}".format(atom['uiso'][0]))
+      for u in range(6):
+        f.write("{:12s}".format(" ---"))
+      f.write("{:12.8f}".format(esds[matrix_run]))
+      matrix_run += 1
+    if matrix_run < len(annotations):
+      if ".C111" in annotations[matrix_run]:
+        matrix_run += 25
+    if matrix_run < len(annotations):
+      if 'occ' in annotations[matrix_run]:
+        matrix_run += 1
+    if matrix_run < len(annotations):
+      if 'fdp' in annotations[matrix_run]:
+        matrix_run += 2
+    f.write("\n")
+  f.close()
+OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
