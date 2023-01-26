@@ -11,7 +11,7 @@ import math
 import subprocess
 
 from olexFunctions import OV
-from utilities import run_with_bitmap
+from utilities import run_with_bitmap, update_GUI
 
 try:
   from_outside = False
@@ -1564,13 +1564,9 @@ ener = cf.kernel()"""
         x = stdout.read()
         if x:
           print(x, end='')
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
+          update_GUI()
         else:
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
+          update_GUI()
         if OV.GetVar("stop_current_process"):
           import signal
           p.send_signal(signal.SIGTERM)
