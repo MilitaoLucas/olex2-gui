@@ -984,11 +984,11 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:>70}".format(" "))
       r1_old = OV.GetParam('snum.refinement.last_R1')
       wr2_old = OV.GetParam('snum.refinement.last_wR2')
-      if r1_old != "n/a":
+      if r1_old != "n/a" and r1_old != None:
         HAR_log.write("{:>6.2f}".format(float(r1_old) * 100))
       else:
         HAR_log.write("{:>6}".format("N/A"))
-      if wr2_old != "n/a":
+      if wr2_old != "n/a" and wr2_old != None:
         HAR_log.write("{:>7.2f}".format(float(wr2_old) * 100))
       else:
         HAR_log.write("{:>7}".format("N/A"))
