@@ -1564,13 +1564,6 @@ ener = cf.kernel()"""
         x = stdout.read()
         if x:
           print(x, end='')
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
-        else:
-          olx.xf.EndUpdate()
-          if OV.HasGUI():
-            olx.Refresh()
         if OV.GetVar("stop_current_process"):
           import signal
           p.send_signal(signal.SIGTERM)

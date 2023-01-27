@@ -793,11 +793,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   t = '''
   <tr bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='32%%'>
+    <td width='35%%'>
       &nbsp;<b>a</b> = %(a)s
     </td>
 
-    <td width='35%%'>
+    <td width='32%%'>
       &nbsp;<b>&alpha;</b> = %(alpha)s&deg;
     </td>
 
@@ -808,11 +808,11 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
 
-    <td width='32%%'>
+    <td width='35%%'>
       &nbsp;<b>b</b> = %(b)s
     </td>
 
-    <td width='35%%'>
+    <td width='32%%'>
       &nbsp;<b>&beta;</b> = %(beta)s&deg;
     </td>
 
@@ -822,10 +822,10 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='32%%' >
+    <td width='35%%' >
       &nbsp;<b>c</b> = %(c)s
     </td>
-    <td width='35%%'>
+    <td width='32%%'>
       &nbsp;<b>&gamma;</b> = %(gamma)s&deg;
     </td>
     <td width='33%%'>
@@ -1494,11 +1494,9 @@ def GetDPRInfo():
 
 OV.registerFunction(GetDPRInfo)
 
-
-def GetRInfo(txt="", d_format='html'):
-  if not OV.HasGUI():
-    return
-  t = "ERROR!"
+def _get_R_values():
+  R1 = 'n/a'
+  wR2 = 'n/a'
 
   if olx.IsFileType('cif') == "true":
     R1 = olx.Cif('_refine_ls_R_factor_gt')
@@ -1508,15 +1506,19 @@ def GetRInfo(txt="", d_format='html'):
     R1 = OV.GetParam('snum.refinement.last_R1')
     wR2 = OV.GetParam('snum.refinement.last_wR2')
     if not R1 or R1 == 'n/a' or not wR2 or wR2 == 'n/a':
+      R1 = olex.f('Ins(R1)')
+      wR2 = olex.f('Ins(wR2)')
+    if not R1 or R1 == 'n/a' or not wR2 or wR2 == 'n/a':
       import History
       try:
         _ = History.tree.active_node
       except:
-        R1 = wR2 = 'n/a'
-        return
+        return R1, wR2
       if _ is not None:
-        R1 = _.R1
-        wR2 = _.wR2
+        if _.R1:
+          R1 = _.R1
+        if _.wR2:
+          wR2 = _.wR2
       else:
         try:
           look = olex.f('IsVar(snum_refinement_last_R1)')
@@ -1528,17 +1530,19 @@ def GetRInfo(txt="", d_format='html'):
             else:
               R1 = olex.f('Lst(R1)')
         except:
-          R1 = 'n/s'
-          return R1
-
+          return R1, wR2
+  return R1, wR2
+      
+def GetRInfo(txt="", d_format='html'):
+  if not OV.HasGUI():
+    return
+  R1, wR2 = _get_R_values()
   if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None) and 'GetRInfo' in cache:
     if d_format == 'html':
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
 
-
 OV.registerFunction(GetRInfo)
-
 
 def FormatRInfo(R1, wR2, d_format):
   cache['R1'] = R1
@@ -1547,13 +1551,18 @@ def FormatRInfo(R1, wR2, d_format):
   font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
   if 'html' in d_format:
     try:
-      R1 = float(R1)
-      col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
-      R1 = "%.2f" % (R1 * 100)
-
-      wR2 = float(wR2)
-      col_wR2 = gui.tools.get_diagnostics_colour('refinement', 'wR2', wR2)
-      wR2 = "%.2f" % (wR2 * 100)
+      if R1 == "n/a":
+        col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', 100)
+      else:
+        R1 = float(R1)
+        col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
+        R1 = "%.2f" % (R1 * 100)
+      if wR2 == "n/a":
+        col_wR2 = gui.tools.get_diagnostics_colour('refinement', 'wR2', 100)
+      else:
+        wR2 = float(wR2)
+        col_wR2 = gui.tools.get_diagnostics_colour('refinement', 'wR2', wR2)
+        wR2 = "%.2f" % (wR2 * 100)
 
       d = {
         'R1': R1,
@@ -1719,17 +1728,22 @@ class DisorderDisplayTools(object):
     OV.registerFunction(self.make_disorder_quicktools, False, 'gui.tools')
     OV.registerFunction(self.set_part_display, False, 'gui.tools')
 
-  def hasDisorder(self):
+  def hasDisorder(self, num_return = False):
+    retVal = False
     olx_atoms = olexex.OlexRefinementModel()
     parts = olx_atoms.disorder_parts()
-    if not parts:
-      return False
-    else:
+    if parts:
       sp = set(parts)
       if len(sp) == 1 and 0 in sp:
-        return False
+        if not num_return:
+          retVal = False
       else:
-        return True
+        retVal = True
+    if num_return:
+      _ = {True:1, False:0}
+      return _[retVal] 
+    else:
+      return retVal
 
   def show_unique_only(self):
     if OV.GetParam('user.parts.keep_unique') == True:
@@ -1771,6 +1785,7 @@ class DisorderDisplayTools(object):
 
   def make_disorder_quicktools(self, scope='main', show_options=True):
     import olexex
+    
     if 'scope' in scope:
       scope = scope.split('scope=')[1]
     parts = set(olexex.OlexRefinementModel().disorder_parts())

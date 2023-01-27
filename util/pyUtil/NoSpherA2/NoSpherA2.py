@@ -606,7 +606,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
-            endings = [".fchk", ".wfn", ".ffn", ".wfx", ".gbw", ".molden"]
+            endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden"]
+            if "5.0" in wfn_code:
+              endings.append(".gbw")
             if wfn_code == "Thakkar IAM":
               wfn_fn = path_base + ".xyz"
             elif not any(os.path.exists(path_base + x) for x in endings):
@@ -1322,8 +1324,10 @@ def get_functional_list():
     list = "HF;B3LYP;"
   elif wfn_code == "pySCF":
     list = "HF;PBE;B3LYP;BLYP;M062X"
+  elif wfn_code == "ORCA 5.0":
+    list = "HF;BP;BP86;PWLDA;R2SCAN;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   else:
-    list = "HF;BP;BP86;PWLDA;R2SCAN;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;XTB1;XTB2;"
+    list = "HF;BP;BP86;PWLDA;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
 OV.registerFunction(get_functional_list,True,'NoSpherA2')
 
