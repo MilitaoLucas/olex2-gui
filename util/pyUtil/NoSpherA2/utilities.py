@@ -27,7 +27,7 @@ def scrub(cmd):
   return log.endListen()
 
 def update_GUI():
-  if not OV.HasGUI():
+  if not OV.HasGUI() or True:
     return
   x = olx.LogLevel()
   olx.LogLevel(0)
@@ -223,9 +223,6 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       x = stdout.read()
       if x:
         print(x, end='')
-        update_GUI()
-      else:
-        update_GUI()
       # if OV.GetVar("stop_current_process"):
       #  p.terminate()
       #  print("Calculation aborted by INTERRUPT!")
@@ -239,7 +236,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     l = f.readlines()
     if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
       sucess = True
-  
+
   if sucess == True:
     print("\n.tsc calculation ended!")
   else:
@@ -321,16 +318,12 @@ def combine_tscs(match_phrase="_part_", no_check=False):
         string = c.decode()
         stdout.write(string)
         stdout.flush()
-        if '\r\n' in string or '\n' in string:
-          update_GUI()
   else:
     with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
         stdout.write(string)
         stdout.flush()
-        if '\r' in string or '\n' in string:
-          update_GUI()
 
   if os.path.exists("combined.tsc"):
     tsc_dst = sfc_name + "_total.tsc"
@@ -372,7 +365,7 @@ def deal_with_parts():
     for i in range(len(grouped_parts)):
       if len(grouped_parts[i]) > longest:
         longest = i
-    
+
     for i in range(len(grouped_parts[longest])):
       command = "showp 0"
       groups.append(["0"])
@@ -728,7 +721,7 @@ def write_precise_model_file():
       matrix_run += 1
     if matrix_run < len(annotations):
       if ".C111" in annotations[matrix_run]:
-        matrix_run += 25    
+        matrix_run += 25
     if matrix_run < len(annotations):
       if 'occ' in annotations[matrix_run]:
         matrix_run += 1

@@ -101,9 +101,7 @@ class StreamRedirection:
     self.redirected = stream
     self.is_redirecting = is_redirecting
     self.isErrorStream = (stream==sys.stderr)
-    self.refresh=False
     self.graph=False
-    self.t0 = time.time()
 
     if self.isErrorStream:
       self.errFile = open(os.path.join(datadir, "PythonError.log"), 'w', encoding="utf8")
@@ -120,11 +118,6 @@ class StreamRedirection:
         self.errFile.write(Str)
         self.errFile.flush()
       olex.post( '\'' + Str + '\'')
-      if self.refresh and olx.HasGUI() == 'true':
-        t1 = time.time()
-        if t1 - self.t0 > 25:
-          olex.m("refresh")
-          self.t0 = t1
       if self.graph!=False:
         self.graph(Str)
     else:
