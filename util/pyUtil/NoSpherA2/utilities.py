@@ -26,15 +26,6 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
-def update_GUI():
-  if not OV.HasGUI() or True:
-    return
-  x = olx.LogLevel()
-  olx.LogLevel(0)
-  olx.xf.EndUpdate()
-  olex.m('refresh')
-  olx.LogLevel(x)
-
 def run_with_bitmap(bitmap_text):
   timage.info_bitmaps(timage, bitmap_text, '#ff4444')
   def decorator(func):

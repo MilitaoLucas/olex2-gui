@@ -1154,13 +1154,12 @@ class RunRefinementPrg(RunPrg):
           HAR_log.close()
           print ("Could not obtain cctbx object and calculate ESDs!\n")
           return False
-        from NoSpherA2.utilities import run_with_bitmap, update_GUI
+        from NoSpherA2.utilities import run_with_bitmap
         @run_with_bitmap('Analyzing shifts')
         def analyze_shifts(results):
           try:
             matrix_run = 0
             matrix_size = len(esds)
-            update_GUI()
             uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
             for i, atom in enumerate(new_model._atoms):
               xyz = atom['crd'][0]
