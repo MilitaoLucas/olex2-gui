@@ -1112,7 +1112,10 @@ class RunRefinementPrg(RunPrg):
             nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
-
+        if "Thakkar" in source:
+          OV.SetParam('snum.NoSpherA2.Calculate',False)
+          HAR_log.close()
+          return True        
         new_model=OlexRefinementModel()
         class results():
           def __init__(self):
@@ -1173,14 +1176,16 @@ class RunRefinementPrg(RunPrg):
                     if res > results.max_dxyz:
                       results.update_xyz(res, annotations[matrix_run])
                   matrix_run += 1
-              has_adp_new = new_model._atoms[i].get('adp')
+              has_adp_new = atom.get('adp')
               has_adp_old = old_model._atoms[i].get('adp')
-              has_anh_new = new_model._atoms[i].get('anharmonic_adp')
+              has_anh_new = atom.get('anharmonic_adp')
               has_anh_old = old_model._atoms[i].get('anharmonic_adp')
               if has_adp_new != None and has_adp_old != None:
                 assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
                 adp = atom['adp'][0]
+                adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
                 adp2 = old_model._atoms[i]['adp'][0]
+                adp2 = (adp2[0], adp2[1], adp2[2], adp2[5], adp2[4], adp2[3])
                 adp = adptbx.u_cart_as_u_cif(uc, adp)
                 adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
                 adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
@@ -1273,10 +1278,8 @@ class RunRefinementPrg(RunPrg):
             HAR_log.close()
             print("Error during analysis of shifts!")
             raise e
+        
         r = results()
-        if "Thakkar" in source:
-          HAR_log.close()
-          return True
         analyze_shifts(r)
         if calculate == False:
           converged = True
