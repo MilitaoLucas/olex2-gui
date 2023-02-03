@@ -828,8 +828,8 @@ class RunRefinementPrg(RunPrg):
       from cctbx.eltbx import henke
       from brennan import brennan
       tables = [sasaki, henke, brennan()]
-      unreasonable_fp = ""
-      unreasonable_fdp = ""
+      unreasonable_fp = []
+      unreasonable_fdp = []
       for sc, fp, fdp in refined_disp:
         e = str(sc.element_symbol())
         table = []
@@ -850,19 +850,19 @@ class RunRefinementPrg(RunPrg):
         fpdiff = (fp_min_max[1] - fp_min_max[0])
         fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
         if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:
-          if unreasonable_fp == "":
-            unreasonable_fp += sc.label
-          else:
-            unreasonable_fp += "," + sc.label
+          unreasonable_fp.append(sc.label)
         if fdp_average + 2 * fdpdiff < fdp or fdp_average - 2 * fdpdiff > fdp:
-          if unreasonable_fdp == "":
-            unreasonable_fdp += sc.label
-          else:
-            unreasonable_fdp += "," + sc.label
-      if unreasonable_fdp != "":
-        self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp)
-      if unreasonable_fp != "":
-        self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp)
+          unreasonable_fdp.append(sc.label)
+      if len(unreasonable_fdp) != 0:
+        if len(unreasonable_fdp) == 1:
+          self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp[0])
+        else:
+          self.refinement_has_failed.append("%s have strongly deviating f''" % ",".join(unreasonable_fdp))
+      if len(unreasonable_fp) != 0:
+        if len(unreasonable_fp) == 1:
+          self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp[0])
+        else:
+          self.refinement_has_failed.append("%s have strongly deviating f'" % ",".join(unreasonable_fp))
 
   def check_mu(self):
     try:
