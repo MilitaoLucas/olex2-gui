@@ -384,6 +384,8 @@ routines requiring structure refinement
           .type = float
         maxG = 2
           .type = float
+        top_up = 0
+          .type = int
         method = *Kinematic 2-Beam Full-diff Full
           .type = choice
         matrix = Palatinus-2013 *Palatinus-2015 ReciPro
