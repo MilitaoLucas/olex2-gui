@@ -791,48 +791,7 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   d['Z'] = olx.xf.au.GetZ()
   d['Zprime'] = olx.xf.au.GetZprime()
 
-  t = '''
-  <tr bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='35%%'>
-      &nbsp;<b>a</b> = %(a)s
-    </td>
-
-    <td width='32%%'>
-      &nbsp;<b>&alpha;</b> = %(alpha)s&deg;
-    </td>
-
-    <td width='33%%'>
-      &nbsp;<b>Z</b> = %(Z)s
-    </td>
-  </tr>
-
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-
-    <td width='35%%'>
-      &nbsp;<b>b</b> = %(b)s
-    </td>
-
-    <td width='32%%'>
-      &nbsp;<b>&beta;</b> = %(beta)s&deg;
-    </td>
-
-    <td width='33%%'>
-      &nbsp;<b>Z'</b> = %(Zprime)s
-    </td>
-  </tr>
-
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-    <td width='35%%' >
-      &nbsp;<b>c</b> = %(c)s
-    </td>
-    <td width='32%%'>
-      &nbsp;<b>&gamma;</b> = %(gamma)s&deg;
-    </td>
-    <td width='33%%'>
-      &nbsp;<b>V</b> = %(volume)s
-    </td>
-  </tr>
-  ''' % d
+  t = gui.tools.TemplateProvider.get_template('snum_cell_display', force=debug) % d
   OV.write_to_olex('celldimensiondisplay.htm', t)
   # if debug:
     # print "Cell: %.5f" %(time.time() - t1)
