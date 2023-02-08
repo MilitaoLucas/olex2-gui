@@ -990,10 +990,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         return self.softwares + ";fragHAR;"
     else:
-      if not parts:
-        return self.softwares + ";"
-      elif len(parts) > 1:
+      if parts and len(parts) > 1:
         return self.softwares + ";Hybrid;"
+    return self.softwares + ";"
 
   def available(self):
     return os.path.exists(self.wfn_2_fchk)
