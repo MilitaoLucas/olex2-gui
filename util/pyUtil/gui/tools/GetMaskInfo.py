@@ -608,10 +608,7 @@ def add_mask_content(i,which):
   global mask_info_has_updated
   global current_sNum
   current_sNum = OV.ModelSrc()
-  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
-    base = "platon_squeeze"
-  else:
-    base = "smtbx_masks"
+  base = "smtbx_masks"
 
   is_CIF = (olx.IsFileType('cif') == 'true')
   if ":" not in i:
