@@ -977,6 +977,12 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:3d}".format(run))
       energy = None
       source = OV.GetParam('snum.NoSpherA2.source')
+      if "Please S" in source:
+        olx.Alert("No tsc generator selected",\
+  """Error: No generator for tsc files selected.
+  Please select one of the generators from the drop-down menu.""", "O", False)
+        OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
+        return      
       if energy == None:
         HAR_log.write("{:^24}".format(" "))
       else:
@@ -1235,7 +1241,8 @@ class RunRefinementPrg(RunPrg):
                   if ".C111" in annotations[matrix_run]:
                     matrix_run += 25
               elif has_adp_old == None and has_adp_new == None:
-                assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                if (i != len(new_model._atoms) - 1):
+                  assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
                 adp = atom['uiso'][0]
                 adp2 = old_model._atoms[i]['uiso'][0]
                 adp_esd = esds[matrix_run]
