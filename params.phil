@@ -388,7 +388,7 @@ routines requiring structure refinement
           .type = int
         method = *Kinematic 2-Beam Full-diff Full
           .type = choice
-        matrix = Palatinus-2013 *Palatinus-2015 ReciPro
+        matrix = Palatinus-2013 *Palatinus-2015 ReciPro 2-Beam Felix
           .type = choice
       }
   }
