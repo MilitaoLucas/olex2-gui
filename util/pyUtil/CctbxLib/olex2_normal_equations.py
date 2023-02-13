@@ -62,6 +62,23 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
 
+  def get_std_DM(self):
+    cl = least_squares.crystallographic_ls_class()
+    self.reparametrisation.linearise()
+    xx = cl(self.observations, self.reparametrisation)
+    def args():
+      args = (xx,
+              self.std_observations,
+              self.f_mask_data,
+              self.weighting_scheme,
+              OV.GetOSF(),
+              self.one_h_linearisation,
+              self.reparametrisation.jacobian_transpose_matching_grad_fc(),
+              self.reparametrisation.fc_correction, False, True, False)
+      return args
+    self.data = build_design_matrix(*args()) #lock destruction
+    return self.data
+
   def build_up(self, objective_only):
     ed_refinement = OV.GetParam("snum.refinement.ED.method")
     if not ed_refinement or "Kinematic" == ed_refinement or not aci.IsMEDEnabled:
@@ -69,21 +86,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       return
     old_func = self.one_h_linearisation
     try:
-      cl = least_squares.crystallographic_ls_class()
-      self.reparametrisation.linearise()
-      xx = cl(self.observations, self.reparametrisation)
-      def args():
-        args = (xx,
-                self.std_observations,
-                self.f_mask_data,
-                self.weighting_scheme,
-                OV.GetOSF(),
-                self.one_h_linearisation,
-                self.reparametrisation.jacobian_transpose_matching_grad_fc(),
-                self.reparametrisation.fc_correction, False, True, False)
-        return args
-      self.data = build_design_matrix(*args())
-      self.one_h_linearisation = aci.EDI.build(self.data,
+      self.one_h_linearisation = aci.EDI.build(self.get_std_DM,
         self.reparametrisation,
         old_func,
         self.refinement.thickness,
