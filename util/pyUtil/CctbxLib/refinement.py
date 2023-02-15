@@ -650,9 +650,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         format="coreCIF",
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
-
-      if cif_block['_space_group_name_Hall'].lower() == '-p 2ybc (x-z,y,z)':
-        cif_block['_space_group_name_Hall'] = '-P 2yn'
+      # do not use change of basis!
+      if '(' in cif_block['_space_group_name_Hall']:
+        sg_sym = sgtbx.space_group_symbols(xs.space_group().type().lookup_symbol())
+        cif_block['_space_group_name_Hall'] = sg_sym.hall()
       for i in range(3):
         for j in range(i+1,3):
           if (cell_params[i] == cell_params[j] and
