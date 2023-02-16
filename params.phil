@@ -851,6 +851,12 @@ routines requiring structure refinement
       .type = float
     htab_min_angle = 120
       .type = float
+    report_rtabs = False
+      .type = bool
+    report_vars = False
+      .type = bool
+    dataname = ''
+      .type = str
   }
 
   olex_conres = RRINGS
