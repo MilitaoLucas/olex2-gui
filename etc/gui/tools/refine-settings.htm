@@ -168,7 +168,6 @@ $-
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
         "label=Use Solvent Mask ",
-        "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
@@ -179,9 +178,8 @@ $-
 
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
-    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
-    "label=Update Mask",
     "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT",
+    "label=Update Mask",
     "checked=spy.GetParam('snum.refinement.recompute_mask_before_refinement')",
     "oncheck=spy.SetMasking(html.GetState(~name~))>>
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
@@ -232,7 +230,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <td>
 <!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
 </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- TABLE CLOSES AT THE END OF THE SECTION -->
 #ignoreif -->
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
@@ -240,8 +238,8 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <!-- #ignoreif fs.Exists strcat(FileName(),_mask_notification.htm)
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 #ignoreif -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
 
