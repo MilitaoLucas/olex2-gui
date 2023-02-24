@@ -518,10 +518,16 @@ class OlexFunctions(inheritFunctions):
               COA.write_fab(mask, fab_path)
           except Exception as e:
             print("Failed to create FAB file: %s" %str(e))
+      opts = {'u': update_atoms_loop,
+              'f': finalise_value,
+              'rtab': self.GetParam('snum.cif.report_rtabs'),
+              'vars': self.GetParam('snum.cif.report_vars'),
+              'dn': self.GetParam('snum.cif.dataname'),
+              }
       if type(filepath) == list:
-        olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
+        olx.CifMerge(*filepath, **opts)
       else:
-        olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
+        olx.CifMerge(filepath, **opts)
       if report:
         pass
         #print "Refinement CIF file has been merged with the meta-data cif file"

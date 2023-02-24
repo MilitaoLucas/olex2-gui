@@ -382,11 +382,16 @@ routines requiring structure refinement
       {
         maxSg = 0.01
           .type = float
-        maxG = 2
+        maxG = 1.5
+          .type = float
+        minPS = 0.0005
+          .type = float
+          .help = Min perturbation strength for weak beams
+        top_up_d = 0.5
           .type = float
         method = *Kinematic 2-Beam Full-diff Full
           .type = choice
-        matrix = Palatinus-2013 *Palatinus-2015 ReciPro
+        matrix = Palatinus-2013 *Palatinus-2015 ReciPro 2-Beam Felix Florian
           .type = choice
       }
   }
@@ -846,6 +851,12 @@ routines requiring structure refinement
       .type = float
     htab_min_angle = 120
       .type = float
+    report_rtabs = False
+      .type = bool
+    report_vars = False
+      .type = bool
+    dataname = ''
+      .type = str
   }
 
   olex_conres = RRINGS

@@ -131,10 +131,13 @@ class MapUtil:
           print("WARNING: Switching to cctbx maps!")
           OV.SetParam("snum.map.source", "cctbx")
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
-        elif map_source == "olex":
+        else:
           olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
       else:
-        olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
+        if OV.GetParam("snum.refinement.program") == "olex2.refine":
+          olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
+        else:
+          olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
 
     self.SetXgridView(update_controls)
 

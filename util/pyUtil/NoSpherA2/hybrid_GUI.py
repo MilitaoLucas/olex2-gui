@@ -93,19 +93,16 @@ def make_hybrid_GUI(softwares_list_string):
   parts = OV.ListParts()
   if parts != None:
     parts = list(parts)
-  nr_parts = 1
-  if len(parts) > 1:
-    nr_parts = len(parts)
-  else:
+  if len(parts) <= 1:
     return begin_new_line() + "Hybrid is not possible with less than two parts!" + end_line()
   t = begin_new_line() + \
-  checkbox(
+      checkbox(
     "iterative",
     "Iterative",
     "spy.GetParam(\'snum.NoSpherA2.full_HAR\')",
     "spy.SetParam(\'snum.NoSpherA2.full_HAR\',\'True\')>>html.Update()",
     "spy.SetParam(\'snum.NoSpherA2.full_HAR\',\'False\')>>html.Update()"
-    ) + '''
+  ) + '''
 <!-- ======= FULL HAR SWITCH ===================== -->
 
 '''
@@ -219,6 +216,8 @@ def make_hybrid_GUI(softwares_list_string):
                 )  
   t += end_line()
   for i in parts:
+    if i == 0:
+      continue
     t += begin_new_line() + "<td width='63%' align='center'>" + "<b>Part %d</b></td>"%i
     softwares_list = "Please Select" + str(softwares_list_string).replace("Hybrid;","")
     t += '''
