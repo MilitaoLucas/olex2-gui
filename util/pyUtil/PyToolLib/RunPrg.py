@@ -828,8 +828,8 @@ class RunRefinementPrg(RunPrg):
       from cctbx.eltbx import henke
       from brennan import brennan
       tables = [sasaki, henke, brennan()]
-      unreasonable_fp = ""
-      unreasonable_fdp = ""
+      unreasonable_fp = []
+      unreasonable_fdp = []
       for sc, fp, fdp in refined_disp:
         e = str(sc.element_symbol())
         table = []
@@ -850,19 +850,19 @@ class RunRefinementPrg(RunPrg):
         fpdiff = (fp_min_max[1] - fp_min_max[0])
         fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
         if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:
-          if unreasonable_fp == "":
-            unreasonable_fp += sc.label
-          else:
-            unreasonable_fp += "," + sc.label
+          unreasonable_fp.append(sc.label)
         if fdp_average + 2 * fdpdiff < fdp or fdp_average - 2 * fdpdiff > fdp:
-          if unreasonable_fdp == "":
-            unreasonable_fdp += sc.label
-          else:
-            unreasonable_fdp += "," + sc.label
-      if unreasonable_fdp != "":
-        self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp)
-      if unreasonable_fp != "":
-        self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp)
+          unreasonable_fdp.append(sc.label)
+      if len(unreasonable_fdp) != 0:
+        if len(unreasonable_fdp) == 1:
+          self.refinement_has_failed.append("%s has strongly deviating f''" % unreasonable_fdp[0])
+        else:
+          self.refinement_has_failed.append("%s have strongly deviating f''" % ",".join(unreasonable_fdp))
+      if len(unreasonable_fp) != 0:
+        if len(unreasonable_fp) == 1:
+          self.refinement_has_failed.append("%s has strongly deviating f'" % unreasonable_fp[0])
+        else:
+          self.refinement_has_failed.append("%s have strongly deviating f'" % ",".join(unreasonable_fp))
 
   def check_mu(self):
     try:
@@ -977,6 +977,12 @@ class RunRefinementPrg(RunPrg):
       HAR_log.write("{:3d}".format(run))
       energy = None
       source = OV.GetParam('snum.NoSpherA2.source')
+      if "Please S" in source:
+        olx.Alert("No tsc generator selected",\
+  """Error: No generator for tsc files selected.
+  Please select one of the generators from the drop-down menu.""", "O", False)
+        OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
+        return      
       if energy == None:
         HAR_log.write("{:^24}".format(" "))
       else:
@@ -1112,7 +1118,10 @@ class RunRefinementPrg(RunPrg):
             nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
-
+        if "Thakkar" in source:
+          OV.SetParam('snum.NoSpherA2.Calculate',False)
+          HAR_log.close()
+          return True        
         new_model=OlexRefinementModel()
         class results():
           def __init__(self):
@@ -1173,14 +1182,16 @@ class RunRefinementPrg(RunPrg):
                     if res > results.max_dxyz:
                       results.update_xyz(res, annotations[matrix_run])
                   matrix_run += 1
-              has_adp_new = new_model._atoms[i].get('adp')
+              has_adp_new = atom.get('adp')
               has_adp_old = old_model._atoms[i].get('adp')
-              has_anh_new = new_model._atoms[i].get('anharmonic_adp')
+              has_anh_new = atom.get('anharmonic_adp')
               has_anh_old = old_model._atoms[i].get('anharmonic_adp')
               if has_adp_new != None and has_adp_old != None:
                 assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
                 adp = atom['adp'][0]
+                adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
                 adp2 = old_model._atoms[i]['adp'][0]
+                adp2 = (adp2[0], adp2[1], adp2[2], adp2[5], adp2[4], adp2[3])
                 adp = adptbx.u_cart_as_u_cif(uc, adp)
                 adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
                 adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
@@ -1230,7 +1241,8 @@ class RunRefinementPrg(RunPrg):
                   if ".C111" in annotations[matrix_run]:
                     matrix_run += 25
               elif has_adp_old == None and has_adp_new == None:
-                assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                if (i != len(new_model._atoms) - 1):
+                  assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
                 adp = atom['uiso'][0]
                 adp2 = old_model._atoms[i]['uiso'][0]
                 adp_esd = esds[matrix_run]
@@ -1273,10 +1285,8 @@ class RunRefinementPrg(RunPrg):
             HAR_log.close()
             print("Error during analysis of shifts!")
             raise e
+        
         r = results()
-        if "Thakkar" in source:
-          HAR_log.close()
-          return True
         analyze_shifts(r)
         if calculate == False:
           converged = True

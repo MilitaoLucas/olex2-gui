@@ -64,10 +64,13 @@ def get_mask_info():
 #  print ".. %s .." %template_path
   global current_sNum
   current_sNum = OV.ModelSrc()
-  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
-    base = "platon_squeeze"
-  else:
-    base = "smtbx_masks"
+  base = "smtbx_masks"
+  
+
+  #if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
+    #base = "platon_squeeze"
+  #else:
+    #base = "smtbx_masks"
 
   d = {}
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
@@ -96,8 +99,11 @@ def get_mask_info():
     try:
       sqf_f = get_sqf_name()
       rFile = open(sqf_f, 'r').read()
+      if "platon_squeeze" in rFile:
+        base = "platon_squeeze"
       if not rFile.startswith("data_"):
         rFile = "data_%s\n"%str(current_sNum) + rFile
+        
       sqf = iotbx.cif.fast_reader(input_string=rFile).model()
     except Exception as err:
       return return_note(note = "No masking info yet!", col=gui_green)
@@ -419,7 +425,10 @@ def get_rounded_formula(rnd=2, as_string_sep=""):
 
 def format_number(num):
   if "." in str(num):
-    if str(num).split(".")[1].startswith('99'):
+    _ = str(num).split(".")[1] 
+    if _.startswith('99'):
+      num = round(num,0)
+    elif _.startswith('00'):
       num = round(num,0)
   s = str(num)
   if s.endswith(".0"):
@@ -599,10 +608,7 @@ def add_mask_content(i,which):
   global mask_info_has_updated
   global current_sNum
   current_sNum = OV.ModelSrc()
-  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
-    base = "platon_squeeze"
-  else:
-    base = "smtbx_masks"
+  base = "smtbx_masks"
 
   is_CIF = (olx.IsFileType('cif') == 'true')
   if ":" not in i:

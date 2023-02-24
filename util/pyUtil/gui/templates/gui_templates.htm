@@ -554,3 +554,46 @@ t:exti_or_swat_gui{
       >
     </td>
 }
+
+t:snum_cell_display{
+  <tr bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='34%%'>
+      &thinsp;<b>a</b>&thinsp;=&thinsp;%(a)s
+    </td>
+
+    <td width='36%%'>
+      &thinsp;<b>&alpha;</b>&thinsp;=&thinsp;%(alpha)s&deg;
+    </td>
+
+    <td width='30%%'>
+      &thinsp;<b>Z</b>&thinsp;=&thinsp;%(Z)s
+    </td>
+  </tr>
+
+  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+
+    <td>
+      &thinsp;<b>b</b>&thinsp;=&thinsp;%(b)s
+    </td>
+
+    <td>
+      &thinsp;<b>&beta;</b>&thinsp;=&thinsp;%(beta)s&deg;
+    </td>
+
+    <td>
+      &thinsp;<b>Z'</b>&thinsp;=&thinsp;%(Zprime)s
+    </td>
+  </tr>
+
+  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td>
+      &thinsp;<b>c</b>&thinsp;=&thinsp;%(c)s
+    </td>
+    <td>
+      &thinsp;<b>&gamma;</b>&thinsp;=&thinsp;%(gamma)s&deg;
+    </td>
+    <td>
+      &thinsp;<b>V</b>&thinsp;=&thinsp;%(volume)s
+    </td>
+  </tr>
+}
