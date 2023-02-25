@@ -333,12 +333,12 @@ def plot_cube(name, color_cube):
         drun += len(values)
         continue
       elif (run == 4):
-        x_size = int(values[0])
+        x_size2 = int(values[0])
       elif (run == 5):
-        y_size = int(values[0])
+        y_size2 = int(values[0])
       elif (run == 6):
-        z_size = int(values[0])
-        total_size = x_size * y_size * z_size
+        z_size2 = int(values[0])
+        total_size = x_size2 * y_size2 * z_size2
         data2 = flex.double()
     
     data2.reshape(flex.grid(x_size, y_size, z_size))
@@ -362,37 +362,32 @@ def plot_cube(name, color_cube):
       ix21 = ix2 + 1
       iy21 = iy2 + 1
       iz21 = iz2 + 1
-      a_0 = data2[ix2][iy2][iz2]*ix21*iy21*iz21 - data2[ix2][iy2][iz21]*ix21*iy21*iz2 - data2[ix2][iy21][iz2]*ix21*iy2*iz21 + data2[ix2][iy21][iz21]*ix21*iy2*iz2 - data2[ix21][iy2][iz2]*ix2*iy21*iz21 + data2[ix21][iy2][iz21]*ix2*iy21*iz2 + data2[ix21][iy21][iz2]*ix2*iy2*iz21 - data2[ix21][iy21][iz21]*ix2*iy2*iz2
-      a_1 = - data2[ix2][iy2][iz2] * iy21 * iz21 + data2[ix2][iy2][iz21] * iy21 * iz2 + data2[ix2][iy21][iz2] * iy2 * iz21 - data2[ix2][iy21][iz21] * iy2 * iz2 + data2[ix21][iy2][iz2] * iy21 * iz21 - data2[ix21][iy2][iz21] * iy21 * iz2 - data2[ix21][iy21][iz2] * iy2 * iz21 + data2[ix21][iy21][iz21] * iy2 * iz2
-      a_2 = - data2[ix2][iy2][iz2] * ix21 * iz21 + data2[ix2][iy2][iz21] * ix21 * iz2 + data2[ix2][iy21][iz2] * ix2 * iz21 - data2[ix2][iy21][iz21] * ix2 * iz2 + data2[ix21][iy2][iz2] * ix21 * iz21 - data2[ix21][iy2][iz21] * ix21 * iz2 - data2[ix21][iy21][iz2] * ix2 * iz21 + data2[ix21][iy21][iz21] * ix2 * iz2
-      a_3 = - data2[ix2][iy2][iz2] * ix21 * iy21 + data2[ix2][iy2][iz21] * ix21 * iy2 + data2[ix2][iy21][iz2] * ix2 * iy21 - data2[ix2][iy21][iz21] * ix2 * iy2 + data2[ix21][iy2][iz2] * ix21 * iy21 - data2[ix21][iy2][iz21] * ix21 * iy2 - data2[ix21][iy21][iz2] * ix2 * iy21 + data2[ix21][iy21][iz21] * ix2 * iy2
-      a_4 = data2[ix2][iy2][iz2] * iz21 - data2[ix2][iy2][iz21] * iz2 - data2[ix2][iy21][iz2] * iz21 + data2[ix2][iy2][iz21] * iz2 - data2[ix21][iy2][iz2] * iz21 + data2[ix21][iy2][iz21] * iz2 + data2[ix21][iy21][iz2] * iz21 - data2[ix21][iy21][iz21] * iz2
-      a_5 = data2[ix2][iy2][iz2] * iy21 - data2[ix2][iy2][iz21] * iy2 - data2[ix2][iy21][iz2] * iy21 + data2[ix2][iy2][iz21] * iy2 - data2[ix21][iy2][iz2] * iy21 + data2[ix21][iy2][iz21] * iy2 + data2[ix21][iy21][iz2] * iy21 - data2[ix21][iy21][iz21] * iy2
-      a_6 = data2[ix2][iy2][iz2] * ix21 - data2[ix2][iy2][iz21] * ix2 - data2[ix2][iy21][iz2] * ix21 + data2[ix2][iy2][iz21] * ix2 - data2[ix21][iy2][iz2] * ix21 + data2[ix21][iy2][iz21] * ix2 + data2[ix21][iy21][iz2] * ix21 - data2[ix21][iy21][iz21] * ix2
-      a_7 = -(data2[ix2][iy2][iz2] - data2[ix2][iy2][iz21] - data2[ix2][iy21][iz2] + data2[ix2][iy2][iz21] - data2[ix21][iy2][iz2] + data2[ix21][iy2][iz21] + data2[ix21][iy21][iz2] - data2[ix21][iy21][iz21])
+      a_0 = data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 * iy21 * iz21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix21 * iy21 * iz2 - data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix21 * iy2 * iz21 + data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * ix21 * iy2 * iz2 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix2 * iy21 * iz21 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 * iy21 * iz2 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix2 * iy2 * iz21 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * ix2 * iy2 * iz2
+      a_1 = - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iy21 * iz21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy21 * iz2 + data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iy2 * iz21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy2 * iz2 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iy21 * iz21 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy21 * iz2 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iy2 * iz21 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * iy2 * iz2
+      a_2 = - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 * iz21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix21 * iz2 + data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix2 * iz21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 * iz2 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 * iz21 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix21 * iz2 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix2 * iz21 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * ix2 * iz2
+      a_3 = - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 * iy21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix21 * iy2 + data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix2 * iy21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 * iy2 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 * iy21 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix21 * iy2 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix2 * iy21 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * ix2 * iy2
+      a_4 = data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iz21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iz2 - data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iz21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iz2 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iz21 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iz2 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iz21 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * iz2
+      a_5 = data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iy21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy2 - data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iy21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy2 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * iy21 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * iy2 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * iy21 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * iy2
+      a_6 = data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 - data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix21 + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] * ix21 + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] * ix2 + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] * ix21 - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21] * ix2
+      a_7 = -(data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz2] - data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] - data2[ix2 * y_size2 * z_size2 + iy21 * z_size2 + iz2] + data2[ix2 * y_size2 * z_size2 + iy2 * z_size2 + iz21] - data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz2] + data2[ix21 * y_size2 * z_size2 + iy2 * z_size2 + iz21] + data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz2] - data2[ix21 * y_size2 * z_size2 + iy21 * z_size2 + iz21])
 
       return a_0 + a_1 * ix2 + a_2 * iy2 + a_3 * z_2 + a_4 * x_2 * y_2 + a_5 * x_2 * z_2 + a_6 * y_2 * z_2 + a_7 * x_2 * y_2 * z_2
-
-
-    value = [[[float(0.0) for k in range(z_size)] for j in range(y_size)] for i in range(x_size)]
     if x_size == x_size2 and y_size == y_size2 and z_size == z_size2:
       for x in range(x_size):
         for y in range(y_size):
           for z in range(z_size):
-            value[x][y][z] = data2[x][y][z]
+            colour = int(get_color(data2[x * y_size * z_size + y * z_size + z]))
+            olex_xgrid.SetValue(x, y, z, data[x * y_size * z_size + y * z_size + z], colour)
     else:
       print("Interpolating...")
       for x in range(x_size):
         for y in range(y_size):
           for z in range(z_size):
-            res = interpolate(x,y,z)
-            value[x][y][z] = res
+            res = interpolate(x, y, z)
+            colour = int(get_color(res))
+            olex_xgrid.SetValue(x, y, z, data[x * y_size * z_size + y * z_size + z], colour)
     data2 = None
-    for x in range(x_size):
-      for y in range(y_size):
-        for z in range(z_size):
-          colour = int(get_color(value[x][y][z]))
-          olex_xgrid.SetValue(x,y,z,data[x][y][z],colour)
+
   else:
     gridding = data.accessor()
     type = isinstance(data, flex.int)
