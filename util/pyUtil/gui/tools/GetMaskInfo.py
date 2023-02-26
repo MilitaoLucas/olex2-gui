@@ -620,6 +620,12 @@ def add_mask_content(i,which):
   if not contents:
     if is_CIF:
       contents = olx.Cif('_%s_void_nr' %base).split(",")
+    else:
+      base = "platon_squeeze"
+      contents = olx.cif_model[current_sNum].get('_%s_void_%s' %(base, which))
+  if not contents:
+    return return_note(note = "No void has been found.", col=gui_orange)
+
   try:
     disp = ",".join(i_l)
   except:
