@@ -88,7 +88,7 @@ class PlatonWrapper:
     else:
       exe_name = olx.file.Which(exe_name)
     if not exe_name:
-      print('The Platon executable could not be located, aborting')
+      print('The Platon executable could not be located, aborting. Has the location of "platon.exe" been added to "Home > Settings > PATH" ?')
       return
     chk_def = os.getenv("CHECKDEF")
     if not chk_def or not os.path.isfile(chk_def):
@@ -133,6 +133,8 @@ class PlatonWrapper:
         # Start just platon with the INS file
         print("Calling Platon Directly")
         a = self.run_platon([exe_name, inputfile])
+        a.wait()
+        olx.html.Update()
         return a
       else:
         if platonflag == 'U':
@@ -149,6 +151,7 @@ class PlatonWrapper:
         try:
           a = self.run_platon(command)
           a.wait()
+          olx.html.Update()
           return
         except Exception as err:
           print("PLATON gave up. This is why: %s" %err)
