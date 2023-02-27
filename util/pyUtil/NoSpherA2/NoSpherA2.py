@@ -252,6 +252,7 @@ class NoSpherA2(PT):
               shutil.move(f_work, f_dest)
           else:
             shutil.move(f_work, f_dest)
+
   def launch(self):
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
@@ -606,6 +607,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
+              shutil.copy(wfn_code,os.path.join(os.path.join("olex2","Wfn_Job"),os.path.split(wfn_code)[1]))
             endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden"]
             if "5.0" in wfn_code:
               endings.append(".gbw")
