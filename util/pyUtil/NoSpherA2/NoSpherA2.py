@@ -429,6 +429,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base+".wfn"):
               wfn_fn = path_base + ".wfn"
+            elif hybrid_part_wfn_code == "Thakkar IAM":
+              wfn_fn = path_base + ".xyz"
+              try:
+                shutil.copy(os.path.join(wfn_job_dir, "%s.xyz" % (self.name)), "%s_part%s.xyz" % (self.name, parts[i]))
+              except:
+                pass
             else:
               return False
             wfn_fn = None
@@ -450,9 +456,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".ffn"
               elif file.endswith(".fchk"):
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".fchk"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn")): wfn_fn = temp
+                if (wfn_fn == None or wfn_fn.endswith(".wfn")):
+                  wfn_fn = temp
               if temp != None:
-                shutil.move(file,temp)
+                shutil.move(file, temp)
+            if hybrid_part_wfn_code == "Thakkar IAM" and wfn_fn == None:
+              wfn_fn = "%s_part%s.xyz" % (self.name, parts[i])
             wfn_files.append(wfn_fn)
         else:
           # Neither Hybrid nor DISCAMB are used, so ORCA; g16; pySCF etc
