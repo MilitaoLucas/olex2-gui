@@ -854,7 +854,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.reparametrisation.fc_correction.expression:
       cif_block['_refine_ls_extinction_expression'] = self.reparametrisation.fc_correction.expression
       if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
-        cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.value
+        cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
       elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
         cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.g +\
            '' + fmt % self.reparametrisation.fc_correction.U
@@ -1032,6 +1032,39 @@ The following options were used:
     cif_block.sort(key=sort_key)
     return cif_block
 
+  #moves EXTI from Fc_sq to Fo_sq
+  def  transfer_exti(self, exti, wavelength, fo_sq, fc_sq):
+    sin_2_theta = fc_sq.unit_cell().sin_two_theta(fc_sq.indices(), wavelength)
+    correction = 0.001 * exti * fc_sq.data() * math.pow(wavelength, 3) / sin_2_theta
+    # recover original Fc_sq
+    fc_sq_original = fc_sq.data()*(correction + flex.pow(flex.pow(correction, 2) + 4, 0.5))/2
+    #compute original correction toapply to Fo_sq
+    correction = 0.001 * exti * fc_sq_original * math.pow(wavelength, 3) / sin_2_theta
+    correction += 1
+    correction = flex.pow(correction, 0.5)
+    # #test fc_sq = fc_sq_original/correction
+    # test_v = fc_sq_original / correction
+    # for i, fc_sq_v in enumerate(fc_sq.data()):
+    #   if abs(fc_sq_v - test_v[i]) > 1e-6:
+    #     raise Exception("Assert!")
+    # #end test
+    fc_sq_ = fc_sq.customized_copy(data=fc_sq_original)
+    fo_sq_ = fo_sq.customized_copy(
+        data=fo_sq.data()*correction,
+        sigmas=fo_sq.sigmas()*correction)
+    return fo_sq_, fc_sq_
+
+  #moves SWAT from Fc_sq to Fo_sq
+  def  transfer_swat(self, g, U, fo_sq, fc_sq):
+    stol_sqs = fc_sq.unit_cell().stol_sq(fc_sq.indices())
+    correction = flex.double([1 - g*math.exp(-8*math.pi**2*U*stol_sq) for stol_sq in stol_sqs])
+    correction = flex.pow(correction, 2.0)
+    fc_sq_ = fc_sq.customized_copy(data=fc_sq.data() / correction)
+    fo_sq_ = fo_sq.customized_copy(
+        data=fo_sq.data()/correction,
+        sigmas=fo_sq.sigmas()/correction)
+    return fo_sq_, fc_sq_
+
   def get_fcf_data(self, anomalous_flag, use_fc_sq=False):
     if self.hklf_code == 5 or\
       (self.twin_components is not None
@@ -1066,14 +1099,28 @@ The following options were used:
     if list_code == 4:
       weights = None
       need_Fc = False
-      if add_weights and self.reflections._merge == 0:
+      rescale = self.exti is not None or self.swat is not None
+      if rescale or (add_weights and self.reflections._merge == 0):
         need_Fc = True
       fo_sq, fc_ = self.get_fcf_data(anomalous_flag=False, use_fc_sq=not need_Fc)
-      if need_Fc:
+
+      if need_Fc or rescale:
         weights = self.compute_weights(fo_sq, fc_)
         fc_sq = fc_.as_intensity_array()
       else:
         fc_sq = fc_
+
+      if self.exti is not None:
+        fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
+      elif self.swat is not None:
+        fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+
+      if rescale:
+        scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+             / flex.sum(weights * flex.pow2(fc_sq.data()))
+        fo_sq = fo_sq.customized_copy(
+          data=fo_sq.data()*scale,
+          sigmas=fo_sq.sigmas()*scale)
 
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc', format="coreCIF")
