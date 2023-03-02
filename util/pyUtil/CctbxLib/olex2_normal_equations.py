@@ -274,7 +274,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
   def feed_olex(self):
     ## Feed Model
     def iter_scatterers():
-      n_equiv_positions = self.xray_structure.space_group().n_equivalent_positions()
       for a in self.xray_structure.scatterers():
         label = a.label
         xyz = a.site
@@ -291,7 +290,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
               u += a.anharmonic_adp.data()
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
         yield (label, xyz, u, u_eq,
-               a.occupancy*(a.multiplicity()/n_equiv_positions),
+               a.occupancy*a.weight_without_occupancy(),
                symbol, a.flags, a)
     this_atom_id = 0
     for name, xyz, u, ueq, occu, symbol, flags, a in iter_scatterers():
