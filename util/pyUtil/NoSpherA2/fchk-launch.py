@@ -3,14 +3,14 @@ import sys
 import time
 import subprocess
 import shutil
-import signal
+#import signal
 
 p = None
-def abort_please(signum, frame):
-  print("Killing " + str(p.pid) + " in 2 seconds")
-  time.sleep(2)
-  p.send_signal(signal.CTRL_C_EVENT)
-  p.kill()
+# def abort_please(signum, frame):
+#  print("Killing " + str(p.pid) + " in 2 seconds")
+#  time.sleep(2)
+#  p.send_signal(signal.CTRL_C_EVENT)
+#  p.kill()
   
 fchk_dir = os.getenv("fchk_dir", "")
 fchk_file = os.getenv("fchk_file", "")
@@ -47,21 +47,21 @@ if out_fn:
   log.write("Command: " + ' '.join(args))
 
 if any("elmo" in x for x in args):
-  if sys.platform[:3] == 'win':
-    p = subprocess.Popen(args, stdin=inp, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-  else:
+#  if sys.platform[:3] == 'win':
+#    p = subprocess.Popen(args, stdin=inp, stdout=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+#  else:
     p = subprocess.Popen(args, stdout=log)
 else:
-  if sys.platform[:3] == 'win':
-    p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-  else:
+#  if sys.platform[:3] == 'win':
+#    p = subprocess.Popen(args, stdout=log, stderr=log, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+#  else:
     p = subprocess.Popen(args, stdout=log, stderr=log)
 
-print("Setting signal handler!")
-signal.signal(signal.SIGTERM, abort_please)
-signal.signal(signal.SIGINT, abort_please)
-if sys.platform[:3] != 'win':
-  signal.signal(signal.SIGKILL, abort_please)
+#print("Setting signal handler!")
+#signal.signal(signal.SIGTERM, abort_please)
+#signal.signal(signal.SIGINT, abort_please)
+# if sys.platform[:3] != 'win':
+#  signal.signal(signal.SIGKILL, abort_please)
 
 if "ubuntu" in args[0]:
   print("Starting Ubuntu for wavefunction calculation, please be patient for start")
