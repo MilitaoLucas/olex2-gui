@@ -1053,6 +1053,8 @@ user
     .expert_level = 1
   start_where = home
     .type = str
+  remember_last = True
+    .type = bool
   report_style = styles/default.css
     .type = str
   report_template = templates/default.htm
