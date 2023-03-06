@@ -804,6 +804,10 @@ routines requiring structure refinement
       .type = bool
     mask = True
       .type = bool
+    mask_d = 1.0
+      .type = float
+    scale = *external external-forced sigma shelx
+      .type = choice
     resolution = 0.1
       .type = float
   }
@@ -1053,6 +1057,8 @@ user
     .expert_level = 1
   start_where = home
     .type = str
+  remember_last = True
+    .type = bool
   report_style = styles/default.css
     .type = str
   report_template = templates/default.htm

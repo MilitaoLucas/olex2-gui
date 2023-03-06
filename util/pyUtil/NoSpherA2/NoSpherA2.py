@@ -252,6 +252,7 @@ class NoSpherA2(PT):
               shutil.move(f_work, f_dest)
           else:
             shutil.move(f_work, f_dest)
+
   def launch(self):
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = OV.GetParam('snum.NoSpherA2.source')
@@ -428,6 +429,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base+".wfn"):
               wfn_fn = path_base + ".wfn"
+            elif hybrid_part_wfn_code == "Thakkar IAM":
+              wfn_fn = path_base + ".xyz"
+              try:
+                shutil.copy(os.path.join(wfn_job_dir, "%s.xyz" % (self.name)), "%s_part%s.xyz" % (self.name, parts[i]))
+              except:
+                pass
             else:
               return False
             wfn_fn = None
@@ -449,9 +456,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".ffn"
               elif file.endswith(".fchk"):
                 temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".fchk"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn")): wfn_fn = temp
+                if (wfn_fn == None or wfn_fn.endswith(".wfn")):
+                  wfn_fn = temp
               if temp != None:
-                shutil.move(file,temp)
+                shutil.move(file, temp)
+            if hybrid_part_wfn_code == "Thakkar IAM" and wfn_fn == None:
+              wfn_fn = "%s_part%s.xyz" % (self.name, parts[i])
             wfn_files.append(wfn_fn)
         else:
           # Neither Hybrid nor DISCAMB are used, so ORCA; g16; pySCF etc
@@ -606,6 +616,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
+              shutil.copy(wfn_code,os.path.join(os.path.join("olex2","Wfn_Job"),os.path.split(wfn_code)[1]))
             endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden"]
             if "5.0" in wfn_code:
               endings.append(".gbw")

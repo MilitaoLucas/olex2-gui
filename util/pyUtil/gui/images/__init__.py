@@ -83,11 +83,10 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   from ImageTools import IT
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
   if not filefull:
-    return
-  if output_folder:
-    name = OV.HKLSrc()
-    _ = os.path.join(output_folder, "%s.%s" %(name, fileext))
-    filefull = _
+    if output_folder:
+      name = OV.HKLSrc()
+      _ = os.path.join(output_folder, "%s.%s" %(name, fileext))
+      filefull = _
   if not filefull:
     return
   resolution, filesize = GetBitmapSize()
@@ -199,6 +198,7 @@ OV.registerFunction(MakePostScriptImage,False,'gui.images')
 
 def GetImageFilename(image_type):
   filename = OV.GetParam('snum.image.name')
+  OV.SetParam('snum.image.name', None)
   if image_type == "PS":
     fileext = "eps"
   elif image_type == "PR":
