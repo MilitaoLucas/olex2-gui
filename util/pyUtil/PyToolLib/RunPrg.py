@@ -1390,13 +1390,13 @@ def delete_stale_fcf():
   fcf = os.path.join(OV.FilePath(), OV.FileName() + '.fcf')
   res = os.path.join(OV.FilePath(), OV.FileName() + '.res')
   if os.path.exists(res) and os.path.exists(fcf):
-    # modified within 1 second
-    if abs(os.path.getmtime(fcf) - os.path.getmtime(res)) < 10:
+    diff = abs(os.path.getmtime(fcf) - os.path.getmtime(res))
+    # modified within 10 seconds
+    if diff < 10:
       return False
     else:
-      print(abs(os.path.getmtime(fcf) - os.path.getmtime(res)))
-      print("Deleting stale fcf: %s" %fcf)
       os.remove(fcf)
+      print("Deleted stale fcf: %s (%ss old)" %(fcf, int(diff)))
       if OV.HasGUI():
         import gui
         gui.set_notification("Stale<font color=$GetVar(gui.red)><b>fcf file</b></font>has been deleted.")

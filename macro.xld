@@ -11,8 +11,6 @@
       <cmd1 "htmlpanelvisible True">
       <cmd2 "py.Export(datadir()/olx)">
       <cmd3 "py.run basedir()/util/pyUtil/initpy.py">
-      <cmd7 xx"spy.load_user_gui_phil()">
-      <cmd8 xx"spy.skin.export_parameters()">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
       <cmd5 "if isos(linux) then setvar(defexplorer,'nautilus')">
       <cmd6 "if isos(linux) then setvar(defbrowser,'xdg-open')">
@@ -20,12 +18,13 @@
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
       <cmd7 "if file.Exists(app.ConfigDir()/radii.xld) then 'Load radii app.ConfigDir()/radii.xld'">
-      <cmd8 "if not(file.Exists(app.getarg(1))) then
+      <cmd8 "if not(spy.GetParam('user.remember_last')) then 'unsetvar startup'">
+      <cmd9 "if not(file.Exists(app.getarg(1))) then
         'if and(IsVar(startup),file.Exists(file.AbsolutePath(GetVar(startup)))) then
               \"reap file.AbsolutePath(GetVar(startup))\"'">
-      <cmd9 "bind wheel 'ShowQ -wheel='">
-      <cmd13 "deletemenu 'Structure;Export picture (experimental)'">
-      <cmd14 "spy.get_news_image_from_server('splash')'">
+      <cmd10 "bind wheel 'ShowQ -wheel='">
+      <cmd11 "deletemenu 'Structure;Export picture (experimental)'">
+      <cmd12 "spy.get_news_image_from_server('splash')'">
     >
 
   <onterminate

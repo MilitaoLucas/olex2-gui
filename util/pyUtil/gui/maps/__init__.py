@@ -102,6 +102,7 @@ class MapUtil:
     map_source = OV.GetParam("snum.map.source")
     map_resolution = OV.GetParam("snum.map.resolution")
     mask = OV.GetParam("snum.map.mask")
+    scale = OV.GetParam("snum.map.scale")
 
     if map_type == "fcalc":
       map_type = "calc"
@@ -109,9 +110,10 @@ class MapUtil:
       map_type = "obs"
 
     if mask:
-      mask_val = "-m"
+      mask_val = "-m=%s" %(OV.GetParam("snum.map.mask_d", 1.0))
     else:
       mask_val = ""
+    cf_cmd = "CalcFourier -%s -r=%s %s -scale=%s" % (map_type, map_resolution, mask_val, scale)
     if map_type == "PDF":
       second = OV.GetParam('snum.map.PDF_second_order')
       third = OV.GetParam('snum.map.PDF_third_order')
@@ -124,7 +126,7 @@ class MapUtil:
       NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical") and\
         OV.GetParam("snum.refinement.program") == "olex2.refine"
       if map_source == "fcf":
-        olex.m("CalcFourier -%s -%s -r=%s %s" % (map_type, map_source, map_resolution, mask_val))
+        olex.m(cf_cmd + " -fcf")
       elif map_source == "olex":
         if NoSpherA2 == True:
           print("NoSpherA2 maps only possible with .fcf or cctbx")
@@ -132,12 +134,12 @@ class MapUtil:
           OV.SetParam("snum.map.source", "cctbx")
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
         else:
-          olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
+          olex.m(cf_cmd)
       else:
         if OV.GetParam("snum.refinement.program") == "olex2.refine":
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
         else:
-          olex.m("CalcFourier -%s -r=%s %s" % (map_type, map_resolution, mask_val))
+          olex.m(cf_cmd)
 
     self.SetXgridView(update_controls)
 

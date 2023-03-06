@@ -246,6 +246,20 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAVE_VIEW';help_ext=Auto_Save_View;1 -->
+  <td width='23%'>
+   <b>%Load last%:</b>
+  </td>
+  <td width='55%'>
+     Load last structure when Olex2 was closed
+  </td>
+  <td align="right">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=REMEMBER_LAST",
+     "checked=spy.GetParam(user.remember_last, 'False')",
+     "onclick=spy.SetParam('user.remember_last', html.GetState(~name~))")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo_Mode;1 -->
   <td width='23%'>
     <b>%Solo Mode%:</b>
