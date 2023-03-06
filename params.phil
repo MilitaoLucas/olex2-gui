@@ -804,6 +804,10 @@ routines requiring structure refinement
       .type = bool
     mask = True
       .type = bool
+    mask_d = 1.0
+      .type = float
+    scale = *external external-forced sigma shelx
+      .type = choice
     resolution = 0.1
       .type = float
   }
