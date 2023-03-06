@@ -807,7 +807,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_iucr_refine_fcf_details'] = f.getvalue()
 
     fo2 = self.reflections.f_sq_obs
-    merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     fmt = "%.4f"
@@ -826,9 +825,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_diffrn_reflns_number'] = refinement_refs.size()
     else:
       cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
+
+    merging = self.reflections.merging
     if merging is not None:
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
+    elif self.hklf_code == 5:
+      if self.use_tsc:
+        fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+      else:
+        fo2, f_calc = self.get_fo_sq_fc()
+      merging = fo2.merge_equivalents(algorithm="shelx")
+      cif_block['_diffrn_reflns_av_R_equivalents'] = "?"
+      cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
+
     cif_block['_diffrn_reflns_limit_h_min'] = h_min
     cif_block['_diffrn_reflns_limit_h_max'] = h_max
     cif_block['_diffrn_reflns_limit_k_min'] = k_min
