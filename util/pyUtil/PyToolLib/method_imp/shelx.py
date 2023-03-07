@@ -343,7 +343,7 @@ class Method_shelxd(Method_shelx_solution):
       'value':'STOP',
       'width':50,
       'height':28,
-      'onclick':r'spy.stopShelx()',
+      'onclick':r'spy.stopProcess()',
     }
     button_html = htmlTools.make_input_button(button_d)
     html = '''
