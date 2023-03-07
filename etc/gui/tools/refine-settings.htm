@@ -230,9 +230,10 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 #ignoreif -->
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
-<td>
 <!-- #ignoreif fs.Exists strcat(FileName(),_mask_notification.htm)
+<td>
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
+</td>
 #ignoreif -->
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -271,17 +272,15 @@ This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
 <!-- ================================== -->
 <!-- FOOTER BELOW      LEAVE UNTOUCHED! -->
 <!-- ================================= -->
-
 </table>
 
-<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-
+<table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;2; -->
-
 </table>
+
 
 <!-- #ignoreif not spy.ac6.isMEDEnabled()
-<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif strcmp(GetVar(ACED_DEV),True) ed_gui basedir()/util/pyUtil/ACEDd/ED_refine_interface.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Settings;onclick=;2; -->
 <!-- #includeif not(strcmp(GetVar(ACED_DEV),True)) ed_gui basedir()/util/pyUtil/ACED/ED_refine_interface.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Settings;onclick=;2; -->
 </table>
