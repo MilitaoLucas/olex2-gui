@@ -41,9 +41,11 @@ def makeProgramSettingsGUI(program, method, prgtype):
   authors = program.author
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
-
-  txt = r"""<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
-  <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableBgColour')">
+  # this is included into <table> </table> but renders 2 tables
+  txt = r"""
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+    </table>
+      <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 """
   if program.name.lower().startswith("superflip"):
     txt += open(os.path.normpath("%s/etc/gui/tools/superflip.htm" %olx.BaseDir()), "r").read()
@@ -53,12 +55,10 @@ def makeProgramSettingsGUI(program, method, prgtype):
     txt += ''.join([makeArgumentsHTML(program, method, instruction)
                     for instruction in method.instructions()])
   txt += r'''
-<tr>
-  <td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <tr><td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td>%s - %s</td>
 </tr>
 %s
-</table>
 ''' %(OV.GetParam('gui.html.table_firstcol_width'), authors, reference, method.extraHtml())
 
   OlexVFS.write_to_olex(wFilePath, txt)
@@ -267,7 +267,7 @@ def stopProcess():
       .close()
   except AttributeError:
     pass
-  
+
   try:
     import RunPrg
     if RunPrg.RunPrg.running:
