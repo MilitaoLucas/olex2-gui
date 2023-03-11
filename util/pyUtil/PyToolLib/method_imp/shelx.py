@@ -285,6 +285,7 @@ class Method_shelxt(Method_shelx_solution):
     RunPrgObject.post_prg_output_html_message = s
     olex.m('delins list')
     olex.m('addins list 4')
+    olex.m('compaq -a')
 
 class Method_shelx_direct_methods(Method_shelx_solution):
 
