@@ -116,7 +116,7 @@ class MultipleDataset:
           highlight = OV.GetParam('gui.green')
           display = "CIF %s" %display
       else:
-        action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(index)
+        action = 'reap \'%s#'%(CURR_CIF_FILE_NAME) + str(index) + "'"
         highlight = olx.GetVar('linkButton.bgcolor')
       name = name.replace("(", "_").replace(")", "_")
       display = display.replace("(", "_").replace(")", "_")
@@ -131,6 +131,7 @@ class MultipleDataset:
     $-''' %(display, name, action, highlight)
 
     html += "</tr></table>"
+    #name = "%s_%s" %(os.path.split(CURR_CIF_FILE_NAME)[1].replace(' ', '_'), 'multicif.htm')
     name = "%s_%s" %(CURR_CIF_FILE_NAME, 'multicif.htm')
     OlexVFS.write_to_olex(name, html)
     return "<!-- #include multicif %s;1; -->" %name
