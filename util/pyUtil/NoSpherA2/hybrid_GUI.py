@@ -257,7 +257,7 @@ def make_hybrid_GUI(softwares_list_string):
 '''
         t += input_combo(
           "NoSpherA2_method_Part%d@refine"%i, 
-          "spy.NoSpherA2.get_functional_list()", 
+          "spy.NoSpherA2.get_functional_list(spy.GetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\'))"%i, 
           "spy.GetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\')"%i,
           "spy.SetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\',html.GetValue(\'~name~\'))"%i)
         t += '''

@@ -1330,8 +1330,9 @@ def change_basisset(input):
     OV.SetParam('snum.NoSpherA2.Relativistic',False)
 OV.registerFunction(change_basisset,True,'NoSpherA2')
 
-def get_functional_list():
-  wfn_code = OV.GetParam('snum.NoSpherA2.source')
+def get_functional_list(wfn_code=None):
+  if wfn_code == None:
+    wfn_code = OV.GetParam('snum.NoSpherA2.source')
   list = None
   if wfn_code == "Tonto" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
