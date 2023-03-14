@@ -824,7 +824,7 @@ Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
 White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
 Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
       full_references.append(NoSpherA2_ref)
-    if current_cif in locals():
+    if 'current_cif' in locals():
       disp_refine = "_atom_site_dispersion_real" in current_cif
       if disp_refine:
         disp_ref = """Meurer, F., Dolomanov, O.V., Hennig, C., Peyerimhoff, N., Kleemiss, F.,
