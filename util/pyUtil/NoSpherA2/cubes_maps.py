@@ -939,7 +939,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
     # prepare lists for integration and evaluate the PDF on the grid
     positive_integrals, negative_integrals, negative_volumes = [], [], []
     volume_scale_factor = linalg.det(np.array(vecs)) / uc.volume()
-    pdfs = np.zeros_like(xi, dtype=np.float)
+    pdfs = np.zeros_like(xi, dtype=float)
     for a in range(n_atoms):
       if (second is False or only_anh is True) and anharms[a] is None:
         pdf = np.zeros(1)
