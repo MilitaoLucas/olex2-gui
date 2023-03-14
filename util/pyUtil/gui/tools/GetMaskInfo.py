@@ -64,13 +64,11 @@ def get_mask_info():
 #  print ".. %s .." %template_path
   global current_sNum
   current_sNum = OV.ModelSrc()
-  base = "smtbx_masks"
-  
 
-  #if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
-    #base = "platon_squeeze"
-  #else:
-    #base = "smtbx_masks"
+  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
+    base = "platon_squeeze"
+  else:
+    base = "smtbx_masks"
 
   d = {}
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
@@ -604,11 +602,20 @@ def update_sqf_file(current_sNum, scope, scope2=None):
     if os.path.exists(sqf_file.replace(".sqf", ".cif")):
       CifInfo.MergeCif()
 
+def _get_mask_base():
+  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
+    base = "platon_squeeze"
+  else:
+    base = "smtbx_masks"
+  return base
+
+
 def add_mask_content(i,which):
   global mask_info_has_updated
   global current_sNum
   current_sNum = OV.ModelSrc()
-  base = "smtbx_masks"
+
+  base = _get_mask_base()
 
   is_CIF = (olx.IsFileType('cif') == 'true')
   if ":" not in i:

@@ -493,8 +493,8 @@ class ExtractCifInfo(CifTools):
             str_solstion_from_cif = None
         except:
           pass
-      except iotbx.cif.CifParserError:
-        print("Failed to parse the CIF for conflicts analysis")
+      except iotbx.cif.CifParserError as err:
+        print("Failed to parse the CIF for conflicts analysis: %s")
 
     full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
