@@ -342,11 +342,7 @@ def OnStructureLoaded(previous):
     OV.ResetMaskHKLWarning()
   if olx.IsFileType('ires') == 'true':
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
-  try:
-    for l in olx.FileChangeListeners:
-      l('structure')
-  except:
-    pass
+    call_listener('structure')
 
 OV.registerFunction(OnStructureLoaded)
 
@@ -355,12 +351,18 @@ def OnHKLChange(hkl):
   OV.SetParam('snum.current_process_diagnostics', 'data')
   olex.m("spy.make_HOS('True')")
   OV.ResetMaskHKLWarning()
+  call_listener('hkl')
+OV.registerFunction(OnHKLChange)
+
+def call_listener(filetype):
   try:
     for l in olx.FileChangeListeners:
-      l('hkl')
+      try:
+        l(filetype)
+      except:
+        pass
   except:
     pass
-OV.registerFunction(OnHKLChange)
 
 def SavesNumParams():
   snum_phil_file = os.path.join(OV.DataDir(), "snum.phil")
