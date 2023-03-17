@@ -917,7 +917,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def setup_discamb(self):
     self.discamb_exe = ""
-    exe_pre = "discamb2tsc"
+    exe_pre = OV.GetParam('user.NoSpherA2.discamb_exe')
 
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" % exe_pre)
