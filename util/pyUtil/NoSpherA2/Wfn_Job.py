@@ -1498,9 +1498,41 @@ ener = cf.kernel()"""
       args.append(">")
       args.append(self.name + ".out")
 
+    out_fn = None
+    path = self.full_dir
+    nr = 0
+    if sys.platform[:3] == 'win':
+      nr = 2
+    # if part != 0:
+    #  path = os.path.join(path,"Part_"+str(part))
+    if software == "Psi4":
+      out_fn = os.path.join(path, self.name + "_psi4.log")
+    else:
+      if "orca" in args[0]:
+        out_fn = os.path.join(path, self.name + "_orca.log")
+      elif "elmo" in args[nr]:
+        out_fn = os.path.join(path, self.name + ".out")
+      elif "python" in args[nr]:
+        out_fn = os.path.join(path, self.name + "_pyscf.log")
+      if "ubuntu" in args[0]:
+        print("Starting Ubuntu for wavefunction calculation, please be patient for start")
+      if out_fn == None:
+        if "ubuntu" in args[0]:
+          out_fn = os.path.join(path, self.name + "_pyscf.log")
+        else:
+          out_fn = os.path.join(path, self.name + ".log")
+
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
-    os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
+    os.environ['fchk_dir'] = os.path.join(OV.FilePath(), self.full_dir)
+    os.environ['fchk_out_fn'] = out_fn
+    pidfile = os.path.join(path, "NoSpherA2.pidfile")
+
+    if os.path.exists(out_fn):
+      print("Moving file to old!")
+      shutil.move(out_fn, out_fn + '_old')
+    if os.path.exists(pidfile):
+      os.remove(pidfile)
 
     import subprocess
     p = None
@@ -1514,7 +1546,8 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)],
-                            startupinfo=startinfo, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                            startupinfo=startinfo
+                           )
     else:
       pyl = OV.getPYLPath()
       if not pyl:
@@ -1522,30 +1555,6 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)])
-
-    out_fn = None
-    path = self.full_dir
-    nr = 0
-    if sys.platform[:3] == 'win':
-      nr = 2
-    #if part != 0:
-    #  path = os.path.join(path,"Part_"+str(part))
-    if software =="Psi4":
-      out_fn = os.path.join(path,self.name + "_psi4.log")
-    else:
-      if "orca" in args[0]:
-        out_fn = os.path.join(path,self.name + "_orca.log")
-      elif "elmo" in args[nr]:
-        out_fn = os.path.join(path,self.name + ".out")
-      elif "python" in args[nr]:
-        out_fn = os.path.join(path,self.name + "_pyscf.log")
-      if "ubuntu" in args[0]:
-        print("Starting Ubuntu for wavefunction calculation, please be patient for start")
-      if out_fn == None:
-        if "ubuntu" in args[0]:
-          out_fn = os.path.join(path,self.name + "_pyscf.log")
-        else:
-          out_fn = os.path.join(path,self.name + ".log")
 
     tries = 0
     time.sleep(0.5)
@@ -1565,9 +1574,18 @@ ener = cf.kernel()"""
         if x:
           print(x, end='')
         if OV.GetVar("stop_current_process"):
-          import signal
-          p.send_signal(signal.SIGTERM)
-          print("Calculation aborted by INTERRUPT!")
+          try:
+            #import signal
+            #pid = None
+            # with open(pidfile, "r") as pf:
+            #  line = pf.read()
+            #  pid = int(line)
+            #os.kill(pid, signal.SIGABRT)
+            #os.kill(pid, signal.SIGTERM)
+            print("Calculation aborted by INTERRUPT!")
+          except Exception as e:
+            print(e)
+            pass
           OV.SetVar("stop_current_process", False)
         else:
           time.sleep(0.5)
