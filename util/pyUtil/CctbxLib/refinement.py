@@ -95,7 +95,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       max_threads = int(OV.GetVar("refine.max_threads", 0))
       if max_threads == 0:
-        max_threads = env.physical_cores // 2
+        max_threads = max(1, int(os.cpu_count() *3/4))
       if max_threads is not None:
         ext.build_normal_equations.available_threads = max_threads
         env.threads = max_threads
@@ -207,17 +207,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
       except:
         aci = ac6.AC6.AC_instance
 
-      thickness = 400
-      grad_t = True
-      ed = self.olx_atoms.model['Generic'].get('ED', None)
-      if ed is not None:
-        st = ed.get('thickness', None)
-        if st:
-          thickness = float(st['value'])
-          grad_t = st['fields'].get('grad', 'true').lower() == 'true'
-
+      thickness = float(aci.EDI.get_stored_param("thickness.value", 400))
+      grad_t =aci.EDI.get_stored_param("thickness.grad", 'true') == 'true'
+      fix_t = aci.EDI.get_stored_param("thickness.constrained", 'true') == 'true'
       print("Thickness: %s" %thickness)
       self.thickness = xray.thickness(thickness, grad_t)
+      self.thickness.constrained = fix_t
       self.std_obserations = self.observations
       self.observations = aci.EDI.build_observations(
         self.xray_structure(),
