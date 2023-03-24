@@ -332,8 +332,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
     #ED stuff
     if self.std_observations:
-      olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
-      aci.EDI.update_scales(self.one_h_linearisation,
+      aci.EDI.set_stored_param('thickness.value', "%.3f" %self.refinement.thickness.value)
+      aci.EDI.on_cycle_end(self.one_h_linearisation,
         self.weighting_scheme,
         self.xray_structure, self.f_mask_data,
         self.refinement.thickness)
@@ -343,6 +343,13 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     if OV.isInterruptSet():
       self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
       self.iterations_object.interrupted = True
+
+  def on_completion(self):
+    if self.std_observations:
+      aci.EDI.on_completion(self.one_h_linearisation,
+        self.weighting_scheme,
+        self.xray_structure, self.f_mask_data,
+        self.refinement.thickness)
 
 
 from scitbx.lstbx import normal_eqns_solving
@@ -422,6 +429,7 @@ class naive_iterations_with_damping_and_shift_limit(
         print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
         print("-- " + "{:10.5f}".format(time.time()-t2) + " for damping+ls_solve+step_forward")
       self.n_iterations += 1
+    self.non_linear_ls.on_completion()
     if timer:
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
@@ -492,6 +500,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       self.non_linear_ls.build_up()
     # get proper s.u.
     self.non_linear_ls.build_up()
+    self.non_linear_ls.on_completion()
     if OV.IsDebugging():
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
