@@ -80,7 +80,7 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
     return self.data
 
   def build_up(self, objective_only):
-    ed_refinement = OV.GetParam("snum.refinement.ED.method")
+    ed_refinement = OV.GetHeaderParam("ED.refinement.method", "Kinematic")
     if not ed_refinement or "Kinematic" == ed_refinement or not aci.IsMEDEnabled:
       super(normal_eqns, self).build_up(objective_only)
       return
