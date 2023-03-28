@@ -379,7 +379,7 @@ class GeneratedGuiMaker(object):
       {'varName': '_publ_requested_journal',
        'itemName': '%Requested% %Journal%',
        'items': "'%s'" % userDictionaries.localList.getListJournals(),
-       'readonly': '',
+       'readonly': 'true',
        'value': 'spy.get_cif_item(_publ_requested_journal)',
        'onchange': "spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
        })
