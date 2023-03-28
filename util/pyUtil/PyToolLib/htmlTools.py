@@ -117,9 +117,15 @@ def makeHtmlTable(dlist):
   return OV.Translate(text)
 
 def makeHtmlInputBox(inputDictionary):
+  # check for old, no value, readonly
+  if 'readonly' in inputDictionary:
+    if not inputDictionary['readonly']:
+      inputDictionary['readonly'] = 'true'
+  else:
+    inputDictionary['readonly'] = 'false'
+
   if 'items' in inputDictionary:
     inputDictionary.setdefault('type','combo')
-    inputDictionary.setdefault('readonly','readonly')
   else:
     if inputDictionary.get('onchange', None) and not inputDictionary.get('onleave'):
       inputDictionary['onleave'] = inputDictionary['onchange']
@@ -164,7 +170,7 @@ onchange="%(onchange)s"
 onchangealways="%(onchangealways)s"
 onleave="%(onleave)s"
 onclick="%(onclick)s"
-readonly=%(readonly)s
+readonly="%(readonly)s"
 bgcolor="%(bgcolor)s"
 >
 </font>
