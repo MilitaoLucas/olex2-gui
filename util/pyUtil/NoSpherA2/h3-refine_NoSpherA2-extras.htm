@@ -512,7 +512,7 @@ N/A
     "name=NoSpherA2_ORCA_CRYSTAL_QMMM_TYPE@refine",
     "items='Mol;Ion'",
     "value=spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~'))")
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()")
   $-
 </td>
 <td width="13%" align="left">
@@ -552,6 +552,7 @@ N/A
     onchange="spy.SetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS,html.GetValue(~name~))"
   > 
 </td>
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE'),Ion)
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
@@ -571,6 +572,7 @@ N/A
     onchange="spy.SetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS,html.GetValue(~name~))"
   > 
 </td>
+#ignoreif -->
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->

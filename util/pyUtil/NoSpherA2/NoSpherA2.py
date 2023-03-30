@@ -1054,7 +1054,12 @@ def discamb(folder, name, discamb_exe):
       f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_max_min()[1], d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
-  os.environ['discamb_cmd'] = discamb_exe#'+&-'.join(move_args)
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    args.append("-ED")
+    os.environ['discamb_cmd'] = '+&-'.join([discamb_exe, "-e"])
+  else:
+    os.environ['discamb_cmd'] = discamb_exe
   os.environ['discamb_file'] = folder
   pyl = OV.getPYLPath()
   if not pyl:
