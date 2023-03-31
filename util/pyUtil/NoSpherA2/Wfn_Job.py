@@ -1479,7 +1479,7 @@ ener = cf.kernel()"""
         args.append(self.parent.ubuntu_exe)
         args.append('run')
         args.append("python %s"%input_fn)
-      elif self.ubuntu_exe == None:
+      elif self.parent.ubuntu_exe == None:
         args.append('python')
         args.append(input_fn)
     elif software == "ELMOdb":
