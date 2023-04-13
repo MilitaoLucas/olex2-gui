@@ -41,6 +41,19 @@ def run_with_bitmap(bitmap_text):
     return wrapper
   return decorator
 
+def write_merged_hkl():
+  folder = OV.FilePath()
+  name = OV.ModelSrc()
+  fn = os.path.join(folder, name + "_merged.hkl")
+  print("Writing " + fn)
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adaptor = OlexCctbxAdapter()
+  with open(fn, "w") as out:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+    f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
+  print("Done!")
+OV.registerFunction(write_merged_hkl, True, "NoSpherA2")
+
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
   basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -61,8 +74,8 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     from cctbx_olex_adapter import OlexCctbxAdapter
     cctbx_adaptor = OlexCctbxAdapter()
     with open(hkl_file, "w") as out:
-      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs
-      f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_max_min()[1]*0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+      f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min()*0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   if (int(ncpus) > 1):
     args.append('-cpus')
@@ -120,7 +133,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     if type([]) == type(cif):
       args.append("-cmtc")
       if len(wfn_file) != len(groups) or len(wfn_file) != len(groups):
-        print("Insonstiant size of parameters! ERROR!")
+        print("Inconsistant size of parameters! ERROR!")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])
@@ -133,7 +146,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       args.append(cif)
       args.append("-mtc")
       if len(wfn_file) != len(groups):
-        print("Insonstiant size of parameters! ERROR!")
+        print("Inconsistant size of parameters! ERROR!")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])
