@@ -1623,7 +1623,7 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
     embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
-    if ("ECP" in basis_name and "orca" in args[0]) or embedding == True:      
+    if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding == True):
       molden_args = []
       molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
       if sys.platform[:3] == 'win':
@@ -1652,7 +1652,7 @@ ener = cf.kernel()"""
         shutil.move(n + ".molden.input", n + ".molden")
       else:
         OV.SetVar('NoSpherA2-Error', "NoMoldenFile")
-        raise NameError("No molden file generated generated!")
+        raise NameError("No molden file generated!")
 
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
