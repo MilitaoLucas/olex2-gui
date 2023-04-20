@@ -3718,15 +3718,15 @@ class HealthOfStructure():
       if item == "MinD":
         _ = olx.xf.exptl.Radiation()
         if _.startswith("1.54"):
-          _ = "Cu\\a"
+          _ = "CuKalpha"
         elif _.startswith("0.71"):
-          _ = "Mo"
+          _ = "MoKalpha"
         elif _.startswith("1.34"):
-          _ = "Ga"
+          _ = "GaKalpha"
         elif _.startswith("0.56"):
-          _ = "Ag"
+          _ = "AgKalpha"
         elif _.startswith("1.39"):
-          _ = "Cu\\b"
+          _ = "Cubeta"
 
         display += " (%s)" % (IT.get_unicode_characters(_))
 
