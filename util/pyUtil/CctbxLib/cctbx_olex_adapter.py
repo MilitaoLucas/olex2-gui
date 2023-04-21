@@ -1120,6 +1120,99 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
 
 OV.registerFunction(generate_DISP, False, "sfac")
 
+def make_DISP_Table():
+  """
+  builds a html table of Anom Disp correction values for a given element
+  """
+  element = OV.GetVar('anom_disp_el')
+  if element == '':
+    element = element_list().split(";")[0]
+    OV.SetVar('anom_disp_el', element)
+  from cctbx.eltbx import sasaki
+  tables_S = sasaki
+  from cctbx.eltbx import henke
+  tables_H = henke
+  from brennan import brennan
+  tables_B = brennan()
+  def row(rowdata, color='white', color2="black"):
+    """
+    creates a table row for the restraints list.
+    :type rowdata: list
+    """
+    td = []
+    for num, item in enumerate(rowdata):
+      if num == 0:
+        td.append(r"""<td width='30%' align='left' {0} ><b><font color={1}> {2} </font></b></td>""".format("bgcolor={}".format(color), color2, item))
+      else:
+        float(item)
+        td.append(r"""<td width='23%' align='center' {0} ><b><font color={1}> {2:.3f} </font></b></td>""".format("bgcolor={}".format(color), color2, item))
+    if not td:
+      row = "<tr> No disp data given. </tr>"
+    else:
+      row = "<tr> {} </tr>".format(''.join(td))
+    return row
+  e = str(element)
+  table = []
+  import olexex
+  rm = olexex.OlexRefinementModel()
+  atoms = rm.atoms()
+  refined_disp = []
+  for a in atoms:
+    if 'disp' in a:
+      fp, fdp = a['disp']
+      refined_disp.append((a['label'], fp, fdp))
+  empty_data = """
+  <b>There may be no Disp data or an error occured.</b>
+  """
+  try:
+    table_B = tables_B.table(e)
+    table_H = tables_H.table(e)
+    wavelength = olx.xf.exptl.Radiation()
+    wavelength = float(wavelength)
+    f_B = table_B.at_angstrom(wavelength)
+    f_H = table_H.at_angstrom(wavelength)
+
+    table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
+    table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
+    if e != 'H':
+      table_S = tables_S.table(e)
+      f_S = table_S.at_angstrom(wavelength)    
+      table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
+    else:
+      table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
+    for entry in refined_disp:
+      if e in entry[0]:
+        table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
+  except:
+    return empty_data
+  html = r"""
+    <tr>
+       <td width='30%'align='left'><b>Table </b></td>
+       <td width='23%'align='center'><b>f' [e]</b></td>
+       <td width='23%'align='center'><b>f'' [e]</b></td>
+       <td width='23%'align='center'><b>mu [barns]</b></td>
+    </tr>
+    {0}
+    """.format('\n'.join(table))
+  if not table:
+    return empty_data
+  return html
+
+OV.registerFunction(make_DISP_Table, False, "disp")
+
+def element_list():
+  import olexex
+  rm = olexex.OlexRefinementModel()
+  elements = rm.get_unique_types(use_charges=True)
+  elements = list(elements)
+  elements.sort()
+  r = ""
+  for e in elements:
+    r += "{};".format(e)
+  OV.SetVar('anom_disp_el', r.split(";")[0])
+  return r
+OV.registerFunction(element_list, False, "disp")
+
 def get_R_cov_Z_from_SFAC_file(table_file_name):
   rv = {}
   with open(table_file_name, 'r') as sfac:
