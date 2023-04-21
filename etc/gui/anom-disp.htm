@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SEL_AND_MUPLOT';help_ext=Anom-Disp;1 -->
-  <td width="10%">
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SEL_AND_MUPLOT';help_ext=Anomalous-Dispersion;1 -->
+  <td width="12%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=anom_disp@element",
@@ -12,18 +12,18 @@
   </td>
   $+
     html.Snippet("gui/snippets/gui-link-button",
-    "value='MuPlot'",
+    "value='&mu; Plot'",
     "onclick=spy.MuPlot()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "td1=<td width="29%" align='center'>",
+    "td1=<td width="44%" align='center'>",
     )
   $-
   $+
     html.Snippet("gui/snippets/gui-link-button",
-    "value='Anom Disp Plot'",
+    "value='Anomalous Dispersion Plot'",
     "onclick=spy.AnomDispPlot()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "td1=<td width="29%" align='center'>",
+    "td1=<td width="44%" align='center'>",
     )
   $-
   <td> </td>
