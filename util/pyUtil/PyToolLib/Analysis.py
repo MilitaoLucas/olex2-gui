@@ -61,8 +61,28 @@ class Graph(ArgumentParser):
   def __init__(self):
     super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
-    self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
-    self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
+    self.marker_params = (self.params.marker_1, 
+                          self.params.marker_2, 
+                          self.params.marker_3, 
+                          self.params.marker_4, 
+                          self.params.marker_5)
+    self.function_params = (self.params.function_1,
+                            self.params.function_2,
+                            self.params.function_3,
+                            self.params.function_4,
+                            self.params.function_5,
+                            self.params.function_6,
+                            self.params.function_7,
+                            self.params.function_8,
+                            self.params.function_1,
+                            self.params.function_2,
+                            self.params.function_3,
+                            self.params.function_4,
+                            self.params.function_5,
+                            self.params.function_6,
+                            self.params.function_7,
+                            self.params.function_8
+                            )
     self.dataset_counter = 0
     self.function_counter = 0
     self.auto_axes = True
@@ -78,6 +98,7 @@ class Graph(ArgumentParser):
     self.max_x = None
     self.max_y = None
     self.decorated = False
+    self.extend_x = True
 
     ## This used to just be the filename; not so good for mulit-structure CIFs!
     _ = ""
@@ -364,7 +385,8 @@ class Graph(ArgumentParser):
       i += 1
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
-                    x_intercept=None, write_text=False, R=None, rotate_text=False, reverse_x=False):
+                    x_intercept=None, write_text=False, R=None, rotate_text=False,
+                    reverse_x=False, width=2):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
     if not x_intercept:
@@ -415,12 +437,8 @@ class Graph(ArgumentParser):
       x2 = offset_x + (float(x2) * scale_x)
       x1 = offset_x + (float(x1) * scale_x)
 
-    lower_bound = 0
-    if self.min_y < 0 and slope==0:
-      lower_bound = self.min_y
-
-    y1 = (float(y1) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
-    y2 = (float(y2) + (lower_bound - self.max_y) + self.delta_y) * self.scale_y
+    y1 = (float(y1) - self.max_y + self.delta_y) * self.scale_y
+    y2 = (float(y2) - self.max_y + self.delta_y) * self.scale_y
 
     if self.reverse_y:
       y1 += self.graph_top
@@ -428,11 +446,6 @@ class Graph(ArgumentParser):
     else:
       y1 = self.graph_bottom - float(y1)
       y2 = self.graph_bottom - float(y2)
-
-    if slope == 0.0:
-      width = 2
-    else:
-      width = 2
 
     adj_x = 2
     adj_y = 0
@@ -742,8 +755,10 @@ class Graph(ArgumentParser):
       else:
         self.max_x = max_x+.1*abs(max_x - min_x)
     else:
-      if self.use_log: max_x = math.log(self.max_x+.1*abs(self.max_x - min_x),log)
-      if(max_x + .1*abs(max_x - min_x) > self.max_x): self.max_x = max_x + .1*abs(max_x - min_x)
+      if self.use_log:
+        max_x = math.log(self.max_x+.1*abs(self.max_x - min_x),log)
+      if(max_x + .1 * abs(max_x - min_x) > self.max_x) and self.extend_x == True:
+        self.max_x = max_x + .1*abs(max_x - min_x)
 
     if not self.max_y:
       self.max_y = max_y + .05*abs(max_y - min_y)
@@ -1256,6 +1271,58 @@ class Graph(ArgumentParser):
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
+  def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width=1):
+    log = self.use_log
+    min_x = self.min_x
+    max_x = self.max_x
+    scale_x = self.scale_x
+    delta_x = self.delta_x
+    max_y = self.max_y
+    min_y = self.min_y
+    scale_y = self.scale_y
+    delta_y = self.delta_y
+
+    self.function_counter += 1
+    fill = self.function_params[self.function_counter - 1].colour.rgb
+
+    pixel_coordinates = []
+    for x_value, y_value in xy_pairs:
+
+      if self.reverse_x:
+        x = self.bX \
+            - (self.boxXoffset +
+               ((float(x_value) * self.scale_x)) +
+               ((0 - max_x) * self.scale_x) +
+               (delta_x * self.scale_x))
+      else:
+        x = (self.graph_left +
+               ((float(x_value) * self.scale_x)) +
+               ((0 - max_x) * self.scale_x) +
+               (delta_x * self.scale_x))
+      if self.reverse_y:
+        y = (self.graph_top +
+               ((float(y_value) * scale_y)) +
+               ((0 - max_y) * scale_y) +
+               (delta_y * scale_y))
+      else:
+        y = self.bY \
+            - (self.boxYoffset
+               + ((float(y_value) * scale_y))
+               + ((0 - max_y) * scale_y)
+               + (delta_y * scale_y))
+  
+      pixel_coordinates.append((round(x), round(y)))
+
+    for i in range(len(xy_pairs) - 1):
+      first_point = pixel_coordinates[i]
+      second_point = pixel_coordinates[i+1]
+      if (second_point[1] < (self.graph_bottom)
+          and second_point[1] >= self.boxYoffset
+          and second_point[0] <= self.graph_right
+          and second_point[0] >= self.graph_left):
+        line = (first_point,second_point)
+        self.draw.line(line, fill=fill, width=width)
+
 
   def draw_y_axis(self, percent=False):
     max_y = self.max_y
@@ -1271,17 +1338,18 @@ class Graph(ArgumentParser):
     else:
       precision = len(str(modulo).split('.')[-1])
 
-    if min_y < 0 and max_y > 0: # axis are in range to be drawn
+    if min_y < 0 and max_y > 0:  # axis are in range to be drawn
       div_val = 0.0
       while div_val > min_y:
         div_val -= dv_y
     else:
-      #if dv_y <= 10:
-        #div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
-      #else:
+      # if dv_y <= 10:
+        # div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
+      # else:
         #div_val = round(min_y-dv_y, precision)
-      div_val = round(min_y-dv_y, precision)
-    if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
+      div_val = round(min_y - dv_y, precision)
+    if div_val == 0.0:
+      div_val = 0.0  # work-around for if div_val is -0.0
     y_axis.append(div_val)
     while div_val < max_y:
       div_val = div_val + float(dv_y)
@@ -2628,7 +2696,206 @@ class Fractal_Dimension(Analysis):
       self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
-    self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-"%(xy_plot.e_gross,xy_plot.e_net),font_size=self.font_size_small)
+    self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
+    
+class MuPlot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "Mu_Plot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Mu Plot")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+    self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
+    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
+
+    self.auto_axes = True
+    self.min_x = 0.1
+    self.max_x = 2.5
+    self.delta_x = 0.1
+    self.params.n_divisions = 10
+    self.reverse_x = True
+    self.extend_x = False
+
+    self.draw_origin = True
+    self.make_mu_plot()
+    self.popout()
+
+  def make_mu_plot(self):
+    import numpy as np
+    from brennan import brennan
+    from cctbx.array_family import flex
+    br = brennan()
+    steps = 100
+    self.x = flex.double(steps)
+    for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
+      self.x[i] = v
+    self.metadata.setdefault("x_label", "Wavelength (Angs)")
+    self.metadata.setdefault("y_label", "Mu (Kbarns)")
+    import olexex
+    rm = olexex.OlexRefinementModel()
+    elements = list(rm.get_unique_types(use_charges=True))
+    elements.sort()
+    atoms = rm.atoms()
+    refined_disp = []
+    for a in atoms:
+      if 'disp' in a:
+        fp, fdp = a['disp']
+        refined_disp.append((a['label'], fp, fdp, a['type']))
+    keys = []
+    self.make_empty_graph(axis_x=True)
+    self.ax_marker_length = int(self.imX * 0.006)
+    wavelength = float(olx.xf.exptl.Radiation())
+    refined_data = {}
+    for n, e in enumerate(elements):
+      y = flex.double(steps)
+      for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
+        y[i] = br.get_mu_at_angstrom(v, e) / 1000
+      data = Dataset(self.x, y)
+      self.data.setdefault(e, data)
+      keys.append({'type': 'function',
+                   'number': n + 1,
+                   'label': e})
+    for n, ref in enumerate(refined_disp):
+      x = flex.double(1)
+      x[0] = wavelength
+      y = flex.double(1)
+      y[0] = br.convert_fdp_to_mu(wavelength, ref[2], ref[3]) / 1000
+      data = Dataset(x, y)
+      refined_data.setdefault(ref[0], data)
+      keys.append({'type': 'marker',
+                   'number': n + 1,
+                   'label': ref[0]})
+
+    self.get_division_spacings_and_scale()
+    self.draw_x_axis()
+    self.draw_y_axis()    
+    for i, wl in enumerate(self.common_wl):
+      self.draw_fit_line(slope=0,
+                         y_intercept=0,
+                         x_intercept=wl,
+                         write_equation=False,
+                         write_text=self.common_wl_name[i],
+                         rotate_text="top_lineright",
+                         width=1)
+    key = self.draw_key(tuple(keys))
+    self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 10)),
+                   int(self.graph_top + 10))
+                  )
+    for data in self.data.values():
+      self.plot_data_points(data.xy_pairs())
+    for data in refined_data.values():
+      self.draw_data_points(data.xy_pairs())
+    
+OV.registerFunction(MuPlot)
+
+class AnomDispPlot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "AnomDispPlot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Anom Disp Plot")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
+    self.auto_axes = True
+    self.min_x = 0.2
+    self.max_x = 2.5
+    self.delta_x = 0.1
+    self.params.n_divisions = 10
+    self.reverse_x = True
+    self.extend_x = False
+    self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
+    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]    
+
+    self.draw_origin = True
+    self.make_anom_plot()
+    self.popout()
+
+  def make_anom_plot(self):
+    import numpy as np
+    from brennan import brennan
+    from cctbx.array_family import flex
+    br = brennan()
+    steps = 200
+    self.x = flex.double(steps)
+    for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
+      self.x[i] = v
+    self.metadata.setdefault("x_label", "Wavelength (Angs)")
+    self.metadata.setdefault("y_label", "f' / f'' (electrons)")
+    import olexex
+    rm = olexex.OlexRefinementModel()
+    elements = list(rm.get_unique_types(use_charges=True))
+    elements.sort()
+    atoms = rm.atoms()
+    refined_disp = []
+    for a in atoms:
+      if 'disp' in a:
+        fp, fdp = a['disp']
+        refined_disp.append((a['label'], fp, fdp))    
+    keys = []
+    self.make_empty_graph(axis_x=True)
+    self.ax_marker_length = int(self.imX * 0.006)
+    wavelength = float(olx.xf.exptl.Radiation())
+    refined_data = {}
+    data2 = {}
+    min_y = 0
+    max_y = 0
+    for n, e in enumerate(elements):
+      y = flex.double(steps)
+      y2 = flex.double(steps)
+      for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
+        y[i], y2[i] = br.at_angstrom(v, e)
+        min_y = min(min_y, y[i])
+        max_y = max(max_y, y2[i])
+      data = Dataset(self.x, y)
+      data_ = Dataset(self.x, y2)
+      self.data.setdefault(e + "fp", data)
+      data2.setdefault(e + "fdp", data_)
+      keys.append({'type': 'function',
+                   'number': n + 1,
+                   'label': e})
+    self.min_y = min_y * 1.1
+    self.max_y = max_y * 1.1
+    for n, ref in enumerate(refined_disp):
+      x = flex.double(2)
+      x[0] = wavelength
+      x[1] = x[0]
+      y = flex.double(2)
+      y[0] = ref[1]
+      y[1] = ref[2]
+      data = Dataset(x, y)
+      refined_data.setdefault(ref[0], data)
+      keys.append({'type': 'marker',
+                   'number': n + 1,
+                   'label': ref[0]})
+
+    self.get_division_spacings_and_scale()
+    self.draw_x_axis()
+    self.draw_y_axis()
+    for i, wl in enumerate(self.common_wl):
+      self.draw_fit_line(slope=0, 
+                         y_intercept=0, 
+                         x_intercept=wl, 
+                         write_equation=False, 
+                         write_text=self.common_wl_name[i], 
+                         rotate_text="top_lineright", 
+                         width=1)
+    key = self.draw_key(tuple(keys))
+    self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 10)),
+                   int(self.graph_top + 10))
+                  )
+    for data in self.data.values():
+      self.plot_data_points(data.xy_pairs())
+    self.function_counter = 0
+    for data in data2.values():
+      self.plot_data_points(data.xy_pairs())
+    for data in refined_data.values():
+      self.draw_data_points(data.xy_pairs())
+
+OV.registerFunction(AnomDispPlot)
 
 
 class Fobs_Fcalc_plot(Analysis):
@@ -3187,21 +3454,21 @@ def makeReflectionGraphOptions(graph, name):
 
     elif data_type == "bool":
       ctrl_name = 'TICK_%s' %(obj_name)
-      d = {'ctrl_name':ctrl_name,
-           'value':'%s ' %caption,
-           'checked':'%s' %value,
-           'oncheck':"spy.SetParam('user.graphs.reflections.%s.%s','True')" %(
+      d = {'ctrl_name': ctrl_name,
+           'value': '%s ' % caption,
+           'checked': '%s' % value,
+           'oncheck': "spy.SetParam('user.graphs.reflections.%s.%s','True')" % (
              graph.name, obj.name),
-           'onuncheck':"spy.SetParam('user.graphs.reflections.%s.%s','False')" %(
+           'onuncheck': "spy.SetParam('user.graphs.reflections.%s.%s','False')" % (
              graph.name, obj.name),
-           'width':'%s' %width,
-           'bgcolor':'%s' %guiParams.html.table_bg_colour,
+           'width': '%s' % width,
+           'bgcolor': '%s' % guiParams.html.table_bg_colour,
            }
       options_gui.append(htmlTools.make_tick_box_input(d))
 
     elif data_type == "choice":
       items_l = []
-      ctrl_name = 'COMBO_%s' %(obj_name)
+      ctrl_name = 'COMBO_%s' % (obj_name)
       for thing in obj.words:
         items_l.append(thing.value.lstrip('*'))
       items = ";".join(items_l)
@@ -3303,7 +3570,7 @@ def makeReflectionGraphGui():
 <td width='20%%' align='right'>
 %(make_graph_button)s
 </td>
-''' %gui_d
+''' % gui_d
 
   if gui_d['options_gui'] != '':
     txt += r'''
@@ -3312,7 +3579,7 @@ def makeReflectionGraphGui():
 %(tool-first-column)s
 %(row_table_on)s
 %(options_gui)s
-''' %gui_d
+''' % gui_d
   txt = OV.Translate(txt)
 
   return txt
@@ -3321,7 +3588,7 @@ OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
   if not OV.HKLSrc():
-    print("To make the %s graph, the reflection file must be accessible." %name)
+    print("To make the %s graph, the reflection file must be accessible." % name)
     print("Are you looking at a CIF file?")
     print("Try typing 'export' to extract the embedded files from the CIF.")
     return

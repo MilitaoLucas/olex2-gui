@@ -1193,6 +1193,26 @@ user
         colour = (255,0,0)
           .type = colour
       }
+      function_4 {
+        colour = (0,255,0)
+          .type = colour
+      }
+      function_5 {
+        colour = (0,255,255)
+          .type = colour
+      }
+      function_6 {
+        colour = (255,255,0)
+          .type = colour
+      }
+      function_7 {
+        colour = (255,0,255)
+          .type = colour
+      }
+      function_8 {
+        colour = (128,128,128)
+          .type = colour
+      }
       cumulative_intensity
         .short_caption = "Cumulative Intensity"
         .caption = "Cumulative Intensity Distribution"
