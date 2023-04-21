@@ -241,7 +241,10 @@ class Graph(ArgumentParser):
       left = 15
       wX, wY = draw.textsize(label, font=self.font_tiny)
       if key_type == "function":
-        fill = self.function_params[key['number']-1].colour.rgb
+        if "colour" in key:
+          fill = key['colour']
+        else:
+          fill = self.function_params[key['number'] - 1].colour.rgb
         draw.line((left,top+wY/2,left+30,top+wY/2),fill=fill,width=2)
       elif key_type == "marker":
         marker = self.marker_params[key['number']-1]
@@ -1271,7 +1274,7 @@ class Graph(ArgumentParser):
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
-  def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width=1):
+  def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width=1, colour=None):
     log = self.use_log
     min_x = self.min_x
     max_x = self.max_x
@@ -1281,9 +1284,11 @@ class Graph(ArgumentParser):
     min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
-
-    self.function_counter += 1
-    fill = self.function_params[self.function_counter - 1].colour.rgb
+    if colour == None:
+      self.function_counter += 1
+      fill = self.function_params[self.function_counter - 1].colour.rgb
+    else:
+      fill = colour
 
     pixel_coordinates = []
     for x_value, y_value in xy_pairs:
@@ -2747,15 +2752,19 @@ class MuPlot(Analysis):
     self.ax_marker_length = int(self.imX * 0.006)
     wavelength = float(olx.xf.exptl.Radiation())
     refined_data = {}
+    colours = []
     for n, e in enumerate(elements):
       y = flex.double(steps)
       for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
         y[i] = br.get_mu_at_angstrom(v, e) / 1000
       data = Dataset(self.x, y)
       self.data.setdefault(e, data)
+      col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(e)).split(";")[1]))
+      colours.append(col)
       keys.append({'type': 'function',
                    'number': n + 1,
-                   'label': e})
+                   'label': e,
+                   'colour': col})
     for n, ref in enumerate(refined_disp):
       x = flex.double(1)
       x[0] = wavelength
@@ -2783,8 +2792,8 @@ class MuPlot(Analysis):
                   (int(self.graph_right - (key.size[0] + 10)),
                    int(self.graph_top + 10))
                   )
-    for data in self.data.values():
-      self.plot_data_points(data.xy_pairs())
+    for i,data in enumerate(self.data.values()):
+      self.plot_data_points(data.xy_pairs(), colour=colours[i], width=2)
     for data in refined_data.values():
       self.draw_data_points(data.xy_pairs())
     
@@ -2842,6 +2851,7 @@ class AnomDispPlot(Analysis):
     data2 = {}
     min_y = 0
     max_y = 0
+    colours = []
     for n, e in enumerate(elements):
       y = flex.double(steps)
       y2 = flex.double(steps)
@@ -2851,11 +2861,14 @@ class AnomDispPlot(Analysis):
         max_y = max(max_y, y2[i])
       data = Dataset(self.x, y)
       data_ = Dataset(self.x, y2)
+      col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(e)).split(";")[1]))
+      colours.append(col)      
       self.data.setdefault(e + "fp", data)
       data2.setdefault(e + "fdp", data_)
       keys.append({'type': 'function',
                    'number': n + 1,
-                   'label': e})
+                   'label': e,
+                   'colour': col})
     self.min_y = min_y * 1.1
     self.max_y = max_y * 1.1
     for n, ref in enumerate(refined_disp):
@@ -2887,11 +2900,11 @@ class AnomDispPlot(Analysis):
                   (int(self.graph_right - (key.size[0] + 10)),
                    int(self.graph_top + 10))
                   )
-    for data in self.data.values():
-      self.plot_data_points(data.xy_pairs())
+    for i, data in enumerate(self.data.values()):
+      self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])
     self.function_counter = 0
-    for data in data2.values():
-      self.plot_data_points(data.xy_pairs())
+    for i,data in enumerate(data2.values()):
+      self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])
     for data in refined_data.values():
       self.draw_data_points(data.xy_pairs())
 
