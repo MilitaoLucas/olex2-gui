@@ -61,10 +61,13 @@ def makeHtmlTable(dlist):
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
         if box_d['varName'].startswith('_'): # treat cif items differently
-          box_d.setdefault('value', "spy.get_cif_item('%(varName)s','?','gui')" %box_d)
+          if OV.IsFileType('cif'):
+            box_d.setdefault('value', olx.Cif('%(varName)s' %box_d))
+          else:
+            box_d.setdefault('value', "spy.get_cif_item('%(varName)s','?','gui')" %box_d)
           box_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('%(ctrl_name)s','#FFDCDC')" %box_d)
         else:
-          box_d.setdefault('value', "spy.GetParam('%(varName)s')" %box_d)
+          box_d.setdefault('value', OV.GetParam('%(varName)s' %box_d))
           box_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %box_d)
 
         if 'extra_onchange' in box_d:
