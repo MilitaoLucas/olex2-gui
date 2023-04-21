@@ -3699,12 +3699,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return "Done"
 
   def info_bitmaps(self, specific=None, colour='#ff4444', factor = 4):
+    if not debug and specific:
+      if OlexVFS.exists("%s.png" %specific):
+        return
+
     if olx.CurrentLanguage() == "Chinese":
       font_size = 24 * factor
       top = 4  * factor
     else:
       font_size = 24  * factor
-      top = -1  * factor
+      top = 0  * factor
 
     info_bitmap_font = "DefaultFont"
 
@@ -3713,7 +3717,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         specific:{'label':'%s' %specific,
                 'name':'%s' %specific,
                 'color':'%s' %colour,
-                'size':((len(specific) * 12 * factor, 32 * factor)),
+                'size':(256 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                 }
         }
@@ -3722,19 +3726,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       'refine':{'label':'Refining',
                 'name':'refine',
                 'color':'#ff4444',
-                'size':(128 * factor, 32 * factor),
+                'size':(256 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                 },
       'solve':{'label':'Solving',
                'name':'solve',
                'color':'#ff4444',
-               'size':(128 * factor, 32 * factor),
+               'size':(256 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                },
       'working':{'label':'Working',
                 'name':'working',
                 'color':'#ff4444',
-                'size':(128 * factor, 32 * factor),
+                'size':(256 * factor, 32 * factor),
                 'font_colour':"#ffffff",
                 },
                 }
@@ -3748,7 +3752,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw = ImageDraw.Draw(image)
       IT.write_text_to_draw(draw,
                                  txt,
-                                 top_left = (5 * factor, top),
+                                 top_left = (6 * factor, top),
                                  font_name=info_bitmap_font,
                                  font_size=font_size,
                                  font_colour = map.get('font_colour', '#000000')
