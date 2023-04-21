@@ -99,7 +99,7 @@ class Graph(ArgumentParser):
     self.max_y = None
     self.decorated = False
     self.extend_x = True
-
+    self.scale = 1
     ## This used to just be the filename; not so good for mulit-structure CIFs!
     _ = ""
     _ = OV.ModelSrc()
@@ -221,7 +221,7 @@ class Graph(ArgumentParser):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
-    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60
+    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60 * self.scale
     boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 18
     colour = self.fillColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
@@ -238,20 +238,20 @@ class Graph(ArgumentParser):
       key_type = key['type']
       assert key_type in ("function", "marker")
       label = OV.correct_rendered_text(key['label'])
-      left = 15
+      left = 0
       wX, wY = draw.textsize(label, font=self.font_tiny)
       if key_type == "function":
         if "colour" in key:
           fill = key['colour']
         else:
           fill = self.function_params[key['number'] - 1].colour.rgb
-        draw.line((left,top+wY/2,left+30,top+wY/2),fill=fill,width=2)
+        draw.line((left,top+wY/2,left + 30 * self.scale,top+wY/2),fill=fill,width=2*self.scale)
       elif key_type == "marker":
         marker = self.marker_params[key['number']-1]
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 50
+      left = 35 * self.scale
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
 
@@ -273,6 +273,13 @@ class Graph(ArgumentParser):
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
     fontscale = f * self.imX
+
+    #scaling
+    self.imX *= self.scale
+    self.imY *= self.scale
+    fontsize *= self.scale
+    fontscale *= self.scale
+
     font_name = "DefaultFont"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
@@ -318,7 +325,7 @@ class Graph(ArgumentParser):
       x = 0 + self.bSides+self.xSpace
       y = self.bTop
       top_left = (x,y)
-      IT.write_text_to_draw(draw, txt, font_name=font_name, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
+      IT.write_text_to_draw(draw, txt, font_name=font_name, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour, max_width=self.imX)
       currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
       # Write something in the right-hand top spot on the graph
       txt = OV.correct_rendered_text(self.graphInfo.get("TopRightTitle", ""))
@@ -331,7 +338,7 @@ class Graph(ArgumentParser):
       self.currX += currX
       self.currY += currY
 
-    self.yAxisSpace = 5
+    self.yAxisSpace = 5 * self.scale
     self.graphX = self.imX - (self.bSides + self.xSpace)
     self.graph_top = int(self.currY + 0.1 * self.imY) + self.yAxisSpace
     self.graphY = self.imY - 2*self.bTop - self.graph_top
@@ -345,7 +352,7 @@ class Graph(ArgumentParser):
       #fillColour = (200, 200, 200)
     #else:
       #fillColour = self.fillColour
-    draw.rectangle(box,  fill=self.fillColour, outline=self.outlineColour)
+    draw.rectangle(box,  fill=self.fillColour, outline=self.outlineColour, width = 2 * self.scale)
     self.boxX = dx - self.bSides*2 + self.xSpace
     self.boxY = dy - self.currY
     self.boxXoffset = self.bSides+self.xSpace
@@ -354,9 +361,10 @@ class Graph(ArgumentParser):
     self.boxYoffset = self.currY + 0.03*self.imY
     self.graph_top = self.boxYoffset
 
-    if self.line_width > 0:
-      box = (box[0] + self.line_width, box[1] + self.line_width, box[2] - self.line_width, box[3] -self.line_width)
-      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+    #if self.line_width > 0:
+      #line_width = self.line_width * self.scale
+      #box = (box[0] + line_width, box[1] + line_width, box[2] - line_width, box[3] - line_width)
+      #draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     self.im = im
     self.draw = draw
 
@@ -391,6 +399,8 @@ class Graph(ArgumentParser):
                     x_intercept=None, write_text=False, R=None, rotate_text=False,
                     reverse_x=False, width=2):
     if self.min_x is None: self.get_division_spacings_and_scale()
+
+    width = width * self.scale
 
     if not x_intercept:
       y1 = slope * self.min_x + y_intercept
@@ -485,7 +495,7 @@ class Graph(ArgumentParser):
       text = OV.correct_rendered_text(write_text)
       wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
-        gap = 6
+        gap = 6 * self.scale
         x = 0
         y = 0
         ins = rotate_text.split("_")
@@ -498,17 +508,21 @@ class Graph(ArgumentParser):
         elif ins[1] == "right":
           x = int(self.graph_right) - wY -gap
         elif ins[1] == "lineright":
-          x = int(x1) + wY - 8
+          x = int(x1) + int(wY/4)
         elif ins[1] == "lineleft":
           x = int(x1) - wY - gap
+        elif ins[1] == "linemiddle":
+          x = int(x1) - int(wY*0.6)
+          y += 10
         if len(ins) > 2:
           colour=ins[2]
         else: colour=self.axislabelColour
-
-        new = Image.new('RGB', (wX+1, wY+1), self.fillColour)
+        bgcolour = self.fillColour
+        #bgcolour = self.fitlineColour
+        new = Image.new('RGB', (wX + 4 * self.scale, wY - 2 * self.scale), bgcolour)
         draw = ImageDraw.Draw(new)
-        draw.text((0, 0), text, font=self.font_tiny, fill=colour)
-        new = new.rotate(90, expand=1)
+        draw.text((self.scale * 2, - self.scale * 2), text, font=self.font_tiny, fill=colour)
+        new = new.rotate(90, expand=2)
         self.im.paste(new, (x, y))
       else:
         adj_x = 1.55 * wY_axis
@@ -1274,7 +1288,8 @@ class Graph(ArgumentParser):
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
-  def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width=1, colour=None):
+  def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width = 1, colour=None):
+    width = width * self.scale
     log = self.use_log
     min_x = self.min_x
     max_x = self.max_x
@@ -1558,7 +1573,7 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
-    y = self.boxY  + self.imY * 0.005
+    y = self.boxY  - self.imY * 0.002
 
     box = (x, y, x+wX, y+wY)
     fill = (256, 256, 256)
@@ -1758,6 +1773,8 @@ class Analysis(Graph):
 
     assert self.item is not None
     image_location = "%s.png" %(self.item)
+    if self.scale != 1:
+      self.im = self.im.resize((int(self.imX/self.scale),(int(self.imY/self.scale))), resample=2, box=None, reducing_gap=None)
     OlexVFS.save_image_to_olex(self.im, image_location, 1)
     if OV.GetParam('user.diagnostics.save_file'):
       disk_fn = OV.ModelSrc() + "_" + image_location
@@ -2713,6 +2730,7 @@ class MuPlot(Analysis):
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
     self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
+    self.scale = 4
 
     self.auto_axes = True
     self.min_x = 0.1
@@ -2735,7 +2753,7 @@ class MuPlot(Analysis):
     self.x = flex.double(steps)
     for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
       self.x[i] = v
-    self.metadata.setdefault("x_label", "Wavelength (Angs)")
+    self.metadata.setdefault("x_label", IT.get_unicode_characters("Wavelength (Angstrom)"))
     self.metadata.setdefault("y_label", "Mu (Kbarns)")
     import olexex
     rm = olexex.OlexRefinementModel()
@@ -2785,15 +2803,16 @@ class MuPlot(Analysis):
                          x_intercept=wl,
                          write_equation=False,
                          write_text=self.common_wl_name[i],
-                         rotate_text="top_lineright",
-                         width=1)
+                         rotate_text="top_linemiddle",
+                         width = 1)
+
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
                   (int(self.graph_right - (key.size[0] + 10)),
-                   int(self.graph_top + 10))
+                   int(self.graph_top + 10 * self.scale))
                   )
     for i,data in enumerate(self.data.values()):
-      self.plot_data_points(data.xy_pairs(), colour=colours[i], width=2)
+      self.plot_data_points(data.xy_pairs(), colour=colours[i], width = 2)
     for data in refined_data.values():
       self.draw_data_points(data.xy_pairs())
     
@@ -2803,10 +2822,11 @@ class AnomDispPlot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
     self.item = "AnomDispPlot"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Anom Disp Plot")
+    self.graphInfo["Title"] = OV.TranslatePhrase("Anomalous Dispersion Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
+    self.scale = 4
 
     self.auto_axes = True
     self.min_x = 0.2
@@ -2831,7 +2851,7 @@ class AnomDispPlot(Analysis):
     self.x = flex.double(steps)
     for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
       self.x[i] = v
-    self.metadata.setdefault("x_label", "Wavelength (Angs)")
+    self.metadata.setdefault("x_label", IT.get_unicode_characters("Wavelength (Angstrom)"))
     self.metadata.setdefault("y_label", "f' / f'' (electrons)")
     import olexex
     rm = olexex.OlexRefinementModel()
@@ -2893,12 +2913,12 @@ class AnomDispPlot(Analysis):
                          x_intercept=wl, 
                          write_equation=False, 
                          write_text=self.common_wl_name[i], 
-                         rotate_text="top_lineright", 
-                         width=1)
+                         rotate_text="top_linemiddle", 
+                         width = 1)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
                   (int(self.graph_right - (key.size[0] + 10)),
-                   int(self.graph_top + 10))
+                   int(self.graph_top + 10 * self.scale))
                   )
     for i, data in enumerate(self.data.values()):
       self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])
@@ -3183,7 +3203,7 @@ class item_vs_resolution_plot(Analysis):
       rad_name = "AgK" + alpha
     else:
       iucr = 0.84
-      rad_name = str(olx.xf.exptl.Radiation()) + "Angstrom"
+      rad_name = str(olx.xf.exptl.Radiation()) + (IT.get_unicode_characters("Angstrom"))
 
     from cctbx import uctbx
 
