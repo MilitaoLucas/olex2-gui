@@ -1276,8 +1276,46 @@ The following options were used:
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
     fix_occupancy_for = []
-    idslist = []
+
+    dependent_occu = {}
+    #dependent_occupancy will refine only the occupancy of the first scatterer
+    for i, var in enumerate(vars):
+      refs = var['references']
+      as_var = []
+      as_var_minus_one = []
+      eadp = []
+      for ref in refs:
+        if ref['index'] == 4 and 'var' in ref['relation']:
+          id, k = ref['id'], ref['k']
+          k /= scatterers[id].weight_without_occupancy()
+          if ref['relation'] == "var":
+            as_var.append((id, k))
+          elif ref['relation'] == "one_minus_var":
+            as_var_minus_one.append((id, k))
+      if ref['index'] == 5 and ref['relation'] == "var":
+        eadp.append(ref['id'])
+      if (len(as_var) + len(as_var_minus_one)) > 0:
+        if len(eadp) != 0:
+          print("Invalid variable use - mixes occupancy and U")
+          continue
+        current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
+        constraints.append(current)
+        if len(as_var) > 0:
+          scale = as_var[0][1]
+          dependent_occu[as_var[0][0]] = current
+          is_as_var = True
+        else:
+          scale = as_var_minus_one[0][1]
+          dependent_occu[as_var_minus_one[0][0]] = current
+          is_as_var = False
+        self.shared_param_constraints.append((i, current, 1./scale, is_as_var))
+      elif len(eadp) > 1:
+        current = adp.shared_u(eadp)
+        constraints.append(current)
+        self.shared_param_constraints.append((i, current, 1, True))
+
     if(len(equations)>0):
+      idslist = []
       # number of free variables
       FvarNum=0
       while OV.GetFVar(FvarNum) is not None:
@@ -1292,8 +1330,16 @@ The following options were used:
         ignored = False
         row = numpy.zeros((FvarNum))
         for variable in equation['variables']:
-          ref = variable[0]['references'][-1]
-          sc_id = ref['id']
+          id_found = False
+          for r in variable[0]['references']:
+            sc_id = r['id']
+            if sc_id in dependent_occu:
+              ref = r
+              id_found = True
+              break
+          if not id_found:
+            ref = variable[0]['references'][-1]
+            sc_id = ref['id']
           label = "%s %d %d"%(ref['name'], sc_id, ref['index'])
           if(ref['index']==4): #occupancy
             if(label not in rowheader):
@@ -1339,40 +1385,11 @@ The following options were used:
           else:
             current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
             constraints.append(current)
-
-    for i, var in enumerate(vars):
-      refs = var['references']
-      as_var = []
-      as_var_minus_one = []
-      eadp = []
-      for ref in refs:
-        if(ref['id'] not in idslist):
-          if ref['index'] == 4 and 'var' in ref['relation']:
-            id, k = ref['id'], ref['k']
-            k /= scatterers[id].weight_without_occupancy()
-            if ref['relation'] == "var":
-              as_var.append((id, k))
-            elif ref['relation'] == "one_minus_var":
-              as_var_minus_one.append((id, k))
-        if ref['index'] == 5 and ref['relation'] == "var":
-          eadp.append(ref['id'])
-      if (len(as_var) + len(as_var_minus_one)) > 0:
-        if len(eadp) != 0:
-          print("Invalid variable use - mixes occupancy and U")
-          continue
-        current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
-        constraints.append(current)
-        if len(as_var) > 0:
-          scale = as_var[0][1]
-          as_var = True
-        else:
-          as_var = False
-          scale = as_var_minus_one[0][1]
-        self.shared_param_constraints.append((i, current, 1./scale, as_var))
-      elif len(eadp) > 1:
-        current = adp.shared_u(eadp)
-        constraints.append(current)
-        self.shared_param_constraints.append((i, current, 1, True))
+            #sort order of creation
+            if idslist[0] in dependent_occu:
+              dep_occu = dependent_occu[idslist[0]]
+              constraints.remove(dep_occu)
+              constraints.append(dep_occu)
 
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
