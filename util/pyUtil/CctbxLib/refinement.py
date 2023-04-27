@@ -127,13 +127,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-    shared_parameter_constraints, fix_occupancy_for = self.setup_shared_parameters_constraints()
+    shared_parameter_constraints, fix_occupancy_for, sump_proxies =\
+      self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
       shared_parameters=shared_parameter_constraints)
     # some of the SUMP got reduced to fixed occupancy
     if fix_occupancy_for:
-      msg = "Consider updatign your model - occupancy has got reduced for:"
+      msg = "Consider updating your model - occupancy has got reduced for:"
       for sc_i, occu in fix_occupancy_for:
         sc = self.xray_structure().scatterers()[sc_i]
         sc.flags.set_grad_occupancy(False)
@@ -141,6 +142,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         msg += " %s.occu=%.3f" %(sc.label, occu)
       print(msg)
     restraints_manager = self.restraints_manager()
+    restraints_manager.sump_proxies = sump_proxies
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     self.fixed_distances = {}
@@ -1210,6 +1212,7 @@ The following options were used:
     shared_adps = {}
     shared_sites = {}
     constraints = []
+    sump_proxies = None
     constraints_itr = self.olx_atoms.constraints_iterator()
     for constraint_type, kwds in constraints_itr:
       i_seqs = kwds["i_seqs"]
@@ -1315,23 +1318,15 @@ The following options were used:
         self.shared_param_constraints.append((i, current, 1, True))
 
     if(len(equations)>0):
-      idslist = []
-      # number of free variables
-      FvarNum=0
-      while OV.GetFVar(FvarNum) is not None:
-        FvarNum+=1
-
-      # Building matrix of equations
-      lineareq = numpy.zeros((0,FvarNum))
-      rowheader = {}
-      nextfree = -1
-      ignored = False
+      from cctbx import other_restraints
+      sump_proxies = other_restraints.shared_sump_proxy()
       for equation in equations:
-        ignored = False
-        row = numpy.zeros((FvarNum))
+        i_seqs, coefficients = [], []
+        id_found = False
         for variable in equation['variables']:
-          id_found = False
           for r in variable[0]['references']:
+            if(ref['index'] !=4 ): #occupancy
+              continue
             sc_id = r['id']
             if sc_id in dependent_occu:
               ref = r
@@ -1340,56 +1335,67 @@ The following options were used:
           if not id_found:
             ref = variable[0]['references'][-1]
             sc_id = ref['id']
-          label = "%s %d %d"%(ref['name'], sc_id, ref['index'])
-          if(ref['index']==4): #occupancy
-            if(label not in rowheader):
+          i_seqs.append(sc_id)
+          k = variable[1]*scatterers[sc_id].weight_without_occupancy()/\
+            ref['k']
+          coefficients.append(k)
+        weight = 1/math.pow(equation['sigma'],2)
+        p = other_restraints.sump_proxy(i_seqs, coefficients, weight, equation['value'])
+        sump_proxies.append(p)
+      if 'constraint' == OV.GetParam('snum.smtbx.sump'):
+        FvarNum = len(self.olx_atoms.model['variables']['variables'])
+        idslist = []
+        # Building matrix of equations
+        lineareq = numpy.zeros((0,FvarNum))
+        rowheader = {}
+        nextfree = -1
+        for proxy in sump_proxies:
+          row = numpy.zeros((FvarNum))
+          for i, i_seq in enumerate(proxy.i_seqs):
+            if(i_seq not in rowheader):
               nextfree+=1
-              rowheader[label]=nextfree
-              idslist.append(sc_id)
+              rowheader[i_seq]=nextfree
+              idslist.append(i_seq)
               key=nextfree
             else:
-              key=rowheader[label]
-            row[key]=variable[1]*scatterers[sc_id].weight_without_occupancy()/\
-              ref['k']
-          else:
-            ignored = True
-        row[FvarNum-1]=equation['value']
-        if(not ignored):
+              key=rowheader[i_seq]
+            row[key]=proxy.coefficients[i]
+          row[FvarNum-1]=proxy.target
           lineareq=numpy.append(lineareq, [row], axis=0)
+        sump_proxies = None
+        # LU decomposition to find incompatible or redundant constraints
+        l,u = scipy.linalg.lu(lineareq, permute_l=True)
 
-      # LU decomposition to find incompatible or redundant constraints
-      l,u = scipy.linalg.lu(lineareq, permute_l=True)
+        if numpy.shape(u)[0] > 1:
+          previous = u[-2,:]
+          for row in numpy.flipud(u):
+            if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
+              (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
+              raise Exception("One or more equations are not independent")
+            previous = row
 
-      if numpy.shape(u)[0] > 1:
-        previous = u[-2,:]
+        # setting up constraints
         for row in numpy.flipud(u):
-          if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
-            (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
+          nn_cnt = 0
+          nn_idx = -1
+          a = numpy.copy(row[:-1])
+          for idx, v in enumerate(a):
+            if v != 0.0:
+              nn_cnt+=1
+              nn_idx = idx
+          if(nn_cnt == 0):
             raise Exception("One or more equations are not independent")
-          previous = row
-
-      # setting up constraints
-      for row in numpy.flipud(u):
-        nn_cnt = 0
-        nn_idx = -1
-        a = numpy.copy(row[:-1])
-        for idx, v in enumerate(a):
-          if v != 0.0:
-            nn_cnt+=1
-            nn_idx = idx
-        if(nn_cnt == 0):
-          raise Exception("One or more equations are not independent")
-        else:
-          if nn_cnt == 1: # reduced
-            fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
           else:
-            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
-            constraints.append(current)
-            #sort order of creation
-            if idslist[0] in dependent_occu:
-              dep_occu = dependent_occu[idslist[0]]
-              constraints.remove(dep_occu)
-              constraints.append(dep_occu)
+            if nn_cnt == 1: # reduced
+              fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
+            else:
+              current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+              constraints.append(current)
+              #sort order of creation
+              if idslist[0] in dependent_occu:
+                dep_occu = dependent_occu[idslist[0]]
+                constraints.remove(dep_occu)
+                constraints.append(dep_occu)
 
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
@@ -1398,7 +1404,7 @@ The following options were used:
     for sd in same_disp:
       constraints.append(fpfdp.shared_fp(sd))
       constraints.append(fpfdp.shared_fdp(sd))
-    return constraints, fix_occupancy_for
+    return constraints, fix_occupancy_for, sump_proxies
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
@@ -1683,8 +1689,10 @@ The following options were used:
         ), file=log)
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
+    n_restraints = self.normal_eqns.n_restraints +\
+      len(self.normal_eqns.origin_fixing_restraint.singular_directions)
     print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
-      %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
+      %(self.n_constraints, n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
 
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)
