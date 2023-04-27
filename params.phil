@@ -144,6 +144,8 @@ routines requiring structure refinement
       .type = choice
     secondary_ch2_angle = idealise refine *shelxl
       .type = choice
+    sump = *constraint restraint
+      .type = choice
     }
 
   solution
