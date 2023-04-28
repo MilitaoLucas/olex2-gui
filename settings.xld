@@ -1,5 +1,4 @@
 <shortcuts
-  <shortcut key="Ctrl+O" macro="reap">
   <shortcut key="Ctrl+G" macro="mode grow">
   <shortcut key="Ctrl+H" macro="showH">
   <shortcut key="Ctrl+Q" macro="showQ">
@@ -24,8 +23,6 @@
   <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="Ctrl+M" macro="spy.gui.maps.MapView()">
   <shortcut key="Ctrl+P" macro="spy.gui.images.MakeBitmapImage()">
-  <shortcut key="Ctrl+S" macro="file">
-  <shortcut key="Ctrl+Shift+S" macro="spy.gui.dialog.SaveModel">
   <shortcut key="Ctrl+0" macro="showP 0">
   <shortcut key="Ctrl+1" macro="showP 1">
   <shortcut key="Ctrl+Shift+1" macro="showP 0 1">
@@ -140,11 +137,11 @@
     <item title="Edit;Delete Selection <DEL>" macro="kill sel">
     <item title="Edit;Undo" macro="undo">
 
-    <item title="File;Open" macro="reap" before="#">
+    <item title="File;Open \tCtrl+O" macro="reap" before="#">
     <check title="File;#" macro="">
-    <item title="File;Save (Ctrl+S)" macro="file">
+    <item title="File;Save \tCtrl+S" macro="file">
     <item title="File;Save With Sorting" macro="file -s">
-    <item title="File;Save model as .. (Ctrl+Shift+S)" macro="spy.gui.dialog.SaveModel">
+    <item title="File;Save model as .. \tCtrl+Shift+S" macro="spy.gui.dialog.SaveModel">
     <item title="File;Close" macro="Close">
     <item title="File;Exit" macro="quit">
 >

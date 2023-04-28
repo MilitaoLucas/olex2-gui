@@ -1322,28 +1322,35 @@ The following options were used:
       sump_proxies = other_restraints.shared_sump_proxy()
       for equation in equations:
         i_seqs, coefficients = [], []
+        labels, all_i_seqs, group_sizes = [], [], []
         id_found = False
         for variable in equation['variables']:
+          group_size = 0
           for r in variable[0]['references']:
-            if(ref['index'] !=4 ): #occupancy
+            if(ref['index'] != 4): #occupancy
               continue
+            group_size += 1
             sc_id = r['id']
-            if sc_id in dependent_occu:
+            all_i_seqs.append(sc_id)
+            if not id_found and sc_id in dependent_occu:
               ref = r
               id_found = True
-              break
+          if not group_size:  continue
+          group_sizes.append(group_size)
+          labels.append("Var_%s" %(vars.index(variable[0])+1))
           if not id_found:
             ref = variable[0]['references'][-1]
-            sc_id = ref['id']
+          sc_id = ref['id']
           i_seqs.append(sc_id)
           k = variable[1]*scatterers[sc_id].weight_without_occupancy()/\
             ref['k']
           coefficients.append(k)
         weight = 1/math.pow(equation['sigma'],2)
-        p = other_restraints.sump_proxy(i_seqs, coefficients, weight, equation['value'])
+        p = other_restraints.sump_proxy(i_seqs, coefficients, weight, equation['value'],
+                                        labels, all_i_seqs, group_sizes)
         sump_proxies.append(p)
       if 'constraint' == OV.GetParam('snum.smtbx.sump'):
-        FvarNum = len(self.olx_atoms.model['variables']['variables'])
+        FvarNum = len(vars)
         idslist = []
         # Building matrix of equations
         lineareq = numpy.zeros((0,FvarNum))
