@@ -1176,7 +1176,7 @@ def make_DISP_Table():
     table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
     if e != 'H':
       table_S = tables_S.table(e)
-      f_S = table_S.at_angstrom(wavelength)    
+      f_S = table_S.at_angstrom(wavelength)
       table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
     else:
       table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
@@ -1292,6 +1292,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   else:
     sfac_elms = set()
   elms = set([x.lower() for x in rm.get_unique_types(use_charges=True)])
+  elms |= set([ec.split(':')[0].lower() for ec in olx.xf.GetFormula('list').split(',')])
   if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
     return
   def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SFAC_Peng_1999.txt")

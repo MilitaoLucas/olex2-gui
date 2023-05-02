@@ -1491,7 +1491,7 @@ def _get_R_values():
         except:
           return R1, wR2
   return R1, wR2
-      
+
 def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
     return
@@ -1700,7 +1700,7 @@ class DisorderDisplayTools(object):
         retVal = True
     if num_return:
       _ = {True:1, False:0}
-      return _[retVal] 
+      return _[retVal]
     else:
       return retVal
 
@@ -1744,7 +1744,7 @@ class DisorderDisplayTools(object):
 
   def make_disorder_quicktools(self, scope='main', show_options=True):
     import olexex
-    
+
     if 'scope' in scope:
       scope = scope.split('scope=')[1]
     parts = set(olexex.OlexRefinementModel().disorder_parts())
@@ -1852,7 +1852,7 @@ def get_custom_scripts(file_name, globule, scope):
           custom_scripts_d.setdefault(script, {})
           custom_scripts_d[script].setdefault('obj', script_obj)
         except:
-          print("Could not obtain script object for %s" % script_s)
+          print("Could not obtain script object %s for %s" %(script, script_s))
           if debug:
             sys.stderr.formatExceptionInfo()
           continue
