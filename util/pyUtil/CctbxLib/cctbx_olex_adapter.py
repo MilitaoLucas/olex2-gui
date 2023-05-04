@@ -168,18 +168,31 @@ class OlexCctbxAdapter(object):
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        try:
-          self._xray_structure.set_inelastic_form_factors(
-            self.wavelength, inelastic_table)
-        except Exception as e:
-          if OV.IsDebugging():
-            print("Failed to retrieve some inelastic scattering factors")
-            print(e)
-        for sc in self._xray_structure.scatterers():
+        if inelastic_table != "brennan":
+          try:
+            self._xray_structure.set_inelastic_form_factors(
+              self.wavelength, inelastic_table)
+          except Exception as e:
+            if OV.IsDebugging():
+              print("Failed to retrieve some inelastic scattering factors")
+              print(e)
+          for sc in self._xray_structure.scatterers():
+            if null_disp:
+              custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+            else:
+              custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+        else:
+          from brennan import brennan
+          br = brennan()          
+          for sc in self._xray_structure.scatterers():
+            fp_fdp = br.at_angstrom(self.wavelength, sc.scattering_type)
+            sc.fp = fp_fdp[0]
+            sc.fdp = fp_fdp[1]
           if null_disp:
             custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
           else:
             custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+          self._xray_structure.inelastic_form_factors_source = "brennan"
       if null_disp:
         self._xray_structure.set_custom_inelastic_form_factors(
           custom_fp_fdps)

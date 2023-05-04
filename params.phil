@@ -136,7 +136,7 @@ routines requiring structure refinement
   smtbx
     .short_caption = Solution & Refinement
     {
-    inelastic_form_factor_table = *henke sasaki
+    inelastic_form_factor_table = henke sasaki *brennan
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
