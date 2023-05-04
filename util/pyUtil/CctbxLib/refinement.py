@@ -1323,8 +1323,8 @@ The following options were used:
       for equation in equations:
         i_seqs, coefficients = [], []
         labels, all_i_seqs, group_sizes = [], [], []
-        id_found = False
         for variable in equation['variables']:
+          id_found = False
           group_size = 0
           for r in variable[0]['references']:
             if(ref['index'] != 4): #occupancy
