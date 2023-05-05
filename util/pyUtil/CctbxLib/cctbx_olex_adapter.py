@@ -142,8 +142,8 @@ class OlexCctbxAdapter(object):
           shared_parameters=shared_parameters)
         same_iter = self.olx_atoms.same_iterator()
       else:
-         restraints_iter = None
-         same_iter = None
+        restraints_iter = None
+        same_iter = None
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
@@ -191,10 +191,6 @@ class OlexCctbxAdapter(object):
               fp_fdp = br.at_angstrom(self.wavelength, sc.scattering_type)
               sc.fp, sc.fdp = fp_fdp
               custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
-          self._xray_structure.inelastic_form_factors_source = "brennan"
-      if null_disp:
-        self._xray_structure.set_custom_inelastic_form_factors(
-          custom_fp_fdps)
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -206,8 +202,10 @@ class OlexCctbxAdapter(object):
               [-b for b in sfac_dict['gaussian'][1]],
               sfac_dict['gaussian'][2]))
           custom_fp_fdps[element] = sfac_dict['fpfdp']
-        self._xray_structure.set_custom_inelastic_form_factors(
-          custom_fp_fdps)
+      if null_disp == True:
+        inelastic_table = "custom"
+      self._xray_structure.set_custom_inelastic_form_factors(
+        custom_fp_fdps, source=inelastic_table)
       if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
         if OV.GetParam("snum.refinement.program") == "olex2.refine":
           custom_gaussians = {}
