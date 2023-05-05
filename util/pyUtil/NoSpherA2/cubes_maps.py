@@ -306,7 +306,7 @@ def plot_cube(name, color_cube):
       data = flex.double()
 
   data.reshape(flex.grid(x_size, y_size, z_size))
-  cube = None
+  del cube
 
   make_colorfull = (color_cube != None)
   if make_colorfull == True:
@@ -342,10 +342,10 @@ def plot_cube(name, color_cube):
         data2 = flex.double()
     
     data2.reshape(flex.grid(x_size, y_size, z_size))
-    cube2 = None
-    values = None
-    line = None
-    run = None
+    del cube2
+    del values
+    del line
+    del run
     olex_xgrid.Init(x_size,y_size,z_size,True)
 
     def interpolate(x,y,z):
@@ -386,7 +386,7 @@ def plot_cube(name, color_cube):
             res = interpolate(x, y, z)
             colour = int(get_color(res))
             olex_xgrid.SetValue(x, y, z, data[x * y_size * z_size + y * z_size + z], colour)
-    data2 = None
+    del data2
 
   else:
     gridding = data.accessor()
@@ -490,7 +490,7 @@ def plot_cube_single(name):
   mmm = data.min_max_mean()
   rms = data.rms()
   data.reshape(flex.grid(x_size, y_size, z_size))
-  cube = None
+  del cube
 
   gridding = data.accessor()
   type = isinstance(data, flex.int)
@@ -500,7 +500,7 @@ def plot_cube_single(name):
   OV.SetVar('map_min', 0)
   OV.SetVar('map_max', 40)
   OV.SetVar('map_slider_scale', 100)
-  data = None
+  del data
   print("Map Min = %.3f, Max = %.3f, RMS = %.3f"%(mmm.min,mmm.max,rms))
   olex_xgrid.SetMinMax(mmm.min, mmm.max)
   olex_xgrid.SetVisible(True)
@@ -649,7 +649,7 @@ def plot_fft_map(fft_map):
   min_v = statistics.min()
   max_v = statistics.max()
   sigma = statistics.sigma()
-  data = None
+  del data
   olex_xgrid.SetMinMax(min_v, max_v)
   olex_xgrid.SetVisible(True)
   mask = OV.GetParam('snum.map.mask')

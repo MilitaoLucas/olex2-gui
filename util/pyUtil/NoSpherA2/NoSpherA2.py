@@ -1184,27 +1184,6 @@ class Job(object):
     if OV.GetParam('snum.NoSpherA2.wfn2fchk_SF') == True:
       args.append("-scf-only")
       args.append("t")
-    disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
-    if 'true' == disp:
-      import olexex
-      from cctbx.eltbx import henke
-      olex_refinement_model = OV.GetRefinementModel(False)
-      sfac = olex_refinement_model.get('sfac')
-      fp_fdps = {}
-      wavelength = olex_refinement_model['exptl']['radiation']
-      if sfac is not None:
-        for element, sfac_dict in sfac.items():
-          custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
-      asu = olex_refinement_model['aunit']
-      for residue in asu['residues']:
-        for atom in residue['atoms']:
-          element_type = atom['type']
-          if element_type not in fp_fdps:
-            fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
-            fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, data2[0], data2[1]) for k,v in fp_fdps.items()])
-      args.append("-dispersion")
-      args.append('%s' %disp_arg)
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
