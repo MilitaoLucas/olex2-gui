@@ -247,7 +247,12 @@ class Graph(ArgumentParser):
           fill = self.function_params[key['number'] - 1].colour.rgb
         draw.line((left,top+wY/2,left + 30 * self.scale,top+wY/2),fill=fill,width=2*self.scale)
       elif key_type == "marker":
-        marker = self.marker_params[key['number']-1]
+        if "colour" in key:
+          marker = self.marker_params[1]
+          marker.fill.rgb = key['colour']
+        else:
+          marker = self.marker_params[key['number'] - 1]
+
         marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
                        fill=marker.fill.rgb, outline=marker.border.rgb)
@@ -1140,32 +1145,40 @@ class Graph(ArgumentParser):
     width = self.params.size_x
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     legend_top = self.graph_top + 20
-    legend_bottom = legend_top + 1.2*wY
+    #legend_bottom = legend_top + 1.2*wY
     x = width - 1.1*wX - self.bSides
     top_left = (x, legend_top)
-    box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
+    #box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
     #self.draw.rectangle(box, fill=(255,255,255,0))
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
-  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None, gt=None, no_negatives=False, scale=None):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None,
+                       hrefs=None, targets=None, lt=None, gt=None, no_negatives=False,
+                       scale=None, colour=None, force_draw=False):
     log = self.use_log
-    min_x = self.min_x
+    #min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
     delta_x = self.delta_x
     max_y = self.max_y
-    min_y = self.min_y
+    #min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
 
-    try:
-      marker = self.marker_params[self.dataset_counter]
-    except IndexError:
-      marker = self.marker_params[0]
+    if colour == None:
+      try:
+        marker = self.marker_params[self.dataset_counter]
+      except IndexError:
+        marker = self.marker_params[0]
 
-    self.dataset_counter += 1
-    fill = marker.fill.rgb
+      self.dataset_counter += 1
+      fill = marker.fill.rgb
+
+    else:
+      marker = self.marker_params[1]
+      fill = colour
+
     outline = marker.border.rgb
     marker_width = int(self.im.size[0])*marker.size_factor
     if marker_size_factor is not None:
@@ -1200,12 +1213,12 @@ class Graph(ArgumentParser):
         x = x_constant + xr * scale_x
         y = y_constant + yr * scale_y
         dy = sigmas[i]*scale_y
-        x_centre = x+half_marker_width
-        y_centre = y+half_marker_width
-        y_plus_dy = y+half_marker_width+dy
+        #x_centre = x + half_marker_width
+        #y_centre = y + half_marker_width
+        y_plus_dy = y + half_marker_width + dy
         y_minus_dy = y+half_marker_width-dy
-        line = ((x+half_marker_width, y_plus_dy),
-                (x+half_marker_width, y_minus_dy))
+        line = ((x + half_marker_width, y_plus_dy),
+                (x + half_marker_width, y_minus_dy))
         self.draw.line(line, width=self.line_width, fill=self.outlineColour)
         self.draw.line(((x, y_plus_dy), (x+marker_width, y_plus_dy)),
                        width=1, fill=self.outlineColour)
@@ -1251,8 +1264,9 @@ class Graph(ArgumentParser):
           fill = self.guiParams.green.hexadecimal
 
       try:
-        if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
-          continue # avoid wasting time drawing points that overlap too much
+        if self.im.getpixel((x + half_marker_width, y + half_marker_width)) == fill:
+          if not force_draw:
+            continue  # avoid wasting time drawing points that overlap too much
       except Exception as err:
         pass
 
@@ -1268,8 +1282,7 @@ class Graph(ArgumentParser):
                             % (box + (hrefs[i], targets[i])))
 
       else:
-        href="UpdateHtml"
-        href=""
+        href = ""
         if scale == None:
           scale = 1
         if indices is None:
@@ -2771,6 +2784,7 @@ class MuPlot(Analysis):
     wavelength = float(olx.xf.exptl.Radiation())
     refined_data = {}
     colours = []
+    colours_mark = []
     for n, e in enumerate(elements):
       y = flex.double(steps)
       for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
@@ -2790,9 +2804,20 @@ class MuPlot(Analysis):
       y[0] = br.convert_fdp_to_mu(wavelength, ref[2], ref[3]) / 1000
       data = Dataset(x, y)
       refined_data.setdefault(ref[0], data)
+      col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(ref[3])).split(";")[1]))
+      for k in keys:
+        if k.get('colour') == col and k.get('type') == 'marker':
+          temp1, temp2, temp3 = col
+          temp1 = min(255, temp1 + 5)
+          temp2 = min(255, temp2 + 5)
+          temp3 = min(255, temp3 + 5)
+          col = (temp1, temp2, temp3)
+          del temp1, temp2, temp3
+      colours_mark.append(col)
       keys.append({'type': 'marker',
                    'number': n + 1,
-                   'label': ref[0]})
+                   'label': ref[0],
+                   'colour': col})
 
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
@@ -2813,8 +2838,8 @@ class MuPlot(Analysis):
                   )
     for i,data in enumerate(self.data.values()):
       self.plot_data_points(data.xy_pairs(), colour=colours[i], width = 2)
-    for data in refined_data.values():
-      self.draw_data_points(data.xy_pairs())
+    for i,data in enumerate(refined_data.values()):
+      self.draw_data_points(data.xy_pairs(), colour=colours_mark[i], force_draw=True)
     
 OV.registerFunction(MuPlot)
 
@@ -2862,7 +2887,7 @@ class AnomDispPlot(Analysis):
     for a in atoms:
       if 'disp' in a:
         fp, fdp = a['disp']
-        refined_disp.append((a['label'], fp, fdp))    
+        refined_disp.append((a['label'], fp, fdp, a['type']))
     keys = []
     self.make_empty_graph(axis_x=True)
     self.ax_marker_length = int(self.imX * 0.006)
@@ -2872,6 +2897,7 @@ class AnomDispPlot(Analysis):
     min_y = 0
     max_y = 0
     colours = []
+    colours_mark = []
     for n, e in enumerate(elements):
       y = flex.double(steps)
       y2 = flex.double(steps)
@@ -2900,9 +2926,20 @@ class AnomDispPlot(Analysis):
       y[1] = ref[2]
       data = Dataset(x, y)
       refined_data.setdefault(ref[0], data)
+      col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(ref[3])).split(";")[1]))
+      for k in keys:
+        if k.get('colour') == col and k.get('type') == 'marker':
+          temp1, temp2, temp3 = col
+          temp1 = min(255, temp1 + 5)
+          temp2 = min(255, temp2 + 5)
+          temp3 = min(255, temp3 + 5)
+          col = (temp1, temp2, temp3)
+          del temp1, temp2, temp3
+      colours_mark.append(col)      
       keys.append({'type': 'marker',
                    'number': n + 1,
-                   'label': ref[0]})
+                   'label': ref[0],
+                   'colour': col})
 
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
@@ -2925,8 +2962,8 @@ class AnomDispPlot(Analysis):
     self.function_counter = 0
     for i,data in enumerate(data2.values()):
       self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])
-    for data in refined_data.values():
-      self.draw_data_points(data.xy_pairs())
+    for i,data in enumerate(refined_data.values()):
+      self.draw_data_points(data.xy_pairs(), colour=colours_mark[i], force_draw=True)
 
 OV.registerFunction(AnomDispPlot)
 
