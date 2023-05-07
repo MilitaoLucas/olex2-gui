@@ -182,18 +182,11 @@ class NoSpherA2(PT):
       OV.SetVar("Parallel",True)
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      import multiprocessing
-      max_cpu = multiprocessing.cpu_count()
-      self.max_cpu = max_cpu
-      cpu_list = ['1',]
-      for n in range(1,max_cpu):
-        cpu_list.append(str(n+1))
-        self.cpu_list_str = ';'.join(cpu_list)
+      
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print("No MPI implementation found in PATH!\n")
-      self.cpu_list_str = '1'
+      print("No MPI implementation found in PATH!\nTonto, ORCA and other software relying on it will only have 1 CPU available!\n")
 
   def tidy_wfn_jobs_folder(self, part=None):
     if part == None:
@@ -987,7 +980,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return True
 
   def getCPUListStr(self):
-    return self.cpu_list_str
+    soft = OV.GetParam('snum.NoSpherA2.source')
+    import multiprocessing
+    max_cpu = multiprocessing.cpu_count()
+    cpu_list = ['1',]
+    for n in range(1, max_cpu):
+      cpu_list.append(str(n + 1))
+    # ORCA and Tonto rely on MPI, so only make it available if mpiexec is found
+    if soft == "Tonto" or "ORCA" in soft or soft == "fragHAR":
+      if not os.path.exists(self.mpiexec):
+        return '1'
+    # otherwise allow more CPUs
+    return ';'.join(cpu_list)
 
   def getwfn_softwares(self):
     parts = OV.ListParts()
