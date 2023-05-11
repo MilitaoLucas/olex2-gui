@@ -4214,9 +4214,12 @@ class HealthOfStructure():
     width = self.width
     scale = self.scale
     font_name = "DefaultFont"
+    font_size =  round(OV.GetParam('gui.timage.hos.font_size'))
     value_display_extra = ""
     targetWidth = round(width/n)
     targetHeight = round(OV.GetParam('gui.timage.hos.height'))
+
+
 
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
     if item == "Completeness":
@@ -4279,13 +4282,8 @@ class HealthOfStructure():
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
-
-    font_l = IT.registerFontInstance("DefaultFont", int(8 * scale))
-    if self.is_CIF:
-      fill = IT.adjust_colour(fill, luminosity=1.9)
-      draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
-
     top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
+
 
     if item == "hooft_str":
       x = boxWidth * second_colour_begin
@@ -4361,16 +4359,24 @@ class HealthOfStructure():
       y = 1 * scale
 
     else:
-      font_size = 18
-      font_size_s = 11
+      #font_size = 18
+      #font_size_s = 11
       x = 2
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
+
     font = IT.registerFontInstance("DefaultFont", int(font_size * scale))
-    font_s = IT.registerFontInstance("DefaultFont", int(font_size_s * scale))
+    font_l = IT.registerFontInstance("DefaultFont", int(font_size * 1.3 * scale))
+    font_s = IT.registerFontInstance("DefaultFont", int(font_size * 0.65 * scale))
+
+
 
     ## ADD THE Key
+
+    if self.is_CIF:
+      fill = IT.adjust_colour(fill, luminosity=0.85)
+      draw.text((int(boxWidth*0.3), -int(font_size * 0.3)), ".cif", font=font_l, fill=fill)
 
     if item == "Rint":
       try:
@@ -4398,6 +4404,12 @@ class HealthOfStructure():
     draw.text((x, y), OV.correct_rendered_text(value_display), font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y + 3 + dy/2), OV.correct_rendered_text(value_display_extra), font=font_s, fill="#ffffff")
+
+    #if self.is_CIF:
+      #fill = IT.adjust_colour(fill, luminosity=1.9)
+      #draw.text((int(x/2 - dx/2), y + 3 + dy/2), "CIF", font=font_s, fill="#ffffff")
+      ##draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
+
 
     _ = im.copy()
     _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
