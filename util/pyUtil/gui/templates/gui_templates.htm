@@ -21,9 +21,10 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="0 | %(part)s@%(scope)s""
+  name="0 | %(part)s@%(scope)s"
   value="0 | %(part)s"
   width="100%%"
+  height="GetVar('HtmlInputHeight')"
   onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s)>>freeze false>>focus"
   bgcolor="GetVar('linkButton.bgcolor')"
   fgcolor="GetVar('linkButton.fgcolor')"
@@ -47,6 +48,7 @@ t:disorder_quicktool_no_options{
   type="button"
   name="ALL@%(scope)s"
   value="All"
+  height="GetVar('HtmlInputHeight')"
   width="100%%"
   onclick="showP>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
@@ -71,6 +73,7 @@ t:disorder_quicktool{
   name="ALL@%(scope)s"
   value="All"
   width="100%%"
+  height="GetVar('HtmlInputHeight')"
   onclick="showP>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
@@ -558,42 +561,42 @@ t:exti_or_swat_gui{
 t:snum_cell_display{
   <tr bgcolor=$GetVar(HtmlTableBgColour)>
     <td width='34%%'>
-      &thinsp;<b>a</b>&thinsp;=&thinsp;%(a)s
+       <b>a</b> = %(a)s
     </td>
 
     <td width='36%%'>
-      &thinsp;<b>&alpha;</b>&thinsp;=&thinsp;%(alpha)s&deg;
+       <b>&alpha;</b> = %(alpha)s&deg;
     </td>
 
     <td width='30%%'>
-      &thinsp;<b>Z</b>&thinsp;=&thinsp;%(Z)s
+       <b>Z</b> = %(Z)s
     </td>
   </tr>
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
 
     <td>
-      &thinsp;<b>b</b>&thinsp;=&thinsp;%(b)s
+       <b>b</b> = %(b)s
     </td>
 
     <td>
-      &thinsp;<b>&beta;</b>&thinsp;=&thinsp;%(beta)s&deg;
+       <b>&beta;</b> = %(beta)s&deg;
     </td>
 
     <td>
-      &thinsp;<b>Z'</b>&thinsp;=&thinsp;%(Zprime)s
+       <b>Z'</b> = %(Zprime)s
     </td>
   </tr>
 
   <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
     <td>
-      &thinsp;<b>c</b>&thinsp;=&thinsp;%(c)s
+       <b>c</b> = %(c)s
     </td>
     <td>
-      &thinsp;<b>&gamma;</b>&thinsp;=&thinsp;%(gamma)s&deg;
+       <b>&gamma;</b> = %(gamma)s&deg;
     </td>
     <td>
-      &thinsp;<b>V</b>&thinsp;=&thinsp;%(volume)s
+       <b>V</b> = %(volume)s
     </td>
   </tr>
 }

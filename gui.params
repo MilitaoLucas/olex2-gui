@@ -170,7 +170,7 @@ gui
       .caption = "Background colour"
     font_colour = #442244
       .type = colour
-    font_name = "Arial"
+    font_name = "Bahnschrift"
       .type = str
     font_size = 2
       .type = int
@@ -538,6 +538,8 @@ gui
     hos{
       height = 22
         .type = int
+      font_size = 16
+        .type = int
     }
 
     h1{
@@ -591,6 +593,8 @@ gui
       scale = 2
         .type = int
       height = 19
+        .type = int
+      info_circle = 36
         .type = int
       width_adjust = 7
         .type = int
