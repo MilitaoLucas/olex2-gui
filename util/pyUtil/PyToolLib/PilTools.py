@@ -1292,6 +1292,7 @@ class timage(ArgumentParser):
   def make_round_info_buttons(self):
     # MAKE ROUND INFO BUTTONS
     height = OV.GetParam('gui.timage.h3.height')
+    info_circle = OV.GetParam('gui.timage.h3.info_circle')
     fill = '#ffffff'
     width = height * 2
     height = int(round(width*1.5))
@@ -1299,12 +1300,13 @@ class timage(ArgumentParser):
     circle_top = 12 * self.scale
     IM =  Image.new('RGBA', size,(0,0,0,0))
     draw = ImageDraw.Draw(IM)
-    xy = (2 * self.scale, circle_top, 36 * self.scale, circle_top + 36 * self.scale)
+    
+    xy = (2 * self.scale, circle_top, info_circle * self.scale, circle_top + info_circle * self.scale)
     draw.ellipse(xy, fill = '#ffffff')
     states = ['', 'on', 'off', 'hover', 'hoveron']
     r,g,b,a = IM.split()
 
-    font_info = IT.registerFontInstance("Serif Bold Italic", 42 * self.scale)
+    font_info = IT.registerFontInstance("Serif Bold Italic", int(info_circle * 1.5 * self.scale))
     top = circle_top - 13 * self.scale
     adjust = 1 * self.scale
     if self.width < 400:
@@ -1312,12 +1314,14 @@ class timage(ArgumentParser):
     for state in states:
       if state == "off":
         col = IT.colourize(IM, (0,0,0,0), IT.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.8))
+        ifill = '#ffffff'
       else:
         col = IT.colourize(IM, (0,0,0,0), self.highlight_colour)
+        ifill = '#ffffff'
       fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
       fIM.paste(col, mask=a)
       draw = ImageDraw.Draw(fIM)
-      draw.text((14*self.scale,top), 'i', font=font_info, fill='#ffffff')
+      draw.text((12*self.scale,top), ' i', font=font_info, fill=ifill)
       _ = int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))
       name = "btn-info%s.png" %(state)
       fIM = IT.resize_image(fIM, size=_, name=name)
@@ -2785,7 +2789,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
-      sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
+      sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
       image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
@@ -3123,9 +3127,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        )
 
 
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif",):
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif", max_height=50):
     dr = draw
-    im = Image.new('RGBA', (self.width, 30 * self.scale), (0,0,0,0))
+    im = Image.new('RGBA', (self.width, max_height * self.scale), (0,0,0,0))
     draw = ImageDraw.Draw(im)
     upon_advance = None
     base_colour = self.params.html.base_colour.rgb
@@ -3243,7 +3247,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 #            cur_pos += advance
         i+= 1
 
-      cut = int(left_start) + int(ls * self.scale), int(ts * self.scale), int(cur_pos + advance + right_margin), int(30 * self.scale)
+      cut = int(left_start) + int(ls * self.scale), int(ts * self.scale), int(cur_pos + advance + right_margin), int(max_height * self.scale)
       sg = im.crop(cut)
       #sg.show()
       return sg, sg.size
