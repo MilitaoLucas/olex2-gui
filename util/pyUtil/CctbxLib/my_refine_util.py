@@ -124,19 +124,20 @@ class hydrogen_atom_constraints_customisation(object):
     special_sites = []
     neighbours = []
 
-    h_parts = set()
+    #h_parts = set()
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
-      if j in self.src.constrained_site_indices:
-        h_parts.add(self.olx_atoms[j]['part'])
+    #  if j in self.src.constrained_site_indices:
+    #    h_parts.add(self.olx_atoms[j]['part'])
 
-    multiple_groups = len(h_parts) > 1
-    for b in self.olx_atoms[i_pivot]['neighbours']:
-      j, op = self.j_rt_mx_from_olx(b)
+    #multiple_groups = len(h_parts) > 1
+    # for b in self.olx_atoms[i_pivot]['neighbours']:
+      #j, op = self.j_rt_mx_from_olx(b)
       if j in self.src.constrained_site_indices: continue
       b_part = self.olx_atoms[j]['part']
       #this case as below is for multiple H groups on a single pivot
-      if multiple_groups and part != 0 and b_part != 0 and b_part != part:
+      # if multiple_groups and part != 0 and b_part != 0 and b_part != part:
+      if part != 0 and b_part != 0 and b_part != part:
         continue
       if not op.is_unit_mx() and op*scatterers[i_pivot].site == scatterers[i_pivot].site:
         special_sites.append((j, op))
