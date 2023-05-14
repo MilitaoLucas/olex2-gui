@@ -528,8 +528,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       # End of loop over parts
       if need_to_partition == True:
         cif_fn = os.path.join(self.jobs_dir, self.name + ".cif")
-        hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
-        cuqct_tsc(wfn_files, hkl_fn, cif_fn, groups)
+        #hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
+        cuqct_tsc(wfn_files, cif_fn, groups)
         if os.path.exists("experimental.tsc"):
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):
@@ -622,9 +622,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               for e in endings:
                 if os.path.exists(path_base + e):
                   wfn_fn = path_base + e
-            hkl_fn = path_base + ".hkl"
+            #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
-            cuqct_tsc(wfn_fn, hkl_fn, cif_fn, [-1000])
+            cuqct_tsc(wfn_fn, cif_fn, [-1000])
             if os.path.exists("experimental.tsc"):
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):
