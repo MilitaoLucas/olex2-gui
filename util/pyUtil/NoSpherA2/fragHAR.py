@@ -1167,7 +1167,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
   wfns = []
   cifs = []
   groups = []
-  hkl_fn = os.path.join(work_folder, wfn_object.name+".hkl")
+  #hkl_fn = os.path.join(work_folder, wfn_object.name+".hkl")
   t2 = time.time()
   if test_frag == True:
     path = os.path.join(OV.FilePath(), work_folder, "fragmentation")
@@ -1217,11 +1217,12 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
       cifs.append(os.path.join(path, wfn_object.name+".cif"))
     try:
       make_wfn()
-    except:
+    except Exception as e:
+      print(e)
       raise NameError('Unsuccesfull Wavefunction Calculation during fragHAR in fragment %d!' % i)
   t3 = time.time()
   try:
-    cuqct_tsc(wfns, hkl_fn, cifs, groups)
+    cuqct_tsc(wfns, cifs, groups)
   except:
     raise NameError('Unsuccesfull Partitioning during fragHAR"')
   try:

@@ -55,7 +55,7 @@ def write_merged_hkl():
 OV.registerFunction(write_merged_hkl, True, "NoSpherA2")
 
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
+def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
   basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -70,13 +70,14 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
   args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   args.append(wfn_2_fchk)
-  if not os.path.exists(hkl_file):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx_adaptor = OlexCctbxAdapter()
-    with open(hkl_file, "w") as out:
-      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
-      f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min()*0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
-      f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adaptor = OlexCctbxAdapter()
+  f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+  if not hkl_file is None:
+    if not os.path.exists(hkl_file):
+      with open(hkl_file, "w") as out:
+        f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
+        f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   if (int(ncpus) > 1):
     args.append('-cpus')
     args.append(ncpus)
@@ -127,8 +128,10 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  args.append("-hkl")
-  args.append(hkl_file)
+  # args.append("-hkl")
+  # args.append(hkl_file)
+  args.append("-dmin")
+  args.append(str(f_sq_obs.d_min() * 0.95))
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")

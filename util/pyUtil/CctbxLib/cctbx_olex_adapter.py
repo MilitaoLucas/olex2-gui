@@ -742,14 +742,23 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     """P. van der Sluis and A. L. Spek, Acta Cryst. (1990). A46, 194-201."""
     from scitbx.math import approx_equal_relatively
     from libtbx.utils import xfrange
+    from smtbx.structure_factors import direct
     assert mask.mask is not None
     if mask.n_voids() == 0: return
     if mask.use_set_completion:
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    mask.f_calc = f_calc_set.structure_factors_from_scatterers(
-      mask.xray_structure, algorithm="direct").f_calc()
+    use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    if use_tsc == True:
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      xray_structure = mask.xray_structure
+      one_h = direct.f_calc_modulus_squared(
+        xray_structure, table_file_name=table_name)
+      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+    else:
+      mask.f_calc = f_calc_set.structure_factors_from_scatterers(
+        mask.xray_structure, algorithm="direct").f_calc()
     f_obs = mask.f_obs()
     mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
       flex.abs(mask.f_calc.data()))
@@ -767,7 +776,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     for i in range(max_cycles):
       mask.diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
       mask.diff_map.apply_volume_scaling()
-      stats = mask.diff_map.statistics()
+      #stats = mask.diff_map.statistics()
       masked_diff_map = mask.diff_map.real_map_unpadded().set_selected(
         mask.mask.data.as_double() == 0, 0)
       mask.f_000 = 0
