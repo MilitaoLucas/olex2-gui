@@ -183,6 +183,12 @@ def export_parameters(load_phil=True):
     OV.SetParam('HtmlTableWidth', table_width)
     OV.SetVar('HtmlTableWidth', table_width)
 
+    OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
+    OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
+    OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
+    OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
+    OV.SetVar('HtmlFontSizeExtraLarge', OV.GetParam('gui.html.font_size_extra_large'))
+
     # Stepwise ajust relative font size according to cut-off
     font_size_steps = OV.GetParam('gui.font_size_steps')
     font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
