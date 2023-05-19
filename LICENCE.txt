@@ -1,4 +1,4 @@
-Olex2 GUI, Copyright (c) 2011-2021, OlexSys
+Olex2 GUI, Copyright (c) 2011-2023, OlexSys
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
