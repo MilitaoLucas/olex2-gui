@@ -4325,7 +4325,7 @@ class HealthOfStructure():
       # Laue bar
       laue = self.hkl_stats[laue_name]
       laue_col = self.get_bg_colour(item, laue)
-
+      fill = laue_col
       _ = int(boxWidth * (1-laue))
       if _ == 0 and theoretical_val < 0.99:
         _ = 1
