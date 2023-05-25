@@ -1307,7 +1307,7 @@ class timage(ArgumentParser):
     r,g,b,a = IM.split()
 
     font_info = IT.registerFontInstance("Serif Bold Italic", int(info_circle * self.scale))
-    top = circle_top - 13 * self.scale
+    itop = int(circle_top - info_circle/4 * self.scale)
     adjust = 1 * self.scale
     if self.width < 400:
       adjust = 0.8 * self.scale
@@ -1321,7 +1321,7 @@ class timage(ArgumentParser):
       fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
       fIM.paste(col, mask=a)
       draw = ImageDraw.Draw(fIM)
-      draw.text((20*self.scale,-3), 'i', font=font_info, fill=ifill)
+      draw.text((int(info_circle/2.4*self.scale),itop), 'i', font=font_info, fill=ifill)
       _ = int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))
       name = "btn-info%s.png" %(state)
       fIM = IT.resize_image(fIM, size=_, name=name)
