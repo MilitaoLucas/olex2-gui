@@ -122,7 +122,7 @@ def makeHtmlTable(dlist):
 def makeHtmlInputBox(inputDictionary):
   # check for old, no value, readonly
   if 'readonly' in inputDictionary:
-    if not inputDictionary['readonly']:
+    if '' == inputDictionary['readonly']:
       inputDictionary['readonly'] = 'true'
   else:
     inputDictionary['readonly'] = 'false'
