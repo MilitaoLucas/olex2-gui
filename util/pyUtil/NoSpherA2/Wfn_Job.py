@@ -798,7 +798,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       else:
         if convergence == "NoSpherA2SCF":
           inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
-      if run > 1 or convergence == "NoSpherA2SCF":
+      if (run > 1 and os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw"))) or convergence == "NoSpherA2SCF":
         inp.write("\nend\n")
     else:
       if convergence == "NoSpherA2SCF":
