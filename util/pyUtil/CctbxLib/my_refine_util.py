@@ -9,6 +9,7 @@ from cctbx import sgtbx
 from cctbx import maptbx
 from smtbx.refinement.constraints import InvalidConstraint
 from scitbx.matrix import col
+from olexFunctions import OV
 
 def shelx_adp_converter(crystal_symmetry):
   def u_star(u11, u22, u33, u23, u13, u12):
@@ -116,6 +117,14 @@ class hydrogen_atom_constraints_customisation(object):
     self.reparametrisation = reparametrisation
     scatterers = reparametrisation.structure.scatterers()
     self.pivot_site = scatterers[i_pivot].site
+    # check for fixed coordinates
+    for i_sc in self.src.constrained_site_indices:
+      sc = scatterers[i_sc]
+      if not sc.flags.grad_site():
+        if OV.IsDebugging():
+          print("Skipping conflicting AFIX for %s" %scatterers[i_pivot].label)
+        return
+
     self.pivot_site_param = reparametrisation.add_new_site_parameter(i_pivot)
     self.pivot_neighbour_sites = ()
     self.pivot_neighbour_site_params = ()
