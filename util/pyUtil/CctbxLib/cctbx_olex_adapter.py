@@ -310,7 +310,7 @@ class OlexCctbxAdapter(object):
       miller_set_ = miller_set
     if (ignore_inversion_twin
         and self.twin_components is not None
-        and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
       apply_twin_law = False
     if (apply_twin_law
         and self.twin_components is not None):
