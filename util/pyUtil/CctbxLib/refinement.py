@@ -106,6 +106,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
+    self.normal_equations_class = normal_equations_class
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
@@ -186,21 +187,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
 
-    def build_ed_reparametrisation(self, thickness, twin_fractions):
-      ed_reparametrisation = constraints.reparametrisation(
-        structure=self.xray_structure(),
-        constraints=self.constraints,
-        connectivity_table=self.connectivity_table,
-        twin_fractions=twin_fractions,
-        temperature=self.temp,
-        fc_correction=self.fc_correction,
-        directions=self.directions,
-        thickness=thickness
-      )
-      ed_reparametrisation.fixed_distances.update(self.fixed_distances)
-      ed_reparametrisation.fixed_angles.update(self.fixed_angles)
-      return ed_reparametrisation
-
     self.std_obserations = None
     if ed_refinement:
       import AC6 as ac6
@@ -208,22 +194,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         aci = ac6.AC_instance
       except:
         aci = ac6.AC6.AC_instance
-
-      thickness = float(aci.EDI.get_stored_param("thickness.value", 400))
-      grad_t =aci.EDI.get_stored_param("thickness.grad", 'true') == 'true'
-      fix_t = aci.EDI.get_stored_param("thickness.constrained", 'true') == 'true'
-      print("Thickness: %s" %thickness)
-      self.thickness = xray.thickness(thickness, grad_t)
-      self.thickness.constrained = fix_t
-      self.std_obserations = self.observations
-      self.observations = aci.EDI.build_observations(
-        self.xray_structure(),
-        anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
-      self.std_obserations = self.observations.fo_sq.select(
-        self.observations.fo_sq.unique_under_symmetry_selection())\
-        .as_xray_observations()
-      self.reparametrisation = build_ed_reparametrisation(
-        self, self.thickness, self.observations.twin_fractions)
+      aci.EDI.setup_refinement(self)
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
@@ -245,7 +216,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
 
-    self.normal_eqns = normal_equations_class(
+    self.normal_eqns = self.normal_equations_class(
       self.observations,
       self,
       self.olx_atoms,
@@ -1075,11 +1046,14 @@ The following options were used:
   def get_fcf_data(self, anomalous_flag, use_fc_sq=False):
     if self.hklf_code == 5 or\
       (self.twin_components is not None
-        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        and self.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
       if self.use_tsc:
         fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
       else:
         fo_sq, fc = self.get_fo_sq_fc()
+      if self.f_mask:
+        f_mask = self.f_mask.common_set(fc)
+        fc = fc.array(data=fc.data()+f_mask.data())
       fo_sq = fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
         sigmas=fo_sq.sigmas()*(1/self.scale_factor),
