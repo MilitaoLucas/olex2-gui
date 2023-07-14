@@ -1,4 +1,4 @@
-﻿<LightModel Ambient="4278190080" ClearColor="4294967295" Flags="6"
+<LightModel Ambient="4278190080" ClearColor="4294967295" Flags="6"
  <Light0 Ambient="5723991" Attenuation="4278190335" Diffuse="15395562" Enabled="true" Position="-1.000,1.000,48.000,0.000" Specular="16777215" SpotCutoff="180" SpotDirection="4278190080" SpotExponent="0">
  <Light1 Ambient="0" Attenuation="4278190335" Diffuse="0" Enabled="false" Position="0.000,64.000,0.000,1.000" Specular="16777215" SpotCutoff="180" SpotDirection="4278190335" SpotExponent="0">
  <Light2 Ambient="2048292" Attenuation="4278190335" Diffuse="0" Enabled="false" Position="-1.000,-2.000,38.000,-2.000" Specular="4194304" SpotCutoff="56" SpotDirection="10.000,10.000,10.000,1.000" SpotExponent="0">
@@ -13,8 +13,8 @@
  <Help "#olex2.fnt:frb_12">
  <Notes "#olex2.fnt:frb_12">
  <Labels "#olex2.fnt:frb_20">
- <AtomLabels "0;-40;0;0;0;400;0;0;0;0;3;2;1;34;Bahnschrift Condensed">
- <BondLabels "#olex2.fnt:fr__14">
+ <AtomLabels "0;-27;0;0;0;400;0;0;0;0;3;2;1;34;Bahnschrift Condensed">
+ <BondLabels "0;-24;0;0;0;400;0;0;0;0;3;2;1;34;Bahnschrift Condensed">
  <Tooltip "#olex2.fnt:frb_12">
  <Picture_labels "#olex2.fnt:frb_0">
  <Console "#olex2.fnt:frb_0">
