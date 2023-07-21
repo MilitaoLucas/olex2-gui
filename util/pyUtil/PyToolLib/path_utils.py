@@ -21,7 +21,7 @@ def setup_cctbx():
   if not build_path:
     build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(
       "%s/cctbx_build" % cctbxRoot)
-    cctbxSources = "%s/cctbx_project" %cctbxRoot
+    cctbxSources = "%s/cctbx_sources" %cctbxRoot
   else:
     cctbxSources = "%s/modules/cctbx_project" %cctbxRoot
   sys.path.append("%s/libtbx" % cctbxSources) # needed to work with old cctbx directory structure
