@@ -1349,7 +1349,7 @@ def check_for_pyscf(loud=True):
         OV.SetParam('user.NoSpherA2.has_pyscf', True)
         nsp2 = get_NoSpherA2_instance()
         nsp2.softwares = nsp2.softwares.replace(";Get pySCF", ";pySCF")
-        olex.m("html.Update()")
+        olx.html.Update()
         return True
     except:
       pass
@@ -1564,7 +1564,7 @@ def toggle_GUI():
   else:
     OV.SetParam('snum.NoSpherA2.use_aspherical', True)
     set_default_cpu_and_mem()
-  olex.m("html.Update()")
+  olx.html.Update()
 OV.registerFunction(toggle_GUI,True,'NoSpherA2')
 
 def sample_folder(input_name):
