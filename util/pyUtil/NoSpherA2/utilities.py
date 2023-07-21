@@ -32,12 +32,18 @@ def run_with_bitmap(bitmap_text):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
       OV.CreateBitmap(bitmap_text)
+      olx.html.Update()
+      olx.xf.EndUpdate()
+      olex.m('refresh')
       try:
         return func(*args, **kwargs)
       except Exception as e:
         raise e
       finally:
         OV.DeleteBitmap(bitmap_text)
+        olx.html.Update()
+        olx.xf.EndUpdate()
+        olex.m('refresh')
     return wrapper
   return decorator
 
@@ -64,6 +70,9 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
+    olx.html.Update()
+    olx.xf.EndUpdate()
+    olex.m('refresh')
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
