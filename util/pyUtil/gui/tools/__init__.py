@@ -377,7 +377,6 @@ def checkPlaton():
     olx.SetVar("HavePlaton", False)
     return ""
 
-
 OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 
@@ -669,27 +668,46 @@ def get_mask_info_old():
 OV.registerFunction(get_mask_info_old, False, 'gui.tools')
 
 
-def makeFormulaForsNumInfo():
-  global current_sNum
-  if timer:
-    t1 = time.time()
-
-  if olx.FileName() == "Periodic Table":
-    return "Periodic Table"
-
+def is_masked_moiety_in_formula(txt_formula):
   isSame = False
-  colour = ""
-  txt_formula = olx.xf.GetFormula('', 3)
   if len(txt_formula) > 100:
     return "Too Much Stuff"
   present = olx.xf.au.GetFormula()
   regex = re.compile(r"(?P<ele>[a-zA-Z]) (\s|\b)", re.X | re.M | re.S)
   txt_formula = regex.sub(r'\g<ele>1 ', txt_formula).strip()
   present = regex.sub(r'\g<ele>1 ', present).strip()
-  if present == txt_formula:
+  present_l = present.split()
+  txt_formula_l = txt_formula.split()
+  present_l.sort()
+  txt_formula_l.sort()
+  isSame = False
+  if present_l == txt_formula_l:
     isSame = True
-    if current_sNum != OV.FileName():
-      current_sNum = OV.FileName()
+  return isSame
+olex.registerFunction(is_masked_moiety_in_formula, False, "gui.tools.is_masked_moiety_in_formula")
+
+
+def makeFormulaForsNumInfo():
+  global current_sNum
+  if timer:
+    t1 = time.time()
+
+  txt_formula = olx.xf.GetFormula('', 3)
+  if OV.GetVar("makeFormulaForsNumInfo", "") == txt_formula:
+    ##if debug:
+      ##print("Formula sNum (2): %.5f" %(time.time() - t1))
+    return OV.GetVar("makeFormulaForsNumInfo_retVal")
+  else:
+    OV.SetVar("makeFormulaForsNumInfo", txt_formula)
+
+  if olx.FileName() == "Periodic Table":
+    return "Periodic Table"
+  colour = ""
+  
+  isSame = gui.tools.is_masked_moiety_in_formula(txt_formula)
+  # I don't know why this was here -- it might bite back!
+    ##if current_sNum != OV.FileName():
+      ##current_sNum = OV.FileName()
 
   l = ['3333', '6667']
   for item in l:
@@ -722,6 +740,7 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
       d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
       d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
+      
     else:
       img_name = 'toolbar-mask_ok'
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
@@ -735,7 +754,7 @@ def makeFormulaForsNumInfo():
     else:
       img_name = 'toolbar-blank'
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
-      formula = present
+      formula = olx.xf.au.GetFormula()
       d.setdefault('target', "Everything is up-to-date")
 
   d.setdefault('img_name', img_name)
@@ -754,12 +773,11 @@ def makeFormulaForsNumInfo():
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
   fn = "snumformula.htm"
   OV.write_to_olex(fn, update)
-  if debug:
-    pass
-    # print "Formula sNum (2): %.5f" %(time.time() - t1)
-
-  return "<!-- #include snumformula %s;1 -->" % fn
-  # return fn
+  ##if debug:
+    ##print("Formula sNum (2): %.5f" %(time.time() - t1))
+  retVal = "<!-- #include snumformula %s;1 -->" % fn
+  OV.SetVar("makeFormulaForsNumInfo_retVal", retVal)
+  return retVal
 
 
 OV.registerFunction(makeFormulaForsNumInfo)
@@ -1989,7 +2007,7 @@ Do you want to install this now? Olex2 will restart.""", "YN", False)
     return
 
 
-def plot_xy(xy=[], filename='fred.png'):
+def plot_xy(xy=[], filename='fred.png', title="", marker_size='1'):
   filename = 'fred.png'
   import numpy as np
   sys.path.append(r"%s/site-packages" % OV.DataDir())
@@ -2009,13 +2027,15 @@ def plot_xy(xy=[], filename='fred.png'):
   # if self.suptitle:
   #  plt.suptitle(_format_mathplotlib_text(self.suptitle), **stfont, y=0.91)
   plt.grid(True)
+  plt.title(title)
   plt.plot(xs,
            ys,
            'o',
-           color='gray',
-           markersize=1, linewidth=0,
+           color='#0066cc',
+           markersize=marker_size,
+           linewidth=1,
            markerfacecolor='white',
-           markeredgecolor='gray',
+           markeredgecolor='#0066cc',
            markeredgewidth=1)
   p = os.path.join(OV.FilePath(), filename)
   plt.savefig(p, bbox_inches='tight', pad_inches=0.3)

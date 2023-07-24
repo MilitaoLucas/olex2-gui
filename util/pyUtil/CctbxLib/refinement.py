@@ -121,9 +121,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         self.f_mask = self.load_mask()
       if not self.f_mask:
-        OlexCctbxMasks()
-        if olx.current_mask.flood_fill.n_voids() > 0:
-          self.f_mask = olx.current_mask.f_mask()
+        _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+        if _ == "Platon":
+          olex.m("spy.OlexPlaton(q,.ins)")
+          if "_sq" not in OV.HKLSrc():
+            fn = OV.HKLSrc().replace(".", "_sq.")
+            if os.path.exists(fn):
+              OV.HKLSrc(fn)
+          self.f_mask = self.load_mask()
+        else:
+          if "_sq" in OV.HKLSrc():
+            fn = OV.HKLSrc().replace("_sq.", ".")
+            if os.path.exists(fn):
+              OV.HKLSrc()
+          OlexCctbxMasks()
+          if olx.current_mask.flood_fill.n_voids() > 0:
+            self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
