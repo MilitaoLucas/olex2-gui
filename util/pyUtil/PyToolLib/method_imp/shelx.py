@@ -99,9 +99,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       fab_path = ""
       if OV.HKLSrc():
         fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
+
+      _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
       method = "smbtx"
-      if "_sq" in fab_path:
-        method="SQUEEZE"
+      if _ == "Platon":
+        method = "SQUEEZE"
       f_mask = None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
@@ -115,7 +117,10 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           raise Exception(_)
 
         if method == "SQUEEZE":
-          olex.m("spy.OlexPlaton(q)")
+          olex.m("spy.OlexPlaton(q,.ins)")
+          fn = OV.HKLSrc().replace(".", "_sq.")
+          if os.path.exists(fn):
+            OV.HKLSrc(fn)
           Method_refinement.pre_refinement(self, RunPrgObject)
           return
 
