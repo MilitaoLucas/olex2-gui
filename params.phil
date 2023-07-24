@@ -323,6 +323,10 @@ routines requiring structure refinement
       .type = bool
     recompute_mask_before_refinement = False
       .type = bool
+    recompute_mask_before_refinement_prg = *Olex2 Platon
+      .type = choice
+    auto_add_masked_moieties = True
+      .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
     cifmerge_after_refinement = True
@@ -1004,7 +1008,7 @@ user
     .type = str
   reference = ""
     .type = str
-  def_style_scene_src_dir = basedir()/etc/styles/
+  def_style_scene_src_dir = datadir()/styles/
     .type = str
   def_style = 'default'
     .type = str
