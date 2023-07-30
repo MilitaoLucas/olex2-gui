@@ -123,7 +123,15 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
             OV.HKLSrc(fn)
           Method_refinement.pre_refinement(self, RunPrgObject)
           return
-
+        else:
+          if "_sq" in OV.HKLSrc():
+            fn = OV.HKLSrc().replace("_sq.", ".")
+            if not os.path.exists(fn):
+              import shutil
+              shutil.copy2(OV.HKLSrc(), fn)
+            OV.HKLSrc(fn)
+            
+              
         COA.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()

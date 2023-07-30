@@ -10,6 +10,7 @@ from olexFunctions import OV
 import olx
 import olex
 import olex_core
+import gui
 
 from cctbx.array_family import flex
 from cctbx import maptbx, miller, sgtbx, uctbx, xray, crystal
@@ -124,17 +125,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
         if _ == "Platon":
           olex.m("spy.OlexPlaton(q,.ins)")
-          if "_sq" not in OV.HKLSrc():
-            fn = OV.HKLSrc().replace(".", "_sq.")
-            if os.path.exists(fn):
-              OV.HKLSrc(fn)
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
         else:
-          if "_sq" in OV.HKLSrc():
-            fn = OV.HKLSrc().replace("_sq.", ".")
-            if os.path.exists(fn):
-              OV.HKLSrc()
           OlexCctbxMasks()
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           if olx.current_mask.flood_fill.n_voids() > 0:
             self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
