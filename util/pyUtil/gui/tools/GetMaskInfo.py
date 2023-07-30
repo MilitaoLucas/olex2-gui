@@ -197,9 +197,8 @@ def get_mask_info():
     accounted_for[volume].append(_[0])
 
     moiety = OV.get_cif_item('_chemical_formula_moiety',None)
-    if not moiety:
+    if not moiety or "[]" in moiety or "[+ solvents]" in moiety:
       moiety = olx.xf.latt.GetMoiety()
-
 
     electron = float(electron) * multiplicity
     volume = float(volume) * multiplicity
@@ -326,20 +325,6 @@ def get_mask_info():
   add_to_formula = ""
   add_to_moiety = ""
 
-  ##original
-  #for entry in sum_content:
-    #entity = entry[1]
-    #if "?" in entity:
-      #add_to_moiety = "[+ solvents]"
-      #continue
-    #multiplicity = float(entry[0])
-    #entity, multi = split_entity(entity)
-    #multi = float(multi)
-    #ent = moieties.get(entity.lower(), entity)
-    #ent_disp = ent.replace(" ", "")
-    #ent = " ".join(re.split("(?<=[0-9])(?=[a-zA-Z])",ent))
-    #ent = formula_cleaner(str(ent))
-  #chatgpt simplification
   for entry in sum_content:
     entity = entry[1]
     if "?" in entity:
@@ -442,7 +427,8 @@ def get_mask_info():
 
 
   if add_to_formula:
-    t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
+    if not OV.GetParam('snum.refinement.auto_add_masked_moieties'):
+      t += get_template('mask_output_end_rp', path=template_path, force=debug)%d
     t += get_template('mask_special_details', path=template_path, force=debug)%d
   t += get_template('mask_output_table_end', path=template_path, force=debug)%d
   OlexVFS.write_to_olex(output_fn, t)
@@ -695,7 +681,6 @@ def add_mask_content(i,which):
     if is_CIF:
       contents = olx.Cif('_%s_void_nr' %base).split(",")
     else:
-      base = "platon_squeeze"
       contents = olx.cif_model[current_sNum].get('_%s_void_%s' %(base, which))
   if not contents:
     return return_note(note = "No void has been found.", col=gui_orange)
@@ -762,8 +747,6 @@ def add_mask_content(i,which):
       val = Fraction(int(_[0]),int(_[1]))
     _ = format_number(float(val) * f / multiplicity)
     user_value_new_l.append("%s %s" %(format_number(float(val) * f / multiplicity), entity))
-#    user_value_new_l.append("%s %s" %(format_number(float(val) * f), entity))
-#    user_value_new_l.append("%s %s" %(float(val) / f, entity))
   user_value = ",".join(user_value_new_l)
 
   _ = list(contents)
@@ -776,8 +759,8 @@ def add_mask_content(i,which):
   update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
  
   mask_info_has_updated = True
-  olex.m("spy.makeFormulaForsNumInfo()")
-  
+  #olex.m("spy.makeFormulaForsNumInfo()")
+  get_mask_info()
   olx.html.Update()
 #  change_based_on_button_states()
 
@@ -870,21 +853,14 @@ def escape_param_names(name):
 def change_hklsrc_according_to_mask_prg(prg):
   OV.SetParam('snum.refinement.recompute_mask_before_refinement_prg',prg)
   target = ""
-  if prg == "Olex2":
-    if "_sq" in OV.HKLSrc():
-      target = OV.HKLSrc().replace("_sq.hkl", ".hkl")
-      OV.HKLSrc(target)
-  else:
-    if "_sq" not in OV.HKLSrc():
-      target = OV.HKLSrc().replace(".hkl", "_sq.hkl")
-      if os.path.exists(target):
-        OV.HKLSrc(target)
+
+  sort_out_masking_hkl()
+
   if target and OV.HasGUI() and OV.IsControl("SET_REFLECTIONS_parent_name"):
     olx.html.SetBG('SET_REFLECTIONS_parent_name',OV.GetParam('gui.green').hexadecimal)
     olx.html.SetValue('SET_REFLECTIONS_parent_name', os.path.basename(target))
     get_mask_info()
   olx.html.Update()
-
 
 def change_based_on_button_states():
   l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
@@ -907,6 +883,22 @@ def change_based_on_button_states():
       for btn in l:
         olx.html.SetBG(btn,'gui_light_grey')
       break
+    
+def sort_out_masking_hkl():
+  _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+  if _ == "Platon":
+    if "_sq" not in OV.HKLSrc():
+      fn = OV.HKLSrc().replace(".", "_sq.")
+      if os.path.exists(fn):
+        OV.HKLSrc(fn)
+  else:
+    if "_sq" in OV.HKLSrc():
+      fn = OV.HKLSrc().replace("_sq.", ".")
+      if not os.path.exists(fn):
+        import shutil
+        shutil.copy2(OV.HKLSrc(), fn)
+      OV.HKLSrc(fn)
+    
 OV.registerFunction(change_based_on_button_states)
 OV.registerFunction(change_hklsrc_according_to_mask_prg)
 OV.registerFunction(add_mask_content)
