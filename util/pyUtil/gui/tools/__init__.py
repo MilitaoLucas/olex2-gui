@@ -693,12 +693,12 @@ def makeFormulaForsNumInfo():
     t1 = time.time()
 
   txt_formula = olx.xf.GetFormula('', 3)
-  if OV.GetVar("makeFormulaForsNumInfo", "") == txt_formula:
-    ##if debug:
-      ##print("Formula sNum (2): %.5f" %(time.time() - t1))
-    return OV.GetVar("makeFormulaForsNumInfo_retVal")
-  else:
-    OV.SetVar("makeFormulaForsNumInfo", txt_formula)
+  #if OV.GetVar("makeFormulaForsNumInfo", "") == txt_formula and not OV.GetParam("snum.refinement.use_solvent_mask"):
+    ###if debug:
+      ###print("Formula sNum (2): %.5f" %(time.time() - t1))
+    #return OV.GetVar("makeFormulaForsNumInfo_retVal")
+  #else:
+    #OV.SetVar("makeFormulaForsNumInfo", txt_formula)
 
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"

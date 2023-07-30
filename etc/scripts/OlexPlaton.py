@@ -25,7 +25,7 @@ class PlatonWrapper:
   'n' : ["ADDSYM SHELX" , "res"],
   'o' : ["Menu Off" , ""],
   'p' : ["PLUTON Mode" , "pjn"],
-  'q' : ["SQUEEZE [CALC SQUEEZE]" , "lis"],
+  'q' : ["SQUEEZE [CALC SQUEEZE]" , "lis", ".ins"],
   'r' : ["RENAME (RES)" , "res"],
   's' : ["SYSTEM-S" , ""],
   't' : ["TABLE Mode [TABLE]" , "sup"],
@@ -70,7 +70,7 @@ class PlatonWrapper:
       print("Platon failed to run")
       return
 
-  def OlexPlaton(self, platonflag="0"):
+  def OlexPlaton(self, platonflag="0", runfrom=".cif"):
     print("Olex2 to Platon Linker")
     # initialisation step
     exe_name = "platon"
@@ -124,11 +124,17 @@ class PlatonWrapper:
         print(" '%s' - %s"%(key, self.platonflagcodes[key][0]))
       return
     else:
-      inputfile = inputfilename + ".cif"
+      inputfile = inputfilename + runfrom
       if not os.path.exists(inputfile):
-        inputfile = inputfilename + ".ins"
+        if runfrom == ".cif":
+          inputfile = inputfilename + ".ins"
         if not os.path.exists(inputfile):
           olx.File(inputfile)
+      #inputfile = inputfilename + ".ins"
+      #if not os.path.exists(inputfile):
+        #inputfile = inputfilename + ".cif"
+        #if not os.path.exists(inputfile):
+          #olx.File(inputfilename + ".ins")
       if platonflag == "0":
         # Start just platon with the INS file
         print("Calling Platon Directly")
@@ -174,8 +180,11 @@ class PlatonWrapper:
 
   def command_list(self):
     rv = []
+    extra = ""
     for k, v in self.platonflagcodes.items():
-      i = "%s<-%s>>echo %s" %(v[0],  "spy.OlexPlaton(%s)" % k, v[1])
+      if len(v) == 3:
+        extra = "," + v[-1:][0]
+      i = "%s<-%s>>echo %s" %(v[0],  "spy.OlexPlaton(%s%s)" % (k, extra), v[1])
       rv.append(i)
     rv.sort()
     return ';'.join(rv)
