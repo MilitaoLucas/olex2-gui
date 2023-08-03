@@ -947,8 +947,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if "DISCAMB" not in self.softwares:
           self.softwares = self.softwares + ";DISCAMB"
       else:
-        if OV.GetParam('user.NoSpherA2.enable_discamb') == True:
-          self.softwares = self.softwares + ";Get DISCAMB"
+        self.softwares = self.softwares + ";Get discambMATT"
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -1060,7 +1059,7 @@ def discamb(folder, name, discamb_exe):
 
   wavelength = float(olx.xf.exptl.Radiation())
   if wavelength < 0.1:
-    args.append("-ED")
+    #args.append("-ED")
     os.environ['discamb_cmd'] = '+&-'.join([discamb_exe, "-e"])
   else:
     os.environ['discamb_cmd'] = discamb_exe
