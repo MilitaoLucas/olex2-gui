@@ -235,7 +235,7 @@ def make_hybrid_GUI(softwares_list_string):
     t += "\n</td>\n"
     selected_software = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d'%i)
     t += end_line() + begin_new_line()
-    if selected_software != "DISCAMB":
+    if selected_software != "discambMATT":
       if selected_software != "ELMOdb":
         t += '''
 <td width="13%" align='left'>
@@ -376,6 +376,6 @@ def make_hybrid_GUI(softwares_list_string):
       
       t += end_line()
     else:
-      t += "<td align='center'><b>So far no further options for DISCAMB TAAM</b></td>" + end_line()
+      t += "<td align='center'><b>So far no further options for discambMATT</b></td>" + end_line()
   
   return t
