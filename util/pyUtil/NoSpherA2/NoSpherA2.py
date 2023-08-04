@@ -272,7 +272,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return
 
     # This checks ne multiplicity and Number of electrons
-    if (wfn_code != "DISCAMB") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
+    if (wfn_code != "discambMATT") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       ne, adapter = calculate_number_of_electrons()
       heavy = False
       for sc in adapter.xray_structure().scatterers():
@@ -331,7 +331,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       cif = False
       if wfn_code == "Tonto":
         cif = True
-      elif wfn_code == "DISCAMB":
+      elif wfn_code == "discambMATT":
         cif = True
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
@@ -388,7 +388,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               out_cif.write(line)
 
         out_cif.close()
-        if wfn_code == "DISCAMB":
+        if wfn_code == "discambMATT":
           #DISCMAB is used
           discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
           shutil.copy(os.path.join(wfn_job_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
@@ -397,7 +397,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
           hybrid_part_wfn_code = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%(parts[i]))
-          if hybrid_part_wfn_code == "DISCAMB":
+          if hybrid_part_wfn_code == "discambMATT":
             groups.pop(i-groups_counter)
             groups_counter+=1
             discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
@@ -553,7 +553,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
-      if wfn_code == "DISCAMB":
+      if wfn_code == "discambMATT":
         cif = str(os.path.join(self.jobs_dir, self.name + ".cif"))
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(), self.jobs_dir), self.name, self.discamb_exe)
@@ -926,8 +926,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.discamb_exe = olx.file.Which("%s" % exe_pre)
     if os.path.exists(self.discamb_exe):
-      if "DISCAMB" not in self.softwares:
-        self.softwares = self.softwares + ";DISCAMB"
+      if "discambMATT" not in self.softwares:
+        self.softwares = self.softwares + ";discambMATT"
     else:
       exe_pre = "discambMATTS2tsc"
       if sys.platform[:3] == 'win':
@@ -944,8 +944,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         else:
           self.discamb_exe = olx.file.Which("%s" % exe_pre)
       if os.path.exists(self.discamb_exe):
-        if "DISCAMB" not in self.softwares:
-          self.softwares = self.softwares + ";DISCAMB"
+        if "discambMATT" not in self.softwares:
+          self.softwares = self.softwares + ";discambMATT"
       else:
         self.softwares = self.softwares + ";Get discambMATT"
 
@@ -1490,7 +1490,7 @@ If that does not throw an error message you were succesfull.""", "O", False)
 
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
-    if input != "DISCAMB" and input != "Thakkar IAM":
+    if input != "discambMATT" and input != "Thakkar IAM":
       OV.SetParam('snum.NoSpherA2.h_aniso', True)
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
