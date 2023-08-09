@@ -36,28 +36,28 @@ t:mask_output_html_table_end{
 
 t:mask_output_table_header_rp{
     <tr width='100%%' bgcolor='%(table_bg)s'>
-      <td align='center' width='5%%'>
+      <td align='center' valign='middle' width='9%%'>
          <b>&#35;</b>
       </td>
-      <td align='center' valign='middle' width='10%%'>
+      <td align='center' valign='middle' width='9%%'>
          <b>V(A<sup>3 </sup>) </b>
       </td>
-      <td align='center' valign='middle' width='10%%'>
+      <td align='center' valign='middle' width='9%%'>
          <b>e<sup>-</sup> </b>
       </td>
-      <td align='center' valign='middle' width='10%%'>
+      <td align='center' valign='middle' width='9%%'>
          <b>V/e<sup>-</sup> </b>
       </td>
-      <td align='center' width='10%%'>
+      <td align='center' width='9%%'>
          <b>V/at. <sup>&nbsp;</sup></b>
       </td>
-      <td align='center' width='36%%'>
+      <td align='center' width='37%%'>
          <b><sup>&nbsp;</sup>Content/%(based_on_display)s<sup>&nbsp;</sup></b>
       </td>
-      <td align='center' width='10%%'>
+      <td align='center' width='9%%'>
          <b>e<sup>-</sup></b>
       </td>
-      <td align='center' width='7%%'>
+      <td align='center' width='9%%'>
          <b>m<sup>&nbsp;</sup></b>
       </td>
     </tr>
@@ -113,7 +113,10 @@ t:mask_output_based_on{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1">
   <tr align='right'>
     <td>
-      All values above are calculated based on the <b>%(based_on_display)s </b>
+      <b>%(moiety)s </b>
+    </td>
+    <td>
+      Based on the <b>%(based_on_display)s
     </td>
     <td width=8%%>
       <input
@@ -160,31 +163,34 @@ t:mask_output_end_rp{
 %(row_begin)s
 %(table_begin)s
   <tr >
-    <td width="10%%" align='left'>
+    <td width="8%%" align='left'>
       <input
         type="button"
         name="ADD_TO_MASK_FORMULA"
         value="Formula +"
-        bgcolor="GetVar('linkButton.bgcolor')"
-        fgcolor="GetVar('linkButton.fgcolor')"
+        bgcolor="GetVar('ADD_TO_MASK_FORMULA_BG', GetVar('linkButton.bgcolor'))"
+        fgcolor="#ffffff"
         onclick="xf.SetFormula(%(suggested_sum)s)>>html.Update()"
         custom="#custom"
       >
     </td>
+
     <td>
         %(suggested_sum)s
     </td>
-    <td align='right'>
-        <b>%(add_to_formula)s</b>
+
+     <td align='right' colspan='2'>
+        <b><font color="$GetVar('ADD_TO_MASK_FORMULA_BG', GetVar('linkButton.bgcolor'))">%(add_to_formula)s</font></b>
     </td>
   </tr>
+  
   <tr >
     <td  align='left'>
       <input
         type="button"
         name="ADD_TO_MASK_MOIETY"
-        bgcolor="GetVar('linkButton.bgcolor')"
-        fgcolor="GetVar('linkButton.fgcolor')"
+        bgcolor="GetVar('ADD_TO_MASK_MOIETY_BG', GetVar('linkButton.bgcolor'))"
+        fgcolor="#ffffff"
         value="Moiety +"
         onclick="spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>html.Update()"
         custom="#custom"
@@ -193,17 +199,38 @@ t:mask_output_end_rp{
     <td width='50%%'>
         %(suggested_moiety)s
     </td>
+
     <td width='10%%'>
-      <input
-        type="button"
-        name="MASK_MOIETY_EDIT"
-        bgcolor="GetVar('linkButton.bgcolor')"
-        width="100%%"
-        value="Edit"
-        onclick="spy.EditCifInfo()"
-        custom="#custom"
-      >
+      <!--<input-->
+        <!--type="button"-->
+        <!--name="MASK_MOIETY_EDIT"-->
+        <!--bgcolor="GetVar('linkButton.bgcolor')"-->
+        <!--width="100%%"-->
+        <!--value="Edit"-->
+        <!--onclick="spy.EditCifInfo()"-->
+        <!--custom="#custom"-->
+      <!-->-->
     </td>
+
+    <td align='right'>
+        Auto Add
+    </td>
+
+
+   <td width='4%%' align='center' valign='center' bgcolor="$GetVar('HtmlTableBgColour')">
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor=$GetVar('HtmlTableBgColour')
+      name='ADD_MASKED_MOIETY_TO_FORMULAE'
+      checked="spy.GetParam('snum.refinement.auto_add_masked_moieties')"
+      oncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties','true')"
+      onuncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties','false')"
+      target="Automatically add the masked moieties to the sum and moiety formulae"
+    >
+    </font>
+   </td>
+
   </tr>
 </table>
 %(row_end)s
@@ -214,7 +241,7 @@ t:_mask_output_end_rp{
 %(row_begin)s
 <table>
   <tr>
-    <td width=20%%>
+    <td width=%%>
       <b>Sum Formula</b>
     </td>
     <td width=80%%>

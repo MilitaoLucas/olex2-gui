@@ -8,6 +8,7 @@
 #disabled=false
 #bgcolor=$GetVar('linkButton.bgcolor')
 #fgcolor=$GetVar('linkButton.fgcolor')
+#scope=
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 
 #td1=<td>
@@ -16,7 +17,7 @@
 #td1
   <input
     type="button"
-    name="#name"
+    name="#name#scope"
     value="#value"
     width="#width"
     height="#height"

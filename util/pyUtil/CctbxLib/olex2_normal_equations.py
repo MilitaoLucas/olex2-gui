@@ -10,12 +10,6 @@ from smtbx_refinement_least_squares_ext import *
 import math
 from olexFunctions import OV
 
-import AC6 as ac6
-try:
-  aci = ac6.AC_instance
-except:
-  aci = ac6.AC6.AC_instance
-
 import olx
 import olex
 import olex_core
@@ -41,13 +35,8 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
           print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
         raise e
     else:
-      ed_refinement = OV.GetParam("snum.refinement.ED.method")
-      if ed_refinement != "Kinematic":
-        one_h_linearisation = direct.f_calc_modulus_squared(
-          self.xray_structure)#, reflections=self.observations)
-      else: # make use of caching
-        one_h_linearisation = direct.f_calc_modulus_squared(
-          self.xray_structure, reflections=self.observations)
+      one_h_linearisation = direct.f_calc_modulus_squared(
+        self.xray_structure, reflections=self.observations)
     self.refinement = refinement
     self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
     self.f_mask_data = None
@@ -61,41 +50,6 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
                                   self.f_mask.data())
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
-
-  def get_std_DM(self):
-    cl = least_squares.crystallographic_ls_class()
-    self.reparametrisation.linearise()
-    xx = cl(self.observations, self.reparametrisation)
-    def args():
-      args = (xx,
-              self.std_observations,
-              self.f_mask_data,
-              self.weighting_scheme,
-              OV.GetOSF(),
-              self.one_h_linearisation,
-              self.reparametrisation.jacobian_transpose_matching_grad_fc(),
-              self.reparametrisation.fc_correction, False, True, False)
-      return args
-    self.data = build_design_matrix(*args()) #lock destruction
-    return self.data
-
-  def build_up(self, objective_only):
-    ed_refinement = OV.GetParam("snum.refinement.ED.method")
-    if not ed_refinement or "Kinematic" == ed_refinement or not aci.IsMEDEnabled:
-      super(normal_eqns, self).build_up(objective_only)
-      return
-    old_func = self.one_h_linearisation
-    try:
-      self.one_h_linearisation = aci.EDI.build(self.get_std_DM,
-        self.reparametrisation,
-        old_func,
-        self.refinement.thickness,
-        self.xray_structure.crystal_symmetry(),
-        self.std_observations.fo_sq.anomalous_flag(),
-        objective_only)
-      super(normal_eqns, self).build_up(objective_only)
-    finally:
-      self.one_h_linearisation = old_func
 
   def step_forward(self):
     self.n_current_cycle += 1
@@ -330,20 +284,18 @@ class normal_eqns(least_squares.crystallographic_ls_class()):
       if r.refine_angle:
         olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
           r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
-    #ED stuff
-    if self.std_observations:
-      olx.xf.rm.StoreParam('ED.thickness.value', "%.3f" %self.refinement.thickness.value)
-      aci.EDI.update_scales(self.one_h_linearisation,
-        self.weighting_scheme,
-        self.xray_structure, self.f_mask_data,
-        self.refinement.thickness)
+    self.complete_update()
     olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
     if OV.isInterruptSet():
       self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
       self.iterations_object.interrupted = True
-
+  # interface functions - do not delete
+  def complete_update(self):
+    pass
+  def on_completion(self):
+    pass
 
 from scitbx.lstbx import normal_eqns_solving
 
@@ -422,6 +374,7 @@ class naive_iterations_with_damping_and_shift_limit(
         print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
         print("-- " + "{:10.5f}".format(time.time()-t2) + " for damping+ls_solve+step_forward")
       self.n_iterations += 1
+    self.non_linear_ls.on_completion()
     if timer:
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))
@@ -492,6 +445,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       self.non_linear_ls.build_up()
     # get proper s.u.
     self.non_linear_ls.build_up()
+    self.non_linear_ls.on_completion()
     if OV.IsDebugging():
       print("Timing for building-up: %.3fs, iterations: %.3fs" %(
         self.non_linear_ls.normal_equations_building_time, time.time()-start_t))

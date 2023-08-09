@@ -142,8 +142,8 @@ class OlexCctbxAdapter(object):
           shared_parameters=shared_parameters)
         same_iter = self.olx_atoms.same_iterator()
       else:
-         restraints_iter = None
-         same_iter = None
+        restraints_iter = None
+        same_iter = None
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
@@ -168,21 +168,29 @@ class OlexCctbxAdapter(object):
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        try:
-          self._xray_structure.set_inelastic_form_factors(
-            self.wavelength, inelastic_table)
-        except Exception as e:
-          if OV.IsDebugging():
-            print("Failed to retrieve some inelastic scattering factors")
-            print(e)
-        for sc in self._xray_structure.scatterers():
-          if null_disp:
-            custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
-          else:
-            custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
-      if null_disp:
-        self._xray_structure.set_custom_inelastic_form_factors(
-          custom_fp_fdps)
+        if inelastic_table != "brennan":
+          try:
+            self._xray_structure.set_inelastic_form_factors(
+              self.wavelength, inelastic_table)
+          except Exception as e:
+            if OV.IsDebugging():
+              print("Failed to retrieve some inelastic scattering factors")
+              print(e)
+          for sc in self._xray_structure.scatterers():
+            if null_disp:
+              custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+            else:
+              custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+        else:
+          from brennan import brennan
+          br = brennan()
+          for sc in self._xray_structure.scatterers():
+            if null_disp:
+              custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+            else:
+              fp_fdp = br.at_angstrom(self.wavelength, sc.scattering_type)
+              sc.fp, sc.fdp = fp_fdp
+              custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -194,8 +202,10 @@ class OlexCctbxAdapter(object):
               [-b for b in sfac_dict['gaussian'][1]],
               sfac_dict['gaussian'][2]))
           custom_fp_fdps[element] = sfac_dict['fpfdp']
-        self._xray_structure.set_custom_inelastic_form_factors(
-          custom_fp_fdps)
+      if null_disp == True:
+        inelastic_table = "custom"
+      self._xray_structure.set_custom_inelastic_form_factors(
+        custom_fp_fdps, source=inelastic_table)
       if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
         if OV.GetParam("snum.refinement.program") == "olex2.refine":
           custom_gaussians = {}
@@ -207,8 +217,7 @@ class OlexCctbxAdapter(object):
     # init disp
     for i, disp in self.olx_atoms.disp_iterator():
       sc = self._xray_structure.scatterers()[i]
-      sc.fp = disp[0]
-      sc.fdp = disp[1]
+      sc.fp, sc.fdp = disp
       sc.flags.set_grad_fp(True)
       sc.flags.set_grad_fdp(True)
 
@@ -301,7 +310,7 @@ class OlexCctbxAdapter(object):
       miller_set_ = miller_set
     if (ignore_inversion_twin
         and self.twin_components is not None
-        and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
       apply_twin_law = False
     if (apply_twin_law
         and self.twin_components is not None):
@@ -375,8 +384,8 @@ class OlexCctbxAdapter(object):
             pass
       miller_set = miller.set(
         crystal_symmetry=self.xray_structure().crystal_symmetry(),
-        indices=flex.miller_index(indices)).auto_anomalous().map_to_asu()
-      return miller.array(miller_set=miller_set, data=flex.complex_double(data))
+        indices=flex.miller_index(indices)).auto_anomalous()
+      return miller.array(miller_set=miller_set, data=flex.complex_double(data)).map_to_asu()
     mask_fn = os.path.join(OV.StrDir(), OV.FileName())+"-f_mask.pickle"
     if os.path.exists(mask_fn):
       return easy_pickle.load(mask_fn)
@@ -733,14 +742,23 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     """P. van der Sluis and A. L. Spek, Acta Cryst. (1990). A46, 194-201."""
     from scitbx.math import approx_equal_relatively
     from libtbx.utils import xfrange
+    from smtbx.structure_factors import direct
     assert mask.mask is not None
     if mask.n_voids() == 0: return
     if mask.use_set_completion:
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    mask.f_calc = f_calc_set.structure_factors_from_scatterers(
-      mask.xray_structure, algorithm="direct").f_calc()
+    use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    if use_tsc == True:
+      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      xray_structure = mask.xray_structure
+      one_h = direct.f_calc_modulus_squared(
+        xray_structure, table_file_name=table_name)
+      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+    else:
+      mask.f_calc = f_calc_set.structure_factors_from_scatterers(
+        mask.xray_structure, algorithm="direct").f_calc()
     f_obs = mask.f_obs()
     mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
       flex.abs(mask.f_calc.data()))
@@ -758,7 +776,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     for i in range(max_cycles):
       mask.diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
       mask.diff_map.apply_volume_scaling()
-      stats = mask.diff_map.statistics()
+      #stats = mask.diff_map.statistics()
       masked_diff_map = mask.diff_map.real_map_unpadded().set_selected(
         mask.mask.data.as_double() == 0, 0)
       mask.f_000 = 0
@@ -1120,6 +1138,99 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
 
 OV.registerFunction(generate_DISP, False, "sfac")
 
+def make_DISP_Table():
+  """
+  builds a html table of Anom Disp correction values for a given element
+  """
+  element = OV.GetVar('anom_disp_el')
+  if element == '':
+    element = element_list().split(";")[0]
+    OV.SetVar('anom_disp_el', element)
+  from cctbx.eltbx import sasaki
+  tables_S = sasaki
+  from cctbx.eltbx import henke
+  tables_H = henke
+  from brennan import brennan
+  tables_B = brennan()
+  def row(rowdata, color='white', color2="black"):
+    """
+    creates a table row for the restraints list.
+    :type rowdata: list
+    """
+    td = []
+    for num, item in enumerate(rowdata):
+      if num == 0:
+        td.append(r"""<td width='30%' align='left' {0} ><b><font color={1}> {2} </font></b></td>""".format("bgcolor={}".format(color), color2, item))
+      else:
+        float(item)
+        td.append(r"""<td width='23%' align='center' {0} ><b><font color={1}> {2:.3f} </font></b></td>""".format("bgcolor={}".format(color), color2, item))
+    if not td:
+      row = "<tr> No disp data given. </tr>"
+    else:
+      row = "<tr> {} </tr>".format(''.join(td))
+    return row
+  e = str(element)
+  table = []
+  import olexex
+  rm = olexex.OlexRefinementModel()
+  atoms = rm.atoms()
+  refined_disp = []
+  for a in atoms:
+    if 'disp' in a:
+      fp, fdp = a['disp']
+      refined_disp.append((a['label'], fp, fdp))
+  empty_data = """
+  <b>There may be no Disp data or an error occured.</b>
+  """
+  try:
+    table_B = tables_B.table(e)
+    table_H = tables_H.table(e)
+    wavelength = olx.xf.exptl.Radiation()
+    wavelength = float(wavelength)
+    f_B = table_B.at_angstrom(wavelength)
+    f_H = table_H.at_angstrom(wavelength)
+
+    table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
+    table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
+    if e != 'H':
+      table_S = tables_S.table(e)
+      f_S = table_S.at_angstrom(wavelength)
+      table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
+    else:
+      table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
+    for entry in refined_disp:
+      if e in entry[0]:
+        table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
+  except:
+    return empty_data
+  html = r"""
+    <tr>
+       <td width='30%'align='left'><b>Table </b></td>
+       <td width='23%'align='center'><b>f' [e]</b></td>
+       <td width='23%'align='center'><b>f'' [e]</b></td>
+       <td width='23%'align='center'><b>mu [barns]</b></td>
+    </tr>
+    {0}
+    """.format('\n'.join(table))
+  if not table:
+    return empty_data
+  return html
+
+OV.registerFunction(make_DISP_Table, False, "disp")
+
+def element_list():
+  import olexex
+  rm = olexex.OlexRefinementModel()
+  elements = rm.get_unique_types(use_charges=True)
+  elements = list(elements)
+  elements.sort()
+  r = ""
+  for e in elements:
+    r += "{};".format(e)
+  OV.SetVar('anom_disp_el', r.split(";")[0])
+  return r
+OV.registerFunction(element_list, False, "disp")
+
 def get_R_cov_Z_from_SFAC_file(table_file_name):
   rv = {}
   with open(table_file_name, 'r') as sfac:
@@ -1199,6 +1310,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   else:
     sfac_elms = set()
   elms = set([x.lower() for x in rm.get_unique_types(use_charges=True)])
+  elms |= set([ec.split(':')[0].lower() for ec in olx.xf.GetFormula('list').split(',')])
   if sfac and len(elms) == len(sfac_elms) and elms.issubset(sfac_elms) and not force:
     return
   def_table_file_name = os.path.join(olx.BaseDir(), "etc", "ED", "SFAC_Peng_1999.txt")

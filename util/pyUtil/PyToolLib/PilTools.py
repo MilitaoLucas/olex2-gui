@@ -1292,6 +1292,7 @@ class timage(ArgumentParser):
   def make_round_info_buttons(self):
     # MAKE ROUND INFO BUTTONS
     height = OV.GetParam('gui.timage.h3.height')
+    info_circle = OV.GetParam('gui.timage.h3.info_circle')
     fill = '#ffffff'
     width = height * 2
     height = int(round(width*1.5))
@@ -1299,25 +1300,28 @@ class timage(ArgumentParser):
     circle_top = 12 * self.scale
     IM =  Image.new('RGBA', size,(0,0,0,0))
     draw = ImageDraw.Draw(IM)
-    xy = (2 * self.scale, circle_top, 36 * self.scale, circle_top + 36 * self.scale)
+    
+    xy = (2 * self.scale, circle_top, info_circle * self.scale, circle_top + info_circle * self.scale)
     draw.ellipse(xy, fill = '#ffffff')
     states = ['', 'on', 'off', 'hover', 'hoveron']
     r,g,b,a = IM.split()
 
-    font_info = IT.registerFontInstance("Serif Bold Italic", 42 * self.scale)
-    top = circle_top - 13 * self.scale
+    font_info = IT.registerFontInstance("Serif Bold Italic", int(info_circle * self.scale))
+    itop = int(circle_top - info_circle/4 * self.scale)
     adjust = 1 * self.scale
     if self.width < 400:
       adjust = 0.8 * self.scale
     for state in states:
       if state == "off":
         col = IT.colourize(IM, (0,0,0,0), IT.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.8))
+        ifill = '#ffffff'
       else:
         col = IT.colourize(IM, (0,0,0,0), self.highlight_colour)
+        ifill = '#ffffff'
       fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
       fIM.paste(col, mask=a)
       draw = ImageDraw.Draw(fIM)
-      draw.text((14*self.scale,top), 'i', font=font_info, fill='#ffffff')
+      draw.text((int(info_circle/2.4*self.scale),itop), 'i', font=font_info, fill=ifill)
       _ = int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))
       name = "btn-info%s.png" %(state)
       fIM = IT.resize_image(fIM, size=_, name=name)
@@ -2785,7 +2789,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
-      sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
+      sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
       image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
@@ -3123,9 +3127,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        )
 
 
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif",):
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif", max_height=50):
     dr = draw
-    im = Image.new('RGBA', (self.width, 30 * self.scale), (0,0,0,0))
+    im = Image.new('RGBA', (self.width, max_height * self.scale), (0,0,0,0))
     draw = ImageDraw.Draw(im)
     upon_advance = None
     base_colour = self.params.html.base_colour.rgb
@@ -3243,7 +3247,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 #            cur_pos += advance
         i+= 1
 
-      cut = int(left_start) + int(ls * self.scale), int(ts * self.scale), int(cur_pos + advance + right_margin), int(30 * self.scale)
+      cut = int(left_start) + int(ls * self.scale), int(ts * self.scale), int(cur_pos + advance + right_margin), int(max_height * self.scale)
       sg = im.crop(cut)
       #sg.show()
       return sg, sg.size
@@ -3699,73 +3703,85 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return "Done"
 
   def info_bitmaps(self, specific=None, colour='#ff4444', factor = 4):
+    if not debug and specific:
+      if OlexVFS.exists("%s.png" %specific):
+        return
+
     if olx.CurrentLanguage() == "Chinese":
       font_size = 24 * factor
       top = 4  * factor
     else:
       font_size = 24  * factor
-      top = -1  * factor
+      top = 0  * factor
 
     info_bitmap_font = "DefaultFont"
 
     if specific:
+      spec_size = len(specific)
+      if spec_size % 2 != 0:
+        spec_size += 1
+      temp = spec_size
+      while temp > 2:
+        temp /= 2
+        if temp < 2:
+          spec_size += 2
+          temp = spec_size
       info_bitmaps = {
-        specific:{'label':'%s' %specific,
-                'name':'%s' %specific,
-                'color':'%s' %colour,
-                'size':((len(specific) * 12 * factor, 32 * factor)),
-                'font_colour':"#ffffff",
-                }
-        }
+        specific: {'label': '%s' % specific,
+                   'name': '%s' % specific,
+                   'color': '%s' % colour,
+                   'size': ((spec_size * 16 * factor, 32 * factor)),
+                   'font_colour': "#ffffff",
+                   }
+      }
     else:
       info_bitmaps = {
-      'refine':{'label':'Refining',
-                'name':'refine',
-                'color':'#ff4444',
-                'size':(128 * factor, 32 * factor),
-                'font_colour':"#ffffff",
-                },
-      'solve':{'label':'Solving',
-               'name':'solve',
-               'color':'#ff4444',
-               'size':(128 * factor, 32 * factor),
-                'font_colour':"#ffffff",
-               },
-      'working':{'label':'Working',
-                'name':'working',
-                'color':'#ff4444',
-                'size':(128 * factor, 32 * factor),
-                'font_colour':"#ffffff",
-                },
-                }
+          'refine': {'label': 'Refining',
+                     'name': 'refine',
+                     'color': '#ff4444',
+                'size':(256 * factor, 32 * factor),
+                     'font_colour': "#ffffff",
+                     },
+          'solve': {'label': 'Solving',
+                    'name': 'solve',
+                    'color': '#ff4444',
+               'size':(256 * factor, 32 * factor),
+                    'font_colour': "#ffffff",
+                    },
+          'working': {'label': 'Working',
+                      'name': 'working',
+                      'color': '#ff4444',
+                'size':(256 * factor, 32 * factor),
+                      'font_colour': "#ffffff",
+                      },
+      }
     for bit in info_bitmaps:
       map = info_bitmaps[bit]
       colour = map.get('color', '#ffffff')
-      name = map.get('name','untitled')
+      name = map.get('name', 'untitled')
       txt = map.get('label', '')
       size = map.get('size')
       image = Image.new('RGB', size, colour)
       draw = ImageDraw.Draw(image)
       IT.write_text_to_draw(draw,
-                                 txt,
-                                 top_left = (5 * factor, top),
-                                 font_name=info_bitmap_font,
-                                 font_size=font_size,
-                                 font_colour = map.get('font_colour', '#000000')
-                               )
-      image = IT.resize_image(image, (size[0]/factor, size[1]/factor), name=name)
+                            txt,
+                            top_left = (6 * factor, top),
+                            font_name=info_bitmap_font,
+                            font_size=font_size,
+                            font_colour=map.get('font_colour', '#000000')
+                            )
+      image = IT.resize_image(image, (size[0] / factor, size[1] / factor), name=name)
       OlexVFS.save_image_to_olex(image, name, 2)
 
-
-  #def gradient_bgr(self, draw, width, height):
-    #for i in xrange(16):
-      #if i < height/3:
+  # def gradient_bgr(self, draw, width, height):
+    # for i in xrange(16):
+      # if i < height/3:
         #incrementA = int(0.6*i*(58/height))
         #incrementB = int(0.6*i*(44/height))
-      #elif height/3 < i < (height/3)*2:
+      # elif height/3 < i < (height/3)*2:
         #incrementA = int(1.2*i*(58/height))
         #incrementB = int(1.2*i*(44/height))
-      #else:
+      # else:
         #incrementA = int(1.4*i*(58/height))
         #incrementB = int(1.4*i*(44/height))
 
@@ -3774,9 +3790,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #R = int(237-incrementA)
       #G = int(237-incrementA)
       #B = int(245-incrementB)
-      ##print i, R,G,B
+      # print i, R,G,B
       #draw.line((begin ,end), fill=(R, G, B))
-
 
 def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
   base_colour = OV.GetParam('gui.html.base_colour').rgb

@@ -144,13 +144,13 @@ class GeneratedGuiMaker(object):
       {'varName': '_exptl_crystal_size',
        'itemName': '%Size% & %Shape%',
        'box1': {'varName': '_exptl_crystal_size_min',
-                'width': '20%'
+                'width': '20%',
                 },
        'box2': {'varName': '_exptl_crystal_size_mid',
-                'width': '20%'
+                'width': '20%',
                 },
        'box3': {'varName': '_exptl_crystal_size_max',
-                'width': '20%'
+                'width': '20%',
                 },
        'box4': {'varName': '_exptl_crystal_description',
                 'items': "'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank'",
@@ -379,7 +379,7 @@ class GeneratedGuiMaker(object):
       {'varName': '_publ_requested_journal',
        'itemName': '%Requested% %Journal%',
        'items': "'%s'" % userDictionaries.localList.getListJournals(),
-       'readonly': '',
+       'readonly': 'true',
        'value': 'spy.get_cif_item(_publ_requested_journal)',
        'onchange': "spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
        })

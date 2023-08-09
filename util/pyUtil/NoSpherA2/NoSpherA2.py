@@ -182,18 +182,11 @@ class NoSpherA2(PT):
       OV.SetVar("Parallel",True)
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      import multiprocessing
-      max_cpu = multiprocessing.cpu_count()
-      self.max_cpu = max_cpu
-      cpu_list = ['1',]
-      for n in range(1,max_cpu):
-        cpu_list.append(str(n+1))
-        self.cpu_list_str = ';'.join(cpu_list)
+      
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print("No MPI implementation found in PATH!\n")
-      self.cpu_list_str = '1'
+      print("No MPI implementation found in PATH!\nTonto, ORCA and other software relying on it will only have 1 CPU available!\n")
 
   def tidy_wfn_jobs_folder(self, part=None):
     if part == None:
@@ -279,7 +272,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return
 
     # This checks ne multiplicity and Number of electrons
-    if (wfn_code != "DISCAMB") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
+    if (wfn_code != "discambMATT") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       ne, adapter = calculate_number_of_electrons()
       heavy = False
       for sc in adapter.xray_structure().scatterers():
@@ -338,7 +331,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       cif = False
       if wfn_code == "Tonto":
         cif = True
-      elif wfn_code == "DISCAMB":
+      elif wfn_code == "discambMATT":
         cif = True
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
@@ -395,7 +388,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               out_cif.write(line)
 
         out_cif.close()
-        if wfn_code == "DISCAMB":
+        if wfn_code == "discambMATT":
           #DISCMAB is used
           discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
           shutil.copy(os.path.join(wfn_job_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
@@ -404,7 +397,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
           hybrid_part_wfn_code = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%(parts[i]))
-          if hybrid_part_wfn_code == "DISCAMB":
+          if hybrid_part_wfn_code == "discambMATT":
             groups.pop(i-groups_counter)
             groups_counter+=1
             discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
@@ -535,8 +528,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       # End of loop over parts
       if need_to_partition == True:
         cif_fn = os.path.join(self.jobs_dir, self.name + ".cif")
-        hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
-        cuqct_tsc(wfn_files, hkl_fn, cif_fn, groups)
+        #hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
+        cuqct_tsc(wfn_files, cif_fn, groups)
         if os.path.exists("experimental.tsc"):
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):
@@ -560,7 +553,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
-      if wfn_code == "DISCAMB":
+      if wfn_code == "discambMATT":
         cif = str(os.path.join(self.jobs_dir, self.name + ".cif"))
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(), self.jobs_dir), self.name, self.discamb_exe)
@@ -629,9 +622,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               for e in endings:
                 if os.path.exists(path_base + e):
                   wfn_fn = path_base + e
-            hkl_fn = path_base + ".hkl"
+            #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
-            cuqct_tsc(wfn_fn, hkl_fn, cif_fn, [-1000])
+            cuqct_tsc(wfn_fn, cif_fn, [-1000])
             if os.path.exists("experimental.tsc"):
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):
@@ -707,7 +700,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       method_part = OV.GetParam("snum.NoSpherA2.Hybrid.method_Part%d"%part)
       relativistc = OV.GetParam("snum.NoSpherA2.Hybrid.Relativistic_Part%d"%part)
       charge = OV.GetParam("snum.NoSpherA2.Hybrid.charge_Part%d"%part)
-      mult = OV.GetParam("snum.NoSpherA2.Hybrid.mult_Part%d"%part)
+      mult = OV.GetParam("snum.NoSpherA2.Hybrid.multiplicity_Part%d" % part)
       conv = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d"%part)
       strategy = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d"%part)
       damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d"%part)
@@ -917,7 +910,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def setup_discamb(self):
     self.discamb_exe = ""
-    exe_pre = "discamb2tsc"
+    exe_pre = OV.GetParam('user.NoSpherA2.discamb_exe')
 
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" % exe_pre)
@@ -933,8 +926,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.discamb_exe = olx.file.Which("%s" % exe_pre)
     if os.path.exists(self.discamb_exe):
-      if "DISCAMB" not in self.softwares:
-        self.softwares = self.softwares + ";DISCAMB"
+      if "discambMATT" not in self.softwares:
+        self.softwares = self.softwares + ";discambMATT"
     else:
       exe_pre = "discambMATTS2tsc"
       if sys.platform[:3] == 'win':
@@ -951,11 +944,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         else:
           self.discamb_exe = olx.file.Which("%s" % exe_pre)
       if os.path.exists(self.discamb_exe):
-        if "DISCAMB" not in self.softwares:
-          self.softwares = self.softwares + ";DISCAMB"
+        if "discambMATT" not in self.softwares:
+          self.softwares = self.softwares + ";discambMATT"
       else:
-        if OV.GetParam('user.NoSpherA2.enable_discamb') == True:
-          self.softwares = self.softwares + ";Get DISCAMB"
+        self.softwares = self.softwares + ";Get discambMATT"
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -987,7 +979,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return True
 
   def getCPUListStr(self):
-    return self.cpu_list_str
+    soft = OV.GetParam('snum.NoSpherA2.source')
+    import multiprocessing
+    max_cpu = multiprocessing.cpu_count()
+    cpu_list = ['1',]
+    for n in range(1, max_cpu):
+      cpu_list.append(str(n + 1))
+    # ORCA and Tonto rely on MPI, so only make it available if mpiexec is found
+    if soft == "Tonto" or "ORCA" in soft or soft == "fragHAR":
+      if not os.path.exists(self.mpiexec):
+        return '1'
+    # otherwise allow more CPUs
+    return ';'.join(cpu_list)
 
   def getwfn_softwares(self):
     parts = OV.ListParts()
@@ -1054,7 +1057,12 @@ def discamb(folder, name, discamb_exe):
       f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_max_min()[1], d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
       f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
-  os.environ['discamb_cmd'] = discamb_exe#'+&-'.join(move_args)
+  wavelength = float(olx.xf.exptl.Radiation())
+  if wavelength < 0.1:
+    #args.append("-ED")
+    os.environ['discamb_cmd'] = '+&-'.join([discamb_exe, "-e"])
+  else:
+    os.environ['discamb_cmd'] = discamb_exe
   os.environ['discamb_file'] = folder
   pyl = OV.getPYLPath()
   if not pyl:
@@ -1179,27 +1187,6 @@ class Job(object):
     if OV.GetParam('snum.NoSpherA2.wfn2fchk_SF') == True:
       args.append("-scf-only")
       args.append("t")
-    disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
-    if 'true' == disp:
-      import olexex
-      from cctbx.eltbx import henke
-      olex_refinement_model = OV.GetRefinementModel(False)
-      sfac = olex_refinement_model.get('sfac')
-      fp_fdps = {}
-      wavelength = olex_refinement_model['exptl']['radiation']
-      if sfac is not None:
-        for element, sfac_dict in sfac.items():
-          custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
-      asu = olex_refinement_model['aunit']
-      for residue in asu['residues']:
-        for atom in residue['atoms']:
-          element_type = atom['type']
-          if element_type not in fp_fdps:
-            fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
-            fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
-      disp_arg = " ".join(["%s %s %s" %(k, data2[0], data2[1]) for k,v in fp_fdps.items()])
-      args.append("-dispersion")
-      args.append('%s' %disp_arg)
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
@@ -1330,14 +1317,15 @@ def change_basisset(input):
     OV.SetParam('snum.NoSpherA2.Relativistic',False)
 OV.registerFunction(change_basisset,True,'NoSpherA2')
 
-def get_functional_list():
-  wfn_code = OV.GetParam('snum.NoSpherA2.source')
+def get_functional_list(wfn_code=None):
+  if wfn_code == None:
+    wfn_code = OV.GetParam('snum.NoSpherA2.source')
   list = None
   if wfn_code == "Tonto" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   elif wfn_code == "pySCF":
     list = "HF;PBE;B3LYP;BLYP;M062X"
-  elif wfn_code == "ORCA 5.0":
+  elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;R2SCAN;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   else:
     list = "HF;BP;BP86;PWLDA;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
@@ -1360,7 +1348,7 @@ def check_for_pyscf(loud=True):
         OV.SetParam('user.NoSpherA2.has_pyscf', True)
         nsp2 = get_NoSpherA2_instance()
         nsp2.softwares = nsp2.softwares.replace(";Get pySCF", ";pySCF")
-        olex.m("html.Update()")
+        olx.html.Update()
         return True
     except:
       pass
@@ -1502,7 +1490,7 @@ If that does not throw an error message you were succesfull.""", "O", False)
 
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
-    if input != "DISCAMB" and input != "Thakkar IAM":
+    if input != "discambMATT" and input != "Thakkar IAM":
       OV.SetParam('snum.NoSpherA2.h_aniso', True)
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
@@ -1575,7 +1563,7 @@ def toggle_GUI():
   else:
     OV.SetParam('snum.NoSpherA2.use_aspherical', True)
     set_default_cpu_and_mem()
-  olex.m("html.Update()")
+  olx.html.Update()
 OV.registerFunction(toggle_GUI,True,'NoSpherA2')
 
 def sample_folder(input_name):

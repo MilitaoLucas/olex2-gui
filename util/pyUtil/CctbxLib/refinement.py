@@ -10,6 +10,7 @@ from olexFunctions import OV
 import olx
 import olex
 import olex_core
+import gui
 
 from cctbx.array_family import flex
 from cctbx import maptbx, miller, sgtbx, uctbx, xray, crystal
@@ -95,7 +96,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       max_threads = int(OV.GetVar("refine.max_threads", 0))
       if max_threads == 0:
-        max_threads = env.physical_cores // 2
+        max_threads = max(1, int(os.cpu_count() *3/4))
       if max_threads is not None:
         ext.build_normal_equations.available_threads = max_threads
         env.threads = max_threads
@@ -106,6 +107,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
+    self.normal_equations_class = normal_equations_class
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
@@ -120,20 +122,28 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         self.f_mask = self.load_mask()
       if not self.f_mask:
-        OlexCctbxMasks()
-        if olx.current_mask.flood_fill.n_voids() > 0:
-          self.f_mask = olx.current_mask.f_mask()
+        _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+        if _ == "Platon":
+          olex.m("spy.OlexPlaton(q,.ins)")
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
+          self.f_mask = self.load_mask()
+        else:
+          OlexCctbxMasks()
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
+          if olx.current_mask.flood_fill.n_voids() > 0:
+            self.f_mask = olx.current_mask.f_mask()
       if self.f_mask:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric() and fo_sq.anomalous_flag():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
-    shared_parameter_constraints, fix_occupancy_for = self.setup_shared_parameters_constraints()
+    shared_parameter_constraints, fix_occupancy_for, sump_proxies =\
+      self.setup_shared_parameters_constraints()
     # pre-build structure taking shared parameters into account
     self.xray_structure(construct_restraints=True,
       shared_parameters=shared_parameter_constraints)
     # some of the SUMP got reduced to fixed occupancy
     if fix_occupancy_for:
-      msg = "Consider updatign your model - occupancy has got reduced for:"
+      msg = "Consider updating your model - occupancy has got reduced for:"
       for sc_i, occu in fix_occupancy_for:
         sc = self.xray_structure().scatterers()[sc_i]
         sc.flags.set_grad_occupancy(False)
@@ -141,6 +151,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         msg += " %s.occu=%.3f" %(sc.label, occu)
       print(msg)
     restraints_manager = self.restraints_manager()
+    restraints_manager.sump_proxies = sump_proxies
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     self.fixed_distances = {}
@@ -184,21 +195,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
 
-    def build_ed_reparametrisation(self, thickness, twin_fractions):
-      ed_reparametrisation = constraints.reparametrisation(
-        structure=self.xray_structure(),
-        constraints=self.constraints,
-        connectivity_table=self.connectivity_table,
-        twin_fractions=twin_fractions,
-        temperature=self.temp,
-        fc_correction=self.fc_correction,
-        directions=self.directions,
-        thickness=thickness
-      )
-      ed_reparametrisation.fixed_distances.update(self.fixed_distances)
-      ed_reparametrisation.fixed_angles.update(self.fixed_angles)
-      return ed_reparametrisation
-
     self.std_obserations = None
     if ed_refinement:
       import AC6 as ac6
@@ -206,27 +202,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         aci = ac6.AC_instance
       except:
         aci = ac6.AC6.AC_instance
-
-      thickness = 400
-      grad_t = True
-      ed = self.olx_atoms.model['Generic'].get('ED', None)
-      if ed is not None:
-        st = ed.get('thickness', None)
-        if st:
-          thickness = float(st['value'])
-          grad_t = st['fields'].get('grad', 'true').lower() == 'true'
-
-      print("Thickness: %s" %thickness)
-      self.thickness = xray.thickness(thickness, grad_t)
-      self.std_obserations = self.observations
-      self.observations = aci.EDI.build_observations(
-        self.xray_structure(),
-        anomalous_flag=self.std_obserations.fo_sq.anomalous_flag())
-      self.std_obserations = self.observations.fo_sq.select(
-        self.observations.fo_sq.unique_under_symmetry_selection())\
-        .as_xray_observations()
-      self.reparametrisation = build_ed_reparametrisation(
-        self, self.thickness, self.observations.twin_fractions)
+      aci.EDI.setup_refinement(self)
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
@@ -248,7 +224,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
 
-    self.normal_eqns = normal_equations_class(
+    self.normal_eqns = self.normal_equations_class(
       self.observations,
       self,
       self.olx_atoms,
@@ -1078,11 +1054,14 @@ The following options were used:
   def get_fcf_data(self, anomalous_flag, use_fc_sq=False):
     if self.hklf_code == 5 or\
       (self.twin_components is not None
-        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        and self.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
       if self.use_tsc:
         fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
       else:
         fo_sq, fc = self.get_fo_sq_fc()
+      if self.f_mask:
+        f_mask = self.f_mask.common_set(fc)
+        fc = fc.array(data=fc.data()+f_mask.data())
       fo_sq = fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
         sigmas=fo_sq.sigmas()*(1/self.scale_factor),
@@ -1215,6 +1194,7 @@ The following options were used:
     shared_adps = {}
     shared_sites = {}
     constraints = []
+    sump_proxies = None
     constraints_itr = self.olx_atoms.constraints_iterator()
     for constraint_type, kwds in constraints_itr:
       i_seqs = kwds["i_seqs"]
@@ -1281,86 +1261,24 @@ The following options were used:
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
     fix_occupancy_for = []
-    idslist = []
-    if(len(equations)>0):
-      # number of free variables
-      FvarNum=0
-      while OV.GetFVar(FvarNum) is not None:
-        FvarNum+=1
 
-      # Building matrix of equations
-      lineareq = numpy.zeros((0,FvarNum))
-      rowheader = {}
-      nextfree = -1
-      ignored = False
-      for equation in equations:
-        ignored = False
-        row = numpy.zeros((FvarNum))
-        for variable in equation['variables']:
-          ref = variable[0]['references'][-1]
-          sc_id = ref['id']
-          label = "%s %d %d"%(ref['name'], sc_id, ref['index'])
-          if(ref['index']==4): #occupancy
-            if(label not in rowheader):
-              nextfree+=1
-              rowheader[label]=nextfree
-              idslist.append(sc_id)
-              key=nextfree
-            else:
-              key=rowheader[label]
-            row[key]=variable[1]*scatterers[sc_id].weight_without_occupancy()/\
-              ref['k']
-          else:
-            ignored = True
-        row[FvarNum-1]=equation['value']
-        if(not ignored):
-          lineareq=numpy.append(lineareq, [row], axis=0)
-
-      # LU decomposition to find incompatible or redundant constraints
-      l,u = scipy.linalg.lu(lineareq, permute_l=True)
-
-      if numpy.shape(u)[0] > 1:
-        previous = u[-2,:]
-        for row in numpy.flipud(u):
-          if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
-            (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
-            raise Exception("One or more equations are not independent")
-          previous = row
-
-      # setting up constraints
-      for row in numpy.flipud(u):
-        nn_cnt = 0
-        nn_idx = -1
-        a = numpy.copy(row[:-1])
-        for idx, v in enumerate(a):
-          if v != 0.0:
-            nn_cnt+=1
-            nn_idx = idx
-        if(nn_cnt == 0):
-          raise Exception("One or more equations are not independent")
-        else:
-          if nn_cnt == 1: # reduced
-            fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
-          else:
-            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
-            constraints.append(current)
-
+    dependent_occu = {}
+    #dependent_occupancy will refine only the occupancy of the first scatterer
     for i, var in enumerate(vars):
       refs = var['references']
       as_var = []
       as_var_minus_one = []
       eadp = []
       for ref in refs:
-        if(ref['id'] not in idslist):
-          if ref['index'] == 4 and 'var' in ref['relation']:
-            id, k = ref['id'], ref['k']
-            k /= scatterers[id].weight_without_occupancy()
-            if ref['relation'] == "var":
-              as_var.append((id, k))
-            elif ref['relation'] == "one_minus_var":
-              as_var_minus_one.append((id, k))
-        if ref['index'] == 5 and ref['relation'] == "var":
-          eadp.append(ref['id'])
+        if ref['index'] == 4 and 'var' in ref['relation']:
+          id, k = ref['id'], ref['k']
+          k /= scatterers[id].weight_without_occupancy()
+          if ref['relation'] == "var":
+            as_var.append((id, k))
+          elif ref['relation'] == "one_minus_var":
+            as_var_minus_one.append((id, k))
+      if ref['index'] == 5 and ref['relation'] == "var":
+        eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
           print("Invalid variable use - mixes occupancy and U")
@@ -1369,15 +1287,104 @@ The following options were used:
         constraints.append(current)
         if len(as_var) > 0:
           scale = as_var[0][1]
-          as_var = True
+          dependent_occu[as_var[0][0]] = current
+          is_as_var = True
         else:
-          as_var = False
           scale = as_var_minus_one[0][1]
-        self.shared_param_constraints.append((i, current, 1./scale, as_var))
+          dependent_occu[as_var_minus_one[0][0]] = current
+          is_as_var = False
+        self.shared_param_constraints.append((i, current, 1./scale, is_as_var))
       elif len(eadp) > 1:
         current = adp.shared_u(eadp)
         constraints.append(current)
         self.shared_param_constraints.append((i, current, 1, True))
+
+    if(len(equations)>0):
+      from cctbx import other_restraints
+      sump_proxies = other_restraints.shared_sump_proxy()
+      for equation in equations:
+        i_seqs, coefficients = [], []
+        labels, all_i_seqs, group_sizes = [], [], []
+        for variable in equation['variables']:
+          id_found = False
+          group_size = 0
+          for r in variable[0]['references']:
+            if(ref['index'] != 4): #occupancy
+              continue
+            group_size += 1
+            sc_id = r['id']
+            all_i_seqs.append(sc_id)
+            if not id_found and sc_id in dependent_occu:
+              ref = r
+              id_found = True
+          if not group_size:  continue
+          group_sizes.append(group_size)
+          labels.append("Var_%s" %(vars.index(variable[0])+1))
+          if not id_found:
+            ref = variable[0]['references'][-1]
+          sc_id = ref['id']
+          i_seqs.append(sc_id)
+          k = variable[1]*scatterers[sc_id].weight_without_occupancy()/\
+            ref['k']
+          coefficients.append(k)
+        weight = 1/math.pow(equation['sigma'],2)
+        p = other_restraints.sump_proxy(i_seqs, coefficients, weight, equation['value'],
+                                        labels, all_i_seqs, group_sizes)
+        sump_proxies.append(p)
+      if 'constraint' == OV.GetParam('snum.smtbx.sump'):
+        FvarNum = len(vars)
+        idslist = []
+        # Building matrix of equations
+        lineareq = numpy.zeros((0,FvarNum))
+        rowheader = {}
+        nextfree = -1
+        for proxy in sump_proxies:
+          row = numpy.zeros((FvarNum))
+          for i, i_seq in enumerate(proxy.i_seqs):
+            if(i_seq not in rowheader):
+              nextfree+=1
+              rowheader[i_seq]=nextfree
+              idslist.append(i_seq)
+              key=nextfree
+            else:
+              key=rowheader[i_seq]
+            row[key]=proxy.coefficients[i]
+          row[FvarNum-1]=proxy.target
+          lineareq=numpy.append(lineareq, [row], axis=0)
+        sump_proxies = None
+        # LU decomposition to find incompatible or redundant constraints
+        l,u = scipy.linalg.lu(lineareq, permute_l=True)
+
+        if numpy.shape(u)[0] > 1:
+          previous = u[-2,:]
+          for row in numpy.flipud(u):
+            if((numpy.all(row[0:-1]==0.0) and row[-1]!=0) or\
+              (numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1])):
+              raise Exception("One or more equations are not independent")
+            previous = row
+
+        # setting up constraints
+        for row in numpy.flipud(u):
+          nn_cnt = 0
+          nn_idx = -1
+          a = numpy.copy(row[:-1])
+          for idx, v in enumerate(a):
+            if v != 0.0:
+              nn_cnt+=1
+              nn_idx = idx
+          if(nn_cnt == 0):
+            raise Exception("One or more equations are not independent")
+          else:
+            if nn_cnt == 1: # reduced
+              fix_occupancy_for.append((idslist[nn_idx], row[-1]/a[nn_idx]))
+            else:
+              current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+              constraints.append(current)
+              #sort order of creation
+              if idslist[0] in dependent_occu:
+                dep_occu = dependent_occu[idslist[0]]
+                constraints.remove(dep_occu)
+                constraints.append(dep_occu)
 
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
@@ -1386,7 +1393,7 @@ The following options were used:
     for sd in same_disp:
       constraints.append(fpfdp.shared_fp(sd))
       constraints.append(fpfdp.shared_fdp(sd))
-    return constraints, fix_occupancy_for
+    return constraints, fix_occupancy_for, sump_proxies
 
   def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
     ##fix angles
@@ -1671,8 +1678,10 @@ The following options were used:
         ), file=log)
 
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
+    n_restraints = self.normal_eqns.n_restraints +\
+      len(self.normal_eqns.origin_fixing_restraint.singular_directions)
     print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
-      %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
+      %(self.n_constraints, n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
 
     OV.SetParam("snum.refinement.max_shift_over_esd",
       max_shift_esd)

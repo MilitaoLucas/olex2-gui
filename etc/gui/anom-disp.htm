@@ -1,0 +1,43 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SEL_AND_MUPLOT';help_ext=Anomalous-Dispersion;1 -->
+  <td width="12%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=anom_disp@element",
+    "items=spy.disp.element_list()",
+    "value=GetVar('anom_disp_el')",
+    "onchange=setvar('anom_disp_el', html.GetValue('~name~'))>>html.Update()")
+  $-
+  </td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='&mu; Plot'",
+    "onclick=spy.MuPlot()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="44%" align='center'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Anomalous Dispersion Plot'",
+    "onclick=spy.AnomDispPlot()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="44%" align='center'>",
+    )
+  $-
+  <td> </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ANOM_DISP_TABLE';help_ext=Disp2;1 -->
+<td>
+  <table width="100%" align='center' border="0" style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="3" bgcolor="$GetVar(HtmlTableBgColour)">
+    $spy.disp.make_DISP_Table()
+  </table>
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+<!-- %Anom Disp% -->
