@@ -305,6 +305,15 @@ class ImageTools(FontInstances):
       
     retVal = "#%s%s%s" %(r, g, b)
     return retVal
+  
+  def decimalColorToRGB(self, dec_colour):
+    
+    r = dec_colour & 255
+    g = (dec_colour >> 8) & 255
+    b = (dec_colour >> 16) & 255
+
+    retVal = (r, g, b)
+    return retVal  
 
   def getOlexVariables(self):
     # self.encoding = self.test_encoding(self.gui_language_encoding) ##Language

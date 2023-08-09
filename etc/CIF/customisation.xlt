@@ -27,7 +27,7 @@
       <pivot "_diffrn_reflns">  <pivot "_diffrn">
       <pivot "_reflns">
       <pivot "_computing">
-      <pivot "_refine"> <pivot "_olex2_refinement_description">
+      <pivot "_refine"> <pivot "_olex2_refinement_description"> <pivot "_olex2_refine_details">
       <pivot "_atom_sites">  <pivot "_atom_site">  <pivot "_atom_site_aniso">
       <pivot "_geom_special">  <pivot "_geom_bond">  <pivot "_geom_angle">  <pivot "_geom">
       <pivot "_smtbx">

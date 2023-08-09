@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import subprocess
 
@@ -9,7 +8,7 @@ if not os.path.exists(discamb_file):
   time.sleep(10)
   exit(1)
 os.chdir(discamb_file)
-args = os.getenv("discamb_cmd", "")#.split('+&-')
+args = os.getenv("discamb_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'" + ' in: ' + discamb_file)
 p = subprocess.Popen(args)
 tries = 0

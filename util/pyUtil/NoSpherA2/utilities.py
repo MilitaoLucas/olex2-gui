@@ -32,17 +32,36 @@ def run_with_bitmap(bitmap_text):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
       OV.CreateBitmap(bitmap_text)
+      olx.html.Update()
+      olx.xf.EndUpdate()
+      olex.m('refresh')
       try:
         return func(*args, **kwargs)
       except Exception as e:
         raise e
       finally:
         OV.DeleteBitmap(bitmap_text)
+        olx.html.Update()
+        olx.xf.EndUpdate()
+        olex.m('refresh')
     return wrapper
   return decorator
 
+def write_merged_hkl():
+  folder = OV.FilePath()
+  name = OV.ModelSrc()
+  fn = os.path.join(folder, name + "_merged.hkl")
+  print("Writing " + fn)
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adaptor = OlexCctbxAdapter()
+  with open(fn, "w") as out:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+    f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
+  print("Done!")
+OV.registerFunction(write_merged_hkl, True, "NoSpherA2")
+
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=False):
+def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
   basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -51,19 +70,23 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
+    olx.html.Update()
+    olx.xf.EndUpdate()
+    olex.m('refresh')
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
   args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   args.append(wfn_2_fchk)
-  if not os.path.exists(hkl_file):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx_adaptor = OlexCctbxAdapter()
-    with open(hkl_file, "w") as out:
-      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs
-      f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_max_min()[1]*0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
-      f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  cctbx_adaptor = OlexCctbxAdapter()
+  f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+  if not hkl_file is None:
+    if not os.path.exists(hkl_file):
+      with open(hkl_file, "w") as out:
+        f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
+        f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   if (int(ncpus) > 1):
     args.append('-cpus')
     args.append(ncpus)
@@ -114,13 +137,15 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  args.append("-hkl")
-  args.append(hkl_file)
+  # args.append("-hkl")
+  # args.append(hkl_file)
+  args.append("-dmin")
+  args.append(str(f_sq_obs.d_min() * 0.95))
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
       if len(wfn_file) != len(groups) or len(wfn_file) != len(groups):
-        print("Insonstiant size of parameters! ERROR!")
+        print("Inconsistant size of parameters! ERROR!")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])
@@ -133,7 +158,7 @@ def cuqct_tsc(wfn_file, hkl_file, cif, groups, save_k_pts=False, read_k_pts=Fals
       args.append(cif)
       args.append("-mtc")
       if len(wfn_file) != len(groups):
-        print("Insonstiant size of parameters! ERROR!")
+        print("Inconsistant size of parameters! ERROR!")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])

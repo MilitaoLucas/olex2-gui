@@ -212,7 +212,7 @@ snum{
       .type = bool
     ORCA_USE_GBW = True
       .type = bool
-    ORCA_CRYSTAL_QMMM_TYPE = "Molecule"
+    ORCA_CRYSTAL_QMMM_TYPE = "Mol"
       .type = str
     ORCA_CRYSTAL_QMMM_RADIUS = "12.0"
       .type = str

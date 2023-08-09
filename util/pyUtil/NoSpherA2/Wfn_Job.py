@@ -798,7 +798,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       else:
         if convergence == "NoSpherA2SCF":
           inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
-      if run > 1 or convergence == "NoSpherA2SCF":
+      if (run > 1 and os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw"))) or convergence == "NoSpherA2SCF":
         inp.write("\nend\n")
     else:
       if convergence == "NoSpherA2SCF":
@@ -1436,6 +1436,9 @@ ener = cf.kernel()"""
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
           txt_col='black_text')
+    olx.html.Update()
+    olx.xf.EndUpdate()
+    olex.m('refresh')
     python_script = "fchk-launch.py"
 
     if software == "ORCA":
@@ -1479,7 +1482,7 @@ ener = cf.kernel()"""
         args.append(self.parent.ubuntu_exe)
         args.append('run')
         args.append("python %s"%input_fn)
-      elif self.ubuntu_exe == None:
+      elif self.parent.ubuntu_exe == None:
         args.append('python')
         args.append(input_fn)
     elif software == "ELMOdb":
@@ -1498,9 +1501,41 @@ ener = cf.kernel()"""
       args.append(">")
       args.append(self.name + ".out")
 
+    out_fn = None
+    path = self.full_dir
+    nr = 0
+    if sys.platform[:3] == 'win':
+      nr = 2
+    # if part != 0:
+    #  path = os.path.join(path,"Part_"+str(part))
+    if software == "Psi4":
+      out_fn = os.path.join(path, self.name + "_psi4.log")
+    else:
+      if "orca" in args[0]:
+        out_fn = os.path.join(path, self.name + "_orca.log")
+      elif "elmo" in args[nr]:
+        out_fn = os.path.join(path, self.name + ".out")
+      elif "python" in args[nr]:
+        out_fn = os.path.join(path, self.name + "_pyscf.log")
+      if "ubuntu" in args[0]:
+        print("Starting Ubuntu for wavefunction calculation, please be patient for start")
+      if out_fn == None:
+        if "ubuntu" in args[0]:
+          out_fn = os.path.join(path, self.name + "_pyscf.log")
+        else:
+          out_fn = os.path.join(path, self.name + ".log")
+
     os.environ['fchk_cmd'] = '+&-'.join(args)
     os.environ['fchk_file'] = self.name
-    os.environ['fchk_dir'] = os.path.join(OV.FilePath(),self.full_dir)
+    os.environ['fchk_dir'] = os.path.join(OV.FilePath(), self.full_dir)
+    os.environ['fchk_out_fn'] = out_fn
+    pidfile = os.path.join(path, "NoSpherA2.pidfile")
+
+    if os.path.exists(out_fn):
+      print("Moving file to old!")
+      shutil.move(out_fn, out_fn + '_old')
+    if os.path.exists(pidfile):
+      os.remove(pidfile)
 
     import subprocess
     p = None
@@ -1514,7 +1549,8 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)],
-                            startupinfo=startinfo, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                            startupinfo=startinfo
+                           )
     else:
       pyl = OV.getPYLPath()
       if not pyl:
@@ -1522,30 +1558,6 @@ ener = cf.kernel()"""
         return
       p = subprocess.Popen([pyl,
                             os.path.join(p_path, python_script)])
-
-    out_fn = None
-    path = self.full_dir
-    nr = 0
-    if sys.platform[:3] == 'win':
-      nr = 2
-    #if part != 0:
-    #  path = os.path.join(path,"Part_"+str(part))
-    if software =="Psi4":
-      out_fn = os.path.join(path,self.name + "_psi4.log")
-    else:
-      if "orca" in args[0]:
-        out_fn = os.path.join(path,self.name + "_orca.log")
-      elif "elmo" in args[nr]:
-        out_fn = os.path.join(path,self.name + ".out")
-      elif "python" in args[nr]:
-        out_fn = os.path.join(path,self.name + "_pyscf.log")
-      if "ubuntu" in args[0]:
-        print("Starting Ubuntu for wavefunction calculation, please be patient for start")
-      if out_fn == None:
-        if "ubuntu" in args[0]:
-          out_fn = os.path.join(path,self.name + "_pyscf.log")
-        else:
-          out_fn = os.path.join(path,self.name + ".log")
 
     tries = 0
     time.sleep(0.5)
@@ -1565,16 +1577,25 @@ ener = cf.kernel()"""
         if x:
           print(x, end='')
         if OV.GetVar("stop_current_process"):
-          import signal
-          p.send_signal(signal.SIGTERM)
-          print("Calculation aborted by INTERRUPT!")
+          try:
+            #import signal
+            #pid = None
+            # with open(pidfile, "r") as pf:
+            #  line = pf.read()
+            #  pid = int(line)
+            #os.kill(pid, signal.SIGABRT)
+            #os.kill(pid, signal.SIGTERM)
+            print("Calculation aborted by INTERRUPT!")
+          except Exception as e:
+            print(e)
+            pass
           OV.SetVar("stop_current_process", False)
         else:
           time.sleep(0.5)
 
     print("\nWavefunction calculation ended!")
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
-    shutil.copy(out_fn, wfnlog)
+    shutil.copy(out_fn, wfnlog, follow_symlinks=False)
 
     if software == "ORCA" or software == "ORCA 5.0":
       if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
@@ -1605,7 +1626,7 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
     embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
-    if ("ECP" in basis_name and "orca" in args[0]) or embedding == True:      
+    if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding == True):
       molden_args = []
       molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
       if sys.platform[:3] == 'win':
@@ -1634,7 +1655,7 @@ ener = cf.kernel()"""
         shutil.move(n + ".molden.input", n + ".molden")
       else:
         OV.SetVar('NoSpherA2-Error', "NoMoldenFile")
-        raise NameError("No molden file generated generated!")
+        raise NameError("No molden file generated!")
 
     if("g03" in args[0]):
       shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))

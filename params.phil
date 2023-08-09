@@ -28,6 +28,13 @@ routines requiring structure refinement
       .expert_level = 1
     }
 
+   ED
+     .short_caption = ED parameters
+   {
+      combined_stats = False
+       .type = bool
+   }
+
   bonds
   {
   mask = 48
@@ -129,13 +136,15 @@ routines requiring structure refinement
   smtbx
     .short_caption = Solution & Refinement
     {
-    inelastic_form_factor_table = *henke sasaki
+    inelastic_form_factor_table = henke sasaki *brennan
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
     electron_table_name = *None Custom 'Peng-1996' 'Peng-1999' 'UCLA-2022' 'CAP-2022'
       .type = choice
     secondary_ch2_angle = idealise refine *shelxl
+      .type = choice
+    sump = *constraint restraint
       .type = choice
     }
 
@@ -314,6 +323,10 @@ routines requiring structure refinement
       .type = bool
     recompute_mask_before_refinement = False
       .type = bool
+    recompute_mask_before_refinement_prg = *Olex2 Platon
+      .type = choice
+    auto_add_masked_moieties = True
+      .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
     cifmerge_after_refinement = True
@@ -376,23 +389,6 @@ routines requiring structure refinement
       remove_anharm = False
         .type = bool
         .help = If set to TRUE, the structure will be automatically harmonized in case of bad PDF
-      }
-      ED
-        .short_caption = ED parameters
-      {
-        maxSg = 0.01
-          .type = float
-        maxG = 1.5
-          .type = float
-        minPS = 0.0005
-          .type = float
-          .help = Min perturbation strength for weak beams
-        top_up_d = 0.5
-          .type = float
-        method = *Kinematic 2-Beam Full-diff Full
-          .type = choice
-        matrix = Palatinus-2013 *Palatinus-2015 ReciPro 2-Beam Felix Florian
-          .type = choice
       }
   }
 
@@ -1012,7 +1008,7 @@ user
     .type = str
   reference = ""
     .type = str
-  def_style_scene_src_dir = basedir()/etc/styles/
+  def_style_scene_src_dir = datadir()/styles/
     .type = str
   def_style = 'default'
     .type = str
@@ -1201,6 +1197,26 @@ user
       }
       function_3 {
         colour = (255,0,0)
+          .type = colour
+      }
+      function_4 {
+        colour = (0,255,0)
+          .type = colour
+      }
+      function_5 {
+        colour = (0,255,255)
+          .type = colour
+      }
+      function_6 {
+        colour = (255,255,0)
+          .type = colour
+      }
+      function_7 {
+        colour = (255,0,255)
+          .type = colour
+      }
+      function_8 {
+        colour = (128,128,128)
           .type = colour
       }
       cumulative_intensity
@@ -2061,8 +2077,10 @@ user
   NoSpherA2{
     has_pyscf = False
       .type = bool
-    enable_discamb = False
+    enable_discamb = True
       .type = bool
+    discamb_exe = "discambMATTS2tsc"
+      .type = str
   }
 }
 

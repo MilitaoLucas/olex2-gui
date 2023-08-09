@@ -96,7 +96,25 @@ class OlexFunctions(inheritFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
-  def GetParam(self,variable, default=None, get_list=False):
+  def GetHeaderParam(self, param, default=None):
+    ed = self.GetRefinementModel(False)['Generic']
+    if ed is None:
+      return default
+    toks = param.split(".")
+    for i, t in enumerate(toks):
+      if (i+1) == len(toks):
+        if t == 'value':
+          return ed.get('value', default)
+        if t == 'fields':
+          return ed.get('fields', default)
+        else:
+          return ed['fields'].get(t, default)
+      ed = ed.get(t)
+      if ed is None:
+        return default
+    return default
+
+  def GetParam(self, variable, default=None, get_list=False):
     retVal = default
     try:
       if variable.startswith('gui'):

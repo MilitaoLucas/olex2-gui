@@ -17,6 +17,8 @@ acetonitrile;C2 H3 N
 mecn;C2 H3 N
 ether;C4 H10 O
 et2o;C4 H10 O
+etoac;C4 H8 O2
+ethylacetate;C4 H8 O2
 diethylether;C4 H10 O
 pyridine;C5 H5 N
 py;C5 H5 N
@@ -33,6 +35,11 @@ isopropanol;C3 H8 O
 dioxane;C4 H8 O2
 1,4-dioxane;C4 H8 O2
 1,2-dichloroethane;C2H4Cl2
-dichloroethane;C2H4Cl2
+dichloroethane;C2 H4 Cl2
+def; C5 H11 N O 
+diethylformamide; C5 H11 N O 
+dmso; C2 H6 S O
+dimethylsulfoxide; C2 H6 S O
+
 # Anions
 triflate;C F3 O3 S
