@@ -926,8 +926,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.discamb_exe = olx.file.Which("%s" % exe_pre)
     if os.path.exists(self.discamb_exe):
-      if "discambMATT" not in self.softwares:
-        self.softwares = self.softwares + ";discambMATT"
+      if "discambMATTS" not in self.softwares:
+        self.softwares = self.softwares + ";discambMATTS"
     else:
       exe_pre = "discambMATTS2tsc"
       if sys.platform[:3] == 'win':
@@ -944,10 +944,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         else:
           self.discamb_exe = olx.file.Which("%s" % exe_pre)
       if os.path.exists(self.discamb_exe):
-        if "discambMATT" not in self.softwares:
-          self.softwares = self.softwares + ";discambMATT"
+        if "discambMATTS" not in self.softwares:
+          self.softwares = self.softwares + ";discambMATTS"
       else:
-        self.softwares = self.softwares + ";Get discambMATT"
+        self.softwares = self.softwares + ";Get discambMATTS"
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -1381,7 +1381,7 @@ def check_for_pyscf(loud=True):
 def change_tsc_generator(input):
   if input == "Get ORCA":
     olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
-  elif input == "Get DISCAMB":
+  elif input == "Get discambMATTS":
     olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
   elif input == "Get pySCF":
     result = check_for_pyscf(False)
