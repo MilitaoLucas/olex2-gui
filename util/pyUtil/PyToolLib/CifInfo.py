@@ -1232,7 +1232,7 @@ If more than one file is present, the path of the most recent file is returned b
     else:
       x = OV.GetParam("snum.metacif.%s_file" %tool)
       if not x:
-        return None
+        return None, None
       x = os.path.normpath(x)
       if x is not None:
         for date, FILE in info:
