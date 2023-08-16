@@ -188,7 +188,8 @@ class OlexCctbxAdapter(object):
             if null_disp:
               custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
             else:
-              fp_fdp = br.at_angstrom(self.wavelength, sc.scattering_type)
+              scattering_type = 'H' if sc.scattering_type =='D' else sc.scattering_type
+              fp_fdp = br.at_angstrom(self.wavelength, scattering_type)
               sc.fp, sc.fdp = fp_fdp
               custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
       if sfac is not None:
