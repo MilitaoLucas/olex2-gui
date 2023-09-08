@@ -265,7 +265,7 @@ class Graph(ArgumentParser):
   def make_x_y_plot(self):
     pass
 
-  def make_empty_graph(self, axis_x=False, draw_title=True):
+  def make_empty_graph(self, axis_x=False, draw_title=True, square=False):
     from PIL import Image
     from PIL import ImageFont, ImageDraw, ImageChops
     guiParams = OV.GuiParams()
@@ -273,7 +273,12 @@ class Graph(ArgumentParser):
     self.imX = self.params.size_x
     if self.imX < 100:
       self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.imY = self.params.size_y
+    if square == True:
+      self.imY = self.imX
+      self.square = True
+    else:
+      self.imY = self.params.size_y
+      self.square = False
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
@@ -313,7 +318,7 @@ class Graph(ArgumentParser):
     self.xSpace = 0
     self.axis_x = axis_x
     if self.axis_x:
-      self.xSpace  = 0.04 * self.imX
+      self.xSpace = 0.04 * self.imX
     self.bTop = round(0.013 * self.imY)
     self.currX = 0
     self.currY = 0
@@ -803,6 +808,12 @@ class Graph(ArgumentParser):
     if min_y != 0.0 and self.min_y == None:
       self.min_y = min_y - .1*abs(self.max_y - min_y)
     elif self.min_y == None: self.min_y = 0.0
+    
+    if self.square == True:
+      if self.max_x < self.max_y:
+        self.max_x = self.max_y
+      elif self.max_y < self.max_x:
+        self.max_y = self.max_x
 
     #if log:
       #if log:
@@ -3033,7 +3044,8 @@ class Fobs_Fcalc_plot(Analysis):
       self.data.setdefault('dataset2', data_omitted)
 
 
-    self.make_empty_graph(axis_x = True)
+    self.make_empty_graph(axis_x = True, square=False)
+    self.plot_function("x", n_points=100)
     self.draw_pairs()
     key = self.draw_key(({'type': 'marker',
                          'number': 1,
