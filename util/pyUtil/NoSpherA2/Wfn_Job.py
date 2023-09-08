@@ -719,6 +719,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       charge = OV.GetParam('snum.NoSpherA2.charge')
     if mult == None:
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    if mult == 0:
+      mult = 1
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
