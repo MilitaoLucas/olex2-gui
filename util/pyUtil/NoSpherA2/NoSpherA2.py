@@ -553,7 +553,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
-      if wfn_code == "discambMATT":
+      if "discambMATT" in wfn_code:
         cif = str(os.path.join(self.jobs_dir, self.name + ".cif"))
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(), self.jobs_dir), self.name, self.discamb_exe)
