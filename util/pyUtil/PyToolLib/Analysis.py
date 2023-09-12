@@ -3058,6 +3058,89 @@ class Fobs_Fcalc_plot(Analysis):
                          'label': OV.TranslatePhrase('Omitted (hkl) Data')}
                         ))
     self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 40)),
+                   int(self.graph_bottom - (key.size[1] + 40)))
+                  )
+
+class Iobs_Icalc_plot(Analysis):
+  def __init__(self, batch_number=None):
+    Analysis.__init__(self)
+    self.item = "Iobs_Icalc"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Iobs vs Icalc")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
+    self.auto_axes = False
+    try:
+      batch_number = int(batch_number)
+    except (ValueError, TypeError):
+      self.batch_number = None
+    else:
+      self.batch_number = batch_number
+    try:
+      self.make_I_obs_I_calc_plot()
+    except AssertionError as e:
+      if str(e) == "model.scatterers().size() > 0":
+        print("You need some scatterers to do this!")
+        return
+      else:
+        raise
+    self.popout()
+    if self.params.Iobs_Icalc.output_csv_file:
+      self.output_data_as_csv()
+
+  def make_I_obs_I_calc_plot(self):
+    from reflection_statistics import I_obs_vs_I_calc
+    xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
+    self.metadata['shapes'] = []
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+
+    equal_line = {'type':'line',
+                   'xy':('0','0','%(max_x)s','%(max_x)s'),
+                   'line': {
+                     'color': 'rgb(100, 100, 100)',
+                     'width': 1,
+                     'dash':'dashdot'
+                   }
+                   }
+
+    self.metadata["shapes"].append(equal_line)
+
+    ## Included Data
+    metadata = {}
+#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    metadata["name"] = "Included Data"
+    data = Dataset(
+      xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
+
+    self.data.setdefault('dataset1', data)
+
+    ## Omitted Data
+    metadata = {}
+    metadata["name"] = "Omitted Data"
+    if xy_plot.I_obs_omitted and xy_plot.I_obs_omitted.size():
+      data_omitted = Dataset(
+        xy_plot.I_calc_omitted, xy_plot.I_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
+      self.data.setdefault('dataset2', data_omitted)
+
+
+    self.make_empty_graph(axis_x = True, square=False)
+    self.plot_function("x", n_points=100)
+    self.draw_pairs()
+    key = self.draw_key(({'type': 'marker',
+                         'number': 1,
+                         'label': OV.TranslatePhrase('Filtered Data')},
+                        {'type':'marker',
+                         'number': 2,
+                         'label': OV.TranslatePhrase('Omitted (cut) Data')},
+                        {'type':'marker',
+                         'number': 3,
+                         'label': OV.TranslatePhrase('Omitted (hkl) Data')}
+                        ))
+    self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
                    int(self.graph_bottom-(key.size[1]+40)))
                   )
@@ -3484,6 +3567,7 @@ OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
+OV.registerFunction(Iobs_Icalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(item_vs_resolution_plot)
@@ -3610,32 +3694,33 @@ def makeReflectionGraphGui():
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
-  d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;" +\
-             "Wilson Plot;" +\
-             "Cumulative Intensity;" +\
-             "Systematic Absences;" +\
-             "Fobs-Fcalc;" +\
-             "I/sigma vs resolution;" +\
-             "cc_half_vs_resolution;" +\
-             "Rmerge vs resolution;" +\
-             "Fobs over Fcalc;" +\
-             "Completeness%;" +\
-             "Normal Probability;" +\
-             "Fractal Dimension;" +\
-             "Scale factor vs resolution;" +\
-             "R1 factor vs resolution;" +\
-             "Bijvoet Differences %Probability Plot%;" +\
-             "Bijvoet Differences %Scatter Plot%",
-     'height':guiParams.html.combo_height,
-     'bgcolor':guiParams.html.input_bg_colour,
-     'value':value,
-     'onchange':"spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
-     'manage':'manage',
-     'readonly':'readonly',
-     'width':'$math.eval(html.clientwidth(self)-140)',
-     'readonly':'readonly',
-    }
+  d = {'ctrl_name': 'SET_REFLECTION_STATISTICS',
+     'items': "-- %Please Select% --;"
+             + "Wilson Plot;"
+             + "Cumulative Intensity;"
+             + "Systematic Absences;"
+             + "Fobs-Fcalc;"
+             + "Iobs-Icalc;"
+             + "I/sigma vs resolution;"
+             + "cc_half_vs_resolution;"
+             + "Rmerge vs resolution;"
+             + "Fobs over Fcalc;"
+             + "Completeness%;"
+             + "Normal Probability;"
+             + "Fractal Dimension;"
+             + "Scale factor vs resolution;"
+             + "R1 factor vs resolution;"
+             + "Bijvoet Differences %Probability Plot%;"
+             + "Bijvoet Differences %Scatter Plot%",
+     'height': guiParams.html.combo_height,
+     'bgcolor': guiParams.html.input_bg_colour,
+     'value': value,
+     'onchange': "spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
+     'manage': 'manage',
+     'readonly': 'readonly',
+     'width': '$math.eval(html.clientwidth(self)-140)',
+     'readonly': 'readonly',
+       }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
   gui_d['row_table_off'] = htmlTools.include_block('gui/blocks/row_table_off.htm')
@@ -3679,6 +3764,7 @@ def make_reflection_graph(name):
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
            'fobs_fcalc': Fobs_Fcalc_plot,
+           'iobs_icalc': Iobs_Icalc_plot,
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,

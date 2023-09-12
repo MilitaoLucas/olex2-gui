@@ -1266,6 +1266,15 @@ user
           .type = bool
           .caption = "%Output% csv"
       }
+      Iobs_Icalc
+        .short_caption = "Iobs-Icalc"
+        .caption = "Iobs-Icalc"
+        .help = "Iobs-vs-Icalc"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
       fobs_over_fcalc
         .short_caption = "Fobs/Fcalc"
         .caption = "Fobs/Fcalc vs resolution"
