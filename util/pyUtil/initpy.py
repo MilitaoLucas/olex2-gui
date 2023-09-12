@@ -402,9 +402,8 @@ def pip(package):
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', '--user', package])
-#  pip.main(['install', package])
-OV.registerFunction(pip,False)
+  pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
+OV.registerFunction(pip, False)
 
 if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))

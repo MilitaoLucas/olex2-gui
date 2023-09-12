@@ -1993,6 +1993,7 @@ OV.registerFunction(load_periodic_table, False, 'gui.tools')
 def load_matplotlib():
   try:
     import matplotlib.pyplot as plt
+    print("We have it!")
     return plt
   except Exception as err:
     if "No module named" in repr(err):
@@ -2000,12 +2001,12 @@ def load_matplotlib():
                             """Error: No working matplotlib installation found!.
 Do you want to install this now? Olex2 will restart.""", "YN", False)
     if selection == 'Y':
-      pip("matplotlib==3.5.1")
+      olex.m("pip matplotlib==3.5.1")
       olex.m("restart")
     else:
       print(err)
     return
-
+#OV.registerFunction(load_matplotlib, False, 'gui.tools')
 
 def plot_xy(xy=[], filename='fred.png', title="", marker_size='1'):
   filename = 'fred.png'
@@ -2076,22 +2077,6 @@ def is_outlier(points, thresh=3.5):
   modified_z_score = 0.6745 * diff / med_abs_deviation
 
   return modified_z_score > thresh
-
-
-def pip(package):
-  import sys
-  sys.stdout.isatty = lambda: False
-  sys.stdout.encoding = sys.getdefaultencoding()
-  import pip
-  try:
-    from pip import main as pipmain
-  except:
-    from pip._internal import main as pipmain
-  pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
-
-
-OV.registerFunction(pip, False, "gui.tools.pip")
-
 
 def _clean_scrub(scrub):
   t = " ".join(scrub).strip()
