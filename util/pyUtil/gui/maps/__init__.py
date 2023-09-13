@@ -123,8 +123,7 @@ class MapUtil:
       self.map_type = 'eden'
       OV.SetVar('olex2.map_type', 'eden')
 
-      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical") and\
-        OV.GetParam("snum.refinement.program") == "olex2.refine"
+      NoSpherA2 = OV.IsNoSpherA2()
       if map_source == "fcf":
         olex.m(cf_cmd + " -fcf")
       elif map_source == "olex":
