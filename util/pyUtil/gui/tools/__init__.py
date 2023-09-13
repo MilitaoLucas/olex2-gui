@@ -2008,8 +2008,7 @@ Do you want to install this now? Olex2 will restart.""", "YN", False)
     return
 #OV.registerFunction(load_matplotlib, False, 'gui.tools')
 
-def plot_xy(xy=[], filename='fred.png', title="", marker_size='1'):
-  filename = 'fred.png'
+def plot_xy(xy=[], filename='test.png', title="", marker_size='1'):
   import numpy as np
   plt = load_matplotlib()
   if not plt:
