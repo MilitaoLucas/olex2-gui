@@ -859,6 +859,10 @@ class OlexFunctions(inheritFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsNoSpherA2(self):
+    return self.GetParam("snum.NoSpherA2.use_aspherical") and\
+      self.GetParam("snum.refinement.program") == "olex2.refine"
+
   def IsEDData(self):
     try:
       return float(olx.xf.exptl.Radiation()) < 0.1

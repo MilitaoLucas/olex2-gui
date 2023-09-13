@@ -352,6 +352,9 @@ class OlexCctbxAdapter(object):
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
 
+  def get_one_h_function(self, table_file_name):
+    return get_one_h_function(self.xray_structure(), table_file_name)
+
   def compute_weights(self, fo2, fc):
     weight = self.olx_atoms.model['weight']
     params = [0.1, 0, 0, 0, 0, 1./3]
@@ -1413,3 +1416,16 @@ def set_ED_tables(tables_name):
   OV.set_cif_item('_diffrn_oxdiff_scatteringfactors_ed', ref)
 OV.registerFunction(set_ED_tables, False, "sfac")
 
+def get_one_h_function(xray_structure, table_file_name):
+  from smtbx.structure_factors import direct
+  from smtbx_refinement_least_squares_ext import f_calc_function_default
+  try:
+    return f_calc_function_default(direct.f_calc_modulus_squared(
+      xray_structure, table_file_name=table_file_name))
+  except Exception as e:
+    e_str = str(e)
+    if "stoks.size() == scatterer" in e_str:
+      print("Number of atoms in model and table are not matching!")
+    elif "Error during building of normal equations using OpenMP" in e_str:
+      print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
+    raise e
