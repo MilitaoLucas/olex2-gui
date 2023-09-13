@@ -885,7 +885,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_aspherical = OV.IsNoSpherA2()
 
     ## Florian's new fcf iucr loop
     if OV.GetParam('user.refinement.refln_loop') == True:
