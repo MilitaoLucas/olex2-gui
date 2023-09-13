@@ -743,7 +743,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
 def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
@@ -1034,7 +1034,7 @@ OV.registerFunction(PDF_map, False, "NoSpherA2")
 
 def tomc_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
     time = os.path.getmtime(table_name)
@@ -1087,7 +1087,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
 OV.registerFunction(tomc_map, False, "NoSpherA2")
 
 def deformation_map(resolution=0.1, return_map=False):
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   if use_tsc == False:
     print("ERROR! Deformation is only available when using a .tsc file!")
     return
@@ -1119,7 +1119,7 @@ OV.registerFunction(deformation_map, False, "NoSpherA2")
 
 def obs_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
     time = os.path.getmtime(table_name)
@@ -1159,7 +1159,7 @@ OV.registerFunction(obs_map, False, "NoSpherA2")
 
 def calc_map(resolution=0.1,return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
     time = os.path.getmtime(table_name)
