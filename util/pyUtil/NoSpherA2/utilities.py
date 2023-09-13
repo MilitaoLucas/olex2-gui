@@ -720,7 +720,7 @@ def calculate_number_of_electrons():
 def write_precise_model_file():
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   table_name = ""
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))

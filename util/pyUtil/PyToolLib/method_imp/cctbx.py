@@ -25,7 +25,7 @@ class Method_cctbx_refinement(Method_refinement):
     if not hide_nsff:
       html = "Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors"
       OV.SetVar('gui_notification', html)
-      use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+      use_aspherical = OV.IsNoSpherA2()
     else:
       self.table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
       if not os.path.exists(self.table_file_name):

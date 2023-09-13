@@ -753,7 +753,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_tsc = OV.IsNoSpherA2()
     if use_tsc == True:
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       xray_structure = mask.xray_structure
