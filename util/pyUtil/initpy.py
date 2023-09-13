@@ -19,6 +19,7 @@ if sys.platform[:3] == 'win':
     python_dir = _
   else:
     python_dir = r"%s\Python38" %basedir
+  sys.path.append(r"%s\site-packages" %datadir)
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
@@ -402,7 +403,7 @@ def pip(package):
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', '--target=%s\site-packages' % OV.DataDir(), package])
+  pipmain(['install', '--upgrade', '--target=%s\site-packages' % OV.DataDir(), package])
 OV.registerFunction(pip, False)
 
 if timer:
