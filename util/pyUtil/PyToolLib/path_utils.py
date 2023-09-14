@@ -142,4 +142,17 @@ def Cleanup():
           os.remove(f)
     except Exception as e:
       print(e)
-      pass
+  vi = sys.version_info
+  if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
+    try:
+      if sys.platform[:3] == 'win':
+        files = [
+          "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
+          "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll"]
+        for f in files:
+          f = os.path.join(base_dir, f)
+          if os.path.exists(f):
+            print("Cleaning up: %s" %f)
+            os.remove(f)
+    except Exception as e:
+      print(e)
