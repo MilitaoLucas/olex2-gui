@@ -1201,7 +1201,7 @@ class OlexFunctions(inheritFunctions):
         if files:
           env.initialise(os.path.join(ob_path, files[0]))
           if env.initialised:
-            print("Successfully initialised SciPy OpenBlas:")
+            print("Successfully initialised OpenBlas from %s:" %files[0])
             print(env.build_config)
             return True
     except Exception as e:
