@@ -139,8 +139,6 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2 = None
       fc = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         fo2, fc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name))
@@ -276,8 +274,6 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     fo2 = None
     fc = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       fo2, fc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
@@ -338,8 +334,6 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_sq_obs_filtered = None
       f_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         f_sq_obs, f_calc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name),
@@ -365,8 +359,6 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_calc_merged = None
       f_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         one_h_function = self.get_one_h_function(table_name)
         try:
@@ -443,7 +435,6 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       I_obs_filtered = None
       I_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         I_obs, f_calc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name),
@@ -468,8 +459,6 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       I_calc_merged = None
       I_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
         one_h_function = self.get_one_h_function(table_name)
         try:
@@ -547,8 +536,6 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
     f_sq_obs_filtered = None
     f_calc_filtered = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
@@ -613,8 +600,6 @@ class normal_probability_plot(OlexCctbxAdapter):
     f_sq_obs = None
     f_calc = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       f_sq_obs, f_calc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
