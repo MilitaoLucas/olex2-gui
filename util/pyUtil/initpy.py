@@ -27,7 +27,7 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
-
+  os.add_dll_directory(basedir)
 else:
   #it looks like we do not want to set the sys PATH on Linux or Mac!
   set_sys_path = True
@@ -51,6 +51,7 @@ else:
       sys.path.append(sys.prefix + '/plat-mac')
     elif sys.platform == 'linux2':
       sys.path.append(sys.prefix + '/plat-linux2')
+  os.add_dll_directory(basedir + "/lib")
 sys.path.append(datadir)
 stdout_redirection = True
 

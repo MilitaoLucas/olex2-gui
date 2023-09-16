@@ -458,22 +458,28 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
         I_obs_filtered = I_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
       I_calc_merged = None
       I_calc_filtered = None
-      if NoSpherA2:
-        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        one_h_function = self.get_one_h_function(table_name)
-        try:
-          I_calc_merged = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function).as_amplitude_array().f_as_f_sq()
+      I_calc_omitted = None
+      do_scale = True
+      if OV.IsEDRefinement():
+        I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic()
+        do_scale = False
+      else:
+        if NoSpherA2:
+          table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+          one_h_function = self.get_one_h_function(table_name)
+          try:
+            I_calc_merged = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function).as_amplitude_array().f_as_f_sq()
+            I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
+            I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
+          except:
+            junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
+            I_calc_merged = f_calc_temp.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
+            print("WARNING! It was not possible to obtain all values of Ic values\n for the plot, so omitted values are skipped!")
+            I_calc_omitted = None
+        else:
+          I_calc_merged = self.f_calc(miller_set=I_obs_merged).as_amplitude_array().f_as_f_sq()
           I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
           I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
-        except:
-          junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
-          I_calc_merged = f_calc_temp.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
-          print("WARNING! It was not possible to obtain all values of Ic values\n for the plot, so omitted values are skipped!")
-          I_calc_omitted = None
-      else:
-        I_calc_merged = self.f_calc(miller_set=I_obs_merged).as_amplitude_array().f_as_f_sq()
-        I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
-        I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
       I_obs_omitted = I_obs_merged.lone_set(I_obs_filtered)
       I_obs_filtered = self.reflections.f_sq_obs_filtered
 
@@ -497,8 +503,9 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
             I_calc_omitted = I_calc_omitted.array(I_calc_omitted.data() + I_mask_omit.data())
     Io = flex.abs(I_obs_filtered.data())
     Ic = flex.abs(I_calc_filtered.data())
-    k = OV.GetOSF()
-    Io /= k
+    if do_scale:
+      k = OV.GetOSF()
+      Io /= k
     # fit = flex.linear_regression(fc, fo)
     # ShowFitSummary(fit)
 
