@@ -197,12 +197,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.std_obserations = None
     if ed_refinement:
-      import AC6 as ac6
-      try:
-        aci = ac6.AC_instance
-      except:
-        aci = ac6.AC6.AC_instance
-      aci.EDI.setup_refinement(self)
+      OV.GetACI().EDI.setup_refinement(self)
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))

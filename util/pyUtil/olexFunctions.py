@@ -869,6 +869,17 @@ class OlexFunctions(inheritFunctions):
     except:
       return False
 
+  def IsEDRefinement(self):
+    return self.IsEDData() and\
+      self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+
+  def GetACI(self):
+    import AC6 as ac6
+    try:
+      return ac6.AC_instance
+    except:
+      return ac6.AC6.AC_instance
+
   def ListParts(self):
     import olexex
     parts = set(olexex.OlexRefinementModel().disorder_parts())
