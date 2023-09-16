@@ -61,10 +61,10 @@ class Graph(ArgumentParser):
   def __init__(self):
     super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
-    self.marker_params = (self.params.marker_1, 
-                          self.params.marker_2, 
-                          self.params.marker_3, 
-                          self.params.marker_4, 
+    self.marker_params = (self.params.marker_1,
+                          self.params.marker_2,
+                          self.params.marker_3,
+                          self.params.marker_4,
                           self.params.marker_5)
     self.function_params = (self.params.function_1,
                             self.params.function_2,
@@ -808,7 +808,7 @@ class Graph(ArgumentParser):
     if min_y != 0.0 and self.min_y == None:
       self.min_y = min_y - .1*abs(self.max_y - min_y)
     elif self.min_y == None: self.min_y = 0.0
-    
+
     if self.square == True:
       if self.max_x < self.max_y:
         self.max_x = self.max_y
@@ -1354,7 +1354,7 @@ class Graph(ArgumentParser):
                + ((float(y_value) * scale_y))
                + ((0 - max_y) * scale_y)
                + (delta_y * scale_y))
-  
+
       pixel_coordinates.append((round(x), round(y)))
 
     for i in range(len(xy_pairs) - 1):
@@ -1832,19 +1832,24 @@ class Analysis(Graph):
     #extraX = 29
     #extraY = 48
 
-    #window = olx.GetWindowSize().split(',')
-
+    ws = [int(x) for x in olx.GetWindowSize('main').split(',')]
+    actual_w = int(width*1.033)
+    actual_h = int(height*1.1)
     mouseX = int(olx.GetMouseX())
     mouseY = int(olx.GetMouseY())
-    X = mouseX - int(width*1.033) + 20
+    X = mouseX - actual_w + 20
+    if X + actual_w > ws[2]:
+      X = ws[2] - actual_w
     Y = mouseY - 20
+    if Y + actual_h > ws[3]:
+      Y = ws[3] - actual_h
 
     if mouseX < width:
       X = 10
 
     if not olx.html.IsPopup(pop_name) == "true":
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
-      pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1), X, Y)
+      pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
       olx.html.SetBorders(pop_name,0)
     OV.UpdateHtml(pop_name)
@@ -2743,7 +2748,7 @@ class Fractal_Dimension(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
-    
+
 class MuPlot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
@@ -2832,7 +2837,7 @@ class MuPlot(Analysis):
 
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
-    self.draw_y_axis()    
+    self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
       self.draw_fit_line(slope=0,
                          y_intercept=0,
@@ -2851,7 +2856,7 @@ class MuPlot(Analysis):
       self.plot_data_points(data.xy_pairs(), colour=colours[i], width = 2)
     for i,data in enumerate(refined_data.values()):
       self.draw_data_points(data.xy_pairs(), colour=colours_mark[i], force_draw=True)
-    
+
 OV.registerFunction(MuPlot)
 
 class AnomDispPlot(Analysis):
@@ -2872,7 +2877,7 @@ class AnomDispPlot(Analysis):
     self.reverse_x = True
     self.extend_x = False
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
-    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]    
+    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
 
     self.draw_origin = True
     self.make_anom_plot()
@@ -2919,7 +2924,7 @@ class AnomDispPlot(Analysis):
       data = Dataset(self.x, y)
       data_ = Dataset(self.x, y2)
       col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(e)).split(";")[1]))
-      colours.append(col)      
+      colours.append(col)
       self.data.setdefault(e + "fp", data)
       data2.setdefault(e + "fdp", data_)
       keys.append({'type': 'function',
@@ -2946,7 +2951,7 @@ class AnomDispPlot(Analysis):
           temp3 = min(255, temp3 + 5)
           col = (temp1, temp2, temp3)
           del temp1, temp2, temp3
-      colours_mark.append(col)      
+      colours_mark.append(col)
       keys.append({'type': 'marker',
                    'number': n + 1,
                    'label': ref[0],
@@ -2956,12 +2961,12 @@ class AnomDispPlot(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
-      self.draw_fit_line(slope=0, 
-                         y_intercept=0, 
-                         x_intercept=wl, 
-                         write_equation=False, 
-                         write_text=self.common_wl_name[i], 
-                         rotate_text="top_linemiddle", 
+      self.draw_fit_line(slope=0,
+                         y_intercept=0,
+                         x_intercept=wl,
+                         write_equation=False,
+                         write_text=self.common_wl_name[i],
+                         rotate_text="top_linemiddle",
                          width = 1)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
