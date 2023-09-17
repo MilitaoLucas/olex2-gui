@@ -164,6 +164,7 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
+      inelastic_table = None
       #  default for DISP first
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
