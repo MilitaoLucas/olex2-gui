@@ -1266,7 +1266,7 @@ user
           .type = bool
           .caption = "%Output% csv"
       }
-      Iobs_Icalc
+      iobs_icalc
         .short_caption = "Iobs-Icalc"
         .caption = "Iobs-Icalc"
         .help = "Iobs-vs-Icalc"
