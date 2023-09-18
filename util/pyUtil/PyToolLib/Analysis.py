@@ -3092,7 +3092,7 @@ class Iobs_Icalc_plot(Analysis):
       else:
         raise
     self.popout()
-    if self.params.Iobs_Icalc.output_csv_file:
+    if self.params.iobs_icalc.output_csv_file:
       self.output_data_as_csv()
 
   def make_I_obs_I_calc_plot(self):
