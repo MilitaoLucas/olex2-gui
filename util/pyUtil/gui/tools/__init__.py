@@ -377,6 +377,7 @@ def checkPlaton():
     olx.SetVar("HavePlaton", False)
     return ""
 
+
 OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 
@@ -684,6 +685,8 @@ def is_masked_moiety_in_formula(txt_formula):
   if present_l == txt_formula_l:
     isSame = True
   return isSame
+
+
 olex.registerFunction(is_masked_moiety_in_formula, False, "gui.tools.is_masked_moiety_in_formula")
 
 
@@ -693,20 +696,20 @@ def makeFormulaForsNumInfo():
     t1 = time.time()
 
   txt_formula = olx.xf.GetFormula('', 3)
-  #if OV.GetVar("makeFormulaForsNumInfo", "") == txt_formula and not OV.GetParam("snum.refinement.use_solvent_mask"):
-    ###if debug:
+  # if OV.GetVar("makeFormulaForsNumInfo", "") == txt_formula and not OV.GetParam("snum.refinement.use_solvent_mask"):
+    # if debug:
       ###print("Formula sNum (2): %.5f" %(time.time() - t1))
-    #return OV.GetVar("makeFormulaForsNumInfo_retVal")
-  #else:
+    # return OV.GetVar("makeFormulaForsNumInfo_retVal")
+  # else:
     #OV.SetVar("makeFormulaForsNumInfo", txt_formula)
 
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
   colour = ""
-  
+
   isSame = gui.tools.is_masked_moiety_in_formula(txt_formula)
   # I don't know why this was here -- it might bite back!
-    ##if current_sNum != OV.FileName():
+    # if current_sNum != OV.FileName():
       ##current_sNum = OV.FileName()
 
   l = ['3333', '6667']
@@ -740,7 +743,7 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
       d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
       d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
-      
+
     else:
       img_name = 'toolbar-mask_ok'
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
@@ -773,7 +776,7 @@ def makeFormulaForsNumInfo():
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
   fn = "snumformula.htm"
   OV.write_to_olex(fn, update)
-  ##if debug:
+  # if debug:
     ##print("Formula sNum (2): %.5f" %(time.time() - t1))
   retVal = "<!-- #include snumformula %s;1 -->" % fn
   OV.SetVar("makeFormulaForsNumInfo_retVal", retVal)
@@ -1471,6 +1474,7 @@ def GetDPRInfo():
 
 OV.registerFunction(GetDPRInfo)
 
+
 def _get_R_values():
   R1 = 'n/a'
   wR2 = 'n/a'
@@ -1510,6 +1514,7 @@ def _get_R_values():
           return R1, wR2
   return R1, wR2
 
+
 def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
     return
@@ -1519,7 +1524,9 @@ def GetRInfo(txt="", d_format='html'):
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
 
+
 OV.registerFunction(GetRInfo)
+
 
 def FormatRInfo(R1, wR2, d_format):
   cache['R1'] = R1
@@ -1705,7 +1712,7 @@ class DisorderDisplayTools(object):
     OV.registerFunction(self.make_disorder_quicktools, False, 'gui.tools')
     OV.registerFunction(self.set_part_display, False, 'gui.tools')
 
-  def hasDisorder(self, num_return = False):
+  def hasDisorder(self, num_return=False):
     retVal = False
     olx_atoms = olexex.OlexRefinementModel()
     parts = olx_atoms.disorder_parts()
@@ -1717,7 +1724,7 @@ class DisorderDisplayTools(object):
       else:
         retVal = True
     if num_return:
-      _ = {True:1, False:0}
+      _ = {True: 1, False: 0}
       return _[retVal]
     else:
       return retVal
@@ -1808,6 +1815,7 @@ class DisorderDisplayTools(object):
       olex.m('sel part %s' % parts)
       olex.m('sel atom bonds -a')
 
+
 DisorderDisplayTools_instance = DisorderDisplayTools()
 
 
@@ -1870,7 +1878,7 @@ def get_custom_scripts(file_name, globule, scope):
           custom_scripts_d.setdefault(script, {})
           custom_scripts_d[script].setdefault('obj', script_obj)
         except:
-          print("Could not obtain script object %s for %s" %(script, script_s))
+          print("Could not obtain script object %s for %s" % (script, script_s))
           if debug:
             sys.stderr.formatExceptionInfo()
           continue
@@ -1900,6 +1908,7 @@ def set_custom_gui(f, scope):
     OV.SetVar("active_custom_function_%s" % scope, f)
   except:
     _ = "--> %s is missing" % f
+
 
   #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
 OV.registerFunction(set_custom_gui, False, 'gui.tools')
@@ -2008,38 +2017,264 @@ Do you want to install this now? Olex2 will restart.""", "YN", False)
     return
 #OV.registerFunction(load_matplotlib, False, 'gui.tools')
 
-def plot_xy(xy=[], filename='test.png', title="", marker_size='1'):
-  import numpy as np
-  plt = load_matplotlib()
-  if not plt:
-    print("Matplotlib is not intalled, and the istallation attempt failed")
-    return
 
-  plt.style.use('seaborn-whitegrid')
-  xs = np.array(xy[0][1:])
-#  xs = xs[~is_outlier(xs)]
-  ys = np.array(xy[1][1:])
-#  ys = ys[~is_outlier(ys)]
-  #plt.xlabel(_format_mathplotlib_text(self.x_title), **afont)
-  #plt.ylabel(_format_mathplotlib_text(self.y_title), **afont)
-  #plt.title(_format_mathplotlib_text(self.title), **tfont, pad=40)
-  # if self.suptitle:
-  #  plt.suptitle(_format_mathplotlib_text(self.suptitle), **stfont, y=0.91)
-  plt.grid(True)
-  plt.title(title)
-  plt.plot(xs,
-           ys,
-           'o',
-           color='#0066cc',
-           markersize=marker_size,
-           linewidth=1,
-           markerfacecolor='white',
-           markeredgecolor='#0066cc',
-           markeredgewidth=1)
-  p = os.path.join(OV.FilePath(), filename)
-  plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
-  olx.Shell(p)
-  plt.close()
+def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
+
+  import numpy as np
+
+  xs = np.array(xy[0][:])
+  y_l = []
+  for i in range(len(xy) -1):
+    y_l.append(np.array(xy[i+1][:]))
+
+  if graphing == 'matplotlib':
+
+    #import matplotlib.pyplot as plt
+    import numpy as np
+    plt = load_matplotlib()
+    plt.style.use('seaborn-whitegrid')
+    
+
+    # Create some mock data
+    t = np.arange(0.01, 10.0, 0.01)
+    t = xs
+    data1 = y_l[0]
+    data2 = y_l[1]
+    data3 = y_l[2]
+    data4 = y_l[3]
+
+    fig, ax1 = plt.subplots()
+    fig, ax2 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_xlabel('N Beams')
+    ax1.set_ylabel('thickness', color=color)
+    ax1.plot(t, data1, 'x',  color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    color = 'tab:red'
+    ax2.set_xlabel('N Beams')
+    ax2.set_ylabel('thickness', color=color)
+    ax2.plot(t, data2, 'o', color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    ax3 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    ax4 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    color = 'tab:blue'
+    ax3.set_ylabel('R_1', color=color)  # we already handled the x-label with ax1
+    ax3.plot(t, data3, 'x', color=color)
+    ax3.tick_params(axis='y', labelcolor=color)
+
+    ax4.set_ylabel('R_1', color=color)  # we already handled the x-label with ax1
+    ax4.plot(t, data4, 'o', color=color)
+    ax4.tick_params(axis='y', labelcolor=color)
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    
+    p = os.path.join(OV.FilePath(), filename)
+    plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+    olx.Shell(p)
+
+
+def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
+  
+  if not colours:
+    colours = {"0":{"0":'tab:red', "1":'tab:red'},
+               "1":{"0":'darkgreen', "1":'darkgreen'}
+               }
+  if not labels:
+    labels=[{'x-label': "",
+            'y-label': "",
+            "series":["", ""]},
+            {'x-label': "",
+            'y-label': "",
+            "series":["", ""]},
+            ]
+
+  import numpy as np
+
+  if x_type == 'float':
+    xs = np.array([float(x) for x in xs])
+  else:
+    xs = np.array(xs)
+    
+    
+
+  y_ll = []
+  y_l = []
+
+
+  if len(ys) == 0:
+    y_l.append(np.array([float(x) for x in ys[0]]))
+    y_ll.append(y_l)
+  else:
+    for block in ys:
+      y_l = []
+      for data in block:
+        y_l.append(np.array([float(x) for x in data]))
+      y_ll.append(y_l)
+
+  if graphing == 'matplotlib':
+    plt = load_matplotlib()
+    if not plt:
+      print("Matplotlib is not intalled, and the istallation attempt failed")
+      return
+    plt.style.use('seaborn-whitegrid')
+    plt.grid(True)
+    colour = 'grey'
+    ax_colour='black'
+      
+    plt.title(title)
+    plt.grid(False)
+    fig, ax1 = plt.subplots()
+
+    i = 0
+    for y_l in y_ll:
+      if i == 0:
+        j = 0
+        for ys in y_l:
+          if len(y_ll) > 1:
+            ax_colour = colours[str(i)][str(j)]
+          try:
+            colour = colours[str(i)][str(j)]
+          except:
+            colour = colour
+          if j == 0:
+            marker = "o"
+            color = colour
+          else:
+            marker = "x"
+          try:
+            label = labels[i]['series'][j]
+          except:
+            label = ""
+          ax1.plot(xs,
+                  ys,
+                  marker,
+                  color=colour,
+                  markersize=marker_size,
+                  linewidth=1,
+                  label=label,
+                  markerfacecolor='white',
+                  markeredgecolor=colour,
+                  markeredgewidth=1,
+                  )
+          ax1.tick_params(axis='y', labelcolor=ax_colour)
+          ax1.grid(False)
+          if labels:
+            ax1.set_xlabel(labels[i]['x-label'])
+            ax1.set_ylabel(labels[i]['y-label'])
+          j += 1
+      if i == 1:
+        ax2 = ax1.twinx()
+        j = 0
+        for ys in y_l:
+          if len(y_ll) > 1:
+            ax_colour = colours[str(i)][str(j)]
+          try:
+            colour = colours[str(i)][str(j)]
+          except:
+            colour = colour 
+          if j == 0:
+            marker = "o"
+            color = colour
+          else:
+            marker = "x"
+            color = colours
+          try:
+            label = labels[i]['series'][j]
+          except:
+            label = ""
+          ax2.plot(xs,
+                  ys,
+                  marker,
+                  color=colour,
+                  markersize=marker_size,
+                  linewidth=1,
+                  label=labels[i]['series'][j],
+                  markerfacecolor='white',
+                  markeredgecolor=colour,
+                  markeredgewidth=1)
+          ax2.tick_params(axis='y', labelcolor=ax_colour)
+          ax2.grid(False)
+          if labels:
+            ax2.set_xlabel(labels[i]['x-label'])
+            ax2.set_ylabel(labels[i]['y-label'])
+          j += 1
+      i += 1
+        
+    ax1.set_title(title)
+    lines2, labels2 = ax1.get_legend_handles_labels()
+    if len(y_ll) > 1:
+      lines3, labels3 = ax2.get_legend_handles_labels()
+      ax1.legend(lines2 + lines3, labels2 + labels3, loc='lower right')
+    else:
+      ax1.legend(lines2, labels2 , loc='lower right')
+    
+    p = os.path.join(OV.FilePath(), filename)
+    plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+    #olx.Shell(p)
+    plt.close()
+    return p
+
+  elif graphing == 'plotly':
+    import plotly
+    print(plotly.__version__)  # version >1.9.4 required
+    from plotly.graph_objs import Scatter, Layout
+    import plotly.graph_objs as go
+
+    y_title = "Fred"
+
+    data = []
+    raw_1 = go.Scatter(
+      x=xs,
+      y=ys,
+      mode='markers',
+      marker=dict(size=4,
+                  ),
+      name='XS_YS'
+    )
+    data.append(raw_1)
+
+    layout = go.Layout(
+      # annotations=[annotation],
+      title=title,
+      titlefont=dict(
+          family='Bahnschrift',
+          size=28,
+          color='#7f7f7f'
+      ),
+        xaxis=dict(
+            title='Normalised Intensity',
+            tickfont=dict(
+                family='Bahnschrift',
+                size=18,
+                color='#7f7f7f'
+            ),
+            titlefont=dict(
+                family='Bahnschrift',
+                size=28,
+                color='#7f7f7f'
+            )
+        ),
+        yaxis=dict(
+            title=y_title,
+            tickfont=dict(
+                family='Bahnschrift',
+                size=18,
+                color='#7f7f7f'
+            ),
+            titlefont=dict(
+                family='Bahnschrift',
+                size=28,
+                color='#7f7f7f'
+            )
+        )
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    p = plotly.offline.plot(fig, filename=filename + '.html')
 
 
 def is_outlier(points, thresh=3.5):
@@ -2075,6 +2310,7 @@ def is_outlier(points, thresh=3.5):
   modified_z_score = 0.6745 * diff / med_abs_deviation
 
   return modified_z_score > thresh
+
 
 def _clean_scrub(scrub):
   t = " ".join(scrub).strip()
@@ -2164,8 +2400,10 @@ def label_rsa():
   for a in olexex.OlexRefinementModel()._atoms:
     rsa = a.get('rsa', None)
     if rsa:
-      args.append("%s=%s*%s" %(a['label'], a['label'], rsa))
+      args.append("%s=%s*%s" % (a['label'], a['label'], rsa))
   if args:
     olx.Label(*args, a=True)
+
+
 OV.registerFunction(label_rsa, False, "tools")
 
