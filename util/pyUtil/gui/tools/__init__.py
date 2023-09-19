@@ -2009,12 +2009,12 @@ def load_matplotlib():
       selection = olx.Alert("matplotlib not found",
                             """Error: No working matplotlib installation found!.
 Do you want to install this now? Olex2 will restart.""", "YN", False)
-    if selection == 'Y':
-      olex.m("pip matplotlib==3.5.1")
-      olex.m("restart")
-    else:
-      print(err)
-    return
+      if selection == 'Y':
+        olex.m("pip matplotlib==3.5.1")
+        olex.m("restart")
+      else:
+        print(err)
+      return
 #OV.registerFunction(load_matplotlib, False, 'gui.tools')
 
 
@@ -2033,7 +2033,7 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     import numpy as np
     plt = load_matplotlib()
     plt.style.use('seaborn-whitegrid')
-    
+
 
     # Create some mock data
     t = np.arange(0.01, 10.0, 0.01)
@@ -2071,14 +2071,14 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     ax4.tick_params(axis='y', labelcolor=color)
 
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    
+
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     olx.Shell(p)
 
 
 def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
-  
+
   if not colours:
     colours = {"0":{"0":'tab:red', "1":'tab:red'},
                "1":{"0":'darkgreen', "1":'darkgreen'}
@@ -2098,8 +2098,8 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
     xs = np.array([float(x) for x in xs])
   else:
     xs = np.array(xs)
-    
-    
+
+
 
   y_ll = []
   y_l = []
@@ -2124,7 +2124,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
     plt.grid(True)
     colour = 'grey'
     ax_colour='black'
-      
+
     plt.title(title)
     plt.grid(False)
     fig, ax1 = plt.subplots()
@@ -2175,7 +2175,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
           try:
             colour = colours[str(i)][str(j)]
           except:
-            colour = colour 
+            colour = colour
           if j == 0:
             marker = "o"
             color = colour
@@ -2203,7 +2203,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
             ax2.set_ylabel(labels[i]['y-label'])
           j += 1
       i += 1
-        
+
     ax1.set_title(title)
     lines2, labels2 = ax1.get_legend_handles_labels()
     if len(y_ll) > 1:
@@ -2211,7 +2211,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
       ax1.legend(lines2 + lines3, labels2 + labels3, loc='lower right')
     else:
       ax1.legend(lines2, labels2 , loc='lower right')
-    
+
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     #olx.Shell(p)
