@@ -514,6 +514,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       return None
 
   def check_hooft(self):
+    #this will fail!
+    if OV.IsEDData():
+      print("Skipping Hooft parameter evaluation for ED data")
+      return
     if self.hooft:
       return self.hooft
     if (not self.xray_structure().space_group().is_centric()
