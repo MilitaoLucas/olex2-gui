@@ -169,7 +169,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.temp < -274: self.temp = 20
     self.fc_correction = None
     #set up Fc  correction if defined
-    if self.exti is not None:
+    if ed_refinement:
+      msg = "ED refinement"
+      msg_l = len(msg)
+      #if self.weighting.a != 0 or self.weighting.b != 0:
+        #self.weighting.a, self.weighting.b = 0, 0
+      #  msg += ", resetting weighting to sigma weights"
+      if self.exti is not None:
+        msg +=", ignoring EXTI"
+      if len(msg) != msg_l:
+        print(msg)
+      self.fc_correction = xray.dummy_fc_correction()
+      self.fc_correction.expression = ''
+    elif self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
       self.fc_correction.grad = True
@@ -406,8 +418,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independents)
-      OV.SetParam(
-        'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      if not OV.IsEDRefinement():
+        OV.SetParam(
+          'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
       if timer:
         t9 = time.time()
         print("-- " + "{:8.3f}".format(t2-t1) + " for constraints")
