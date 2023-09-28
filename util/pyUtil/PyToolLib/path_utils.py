@@ -121,12 +121,12 @@ def cleanup_files(file_ext):
     pass
 
 def Cleanup():
+  import shutil
   cleanup_files(".tmp")
   base_dir = olx.BaseDir()
   ac5_dir = os.path.join(base_dir, "util", "pyUtil", "AC5")
   if os.path.exists(ac5_dir):
     try:
-      import shutil
       shutil.rmtree(ac5_dir)
       ac5_files = [
         "lib/ac5util.so",
@@ -136,7 +136,6 @@ def Cleanup():
       ]
       for f in ac5_files:
         f = os.path.join(base_dir, f)
-        print(f)
         if os.path.exists(f):
           print("->%s" %f)
           os.remove(f)
@@ -145,7 +144,10 @@ def Cleanup():
   vi = sys.version_info
   if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
     try:
+      dirs = []
       if sys.platform[:3] == 'win':
+        sp_dir = os.path.join(base_dir, "Python38", "Lib", "site-packages")
+        dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
         files = [
           "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
           "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll"]
@@ -154,5 +156,21 @@ def Cleanup():
           if os.path.exists(f):
             print("Cleaning up: %s" %f)
             os.remove(f)
+      elif sys.platform[:3] == 'lin':
+        sp_dir = os.path.join(base_dir, "lib", "python3.8", "site-packages")
+        dirs = [os.path.join(sp_dir, x) for x in ("scipy-1.2.3-py3.8-linux-x86_64.egg",
+                                                  "numpy-1.18.2-py3.8-linux-x86_64.egg")]
+      else:
+        sp_dir = os.path.join(base_dir, "lib", "python3.8", "site-packages")
+        dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
+      #clean up old numpy/scipy
+      for d in dirs:
+        if not os.path.exists(d):
+          continue
+        try:
+          print("->%s" %d)
+          shutil.rmtree(d)
+        except Exception as e:
+          print(e)
     except Exception as e:
       print(e)
