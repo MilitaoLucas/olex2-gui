@@ -146,25 +146,34 @@ def Cleanup():
     try:
       dirs = []
       if sys.platform[:3] == 'win':
-        sp_dir = os.path.join(base_dir, "Python38", "Lib", "site-packages")
-        #dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
+        sp_dir = os.path.join( "Python38", "Lib", "site-packages")
+        dirs = [
+          os.path.join(sp_dir, r"scipy\sparse\linalg\dsolve"),
+          os.path.join(sp_dir, r"scipy\sparse\linalg\eigen"),
+          os.path.join(sp_dir, r"scipy\sparse\linalg\isolve)",
+          os.path.join(sp_dir, r"scipy\.libs"),
+        ]
         files = [
           "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
-          "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll"]
+          "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll",
+          ]
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[0])
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[1])
         for f in files:
           f = os.path.join(base_dir, f)
           if os.path.exists(f):
             print("Cleaning up: %s" %f)
             os.remove(f)
       elif sys.platform[:3] == 'lin':
-        sp_dir = os.path.join(base_dir, "lib", "python3.8", "site-packages")
+        sp_dir = os.path.join("lib", "python3.8", "site-packages")
         dirs = [os.path.join(sp_dir, x) for x in ("scipy-1.2.3-py3.8-linux-x86_64.egg",
                                                   "numpy-1.18.2-py3.8-linux-x86_64.egg")]
       else:
-        sp_dir = os.path.join(base_dir, "lib", "python3.8", "site-packages")
+        sp_dir = os.path.join("lib", "python3.8", "site-packages")
         #dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
       #clean up old numpy/scipy
       for d in dirs:
+        d = os.path.join(base_dir, d)
         if not os.path.exists(d):
           continue
         try:
