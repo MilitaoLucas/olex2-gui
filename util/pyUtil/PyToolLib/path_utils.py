@@ -150,15 +150,15 @@ def Cleanup():
         dirs = [
           os.path.join(sp_dir, r"scipy\sparse\linalg\dsolve"),
           os.path.join(sp_dir, r"scipy\sparse\linalg\eigen"),
-          os.path.join(sp_dir, r"scipy\sparse\linalg\isolve)",
+          os.path.join(sp_dir, r"scipy\sparse\linalg\isolve"),
           os.path.join(sp_dir, r"scipy\.libs"),
         ]
         files = [
           "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
           "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll",
           ]
-        files.append(os.path.join(sp_dir, "numpy", ".libs", files[0])
-        files.append(os.path.join(sp_dir, "numpy", ".libs", files[1])
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[0]))
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[1]))
         for f in files:
           f = os.path.join(base_dir, f)
           if os.path.exists(f):
