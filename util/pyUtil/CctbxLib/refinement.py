@@ -1289,8 +1289,8 @@ The following options were used:
             as_var.append((id, k))
           elif ref['relation'] == "one_minus_var":
             as_var_minus_one.append((id, k))
-      if ref['index'] == 5 and ref['relation'] == "var":
-        eadp.append(ref['id'])
+        if ref['index'] == 5 and ref['relation'] == "var":
+          eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
           print("Invalid variable use - mixes occupancy and U")
