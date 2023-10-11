@@ -51,7 +51,6 @@ else:
       sys.path.append(sys.prefix + '/plat-mac')
     elif sys.platform == 'linux2':
       sys.path.append(sys.prefix + '/plat-linux2')
-  os.add_dll_directory(basedir + "/lib")
 sys.path.append(datadir)
 stdout_redirection = True
 
