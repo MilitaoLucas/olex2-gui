@@ -818,9 +818,9 @@ class ExtractCifInfo(CifTools):
     self.update_manageable()
     use_aspherical = OV.IsNoSpherA2()
     if use_aspherical:
-      NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, M.,
+      NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, L.,
 Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B, Steinhauer, S., Lentz, D., Puschmann, H.,
+White, F., Grundkoetter-Stock, B., Steinhauer, S., Lentz, D., Puschmann, H.,
 Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
       full_references.append(NoSpherA2_ref)
     if 'current_cif' in locals():
