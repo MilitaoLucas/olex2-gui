@@ -316,10 +316,16 @@ class OlexCctbxAdapter(object):
       apply_twin_law = False
     if (apply_twin_law
         and self.twin_components is not None):
-      twin_component = self.twin_components[0]
-      twinning = cctbx_controller.hemihedral_twinning(
-        twin_component.twin_law.as_double(), miller_set_)
-      twin_set = twinning.twin_complete_set
+      twin_sets = []
+      #twin_component = self.twin_components[0]
+      for twin_component in self.twin_components:
+        twinning = cctbx_controller.hemihedral_twinning(
+          twin_component.twin_law.as_double(), miller_set_)
+        twin_sets.append(twinning.twin_complete_set)
+      if len(twin_sets) > 1:
+        twin_set = miller.union_of_sets(twin_sets)
+      else:
+        twin_set = twin_sets[0]
       if one_h_function:
         data = []
         for mi in twin_set.indices():
@@ -330,6 +336,7 @@ class OlexCctbxAdapter(object):
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
       if twin_data:
+        assert len(twin_sets) == 1
         value = twin_component.value
         if value < 0: value = 0
         elif value > 1: value = 1
