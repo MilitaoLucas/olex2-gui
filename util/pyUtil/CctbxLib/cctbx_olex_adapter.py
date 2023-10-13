@@ -469,8 +469,10 @@ def write_fab(f_mask, fab_path=None):
 from smtbx import absolute_structure
 
 class hooft_analysis(absolute_structure.hooft_analysis):
-  def __init__(self, olex2_adaptor, probability_plot_slope=None, use_fcf=False):
+  def __init__(self, olex2_adaptor=None, probability_plot_slope=None, use_fcf=False):
     self.olex2_adaptor = olex2_adaptor
+    if self.olex2_adaptor is None:
+      self.olex2_adaptor = OlexCctbxAdapter()
     if probability_plot_slope is not None:
       probability_plot_slope = float(probability_plot_slope)
     if use_fcf:
