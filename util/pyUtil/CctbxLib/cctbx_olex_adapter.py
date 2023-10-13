@@ -468,9 +468,9 @@ def write_fab(f_mask, fab_path=None):
 
 from smtbx import absolute_structure
 
-class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
-  def __init__(self, probability_plot_slope=None, use_fcf=False):
-    OlexCctbxAdapter.__init__(self)
+class hooft_analysis(absolute_structure.hooft_analysis):
+  def __init__(self, olex2_adaptor, probability_plot_slope=None, use_fcf=False):
+    self.olex2_adaptor = olex2_adaptor
     if probability_plot_slope is not None:
       probability_plot_slope = float(probability_plot_slope)
     if use_fcf:
@@ -492,8 +492,8 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
         fc = fc.common_set(fo2)
       scale = 1
     else:
-      fo2, fc = self.get_fo_sq_fc()
-      weights = self.compute_weights(fo2, fc)
+      fo2, fc = self.olex2_adaptor.get_fo_sq_fc()
+      weights = self.olex2_adaptor.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
       print("No Bijvoet pairs")
