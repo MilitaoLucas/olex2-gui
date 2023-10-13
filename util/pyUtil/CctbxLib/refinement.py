@@ -315,6 +315,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if str(e) == 'external_interrupt':
           print("Refinement interrupted")
           self.interrupted = True
+        elif "is an empty array" in str(e):
+          print("There is nothing to refine.")
+          self.interrupted = True
+          return
         else:
           raise e
       if timer:
