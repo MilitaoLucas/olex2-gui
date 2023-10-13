@@ -2078,6 +2078,8 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
 
 
 def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
+  plot_params = OV.Params().user.graphs.matplotlib
+ 
 
   if not colours:
     colours = {"0":{"0":'tab:red', "1":'tab:red'},
@@ -2203,14 +2205,17 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
             ax2.set_ylabel(labels[i]['y-label'])
           j += 1
       i += 1
+      
+    loc = "%s %s %s" %(plot_params.legend_in_out,  plot_params.legend_vertical, plot_params.legend_horizontal)
+    loc = loc.strip()
 
     ax1.set_title(title)
     lines2, labels2 = ax1.get_legend_handles_labels()
     if len(y_ll) > 1:
       lines3, labels3 = ax2.get_legend_handles_labels()
-      ax1.legend(lines2 + lines3, labels2 + labels3, loc='lower right')
+      ax1.legend(lines2 + lines3, labels2 + labels3, loc=loc, bbox_to_anchor=(1, 0.25))
     else:
-      ax1.legend(lines2, labels2 , loc='lower right')
+      ax1.legend(lines2, labels2 , loc=loc, bbox_to_anchor=(1, 0.25))
 
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
