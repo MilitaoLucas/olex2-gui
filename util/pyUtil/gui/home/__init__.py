@@ -30,16 +30,18 @@ class MultipleDataset:
     self.CURR_CIF_FILE_LIST = []
 
   def check(self):
-    if self.CURR_CIF_FILE_FOLDER:
-      if self.CURR_CIF_FILE_FOLDER != OV.FilePath():
-        return False
-    #if self.CURR_CIF_FILE_NAME:
-      ##self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
-      #return True
+    # if self.CURR_CIF_FILE_FOLDER:
+      # if self.CURR_CIF_FILE_FOLDER != OV.FilePath():
+        # return False
+    # if self.CURR_CIF_FILE_NAME:
+      ###self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
+      # return True
     if olx.IsFileType('cif') == 'false':
-      return False
-    if int(olx.xf.DataCount()) <= 1:
-      return False
+      if not any(OV.ModelSrc() in item for item in self.CURR_CIF_FILE_LIST):
+        return False
+    else:
+      if int(olx.xf.DataCount()) <= 1:
+        return False
     return True
 
   def generateHtml(self, make_always=False, sort_key='_database_code_depnum_ccdc_archive'):
@@ -53,13 +55,16 @@ class MultipleDataset:
       if self.CURR_CIF_FILE_NAME != OV.FileFull():
         self.CURR_CIF_FILE_NAME = None
         self.CURR_CIF_FILE_LIST = []
+    else:
+      if not any(OV.ModelSrc() in item for item in self.CURR_CIF_FILE_LIST):
+        self.CURR_CIF_FILE_LIST = []
 
     if not self.CURR_CIF_FILE_FOLDER or self.CURR_CIF_FILE_FOLDER != OV.FilePath():
       self.CURR_CIF_FILE_FOLDER = OV.FilePath()
 
-    if not self.CURR_CIF_FILE_NAME or self.CURR_CIF_FILE_FOLDER != OV.FileName():
-      self.CURR_CIF_FILE_NAME = OV.FileFull()
+    if not self.CURR_CIF_FILE_NAME or self.CURR_CIF_FILE_NAME != OV.FileName():
       if olx.IsFileType('cif') == 'true':
+        self.CURR_CIF_FILE_NAME = OV.FileFull()
         current = int(olx.xf.CurrentData())
 
     if not self.CURR_CIF_FILE_LIST:
@@ -99,8 +104,8 @@ class MultipleDataset:
       td_width = '25'
 
     self.CURR_CIF_FILE_LIST = sorted(self.CURR_CIF_FILE_LIST, key=lambda x: x[3])
-
     for i in range(0, cnt):
+      fg = OV.GetVar('linkButton.fgcolor')
       index = self.CURR_CIF_FILE_LIST[i][0]
       name = self.CURR_CIF_FILE_LIST[i][1]
       display = self.CURR_CIF_FILE_LIST[i][2]
@@ -112,19 +117,26 @@ class MultipleDataset:
           reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
           if not os.path.exists(reapfile):
             action = "export>>reap '%s'" % reapfile
+            display = "*EXP/LOAD*"
+            highlight = olx.GetVar('HtmlHighlightColour')
           else:
             action = "reap '%s'" % reapfile
-          highlight = olx.GetVar('HtmlHighlightColour')
-          display = "** LOAD **"
+            highlight = olx.GetVar('gui.blue')
+            fg = '#ffffff'
+            display = "*LOAD RES*"
         else:
-          action = 'reap %s#' % (self.CURR_CIF_FILE_NAME) + str(index)
+          if not self.CURR_CIF_FILE_NAME:
+            _ = OV.FileName() + ".cif"
+          else: _ = (self.CURR_CIF_FILE_NAME) + str(index)
+          action = 'reap %s#' % _
           highlight = OV.GetParam('gui.green')
+          fg = '#ffffff'
           display = "CIF %s" % display
       else:
         action = 'reap \'%s#' % (self.CURR_CIF_FILE_NAME) + str(index) + "'"
         highlight = olx.GetVar('linkButton.bgcolor')
       name = name.replace("(", "_").replace(")", "_")
-      display = display.replace("(", "_").replace(")", "_")
+      display = display.replace("(", "_").replace(")", "_").replace("_0m_a", ".").replace("_auto", ".")
       html += '''
     $+
       html.Snippet(GetVar(default_link),
@@ -132,8 +144,9 @@ class MultipleDataset:
       "name=%s",
       "onclick=%s",
       "bgcolor=%s",
+      "fgcolor=%s",
       )
-    $-''' % (display, name, action, highlight)
+    $-''' % (display, name, action, highlight, fg)
 
     html += "</tr></table>"
     #name = "%s_%s" %(os.path.split(CURR_CIF_FILE_NAME)[1].replace(' ', '_'), 'multicif.htm')
