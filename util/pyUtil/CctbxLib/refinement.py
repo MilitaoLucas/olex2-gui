@@ -111,6 +111,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
+    self.fo_sq_fc = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
@@ -528,7 +529,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis
       try:
-        self.hooft = hooft_analysis()
+        self.hooft = hooft_analysis(self)
         self.hooft_str = utils.format_float_with_standard_uncertainty(
           self.hooft.hooft_y, self.hooft.sigma_y)
       except utils.Sorry as e:
@@ -1741,6 +1742,11 @@ The following options were used:
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
+
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True):
+    if self.fo_sq_fc is  None:
+      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function, filtered=filtered)
+    return self.fo_sq_fc
 
 
 def write_diagnostics_stuff(f_calc):
