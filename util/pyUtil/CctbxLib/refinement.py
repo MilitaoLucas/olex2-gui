@@ -1456,6 +1456,20 @@ The following options were used:
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       # pivot_neighbours excludes dependent atoms
       if len(dependent) == 0: continue
+      valid = True
+      if not scatterers[pivot].flags.grad_site():
+        valid = False
+      if valid:
+        # check for fixed coordinates
+        for i_sc in dependent:
+          sc = scatterers[i_sc]
+          if not sc.flags.grad_site():
+            valid = False
+            break
+      if not valid:
+        print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+        continue
+
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
       if info != None and info[1] == len(dependent):
         lengths = None

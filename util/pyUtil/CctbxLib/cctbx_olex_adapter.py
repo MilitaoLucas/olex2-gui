@@ -473,6 +473,7 @@ class hooft_analysis(absolute_structure.hooft_analysis):
     self.olex2_adaptor = olex2_adaptor
     if self.olex2_adaptor is None:
       self.olex2_adaptor = OlexCctbxAdapter()
+    self.reflections = self.olex2_adaptor.reflections
     if probability_plot_slope is not None:
       probability_plot_slope = float(probability_plot_slope)
     if use_fcf:

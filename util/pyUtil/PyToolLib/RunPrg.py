@@ -631,7 +631,8 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
+    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement') and\
+      not OV.IsEDRefinement():
       try:
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
@@ -923,7 +924,7 @@ class RunRefinementPrg(RunPrg):
   """Error: No generator for tsc files selected.
   Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
-        return      
+        return
       if energy == None:
         HAR_log.write("{:^24}".format(" "))
       else:
@@ -1062,7 +1063,7 @@ class RunRefinementPrg(RunPrg):
         if "Thakkar" in source:
           OV.SetParam('snum.NoSpherA2.Calculate',False)
           HAR_log.close()
-          return True        
+          return True
         new_model=OlexRefinementModel()
         class results():
           def __init__(self):
@@ -1226,7 +1227,7 @@ class RunRefinementPrg(RunPrg):
             HAR_log.close()
             print("Error during analysis of shifts!")
             raise e
-        
+
         r = results()
         analyze_shifts(r)
         if calculate == False:
