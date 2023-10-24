@@ -810,6 +810,163 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   def write_psi4_input(self,xyz):
     if xyz:
       self.write_xyz_file()
+      coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+      pbc = OV.GetParam('snum.NoSpherA2.pySCF_PBC')
+      if pbc == True:
+        olex.m("pack cell")
+      if xyz:
+        self.write_xyz_file()
+      xyz = open(coordinates_fn,"r")
+      self.input_fn = os.path.join(self.full_dir, self.name) + ".py"
+      inp = open(self.input_fn,"w")
+      if basis_name == None:
+        basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+      basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+      basis = open(basis_set_fn,"r")
+      ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+      if charge == None:
+        charge = int(OV.GetParam('snum.NoSpherA2.charge'))
+      mem = OV.GetParam('snum.NoSpherA2.mem')
+      mem_value = float(mem) * 1024
+      if pbc == False:
+        inp.write("#!/usr/bin/env python\n%s\n\nfrom pyscf import gto, scf, dft, lib\n"%fixed_wfn_function)
+        inp.write("lib.num_threads(%s)\nmol = gto.M(\n  atom = '''"%ncpus)
+        atom_list = []
+        i = 0
+        for line in xyz:
+          i = i+1
+          if i > 2:
+            atom = line.split()
+            inp.write(line)
+            if not atom[0] in atom_list:
+              atom_list.append(atom[0])
+        xyz.close()
+        inp.write("''',\n  verbose = 4,\n  charge = %d,\n  spin = %d\n)\nmol.output = '%s_pyscf.log'\n"%(int(charge),int(mult-1),self.name))
+        inp.write("mol.max_memory = %s\n"%str(mem_value))
+        inp.write("mol.basis = {")
+        for i in range(0,len(atom_list)):
+          atom_type = "'" +atom_list[i] + "': ["
+          inp.write(atom_type)
+          temp_atom = atom_list[i] + ":" + basis_name
+          basis.seek(0,0)
+          while True:
+            line = basis.readline()
+            if not line:
+              raise RecursionError("Atom not found in the basis set!")          
+            if line[0] == "!":
+              continue
+            if "keys=" in line:
+              key_line = line.split(" ")
+              type = key_line[key_line.index("keys=")+2]
+            if temp_atom in line:
+              break
+          line_run = basis.readline()
+          if "{"  in line_run:
+            line_run = basis.readline()
+          while (not "}" in line_run):
+            shell_line = line_run.split()
+            if type == "turbomole=":
+              n_primitives = shell_line[0]
+              shell_type = shell_line[1]
+            elif type == "gamess-us=":
+              n_primitives = shell_line[1]
+              shell_type = shell_line[0]
+            if shell_type.upper() == "S":
+              momentum = '0'
+            elif shell_type.upper() == "P":
+              momentum = '1'
+            elif shell_type.upper() == "D":
+              momentum = '2'
+            elif shell_type.upper() == "F":
+              momentum = '3'
+            inp.write("[%s,"%momentum)
+            for n in range(0,int(n_primitives)):
+              if type == "turbomole=":
+                number1, number2 = basis.readline().replace("D","E").split()
+                inp.write("\n                (" + number1 + ', ' + number2 + "),")
+              else:
+                number1, number2, number3 = basis.readline().replace("D","E").split()
+                inp.write("\n                (" + number2 + ', ' + number3 + "),")
+            inp.write("],\n")
+            line_run = basis.readline()
+          inp.write("],\n")
+        basis.close()
+        inp.write("\n}\nmol.build()\n")
+  
+        model_line = None
+        if method == None:
+          method = OV.GetParam('snum.NoSpherA2.method')
+        if method == "HF":
+          if mult == 1:
+            model_line = "scf.RHF(mol)"
+          else:
+            model_line = "scf.UHF(mol)"
+        else:
+          if mult == 1:
+            model_line = "dft.RKS(mol)"
+          else:
+            model_line = "dft.UKS(mol)"
+        
+        if relativistic == None:
+          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+        if relativistic == True:
+          model_line += ".x2c()"
+        #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
+        inp.write("mf = %s\n"%model_line)
+        if method == "B3LYP":
+          #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
+          inp.write("mf.xc = 'b3lyp'\n")
+        elif method == "PBE":
+          inp.write("mf.xc = 'pbe,pbe'\n")
+        elif method == "BLYP":
+          inp.write("mf.xc = 'b88,lyp'\n")
+        elif method == "M062X":
+          inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+        elif method == "PBE0":
+          inp.write("mf.xc = 'PBE0'\n")
+        grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+        grid = None
+        if grid_accuracy == "Low":
+          grid = 0
+        elif grid_accuracy == "Normal":
+          grid = 0
+        elif grid_accuracy == "High":
+          grid = 3
+        else:
+          grid = 9
+        rest = "mf = mf.density_fit()\n"
+        if method != "HF":
+          rest += "mf.grids.radi_method = dft.gauss_chebyshev\n"
+        rest += "mf.grids.level = "+str(grid)+"\n"
+        rest += """mf.with_df.auxbasis = 'def2-tzvp-jkfit'
+  mf.diis_space = 19
+  mf.conv_tol = 0.0033
+  mf.conv_tol_grad = 1e-2
+  mf.level_shift = 0.25"""
+        if damp == None:
+          damp = float(OV.GetParam('snum.NoSpherA2.pySCF_Damping'))
+        rest += "\nmf.damp = %f\n"%damp
+        rest += "mf.chkfile = '%s.chk'\n"%self.name
+        Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+        run = None
+        if Full_HAR == True:
+          run = OV.GetVar('Run_number')
+          if run > 1:
+            rest += "mf.init_guess = 'chk'\n"
+        solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+        if solv != "Vacuum":
+          rest += "from pyscf import solvent\nmf = mf.ddCOSMO()\nmf.with_solvent.lebedev_order = 11\nmf.with_solvent.lmax = 5\nmf.with_solvent.grids.radi_method = dft.gauss_chebyshev\nmf.with_solvent.grids.level = %d\nmf.with_solvent.eps = %f\n"%(int(grid),float(solv_epsilon[solv]))
+        rest +="""mf.kernel()
+  print("Switching to SOSCF and shutting down damping & levelshift")
+  mf.conv_tol = 1e-9
+  mf.conv_tol_grad = 1e-5
+  mf.level_shift = 0.0
+  mf.damp = 0.0
+  mf = scf.newton(mf)
+  mf.kernel()"""
+        rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
+        inp.write(rest)
+        inp.close()    
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
     solv_epsilon = {
