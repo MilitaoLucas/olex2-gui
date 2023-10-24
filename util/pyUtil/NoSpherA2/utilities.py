@@ -260,14 +260,19 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     raise NameError('NoSpherA2-Output not complete!')
 
 def get_nmo():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
   line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[1]
+  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+    with open(os.path.join(OV.FilePath(),OV.ModelSrc()+".partitionlog")) as partlog:
+      while "Number of MOs:" not in line:
+        line = partlog.readline()
+    values = line.split(":")
+    return int(values[2])
+  else:
+    with open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) as wfn:
+      while "MOL ORBITAL" not in line:
+        line = wfn.readline()
+    values = line.split()
+    return int(values[1])
 
 def get_ncen():
   if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:

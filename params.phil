@@ -2098,6 +2098,8 @@ user
   NoSpherA2{
     has_pyscf = False
       .type = bool
+    enable_psi4 = False
+      .type = bool
     enable_discamb = True
       .type = bool
     discamb_exe = "discambMATTS2tsc"
