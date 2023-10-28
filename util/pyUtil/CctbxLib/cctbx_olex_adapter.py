@@ -241,10 +241,12 @@ class OlexCctbxAdapter(object):
     hklf_matrix = sgtbx.rot_mx(nums, den)
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
+    merge_code = self.olx_atoms.model.get('merge')
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
         olx.current_reflections.hklf_code != self.hklf_code or
+        (olx.current_reflections is not None and merge_code != olx.current_reflections._merge) or
         (olx.current_reflections is not None and
           (hklf_matrix != olx.current_reflections.hklf_matrix
             or self.space_group != olx.current_space_group))):
@@ -254,7 +256,8 @@ class OlexCctbxAdapter(object):
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
-        hklf_matrix=hklf_matrix)
+        hklf_matrix=hklf_matrix,
+        merge_code=merge_code)
       olx.current_observations = None
     if olx.current_reflections:
       self.reflections = olx.current_reflections
@@ -270,27 +273,21 @@ class OlexCctbxAdapter(object):
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
-        hklf_matrix=hklf_matrix)
+        hklf_matrix=hklf_matrix,
+        merge_code=merge_code)
       self.reflections = olx.current_reflections
 
-    merge = self.olx_atoms.model.get('merge')
     omit = self.olx_atoms.model['omit']
     shel = self.olx_atoms.model.get('shel', None)
     update = False
-    re_filter = True
-    if force or merge is None or merge != self.reflections._merge:
-      self.reflections.merge(merge=merge)
-      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
+    if merge_code is None or merge_code != self.reflections._merge:
+      self.reflections.merge(merge=merge_code)
       update = True
-      re_filter = False
     if force or omit is None or omit != self.reflections._omit or shel != self.reflections._shel:
-      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
       update = True
-      re_filter = False
 
     if update or self.observations is None:
-      if re_filter:
-        self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
+      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
