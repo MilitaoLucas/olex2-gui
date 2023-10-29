@@ -79,8 +79,8 @@ class MultipleDataset:
         if olx.IsFileType('cif') == 'true':
           name = olx.xf.DataName(i)
           sort = olx.Cif('%s#%i' % (sort_key, i))
-        else:
-          name = OV.FileName()
+          if sort == "n/a":
+            sort = name
         if len(name) > 15:
           display = "%s..%s" % (name[:6], name[-6:])
         else:
