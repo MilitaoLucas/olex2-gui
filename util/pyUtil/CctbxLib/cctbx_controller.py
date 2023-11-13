@@ -102,7 +102,7 @@ class hemihedral_twinning(object):
 class reflections(object):
   """ reflections is the filename holding the reflections """
   def __init__(self,  cell, spacegroup, reflection_file, hklf_code, hklf_matrix=None, merge_code=2):
-    if merge_code != 0:
+    if merge_code != 0 or hklf_code == 5:
       cs = crystal.symmetry(cell, spacegroup)
     else:
       cs = crystal.symmetry(cell, "P1")
