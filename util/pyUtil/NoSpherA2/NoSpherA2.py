@@ -392,7 +392,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           #DISCMAB is used
           discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
           shutil.copy(os.path.join(wfn_job_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
-          shutil.copy(os.path.join(wfn_job_dir, "discamb2tsc.log"), os.path.join(self.jobs_dir, "discamb2tsc.log"))
+          shutil.copy(os.path.join(wfn_job_dir, "discambMATTS2tsc.log"), os.path.join(self.jobs_dir, "discamb2tsc.log"))
           need_to_combine = True
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
@@ -402,7 +402,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             groups_counter+=1
             discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
             shutil.copy(os.path.join(wfn_job_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
-            shutil.copy(os.path.join(wfn_job_dir, "discamb2tsc.log"), os.path.join(self.jobs_dir, "discamb2tsc.log"))
+            shutil.copy(os.path.join(wfn_job_dir, "discambMATTS2tsc.log"), os.path.join(self.jobs_dir, "discamb2tsc.log"))
             need_to_combine = True
           else:
             need_to_partition = True
@@ -492,7 +492,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
               OV.SetVar('NoSpherA2-Error', "StructureFactor")
               return False
-            olx.html.Update()
+            if OV.HasGUI():
+              olx.html.Update()
             shutil.copy(os.path.join(job.full_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
           elif wfn_code == "Thakkar IAM":
             wfn_fn = os.path.join(OV.FilePath(), wfn_job_dir, self.name + ".xyz")
@@ -582,7 +583,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if success == False:
             OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
-          olx.html.Update()
+          if OV.HasGUI():
+            olx.html.Update()
           if (experimental_SF == False):
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
@@ -652,7 +654,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if success == False:
             OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
-          olx.html.Update()
+          if OV.HasGUI():
+            olx.html.Update()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
     #add_info_to_tsc()
@@ -1094,7 +1097,8 @@ def discamb(folder, name, discamb_exe):
                         os.path.join(p_path, "discamb-launch.py")])
   while p.poll() is None:
     time.sleep(5)
-    olx.html.Update()
+    if OV.HasGUI():
+      olx.html.Update()
 
 class Job(object):
   origin_folder = " "
@@ -1369,7 +1373,8 @@ def check_for_pyscf(loud=True):
         OV.SetParam('user.NoSpherA2.has_pyscf', True)
         nsp2 = get_NoSpherA2_instance()
         nsp2.softwares = nsp2.softwares.replace(";Get pySCF", ";pySCF")
-        olx.html.Update()
+        if OV.HasGUI():
+          olx.html.Update()
         return True
     except:
       pass
@@ -1594,7 +1599,8 @@ def toggle_GUI():
   else:
     OV.SetParam('snum.NoSpherA2.use_aspherical', True)
     set_default_cpu_and_mem()
-  olx.html.Update()
+  if OV.HasGUI():
+    olx.html.Update()
 OV.registerFunction(toggle_GUI,True,'NoSpherA2')
 
 def sample_folder(input_name):

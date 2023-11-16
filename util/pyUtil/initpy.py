@@ -420,6 +420,6 @@ print("\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
 
-if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
-  from HAR import HARp
-  from NoSpherA2 import NoSpherA2
+#if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
+from HAR import HARp
+from NoSpherA2 import NoSpherA2

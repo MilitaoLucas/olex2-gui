@@ -17,7 +17,8 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from cctbx_olex_adapter import OlexCctbxMasks
 from cctbx.eltbx import tiny_pse
-import olex_xgrid
+if OV.HasGUI():
+  import olex_xgrid
 
 import NoSpherA2
 import Wfn_Job
@@ -437,15 +438,16 @@ def plot_cube(name, color_cube):
   mmm = data.as_1d().min_max_mean()
   mi = mmm.min
   ma = mmm.max
-  olex_xgrid.SetMinMax(mmm.min, mmm.max)
-  olex_xgrid.SetVisible(True)
-  mask = OV.GetParam('snum.map.mask')
-  if mask == True:
-    olex_xgrid.InitSurface(True, 1.1)
-  else:
-    olex_xgrid.InitSurface(True, -100)
-  iso = float((abs(mi)+abs(ma))*2/3)
-  olex_xgrid.SetSurfaceScale(iso)
+  if OV.HasGUI():
+    olex_xgrid.SetMinMax(mmm.min, mmm.max)
+    olex_xgrid.SetVisible(True)
+    mask = OV.GetParam('snum.map.mask')
+    if mask == True:
+      olex_xgrid.InitSurface(True, 1.1)
+    else:
+      olex_xgrid.InitSurface(True, -100)
+    iso = float((abs(mi)+abs(ma))*2/3)
+    olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
 OV.registerFunction(plot_cube,True,'NoSpherA2')
@@ -502,16 +504,17 @@ def plot_cube_single(name):
   OV.SetVar('map_slider_scale', 100)
   del data
   print("Map Min = %.3f, Max = %.3f, RMS = %.3f"%(mmm.min,mmm.max,rms))
-  olex_xgrid.SetMinMax(mmm.min, mmm.max)
-  olex_xgrid.SetVisible(True)
-  if OV.GetParam('snum.map.mask') == True:
-    olex_xgrid.InitSurface(True, 1.1)
-  else:
-    olex_xgrid.InitSurface(True, -100)
-  iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
-  olex_xgrid.SetSurfaceScale(iso)  
-  OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
-  olex.m("html.Update()")
+  if OV.HasGUI():
+    olex_xgrid.SetMinMax(mmm.min, mmm.max)
+    olex_xgrid.SetVisible(True)
+    if OV.GetParam('snum.map.mask') == True:
+      olex_xgrid.InitSurface(True, 1.1)
+    else:
+      olex_xgrid.InitSurface(True, -100)
+    iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
+    olex_xgrid.SetSurfaceScale(iso)  
+    OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
+    olex.m("html.Update()")
 
 OV.registerFunction(plot_cube_single,True,'NoSpherA2')
 
@@ -565,8 +568,7 @@ def save_map_cube(map_type, resolution):
       for y in range(size[1]):
         string = ""
         for z in range(size[2]):
-          value = olex_xgrid.GetValue(x,y,z)
-          string += ("%13.5e" % value)
+          string += ("%13.5e" % olex_xgrid.GetValue(x,y,z))
           if (z+1) % 6 == 0 and (z+1) != size[2]:
             string += '\n'
         if (y != (size[1] - 1)):
@@ -650,21 +652,24 @@ def plot_fft_map(fft_map):
   max_v = statistics.max()
   sigma = statistics.sigma()
   del data
-  olex_xgrid.SetMinMax(min_v, max_v)
-  olex_xgrid.SetVisible(True)
-  mask = OV.GetParam('snum.map.mask')
-  if mask == True:
-    olex_xgrid.InitSurface(True, 1.1)
-  else:
-    olex_xgrid.InitSurface(True, -100)
-  iso = float(-sigma*3.3)
-  olex_xgrid.SetSurfaceScale(iso)
+  if OV.HasGUI():
+    olex_xgrid.SetMinMax(min_v, max_v)
+    olex_xgrid.SetVisible(True)
+    mask = OV.GetParam('snum.map.mask')
+    if mask == True:
+      olex_xgrid.InitSurface(True, 1.1)
+    else:
+      olex_xgrid.InitSurface(True, -100)
+    iso = float(-sigma*3.3)
+    olex_xgrid.SetSurfaceScale(iso)
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
   print("Map size: %d x %d x %d"%(fft_map.n_real()[0],fft_map.n_real()[1],fft_map.n_real()[2]))
 
 OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
+  if OV.HasGUI():
+    return
   gridding = data.accessor()
   type = isinstance(data, flex.int)
   olex_xgrid.Import(
@@ -1020,7 +1025,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
     if save_cube:
       write_map_to_cube(data, "PDF", size)
 
-    if do_plot:
+    if do_plot and OV.HasGUI():
       iso = -0.05 if second is False else -3.1415
       if OV.GetVar("Negative_PDF") == True:
         iso = stats.min * 0.6
@@ -1104,6 +1109,8 @@ def deformation_map(resolution=0.1, return_map=False):
   else:
     f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
   f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
+  print("Fspher_Fcalc R1:")
+  print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
   f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
   f_diff = f_diff.expand_to_p1()
   wavelength = float(olx.xf.exptl.Radiation())
