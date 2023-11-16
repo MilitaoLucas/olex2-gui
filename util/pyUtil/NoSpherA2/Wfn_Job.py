@@ -1595,9 +1595,10 @@ ener = cf.kernel()"""
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
           txt_col='black_text')
-    olx.html.Update()
-    olx.xf.EndUpdate()
-    olex.m('refresh')
+    if OV.HasGUI():
+      olx.html.Update()
+      olx.xf.EndUpdate()
+      olex.m('refresh')
     python_script = "fchk-launch.py"
 
     if software == "ORCA":
