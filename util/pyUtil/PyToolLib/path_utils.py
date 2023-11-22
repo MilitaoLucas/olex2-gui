@@ -146,13 +146,15 @@ def Cleanup():
     try:
       dirs = []
       if sys.platform[:3] == 'win':
+        import platform
         sp_dir = os.path.join( "Python38", "Lib", "site-packages")
         dirs = [
           os.path.join(sp_dir, r"scipy\sparse\linalg\dsolve"),
           os.path.join(sp_dir, r"scipy\sparse\linalg\eigen"),
           os.path.join(sp_dir, r"scipy\sparse\linalg\isolve"),
-          os.path.join(sp_dir, r"scipy\.libs"),
         ]
+        if platform.architecture()[0] != "32bit":
+          dirs.append(os.path.join(sp_dir, r"scipy\.libs"))
         files = [
           "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
           "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll",
