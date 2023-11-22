@@ -111,7 +111,7 @@ class MultipleDataset:
       display = self.CURR_CIF_FILE_LIST[i][2]
       if i > 0 and (i % 4) == 0:
         html += "</tr><tr width=100%>"
-      if i == current:
+      if index == current:
         bgcolour = OV.GetVar('HtmlBgColour')
         if OV.FileExt() == "cif":
           reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
