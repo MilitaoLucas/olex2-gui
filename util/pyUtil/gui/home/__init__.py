@@ -30,16 +30,14 @@ class MultipleDataset:
     cnt = int(olx.xf.DataCount())
     sort = 0
     for i in range(0, cnt):
-      if olx.IsFileType('cif') == 'true':
-        if olx.xf.DataName(i) == "global" or not olx.xf.DataName(i):
-          rv.append((i, name, display, sort, False))
-          continue
+      name = olx.xf.DataName(i)
+      if name == "global" or not name:
+        rv.append((i, name, "", "", False))
+        continue
       display = ""
-      if olx.IsFileType('cif') == 'true':
-        name = olx.xf.DataName(i)
-        sort = olx.Cif('%s#%i' % (sort_key, i))
-        if sort == "n/a":
-          sort = name
+      sort = olx.Cif('%s#%i' % (sort_key, i))
+      if sort == "n/a":
+        sort = name
       if len(name) > 15:
         display = "%s..%s" % (name[:6], name[-6:])
       else:
