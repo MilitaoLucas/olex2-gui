@@ -54,9 +54,11 @@ class MultipleDataset:
     current = int(olx.xf.CurrentData())
     file_name = olx.FileFull()
     html = '<table border="0" VALIGN="center" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableRowBgColour)"><tr>'
-    datasets = self.list_datasets(sort_key=sort_key)
 
+    datasets = self.list_datasets(sort_key=sort_key)
+    datasets.sort(key=lambda x: x[3])
     shown_cnt = 0
+
     for index, name, display, sk, do_show in datasets:
       if not do_show:
         continue
