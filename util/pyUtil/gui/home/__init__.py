@@ -48,12 +48,12 @@ class MultipleDataset:
     return rv
 
   def generateHtml(self, make_always=False, sort_key='_database_code_depnum_ccdc_archive'):
+    if olx.IsFileType('cif') != 'true':
+      return ""
+
     current = int(olx.xf.CurrentData())
     file_name = olx.FileFull()
     html = '<table border="0" VALIGN="center" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableRowBgColour)"><tr>'
-
-    if olx.IsFileType('cif') != 'true':
-      return ""
     datasets = self.list_datasets(sort_key=sort_key)
 
     shown_cnt = 0
