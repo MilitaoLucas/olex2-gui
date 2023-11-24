@@ -1598,7 +1598,21 @@ The following options were used:
       k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    if OV.IsEDRefinement():
+      new_data = []
+      fc_sq = self.normal_eqns.fc_sq
+      for i in range(f_obs.size()):
+        mfc = math.sqrt(fc_sq.data()[i])
+        if mfc == 0:
+          s = 1
+        else:
+          s = abs(f_calc.data()[i])/mfc
+        new_data.append(f_obs.data()[i]*s)
+      f_obs = f_obs.customized_copy(data=flex.double(new_data))
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    else:
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+
     if OV.IsEDData():
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
