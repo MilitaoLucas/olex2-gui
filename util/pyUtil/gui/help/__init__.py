@@ -175,7 +175,7 @@ class GetHelp(VFSDependent):
 
     for root, dirnames, filenames in os.walk(self.source_dir):
       for filename in fnmatch.filter(filenames, '*.md'):
-        matches.append((root.replace(self.source_dir, 'help').replace("\\", "_") + "_" + filename.replace('.md', ""),os.path.join(root, filename)))
+        matches.append((root.replace(str(self.source_dir), 'help').replace("\\", "_") + "_" + filename.replace('.md', ""),os.path.join(root, filename)))
 
     if not matches:
       return
