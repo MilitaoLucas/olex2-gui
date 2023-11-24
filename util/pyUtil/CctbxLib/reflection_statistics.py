@@ -480,8 +480,8 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
           I_calc_merged = self.f_calc(miller_set=I_obs_merged).as_amplitude_array().f_as_f_sq()
           I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
           I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
-      I_obs_omitted = I_obs_merged.lone_set(I_obs_filtered)
-      I_obs_filtered = self.reflections.f_sq_obs_filtered
+        I_obs_omitted = I_obs_merged.lone_set(I_obs_filtered)
+        I_obs_filtered = self.reflections.f_sq_obs_filtered
 
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       from smtbx import masks
