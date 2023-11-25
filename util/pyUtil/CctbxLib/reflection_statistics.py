@@ -1,5 +1,6 @@
 from __future__ import division
 from cctbx_olex_adapter import OlexCctbxAdapter
+
 from olexFunctions import OV
 import olx
 
@@ -134,15 +135,13 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.cc_one_half(use_binning=True)
     elif self.item == "r1_factor_vs_resolution":
-      NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+      NoSpherA2 = OV.IsNoSpherA2()
       fo2 = None
       fc = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-        fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+        fo2, fc = self.get_fo_sq_fc(
+          one_h_function=self.get_one_h_function(table_name))
       else:
         fo2, fc = self.get_fo_sq_fc()
       if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -225,7 +224,7 @@ class item_vs_resolution(OlexCctbxAdapter):
 #  def __init__(self, n_bins=10, resolution_as="two_theta"):
 #    OlexCctbxAdapter.__init__(self)
 #    self.resolution_as = resolution_as
-#    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+#    NoSpherA2 = OV.IsNoSpherA2()
 #    fo2 = None
 #    fc = None
 #    if NoSpherA2:
@@ -271,15 +270,13 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta", normalize=True):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    NoSpherA2 = OV.IsNoSpherA2()
     fo2 = None
     fc = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+      fo2, fc = self.get_fo_sq_fc(
+        one_h_function=self.get_one_h_function(table_name))
     else:
       fo2, fc = self.get_fo_sq_fc()
     fo2.setup_binner(n_bins=n_bins)
@@ -292,7 +289,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
            self.reflections.f_sq_obs.anomalous_flag():
           f_mask = f_mask.generate_bijvoet_mates()
         f_mask_cs = f_mask.common_set(fo2)
-        fc = fc.array(data=fc.data() + f_mask_cs.data())    
+        fc = fc.array(data=fc.data() + f_mask_cs.data())
     weights = self.compute_weights(fo2, fc)
     self.binned_data = fo2.scale_factor(
       fc, weights=weights, use_binning=True)
@@ -332,16 +329,15 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     from cctbx.array_family import flex
     from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    NoSpherA2 = OV.IsNoSpherA2()
     if self.hklf_code == 5:
       f_sq_obs_filtered = None
       f_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-        f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation, filtered=False)
+        f_sq_obs, f_calc = self.get_fo_sq_fc(
+          one_h_function=self.get_one_h_function(table_name),
+          filtered=False)
       else:
         f_sq_obs, f_calc = self.get_fo_sq_fc(filtered=False)
       f_sq_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered)
@@ -363,16 +359,14 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_calc_merged = None
       f_calc_filtered = None
       if NoSpherA2:
-        from refinement import FullMatrixRefine
-        fmr = FullMatrixRefine()
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
+        one_h_function = self.get_one_h_function(table_name)
         try:
-          f_calc_merged = self.f_calc(miller_set=f_obs_merged, one_h_function=nrml_eqns.one_h_linearisation)
+          f_calc_merged = self.f_calc(miller_set=f_obs_merged, one_h_function=one_h_function)
           f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
           f_calc_omitted = f_calc_merged.common_set(f_obs_merged).lone_set(f_calc_filtered)
         except:
-          junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+          junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
           f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
           print("WARNING! It was not possible to obtain all values of Fc values\n for the plot, so omitted values are skipped!")
           f_calc_omitted = None
@@ -430,6 +424,113 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.yLegend = "F obs"
     self.xy_plot = plot
 
+class I_obs_vs_I_calc(OlexCctbxAdapter):
+  def __init__(self, batch_number=None):
+    import os
+    from cctbx.array_family import flex
+    from cctbx import maptbx, miller, sgtbx, uctbx, xray
+    OlexCctbxAdapter.__init__(self)
+    NoSpherA2 = OV.IsNoSpherA2()
+    if self.hklf_code == 5:
+      I_obs_filtered = None
+      I_calc_filtered = None
+      if NoSpherA2:
+        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        I_obs, f_calc = self.get_fo_sq_fc(
+          one_h_function=self.get_one_h_function(table_name),
+          filtered=False)
+      else:
+        I_obs, f_calc = self.get_fo_sq_fc(filtered=False)
+      I_obs_filtered = I_obs.common_set(self.reflections.f_sq_obs_filtered)
+      I_obs_omitted = I_obs.lone_set(I_obs_filtered)
+      I_calc_filtered = f_calc.common_set(self.reflections.f_sq_obs_filtered).as_amplitude_array().f_as_f_sq()
+      I_calc_omitted = f_calc.lone_set(I_calc_filtered).as_amplitude_aray().f_as_f_sq()
+    else:
+      if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
+        assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"
+        selection = (self.reflections.batch_numbers_array.data() == batch_number)
+        f_sq_obs = self.reflections.f_sq_obs.select(selection)
+        merging = self.reflections.merge(f_sq_obs)
+        I_obs_merged = merging.array()
+        I_obs_filtered = merging.array()
+      else:
+        I_obs_merged = self.reflections.f_sq_obs_merged
+        I_obs_filtered = I_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
+      I_calc_merged = None
+      I_calc_filtered = None
+      I_calc_omitted = None
+      do_scale = True
+      if OV.IsEDRefinement():
+        I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic()
+        do_scale = False
+      else:
+        if NoSpherA2:
+          table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+          one_h_function = self.get_one_h_function(table_name)
+          try:
+            I_calc_merged = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function).as_amplitude_array().f_as_f_sq()
+            I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
+            I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
+          except:
+            junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
+            I_calc_merged = f_calc_temp.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
+            print("WARNING! It was not possible to obtain all values of Ic values\n for the plot, so omitted values are skipped!")
+            I_calc_omitted = None
+        else:
+          I_calc_merged = self.f_calc(miller_set=I_obs_merged).as_amplitude_array().f_as_f_sq()
+          I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
+          I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
+        I_obs_omitted = I_obs_merged.lone_set(I_obs_filtered)
+        I_obs_filtered = self.reflections.f_sq_obs_filtered
+
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      from smtbx import masks
+      f_mask = self.load_mask()
+      if f_mask:
+        if not self.reflections.f_sq_obs.space_group().is_centric() and\
+           self.reflections.f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        I_mask_cs = f_mask.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
+        I_calc_filtered = I_calc_filtered.array(data=I_calc_filtered.data() + I_mask_cs.data())
+        if I_calc_omitted != None and I_obs_omitted.size() > 0:
+          I_mask_omit = f_mask.common_set(I_obs_omitted).as_amplitude_array().f_as_f_sq()
+          if I_mask_omit.data().size() < I_obs_omitted.data().size():
+            print("WARNING!\nMissing Information in the Mask about omitted reflections,\nomitted reflections will only display those where information\nabout the map is available!")
+            I_calc_omitted = I_calc_omitted.common_set(I_mask_omit)
+            I_calc_omitted = I_calc_omitted.array(I_calc_omitted.data() + I_mask_omit.data())
+            I_obs_omitted = I_obs_omitted.common_set(I_mask_omit)
+          else:
+            I_calc_omitted = I_calc_omitted.array(I_calc_omitted.data() + I_mask_omit.data())
+    Io = flex.abs(I_obs_filtered.data())
+    Ic = flex.abs(I_calc_filtered.data())
+    if do_scale:
+      k = OV.GetOSF()
+      Io /= k
+    # fit = flex.linear_regression(fc, fo)
+    # ShowFitSummary(fit)
+
+    plot = empty()
+    plot.indices = I_obs_filtered.indices()
+    plot.I_obs = Io
+    plot.I_calc = Ic
+    if I_calc_omitted:
+      plot.I_calc_omitted = flex.abs(I_calc_omitted.data())
+      if I_obs_omitted:
+        plot.I_obs_omitted = flex.abs(I_obs_omitted.data()) / k
+        plot.indices_omitted = I_obs_omitted.indices()
+      else:
+        plot.I_obs_omitted = None
+        plot.indices_omitted = None
+    else:
+      plot.I_calc_omitted = None
+      plot.I_obs_omitted = None
+      plot.indices_omitted = None
+    #plot.fit_slope = fit.slope()
+    #plot.fit_y_intercept = fit.y_intercept()
+    plot.xLegend = "I calc"
+    plot.yLegend = "I obs"
+    self.xy_plot = plot
+
 
 class f_obs_over_f_calc(OlexCctbxAdapter):
   def __init__(self,
@@ -438,15 +539,13 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
                resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
 
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    NoSpherA2 = OV.IsNoSpherA2()
     f_sq_obs_filtered = None
     f_calc_filtered = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(
+        one_h_function=self.get_one_h_function(table_name))
     else:
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
@@ -504,15 +603,13 @@ class normal_probability_plot(OlexCctbxAdapter):
                distribution=None):
     OlexCctbxAdapter.__init__(self)
     from scitbx.math import distributions
-    NoSpherA2 = OV.GetParam("snum.NoSpherA2.use_aspherical")
+    NoSpherA2 = OV.IsNoSpherA2()
     f_sq_obs = None
     f_calc = None
     if NoSpherA2:
-      from refinement import FullMatrixRefine
-      fmr = FullMatrixRefine()
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
-      f_sq_obs, f_calc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
+      f_sq_obs, f_calc = self.get_fo_sq_fc(
+        one_h_function=self.get_one_h_function(table_name))
     else:
       f_sq_obs, f_calc = self.get_fo_sq_fc()
     if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -524,7 +621,7 @@ class normal_probability_plot(OlexCctbxAdapter):
           f_mask = f_mask.generate_bijvoet_mates()
         f_mask_cs = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=f_calc.data() + f_mask_cs.data())
-        
+
     f_obs = f_sq_obs.f_sq_as_f()
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:

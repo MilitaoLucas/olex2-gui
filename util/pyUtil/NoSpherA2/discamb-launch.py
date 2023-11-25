@@ -12,14 +12,14 @@ args = os.getenv("discamb_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'" + ' in: ' + discamb_file)
 p = subprocess.Popen(args)
 tries = 0
-while not os.path.exists('discamb2tsc.log'):
+while not os.path.exists('discambMATTS2tsc.log'):
   time.sleep(1)
   tries += 1
   if tries >= 5:
     print("Failed to locate the output file")
     time.sleep(10)
     exit(1)
-with open('discamb2tsc.log', "r") as stdout:
+with open('discambMATTS2tsc.log', "r") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:

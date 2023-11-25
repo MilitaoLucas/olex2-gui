@@ -388,6 +388,7 @@
     >
     <cmd
       <cmd3 "telp_a %1">
+      <cmd3 "telp_b">
     >
   >
 >
@@ -1172,7 +1173,16 @@
   >
 >
 
-
+<pip help="Installs a package via pip into the Olex2 DataDir"
+  <body
+    <args
+      <arg1 name="Package name" def="None">
+    >
+    <cmd
+      <cmd1 "spy.pip(%1)">
+    >
+  >
+>
 
 
 <dire help="Opens the current directory in Explorer"
@@ -1271,6 +1281,19 @@
     <cmd
       <cmd1 "if strcmp(%2,'') then none else spy.SetParam(graphs.reflections.fobs_fcalc.output_csv_file,%2)">
       <cmd2 "spy.Fobs_Fcalc_plot(%1)">
+    >
+  >
+>
+
+<Iobs_Icalc help="Calculates and displays an Fobs vs Fcalc plot"
+  <body
+    <args
+      <arg1 name="batch_number" def="None">
+      <arg2 name="output_csv_file">
+    >
+    <cmd
+      <cmd1 "if strcmp(%2,'') then none else spy.SetParam(graphs.reflections.iobs_icalc.output_csv_file,%2)">
+      <cmd2 "spy.Iobs_Icalc_plot(%1)">
     >
   >
 >

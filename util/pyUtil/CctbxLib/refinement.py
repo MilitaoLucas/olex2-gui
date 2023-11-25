@@ -111,6 +111,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
+    self.fo_sq_fc = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
@@ -169,7 +170,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.temp < -274: self.temp = 20
     self.fc_correction = None
     #set up Fc  correction if defined
-    if self.exti is not None:
+    if ed_refinement:
+      msg = "ED refinement"
+      msg_l = len(msg)
+      #if self.weighting.a != 0 or self.weighting.b != 0:
+        #self.weighting.a, self.weighting.b = 0, 0
+      #  msg += ", resetting weighting to sigma weights"
+      if self.exti is not None:
+        msg +=", ignoring EXTI"
+      if len(msg) != msg_l:
+        print(msg)
+      self.fc_correction = xray.dummy_fc_correction()
+      self.fc_correction.expression = ''
+    elif self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
       self.fc_correction.grad = True
@@ -197,12 +210,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.std_obserations = None
     if ed_refinement:
-      import AC6 as ac6
-      try:
-        aci = ac6.AC_instance
-      except:
-        aci = ac6.AC6.AC_instance
-      aci.EDI.setup_refinement(self)
+      OV.GetACI().EDI.setup_refinement(self)
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
@@ -308,6 +316,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if str(e) == 'external_interrupt':
           print("Refinement interrupted")
           self.interrupted = True
+        elif "is an empty array" in str(e):
+          print("There is nothing to refine.")
+          self.interrupted = True
+          return
         else:
           raise e
       if timer:
@@ -411,8 +423,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independents)
-      OV.SetParam(
-        'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      if not OV.IsEDRefinement():
+        OV.SetParam(
+          'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
       if timer:
         t9 = time.time()
         print("-- " + "{:8.3f}".format(t2-t1) + " for constraints")
@@ -506,13 +519,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
       return None
 
   def check_hooft(self):
+    #this will fail!
+    if OV.IsEDData():
+      print("Skipping Hooft parameter evaluation for ED data")
+      return
     if self.hooft:
       return self.hooft
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis
       try:
-        self.hooft = hooft_analysis()
+        self.hooft = hooft_analysis(self)
         self.hooft_str = utils.format_float_with_standard_uncertainty(
           self.hooft.hooft_y, self.hooft.sigma_y)
       except utils.Sorry as e:
@@ -885,7 +902,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
     cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_aspherical = OV.IsNoSpherA2()
 
     ## Florian's new fcf iucr loop
     if OV.GetParam('user.refinement.refln_loop') == True:
@@ -1277,8 +1294,8 @@ The following options were used:
             as_var.append((id, k))
           elif ref['relation'] == "one_minus_var":
             as_var_minus_one.append((id, k))
-      if ref['index'] == 5 and ref['relation'] == "var":
-        eadp.append(ref['id'])
+        if ref['index'] == 5 and ref['relation'] == "var":
+          eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
           print("Invalid variable use - mixes occupancy and U")
@@ -1439,6 +1456,20 @@ The following options were used:
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       # pivot_neighbours excludes dependent atoms
       if len(dependent) == 0: continue
+      valid = True
+      if not scatterers[pivot].flags.grad_site():
+        valid = False
+      if valid:
+        # check for fixed coordinates
+        for i_sc in dependent:
+          sc = scatterers[i_sc]
+          if not sc.flags.grad_site():
+            valid = False
+            break
+      if not valid:
+        print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+        continue
+
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
       if info != None and info[1] == len(dependent):
         lengths = None
@@ -1567,7 +1598,21 @@ The following options were used:
       k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    if OV.IsEDRefinement():
+      new_data = []
+      fc_sq = self.normal_eqns.fc_sq
+      for i in range(f_obs.size()):
+        mfc = math.sqrt(fc_sq.data()[i])
+        if mfc == 0:
+          s = 1
+        else:
+          s = abs(f_calc.data()[i])/mfc
+        new_data.append(f_obs.data()[i]*s)
+      f_obs = f_obs.customized_copy(data=flex.double(new_data))
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+    else:
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+
     if OV.IsEDData():
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
@@ -1725,6 +1770,11 @@ The following options were used:
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
+
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True):
+    if self.fo_sq_fc is  None:
+      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function, filtered=filtered)
+    return self.fo_sq_fc
 
 
 def write_diagnostics_stuff(f_calc):

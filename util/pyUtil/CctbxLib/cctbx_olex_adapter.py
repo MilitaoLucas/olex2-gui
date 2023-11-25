@@ -164,6 +164,7 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
+      inelastic_table = None
       #  default for DISP first
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
@@ -240,10 +241,12 @@ class OlexCctbxAdapter(object):
     hklf_matrix = sgtbx.rot_mx(nums, den)
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
+    merge_code = self.olx_atoms.model.get('merge')
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
         olx.current_reflections.hklf_code != self.hklf_code or
+        (olx.current_reflections is not None and merge_code != olx.current_reflections._merge) or
         (olx.current_reflections is not None and
           (hklf_matrix != olx.current_reflections.hklf_matrix
             or self.space_group != olx.current_space_group))):
@@ -253,7 +256,8 @@ class OlexCctbxAdapter(object):
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
-        hklf_matrix=hklf_matrix)
+        hklf_matrix=hklf_matrix,
+        merge_code=merge_code)
       olx.current_observations = None
     if olx.current_reflections:
       self.reflections = olx.current_reflections
@@ -269,27 +273,21 @@ class OlexCctbxAdapter(object):
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
-        hklf_matrix=hklf_matrix)
+        hklf_matrix=hklf_matrix,
+        merge_code=merge_code)
       self.reflections = olx.current_reflections
 
-    merge = self.olx_atoms.model.get('merge')
     omit = self.olx_atoms.model['omit']
     shel = self.olx_atoms.model.get('shel', None)
     update = False
-    re_filter = True
-    if force or merge is None or merge != self.reflections._merge:
-      self.reflections.merge(merge=merge)
-      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
+    if merge_code is None or merge_code != self.reflections._merge:
+      self.reflections.merge(merge=merge_code)
       update = True
-      re_filter = False
     if force or omit is None or omit != self.reflections._omit or shel != self.reflections._shel:
-      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
       update = True
-      re_filter = False
 
     if update or self.observations is None:
-      if re_filter:
-        self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
+      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
@@ -315,10 +313,16 @@ class OlexCctbxAdapter(object):
       apply_twin_law = False
     if (apply_twin_law
         and self.twin_components is not None):
-      twin_component = self.twin_components[0]
-      twinning = cctbx_controller.hemihedral_twinning(
-        twin_component.twin_law.as_double(), miller_set_)
-      twin_set = twinning.twin_complete_set
+      twin_sets = []
+      #twin_component = self.twin_components[0]
+      for twin_component in self.twin_components:
+        twinning = cctbx_controller.hemihedral_twinning(
+          twin_component.twin_law.as_double(), miller_set_)
+        twin_sets.append(twinning.twin_complete_set)
+      if len(twin_sets) > 1:
+        twin_set = miller.union_of_sets(twin_sets)
+      else:
+        twin_set = twin_sets[0]
       if one_h_function:
         data = []
         for mi in twin_set.indices():
@@ -329,6 +333,7 @@ class OlexCctbxAdapter(object):
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
       if twin_data:
+        assert len(twin_sets) == 1
         value = twin_component.value
         if value < 0: value = 0
         elif value > 1: value = 1
@@ -351,6 +356,9 @@ class OlexCctbxAdapter(object):
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
+
+  def get_one_h_function(self, table_file_name):
+    return get_one_h_function(self.xray_structure(), table_file_name)
 
   def compute_weights(self, fo2, fc):
     weight = self.olx_atoms.model['weight']
@@ -457,9 +465,12 @@ def write_fab(f_mask, fab_path=None):
 
 from smtbx import absolute_structure
 
-class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
-  def __init__(self, probability_plot_slope=None, use_fcf=False):
-    OlexCctbxAdapter.__init__(self)
+class hooft_analysis(absolute_structure.hooft_analysis):
+  def __init__(self, olex2_adaptor=None, probability_plot_slope=None, use_fcf=False):
+    self.olex2_adaptor = olex2_adaptor
+    if self.olex2_adaptor is None:
+      self.olex2_adaptor = OlexCctbxAdapter()
+    self.reflections = self.olex2_adaptor.reflections
     if probability_plot_slope is not None:
       probability_plot_slope = float(probability_plot_slope)
     if use_fcf:
@@ -481,8 +492,8 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
         fc = fc.common_set(fo2)
       scale = 1
     else:
-      fo2, fc = self.get_fo_sq_fc()
-      weights = self.compute_weights(fo2, fc)
+      fo2, fc = self.olex2_adaptor.get_fo_sq_fc()
+      weights = self.olex2_adaptor.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
       print("No Bijvoet pairs")
@@ -750,7 +761,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+    use_tsc = OV.IsNoSpherA2()
     if use_tsc == True:
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       xray_structure = mask.xray_structure
@@ -1413,3 +1424,16 @@ def set_ED_tables(tables_name):
   OV.set_cif_item('_diffrn_oxdiff_scatteringfactors_ed', ref)
 OV.registerFunction(set_ED_tables, False, "sfac")
 
+def get_one_h_function(xray_structure, table_file_name):
+  from smtbx.structure_factors import direct
+  from smtbx_refinement_least_squares_ext import f_calc_function_default
+  try:
+    return f_calc_function_default(direct.f_calc_modulus_squared(
+      xray_structure, table_file_name=table_file_name))
+  except Exception as e:
+    e_str = str(e)
+    if "stoks.size() == scatterer" in e_str:
+      print("Number of atoms in model and table are not matching!")
+    elif "Error during building of normal equations using OpenMP" in e_str:
+      print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
+    raise e

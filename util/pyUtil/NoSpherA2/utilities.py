@@ -27,7 +27,8 @@ def scrub(cmd):
   return log.endListen()
 
 def run_with_bitmap(bitmap_text):
-  timage.info_bitmaps(timage, bitmap_text, '#ff4444')
+  if OV.HasGUI():
+    timage.info_bitmaps(timage, bitmap_text, '#ff4444')
   def decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -45,7 +46,18 @@ def run_with_bitmap(bitmap_text):
         olx.xf.EndUpdate()
         olex.m('refresh')
     return wrapper
-  return decorator
+  def headless_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      try:
+        return func(*args, **kwargs)
+      except Exception as e:
+        raise e
+    return wrapper  
+  if OV.HasGUI():
+    return decorator
+  else:
+    return headless_decorator
 
 def write_merged_hkl():
   folder = OV.FilePath()
@@ -70,9 +82,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
-    olx.html.Update()
-    olx.xf.EndUpdate()
-    olex.m('refresh')
+    if OV.HasGUI():
+      olx.html.Update()
+      olx.xf.EndUpdate()
+      olex.m('refresh')
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
@@ -260,14 +273,23 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     raise NameError('NoSpherA2-Output not complete!')
 
 def get_nmo():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
-    return -1
-  wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
   line = ""
-  while "MOL ORBITAL" not in line:
-    line = wfn.readline()
-  values = line.split()
-  return values[1]
+  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+    part_log_path =  os.path.join(OV.FilePath(),OV.ModelSrc()+".partitionlog")
+    if os.path.exists(part_log_path):
+      with open(part_log_path) as partlog:
+        while "Number of MOs:" not in line:
+          line = partlog.readline()
+      values = line.split(":")
+      return int(values[2])
+    else:
+      return -1
+  else:
+    with open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) as wfn:
+      while "MOL ORBITAL" not in line:
+        line = wfn.readline()
+    values = line.split()
+    return int(values[1])
 
 def get_ncen():
   if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
@@ -353,7 +375,8 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
-  olx.html.Update()
+  if OV.HasGUI():
+    olx.html.Update()
   return True
 
 OV.registerFunction(combine_tscs,True,'NoSpherA2')
@@ -720,7 +743,7 @@ def calculate_number_of_electrons():
 def write_precise_model_file():
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
-  use_tsc = OV.GetParam('snum.NoSpherA2.use_aspherical')
+  use_tsc = OV.IsNoSpherA2()
   table_name = ""
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
@@ -813,5 +836,53 @@ def write_precise_model_file():
       if 'fdp' in annotations[matrix_run]:
         matrix_run += 2
     f.write("\n")
+    
+  connectivity_full = fmr.reparametrisation.connectivity_table
+  xs = fmr.xray_structure()
+  from scitbx import matrix
+  import math
+  from cctbx.crystal import calculate_distances
+  cell_params = fmr.olx_atoms.getCell()
+  cell_errors = fmr.olx_atoms.getCellErrors()
+  cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
+  dist_stats = {}
+  dist_errs = {}    
+  for i in range(3):
+    for j in range(i+1,3):
+      if (cell_params[i] == cell_params[j] and
+            cell_errors[i] == cell_errors[j] and
+            cell_params[i+3] == 90 and
+            cell_errors[i+3] == 0 and
+            cell_params[j+3] == 90 and
+            cell_errors[j+3] == 0):
+        cell_vcv[i,j] = math.pow(cell_errors[i],2)
+        cell_vcv[j,i] = math.pow(cell_errors[i],2)
+  #Prepare the Cell Variance covariance matrix, since we need it for error propagation in distances
+  cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
+  sl = xs.scatterers().extract_labels()
+  sf = xs.sites_frac()
+  #This is VCV from refinement equations
+  cm = norm_eq.covariance_matrix_and_annotations().matrix
+  pm = xs.parameter_map()
+  pat = connectivity_full.pair_asu_table
+    
+  # calculate the distances using the prepared information
+  distances = calculate_distances(
+              pat,
+              sf,
+              covariance_matrix=cm,
+              cell_covariance_matrix=cell_vcv,
+              parameter_map=pm)
+    
+  #The distances only exist once we iterate over them! Therefore build them and save them in this loop
+  for i,d in enumerate(distances):
+    bond = sl[d.i_seq]+"-"+sl[d.j_seq]
+    dist_stats[bond] = distances.distances[i]
+    dist_errs[bond] = math.sqrt(distances.variances[i])
+  
+  f.write("\n\nBondlengths and errors:\n")
+  for key in dist_stats:
+    f.write(f"{key} {dist_stats[key]} {dist_errs[key]}\n")
+  
   f.close()
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")

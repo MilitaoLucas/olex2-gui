@@ -859,11 +859,26 @@ class OlexFunctions(inheritFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsNoSpherA2(self):
+    return self.GetParam("snum.NoSpherA2.use_aspherical") and\
+      self.GetParam("snum.refinement.program") == "olex2.refine"
+
   def IsEDData(self):
     try:
       return float(olx.xf.exptl.Radiation()) < 0.1
     except:
       return False
+
+  def IsEDRefinement(self):
+    return self.IsEDData() and\
+      self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+
+  def GetACI(self):
+    import AC6 as ac6
+    try:
+      return ac6.AC_instance
+    except:
+      return ac6.AC6.AC_instance
 
   def ListParts(self):
     import olexex
@@ -1197,7 +1212,7 @@ class OlexFunctions(inheritFunctions):
         if files:
           env.initialise(os.path.join(ob_path, files[0]))
           if env.initialised:
-            print("Successfully initialised SciPy OpenBlas:")
+            print("Successfully initialised OpenBlas from %s:" %files[0])
             print(env.build_config)
             return True
     except Exception as e:

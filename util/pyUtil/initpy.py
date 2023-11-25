@@ -19,6 +19,7 @@ if sys.platform[:3] == 'win':
     python_dir = _
   else:
     python_dir = r"%s\Python38" %basedir
+  sys.path.append(r"%s\site-packages" %datadir)
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
@@ -26,7 +27,7 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
-
+  os.add_dll_directory(basedir)
 else:
   #it looks like we do not want to set the sys PATH on Linux or Mac!
   set_sys_path = True
@@ -402,9 +403,8 @@ def pip(package):
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', '--user', package])
-#  pip.main(['install', package])
-OV.registerFunction(pip,False)
+  pipmain(['install', '--upgrade', '--target=%s\site-packages' % OV.DataDir(), package])
+OV.registerFunction(pip, False)
 
 if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
@@ -420,6 +420,6 @@ print("\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
 
-if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
-  from HAR import HARp
-  from NoSpherA2 import NoSpherA2
+#if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
+from HAR import HARp
+from NoSpherA2 import NoSpherA2

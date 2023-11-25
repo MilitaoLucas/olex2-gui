@@ -61,10 +61,10 @@ class Graph(ArgumentParser):
   def __init__(self):
     super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
-    self.marker_params = (self.params.marker_1, 
-                          self.params.marker_2, 
-                          self.params.marker_3, 
-                          self.params.marker_4, 
+    self.marker_params = (self.params.marker_1,
+                          self.params.marker_2,
+                          self.params.marker_3,
+                          self.params.marker_4,
                           self.params.marker_5)
     self.function_params = (self.params.function_1,
                             self.params.function_2,
@@ -265,7 +265,7 @@ class Graph(ArgumentParser):
   def make_x_y_plot(self):
     pass
 
-  def make_empty_graph(self, axis_x=False, draw_title=True):
+  def make_empty_graph(self, axis_x=False, draw_title=True, square=False):
     from PIL import Image
     from PIL import ImageFont, ImageDraw, ImageChops
     guiParams = OV.GuiParams()
@@ -273,7 +273,12 @@ class Graph(ArgumentParser):
     self.imX = self.params.size_x
     if self.imX < 100:
       self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.imY = self.params.size_y
+    if square == True:
+      self.imY = self.imX
+      self.square = True
+    else:
+      self.imY = self.params.size_y
+      self.square = False
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
@@ -313,7 +318,7 @@ class Graph(ArgumentParser):
     self.xSpace = 0
     self.axis_x = axis_x
     if self.axis_x:
-      self.xSpace  = 0.04 * self.imX
+      self.xSpace = 0.04 * self.imX
     self.bTop = round(0.013 * self.imY)
     self.currX = 0
     self.currY = 0
@@ -803,6 +808,12 @@ class Graph(ArgumentParser):
     if min_y != 0.0 and self.min_y == None:
       self.min_y = min_y - .1*abs(self.max_y - min_y)
     elif self.min_y == None: self.min_y = 0.0
+
+    if self.square == True:
+      if self.max_x < self.max_y:
+        self.max_x = self.max_y
+      elif self.max_y < self.max_x:
+        self.max_y = self.max_x
 
     #if log:
       #if log:
@@ -1343,7 +1354,7 @@ class Graph(ArgumentParser):
                + ((float(y_value) * scale_y))
                + ((0 - max_y) * scale_y)
                + (delta_y * scale_y))
-  
+
       pixel_coordinates.append((round(x), round(y)))
 
     for i in range(len(xy_pairs) - 1):
@@ -1821,19 +1832,24 @@ class Analysis(Graph):
     #extraX = 29
     #extraY = 48
 
-    #window = olx.GetWindowSize().split(',')
-
+    ws = [int(x) for x in olx.GetWindowSize('main').split(',')]
+    actual_w = int(width*1.033)
+    actual_h = int(height*1.1)
     mouseX = int(olx.GetMouseX())
     mouseY = int(olx.GetMouseY())
-    X = mouseX - int(width*1.033) + 20
+    X = mouseX - actual_w + 20
+    if X + actual_w > ws[2]:
+      X = ws[2] - actual_w
     Y = mouseY - 20
+    if Y + actual_h > ws[3]:
+      Y = ws[3] - actual_h
 
     if mouseX < width:
       X = 10
 
     if not olx.html.IsPopup(pop_name) == "true":
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
-      pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1), X, Y)
+      pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
       olx.html.SetBorders(pop_name,0)
     OV.UpdateHtml(pop_name)
@@ -2732,7 +2748,7 @@ class Fractal_Dimension(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
-    
+
 class MuPlot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
@@ -2821,7 +2837,7 @@ class MuPlot(Analysis):
 
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
-    self.draw_y_axis()    
+    self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
       self.draw_fit_line(slope=0,
                          y_intercept=0,
@@ -2840,7 +2856,7 @@ class MuPlot(Analysis):
       self.plot_data_points(data.xy_pairs(), colour=colours[i], width = 2)
     for i,data in enumerate(refined_data.values()):
       self.draw_data_points(data.xy_pairs(), colour=colours_mark[i], force_draw=True)
-    
+
 OV.registerFunction(MuPlot)
 
 class AnomDispPlot(Analysis):
@@ -2861,7 +2877,7 @@ class AnomDispPlot(Analysis):
     self.reverse_x = True
     self.extend_x = False
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
-    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]    
+    self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
 
     self.draw_origin = True
     self.make_anom_plot()
@@ -2908,7 +2924,7 @@ class AnomDispPlot(Analysis):
       data = Dataset(self.x, y)
       data_ = Dataset(self.x, y2)
       col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(e)).split(";")[1]))
-      colours.append(col)      
+      colours.append(col)
       self.data.setdefault(e + "fp", data)
       data2.setdefault(e + "fdp", data_)
       keys.append({'type': 'function',
@@ -2935,7 +2951,7 @@ class AnomDispPlot(Analysis):
           temp3 = min(255, temp3 + 5)
           col = (temp1, temp2, temp3)
           del temp1, temp2, temp3
-      colours_mark.append(col)      
+      colours_mark.append(col)
       keys.append({'type': 'marker',
                    'number': n + 1,
                    'label': ref[0],
@@ -2945,12 +2961,12 @@ class AnomDispPlot(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
-      self.draw_fit_line(slope=0, 
-                         y_intercept=0, 
-                         x_intercept=wl, 
-                         write_equation=False, 
-                         write_text=self.common_wl_name[i], 
-                         rotate_text="top_linemiddle", 
+      self.draw_fit_line(slope=0,
+                         y_intercept=0,
+                         x_intercept=wl,
+                         write_equation=False,
+                         write_text=self.common_wl_name[i],
+                         rotate_text="top_linemiddle",
                          width = 1)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
@@ -3033,7 +3049,91 @@ class Fobs_Fcalc_plot(Analysis):
       self.data.setdefault('dataset2', data_omitted)
 
 
-    self.make_empty_graph(axis_x = True)
+    self.make_empty_graph(axis_x = True, square=False)
+    self.plot_function("x", n_points=100)
+    self.draw_pairs()
+    key = self.draw_key(({'type': 'marker',
+                         'number': 1,
+                         'label': OV.TranslatePhrase('Filtered Data')},
+                        {'type':'marker',
+                         'number': 2,
+                         'label': OV.TranslatePhrase('Omitted (cut) Data')},
+                        {'type':'marker',
+                         'number': 3,
+                         'label': OV.TranslatePhrase('Omitted (hkl) Data')}
+                        ))
+    self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 40)),
+                   int(self.graph_bottom - (key.size[1] + 40)))
+                  )
+
+class Iobs_Icalc_plot(Analysis):
+  def __init__(self, batch_number=None):
+    Analysis.__init__(self)
+    self.item = "Iobs_Icalc"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Iobs vs Icalc")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
+    self.auto_axes = False
+    try:
+      batch_number = int(batch_number)
+    except (ValueError, TypeError):
+      self.batch_number = None
+    else:
+      self.batch_number = batch_number
+    try:
+      self.make_I_obs_I_calc_plot()
+    except AssertionError as e:
+      if str(e) == "model.scatterers().size() > 0":
+        print("You need some scatterers to do this!")
+        return
+      else:
+        raise
+    self.popout()
+    if self.params.iobs_icalc.output_csv_file:
+      self.output_data_as_csv()
+
+  def make_I_obs_I_calc_plot(self):
+    from reflection_statistics import I_obs_vs_I_calc
+    xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
+    self.metadata['shapes'] = []
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+
+    equal_line = {'type':'line',
+                   'xy':('0','0','%(max_x)s','%(max_x)s'),
+                   'line': {
+                     'color': 'rgb(100, 100, 100)',
+                     'width': 1,
+                     'dash':'dashdot'
+                   }
+                   }
+
+    self.metadata["shapes"].append(equal_line)
+
+    ## Included Data
+    metadata = {}
+#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    metadata["name"] = "Included Data"
+    data = Dataset(
+      xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
+
+    self.data.setdefault('dataset1', data)
+
+    ## Omitted Data
+    metadata = {}
+    metadata["name"] = "Omitted Data"
+    if xy_plot.I_obs_omitted and xy_plot.I_obs_omitted.size():
+      data_omitted = Dataset(
+        xy_plot.I_calc_omitted, xy_plot.I_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
+      self.data.setdefault('dataset2', data_omitted)
+
+
+    self.make_empty_graph(axis_x = True, square=False)
+    self.plot_function("x", n_points=100)
     self.draw_pairs()
     key = self.draw_key(({'type': 'marker',
                          'number': 1,
@@ -3472,6 +3572,7 @@ OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
+OV.registerFunction(Iobs_Icalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(item_vs_resolution_plot)
@@ -3598,32 +3699,33 @@ def makeReflectionGraphGui():
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
-  d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;" +\
-             "Wilson Plot;" +\
-             "Cumulative Intensity;" +\
-             "Systematic Absences;" +\
-             "Fobs-Fcalc;" +\
-             "I/sigma vs resolution;" +\
-             "cc_half_vs_resolution;" +\
-             "Rmerge vs resolution;" +\
-             "Fobs over Fcalc;" +\
-             "Completeness%;" +\
-             "Normal Probability;" +\
-             "Fractal Dimension;" +\
-             "Scale factor vs resolution;" +\
-             "R1 factor vs resolution;" +\
-             "Bijvoet Differences %Probability Plot%;" +\
-             "Bijvoet Differences %Scatter Plot%",
-     'height':guiParams.html.combo_height,
-     'bgcolor':guiParams.html.input_bg_colour,
-     'value':value,
-     'onchange':"spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
-     'manage':'manage',
-     'readonly':'readonly',
-     'width':'$math.eval(html.clientwidth(self)-140)',
-     'readonly':'readonly',
-    }
+  d = {'ctrl_name': 'SET_REFLECTION_STATISTICS',
+     'items': "-- %Please Select% --;"
+             + "Wilson Plot;"
+             + "Cumulative Intensity;"
+             + "Systematic Absences;"
+             + "Fobs-Fcalc;"
+             + "Iobs-Icalc;"
+             + "I/sigma vs resolution;"
+             + "cc_half_vs_resolution;"
+             + "Rmerge vs resolution;"
+             + "Fobs over Fcalc;"
+             + "Completeness%;"
+             + "Normal Probability;"
+             + "Fractal Dimension;"
+             + "Scale factor vs resolution;"
+             + "R1 factor vs resolution;"
+             + "Bijvoet Differences %Probability Plot%;"
+             + "Bijvoet Differences %Scatter Plot%",
+     'height': guiParams.html.combo_height,
+     'bgcolor': guiParams.html.input_bg_colour,
+     'value': value,
+     'onchange': "spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
+     'manage': 'manage',
+     'readonly': 'readonly',
+     'width': '$math.eval(html.clientwidth(self)-140)',
+     'readonly': 'readonly',
+       }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
   gui_d['row_table_off'] = htmlTools.include_block('gui/blocks/row_table_off.htm')
@@ -3667,6 +3769,7 @@ def make_reflection_graph(name):
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
            'fobs_fcalc': Fobs_Fcalc_plot,
+           'iobs_icalc': Iobs_Icalc_plot,
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
