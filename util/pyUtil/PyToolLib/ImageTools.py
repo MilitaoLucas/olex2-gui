@@ -500,7 +500,7 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('logo1_txt.htm', txt, 2)
     return "Done"
 
-  def resize_to_panelwidth(self, i, colourize=False, width_adjust=0, width=None):
+  def resize_to_panelwidth(self, i, colourize=False, width_adjust=0, width=None, outname=None, persistence=2):
     import olex
     import io
     do_cache_image = True
@@ -518,6 +518,8 @@ class ImageTools(FontInstances):
       if not sio.getbuffer().nbytes:  # resize was called twice in a raw
         return
       im = Image.open(sio)
+    elif os.path.exists(name):
+      im = Image.open(name)
     else:
       path = ("%s/etc/%s" % (self.basedir, name))
       if os.path.exists(path):
@@ -538,7 +540,8 @@ class ImageTools(FontInstances):
         im = self.resize_image(im, (width, height), name=name)
       else:
         im = self.resize_image(im, (width, height))
-      OlexVFS.save_image_to_olex(im, name, 2)
+      if outname: name = outname
+      OlexVFS.save_image_to_olex(im, name, persistence)
     else:
       pass
     return "Done"

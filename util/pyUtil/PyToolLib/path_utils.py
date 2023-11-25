@@ -121,12 +121,12 @@ def cleanup_files(file_ext):
     pass
 
 def Cleanup():
+  import shutil
   cleanup_files(".tmp")
   base_dir = olx.BaseDir()
   ac5_dir = os.path.join(base_dir, "util", "pyUtil", "AC5")
   if os.path.exists(ac5_dir):
     try:
-      import shutil
       shutil.rmtree(ac5_dir)
       ac5_files = [
         "lib/ac5util.so",
@@ -136,10 +136,52 @@ def Cleanup():
       ]
       for f in ac5_files:
         f = os.path.join(base_dir, f)
-        print(f)
         if os.path.exists(f):
           print("->%s" %f)
           os.remove(f)
     except Exception as e:
       print(e)
-      pass
+  vi = sys.version_info
+  if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
+    try:
+      dirs = []
+      if sys.platform[:3] == 'win':
+        import platform
+        sp_dir = os.path.join( "Python38", "Lib", "site-packages")
+        dirs = [
+          os.path.join(sp_dir, r"scipy\sparse\linalg\dsolve"),
+          os.path.join(sp_dir, r"scipy\sparse\linalg\eigen"),
+          os.path.join(sp_dir, r"scipy\sparse\linalg\isolve"),
+        ]
+        if platform.architecture()[0] != "32bit":
+          dirs.append(os.path.join(sp_dir, r"scipy\.libs"))
+        files = [
+          "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
+          "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll",
+          ]
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[0]))
+        files.append(os.path.join(sp_dir, "numpy", ".libs", files[1]))
+        for f in files:
+          f = os.path.join(base_dir, f)
+          if os.path.exists(f):
+            print("Cleaning up: %s" %f)
+            os.remove(f)
+      elif sys.platform[:3] == 'lin':
+        sp_dir = os.path.join("lib", "python3.8", "site-packages")
+        dirs = [os.path.join(sp_dir, x) for x in ("scipy-1.2.3-py3.8-linux-x86_64.egg",
+                                                  "numpy-1.18.2-py3.8-linux-x86_64.egg")]
+      else:
+        sp_dir = os.path.join("lib", "python3.8", "site-packages")
+        #dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
+      #clean up old numpy/scipy
+      for d in dirs:
+        d = os.path.join(base_dir, d)
+        if not os.path.exists(d):
+          continue
+        try:
+          print("->%s" %d)
+          shutil.rmtree(d)
+        except Exception as e:
+          print(e)
+    except Exception as e:
+      print(e)

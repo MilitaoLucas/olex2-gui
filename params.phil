@@ -1122,8 +1122,20 @@ user
   }
 
   graphs
+
     .short_caption = Analysis Graphs
     {
+
+    matplotlib{
+      legend_in_out =  * outside best
+        .type = choice
+      legend_vertical = *upper center lower
+        .type = choice
+      legend_horizontal = left center *right
+        .type = choice
+    }
+
+
     program_analysis {
       font_scale = 0.03
         .type = float(value_min=0.0)
@@ -1261,6 +1273,15 @@ user
         .short_caption = "Fobs-Fcalc"
         .caption = "Fobs-Fcalc"
         .help = "Fobs-vs-Fcalc"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      iobs_icalc
+        .short_caption = "Iobs-Icalc"
+        .caption = "Iobs-Icalc"
+        .help = "Iobs-vs-Icalc"
       {
         output_csv_file = False
           .type = bool
@@ -2076,6 +2097,8 @@ user
   }
   NoSpherA2{
     has_pyscf = False
+      .type = bool
+    enable_psi4 = False
       .type = bool
     enable_discamb = True
       .type = bool

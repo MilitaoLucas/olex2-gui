@@ -507,7 +507,7 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     self.reset_params()
-    use_aspherical = OV.GetParam('snum.NoSpherA2.use_aspherical') and 'olex2' in self.program.name
+    use_aspherical = OV.IsNoSpherA2()
     result = False
     try:
       if use_aspherical == True:
@@ -631,7 +631,8 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
+    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement') and\
+      not OV.IsEDRefinement():
       try:
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
@@ -923,7 +924,7 @@ class RunRefinementPrg(RunPrg):
   """Error: No generator for tsc files selected.
   Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
-        return      
+        return
       if energy == None:
         HAR_log.write("{:^24}".format(" "))
       else:
@@ -1002,7 +1003,7 @@ class RunRefinementPrg(RunPrg):
         # get energy from wfn file
         #TODO Check if WFN is new, otherwise skip this!
         energy = None
-        if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB":
+        if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB" or "MATTS" in source or "hakkar" in source:
           HAR_log.write("{:24}".format(" "))
         else:
           if (wfn_file != None) and (calculate == True):
@@ -1059,10 +1060,6 @@ class RunRefinementPrg(RunPrg):
             nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
-        if "Thakkar" in source:
-          OV.SetParam('snum.NoSpherA2.Calculate',False)
-          HAR_log.close()
-          return True        
         new_model=OlexRefinementModel()
         class results():
           def __init__(self):
@@ -1135,7 +1132,12 @@ class RunRefinementPrg(RunPrg):
                 adp2 = (adp2[0], adp2[1], adp2[2], adp2[5], adp2[4], adp2[3])
                 adp = adptbx.u_cart_as_u_cif(uc, adp)
                 adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
-                adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
+                adp_esds = (esds[matrix_run],
+                            esds[matrix_run + 1],
+                            esds[matrix_run + 2],
+                            esds[matrix_run + 3],
+                            esds[matrix_run + 4],
+                            esds[matrix_run + 5])
                 adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
                 for u in range(6):
                   # if parameter is fixed and therefore has 0 esd
@@ -1226,7 +1228,7 @@ class RunRefinementPrg(RunPrg):
             HAR_log.close()
             print("Error during analysis of shifts!")
             raise e
-        
+
         r = results()
         analyze_shifts(r)
         if calculate == False:
@@ -1258,7 +1260,7 @@ class RunRefinementPrg(RunPrg):
     if converged == False:
       HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
       self.refinement_has_failed.append("Warning: Unconverged Model!")
-    if "DISCAMB" in source:
+    if "DISCAMB" in source or "MATTS" in source:
       unknown_sources = False
       with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
         for i in discamb_log.readlines():
