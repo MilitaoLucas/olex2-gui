@@ -210,8 +210,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.std_obserations = None
     if ed_refinement:
-      OV.GetACI().EDI.setup_refinement(self)
-
+      try:
+        OV.GetACI().EDI.setup_refinement(self)
+      except Exception as e:
+        olx.Echo(str(e), m="error")
+        self.failure = True
+        return
+    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+      olx.Echo("Nothing to refine!", m="error")
+      self.failure = True
+      return
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
     if timer:
@@ -318,7 +326,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.interrupted = True
         elif "is an empty array" in str(e):
           print("There is nothing to refine.")
-          self.interrupted = True
+          self.failure = True
           return
         else:
           raise e
