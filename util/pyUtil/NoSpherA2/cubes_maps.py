@@ -668,7 +668,7 @@ def plot_fft_map(fft_map):
 OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
-  if OV.HasGUI():
+  if not OV.HasGUI():
     return
   gridding = data.accessor()
   type = isinstance(data, flex.int)
