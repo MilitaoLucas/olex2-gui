@@ -196,16 +196,40 @@ def mangle_fdb_data(tabledata):
     new_l.append(l[0:-1] + [_[0]] + [" ".join(_[1:])])
   return new_l
 
+def make_fvar_table(*kwds):
+  fvar_table: str = ""
+  header = """
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_1;1; -->
+
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->"""
+  footer = """<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->"""
+  filling = """<td align="left"><b>FVAR:</b></td>"""
+  fvars = []
+  try:
+    for i in range(20):
+      fvars.append(olx.xf.rm.FVar(i))
+  except:
+    pass
+  for i, var in enumerate(fvars):
+    filling += """<td align="center"><b>""" + "%d:</b> %s </td>" % (i + 1, var)
+  
+  filling += "</b></td>"
+  fvar_table = header + filling + footer
+  return fvar_table
+
+OV.registerFunction(make_fvar_table, False, "gui.restraints")
 
 def make_restraints_table(*kwds):
   global cache_restraint_table
   global filtered_off
   filtered_off = 0
   filter_message = "No Restraints are shown"
-  top_line = gui.tools.TemplateProvider.get_template('restraints_top', force=debug) % {'filtered_off': filter_message}
   if olx.GetVar('show_restraints_table').lower() == 'false':
+    top_line = gui.tools.TemplateProvider.get_template('restraints_top', force=debug) % {'filtered_off': filter_message}
     return top_line
   else:
+    top_line = gui.tools.TemplateProvider.get_template('restraints_top', force=debug) % {'filtered_off': filter_message}
     retVal = top_line
     if cache_restraint_table and olx.GetVar('restraint_filter_changed','Flase') == "False":
       retVal = cache_restraint_table
