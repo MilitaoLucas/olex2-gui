@@ -1155,7 +1155,8 @@ The following options were used:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
         else:
           fmt_str = "%i %i %i %.3f %.3f %.3f %s"
-
+      if OV.IsEDRefinement():
+        fmt_str = fmt_str.replace("f", "g")
       _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
       mas_as_cif_block.add_miller_array(
         _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
@@ -1200,6 +1201,7 @@ The following options were used:
     cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
+    cif_block['_shelx_F_squared_multiplier'] = "%.3f" %(multiplier)
     cif[OV.FileName().replace(' ', '')] = cif_block
 
     return cif, fmt_str
@@ -1207,6 +1209,9 @@ The following options were used:
   def output_fcf(self):
     try: list_code = int(olx.Ins('list'))
     except: return
+    if OV.IsEDRefinement() and list_code != 4:
+      olx.Echo("Only LIST 4 is currently supported for the ED refinement", m="warning")
+      return
 
     fcf_cif, fmt_str = self.create_fcf_content(list_code)
     if not fcf_cif:
@@ -1607,6 +1612,7 @@ The following options were used:
     else:
       k = math.sqrt(scale_factor)
     if OV.IsEDRefinement():
+      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
       new_data = []
       fc_sq = self.normal_eqns.fc_sq
       for i in range(f_obs.size()):
@@ -1618,10 +1624,11 @@ The following options were used:
         new_data.append(f_obs.data()[i]*s)
       f_obs = f_obs.customized_copy(data=flex.double(new_data))
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664/Fc2Ug)
     else:
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
-    if OV.IsEDData():
+    if OV.IsEDData() and not OV.IsEDRefinement():
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
