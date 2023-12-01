@@ -611,19 +611,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
-              shutil.copy(wfn_code,os.path.join(os.path.join("olex2","Wfn_Job"),os.path.split(wfn_code)[1]))
-            endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".gbw"]
-            if "5.0" in wfn_code:
-              endings.append(".gbw")
-            if wfn_code == "Thakkar IAM":
-              wfn_fn = path_base + ".xyz"
-            elif not any(os.path.exists(path_base + x) for x in endings):
-              print("No usefull wavefunction found!")
-              return False
             else:
-              for e in endings:
-                if os.path.exists(path_base + e):
-                  wfn_fn = path_base + e
+              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden"]
+              if "5.0" in wfn_code:
+                endings.append(".gbw")
+              if wfn_code == "Thakkar IAM":
+                wfn_fn = path_base + ".xyz"
+              elif not any(os.path.exists(path_base + x) for x in endings):
+                print("No usefull wavefunction found!")
+                return False
+              else:
+                for e in endings:
+                  if os.path.exists(path_base + e):
+                    wfn_fn = path_base + e
             #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
             cuqct_tsc(wfn_fn, cif_fn, [-1000])
