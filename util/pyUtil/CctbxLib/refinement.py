@@ -1201,7 +1201,7 @@ The following options were used:
     cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
-    cif_block['_shelx_F_squared_multiplier'] = "%.3f" %(multiplier)
+    #cif_block['_shelx_F_squared_multiplier'] = "%.3f" %(multiplier)
     cif[OV.FileName().replace(' ', '')] = cif_block
 
     return cif, fmt_str
