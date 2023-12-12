@@ -139,8 +139,12 @@ class RunPrg(ArgumentParser):
         t1 = time.time()
     except Exception as e:
       e_str = str(e)
-      if ("stoks.size() == scatterer" not in e_str) and ("Error during building of normal equations using OpenMP" not in e_str):
+      if ("stoks.size() == scatterer" not in e_str)\
+        and ("Error during building of normal equations using OpenMP" not in e_str)\
+        and ("fsci != sc_map.end()" not in e_str):
         sys.stdout.formatExceptionInfo()
+      else:
+        print("Error!: ")
       caught_exception = e
     finally:
       self.endRun()
@@ -1053,11 +1057,18 @@ class RunRefinementPrg(RunPrg):
             self.method.observe(self)
           try:
             RunPrg.run(self)
-          except:
+            f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
+            if f_obs_sq != None and f_calc != None:
+              nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)            
+          except Exception as e:
+            e_str = str(e)
+            if ("stoks.size() == scatterer" in e_str):
+              print("Insufficient number of scatterers in .tsc file!\nDid you forget to recalculate after adding or deleting atoms?")
+            elif ("Error during building of normal equations using OpenMP" in e_str):
+              print("Error initializing OpenMP refinement, try disabling it!")
+            elif  ("fsci != sc_map.end()" in e_str):
+              print("An Atom was not found in the .tsc file!\nHave you renamed some and not recalcualted the tsc file?")
             return
-          f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
-          if f_obs_sq != None and f_calc != None:
-            nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
         new_model=OlexRefinementModel()
