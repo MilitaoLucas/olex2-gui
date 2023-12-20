@@ -1275,19 +1275,19 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
   # if item == 'MinD':
     #mindfac = float(olx.xf.exptl.Radiation())/0.71
 
-  op = OV.GetParam('user.diagnostics.%s.%s.op' % (scope, item))
+  op = OV.get_diag('%s.%s.op' % (scope, item))
   if op == "between":
-    soll = OV.GetParam('user.diagnostics.%s.%s.soll' % (scope, item))
+    soll = OV.get_diag('%s.%s.soll' % (scope, item))
   for i in range(4):
     i += 1
     if op == "greater":
-      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
+      if val >= OV.get_diag('%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'smaller':
-      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
+      if val <= OV.get_diag('%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'between':
-      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac:
+      if val - (OV.get_diag('%s.%s.grade%s' % (scope, item, i))) * mindfac <= soll <= val + (OV.get_diag('%s.%s.grade%s' % (scope, item, i))) * mindfac:
         break
 
   if number_only:

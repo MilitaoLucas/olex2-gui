@@ -3812,6 +3812,9 @@ class HealthOfStructure():
     self.supplied_cif = False
     self.deg = u"\u00B0"
     self.im_cache = {}
+    self.isED = False
+    self.default_phil_handler = olx.phil_handler
+    self.ED_phil_handler = None
     _ = ['Completeness', 'MeanIOverSigma','Rint']
     _ += ['_refine_ls_shift/su_max', '_refine_diff_density_max',
          '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
@@ -3828,7 +3831,27 @@ class HealthOfStructure():
       print(err)
       return None
 
+  def set_ED_phil(self):
+    if OV.IsEDData():
+      self.ED = True
+      if not self.ED_phil_handler:
+        ACED_path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'ACEDd', 'ACED.phil')
+        if not os.path.exists(ACED_path):
+          ACED_path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'ACED', 'ACED.phil')
+        phil_file = ACED_path
+        if os.path.exists(phil_file):
+          ACED_phil = open(phil_file, 'r').read()
+          olx.phil_handler.merge_phil(phil_string=ACED_phil)
+          self.ED_phil_handler = olx.phil_handler
+      else:
+        olx.phil_handler = self.ED_phil_handler
+    else:
+      self.isED = False
+      if olx.phil_handler != self.default_phil_handler:
+        olx.phil_handler = self.default_phil_handler
+
   def make_HOS(self, force=False, supplied_cif=False):
+    #self.set_ED_phil()
     force = bool(force)
     self.width = int(IT.skin_width*0.98)
     self.supplied_cif = supplied_cif
@@ -3837,7 +3860,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
-
+ 
     res = self.initialise_HOS(force=force)
 
     self.hos_text = ""
@@ -3955,8 +3978,8 @@ class HealthOfStructure():
       if self.hkl_stats['DataCount'] == 0:
         self.hkl_stats = {}
       self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
-      self.resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
-      self.resolution_display = OV.GetParam("user.diagnostics.hkl.Completeness.resolution_display")
+      self.resolution_type = OV.get_diag('hkl.Completeness.resolution')
+      self.resolution_display = OV.get_diag('hkl.Completeness.resolution_display')
 
       if self.is_CIF:
         self.get_info_from_cif()
@@ -4153,7 +4176,7 @@ class HealthOfStructure():
       elif item == "_refine_ls_abs_structure_Flack":
         item = 'hooft_str'
 
-      display = OV.GetParam('user.diagnostics.%s.%s.display' %(self.scope,item))
+      display = OV.get_diag('%s.%s.display' %(self.scope,item))
 
       if item == "MinD":
         _ = olx.xf.exptl.Radiation()
@@ -4170,8 +4193,8 @@ class HealthOfStructure():
 
         display += " (%s)" % (IT.get_unicode_characters(_))
 
-      value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
-      href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+      value_format = OV.get_diag('%s.%s.value_format' %(self.scope,item))
+      href = OV.get_diag('%s.%s.href' %(self.scope,item))
 
       raw_val = value
       bg_colour = None
@@ -4324,7 +4347,7 @@ class HealthOfStructure():
 
 
 
-    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    href = OV.get_diag('%s.%s.href' %(self.scope,item))
     if item == "Completeness":
       target = OV.GetParam('snum.refinement.%s.target' %item.lower())
     elif item == "Rint":
@@ -4332,7 +4355,7 @@ class HealthOfStructure():
       target = "&#013;- ".join(target)
       OV.SetParam('snum.refinement.Rint.target', target)
     else:
-      target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+      target = OV.get_diag('%s.%s.target' %(self.scope,item))
 
     txt = ""
     ref_open = ''
@@ -4385,7 +4408,7 @@ class HealthOfStructure():
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
-    top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
+    top = OV.get_diag('hkl.%s.top' %item)
 
 
     if item == "hooft_str":
