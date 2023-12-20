@@ -862,6 +862,17 @@ class OlexFunctions(inheritFunctions):
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
       self.GetParam("snum.refinement.program") == "olex2.refine"
+  
+  def get_diag(self, param):
+    v = None
+    if OV.IsEDData():
+      v = OV.GetParam("user.diagnostics_ed.%s" %param)
+    if not v:
+      v = OV.GetParam("user.diagnostics.%s" %param)
+    return v
+    
+    #v = OV.GetParam(f"user.diagnostics_ed.{param}") if OV.IsEDData() else OV.GetParam(f"user.diagnostics.{param}")
+              
 
   def IsEDData(self):
     try:
@@ -1328,3 +1339,4 @@ OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
 OV.registerFunction(OV.IsEDData)
+OV.registerFunction(OV.get_diag)
