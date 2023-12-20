@@ -1459,6 +1459,7 @@ user
       .type = int
     scopes = hkl refinement
       .type = strings
+
     refinement{
       dpr{
         halve_for_non_centro = False
@@ -1889,6 +1890,230 @@ user
       }
     }
   }
+
+  diagnostics_ed {
+    refinement{
+      dpr{
+        grade1 = 4
+          .type = float
+        grade2 = 6
+          .type = float
+        grade3 = 8
+          .type = float
+        grade4 = 10
+          .type = float
+      }
+
+      flack_esd{
+        grade1 = 0.04
+           .type = float
+       grade2 = 0.05
+          .type = float
+        grade3 = 0.06
+          .type = float
+        grade4 = 0.07
+          .type = float
+      }
+
+      flack_val{
+        grade1 = 0.02
+          .type = float
+        grade2 = 0.04
+          .type = float
+        grade3 = 0.08
+          .type = float
+        grade4 = 0.10
+          .type = float
+      }
+
+      R1{
+        grade1 = 0.10
+          .type = float
+        grade2 = 0.15
+          .type = float
+        grade3 = 0.20
+          .type = float
+        grade4 = 0.25
+          .type = float
+        top = 0.40
+          .type = float
+      }
+
+      wR2{
+        grade1 = 0.10
+          .type = float
+        grade2 = 0.20
+          .type = float
+        grade3 = 0.30
+          .type = float
+        grade4 = 0.40
+          .type = float
+        top = 0.50
+          .type = float
+      }
+
+
+      max_shift_site{
+        grade1 = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+
+      }
+
+      max_shift_over_esd {
+        grade1 = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+      }
+
+      _refine_ls_shift_over_su_max {
+        grade1 = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+      }
+
+      max_shift_u{
+        grade1 = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+      }
+
+      max_peak{
+        grade1 = 0.51
+          .type = float
+        grade2 = 1.01
+          .type = float
+        grade3 = 2.01
+          .type = float
+        grade4 = 3.01
+          .type = float
+        top = 5
+          .type = float
+      }
+      _refine_diff_density_max{
+        grade1 = 0.51
+          .type = float
+        grade2 = 1.01
+          .type = float
+        grade3 = 2.01
+          .type = float
+        grade4 = 3.01
+          .type = float
+        top = 5
+          .type = float
+      }
+      max_hole{
+        grade1 = -0.51
+          .type = float
+        grade2 = -1.01
+          .type = float
+        grade3 = -2.01
+          .type = float
+        grade4 = -3.01
+          .type = float
+        top = -5
+          .type = float
+      }
+      _refine_diff_density_min{
+        grade1 = -0.51
+          .type = float
+        grade2 = -1.01
+          .type = float
+        grade3 = -2.01
+          .type = float
+        grade4 = -3.01
+          .type = float
+        top = -5
+          .type = float
+      }
+      goof{
+        soll = 1.0
+          .type = float
+        grade1 = 0.1
+          .type = float
+        grade2 =  0.2
+          .type = float
+        grade3 =  0.3
+          .type = float
+        grade4 =  0.5
+          .type = float
+        top = 0.5
+          .type = float
+      }
+    
+    }
+    hkl{
+      MinD{
+        grade1 = 0.75
+          .type = float
+        grade2 = 0.841
+          .type = float
+        grade3 = 0.86
+          .type = float
+        grade4 = 0.88
+          .type = float
+      }
+      MeanIOverSigma{
+        grade1 = 4
+          .type = float
+        grade2 = 3
+          .type = float
+        grade3 = 2
+          .type = float
+        grade4 = 1
+          .type = float
+      }
+      Rint{
+        grade1 = 0.10
+          .type = float
+        grade2 = 0.15
+          .type = float
+        grade3 = 0.20
+          .type = float
+        grade4 = 0.25
+          .type = float
+      }
+      Completeness{
+        grade1 = 0.95
+          .type = float
+        grade2 = 0.90
+          .type = float
+        grade3 = 0.85
+          .type = float
+        grade4 = 0.80
+          .type = float
+      }
+    }
+  }
+
 
   diagnostics{
     pin_scopes = True
