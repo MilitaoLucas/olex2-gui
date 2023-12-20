@@ -830,10 +830,10 @@ class RunRefinementPrg(RunPrg):
           wrong_occu.append(sc.label)
     if len(wrong_occu) != 0:
       if len(wrong_occu) == 1:    
-        self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupation")
+        self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupancy")
       else:
         _ =  ",".join(wrong_occu)
-        self.refinement_has_failed.append(f"{_} have unreasonable Occupation")
+        self.refinement_has_failed.append(f"{_} have unreasonable Occupancy")
 
   def check_disp(self):
     scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
