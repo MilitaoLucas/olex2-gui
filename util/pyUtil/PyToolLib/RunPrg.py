@@ -648,6 +648,7 @@ class RunRefinementPrg(RunPrg):
         except Exception as e:
           print("Could not check PDF: %s" % e)
       self.check_disp()
+      self.check_occu()
       self.check_mu() #This is the L-M mu!
 
     OV.SetParam('snum.init.skip_routine', False)
@@ -819,6 +820,20 @@ class RunRefinementPrg(RunPrg):
         err_list.append("Kuhs' rule not fulfilled")
       if err_list:
         self.refinement_has_failed.extend(err_list)
+
+  def check_occu(self):
+    scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
+    wrong_occu = []
+    for sc in scatterers:
+      if sc.flags.grad_occupancy():
+        if sc.occupancy < 0 or sc.occupancy > 1.0:
+          wrong_occu.append(sc.label)
+    if len(wrong_occu) != 0:
+      if len(wrong_occu) == 1:    
+        self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupation")
+      else:
+        _ =  ",".join(wrong_occu)
+        self.refinement_has_failed.append(f"{_} have unreasonable Occupation")
 
   def check_disp(self):
     scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
