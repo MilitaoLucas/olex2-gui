@@ -39,6 +39,8 @@ gui
     .type = str
   purple = #a245a2
     .type = colour
+  ed_colour = #385785
+    .type = colour
   red = #bd2010
     .type = colour
   green = #00b400

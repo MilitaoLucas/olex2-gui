@@ -2685,9 +2685,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #=========================================================================
       if OV.FileExt() == "cif":
         grad_colour = self.params.dark_green.rgb
-      if OV.FileFull().endswith(".oxm"):
+      elif OV.FileFull().endswith(".oxm"):
         grad_colour = self.params.orange.rgb
-        #font_colour = "#222222"
+      if OV.IsEDData():
+        grad_colour = self.params.ed_colour.rgb
       #=========================================================================
 
     elif item_type == "small_button":

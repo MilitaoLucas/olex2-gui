@@ -297,6 +297,12 @@ routines requiring structure refinement
     manual_q_peak_override = 0
       .type = int
       .help = Retain manually set numbers of peaks 
+    fix_xyz = False
+      .type = bool
+      .help = Set all xyz parameters to 'fixed' before the next refinement
+    fix_uiso = False
+      .type = bool
+      .help = Set all uiso parameters to 'fixed' before the next refinement
     update_weight = True
       .type = bool
       .help = Automatically update the weight instruction before the next \
