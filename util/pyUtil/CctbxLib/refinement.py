@@ -81,12 +81,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         params[param] = value
       self.weighting = least_squares.mainstream_shelx_weighting(**params)
 
-  def run(self, build_only=False,
+  def run(self,
+          build_only=False, #return normal normal equations object
           table_file_name = None,
           normal_equations_class=olex2_normal_equations.normal_eqns,
-          ed_refinement=None):
+          ed_refinement=None,
+          reparametrisation_only=False #returns self.reparametrisation
+          ):
     """ If build_only is True - this method initialises and returns the normal
-     equations object
+     equations object.
+     If reparametrisation_only is True - only constructs and returns the reparametrisation object
     """
     timer = OV.IsDebugging()
     import time
@@ -112,7 +116,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
     self.fo_sq_fc = None
-    if OV.GetParam("snum.refinement.use_solvent_mask"):
+    if OV.GetParam("snum.refinement.use_solvent_mask") and not reparametrisation_only:
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
@@ -211,7 +215,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.std_obserations = None
     if ed_refinement:
       try:
-        OV.GetACI().EDI.setup_refinement(self)
+        OV.GetACI().EDI.setup_refinement(self, reparametrisation_only=reparametrisation_only)
       except Exception as e:
         olx.Echo(str(e), m="error")
         self.failure = True
@@ -220,6 +224,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       olx.Echo("Nothing to refine!", m="error")
       self.failure = True
       return
+    if reparametrisation_only:
+      return self.reparametrisation
+
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
     if timer:
