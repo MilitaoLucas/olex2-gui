@@ -745,7 +745,7 @@ class RunRefinementPrg(RunPrg):
       if twinning is not None:
         twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
                     for i in range(3) for j in range(3)])
-        if twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
+        if twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
           flack = olx.xf.rm.BASF(0)
           OV.SetParam('snum.refinement.flack_str', flack)
 
@@ -790,8 +790,8 @@ class RunRefinementPrg(RunPrg):
     elif inversion_needed:
       print(inversion_warning)
     if possible_racemic_twin:
-      if (hooft.twin_components is not None and
-          hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+      if (hooft.olex2_adaptor.twin_components is not None and
+          hooft.olex2_adaptor.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print(racemic_twin_warning)
 
   def check_PDF(self, force=False):
