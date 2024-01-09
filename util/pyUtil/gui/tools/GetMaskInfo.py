@@ -754,7 +754,7 @@ def add_mask_content(i,which):
     idx = int(idx.split("|")[0]) - 1
     _[idx] = user_value
 
-  mask = OV.get_cif_item('_%s_void' %base)
+  #mask = OV.get_cif_item('_%s_void' %base)
   olx.cif_model[current_sNum]['_%s_void' %base]['_%s_void_content' %base] = _
   update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
  
