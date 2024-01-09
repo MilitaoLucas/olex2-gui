@@ -1852,7 +1852,7 @@ class Analysis(Graph):
       pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
       olx.html.SetBorders(pop_name,0)
-    OV.UpdateHtml(pop_name)
+    OV.UpdateHtml(html_name=pop_name, force=True)
 
   def analyse_lst(self):
     fl = self.fl
@@ -3323,24 +3323,25 @@ class item_vs_resolution_plot(Analysis):
     beta = IT.get_unicode_characters("beta")
     iucr = 0
     rad_name = "?"
-    if olx.xf.exptl.Radiation().startswith('1.54'): # Cu alpha radiation
-      iucr = 135
+    radi= olx.xf.exptl.Radiation()
+    if radi.startswith('1.54'): # Cu alpha radiation
+      iucr = 135.58
       rad_name = "CuK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('1.39'): # Ga radiation
-      iucr = 40
-      rad_name = "GaK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('1.34'): # Cu beta radiation
-      iucr = 40
+    elif radi.startswith('1.39'): # Cu beta radiation
+      iucr = 113.16
       rad_name = "CuK" + beta
-    elif olx.xf.exptl.Radiation().startswith('0.71'): # Mo radiation
-      iucr = 50
+    elif radi.startswith('1.34'): # Ga alpha radiation
+      iucr = 112.88
+      rad_name = "GaK" + alpha
+    elif radi.startswith('0.71'): # Mo radiation
+      iucr = 50.74
       rad_name = "MoK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('0.56'): # Ag radiation
-      iucr = 33
+    elif radi.startswith('0.56'): # Ag radiation
+      iucr = 39.02
       rad_name = "AgK" + alpha
     else:
       iucr = 0.84
-      rad_name = str(olx.xf.exptl.Radiation()) + (IT.get_unicode_characters("Angstrom"))
+      rad_name = str(radi) + (IT.get_unicode_characters("Angstrom"))
 
     from cctbx import uctbx
 
