@@ -427,7 +427,7 @@ class wfn_Job(object):
         control += " ROKS "      
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
-        if method != "wB97" and method != "wB97X":
+        if method != "wB97X":
           control += method + ' SCNL '
         else:
           control += method + '-V SCNL '
@@ -657,7 +657,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if software == "ORCA 5.0":
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL == True:
-          if method != "wB97" and method != "wB97X":
+          if method != "wB97X":
             control += method + ' SCNL '
           else:
             control += method + '-V SCNL '
