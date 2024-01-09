@@ -1137,9 +1137,12 @@ class Graph(ArgumentParser):
     width = self.params.size_x
     legend_top = height + 20
     legend_bottom = self.graph_bottom + 2
-    m_offset = 5
+    #m_offset = 5
     ## Wipe the legend area
-    box = (0,legend_top,width,legend_bottom)
+    if legend_top < legend_bottom:
+      box = (0,legend_top,width,legend_bottom)
+    else:
+      box = (0,legend_bottom,width,legend_top)
     self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
