@@ -1288,12 +1288,19 @@ class RunRefinementPrg(RunPrg):
       self.refinement_has_failed.append("Warning: Unconverged Model!")
     if "DISCAMB" in source or "MATTS" in source:
       unknown_sources = False
-      with open(os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")) as discamb_log:
-        for i in discamb_log.readlines():
-          if "unassigned atom types" in i:
-            unknown_sources = True
-          if unknown_sources == True:
-            HAR_log.write(i)
+      fn = os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")
+      if not os.path.exists(fn):
+        fn = os.path.join("olex2","Wfn_job","discamb2tsc.log")
+      if not os.path.exists(fn):
+        HAR_log.write("                   !!! WARNING: No output file found! !!!\n")
+        self.refinement_has_failed.append("Output file not found!")
+      else:
+        with open(os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")) as discamb_log:
+          for i in discamb_log.readlines():
+            if "unassigned atom types" in i:
+              unknown_sources = True
+            if unknown_sources == True:
+              HAR_log.write(i)
       if unknown_sources == True:
         HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
         self.refinement_has_failed.append("Unassigned Atom Types!")
