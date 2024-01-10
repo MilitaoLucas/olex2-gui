@@ -1288,7 +1288,7 @@ class RunRefinementPrg(RunPrg):
       self.refinement_has_failed.append("Warning: Unconverged Model!")
     if "DISCAMB" in source or "MATTS" in source:
       unknown_sources = False
-      with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
+      with open(os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")) as discamb_log:
         for i in discamb_log.readlines():
           if "unassigned atom types" in i:
             unknown_sources = True
