@@ -14,7 +14,16 @@ import olx
 import olex
 import olex_core
 
-class normal_eqns(least_squares.crystallographic_ls_class()):
+#Overwrite to force BLAS Normal Equations from cctbx, since OpenMP builds them itself
+def get_base_class():
+  OpenMP = OV.GetParam('user.refinement.use_openmp')
+  if OpenMP == True:
+    from scitbx.lstbx import normal_eqns
+    return least_squares.crystallographic_ls_class(
+      normal_eqns.non_linear_ls_with_separable_scale_factor_BLAS_2)
+  return least_squares.crystallographic_ls_class()
+
+class normal_eqns(get_base_class()):
   log = None
   std_observations = None
 
