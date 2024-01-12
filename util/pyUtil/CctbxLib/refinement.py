@@ -84,7 +84,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def run(self,
           build_only=False, #return normal normal equations object
           table_file_name = None,
-          normal_equations_class=olex2_normal_equations.normal_eqns,
+          normal_equations_class_builder=olex2_normal_equations.normal_equation_class,
           ed_refinement=None,
           reparametrisation_only=False #returns self.reparametrisation
           ):
@@ -111,7 +111,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
-    self.normal_equations_class = normal_equations_class
+    self.normal_equations_class = normal_equations_class_builder()
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
@@ -432,7 +432,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if timer:
         t8 = time.time()
 
-      self.output_fcf()
+      self.output_fcf(cif[block_name].get('_iucr_refine_fcf_details', None))
       new_weighting = self.weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
@@ -1133,8 +1133,10 @@ The following options were used:
 
       if self.exti is not None:
         fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
+        rescale = True
       elif self.swat is not None:
         fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+        rescale = True
 
       if rescale:
         scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
@@ -1213,19 +1215,23 @@ The following options were used:
 
     return cif, fmt_str
 
-  def output_fcf(self):
+  def output_fcf(self, fcf_content=None):
     try: list_code = int(olx.Ins('list'))
     except: return
     if OV.IsEDRefinement() and list_code != 4:
       olx.Echo("Only LIST 4 is currently supported for the ED refinement", m="warning")
       return
-
-    fcf_cif, fmt_str = self.create_fcf_content(list_code)
-    if not fcf_cif:
-      print("Unsupported list (fcf) format")
-      return
-    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+    if fcf_content is None:
+      import io
+      f = io.StringIO()
+      fcf_cif, fmt_str = self.create_fcf_content(list_code, fixed_format=False)
+      if not fcf_cif:
+        print("Unsupported list (fcf) format")
+        return
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+      fcf_content = f.getvalue()
+    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+      f.write(fcf_content)
 
   def setup_shared_parameters_constraints(self):
     shared_adps = {}
