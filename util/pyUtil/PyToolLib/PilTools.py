@@ -833,7 +833,6 @@ class timage(ArgumentParser):
     image = Image.new('RGBA', (1,1), (0,0,0,0))
     OlexVFS.save_image_to_olex(image, "blank.png", 2)
 
-
     self.imageSource = None
     self.iconSource = None
 
@@ -2683,12 +2682,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       self.title_case = False
       # this had been commented out in this style... it wasn't me... not sure why it was done. Any idea, Oleg?
       #=========================================================================
+      filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
       if OV.FileExt() == "cif":
         grad_colour = self.params.dark_green.rgb
+        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
       elif OV.FileFull().endswith(".oxm"):
         grad_colour = self.params.orange.rgb
+        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
       if OV.IsEDData():
         grad_colour = self.params.ed_colour.rgb
+        font_colour = self.params.timage.snumtitle.font_dark
+        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour_dark
       #=========================================================================
 
     elif item_type == "small_button":
@@ -2788,8 +2792,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
-      colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
+      #filefullinfo_colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
+      
+      self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
       image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
@@ -2901,8 +2906,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           counter += 1
       if cnt > 1:
         txt += (' (%s/%s)') %(current, counter - 1)
-      font_colour = '#ffdf09'
-
+      if not OV.IsEDData:
+        font_colour = '#ffdf09'
+      else:
+        font_colour = font_colour
     ## Actually print the text on the new image item.
     wX, wY = IT.write_text_to_draw(draw,
                             txt,
@@ -3135,6 +3142,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     upon_advance = None
     base_colour = self.params.html.base_colour.rgb
     font_colour = IT.adjust_colour(base_colour, luminosity=luminosity)
+    if OV.IsEDData():
+      font_colour = self.params.timage.snumtitle.font_dark.rgb
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     fscale = self.scale * OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
@@ -3422,14 +3431,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
 
-    self.make_border(rad=border_rad,
-            draw=draw,
-            width=width,
-            height=height,
-            bg_colour=bg_colour,
-            border_colour=bg_colour,
-            border_hls = (0, 0.7, 1)
-          )
+    #self.make_border(rad=border_rad,
+            #draw=draw,
+            #width=width,
+            #height=height,
+            #bg_colour=bg_colour,
+            #border_colour=bg_colour,
+            #border_hls = (0, 0.7, 1)
+          #)
 
     i = 0
     for txt in lines:
@@ -3450,6 +3459,98 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = IT.add_whitespace(image=image, side='top', weight=2, colour=self.params.html.bg_colour.rgb)
 
     return image
+
+  def make_notification_image(self, d):
+    text = d.get('txt')
+    needs_warning=d.get('warning')
+    bg_colour = d['col_bg']
+    font_colour=d.get('col_fg')
+    centered = d.get('centered')
+    border = d.get('border')
+    scale = 4
+    width = int(self.width * scale)
+    width = 512 * scale
+    height = int(width/28)
+    font_size = int(width/36)
+
+    if type(text)==str:
+      text = [text]
+
+    line_height = int(scale* (font_size + font_size * 0.18))
+
+    #if needs_warning:
+    #  w = self.warning.size[0] + 8
+    #  width = width - w
+    height = height * len(text)
+    size = (width, height)
+    image = Image.new('RGBA', size, bg_colour)
+    draw = ImageDraw.Draw(image)
+
+    text_ll = []
+    for line in text:
+      line = OV.TranslatePhrase(line)
+      #if olx.IsCurrentLanguage('Chinese') == 'true':
+      #  text = text.decode('GB2312')
+  
+      if olx.IsCurrentLanguage('Chinese') == 'true':
+        #font_name = "Arial UTF"
+        font_name = self.params.chinese_font_name
+      else:
+        font_name = "DefaultFont"
+        if self.params.image_font_name:
+          font_name = self.params.image_font_name
+      text_l = []
+      line = line.split()
+      total_text_width = 3 * scale
+  
+      ttw = 0
+      for txt in line:
+        ## Set Font
+        if "**" in txt:
+          fontName = "DefaultFont Bold"
+          txt = txt.replace("**", "")
+        else:
+          fontName = "DefaultFont"
+          left = total_text_width
+        font = IT.registerFontInstance(fontName, font_size)
+        tw = draw.textsize(f" {txt}", font=font)[0]
+        ttw += tw
+        text_l.append([txt, fontName, tw])
+        
+  
+      total = 4 * scale
+      if centered:
+        total = 0
+  
+      for words in text_l:
+        tl = words[2]
+        if not centered:
+          words.append(total)
+        else:
+          words.append(int(((width - ttw)/2) + total))
+        total += tl
+      text_ll.append(text_l)
+    
+    i = 0
+    for text_l in text_ll:
+      for text, fontName, tw, left in text_l:
+        IT.write_text_to_draw(draw,
+                     text,
+                     top_left=(left, 3 + i*font_size + 5*i),
+                     font_name=fontName,
+                     font_size=font_size,
+                     font_colour=font_colour,
+                     translate=False,
+                     )
+      i += 1
+
+    if border != 0:
+      border_colour = font_colour
+      image = self.make_timage_border(image, fill= border_colour, weight = border)
+
+    image =  image.resize((int(width/scale), int(height/scale)),Image.ANTIALIAS)
+    return image
+
 
   def label_items(self, item, font_name = "DefaultFont"):
     text = item[0]
