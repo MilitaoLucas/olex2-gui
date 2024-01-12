@@ -64,9 +64,9 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd14 "spy.setAllMainToolbarTabButtons()">
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
-	  <cmd3  "spy.gui.get_default_notification('Structure <b>$FileName() </b> loaded')">
       <cmd16 "html.Update">
-      <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
+	  <cmd17 "spy.gui.get_default_notification('Structure **$FileName()** loaded')">
+      <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
     >
     <onabort
      <cmd "ceiling off">
@@ -1532,6 +1532,17 @@
   >
 >
 
+<sp help="short show part"
+  <body
+    <args
+      <arg1 name="p1" def="">
+      <arg1 name="p2" def="">
+    \>
+    <cmd
+      <cmd1 "showp %1 %2">
+    \>
+  \>
+\>
 
 
 <user_onstartup help="dummy definition" <body > >
