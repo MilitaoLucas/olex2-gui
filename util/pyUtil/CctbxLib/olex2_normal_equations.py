@@ -14,297 +14,299 @@ import olx
 import olex
 import olex_core
 
-#Overwrite to force BLAS Normal Equations from cctbx, since OpenMP builds them itself
-def get_base_class():
-  OpenMP = OV.GetParam('user.refinement.use_openmp')
-  if OpenMP == True:
-    from scitbx.lstbx import normal_eqns
-    return least_squares.crystallographic_ls_class(
-      normal_eqns.non_linear_ls_with_separable_scale_factor_BLAS_2)
-  return least_squares.crystallographic_ls_class()
+# need this pattern to use 'dynamic' base
+def normal_equation_class():
+  #Overwrite to force BLAS Normal Equations from cctbx, since OpenMP builds them itself
+  def get_base_class():
+    OpenMP = OV.GetParam('user.refinement.use_openmp')
+    if OpenMP == True:
+      from scitbx.lstbx import normal_eqns
+      return least_squares.crystallographic_ls_class(
+        normal_eqns.non_linear_ls_with_separable_scale_factor_BLAS_2)
+    return least_squares.crystallographic_ls_class()
 
-class normal_eqns(get_base_class()):
-  log = None
-  std_observations = None
+  class normal_eqns(get_base_class()):
+    log = None
+    std_observations = None
 
-  def __init__(self, observations, refinement, olx_atoms,
-               table_file_name=None, **kwds):
-    super(normal_eqns, self).__init__(
-      observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(),
-      **kwds)
-    if table_file_name:
-      try:
-        one_h_linearisation = direct.f_calc_modulus_squared(
-          self.xray_structure, table_file_name=table_file_name)
-      except Exception as e:
-        e_str = str(e)
-        if "stoks.size() == scatterer" in e_str:
-          print("Number of atoms in model and table are not matching!")
-        elif "Error during building of normal equations using OpenMP" in e_str:
-          print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
-        raise e
-    else:
-      one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, reflections=self.observations)
-    self.refinement = refinement
-    self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
-    self.f_mask_data = None
-    if self.f_mask is None:
-      self.f_mask_data = MaskData(flex.complex_double())
-    else:
-      self.f_mask_data = MaskData(self.observations,
-                                  self.xray_structure.space_group(),
-                                  self.observations.fo_sq.anomalous_flag(),
-                                  self.f_mask.indices(),
-                                  self.f_mask.data())
-    self.olx_atoms = olx_atoms
-    self.n_current_cycle = 0
-
-  def step_forward(self):
-    self.n_current_cycle += 1
-    self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
-    super(normal_eqns, self).step_forward()
-    self.show_cycle_summary(log=self.log)
-    self.show_sorted_shifts(max_items=10, log=self.log)
-    self.restraints_manager.show_sorted(
-      self.xray_structure, f=self.log)
-    self.show_cycle_summary()
-    self.feed_olex()
-    return self
-
-  def step_backward(self):
-    super(normal_eqns, self).step_backward()
-    return self
-
-  def analyse_shifts(self):
-    self.max_shift_esd = None
-    self.max_shift_esd_item = None
-    self.mean_shift_esd = None
-    try:
-      self.iterations_object.analyse_shifts()
-      self.mean_shift_esd = self.iterations_object.mean_ls_shift_over_su
-      self.max_shift_esd = self.iterations_object.max_ls_shift_over_su
-      self.max_shift_esd_item = self.iterations_object.max_shift_for
-    except Exception as s:
-      print(s)
-
-  def show_cycle_summary(self, log=None):
-    if log is None: log = sys.stdout
-    # self.reparametrisation.n_independents + OSF
-    max_shift_site = self.max_shift_site()
-    OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
-    OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
-    max_shift_u = self.max_shift_u()
-    OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
-    OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
-    self.analyse_shifts()
-    print_tabular = True
-
-    if print_tabular:
-      header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
-      params = (self.n_current_cycle,
-          self.r1_factor(cutoff_factor=2)[0] * 100,
-          self.wR2() * 100,
-          self.goof(),
-          self.max_shift_esd,
-          '(' + self.max_shift_esd_item + ')',
-          max_shift_site[0],
-          '(' + max_shift_site[1].label + ')',
-          max_shift_u[0],
-          '(' + max_shift_u[1].label + ')',
-      )
-      if hasattr(self.iterations_object,'mu'):
-        header += "  % 8.2e"
-        params += (self.iterations_object.mu,)
-      print(header %params, file=log)
-
-    else:
-      print("wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
-        self.wR2(),
-        self.goof(),
-        self.observations.fo_sq.size(),
-        self.reparametrisation.n_independents + 1,
-      ), file=log)
-
-      print("Max shifts: ", end=' ', file=log)
-
-      print("Site: %.4f A for %s |" %(
-        max_shift_site[0],
-        max_shift_site[1].label
-      ), end=' ', file=log)
-      print("dU = %.4f for %s" %(
-        max_shift_u[0],
-        max_shift_u[1].label,
-      ), file=log)
-
-
-  def max_shift_site(self):
-    return next(self.iter_shifts_sites(max_items=1))
-
-  def max_shift_u(self):
-    return next(self.iter_shifts_u(max_items=1))
-
-  def max_shift_esd(self):
-    self.get_shifts()
-    return next(self.iter_shifts_u(max_items=1))
-
-
-  def iter_shifts_sites(self, max_items=None):
-    scatterers = self.xray_structure.scatterers()
-    sites_shifts = self.xray_structure.sites_cart() -\
-                 self.xray_structure_pre_cycle.sites_cart()
-    distances = sites_shifts.norms()
-    i_distances_sorted = flex.sort_permutation(data=distances, reverse=True)
-    if max_items is not None:
-      i_distances_sorted = i_distances_sorted[:max_items]
-    for i_seq in iter(i_distances_sorted):
-      yield distances[i_seq], scatterers[i_seq]
-
-  def iter_shifts_u(self, max_items=None):
-    scatterers = self.xray_structure.scatterers()
-    adp_shifts = self.xray_structure.extract_u_cart_plus_u_iso() \
-               - self.xray_structure_pre_cycle.extract_u_cart_plus_u_iso()
-    norms = adp_shifts.norms()
-    i_adp_shifts_sorted = flex.sort_permutation(data=norms, reverse=True)
-    if max_items is not None:
-      i_adp_shifts_sorted = i_adp_shifts_sorted[:max_items]
-    for i_seq in iter(i_adp_shifts_sorted):
-      yield norms[i_seq], scatterers[i_seq]
-
-  def show_log(self, f=None):
-    import sys
-    if self.log is sys.stdout: return
-    if f is None: f = sys.stdout
-    print(self.log.getvalue(), file=f)
-
-  def show_sorted_shifts(self, max_items=None, log=None):
-    import sys
-    if log is None: log = sys.stdout
-    print("Sorted site shifts in Angstrom:", file=log)
-    print("shift scatterer", file=log)
-    n_not_shown = self.xray_structure.scatterers().size()
-    for distance, scatterer in self.iter_shifts_sites(max_items=max_items):
-      n_not_shown -= 1
-      print("%5.3f %s" %(distance, scatterer.label), file=log)
-      if round(distance, 3) == 0: break
-    if n_not_shown != 0:
-      print("... (remaining %d not shown)" % n_not_shown, file=log)
-    #
-    print("Sorted adp shift norms:", file=log)
-    print("dU scatterer", file=log)
-    n_not_shown = self.xray_structure.scatterers().size()
-    for norm, scatterer in self.iter_shifts_u(max_items=max_items):
-      n_not_shown -= 1
-      print("%5.3f %s" %(norm, scatterer.label), file=log)
-      if round(norm, 3) == 0: break
-    if n_not_shown != 0:
-      print("... (remaining %d not shown)" % n_not_shown, file=log)
-
-  def show_shifts(self, log=None):
-    import sys
-    if log is None: log = sys.stdout
-    site_symmetry_table = self.xray_structure.site_symmetry_table()
-    i=0
-    for i_sc, sc in enumerate(self.xray_structure.scatterers()):
-      op = site_symmetry_table.get(i_sc)
-      print("%-4s" % sc.label, file=log)
-      if sc.flags.grad_site():
-        n = op.site_constraints().n_independent_params()
-        if n != 0:
-          print(("site:" + "%7.4f, "*(n-1) + "%7.4f")\
-                % tuple(self.shifts[-1][i:i+n]), file=log)
-        i += n
-      if sc.flags.grad_u_iso() and sc.flags.use_u_iso():
-        if not(sc.flags.tan_u_iso() and sc.flags.param > 0):
-          print("u_iso: %6.4f" % self.shifts[i], file=log)
-          i += 1
-      if sc.flags.grad_u_aniso() and sc.flags.use_u_aniso():
-        n = op.adp_constraints().n_independent_params()
-        print((("u_aniso:" + "%6.3f, "*(n-1) + "%6.3f")
-                       % tuple(self.shifts[-1][i:i+n])), file=log)
-        i += n
-      if sc.flags.grad_occupancy():
-        print("occ: %4.2f" % self.shifts[-1][i], file=log)
-        i += 1
-      if sc.flags.grad_fp():
-        print("f': %6.4f" % self.shifts[-1][i], file=log)
-        i += 1
-      if sc.flags.grad_fdp():
-        print("f'': %6.4f" % self.shifts[-1][i], file=log)
-        i += 1
-      print(file=log)
-
-  def feed_olex(self):
-    ## Feed Model
-    def iter_scatterers():
-      for a in self.xray_structure.scatterers():
-        label = a.label
-        xyz = a.site
-        symbol = a.scattering_type
-        if a.flags.use_u_iso():
-          u = (a.u_iso,)
-          u_eq = u[0]
-        if a.flags.use_u_aniso():
-          u_cif = adptbx.u_star_as_u_cart(self.xray_structure.unit_cell(), a.u_star)
-          u = u_cif
-          if len(u) == 6:
-            u = [u[0], u[1], u[2], u[5], u[4], u[3]]
-            if a.is_anharmonic_adp():
-              u += a.anharmonic_adp.data()
-          u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
-        yield (label, xyz, u, u_eq,
-               a.occupancy*a.weight_without_occupancy(),
-               symbol, a.flags, a)
-    this_atom_id = 0
-    for name, xyz, u, ueq, occu, symbol, flags, a in iter_scatterers():
-      id = self.olx_atoms.atom_ids[this_atom_id]
-      this_atom_id += 1
-      olx.xf.au.SetAtomCrd(id, *xyz)
-      olx.xf.au.SetAtomU(id, *u)
-      olx.xf.au.SetAtomOccu(id, occu)
-      if flags.grad_fp():
-        olx.xf.au.SetAtomDisp(id, a.fp, a.fdp)
-    #update OSF
-    OV.SetOSF(self.scale_factor())
-    #update FVars
-    for var in self.shared_param_constraints:
-      if var[3]:
-        OV.SetFVar(var[0], var[1].value.value*var[2])
+    def __init__(self, observations, refinement, olx_atoms,
+                table_file_name=None, **kwds):
+      super(normal_eqns, self).__init__(
+        observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(),
+        **kwds)
+      if table_file_name:
+        try:
+          one_h_linearisation = direct.f_calc_modulus_squared(
+            self.xray_structure, table_file_name=table_file_name)
+        except Exception as e:
+          e_str = str(e)
+          if "stoks.size() == scatterer" in e_str:
+            print("Number of atoms in model and table are not matching!")
+          elif "Error during building of normal equations using OpenMP" in e_str:
+            print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
+          raise e
       else:
-        OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
-    #update BASF
-    if self.twin_fractions is not None:
-      idx = 0
-      for fraction in self.twin_fractions:
-        if fraction.grad:
-          olx.xf.rm.BASF(idx, fraction.value)
-          idx += 1
-    #update EXTI
-    if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
-      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
-        OV.SetExtinction(self.reparametrisation.fc_correction.value)
-      elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
-        OV.SetSWAT(self.reparametrisation.fc_correction.g,
-          self.reparametrisation.fc_correction.U)
-    for (i,r) in enumerate(self.shared_rotated_adps):
-      if r.refine_angle:
-        olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
-    for (i,r) in enumerate(self.shared_rotating_adps):
-      if r.refine_angle:
-        olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
-          r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
-    self.complete_update()
-    olx.xf.EndUpdate()
-    if OV.HasGUI():
-      olx.Refresh()
-    if OV.isInterruptSet():
-      self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
-      self.iterations_object.interrupted = True
-  # interface functions - do not delete
-  def complete_update(self):
-    pass
-  def on_completion(self):
-    pass
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, reflections=self.observations)
+      self.refinement = refinement
+      self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
+      self.f_mask_data = None
+      if self.f_mask is None:
+        self.f_mask_data = MaskData(flex.complex_double())
+      else:
+        self.f_mask_data = MaskData(self.observations,
+                                    self.xray_structure.space_group(),
+                                    self.observations.fo_sq.anomalous_flag(),
+                                    self.f_mask.indices(),
+                                    self.f_mask.data())
+      self.olx_atoms = olx_atoms
+      self.n_current_cycle = 0
+
+    def step_forward(self):
+      self.n_current_cycle += 1
+      self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
+      super(normal_eqns, self).step_forward()
+      self.show_cycle_summary(log=self.log)
+      self.show_sorted_shifts(max_items=10, log=self.log)
+      self.restraints_manager.show_sorted(
+        self.xray_structure, f=self.log)
+      self.show_cycle_summary()
+      self.feed_olex()
+      return self
+
+    def step_backward(self):
+      super(normal_eqns, self).step_backward()
+      return self
+
+    def analyse_shifts(self):
+      self.max_shift_esd = None
+      self.max_shift_esd_item = None
+      self.mean_shift_esd = None
+      try:
+        self.iterations_object.analyse_shifts()
+        self.mean_shift_esd = self.iterations_object.mean_ls_shift_over_su
+        self.max_shift_esd = self.iterations_object.max_ls_shift_over_su
+        self.max_shift_esd_item = self.iterations_object.max_shift_for
+      except Exception as s:
+        print(s)
+
+    def show_cycle_summary(self, log=None):
+      if log is None: log = sys.stdout
+      # self.reparametrisation.n_independents + OSF
+      max_shift_site = self.max_shift_site()
+      OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
+      OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
+      max_shift_u = self.max_shift_u()
+      OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
+      OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
+      self.analyse_shifts()
+      print_tabular = True
+
+      if print_tabular:
+        header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
+        params = (self.n_current_cycle,
+            self.r1_factor(cutoff_factor=2)[0] * 100,
+            self.wR2() * 100,
+            self.goof(),
+            self.max_shift_esd,
+            '(' + self.max_shift_esd_item + ')',
+            max_shift_site[0],
+            '(' + max_shift_site[1].label + ')',
+            max_shift_u[0],
+            '(' + max_shift_u[1].label + ')',
+        )
+        if hasattr(self.iterations_object,'mu'):
+          header += "  % 8.2e"
+          params += (self.iterations_object.mu,)
+        print(header %params, file=log)
+
+      else:
+        print("wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
+          self.wR2(),
+          self.goof(),
+          self.observations.fo_sq.size(),
+          self.reparametrisation.n_independents + 1,
+        ), file=log)
+
+        print("Max shifts: ", end=' ', file=log)
+
+        print("Site: %.4f A for %s |" %(
+          max_shift_site[0],
+          max_shift_site[1].label
+        ), end=' ', file=log)
+        print("dU = %.4f for %s" %(
+          max_shift_u[0],
+          max_shift_u[1].label,
+        ), file=log)
+
+    def max_shift_site(self):
+      return next(self.iter_shifts_sites(max_items=1))
+
+    def max_shift_u(self):
+      return next(self.iter_shifts_u(max_items=1))
+
+    def max_shift_esd(self):
+      self.get_shifts()
+      return next(self.iter_shifts_u(max_items=1))
+
+
+    def iter_shifts_sites(self, max_items=None):
+      scatterers = self.xray_structure.scatterers()
+      sites_shifts = self.xray_structure.sites_cart() -\
+                  self.xray_structure_pre_cycle.sites_cart()
+      distances = sites_shifts.norms()
+      i_distances_sorted = flex.sort_permutation(data=distances, reverse=True)
+      if max_items is not None:
+        i_distances_sorted = i_distances_sorted[:max_items]
+      for i_seq in iter(i_distances_sorted):
+        yield distances[i_seq], scatterers[i_seq]
+
+    def iter_shifts_u(self, max_items=None):
+      scatterers = self.xray_structure.scatterers()
+      adp_shifts = self.xray_structure.extract_u_cart_plus_u_iso() \
+                - self.xray_structure_pre_cycle.extract_u_cart_plus_u_iso()
+      norms = adp_shifts.norms()
+      i_adp_shifts_sorted = flex.sort_permutation(data=norms, reverse=True)
+      if max_items is not None:
+        i_adp_shifts_sorted = i_adp_shifts_sorted[:max_items]
+      for i_seq in iter(i_adp_shifts_sorted):
+        yield norms[i_seq], scatterers[i_seq]
+
+    def show_log(self, f=None):
+      import sys
+      if self.log is sys.stdout: return
+      if f is None: f = sys.stdout
+      print(self.log.getvalue(), file=f)
+
+    def show_sorted_shifts(self, max_items=None, log=None):
+      import sys
+      if log is None: log = sys.stdout
+      print("Sorted site shifts in Angstrom:", file=log)
+      print("shift scatterer", file=log)
+      n_not_shown = self.xray_structure.scatterers().size()
+      for distance, scatterer in self.iter_shifts_sites(max_items=max_items):
+        n_not_shown -= 1
+        print("%5.3f %s" %(distance, scatterer.label), file=log)
+        if round(distance, 3) == 0: break
+      if n_not_shown != 0:
+        print("... (remaining %d not shown)" % n_not_shown, file=log)
+      #
+      print("Sorted adp shift norms:", file=log)
+      print("dU scatterer", file=log)
+      n_not_shown = self.xray_structure.scatterers().size()
+      for norm, scatterer in self.iter_shifts_u(max_items=max_items):
+        n_not_shown -= 1
+        print("%5.3f %s" %(norm, scatterer.label), file=log)
+        if round(norm, 3) == 0: break
+      if n_not_shown != 0:
+        print("... (remaining %d not shown)" % n_not_shown, file=log)
+
+    def show_shifts(self, log=None):
+      import sys
+      if log is None: log = sys.stdout
+      site_symmetry_table = self.xray_structure.site_symmetry_table()
+      i=0
+      for i_sc, sc in enumerate(self.xray_structure.scatterers()):
+        op = site_symmetry_table.get(i_sc)
+        print("%-4s" % sc.label, file=log)
+        if sc.flags.grad_site():
+          n = op.site_constraints().n_independent_params()
+          if n != 0:
+            print(("site:" + "%7.4f, "*(n-1) + "%7.4f")\
+                  % tuple(self.shifts[-1][i:i+n]), file=log)
+          i += n
+        if sc.flags.grad_u_iso() and sc.flags.use_u_iso():
+          if not(sc.flags.tan_u_iso() and sc.flags.param > 0):
+            print("u_iso: %6.4f" % self.shifts[i], file=log)
+            i += 1
+        if sc.flags.grad_u_aniso() and sc.flags.use_u_aniso():
+          n = op.adp_constraints().n_independent_params()
+          print((("u_aniso:" + "%6.3f, "*(n-1) + "%6.3f")
+                        % tuple(self.shifts[-1][i:i+n])), file=log)
+          i += n
+        if sc.flags.grad_occupancy():
+          print("occ: %4.2f" % self.shifts[-1][i], file=log)
+          i += 1
+        if sc.flags.grad_fp():
+          print("f': %6.4f" % self.shifts[-1][i], file=log)
+          i += 1
+        if sc.flags.grad_fdp():
+          print("f'': %6.4f" % self.shifts[-1][i], file=log)
+          i += 1
+        print(file=log)
+
+    def feed_olex(self):
+      ## Feed Model
+      def iter_scatterers():
+        for a in self.xray_structure.scatterers():
+          label = a.label
+          xyz = a.site
+          symbol = a.scattering_type
+          if a.flags.use_u_iso():
+            u = (a.u_iso,)
+            u_eq = u[0]
+          if a.flags.use_u_aniso():
+            u_cif = adptbx.u_star_as_u_cart(self.xray_structure.unit_cell(), a.u_star)
+            u = u_cif
+            if len(u) == 6:
+              u = [u[0], u[1], u[2], u[5], u[4], u[3]]
+              if a.is_anharmonic_adp():
+                u += a.anharmonic_adp.data()
+            u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
+          yield (label, xyz, u, u_eq,
+                a.occupancy*a.weight_without_occupancy(),
+                symbol, a.flags, a)
+      this_atom_id = 0
+      for name, xyz, u, ueq, occu, symbol, flags, a in iter_scatterers():
+        id = self.olx_atoms.atom_ids[this_atom_id]
+        this_atom_id += 1
+        olx.xf.au.SetAtomCrd(id, *xyz)
+        olx.xf.au.SetAtomU(id, *u)
+        olx.xf.au.SetAtomOccu(id, occu)
+        if flags.grad_fp():
+          olx.xf.au.SetAtomDisp(id, a.fp, a.fdp)
+      #update OSF
+      OV.SetOSF(self.scale_factor())
+      #update FVars
+      for var in self.shared_param_constraints:
+        if var[3]:
+          OV.SetFVar(var[0], var[1].value.value*var[2])
+        else:
+          OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
+      #update BASF
+      if self.twin_fractions is not None:
+        idx = 0
+        for fraction in self.twin_fractions:
+          if fraction.grad:
+            olx.xf.rm.BASF(idx, fraction.value)
+            idx += 1
+      #update EXTI
+      if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+        if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+          OV.SetExtinction(self.reparametrisation.fc_correction.value)
+        elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+          OV.SetSWAT(self.reparametrisation.fc_correction.g,
+            self.reparametrisation.fc_correction.U)
+      for (i,r) in enumerate(self.shared_rotated_adps):
+        if r.refine_angle:
+          olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+      for (i,r) in enumerate(self.shared_rotating_adps):
+        if r.refine_angle:
+          olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
+            r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
+      self.complete_update()
+      olx.xf.EndUpdate()
+      if OV.HasGUI():
+        olx.Refresh()
+      if OV.isInterruptSet():
+        self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
+        self.iterations_object.interrupted = True
+    # interface functions - do not delete
+    def complete_update(self):
+      pass
+    def on_completion(self):
+      pass
+  return normal_eqns
 
 from scitbx.lstbx import normal_eqns_solving
 
