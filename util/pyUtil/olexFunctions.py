@@ -241,7 +241,7 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
-
+  #used in RunPrg to update the HKL digest ifHKL changes after ShelXT
   def get_AC_digests(self):
     acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
     if not acd:
@@ -862,7 +862,7 @@ class OlexFunctions(inheritFunctions):
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
       self.GetParam("snum.refinement.program") == "olex2.refine"
-  
+
   def get_diag(self, param):
     v = None
     if OV.IsEDData():
@@ -870,9 +870,9 @@ class OlexFunctions(inheritFunctions):
     if not v:
       v = OV.GetParam("user.diagnostics.%s" %param)
     return v
-    
+
     #v = OV.GetParam(f"user.diagnostics_ed.{param}") if OV.IsEDData() else OV.GetParam(f"user.diagnostics.{param}")
-              
+
 
   def IsEDData(self):
     try:
