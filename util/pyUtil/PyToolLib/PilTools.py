@@ -2690,9 +2690,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         grad_colour = self.params.orange.rgb
         filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
       if OV.IsEDData():
-        grad_colour = self.params.ed_colour.rgb
-        font_colour = self.params.timage.snumtitle.font_dark
-        filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour_dark
+        grad_colour = self.params.ed_bg.rgb
+        font_colour = self.params.ed_fg.rgb
+        filefullinfo_colour = self.params.ed_fg.rgb
       #=========================================================================
 
     elif item_type == "small_button":
@@ -3143,7 +3143,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     base_colour = self.params.html.base_colour.rgb
     font_colour = IT.adjust_colour(base_colour, luminosity=luminosity)
     if OV.IsEDData():
-      font_colour = self.params.timage.snumtitle.font_dark.rgb
+      font_colour = self.params.ed_fg.rgb
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     fscale = self.scale * OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
