@@ -597,7 +597,7 @@ class OlexFunctions(inheritFunctions):
     olex.m('@reap %s' %path)
     if OV.HasGUI():
       olex.m('spy.run_skin sNumTitle')
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def Reset(self):
     olx.Reset()
@@ -622,7 +622,7 @@ class OlexFunctions(inheritFunctions):
         import gui
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
-          olx.html.Update()
+          OV.UpdateHtml()
     except Exception as ex:
       print("An error occured whilst trying to reload %s/%s" %(path, file), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
@@ -763,6 +763,10 @@ class OlexFunctions(inheritFunctions):
     for path in list_of_paths:
       retList.append(self.standardizePath(path))
     return retList
+
+  def evaluate_function(self, func):
+    a = getattr(self, func)
+    return a()
 
   def BaseDir(self):
     return olx.BaseDir()
