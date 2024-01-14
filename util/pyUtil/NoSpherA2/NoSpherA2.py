@@ -82,6 +82,7 @@ class NoSpherA2(PT):
     self.setup_g16_executables()
     self.setup_orca_executables()
     self.setup_wfn_2_fchk()
+    self.setup_xtb_executables()
 
     import platform
     if platform.architecture()[0] != "64bit":
@@ -697,6 +698,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_psi4_input(xyz)
     elif software == "Thakkar IAM":
       wfn_object.write_xyz_file()
+    elif software == "xTB":
+      wfn_object.write_xtb_input()
     elif software == "Hybrid":
       software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d"%part)
@@ -931,6 +934,31 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.softwares = self.softwares + ";ORCA;ORCA 5.0"
     else:
       self.softwares = self.softwares + ";Get ORCA"
+
+  def setup_xtb_executables(self):
+    self.xtb_exe = ""
+    exe_pre = "xtb"
+    self.xtb_exe_pre = exe_pre
+
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.xtb_exe = _
+      else:
+        self.xtb_exe = olx.file.Which("%s.exe" %exe_pre)
+
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.xtb_exe = _
+      else:
+        self.xtb_exe = olx.file.Which("%s" %exe_pre)
+    if os.path.exists(self.xtb_exe):
+      OV.SetParam('snum.NoSpherA2.source',"xTB")
+      if "xTB" not in self.softwares:
+        self.softwares = self.softwares + ";xTB"
+    else:
+      self.softwares = self.softwares + ";Get xTB"
 
   def setup_discamb(self):
     self.discamb_exe = ""
@@ -1352,6 +1380,8 @@ def get_functional_list(wfn_code=None):
     list = "HF;PBE;B3LYP;BLYP;M062X"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V"
+  elif wfn_code == "xTB":
+    list = "GFN0;GFN1;GFN2;GFNFF"
   else:
     list = "HF;BP;BP86;PWLDA;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
@@ -1409,6 +1439,8 @@ def change_tsc_generator(input):
     olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "Get discambMATTS":
     olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
+  elif input == "Get xtb":
+    olx.Shell("https://github.com/grimme-lab/xtb")
   elif input == "Get pySCF":
     result = check_for_pyscf(False)
     if result == False:
