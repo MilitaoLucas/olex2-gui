@@ -1295,7 +1295,7 @@ class RunRefinementPrg(RunPrg):
         HAR_log.write("                   !!! WARNING: No output file found! !!!\n")
         self.refinement_has_failed.append("Output file not found!")
       else:
-        with open(os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")) as discamb_log:
+        with open(fn) as discamb_log:
           for i in discamb_log.readlines():
             if "unassigned atom types" in i:
               unknown_sources = True
