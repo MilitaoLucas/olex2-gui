@@ -123,10 +123,15 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append('-skpts')
   if(read_k_pts):
     args.append('-rkpts')
+  software = OV.GetParam('snum.NoSpherA2.source')
   if "ECP" in basis_name:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
     args.append(str(mode))
+  elif "xTB" in software:
+    args.append("-ECP")
+    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
+    args.append(str(2))    
   olex_refinement_model = OV.GetRefinementModel(False)
 
   if olex_refinement_model['hklf']['value'] >= 5:
