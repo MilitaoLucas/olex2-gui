@@ -120,7 +120,7 @@ cleanup=yes      ...... remove all intermediate files, keep only .res (default=y
 
         for k, v in list(flip_keywords.items()):
             if k+"=" in s[i]:
-                flip_keywords[k] = string.split(s[i], "=")[1]
+                flip_keywords[k] = s[i].split("=")[1]
 
     if not insfile_defined:
         if olexrun:
@@ -205,20 +205,20 @@ def process_insfile(flip_keywords, files, derived_info):
     derived_info['latt'] = 0
     for line in fileinput.input(files['insin']):
         if "CELL" in line:
-            derived_info['cell'] = string.join(string.split(line)[2:])
-            derived_info['wavelength'] = string.split(line)[1]
+            derived_info['cell'] = " ".join(line.split()[2:])
+            derived_info['wavelength'] = line.split()[1]
         if "LATT" in line:
-            derived_info['latt'] = int(string.split(line)[1])
+            derived_info['latt'] = int(line.split()[1])
         if "SYMM" in line:
             nsymm = nsymm + 1
         if "SFAC" in line:
             nsfac = nsfac + 1
         if "ZERR" in line:
-            derived_info['zerr'] = string.split(line)[1]
-            derived_info['cellesd'] = string.join(string.split(line)[2:])
+            derived_info['zerr'] = line.split()[1]
+            derived_info['cellesd'] = " ".join(line.split()[2:])
 
 # Determine crystal system from lattice metrics
-    c = string.split(derived_info['cell'])
+    c = derived_info['cell'].split()
     delta = 0.001
     derived_info["crsyst"] = "tric"
     c = list(map(float, c))
@@ -274,27 +274,26 @@ def process_insfile(flip_keywords, files, derived_info):
                 print(" -x1 -x2 -x3", file=symcards)
             for line in fileinput.input(files['insin']):
                 if "SYMM" in line:
-                    line = string.split(string.upper(
-                        string.replace(line, "SYMM", "")), ',')
+                    line = line.replace("SYMM", "").upper().split(',')
                     for k in range(len(line)):
-                        line[k] = string.replace(line[k], " ", "")
-                        line[k] = string.replace(line[k], "\n", "")
-                        line[k] = string.replace(line[k], "X", "x1")
-                        line[k] = string.replace(line[k], "Y", "x2")
-                        line[k] = string.replace(line[k], "Z", "x3")
+                        line[k] = line[k].replace(" ", "")
+                        line[k] = line[k].replace("\n", "")
+                        line[k] = line[k].replace("X", "x1")
+                        line[k] = line[k].replace("Y", "x2")
+                        line[k] = line[k].replace("Z", "x3")
                         if ".5" in line[k] and "0.5" not in line[k]:
-                            line[k] = string.replace(line[k], ".5", "0.5")
+                            line[k] = line[k].replace(".5", "0.5")
                         if ".25" in line[k] and "0.25" not in line[k]:
-                            line[k] = string.replace(line[k], ".25", "0.25")
+                            line[k] = line[k].replace(".25", "0.25")
                         if ".75" in line[k] and "0.75" not in line[k]:
-                            line[k] = string.replace(line[k], ".75", "0.75")
+                            line[k] = line[k].replace(".75", "0.75")
                         if ".33" in line[k] and "0.33" not in line[k]:
-                            line[k] = string.replace(line[k], ".33", "0.33")
+                            line[k] = line[k].replace(".33", "0.33")
                         if ".66" in line[k] and "0.66" not in line[k]:
-                            line[k] = string.replace(line[k], ".66", "0.66")
+                            line[k] = line[k].replace(".66", "0.66")
                         if ".83" in line[k] and "0.83" not in line[k]:
-                            line[k] = string.replace(line[k], ".83", "0.83")
-                    print(string.join(line), file=symcards)
+                            line[k] = line[k].replace(".83", "0.83")
+                    print(" ".join(line), file=symcards)
                     if (derived_info['latt'] > 0):
                         invline = []
                         for symop in line:
@@ -311,7 +310,7 @@ def process_insfile(flip_keywords, files, derived_info):
                                 if (k > 0 and symop[k] != "-" and symop[k] != "+"):
                                     symopinv = symopinv + symop[k]
                             invline.append(symopinv)
-                        print("%s" % string.join(invline), file=symcards)
+                        print(" ".join(invline), file=symcards)
         print("endsymmetry", file=symcards)
         symcards.close()
 
@@ -388,25 +387,25 @@ def process_insfile(flip_keywords, files, derived_info):
         for line in fileinput.input(files['insin']):
             if "SFAC" in line:
                 multi = re.search('=$', line)
-                sfacline = string.split(line)[1:]
+                sfacline = line.split()[1:]
     else:
         multi = 'yes'
     if (nsfac > 1) or (multi == 'yes'):
         sfacline = ''
         for line in fileinput.input(files['insin']):
             if "SFAC" in line:
-                sfacline = sfacline+' '+string.split(line)[1]
-        sfacline = string.split(sfacline)
+                sfacline = sfacline+' '+line.split()[1]
+        sfacline = sfacline.split()
     if (nsfac == 1) and (multi):
         del sfacline[1:]
     derived_info['sfac'] = ''
     for k in sfacline:
         if (len(k) > 1):
             derived_info['sfac'] = derived_info['sfac'] + \
-                ' '+string.replace(k, k[1], k[1].lower())
+                ' '+k.replace(k[1], k[1].lower())
         else:
             derived_info['sfac'] = derived_info['sfac']+' '+k
-    derived_info['sfac'] = string.lstrip(derived_info['sfac'])
+    derived_info['sfac'] = derived_info['sfac'].lstrip()
     if flip_keywords['aar'] == "yes":
         elements = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
                     'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr',
@@ -414,7 +413,7 @@ def process_insfile(flip_keywords, files, derived_info):
                     'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os',
                     'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U']
         print(derived_info['sfac'])
-        lst = string.split(derived_info['sfac'], " ")
+        lst = derived_info['sfac'].split(" ")
         y = []
         for l in range(len(lst)):
             y.append(elements.index(lst[l]))
@@ -584,7 +583,7 @@ def analyze_superflip_logfile(flip_keywords, files, derived_info):
         if "Last run from" in line:
             cev = fileinput.filelineno()-goback
         if "Number of successes" in line:
-            nsuccess = int(string.split(line)[4])
+            nsuccess = int(line.split()[4])
         if "# Iteration #" in line:
             derived_info['itlino'].append(fileinput.filelineno()-1)
     try:
@@ -598,9 +597,9 @@ def analyze_superflip_logfile(flip_keywords, files, derived_info):
     bestresults = open(files['fliplog'], 'r').readlines()[cev].strip()
     if (bestresults[0:3] == ""):
         bestresults = open(files['fliplog'], 'r').readlines()[cev-2].strip()
-    derived_info['bestrun'] = int(string.split(bestresults)[0])
-    derived_info['spgr'] = string.split(bestresults)[4]
-    phisym = float(string.split(bestresults)[3])
+    derived_info['bestrun'] = int(bestresults.split()[0])
+    derived_info['spgr'] = bestresults.split()[4]
+    phisym = float(bestresults.split()[3])
 
     if (flip_keywords['logging'] == "yes"):
         log.write("\
@@ -712,7 +711,7 @@ cell             %s
                 if (line.strip() == ''):
                     break
                 else:
-                    h.write(string.join(string.split(line.strip())[1:])+'\n')
+                    h.write(" ".join(line.strip().split()[1:])+'\n')
         h.write("\
 endsymmetry\n\
 centers\n")
@@ -722,7 +721,7 @@ centers\n")
                     if 'Symmetry operations' in line:
                         break
                     else:
-                        a = string.split(line)
+                        a = line.split()
                         if (len(a) > 0):
                             if (a[0] == '0.333') or (a[0] == '0.667'):
                                 for k in a:
@@ -732,8 +731,7 @@ centers\n")
                                         h.write('0.66666667 ')
                                 h.write('\n')
                             else:
-                                h.write(string.join(
-                                    string.split(line.strip())[0:])+'\n')
+                                h.write(" ".join(line.strip().split()[0:])+'\n')
         else:
             h.write('0.000 0.000 0.000\n')
         h.write('endcenters\n')
@@ -764,11 +762,11 @@ def cleanup(files):
     zerrfound = 0
     for line in fileinput.input(files['edmaout']):
         if "LATT" in line:
-            latt = int(string.split(line)[1])
+            latt = int(line.split()[1])
         if "SYMM" in line:
             nsymm = nsymm + 1
         if "ZERR" in line:
-            derived_info['zerr'] = string.split(line)[1]
+            derived_info['zerr'] = line.split()[1]
             zerrfound = 1
 
     if (zerrfound == 0):
@@ -879,7 +877,7 @@ def flipsmall(*args):
     if olexrun:
         # check whether commas or spaces are used as separators, for olexrun it should be commas; replace simply all spaces by commas
         if len(args) > 1:
-            temp = string.join(args, ',')
+            temp = ','.join(args)
         else:
             if len(args) == 1:
                 args[0] = args[0].replace(' ', ',')
@@ -887,7 +885,7 @@ def flipsmall(*args):
             else:
                 temp = ''
 #       print args
-        args = string.split(temp, ',')
+        args = temp.split(',')
         insertins = True
         for i in range(0, len(args)):
             if ".ins" in args[i]:
