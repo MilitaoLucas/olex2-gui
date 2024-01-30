@@ -2015,7 +2015,7 @@ Do you want to install this now?""", "YN", False)
           from zipfile import ZipFile
           import platform
           architecture = platform.architecture()[0]
-          arch = '86'
+          arch = '32'
           if not architecture:
             pass
           elif architecture == '64bit':
@@ -2031,9 +2031,13 @@ Do you want to install this now?""", "YN", False)
           os.remove(fn)
         else:
           olex.m("pip matplotlib==3.5.1")
-        print("Please restart Olex2 to use new functionality")
+        import matplotlib.pyplot as plt
+        return plt
       else:
-        raise err
+        return None
+    else:
+      print("Failed to initialise matplotlib: %s" %str(err))
+      return None
 
 
 
@@ -2052,7 +2056,8 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     import numpy as np
     plt = load_matplotlib()
     plt.style.use('seaborn-whitegrid')
-
+    if not plt:
+      return
 
     # Create some mock data
     t = np.arange(0.01, 10.0, 0.01)
@@ -2139,7 +2144,6 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
   if graphing == 'matplotlib':
     plt = load_matplotlib()
     if not plt:
-      print("Matplotlib is not intalled, and the istallation attempt failed")
       return
     plt.style.use('seaborn-whitegrid')
     plt.grid(True)
