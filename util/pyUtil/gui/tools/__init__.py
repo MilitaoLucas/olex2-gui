@@ -2002,20 +2002,39 @@ OV.registerFunction(load_periodic_table, False, 'gui.tools')
 def load_matplotlib():
   try:
     import matplotlib.pyplot as plt
-    print("We have it!")
     return plt
   except Exception as err:
     if "No module named" in repr(err):
       selection = olx.Alert("matplotlib not found",
                             """Error: No working matplotlib installation found!.
-Do you want to install this now? Olex2 will restart.""", "YN", False)
+Do you want to install this now?""", "YN", False)
       if selection == 'Y':
-        olex.m("pip matplotlib==3.5.1")
-        olex.m("restart")
+        if sys.platform[:3] == 'win':
+          from olexex import GetHttpFile
+          import zipfile
+          from zipfile import ZipFile
+          import platform
+          architecture = platform.architecture()[0]
+          arch = '86'
+          if not architecture:
+            pass
+          elif architecture == '64bit':
+            arch = '64'
+          fn = "site-packages-x%s.zip" %arch
+          fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
+                            fn,
+                            os.path.join(OV.DataDir(), "tmp"))
+          if not fn:
+            raise Exception("matplotlib is required by this functionality!")
+          with ZipFile(fn) as zip:
+            zip.extractall(path=OV.DataDir())
+          os.remove(fn)
+        else:
+          olex.m("pip matplotlib==3.5.1")
+        print("Please restart Olex2 to use new functionality")
       else:
-        print(err)
-      return
-#OV.registerFunction(load_matplotlib, False, 'gui.tools')
+        raise err
+
 
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
@@ -2079,7 +2098,7 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
 
 def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
   plot_params = OV.Params().user.graphs.matplotlib
- 
+
 
   if not colours:
     colours = {"0":{"0":'tab:red', "1":'tab:red'},
@@ -2205,7 +2224,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
             ax2.set_ylabel(labels[i]['y-label'])
           j += 1
       i += 1
-      
+
     loc = "%s %s %s" %(plot_params.legend_in_out,  plot_params.legend_vertical, plot_params.legend_horizontal)
     loc = loc.strip()
 
