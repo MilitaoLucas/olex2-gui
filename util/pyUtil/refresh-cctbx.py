@@ -27,7 +27,7 @@ else:
     build_def = {
     'win32-32bit': [('d:/devel/cctbx/cctbx_latest/build_win32_py38/',
       'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-      'd:/devel/rundir-py3/cctbx/','-j10')],
+      'd:/devel/rundir-py3x32/cctbx/','-j10')],
     'win32-64bit': [('d:/devel/cctbx/cctbx_latest/build_win64_py38/',
       'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
       'd:/devel/rundir-py3/cctbx/','-j10')],
