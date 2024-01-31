@@ -241,7 +241,7 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
-
+  #used in RunPrg to update the HKL digest ifHKL changes after ShelXT
   def get_AC_digests(self):
     acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
     if not acd:
@@ -597,7 +597,7 @@ class OlexFunctions(inheritFunctions):
     olex.m('@reap %s' %path)
     if OV.HasGUI():
       olex.m('spy.run_skin sNumTitle')
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def Reset(self):
     olx.Reset()
@@ -622,7 +622,7 @@ class OlexFunctions(inheritFunctions):
         import gui
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
-          olx.html.Update()
+          OV.UpdateHtml()
     except Exception as ex:
       print("An error occured whilst trying to reload %s/%s" %(path, file), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
@@ -764,6 +764,10 @@ class OlexFunctions(inheritFunctions):
       retList.append(self.standardizePath(path))
     return retList
 
+  def evaluate_function(self, func):
+    a = getattr(self, func)
+    return a()
+
   def BaseDir(self):
     return olx.BaseDir()
 
@@ -862,6 +866,17 @@ class OlexFunctions(inheritFunctions):
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
       self.GetParam("snum.refinement.program") == "olex2.refine"
+
+  def get_diag(self, param):
+    v = None
+    if OV.IsEDData():
+      v = OV.GetParam("user.diagnostics_ed.%s" %param)
+    if not v:
+      v = OV.GetParam("user.diagnostics.%s" %param)
+    return v
+
+    #v = OV.GetParam(f"user.diagnostics_ed.{param}") if OV.IsEDData() else OV.GetParam(f"user.diagnostics.{param}")
+
 
   def IsEDData(self):
     try:
@@ -1328,3 +1343,4 @@ OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
 OV.registerFunction(OV.IsEDData)
+OV.registerFunction(OV.get_diag)

@@ -427,7 +427,7 @@ class wfn_Job(object):
         control += " ROKS "      
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
-        if method != "wB97" and method != "wB97X":
+        if method != "wB97X":
           control += method + ' SCNL '
         else:
           control += method + '-V SCNL '
@@ -657,7 +657,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if software == "ORCA 5.0":
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL == True:
-          if method != "wB97" and method != "wB97X":
+          if method != "wB97X":
             control += method + ' SCNL '
           else:
             control += method + '-V SCNL '
@@ -967,6 +967,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
         inp.write(rest)
         inp.close()    
+
+  def write_xtb_input(self):
+    #coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    self.write_xyz_file()
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
     solv_epsilon = {
@@ -1660,6 +1664,36 @@ ener = cf.kernel()"""
       args.append(self.name + ".inp")
       args.append(">")
       args.append(self.name + ".out")
+    elif software == "xTB":
+      method = OV.GetParam('snum.NoSpherA2.method')
+      args.append(self.parent.xtb_exe)
+      if method == "GFN0":
+        args.append("--gfn")
+        args.append("0")
+      elif method == "GFN1":
+        args.append("--gfn")
+        args.append("1")
+      elif method == "GFN2":
+        args.append("--gfn")
+        args.append("2")
+      elif method == "GFNFF":
+        args.append("--gfnff")
+      acc = OV.GetParam("snum.NoSpherA2.becke_accuracy")
+      if acc == "Low":
+        args.append("--acc")
+        args.append("30")
+      elif acc == "High" or acc == "Max":
+        args.append("--acc")
+        args.append("0.1")
+      args.append("--molden")
+      args.append(self.name+".xyz")
+      charge = OV.GetParam("snum.NoSpherA2.charge")
+      args.append("--chrg")
+      args.append(str(charge))
+      mult = OV.GetParam("snum.NoSpherA2.multiplicity")
+      if mult != 1:
+        args.append("--uhf")
+        args.append(str(int(mult)-1))
 
     out_fn = None
     path = self.full_dir
@@ -1733,7 +1767,11 @@ ener = cf.kernel()"""
 
     with open(out_fn, "r") as stdout:
       while p.poll() is None:
-        x = stdout.read()
+        x = None
+        try:
+          x = stdout.read()
+        except:
+          pass
         if x:
           print(x, end='')
         if OV.GetVar("stop_current_process"):
@@ -1848,6 +1886,10 @@ ener = cf.kernel()"""
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
+    elif("xtb" in args[0]):
+      if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
+        shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
+        shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
     elif("elmodb" in args[0]):
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")

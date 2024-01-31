@@ -81,12 +81,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         params[param] = value
       self.weighting = least_squares.mainstream_shelx_weighting(**params)
 
-  def run(self, build_only=False,
+  def run(self,
+          build_only=False, #return normal normal equations object
           table_file_name = None,
-          normal_equations_class=olex2_normal_equations.normal_eqns,
-          ed_refinement=None):
+          normal_equations_class_builder=olex2_normal_equations.normal_equation_class,
+          ed_refinement=None,
+          reparametrisation_only=False #returns self.reparametrisation
+          ):
     """ If build_only is True - this method initialises and returns the normal
-     equations object
+     equations object.
+     If reparametrisation_only is True - only constructs and returns the reparametrisation object
     """
     timer = OV.IsDebugging()
     import time
@@ -107,12 +111,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
-    self.normal_equations_class = normal_equations_class
+    self.normal_equations_class = normal_equations_class_builder()
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
     self.fo_sq_fc = None
-    if OV.GetParam("snum.refinement.use_solvent_mask"):
+    if OV.GetParam("snum.refinement.use_solvent_mask") and not reparametrisation_only:
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
@@ -210,7 +214,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.std_obserations = None
     if ed_refinement:
-      OV.GetACI().EDI.setup_refinement(self)
+      try:
+        OV.GetACI().EDI.setup_refinement(self, reparametrisation_only=reparametrisation_only)
+      except Exception as e:
+        olx.Echo(str(e), m="error")
+        self.failure = True
+        return
+    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+      olx.Echo("Nothing to refine!", m="error")
+      self.failure = True
+      return
+    if reparametrisation_only:
+      return self.reparametrisation
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
@@ -265,7 +280,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.max_cycles = 0
     try:
       damping = OV.GetDampingParams()
-      self.data_to_parameter_watch()
       if not fcf_only:
         self.print_table_header()
         self.print_table_header(self.log)
@@ -318,7 +332,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.interrupted = True
         elif "is an empty array" in str(e):
           print("There is nothing to refine.")
-          self.interrupted = True
+          self.failure = True
           return
         else:
           raise e
@@ -417,7 +431,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if timer:
         t8 = time.time()
 
-      self.output_fcf()
+      self.output_fcf(cif[block_name].get('_iucr_refine_fcf_details', None))
       new_weighting = self.weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
@@ -444,17 +458,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
     finally:
+      self.data_to_parameter_watch()
       sys.stdout.refresh = True
       self.log.close()
 
   def data_to_parameter_watch(self):
-    #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
-    #data_all = self.reflections.f_sq_obs_filtered.size()
-    data = self.reflections.f_sq_obs_merged.size()
+    try:
+      data = self.normal_eqns.r1_factor()[1]
+    except:
+      data = self.reflections.f_sq_obs_merged.size()
+    try:
+      print (f"Data: {self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (> 2 sig) | {self.normal_eqns.r1_factor(5)[1]} (> 5 sig) [hkl: {self.reflections.f_sq_obs_merged.size()}]")
+    except:
+     pass
+
     dpr = "%.2f" %(data/parameters)
     OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
     OV.SetParam('snum.refinement.parameters', parameters)
+    OV.SetParam('snum.refinement.data', data)
     print("Data/Parameter ratio = %s" %dpr)
 
   def print_table_header(self, log=None):
@@ -1118,8 +1140,10 @@ The following options were used:
 
       if self.exti is not None:
         fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
+        rescale = True
       elif self.swat is not None:
         fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+        rescale = True
 
       if rescale:
         scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
@@ -1147,7 +1171,8 @@ The following options were used:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
         else:
           fmt_str = "%i %i %i %.3f %.3f %.3f %s"
-
+      if OV.IsEDRefinement():
+        fmt_str = fmt_str.replace("f", "g")
       _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
       mas_as_cif_block.add_miller_array(
         _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
@@ -1192,20 +1217,28 @@ The following options were used:
     cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
+    #cif_block['_shelx_F_squared_multiplier'] = "%.3f" %(multiplier)
     cif[OV.FileName().replace(' ', '')] = cif_block
 
     return cif, fmt_str
 
-  def output_fcf(self):
+  def output_fcf(self, fcf_content=None):
     try: list_code = int(olx.Ins('list'))
     except: return
-
-    fcf_cif, fmt_str = self.create_fcf_content(list_code)
-    if not fcf_cif:
-      print("Unsupported list (fcf) format")
+    if OV.IsEDRefinement() and list_code != 4:
+      olx.Echo("Only LIST 4 is currently supported for the ED refinement", m="warning")
       return
-    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+    if fcf_content is None:
+      import io
+      f = io.StringIO()
+      fcf_cif, fmt_str = self.create_fcf_content(list_code, fixed_format=False)
+      if not fcf_cif:
+        print("Unsupported list (fcf) format")
+        return
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+      fcf_content = f.getvalue()
+    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
+      f.write(fcf_content)
 
   def setup_shared_parameters_constraints(self):
     shared_adps = {}
@@ -1599,6 +1632,7 @@ The following options were used:
     else:
       k = math.sqrt(scale_factor)
     if OV.IsEDRefinement():
+      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
       new_data = []
       fc_sq = self.normal_eqns.fc_sq
       for i in range(f_obs.size()):
@@ -1610,10 +1644,11 @@ The following options were used:
         new_data.append(f_obs.data()[i]*s)
       f_obs = f_obs.customized_copy(data=flex.double(new_data))
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664/Fc2Ug)
     else:
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
-    if OV.IsEDData():
+    if OV.IsEDData() and not OV.IsEDRefinement():
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(

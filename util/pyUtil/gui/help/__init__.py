@@ -174,6 +174,8 @@ class GetHelp(VFSDependent):
     matches = []
 
     for root, dirnames, filenames in os.walk(self.source_dir):
+      if ".git" in root:
+        continue
       for filename in fnmatch.filter(filenames, '*.md'):
         matches.append((root.replace(str(self.source_dir), 'help').replace("\\", "_") + "_" + filename.replace('.md', ""),os.path.join(root, filename)))
 

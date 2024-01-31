@@ -157,23 +157,45 @@ class NewsImageRetrivalThread(ThreadEx):
     help.make_help_box(helpTxt=cont, name="Sample_list")
 
   def get_structure_from_url(self, name, url=None):
+    isZip = False
     if not url:
       url = OV.GetParam('olex2.samples.url')
-    url = '%s/%s.cif' %(url, name)
-    _ = self.make_call(url)
-    if _ is None:
-      return ""
-    p = os.path.join(OV.DataDir(), 'samples', name)
-    if not os.path.exists(p):
-      os.makedirs(p)
-    pp = os.path.join(p, name + '.cif')
-    if not os.path.exists(pp):
-      cont = _.read().decode()
-      with open(pp, 'w') as wFile:
-        wFile.write(cont)
+      
+    if ".zip" not in name:
+      url = '%s/%s.cif' %(url, name)
     else:
-      print("Loading the existing structure; please delete this structure (cif file) if you want to get it again!")
-    olex.m("reap '%s'" %pp)
+      url = '%s/%s' %(url, name)
+      isZip = True
+
+    if not isZip:
+      p = os.path.join(OV.DataDir(), 'samples', name)
+      if not os.path.exists(p):
+        _ = self.make_call(url)
+        if _ is None:
+          return ""
+        os.makedirs(p)
+      pp = os.path.join(p, name + '.cif')
+      if not os.path.exists(pp):
+        cont = _.read().decode()
+        with open(pp, 'w') as wFile:
+          wFile.write(cont)
+      olex.m("reap '%s'" %pp)
+      return
+    else:
+      pp = os.path.join(OV.DataDir(), 'samples', name)
+      p = pp.rstrip(".zip")
+      if not os.path.exists(p):
+        _ = self.make_call(url)
+        if _ is None:
+          print("Are you online?")
+          return ""
+        cont = _.read()
+        with open(pp, 'wb') as wFile:
+          wFile.write(cont)
+        import zipfile
+        with zipfile.ZipFile(pp, 'r') as zip_ref:
+          zip_ref.extractall(p)
+    olex.m("reap '%s/%s.cif'" %(p,name.rstrip(".zip")))
 
   def get_styles_from_url(self, name, url=None):
     if not url:

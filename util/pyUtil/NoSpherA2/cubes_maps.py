@@ -642,6 +642,9 @@ def is_colored():
 OV.registerFunction(is_colored,True,'NoSpherA2')
 
 def plot_fft_map(fft_map):
+  if fft_map is None:
+    print("The Calculation of Maps was unsuccesfull, aborting")
+    return
   data = fft_map.real_map_unpadded()
   gridding = data.accessor()
   type = isinstance(data, flex.int)
@@ -668,7 +671,7 @@ def plot_fft_map(fft_map):
 OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
-  if OV.HasGUI():
+  if not OV.HasGUI():
     return
   gridding = data.accessor()
   type = isinstance(data, flex.int)
@@ -749,20 +752,17 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
   use_tsc = OV.IsNoSpherA2()
-  NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-    time = os.path.getmtime(table_name)
-    if NoSpherA2_instance.reflection_date is None or time < NoSpherA2_instance.reflection_date:
-      print("Calculating Structure Factors from files...")
-      one_h = direct.f_calc_modulus_squared(
+    print("Calculating Structure Factors from files...")
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return      
+    one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
-      NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
-    else:
-      print("Calculating Structure Factors from memory...")
-      f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
+    print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
   if OV.GetParam("snum.refinement.use_solvent_mask"):
     f_mask = cctbx_adapter.load_mask()
@@ -1042,17 +1042,16 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-    time = os.path.getmtime(table_name)
-    NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
-    if NoSpherA2_instance.reflection_date is None or time < NoSpherA2_instance.reflection_date:
-      xray_structure = cctbx_adapter.xray_structure()
-      one_h = direct.f_calc_modulus_squared(
+    print("Calculating Structure Factors from files...")
+    xray_structure = cctbx_adapter.xray_structure()
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return      
+    one_h = direct.f_calc_modulus_squared(
                        xray_structure, table_file_name=table_name)
-      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
-      NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
-    else:
-      f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
+    print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
   if OV.GetParam("snum.refinement.use_solvent_mask"):
     f_mask = cctbx_adapter.load_mask()
@@ -1098,16 +1097,14 @@ def deformation_map(resolution=0.1, return_map=False):
     return
   cctbx_adapter = OlexCctbxAdapter()
   table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-  time = os.path.getmtime(table_name)
-  NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
-  if NoSpherA2_instance.reflection_date is None or time < NoSpherA2_instance.reflection_date:
-    xray_structure = cctbx_adapter.xray_structure()
-    one_h = direct.f_calc_modulus_squared(
+  print("Calculating Structure Factors from files...")
+  xray_structure = cctbx_adapter.xray_structure()
+  if not os.path.exists(table_name):
+    print("Error! Form factor file does not exist!")
+    return
+  one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
-    NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
-  else:
-    f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
+  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
   print("Fspher_Fcalc R1:")
   print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
@@ -1129,18 +1126,16 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-    time = os.path.getmtime(table_name)
-    NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
-    if NoSpherA2_instance.reflection_date is None or time < NoSpherA2_instance.reflection_date:
-      
-      xray_structure = cctbx_adapter.xray_structure()
-      one_h = direct.f_calc_modulus_squared(
+    print("Calculating Structure Factors from files...")
+    xray_structure = cctbx_adapter.xray_structure()
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return      
+    one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
-      NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
-    else:
-      f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
+    print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
   f_obs = f_sq_obs.f_sq_as_f()
   k = math.sqrt(OV.GetOSF())
@@ -1169,17 +1164,16 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-    time = os.path.getmtime(table_name)
-    NoSpherA2_instance = NoSpherA2.get_NoSpherA2_instance()
-    if NoSpherA2_instance.reflection_date is None or time < NoSpherA2_instance.reflection_date:
-      xray_structure = cctbx_adapter.xray_structure()
-      one_h = direct.f_calc_modulus_squared(
+    print("Calculating Structure Factors from files...")
+    xray_structure = cctbx_adapter.xray_structure()
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return
+    one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
-      NoSpherA2_instance.set_f_calc_obs_sq_one_h_linearisation(f_calc, f_sq_obs, one_h)
-    else:
-      f_sq_obs, f_calc = NoSpherA2_instance.f_obs_sq, NoSpherA2_instance.f_calc
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
+    print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
   wavelength = float(olx.xf.exptl.Radiation())
   if wavelength < 0.1:
