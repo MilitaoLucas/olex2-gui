@@ -56,8 +56,8 @@ class GuiFunctions(object):
       retStr = None
     return retStr
 
-  def UpdateHtml(self, html_name=''):
-    olx.html.Update(html_name)
+  def UpdateHtml(self, html_name='', force=False):
+      olx.html.Update(html_name)
 
   def HtmlLoad(self, path):
     olx.html.Load(path)

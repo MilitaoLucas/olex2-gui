@@ -19,7 +19,6 @@ if sys.platform[:3] == 'win':
     python_dir = _
   else:
     python_dir = r"%s\Python38" %basedir
-  sys.path.append(r"%s\site-packages" %datadir)
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
@@ -52,6 +51,7 @@ else:
     elif sys.platform == 'linux2':
       sys.path.append(sys.prefix + '/plat-linux2')
 sys.path.append(datadir)
+sys.path.append("%s/site-packages" %datadir)
 stdout_redirection = True
 
 import os
@@ -398,12 +398,25 @@ def pip(package):
   import sys
   sys.stdout.isatty = lambda: False
   sys.stdout.encoding = sys.getdefaultencoding()
+  import numpy as np
+  import scipy as sp
+  import PIL as PIL
+  np_version = np.__version__
+  sp_version = sp.__version__
+  PIL_version = PIL.__version__
+
+  print(f"numpy version: {np_version}, scipy version: {sp_version} will be enforced")
+  dd = OV.DataDir()
+  c_fn = os.path.join(dd, "pip_constraints.txt")
+  print(c_fn)
+  with open(c_fn, "w") as c_f:
+    c_f.write(f"scipy=={sp_version}\nnumpy=={np_version}\npillow=={PIL_version}")
   import pip
   try:
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', '--upgrade', '--target=%s\site-packages' % OV.DataDir(), package])
+  pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
 OV.registerFunction(pip, False)
 
 if timer:

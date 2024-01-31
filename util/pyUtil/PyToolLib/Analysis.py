@@ -1137,9 +1137,12 @@ class Graph(ArgumentParser):
     width = self.params.size_x
     legend_top = height + 20
     legend_bottom = self.graph_bottom + 2
-    m_offset = 5
+    #m_offset = 5
     ## Wipe the legend area
-    box = (0,legend_top,width,legend_bottom)
+    if legend_top < legend_bottom:
+      box = (0,legend_top,width,legend_bottom)
+    else:
+      box = (0,legend_bottom,width,legend_top)
     self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
@@ -1852,7 +1855,7 @@ class Analysis(Graph):
       pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
       olx.html.SetBorders(pop_name,0)
-    OV.UpdateHtml(pop_name)
+    OV.UpdateHtml(html_name=pop_name, force=True)
 
   def analyse_lst(self):
     fl = self.fl
@@ -3323,24 +3326,25 @@ class item_vs_resolution_plot(Analysis):
     beta = IT.get_unicode_characters("beta")
     iucr = 0
     rad_name = "?"
-    if olx.xf.exptl.Radiation().startswith('1.54'): # Cu alpha radiation
-      iucr = 135
+    radi= olx.xf.exptl.Radiation()
+    if radi.startswith('1.54'): # Cu alpha radiation
+      iucr = 135.58
       rad_name = "CuK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('1.39'): # Ga radiation
-      iucr = 40
-      rad_name = "GaK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('1.34'): # Cu beta radiation
-      iucr = 40
+    elif radi.startswith('1.39'): # Cu beta radiation
+      iucr = 113.16
       rad_name = "CuK" + beta
-    elif olx.xf.exptl.Radiation().startswith('0.71'): # Mo radiation
-      iucr = 50
+    elif radi.startswith('1.34'): # Ga alpha radiation
+      iucr = 112.88
+      rad_name = "GaK" + alpha
+    elif radi.startswith('0.71'): # Mo radiation
+      iucr = 50.74
       rad_name = "MoK" + alpha
-    elif olx.xf.exptl.Radiation().startswith('0.56'): # Ag radiation
-      iucr = 33
+    elif radi.startswith('0.56'): # Ag radiation
+      iucr = 39.02
       rad_name = "AgK" + alpha
     else:
       iucr = 0.84
-      rad_name = str(olx.xf.exptl.Radiation()) + (IT.get_unicode_characters("Angstrom"))
+      rad_name = str(radi) + (IT.get_unicode_characters("Angstrom"))
 
     from cctbx import uctbx
 
@@ -3812,6 +3816,9 @@ class HealthOfStructure():
     self.supplied_cif = False
     self.deg = u"\u00B0"
     self.im_cache = {}
+    self.isED = False
+    self.default_phil_handler = olx.phil_handler
+    self.ED_phil_handler = None
     _ = ['Completeness', 'MeanIOverSigma','Rint']
     _ += ['_refine_ls_shift/su_max', '_refine_diff_density_max',
          '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
@@ -3828,7 +3835,27 @@ class HealthOfStructure():
       print(err)
       return None
 
+  def set_ED_phil(self):
+    if OV.IsEDData():
+      self.ED = True
+      if not self.ED_phil_handler:
+        ACED_path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'ACEDd', 'ACED.phil')
+        if not os.path.exists(ACED_path):
+          ACED_path = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'ACED', 'ACED.phil')
+        phil_file = ACED_path
+        if os.path.exists(phil_file):
+          ACED_phil = open(phil_file, 'r').read()
+          olx.phil_handler.merge_phil(phil_string=ACED_phil)
+          self.ED_phil_handler = olx.phil_handler
+      else:
+        olx.phil_handler = self.ED_phil_handler
+    else:
+      self.isED = False
+      if olx.phil_handler != self.default_phil_handler:
+        olx.phil_handler = self.default_phil_handler
+
   def make_HOS(self, force=False, supplied_cif=False):
+    #self.set_ED_phil()
     force = bool(force)
     self.width = int(IT.skin_width*0.98)
     self.supplied_cif = supplied_cif
@@ -3837,7 +3864,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
-
+ 
     res = self.initialise_HOS(force=force)
 
     self.hos_text = ""
@@ -3955,8 +3982,8 @@ class HealthOfStructure():
       if self.hkl_stats['DataCount'] == 0:
         self.hkl_stats = {}
       self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
-      self.resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
-      self.resolution_display = OV.GetParam("user.diagnostics.hkl.Completeness.resolution_display")
+      self.resolution_type = OV.get_diag('hkl.Completeness.resolution')
+      self.resolution_display = OV.get_diag('hkl.Completeness.resolution_display')
 
       if self.is_CIF:
         self.get_info_from_cif()
@@ -4153,7 +4180,7 @@ class HealthOfStructure():
       elif item == "_refine_ls_abs_structure_Flack":
         item = 'hooft_str'
 
-      display = OV.GetParam('user.diagnostics.%s.%s.display' %(self.scope,item))
+      display = OV.get_diag('%s.%s.display' %(self.scope,item))
 
       if item == "MinD":
         _ = olx.xf.exptl.Radiation()
@@ -4170,8 +4197,8 @@ class HealthOfStructure():
 
         display += " (%s)" % (IT.get_unicode_characters(_))
 
-      value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
-      href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+      value_format = OV.get_diag('%s.%s.value_format' %(self.scope,item))
+      href = OV.get_diag('%s.%s.href' %(self.scope,item))
 
       raw_val = value
       bg_colour = None
@@ -4324,7 +4351,7 @@ class HealthOfStructure():
 
 
 
-    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    href = OV.get_diag('%s.%s.href' %(self.scope,item))
     if item == "Completeness":
       target = OV.GetParam('snum.refinement.%s.target' %item.lower())
     elif item == "Rint":
@@ -4332,7 +4359,7 @@ class HealthOfStructure():
       target = "&#013;- ".join(target)
       OV.SetParam('snum.refinement.Rint.target', target)
     else:
-      target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+      target = OV.get_diag('%s.%s.target' %(self.scope,item))
 
     txt = ""
     ref_open = ''
@@ -4385,7 +4412,7 @@ class HealthOfStructure():
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
-    top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
+    top = OV.get_diag('hkl.%s.top' %item)
 
 
     if item == "hooft_str":

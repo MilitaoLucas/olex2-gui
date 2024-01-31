@@ -139,8 +139,12 @@ class RunPrg(ArgumentParser):
         t1 = time.time()
     except Exception as e:
       e_str = str(e)
-      if ("stoks.size() == scatterer" not in e_str) and ("Error during building of normal equations using OpenMP" not in e_str):
+      if ("stoks.size() == scatterer" not in e_str)\
+        and ("Error during building of normal equations using OpenMP" not in e_str)\
+        and ("fsci != sc_map.end()" not in e_str):
         sys.stdout.formatExceptionInfo()
+      else:
+        print("Error!: ")
       caught_exception = e
     finally:
       self.endRun()
@@ -644,6 +648,7 @@ class RunRefinementPrg(RunPrg):
         except Exception as e:
           print("Could not check PDF: %s" % e)
       self.check_disp()
+      self.check_occu()
       self.check_mu() #This is the L-M mu!
 
     OV.SetParam('snum.init.skip_routine', False)
@@ -740,7 +745,7 @@ class RunRefinementPrg(RunPrg):
       if twinning is not None:
         twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
                     for i in range(3) for j in range(3)])
-        if twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
+        if twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
           flack = olx.xf.rm.BASF(0)
           OV.SetParam('snum.refinement.flack_str', flack)
 
@@ -785,8 +790,8 @@ class RunRefinementPrg(RunPrg):
     elif inversion_needed:
       print(inversion_warning)
     if possible_racemic_twin:
-      if (hooft.twin_components is not None and
-          hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+      if (hooft.olex2_adaptor.twin_components is not None and
+          hooft.olex2_adaptor.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print(racemic_twin_warning)
 
   def check_PDF(self, force=False):
@@ -815,6 +820,20 @@ class RunRefinementPrg(RunPrg):
         err_list.append("Kuhs' rule not fulfilled")
       if err_list:
         self.refinement_has_failed.extend(err_list)
+
+  def check_occu(self):
+    scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
+    wrong_occu = []
+    for sc in scatterers:
+      if sc.flags.grad_occupancy():
+        if sc.occupancy < 0 or sc.occupancy > 1.0:
+          wrong_occu.append(sc.label)
+    if len(wrong_occu) != 0:
+      if len(wrong_occu) == 1:    
+        self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupancy")
+      else:
+        _ =  ",".join(wrong_occu)
+        self.refinement_has_failed.append(f"{_} have unreasonable Occupancy")
 
   def check_disp(self):
     scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
@@ -1053,11 +1072,18 @@ class RunRefinementPrg(RunPrg):
             self.method.observe(self)
           try:
             RunPrg.run(self)
-          except:
+            f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
+            if f_obs_sq != None and f_calc != None:
+              nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)            
+          except Exception as e:
+            e_str = str(e)
+            if ("stoks.size() == scatterer" in e_str):
+              print("Insufficient number of scatterers in .tsc file!\nDid you forget to recalculate after adding or deleting atoms?")
+            elif ("Error during building of normal equations using OpenMP" in e_str):
+              print("Error initializing OpenMP refinement, try disabling it!")
+            elif  ("fsci != sc_map.end()" in e_str):
+              print("An Atom was not found in the .tsc file!\nHave you renamed some and not recalcualted the tsc file?")
             return
-          f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
-          if f_obs_sq != None and f_calc != None:
-            nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         else:
           break
         new_model=OlexRefinementModel()
@@ -1262,12 +1288,19 @@ class RunRefinementPrg(RunPrg):
       self.refinement_has_failed.append("Warning: Unconverged Model!")
     if "DISCAMB" in source or "MATTS" in source:
       unknown_sources = False
-      with open(os.path.join("olex2","Wfn_job","discamb2tsc.log")) as discamb_log:
-        for i in discamb_log.readlines():
-          if "unassigned atom types" in i:
-            unknown_sources = True
-          if unknown_sources == True:
-            HAR_log.write(i)
+      fn = os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")
+      if not os.path.exists(fn):
+        fn = os.path.join("olex2","Wfn_job","discamb2tsc.log")
+      if not os.path.exists(fn):
+        HAR_log.write("                   !!! WARNING: No output file found! !!!\n")
+        self.refinement_has_failed.append("Output file not found!")
+      else:
+        with open(fn) as discamb_log:
+          for i in discamb_log.readlines():
+            if "unassigned atom types" in i:
+              unknown_sources = True
+            if unknown_sources == True:
+              HAR_log.write(i)
       if unknown_sources == True:
         HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
         self.refinement_has_failed.append("Unassigned Atom Types!")

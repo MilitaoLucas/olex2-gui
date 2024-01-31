@@ -1710,31 +1710,41 @@ def SetMasking(v):
 OV.registerFunction(SetMasking)
 
 #
-def GetHttpFile(f, force=False, fullURL = False):
-  URL = "http://dimas.dur.ac.uk/"
-  global _is_online
-  retVal = None
-  go_online = _is_online
-  verbose = OV.FindValue("ac_verbose", "False")
-  if go_online or force:
-    try:
-      if not fullURL:
-        url = "%s/%s" %(URL, f.replace(" ",r"%20"))
-      else:
-        url = f
-      if verbose: print("--> Getting %s" %url, end=' ')
-      response = HttpTools.make_url_call(url,"")
-      content = response.read()
-      if verbose: print("OK")
-      retVal = content
-    except Exception as err:
-      _is_online = False
-      retVal = None
-      print("Olex2 can not reach the update server: %s" %err)
-      print(url)
-  else:
-    retVal = None
-  return retVal
+def GetHttpFile(URL, file_name, dest):
+  from datetime import datetime
+  import olex
+  try:
+    print("--> Downloading %s%s\n\n" %(URL, file_name), end=' ')
+    if not os.path.exists(dest):
+      os.makedirs(dest)
+    uc = HttpTools.make_url_call(URL + file_name)
+    ts = datetime.strptime(uc.headers["Last-Modified"], '%Y.%m.%d %H:%M:%S')
+    server_ft = time.mktime(ts.timetuple())
+    fn = os.path.join(dest, file_name)
+    if os.path.exists(fn):
+      mt = os.path.getmtime(fn)
+      if  mt == server_ft:
+        print("Skipping %s - file is up-to-date" %file_name)
+        return fn
+    total_sz = int(uc.headers["Content-Length"])
+    with open(fn, "wb") as of:
+      read_sz = 0
+      while True:
+        bf = uc.read(1024*1024)
+        if not bf:
+          break
+        read_sz += len(bf)
+        of.write(bf)
+        status = "\r%10d  [%3.2f%%]" % (read_sz, read_sz * 100. / total_sz)
+        status = status + chr(32)*(len(status)+1)
+        olex.post(status)
+    os.utime(fn, (server_ft, server_ft))
+    print('Done\n')
+    return fn
+  except Exception as err:
+    print("Failed to download %s: %s" %(file_name, err))
+  return None
+OV.registerFunction(GetHttpFile)
 
 def EditIns():
   stats_var_name = "merge_stats_updated"
@@ -1753,7 +1763,7 @@ def EditIns():
   if OV.GetVar(stats_var_name) == "true":
     from Analysis import HOS_instance
     HOS_instance.make_HOS()
-  olx.html.Update()
+  OV.UpdateHtml()
 OV.registerFunction(EditIns)
 
 def FixMACQuotes(text):

@@ -28,6 +28,7 @@ haveGUI = OV.HasGUI()
 
 import olexex
 import gui
+import shutil
 
 import re
 
@@ -101,7 +102,7 @@ class FolderView:
     if f:
       self.root = FolderView.node(f)
       self.root.expand(mask=set(mask.split(';')))
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def generateHtml(self):
     import OlexVFS
@@ -578,7 +579,7 @@ def add_mask_content(i, which):
   _ = list(contents)
   _[idx] = user_value
   olx.cif_model[current_sNum]['_%s_masks_void_content' % base] = _
-  olx.html.Update()
+  OV.UpdateHtml()
 
 
 OV.registerFunction(add_mask_content)
@@ -1275,19 +1276,19 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
   # if item == 'MinD':
     #mindfac = float(olx.xf.exptl.Radiation())/0.71
 
-  op = OV.GetParam('user.diagnostics.%s.%s.op' % (scope, item))
+  op = OV.get_diag('%s.%s.op' % (scope, item))
   if op == "between":
-    soll = OV.GetParam('user.diagnostics.%s.%s.soll' % (scope, item))
+    soll = OV.get_diag('%s.%s.soll' % (scope, item))
   for i in range(4):
     i += 1
     if op == "greater":
-      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
+      if val >= OV.get_diag('%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'smaller':
-      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i)) * mindfac:
+      if val <= OV.get_diag('%s.%s.grade%s' % (scope, item, i)) * mindfac:
         break
     elif op == 'between':
-      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' % (scope, item, i))) * mindfac:
+      if val - (OV.get_diag('%s.%s.grade%s' % (scope, item, i))) * mindfac <= soll <= val + (OV.get_diag('%s.%s.grade%s' % (scope, item, i))) * mindfac:
         break
 
   if number_only:
@@ -1357,8 +1358,9 @@ def get_data_number():
   try:
     import olex_core
     hkl_stats = olex_core.GetHklStat()
-    data = hkl_stats.get('DataCount', None)
-    absences = hkl_stats.get('SystematicAbsencesRemoved', 0)
+    data = OV.GetParam('snum.refinement.data', None)
+    if not data:
+      data = hkl_stats.get('DataCount', None)
     if not data:
       try:
         data = int(olx.Cif('_reflns_number_gt'))
@@ -1966,10 +1968,14 @@ def load_res_from_cif():
 
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
 
-
 def set_style_and_scene(style=None, scene=None, src_dir=None, ):
-  if not src_dir:
+  if not src_dir or "etc/styles" in src_dir:
     src_dir = OV.GetParam('user.def_style_scene_src_dir')
+    if "etc/styles" in src_dir:
+      dst_dir = os.path.join(OV.DataDir(), 'styles')
+      copy_directory(src_dir, dst_dir)
+      src_dir = dst_dir
+
   if not style:
     style = OV.GetParam('user.def_style')
   if not scene:
@@ -1977,8 +1983,10 @@ def set_style_and_scene(style=None, scene=None, src_dir=None, ):
   OV.SetParam('user.def_style', style)
   OV.SetParam('user.def_scene', scene)
   OV.SetParam('user.def_style_scene_src_dir', src_dir)
+  olex.m('grad false')
   style_p = os.path.join(src_dir, style + ".glds")
   scene_p = os.path.join(src_dir, scene + ".glsp")
+
   olex.m("load style %s" % style_p)
   olex.m("load scene %s" % scene_p)
 
@@ -2002,20 +2010,43 @@ OV.registerFunction(load_periodic_table, False, 'gui.tools')
 def load_matplotlib():
   try:
     import matplotlib.pyplot as plt
-    print("We have it!")
     return plt
   except Exception as err:
     if "No module named" in repr(err):
       selection = olx.Alert("matplotlib not found",
                             """Error: No working matplotlib installation found!.
-Do you want to install this now? Olex2 will restart.""", "YN", False)
+Do you want to install this now?""", "YN", False)
       if selection == 'Y':
-        olex.m("pip matplotlib==3.5.1")
-        olex.m("restart")
+        if sys.platform[:3] == 'win':
+          from olexex import GetHttpFile
+          import zipfile
+          from zipfile import ZipFile
+          import platform
+          architecture = platform.architecture()[0]
+          arch = '32'
+          if not architecture:
+            pass
+          elif architecture == '64bit':
+            arch = '64'
+          fn = "site-packages-x%s.zip" %arch
+          fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
+                            fn,
+                            os.path.join(OV.DataDir(), "tmp"))
+          if not fn:
+            raise Exception("matplotlib is required by this functionality!")
+          with ZipFile(fn) as zip:
+            zip.extractall(path=OV.DataDir())
+          os.remove(fn)
+        else:
+          olex.m("pip matplotlib==3.5.1")
+        import matplotlib.pyplot as plt
+        return plt
       else:
-        print(err)
-      return
-#OV.registerFunction(load_matplotlib, False, 'gui.tools')
+        return None
+    else:
+      print("Failed to initialise matplotlib: %s" %str(err))
+      return None
+
 
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
@@ -2033,7 +2064,8 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     import numpy as np
     plt = load_matplotlib()
     plt.style.use('seaborn-whitegrid')
-
+    if not plt:
+      return
 
     # Create some mock data
     t = np.arange(0.01, 10.0, 0.01)
@@ -2079,7 +2111,7 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
 
 def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
   plot_params = OV.Params().user.graphs.matplotlib
- 
+
 
   if not colours:
     colours = {"0":{"0":'tab:red', "1":'tab:red'},
@@ -2120,7 +2152,6 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
   if graphing == 'matplotlib':
     plt = load_matplotlib()
     if not plt:
-      print("Matplotlib is not intalled, and the istallation attempt failed")
       return
     plt.style.use('seaborn-whitegrid')
     plt.grid(True)
@@ -2205,7 +2236,7 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
             ax2.set_ylabel(labels[i]['y-label'])
           j += 1
       i += 1
-      
+
     loc = "%s %s %s" %(plot_params.legend_in_out,  plot_params.legend_vertical, plot_params.legend_horizontal)
     loc = loc.strip()
 
@@ -2411,4 +2442,30 @@ def label_rsa():
 
 
 OV.registerFunction(label_rsa, False, "tools")
+
+def set_data_parameter_stats_display(target):
+  parameters = get_refinement_stats('Parameters')
+  #reflections_all = get_refinement_stats('Reflections_all')
+  #data_count = get_refinement_stats('DataCount')
+  if OV.IsControl(target):
+    olx.html.SetLabel(target, f"Parameters: {parameters}")
+OV.registerFunction(set_data_parameter_stats_display, False, "tools")
+    
+def get_refinement_stats(which):
+  try:
+    stats = olx.xf.RefinementInfo()
+    d1 = dict(x.split("=") for x in stats.split(";"))
+    d2 = olex_core.GetHklStat()
+    d = {**d1, **d2}
+    return d.get(which, "n/a")
+  except:
+    return ("...")
+
+def copy_directory(src, dst):
+  try:
+    shutil.copytree(src, dst)
+    print(f"Directory copied from {src} to {dst}")
+  except OSError as e:
+    print(f"Error: {e}")
+
 

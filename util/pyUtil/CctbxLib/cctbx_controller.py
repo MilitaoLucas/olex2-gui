@@ -152,6 +152,7 @@ class reflections(object):
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
     self.hklf_code = hklf_code
+    self.merge_code = merge_code
     #self.observations = self.get_observations(twin_components, twin_fractions)
 
   def merge(self, observations=None, merge=None):
@@ -192,10 +193,17 @@ class reflections(object):
     elif self._shel['high'] > self._shel['low']:
       self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
 
+    if self.hklf_code >= 5 or self.merge_code == 0:
+      space_group = sgtbx.space_group("P1")
+      anomalous_flag = True
+    else:
+      space_group = f_sq_obs_filtered.crystal_symmetry().space_group()
+      anomalous_flag = f_sq_obs_filtered.anomalous_flag()
+
     filter = observations.filter(
       f_sq_obs_filtered.unit_cell(),
-      f_sq_obs_filtered.crystal_symmetry().space_group(),
-      f_sq_obs_filtered.anomalous_flag(),
+      space_group,
+      anomalous_flag,
       flex.miller_index(hkl),
       float(self._shel['high']),
       float(self._shel['low']),
