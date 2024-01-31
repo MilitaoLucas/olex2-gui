@@ -1763,7 +1763,7 @@ def EditIns():
   if OV.GetVar(stats_var_name) == "true":
     from Analysis import HOS_instance
     HOS_instance.make_HOS()
-  olx.html.Update()
+  OV.UpdateHtml()
 OV.registerFunction(EditIns)
 
 def FixMACQuotes(text):
