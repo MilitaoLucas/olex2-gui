@@ -28,6 +28,7 @@ haveGUI = OV.HasGUI()
 
 import olexex
 import gui
+import shutil
 
 import re
 
@@ -101,7 +102,7 @@ class FolderView:
     if f:
       self.root = FolderView.node(f)
       self.root.expand(mask=set(mask.split(';')))
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def generateHtml(self):
     import OlexVFS
@@ -578,7 +579,7 @@ def add_mask_content(i, which):
   _ = list(contents)
   _[idx] = user_value
   olx.cif_model[current_sNum]['_%s_masks_void_content' % base] = _
-  olx.html.Update()
+  OV.UpdateHtml()
 
 
 OV.registerFunction(add_mask_content)
@@ -1357,8 +1358,9 @@ def get_data_number():
   try:
     import olex_core
     hkl_stats = olex_core.GetHklStat()
-    data = hkl_stats.get('DataCount', None)
-    absences = hkl_stats.get('SystematicAbsencesRemoved', 0)
+    data = OV.GetParam('snum.refinement.data', None)
+    if not data:
+      data = hkl_stats.get('DataCount', None)
     if not data:
       try:
         data = int(olx.Cif('_reflns_number_gt'))
@@ -1966,10 +1968,14 @@ def load_res_from_cif():
 
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
 
-
 def set_style_and_scene(style=None, scene=None, src_dir=None, ):
-  if not src_dir:
+  if not src_dir or "etc/styles" in src_dir:
     src_dir = OV.GetParam('user.def_style_scene_src_dir')
+    if "etc/styles" in src_dir:
+      dst_dir = os.path.join(OV.DataDir(), 'styles')
+      copy_directory(src_dir, dst_dir)
+      src_dir = dst_dir
+
   if not style:
     style = OV.GetParam('user.def_style')
   if not scene:
@@ -1977,8 +1983,10 @@ def set_style_and_scene(style=None, scene=None, src_dir=None, ):
   OV.SetParam('user.def_style', style)
   OV.SetParam('user.def_scene', scene)
   OV.SetParam('user.def_style_scene_src_dir', src_dir)
+  olex.m('grad false')
   style_p = os.path.join(src_dir, style + ".glds")
   scene_p = os.path.join(src_dir, scene + ".glsp")
+
   olex.m("load style %s" % style_p)
   olex.m("load scene %s" % scene_p)
 
@@ -2434,4 +2442,30 @@ def label_rsa():
 
 
 OV.registerFunction(label_rsa, False, "tools")
+
+def set_data_parameter_stats_display(target):
+  parameters = get_refinement_stats('Parameters')
+  #reflections_all = get_refinement_stats('Reflections_all')
+  #data_count = get_refinement_stats('DataCount')
+  if OV.IsControl(target):
+    olx.html.SetLabel(target, f"Parameters: {parameters}")
+OV.registerFunction(set_data_parameter_stats_display, False, "tools")
+    
+def get_refinement_stats(which):
+  try:
+    stats = olx.xf.RefinementInfo()
+    d1 = dict(x.split("=") for x in stats.split(";"))
+    d2 = olex_core.GetHklStat()
+    d = {**d1, **d2}
+    return d.get(which, "n/a")
+  except:
+    return ("...")
+
+def copy_directory(src, dst):
+  try:
+    shutil.copytree(src, dst)
+    print(f"Directory copied from {src} to {dst}")
+  except OSError as e:
+    print(f"Error: {e}")
+
 
