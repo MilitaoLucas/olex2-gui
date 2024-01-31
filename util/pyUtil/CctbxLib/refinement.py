@@ -280,7 +280,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.max_cycles = 0
     try:
       damping = OV.GetDampingParams()
-      self.data_to_parameter_watch()
       if not fcf_only:
         self.print_table_header()
         self.print_table_header(self.log)
@@ -459,17 +458,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
     finally:
+      self.data_to_parameter_watch()
       sys.stdout.refresh = True
       self.log.close()
 
   def data_to_parameter_watch(self):
-    #parameters = self.normal_eqns.n_parameters
     parameters = self.reparametrisation.n_independents + 1
-    #data_all = self.reflections.f_sq_obs_filtered.size()
-    data = self.reflections.f_sq_obs_merged.size()
+    try:
+      data = self.normal_eqns.r1_factor()[1]
+    except:
+      data = self.reflections.f_sq_obs_merged.size()
+    try:
+      print (f"Data: {self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (> 2 sig) | {self.normal_eqns.r1_factor(5)[1]} (> 5 sig) [hkl: {self.reflections.f_sq_obs_merged.size()}]")
+    except:
+     pass
+
     dpr = "%.2f" %(data/parameters)
     OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
     OV.SetParam('snum.refinement.parameters', parameters)
+    OV.SetParam('snum.refinement.data', data)
     print("Data/Parameter ratio = %s" %dpr)
 
   def print_table_header(self, log=None):
