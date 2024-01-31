@@ -194,7 +194,6 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(copy_from, copy_to)
 
   def doFileResInsMagic(self):
-    import _ac6util
     file_lock = OV.createFileLock(os.path.join(self.filePath, self.original_filename))
     try:
       extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb', 'lxt']
@@ -212,18 +211,7 @@ class RunPrg(ArgumentParser):
         copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
         if os.path.isfile(copy_from) and\
           copy_from.lower() != copy_to.lower(): # could this ever be true??
-          digests = None
-          if copy_from.endswith(".hkl"):
-            digests = OV.get_AC_digests()
-            digests = _ac6util.onHKLChange(OV.HKLSrc(), copy_from, digests[0], digests[1])
           shutil.copyfile(copy_from, copy_to)
-          if digests:
-            digests = digests.split(',')
-            OV.set_cif_item("_diffrn_oxdiff_ac3_digest_hkl", digests[0])
-            if len(digests) > 1:
-              OV.set_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed", digests[1])
-            from CifInfo import SaveCifInfo
-            SaveCifInfo()
         if timer:
           pass
           #print "---- copying %s: %.3f" %(copy_from, time.time() -t)
@@ -829,7 +817,7 @@ class RunRefinementPrg(RunPrg):
         if sc.occupancy < 0 or sc.occupancy > 1.0:
           wrong_occu.append(sc.label)
     if len(wrong_occu) != 0:
-      if len(wrong_occu) == 1:    
+      if len(wrong_occu) == 1:
         self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupancy")
       else:
         _ =  ",".join(wrong_occu)
@@ -1074,7 +1062,7 @@ class RunRefinementPrg(RunPrg):
             RunPrg.run(self)
             f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
             if f_obs_sq != None and f_calc != None:
-              nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)            
+              nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
           except Exception as e:
             e_str = str(e)
             if ("stoks.size() == scatterer" in e_str):

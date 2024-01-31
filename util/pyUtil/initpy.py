@@ -186,7 +186,7 @@ def set_olex_paths():
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   olx.InstalledPlugins = set()
-  import AC6
+  import AC7
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
 
