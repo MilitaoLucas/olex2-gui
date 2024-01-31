@@ -236,6 +236,8 @@ routines requiring structure refinement
       .type = float
     parameters = None
       .type = int
+    data = None
+      .type = int
     max_shift_over_esd = None
       .type = float
     max_shift_over_esd_atom = None
@@ -1008,7 +1010,7 @@ user
     .type = str
   reference = ""
     .type = str
-  def_style_scene_src_dir = datadir()/styles/
+  def_style_scene_src_dir = BaseDir()/etc/styles/
     .type = str
   def_style = 'default'
     .type = str
