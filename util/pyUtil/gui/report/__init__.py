@@ -430,17 +430,12 @@ def get_reflections_stats_dictionary():
 
 def create_report():
   try:
-    ac4i = None
-    import AC6 as ac6
-    try:
-      ac4i = ac6.AC_instance
-    except:
-      ac4i = ac6.AC6.AC_instance
-    if ac4i.HasAC():
+    aci = OV.GetACI()
+    if aci.HasAC():
       try:
-        olex.m('spy.ac6.create_report()')
+        olex.m('spy.ac.create_report()')
       except:
-        print("Tried to make AC6 report and failed. Making default report instead")
+        print("Tried to make AC report and failed. Making default report instead")
         olex.m("report")
     else:
       olex.m("report")
