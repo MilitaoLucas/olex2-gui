@@ -3,52 +3,39 @@
 
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='NAMING';help_ext=Naming;1 -->
-  <td>%Start%</td>
-  <td name=MODE_NAME_NUMBER>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="$GetVar('HtmlInputHeight')"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      valign='center'
-      name="MODE_NAME_NUMBER"
-      width="35"
-      height="$GetVar('HtmlInputHeight')"
-      value = "1"
-    >
-    </font>
-  </td>
+<table width="100%" border="0" width="100%" bgcolor="$GetVar(HtmlTableBgColour)"><tr>
+  <td width="18%">%Start%</td>
+  <td name=MODE_NAME_NUMBER>$+
+     html.Snippet("gui/snippets/input-text", "name=naming*start", "width=35", "manage=true")
+  $-</td>
   <td>%Suffix%</td>
-  <td name=MODE_NAME_SUFFIX>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="$GetVar('HtmlInputHeight')"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      valign='center'
-      name = "MODE_NAME_SUFFIX"
-      width="25"
-      value = ""
-    >
-    </font>
-  </td>
+  <td name=MODE_NAME_SUFFIX>$+
+     html.Snippet("gui/snippets/input-text", "name=naming*suffix", "width=35", "manage=true")
+  $-</td>
   <td>%Type%</td>
-  <td name=MODE_NAME_TYPE>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="$GetVar('HtmlInputHeight')"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      valign='center'
-      name = "MODE_NAME_TYPE"
-      width="25"
-      value = ""
-    >
-    </font>
-  </td>
+  <td name=MODE_NAME_TYPE>$+
+     html.Snippet("gui/snippets/input-text", "name=naming*type", "width=35", "manage=true")
+  $-</td>
   <td name=IMG_BUTTON_SMALL-NAME align='right'>
-$spy.MakeHoverButton('small-Name',"guinames_m")
+$spy.MakeHoverButton('small-Name',"spy.gui.NamingMode")
   </td>
+</tr></table>
+<table width="100%" border="0" width="100%" bgcolor="$GetVar(HtmlTableBgColour)"><tr>
+  <td width="18%">Autocomplete</td>
+  <td width='20%' align="left">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=naming*auto*on", "value=ON", "manage=true")
+   $-</td>
+  <td width='20%' align="left">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=naming*auto*stop_type", "value=Stop on type", "manage=true")
+   $-</td>
+  <td width='20%' align="left">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=naming*auto*stop_part", "value=Stop on part", "manage=true")
+   $-</td>
+  <td align="right">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=naming*auto*stop_branch", "value=Stop on branch", "manage=true")
+   $-</td>
+</tr></table>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECCOND ROW -->
