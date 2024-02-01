@@ -1041,6 +1041,8 @@ def get_refinement_programs(scope='snum'):
   retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
+  if OV.IsControl('SET_snum_refinement_PROGRAM'):
+    olx.html.SetItems('SET_snum_refinement_PROGRAM', retval)
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1055,6 +1057,8 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
+  if OV.IsControl('SET_snum_refinement_METHOD'):
+    olx.html.SetItems(f'SET_{scope}_refinement_METHOD', retval)
   return retval
 OV.registerFunction(get_refinement_methods)
 

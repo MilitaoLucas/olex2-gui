@@ -468,3 +468,25 @@ def file_open(path, base="", mode='r', readlines=False, binary=False, encoding=N
 
 olex.registerFunction(file_open, False, "tools")
 
+def NamingMode():
+  if not OV.IsControl("naming*start"):
+    print("Available from the GUI only!")
+    return
+  args = []
+  start = olx.html.GetValue("naming*start", "")
+  if start:
+    args.append(start)
+  suffix = olx.html.GetValue("naming*suffix", "")
+  elm = olx.html.GetValue("naming*type", "")
+  auto = 0
+  if olx.html.GetState("naming*auto*on", "false") == "true":
+    auto = 1
+    if olx.html.GetState("naming*auto*stop_type", "false") == "true":
+      auto += 2
+    if olx.html.GetState("naming*auto*stop_part", "false") == "true":
+      auto += 4
+    if olx.html.GetState("naming*auto*stop_branch", "true") == "false":
+      auto += 8
+  olx.Mode("Name", *args, a=auto, t=elm, s=suffix)
+
+olex.registerFunction(NamingMode, False, "gui")
