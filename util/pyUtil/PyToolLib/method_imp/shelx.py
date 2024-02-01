@@ -5,6 +5,7 @@ from olexFunctions import OV
 import olex
 import olx
 import glob
+import olex_core
 import OlexVFS
 import ntpath
 import cctbx_olex_adapter as COA
@@ -177,13 +178,14 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       if v == 'n/a':  v = ""
       OV.SetParam(k, v)
     try:
+      hkl_stats = olex_core.GetHklStat()
+      data = hkl_stats.get('DataCount', None)
       parameters = float(olx.Lst('param_n'))
-      data = float(olx.Lst('ref_4sig'))
-      ratio = data/parameters
-      OV.SetParam('snum.refinement.data_parameter_ratio', ratio)
       OV.SetParam('snum.refinement.parameters', parameters)
+      OV.SetParam('snum.refinement.data', data)
     except:
-      OV.SetParam('snum.refinement.data_parameter_ratio', None)
+      OV.SetParam('snum.refinement.parameters', None)
+      OV.SetParam('snum.refinement.data', None)
 
   def gather_refinement_information(self):
     cif = {}
@@ -883,4 +885,4 @@ def post_solution_html(d):
   t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
   f_name = OV.FileName() + "_solution_output.html"
   OlexVFS.write_to_olex(f_name, t)
-  olx.html.Update()
+  OV.UpdateHtml()
