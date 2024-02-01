@@ -22,7 +22,7 @@
         value='$spy.GetParam(snum.refinement.program)'
         items='$spy.getRefinementPrgs()'
         label='', 
-        onchange="spy.SetRefinementProgram(html.GetValue(~name~))>>html.Update"
+        onchange="spy.SetRefinementProgram(html.GetValue(~name~))"
         readonly='true'
       >
     </font>
@@ -47,7 +47,7 @@
         value='spy.GetParam(snum.refinement.method)', 
         items='spy.getRefinementMethods(spy.GetParam(snum.refinement.program))'
         label='', 
-        onchange="spy.SetParam(snum.refinement.method,GetValue('~name~'))>>html.Update" 
+        onchange="spy.SetParam(snum.refinement.method,GetValue('~name~'))" 
         readonly='true'
       >
     </font>

@@ -914,8 +914,6 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
     if not OV.IsFileType('cif'):
       if method == 'Least Squares' and olx.LSM() == 'CGLS':
         method = 'CGLS' # work-around for bug #26
-  if OV.IsControl('SET_snum_refinement_PROGRAM'):
-    olx.html.SetValue('SET_snum_refinement_PROGRAM', prg_name)
   OV.SetParam("%s.refinement.program" %scope, prg_name)
   OV.SetParam('user.refinement.default_program', prg_name)
   OV.SetParam("%s.refinement.method" %scope, method)
@@ -925,12 +923,6 @@ def onRefinementMethodChange(prg_name, method):
   if method in RPD.programs[prg_name].methods:
     programSettings.doProgramSettings(prg_name, method)
     OV.SetParam('user.refinement.default_method', method)
-    if OV.IsControl('SET_snum_refinement_METHOD'):
-      if method == "Gauss-Newton":
-        m = "G-N"
-      else:
-        m = "L-M"
-      olx.html.SetValue('SET_snum_refinement_METHOD', m)
   else:
     print("Please choose a valid method for the refinement program %s" %prg_name)
 OV.registerFunction(onRefinementMethodChange)
@@ -1049,6 +1041,8 @@ def get_refinement_programs(scope='snum'):
   retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
+  if OV.IsControl('SET_snum_refinement_PROGRAM'):
+    olx.html.SetItems('SET_snum_refinement_PROGRAM', retval)
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1063,6 +1057,8 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
+  if OV.IsControl('SET_snum_refinement_METHOD'):
+    olx.html.SetItems(f'SET_{scope}_refinement_METHOD', retval)
   return retval
 OV.registerFunction(get_refinement_methods)
 
