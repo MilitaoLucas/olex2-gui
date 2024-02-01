@@ -305,6 +305,7 @@ BYPASS (a.k.a. SQUEEZE)
 <!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;2; -->
 </table>
 
+<!-- #ignoreif not(strcmp(spy.GetParam(snum.refinement.program), olex2.refine))
 
 <!-- #ignoreif not spy.ac6.isMEDEnabled()
 <!-- #ignoreif not(spy.IsEDData())
@@ -337,4 +338,5 @@ BYPASS (a.k.a. SQUEEZE)
 </table>
 #ignoreif -->
 #ignoreif -->
+#ignoreif --> <!-- olex2.refine -->
 

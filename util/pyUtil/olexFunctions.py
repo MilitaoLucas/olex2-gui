@@ -308,8 +308,6 @@ class OlexFunctions(inheritFunctions):
   def set_refinement_program(self, program, method=None, scope='snum'):
     try:
       import olexex
-      if self.GetParam('%s.refinement.program' %scope) == program:
-        return
       self.SetParam('%s.refinement.program' %scope, program)
       olexex.onRefinementProgramChange(program, method, scope)
     except Exception as ex:
