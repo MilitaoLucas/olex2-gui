@@ -2691,7 +2691,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         filefullinfo_colour = self.params.timage.snumtitle.filefullinfo_colour
       if OV.IsEDData():
         grad_colour = self.params.ed_bg.rgb
-        font_colour = self.params.ed_fg.rgb
         filefullinfo_colour = self.params.ed_fg.rgb
       #=========================================================================
 
@@ -2906,10 +2905,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           counter += 1
       if cnt > 1:
         txt += (' (%s/%s)') %(current, counter - 1)
-      if not OV.IsEDData:
-        font_colour = '#ffdf09'
-      else:
-        font_colour = font_colour
+      font_colour = '#ffdf09'
     ## Actually print the text on the new image item.
     wX, wY = IT.write_text_to_draw(draw,
                             txt,
@@ -3142,8 +3138,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     upon_advance = None
     base_colour = self.params.html.base_colour.rgb
     font_colour = IT.adjust_colour(base_colour, luminosity=luminosity)
-    if OV.IsEDData():
-      font_colour = self.params.ed_fg.rgb
+    #if OV.IsEDData():
+      #font_colour = self.params.ed_fg.rgb
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     fscale = self.scale * OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
