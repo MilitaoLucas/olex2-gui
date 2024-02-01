@@ -1353,7 +1353,6 @@ def get_battery_image(colour, colourize=True):
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
 
-
 def get_data_number():
   try:
     import olex_core
@@ -1372,7 +1371,6 @@ def get_data_number():
     return data
   except Exception as err:
     print("An error occured: %s" % err)
-
 
 def get_Z_prime_from_fraction(string):
   val = string
