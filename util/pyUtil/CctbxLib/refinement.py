@@ -469,15 +469,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
       data = self.reflections.f_sq_obs_merged.size()
     try:
-      print (f"Data: {self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (> 2 sig) | {self.normal_eqns.r1_factor(5)[1]} (> 5 sig) [hkl: {self.reflections.f_sq_obs_merged.size()}]")
+      print (f"Data: {self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (I >= 2u(I)g) | {self.normal_eqns.r1_factor(5)[1]} (I >= 5u(I)) [hkl: {self.reflections.f_sq_obs_merged.size()}]")
     except:
      pass
 
-    dpr = "%.2f" %(data/parameters)
-    OV.SetParam('snum.refinement.data_parameter_ratio', dpr)
     OV.SetParam('snum.refinement.parameters', parameters)
     OV.SetParam('snum.refinement.data', data)
-    print("Data/Parameter ratio = %s" %dpr)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
