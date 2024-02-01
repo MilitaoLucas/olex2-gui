@@ -14,8 +14,8 @@ downloads = [
 
 zips_dir = os.path.join(r"D:\tmp", p_name)
 zexes = zipfile.ZipFile(download, mode="r")
-if len(zexes.infolist()) != 3:
-  print("Invalid archive - 3 file is expected: %s" %(iz))
+if len(zexes.infolist()) < 3:
+  print("Invalid archive - 3 file is expected")
   exit(1)
 
 zmap = {}
@@ -47,4 +47,5 @@ for z in downloads:
   oz_t = os.path.join(zips_dir, z[1]) + "_t.zip"
   os.remove(oz)
   os.rename(oz_t, oz)
+  print("%s completed" %oz)
 print("Done updating NoSpherA2")

@@ -44,6 +44,7 @@ if __name__ == "__main__":
   revision = get_revision(repo_root)
   if not revision:
     exit(1)
+  print("Current revision: %s" %revision)
   home = os.path.expanduser("~")
   cache_fn = os.path.join(home, ".cg_cache.pickle")
   if os.path.exists(cache_fn):
