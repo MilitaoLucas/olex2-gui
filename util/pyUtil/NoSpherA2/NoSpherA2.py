@@ -1035,7 +1035,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     import multiprocessing
     max_cpu = multiprocessing.cpu_count()
     cpu_list = ['1',]
-    for n in range(1, max_cpu):
+    hyperthreading = OV.GetParam('user.refinement.use_HT')
+    if not hyperthreading:
+      max_cpu /= 2
+    for n in range(1, int(max_cpu)):
       cpu_list.append(str(n + 1))
     # ORCA and Tonto rely on MPI, so only make it available if mpiexec is found
     if soft == "Tonto" or "ORCA" in soft or soft == "fragHAR":
@@ -1577,6 +1580,9 @@ def set_default_cpu_and_mem():
   import multiprocessing
   parallel = OV.GetVar("Parallel")
   max_cpu = multiprocessing.cpu_count()
+  hyperthreading = OV.GetParam('user.refinement.use_HT')
+  if not hyperthreading:
+    max_cpu /= 2  
   current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')
   update = False
   if not parallel:

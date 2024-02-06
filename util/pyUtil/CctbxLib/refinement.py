@@ -98,7 +98,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if timer:
         t1 = time.time()
       from fast_linalg import env
-      max_threads = int(OV.GetVar("refine.max_threads", 0))
+      max_threads = int(OV.GetParam("user.refinement.openmp_cpus", 0))
       if max_threads == 0:
         max_threads = max(1, int(os.cpu_count() *3/4))
       if max_threads is not None:
