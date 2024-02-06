@@ -1106,7 +1106,11 @@ user
       .type = bool
     use_openmp = False
       .type = bool
+    use_HT = False
+      .type = bool
     openmp_mem = 2000
+      .type = int
+    openmp_cpus = 0
       .type = int
     diagnostics = False
       .type = bool
