@@ -400,20 +400,21 @@ class OlexCctbxAdapter(object):
       return easy_pickle.load(mask_fn)
     return None
 
-  def get_fo_sq_fc(self, one_h_function=None, filtered=True):
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True):
     if filtered:
       fo2 = self.reflections.f_sq_obs_filtered
     else:
       fo2 = self.reflections.f_sq_obs_merged
+    miller_set = None
     if one_h_function:
       try:
-        fc = self.f_calc(None, self.exti is not None, True, False,
+        fc = self.f_calc(miller_set, self.exti is not None, True, False,
                        one_h_function=one_h_function, twin_data=False)
       except Exception as e:
         print("Error during calculation of F_calcs: %s"%(str(e)))
         return None, None
     else:
-      fc = self.f_calc(None, self.exti is not None, True,
+      fc = self.f_calc(miller_set, self.exti is not None, True,
        ignore_inversion_twin=False,
        twin_data=False)
     obs = self.observations.detwin(
@@ -428,10 +429,24 @@ class OlexCctbxAdapter(object):
           anomalous_flag=fo2.anomalous_flag()),
         data=obs.data,
         sigmas=obs.sigmas).set_observation_type(fo2)
-    fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
-    fc = fc.common_set(fo2)
-    if fc.size() != fo2.size():
-      fo2 = fo2.common_set(fc)
+    if self.hklf_code < 5 or merge:
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      fc = fc.common_set(fo2)
+      if fc.size() != fo2.size():
+        fo2 = fo2.common_set(fc)
+    else:
+      lt = miller.lookup_tensor(fc.indices(), fc.space_group(), fc.anomalous_flag())
+      fc_data_ = fc.data()
+      fc_data = []
+      for h in fo2.indices():
+        fc_data.append(fc_data_[lt.find_hkl(h)])
+      fc = miller.array(
+          miller_set=miller.set(
+            crystal_symmetry=fc.crystal_symmetry(),
+            indices=fo2.indices(),
+            anomalous_flag=fc.anomalous_flag()),
+          data=flex.complex_double(fc_data))\
+            .set_observation_type(fo2)
     return (fo2, fc)
 
   def update_twinning(self, tw_f, tw_c):
