@@ -184,14 +184,21 @@ class reflections(object):
     self._omit = omit
     self._shel = shel
     two_theta = omit['2theta']
+    if shel and two_theta != 180:
+      import olx
+      olx.Echo("Warning - mixing SHEL and OMIT. Using low resolution limit from SHEL and high resolution from OMIT",
+               m="warning")
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     hkl = omit.get('hkl')
     f_sq_obs_filtered = self.f_sq_obs_merged
     if hkl is None: hkl = ()
     if self._shel is None:
       self._shel = {'high' : self.d_min, 'low': -1}
-    elif self._shel['high'] > self._shel['low']:
-      self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
+    else:
+      if self._shel['high'] > self._shel['low']:
+        self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
+      if two_theta != 180:
+        self._shel['high'] = self.d_min
 
     if self.hklf_code >= 5 or self.merge_code == 0:
       space_group = sgtbx.space_group("P1")
