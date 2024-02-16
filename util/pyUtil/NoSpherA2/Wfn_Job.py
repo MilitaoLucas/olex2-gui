@@ -785,6 +785,18 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
+    damping = OV.GetParam('snum.NoSpherA2.ORCA_DAMP')
+    scf_block = ""
+    if damping:
+      scf_block += "   CNVZerner true\n"
+      if strategy == "SlowConv":
+        scf_block += "   DampMax 0.9\n"
+      elif strategy == "VerySlowConv":
+        scf_block += "   DampMax 0.975\n"
+      elif strategy == "NormalConv":
+        scf_block += "   DampMax 0.8\n"
+      elif strategy == "EasyConv":
+        scf_block += "   DampMax 0.72\n"
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
       source = OV.GetParam('snum.NoSpherA2.source')
@@ -792,19 +804,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         run = 0
       if run > 1:
         if os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw")):
-          inp.write("%scf\n   Guess MORead\n   MOInp \"" + self.name + "2.gbw\"")
+          scf_block += f"   Guess MORead\n   MOInp \"{self.name}2.gbw\""
           if convergence == "NoSpherA2SCF":
-            inp.write("\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
+            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
         elif convergence == "NoSpherA2SCF":
-          inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
       else:
         if convergence == "NoSpherA2SCF":
-          inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
-      if (run > 1 and os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw"))) or convergence == "NoSpherA2SCF":
-        inp.write("\nend\n")
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     else:
       if convergence == "NoSpherA2SCF":
-        inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4\nend\n")
+        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+    if scf_block != "":
+      inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()
 
   def write_psi4_input(self,xyz):

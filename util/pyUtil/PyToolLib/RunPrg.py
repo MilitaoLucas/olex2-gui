@@ -957,9 +957,6 @@ class RunRefinementPrg(RunPrg):
           olx.Anis("$H", h=True)
         if OV.GetParam('snum.NoSpherA2.h_afix') == True:
           olex.m("Afix 0 $H")
-      add_disp = OV.GetParam('snum.NoSpherA2.add_disp')
-      if add_disp is True:
-        olex.m('gendisp -source=brennan -force')
 
       while converged == False:
         run += 1

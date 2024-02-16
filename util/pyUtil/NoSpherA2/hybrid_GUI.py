@@ -208,12 +208,6 @@ def make_hybrid_GUI(softwares_list_string):
                 "spy.GetParam(\'snum.NoSpherA2.h_afix\')",
                 "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'True\')",
                 "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'False\')")
-  t += checkbox("DISP",
-                "DISP",
-                "spy.GetParam(\'snum.NoSpherA2.add_disp\')",
-                "spy.SetParam(\'snum.NoSpherA2.add_disp\',\'True\')",
-                "spy.SetParam(\'snum.NoSpherA2.add_disp\',\'False\')"
-                )  
   t += end_line()
   for i in parts:
     if i == 0:
