@@ -100,7 +100,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       with open(hkl_file, "w") as out:
         f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-  if (int(ncpus) > 1):
+  if (int(ncpus) >= 1):
     args.append('-cpus')
     args.append(ncpus)
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):

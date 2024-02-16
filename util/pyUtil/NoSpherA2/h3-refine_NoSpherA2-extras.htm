@@ -314,18 +314,6 @@ N/A
 </td>
 
 #ignoreif -->
-<td width='1%' align='left'>
-  $+
-    html.Snippet("gui/snippets/input-checkbox-td",
-    "name=DISP",
-    "label=DISP",
-    "checked=spy.GetParam('snum.NoSpherA2.add_disp')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.add_disp','True')",
-    "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.add_disp','False')"
-    )
-  $-
-</td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- ======= TONTO SPECIFIC START ===================== -->
@@ -559,6 +547,18 @@ N/A
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='1%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Damp",
+    "label=Dyn. Damp",
+    "checked=spy.GetParam('snum.NoSpherA2.ORCA_DAMP')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.ORCA_DAMP','True')",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_DAMP','False')"
+    )
+  $-
+</td>
 <td width="0%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
