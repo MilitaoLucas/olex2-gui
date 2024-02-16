@@ -2,8 +2,6 @@ snum{
   NoSpherA2{
     use_aspherical = False
       .type = bool
-    add_disp = False
-      .type = bool
     dir = ""
       .type = str
     name = ""
@@ -222,6 +220,8 @@ snum{
       .type = int
     ORCA_CRYSTAL_QMMM_ECP_LAYERS = 2
       .type = int
+    ORCA_DAMP = False
+      .type = bool
     ORCA_FORCE_ROKS = False
       .type = bool
     ORCA_Relativistic = "ZORA"
