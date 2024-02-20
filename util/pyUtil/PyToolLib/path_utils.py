@@ -143,13 +143,10 @@ def _cleanup_ac5(base_dir):
 
 def _cleanup_ac6(base_dir):
   ac6_root_dir = os.path.join(base_dir, "util", "pyUtil")
-  ac6_dirs = [os.path.join(ac6_root_dir, "AC6"),
-              os.path.join(ac6_root_dir, "ACED"),
-              os.path.join(ac6_root_dir, "RPAC")]
-  if os.path.exists(ac6_dirs[0]):
+  ac6_dir = os.path.join(ac6_root_dir, "AC6")
+  if os.path.exists(ac6_dir):
     try:
-      for d in ac6_dirs:
-        shutil.rmtree(d)
+      shutil.rmtree(ac6_dir)
       ac6_files = [
         "lib/ac6util.so",
         "_ac6util.so",
