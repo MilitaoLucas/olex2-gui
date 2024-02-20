@@ -1,5 +1,7 @@
 import os
 import sys
+import shutil
+from datetime import datetime
 
 import olx
 
@@ -120,10 +122,7 @@ def cleanup_files(file_ext):
   except:
     pass
 
-def Cleanup():
-  import shutil
-  cleanup_files(".tmp")
-  base_dir = olx.BaseDir()
+def _cleanup_ac5(base_dir):
   ac5_dir = os.path.join(base_dir, "util", "pyUtil", "AC5")
   if os.path.exists(ac5_dir):
     try:
@@ -141,6 +140,47 @@ def Cleanup():
           os.remove(f)
     except Exception as e:
       print(e)
+
+def _cleanup_ac6(base_dir):
+  ac6_root_dir = os.path.join(base_dir, "util", "pyUtil")
+  ac6_dirs = [os.path.join(ac6_root_dir, "AC6"),
+              os.path.join(ac6_root_dir, "ACED"),
+              os.path.join(ac6_root_dir, "RPAC")]
+  if os.path.exists(ac6_dirs[0]):
+    try:
+      for d in ac6_dirs:
+        shutil.rmtree(d)
+      ac6_files = [
+        "lib/ac6util.so",
+        "_ac6util.so",
+        "_ac6util.pyd",
+        "ac6util.dll",
+      ]
+      for f in ac6_files:
+        f = os.path.join(base_dir, f)
+        if os.path.exists(f):
+          print("->%s" %f)
+          os.remove(f)
+    except Exception as e:
+      print(e)
+
+def Cleanup():
+  compilation_date = datetime.strptime(
+    olx.GetCompilationInfo("yyyy.MM.dd").split()[0], "%Y.%m.%d")
+  #print(compilation_date)
+  cleanup_files(".tmp")
+  base_dir = olx.BaseDir()
+  # clean up old AC files
+  ac6_dir = os.path.join(base_dir, "util", "pyUtil", "AC6")
+  ac7_dir = os.path.join(base_dir, "util", "pyUtil", "AC7")
+  if os.path.exists(ac7_dir):
+    ac6d_dir = os.path.join(base_dir, "util", "pyUtil", "AC6d")
+    if not os.path.exists(ac6d_dir): # abort if development environment
+      _cleanup_ac5(base_dir)
+      _cleanup_ac6(base_dir)
+  elif os.path.exists(ac6_dir):
+    _cleanup_ac5(base_dir)
+
   vi = sys.version_info
   if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
     try:
