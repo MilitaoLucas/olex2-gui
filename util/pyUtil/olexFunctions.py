@@ -884,10 +884,7 @@ class OlexFunctions(inheritFunctions):
 
   def GetACI(self):
     import AC7 as ac
-    try:
-      return ac.AC_instance
-    except:
-      return ac.AC.AC_instance
+    return ac.get_aci()
 
   def ListParts(self):
     import olexex
