@@ -3284,6 +3284,8 @@ class brennan:
     result = [0.0, 0.0]
     if z<3:
       result = mcm(z,energy)
+    elif z > 92:
+      raise ValueError("Brennan & Cowan Table only defined up to Z=92 (U)!")
     else:
       for i in range(self.n_orb[z]):
         icount = 5
