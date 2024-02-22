@@ -183,16 +183,32 @@ class OlexCctbxAdapter(object):
             else:
               custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
         else:
-          from brennan import brennan
-          br = brennan()
-          for sc in self._xray_structure.scatterers():
-            if null_disp:
-              custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
-            else:
-              scattering_type = 'H' if sc.scattering_type =='D' else sc.scattering_type
-              fp_fdp = br.at_angstrom(self.wavelength, scattering_type)
-              sc.fp, sc.fdp = fp_fdp
-              custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
+          try:
+            from brennan import brennan
+            br = brennan()
+            for sc in self._xray_structure.scatterers():
+              if null_disp:
+                custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+              else:
+                scattering_type = 'H' if sc.scattering_type =='D' else sc.scattering_type
+                fp_fdp = br.at_angstrom(self.wavelength, scattering_type)
+                sc.fp, sc.fdp = fp_fdp
+                custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
+          except:
+            print("Error: Brennan & Cowan failed, switching to Sasaki!")
+            inelastic_table = "sasaki"
+            try:
+              self._xray_structure.set_inelastic_form_factors(
+                        self.wavelength, inelastic_table)
+            except Exception as e:
+              if OV.IsDebugging():
+                print("Failed to retrieve some inelastic scattering factors")
+                print(e)
+            for sc in self._xray_structure.scatterers():
+              if null_disp:
+                custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
+              else:
+                custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))            
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -1152,15 +1168,30 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     print("Invalid table name %s, resetting to Brennan & Cowan" % table_name_)
     from brennan import brennan
     tables = brennan()
-  for e in elements:
-    e = str(e)
-    try:
-      table = tables.table(e)
-      f = table.at_angstrom(wavelength)
-      #m_table = attc.get_table(nist_elements.atomic_number(e))
-      rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
-    except ValueError:
-      rv.append(e + ',0.0, 0.0')
+  try:
+    for e in elements:
+      e = str(e)
+      try:
+        table = tables.table(e)
+        f = table.at_angstrom(wavelength)
+        #m_table = attc.get_table(nist_elements.atomic_number(e))
+        rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
+      except ValueError:
+        rv.append(e + ',0.0, 0.0')
+  except:
+    from cctbx.eltbx import sasaki
+    tables = sasaki
+    rv = []
+    print("ERROR: Previous table failed! Switching to Sasaki!")
+    for e in elements:
+      e = str(e)
+      try:
+        table = tables.table(e)
+        f = table.at_angstrom(wavelength)
+        #m_table = attc.get_table(nist_elements.atomic_number(e))
+        rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
+      except ValueError:
+        rv.append(e + ',0.0, 0.0')
   return ';'.join(rv)
 
 OV.registerFunction(generate_DISP, False, "sfac")
@@ -1214,20 +1245,37 @@ def make_DISP_Table():
     table_H = tables_H.table(e)
     wavelength = olx.xf.exptl.Radiation()
     wavelength = float(wavelength)
-    f_B = table_B.at_angstrom(wavelength)
-    f_H = table_H.at_angstrom(wavelength)
-
-    table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
-    table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
-    if e != 'H':
-      table_S = tables_S.table(e)
-      f_S = table_S.at_angstrom(wavelength)
-      table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
-    else:
-      table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
-    for entry in refined_disp:
-      if e in entry[0]:
-        table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
+    try:
+      f_B = table_B.at_angstrom(wavelength)
+      f_H = table_H.at_angstrom(wavelength)
+    
+      table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
+      table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
+      if e != 'H':
+        table_S = tables_S.table(e)
+        f_S = table_S.at_angstrom(wavelength)
+        table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
+      else:
+        table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
+      for entry in refined_disp:
+        if e in entry[0]:
+          table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))      
+    except:
+      print(f"Error getting value of B & C for {e}")
+      f_H = table_H.at_angstrom(wavelength)
+    
+      table.append(row(["Henke", f_H.fp(), f_H.fdp()]))
+      table.append(row(["Brennan & Cowan"]))
+      if e != 'H':
+        table_S = tables_S.table(e)
+        f_S = table_S.at_angstrom(wavelength)
+        table.append(row(["Sasaki", f_S.fp(), f_S.fdp()]))
+      else:
+        table.append(row(["Sasaki", 0, 0]))
+      for entry in refined_disp:
+        if e in entry[0]:
+          table.append(row([entry[0] + " Refined", entry[1], entry[2]], 'orange', 'white'))       
+    
   except:
     return empty_data
   html = r"""
