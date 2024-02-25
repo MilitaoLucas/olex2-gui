@@ -1159,26 +1159,35 @@ class RunRefinementPrg(RunPrg):
                 matrix_run += 6
                 if matrix_run < len(annotations):
                   if has_anh_new != None and has_anh_old != None:
-                    assert matrix_run + 24 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                    adp_C = atom['anharmonic_adp']['C']
-                    adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
-                    adp_esds_C = (esds[matrix_run:matrix_run + 10])
-                    adp_D = atom['anharmonic_adp']['D']
-                    adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
-                    adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
-                    for u in range(10):
-                      # if parameter is fixed and therefore has 0 esd
-                      if adp_esds_C[u] > 0:
-                        res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
-                        if res > results.max_overall:
-                          results.update_overall(res, annotations[matrix_run + u])
-                    for u in range(14):
-                      # if parameter is fixed and therefore has 0 esd
-                      if adp_esds_D[u] > 0:
-                        res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
-                        if res > results.max_overall:
-                          results.update_overall(res, annotations[matrix_run + u + 10])
-                    matrix_run += 25
+                    order = atom['anharmonic_adp']['order']
+                    if order == 3:
+                        size = 10
+                    elif order == 4:
+                        size = 25
+                    else:
+                        size = 0
+                    assert matrix_run + (size - 1) < matrix_size, "Inconsistent size of annotations and expected parameters!"
+                    if order >= 3:
+                      adp_C = atom['anharmonic_adp']['C']
+                      adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
+                      adp_esds_C = (esds[matrix_run:matrix_run + 10])
+                      for u in range(10):
+                        # if parameter is fixed and therefore has 0 esd
+                        if adp_esds_C[u] > 0:
+                          res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
+                          if res > results.max_overall:
+                            results.update_overall(res, annotations[matrix_run + u])
+                    if order >= 4:
+                      adp_D = atom['anharmonic_adp']['D']
+                      adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
+                      adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
+                      for u in range(14):
+                        # if parameter is fixed and therefore has 0 esd
+                        if adp_esds_D[u] > 0:
+                          res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
+                          if res > results.max_overall:
+                            results.update_overall(res, annotations[matrix_run + u + 10])
+                    matrix_run += size
               elif has_adp_new != None and has_adp_old == None:
                 assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
                 adp = atom['uiso'][0]

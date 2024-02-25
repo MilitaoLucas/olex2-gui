@@ -98,6 +98,9 @@ class HermitePolynomial:
 hermite_polynomials_of_3rd_and_4th_order = \
   [HermitePolynomial(c) for c in HermitePolynomial.THIRD_ORDER_COEFFICIENTS] +\
   [HermitePolynomial(c) for c in HermitePolynomial.FOURTH_ORDER_COEFFICIENTS]
+  
+hermite_polynomials_of_3rd_order = \
+  [HermitePolynomial(c) for c in HermitePolynomial.THIRD_ORDER_COEFFICIENTS]
 
 
 def kuhs_limit(order: int, adp: np.ndarray) -> float:
@@ -876,8 +879,12 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
       if atom.anharmonic_adp == None:
         anharms.append(None)
       else:
+        order = atom.anharmonic_adp.get_order()
         anharmonic_values = np.array(atom.anharmonic_adp.data())
-        anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
+        if order == 3:
+          anharmonic_use = np.array([third, ] * 10, dtype=float)
+        elif order == 4:
+          anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
         anharms.append(anharmonic_use * anharmonic_values)
       sigmas.append(adp_list_to_sigma_inv(adp_star))
       pre_temp = linalg.det(sigmas[-1])
@@ -960,7 +967,12 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
         p0[abs(p0) < 1E-30] = 0
         fact = float(second)
         if anharms[a] is not None:
-          for i, h in enumerate(hermite_polynomials_of_3rd_and_4th_order):
+          poly = 0
+          if len(anharms[a]) == 10:
+              poly = hermite_polynomials_of_3rd_order
+          elif len(anharms[a]) == 25:
+              poly = hermite_polynomials_of_3rd_and_4th_order
+          for i, h in enumerate(poly):
             if anharms[a][i] != 0:
               fact += anharms[a][i] * h(u, sigmas[a]) / h.order_factorial
         pdf = p0 * fact
