@@ -573,9 +573,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           except NameError as error:
             print("Aborted due to: ", error)
             success = False
-          if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
+          if 'Error in' in open(job.error_fn).read():
             success = False
-            with open(os.path.join(job.full_dir, job.name+".err")) as file:
+            with open(job.error_fn) as file:
               for i in file.readlines():
                 if 'Error in' in i:
                   print(i)
@@ -1170,7 +1170,7 @@ class Job(object):
     self.origin_folder = OV.FilePath()
 
     if wfn_dir == '':
-      model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
+      model_file_name = os.path.join(self.full_dir, self.name) + "_tonto.cif"
       olx.Kill("$Q")
       olx.File(model_file_name,p=10)
     else:
@@ -1190,9 +1190,9 @@ class Job(object):
     if fchk_source == "Tonto":
       # We want these from a wavefunction calculation using TONTO """
 
-     # run = OV.GetVar('Run_number')
+      # run = OV.GetVar('Run_number')
 
-      args = [self.name+".cif",
+      args = [self.name+"_tonto.cif",
               "-basis-dir", self.parent.basis_dir,
               "-shelx-f2", self.name+".hkl"
               ,"-basis", OV.GetParam('snum.NoSpherA2.basis_name')
@@ -1200,11 +1200,10 @@ class Job(object):
               ,"-dtol", OV.GetParam('snum.NoSpherA2.DIIS')
               ]
       method = OV.GetParam('snum.NoSpherA2.method')
+      args.append("-scf")
       if method == "HF":
-        args.append("-scf")
         args.append("rhf")
       else:
-        args.append("-scf")
         args.append("rks")
       clustergrow = OV.GetParam('snum.NoSpherA2.cluster_grow')
       if clustergrow == False:
@@ -1218,7 +1217,7 @@ class Job(object):
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
-      args = [self.name+".cif",
+      args = [self.name+"_tonto.cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]
 
@@ -1245,8 +1244,9 @@ class Job(object):
       args.append("t")
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
-    self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
-    self.out_fn = os.path.join(self.full_dir, self.name) + ".out"
+    self.error_fn = os.path.join(self.full_dir, self.name) + "_tonto.err"
+    self.out_fn = os.path.join(self.full_dir, self.name) + "_tonto.out"
+    self.wfn_name = os.path.join(self.full_dir, self.name) + "_tonto.ffn"
     self.dump_fn = os.path.join(self.full_dir, "hart.exe.stackdump")
     self.analysis_fn = os.path.join(self.full_dir, "stdout.fit_analysis")
     os.environ['hart_cmd'] = '+&-'.join(args)
@@ -1263,17 +1263,27 @@ class Job(object):
     import subprocess
     p = subprocess.Popen([pyl,
                           os.path.join(p_path, "HARt-launch.py")])
-    while p.poll() is None:
-      time.sleep(3)
+    time.sleep(3)
+    with open(self.out_fn, "r") as stdout:
+      while p.poll() is None:
+        x = None
+        try:
+          x = stdout.read()
+        except:
+          pass
+        if x:
+          print(x, end='')
+        time.sleep(0.5)      
 
-    if 'Error in' in open(os.path.join(self.full_dir,self.name+".err")).read():
+    if 'Error in' in open(self.error_fn).read():
       OV.SetVar('NoSpherA2-Error',"TontoError")
       raise NameError("Tonto Error!")
-    if 'Wall-clock time taken for job' in open(os.path.join(self.full_dir,self.name+".out")).read():
+    if 'Wall-clock time taken for job' in open(self.out_fn).read():
       pass
     else:
       OV.SetVar('NoSpherA2-Error',"Tonto")
       raise NameError("Tonto unsuccessfull!")
+    shutil.move(self.wfn_name, os.path.join(self.full_dir, self.name) + ".ffn")
 
 def add_info_to_tsc():
   tsc_fn = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
