@@ -297,11 +297,10 @@ class create_cctbx_xray_structure(object):
                            occupancy=occupancy,
                            scattering_type=scattering_type)
         if anharmonic_u:
-          order = anharmonic_u['order']
-          if order == 3:
-            a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'])
-          elif order == 4:
+          if 'D' in anharmonic_u:
             a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
+          else:
+            a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'])
         behaviour_of_variable.pop(5)
       else:
         a = xray.scatterer(label=label,
