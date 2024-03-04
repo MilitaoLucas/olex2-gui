@@ -247,7 +247,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
-
     self.normal_eqns = self.normal_equations_class(
       self.observations,
       self,
@@ -328,7 +327,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               step_threshold=None)
 
       except RuntimeError as e:
-        if str(e) == 'external_interrupt':
+        if 'external_interrupt' in str(e):
           print("Refinement interrupted")
           self.interrupted = True
         elif "is an empty array" in str(e):

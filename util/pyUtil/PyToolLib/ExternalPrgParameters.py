@@ -92,6 +92,9 @@ def defineExternalPrograms():
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
+  gauss_newton_srv = Method_cctbx_refinement_srv(gauss_newton_phil)
+  levenberg_marquardt_srv = Method_cctbx_refinement_srv(levenberg_marquardt_phil)
+
   # define solution programs
 
 
@@ -335,6 +338,14 @@ Palatinus et al., 2012""",
     brief_reference=smtbx_solve.brief_reference,
     phil_entry_name="cctbx"
   )
+  smtbx_refine_srv = Program(
+    name='olex2.refine-srv',
+    program_type='refinement',
+    author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
+    reference=smtbx_solve.reference,
+    brief_reference=smtbx_solve.brief_reference,
+    phil_entry_name="cctbx"
+  )
   #tonto_refine = Program(
   #  name='Tonto',
   #  program_type='refinement',
@@ -353,6 +364,11 @@ Palatinus et al., 2012""",
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
   RPD.addProgram(smtbx_refine)
+
+  if OV.IsDebugging():
+    smtbx_refine_srv.addMethod(gauss_newton_srv)
+    smtbx_refine_srv.addMethod(levenberg_marquardt_srv)
+    RPD.addProgram(smtbx_refine_srv)
 
   #tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
   #RPD.addProgram(tonto_refine)
