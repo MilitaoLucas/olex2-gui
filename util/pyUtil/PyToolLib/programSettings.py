@@ -267,6 +267,9 @@ def stopProcess():
       .close()
   except AttributeError:
     pass
+  # if the Olex2 Refinement listener is installed - this should interrupt olex2.refine
+  # refinement cycle vs 'normal' interruption of the next cycle
+  olx.SetOlex2RefinementInterrupt(True)
 
   try:
     import RunPrg

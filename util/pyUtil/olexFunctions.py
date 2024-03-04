@@ -322,7 +322,7 @@ class OlexFunctions(inheritFunctions):
 
   def have_nsff(self):
     retVal = False
-    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
+    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program').startswith("olex2.refine"):
       retVal = True
     return retVal
 
@@ -500,7 +500,7 @@ class OlexFunctions(inheritFunctions):
 
   def CifMerge(self, filepath, update_atoms_loop=None, report=True):
     try:
-      olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
+      olex2_refine = (OV.GetParam('snum.refinement.program', '').startswith("olex2.refine"))
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
       ires = olx.IsFileType('IRES') == 'true'
       finalise_value = None
@@ -858,7 +858,7 @@ class OlexFunctions(inheritFunctions):
 
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
-      self.GetParam("snum.refinement.program") == "olex2.refine"
+      self.GetParam("snum.refinement.program").startswith("olex2.refine")
 
   def get_diag(self, param):
     v = None
@@ -880,7 +880,7 @@ class OlexFunctions(inheritFunctions):
   def IsEDRefinement(self):
     return self.IsEDData() and\
       self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic" and\
-      self.GetParam("snum.refinement.program") == "olex2.refine"
+      self.GetParam("snum.refinement.program").startswith("olex2.refine")
 
   def GetACI(self):
     import AC7 as ac
