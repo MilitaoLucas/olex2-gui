@@ -5,6 +5,8 @@ import olx
 import olex
 import os
 
+import subprocess, socket, time
+
 class Method_cctbx_refinement(Method_refinement):
   flack = None
   version = "(default)"
@@ -118,6 +120,81 @@ class Method_cctbx_refinement(Method_refinement):
     OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
 
+class Method_cctbx_refinement_srv(Method_refinement):
+  flack = None
+  version = "(default)"
+
+  def __init__(self, phil_object):
+    super(Method_cctbx_refinement_srv, self).__init__(phil_object)
+    _ = os.environ.get('OLEX2_CCTBX_DIR')
+    if _ is not None:
+      self.version = _
+    self.table_file_name = None
+
+  def send_cmd(self, host, port, cmd):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+      try:
+        s.connect((host, port))
+        s.sendall(cmd)
+        return s.recv(1024)
+      except ConnectionRefusedError as ex:
+        return None
+
+  def pre_refinement(self, RunPrgObject):
+    Method_refinement.pre_refinement(self, RunPrgObject)
+    host = OV.GetParam("user.Server.host")
+    port = OV.GetParam("user.Server.port")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+      try:
+        s.connect((host, port))
+        s.sendall(b"status\n")
+        data = s.recv(1024)
+        print(f"Received {data!r}")
+        while data == b"busy":
+          time.sleep(0.5)
+          s.sendall(b"status\n")
+          data = s.recv(1024)
+          print(f"Received {data!r}")
+
+        if data.strip() == b"ready":
+          print("Using Olex2 server on %s" %port)
+      except ConnectionRefusedError as ex:
+        print("Launching Olex2 server...")
+        cd = os.curdir
+        os.chdir(olx.BaseDir())
+        subprocess.Popen([os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)])
+        os.chdir(cd)
+
+  def do_run(self, RunPrgObject):
+    host = OV.GetParam("user.Server.host")
+    port = OV.GetParam("user.Server.port")
+    xl_ins_filename = RunPrgObject.shelx_alias
+    log_fn = os.path.join(OV.StrDir(), "olex2.refine_srv.log")
+    cmds = ["run:",
+            "log:%s" %log_fn,
+            "spy.SetParam(snum.refinement.program,'olex2.refine')",
+            "SetOlex2RefinementListener(True)",
+            "reap '%s.ins'" %os.path.join(RunPrgObject.tempPath, xl_ins_filename),
+            "spy.ac.diagnose",
+            "refine"]
+    data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode())
+    print(f"Received {data!r}")
+    data = b"busy"
+    while data.strip() == b"busy":
+      time.sleep(0.5)
+      data = self.send_cmd(host=host, port=port, cmd=b"status\n")
+      olx.Refresh()
+      if data is None:
+        break
+
+  def post_refinement(self, RunPrgObject):
+    from variableFunctions import set_params_from_ires
+    set_params_from_ires()
+    OV.SetVar('cctbx_R1', OV.GetParam('snum.refinement.last_R1', -1))
+    OV.SetVar('cctbx_wR2', OV.GetParam('snum.refinement.last_wR2', -1))
+
+  def writeRefinementInfoForGui(self, cif):
+    pass
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
@@ -215,3 +292,47 @@ name = 'NSFF'
 display = 'NSFF'
   .type=str
 """)
+
+##########################################################################
+# this is how a refinement thread could look like
+
+# from threading import Thread
+# from threads import ThreadEx
+# from threads import ThreadRegistry
+# class RefinementThread(ThreadEx):
+#   instance = None
+#   def RefinementThread(self):
+#     ThreadRegistry().register(RefinementThread)
+#     Thread.__init__(self)
+#     RefinementThread.instance = self
+
+#   def init(self, cctbx, table_file_name):
+#     self.cctbx = cctbx
+#     self.table_file_name = table_file_name
+#     return self
+
+#   def run(self):
+#     import olex_core
+#     try:
+#       olex_core.IncRunningThreadsCount()
+#       def EndUpdate(clear_meta=False):
+#         olx.Schedule("xf.EndUpdate %s" %clear_meta)
+#       def Compaq(**opts):
+#         co = ""
+#         for k,v in opts.items():
+#           co += " -%s=%s" %(k, v)
+#         olx.Schedule("compaq %s" %co)
+
+#       self.EndUpdate_ = olx.xf.EndUpdate
+#       self.Compaq_ = olx.Compaq
+#       olx.xf.EndUpdate = EndUpdate
+#       olx.Compaq = Compaq
+#       self.cctbx.run(table_file_name=self.table_file_name,
+#         ed_refinement=OV.IsEDRefinement())
+#     finally:
+#       olex_core.DecRunningThreadsCount()
+#       olx.xf.EndUpdate = self.EndUpdate_
+#       olx.Compaq = self.Compaq_
+#       if OV.HasGUI():
+#         import olex_gui
+#         olex_gui.StopWaiting()

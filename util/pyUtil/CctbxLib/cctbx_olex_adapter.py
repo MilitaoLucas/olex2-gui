@@ -225,7 +225,7 @@ class OlexCctbxAdapter(object):
       self._xray_structure.set_custom_inelastic_form_factors(
         custom_fp_fdps, source=inelastic_table)
       if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
-        if OV.GetParam("snum.refinement.program") == "olex2.refine":
+        if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
           custom_gaussians = {}
           print("Custom gaussians will not be used for the refinement! Using 5-Gaussian Peng-1996")
       self._xray_structure.scattering_type_registry(

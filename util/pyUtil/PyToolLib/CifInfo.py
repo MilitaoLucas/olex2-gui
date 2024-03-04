@@ -392,7 +392,7 @@ class MergeCif(CifTools):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
-        if prg == 'olex2.refine':
+        if prg.startswith("olex2.refine"):
           OV.set_refinement_program(prg, method)
         else:
           if method == 'CGLS':

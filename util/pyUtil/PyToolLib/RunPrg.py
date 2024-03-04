@@ -199,6 +199,9 @@ class RunPrg(ArgumentParser):
       extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb', 'lxt']
       if "xt" in self.program.name.lower():
         extensions.append('hkl')
+      if "srv" in self.program.name.lower():
+        extensions.append('npy')
+        extensions.append('log')
       if self.broadcast_mode:
         self.doBroadcast()
       for ext in extensions:
@@ -235,7 +238,7 @@ class RunPrg(ArgumentParser):
       os.mkdir(self.tempPath)
 
     ## clear temp folder to avoid problems
-    if 'olex2' not in self.program.name:
+    if self.program.name != "olex2.refine":
       old_temp_files = os.listdir(self.tempPath)
       for file_n in old_temp_files:
         try:
@@ -254,13 +257,18 @@ class RunPrg(ArgumentParser):
         raise Exception("Please choose a reflection file")
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     self.curr_file = OV.FileName()
-    if 'olex2' in self.program.name:
+    if self.program.name == "olex2.refine":
       return
     if olx.xf.GetIncludedFiles():
       files = [(os.path.join(self.filePath, x),os.path.join(self.tempPath, x))
         for x in olx.xf.GetIncludedFiles().split('\n')]
     else:
       files = []
+    if "srv" in self.program.name.lower():
+      files.append((os.path.join(self.filePath, self.curr_file) + ".cif_od",
+        os.path.join(self.tempPath, self.shelx_alias) + ".cif_od"))
+      files.append((os.path.join(self.filePath, self.curr_file) + "_dyn.cif_cap",
+        os.path.join(self.tempPath, self.shelx_alias) + "_dyn.cif_cap"))
     files.append((self.hkl_src,
       os.path.join(self.tempPath, self.shelx_alias) + ".hkl"))
     files.append((os.path.join(self.filePath, self.curr_file) + ".ins",
@@ -272,7 +280,7 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(f[0], f[1])
 
   def runAfterProcess(self):
-    if 'olex2' not in self.program.name:
+    if self.program.name != "olex2.refine":
       if timer:
         t = time.time()
       self.doFileResInsMagic()
@@ -629,7 +637,7 @@ class RunRefinementPrg(RunPrg):
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
         print("Could not determine whether structure inversion is needed: %s" % e)
-    if self.program.name == 'olex2.refine':
+    if self.program.name == "olex2.refine":
       if OV.GetParam('snum.refinement.check_PDF'):
         try:
           self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)

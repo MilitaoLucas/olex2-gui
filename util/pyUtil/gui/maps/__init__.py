@@ -135,7 +135,7 @@ class MapUtil:
         else:
           olex.m(cf_cmd)
       else:
-        if OV.GetParam("snum.refinement.program") == "olex2.refine":
+        if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
           olex.m("spy.NoSpherA2.show_fft_map(%s,%s)" % (map_resolution, map_type))
         else:
           olex.m(cf_cmd)
