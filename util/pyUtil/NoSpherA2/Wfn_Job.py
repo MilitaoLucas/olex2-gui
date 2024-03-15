@@ -1706,6 +1706,23 @@ ener = cf.kernel()"""
       if mult != 1:
         args.append("--uhf")
         args.append(str(int(mult)-1))
+    elif software == "pTB":
+      method = OV.GetParam('snum.NoSpherA2.method')
+      charge = OV.GetParam("snum.NoSpherA2.charge")
+      mult = OV.GetParam("snum.NoSpherA2.multiplicity")
+      base = os.path.dirname(self.parent.ptb_exe)
+      args.append(self.parent.ptb_exe)
+      args.append(self.name+".xyz")
+      args.append("-stda")
+      args.append("-par")
+      args.append(os.path.join(base, ".atompara"))
+      args.append("-bas")
+      args.append(os.path.join(base, ".basis_vDZP"))
+      args.append("-chrg")
+      args.append(str(charge))
+      if mult != 1:
+        args.append("-uhf")
+        args.append(str(int(mult)-1))
 
     out_fn = None
     path = self.full_dir
@@ -1812,7 +1829,7 @@ ener = cf.kernel()"""
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
-        with open(os.path.join(self.full_dir, self.name+"_orca.log")) as file:
+        with open(wfnlog) as file:
           lines = file.readlines()
         for line in lines:
           if "Error" in line:
@@ -1829,12 +1846,21 @@ ener = cf.kernel()"""
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
-        with open(os.path.join(self.full_dir, self.name+".out")) as file:
-          lines = file.readlines()
+        lines = open(wfnlog).readlines()
         for line in lines:
           if "Error" in line:
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
+    elif software == "pTB":
+      if 'cpu  time for all' in open(wfnlog).read():
+        pass
+      else:
+        OV.SetVar('NoSpherA2-Error',"pTB")
+        lines = open(wfnlog).readlines()
+        for line in lines:
+          if "Error" in line:
+            print(line)
+        raise NameError('pTB did not terminate normally!')        
     embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
     if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding == True):
       molden_args = []
@@ -1902,6 +1928,10 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
         shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
         shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
+    elif("ptb" in args[0]):
+      if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
+        shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
+        shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))    
     elif("elmodb" in args[0]):
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
