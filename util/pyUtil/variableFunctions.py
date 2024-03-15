@@ -338,8 +338,10 @@ def OnStructureLoaded(previous):
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin
     #gui.skin.change_bond_colour()
-
-  if previous != OV.FileFull() and olx.FileExt() != "cif":
+  if olx.IsFileType('cif') == 'true':
+    import History
+    History.tree = None
+  elif previous != OV.FileFull():
     import History
     History.hist.loadHistory()
     OV.ResetMaskHKLWarning()
