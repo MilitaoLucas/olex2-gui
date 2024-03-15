@@ -83,6 +83,7 @@ class NoSpherA2(PT):
     self.setup_orca_executables()
     self.setup_wfn_2_fchk()
     self.setup_xtb_executables()
+    self.setup_ptb_executables()
 
     import platform
     if platform.architecture()[0] != "64bit":
@@ -514,10 +515,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 wfn_fn = path_base + ".gbw"
             elif os.path.exists(path_base + ".molden"):
               wfn_fn = path_base + ".molden"
+            elif os.path.exists(path_base + ".xtb"):
+              wfn_fn = path_base + ".xtb"
             else:
               return False
           wfn_files.append(wfn_fn)
-          endings = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog"]
+          endings = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog", ".xtb"]
           for file in os.listdir(os.getcwd()):
             if "_part" in file:
               continue
@@ -613,7 +616,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
             else:
-              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden"]
+              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
               if "5.0" in wfn_code:
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
@@ -699,7 +702,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     elif software == "Thakkar IAM":
       wfn_object.write_xyz_file()
     elif software == "xTB":
-      wfn_object.write_xtb_input()
+      wfn_object.write_xyz_file()
+    elif software == "pTB":
+      wfn_object.write_xyz_file()
     elif software == "Hybrid":
       software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d"%part)
@@ -936,6 +941,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.softwares = self.softwares + ";Get ORCA"
 
   def setup_xtb_executables(self):
+    if debug == False:
+      return
     self.xtb_exe = ""
     exe_pre = "xtb"
     self.xtb_exe_pre = exe_pre
@@ -959,6 +966,31 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.softwares = self.softwares + ";xTB"
     else:
       self.softwares = self.softwares + ";Get xTB"
+      
+  def setup_ptb_executables(self):
+    if debug == False:
+      return    
+    self.ptb_exe = ""
+    exe_pre = "ptb"
+    self.ptb_exe_pre = exe_pre
+
+    if sys.platform[:3] == 'win':
+      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
+      if os.path.exists(_):
+        self.ptb_exe = _
+      else:
+        self.ptb_exe = olx.file.Which("%s.exe" %exe_pre)
+
+    else:
+      _ = os.path.join(self.p_path, "%s" %exe_pre)
+      if os.path.exists(_):
+        self.ptb_exe = _
+      else:
+        self.ptb_exe = olx.file.Which("%s" %exe_pre)
+    if os.path.exists(self.ptb_exe):
+      OV.SetParam('snum.NoSpherA2.source',"pTB")
+      if "pTB" not in self.softwares:
+        self.softwares = self.softwares + ";pTB"
 
   def setup_discamb(self):
     self.discamb_exe = ""

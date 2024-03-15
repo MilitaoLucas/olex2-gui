@@ -128,10 +128,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
     args.append(str(mode))
-  elif "xTB" in software:
+  elif "xTB" in software or "pTB" in software:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
-    args.append(str(2))    
+    if "xTB" in software:
+      args.append(str(2))
+    elif "pTB" in software:
+      args.append(str(3))
   olex_refinement_model = OV.GetRefinementModel(False)
 
   if olex_refinement_model['hklf']['value'] >= 5:
@@ -183,6 +186,23 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
+    if software == "Hybrid":
+      args.append("-mtc_mult")
+      for i in range(min(6, len(groups))):
+        args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.muliplicity_Part%d' % i)))
+      args.append("-mtc_charge")
+      for i in range(min(6, len(groups))):
+        args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
+    else:
+      args.append("-mtc_mult")
+      for i in range(len(groups)):
+        m =  OV.GetParam('snum.NoSpherA2.muliplicity')
+        if m is None:
+          m = 1
+        args.append(str(m))
+      args.append("-mtc_charge")
+      for i in range(len(groups)):
+        args.append(str(OV.GetParam('snum.NoSpherA2.charge')))      
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:
@@ -197,6 +217,16 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append(wfn_file)
     args.append("-cif")
     args.append(cif)
+    args.append("-mult")
+    m = OV.GetParam('snum.NoSpherA2.multiplicity')
+    if m == 0:
+      m = 1
+    if m is None:
+      m = 1
+    args.append(str(m))
+    args.append("-charge")
+    c = OV.GetParam('snum.NoSpherA2.charge')
+    args.append(str(c))
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
