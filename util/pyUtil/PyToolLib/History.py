@@ -56,11 +56,11 @@ class History(ArgumentParser):
       return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
     filefull_cif_od = os.path.splitext(self.filefull)[0] + '.cif_od'
-    if self.solve:
+    if self.solve or not tree.children:
       tree.add_top_level_node(
         OV.HKLSrc(), self.filefull, filefull_lst, cif_odPath=filefull_cif_od,
           is_solution=True, label=label)
-    else:
+    if not self.solve:
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
@@ -165,6 +165,8 @@ class History(ArgumentParser):
     self._make_history_bars()
 
   def saveHistory(self):
+    if tree == None: # cif is loaded or no history
+      return
     if timing:
       t = time.time()
     self._getItems()
