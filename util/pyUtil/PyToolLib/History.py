@@ -25,6 +25,35 @@ tree = None
 
 timing = False #bool(OV.GetParam('gui.timing'))
 
+class HistoryFiles(object):
+  def from_list(self, files):
+    self.hkl = None
+    self.dyn = None
+    self.res = None
+    self.cif_od = None
+    self.files = []
+    for f in files:
+      if not os.path.exists(f):
+        continue
+      ext = os.path.splitext(f)[1]
+      if ext ==".hkl":
+        self.hkl = f
+      elif ext == ".cif_od":
+        self.cif_od = f
+      elif ext == ".cif_cap":
+        self.dyn = f
+      elif ext == ".res":
+        self.res = f
+      else:
+        raise Exception("Undefined file found in the list!")
+      self.files.append(f)
+
+  def __init__(self, hkl_name, res_name):
+    data_base = os.path.splitext(hkl_name)[0]
+    self.from_list([hkl_name, res_name,
+                   data_base + "_dyn.cif_cap",
+                   data_base + ".cif_od"])
+
 class History(ArgumentParser):
   def __init__(self):
     super(History, self).__init__()
@@ -51,22 +80,18 @@ class History(ArgumentParser):
     global tree
     if not tree:
       tree = HistoryTree()
-
+    # don't attempt to make a history if a cif is loaded
     if os.path.splitext(self.filefull)[-1].lower() == '.cif':
-      return # don't attempt to make a history if a cif is loaded
-    filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
-    filefull_cif_od = os.path.splitext(self.filefull)[0] + '.cif_od'
+      return
+    files = HistoryFiles(OV.HKLSrc(), self.filefull)
     if self.solve or not tree.children:
-      tree.add_top_level_node(
-        OV.HKLSrc(), self.filefull, filefull_lst, cif_odPath=filefull_cif_od,
-          is_solution=True, label=label)
+      tree.add_top_level_node(files, is_solution=True, label=label)
     if not self.solve:
-      tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
+      tree.add_node(files)
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     if timing:
       t = time.time()
-    self._make_history_bars()
     if timing:
       print(time.time() - t)
     self.saveHistory()
@@ -77,7 +102,6 @@ class History(ArgumentParser):
     node = tree._full_index.get(name)
     assert node is not None
     node.label = label
-    self._make_history_bars()
 
   def revert_to_original(self):
     node = tree._full_index.get(OV.FileName())
@@ -111,36 +135,12 @@ class History(ArgumentParser):
     if revert_hkl is None:
       revert_hkl = OV.GetParam("snum.history.revert_hkl")
 
-    cif_odFile = os.path.join(filepath, filename + ".cif_od")
     try:
       if node.cif_od is not None:
-        cif_odFileData = decompressFile(node.cif_od)
+        cif_odFile = os.path.join(filepath, filename + ".cif_od")
+        cif_odFileData = decompressFile(tree.getCifODData(node))
         with open(cif_odFile, 'wb') as wFile:
           wFile.write(cif_odFileData)
-        if revert_hkl: # revert the HKL digests, if any
-          try:
-            import iotbx
-            reader = iotbx.cif.reader(input_string=cif_odFileData)
-            model = reader.model()
-            data_name = "xcalibur"
-            if data_name in model:
-              rv_ac = model[data_name].get("_diffrn_oxdiff_digest_hkl", "").\
-                strip("\r\n ")
-              if not rv_ac:
-                rv_ac = model[data_name].get("_diffrn_oxdiff_ac3_digest_hkl", "").\
-                  strip("\r\n ")
-              rv_ed = model[data_name].get("_diffrn_oxdiff_ac6_digest_hkl_ed", "").\
-                strip("\r\n ")
-              if rv_ac:
-                OV.set_cif_item("_diffrn_oxdiff_ac3_digest_hkl", rv_ac)
-              if rv_ed:
-                OV.set_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed", rv_ed)
-              if rv_ac or rv_ed:
-                from CifInfo import SaveCifInfo
-                SaveCifInfo()
-          except Exception as e:
-            print("Error while reverting data digests: %s" %str(e))
-
     except AttributeError:
       node.cif_od = None
     destination = resFile
@@ -156,13 +156,20 @@ class History(ArgumentParser):
         with open(hklFile, 'wb') as wFile:
           wFile.write(hklFileData)
         OV.HKLSrc(hklFile)
+      try:
+        if node.dyn is not None:
+          dynFile = os.path.join(str_dir, "history_dyn.cif_cap")
+          dynFileData = decompressFile(tree.getDynData(node))
+          with open(dynFile, 'wb') as wFile:
+            wFile.write(dynFileData)
+      except AttributeError:
+        node.dyn = None
 
     olx.File() ## needed to make new .ins file
     sg1 = olex.f("sg()")
     if sg != sg1:
       if OV.HasGUI():
         olex.m("spy.run_skin sNumTitle")
-    self._make_history_bars()
 
   def saveHistory(self):
     if tree == None: # cif is loaded or no history
@@ -204,109 +211,17 @@ class History(ArgumentParser):
     else:
       self._createNewHistory()
 
-    self._make_history_bars()
     if timing:
       print("loadHistory took %4fs" %(time.time() - t))
 
-  def resetHistory(self):
-    self._getItems()
-    backupFolder = '%s/originals' %OV.StrDir()
-    resetFile = '%s.ins' %OV.FileName()
-    if os.path.exists(backupFolder):
-      for ext in ('res','ins','lst', 'cif_od'):
-        path = '%s/%s.%s' %(OV.FilePath(),OV.FileName(),ext)
-        if os.path.exists(path):
-          os.remove(path)
-
-      for fileName in os.listdir(backupFolder):
-        if fileName == '%s.res' %OV.FileName():
-          resetFile = '%s.res' %(OV.FileName())
-        backupFilePath = '%s/%s' %(backupFolder, fileName)
-        if os.path.exists(backupFilePath):
-          restorePath = '%s/%s' %(OV.FilePath(), fileName)
-          shutil.copyfile(backupFilePath,restorePath)
-
-    self.filefull = '%s/%s' %(OV.FilePath(), resetFile)
-    olx.Atreap(self.filefull)
-    self.params.snum.history.current_solution = 'Solution 01'
-    self.params.snum.history.next_solution = 'Solution 01'
-    self._createNewHistory()
-    self.setParams()
-
   def _createNewHistory(self):
     self.filename = OV.ModelSrc()
-    historyFolder = '/'.join([self.strdir,"%s-history" %self.filename])
-    global tree
-    if os.path.exists(historyFolder):
-      tree = self._convertHistory(historyFolder)
-    else:
-      tree = HistoryTree()
-      file_base = os.path.splitext(OV.FileFull())[0]
-      tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(),
-                              file_base + '.lst',
-                              file_base + '.cif_od',
-                              is_solution=True)
-      tree.active_node.program = 'Unknown'
-      tree.active_node.method = 'Unknown'
-
-  def _convertHistory(self, historyFolder):
-    folders = []
-    items = os.listdir(historyFolder)
-    for item in items:
-      itemPath = '/'.join([historyFolder,item])
-      if os.path.isdir(itemPath):
-        folders.append(OV.standardizePath(itemPath))
-
     global tree
     tree = HistoryTree()
-    for folder in folders:
-      g = OV.ListFiles(r'%s/*.res' %folder)
-      g.sort()
-      g = OV.standardizeListOfPaths(g)
-      solution = r'%s/Solution.res' %folder
-      if solution in g:
-        g.remove(solution)
-        self.current_solution = tree.newBranch(solution, os.path.splitext(solution)[0] + '.lst')
-      else:
-        self.current_solution = tree.newBranch(g[0], os.path.splitext(g[0])[0] + '.lst')
-        g.remove(g[0])
-      refinements = []
-      for item in g:
-        name = item.split('/')[-1]
-        strNum = name.split('.')[0]
-        try:
-          number = int(strNum)
-        except:
-          try:
-            strNum = strNum.split('_')[1]
-            number = int(strNum)
-          except:
-            number = 0
-        refinements.append((number,item))
-      refinements.sort()
-      sol_name = tree.current_solution
-      for refinement in refinements:
-        tree.historyTree[sol_name].newLeaf(refinement[1], os.path.splitext(refinement[1])[0] + '.lst')
-    return tree
-
-  def _make_history_bars(self):
-    return #HP this should be retired. Leave here for the moment, in case things go bad"
-    if not OV.HasGUI():
-      return
-    try:
-      state = olx.html.GetItemState('work-history')
-    except:
-      state = None
-    #TODO must be a better way, this does not work when switching between upper
-    #tabs like work and view while the history is still opened - loading another
-    #structure does not update it
-    if state == '0' or state == None:
-      full_tree = not OV.GetParam('snum.history.condensed_tree')
-      OV.write_to_olex(
-        'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
-      from Analysis import HistoryGraph
-      HistoryGraph(tree)
-    return
+    tree.add_top_level_node(HistoryFiles(OV.HKLSrc(), OV.FileFull()),
+                            is_solution=True)
+    tree.active_node.program = 'Unknown'
+    tree.active_node.method = 'Unknown'
 
   def make_graph(self):
     full_tree = not OV.GetParam('snum.history.condensed_tree')
@@ -326,8 +241,6 @@ OV.registerFunction(hist.revert_history)
 OV.registerFunction(hist.create_history)
 OV.registerFunction(hist.saveHistory)
 OV.registerFunction(hist.loadHistory)
-OV.registerFunction(hist.resetHistory)
-OV.registerFunction(hist._make_history_bars)
 
 
 class Node(object):
@@ -340,10 +253,7 @@ class Node(object):
   def __init__(self,
                link_table=None,
                name=None,
-               hklPath=None,
-               resPath=None,
-               lstPath=None,
-               cif_odPath=None,
+               files: HistoryFiles=None,
                label=None,
                is_solution=False,
                primary_parent_node=None,
@@ -364,18 +274,17 @@ class Node(object):
     self.lst = None
     self.res = None
     self.hkl = None
+    self.dyn = None
     self.cif_od = None
 
-    if hklPath and os.path.exists(hklPath):
-      self.hkl = hashlib.md5(
-        b'%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
-
-    if cif_odPath and os.path.exists(cif_odPath):
-      self.cif_od = compressFile(cif_odPath)
+    if files:
+      if files.hkl:     self.hkl = digestPath(files.hkl)
+      if files.dyn:     self.dyn = digestPath(files.dyn)
+      if files.cif_od:  self.cif_od = digestPath(files.cif_od)
 
     if history_leaf is None:
-      if resPath is not None and os.path.exists(resPath):
-        self.res = compressFile(resPath)
+      if files.res:
+        self.res = compressFile(files.res)
 
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
@@ -391,20 +300,6 @@ class Node(object):
         except:
           pass
 
-    else:
-      # XXX backwards compatibility 2010-01-15
-      self.R1 = history_leaf.R1
-      self.wR2 = history_leaf.wR2
-      self.res = history_leaf.res
-      self.lst = history_leaf.lst
-      self.program_version = history_leaf.program_version
-      if self.is_solution:
-        self.program = history_leaf.solution_program
-        self.method = history_leaf.solution_method
-      else:
-        self.program = history_leaf.refinement_program
-        self.method = history_leaf.refinement_method
-
   def get_node_index(self, node):
     if node not in self.link_table:
       self.link_table.append(node)
@@ -414,15 +309,10 @@ class Node(object):
 
   @property
   def active_child_node(self):
-    try:
-      if self._active_child_node is None:
-        return None
-      return self.link_table[self._active_child_node]
-    except TypeError:
-      # XXX backwards compatibility 2010-11-22
-      node = self._active_child_node
-      self._active_child_node = self.get_node_index(node)
-      return node
+    if self._active_child_node is None:
+      return None
+    return self.link_table[self._active_child_node]
+
   @active_child_node.setter
   def active_child_node(self, node):
     self._active_child_node = self.get_node_index(node)
@@ -483,27 +373,6 @@ class Node(object):
         OV.set_refinement_program(OV.getCompatibleProgramName(self.program), self.method)
 
   def __setstate__(self, state):
-    # XXX backwards compatibility 2010-12-12
-    # This is to deal correctly with an older version of Node where
-    # active_child_node and children were not properties of Node.
-    if 'active_child_node' in state:
-      if not self.is_root:
-        parent = state['primary_parent_node']
-        while not parent.is_root:
-          if parent.primary_parent_node is None:
-            break
-          parent = parent.primary_parent_node
-        self.link_table = parent.link_table
-      self.active_child_node = state['active_child_node']
-      if 'link_table' in state: del state['link_table']
-      del state['active_child_node']
-    if 'children' in state:
-      self.children = state['children']
-      del state['children']
-    if 'primary_parent_node' in state:
-      if state['primary_parent_node'] is not None:
-        self.primary_parent_node = state['primary_parent_node']
-      del state['primary_parent_node']
     self.__dict__.update(state)
 
 class HistoryTree(Node):
@@ -521,47 +390,60 @@ class HistoryTree(Node):
     # 2.2 - the digest of actual reflections up to the end
     # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
     # 2.4 - fixing so that 2.2-3 actually proceed to the end
-    self.version = 2.4
-    self.hklFiles = {}
+    # 2.5 - add dyn support, use cif_od register
+    self.version = 2.5
+    self.hklFiles, self.dynFiles, self.cif_odFiles = {}, {}, {}
     #maps simple digest of the file timestamp and path to full one
-    self.hklFilesMap = {}
+    self.hklFilesMap, self.dynFilesMap, self.cif_odFilesMap = {}, {}, {}
     self.label = "root"
     self.next_sol_num = 1
 
-  def _updateHKL(self, node, hklPath):
+  def _updateData(self, node: Node, files: HistoryFiles):
     if node.hkl is not None and node.hkl not in self.hklFiles:
       full_md = self.hklFilesMap.get(node.hkl, None)
       if full_md is None:
-        full_md = digestHKLFile(hklPath)
-        self.hklFiles.setdefault(full_md, compressFile(hklPath))
+        full_md = digestHKLFile(files.hkl)
+        self.hklFiles.setdefault(full_md, compressFile(files.hkl))
         self.hklFilesMap[node.hkl] = full_md
+    if node.dyn is not None and node.dyn not in self.dynFiles:
+      full_md = self.dynFilesMap.get(node.dyn, None)
+      if full_md is None:
+        full_md = digestFile(files.dyn)
+        self.dynFiles.setdefault(full_md, compressFile(files.dyn))
+        self.dynFilesMap[node.dyn] = full_md
+    if node.cif_od is not None and node.cif_od not in self.cif_odFiles:
+      full_md = self.cif_odFilesMap.get(node.cif_od, None)
+      if full_md is None:
+        full_md = digestFile(files.cif_od)
+        self.cif_odFiles.setdefault(full_md, compressFile(files.cif_od))
+        self.cif_odFilesMap[node.cif_od] = full_md
 
   def add_top_level_node(
-    self, hklPath, resPath, lstPath=None, cif_odPath=None, is_solution=True, label=None):
+    self, files: HistoryFiles, is_solution=True, label=None):
     if len(self.children) == 0:
-      saveOriginals(resPath, lstPath, cif_odPath)
+      saveOriginals(files)
 
     if label is None:
       label = 'Solution %s' %self.next_sol_num
       self.next_sol_num += 1
     name = hashlib.md5(time.asctime(time.localtime()).encode('utf-8')).hexdigest()
-    node = Node(self.link_table, name, hklPath, resPath, lstPath, cif_odPath, label=label,
+    node = Node(self.link_table, name, files, label=label,
                 is_solution=is_solution, primary_parent_node=self)
     self.children.append(node)
     self.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(name, node)
-    self._updateHKL(node, hklPath)
+    self._updateData(node, files)
     return self.active_child_node.name
 
-  def add_node(self, hklPath, resPath, lstPath=None):
+  def add_node(self, files: HistoryFiles):
     ref_name = hashlib.md5(time.asctime(time.localtime()).encode()).hexdigest()
-    node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
+    node = Node(self.link_table, ref_name, files,
                 primary_parent_node=self.active_node)
     self.active_node.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(ref_name, node)
-    self._updateHKL(node, hklPath)
+    self._updateData(node, files)
 
   @property
   def active_node(self):
@@ -602,7 +484,13 @@ class HistoryTree(Node):
     self._full_index = index_node(self, {})
 
   def getHklData(self, node):
-    return self.hklFiles[self.hklFilesMap[node.hkl]]
+    return self.hklFiles[self.hklFilesMap.get(node.hkl, node.hkl)]
+
+  def getDynData(self, node):
+    return self.dynFiles[self.dynFilesMap.get(node.dyn, node.dyn)]
+
+  def getCifODData(self, node):
+    return self.cif_odFiles[self.cif_odFilesMap.get(node.cif_od, node.cif_od)]
 
   def delete_solution_node_by_label(self, label):
     node = self.find_solution_node_by_label(label)
@@ -618,16 +506,24 @@ class HistoryTree(Node):
     return True
 
   def __setstate__(self, state):
-    if 'active_node' in state:
-      if 'link_table' in state:
-        del state['link_table']
-      self.active_node = state['active_node']
-      del state['active_node']
     Node.__setstate__(self, state)
 
+  def _build_cif_od_register_etc(self, node: Node, call_id=0):
+    """For upgrade from 2.4->2.5 only"""
+    try:
+      node.dyn = None
+      if call_id > 0 and node.cif_od:
+        md = digestData(decompressFile(node.cif_od))
+        self.cif_odFiles.setdefault(md, node.cif_od)
+        node.cif_od = md
+    except AttributeError:
+      node.cif_od = None
+    call_id += 1
+    for c in node.children:
+      self._build_cif_od_register_etc(c, call_id=call_id)
+
   def upgrade(self):
-    # current version
-    current_version = 2.4
+    current_version = 2.5 # current version
     if self.version == current_version:
       return
     start_time = time.time()
@@ -656,10 +552,14 @@ class HistoryTree(Node):
           for hkl_d in r_index[k]:
             self.hklFilesMap[hkl_d] = md
       self.hklFiles = new_index
+    elif self.version < 2.5: # create cif_od register
+      self.dynFiles, self.cif_odFiles = {}, {}
+      self.dynFilesMap, self.cif_odFilesMap = {}, {}
+      self._build_cif_od_register_etc(self)
     self.version = current_version
     print("History has been upgraded in: %.2f ms" %((time.time() - start_time)*1000))
-    print("History contains %s HKL file(s) and %s nodes" %(
-      len(self.hklFiles),len(self._full_index)))
+    print("History contains %s HKL file(s), %s cif_od files and %s nodes" %(
+      len(self.hklFiles),len(self.cif_odFiles),len(self._full_index)))
 
 
 def index_node(node, full_index):
@@ -690,18 +590,15 @@ def delete_history(node_name):
   tree.active_node = active_node
   tree._full_index = index_node(tree, {})
   hist.revert_history(active_node.name)
-  hist._make_history_bars()
 
-
-def saveOriginals(resPath, lstPath, cif_od_path):
+def saveOriginals(originals: HistoryFiles):
   backupFolder = '%s/originals' %OV.StrDir()
   if not os.path.exists(backupFolder):
     os.mkdir(backupFolder)
-  for filePath in (resPath, lstPath, cif_od_path):
-    if filePath and os.path.exists(filePath):
-      filename = os.path.basename(filePath)
-      backupFileFull = '%s/%s' %(backupFolder,filename)
-      shutil.copyfile(filePath,backupFileFull)
+  for filePath in originals.files:
+    filename = os.path.basename(filePath)
+    backupFileFull = os.path.join(backupFolder,filename)
+    shutil.copyfile(filePath,backupFileFull)
 
 def compressFile(filePath):
   return zlib.compress(open(filePath, "rb").read(), 9)
@@ -730,11 +627,25 @@ def digestHKLData(fileData):
 def digestHKLFile(filePath):
   return digestHKLData(open(filePath, "rb").read())
 
+def digestFile(filePath):
+  md = hashlib.md5()
+  md.update(open(filePath, "rb").read())
+  return md.hexdigest()
+
+def digestData(fileData):
+  import io
+  md = hashlib.md5()
+  input = io.BytesIO(fileData)
+  md.update(input.read())
+  return md.hexdigest()
+
+def digestPath(filePath):
+  return hashlib.md5(b'%f%s' %(os.path.getmtime(filePath),
+                               filePath.encode('utf-8'))).hexdigest()
 def make_history_bars():
   if olx.GetVar("update_history_bars", 'true') == 'false':
     olx.UnsetVar("update_history_bars")
     return
-#  hist._make_history_bars()
   hist.make_graph()
 OV.registerFunction(make_history_bars)
 
@@ -811,7 +722,10 @@ def make_html_tree(node, tree_text, indent_level, full_tree=False,
     indent_level += 1
   elif (node.is_root or
         node.primary_parent_node.is_root or
-        len(node.children) > 1# or
+        len(node.children) > 1
+          #or node.program != node.primary_parent_node.program
+
+        # or
         #len(node.primary_parent_node.children) > 1
         ):
     start_count = end_count + 1
