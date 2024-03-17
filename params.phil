@@ -534,8 +534,6 @@ routines requiring structure refinement
       .expert_level = 2
     condensed_tree = True
       .type = bool
-    revert_hkl = False
-      .type = bool
   }
 
   autochem_current_solution = "Autochem 01"
