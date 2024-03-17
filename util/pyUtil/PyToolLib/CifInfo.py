@@ -1124,7 +1124,7 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*_1"
       extension = ".001"
     elif tool == "cif_od":
-      name = OV.FileName()
+      name = os.path.basename(OV.HKLSrc())
       extension = ".cif_od"
     elif tool == "cfx":
       name = OV.FileName()

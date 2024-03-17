@@ -42,7 +42,7 @@ class HistoryFiles(object):
         self.cif_od = f
       elif ext == ".cif_cap":
         self.dyn = f
-      elif ext == ".res":
+      elif ext == ".res" or ext == ".ins":
         self.res = f
       else:
         raise Exception("Undefined file found in the list!")
@@ -105,9 +105,9 @@ class History(ArgumentParser):
 
   def revert_to_original(self):
     node = tree._full_index.get(OV.FileName())
-    self.revert_history(node.children[0].name, revert_hkl=True)
+    self.revert_history(node.children[0].name)
 
-  def revert_history(self, node_index, revert_hkl=None):
+  def revert_history(self, node_index):
     node = tree._full_index.get(node_index)
     assert node is not None
     if node.is_root:
@@ -132,44 +132,36 @@ class History(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
 
-    if revert_hkl is None:
-      revert_hkl = OV.GetParam("snum.history.revert_hkl")
-
-    try:
-      if node.cif_od is not None:
-        cif_odFile = os.path.join(filepath, filename + ".cif_od")
-        cif_odFileData = decompressFile(tree.getCifODData(node))
-        with open(cif_odFile, 'wb') as wFile:
-          wFile.write(cif_odFileData)
-    except AttributeError:
-      node.cif_od = None
-    destination = resFile
-    destination = "%s" %destination.strip('"').strip("'")
-    sg = olex.f("sg()")
-    olex.m("reap '%s'" % destination)
-
-    if revert_hkl:
-      str_dir = OV.StrDir()
-      if str_dir:
-        hklFile = os.path.join(str_dir, "history.hkl")
-        hklFileData = decompressFile(tree.getHklData(node))
-        with open(hklFile, 'wb') as wFile:
-          wFile.write(hklFileData)
-        OV.HKLSrc(hklFile)
+    original_sg = olex.f("sg()")
+    olex.m("reap '%s'" %resFile)
+    hklSrc = OV.HKLSrc()
+    if not tree.isTheSameHklDigest(node, hklSrc):
+      olx.Echo("Current HKL does not match the one from history - updating!", m='warning')
+      hklFileData = decompressFile(tree.getHklData(node))
+      with open(hklSrc, 'wb') as wFile:
+        wFile.write(hklFileData)
       try:
         if node.dyn is not None:
-          dynFile = os.path.join(str_dir, "history_dyn.cif_cap")
+          dynFile = os.path.splitext(hklSrc)[0] + "_dyn_.cif_cap"
           dynFileData = decompressFile(tree.getDynData(node))
           with open(dynFile, 'wb') as wFile:
             wFile.write(dynFileData)
       except AttributeError:
         node.dyn = None
 
+    try:
+      if node.cif_od is not None:
+        cif_odFile = os.path.splitext(hklSrc)[0] + ".cif_od"
+        if not os.path.exists(cif_odFile) and not tree.isTheSameCifODDigest(node, cif_odFile):
+          cif_odFileData = decompressFile(tree.getCifODData(node))
+          with open(cif_odFile, 'wb') as wFile:
+            wFile.write(cif_odFileData)
+    except AttributeError:
+      node.cif_od = None
+
     olx.File() ## needed to make new .ins file
-    sg1 = olex.f("sg()")
-    if sg != sg1:
-      if OV.HasGUI():
-        olex.m("spy.run_skin sNumTitle")
+    if OV.HasGUI() and original_sg != olex.f("sg()"):
+      olex.m("spy.run_skin sNumTitle")
 
   def saveHistory(self):
     if tree == None: # cif is loaded or no history
@@ -178,7 +170,10 @@ class History(ArgumentParser):
       t = time.time()
     self._getItems()
     if self.strdir:
-      variableFunctions.Pickle(tree,self.history_filepath)
+      variableFunctions.Pickle(tree,self.history_filepath + ".tmp")
+      if os.path.exists(self.history_filepath):
+        os.remove(self.history_filepath)
+      os.rename(self.history_filepath + ".tmp", self.history_filepath)
     if timing:
       print("saveHistory took %4fs" %(time.time() - t))
 
@@ -483,6 +478,18 @@ class HistoryTree(Node):
       n._reindex(old_table, new_lt)
     self._full_index = index_node(self, {})
 
+  def isTheSameHklDigest(self, node: Node, hklPath: str):
+    md5 = self.hklFilesMap.get(node.hkl, node.hkl)
+    return os.path.exists(hklPath) and digestHKLFile(hklPath) == md5
+
+  def isTheSameDynDigest(self, node: Node, dynPath: str):
+    md5 = self.dynFilesMap.get(node.dyn, node.dyn)
+    return os.path.exists(dynPath) and digestFile(dynPath) == md5
+
+  def isTheSameCifODDigest(self, node: Node, cif_odPath: str):
+    md5 = self.cif_odFilesMap.get(node.cif_od, node.cif_od)
+    return os.path.exists(cif_odPath) and digestFile(cif_odPath) == md5
+
   def getHklData(self, node):
     return self.hklFiles[self.hklFilesMap.get(node.hkl, node.hkl)]
 
@@ -592,9 +599,16 @@ def delete_history(node_name):
   hist.revert_history(active_node.name)
 
 def saveOriginals(originals: HistoryFiles):
-  backupFolder = '%s/originals' %OV.StrDir()
-  if not os.path.exists(backupFolder):
-    os.mkdir(backupFolder)
+  backupFolder_base = os.path.join(OV.StrDir(), "originals")
+  backupFolder = backupFolder_base
+  inc = 1
+  while os.path.exists(backupFolder):
+    backupFolder = "%s_%s" %(backupFolder_base, inc)
+    inc += 1
+  os.mkdir(backupFolder)
+  if inc > 1:
+    olx.Echo("%s Previous backups found!" %(inc-1), m="warning")
+  print("Originals files have been saved to %s" %backupFolder)
   for filePath in originals.files:
     filename = os.path.basename(filePath)
     backupFileFull = os.path.join(backupFolder,filename)
