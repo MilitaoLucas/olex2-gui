@@ -599,20 +599,22 @@ def delete_history(node_name):
   hist.revert_history(active_node.name)
 
 def saveOriginals(originals: HistoryFiles):
-  backupFolder_base = os.path.join(OV.StrDir(), "originals")
-  backupFolder = backupFolder_base
-  inc = 1
-  while os.path.exists(backupFolder):
-    backupFolder = "%s_%s" %(backupFolder_base, inc)
-    inc += 1
-  os.mkdir(backupFolder)
-  if inc > 1:
-    olx.Echo("%s Previous backups found!" %(inc-1), m="warning")
-  print("Originals files have been saved to %s" %backupFolder)
+  backupFolder = os.path.join(OV.StrDir(), "originals")
+  if not os.path.exists(backupFolder):
+    os.mkdir(backupFolder)
+  duplicates = 0
   for filePath in originals.files:
-    filename = os.path.basename(filePath)
-    backupFileFull = os.path.join(backupFolder,filename)
-    shutil.copyfile(filePath,backupFileFull)
+    dest_base = os.path.join(backupFolder, os.path.basename(filePath))
+    dest_file = dest_base
+    #find unique backup name
+    inc = 1
+    while os.path.exists(dest_file):
+      dest_file = "%s_%s" %(dest_base, inc)
+      inc += 1
+      duplicates += 1
+    shutil.copyfile(filePath, dest_file)
+  if duplicates > 0:
+    olx.Echo("%s Previous backups found!" %(duplicates), m="warning")
 
 def compressFile(filePath):
   return zlib.compress(open(filePath, "rb").read(), 9)
