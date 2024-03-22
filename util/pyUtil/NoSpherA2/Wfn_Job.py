@@ -378,13 +378,14 @@ class wfn_Job(object):
       "O": -2.0
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
+    #oxm_asu = os.path.join(self.full_dir, "asu") + ".oxm"
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
     olx.Kill("$Q")
     if xyz:
-      olx.File(coordinates_fn1,p=10)
-    olx.File(os.path.join(self.full_dir, self.name + ".cif"))
-    xyz1 = open(coordinates_fn1,"r")
+      olx.File(coordinates_fn1, p=10)
+    # olx.File(oxm_asu)
+    xyz1 = open(coordinates_fn1, "r")
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
     radius = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS")
     olex.m("pack %s -c"%radius)
@@ -443,18 +444,12 @@ class wfn_Job(object):
       conv = " LooseSCF"
     else:
       conv = convergence
-    control = control + grids + ' ' + conv + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+    control += grids + ' ' + conv + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-    if method == "BP86" or method == "PBE" or method == "PWLDA":
-      if relativistic == True:
-        control = control + " DKH2 SARC/J RI RIJCOSX"
-      else:
-        control = control + " def2/J RI RIJCOSX"
+    if relativistic == True:
+      control += " DKH2 SARC/J RIJCOSX"
     else:
-      if relativistic == True:
-        control = control + " DKH2 SARC/J RIJCOSX"
-      else:
-        control = control + " def2/J RIJCOSX"
+      control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM("+Solvation+") "
@@ -520,7 +515,6 @@ class wfn_Job(object):
         inp.write("end\n")
       basis.close()
       inp.write("end\n")
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
     hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
     ecplayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')
@@ -566,12 +560,7 @@ class wfn_Job(object):
   ORCAFFFilename "%s"
 end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
-      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))      
-    run = None
-    if Full_HAR == True:
-      run = OV.GetVar('Run_number')
-      if run > 1:
-        inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
+      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend" % (float(conv), hflayer))
     inp.close()
     if qmmmtype == "Ion":
       import subprocess
