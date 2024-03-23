@@ -159,8 +159,6 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  # args.append("-hkl")
-  # args.append(hkl_file)
   args.append("-dmin")
   args.append(str(f_sq_obs.d_min() * 0.95))
   if type([]) == type(wfn_file):
