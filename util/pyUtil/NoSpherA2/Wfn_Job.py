@@ -378,21 +378,17 @@ class wfn_Job(object):
       "O": -2.0
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
-    #oxm_asu = os.path.join(self.full_dir, "asu") + ".oxm"
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1, p=10)
-    # olx.File(oxm_asu)
     xyz1 = open(coordinates_fn1, "r")
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
     radius = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS")
-    olex.m("pack %s -c"%radius)
-    if xyz:
-      olx.File(coordinates_fn2,p=10)
+    olex.m("XYZCluster_4NoSpherA2 %s"%radius)
+    shutil.move(self.name + ".xyz", os.path.join(self.full_dir, self.name) + ".xyz")
     xyz2 = open(coordinates_fn2,"r")
-    olex.m("fuse")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
