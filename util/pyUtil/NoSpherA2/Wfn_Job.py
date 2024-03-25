@@ -965,9 +965,6 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         inp.write(rest)
         inp.close()    
 
-  def write_xtb_input(self):
-    #coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
-    self.write_xyz_file()
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
     solv_epsilon = {
