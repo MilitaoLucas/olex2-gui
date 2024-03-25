@@ -702,9 +702,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     elif software == "Thakkar IAM":
       wfn_object.write_xyz_file()
     elif software == "xTB":
-      wfn_object.write_xyz_file()
+      if xyz == True:
+        wfn_object.write_xyz_file()
     elif software == "pTB":
-      wfn_object.write_xyz_file()
+      if xyz == True:
+        wfn_object.write_xyz_file()
     elif software == "Hybrid":
       software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d"%part)
@@ -1426,7 +1428,7 @@ def get_functional_list(wfn_code=None):
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V"
   elif wfn_code == "xTB":
-    list = "GFN0;GFN1;GFN2;GFNFF"
+    list = "GFN1;GFN2"
   else:
     list = "HF;BP;BP86;PWLDA;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
