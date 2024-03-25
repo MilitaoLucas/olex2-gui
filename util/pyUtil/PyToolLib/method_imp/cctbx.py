@@ -165,13 +165,42 @@ class Method_cctbx_refinement_srv(Method_refinement):
         subprocess.Popen([os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)])
         os.chdir(cd)
 
+  def read_log_markup(self, log, marker):
+    rv = []
+    txt = log.readline()
+    while txt:
+      txt = txt.rstrip("\n\r")
+      if txt == marker:
+        break
+      else:
+        rv.append(txt)
+      txt = log.readline()
+    return rv
+
+  def read_log(self, log):
+    out = "_"
+    while out:
+      out = log.readline().rstrip("\r\n")
+      if out:
+        if out.startswith(">>>") and out.endswith("<<<"):
+          marker = out[3:-3]
+          txt = self.read_log_markup(log, f"<<<{marker}>>>")
+          if marker == "info":
+            continue
+          if marker in ("error", "warning", "exceptio"):
+            olx.Echo('\n'.join(txt), m="error")
+          else:
+            print('\n'.join(txt))
+        else:
+          print(out)
+
   def do_run(self, RunPrgObject):
     host = OV.GetParam("user.Server.host")
     port = OV.GetParam("user.Server.port")
     xl_ins_filename = RunPrgObject.shelx_alias
     log_fn = os.path.join(OV.StrDir(), "olex2.refine_srv.log")
     cmds = ["run:",
-            "log:%s" %log_fn,
+            "xlog:%s" %log_fn,
             "spy.SetParam(snum.refinement.program,'olex2.refine')",
             "SetOlex2RefinementListener(True)",
             "reap '%s.ins'" %os.path.join(RunPrgObject.tempPath, xl_ins_filename),
@@ -180,12 +209,15 @@ class Method_cctbx_refinement_srv(Method_refinement):
     data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode())
     print(f"Received {data!r}")
     data = b"busy"
-    while data.strip() == b"busy":
-      time.sleep(0.5)
-      data = self.send_cmd(host=host, port=port, cmd=b"status\n")
-      olx.Refresh()
-      if data is None:
-        break
+    with open(log_fn, "r") as log:
+      while data.strip() == b"busy":
+        self.read_log(log)
+        time.sleep(0.5)
+        data = self.send_cmd(host=host, port=port, cmd=b"status\n")
+        olx.Refresh()
+        if data is None:
+          break
+      self.read_log(log)
 
   def post_refinement(self, RunPrgObject):
     from variableFunctions import set_params_from_ires
