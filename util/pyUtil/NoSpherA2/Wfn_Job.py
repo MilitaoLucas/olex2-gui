@@ -1676,9 +1676,18 @@ ener = cf.kernel()"""
       if acc == "Low":
         args.append("--acc")
         args.append("30")
-      elif acc == "High" or acc == "Max":
+      elif acc == "Normal":
+        args.append("--acc")
+        args.append("1")
+      elif acc == "High":
+        args.append("--acc")
+        args.append("0.2")
+      elif acc == "Max":
         args.append("--acc")
         args.append("0.1")
+      temperature = OV.GetParam("snum.NoSpherA2.temperature")
+      args.append("--etemp")
+      args.append(str(temperature))
       args.append("--molden")
       args.append(self.name+".xyz")
       charge = OV.GetParam("snum.NoSpherA2.charge")

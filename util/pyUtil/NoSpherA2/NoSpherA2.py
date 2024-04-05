@@ -1486,7 +1486,7 @@ def change_tsc_generator(input):
     olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "Get discambMATTS":
     olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
-  elif input == "Get xtb":
+  elif input == "Get xTB":
     olx.Shell("https://github.com/grimme-lab/xtb")
   elif input == "Get pySCF":
     result = check_for_pyscf(False)
