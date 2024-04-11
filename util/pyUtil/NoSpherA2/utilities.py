@@ -920,3 +920,13 @@ def write_precise_model_file():
   
   f.close()
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
+
+def get_tsc_file_dropdown_items():
+    res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
+    t = res.split(";")
+    if len(t[0]) == 0:
+        OV.SetParam('snum.NoSpherA2.file', 'No .tsc/.tscb files found')
+        return "No .tsc/.tscb files found"
+    else:
+        return res
+OV.registerFunction(get_tsc_file_dropdown_items, False, "NoSpherA2")
