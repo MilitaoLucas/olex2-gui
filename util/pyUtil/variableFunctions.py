@@ -298,8 +298,8 @@ def LoadStructureParams():
 
 OV.registerFunction(LoadStructureParams)
 
-def SaveStructureParams():
-  if OV.FileName() != 'none':
+def SaveStructureParams(no_save='false'):
+  if OV.FileName() != 'none' and no_save != 'true':
     structure_phil_file = "%s/%s.phil" %(OV.StrDir(), OV.ModelSrc())
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
@@ -307,7 +307,7 @@ def SaveStructureParams():
     if auto_save_view and olx.IsFileType('oxm') != 'true':
       oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
       olex.m("save gview '%s'" %oxvf)
-OV.registerFunction(SaveStructureParams)
+OV.registerMacro(SaveStructureParams, "no_save")
 
 def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
