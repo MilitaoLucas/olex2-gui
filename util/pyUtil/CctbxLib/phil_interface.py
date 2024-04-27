@@ -151,9 +151,11 @@ class phil_handler(index):
 
 
 
-  def save_param_file(self, file_name, scope_name=None, sources=[], diff_only=False):
+  def save_param_file(self, file_name, scope_name=None, sources=[], diff_only=False,
+                      out_stream=None):
     if scope_name is not None:
       assert '.' not in scope_name # can only save top-level scopes
+    assert not(file_name and out_stream)
     if len(sources) > 0:
       for source in sources:
         self.merge_phil(phil_object=source, overwrite_params=False,
@@ -178,8 +180,11 @@ class phil_handler(index):
         return # diff is empty -> write empty file
       else:
         output_phil = scope_output_phil
-    with open(file_name, "w", encoding="utf-8") as f:
-      output_phil.show(out=f)
+    if out_stream:
+      output_phil.show(out=out_stream)
+    else:
+      with open(file_name, "w", encoding="utf-8") as f:
+        output_phil.show(out=f)
 
   def show_diff(self, out=None):
     self.get_diff().show(out=out)
