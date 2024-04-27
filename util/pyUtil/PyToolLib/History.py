@@ -131,6 +131,16 @@ class History(ArgumentParser):
       ## remove lst file if no lst file was saved in history
       if os.path.exists(lstFile):
         os.remove(lstFile)
+    try:
+      if node.phil:
+        phil = zlib.decompress(node.phil) #.decode("utf-8")
+        phil_fn = os.path.join(OV.StrDir(), OV.ModelSrc()) + ".phil"
+        with open(phil_fn, "wb") as out:
+          out.write(phil)
+    except AttributeError:
+      node.phil = None
+    except:
+      print("Failed to revert SNUM PHIL")
 
     original_sg = olex.f("sg()")
     olex.m("reap '%s'" %resFile)
@@ -294,6 +304,15 @@ class Node(object):
           self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
         except:
           pass
+      try:
+        from io import StringIO
+        out = StringIO()
+        olx.phil_handler.save_param_file(
+          file_name=None, out_stream=out,
+           scope_name='snum', diff_only=True)
+        self.phil = zlib.compress(out.read().encode("utf-8"))
+      except:
+        self.phil = None
 
   def get_node_index(self, node):
     if node not in self.link_table:
@@ -386,7 +405,8 @@ class HistoryTree(Node):
     # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
     # 2.4 - fixing so that 2.2-3 actually proceed to the end
     # 2.5 - add dyn support, use cif_od register
-    self.version = 2.5
+    # 2.6 - added snmu phil
+    self.version = 2.6
     self.hklFiles, self.dynFiles, self.cif_odFiles = {}, {}, {}
     #maps simple digest of the file timestamp and path to full one
     self.hklFilesMap, self.dynFilesMap, self.cif_odFilesMap = {}, {}, {}
@@ -524,6 +544,9 @@ class HistoryTree(Node):
         self.cif_odFiles.setdefault(md, node.cif_od)
         node.cif_od = md
     except AttributeError:
+      node.cif_od = None
+    except zlib.error:
+      print("Failed to build cif_od_register")
       node.cif_od = None
     call_id += 1
     for c in node.children:
