@@ -143,7 +143,7 @@ class History(ArgumentParser):
       print("Failed to revert SNUM PHIL")
 
     original_sg = olex.f("sg()")
-    olex.m("reap '%s'" %resFile)
+    olex.m("reap '%s' -no_save=true" %resFile)
     hklSrc = OV.HKLSrc()
     if not tree.isTheSameHklDigest(node, hklSrc):
       olx.Echo("Current HKL does not match the one from history - updating!", m='warning')
@@ -310,7 +310,7 @@ class Node(object):
         olx.phil_handler.save_param_file(
           file_name=None, out_stream=out,
            scope_name='snum', diff_only=True)
-        self.phil = zlib.compress(out.read().encode("utf-8"))
+        self.phil = zlib.compress(out.getvalue().encode("utf-8"))
       except:
         self.phil = None
 
