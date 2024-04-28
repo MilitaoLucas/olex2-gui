@@ -275,7 +275,7 @@ class phil_handler(index):
     wos = new_phil_object.get_without_substitution(name)
     mwos = self.master_phil.get_without_substitution(name)
     if not mwos:
-      raise libtbx.phil.Sorry(f"Udnefined keyword: {name}")
+      raise libtbx.phil.Sorry(f"Undefined keyword: {name}")
     for master_defintion, working_definition in zip(
           mwos, self.working_phil.get_without_substitution(name)):
       assert working_definition.is_definition
