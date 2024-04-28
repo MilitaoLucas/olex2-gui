@@ -272,11 +272,14 @@ class phil_handler(index):
 
   def update_single_param(self, name, value):
     new_phil_object = self.parse("%s=%s" %(name,value))
+    wos = new_phil_object.get_without_substitution(name)
+    mwos = self.master_phil.get_without_substitution(name)
+    if not mwos:
+      raise libtbx.phil.Sorry(f"Udnefined keyword: {name}")
     for master_defintion, working_definition in zip(
-          self.master_phil.get_without_substitution(name),
-          self.working_phil.get_without_substitution(name)):
+          mwos, self.working_phil.get_without_substitution(name)):
       assert working_definition.is_definition
-      for new_definition in new_phil_object.get_without_substitution(name):
+      for new_definition in wos:
         if working_definition.name == new_definition.name:
           proxy = master_defintion.validate(str(value))
           if proxy.error_message is None:
