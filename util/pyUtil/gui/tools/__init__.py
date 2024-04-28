@@ -1926,30 +1926,58 @@ def run_custom_script(*args):
 OV.registerFunction(run_custom_script, False, 'gui.tools')
 
 
-def find_movie_folder(directory=None, directory_l=None):
-  from gui import report
-  if not directory:
-    directory = OV.FilePath()
-  if not directory_l:
-    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
-  if not directory or not directory_l:
-    return
-  name = OV.FileName()
-  extension = "*.jpg"
+def find_movie_folder_b(directory, directory_l):
+  directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
+  g = glob.glob(directory)
+  i = 1
+  while not g:
+    directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
+    g = glob.glob(directory)
+    i += 1
+    if i > 3:
+      return None
+
+  zip_file = g[0]
+  import zipfile
+  l = []
+  try:
+    with zipfile.ZipFile(zip_file, "r") as z:
+      for filename in z.namelist():
+        if filename and ".jpg" in filename:
+          l.append(r'%s/%s' %(g[0], filename))
+    return l
+  except:
+    return None
+
+def find_movie_folder_r(directory, directory_l):
   i = 1
   while not os.path.exists(directory + os.sep + "movie"):
     directory = os.sep.join(directory_l[:-(i)])
     i += 1
     if i == 5:
-      return None, None
+      return None
   directory = directory + os.sep + "movie"
   if OV.FileName() not in directory:
-    print("Crystal images found, but crystal name not in path!")
-  l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
-  if not l:
-    OV.SetParam("snum.metacif.list_crystal_images_files", "")
+    print("Crystal images found, but structure name is not in path!")
+  return gui.report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+
+def find_movie_folder(directory=None, directory_l=None):
+  if not directory:
+    directory = OV.FilePath()
+  if not directory_l:
+    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
+  if not directory or not directory_l:
     return None, None
-  OV.SetParam("snum.metacif.list_crystal_images_files", (l))
+  cif_od = olx.file.ChangeExt(OV.HKLSrc(), "cif_od")
+  l = None
+  if os.path.exists(cif_od):
+    l = find_movie_folder_r(directory=directory, directory_l=directory_l)
+  else:
+    l = find_movie_folder_b(directory=directory, directory_l=directory_l)
+  if not l:
+    OV.SetParam("snum.metacif.list_crystal_images_files", [])
+    return None, None
+  OV.SetParam("snum.metacif.list_crystal_images_files", l)
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
 
@@ -2448,7 +2476,7 @@ def set_data_parameter_stats_display(target):
   if OV.IsControl(target):
     olx.html.SetLabel(target, f"Parameters: {parameters}")
 OV.registerFunction(set_data_parameter_stats_display, False, "tools")
-    
+
 def get_refinement_stats(which):
   try:
     stats = olx.xf.RefinementInfo()
