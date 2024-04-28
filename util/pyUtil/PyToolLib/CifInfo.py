@@ -587,14 +587,14 @@ class ExtractCifInfo(CifTools):
           print("Error processing OD frame image %s" %p)
         pass
 
-    # OD Crystal Image
-    p, pp = self.sort_out_path(path, "od_crystal_images")
+    # Crystal Image
+    p, pp = self.sort_out_path(path, "crystal_images")
     if pp:
       try:
         OV.SetParam('snum.report.crystal_image', p)
         OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
       except:
-        print("Error processing OD crystal image %s" %p)
+        print("Error processing rystal images %s" %p)
 
     # OD Notes File
     p, pp = self.sort_out_path(path, "notes_file")
@@ -603,15 +603,6 @@ class ExtractCifInfo(CifTools):
         OV.SetParam('snum.report.data_collection_notes', p)
       except:
         print("Error processing notes file %s" %p)
-
-    # Bruker Crystal Image
-    p, pp = self.sort_out_path(path, "bruker_crystal_images")
-    if pp:
-      try:
-        OV.SetParam('snum.report.crystal_image', p)
-        OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
-      except:
-        print("Error processing Bruker crystal image %s" %p)
 
     ##THINGS IN CIF FORMAT
     p, pp = self.sort_out_path(path, "smart")
@@ -1143,35 +1134,9 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*"
       extension = "*.jpg"
       directory = os.sep.join(directory_l[:-3] + ["frames", "jpg"])
-    elif tool == "bruker_crystal_images":
-      name = OV.FileName()
-      directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
-      g = glob.glob(directory)
-      i = 1
-      while not g:
-        directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
-        g = glob.glob(directory)
-        i += 1
-        if i > 3:
-          return None, None
-
-      zip_file = g[0]
-      import zipfile
-      l = []
-      try:
-        with zipfile.ZipFile(zip_file, "r") as z:
-          for filename in z.namelist():
-            if filename and ".jpg" in filename:
-              l.append(r'%s/%s' %(g[0], filename))
-        OV.SetParam("snum.metacif.list_crystal_images_files", l)
-        setattr(self.metacifFiles, "list_crystal_images_files", l)
-        return l[0], l
-      except:
-        return None, None
-
-    elif tool == "od_crystal_images":
+    elif tool == "crystal_images" or tool == "crystal_images":
       l0, l = gui.tools.find_movie_folder(directory, directory_l)
-      setattr(self.metacifFiles, "list_crystal_images_files", (l))
+      setattr(self.metacifFiles, "list_crystal_images_files", l)
       return l0, l
 
     elif tool == "notes_file":
