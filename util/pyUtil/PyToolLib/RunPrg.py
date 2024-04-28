@@ -715,7 +715,6 @@ class RunRefinementPrg(RunPrg):
       self.R1 = self.wR2 = "n/a"
       self.his_file = None
       print("The refinement has failed, no R value was returned by the refinement")
-    OV.SetParam('snum.refinement.current_history', self.his_file)
     return self.his_file, self.R1
 
   def isInversionNeeded(self, force=False):
