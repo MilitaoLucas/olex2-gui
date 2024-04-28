@@ -218,6 +218,7 @@ def LoadStructureParams():
   import olexex
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
+  olx.structure_params = {}
   # read current setting - to use for the new structures
   solutionPrg = OV.GetParam('user.solution.default_program')
   solutionMethod = OV.GetParam('user.solution.default_method')

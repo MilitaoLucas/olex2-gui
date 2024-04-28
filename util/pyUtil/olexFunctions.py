@@ -72,6 +72,9 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      if not handler.param_exists(variable):
+        olx.structure_params[variable] = value
+        return
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
@@ -123,6 +126,8 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      if variable in olx.structure_params:
+        return olx.structure_params[variable]
 
       retVal = handler.get_validated_param(variable)
 

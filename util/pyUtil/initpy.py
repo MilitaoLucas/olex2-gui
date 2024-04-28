@@ -241,6 +241,8 @@ except Exception as e:
 if timer:
   tt.append("%.3f s == import olx" %(time.time() - t))
   t = time.time()
+#!! transient structure parameters, cleared on loading a structure
+olx.structure_params = {}
 
 basedir = olx.BaseDir()
 datadir = olx.DataDir()
