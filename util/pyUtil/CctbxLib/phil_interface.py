@@ -270,6 +270,9 @@ class phil_handler(index):
         print("Error updating Phil", file=sys.stderr)
         sys.stderr.formatExceptionInfo()
 
+  def param_exists(self, name):
+    return len(self.master_phil.get_without_substitution(name)) > 0
+
   def update_single_param(self, name, value):
     new_phil_object = self.parse("%s=%s" %(name,value))
     wos = new_phil_object.get_without_substitution(name)
