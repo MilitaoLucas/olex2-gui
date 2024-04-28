@@ -225,11 +225,6 @@ routines requiring structure refinement
     .short_caption = Structure Refinement
     {
 
-    completeness{
-      target = ""
-        .type = str
-      }
-
     ata = 0
       .type = float
     data_parameter_ratio = None
@@ -598,12 +593,6 @@ routines requiring structure refinement
     cad4_file = None
       .type = path
       .expert_level = 1
-    cif_od_file = None
-      .type = path
-      .expert_level = 1
-    crystal_image_file = None
-      .type = path
-      .expert_level = 1
     crystal_clear_file = None
       .type = path
       .expert_level = 1
@@ -646,12 +635,6 @@ routines requiring structure refinement
       .type = strings
       .expert_level = 2
     list_crystal_clear_files = None
-      .type = strings
-      .expert_level = 2
-    list_cif_od_files = None
-      .type = strings
-      .expert_level = 2
-    list_crystal_images_files = None
       .type = strings
       .expert_level = 2
     list_result_cif_files = None
@@ -698,10 +681,6 @@ routines requiring structure refinement
       .type = str
     total_time = 0
       .type = int
-    crystal_images = None
-      .type = strings
-    crystal_image = None
-      .type = str
     frame_images = None
       .type = strings
     notes_file = None
