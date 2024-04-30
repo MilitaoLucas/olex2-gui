@@ -416,6 +416,7 @@ class wfn_Job(object):
       control += "IONIC-CRYSTAL-QMMM "
     method = OV.GetParam('snum.NoSpherA2.method')
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    mp2_block = ""
     if method == "HF":
       control += "rhf "
       grids = ""
@@ -429,7 +430,11 @@ class wfn_Job(object):
         else:
           control += method + '-V SCNL '
       else:
-        control += method + ' '
+        if method == "DSD-BLYP":
+          control += method + ' D3BJ def2-TZVPP/C '
+          mp2_block += "%mp2 Density relaxed RI true end"
+        else:
+          control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
       if software == "ORCA 5.0":
         grids = self.write_grids_5(method, grid)
@@ -466,6 +471,8 @@ class wfn_Job(object):
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     inp.write("   end\nend\n")
+    if mp2_block != "":
+      inp.write(mp2_block+"\n")
     el_list = atom_list
     if ECP == False:
       basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
@@ -625,6 +632,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       control += basis_name.replace("ECP-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    mp2_block = ""
     if method == "HF":
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
         control += " ROHF "
@@ -647,7 +655,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           else:
             control += method + '-V SCNL '
         else:
-          control += method + ' '
+          if method == "DSD-BLYP":
+            control += method + ' D3BJ def2-TZVPP/C '
+            mp2_block += "%mp2 Density relaxed RI true end"
+          else:
+            control += method + ' '   
         grids = self.write_grids_5(method, grid)
       else:
         control += method + ' '
@@ -724,6 +736,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           atom_list.append(atom[0])
     xyz.close()
     inp.write("   end\nend\n")
+    if mp2_block != "":
+      inp.write(mp2_block+'\n')
     if ECP == False:
       basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")      
