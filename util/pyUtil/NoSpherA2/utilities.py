@@ -188,7 +188,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if software == "Hybrid":
       args.append("-mtc_mult")
       for i in range(min(6, len(groups))):
-        args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.muliplicity_Part%d' % i)))
+        m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
+        if m is None or m == 'None':
+          m = 1
+        args.append(str(m))
       args.append("-mtc_charge")
       for i in range(min(6, len(groups))):
         args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
@@ -196,7 +199,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       args.append("-mtc_mult")
       for i in range(len(groups)):
         m =  OV.GetParam('snum.NoSpherA2.muliplicity')
-        if m is None:
+        if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")

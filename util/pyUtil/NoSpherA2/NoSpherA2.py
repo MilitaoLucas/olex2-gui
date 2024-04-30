@@ -1426,7 +1426,7 @@ def get_functional_list(wfn_code=None):
   elif wfn_code == "pySCF":
     list = "HF;PBE;B3LYP;BLYP;M062X"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
-    list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V"
+    list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
   else:
