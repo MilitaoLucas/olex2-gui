@@ -392,7 +392,7 @@ class MergeCif(CifTools):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
-        if prg == 'olex2.refine':
+        if prg.startswith("olex2.refine"):
           OV.set_refinement_program(prg, method)
         else:
           if method == 'CGLS':
@@ -1124,7 +1124,7 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*_1"
       extension = ".001"
     elif tool == "cif_od":
-      name = OV.FileName()
+      name = os.path.splitext(os.path.basename(OV.HKLSrc()))[0]
       extension = ".cif_od"
     elif tool == "cfx":
       name = OV.FileName()
