@@ -134,7 +134,10 @@ class OlexCctbxAdapter(object):
     #sys.stdout.refresh = False
     return
 
-  def xray_structure(self, construct_restraints=False, shared_parameters=None):
+  def xray_structure(self, construct_restraints=False, shared_parameters=None,
+                     space_group=None):
+    if space_group is None:
+      space_group = self.space_group
     if self._xray_structure is None or construct_restraints:
       if construct_restraints:
         restraints_iter=self.olx_atoms.restraints_iterator(
@@ -146,7 +149,7 @@ class OlexCctbxAdapter(object):
         same_iter = None
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
-        self.space_group,
+        space_group,
         self.olx_atoms.iterator(use_charges=True),
         restraints_iter=restraints_iter,
         constraints_iter=None, #self.olx_atoms.constraints_iterator()
@@ -208,7 +211,7 @@ class OlexCctbxAdapter(object):
               if null_disp:
                 custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
               else:
-                custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))            
+                custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -256,7 +259,10 @@ class OlexCctbxAdapter(object):
     nums = [ r.numerator()*(den//r.denominator()) for r in mx ]
     hklf_matrix = sgtbx.rot_mx(nums, den)
     reflections = olx.HKLSrc()
-    mtime = os.path.getmtime(reflections)
+    if reflections:
+      mtime = os.path.getmtime(reflections)
+    else:
+      mtime = time.time()
     merge_code = self.olx_atoms.model.get('merge')
     if (force or
         reflections != olx.current_hklsrc or
@@ -1248,7 +1254,7 @@ def make_DISP_Table():
     try:
       f_B = table_B.at_angstrom(wavelength)
       f_H = table_H.at_angstrom(wavelength)
-    
+
       table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
       table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
       if e != 'H':
@@ -1259,11 +1265,11 @@ def make_DISP_Table():
         table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
       for entry in refined_disp:
         if e in entry[0]:
-          table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))      
+          table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
     except:
       print(f"Error getting value of B & C for {e}")
       f_H = table_H.at_angstrom(wavelength)
-    
+
       table.append(row(["Henke", f_H.fp(), f_H.fdp()]))
       table.append(row(["Brennan & Cowan"]))
       if e != 'H':
@@ -1274,8 +1280,8 @@ def make_DISP_Table():
         table.append(row(["Sasaki", 0, 0]))
       for entry in refined_disp:
         if e in entry[0]:
-          table.append(row([entry[0] + " Refined", entry[1], entry[2]], 'orange', 'white'))       
-    
+          table.append(row([entry[0] + " Refined", entry[1], entry[2]], 'orange', 'white'))
+
   except:
     return empty_data
   html = r"""

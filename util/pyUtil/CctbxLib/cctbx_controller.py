@@ -110,15 +110,40 @@ class reflections(object):
     f_hklf_code = hklf_code
     if f_hklf_code != 3:
       f_hklf_code = 4
-    reflections_server = reflection_file_utils.reflection_file_server(
-      crystal_symmetry = cs,
-      reflection_files = [
-        reflection_file_reader.any_reflection_file(
-          'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
-      ]
-    )
+    if reflection_file:
+      reflections_server = reflection_file_utils.reflection_file_server(
+        crystal_symmetry = cs,
+        reflection_files = [
+          reflection_file_reader.any_reflection_file(
+            'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
+        ]
+      )
+      miller_arrays = reflections_server.get_miller_arrays(None)
+    else:
+      import olex_core
+      from cctbx.xray import observation_types as obs_t
+      refs = olex_core.GetReflections()
+      hklf_matrix = None
+      miller_set = miller.set(
+        crystal_symmetry=cs,
+        indices=flex.miller_index(refs[0])).auto_anomalous()
+      miller_arrays = []
+      base_array_info = miller.array_info(source_type="shelx_hklf")
+      miller_arrays.append(
+        miller.array(
+          miller_set=miller_set,
+          data=flex.double(refs[1]),
+          sigmas=flex.double(refs[2])))
+      miller_arrays[0].set_info(base_array_info.customized_copy(labels=["obs", "sigmas"]))
+      miller_arrays[0].set_observation_type(obs_t.amplitude() if hklf_code == 3 else obs_t.intensity())
+      if refs[3]:
+        miller_arrays.append(
+          miller.array(
+            miller_set=miller_set,
+            data=flex.int(refs[3])))
+        miller_arrays[1].set_info(base_array_info.customized_copy(labels=["batch_numbers"]))
+
     self.crystal_symmetry = cs
-    miller_arrays = reflections_server.get_miller_arrays(None)
     for array in miller_arrays:
       array.info().source = reflection_file.encode("utf-8")
 

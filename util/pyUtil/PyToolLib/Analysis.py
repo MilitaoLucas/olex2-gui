@@ -14,7 +14,7 @@ from ImageTools import ImageTools
 from PIL import ImageFilter
 from ArgumentParser import ArgumentParser
 import math
-import os
+import os, sys
 import gui
 
 try:
@@ -2937,7 +2937,7 @@ class AnomDispPlot(Analysis):
         except:
           print(f"Error getting Value for {e}; Switching to Sasaki; Carefull with interpreting the Plot for {e}!")
           from cctbx.eltbx import sasaki
-          tables = sasaki          
+          tables = sasaki
           t = tables.table(e)
           r = t.at_angstrom(v)
           y[i] = r.fp()
@@ -3783,11 +3783,6 @@ def makeReflectionGraphGui():
 OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
-  if not OV.HKLSrc():
-    print("To make the %s graph, the reflection file must be accessible." % name)
-    print("Are you looking at a CIF file?")
-    print("Try typing 'export' to extract the embedded files from the CIF.")
-    return
   name = name.lower().replace(" ", "_").replace("-", "_")
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
@@ -3819,6 +3814,8 @@ def make_reflection_graph(name):
         func()
       except Exception as e:
         print(e)
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
@@ -3884,7 +3881,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
- 
+
     res = self.initialise_HOS(force=force)
 
     self.hos_text = ""
