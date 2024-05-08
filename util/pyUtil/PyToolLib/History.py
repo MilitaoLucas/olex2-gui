@@ -69,7 +69,7 @@ class History(ArgumentParser):
     else:
       self.strdir = None
     self.datadir = OV.DataDir()
-    self.history_filepath = os.path.join(self.strdir,self.filename) + ".hist5"
+    self.history_filepath = os.path.join(self.strdir,self.filename) + ".hist6"
     self.rename = OV.FindValue('rename')
     self.his_file = None
     OV.registerFunction(self.make_graph,False,'History')
@@ -194,8 +194,10 @@ class History(ArgumentParser):
     global tree
     if os.path.exists(self.history_filepath):
       history_path = self.history_filepath
-    else: # older version
-      history_path = os.path.join(self.strdir,self.filename) + ".hist"
+    else: # older versions
+      history_path = os.path.join(self.strdir,self.filename) + ".hist5"
+      if not os.path.exists(history_path):
+        history_path = os.path.join(self.strdir,self.filename) + ".hist"
     if os.path.exists(history_path):
       tree = variableFunctions.unPickle(history_path)
       if tree is None:
@@ -540,13 +542,11 @@ class HistoryTree(Node):
     try:
       node.dyn = None
       if call_id > 0 and node.cif_od:
-        md = digestData(decompressFile(node.cif_od))
-        self.cif_odFiles.setdefault(md, node.cif_od)
-        node.cif_od = md
+        if len(node.cif_od) != 32: # already upgraded?
+          md = digestData(decompressFile(node.cif_od))
+          self.cif_odFiles.setdefault(md, node.cif_od)
+          node.cif_od = md
     except AttributeError:
-      node.cif_od = None
-    except zlib.error:
-      print("Failed to build cif_od_register")
       node.cif_od = None
     call_id += 1
     for c in node.children:
