@@ -124,6 +124,9 @@ class MapUtil:
       OV.SetVar('olex2.map_type', 'eden')
 
       NoSpherA2 = OV.IsNoSpherA2()
+      # override for ED refinement, people still can use kinematic maps from the GUI
+      if OV.IsEDRefinement():
+        map_source = "cctbx"
       if map_source == "fcf":
         olex.m(cf_cmd + " -fcf")
       elif map_source == "olex":
