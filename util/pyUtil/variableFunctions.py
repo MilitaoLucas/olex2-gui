@@ -339,7 +339,7 @@ def OnStructureLoaded(previous):
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin
     #gui.skin.change_bond_colour()
-  if olx.IsFileType('cif') == 'true':
+  if olx.IsFileType('cif') == 'true' or OV.IsRemoteMode():
     import History
     History.tree = None
   elif previous != OV.FileFull():

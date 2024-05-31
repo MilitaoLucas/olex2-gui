@@ -81,7 +81,7 @@ class History(ArgumentParser):
     if not tree:
       tree = HistoryTree()
     # don't attempt to make a history if a cif is loaded
-    if os.path.splitext(self.filefull)[-1].lower() == '.cif':
+    if os.path.splitext(self.filefull)[-1].lower() == '.cif' or OV.IsRemoteMode():
       return
     files = HistoryFiles(OV.HKLSrc(), self.filefull)
     if self.solve or not tree.children:
