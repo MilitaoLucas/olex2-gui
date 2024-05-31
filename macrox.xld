@@ -80,7 +80,6 @@
       <cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
       <cmd9  "spy.SetParam(snum.refinement_max_cycles,Ins(LS))">
       <cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
-      <cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
       <cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
     >
   >

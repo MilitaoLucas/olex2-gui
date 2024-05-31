@@ -14,6 +14,7 @@ from History import hist
 from olexex import OlexRefinementModel
 
 from olexFunctions import OV, SilentException
+
 debug = OV.IsDebugging()
 timer = debug
 
@@ -222,30 +223,24 @@ class RunPrg(ArgumentParser):
       OV.deleteFileLock(file_lock)
 
   def doHistoryCreation(self, type="normal"):
-    if type == "first":
-      historyPath = "%s/%s.history" %(OV.StrDir(), OV.FileName())
-      if not os.path.exists(historyPath):
-        type = 'normal'
-    if type != "normal":
-      return
+    return
 
   def setupFiles(self):
     olx.User("%s" %OV.FilePath())
     self.filePath = OV.FilePath()
     self.fileName = OV.FileName()
-    self.tempPath = "%s/temp" %OV.StrDir()
-    if not os.path.exists(self.tempPath):
-      os.mkdir(self.tempPath)
+    self.tempPath = os.path.join(OV.StrDir(), "temp")
 
     ## clear temp folder to avoid problems
-    if self.program.name != "olex2.refine":
-      old_temp_files = os.listdir(self.tempPath)
-      for file_n in old_temp_files:
-        try:
-          if "_.res" or "_.hkl" not in file_n:
-            os.remove(r'%s/%s' %(self.tempPath,file_n))
-        except OSError:
-          continue
+    if os.path.exists(self.tempPath):
+      if self.program.name != "olex2.refine":
+        old_temp_files = os.listdir(self.tempPath)
+        for file_n in old_temp_files:
+          try:
+            if "_.res" or "_.hkl" not in file_n:
+              os.remove(r'%s/%s' %(self.tempPath,file_n))
+          except OSError:
+            continue
 
     self.hkl_src = OV.HKLSrc()
     if not os.path.exists(self.hkl_src):
@@ -259,6 +254,10 @@ class RunPrg(ArgumentParser):
     self.curr_file = OV.FileName()
     if self.program.name == "olex2.refine":
       return
+
+    if not os.path.exists(self.tempPath):
+      os.mkdir(self.tempPath)
+
     if olx.xf.GetIncludedFiles():
       files = [(os.path.join(self.filePath, x),os.path.join(self.tempPath, x))
         for x in olx.xf.GetIncludedFiles().split('\n')]
@@ -269,6 +268,21 @@ class RunPrg(ArgumentParser):
         os.path.join(self.tempPath, self.shelx_alias) + ".cif_od"))
       files.append((os.path.join(self.filePath, self.curr_file) + "_dyn.cif_cap",
         os.path.join(self.tempPath, self.shelx_alias) + "_dyn.cif_cap"))
+      # create snum phil with current settings
+      str_dir = os.path.join(self.tempPath, "olex2")
+      if not os.path.exists(str_dir):
+        os.mkdir(str_dir)
+      olx.phil_handler.save_param_file(
+        file_name=os.path.join(str_dir, self.shelx_alias) + ".phil",
+        scope_name='snum', diff_only=True)
+
+      model_src = OV.ModelSrc(force_cif_data=True)
+      metacif_path = os.path.join(OV.StrDir(), model_src) + ".metacif"
+      if os.path.exists(metacif_path):
+        files.append((metacif_path,
+          os.path.join(str_dir, self.shelx_alias) + ".metacif"))
+
+
     files.append((self.hkl_src,
       os.path.join(self.tempPath, self.shelx_alias) + ".hkl"))
     files.append((os.path.join(self.filePath, self.curr_file) + ".ins",
@@ -461,6 +475,8 @@ class RunSolutionPrg(RunPrg):
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
     OV.SetParam('snum.refinement.last_wR2', 'Solution')
+    if OV.isRemoteMode():
+      return None
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
@@ -480,21 +496,24 @@ class RunRefinementPrg(RunPrg):
     OV.registerCallback("procout", self.refinement_observer)
     self.run()
     OV.unregisterCallback("procout", self.refinement_observer)
-    if OV.HasGUI():
-      if self.refinement_has_failed:
-        bg = red
-        fg = white
-        msg = " | ".join(self.refinement_has_failed)
-        if "warning" in msg.lower():
-          bg = orange
-        gui.set_notification("%s;%s;%s" % (msg, bg, fg))
-      elif OV.GetParam('snum.NoSpherA2.use_aspherical') == False:
-        gui.get_default_notification(txt="Refinement Finished",
+    if self.refinement_has_failed:
+      bg = red
+      fg = white
+      msg = " | ".join(self.refinement_has_failed)
+      if "warning" in msg.lower():
+        bg = orange
+      gui.set_notification("%s;%s;%s" % (msg, bg, fg))
+    elif 'srv' in self.program.name:
+      rc_fn = os.path.join(self.tempPath, "olex2", "refinement.check")
+      if os.path.exists(rc_fn):
+        gui.set_notification(open(rc_fn, "r").read())
+    elif not OV.IsNoSpherA2():
+      gui.get_default_notification(txt="Refinement Finished",
+        txt_col='green_text')
+    else:
+      gui.get_default_notification(
+        txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
-      else:
-        gui.get_default_notification(
-          txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
-            txt_col='green_text')
 
   def reset_params(self):
     OV.SetParam('snum.refinement.hooft_str', "")
@@ -513,9 +532,10 @@ class RunRefinementPrg(RunPrg):
       if use_aspherical == True:
         make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
         if make_fcf_only == True:
-          self.make_fcf()
+          from aaff import make_fcf
+          result = make_fcf(self)
         else:
-          result = self.deal_with_AAFF()
+          result = self.method.deal_with_AAFF(self)
       else:
         self.startRun()
         try:
@@ -609,6 +629,8 @@ class RunRefinementPrg(RunPrg):
       olx.Clean('-npd -aq=0.1 -at')
 
   def runAfterProcess(self):
+    if self.terminate:
+      return
     RunPrg.runAfterProcess(self)
     if timer:
       t = time.time()
@@ -638,14 +660,17 @@ class RunRefinementPrg(RunPrg):
       except Exception as e:
         print("Could not determine whether structure inversion is needed: %s" % e)
     if self.program.name == "olex2.refine":
+      from refinement_checks import RefinementChecks
+      rc = RefinementChecks(self.cctbx)
       if OV.GetParam('snum.refinement.check_PDF'):
         try:
-          self.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
+          rc.check_PDF(force=self.params.snum.refinement.auto.remove_anharm)
         except Exception as e:
           print("Could not check PDF: %s" % e)
-      self.check_disp()
-      self.check_occu()
-      self.check_mu() #This is the L-M mu!
+      rc.check_disp()
+      rc.check_occu()
+      rc.check_mu() #This is the L-M mu!
+      self.refinement_has_failed = rc.refinement_has_failed
 
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
@@ -700,7 +725,7 @@ class RunRefinementPrg(RunPrg):
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
       OV.SetParam('snum.refinement.last_wR2',wR2)
-      if not self.params.snum.init.skip_routine:
+      if not (self.params.snum.init.skip_routine or OV.IsRemoteMode()):
         try:
           self.his_file = hist.create_history()
         except Exception as ex:
@@ -708,7 +733,7 @@ class RunRefinementPrg(RunPrg):
           if debug:
             sys.stderr.formatExceptionInfo()
       else:
-        print ("Skipping History")
+        print("Skipping History")
       self.R1 = R1
       self.wR2 = wR2
     else:
@@ -788,542 +813,6 @@ class RunRefinementPrg(RunPrg):
       if (hooft.olex2_adaptor.twin_components is not None and
           hooft.olex2_adaptor.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print(racemic_twin_warning)
-
-  def check_PDF(self, force=False):
-    RM = OlexRefinementModel()
-    any_have_anh = False
-    label_list = []
-    for i, atom in enumerate(RM._atoms):
-      anh_adp = atom.get('anharmonic_adp')
-      if anh_adp == None:
-        continue
-      any_have_anh = True
-      label_list.append(atom['label'])
-    if any_have_anh == True:
-      olex.m("PDF")
-      problem = OV.GetVar("Negative_PDF")
-      Kuhs = OV.GetVar("Kuhs_Rule")
-      err_list = []
-      if problem == True:
-        err_list.append("Negative PDF found")
-        if force == True:
-          print("Making all anharmonic atoms hamrnoic again!")
-          for label in label_list:
-            print(label)
-            olex.m("anis %s" % label)
-      if Kuhs == True:
-        err_list.append("Kuhs' rule not fulfilled")
-      if err_list:
-        self.refinement_has_failed.extend(err_list)
-
-  def check_occu(self):
-    scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
-    wrong_occu = []
-    for sc in scatterers:
-      if sc.flags.grad_occupancy():
-        if sc.occupancy < 0 or sc.occupancy > 1.0:
-          wrong_occu.append(sc.label)
-    if len(wrong_occu) != 0:
-      if len(wrong_occu) == 1:
-        self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupancy")
-      else:
-        _ =  ",".join(wrong_occu)
-        self.refinement_has_failed.append(f"{_} have unreasonable Occupancy")
-
-  def check_disp(self):
-    scatterers = self.cctbx.normal_eqns.xray_structure.scatterers()
-    refined_disp = []
-    for sc in scatterers:
-      if sc.flags.grad_fp() or sc.flags.grad_fdp():
-        fp, fdp = sc.fp, sc.fdp
-        refined_disp.append((sc, fp, fdp))
-    if refined_disp != []:
-      wavelength = float(olx.xf.exptl.Radiation())
-      from cctbx.eltbx import sasaki
-      from cctbx.eltbx import henke
-      from brennan import brennan
-      tables = [sasaki, henke, brennan()]
-      unreasonable_fp = []
-      unreasonable_fdp = []
-      for sc, fp, fdp in refined_disp:
-        e = str(sc.element_symbol())
-        table = []
-        for t in tables:
-          table.append(t.table(e))
-        fp_min_max = [135.0, 0.0]
-        fdp_min_max = [135.0, 0.0]
-        fp_average = 0.0
-        fdp_average = 0.0
-        for t in table:
-          temp = t.at_angstrom(wavelength)
-          fp_average += temp.fp()
-          fdp_average += temp.fdp()
-          fp_min_max = [min(fp_min_max[0], temp.fp()), max(fp_min_max[1], temp.fp())]
-          fdp_min_max = [min(fdp_min_max[0], temp.fdp()), max(fdp_min_max[1], temp.fdp())]
-        fp_average /= len(tables)
-        fdp_average /= len(tables)
-        fpdiff = (fp_min_max[1] - fp_min_max[0])
-        fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
-        if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:
-          unreasonable_fp.append(sc.label)
-        if fdp_average + 2 * fdpdiff < fdp or fdp_average - 2 * fdpdiff > fdp:
-          unreasonable_fdp.append(sc.label)
-      if len(unreasonable_fdp) != 0:
-        if len(unreasonable_fdp) == 1:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s has strongly deviating f''</a>" % unreasonable_fdp[0])
-        else:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s have strongly deviating f''</a>" % ",".join(unreasonable_fdp))
-      if len(unreasonable_fp) != 0:
-        if len(unreasonable_fp) == 1:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s has strongly deviating f'</a>" % unreasonable_fp[0])
-        else:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s have strongly deviating f'</a>" % ",".join(unreasonable_fp))
-
-  def check_mu(self):
-    try:
-      mu = self.cctbx.normal_eqns.iterations_object.mu
-      if mu > 1E1:
-        self.refinement_has_failed.append("Mu of LM is very large!")
-    except AttributeError:
-      return
-
-  def make_fcf(self):
-    from refinement import FullMatrixRefine
-    table = str(OV.GetParam('snum.NoSpherA2.file'))
-    self.startRun()
-    try:
-      self.setupRefine()
-      OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
-      self.setupFiles()
-    except Exception as err:
-      sys.stderr.formatExceptionInfo()
-      print(err)
-      self.endRun()
-      return False
-    if self.terminate:
-      self.endRun()
-      return
-    if self.params.snum.refinement.graphical_output and self.HasGUI:
-      self.method.observe(self)
-    FM = FullMatrixRefine(
-          max_cycles=0,
-          max_peaks=1)
-    ne = FM.run(False,table)
-
-    fcf_cif, fmt_str = FM.create_fcf_content(list_code = 6)
-    with open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w') as f:
-      fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
-    return
-
-  def deal_with_AAFF(self):
-    HAR_log = None
-    try:
-      from cctbx import adptbx
-
-      Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
-      old_model = OlexRefinementModel()
-      converged = False
-      run = 0
-      HAR_log = open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename),"w")
-      HAR_log.write("NoSpherA2 in Olex2 for structure %s\n\n" %(OV.ModelSrc()))
-      import datetime
-      HAR_log.write("Refinement startet at: ")
-      HAR_log.write(str(datetime.datetime.now())+"\n")
-      HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n"+"*" * 110 + "\n")
-      HAR_log.write("{:3d}".format(run))
-      energy = None
-      source = OV.GetParam('snum.NoSpherA2.source')
-      if "Please S" in source:
-        olx.Alert("No tsc generator selected",\
-  """Error: No generator for tsc files selected.
-  Please select one of the generators from the drop-down menu.""", "O", False)
-        OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
-        return
-      if energy == None:
-        HAR_log.write("{:^24}".format(" "))
-      else:
-        HAR_log.write("{:^24.10f}".format(energy))
-      HAR_log.write("{:>70}".format(" "))
-      r1_old = OV.GetParam('snum.refinement.last_R1')
-      wr2_old = OV.GetParam('snum.refinement.last_wR2')
-      if r1_old != "n/a" and r1_old != None:
-        HAR_log.write("{:>6.2f}".format(float(r1_old) * 100))
-      else:
-        HAR_log.write("{:>6}".format("N/A"))
-      if wr2_old != "n/a" and wr2_old != None:
-        HAR_log.write("{:>7.2f}".format(float(wr2_old) * 100))
-      else:
-        HAR_log.write("{:>7}".format("N/A"))
-      HAR_log.write("\n")
-      HAR_log.flush()
-
-      max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
-      calculate = OV.GetParam('snum.NoSpherA2.Calculate')
-      if calculate == True:
-        if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
-          olx.Anis("$H", h=True)
-        if OV.GetParam('snum.NoSpherA2.h_afix') == True:
-          olex.m("Afix 0 $H")
-
-      while converged == False:
-        run += 1
-        HAR_log.write("{:3d}".format(run))
-
-        old_model = OlexRefinementModel()
-        OV.SetVar('Run_number', run)
-        self.refinement_has_failed = []
-
-        #Calculate Wavefunction
-        try:
-          from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
-          v = nsp2.launch()
-          if v == False:
-            print("Error during NoSpherA2! Abnormal Ending of program!")
-            HAR_log.close()
-            return False
-        except NameError as error:
-          print("Error during NoSpherA2:")
-          print(error)
-          RunRefinementPrg.running = None
-          RunRefinementPrg.Terminate = True
-          HAR_log.close()
-          return False
-        Error_Status = OV.GetVar('NoSpherA2-Error')
-        if Error_Status != "None":
-          print("Error in NoSpherA2: %s" %Error_Status)
-          return False
-        tsc_exists = False
-        wfn_file = None
-        for file in os.listdir(olx.FilePath()):
-          if file == os.path.basename(OV.GetParam('snum.NoSpherA2.file')):
-            tsc_exists = True
-          elif file.endswith(".wfn"):
-            wfn_file = file
-          elif file.endswith(".wfx"):
-            wfn_file = file
-          elif file.endswith(".gbw"):
-            wfn_file = file
-          elif file.endswith(".tscb"):
-            tsc_exists = True
-        if tsc_exists == False:
-          print("Error during NoSpherA2: No .tsc file found")
-          RunRefinementPrg.running = None
-          HAR_log.close()
-          return False
-
-        # get energy from wfn file
-        #TODO Check if WFN is new, otherwise skip this!
-        energy = None
-        if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB" or "MATTS" in source or "hakkar" in source:
-          HAR_log.write("{:24}".format(" "))
-        else:
-          if (wfn_file != None) and (calculate == True):
-            if ".gbw" not in wfn_file:
-              with open(wfn_file, "rb") as f:
-                f.seek(-2000, os.SEEK_END)
-                fread = f.readlines()[-1].decode()
-                if "THE VIRIAL" in fread:
-                  source = OV.GetParam('snum.NoSpherA2.source')
-                  if "Gaussian" in source:
-                    energy = float(fread.split()[3])
-                  elif "ORCA" in source:
-                    energy = float(fread.split()[4])
-                  elif "pySCF" in source:
-                    energy = float(fread.split()[4])
-                  elif ".wfn" in source:
-                    energy = float(fread[17:38])
-                  elif "Tonto" in source:
-                    energy = float(fread.split()[4])
-                  else:
-                    energy = 0.0
-            if energy is not None:
-              HAR_log.write("{:^24.10f}".format(energy))
-            else:
-              HAR_log.write("{:24}".format(" "))
-            fread = None
-          else:
-            HAR_log.write("{:24}".format(" "))
-
-        if OV.GetParam('snum.NoSpherA2.run_refine') == True:
-          # Run Least-Squares
-          self.startRun()
-          try:
-            self.setupRefine()
-            OV.File("%s/%s.ins" %(OV.FilePath(),self.original_filename))
-            self.setupFiles()
-          except Exception as err:
-            sys.stderr.formatExceptionInfo()
-            print(err)
-            self.endRun()
-            HAR_log.close()
-            return False
-          if self.terminate:
-            self.endRun()
-            return
-          if self.params.snum.refinement.graphical_output and self.HasGUI:
-            self.method.observe(self)
-          try:
-            RunPrg.run(self)
-            f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
-            if f_obs_sq != None and f_calc != None:
-              nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
-          except Exception as e:
-            e_str = str(e)
-            if ("stoks.size() == scatterer" in e_str):
-              print("Insufficient number of scatterers in .tsc file!\nDid you forget to recalculate after adding or deleting atoms?")
-            elif ("Error during building of normal equations using OpenMP" in e_str):
-              print("Error initializing OpenMP refinement, try disabling it!")
-            elif  ("fsci != sc_map.end()" in e_str):
-              print("An Atom was not found in the .tsc file!\nHave you renamed some and not recalcualted the tsc file?")
-            return
-        else:
-          break
-        new_model=OlexRefinementModel()
-        class results():
-          def __init__(self):
-            self.max_dxyz = 0
-            self.max_duij = 0
-            self.label_uij = None
-            self.label_xyz = None
-            self.r1 = 0
-            self.wr2 = 0
-            self.max_overall = 0
-            self.label_overall = None
-          def update_xyz(self, dxyz, label):
-            if dxyz > self.max_dxyz:
-              self.max_dxyz = dxyz
-              self.label_xyz = label
-              if dxyz > self.max_overall:
-                self.max_overall = dxyz
-                self.label_overall = label
-          def update_uij(self, duij, label):
-            if duij > self.max_duij:
-              self.max_duij = duij
-              self.label_uij = label
-              if duij > self.max_overall:
-                self.max_overall = duij
-                self.label_overall = label
-          def update_overall(self, d, label):
-            if d > self.max_overall:
-              self.max_overall = d
-              self.label_overall = label
-
-        try:
-          jac_tr = self.cctbx.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-          from scitbx.array_family import flex
-          cov_matrix = flex.abs(flex.sqrt(self.cctbx.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
-          esds = jac_tr.transpose() * flex.double(cov_matrix)
-          jac_tr = None
-          annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
-        except:
-          HAR_log.close()
-          print ("Could not obtain cctbx object and calculate ESDs!\n")
-          return False
-        from NoSpherA2.utilities import run_with_bitmap
-        @run_with_bitmap('Analyzing shifts')
-        def analyze_shifts(results):
-          try:
-            matrix_run = 0
-            matrix_size = len(esds)
-            uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
-            for i, atom in enumerate(new_model._atoms):
-              xyz = atom['crd'][0]
-              xyz2 = old_model._atoms[i]['crd'][0]
-              assert matrix_run + 2 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-              if ".x" in annotations[matrix_run]:
-                for x in range(3):
-                  # if parameter is fixed and therefore has 0 esd
-                  if esds[matrix_run] > 0:
-                    res = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
-                    if res > results.max_dxyz:
-                      results.update_xyz(res, annotations[matrix_run])
-                  matrix_run += 1
-              has_adp_new = atom.get('adp')
-              has_adp_old = old_model._atoms[i].get('adp')
-              has_anh_new = atom.get('anharmonic_adp')
-              has_anh_old = old_model._atoms[i].get('anharmonic_adp')
-              if has_adp_new != None and has_adp_old != None:
-                assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                adp = atom['adp'][0]
-                adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
-                adp2 = old_model._atoms[i]['adp'][0]
-                adp2 = (adp2[0], adp2[1], adp2[2], adp2[5], adp2[4], adp2[3])
-                adp = adptbx.u_cart_as_u_cif(uc, adp)
-                adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
-                adp_esds = (esds[matrix_run],
-                            esds[matrix_run + 1],
-                            esds[matrix_run + 2],
-                            esds[matrix_run + 3],
-                            esds[matrix_run + 4],
-                            esds[matrix_run + 5])
-                adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-                for u in range(6):
-                  # if parameter is fixed and therefore has 0 esd
-                  if adp_esds[u] > 0:
-                    res = abs(adp[u] - adp2[u]) / adp_esds[u]
-                    if res > results.max_duij:
-                      results.update_uij(res, annotations[matrix_run + u])
-                matrix_run += 6
-                if matrix_run < len(annotations):
-                  if has_anh_new != None and has_anh_old != None:
-                    order = atom['anharmonic_adp']['order']
-                    if order == 3:
-                        size = 10
-                    elif order == 4:
-                        size = 25
-                    else:
-                        size = 0
-                    assert matrix_run + (size - 1) < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                    if order >= 3:
-                      adp_C = atom['anharmonic_adp']['C']
-                      adp2_C = old_model._atoms[i]['anharmonic_adp']['C']
-                      adp_esds_C = (esds[matrix_run:matrix_run + 10])
-                      for u in range(10):
-                        # if parameter is fixed and therefore has 0 esd
-                        if adp_esds_C[u] > 0:
-                          res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
-                          if res > results.max_overall:
-                            results.update_overall(res, annotations[matrix_run + u])
-                    if order >= 4:
-                      adp_D = atom['anharmonic_adp']['D']
-                      adp2_D = old_model._atoms[i]['anharmonic_adp']['D']
-                      adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
-                      for u in range(14):
-                        # if parameter is fixed and therefore has 0 esd
-                        if adp_esds_D[u] > 0:
-                          res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
-                          if res > results.max_overall:
-                            results.update_overall(res, annotations[matrix_run + u + 10])
-                    matrix_run += size
-              elif has_adp_new != None and has_adp_old == None:
-                assert matrix_run + 5 < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                adp = atom['uiso'][0]
-                adp2 = adptbx.u_cart_as_u_cif(uc, new_model._atoms[i]['adp'][0])
-                adp_esds = (esds[matrix_run], esds[matrix_run + 1], esds[matrix_run + 2], esds[matrix_run + 3], esds[matrix_run + 4], esds[matrix_run + 5])
-                adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
-                for u in range(6):
-                  if esds[matrix_run] > 0:
-                    res = abs(adp - adp2[u]) / adp_esds[u]
-                    if res > results.max_duij:
-                      results.update_uij(res, annotations[matrix_run])
-                matrix_run += 6
-                if matrix_run < len(annotations):
-                  if ".C111" in annotations[matrix_run]:
-                    matrix_run += 25
-              elif has_adp_old == None and has_adp_new == None:
-                if (i != len(new_model._atoms) - 1):
-                  assert matrix_run < matrix_size, "Inconsistent size of annotations and expected parameters!"
-                adp = atom['uiso'][0]
-                adp2 = old_model._atoms[i]['uiso'][0]
-                adp_esd = esds[matrix_run]
-                if esds[matrix_run] > 0:
-                  res = abs(adp - adp2) / adp_esd
-                  if res > results.max_duij:
-                    results.update_uij(res, annotations[matrix_run])
-                matrix_run += 1
-              if matrix_run < len(annotations):
-                if 'occ' in annotations[matrix_run]:
-                  matrix_run += 1
-            HAR_log.write("{:>16.4f}".format(results.max_dxyz))
-            if results.label_xyz != None:
-              HAR_log.write("{:>10}".format(results.label_xyz))
-            else:
-              HAR_log.write("{:>10}".format("N/A"))
-
-            HAR_log.write("{:>10.4f}".format(results.max_duij))
-            if results.label_uij != None:
-              HAR_log.write("{:>12}".format(results.label_uij))
-            else:
-              HAR_log.write("{:>12}".format("N/A"))
-
-            HAR_log.write("{:>10.4f}".format(results.max_overall))
-            if results.label_overall != None:
-              HAR_log.write("{:>12}".format(results.label_overall))
-            else:
-              HAR_log.write("{:>12}".format("N/A"))
-
-            results.r1 = OV.GetParam('snum.refinement.last_R1')
-            results.wr2 = OV.GetParam('snum.refinement.last_wR2')
-
-            HAR_log.write("{:>6.2f}".format(float(results.r1) * 100))
-            HAR_log.write("{:>7.2f}".format(float(results.wr2) * 100))
-
-            HAR_log.write("\n")
-            HAR_log.flush()
-          except Exception as e:
-            HAR_log.write("!!!ERROR!!!\n")
-            HAR_log.close()
-            print("Error during analysis of shifts!")
-            raise e
-
-        r = results()
-        analyze_shifts(r)
-        if calculate == False:
-          converged = True
-          break
-        elif Full_HAR == False:
-          converged = True
-          break
-        elif (r.max_overall <= 0.01):
-          converged = True
-          break
-        elif run == max_cycles:
-          break
-        elif r1_old != "n/a":
-          if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
-            HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
-            self.refinement_has_failed.append("Error: R1 is not behaving nicely! Stopping!")
-            break
-        else:
-          r1_old = r.r1
-          wr2_old = r.wr2
-    except Exception as e :
-      if HAR_log != None:
-        HAR_log.close()
-      raise e
-
-    # Done with the while !Converged
-    OV.SetParam('snum.NoSpherA2.Calculate',False)
-    if converged == False:
-      HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
-      self.refinement_has_failed.append("Warning: Unconverged Model!")
-    if "DISCAMB" in source or "MATTS" in source:
-      unknown_sources = False
-      fn = os.path.join("olex2","Wfn_job","discambMATTS2tsc.log")
-      if not os.path.exists(fn):
-        fn = os.path.join("olex2","Wfn_job","discamb2tsc.log")
-      if not os.path.exists(fn):
-        HAR_log.write("                   !!! WARNING: No output file found! !!!\n")
-        self.refinement_has_failed.append("Output file not found!")
-      else:
-        with open(fn) as discamb_log:
-          for i in discamb_log.readlines():
-            if "unassigned atom types" in i:
-              unknown_sources = True
-            if unknown_sources == True:
-              HAR_log.write(i)
-      if unknown_sources == True:
-        HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
-        self.refinement_has_failed.append("Unassigned Atom Types!")
-    HAR_log.write("*" * 110 + "\n")
-    HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
-    HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
-    HAR_log.write("Residual density RMS:{:+8.3f}\n".format(OV.GetParam('snum.refinement.res_rms')))
-    HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
-    HAR_log.write("Refinement finished at: ")
-    HAR_log.write(str(datetime.datetime.now()))
-    HAR_log.write("\n")
-
-    precise = OV.GetParam('snum.NoSpherA2.precise_output')
-    if precise == True:
-      olex.m("spy.NoSpherA2.write_precise_model_file()")
-
-    HAR_log.flush()
-    HAR_log.close()
-
-    with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
-      print(f.read())
-    return True
 
 def AnalyseRefinementSource():
   file_name = OV.ModelSrc()

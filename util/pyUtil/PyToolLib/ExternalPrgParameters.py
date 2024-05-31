@@ -365,10 +365,9 @@ Palatinus et al., 2012""",
   smtbx_refine.addMethod(levenberg_marquardt)
   RPD.addProgram(smtbx_refine)
 
-  if OV.IsDebugging():
-    smtbx_refine_srv.addMethod(gauss_newton_srv)
-    smtbx_refine_srv.addMethod(levenberg_marquardt_srv)
-    RPD.addProgram(smtbx_refine_srv)
+  smtbx_refine_srv.addMethod(gauss_newton_srv)
+  smtbx_refine_srv.addMethod(levenberg_marquardt_srv)
+  RPD.addProgram(smtbx_refine_srv)
 
   #tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
   #RPD.addProgram(tonto_refine)

@@ -863,7 +863,7 @@ class OlexFunctions(inheritFunctions):
 
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
-      self.GetParam("snum.refinement.program").startswith("olex2.refine")
+      self.GetParam("snum.refinement.program") == "olex2.refine"
 
   def get_diag(self, param):
     v = None
@@ -886,6 +886,9 @@ class OlexFunctions(inheritFunctions):
     return self.IsEDData() and\
       self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic" and\
       self.GetParam("snum.refinement.program").startswith("olex2.refine")
+
+  def IsRemoteMode(self):
+    return 'true' ==olx.GetVar('olex2.remote_mode', 'false')
 
   def GetACI(self):
     import AC7 as ac

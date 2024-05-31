@@ -466,9 +466,6 @@ class ExtractCifInfo(CifTools):
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
     basename = self.filename
     path = self.filepath
-    merge_cif_file = "%s/%s" %(path, "fileextract.cif")
-    cif_file = "%s/%s%s" %(path, basename, ".cif")
-    tmp = "%s/%s" %(path, "tmp.cif")
 
     info = ""
     for p in OV.ListFiles(os.path.join(path, basename + ".cif")):
@@ -477,7 +474,7 @@ class ExtractCifInfo(CifTools):
     versions = self.get_def()
 
     import History
-    active_solution = History.tree.active_child_node
+    active_solution = None if  History.tree is None else History.tree.active_child_node
     all_sources_d = {}
 
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
@@ -531,7 +528,7 @@ class ExtractCifInfo(CifTools):
         '_atom_sites_solution_primary': atom_sites_solution_primary
       }, force = force)
 
-    active_node = History.tree.active_node
+    active_node = None if History.tree is None else History.tree.active_node
 
     if active_node is not None and not active_node.is_solution:
       ## Backwards Compatibility

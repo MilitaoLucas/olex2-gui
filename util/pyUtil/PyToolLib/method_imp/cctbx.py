@@ -18,7 +18,6 @@ class Method_cctbx_refinement(Method_refinement):
       self.version = _
 
   def pre_refinement(self, RunPrgObject):
-    import gui
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
     self.table_file_name = None
@@ -51,7 +50,6 @@ class Method_cctbx_refinement(Method_refinement):
     import time
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
-    import gui
 
     timer = OV.IsDebugging()
     self.failure = True
@@ -120,6 +118,10 @@ class Method_cctbx_refinement(Method_refinement):
     OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
 
+  def deal_with_AAFF(self, RunPrgObject):
+    from aaff import deal_with_AAFF
+    return deal_with_AAFF(RunPrgObject)
+
 class Method_cctbx_refinement_srv(Method_refinement):
   flack = None
   version = "(default)"
@@ -148,15 +150,15 @@ class Method_cctbx_refinement_srv(Method_refinement):
       try:
         s.connect((host, port))
         s.sendall(b"status\n")
-        data = s.recv(1024)
-        print(f"Received {data!r}")
-        while data == b"busy":
+        data = s.recv(1024).decode("utf-8").rstrip('\n')
+        print(f"Received {data}")
+        while data == "busy":
           time.sleep(0.5)
           s.sendall(b"status\n")
-          data = s.recv(1024)
-          print(f"Received {data!r}")
+          data = s.recv(1024).decode("utf-8").rstrip('\n')
+          print(f"Received {data}")
 
-        if data.strip() == b"ready":
+        if data == "ready":
           print("Using Olex2 server on %s" %port)
       except ConnectionRefusedError as ex:
         print("Launching Olex2 server...")
@@ -178,16 +180,18 @@ class Method_cctbx_refinement_srv(Method_refinement):
     return rv
 
   def read_log(self, log):
-    out = "_"
-    while out:
-      out = log.readline().rstrip("\r\n")
+    while True:
+      out = log.readline()
+      if not out:
+        break
+      out = out.rstrip("\r\n")
       if out:
         if out.startswith(">>>") and out.endswith("<<<"):
           marker = out[3:-3]
           txt = self.read_log_markup(log, f"<<<{marker}>>>")
           if marker == "info":
             continue
-          if marker in ("error", "warning", "exceptio"):
+          if marker in ("error", "warning", "exception"):
             olx.Echo('\n'.join(txt), m="error")
           else:
             print('\n'.join(txt))
@@ -201,22 +205,26 @@ class Method_cctbx_refinement_srv(Method_refinement):
     log_fn = os.path.join(OV.StrDir(), "olex2.refine_srv.log")
     cmds = ["run:",
             "xlog:%s" %log_fn,
-            "spy.SetParam(snum.refinement.program,'olex2.refine')",
+            #"spy.DebugInVSC",
+            "SetVar olex2.remote_mode true",
             "SetOlex2RefinementListener(True)",
-            "reap '%s.ins'" %os.path.join(RunPrgObject.tempPath, xl_ins_filename),
+            "reap '%s.ins' -no_save=true" %os.path.join(RunPrgObject.tempPath, xl_ins_filename),
+            "spy.SetParam(snum.refinement.program,'olex2.refine')",
             "spy.ac.diagnose",
-            "refine"]
-    data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode())
-    print(f"Received {data!r}")
-    data = b"busy"
+            "refine"
+            ]
+    data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode()).decode("utf-8").rstrip('\n')
+    print(f"Received {data}")
+    data = "busy"
     with open(log_fn, "r") as log:
-      while data.strip() == b"busy":
+      while data == "busy":
         self.read_log(log)
         time.sleep(0.5)
         data = self.send_cmd(host=host, port=port, cmd=b"status\n")
         olx.Refresh()
         if data is None:
           break
+        data = data.decode("utf-8").rstrip('\n')
       self.read_log(log)
 
   def post_refinement(self, RunPrgObject):
