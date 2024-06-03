@@ -961,83 +961,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
 
     if self.use_tsc and use_aspherical == True:
-      tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
-      if os.path.exists(tsc_file_name):
-        #tsc = open(tsc_file_name, 'r').readlines()
-        #cif_block_found = False
-        tsc_info = """;\n"""
-        #for line in tsc:
-        #  if "CIF:" in line:
-        #    cif_block_found = True
-        #    continue
-        #  if ":CIF" in line:
-        #    break
-        #  if cif_block_found == True:
-        #    tsc_info = tsc_info + line
-        #if not cif_block_found:
-        details_text = """Refinement using NoSpherA2, an implementation of
-NOn-SPHERical Atom-form-factors in Olex2.
-Please cite:
-F. Kleemiss et al. Chem. Sci. DOI 10.1039/D0SC05526C - 2021
-NoSpherA2 implementation of HAR makes use of
-tailor-made aspherical atomic form factors calculated
-on-the-fly from a Hirshfeld-partitioned electron density (ED) - not from
-spherical-atom form factors.
-
-The ED is calculated from a gaussian basis set single determinant SCF
-wavefunction - either Hartree-Fock or DFT using selected funtionals
- - for a fragment of the crystal.
-This fragment can be embedded in an electrostatic crystal field by employing cluster charges
-or modelled using implicit solvation models, depending on the software used.
-The following options were used:
-"""
-        software = OV.GetParam('snum.NoSpherA2.source')
-        details_text = details_text + "   SOFTWARE:       %s\n"%software
-        if software != "DISCAMB":
-          method = OV.GetParam('snum.NoSpherA2.method')
-          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
-          charge = OV.GetParam('snum.NoSpherA2.charge')
-          mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-          partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-          accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
-          if partitioning == True:
-            details_text += "   PARTITIONING:   NoSpherA2\n"
-            details_text += "   INT ACCURACY:   %s\n"%accuracy
-          else:
-            details_text += "   PARTITIONING:   Tonto\n"
-          details_text += "   METHOD:         %s\n"%method
-          details_text += "   BASIS SET:      %s\n"%basis_set
-          details_text += "   CHARGE:         %s\n"%charge
-          details_text += "   MULTIPLICITY:   %s\n"%mult
-          solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
-          if solv != "Vacuum":
-            details_text += "   SOLVATION:      %s\n"%solv
-          if relativistic == True:
-            details_text = details_text + "   RELATIVISTIC:   DKH2\n"
-          if software == "Tonto":
-            radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
-            details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-        tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
-        if os.path.exists(tsc_file_name):
-          f_time = os.path.getctime(tsc_file_name)
-        import datetime
-        f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
-        details_text = details_text + "   DATE:           %s\n"%f_date
-        tsc_info = tsc_info + details_text + ";\n"
-        cif_block['_olex2_refine_details'] = tsc_info
-        if acta_stuff:
-          # remove IAM scatterer reference
-          for sl in ['a', 'b']:
-            for sn in range(1, 5):
-              key = '_atom_type_scat_Cromer_Mann_%s%s' % (sl, sn)
-              if key in cif_block:
-                cif_block.pop(key)
-          if '_atom_type_scat_Cromer_Mann_c' in cif_block:
-            cif_block.pop('_atom_type_scat_Cromer_Mann_c')
-          if '_atom_type_scat_source' in cif_block:
-            for i in range(cif_block['_atom_type_scat_source'].size()):
-              cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
+      from aaff import get_refinement_details
+      get_refinement_details(cif_block, acta_stuff)
+    elif OV.IsEDRefinement():
+      cif_block['_olex2_refine_details'] = OV.GetACI().EDI.describe()
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return "a"
