@@ -282,7 +282,17 @@ BYPASS (a.k.a. SQUEEZE)
         "td1=<td align='left' width="22%">",
         "onclick=spy.NoSpherA2.toggle_GUI()")
       $-
-
+      $+
+        html.Snippet("gui/snippets/input-checkbox-td",
+        "name=USE_CLIENT_MODE@refine",
+        "checked=spy.GetParam(user.refinement.client_mode, false)",
+        "label=Client mode ",
+        "height=0",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
+        "td1=<td align='left' width="22%">",
+        "onclick=spy.SetParam(user.refinement.client_mode, html.GetState(~name~))")
+      $-
+ 
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
 <!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
 #ignoreif -->

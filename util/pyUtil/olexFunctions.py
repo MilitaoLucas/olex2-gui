@@ -890,6 +890,9 @@ class OlexFunctions(inheritFunctions):
   def IsRemoteMode(self):
     return 'true' ==olx.GetVar('olex2.remote_mode', 'false')
 
+  def IsClientMode(self):
+    return self.GetParam('user.refinement.client_mode', False)
+
   def GetACI(self):
     import AC7 as ac
     return ac.get_aci()

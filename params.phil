@@ -350,8 +350,6 @@ routines requiring structure refinement
         .type = str
     }
 
-
-
     auto
       .short_caption = Autotidy
       {
@@ -1090,6 +1088,8 @@ user
     openmp_cpus = 0
       .type = int
     diagnostics = False
+      .type = bool
+    client_mode = False
       .type = bool
   }
 
