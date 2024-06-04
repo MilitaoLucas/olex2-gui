@@ -301,7 +301,7 @@ OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams(no_save='false'):
   if OV.FileName() != 'none' and no_save != 'true':
-    structure_phil_file = "%s/%s.phil" %(OV.StrDir(), OV.ModelSrc())
+    structure_phil_file = os.path.join(OV.StrDir(), OV.ModelSrc()) + ".phil"
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
     auto_save_view = OV.GetParam('user.auto_save_view', False)
@@ -339,10 +339,10 @@ def OnStructureLoaded(previous):
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin
     #gui.skin.change_bond_colour()
-  if olx.IsFileType('cif') == 'true' or OV.IsRemoteMode():
+  if olx.IsFileType('cif') == 'true':
     import History
     History.tree = None
-  elif previous != OV.FileFull():
+  elif previous != OV.FileFull() or OV.IsClientMode():
     import History
     History.hist.loadHistory()
     OV.ResetMaskHKLWarning()
