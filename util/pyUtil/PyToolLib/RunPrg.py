@@ -231,7 +231,10 @@ class RunPrg(ArgumentParser):
     self.fileName = OV.FileName()
     self.tempPath = os.path.join(OV.StrDir(), "temp")
     self.curr_file = OV.FileName()
-
+    fin_file = os.path.join(self.tempPath,
+                      self.curr_file.replace(' ', '').lower()) + ".fin"
+    if os.path.exists(fin_file):
+      os.remove(fin_file)
     # just save snum phil with current settings
     if OV.IsClientMode():
       str_dir = OV.StrDir()

@@ -90,6 +90,7 @@ class Method_client_refinement(Method_refinement):
             "xlog:%s" %log_fn,
             #"spy.DebugInVSC",
             "SetVar olex2.remote_mode true",
+            "spy.SetParam user.refinement.client_mode False",
             "SetOlex2RefinementListener(True)",
             "reap '%s.ins' -no_save=true" %inp_fn,
             "spy.ac.diagnose",
