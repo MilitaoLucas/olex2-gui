@@ -2101,6 +2101,8 @@ user
   diagnostics{
     pin_scopes = True
       .type = bool
+    use_matplotlib = False
+      .type = bool
     use_plotly = False
       .type = bool
     plotly_username = ""
