@@ -294,6 +294,7 @@
       <arg1 name="SOLVE" def='SOLVE'>
     >
     <cmd
+      <cmd0 "spy.SetParam user.refinement.client_mode False">
       <cmd1 "spy.RunSolutionPrg()">
       <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
         spy.GetParam(snum.refinement.method),true)">
