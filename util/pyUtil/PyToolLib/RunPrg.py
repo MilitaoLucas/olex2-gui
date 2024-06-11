@@ -474,7 +474,7 @@ class RunSolutionPrg(RunPrg):
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
     OV.SetParam('snum.refinement.last_wR2', 'Solution')
-    if OV.isClientMode():
+    if OV.IsClientMode():
       return None
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
