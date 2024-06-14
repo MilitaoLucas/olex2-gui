@@ -95,7 +95,7 @@ class Method_client_refinement(Method_refinement):
             "reap '%s.ins' -no_save=true" %inp_fn,
             "spy.ac.diagnose",
             "refine",
-            "spy.saveHistory",
+            #"spy.saveHistory",
             "@close",
             ]
     data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode()).decode("utf-8").rstrip('\n')
@@ -120,3 +120,8 @@ class Method_client_refinement(Method_refinement):
 
   def writeRefinementInfoForGui(self, cif):
     pass
+
+  def runAfterProcess(self, RPO):
+    res_file = os.path.join(RPO.filePath, RPO.curr_file)+".res"
+    if os.path.exists(res_file):
+      olex.f("run(@reap '%s'>>spy.loadHistory>>html.Update)" %res_file)

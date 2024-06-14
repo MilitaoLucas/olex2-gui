@@ -961,10 +961,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
 
     if self.use_tsc and use_aspherical == True:
-      from aaff import get_refinement_details
-      get_refinement_details(cif_block, acta_stuff)
+      import aaff
+      aaff.get_refinement_details(cif_block, acta_stuff)
     elif OV.IsEDRefinement():
-      cif_block['_olex2_refine_details'] = OV.GetACI().EDI.describe()
+      OV.GetACI().EDI.get_refinement_details(cif_block, acta_stuff)
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return "a"
