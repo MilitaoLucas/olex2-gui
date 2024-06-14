@@ -47,7 +47,11 @@ class Method_client_refinement(Method_refinement):
         print("Launching Olex2 server...")
         cd = os.curdir
         os.chdir(olx.BaseDir())
-        subprocess.Popen([os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)])
+        my_env = os.environ.copy()
+        if "OLEX2_ATTACHED_WITH_PYDEBUGGER" in my_env:
+          del my_env["OLEX2_ATTACHED_WITH_PYDEBUGGER"]
+        subprocess.Popen([os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)],
+                        env=my_env)
         os.chdir(cd)
 
   def read_log_markup(self, log, marker):
