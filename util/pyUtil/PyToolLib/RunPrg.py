@@ -76,7 +76,6 @@ class RunPrg(ArgumentParser):
     self.CFOM = 0
     self.HasGUI = OV.HasGUI()
     self.make_unique_names = False
-    self.shelx_files = r"%s/util/SHELX/" %self.basedir
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
     self.please_run_auto_vss = False
@@ -138,6 +137,7 @@ class RunPrg(ArgumentParser):
           print("runAfterProcess: %.3f" %(time.time() - t1))
       if timer:
         t1 = time.time()
+      return True
     except Exception as e:
       e_str = str(e)
       if ("stoks.size() == scatterer" not in e_str)\
@@ -290,7 +290,7 @@ class RunPrg(ArgumentParser):
 
   def runAfterProcess(self):
     if OV.IsClientMode():
-      olex.f("run(@reap '%s'>>spy.loadHistory>>html.Update)" %(os.path.join(self.filePath, self.curr_file)+".res"))
+      self.method.runAfterProcess(self)
       return
     if self.program.name != "olex2.refine":
       if timer:
@@ -529,6 +529,7 @@ class RunRefinementPrg(RunPrg):
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2()
     result = False
+    failed = False
     try:
       if use_aspherical == True:
         make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
@@ -552,15 +553,21 @@ class RunRefinementPrg(RunPrg):
           return
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
-        RunPrg.run(self)
+        failed = not RunPrg.run(self)
     except Exception as err:
       sys.stderr.formatExceptionInfo()
       self.terminate = True
+      failed = True
     finally:
       if result == False:
         self.terminate = True
         if use_aspherical == True:
           self.refinement_has_failed.append("Error during NoSpherA2")
+      # remove res if failed but only for remote run
+      if failed and OV.IsRemoteMode():
+        res_file = os.path.join(self.filePath, self.curr_file)+".res"
+        if os.path.exists(res_file):
+          os.remove(res_file)
       RunRefinementPrg.running = None
 
   def setupRefine(self):
