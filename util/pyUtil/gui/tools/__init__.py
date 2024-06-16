@@ -1514,6 +1514,76 @@ def _get_R_values():
           return R1, wR2
   return R1, wR2
 
+def has_digit(s):
+  return any(char.isdigit() for char in s)
+
+def parse_atominfo(atominfo):
+  atom = atominfo.split(":")[0].strip()
+  if not has_digit(atom):
+    atom += str(random.randint(100, 999))
+  rs = atominfo.split(":")[1].split("(")[0].strip()
+  try:
+    sort = int(re.split('(\d+)', atom)[1])
+  except ValueError:
+    sort = atom
+  return sort, atom, rs
+
+def format_chiral_atoms(chiral_list):
+  if not chiral_list:
+    return "", ""
+  if len(chiral_list) == 1:
+    return chiral_list[0], chiral_list[0]
+  elif len(chiral_list) == 2:
+    listing = " and ".join(chiral_list)
+  else:
+    listing = ", ".join(chiral_list[:-1]) + " and " + chiral_list[-1]
+  description = "The chiral atoms in this structure are: %s" % ", ".join(chiral_list)
+  return description, listing
+
+def get_chiral_atom_info(return_what=""):
+  l = []
+  d = {}
+  cmd = "RSA"
+
+  try:
+    atominfos = gui.tools.scrub(cmd)[1:]
+    if len(atominfos) == 1:
+      t = "This structure is in chiral space group, but there are no chiral atoms"
+      d.update({
+        "chiral_atoms": t,
+        "chiral_atoms_listing": "",
+        "additional_chiral.txt": "",
+        "additional_chiral": ""
+      })
+      OV.SetVar('chiral_first_atom', "")
+      return ""
+
+    for atominfo in atominfos:
+      if ":" not in atominfo:
+        continue
+      sort, atom, rs = parse_atominfo(atominfo)
+      l.append((sort, "%s(%s)" % (atom, rs)))
+      d.setdefault("chiral_atoms", {})[atom] = rs
+
+    l.sort()
+    chiral_atoms_list = [cont for _, cont in l]
+    description, listing = format_chiral_atoms(chiral_atoms_list)
+
+    d.update({
+      "chiral_atoms": description,
+      "chiral_atoms_listing": listing,
+      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else Falsey
+    })
+    
+    OV.SetVar('chiral_first_atom', d['chiral_first_atom'])
+
+  except Exception as err:
+    d["chiral_atoms"] = "There is a problem with finding the chiral atoms"
+    print("An error occurred: %s" % err)
+
+  return d.get(return_what, d)
+
+OV.registerFunction(get_chiral_atom_info)
 
 def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
@@ -1523,8 +1593,6 @@ def GetRInfo(txt="", d_format='html'):
     if d_format == 'html':
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
-
-
 OV.registerFunction(GetRInfo)
 
 
@@ -1538,6 +1606,7 @@ def FormatRInfo(R1, wR2, d_format):
       if R1 == "n/a":
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', 100)
       else:
+
         R1 = float(R1)
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
         R1 = "%.2f" % (R1 * 100)
@@ -2135,14 +2204,20 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     olx.Shell(p)
 
 
-def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
+def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float',max_major_ticks = 6, use_dual=False, dual_style='bar', terms=None):
+
   plot_params = OV.Params().user.graphs.matplotlib
-
-
+  colours =  get_N_HexCol(len(ys))
+  dual_colour = "#efefef"
+  #colours =  generate_color_palette(len(ys))
   if not colours:
-    colours = {"0":{"0":'tab:red', "1":'tab:red'},
-               "1":{"0":'darkgreen', "1":'darkgreen'}
-               }
+    if use_dual:
+      colours = {"0":{"0":'tab:red', "1":'tab:red'},
+                 "1":{"0":'darkgreen', "1":'darkgreen'}
+                 }
+    else:
+      colours =  get_N_HexCol(len(ys))
+    
   if not labels:
     labels=[{'x-label': "",
             'y-label': "",
@@ -2157,82 +2232,106 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
   if x_type == 'float':
     xs = np.array([float(x) for x in xs])
   else:
-    xs = np.array(xs)
+    xs = np.array(xs, dtype=int)
 
+  #y_ll = []
+  #y_l = []
 
-
-  y_ll = []
-  y_l = []
-
-
-  if len(ys) == 0:
-    y_l.append(np.array([float(x) for x in ys[0]]))
-    y_ll.append(y_l)
-  else:
-    for block in ys:
-      y_l = []
-      for data in block:
-        y_l.append(np.array([float(x) for x in data]))
-      y_ll.append(y_l)
+  #if len(ys) == 0:
+    #y_l.append(np.array([float(x) for x in ys[0]]))
+    #y_ll.append(y_l)
+  #else:
+    #for block in ys:
+      #y_l = []
+      #try:
+        #for data in block:
+          #y_l.append(np.array([float(x) for x in data]))
+      #except:
+        #y_l.append(block)
+      #y_ll.append(y_l)
 
   if graphing == 'matplotlib':
     plt = load_matplotlib()
+    from matplotlib.dates import YearLocator, DateFormatter
+    from matplotlib.ticker import MaxNLocator
     if not plt:
       return
     plt.style.use('seaborn-whitegrid')
     plt.grid(True)
     colour = 'grey'
-    ax_colour='black'
+    ax_colour='#666666'
 
-    plt.title(title)
     plt.grid(False)
     fig, ax1 = plt.subplots()
+    
+    #fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)  #plots them on top of each other.
 
     i = 0
-    for y_l in y_ll:
-      if i == 0:
-        j = 0
-        for ys in y_l:
-          if len(y_ll) > 1:
-            ax_colour = colours[str(i)][str(j)]
+    for y in ys:
+      if i not in use_dual or not use_dual:
+        #j = 0
+        #for ys in y_l:
+          #if len(y_ll) > 1:
+            #ax_colour = colours[i]
+        colour = colours[i]
+        marker = "o"
+        label = "Fred"
+        if len(y) != len(xs):
+          y = np.array(y[i])
+          
+        #except:
+          #colour = colour
+          ##if use_dual:
+            ##if len(y_ll) > 1:
+              ##ax_colour = colours[str(i)][str(j)]
+            ##try:
+              ##colour = colours[str(i)][str(j)]
+            ##except:
+              ##colour = colour
+          #else:
+            #colour = colours[i]
+            #ax_colour = 'black'
+          #if j == 0:
+            #marker = "o"
+            #color = colour
+          #else:
+            #marker = "x"
+          #marker = ""
+          #try:
+            #label = labels[i]['series'][j]
+          #except:
+            #label = ""
+        ax1.plot(xs,
+                y,
+                marker,
+                color=colour,
+                markersize=marker_size,
+                linewidth=2,
+                label=label,
+                markerfacecolor='white',
+                markeredgecolor=colour,
+                markeredgewidth=1,
+                )
+        ax1.tick_params(axis='y', labelcolor=ax_colour)
+        ax1.xaxis.set_major_locator(MaxNLocator(max_major_ticks))          
+        ax1.grid(False)
+        if labels:
           try:
-            colour = colours[str(i)][str(j)]
-          except:
-            colour = colour
-          if j == 0:
-            marker = "o"
-            color = colour
-          else:
-            marker = "x"
-          try:
-            label = labels[i]['series'][j]
-          except:
-            label = ""
-          ax1.plot(xs,
-                  ys,
-                  marker,
-                  color=colour,
-                  markersize=marker_size,
-                  linewidth=1,
-                  label=label,
-                  markerfacecolor='white',
-                  markeredgecolor=colour,
-                  markeredgewidth=1,
-                  )
-          ax1.tick_params(axis='y', labelcolor=ax_colour)
-          ax1.grid(False)
-          if labels:
             ax1.set_xlabel(labels[i]['x-label'])
             ax1.set_ylabel(labels[i]['y-label'])
-          j += 1
-      if i == 1:
+          except:
+            pass
+        #j += 1
+      elif i in use_dual:
         ax2 = ax1.twinx()
         j = 0
-        for ys in y_l:
-          if len(y_ll) > 1:
-            ax_colour = colours[str(i)][str(j)]
+        label = "Pferd"
+        for y in ys:
+          #if len(y_ll) > 1:
+            #pass
+            #ax_colour = colours[i]
           try:
-            colour = colours[str(i)][str(j)]
+            colour = colours[i]
           except:
             colour = colour
           if j == 0:
@@ -2245,34 +2344,55 @@ def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6',
             label = labels[i]['series'][j]
           except:
             label = ""
-          ax2.plot(xs,
-                  ys,
-                  marker,
-                  color=colour,
-                  markersize=marker_size,
-                  linewidth=1,
-                  label=labels[i]['series'][j],
-                  markerfacecolor='white',
-                  markeredgecolor=colour,
-                  markeredgewidth=1)
+          if dual_style in ['line', 'markers']:
+            if dual_style == "line":
+              markers = ""
+            ax2.plot(xs,
+                    y[i],
+                    marker,
+                    color=colour,
+                    markersize=marker_size,
+                    linewidth=1,
+                    label=labels[i]['series'][j],
+                    markerfacecolor='white',
+                    markeredgecolor=dual_colour,
+                    markeredgewidth=1)
+          elif dual_style=='bar':
+            ax2.bar(xs, ys, color=dual_colour)
+            plt.xlim(-0.5,len(xs)-.5)
           ax2.tick_params(axis='y', labelcolor=ax_colour)
           ax2.grid(False)
           if labels:
             ax2.set_xlabel(labels[i]['x-label'])
             ax2.set_ylabel(labels[i]['y-label'])
-          j += 1
+          #j += 1
       i += 1
+
+    if use_dual:
+      ax1.set_zorder(ax2.get_zorder()+1)
+    ax1.set_frame_on(False)
+
+    #plt.figure(figsize=(15,8))
 
     loc = "%s %s %s" %(plot_params.legend_in_out,  plot_params.legend_vertical, plot_params.legend_horizontal)
     loc = loc.strip()
 
-    ax1.set_title(title)
-    lines2, labels2 = ax1.get_legend_handles_labels()
-    if len(y_ll) > 1:
-      lines3, labels3 = ax2.get_legend_handles_labels()
-      ax1.legend(lines2 + lines3, labels2 + labels3, loc=loc, bbox_to_anchor=(1, 0.25))
-    else:
-      ax1.legend(lines2, labels2 , loc=loc, bbox_to_anchor=(1, 0.25))
+    ax1.set_title(title, fontname='Consolas', loc="Left")
+    
+    i = 0
+    
+    if terms:
+      for term in terms:
+        term = term.strip("'")
+        plt.text(0.02, 0.95 - i*0.045, term, color=colours[i+1], fontname= "Consolas", fontsize=10, ha='left', transform=plt.gca().transAxes)
+        i += 1
+    
+    #lines2, labels2 = ax1.get_legend_handles_labels()
+    #if len(y_ll) > 1 and use_dual:
+      #lines3, labels3 = ax2.get_legend_handles_labels()
+      #ax1.legend(lines2 + lines3, labels2 + labels3, loc=loc, bbox_to_anchor=(1, 0.25))
+    #else:
+      #ax1.legend(lines2, labels2 , loc=loc, bbox_to_anchor=(1, 0.25))
 
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
@@ -2495,3 +2615,22 @@ def copy_directory(src, dst):
     print(f"Error: {e}")
 
 
+def get_N_HexCol(N=5, a=1, b=0.5, c=0.5):
+  import colorsys
+  HSV_tuples = [(x * a / N, b, c) for x in range(N)]
+  hex_out = []
+  for rgb in HSV_tuples:
+    rgb = map(lambda x: int(x * 255), colorsys.hsv_to_rgb(*rgb))
+    hex_out.append('#%02x%02x%02x' % tuple(rgb))
+  return hex_out
+
+
+def generate_color_palette(n):
+  import colorsys
+  """Generate a color palette with n colors distributed evenly around the color wheel."""
+  hues = [i * (360 / n) for i in range(n)]  # Distribute hues evenly
+
+  # Convert HSL colors to RGB colors
+  colors = [colorsys.hsv_to_rgb(hue / 360, 1.0, 1.0) for hue in hues]
+
+  return colors
