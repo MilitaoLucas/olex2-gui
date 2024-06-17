@@ -34,22 +34,45 @@ $spy.gui.cif.check_for_embedded_hkl()
       <b>Program </b>
     </td>
 
-    <td width='45%'>
+    <td width='35%'>
       <table cellpadding="0" cellspacing="0">
         <tr>
-          <td width='49%'>
+          <td width='61%'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;width='20%';1; -->
           </td>
           <td width='2%'>
           </td>
-          <td width='49%'>
+          <td width='37%'>
 <!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;width='20%';1; -->
           </td>
         </tr>
       </table>
     </td>
 
-    <td align='left' width='11%'>
+<!-- #ignoreif not(strcmp(spy.GetParam(snum.refinement.program),'olex2.refine'))
+    <td width='15%'>
+      $+
+        html.Snippet("gui/snippets/input-checkbox",
+        "name=USE_CLIENT_MODE@refine",
+        "checked=spy.GetParam(user.refinement.client_mode, false)",
+        "label=Client",
+        "height=0",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
+        "td1=<td align='left' width="22%">",
+        "onclick=spy.SetParam(user.refinement.client_mode, html.GetState(~name~))")
+      $-
+      </td>
+#ignoreif -->
+
+
+<!-- #ignoreif strcmp(spy.GetParam(snum.refinement.program),'olex2.refine')
+    <td width='15%'>
+    </td>
+#ignoreif -->
+
+
+
+    <td align='left' width='8%'>
       <b>Cycles </b>
     </td>
       $+
@@ -61,7 +84,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "max=200",
         )
       $-
-    <td align='right' width='12%'>
+    <td align='right' width='8%'>
       <b>Peaks </b>
     </td>
       $+
@@ -282,17 +305,6 @@ BYPASS (a.k.a. SQUEEZE)
         "td1=<td align='left' width="22%">",
         "onclick=spy.NoSpherA2.toggle_GUI()")
       $-
-      $+
-        html.Snippet("gui/snippets/input-checkbox-td",
-        "name=USE_CLIENT_MODE@refine",
-        "checked=spy.GetParam(user.refinement.client_mode, false)",
-        "label=Client mode ",
-        "height=0",
-        "bgcolor=GetVar(HtmlTableFirstcolColour)",
-        "td1=<td align='left' width="22%">",
-        "onclick=spy.SetParam(user.refinement.client_mode, html.GetState(~name~))")
-      $-
- 
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
 <!-- #include NoSpherA2_refine_interface ..\util\pyUtil\NoSpherA2\NoSpherA2_refine_interface.htm;help_ext=NoSpherA2 Refinement;1; -->
 #ignoreif -->
