@@ -159,8 +159,21 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     for row in c:
       for el in row:
         args.append(str(float(el)))
+  shel = olx.Ins('SHEL')
+  omit = olx.Ins('OMIT')
+  d_min = f_sq_obs.d_min()
+  if shel != "n/a":
+    d = float(shel.split()[-1])
+    if d > d_min:
+      d_min = d
+  if omit != "n/a":
+    from cctbx import uctbx
+    d = uctbx.two_theta_as_d(float(omit.split()[-1]),float(olx.xf.exptl.Radiation()),deg=True)
+    if d > d_min:
+      d_min = d
   args.append("-dmin")
-  args.append(str(f_sq_obs.d_min() * 0.95))
+  args.append(str(d_min * 0.95))
+  print("dmin = ", f_sq_obs.d_min())
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
