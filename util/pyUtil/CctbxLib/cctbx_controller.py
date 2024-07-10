@@ -215,7 +215,7 @@ class reflections(object):
                m="warning")
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     hkl = omit.get('hkl')
-    f_sq_obs_filtered = self.f_sq_obs_merged
+    f_sq_obs_filtered = self.f_sq_obs_merged.enforce_positive_amplitudes_shelx(omit['s'])
     if hkl is None: hkl = ()
     if self._shel is None:
       self._shel = {'high' : self.d_min, 'low': -1}
