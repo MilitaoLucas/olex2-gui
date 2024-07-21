@@ -2772,18 +2772,16 @@ class PlotIt():
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
               )
       colour = None
-    if self.plt_params.ax1.style == 'bar':
-      ax.bar(xs, ys, colour)
-      self.plt.xlim(-0.5, len(xs) - .5)
+      ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
+      #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+      #self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+      #self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+
     if lim_x:
       self.plt.xlim(-1 * lim_x, lim_x)
     ax.tick_params(axis='y', labelcolor=ax_colour)
     
-    ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
-    ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
-    ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
-    self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
