@@ -1110,12 +1110,77 @@ user
     {
 
     matplotlib{
+      style = 'seaborn-whitegrid'
+        .type = str
       legend_in_out =  * outside best
         .type = choice
       legend_vertical = *upper center lower
         .type = choice
       legend_horizontal = left center *right
         .type = choice
+      grid = False
+        .type = bool
+      ax_colour = #666666
+        .type = str
+      fig_width = 8
+        .type = int
+      fig_height = 8
+        .type = int
+      font_name = 'Consolas'
+        .type = str
+      title_fontsize = 18
+        .type=int
+      tick_fontsize = 14
+        .type=int
+      axis_fontsize = 14
+        .type=int
+      highlight_colour = #FFAC1C
+        .type = str
+      subplot_ratio = 3
+        .type = int
+      stack = False
+        .type = bool
+      ax1{
+        colour = auto_scale
+          .type = str
+        style = 'line'
+          .type = str
+        marker = "."
+          .type = str
+        marker_size = 1
+          .type = int
+        marker_face_colour = #ff88ff
+          .type = str
+        marker_edge_colour = #ff0000
+          .type = str
+        marker_edge_width = 1
+          .type = int
+        line_width = 1
+          .type = int
+        linestyle = solid
+          .type = str
+        
+        }
+      ax2{
+        colour = auto_scale
+          .type = str
+        style = 'line'
+          .type = str
+        marker = "."
+          .type = str
+        marker_size = 1
+          .type = int
+        marker_face_colour = #ff88ff
+          .type = str
+        marker_edge_colour = #ff0000
+          .type = str
+        marker_edge_width = 1
+          .type = int
+        line_width = 1
+          .type = int
+        linestyle = solid
+          .type = str
+        }
     }
 
 
