@@ -2385,6 +2385,8 @@ user
       .type=str
     port=8899
       .type=int
+    debug=*None Wing VCS Eclipse
+      .type=choice
   }
 }
 

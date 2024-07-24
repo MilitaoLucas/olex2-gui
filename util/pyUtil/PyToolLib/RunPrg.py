@@ -119,6 +119,10 @@ class RunPrg(ArgumentParser):
       print("Already running. Please wait...")
       return
     RunPrg.running = self
+    if  OV.IsRemoteMode():
+      res_file = os.path.join(self.filePath, self.curr_file)+".res"
+      if os.path.exists(res_file):
+        os.remove(res_file)
     caught_exception = None
     try:
       token = TimeWatch.start("Running %s" %self.program.name)
@@ -529,7 +533,6 @@ class RunRefinementPrg(RunPrg):
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2()
     result = False
-    failed = False
     try:
       if use_aspherical == True:
         make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
@@ -553,21 +556,16 @@ class RunRefinementPrg(RunPrg):
           return
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
-        failed = not RunPrg.run(self)
+        RunPrg.run(self)
     except Exception as err:
       sys.stderr.formatExceptionInfo()
       self.terminate = True
-      failed = True
     finally:
       if result == False:
         self.terminate = True
         if use_aspherical == True:
           self.refinement_has_failed.append("Error during NoSpherA2")
       # remove res if failed but only for remote run
-      if failed and OV.IsRemoteMode():
-        res_file = os.path.join(self.filePath, self.curr_file)+".res"
-        if os.path.exists(res_file):
-          os.remove(res_file)
       RunRefinementPrg.running = None
 
   def setupRefine(self):
