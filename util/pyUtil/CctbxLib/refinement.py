@@ -1635,8 +1635,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.Refresh()
 
   def show_summary(self, log=None):
-    import sys
-
     _ = self.cycles.n_iterations
     plural = "S"
     if _ == 1:
@@ -1701,7 +1699,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       .apply_scaling(factor=1/self.normal_eqns.scale_factor())
 
     if show_in_console:
-      result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
+      result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=sys.stdout)
     else:
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
 
@@ -1715,7 +1713,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     olex_core.SetBadReflections(bad_refs.__iter__())
 
   def show_comprehensive_summary(self, log=None):
-    import sys
     if log is None: log = sys.stdout
     self.show_summary(log)
     standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
