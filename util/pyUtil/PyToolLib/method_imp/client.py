@@ -29,6 +29,7 @@ class Method_client_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
     host = OV.GetParam("user.Server.host")
     port = OV.GetParam("user.Server.port")
+    debug = OV.GetParam("user.Server.debug")
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
       try:
         s.connect((host, port))
@@ -48,10 +49,11 @@ class Method_client_refinement(Method_refinement):
         cd = os.curdir
         os.chdir(olx.BaseDir())
         my_env = os.environ.copy()
-        if "OLEX2_ATTACHED_WITH_PYDEBUGGER" in my_env:
+        if "OLEX2_ATTACHED_WITH_PYDEBUGGER" in my_env and debug != "Wing":
           del my_env["OLEX2_ATTACHED_WITH_PYDEBUGGER"]
-        subprocess.Popen([os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)],
-                        env=my_env)
+        subprocess.Popen(
+          [os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port)],
+          env=my_env)
         os.chdir(cd)
 
   def read_log_markup(self, log, marker):
@@ -90,9 +92,10 @@ class Method_client_refinement(Method_refinement):
     port = OV.GetParam("user.Server.port")
     log_fn = os.path.join(OV.StrDir(), "olex2.refine_srv.log")
     inp_fn = os.path.join(RunPrgObject.filePath, RunPrgObject.original_filename)
+    debug = OV.GetParam("user.Server.debug")
     cmds = ["run:",
             "xlog:%s" %log_fn,
-            #"spy.DebugInVSC",
+            "spy.DebugInVSC" if debug=="VSC" else "",
             "SetVar olex2.remote_mode true",
             "spy.SetParam user.refinement.client_mode False",
             "SetOlex2RefinementListener(True)",

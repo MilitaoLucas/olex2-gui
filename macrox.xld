@@ -86,25 +86,6 @@
 >
 
 
-<onexit help="Executes on program exit"
-  <body
-    <args
-    >
-
-  <cmd
-    <cmd1  "echo Good Bye">
-    <cmd2  "spy.saveHistory()">
-    <cmd3  x="spy.pickleVVD(structure)">
-    <cmd4  x="storeparam startup filefull()">
-    <cmd26 "stop logging">
->
-
-  <onterminate
-  >
->
->
-
-
 <report help="Creates structure report"
   <body
     <args
