@@ -602,7 +602,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         OV.SetVar('NoSpherA2-Error', "NoORCAMMFile")
         raise NameError("No MM File for ORCA file generated!")
 
-  def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None):
+  def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     ECP = False
     if basis_name == None:
@@ -796,6 +796,17 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         scf_block += "   DampMax 0.8\n"
       elif strategy == "EasyConv":
         scf_block += "   DampMax 0.72\n"
+    if not efield == None:
+      amp = float(efield[1:])
+      direction = efield[0]
+      if direction == "x":
+        scf_block += f"    EField {amp}, 0.0, 0.0"
+      elif direction == "y":
+        scf_block += f"    EField 0.0, {amp}, 0.0"
+      elif direction == "z":
+        scf_block += f"    EField 0.0, 0.0, {amp}"
+      if direction != "0":
+        scf_block += f"   Guess MORead\n   MOInp \"zero.gbw\"\n"
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
       source = OV.GetParam('snum.NoSpherA2.source')
@@ -1597,7 +1608,7 @@ ener = cf.kernel()"""
       inp.close()
 
   @run_with_bitmap('Calculating WFN')
-  def run(self,part=0,software=None,basis_name=None):
+  def run(self,part=0,software=None,basis_name=None, copy = True):
     args = []
     if basis_name == None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -1897,60 +1908,60 @@ ener = cf.kernel()"""
       else:
         OV.SetVar('NoSpherA2-Error', "NoMoldenFile")
         raise NameError("No molden file generated!")
+    if copy == True:
+      if("g03" in args[0]):
+        shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
+        shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
+        if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("g09" in args[0]):
+        shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+        shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g09.log"))
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("g16" in args[0]):
+        shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+        shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g16.log"))
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("orca" in args[0]):
+        if software == "ORCA 5.0" or software == "ORCA 6.0":
+          if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
+            shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
+      elif("xtb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
+          shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
+          shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
+      elif("ptb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
+          shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
+          shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))    
+      elif("elmodb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif(software == "Psi4"):
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
+      elif software == "pySCF":
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 
-    if("g03" in args[0]):
-      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
-      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("g09" in args[0]):
-      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
-      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g09.log"))
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("g16" in args[0]):
-      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
-      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g16.log"))
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("orca" in args[0]):
-      if software == "ORCA 5.0" or software == "ORCA 6.0":
-        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
-          shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
-    elif("xtb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
-        shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
-        shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
-    elif("ptb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
-        shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
-        shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))    
-    elif("elmodb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif(software == "Psi4"):
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
-    elif software == "pySCF":
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
 
-    experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-
-    if (experimental_SF == False) and ("g" not in args[0]):
-      self.convert_to_fchk()
+      if (experimental_SF == False) and ("g" not in args[0]):
+        self.convert_to_fchk()
   @run_with_bitmap("Converting to .fchk")
   def convert_to_fchk(self):
     move_args = []
