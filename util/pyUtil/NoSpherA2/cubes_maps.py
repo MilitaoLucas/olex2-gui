@@ -799,7 +799,8 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
         s = 1
       else:
         s = abs(f_calc.data()[i])/mfc
-      new_data.append(math.sqrt(I_obs.data()[i])*s)
+      Io = I_obs.data()[i]
+      new_data.append(0 if Io < 0 else math.sqrt(Io)*s)
     I_obs = I_obs.customized_copy(data=flex.double(new_data))
     f_diff = I_obs.f_obs_minus_f_calc(1. , f_calc)
     f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
