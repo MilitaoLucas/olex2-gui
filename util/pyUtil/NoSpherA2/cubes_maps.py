@@ -177,7 +177,7 @@ def calculate_cubes():
     print("A problem with pyl is encountered, aborting.")
     return
   subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
-OV.registerFunction(calculate_cubes,True,'NoSpherA2')
+OV.registerFunction(calculate_cubes,False,'NoSpherA2')
 
 def get_map_types():
   name = OV.ModelSrc()
@@ -219,7 +219,7 @@ def get_map_types():
   if list == "":
     return "None;"
   return list
-OV.registerFunction(get_map_types,True,'NoSpherA2')
+OV.registerFunction(get_map_types,False,'NoSpherA2')
 
 def change_map():
   Type = OV.GetParam('snum.NoSpherA2.map.type')
@@ -264,12 +264,12 @@ def change_map():
   else:
     print("Sorry, no map type available or selected map type not correct!")
     return
-OV.registerFunction(change_map,True,'NoSpherA2')
+OV.registerFunction(change_map,False,'NoSpherA2')
 
 def change_pointsize():
   PS = OV.GetParam('snum.NoSpherA2.gl_pointsize')
   olex.m('gl.PointSize ' + PS)
-OV.registerFunction(change_pointsize,True,'NoSpherA2')
+OV.registerFunction(change_pointsize,False,'NoSpherA2')
 
 def plot_cube(name, color_cube):
   if not os.path.isfile(name):
@@ -453,7 +453,7 @@ def plot_cube(name, color_cube):
     olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
-OV.registerFunction(plot_cube,True,'NoSpherA2')
+OV.registerFunction(plot_cube,False,'NoSpherA2')
 
 def plot_cube_single(name):
   if not os.path.isfile(name):
@@ -519,7 +519,7 @@ def plot_cube_single(name):
     OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
     olex.m("html.Update()")
 
-OV.registerFunction(plot_cube_single,True,'NoSpherA2')
+OV.registerFunction(plot_cube_single,False,'NoSpherA2')
 
 def save_map_cube(map_type, resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
@@ -584,7 +584,7 @@ def save_map_cube(map_type, resolution):
 
   print("Saved Fourier map successfully")
 
-OV.registerFunction(save_map_cube, True, 'NoSpherA2')
+OV.registerFunction(save_map_cube, False, 'NoSpherA2')
 
 def get_color(value):
   a = 127
@@ -632,7 +632,7 @@ def get_color(value):
   if value == "0.00101":
     print(rgba)
   return rgba
-OV.registerFunction(get_color,True,'NoSpherA2')
+OV.registerFunction(get_color,False,'NoSpherA2')
 
 def is_colored():
   Type = OV.GetParam('snum.NoSpherA2.map.type')
@@ -642,7 +642,7 @@ def is_colored():
     return True
   else:
     return False
-OV.registerFunction(is_colored,True,'NoSpherA2')
+OV.registerFunction(is_colored,False,'NoSpherA2')
 
 def plot_fft_map(fft_map):
   if fft_map is None:
@@ -671,7 +671,7 @@ def plot_fft_map(fft_map):
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
   print("Map size: %d x %d x %d"%(fft_map.n_real()[0],fft_map.n_real()[1],fft_map.n_real()[2]))
 
-OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
+OV.registerFunction(plot_fft_map, False, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   if not OV.HasGUI():
