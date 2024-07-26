@@ -953,10 +953,92 @@ def get_tsc_file_dropdown_items():
         return res
 OV.registerFunction(get_tsc_file_dropdown_items, False, "NoSpherA2")
 
-def show_reciprocal_space():
-  import reciprocal_show
-  app = QApplication(sys.argv)
-  window = MainWindow()
-  window.show()
-  app.exec_()
-OV.registerFunction(show_reciprocal_space, profiling=False, namespace="NoSpherA2")
+@run_with_bitmap("Polarizibilities")
+def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
+  from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+  from . import Wfn_Job
+  pol_fol =  os.path.join("olex2", "Polarizability")
+  if not os.path.exists(pol_fol):
+    try:
+      os.mkdir(pol_fol)
+    except:
+      pass
+  OV.SetVar("Run_number", 0)
+  wfn_job = Wfn_Job.wfn_Job(nsp2, olx.FileName(), dir="olex2\\Polarizability")
+  wfn_job.write_orca_input(True, efield="00")
+  wfn_job.run(copy=False)
+  gbw_name = os.path.join(pol_fol, olx.FileName() + ".gbw")
+  zero =  os.path.join(pol_fol, "zero.gbw")
+  shutil.move(gbw_name, zero)
+  wfn_job.write_orca_input(True, efield=f"x{efield}")
+  wfn_job.run(copy=False)
+  xp = os.path.join(pol_fol, "xp.gbw")
+  shutil.move(gbw_name, xp)
+  wfn_job.write_orca_input(True, efield=f"x-{efield}")
+  wfn_job.run(copy=False)
+  xm = os.path.join(pol_fol, "xm.gbw")
+  shutil.move(gbw_name, xm)
+  wfn_job.write_orca_input(True, efield=f"y{efield}")
+  wfn_job.run(copy=False)
+  yp = os.path.join(pol_fol, "yp.gbw")
+  shutil.move(gbw_name, yp)
+  wfn_job.write_orca_input(True, efield=f"y-{efield}")
+  wfn_job.run(copy=False)
+  ym = os.path.join(pol_fol, "ym.gbw")
+  shutil.move(gbw_name, ym)
+  wfn_job.write_orca_input(True, efield=f"z{efield}")
+  wfn_job.run(copy=False)
+  zp = os.path.join(pol_fol, "zp.gbw")
+  shutil.move(gbw_name, zp)
+  wfn_job.write_orca_input(True, efield=f"z-{efield}")
+  wfn_job.run(copy=False)
+  zm = os.path.join(pol_fol, "zm.gbw")
+  shutil.move(gbw_name, zm)
+  args = []
+  NSP2_exe = OV.GetVar("Wfn2Fchk")
+  args.append(NSP2_exe)
+  args.append("-polarizabilities")
+  args.append(zero)
+  args.append(xp)
+  args.append(xm)
+  args.append(yp)
+  args.append(ym)
+  args.append(zp)
+  args.append(zm)
+  args.append("-e_field")
+  args.append(str(efield))
+  args.append("-resolution")
+  args.append(str(resolution))
+  args.append("-radius")
+  args.append(str(radius))
+  args.append("-cpus")
+  args.append(OV.GetParam("snum.NoSpherA2.ncpus"))
+  
+  startinfo = None
+
+  from subprocess import Popen, PIPE
+  from sys import stdout
+  if sys.platform[:3] == 'win':
+    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW, SW_HIDE
+    startinfo = STARTUPINFO()
+    startinfo.dwFlags |= STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = SW_HIDE
+
+  if startinfo == None:
+    with Popen(args, stdout=PIPE) as p:
+      for c in iter(lambda: p.stdout.read(1), b''):
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+  else:
+    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+      for c in iter(lambda: p.stdout.read(1), b''):
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+  
+  NSA2_log = "NoSpherA2.log"
+  if os.path.exists(NSA2_log):
+    shutil.copy(NSA2_log, olx.FileName()+".polarizability")
+    
+OV.registerFunction(calc_polarizabilities, namespace="NoSpherA2")

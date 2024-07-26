@@ -53,6 +53,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         olx.Anis("$H", h=True)
       if OV.GetParam('snum.NoSpherA2.h_afix') == True:
         olex.m("Afix 0 $H")
+      else:
+        print("Setting all AFIX H Atoms to Neutron distances")
+        olex.m("NeutronHDist")
     while converged == False:
       run += 1
       HAR_log.write("{:3d}".format(run))
