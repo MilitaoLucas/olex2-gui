@@ -436,7 +436,7 @@ class wfn_Job(object):
         else:
           control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
-      if software == "ORCA 5.0":
+      if software == "ORCA 5.0" or software == "ORCA 6.0":
         grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
@@ -647,7 +647,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       elif software == "fragHAR":
         software = "ORCA 5.0"
-      if software == "ORCA 5.0":
+      if software == "ORCA 5.0" or software == "ORCA 6.0":
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL == True:
           if method != "wB97X":
@@ -708,7 +708,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM(" + Solvation + ") "
     GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
-    if "5.0" not in OV.GetParam("snum.NoSpherA2.source"):
+    if "5.0" not in OV.GetParam("snum.NoSpherA2.source") and "6.0" not in OV.GetParam("snum.NoSpherA2.source"):
       GBW_file = False
     if GBW_file == False:
       control += " AIM "
@@ -718,7 +718,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     if mult == 0:
       mult = 1
-    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    inp.write(control + ' NOTRAH\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
     for line in xyz:
@@ -1617,7 +1617,7 @@ ener = cf.kernel()"""
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
       args.append(input_fn)
-    if software == "ORCA 5.0" or software == "fragHAR":
+    if software == "ORCA 5.0" or software == "fragHAR" or software == "ORCA 6.0":
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
       args.append(input_fn)
@@ -1829,7 +1829,7 @@ ener = cf.kernel()"""
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
     shutil.copy(out_fn, wfnlog, follow_symlinks=False)
 
-    if software == "ORCA" or software == "ORCA 5.0":
+    if software == "ORCA 6.0" or software == "ORCA 5.0":
       if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
         pass
       else:
@@ -1920,7 +1920,7 @@ ener = cf.kernel()"""
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
         shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
     elif("orca" in args[0]):
-      if software == "ORCA 5.0":
+      if software == "ORCA 5.0" or software == "ORCA 6.0":
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
       if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
