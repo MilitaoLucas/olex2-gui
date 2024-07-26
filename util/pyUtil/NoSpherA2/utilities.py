@@ -70,7 +70,7 @@ def write_merged_hkl():
     f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
     f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   print("Done!")
-OV.registerFunction(write_merged_hkl, True, "NoSpherA2")
+OV.registerFunction(write_merged_hkl, False, "NoSpherA2")
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
@@ -351,8 +351,8 @@ def get_ncen():
   values = line.split()
   return values[6]
 
-OV.registerFunction(get_nmo,True,'NoSpherA2')
-OV.registerFunction(get_ncen, True, 'NoSpherA2')
+OV.registerFunction(get_nmo, False, 'NoSpherA2')
+OV.registerFunction(get_ncen, False, 'NoSpherA2')
 
 @run_with_bitmap("Combining .tsc")
 def combine_tscs(match_phrase="_part_", no_check=False):
@@ -429,7 +429,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     olx.html.Update()
   return True
 
-OV.registerFunction(combine_tscs,True,'NoSpherA2')
+OV.registerFunction(combine_tscs, False, 'NoSpherA2')
 
 def deal_with_parts():
   parts = OV.ListParts()
@@ -472,7 +472,7 @@ def deal_with_parts():
     # I will return only a simple sequence which maps onto the calculations to be done
     olex.m("showp")
     return result, groups
-OV.registerFunction(deal_with_parts, True, 'NoSpherA2')
+OV.registerFunction(deal_with_parts, False, 'NoSpherA2')
 
 def check_for_matching_fcf():
   p = OV.FilePath()
@@ -482,7 +482,7 @@ def check_for_matching_fcf():
     return True
   else:
     return False
-OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
+OV.registerFunction(check_for_matching_fcf, False, 'NoSpherA2')
 
 def check_for_matching_wfn():
   p = OV.FilePath()
@@ -498,7 +498,7 @@ def check_for_matching_wfn():
     return True
   else:
     return False
-OV.registerFunction(check_for_matching_wfn,True,'NoSpherA2')
+OV.registerFunction(check_for_matching_wfn, False, 'NoSpherA2')
 
 def read_disorder_groups():
   inp = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
@@ -518,7 +518,7 @@ def read_disorder_groups():
       else:
         result[i].append(int(part))
   return result
-OV.registerFunction(read_disorder_groups, True, 'NoSpherA2')
+OV.registerFunction(read_disorder_groups, False, 'NoSpherA2')
 
 def is_disordered():
   parts = OV.ListParts()
@@ -526,7 +526,7 @@ def is_disordered():
     return False
   else:
     return True
-OV.registerFunction(is_disordered, True, 'NoSpherA2')
+OV.registerFunction(is_disordered, False, 'NoSpherA2')
 
 def software():
   return OV.GetParam('snum.NoSpherA2.source')
@@ -550,6 +550,7 @@ def org_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
+
 def org_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
   if "Tonto" in software():
@@ -572,6 +573,7 @@ def org_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_small, False, "NoSpherA2")
+
 def org_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
   if "Tonto" in software():
@@ -617,12 +619,13 @@ def light_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_min, False, "NoSpherA2")
+
 def light_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -639,6 +642,7 @@ def light_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
+
 def light_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
   if "Tonto" in software():
@@ -684,6 +688,7 @@ def heavy_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_min, False, "NoSpherA2")
+
 def heavy_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
   if "Tonto" in software():
@@ -706,6 +711,7 @@ def heavy_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_small, False, "NoSpherA2")
+
 def heavy_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
   if "Tonto" in software():
@@ -946,3 +952,11 @@ def get_tsc_file_dropdown_items():
     else:
         return res
 OV.registerFunction(get_tsc_file_dropdown_items, False, "NoSpherA2")
+
+def show_reciprocal_space():
+  import reciprocal_show
+  app = QApplication(sys.argv)
+  window = MainWindow()
+  window.show()
+  app.exec_()
+OV.registerFunction(show_reciprocal_space, profiling=False, namespace="NoSpherA2")

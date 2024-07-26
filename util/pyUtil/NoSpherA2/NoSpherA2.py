@@ -227,6 +227,11 @@ class NoSpherA2(PT):
                 shutil.move(f_work, f_dest)
               else:
                 shutil.move(os.path.join(wfn_job_dir, f), os.path.join(wfn_job_dir, self.name + "2.gbw"))
+            elif self.wfn_code == "ORCA 6.0":
+              if ".gbw" not in f:
+                shutil.move(f_work, f_dest)
+              else:
+                shutil.move(os.path.join(wfn_job_dir, f), os.path.join(wfn_job_dir, self.name + "2.gbw"))
             elif "Gaussian" in self.wfn_code:
               if ".chk" not in f:
                 shutil.move(f_work, f_dest)
@@ -511,7 +516,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             elif os.path.exists(path_base + ".wfn"):
               wfn_fn = path_base + ".wfn"
             elif os.path.exists(path_base + ".gbw"):
-              if (wfn_fn == None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk") and "5.0" in wfn_code):
+              if (wfn_fn == None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk") and "5.0" in wfn_code or "6.0" in wfn_code):
                 wfn_fn = path_base + ".gbw"
             elif os.path.exists(path_base + ".molden"):
               wfn_fn = path_base + ".molden"
@@ -617,7 +622,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = wfn_code
             else:
               endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
-              if "5.0" in wfn_code:
+              if "5.0" or "6.0" in wfn_code:
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
                 wfn_fn = path_base + ".xyz"
@@ -681,7 +686,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return
     elif software == "ORCA":
       wfn_object.write_orca_input(xyz)
-    elif software == "ORCA 5.0":
+    elif software == "ORCA 5.0" or software == "ORCA 6.0":
       embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
       if embedding == True:
         wfn_object.write_orca_crystal_input(xyz)
@@ -719,7 +724,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d"%part)
       if software_part == "ORCA":
         wfn_object.write_orca_input(xyz,basis_part,method_part,relativistc,charge,mult,strategy,conv,part)
-      elif software_part == "ORCA 5.0":
+      elif software_part == "ORCA 5.0" or software_part == "ORCA 6.0":
         wfn_object.write_orca_input(xyz,basis_part,method_part,relativistc,charge,mult,strategy,conv,part)
       elif software_part == "Gaussian03":
         wfn_object.write_gX_input(xyz,basis_part,method_part,relativistc,charge,mult,part)
@@ -938,7 +943,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if os.path.exists(self.orca_exe):
       OV.SetParam('snum.NoSpherA2.source',"ORCA")
       if "ORCA" not in self.softwares:
-        self.softwares = self.softwares + ";ORCA;ORCA 5.0"
+        self.softwares = self.softwares + ";ORCA;ORCA 5.0;ORCA 6.0"
     else:
       self.softwares = self.softwares + ";Get ORCA"
 
@@ -1050,7 +1055,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     for basis in BL:
       if self.check_for_atom_in_basis_set(basis, XRS, elements):
         final_string += basis + ";"
-    if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid":
+    if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0":
       if max_Z <= 86 and max_Z > 36:
         return final_string + ";ECP-def2-SVP;ECP-def2-TZVP;ECP-def2-TZVPP;ECP-def2-QZVP;ECP-def2-QZVPP"
     return final_string
@@ -1405,7 +1410,7 @@ The following options were used:
         write_file.write(line)
   write_file.close()
 
-OV.registerFunction(add_info_to_tsc,True,'NoSpherA2')
+OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
@@ -1415,7 +1420,7 @@ def change_basisset(input):
     OV.SetParam('snum.NoSpherA2.Relativistic',True)
   else:
     OV.SetParam('snum.NoSpherA2.Relativistic',False)
-OV.registerFunction(change_basisset,True,'NoSpherA2')
+OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
   if wfn_code == None:
@@ -1427,12 +1432,14 @@ def get_functional_list(wfn_code=None):
     list = "HF;PBE;B3LYP;BLYP;M062X"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
+  elif wfn_code == "ORCA 6.0":
+    list = "HF;BP;PWLDA;R2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
   else:
     list = "HF;BP;BP86;PWLDA;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;"
   return list
-OV.registerFunction(get_functional_list,True,'NoSpherA2')
+OV.registerFunction(get_functional_list,False,'NoSpherA2')
 
 def check_for_pyscf(loud=True):
   ubuntu_exe = None
@@ -1617,7 +1624,7 @@ Home -> Settings -> PATH""", "O", False)
     else:
       OV.SetParam('snum.NoSpherA2.h_aniso', False)
       OV.SetParam('snum.NoSpherA2.h_afix', False)
-OV.registerFunction(change_tsc_generator,True,'NoSpherA2')
+OV.registerFunction(change_tsc_generator,False,'NoSpherA2')
 
 def set_default_cpu_and_mem():
   import math
@@ -1671,7 +1678,7 @@ def set_default_cpu_and_mem():
   if update == False:
     OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
   OV.SetParam('snum.NoSpherA2.mem', str(tf_mem))
-OV.registerFunction(set_default_cpu_and_mem,True,'NoSpherA2')
+OV.registerFunction(set_default_cpu_and_mem,False,'NoSpherA2')
 
 def toggle_GUI():
   use = OV.IsNoSpherA2()
@@ -1683,7 +1690,7 @@ def toggle_GUI():
     set_default_cpu_and_mem()
   if OV.HasGUI():
     olx.html.Update()
-OV.registerFunction(toggle_GUI,True,'NoSpherA2')
+OV.registerFunction(toggle_GUI,False,'NoSpherA2')
 
 def sample_folder(input_name):
   import shutil
