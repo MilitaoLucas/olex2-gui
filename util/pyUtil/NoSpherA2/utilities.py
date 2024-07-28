@@ -536,7 +536,10 @@ def org_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    else:
+      OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
     OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
@@ -556,7 +559,7 @@ def org_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -579,7 +582,7 @@ def org_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -602,7 +605,7 @@ def light_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -648,7 +651,7 @@ def light_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -671,7 +674,7 @@ def heavy_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -694,7 +697,7 @@ def heavy_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -717,7 +720,7 @@ def heavy_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
+    if "5.0" in software() or "6.0" in software():
       OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
