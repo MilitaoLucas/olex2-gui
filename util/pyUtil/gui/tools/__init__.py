@@ -1432,7 +1432,7 @@ def GetDPRInfo():
       name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
   image = """
   <input
-  name="BATTERY-EDIT"
+  name="BATTERY-EDTT"
   type="button"
   align="center"
   image="%s"
@@ -2680,6 +2680,7 @@ class PlotIt():
 
     filename = dd["filename"]
     title= dd["title"]
+    second_title = dd["second_title"]
     
     n_plots = len(dd['data'])
 
@@ -2703,9 +2704,11 @@ class PlotIt():
 
     if i > 1:
       self.plt.suptitle(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+#      self.plt.text(x=0.2, y=0.9, s=second_title, ha='center', fontsize=10)
       self.fig.subplots_adjust(top=0.95)
     else:
       self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+    #self.plt.legend(loc="upper left")
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     #olx.Shell(p)
@@ -2729,6 +2732,7 @@ class PlotIt():
              markersize=None,
              linestyle=None,
              ylabel="",
+             labels=[], 
              x_type="",
              y_type="",
              ):
@@ -2759,18 +2763,23 @@ class PlotIt():
       if not colour:
         colour = get_N_HexCol(len(xs))[i]
       i += 1
+      label = None
       ax.plot(x,
               y,
               marker=marker,
               color=colour,
               markersize=markersize,
               linewidth=self.plt_params.ax1.line_width,
-              label=label,
               linestyle=linestyle,
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
               markeredgecolor=colour,
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
               )
+
+      #if labels and len(labels)==len(xs):
+        #for x, label in zip(y, labels):
+          #self.plt.plot(x, y, label=label)
+      #self.plt.legend()
       colour = None
       ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
       ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)

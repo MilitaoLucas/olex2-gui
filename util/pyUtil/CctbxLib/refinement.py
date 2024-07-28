@@ -306,6 +306,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.parent.interrupted = val
 
       try:
+        convergence_as_shift_over_esd = OV.GetVar('convergence_as_shift_over_esd', 1e-3)
         if(method=='Levenberg-Marquardt'):
 #          normal_eqns_solving.levenberg_marquardt_iterations.tau=1e-4
           refinementWrapper(self, self.normal_eqns,
@@ -314,7 +315,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               gradient_threshold=None,
               step_threshold=None,
               tau = 1e-6,
-              convergence_as_shift_over_esd=1e-3,
+              convergence_as_shift_over_esd=convergence_as_shift_over_esd,
               )
         else:
           refinementWrapper(self, self.normal_eqns,
@@ -322,7 +323,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               track_all=True,
               damping_value=damping[0],
               max_shift_over_esd=damping[1],
-              convergence_as_shift_over_esd=1e-3,
+              convergence_as_shift_over_esd=convergence_as_shift_over_esd,
               gradient_threshold=None,
               step_threshold=None)
 
