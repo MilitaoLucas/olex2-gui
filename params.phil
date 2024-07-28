@@ -233,6 +233,8 @@ routines requiring structure refinement
       .type = int
     data = None
       .type = int
+    coverge_max_shift = 0.001
+      .type = float
     max_shift_over_esd = None
       .type = float
     max_shift_over_esd_atom = None
