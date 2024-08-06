@@ -1558,8 +1558,8 @@ def get_chiral_atom_info(return_what=""):
   cmd = "RSA"
 
   try:
-    atominfos = gui.tools.scrub(cmd)[1:]
-    if len(atominfos) == 1:
+    atominfos = olex.f("rsa()").split('\n')
+    if not atominfos:
       t = "This structure is in chiral space group, but there are no chiral atoms"
       d.update({
         "chiral_atoms": t,
