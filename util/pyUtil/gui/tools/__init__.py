@@ -953,15 +953,20 @@ def getExpectedPeaks():
 
 def make_exti_swat_gui():
   html = ""
-  exti = olx.xf.rm.Exti()
-  if exti and exti != "n/a":
-    html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+  if OV.IsEDRefinement():
+    html = gui.tools.TemplateProvider.get_template('edt_gui', force=debug)
+    import olex_gui
+    html = olex_gui.PreprocessHtml(html)
   else:
-    swat = olx.xf.rm.SWAT()
-    if swat and swat != "n/a":
-      html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
-  if not html:
-    html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
+    exti = olx.xf.rm.Exti()
+    if exti and exti != "n/a":
+      html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+    else:
+      swat = olx.xf.rm.SWAT()
+      if swat and swat != "n/a":
+        html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
+    if not html:
+      html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
   return html
 
 
@@ -2667,7 +2672,7 @@ class PlotIt():
     if OV.HasGUI():
       import olex_gui
       dpi = olex_gui.GetPPI()[0]
-    
+
     self.plt = load_matplotlib()
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
@@ -2689,7 +2694,7 @@ class PlotIt():
       if stack_type == "stacked":
         subplot_ratio = dd["subplot_ratio"]
         self.fig, axes = self.plt.subplots(n_plots, 1, sharex=True, figsize=plt_size, dpi=dpi, gridspec_kw={'height_ratios': subplot_ratio})  #plots them on top of each other.
-        
+
       elif stack_type == "combined":
         pass
     else:
@@ -2698,7 +2703,7 @@ class PlotIt():
 
     i = 0
     for series in dd['data']:
-      d =  dd['data'][series] 
+      d =  dd['data'][series]
       self.get_ax(axes[i], **d)
       i += 1
 
@@ -2714,9 +2719,9 @@ class PlotIt():
     #olx.Shell(p)
     self.plt.close()
     return p
-      
+
   def get_ax(self,
-             ax, 
+             ax,
              xs,
              ys,
              label=None,
@@ -2736,7 +2741,7 @@ class PlotIt():
              x_type="",
              y_type="",
              ):
-    
+
     from matplotlib.ticker import MaxNLocator
     import matplotlib.ticker as ticker
     import numpy as np
@@ -2745,7 +2750,7 @@ class PlotIt():
     self.plt.grid(self.plt_params.grid)
 
     ax_colour = self.plt_params.ax_colour
-  
+
     if not marker:
       marker = self.plt_params.ax1.marker
     if not markersize:
@@ -2791,6 +2796,6 @@ class PlotIt():
     if lim_x:
       self.plt.xlim(-1 * lim_x, lim_x)
     ax.tick_params(axis='y', labelcolor=ax_colour)
-    
+
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)

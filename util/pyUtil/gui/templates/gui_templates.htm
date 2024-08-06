@@ -558,6 +558,32 @@ t:exti_or_swat_gui{
     </td>
 }
 
+t:edt_gui{
+  <td width="4%" align="left">
+    EDT
+  </td>
+  <td width="10%" align="left">
+    $+
+     html.Snippet("gui/snippets/input-text",
+     "name=ED_ThicknessVal_B@Refine",
+     "value=spy.ED.get_stored_param('thickness.value', sd=0)",
+     "onchange=spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))",
+     "disabled=not(spy.ED.is_dynamic())")
+    $-
+  </td>
+  <td width="10%" align='left'>
+    $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=rthickness_B@Refine",
+     "bgcolor=GetVar(HtmlTableFirstcolColour)",
+     "value=Refine",
+     "checked=spy.ED.get_stored_param('thickness.grad')",
+     "onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",
+     "disabled=not(spy.ED.is_dynamic())")
+   $-
+  </td>
+}
+
 t:snum_cell_display{
   <tr bgcolor=$GetVar(HtmlTableBgColour)>
     <td width='34%%'>
