@@ -50,6 +50,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
     if calculate == True:
       if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+        olx.Anis("$D", h=True)
         olx.Anis("$H", h=True)
       if OV.GetParam('snum.NoSpherA2.h_afix') == True:
         olex.m("Afix 0 $H")
