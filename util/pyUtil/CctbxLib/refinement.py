@@ -187,6 +187,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print(msg)
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
+      #disable weights auto-update
+      OV.SetParam('snum.refinement.update_weight', False)
     elif self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
