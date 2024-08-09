@@ -54,6 +54,7 @@ class Method_cctbx_refinement(Method_refinement):
     print('\n+++ STARTING olex2.refine +++++ %s' %self.version)
 
     verbose = OV.GetParam('olex2.verbose')
+
     RunPrgObject.cctbx = cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
@@ -76,6 +77,17 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.SetVar('cctbx_wR2',cctbx.wR2_factor())
         OV.File('%s.res' %OV.FileName())
+      # happens in the case of external interrupt
+      elif cctbx.failure and OV.IsRemoteMode():
+        if cctbx.cycles.n_iterations > 0:
+          olx.Echo(
+"""Saving model after %s cycles, some details will be unavailable.
+The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning")
+          from collections import defaultdict
+          self.cif = defaultdict(str)
+          self.cif.update(cctbx.cycles.non_linear_ls.step_info)
+          OV.File('%s.res' %OV.FileName())
+          self.post_refinement(RunPrgObject=RunPrgObject)
     finally:
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       OV.DeleteBitmap('refine')
