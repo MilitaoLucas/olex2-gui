@@ -545,7 +545,7 @@ class RunRefinementPrg(RunPrg):
         self.startRun()
         try:
           self.setupRefine()
-          OV.File("%s/%s.ins" %(OV.FilePath(), self.original_filename))
+          OV.File(os.path.join(OV.FilePath(), self.original_filename) + ".ins")
           self.setupFiles()
         except Exception as err:
           sys.stderr.formatExceptionInfo()
