@@ -1026,7 +1026,14 @@ def refine_extinction():
       esd = ""
       OV.SetParam('snum.refinement.refine_extinction', 1)
       OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-    retVal = "%s(%s)" % (exti, esd)
+    
+    exti = float(exti)
+    if exti > 99:
+      exti = int(exti)
+    if esd:
+      retVal = "%s(%i)" % (exti, int(esd))
+    else:
+      retVal = "%s" % (exti)
   else:
     OV.SetParam('snum.refinement.refine_extinction', 0)
     OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
@@ -1584,7 +1591,7 @@ def get_chiral_atom_info(return_what=""):
     d.update({
       "chiral_atoms": description,
       "chiral_atoms_listing": listing,
-      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else False
+      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else ""
     })
 
     OV.SetVar('chiral_first_atom', d['chiral_first_atom'])
@@ -2685,7 +2692,7 @@ class PlotIt():
 
     filename = dd["filename"]
     title= dd["title"]
-    second_title = dd["second_title"]
+    second_title = dd.get("second_title", "")
     
     n_plots = len(dd['data'])
 
