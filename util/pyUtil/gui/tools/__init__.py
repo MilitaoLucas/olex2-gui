@@ -1584,7 +1584,7 @@ def get_chiral_atom_info(return_what=""):
     d.update({
       "chiral_atoms": description,
       "chiral_atoms_listing": listing,
-      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else Falsey
+      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else False
     })
 
     OV.SetVar('chiral_first_atom', d['chiral_first_atom'])
