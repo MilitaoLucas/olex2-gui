@@ -1506,3 +1506,14 @@ def get_one_h_function(xray_structure, table_file_name):
     elif "Error during building of normal equations using OpenMP" in e_str:
       print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
     raise e
+
+def fdp_to_mu(element, fdp, wavelength=None):
+  from brennan import  brennan
+  tables = brennan()
+  if not wavelength:
+    wavelength = olx.xf.exptl.Radiation()
+  wavelength = float(wavelength)
+  return tables.convert_fdp_to_mu(wavelength, float(fdp), element)
+
+OV.registerFunction(fdp_to_mu, False, "disp")
+
