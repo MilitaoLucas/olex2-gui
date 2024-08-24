@@ -92,6 +92,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   args.append(wfn_2_fchk)
+  if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
+    salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+    args.append("-SALTED")
+    args.append(salted_model_dir)  
   from cctbx_olex_adapter import OlexCctbxAdapter
   cctbx_adaptor = OlexCctbxAdapter()
   f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
@@ -1045,3 +1049,53 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
     shutil.copy(NSA2_log, olx.FileName()+".polarizability")
     
 OV.registerFunction(calc_polarizabilities, namespace="NoSpherA2")
+
+#CHOOSE FOLDER UTILITIES! (Used in SALTED)
+def setDir(phil_value) -> None:
+  """Choose a directory and set the given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  a = olex.f('choosedir("Choose your data folder")')
+  OV.SetParam(phil_value, a)
+OV.registerFunction(setDir, False, "NoSpherA2")
+
+def appendDir(phil_value) -> None:
+  """Choose a directory and set teh given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  a = olex.f('choosedir("Choose your data folder")')
+  old = OV.GetParam(phil_value)
+  if old is None:
+    pass
+  else:
+    old += ";"+a
+  OV.SetParam(phil_value, old)
+OV.registerFunction(appendDir, False, "NoSpherA2")
+
+def removeDir(phil_value, item_to_remove) -> None:
+  """Choose a directory and set the given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  if item_to_remove == "" or item_to_remove == "Please Select":
+    return
+  item_to_remove = ";" + item_to_remove 
+  old = OV.GetParam(phil_value)
+  old = old.replace(item_to_remove,"")
+
+  OV.SetParam(phil_value, old)
+OV.registerFunction(removeDir, False, "NoSpherA2")

@@ -266,6 +266,8 @@ snum{
       .type = bool
     run_refine = True
       .type = bool
+    selected_salted_model = ""
+      .type = str
     source = "'Please Select'"
       .type = str
     temperature = 100

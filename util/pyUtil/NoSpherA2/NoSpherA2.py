@@ -502,7 +502,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             if OV.HasGUI():
               olx.html.Update()
             shutil.copy(os.path.join(job.full_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
-          elif wfn_code == "Thakkar IAM":
+          elif wfn_code == "Thakkar IAM" or wfn_code == "SALTED":
             wfn_fn = os.path.join(OV.FilePath(), wfn_job_dir, self.name + ".xyz")
           else:
             wfn_fn = None
@@ -615,7 +615,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         # make the tsc file
 
         if (experimental_SF == True):
-          if wfn_code != "fragHAR":
+          if wfn_code != "fragHAR" and wfn_code != "SALTED":
             path_base = os.path.join(self.jobs_dir, self.name)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
@@ -643,6 +643,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
             else:
               OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+
+          elif wfn_code == "SALTED":
+            path_base = os.path.join(self.jobs_dir, self.name)
+            cif_fn = path_base + ".cif"
+            wfn_fn = path_base + ".xyz"
+            cuqct_tsc(wfn_fn, cif_fn, [-1000])
+            if os.path.exists("experimental.tsc"):
+              shutil.move("experimental.tsc", self.name + ".tsc")
+            if os.path.exists("experimental.tscb"):
+              shutil.move("experimental.tscb", self.name + ".tscb")
+              OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
+            else:
+              OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")          
 
         elif wfn_code != "Tonto":
           job = Job(self, self.name)
@@ -704,7 +717,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_elmodb_input(xyz)
     elif software == "Psi4":
       wfn_object.write_psi4_input(xyz)
-    elif software == "Thakkar IAM":
+    elif software == "Thakkar IAM" or software == "SALTED":
       wfn_object.write_xyz_file()
     elif software == "xTB":
       if xyz == True:
@@ -740,17 +753,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       elif software_part == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
         return False
-      elif software_part == "Thakkar IAM":
+      elif software_part == "Thakkar IAM" or software == "SALTED":
         wfn_object.write_xyz_file()
     if software == "Hybrid":
-      if software_part != "Thakkar IAM":
+      if software_part != "Thakkar IAM" and software_part != "SALTED":
         try:
           wfn_object.run(part, software_part, basis_part)
         except NameError as error:
           print("The following error occured during QM Calculation: ",error)
           OV.SetVar('NoSpherA2-Error',error)
           raise NameError('Unsuccesfull Wavefunction Calculation!')
-    elif software != "Thakkar IAM":
+    elif software != "Thakkar IAM" and software != "SALTED":
       try:
         wfn_object.run(part)
       except NameError as error:
@@ -1085,6 +1098,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return '1'
     # otherwise allow more CPUs
     return ';'.join(cpu_list)
+  
+  def get_SALTED_model_locations(self):
+    old = OV.GetParam('user.NoSpherA2.salted_models_list')
+    return old  
 
   def getwfn_softwares(self):
     parts = OV.ListParts()
@@ -1092,7 +1109,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       parts = list(parts)
     if OV.IsDebugging():
       if not parts:
-        return self.softwares + ";fragHAR;"
+        return self.softwares + ";fragHAR;SALTED;"
       elif len(parts) > 1:
         return self.softwares + ";Hybrid;fragHAR;"
       else:
@@ -1253,6 +1270,9 @@ class Job(object):
       if rel == True:
         args.append("-dkh")
         args.append("t")
+    elif fchk_source == "SALTED":
+      salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+      args = ["-SALTED",salted_model_dir, "-cif" ,data_file_name+".cif", "-xyz", data_file_name+".xyz", "-dmin", ]    
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
@@ -1785,6 +1805,7 @@ OV.registerFunction(NoSpherA2_instance.launch, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.delete_f_calc_f_obs_one_h, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getBasisListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getCPUListStr, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.get_SALTED_model_locations, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")

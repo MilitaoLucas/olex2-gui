@@ -2381,6 +2381,8 @@ user
       .type = bool
     discamb_exe = "discambMATTS2tsc"
       .type = str
+    salted_models_list = ""
+      .type = str
   }
   Server{
     host=localhost
