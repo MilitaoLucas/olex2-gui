@@ -420,7 +420,14 @@ class OlexCctbxAdapter(object):
     mask_fn = os.path.join(OV.StrDir(), OV.FileName())+"-f_mask.pickle"
     if os.path.exists(mask_fn):
       return easy_pickle.load(mask_fn)
-    return None
+    import olex_core
+    mask = olex_core.GetMask()
+    if mask is None:
+      return None
+    miller_set = miller.set(
+      crystal_symmetry=self.xray_structure().crystal_symmetry(),
+      indices=flex.miller_index(mask[0])).auto_anomalous()
+    return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
 
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True):
     if filtered:
