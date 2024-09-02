@@ -10,11 +10,11 @@ def setup_cctbx():
   basedir = olx.BaseDir()
   cctbx_dir = os.environ.get('OLEX2_CCTBX_DIR')
   if cctbx_dir and os.path.isdir(cctbx_dir):
-    # check if the build is given, the ../modules/cctbx_project will beset as  sources
-    if os.path.exists(os.path.join(cctbx_dir, "libtbx_env")):
+    # check if the build is given, the ../modules/cctbx_project will be set as sources
+    if os.path.exists(os.path.join(cctbx_dir, "SConstruct")):
       build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(cctbx_dir)
       import pathlib
-      cctbxRoot = pathlib.Path(cctbx_dir).parent.absolute()
+      cctbxRoot = str(pathlib.Path(cctbx_dir).parent.absolute())
       print("Changing cctbx root to %s" %cctbxRoot)
     else:
       cctbxRoot = cctbx_dir
@@ -56,8 +56,8 @@ def setup_cctbx():
     else:
       TAG_file_path = "%s/TAG" %build_path
       ENV_file_path = "%s/libtbx_env" %build_path
-      need_cold_start =\
-        os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime
+      need_cold_start = not os.path.exists(ENV_file_path)\
+        or os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime
       if not need_cold_start:
         raise
   cctbx_TAG_file_path = "%s/TAG" %cctbxSources
@@ -77,7 +77,11 @@ Current cctbx build: '%s'
     import libtbx.load_env
     reload(libtbx.load_env)
   for i in libtbx.env.pythonpath:
-    sys.path.append(abs(i))
+    i = abs(i)
+    if not i.startswith(cctbxRoot):
+      print("skpping '%s'" %i)
+      continue
+    sys.path.append(i)
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
   elif sys.platform.startswith('darwin'):
