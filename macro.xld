@@ -1524,13 +1524,19 @@
     <args
       <arg1 name="p1" def="">
       <arg1 name="p2" def="">
-    \>
+    >
     <cmd
       <cmd1 "showp %1 %2">
-    \>
-  \>
-\>
+    >
+  >
+>
 
+<py_path help="Prints Python PATH"
+  <body
+    <args>
+    <cmd
+      <cmd1 "@py 'import sys\nfor x in sys.path:\n  print(x)'">
+>>>
 
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >
