@@ -19,7 +19,7 @@ def setup_cctbx():
     else:
       cctbxRoot = cctbx_dir
   else:
-    cctbxRoot = "%s/cctbx" %basedir
+    cctbxRoot = os.path.join(basedir, "cctbx")
   if not build_path:
     build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(
       "%s/cctbx_build" % cctbxRoot)
@@ -76,8 +76,9 @@ Current cctbx build: '%s'
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
     reload(libtbx.load_env)
+  cctbxRoot = os.path.realpath(cctbxRoot)
   for i in libtbx.env.pythonpath:
-    i = abs(i)
+    i = os.path.realpath(abs(i))
     if not i.startswith(cctbxRoot):
       print("skpping '%s'" %i)
       continue
