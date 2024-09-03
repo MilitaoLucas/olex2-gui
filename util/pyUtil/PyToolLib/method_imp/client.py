@@ -24,6 +24,8 @@ class Method_client_refinement(Method_refinement):
         return s.recv(1024)
       except ConnectionRefusedError as ex:
         return None
+      except OSError as ex: # socket closed?
+        return None
 
   def pre_refinement(self, RunPrgObject):
     Method_refinement.pre_refinement(self, RunPrgObject)
@@ -105,7 +107,19 @@ class Method_client_refinement(Method_refinement):
             #"spy.saveHistory",
             "@close",
             ]
-    data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode()).decode("utf-8").rstrip('\n')
+    attempt = 1
+    while attempt < 3:
+      data = self.send_cmd(host=host, port=port, cmd='\n'.join(cmds).encode())
+      if data is None:
+        attempt += 1
+        print("Attempt %s" %attempt)
+        time.sleep(1)
+        continue
+      else:
+        data = data.decode("utf-8").rstrip('\n')
+        break
+    if data is None:
+      raise Exception("Failed to start the refinement")
     print(f"Received {data}")
     data = "busy"
     with open(log_fn, "r") as log:
