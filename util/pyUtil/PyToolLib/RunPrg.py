@@ -229,6 +229,12 @@ class RunPrg(ArgumentParser):
   def doHistoryCreation(self, type="normal"):
     return
 
+  def IsClientMode(self):
+    from method_imp import Method_client_refinement
+    return OV.IsClientMode() and\
+      self.method is not None and\
+      isinstance(self.method, Method_client_refinement)
+
   def setupFiles(self):
     olx.User("%s" %OV.FilePath())
     self.filePath = OV.FilePath()
@@ -240,7 +246,7 @@ class RunPrg(ArgumentParser):
     if os.path.exists(fin_file):
       os.remove(fin_file)
     # just save snum phil with current settings
-    if OV.IsClientMode():
+    if self.IsClientMode():
       str_dir = OV.StrDir()
       if not os.path.exists(str_dir):
         os.mkdir(str_dir)
@@ -252,7 +258,7 @@ class RunPrg(ArgumentParser):
     ## clear temp folder to avoid problems
     if os.path.exists(self.tempPath) and \
           self.program.name != "olex2.refine" and\
-          not OV.IsClientMode():
+          not self.IsClientMode():
         old_temp_files = os.listdir(self.tempPath)
         for file_n in old_temp_files:
           try:
@@ -270,7 +276,7 @@ class RunPrg(ArgumentParser):
       else:
         raise Exception("Please choose a reflection file")
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
-    if self.program.name == "olex2.refine" or OV.IsClientMode():
+    if self.program.name == "olex2.refine" or self.IsClientMode():
       return
 
     if not os.path.exists(self.tempPath):
@@ -293,7 +299,7 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(f[0], f[1])
 
   def runAfterProcess(self):
-    if OV.IsClientMode():
+    if self.IsClientMode():
       self.method.runAfterProcess(self)
       return
     if self.program.name != "olex2.refine":
@@ -478,7 +484,7 @@ class RunSolutionPrg(RunPrg):
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
     OV.SetParam('snum.refinement.last_wR2', 'Solution')
-    if OV.IsClientMode():
+    if self.IsClientMode():
       return None
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
@@ -508,7 +514,7 @@ class RunRefinementPrg(RunPrg):
       if "warning" in msg.lower():
         bg = orange
       gui.set_notification("%s;%s;%s" % (msg, bg, fg))
-    elif OV.IsClientMode():
+    elif self.IsClientMode():
       rc_fn = os.path.join(OV.StrDir(), "refinement.check")
       if os.path.exists(rc_fn):
         gui.set_notification(open(rc_fn, "r").read())
@@ -665,7 +671,7 @@ class RunRefinementPrg(RunPrg):
         self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
       except Exception as e:
         print("Could not determine whether structure inversion is needed: %s" % e)
-    if self.program.name == "olex2.refine" and not OV.IsClientMode():
+    if self.program.name == "olex2.refine" and not self.IsClientMode():
       from refinement_checks import RefinementChecks
       rc = RefinementChecks(self.cctbx)
       if OV.GetParam('snum.refinement.check_PDF'):
@@ -731,14 +737,14 @@ class RunRefinementPrg(RunPrg):
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
       OV.SetParam('snum.refinement.last_wR2',wR2)
-      if not (self.params.snum.init.skip_routine or OV.IsClientMode()):
+      if not (self.params.snum.init.skip_routine or self.IsClientMode()):
         try:
           self.his_file = hist.create_history()
         except Exception as ex:
           sys.stderr.write("History could not be created\n")
           if debug:
             sys.stderr.formatExceptionInfo()
-      elif not OV.IsClientMode():
+      elif not self.IsClientMode():
         print("Skipping History")
       self.R1 = R1
       self.wR2 = wR2
