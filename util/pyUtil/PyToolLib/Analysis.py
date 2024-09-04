@@ -3784,6 +3784,9 @@ OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
   name = name.lower().replace(" ", "_").replace("-", "_")
+  if name == "gui_fobs_fcalc":
+    name = "iobs_icalc" if OV.IsEDRefinement() else "fobs_fcalc"
+    
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
