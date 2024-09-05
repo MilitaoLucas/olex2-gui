@@ -1026,7 +1026,7 @@ def refine_extinction():
       esd = ""
       OV.SetParam('snum.refinement.refine_extinction', 1)
       OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-    
+
     exti = float(exti)
     if exti > 99:
       exti = int(exti)
@@ -2132,41 +2132,43 @@ def load_matplotlib():
   try:
     import matplotlib.pyplot as plt
     return plt
-  except Exception as err:
-    if "No module named" in repr(err):
-      selection = olx.Alert("matplotlib not found",
-                            """Error: No working matplotlib installation found!.
+  except ModuleNotFoundError:
+    selection = olx.Alert("matplotlib not found",
+                          """Error: No working matplotlib installation found!.
 Do you want to install this now?""", "YN", False)
-      if selection == 'Y':
-        if sys.platform[:3] == 'win':
-          from olexex import GetHttpFile
-          import zipfile
-          from zipfile import ZipFile
-          import platform
-          architecture = platform.architecture()[0]
-          arch = '32'
-          if not architecture:
-            pass
-          elif architecture == '64bit':
-            arch = '64'
-          fn = "site-packages-x%s.zip" % arch
-          fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
-                           fn,
-                           os.path.join(OV.DataDir(), "tmp"))
-          if not fn:
-            raise Exception("matplotlib is required by this functionality!")
-          with ZipFile(fn) as zip:
-            zip.extractall(path=OV.DataDir())
-          os.remove(fn)
-        else:
-          olex.m("pip matplotlib==3.5.1")
-        import matplotlib.pyplot as plt
-        return plt
+    if selection == 'Y':
+      if sys.platform[:3] == 'win':
+        from olexex import GetHttpFile
+        import zipfile
+        from zipfile import ZipFile
+        import platform
+        architecture = platform.architecture()[0]
+        arch = '32'
+        if not architecture:
+          pass
+        elif architecture == '64bit':
+          arch = '64'
+        fn = "site-packages-x%s.zip" % arch
+        fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
+                          fn,
+                          os.path.join(OV.DataDir(), "tmp"))
+        if not fn:
+          raise Exception("matplotlib is required by this functionality!")
+        with ZipFile(fn) as zip:
+          zip.extractall(path=OV.DataDir())
+        os.remove(fn)
       else:
-        return None
+        olex.m("pip matplotlib==3.5.1")
+      # clear cache to discover the new module
+      import importlib
+      importlib.invalidate_caches()
+      import matplotlib.pyplot as plt
+      return plt
     else:
-      print("Failed to initialise matplotlib: %s" % str(err))
       return None
+  else:
+    print("Failed to initialise matplotlib: %s" % str(err))
+    return None
 
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
@@ -2672,7 +2674,6 @@ def generate_color_palette(n):
 
 class PlotIt():
   def __init__(self):
-    from matplotlib.dates import YearLocator, DateFormatter
     self.plt_params = OV.GetParam('user.graphs.matplotlib')
 
   def plot_it(self, dd):
@@ -2693,7 +2694,7 @@ class PlotIt():
     filename = dd["filename"]
     title= dd["title"]
     second_title = dd.get("second_title", "")
-    
+
     n_plots = len(dd['data'])
 
     stack_type = dd.get("stack_type", None)
@@ -2744,7 +2745,7 @@ class PlotIt():
              markersize=None,
              linestyle=None,
              ylabel="",
-             labels=[], 
+             labels=[],
              x_type="",
              y_type="",
              ):
