@@ -943,9 +943,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         elif method == "BLYP":
           inp.write("mf.xc = 'b88,lyp'\n")
         elif method == "M062X":
-          inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+          inp.write("mf.xc = 'M062X'\n")
         elif method == "PBE0":
           inp.write("mf.xc = 'PBE0'\n")
+        elif method == "R2SCAN":
+          inp.write("mf.xc = 'R2SCAN'\n")
         grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
         grid = None
         if grid_accuracy == "Low":
@@ -1425,9 +1427,11 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
       elif method == "BLYP":
         inp.write("mf.xc = 'b88,lyp'\n")
       elif method == "M062X":
-        inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+        inp.write("mf.xc = 'M062X'\n")
       elif method == "PBE0":
         inp.write("mf.xc = 'PBE0'\n")
+      elif method == "R2SCAN":
+        inp.write("mf.xc = 'R2SCAN'\n")
       grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
       grid = None
       if grid_accuracy == "Low":
