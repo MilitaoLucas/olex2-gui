@@ -72,6 +72,16 @@ class NoSpherA2(PT):
       self.setup_gui()
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
+    if sys.platform[:3] == "win":
+      self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu2204.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu2404.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu2004.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")        
     self.setup_har_executables()
     self.setup_pyscf()
     self.setup_discamb()
@@ -349,7 +359,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       need_to_combine = False
       need_to_partition = False
       if ".wfn" in wfn_code:
-        print("Calcualtion from wfn with disorder not possible, sorry!\n")
+        print("Calculation from wfn with disorder not possible, sorry!\n")
         return
       groups_counter = 0
       # Check if job folder already exists and (if needed) make the backup folders
@@ -842,7 +852,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     self.elmodb_exe_pre = exe_pre
 
     if sys.platform[:3] == 'win':
-      self.ubuntu_exe = olx.file.Which("ubuntu.exe")
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
         self.elmodb_exe = _
@@ -1449,7 +1458,7 @@ def get_functional_list(wfn_code=None):
   if wfn_code == "Tonto" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   elif wfn_code == "pySCF":
-    list = "HF;PBE;B3LYP;BLYP;M062X"
+    list = "HF;PBE;B3LYP;BLYP;M062X;R2SCAN;PBE0"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
   elif wfn_code == "ORCA 6.0":
@@ -1465,6 +1474,15 @@ def check_for_pyscf(loud=True):
   ubuntu_exe = None
   if sys.platform[:3] == 'win':
     ubuntu_exe = olx.file.Which("ubuntu.exe")
+    if ubuntu_exe is None or ubuntu_exe == "":
+      ubuntu_exe = olx.file.Which("ubuntu2204.exe")
+    if ubuntu_exe is None or ubuntu_exe == "":
+      ubuntu_exe = olx.file.Which("ubuntu2404.exe")
+    if ubuntu_exe is None or ubuntu_exe == "":
+      ubuntu_exe = olx.file.Which("ubuntu2004.exe")
+    if ubuntu_exe is None or ubuntu_exe == "":
+      ubuntu_exe = olx.file.Which("ubuntu1804.exe")
+    print("ubuntu exe:", ubuntu_exe)
   else:
     ubuntu_exe = None
   if ubuntu_exe != None and os.path.exists(ubuntu_exe):
@@ -1547,6 +1565,14 @@ step of installation will be shown if the installation was succesfull""", "O", F
 
 #Check for Ubuntu installation
           ubuntu_exe = olx.file.Which("ubuntu.exe")
+          if ubuntu_exe == None or ubuntu_exe == "":
+            ubuntu_exe = olx.file.Which("ubuntu2204.exe")
+          if ubuntu_exe == None or ubuntu_exe == "":
+            ubuntu_exe = olx.file.Which("ubuntu2404.exe")
+          if ubuntu_exe == None or ubuntu_exe == "":
+            ubuntu_exe = olx.file.Which("ubuntu2004.exe")
+          if ubuntu_exe == None or ubuntu_exe == "":
+            ubuntu_exe = olx.file.Which("ubuntu1804.exe")
           if ubuntu_exe == None or os.path.exists(ubuntu_exe) == False:
             olx.Alert("Please install Ubuntu",\
 """pySCF requires Ubuntu to be installed on your system.
@@ -1557,6 +1583,14 @@ After this setup is completed you can close the Ubuntu window and continue with 
 Please do this now and klick 'Ok' once everything is done!""", "O", False)
             while not cont:
               ubuntu_exe = olx.file.Which("ubuntu.exe")
+              if ubuntu_exe == None or ubuntu_exe == "":
+                ubuntu_exe = olx.file.Which("ubuntu2204.exe")
+              if ubuntu_exe == None or ubuntu_exe == "":
+                ubuntu_exe = olx.file.Which("ubuntu2404.exe")
+              if ubuntu_exe == None or ubuntu_exe == "":
+                ubuntu_exe = olx.file.Which("ubuntu2004.exe")
+              if ubuntu_exe == None or ubuntu_exe == "":
+                ubuntu_exe = olx.file.Which("ubuntu1804.exe")
               if os.path.exists(ubuntu_exe) == False:
                 tries += 1
                 if tries == 4:
@@ -1633,7 +1667,6 @@ Home -> Settings -> PATH""", "O", False)
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     if input != "discambMATT" and input != "Thakkar IAM":
-      OV.SetParam('snum.NoSpherA2.h_aniso', True)
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if mult == 0:
@@ -1641,9 +1674,6 @@ Home -> Settings -> PATH""", "O", False)
           OV.SetParam('snum.NoSpherA2.multiplicity',1)
         elif (ne % 2 != 0):
           OV.SetParam('snum.NoSpherA2.multiplicity',2)
-    else:
-      OV.SetParam('snum.NoSpherA2.h_aniso', False)
-      OV.SetParam('snum.NoSpherA2.h_afix', False)
 OV.registerFunction(change_tsc_generator,False,'NoSpherA2')
 
 def set_default_cpu_and_mem():
