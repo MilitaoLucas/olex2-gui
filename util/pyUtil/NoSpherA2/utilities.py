@@ -291,7 +291,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if p.poll() is None:
       time.sleep(1)
       tries += 1
-      if tries >= 5:
+      if tries >= 10:
         if "python" in args[2] and tries <=10:
           continue
         print("Failed to locate the output file")
