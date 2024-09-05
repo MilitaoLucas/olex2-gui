@@ -537,7 +537,7 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     self.reset_params()
-    use_aspherical = OV.IsNoSpherA2()
+    use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
     try:
       if use_aspherical == True:
