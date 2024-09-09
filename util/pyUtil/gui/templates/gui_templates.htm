@@ -484,6 +484,89 @@ t:restraints_top{
 >  </td>
 }
 
+t:EDT_gui{
+    <td width='6%' align='right'>
+      <b>EDT</b>
+    </td>
+
+    <td width='4%'>
+      <input
+        type="checkbox"
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name="ED_EDT"
+        checked="not(strcmp(xf.rm.Exti(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+      >
+    </td>
+
+    <td width="10%" align="left">
+      <input
+        type = "input-text"
+        name="ED_EDT_VAL"
+        value="spy.ED.get_stored_param('thickness.value', sd=1000)"
+        onchange="spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))"
+      >  
+    </td>
+}
+
+t:go_dynamic{
+
+<table cellpadding='0' cellspacing='0' width='100%%'>
+<tr>
+<td width='50%%'>
+%(exti)s%(esd)s
+</td>
+<td width='50%%' align='right'>
+<input
+  type="button"
+  name=GO_DYNAMIC"
+  value="DYN"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="%(href)s"
+  bgcolor="GetVar(ed_fg)"
+  fgcolor="GetVar(ed_bg)"
+  custom="#custom"
+>
+</td>
+</tr>
+</table>
+}
+
+t:chiral_first_atom_button{
+<table cellpadding='0' cellspacing='0' width='100%%'>
+<tr>
+<td width='50%%'>
+<input
+  type="button"
+  name=CHIRAL_FIRST_ATOM"
+  value="%s"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="spy.tools.label_rsa()"
+  bgcolor="GetVar(ed_fg)"
+  fgcolor="GetVar(ed_bg)"
+  custom="#custom"
+>
+</td>
+<td width='50%%' align='right'>
+<input
+  type="button"
+  name=CHIRAL_INVERT"
+  value="Invert"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="inv -f >> spy.tools.label_rsa()"
+  bgcolor="GetVar(gui.red)"
+  fgcolor="#ffffff"
+  custom="#custom"
+>
+</td>
+</tr>
+</table>
+}
+
 t:exti_gui{
     <td width='5%' align='right'>
       <b>EXTI </b>
@@ -500,7 +583,7 @@ t:exti_gui{
       >
     </td>
 
-    <td width='18%'>
+    <td width='22%'>
       <b>$spy.gui.tools.refine_extinction()<b>
     </td>
 }
@@ -512,7 +595,7 @@ t:swat_gui{
 
     <td width='4%'>
       <input
-        type='checkbox'
+        type="checkbox"
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
@@ -571,17 +654,17 @@ t:edt_gui{
      "disabled=not(spy.ED.is_dynamic())")
     $-
   </td>
-  <td width="10%" align='left'>
-    $+
-     html.Snippet("gui/snippets/input-checkbox",
-     "name=rthickness_B@Refine",
-     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-     "value=Refine",
-     "checked=spy.ED.get_stored_param('thickness.grad')",
-     "onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",
-     "disabled=not(spy.ED.is_dynamic())")
-   $-
-  </td>
+  <!--<td width="10%" align='left'>-->
+    <!--$+-->
+     <!--html.Snippet("gui/snippets/input-checkbox",-->
+     <!--"name=rthickness_B@Refine",-->
+     <!--"bgcolor=GetVar(HtmlTableFirstcolColour)",-->
+     <!--"value=Refine",-->
+     <!--"checked=spy.ED.get_stored_param('thickness.grad')",-->
+     <!--"onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",-->
+     <!--"disabled=not(spy.ED.is_dynamic())")-->
+   <!--$--->
+  <!--</td>-->
 }
 
 t:snum_cell_display{
