@@ -209,6 +209,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
+  OV.SetVar('HtmlTableGroupBgColour', OV.GetParam('gui.html.table_group_bg_colour').hexadecimal)
+  OV.SetVar('HtmlTableGroupHeaderColour', OV.GetParam('gui.html.table_group_header_colour').hexadecimal)
   OV.SetVar('HtmlTableRowBgColour', OV.GetParam('gui.html.table_row_bg_colour').hexadecimal)
   OV.SetVar('HtmlInputBgColour', OV.GetParam('gui.html.input_bg_colour').hexadecimal)
   OV.SetVar('HtmlComboHeight', OV.GetParam('gui.html.combo_height'))

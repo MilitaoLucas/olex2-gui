@@ -2682,6 +2682,14 @@ class PlotIt():
       dpi = olex_gui.GetPPI()[0]
 
     self.plt = load_matplotlib()
+    
+    self.plt.rcParams['xtick.labelsize'] = 11
+    self.plt.rcParams['ytick.labelsize'] = 11
+
+    
+    self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
     if not plt_size:
@@ -2694,13 +2702,19 @@ class PlotIt():
     filename = dd["filename"]
     title= dd["title"]
     second_title = dd.get("second_title", "")
+    comment = dd.get('comment', "")
+    gap = self.plt_params.subplot_top_gap
+    gap_facor = 0.05
+    if comment:
+      gap = gap - gap * 0.05
 
     n_plots = len(dd['data'])
-
     stack_type = dd.get("stack_type", None)
     if stack_type:
       if stack_type == "stacked":
         subplot_ratio = dd["subplot_ratio"]
+        if n_plots != len(subplot_ratio):
+          subplot_ratio = [1] * n_plots
         self.fig, axes = self.plt.subplots(n_plots, 1, sharex=True, figsize=plt_size, dpi=dpi, gridspec_kw={'height_ratios': subplot_ratio})  #plots them on top of each other.
 
       elif stack_type == "combined":
@@ -2709,19 +2723,30 @@ class PlotIt():
       self.fig, axes = self.plt.subplots(figsize=plt_size, dpi=dpi)
       axes = [axes]
 
+    if len(dd['data']) > 1:
+      self.fig.suptitle(f"{title}", fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
+#      self.plt.text(.8, 1, 'right title', transform=self.fig.transFigure, horizontalalignment='center')
+#      self.plt.text(.2, 1, 'left title', transform=self.fig.transFigure, horizontalalignment='center')
+
+      #self.plt.text(0.5, 0.92, second_title, 
+               #fontsize=12, ha='center')
+      #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
+
+
+    else:
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+
     i = 0
     for series in dd['data']:
       d =  dd['data'][series]
       self.get_ax(axes[i], **d)
       i += 1
 
-    if i > 1:
-      self.plt.suptitle(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
-#      self.plt.text(x=0.2, y=0.9, s=second_title, ha='center', fontsize=10)
-      self.fig.subplots_adjust(top=0.95)
-    else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
-    #self.plt.legend(loc="upper left")
+    self.plt.tight_layout(rect=[0, 0, 1, gap])
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    if comment:
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+            
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     #olx.Shell(p)
@@ -2798,8 +2823,6 @@ class PlotIt():
       ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-      #self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
-      #self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
 
     if lim_x:
       self.plt.xlim(-1 * lim_x, lim_x)

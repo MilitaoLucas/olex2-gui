@@ -1130,8 +1130,12 @@ user
         .type = int
       font_name = 'Consolas'
         .type = str
-      title_fontsize = 18
+      title_fontsize = 20
         .type=int
+      subtitle_fontsize = 14
+        .type=int
+      subplot_top_gap = 0.95
+        .type=float
       tick_fontsize = 14
         .type=int
       axis_fontsize = 14
