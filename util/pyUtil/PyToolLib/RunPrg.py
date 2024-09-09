@@ -6,6 +6,7 @@ import os
 import olexex
 import OlexVFS
 import gui
+import olex
 
 
 from ArgumentParser import ArgumentParser
@@ -531,11 +532,21 @@ class RunRefinementPrg(RunPrg):
     OV.SetParam('snum.refinement.flack_str', "")
     OV.SetParam('snum.refinement.parson_str', "")
 
+  def run_pre_run_macro(self):
+    macro = OV.GetVar('pre_run_macro')
+    if not macro:
+      return
+    else:
+      mac = macro.split(">>")
+      for cmd in mac:
+        olex.m(cmd)
+
   def run(self):
     if RunRefinementPrg.running:
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
+    self.run_pre_run_macro()
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
