@@ -534,12 +534,16 @@ class RunRefinementPrg(RunPrg):
 
   def run_pre_run_macro(self):
     macro = OV.GetVar('pre_run_macro')
+    OV.SetVar("pre_run_macro", "")
     if not macro:
       return
     else:
+      print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
       mac = macro.split(">>")
       for cmd in mac:
         olex.m(cmd)
+        print("> -- %s" % cmd.strip())
+      print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
   def run(self):
     if RunRefinementPrg.running:
