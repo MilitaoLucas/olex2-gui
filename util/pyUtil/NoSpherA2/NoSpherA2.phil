@@ -322,6 +322,8 @@ snum{
 }
 
 NoSpherA2{
+  ORCA_Version = "5"
+  .type = str
 
 }
 

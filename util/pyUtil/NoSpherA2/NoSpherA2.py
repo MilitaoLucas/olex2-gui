@@ -963,9 +963,23 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.orca_exe):
-      OV.SetParam('snum.NoSpherA2.source',"ORCA")
+      import subprocess
+      p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+      idx = p.stdout.index("Version")
+      result = p.stdout[idx:idx+50].split('\n')[0].split()[1]
+      print("ORCA VERSION: ", result) #print the version
+      OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
+      Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
       if "ORCA" not in self.softwares:
-        self.softwares = self.softwares + ";ORCA;ORCA 5.0;ORCA 6.0"
+        if Orca_Vers == "4":
+          self.softwares = self.softwares + ";ORCA"
+          OV.SetParam('snum.NoSpherA2.source',"ORCA")
+        elif Orca_Vers == "5":
+          self.softwares = self.softwares + ";ORCA 5.0"
+          OV.SetParam('snum.NoSpherA2.source',"ORCA 5.0")
+        elif Orca_Vers == "6":
+          self.softwares = self.softwares + ";ORCA 6.0"
+          OV.SetParam('snum.NoSpherA2.source',"ORCA 6.0")
     else:
       self.softwares = self.softwares + ";Get ORCA"
 
@@ -990,7 +1004,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.xtb_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.xtb_exe):
-      OV.SetParam('snum.NoSpherA2.source',"xTB")
       if "xTB" not in self.softwares:
         self.softwares = self.softwares + ";xTB"
     else:
@@ -1017,7 +1030,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.ptb_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.ptb_exe):
-      OV.SetParam('snum.NoSpherA2.source',"pTB")
       if "pTB" not in self.softwares:
         self.softwares = self.softwares + ";pTB"
 
@@ -1460,9 +1472,9 @@ def get_functional_list(wfn_code=None):
   elif wfn_code == "pySCF":
     list = "HF;PBE;B3LYP;BLYP;M062X;R2SCAN;PBE0"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
-    list = "HF;BP;BP86;PWLDA;R2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
+    list = "HF;BP;BP86;PWLDA;r2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
   elif wfn_code == "ORCA 6.0":
-    list = "HF;BP;PWLDA;R2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
+    list = "HF;BP;PWLDA;r2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
   else:
