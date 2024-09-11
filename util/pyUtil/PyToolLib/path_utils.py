@@ -77,12 +77,13 @@ Current cctbx build: '%s'
     import libtbx.load_env
     reload(libtbx.load_env)
   cctbxRoot = os.path.realpath(cctbxRoot)
-  for i in libtbx.env.pythonpath:
-    i = os.path.realpath(abs(i))
-    if not i.startswith(cctbxRoot):
-      print("skpping '%s'" %i)
-      continue
-    sys.path.append(i)
+  if sys.platform.startswith('win'):
+    for i in libtbx.env.pythonpath:
+      i = os.path.realpath(abs(i)).lower()
+      if not i.startswith(cctbxRoot.lower()):
+        print("skpping '%s'" %i)
+        continue
+      sys.path.append(i)
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
   elif sys.platform.startswith('darwin'):
