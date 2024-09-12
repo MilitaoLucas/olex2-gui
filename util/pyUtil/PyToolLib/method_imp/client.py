@@ -40,7 +40,7 @@ class Method_client_refinement(Method_refinement):
     host = OV.GetParam("user.Server.host")
     port = OV.GetParam("user.Server.port")
     debug = OV.GetParam("user.Server.debug")
-    share = OV.GetParam("user.Server.share_localhost")
+    share = OV.GetParam("user.Server.shared_localhost")
     try:
         reserve_ = ("reserve:%s\n" %self.job_id).encode()
         data = self.send_cmd(host, port, reserve_, handle=False).decode("utf-8").rstrip('\n')
@@ -77,7 +77,12 @@ class Method_client_refinement(Method_refinement):
         env=my_env)
       os.chdir(cd)
       OV.SetVar("server.port", str(port))
-      OV.SetVar("launched_server.port", str(port))
+      launched = OV.GetVar("launched_server.ports", "")
+      if launched:
+        launched += ",%s" %port
+      else:
+        launched = str(port)
+      OV.SetVar("launched_server.ports", launched)
 
   def read_log_markup(self, log, marker):
     rv = []
