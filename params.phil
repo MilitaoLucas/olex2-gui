@@ -2395,6 +2395,8 @@ user
       .type=int
     debug=*None Wing VCS Eclipse
       .type=choice
+    shared_localhost=False
+      .type=bool
   }
 }
 

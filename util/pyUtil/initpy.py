@@ -57,8 +57,20 @@ stdout_redirection = True
 import os
 import locale
 def onexit():
-  pass
-olex.registerFunction(onexit,False)
+  sp = int(OV.GetVar("launched_server.port", "0"))
+  host = OV.GetParam("user.Server.host")
+  share = OV.GetParam("user.Server.share_localhost")
+  if not share and host == "localhost" and sp != 0:
+    print("Shutting down the server")
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+      try:
+        s.connect((host, sp))
+        s.sendall(b"stop\n")
+      except:
+        pass
+
+olex.registerFunction(onexit, False)
 
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
