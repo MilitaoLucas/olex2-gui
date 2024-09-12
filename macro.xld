@@ -128,6 +128,7 @@
   <cmd
     <cmd "stop logging">
     <cmd "flush history">
+    <cmd "spy.onexit()">
     <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
           spy.SaveCifInfo()>>mode off'">
     <cmd "spy.SaveUserParams()">
@@ -137,8 +138,7 @@
     <cmd "storeparam last_version GetVar(last_version, '')">
     <cmd "spy.threading.joinAll()">
     <cmd "user_onexit">
-    <cmd "spy.onexit()">
-    <cmd "echo Good Bye">
+    <cmd "echo 'Good Bye'">
   >
  >
 >
