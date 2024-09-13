@@ -1,6 +1,7 @@
 import olex
 import olx
 import olexex
+import olex_core
 import os
 import sys
 import OlexVFS
@@ -2603,6 +2604,18 @@ def get_polyhedra_tau():
 
 
 OV.registerFunction(get_polyhedra_tau, False, "tools")
+
+def get_refinement_stats_value(which):
+  try:
+    stats = olx.xf.RefinementInfo()
+    d1 = dict(x.split("=") for x in stats.split(";"))
+    d2 = olex_core.GetHklStat()
+    d = {**d1, **d2}
+    return d.get(which, "n/a")
+  except:
+    return ("...")
+OV.registerFunction(get_refinement_stats_value, False, "tools")
+
 
 
 def label_rsa():
