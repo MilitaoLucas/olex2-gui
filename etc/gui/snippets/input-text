@@ -22,6 +22,7 @@
   value="#value"
   onchange="#onchange"
   onleave="#onleave"
+  onreturn="#onreturn"
   manage="#manage"
   password="#password"
   multiline="#multiline"
