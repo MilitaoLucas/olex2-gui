@@ -157,7 +157,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
-  @gui_only
+  @gui_only()
   def HtmlGetValue(self, control, default=None):
     '''
     returns the value of a html control.
@@ -599,11 +599,11 @@ class OlexFunctions(inheritFunctions):
   def Reset(self):
     olx.Reset()
 
-  @gui_only
+  @gui_only()
   def htmlUpdate(self):
     olex.m("html.Update")
 
-  @gui_only
+  @gui_only()
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
 
