@@ -57,3 +57,14 @@ def gui_only(returns=None):
         return returns
     return wrapper
   return decorator
+
+def return_str(convert_None=True, lower=False):
+  def decorator(self, func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+      rv = func(*args, **kwargs)
+      if rv is None and convert_None:
+        return ""
+      return str(rv) if not lower else str(rv).lower()
+    return wrapper
+  return decorator
