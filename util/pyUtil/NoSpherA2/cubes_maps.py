@@ -22,7 +22,7 @@ if OV.HasGUI():
 
 import NoSpherA2
 import Wfn_Job
-from utilities import run_with_bitmap
+from decors import run_with_bitmap
 
 a2b = 0.529177210903
 

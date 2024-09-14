@@ -9,8 +9,7 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
-import socket
-import pickle
+from decors import gui_only
 
 import time
 
@@ -158,6 +157,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
+  @gui_only
   def HtmlGetValue(self, control, default=None):
     '''
     returns the value of a html control.
@@ -493,7 +493,6 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-
   def CurrentLanguageEncoding(self):
     try:
       retStr = olx.CurrentLanguageEncoding()
@@ -600,9 +599,11 @@ class OlexFunctions(inheritFunctions):
   def Reset(self):
     olx.Reset()
 
+  @gui_only
   def htmlUpdate(self):
     olex.m("html.Update")
 
+  @gui_only
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
 
