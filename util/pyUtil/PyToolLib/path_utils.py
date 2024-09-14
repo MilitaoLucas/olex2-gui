@@ -14,7 +14,7 @@ def setup_cctbx():
     if os.path.exists(os.path.join(cctbx_dir, "SConstruct")):
       build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(cctbx_dir)
       import pathlib
-      cctbxRoot = str(pathlib.Path(cctbx_dir).parent.absolute())
+      cctbxRoot = pathlib.Path(cctbx_dir).parent.absolute()
       print("Changing cctbx root to %s" %cctbxRoot)
     else:
       cctbxRoot = cctbx_dir
@@ -78,9 +78,10 @@ Current cctbx build: '%s'
     reload(libtbx.load_env)
   cctbxRoot = os.path.realpath(cctbxRoot)
   if sys.platform.startswith('win'):
+    root = str(cctbxRoot).lower()
     for i in libtbx.env.pythonpath:
       i = os.path.realpath(abs(i)).lower()
-      if not i.startswith(cctbxRoot.lower()):
+      if not i.startswith(root):
         print("skpping '%s'" %i)
         continue
       sys.path.append(i)

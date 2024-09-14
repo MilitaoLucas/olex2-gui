@@ -13,7 +13,7 @@ from ImageTools import IT
 from PilTools import timage
 from cctbx import adptbx
 from cctbx.array_family import flex
-
+from decors import run_with_bitmap
 try:
   from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
@@ -25,39 +25,6 @@ def scrub(cmd):
   log = gui.tools.LogListen()
   olex.m(cmd)
   return log.endListen()
-
-def run_with_bitmap(bitmap_text):
-  if OV.HasGUI():
-    timage.info_bitmaps(timage, bitmap_text, '#ff4444')
-  def decorator(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-      OV.CreateBitmap(bitmap_text)
-      olx.html.Update()
-      olx.xf.EndUpdate()
-      olex.m('refresh')
-      try:
-        return func(*args, **kwargs)
-      except Exception as e:
-        raise e
-      finally:
-        OV.DeleteBitmap(bitmap_text)
-        olx.html.Update()
-        olx.xf.EndUpdate()
-        olex.m('refresh')
-    return wrapper
-  def headless_decorator(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-      try:
-        return func(*args, **kwargs)
-      except Exception as e:
-        raise e
-    return wrapper  
-  if OV.HasGUI():
-    return decorator
-  else:
-    return headless_decorator
 
 def write_merged_hkl():
   folder = OV.FilePath()
@@ -84,8 +51,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         txt_col='black_text')
     if OV.HasGUI():
       olx.html.Update()
-      olx.xf.EndUpdate()
-      olex.m('refresh')
+      olx.Refresh()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
@@ -95,7 +61,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
-    args.append(salted_model_dir)  
+    args.append(salted_model_dir)
   from cctbx_olex_adapter import OlexCctbxAdapter
   cctbx_adaptor = OlexCctbxAdapter()
   f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
@@ -134,12 +100,12 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if "xTB" in software:
       args.append(str(2))
     elif "pTB" in software:
-      args.append(str(3))  
+      args.append(str(3))
   elif "ECP" in basis_name:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
     args.append(str(mode))
-  
+
   olex_refinement_model = OV.GetRefinementModel(False)
 
   if olex_refinement_model['hklf']['value'] >= 5:
@@ -221,7 +187,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(str(m))
       args.append("-mtc_charge")
       for i in range(len(groups)):
-        args.append(str(OV.GetParam('snum.NoSpherA2.charge')))      
+        args.append(str(OV.GetParam('snum.NoSpherA2.charge')))
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:
@@ -899,7 +865,7 @@ def write_precise_model_file():
       if 'fdp' in annotations[matrix_run]:
         matrix_run += 2
     f.write("\n")
-    
+
   connectivity_full = fmr.reparametrisation.connectivity_table
   xs = fmr.xray_structure()
   from scitbx import matrix
@@ -909,7 +875,7 @@ def write_precise_model_file():
   cell_errors = fmr.olx_atoms.getCellErrors()
   cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
   dist_stats = {}
-  dist_errs = {}    
+  dist_errs = {}
   for i in range(3):
     for j in range(i+1,3):
       if (cell_params[i] == cell_params[j] and
@@ -928,7 +894,7 @@ def write_precise_model_file():
   cm = norm_eq.covariance_matrix_and_annotations().matrix
   pm = xs.parameter_map()
   pat = connectivity_full.pair_asu_table
-    
+
   # calculate the distances using the prepared information
   distances = calculate_distances(
               pat,
@@ -936,17 +902,17 @@ def write_precise_model_file():
               covariance_matrix=cm,
               cell_covariance_matrix=cell_vcv,
               parameter_map=pm)
-    
+
   #The distances only exist once we iterate over them! Therefore build them and save them in this loop
   for i,d in enumerate(distances):
     bond = sl[d.i_seq]+"-"+sl[d.j_seq]
     dist_stats[bond] = distances.distances[i]
     dist_errs[bond] = math.sqrt(distances.variances[i])
-  
+
   f.write("\n\nBondlengths and errors:\n")
   for key in dist_stats:
     f.write(f"{key} {dist_stats[key]} {dist_errs[key]}\n")
-  
+
   f.close()
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
 
@@ -1020,7 +986,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
   args.append(str(radius))
   args.append("-cpus")
   args.append(OV.GetParam("snum.NoSpherA2.ncpus"))
-  
+
   startinfo = None
 
   from subprocess import Popen, PIPE
@@ -1043,11 +1009,11 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
         string = c.decode()
         stdout.write(string)
         stdout.flush()
-  
+
   NSA2_log = "NoSpherA2.log"
   if os.path.exists(NSA2_log):
     shutil.copy(NSA2_log, olx.FileName()+".polarizability")
-    
+
 OV.registerFunction(calc_polarizabilities, namespace="NoSpherA2")
 
 #CHOOSE FOLDER UTILITIES! (Used in SALTED)
@@ -1093,7 +1059,7 @@ def removeDir(phil_value, item_to_remove) -> None:
       """
   if item_to_remove == "" or item_to_remove == "Please Select":
     return
-  item_to_remove = ";" + item_to_remove 
+  item_to_remove = ";" + item_to_remove
   old = OV.GetParam(phil_value)
   old = old.replace(item_to_remove,"")
 

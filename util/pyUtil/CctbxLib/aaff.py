@@ -206,8 +206,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         HAR_log.close()
         print ("Could not obtain cctbx object and calculate ESDs!\n")
         return False
-      from NoSpherA2.utilities import run_with_bitmap
-      @run_with_bitmap('Analyzing shifts')
+      from decors import run_with_bitmap
+      @run_with_bitmap('Analyzing shifts', update_model_after=False)
       def analyze_shifts(results):
         try:
           matrix_run = 0

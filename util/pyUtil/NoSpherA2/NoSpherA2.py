@@ -12,6 +12,7 @@ debug = OV.IsDebugging()
 
 # Local imports for NoSpherA2 functions
 from utilities import *
+from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI
 import Wfn_Job
 import ELMO
@@ -81,7 +82,7 @@ class NoSpherA2(PT):
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
         self.ubuntu_exe = olx.file.Which("ubuntu2004.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
-        self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")        
+        self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")
     self.setup_har_executables()
     self.setup_pyscf()
     self.setup_discamb()
@@ -112,16 +113,16 @@ class NoSpherA2(PT):
       self.basis_dir = None
       print("No NoSpherA2 executable found!")
     print(" ")
-    
+
   def set_f_calc(self, f_calc):
     self.f_calc = f_calc
-    
+
   def set_f_obs_sq(self, f_obs_sq):
     self.f_obs_sq = f_obs_sq
-    
+
   def set_one_h_linearization(self, one_h_linarization):
     self.one_h_linearisation = one_h_linarization
-    
+
   def set_f_calc_obs_sq_one_h_linearisation(self,f_calc,f_obs_sq,one_h_linarization):
     self.f_calc = f_calc
     self.f_obs_sq = f_obs_sq
@@ -129,7 +130,7 @@ class NoSpherA2(PT):
     file_name = OV.GetParam("snum.NoSpherA2.file")
     time = os.path.getmtime(file_name)
     self.reflection_date = time
-  
+
   def delete_f_calc_f_obs_one_h(self):
     self.f_calc = None
     self.f_obs_sq = None
@@ -194,7 +195,7 @@ class NoSpherA2(PT):
       OV.SetVar("Parallel",True)
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      
+
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
@@ -209,7 +210,7 @@ class NoSpherA2(PT):
       while (os.path.exists(backup + "_%d" % l)):
         l = l + 1
       backup = backup + "_%d" % l
-    
+
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
     if Full_HAR == True:
@@ -257,7 +258,7 @@ class NoSpherA2(PT):
             shutil.move(f_work, f_dest)
         else:
           shutil.move(f_work, f_dest)
-          
+
   def wipe_wfn_jobs_folder(self):
     print(f"Deleting {self.jobs_dir}... ")
     if os.path.exists(self.jobs_dir):
@@ -300,7 +301,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         and ("STO" not in basis) and ("3-21" not in basis):
         print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
         OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
-        return False      
+        return False
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
         print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
@@ -363,7 +364,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return
       groups_counter = 0
       # Check if job folder already exists and (if needed) make the backup folders
-      self.tidy_wfn_jobs_folder()      
+      self.tidy_wfn_jobs_folder()
       olex.m("CifCreate_4NoSpherA2")
       shutil.move(self.name + ".cif_NoSpherA2", os.path.join(self.jobs_dir, self.name + ".cif"))
       if wfn_code == "fragHAR":
@@ -429,7 +430,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             except NameError as error:
               print ("Aborted due to: ",error)
               OV.SetVar('NoSpherA2-Error',error)
-              return False         
+              return False
             path_base = os.path.join(OV.FilePath(), wfn_job_dir, self.name)
             if os.path.exists(path_base + ".gbw"):
               wfn_fn = path_base + ".gbw"
@@ -521,7 +522,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
                 wfn_fn = path_base + ".wfx"
             elif os.path.exists(path_base + ".fchk"):
-              if (wfn_fn == None): 
+              if (wfn_fn == None):
                 wfn_fn = path_base + ".fchk"
             elif os.path.exists(path_base + ".wfn"):
               wfn_fn = path_base + ".wfn"
@@ -665,7 +666,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move("experimental.tscb", self.name + ".tscb")
               OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
             else:
-              OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")          
+              OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
 
         elif wfn_code != "Tonto":
           job = Job(self, self.name)
@@ -779,7 +780,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       except NameError as error:
         print("The following error occured during QM Calculation: ",error)
         OV.SetVar('NoSpherA2-Error',error)
-        raise NameError('Unsuccesfull Wavefunction Calculation!')      
+        raise NameError('Unsuccesfull Wavefunction Calculation!')
 
   def setup_wfn_2_fchk(self):
     exe_pre ="NoSpherA2"
@@ -1008,10 +1009,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.softwares = self.softwares + ";xTB"
     else:
       self.softwares = self.softwares + ";Get xTB"
-      
+
   def setup_ptb_executables(self):
     if debug == False:
-      return    
+      return
     self.ptb_exe = ""
     exe_pre = "ptb"
     self.ptb_exe_pre = exe_pre
@@ -1119,10 +1120,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return '1'
     # otherwise allow more CPUs
     return ';'.join(cpu_list)
-  
+
   def get_SALTED_model_locations(self):
     old = OV.GetParam('user.NoSpherA2.salted_models_list')
-    return old  
+    return old
 
   def getwfn_softwares(self):
     parts = OV.ListParts()
@@ -1205,8 +1206,7 @@ def discamb(folder, name, discamb_exe):
                         os.path.join(p_path, "discamb-launch.py")])
   while p.poll() is None:
     time.sleep(5)
-    if OV.HasGUI():
-      olx.html.Update()
+    OV.htmlUpdate()
 
 class Job(object):
   origin_folder = " "
@@ -1293,7 +1293,7 @@ class Job(object):
         args.append("t")
     elif fchk_source == "SALTED":
       salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
-      args = ["-SALTED",salted_model_dir, "-cif" ,data_file_name+".cif", "-xyz", data_file_name+".xyz", "-dmin", ]    
+      args = ["-SALTED",salted_model_dir, "-cif" ,data_file_name+".cif", "-xyz", data_file_name+".xyz", "-dmin", ]
     else:
       # We want these from supplied fchk file """
       fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
@@ -1353,7 +1353,7 @@ class Job(object):
           pass
         if x:
           print(x, end='')
-        time.sleep(0.5)      
+        time.sleep(0.5)
 
     if 'Error in' in open(self.error_fn).read():
       OV.SetVar('NoSpherA2-Error',"TontoError")
@@ -1695,7 +1695,7 @@ def set_default_cpu_and_mem():
   max_cpu = multiprocessing.cpu_count()
   hyperthreading = OV.GetParam('user.refinement.use_HT')
   if not hyperthreading:
-    max_cpu /= 2  
+    max_cpu /= 2
   current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')
   update = False
   if not parallel:

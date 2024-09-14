@@ -72,7 +72,7 @@ class wfn_Job(object):
   def write_xyz_file(self):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
-    olx.File(coordinates_fn,p=10)    
+    olx.File(coordinates_fn,p=10)
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -261,7 +261,7 @@ class wfn_Job(object):
           line = line.replace("D", "H")
         if atom[0] == "T":
           atom[0] = "H"
-          line = line.replace("T", "H")        
+          line = line.replace("T", "H")
         com.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -275,7 +275,7 @@ class wfn_Job(object):
       while True:
         line = basis.readline()
         if not line:
-          raise RecursionError("Atom not found in the basis set!")        
+          raise RecursionError("Atom not found in the basis set!")
         if line[0] == "!":
           continue
         if "keys=" in line:
@@ -379,7 +379,7 @@ class wfn_Job(object):
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
     charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1, p=10)
@@ -409,7 +409,7 @@ class wfn_Job(object):
       control += " 3-21G "
     else:
       control += basis_name.replace("ECP-", "") + ' '
-    
+
     if qmmmtype == "Mol":
       control += "MOL-CRYSTAL-QMMM "
     else:
@@ -422,7 +422,7 @@ class wfn_Job(object):
       grids = ""
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
-        control += " ROKS "      
+        control += " ROKS "
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
         if method != "wB97X":
@@ -466,7 +466,7 @@ class wfn_Job(object):
           line = line.replace("D", "H")
         if atom[0] == "T":
           atom[0] = "H"
-          line = line.replace("T", "H")        
+          line = line.replace("T", "H")
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -584,16 +584,16 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startinfo.wShowWindow = 7
-        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE,
                              startupinfo=startinfo)
       else:
-        m = subprocess.Popen(mm_prep_args, 
-                             cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(mm_prep_args,
+                             cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
@@ -659,7 +659,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             control += method + ' D3BJ def2-TZVPP/C '
             mp2_block += "%mp2 Density relaxed RI true end"
           else:
-            control += method + ' '   
+            control += method + ' '
         grids = self.write_grids_5(method, grid)
       else:
         control += method + ' '
@@ -740,7 +740,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       inp.write(mp2_block+'\n')
     if ECP == False:
       basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
-      basis = open(basis_set_fn,"r")      
+      basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
       for i in range(0, len(atom_list)):
         atom_type = "newgto " + atom_list[i] + '\n'
@@ -874,7 +874,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           while True:
             line = basis.readline()
             if not line:
-              raise RecursionError("Atom not found in the basis set!")          
+              raise RecursionError("Atom not found in the basis set!")
             if line[0] == "!":
               continue
             if "keys=" in line:
@@ -914,7 +914,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           inp.write("],\n")
         basis.close()
         inp.write("\n}\nmol.build()\n")
-  
+
         model_line = None
         if method == None:
           method = OV.GetParam('snum.NoSpherA2.method')
@@ -928,7 +928,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             model_line = "dft.RKS(mol)"
           else:
             model_line = "dft.UKS(mol)"
-        
+
         if relativistic == None:
           relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
         if relativistic == True:
@@ -990,7 +990,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   mf.kernel()"""
         rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
         inp.write(rest)
-        inp.close()    
+        inp.close()
 
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
@@ -1358,7 +1358,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
         while True:
           line = basis.readline()
           if not line:
-            raise RecursionError("Atom not found in the basis set!")          
+            raise RecursionError("Atom not found in the basis set!")
           if line[0] == "!":
             continue
           if "keys=" in line:
@@ -1412,7 +1412,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
           model_line = "dft.RKS(mol)"
         else:
           model_line = "dft.UKS(mol)"
-      
+
       if relativistic == None:
         relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
       if relativistic == True:
@@ -1855,13 +1855,13 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('Orca did not terminate normally!')
-    elif "Gaussian" in software:   
+    elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-    elif software == "ELMOdb":     
+    elif software == "ELMOdb":
       if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
         pass
       else:
@@ -1880,7 +1880,7 @@ ener = cf.kernel()"""
         for line in lines:
           if "Error" in line:
             print(line)
-        raise NameError('pTB did not terminate normally!')        
+        raise NameError('pTB did not terminate normally!')
     embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
     if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding == True):
       molden_args = []
@@ -1893,16 +1893,16 @@ ener = cf.kernel()"""
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startinfo.wShowWindow = 7
-        m = subprocess.Popen(molden_args, cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(molden_args, cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE,
                              startupinfo=startinfo)
       else:
-        m = subprocess.Popen(molden_args, 
-                             cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(molden_args,
+                             cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
@@ -1951,7 +1951,7 @@ ener = cf.kernel()"""
       elif("ptb" in args[0]):
         if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
           shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
-          shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))    
+          shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))
       elif("elmodb" in args[0]):
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
