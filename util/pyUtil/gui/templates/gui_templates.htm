@@ -183,7 +183,7 @@ t:R_factor_display{
         <b><i>R</i><sub>1&nbsp;</sub></b>
       </font>
     </td>
-    
+
     <td align='right'>
       <font size='%(font_size_R1)s' color='%(font_colour_R1)s'>
         <b>%(R1)s</b>
@@ -201,7 +201,7 @@ t:R_factor_display{
       <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'>
         <b>%(wR2)s</b>&nbsp;
       </font>
-      
+
       <font size='%(font_size_wR2)s' color='%(grey)s'>
         <b>%%</b>
       </font>
@@ -253,7 +253,7 @@ t:conflicts_header_row_files{
     "td1=<td align='right'>",
     )
             $-
-        </tr>      
+        </tr>
       </table>
     </td>
 }
@@ -291,9 +291,9 @@ t:conflicts_display_2{
     "name=%(conflict)s_edit",
     "value=?",
     )
-  $-    
+  $-
     </td>
-   
+
   $+
     html.Snippet(GetVar(default_link),
     "value=Use",
@@ -303,7 +303,7 @@ t:conflicts_display_2{
     "fgcolor=#ffffff",
     "onclick=spy.gui.metadata.add_resolved_conflict_item_to_phil('%(conflict)s', html.GetValue('~popup_name~.%(conflict)s_edit'))",
     )
-  $-    
+  $-
   </tr>
 </table>
 }
@@ -421,7 +421,7 @@ t:gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
   <tr>
     <td bgcolor='%(col_bg)s'>
-      <font color='%(col_fg)s'><b> %(txt)s </b></font>	
+      <font color='%(col_fg)s'><b> %(txt)s </b></font>
     </td>
   </tr>
 </table>
@@ -506,7 +506,7 @@ t:EDT_gui{
         name="ED_EDT_VAL"
         value="spy.ED.get_stored_param('thickness.value', sd=1000)"
         onchange="spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))"
-      >  
+      >
     </td>
 }
 
@@ -654,17 +654,17 @@ t:edt_gui{
      "disabled=not(spy.ED.is_dynamic())")
     $-
   </td>
-  <!--<td width="10%" align='left'>-->
-    <!--$+-->
-     <!--html.Snippet("gui/snippets/input-checkbox",-->
-     <!--"name=rthickness_B@Refine",-->
-     <!--"bgcolor=GetVar(HtmlTableFirstcolColour)",-->
-     <!--"value=Refine",-->
-     <!--"checked=spy.ED.get_stored_param('thickness.grad')",-->
-     <!--"onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",-->
-     <!--"disabled=not(spy.ED.is_dynamic())")-->
-   <!--$--->
-  <!--</td>-->
+  <td width="10%" align='left'>
+    $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=rthickness_B@Refine",
+     "bgcolor=GetVar(HtmlTableFirstcolColour)",
+     "value=Refine",
+     "checked=spy.ED.get_stored_param('thickness.grad')",
+     "onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",
+     "disabled=not(spy.ED.is_dynamic())")
+   $-
+  </td>
 }
 
 t:snum_cell_display{

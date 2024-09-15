@@ -513,3 +513,24 @@ def NamingMode():
   olx.Mode("Name", *args, a=auto, t=elm, s=suffix)
 
 olex.registerFunction(NamingMode, False, "gui")
+
+def FixFree(target):
+  target = target.upper()
+  if target == "FIX ALL":
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu>>fix HUiso")
+  elif target == "FREE XYZ":
+    olx.Run("sel -u>>sel $*,H>>free xyz")
+  elif target == "FREE ADP":
+    olx.Run("sel -u>>sel $*,H>>free adp")
+  elif target == "FREE H XYZ":
+    olx.Run("sel -u>>sel $H>>free xyz -cs>>afix 0")
+  elif target == "FREE H UISO":
+    olx.Run("sel -u>>sel $H>>free Uiso")
+  elif target == "AFIX":
+    cmd = "kill $H>>HAdd"
+    if OV.IsEDData():
+      cmd += ">>NeutronHDist"
+    olx.Run(cmd)
+  olx.Labels(f=True, h=True, a=True, r=True)
+
+olex.registerFunction(FixFree, False, "gui")
