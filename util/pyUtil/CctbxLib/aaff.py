@@ -30,7 +30,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
       return
     if energy == None:
-      HAR_log.write("{:^24}".format(" "))
+      HAR_log.write("{:^24}".format("---"))
     else:
       HAR_log.write("{:^24.10f}".format(energy))
     HAR_log.write("{:>70}".format(" "))
