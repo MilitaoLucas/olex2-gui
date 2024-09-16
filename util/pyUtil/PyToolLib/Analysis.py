@@ -3786,7 +3786,7 @@ def make_reflection_graph(name):
   name = name.lower().replace(" ", "_").replace("-", "_")
   if name == "gui_fobs_fcalc":
     name = "iobs_icalc" if OV.IsEDRefinement() else "fobs_fcalc"
-    
+
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
@@ -4039,6 +4039,16 @@ class HealthOfStructure():
       target = "&#013;- ".join(l)
 
       OV.SetParam('snum.refinement.completeness.target', target)
+
+      try:
+        multi = self.hkl_stats['TotalReflections']/self.hkl_stats['UniqueReflections']
+        self.hkl_stats.setdefault('multiplicity', multi)
+        target = ["Internal R factors. Click to see the graph", "-- Multiplicity = %.2f" %multi]
+        target = "&#013;- ".join(target)
+        OV.SetParam('snum.refinement.Rint.target', target)
+      except:
+        pass
+
     except Exception as err:
       print(err)
       return (False, True)
@@ -4365,6 +4375,7 @@ class HealthOfStructure():
     elif item == "Rint":
       target = ["Internal R factors. Click to see the graph", " Multiplicity = %.2f" %self.hkl_stats.get('multiplicity', 0.0)]
       target = "&#013;- ".join(target)
+      OV.SetParam('snum.refinement.Rint.target', target)
     else:
       target = OV.get_diag('%s.%s.target' %(self.scope,item))
 
