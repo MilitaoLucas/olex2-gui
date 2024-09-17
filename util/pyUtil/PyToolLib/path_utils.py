@@ -5,7 +5,7 @@ from datetime import datetime
 
 import olx
 
-def setup_cctbx():
+def setup_cctbx(run_cold_start=False):
   build_path = ""
   basedir = olx.BaseDir()
   cctbx_dir = os.environ.get('OLEX2_CCTBX_DIR')
@@ -61,13 +61,7 @@ def setup_cctbx():
             os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime)
       if not need_cold_start:
         raise
-  if not need_cold_start:
-    try:
-      from cctbx import xray
-    except Exception as err:
-      if "boost_python_meta_ext" in str(err):
-        need_cold_start = True
-  if need_cold_start:
+  if need_cold_start or run_cold_start:
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
     reload(libtbx.load_env)
@@ -80,6 +74,9 @@ def setup_cctbx():
         print("skpping '%s'" %i)
         continue
       sys.path.append(i)
+  else:
+    for i in libtbx.env.pythonpath:
+      sys.path.append(abs(i))
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
   elif sys.platform.startswith('darwin'):
@@ -100,6 +97,14 @@ def setup_cctbx():
       os.environ[lib_path] += lib_sep + abs(libtbx.env.lib_path)
   else:
     os.environ[lib_path] = abs(libtbx.env.lib_path)
+  # double check!
+  if not need_cold_start and not run_cold_start and False:
+    try:
+      from cctbx import xray
+    except Exception as err:
+      print("IMPORT FAILD" + str(err))
+      if "boost_python_meta_ext" in str(err):
+        setup_cctbx(True)
 
 def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwd()
