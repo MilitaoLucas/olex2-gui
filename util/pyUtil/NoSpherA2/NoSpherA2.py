@@ -964,12 +964,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       else:
         self.orca_exe = olx.file.Which("%s" %exe_pre)
     if os.path.exists(self.orca_exe):
-      import subprocess
-      p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-      idx = p.stdout.index("Version")
-      result = p.stdout[idx:idx+50].split('\n')[0].split()[1]
-      print("ORCA VERSION: ", result) #print the version
-      OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
+      try:
+        import subprocess
+        creationflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+        p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=creationflags)
+        idx = p.stdout.index("Version")
+        result = p.stdout[idx:idx+50].split('\n')[0].split()[1]
+        print("ORCA VERSION: ", result) #print the version
+        OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
+      except:
+        print("Failed to evaluate ORCA version")
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
       if "ORCA" not in self.softwares:
         if Orca_Vers == "4":
