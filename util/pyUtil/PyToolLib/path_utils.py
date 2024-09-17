@@ -56,22 +56,17 @@ def setup_cctbx():
     else:
       TAG_file_path = "%s/TAG" %build_path
       ENV_file_path = "%s/libtbx_env" %build_path
-      need_cold_start = not os.path.exists(ENV_file_path)\
-        or os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime
+      need_cold_start = not os.path.exists(ENV_file_path) or\
+         (os.path.exists(TAG_file_path) and
+            os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime)
       if not need_cold_start:
         raise
-  cctbx_TAG_file_path = "%s/TAG" %cctbxSources
-  if not os.path.isdir('%s/.svn' %cctbxSources)\
-     and os.path.exists(cctbx_TAG_file_path):
-    cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
-    cctbx_compile_date = cctbx_TAG_file.readline().strip()
-    cctbx_TAG_file.close()
-    cctbx_compatible_version = "2011_10_10_0000"
-    if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
-      sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
-Please update to cctbx build '%s' or later.
-Current cctbx build: '%s'
-""" %(cctbx_compatible_version, cctbx_compile_date))
+  if need_cold_start:
+    try:
+      from cctbx import xray
+    except Exception as err:
+      if "boost_python_meta_ext" in str(err):
+        cold_start = True
   if need_cold_start:
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
