@@ -61,12 +61,12 @@ def setup_cctbx():
             os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime)
       if not need_cold_start:
         raise
-  if need_cold_start:
+  if not need_cold_start:
     try:
       from cctbx import xray
     except Exception as err:
       if "boost_python_meta_ext" in str(err):
-        cold_start = True
+        need_cold_start = True
   if need_cold_start:
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
