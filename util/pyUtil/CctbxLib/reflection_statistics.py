@@ -368,6 +368,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         except:
           junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
           f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
+          f_calc_filtered = f_calc_merged
           print("WARNING! It was not possible to obtain all values of Fc values\n for the plot, so omitted values are skipped!")
           f_calc_omitted = None
       else:

@@ -684,6 +684,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           control += " ZORA SARC/J RI"
         elif t == "ZORA/RI":
           control += " ZORA/RI SARC/J RI"
+        elif t == "IORA":
+          control += " IORA SARC/J RI"
         else:
           control += " IORA/RI SARC/J RI"
       else:
@@ -695,6 +697,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           control += " DKH2 SARC/J RIJCOSX"
         elif t == "ZORA":
           control += " ZORA SARC/J RIJCOSX"
+        elif t == "IORA":
+          control += " IORA SARC/J RIJCOSX"        
         elif t == "ZORA/RI":
           control += " ZORA/RI SARC/J RIJCOSX"
         elif t == "IORA/RI":
