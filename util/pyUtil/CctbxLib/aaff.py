@@ -128,10 +128,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if energy is not None:
             HAR_log.write("{:^24.10f}".format(energy))
           else:
-            HAR_log.write("{:24}".format(" "))
+            HAR_log.write("{:24}".format("---"))
           fread = None
         else:
-          HAR_log.write("{:24}".format(" "))
+          HAR_log.write("{:24}".format("---"))
       if OV.GetParam('snum.NoSpherA2.run_refine') == True:
         # Run Least-Squares
         self.startRun()
@@ -241,6 +241,24 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 if res > results.max_duij:
                   results.update_uij(res, annotations[matrix_run])
               matrix_run += 1
+            elif 'fp' in an:
+              new_disp = new_atom['disp'][0]
+              old_disp = old_atom['disp'][0]
+              disp_esd = esds[matrix_run]
+              if disp_esd > 0:
+                res = abs(new_disp - old_disp) / disp_esd
+                if res > results.max_overall:
+                  results.update_overall(res, annotations[matrix_run])
+              matrix_run += 1
+            elif 'fdp' in an:
+              new_disp = new_atom['disp'][0]
+              old_disp = old_atom['disp'][0]
+              disp_esd = esds[matrix_run]
+              if disp_esd > 0:
+                res = abs(new_disp - old_disp) / disp_esd
+                if res > results.max_overall:
+                  results.update_overall(res, annotations[matrix_run])
+              matrix_run += 1            
             elif '.u' in an:
               adp = new_atom['adp'][0]
               adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
