@@ -23,7 +23,8 @@ def deal_with_AAFF(self: RunRefinementPrg):
     HAR_log.write("{:3d}".format(run))
     energy = None
     source = OV.GetParam('snum.NoSpherA2.source')
-    if "Please S" in source:
+    update = OV.GetParam('snum.NoSpherA2.Calculate')
+    if "Please S" in source and update:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
 Please select one of the generators from the drop-down menu.""", "O", False)
