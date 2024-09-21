@@ -404,8 +404,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif "SMTBX_ASSERT(l != mi_lookup.end()) failure" in e_string:
         lines = e_string.split("\n")
         indices = lines[1].split("(")[2].split(")")[0].split(',')
-        print("Did not find values for reflection (%s,%s,%s) in scattering table!"%(indices[0],indices[1],indices[2]))
-        print("Try recalculating the .tsc file!")
+        olx.Echo("Did not find values for reflection (%s,%s,%s) in scattering table!"%(indices[0],indices[1],indices[2]), m="error")
+        olx.Echo("Try recalculating the .tsc file!", m="error")
       else:
         print("Refinement failed")
         import traceback
