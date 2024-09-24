@@ -1,5 +1,5 @@
 gui {
-  base_colour = #b6b6b6
+  base_colour = c6c6c6
   logo_colour = #014e8f
   htmlpanelwidth = 530
   red = #aa0000
@@ -23,14 +23,16 @@ gui {
   }
 
   html {
-    base_colour = #b6b6b6
+    base_colour = #c6c6c6
     font_colour = #222244
-    bg_colour = #dddddd
+    bg_colour = #eeeeee
     highlight_colour = #ff7800
-    input_bg_colour = #ffffff
+    input_bg_colour = #efefef
     link_colour = #585886
-    table_bg_colour = #cccccc
-    table_firstcol_colour = #bbbbbb
+    table_bg_colour = #dddddd
+    table_firstcol_colour = #cccccc
+    table_group_bg_colour = #d9d9d9
+    table_group_header_colour = #cdcdcd
     input_height = 20
     checkbox_height = 20
     checkbox_width = 20
@@ -60,8 +62,8 @@ gui {
       bg_colour_L = 0.7
       grad_colour_L = 0.7
       font_colour_L = 1.4
-      font_size = 19
-      top = 7
+      font_size = 21
+      top = 4
       rounded = "1100"
       arrows = "bar:top:5"
       off_L = 0.8
@@ -78,8 +80,8 @@ gui {
       grad_colour_L = 1.3
       font_colour_L = 0.8
       font_size = 16
-      top = 3
-      left = 3
+      top = 2
+      left = 5
       off_L = 1.2
     }
 
@@ -96,8 +98,8 @@ gui {
     h1 {
       grad_colour = #527bde
       height = 26
-      font_size = 16
-      top = 4
+      font_size = 18
+      top = 2
       left = 13
       bg_colour_L = 1.2
       grad_colour_L = 0.9
@@ -110,7 +112,9 @@ gui {
     }
     h3 {
       grad_colour = #527bde
-      height = 19
+      height = 21
+      font_size = 14
+      top = 1
       bg_colour_L = 1.2
       grad_colour_L = 0.9
       font_colour_L = 1.5
@@ -122,9 +126,10 @@ gui {
       off_L = 0.6
     }
     tinybutton{
-      height = 28
-      width = 30
-      font_size = 14
+      height = 21
+      width = 21
+      top = 1
+      font_size = 15
       }
   }
 
@@ -153,7 +158,7 @@ gui {
   }
 
 
-  button_colouring = #dddddd
+  button_colouring = #aaaaaa
   button_writing = #777777
   tab_colour = #5563a4
   grad_top_left = #1f3257

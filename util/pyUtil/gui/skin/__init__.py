@@ -376,14 +376,14 @@ class Skin():
     except:
       pass
 
-    try:
-      for plugin in olx.InstalledPlugins:
-        try:
-          plugin.setup_gui(force=True)
-        except Exception as err:
-          print("Could not update images for plugin '%s': %s" % (plugin, err))
-    except:
-      pass
+    #try:
+      #for plugin in olx.InstalledPlugins:
+        #try:
+          #plugin.setup_gui(force=True)
+        #except Exception as err:
+          #print("Could not update images for plugin '%s': %s" % (plugin, err))
+    #except:
+      #pass
 
     olx.FlushFS()
 

@@ -25,7 +25,7 @@ t:part_0_and_n{
   value="0 | %(part)s"
   width="100%%"
   height="GetVar('HtmlInputHeight')"
-  onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s)>>freeze false>>focus"
+  onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
   bgcolor="GetVar('linkButton.bgcolor')"
   fgcolor="GetVar('linkButton.fgcolor')"
   custom="#custom"
@@ -419,6 +419,7 @@ $run(Focus)
 
 t:gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+
   <tr>
     <td bgcolor='%(col_bg)s'>
       <font color='%(col_fg)s'><b> %(txt)s </b></font>
@@ -460,7 +461,7 @@ t:restraints_top{
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type='checkbox'
-      bgcolor="GetVar('HtmlTableBgColour')"
+      bgcolor="GetVar('HtmlTableGroupBgColour')"
       name='SHOW_RESTRAINTS'
       checked="GetVar('show_restraints_table','false')"
       oncheck="SetVar('show_restraints_table','true')>>spy.gui.restraints.make_restraints_table()>>html.update"
@@ -492,7 +493,7 @@ t:EDT_gui{
     <td width='4%'>
       <input
         type="checkbox"
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name="ED_EDT"
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
@@ -575,7 +576,7 @@ t:exti_gui{
     <td width='4%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
@@ -596,7 +597,7 @@ t:swat_gui{
     <td width='4%'>
       <input
         type="checkbox"
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
@@ -617,7 +618,7 @@ t:exti_or_swat_gui{
     <td width='5%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
@@ -632,7 +633,7 @@ t:exti_or_swat_gui{
     <td width='5%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
@@ -668,7 +669,7 @@ t:edt_gui{
 }
 
 t:snum_cell_display{
-  <tr bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr bgcolor=$GetVar(HtmlTableGroupBgColour)>
     <td width='34%%'>
        <b>a</b> = %(a)s
     </td>
@@ -682,7 +683,7 @@ t:snum_cell_display{
     </td>
   </tr>
 
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
 
     <td>
        <b>b</b> = %(b)s
@@ -697,7 +698,7 @@ t:snum_cell_display{
     </td>
   </tr>
 
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
     <td>
        <b>c</b> = %(c)s
     </td>
