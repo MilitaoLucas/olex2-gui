@@ -1,22 +1,20 @@
-<!-- #include group-begin gui\blocks\group_begin.htm;width=50;1 -->
+<!-- #include group-begin gui\blocks\group_begin.htm;width=70;1 -->
 
 <td width='100%' align='left'>
 $spy.MakeElementButtonsFromFormula('mode')
 </td>
 <!-- #include group-end gui\blocks\group_end.htm;1 -->
 
-<!-- #include group-begin gui\blocks\group_begin.htm;width=30;1 -->
-<td width='50%'>
+<!-- #include group-begin gui\blocks\group_begin.htm;width=15;1 -->
     $+
     html.Snippet(GetVar(default_link),
     "value=Add H",
     "onclick=showH a true >> HADD",
     )$-
-</td>
 <!-- #include group-end gui\blocks\group_end.htm;1 -->
 
-<!-- #include group-begin gui\blocks\group_begin.htm;width=30;1 -->
-<td width='40%' align='center' valign='center'>
+<!-- #include group-begin gui\blocks\group_begin.htm;width=15;1 -->
+<td width='40%' align='right' valign='center'>
   $spy.MakeHoverButton('toolbar-anis',"anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine")
   $spy.MakeHoverButton('toolbar-isot',"isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine")
 </td>
