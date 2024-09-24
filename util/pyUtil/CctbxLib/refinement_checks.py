@@ -50,7 +50,7 @@ class RefinementChecks(object):
       if len(wrong_occu) == 1:
         self.refinement_has_failed.append(f"{wrong_occu[0]} has unreasonable Occupancy")
       else:
-        _ =  ",".join(wrong_occu)
+        _ =  ", ".join(wrong_occu)
         self.refinement_has_failed.append(f"{_} have unreasonable Occupancy")
 
   def check_disp(self):

@@ -26,12 +26,12 @@ $spy.NoSpherA2.make_quick_button_gui()
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_1;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;width=60;1; -->
 
-<td width="13%" align='left'>
+<td width="22%" align='left'>
     <b>Basis Set </b>
 </td>
-<td width="20%">
+<td width="28%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_basis@refine",
@@ -41,10 +41,10 @@ $spy.NoSpherA2.make_quick_button_gui()
   $-
   </td>
 
-<td width="11%" align='right'>
+<td width="22%" align='right'>
   <b>Method</b>
 </td>
-<td width="20%">
+<td width="28%">
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_method@refine",
@@ -53,6 +53,10 @@ $spy.NoSpherA2.make_quick_button_gui()
     "onchange=spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))")
   $-
 </td>
+
+<!-- #include group-end gui\blocks\group_end.htm;1 -->
+<!-- #include group-begin gui\blocks\group_begin.htm;width=40;1 -->
+
 
 #ignoreif -->
 #ignoreif -->
@@ -85,10 +89,10 @@ $-
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 #ignoreif -->
 
-<td width="8%" align='right'>
+<td width="20%" align='right'>
   <b>CPUs</b>
 </td>
-<td width="9%" align='center'>
+<td width="20%" align='center'>
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_cpus@refine",
@@ -98,10 +102,10 @@ $-
   $-
 </td>
 
-<td width="8%" align='right'>
+<td width="30%" align='right'>
   <b>Mem(Gb) </b>
 </td>
-<td width="9%" align='center'>
+<td width="20%" align='center'>
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_mem",
