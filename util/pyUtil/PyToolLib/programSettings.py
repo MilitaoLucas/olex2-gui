@@ -262,8 +262,10 @@ def stopProcess():
      (for shelxl and shelxd at least)"""
   OV.SetVar("stop_current_process", True)
   try:
-    open(os.path.join(OV.StrDir(), "temp",
-                      OV.FileName().replace(' ', '').lower()) + ".fin", 'w')\
+    shelx_dir = os.path.join(OV.StrDir(), "temp")
+    if os.path.exists(shelx_dir):
+      open(os.path.join(shelx_dir,
+        OV.FileName().replace(' ', '').lower()) + ".fin", 'w')\
       .close()
   except AttributeError:
     pass
