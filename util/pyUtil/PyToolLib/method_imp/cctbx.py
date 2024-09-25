@@ -61,6 +61,7 @@ class Method_cctbx_refinement(Method_refinement):
       verbose=verbose,
       on_completion=self.writeRefinementInfoForGui)
     try:
+      olx.SetOlex2RefinementListener(True)
       if timer:
         t1 = time.time()
       cctbx.run(table_file_name=self.table_file_name,
@@ -90,6 +91,7 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
           self.post_refinement(RunPrgObject=RunPrgObject)
     finally:
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
+      olx.SetOlex2RefinementListener(False)
       OV.DeleteBitmap('refine')
       self.interrupted = cctbx.interrupted
 
