@@ -4,7 +4,7 @@ from olexFunctions import OV
 
 import olx
 import olex
-import os
+import os, sys
 
 import subprocess, socket, time
 
@@ -72,8 +72,11 @@ class Method_client_refinement(Method_refinement):
       my_env = os.environ.copy()
       if "OLEX2_ATTACHED_WITH_PYDEBUGGER" in my_env and debug != "Wing":
         del my_env["OLEX2_ATTACHED_WITH_PYDEBUGGER"]
+      headless_name = "olex2c"
+      if sys.platform[:3] == 'win':
+        headless_name += ".dll"
       subprocess.Popen(
-        [os.path.join(olx.BaseDir(), "olex2c.dll"), "server", str(port), self.job_id],
+        [os.path.join(olx.BaseDir(), headless_name), "server", str(port), self.job_id],
         env=my_env)
       os.chdir(cd)
       OV.SetVar("server.port", str(port))
