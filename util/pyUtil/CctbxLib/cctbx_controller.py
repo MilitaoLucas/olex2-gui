@@ -205,7 +205,12 @@ class reflections(object):
     else:
       return merging
 
-  def filter(self, omit, shel, wavelength):
+  def filter(self, omit, shel, wavelength, doFilter=True):
+    if not doFilter:
+      self.f_sq_obs_filtered = self.f_sq_obs_merged
+      if self.hklf_code == 5:
+        self.batch_numbers = self.batch_numbers_array.data()
+      return
     self._omit = omit
     self._shel = shel
     two_theta = omit['2theta']
