@@ -61,7 +61,7 @@ class twin_domains:
 
 
 class OlexCctbxAdapter(object):
-  def __init__(self):
+  def __init__(self, do_filter=True):
     import olexex
     if OV.HasGUI():
       sys.stdout.refresh = True
@@ -126,7 +126,7 @@ class OlexCctbxAdapter(object):
 
     self.exti = self.olx_atoms.model.get('exti', None)
     self.swat = self.olx_atoms.model.get('swat', None)
-    self.initialise_reflections()
+    self.initialise_reflections(doFilter=do_filter)
     from connectivity_table import connectivity_table
     self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
 
@@ -249,7 +249,7 @@ class OlexCctbxAdapter(object):
       self.xray_structure(construct_restraints=True)
     return self._restraints_manager
 
-  def initialise_reflections(self, force=False, verbose=False):
+  def initialise_reflections(self, force=False, verbose=False, doFilter=True):
     self.cell = self.olx_atoms.getCell()
     self.space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
@@ -281,7 +281,7 @@ class OlexCctbxAdapter(object):
         hklf_matrix=hklf_matrix,
         merge_code=merge_code)
       olx.current_observations = None
-    if olx.current_reflections:
+    if olx.current_reflections and doFilter:
       self.reflections = olx.current_reflections
       self.observations = olx.current_observations
       if self.observations is not None:
@@ -309,7 +309,7 @@ class OlexCctbxAdapter(object):
       update = True
 
     if update or self.observations is None:
-      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'])
+      self.reflections.filter(omit, shel, self.olx_atoms.exptl['radiation'], doFilter=doFilter)
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
