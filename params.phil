@@ -927,6 +927,10 @@ olex2
     pyl = True
      .type = bool
   }
+  refinement {
+    stop_ED_ASAP = True
+      .type = bool
+  }
 }
 
 
