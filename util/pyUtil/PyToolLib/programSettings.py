@@ -271,7 +271,12 @@ def stopProcess():
     pass
   # if the Olex2 Refinement listener is installed - this should interrupt olex2.refine
   # refinement cycle vs 'normal' interruption of the next cycle
-  olx.SetOlex2RefinementInterrupt(True)
+  if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
+    if OV.GetParam("olex2.refinement.stop_ED_ASAP") and OV.IsEDRefinement():
+      if OV.IsClientMode():
+        open(os.path.join(OV.StrDir(), OV.FileName()) + ".fin", 'w').close()
+      else:
+        olx.SetOlex2RefinementInterrupt(True)
 
   try:
     import RunPrg
@@ -280,5 +285,4 @@ def stopProcess():
   except:
     pass
 
-  return
 OV.registerFunction(stopProcess)

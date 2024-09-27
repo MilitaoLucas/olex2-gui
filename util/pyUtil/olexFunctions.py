@@ -889,7 +889,7 @@ class OlexFunctions(inheritFunctions):
       self.GetParam("snum.refinement.program").startswith("olex2.refine")
 
   def IsRemoteMode(self):
-    return 'true' ==olx.GetVar('olex2.remote_mode', 'false')
+    return 'true' == olx.GetVar('olex2.remote_mode', 'false')
 
   def IsClientMode(self):
     return self.GetParam('user.refinement.client_mode', False)
