@@ -1,0 +1,16 @@
+<tr ALIGN='left'>
+<td />
+<!-- #include x gui\blocks\group_begin.htm;1 -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Terminate_ED;1 -->
+<td width='75%'>
+  <b>Break ED refinement ASAP</b>
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-checkbox-plain"
+     name="terminate_ASAP"
+     checked="spy.GetParam('olex2.refinement.stop_ED_ASAP')"
+     onclick="spy.SetParam('olex2.refinement.stop_ED_ASAP', html.GetState('~name~'))" />
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- #include x gui\blocks\group_end.htm;1 -->
+</tr>
