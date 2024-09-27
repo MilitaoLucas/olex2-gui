@@ -71,6 +71,7 @@
     <onabort
      <cmd "ceiling off">
      <cmd "freeze false">
+     <cmd  "if strcmp(lasterror(),'Cancelled') then 'abort -q'">
      <cmd "echo lasterror() -m=error">
      <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually.'">
      <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there.'">

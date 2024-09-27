@@ -41,6 +41,10 @@ class Method_cctbx_refinement(Method_refinement):
       OV.SetParam('snum.auto_hydrogen_naming', False)
       print("Using tabulated atomic form factors")
 
+    fin_fn = os.path.join(OV.StrDir(), OV.FileName()) + ".fin"
+    if os.path.exists(fin_fn):
+      os.remove(fin_fn)
+
     Method_refinement.pre_refinement(self, RunPrgObject)
 
 
