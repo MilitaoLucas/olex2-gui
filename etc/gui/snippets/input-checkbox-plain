@@ -1,0 +1,38 @@
+#value=
+#checked=false
+#width=0
+#height=0
+#manage=false
+#right=false
+#bgcolor=GetVar(HtmlTableBgColour)
+#fgcolor=GetVar(HtmlFontColour)
+#disabled=false
+#oncheck="html.SetData(~name~,'True')"
+#onuncheck="html.SetData(~name~,' ')"
+#custom=$GetVar(custom_button)
+#target=
+#data=
+#label=
+
+<font size="$GetVar('HtmlFontSizeControls')">
+  <input
+    type="checkbox"
+    height="#height"
+    fgcolor="#fgcolor"
+    bgcolor="#bgcolor"
+    name="#name"
+    width="#width"
+    value="#value"
+    label="#label"
+    data="#data"
+    checked="#checked"
+    onclick="#onclick"
+    oncheck="#oncheck"
+    onuncheck="#onuncheck"
+    right="#right"
+    manage="#manage"
+    disabled="#disabled"
+    target="#target"
+    custom="#custom"
+  />
+</font>

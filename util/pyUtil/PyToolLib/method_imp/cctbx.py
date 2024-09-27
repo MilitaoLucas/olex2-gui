@@ -138,6 +138,10 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     from aaff import deal_with_AAFF
     return deal_with_AAFF(RunPrgObject)
 
+  def extraHtml(self):
+    html = "<!-- #include olex2.refine-extra gui/tools/olex2.refine-extra.htm;1 -->"
+    return html
+
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
