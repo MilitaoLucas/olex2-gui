@@ -45,8 +45,9 @@ def makeProgramSettingsGUI(program, method, prgtype):
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
     </table>
-      <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 """
+# mind first %s formatting - as it could be <!-- icnlude etc!
   if program.name.lower().startswith("superflip"):
     txt += open(os.path.normpath("%s/etc/gui/tools/superflip.htm" %olx.BaseDir()), "r").read()
   elif program.name.lower().startswith("tonto"):
@@ -55,11 +56,12 @@ def makeProgramSettingsGUI(program, method, prgtype):
     txt += ''.join([makeArgumentsHTML(program, method, instruction)
                     for instruction in method.instructions()])
   txt += r'''
-  <tr><td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td>%s - %s</td>
-</tr>
+  <tr><td valign="center" width="$GetVar(HtmlTableFirstcolWidth)" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+<td>
 %s
-''' %(OV.GetParam('gui.html.table_firstcol_width'), authors, reference, method.extraHtml())
+</td></tr>
+  <tr><td></td> <td>%s - %s</td></tr>
+''' %(method.extraHtml(), authors, reference)
 
   OlexVFS.write_to_olex(wFilePath, txt)
   return
