@@ -5,6 +5,7 @@ import shutil
 import time
 import olx
 import olex
+import olex_core
 import sys
 from olexFunctions import OV
 import OlexVFS
@@ -62,11 +63,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
     args.append(salted_model_dir)
-  from cctbx_olex_adapter import OlexCctbxAdapter
-  cctbx_adaptor = OlexCctbxAdapter()
-  f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
   if not hkl_file is None:
     if not os.path.exists(hkl_file):
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      cctbx_adaptor = OlexCctbxAdapter()
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged      
       with open(hkl_file, "w") as out:
         f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
@@ -129,21 +130,28 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  shel = olx.Ins('SHEL')
-  omit = olx.Ins('OMIT')
-  d_min = f_sq_obs.d_min()
-  if shel != "n/a":
-    d = float(shel.split()[-1])
-    if d > d_min:
-      d_min = d
-  if omit != "n/a":
-    from cctbx import uctbx
-    d = uctbx.two_theta_as_d(float(omit.split()[-1]),float(olx.xf.exptl.Radiation()),deg=True)
-    if d > d_min:
-      d_min = d
-  args.append("-dmin")
-  args.append(str(d_min * 0.95))
-  print("dmin = ", f_sq_obs.d_min())
+  d2 = olex_core.GetHklStat()
+  args.append("-hkl_min_max")
+  args.append(str(d2['FileMinIndices'][0]))
+  args.append(str(d2['FileMaxIndices'][0]))
+  args.append(str(d2['FileMinIndices'][1]))
+  args.append(str(d2['FileMaxIndices'][1]))
+  args.append(str(d2['FileMinIndices'][2]))
+  args.append(str(d2['FileMaxIndices'][2]))
+  #shel = olx.Ins('SHEL')
+  #omit = olx.Ins('OMIT')
+  #d_min = d2['MinD']
+  #if shel != "n/a":
+  #  d = float(shel.split()[-1])
+  #  if d > d_min:
+  #    d_min = d
+  #if omit != "n/a":
+  #  from cctbx import uctbx
+  #  d = uctbx.two_theta_as_d(float(omit.split()[-1]),float(olx.xf.exptl.Radiation()),deg=True)
+  #  if d > d_min:
+  #    d_min = d
+  #args.append("-dmin")
+  #args.append(str(d_min * 0.95))
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
