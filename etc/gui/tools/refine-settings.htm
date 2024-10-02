@@ -56,6 +56,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "checked=spy.GetParam(user.refinement.client_mode, false)",
         "label=Client",
         "height=0",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td align='left' width="22%">",
         "onclick=spy.SetParam(user.refinement.client_mode, html.GetState(~name~))")
       $-
@@ -141,6 +142,7 @@ $-
         html.Snippet("gui/snippets/input-checkbox",
         "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
         "checked=spy.GetParam('snum.refinement.update_weight')",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))",
         )
        $-
@@ -177,6 +179,7 @@ $-
         "label=Use Mask ",
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td width=22%>"
         )
       $-
@@ -291,6 +294,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
         "label=NoSpherA2 ",
         "height=0",
         "td1=<td align='left' width="22%">",
+        "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "onclick=spy.NoSpherA2.toggle_GUI()")
       $-
 
