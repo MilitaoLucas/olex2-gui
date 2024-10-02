@@ -112,9 +112,9 @@ gui {
     }
     h3 {
       grad_colour = #527bde
-      height = 21
-      font_size = 14
-      top = 1
+      height = 22
+      font_size = 15
+      top = 3
       bg_colour_L = 1.2
       grad_colour_L = 0.9
       font_colour_L = 1.5
