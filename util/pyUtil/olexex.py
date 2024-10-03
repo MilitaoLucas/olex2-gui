@@ -427,38 +427,27 @@ class OlexRefinementModel(object):
             i_seqs = []
             sym_ops = []
             # looking for the pivot atom in the model
-            for residue in self.model['aunit']['residues']:
-              for atom in residue['atoms']:
-                if(atom['aunit_id']==atom_restraint[0]):
-                  # found the pivot atom
-                  i_seqs.append(atom_restraint[0])
-                  sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1])
-                    if atom_restraint[1] is not None else None) )
-                  pivot_name = atom['label']
+            atom = self._atoms[atom_restraint[0]]
+            i_seqs.append(atom_restraint[0])
+            sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1])
+              if atom_restraint[1] is not None else None) )
+            pivot_name = atom['label']
 
-                  # if symmetry related we have a tuple, not an int
-                  for neighbour in atom['neighbours']:
-                    if(type(neighbour)==type(())):
-                      neighbour_id=neighbour[0]
-                    else:
-                      neighbour_id=neighbour
+            # if symmetry related we have a tuple, not an int
+            for neighbour in atom['neighbours']:
+              if(type(neighbour)==type(())):
+                neighbour_id=neighbour[0]
+              else:
+                neighbour_id=neighbour
 
-                    # now finding the type of the neighbour
-                    getmeout=False
-                    for residuebis in self.model['aunit']['residues']:
-                      for atombis in residuebis['atoms']:
-                        if(atombis['aunit_id']==neighbour_id):
-                          if(atombis['type']!='H'): # only non hydrogen atom are considered
-                            i_seqs.append(neighbour_id)
-                            if(type(neighbour)==type(())):
-                              sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
-                            else:
-                              sym_ops.append(None)
-                            getmeout=True
-                            break
-                      if(getmeout): break
-                  # end loop over neighbours
-            # end search of pivot atom
+              # now finding the type of the neighbour
+              atombis = self._atoms[neighbour_id]
+              if(atombis['type']!='H'): # only non hydrogen atom are considered
+                i_seqs.append(neighbour_id)
+                if(type(neighbour)==type(())):
+                  sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
+                else:
+                  sym_ops.append(None)
 
             if(len(i_seqs)==4):
               yield restraint_type, dict(
