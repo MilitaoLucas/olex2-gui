@@ -1335,7 +1335,6 @@ def get_battery_image(colour, colourize=True):
             'yellow': 3,
             'orange': 2,
             'red': 1}
-
   n_dots = d_dots[colour]
 
   src_battery = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_rgb.png")
@@ -1344,6 +1343,7 @@ def get_battery_image(colour, colourize=True):
 
   bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
   im = Image.alpha_composite(bg, IM_battery)
+  
   draw = ImageDraw.Draw(im)
   width, height = bg.size
 
@@ -1362,7 +1362,7 @@ def get_battery_image(colour, colourize=True):
     box = (left, top, boxWidth + left, boxHeight + top)
     draw.rectangle(box, fill=col)
   new_width = 18
-  new_height = int(im.size[1] / im.size[0] * 18)
+  new_height = int(im.size[1] / im.size[0] * 20)
   IM = im.resize((new_width, new_height), Image.ANTIALIAS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
@@ -1408,6 +1408,24 @@ def get_parameter_number():
       pass
   return parameters
 
+def GetNParams():
+  if OV.GetParam('snum.refinement.program') != "olex2.refine":
+    return
+  from refinement import FullMatrixRefine
+  fmr = FullMatrixRefine()
+  dyn = bool(OV.GetVar("isDynamic", False))
+  rpm = fmr.run(reparametrisation_only=True, ed_refinement=dyn)
+  if rpm is None:
+    retVal = 0
+  try:
+    retVal = rpm.jacobian_transpose_matching_grad_fc().n_rows
+  except:
+    retVal = 0
+  if OV.IsControl("NParameters"):
+    olx.html.SetLabel("NParameters", retVal)
+    olx.html.SetFG("NParameters", gui_red)
+OV.registerFunction(GetNParams)
+
 
 def GetDPRInfo():
   hklsrc = OV.HKLSrc()
@@ -1437,25 +1455,12 @@ def GetDPRInfo():
 
   idx = 4 - dpr_col_number
   colour = colour_txt[idx]
-  name = "battery_%s.png" % colour
-  if not OlexVFS.exists(name):
+  img_name = "battery_%s.png" % colour
+  if not OlexVFS.exists(img_name):
     try:
-      name = get_battery_image(colour)
+      img_name = get_battery_image(colour)
     except:
-      name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
-  image = """
-  <input
-  name="BATTERY-EDTT"
-  type="button"
-  align="center"
-  image="%s"
-  hint="%s"
-  >
-  """ % (name, text_output[idx])
-
-  image = """
-  <a target="%s" href="echo '%s'"><zimg src="%s"></a>
-  """ % (text_output[idx], text_output[idx], name)
+      img_name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
 
   if dpr <= 10:
     disp_dpr = "%.2f" % dpr
@@ -1464,25 +1469,15 @@ def GetDPRInfo():
 
   d = {
     'dpr': disp_dpr,
-    'image': image,
-  }
+    'img_name': img_name,
+    'hint': text_output[idx], 
+    'label': f"{data}/{parameters}", 
+    'data': f"{data}", 
+    'parameters': f"{parameters}"
+    }
 
-  t = """
-  <table border="0" cellpadding="0" cellspacing="0" align='center'>
-    <tr align='center'>
-      <td align='center'>
-        %(image)s
-      </td>
-    </tr>
-    <tr>
-      <td align='center'>
-        <font size='-1'>
-          <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
-        </font>
-      </td>
-    </tr>
-  </table>
-  """ % d
+  t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
+ 
   retVal = t
   cache[dpr] = t
   return retVal

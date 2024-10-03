@@ -113,32 +113,32 @@ $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>
     $+
     html.Snippet(GetVar(default_link),
       "value=Fix all",
-      "onclick=spy.gui.FixFree(fix all)",
+      "onclick=spy.gui.FixFree(fix all) >> spy.GetNParams()",
     )$-
     $+
     html.Snippet(GetVar(default_link),
       "value=AFIX",
-      "onclick=spy.gui.FixFree(AFIX)",
+      "onclick=spy.gui.FixFree(AFIX) >> spy.GetNParams()",
     )$-
     $+
     html.Snippet(GetVar(default_link),
       "value=Free XYZ",
-      "onclick=spy.gui.FixFree(free xyz)",
+      "onclick=spy.gui.FixFree(free xyz) >> spy.GetNParams()",
     )$-
     $+
     html.Snippet(GetVar(default_link),
       "value=Free ADP",
-      "onclick=spy.gui.FixFree(free adp)",
+      "onclick=spy.gui.FixFree(free adp)  >> spy.GetNParams()",
     )$-
     $+
     html.Snippet(GetVar(default_link),
       "value=Free H XYZ",
-      "onclick=spy.gui.FixFree(free H xyz)",
+      "onclick=spy.gui.FixFree(free H xyz) >> spy.GetNParams()",
     )$-
     $+
     html.Snippet(GetVar(default_link),
       "value=Free H ADP",
-      "onclick=spy.gui.FixFree(free H Uiso)",
+      "onclick=spy.gui.FixFree(free H Uiso) >> spy.GetNParams()",
     )$-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
