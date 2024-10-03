@@ -313,7 +313,7 @@ Use non-spherical atomic scattering factors
       html.Snippet("gui/snippets/input-checkbox-td",
       "name=calcualte_new@refine",
       "label=Update Table",
-      "bgcolor=GetVar(HtmlTableRowBgColour)",
+      "bgcolor=GetVar(HtmlTableFirstcolColour)",
       "td1=<td align='left' width="22%">",
       "checked=spy.GetParam('snum.NoSpherA2.Calculate')",
       "onclick=spy.SetParam('snum.NoSpherA2.Calculate', html.GetState('~name~'))>>if strcmp(spy.GetParam('snum.NoSpherA2.Calculate'),True) then 'html.ItemState h3-NoSpherA2-extras 1' else 'html.ItemState h3-NoSpherA2-extras 2'>>html.Update()")
@@ -410,7 +410,9 @@ $spy.MakeHoverButton('toolbar-delete', 'spy.NoSpherA2.wipe_wfn_jobs_folder()')
 <!-- #ignoreif not spy.ac.isMEDEnabled()
 <!-- #ignoreif not(spy.IsEDData())
 <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-<!-- #includeif strcmp(GetVar(ACED_DEV),True) ed_gui_testing basedir()/util/pyUtil/ACED7d/ED_refine_interface_testing.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Testing;onclick=;2; -->
+
+<!-- #includeif strcmp(GetParam('olex2.debug'),True) ed_gui_testing basedir()/util/pyUtil/ACED7d/ED_refine_interface_testing.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Testing;onclick=;2; -->
+
 <!-- #includeif not(strcmp(GetVar(ACED_DEV),True)) ed_gui_testing basedir()/util/pyUtil/ACED/ED_refine_interface_testing.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Testing;onclick=;2; -->
 
 </table>
