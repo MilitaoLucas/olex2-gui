@@ -710,3 +710,63 @@ t:snum_cell_display{
     </td>
   </tr>
 }
+
+t:battery_gui{
+  <table border="0" cellpadding="0" cellspacing="0" align='center' width='100%%' >
+    <tr align='center' width="100%%">
+      <td align='center'>
+        <a target="%(hint)s" href="echo '%(hint)s'"><zimg src="%(img_name)s"></a>
+      </td>
+      
+      <td align='center'>
+  <table border="0" cellpadding="1" cellspacing="1" align='center' width='100%%'>
+<tr>
+            <td width='100%%'>
+              <b>
+              <input
+                type="label"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                name="DPR"
+                value="%(dpr)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+              </b>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input
+                name="NData"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                type="label"
+                value="%(data)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input
+                name="NParameters"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                type="label"
+                value="%(parameters)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+}
