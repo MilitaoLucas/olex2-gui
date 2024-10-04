@@ -76,7 +76,10 @@ class Method_cctbx_refinement(Method_refinement):
       print(e)
     except NotImplementedError as e:
       print(e)
-    else:
+    except Exception as e:
+      if "No observations" in str(e):
+        print(e)
+        return
       self.failure = cctbx.failure
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
