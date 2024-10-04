@@ -76,10 +76,7 @@ class Method_cctbx_refinement(Method_refinement):
       print(e)
     except NotImplementedError as e:
       print(e)
-    except Exception as e:
-      if "No observations" in str(e):
-        print(e)
-        return
+    else:
       self.failure = cctbx.failure
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
@@ -87,15 +84,18 @@ class Method_cctbx_refinement(Method_refinement):
         OV.File('%s.res' %OV.FileName())
       # happens in the case of external interrupt
       elif cctbx.failure and OV.IsRemoteMode():
-        if cctbx.cycles.n_iterations > 0:
-          olx.Echo(
+        try :
+          if cctbx.cycles.n_iterations > 0:
+            olx.Echo(
 """Saving model after %s cycles, some details will be unavailable.
 The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning")
-          from collections import defaultdict
-          self.cif = defaultdict(str)
-          self.cif.update(cctbx.cycles.non_linear_ls.step_info)
-          OV.File('%s.res' %OV.FileName())
-          self.post_refinement(RunPrgObject=RunPrgObject)
+            from collections import defaultdict
+            self.cif = defaultdict(str)
+            self.cif.update(cctbx.cycles.non_linear_ls.step_info)
+            OV.File('%s.res' %OV.FileName())
+            self.post_refinement(RunPrgObject=RunPrgObject)
+        except AttributeError:
+          pass
     finally:
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       olx.SetOlex2RefinementListener(False)
