@@ -804,7 +804,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     else:
       cif_block['_chemical_formula_sum'] = olx.xf.GetFormula()
     cif_block['_chemical_formula_weight'] = olx.xf.GetMass()
-    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
+    try:
+      cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
+    except:
+      olx.Echo("Failed to compute IT/NIST mu, falling back to Brennan", m="warning")
+      cif_block['_exptl_absorpt_coefficient_mu'] = '?'
     cif_block['_exptl_crystal_density_diffrn'] = olx.xf.GetDensity()
     cif_block['_exptl_crystal_F_000'] = olx.xf.GetF000()
 
