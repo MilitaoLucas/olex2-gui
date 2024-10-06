@@ -1521,6 +1521,18 @@ def fdp_to_mu(element, fdp, wavelength=None):
     wavelength = olx.xf.exptl.Radiation()
   wavelength = float(wavelength)
   return tables.convert_fdp_to_mu(wavelength, float(fdp), element)
-
 OV.registerFunction(fdp_to_mu, False, "disp")
+
+def calculate_brennan_mu():
+  from brennan import  brennan
+  tables = brennan()
+  formula = olx.xf.GetFormula('list')
+  wavelength = float(olx.xf.exptl.Radiation())
+  mu = 0
+  for ec in formula.split(','):
+    e,c = ec.split(':')
+    mu += tables.get_mu_at_angstrom(wavelength, e) * float(c)
+  return mu * float(olx.xf.au.GetZprime())/ (10*float(olx.xf.au.GetVolume()))
+OV.registerFunction(calculate_brennan_mu, False, "disp")
+
 
