@@ -1252,6 +1252,13 @@ class OlexFunctions(inheritFunctions):
       return t.encode(gui_encoding)
     return t
 
+  def writeShelxFinFile(self):
+    shelx_dir = os.path.join(self.StrDir(), "temp")
+    if os.path.exists(shelx_dir):
+      open(os.path.join(shelx_dir,
+        self.FileName().replace(' ', '').lower()) + ".fin", 'w')\
+      .close()
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)

@@ -1757,6 +1757,8 @@ def EditIns():
     from Analysis import HOS_instance
     HOS_instance.make_HOS()
   OV.UpdateHtml()
+  olx.Focus()
+
 OV.registerFunction(EditIns)
 
 def FixMACQuotes(text):

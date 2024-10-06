@@ -112,6 +112,8 @@ class Graph(ArgumentParser):
     self.graphInfo = {
       "TopRightTitle":self.TopRightTitle,
     }
+    # added this to fix functionality where it is used!!!
+    self.gui_green = guiParams.green.hexadecimal
 
   def plot_function(self, function, locals=None, width=1, n_points=50):
     if locals is None:
