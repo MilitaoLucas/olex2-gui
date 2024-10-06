@@ -131,8 +131,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
               import shutil
               shutil.copy2(OV.HKLSrc(), fn)
             OV.HKLSrc(fn)
-            
-              
+
+
         COA.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
@@ -212,6 +212,10 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     import Analysis
     self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
     OV.registerCallback("procout", self.observer.observe)
+
+  def extraHtml(self):
+    html = "<!-- #include shelxl-extra gui/tools/shelxl-extra.htm;1 -->"
+    return html
 
 class Method_shelxt(Method_shelx_solution):
   def pre_solution(self, RunPrgObject):

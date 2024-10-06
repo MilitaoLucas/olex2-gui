@@ -1097,6 +1097,10 @@ user
       .type = bool
     client_mode = False
       .type = bool
+    shelxl_convergence = 0.000
+      .type = float
+    shelxl_convergence_use = True
+      .type = bool
   }
 
   masks{

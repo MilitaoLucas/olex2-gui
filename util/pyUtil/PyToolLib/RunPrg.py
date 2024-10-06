@@ -504,10 +504,16 @@ class RunRefinementPrg(RunPrg):
       self.method = Method_client_refinement()
     self.refinement_observer_timer = 0
     self.refinement_has_failed = []
-
+    # may need to check self.program.name for ShelXl to make cleaner...
+    use_convergence = OV.GetParam("user.refinement.shelxl_convergence_use")
     OV.registerCallback("procout", self.refinement_observer)
+    if use_convergence:
+      cl = RunRefinementPrg.convergency_listener()
+      OV.registerCallback("procout", cl.listen_for_convergency)
     self.run()
     OV.unregisterCallback("procout", self.refinement_observer)
+    if use_convergence:
+      OV.unregisterCallback("procout", cl.listen_for_convergency)
     if self.refinement_has_failed:
       bg = red
       fg = white
@@ -714,6 +720,29 @@ class RunRefinementPrg(RunPrg):
     if timer:
       print("-- MergeCif: %.3f" %(time.time()-t))
 
+
+  class  convergency_listener(object):
+    done = False
+    convergence_value = 1e3
+    def __init__(self) -> None:
+      self.convergence_value = OV.GetParam("user.refinement.shelxl_convergence")
+
+    def listen_for_convergency(self, line):
+      if self.done or self.convergence_value < 0:
+        return
+      #if "Max. shift = " in line:
+      if "Maximum = " in line:
+        try:
+          max_shift = float(line.split("Maximum = ")[1].split()[0])
+          if abs(max_shift) <= self.convergence_value:
+            try:
+              self.done = True
+              OV.writeShelxFinFile()
+              olx.Echo("Refinement has converged, writing .fin file", m="warning")
+            except:
+              pass
+        except:
+          pass
 
   def refinement_observer(self, msg):
     if self.refinement_observer_timer == 0:
