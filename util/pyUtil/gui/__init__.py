@@ -515,6 +515,7 @@ def NamingMode():
 olex.registerFunction(NamingMode, False, "gui")
 
 def FixFree(target):
+  from gui.tools import GetNParams
   target = target.upper()
   if target == "FIX ALL":
     olx.Run("sel -u>>sel $*>>fix xyz,adp,occu>>fix HUiso")
@@ -532,5 +533,6 @@ def FixFree(target):
       cmd += ">>NeutronHDist"
     olx.Run(cmd)
   olx.Labels(f=True, h=True, a=True, r=True)
+  GetNParams()
 
 olex.registerFunction(FixFree, False, "gui")
