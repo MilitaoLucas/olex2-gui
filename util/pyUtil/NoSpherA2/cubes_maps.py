@@ -906,12 +906,18 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
           anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
         anharms.append(anharmonic_use * anharmonic_values)
       sigmas.append(adp_list_to_sigma_inv(adp_star))
-      pre_temp = linalg.det(sigmas[-1])
-      if pre_temp < 0:
-        print("Skipping NPD Atom %s"%atom.label)
-        pre_temp = -math.sqrt(-pre_temp) / fixed
-      else:
-        pre_temp = math.sqrt(pre_temp) / fixed
+      #check for problems in sigmas
+      try:
+        pre_temp = linalg.det(sigmas[-1])
+        if pre_temp < 0:
+          print("Skipping NPD Atom %s"%atom.label)
+          pre_temp = -math.sqrt(-pre_temp) / fixed
+        else:
+          pre_temp = math.sqrt(pre_temp) / fixed
+      except:
+        print("Problem with atom %s"%atom.label)
+        pre_temp = 0
+        pass
       pre.append(pre_temp)
 
     gridding = cctbx_adapter.xray_structure().gridding(step=float(resolution))
@@ -974,7 +980,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
     for a in range(n_atoms):
       if (second is False or only_anh is True) and anharms[a] is None:
         pdf = np.zeros(1)
-      elif pre[a] < 0:  # Skip NPD atoms
+      elif pre[a] <= 0:  # Skip NPD atoms
         pdf = np.zeros(1)
       else:
         u = np.vstack([xi[masks[a]] / size[0] - posn[a][0],
