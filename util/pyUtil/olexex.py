@@ -335,7 +335,31 @@ class OlexRefinementModel(object):
     #        %(self._atoms[k]['label'], self._atoms[v]['label']))
 
     for shelxl_restraint in self.restraint_types:
-      for restraint in self.model.get(shelxl_restraint, ()):
+      restraints = self.model.get(shelxl_restraint, ())
+      restrained_set = set()
+      filtered_restraints = []
+      for restraint in restraints:
+        restraint_type = self.restraint_types.get(shelxl_restraint)
+        if shelxl_restraint in ('rigu', 'simu', 'delu'):
+          i_seqs = [i[0] for i in restraint['atoms']]
+          if not i_seqs:
+            if restrained_set:
+              i_seqs = set(range(1, len(self._atoms)))-restrained_set
+              restrained_set.update(i_seqs)
+              i_seqs = [(x, None) for x in i_seqs]
+              restraint['atoms'] = i_seqs
+            filtered_restraints.append(restraint)
+            break
+          else:
+            new_i_seqs = [x for x in i_seqs if x not in restrained_set]
+            if not new_i_seqs:
+              continue
+            restrained_set.update(new_i_seqs)
+          filtered_restraints.append(restraint)
+        else:
+          filtered_restraints.append(restraint)
+
+      for restraint in filtered_restraints:
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
 
