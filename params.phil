@@ -277,7 +277,7 @@ routines requiring structure refinement
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine' 'olex2.refine-srv'\
+    program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine'\
       Unknown 
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
