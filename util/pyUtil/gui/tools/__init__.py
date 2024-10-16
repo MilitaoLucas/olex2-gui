@@ -2806,7 +2806,7 @@ class PlotIt():
     colour =  OV.GetParam('user.graphs.matplotlib.%s.colour' % colour, None)
     i = 0
     for x, y in zip(xs, ys):
-      if not colour:
+      if not colour or colour == "auto_scale":
         colour = get_N_HexCol(len(xs))[i]
       i += 1
       label = None
