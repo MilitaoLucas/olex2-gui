@@ -468,7 +468,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.log.close()
 
   def data_to_parameter_watch(self):
-    parameters = self.reparametrisation.n_independents + 1
+    parameters = self.reparametrisation.n_independents
     try:
       data = self.normal_eqns.r1_factor()[1]
     except:
