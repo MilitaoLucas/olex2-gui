@@ -629,13 +629,29 @@ def saveOriginals(originals: HistoryFiles):
   for filePath in originals.files:
     dest_base = os.path.join(backupFolder, os.path.basename(filePath))
     dest_file = dest_base
+    src_stat = os.stat(filePath)
+    src_sha256 =None
     #find unique backup name
     inc = 1
+    do_copy = True
     while os.path.exists(dest_file):
+      dest_stat = os.stat(dest_file)
+      if src_stat.st_size == dest_stat.st_size:
+        if src_stat.st_mtime == dest_stat.st_mtime:
+          do_copy = False
+          break
+        else: # fall back to digests
+          import hashlib
+          if src_sha256 is None:
+            src_sha256 = hashlib.sha256(open(filePath, 'rb').read()).hexdigest()
+          if src_sha256 == hashlib.sha256(open(dest_file, 'rb').read()).hexdigest():
+            do_copy = False
+            break
       dest_file = "%s_%s" %(dest_base, inc)
       inc += 1
       duplicates += 1
-    shutil.copyfile(filePath, dest_file)
+    if do_copy:
+      shutil.copy2(filePath, dest_file)
   if duplicates > 0:
     olx.Echo("%s Previous backups found!" %(duplicates), m="warning")
 
