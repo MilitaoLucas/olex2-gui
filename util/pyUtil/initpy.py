@@ -451,3 +451,7 @@ from RunPrg import RunPrg
 #if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
 from HAR import HARp
 from NoSpherA2 import NoSpherA2
+
+if 'OLEX2_DEBUG_IN_VSC' in os.environ:
+  from olexex import debugInVSC
+  debugInVSC()
