@@ -506,7 +506,7 @@ class OlexRefinementModel(object):
           yield restraint_type, kwds
 
   def same_iterator(self):
-    groups = self.model['same']
+    groups = self.model.get('same', None)
     if not groups:
       return
     for group in groups:
