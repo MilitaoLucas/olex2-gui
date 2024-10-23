@@ -330,13 +330,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
               step_threshold=None)
 
       except RuntimeError as e:
-        if 'external_interrupt' in str(e):
+        str_e = str(e)
+        if 'external_interrupt' in str_e:
           print("Refinement interrupted")
           self.interrupted = True
           self.failure = True # the object is unusable
           return
-        elif "is an empty array" in str(e):
+        elif "is an empty array" in str_e:
           print("There is nothing to refine.")
+          self.failure = True
+          return
+        elif use_openmp and "normal_equations.h" in str_e and  "Not implemented" in str_e:
+          olx.Echo("Please restart Olex2 to fully enable OpenMP!", m="warning")
           self.failure = True
           return
         else:
