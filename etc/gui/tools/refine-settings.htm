@@ -168,11 +168,28 @@ $-
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- ==================================== LISTS BEGIN == -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-List;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="12%"><b>List</b></td>
+  <td width="58%">
+     <snippet src="gui/snippets/input-combo"
+     name="LIST"
+     items="spy.gui.get_refinement_lists()"
+     readonly="true"
+     value="ins(list)"
+     onchange="spy.gui.set_refinement_list(html.GetValue('~name~'))" />
+  </td>
+  <td />
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ==================================== LISTS END == -->
+
+
 <!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
 <tr ALIGN='left' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Masks;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-    
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
