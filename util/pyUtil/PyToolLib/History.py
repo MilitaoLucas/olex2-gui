@@ -1,8 +1,5 @@
-import string
-import sys
 import os
 import hashlib
-import glob
 import os.path
 import shutil
 import FileSystem as FS
@@ -18,8 +15,6 @@ from olexFunctions import OV
 
 import time
 import zlib
-import lst_reader
-import ires_reader
 
 tree = None
 
@@ -328,7 +323,6 @@ class Node(object):
     if self._active_child_node is None:
       return None
     return self.link_table[self._active_child_node]
-
   @active_child_node.setter
   def active_child_node(self, node):
     self._active_child_node = self.get_node_index(node)
@@ -407,7 +401,7 @@ class HistoryTree(Node):
     # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
     # 2.4 - fixing so that 2.2-3 actually proceed to the end
     # 2.5 - add dyn support, use cif_od register
-    # 2.6 - added snmu phil
+    # 2.6 - added snum phil
     self.version = 2.6
     self.hklFiles, self.dynFiles, self.cif_odFiles = {}, {}, {}
     #maps simple digest of the file timestamp and path to full one
@@ -553,7 +547,7 @@ class HistoryTree(Node):
       self._build_cif_od_register_etc(c, call_id=call_id)
 
   def upgrade(self):
-    current_version = 2.5 # current version
+    current_version = 2.6 # current version
     if self.version == current_version:
       return
     start_time = time.time()
