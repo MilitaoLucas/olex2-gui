@@ -67,7 +67,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if not os.path.exists(hkl_file):
       from cctbx_olex_adapter import OlexCctbxAdapter
       cctbx_adaptor = OlexCctbxAdapter()
-      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged      
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
       with open(hkl_file, "w") as out:
         f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
@@ -152,6 +152,14 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   #    d_min = d
   #args.append("-dmin")
   #args.append(str(d_min * 0.95))
+  if OV.IsEDRefinement():
+    try:
+      top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d"))
+      if top_up_d < d2['MinD']:
+        args.append("-dmin")
+        args.append(str(top_up_d))
+    except:
+      print("Failed to set dmin for TSC")
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
