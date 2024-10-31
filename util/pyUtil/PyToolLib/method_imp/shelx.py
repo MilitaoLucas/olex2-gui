@@ -54,8 +54,17 @@ class Method_shelx(Method):
           x.write(l)
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
+    set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl']#, 'shelxt', 'xt']
+    thread_n = int(OV.GetParam("user.refinement.thread_n", 0))
     if self.command_line_options:
-      commands += self.command_line_options.split()
+      cmds = self.command_line_options.split()
+      if not set_thread_n or thread_n < 1:
+        commands += cmds
+      else:
+        commands += [x for x in cmds if not x.startswith("-t")]
+    if set_thread_n and thread_n >= 1:
+      commands.append("-t%s" %thread_n)
+
     success = olx.Exec(prgName, *commands, q=(not RunPrgObject.params.snum.shelx_output))
     if not success:
       raise RuntimeError(
