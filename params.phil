@@ -1093,6 +1093,8 @@ user
       .type = int
     openmp_cpus = 0
       .type = int
+    thread_n = -1
+      .type = int
     diagnostics = False
       .type = bool
     client_mode = False
