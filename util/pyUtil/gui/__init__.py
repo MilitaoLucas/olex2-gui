@@ -540,7 +540,7 @@ olex.registerFunction(FixFree, False, "gui")
 def get_refinement_lists():
   if OV.IsEDRefinement():
     return "None<-n/a;Other<-other;4: Fc_sq, Fo_sq, sig_Fo_sq<-4"
-  return "None<n/a;Other<-other;3: Fo, sig_Fo, A_re and B_im<-3;4: Fc_sq, Fo_sq, sig_Fo_sq<-4;6: Fo_sq, sig_Fo_sq, Fc, phase<-6"
+  return "None<-n/a;Other<-other;3: Fo, sig_Fo, A_re and B_im<-3;4: Fc_sq, Fo_sq, sig_Fo_sq<-4;6: Fo_sq, sig_Fo_sq, Fc, phase<-6"
 
 def set_refinement_list(val):
   if "other" == val:
