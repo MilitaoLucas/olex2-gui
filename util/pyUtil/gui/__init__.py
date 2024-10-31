@@ -553,3 +553,17 @@ def set_refinement_list(val):
 
 olex.registerFunction(get_refinement_lists, False, "gui")
 olex.registerFunction(set_refinement_list, False, "gui")
+
+def get_thread_n_selection():
+  cpu_n = os.cpu_count()
+  rv_l = []
+  cpu_n = os.cpu_count()
+  while cpu_n > 1:
+    if cpu_n % 2 == 0:
+      rv_l.append(int(cpu_n))
+    cpu_n -= 2
+  rv_l.sort()
+  rv_l = ["Def<--1;1"] + [str(item) for item in rv_l]
+  return ";".join(rv_l)
+
+olex.registerFunction(get_thread_n_selection, False, "gui")
