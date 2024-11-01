@@ -367,47 +367,4 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=OpenMP;1 -->
-  <td width='23%'>
-    <b>%OpenMP%:</b>
-  </td>
-  <td width='15%'>
-  OpenMP in olex2.refine
-  </td>
-  <td width="5%" align='right'>$+
-    html.Snippet("gui/snippets/input-checkbox", "name=use_openmp",
-     "checked=spy.GetParam('user.refinement.use_openmp')",
-     "onclick=spy.SetParam('user.refinement.use_openmp', html.GetState('~name~'))")
-   $-</td>
-  <td width='16%'>
-  Max. Memory (MB)
-  </td>
-  <td width="10%" align='right'>
-    $+
-    html.Snippet("gui/snippets/input-text", "name=openmp_mem",
-     "value=spy.GetParam('user.refinement.openmp_mem')",
-     "onchange=spy.SetParam('user.refinement.openmp_mem', html.GetValue('~name~'))")
-   $-</td>
-  <td width='5%'>
-  CPUs
-  </td>
-   <td width="10%" align='right'>
-    $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=NoSpherA2_cpus@refine",
-    "items=spy.NoSpherA2.getCPUListStr()",
-    "value=spy.GetParam('user.refinement.openmp_cpus')",
-    "onchange=spy.SetParam('user.refinement.openmp_cpus', html.GetValue('~name~'))")
-    $-</td>
-  <td width='10%'>
-  Hyper Threading
-  </td>
-  <td width="5%" align='right'>$+
-    html.Snippet("gui/snippets/input-checkbox", "name=use_HT",
-     "checked=spy.GetParam('user.refinement.use_HT')",
-     "onclick=spy.SetParam('user.refinement.use_HT', html.GetState('~name~'))>>html.Update()")
-   $-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
