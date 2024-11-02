@@ -45,8 +45,9 @@ def makeProgramSettingsGUI(program, method, prgtype):
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
     </table>
-      <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 """
+# mind first %s formatting - as it could be <!-- icnlude etc!
   if program.name.lower().startswith("superflip"):
     txt += open(os.path.normpath("%s/etc/gui/tools/superflip.htm" %olx.BaseDir()), "r").read()
   elif program.name.lower().startswith("tonto"):
@@ -55,11 +56,12 @@ def makeProgramSettingsGUI(program, method, prgtype):
     txt += ''.join([makeArgumentsHTML(program, method, instruction)
                     for instruction in method.instructions()])
   txt += r'''
-  <tr><td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td>%s - %s</td>
-</tr>
+  <tr><td valign="center" width="$GetVar(HtmlTableFirstcolWidth)" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+<td>
 %s
-''' %(OV.GetParam('gui.html.table_firstcol_width'), authors, reference, method.extraHtml())
+</td></tr>
+  <tr><td></td> <td>%s - %s</td></tr>
+''' %(method.extraHtml(), authors, reference)
 
   OlexVFS.write_to_olex(wFilePath, txt)
   return
@@ -68,7 +70,6 @@ def makeArgumentsHTML(program, method, instruction):
   import htmlTools
   first_col1 = htmlTools.make_table_first_col(help_name="%s" %instruction.name)
   first_col = htmlTools.make_table_first_col()
-  first_col_width = OV.GetParam('gui.html.table_firstcol_width')
   if instruction.caption is not None:
     argName = instruction.caption
   else:
@@ -262,11 +263,17 @@ def stopProcess():
      (for shelxl and shelxd at least)"""
   OV.SetVar("stop_current_process", True)
   try:
-    open(os.path.join(OV.StrDir(), "temp",
-                      OV.FileName().replace(' ', '').lower()) + ".fin", 'w')\
-      .close()
-  except AttributeError:
+    OV.writeShelxFinFile()
+  except:
     pass
+  # if the Olex2 Refinement listener is installed - this should interrupt olex2.refine
+  # refinement cycle vs 'normal' interruption of the next cycle
+  if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
+    if OV.GetParam("olex2.refinement.stop_ED_ASAP") and OV.IsEDRefinement():
+      if OV.IsClientMode():
+        open(os.path.join(OV.StrDir(), OV.FileName()) + ".fin", 'w').close()
+      else:
+        olx.SetOlex2RefinementInterrupt(True)
 
   try:
     import RunPrg
@@ -275,5 +282,4 @@ def stopProcess():
   except:
     pass
 
-  return
 OV.registerFunction(stopProcess)

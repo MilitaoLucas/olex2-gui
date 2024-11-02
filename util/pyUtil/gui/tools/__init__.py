@@ -1,6 +1,7 @@
 import olex
 import olx
 import olexex
+import olex_core
 import os
 import sys
 import OlexVFS
@@ -47,6 +48,7 @@ gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
 gui_yellow = OV.GetParam('gui.dark_yellow')
+
 
 import subprocess
 
@@ -952,15 +954,20 @@ def getExpectedPeaks():
 
 def make_exti_swat_gui():
   html = ""
-  exti = olx.xf.rm.Exti()
-  if exti and exti != "n/a":
-    html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+  if OV.IsEDRefinement():
+    html = gui.tools.TemplateProvider.get_template('edt_gui', force=debug)
+    import olex_gui
+    html = olex_gui.PreprocessHtml(html)
   else:
-    swat = olx.xf.rm.SWAT()
-    if swat and swat != "n/a":
-      html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
-  if not html:
-    html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
+    exti = olx.xf.rm.Exti()
+    if exti and exti != "n/a":
+      html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+    else:
+      swat = olx.xf.rm.SWAT()
+      if swat and swat != "n/a":
+        html = gui.tools.TemplateProvider.get_template('swat_gui', force=debug)
+    if not html:
+      html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
   return html
 
 
@@ -1020,7 +1027,14 @@ def refine_extinction():
       esd = ""
       OV.SetParam('snum.refinement.refine_extinction', 1)
       OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-    retVal = "%s(%s)" % (exti, esd)
+
+    exti = float(exti)
+    if exti > 99:
+      exti = int(exti)
+    if esd:
+      retVal = "%s(%i)" % (exti, int(esd))
+    else:
+      retVal = "%s" % (exti)
   else:
     OV.SetParam('snum.refinement.refine_extinction', 0)
     OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
@@ -1321,7 +1335,6 @@ def get_battery_image(colour, colourize=True):
             'yellow': 3,
             'orange': 2,
             'red': 1}
-
   n_dots = d_dots[colour]
 
   src_battery = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_rgb.png")
@@ -1330,6 +1343,7 @@ def get_battery_image(colour, colourize=True):
 
   bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
   im = Image.alpha_composite(bg, IM_battery)
+  
   draw = ImageDraw.Draw(im)
   width, height = bg.size
 
@@ -1348,10 +1362,11 @@ def get_battery_image(colour, colourize=True):
     box = (left, top, boxWidth + left, boxHeight + top)
     draw.rectangle(box, fill=col)
   new_width = 18
-  new_height = int(im.size[1] / im.size[0] * 18)
+  new_height = int(im.size[1] / im.size[0] * 20)
   IM = im.resize((new_width, new_height), Image.ANTIALIAS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
+
 
 def get_data_number():
   try:
@@ -1372,6 +1387,7 @@ def get_data_number():
   except Exception as err:
     print("An error occured: %s" % err)
 
+
 def get_Z_prime_from_fraction(string):
   val = string
   if "/" in val:
@@ -1391,6 +1407,24 @@ def get_parameter_number():
     except:
       pass
   return parameters
+
+def GetNParams():
+  if OV.GetParam('snum.refinement.program') != "olex2.refine":
+    return
+  from refinement import FullMatrixRefine
+  fmr = FullMatrixRefine()
+  dyn = bool(OV.GetVar("isDynamic", False))
+  rpm = fmr.run(reparametrisation_only=True, ed_refinement=dyn)
+  if rpm is None:
+    retVal = 0
+  try:
+    retVal = rpm.jacobian_transpose_matching_grad_fc().n_rows
+  except:
+    retVal = 0
+  if OV.IsControl("NParameters"):
+    olx.html.SetLabel("NParameters", retVal)
+    olx.html.SetFG("NParameters", gui_red)
+OV.registerFunction(GetNParams)
 
 
 def GetDPRInfo():
@@ -1421,25 +1455,12 @@ def GetDPRInfo():
 
   idx = 4 - dpr_col_number
   colour = colour_txt[idx]
-  name = "battery_%s.png" % colour
-  if not OlexVFS.exists(name):
+  img_name = "battery_%s.png" % colour
+  if not OlexVFS.exists(img_name):
     try:
-      name = get_battery_image(colour)
+      img_name = get_battery_image(colour)
     except:
-      name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
-  image = """
-  <input
-  name="BATTERY-EDIT"
-  type="button"
-  align="center"
-  image="%s"
-  hint="%s"
-  >
-  """ % (name, text_output[idx])
-
-  image = """
-  <a target="%s" href="echo '%s'"><zimg src="%s"></a>
-  """ % (text_output[idx], text_output[idx], name)
+      img_name = os.path.join(OV.BaseDir(), "etc", "gui", "images", "src", "battery_%s.png" % colour)
 
   if dpr <= 10:
     disp_dpr = "%.2f" % dpr
@@ -1448,25 +1469,15 @@ def GetDPRInfo():
 
   d = {
     'dpr': disp_dpr,
-    'image': image,
-  }
+    'img_name': img_name,
+    'hint': text_output[idx], 
+    'label': f"{data}/{parameters}", 
+    'data': f"{data}", 
+    'parameters': f"{parameters}"
+    }
 
-  t = """
-  <table border="0" cellpadding="0" cellspacing="0" align='center'>
-    <tr align='center'>
-      <td align='center'>
-        %(image)s
-      </td>
-    </tr>
-    <tr>
-      <td align='center'>
-        <font size='-1'>
-          <b>&nbsp;&nbsp;%(dpr)s&nbsp;</b>
-        </font>
-      </td>
-    </tr>
-  </table>
-  """ % d
+  t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
+ 
   retVal = t
   cache[dpr] = t
   return retVal
@@ -1515,6 +1526,82 @@ def _get_R_values():
   return R1, wR2
 
 
+def has_digit(s):
+  return any(char.isdigit() for char in s)
+
+
+def parse_atominfo(atominfo):
+  atom = atominfo.split(":")[0].strip()
+  if not has_digit(atom):
+    atom += str(random.randint(100, 999))
+  rs = atominfo.split(":")[1].split("(")[0].strip()
+  try:
+    sort = int(re.split('(\d+)', atom)[1])
+  except ValueError:
+    sort = atom
+  return sort, atom, rs
+
+
+def format_chiral_atoms(chiral_list):
+  if not chiral_list:
+    return "", ""
+  if len(chiral_list) == 1:
+    return chiral_list[0], chiral_list[0]
+  elif len(chiral_list) == 2:
+    listing = " and ".join(chiral_list)
+  else:
+    listing = ", ".join(chiral_list[:-1]) + " and " + chiral_list[-1]
+  description = "The chiral atoms in this structure are: %s" % ", ".join(chiral_list)
+  return description, listing
+
+
+def get_chiral_atom_info(return_what=""):
+  l = []
+  d = {}
+  cmd = "RSA"
+
+  try:
+    atominfos = olex.f("rsa()").split('\n')
+    if not atominfos:
+      t = "This structure is in chiral space group, but there are no chiral atoms"
+      d.update({
+        "chiral_atoms": t,
+        "chiral_atoms_listing": "",
+        "additional_chiral.txt": "",
+        "additional_chiral": ""
+      })
+      OV.SetVar('chiral_first_atom', "")
+      return ""
+
+    for atominfo in atominfos:
+      if ":" not in atominfo:
+        continue
+      sort, atom, rs = parse_atominfo(atominfo)
+      l.append((sort, "%s(%s)" % (atom, rs)))
+      d.setdefault("chiral_atoms", {})[atom] = rs
+
+    l.sort()
+    chiral_atoms_list = [cont for _, cont in l]
+    description, listing = format_chiral_atoms(chiral_atoms_list)
+
+    d.update({
+      "chiral_atoms": description,
+      "chiral_atoms_listing": listing,
+      "chiral_first_atom": chiral_atoms_list[0] if chiral_atoms_list else ""
+    })
+
+    OV.SetVar('chiral_first_atom', d['chiral_first_atom'])
+
+  except Exception as err:
+    d["chiral_atoms"] = "There is a problem with finding the chiral atoms"
+    print("An error occurred: %s" % err)
+
+  return d.get(return_what, d)
+
+
+OV.registerFunction(get_chiral_atom_info)
+
+
 def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
     return
@@ -1538,6 +1625,7 @@ def FormatRInfo(R1, wR2, d_format):
       if R1 == "n/a":
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', 100)
       else:
+
         R1 = float(R1)
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
         R1 = "%.2f" % (R1 * 100)
@@ -1926,30 +2014,60 @@ def run_custom_script(*args):
 OV.registerFunction(run_custom_script, False, 'gui.tools')
 
 
-def find_movie_folder(directory=None, directory_l=None):
-  from gui import report
-  if not directory:
-    directory = OV.FilePath()
-  if not directory_l:
-    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
-  if not directory or not directory_l:
-    return
-  name = OV.FileName()
-  extension = "*.jpg"
+def find_movie_folder_b(directory, directory_l):
+  directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
+  g = glob.glob(directory)
+  i = 1
+  while not g:
+    directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
+    g = glob.glob(directory)
+    i += 1
+    if i > 3:
+      return None
+
+  zip_file = g[0]
+  import zipfile
+  l = []
+  try:
+    with zipfile.ZipFile(zip_file, "r") as z:
+      for filename in z.namelist():
+        if filename and ".jpg" in filename:
+          l.append(r'%s/%s' % (g[0], filename))
+    return l
+  except:
+    return None
+
+
+def find_movie_folder_r(directory, directory_l):
   i = 1
   while not os.path.exists(directory + os.sep + "movie"):
     directory = os.sep.join(directory_l[:-(i)])
     i += 1
     if i == 5:
-      return None, None
+      return None
   directory = directory + os.sep + "movie"
   if OV.FileName() not in directory:
-    print("Crystal images found, but crystal name not in path!")
-  l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
-  if not l:
-    OV.SetParam("snum.metacif.list_crystal_images_files", "")
+    print("Crystal images found, but structure name is not in path!")
+  return gui.report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+
+
+def find_movie_folder(directory=None, directory_l=None):
+  if not directory:
+    directory = OV.FilePath()
+  if not directory_l:
+    directory_l = os.path.normpath(OV.FileFull()).split(os.path.sep)
+  if not directory or not directory_l:
     return None, None
-  OV.SetParam("snum.metacif.list_crystal_images_files", (l))
+  cif_od = olx.file.ChangeExt(OV.HKLSrc(), "cif_od")
+  l = None
+  if os.path.exists(cif_od):
+    l = find_movie_folder_r(directory=directory, directory_l=directory_l)
+  else:
+    l = find_movie_folder_b(directory=directory, directory_l=directory_l)
+  if not l:
+    OV.SetParam("snum.metacif.list_crystal_images_files", [])
+    return None, None
+  OV.SetParam("snum.metacif.list_crystal_images_files", l)
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
 
@@ -1965,6 +2083,7 @@ def load_res_from_cif():
 
 
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
+
 
 def set_style_and_scene(style=None, scene=None, src_dir=None, ):
   if not src_dir or "etc/styles" in src_dir:
@@ -2009,42 +2128,43 @@ def load_matplotlib():
   try:
     import matplotlib.pyplot as plt
     return plt
-  except Exception as err:
-    if "No module named" in repr(err):
-      selection = olx.Alert("matplotlib not found",
-                            """Error: No working matplotlib installation found!.
+  except ModuleNotFoundError:
+    selection = olx.Alert("matplotlib not found",
+                          """Error: No working matplotlib installation found!.
 Do you want to install this now?""", "YN", False)
-      if selection == 'Y':
-        if sys.platform[:3] == 'win':
-          from olexex import GetHttpFile
-          import zipfile
-          from zipfile import ZipFile
-          import platform
-          architecture = platform.architecture()[0]
-          arch = '32'
-          if not architecture:
-            pass
-          elif architecture == '64bit':
-            arch = '64'
-          fn = "site-packages-x%s.zip" %arch
-          fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
-                            fn,
-                            os.path.join(OV.DataDir(), "tmp"))
-          if not fn:
-            raise Exception("matplotlib is required by this functionality!")
-          with ZipFile(fn) as zip:
-            zip.extractall(path=OV.DataDir())
-          os.remove(fn)
-        else:
-          olex.m("pip matplotlib==3.5.1")
-        import matplotlib.pyplot as plt
-        return plt
+    if selection == 'Y':
+      if sys.platform[:3] == 'win':
+        from olexex import GetHttpFile
+        import zipfile
+        from zipfile import ZipFile
+        import platform
+        architecture = platform.architecture()[0]
+        arch = '32'
+        if not architecture:
+          pass
+        elif architecture == '64bit':
+          arch = '64'
+        fn = "site-packages-x%s.zip" % arch
+        fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
+                          fn,
+                          os.path.join(OV.DataDir(), "tmp"))
+        if not fn:
+          raise Exception("matplotlib is required by this functionality!")
+        with ZipFile(fn) as zip:
+          zip.extractall(path=OV.DataDir())
+        os.remove(fn)
       else:
-        return None
+        olex.m("pip matplotlib==3.5.1")
+      # clear cache to discover the new module
+      import importlib
+      importlib.invalidate_caches()
+      import matplotlib.pyplot as plt
+      return plt
     else:
-      print("Failed to initialise matplotlib: %s" %str(err))
       return None
-
+  else:
+    print("Failed to initialise matplotlib: %s" % str(err))
+    return None
 
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
@@ -2053,8 +2173,8 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
 
   xs = np.array(xy[0][:])
   y_l = []
-  for i in range(len(xy) -1):
-    y_l.append(np.array(xy[i+1][:]))
+  for i in range(len(xy) - 1):
+    y_l.append(np.array(xy[i + 1][:]))
 
   if graphing == 'matplotlib':
 
@@ -2079,7 +2199,7 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     color = 'tab:red'
     ax1.set_xlabel('N Beams')
     ax1.set_ylabel('thickness', color=color)
-    ax1.plot(t, data1, 'x',  color=color)
+    ax1.plot(t, data1, 'x', color=color)
     ax1.tick_params(axis='y', labelcolor=color)
 
     color = 'tab:red'
@@ -2107,145 +2227,200 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     olx.Shell(p)
 
 
-def plot_xy(xs, ys, labels=None, filename='test.png', title="", marker_size='6', graphing="matplotlib", colours=None, x_type='float'):
-  plot_params = OV.Params().user.graphs.matplotlib
-
+def plot_xy(xs,
+            ys,
+            labels=None,
+            filename='test.png',
+            title="",
+            graphing="matplotlib",
+            colours=None,
+            ax2_colours=None,
+            x_type='float',
+            y_type='float',
+            ax2_y_type='float',
+            max_major_ticks=6,
+            use_dual=[],
+            dual_stacked=False,
+            dual_style='bar',
+            terms=None,
+            use_highlight=[],
+            lim_x=False,
+            marker=None,
+            ax2_marker=None,
+            markersize=None,
+            ax2_markersize=None,
+            linestyle=None,
+            ax2_linestyle=None,
+            ylabel="",
+            ax2_ylabel="",
+            ):
 
   if not colours:
-    colours = {"0":{"0":'tab:red', "1":'tab:red'},
-               "1":{"0":'darkgreen', "1":'darkgreen'}
-               }
+    colours = get_N_HexCol(len(ys))
+  if not ax2_colours:
+    ax2_colours = get_N_HexCol(len(ys))
+
   if not labels:
-    labels=[{'x-label': "",
-            'y-label': "",
-            "series":["", ""]},
-            {'x-label': "",
-            'y-label': "",
-            "series":["", ""]},
-            ]
+    labels = [{'x-label': "",
+              'y-label': "",
+               "series": ["", ""]},
+              {'x-label': "",
+              'y-label': "",
+               "series": ["", ""]},
+              ]
 
   import numpy as np
 
   if x_type == 'float':
     xs = np.array([float(x) for x in xs])
+  elif x_type == 'list':
+    xs = np.array(xs, dtype=float)
+  elif x_type == 'strings':
+    xs = np.array(xs, dtype=str)
+  elif x_type == 'int':
+    xs = np.array(xs, dtype=int)
   else:
-    xs = np.array(xs)
-
-
-
-  y_ll = []
-  y_l = []
-
-
-  if len(ys) == 0:
-    y_l.append(np.array([float(x) for x in ys[0]]))
-    y_ll.append(y_l)
-  else:
-    for block in ys:
-      y_l = []
-      for data in block:
-        y_l.append(np.array([float(x) for x in data]))
-      y_ll.append(y_l)
+    xs = np.array(xs, dtype=int)
+    xs = np.around(xs, 8)
 
   if graphing == 'matplotlib':
+    plt_params = OV.GetParam('user.graphs.matplotlib')
     plt = load_matplotlib()
+    from matplotlib.dates import YearLocator, DateFormatter
+    from matplotlib.ticker import MaxNLocator
+    import matplotlib.ticker as ticker
     if not plt:
       return
-    plt.style.use('seaborn-whitegrid')
-    plt.grid(True)
+    plt.style.use(plt_params.style)
+    plt.grid(plt_params.grid)
     colour = 'grey'
-    ax_colour='black'
+    ax_colour = plt_params.ax_colour
 
-    plt.title(title)
-    plt.grid(False)
-    fig, ax1 = plt.subplots()
+    if not marker:
+      marker = plt_params.ax1.marker
+    if not ax2_marker:
+      ax2_marker = plt_params.ax2.marker
+
+    if not markersize:
+      markersize = plt_params.ax1.marker_size
+    if not ax2_markersize:
+      ax2_markersize = plt_params.ax2.marker_size
+
+    if not linestyle:
+      linestyle = plt_params.ax1.linestyle
+    if not ax2_linestyle:
+      ax2_linestyle = plt_params.ax2.linestyle
+
+    plt_size = (plt_params.fig_width, plt_params.fig_height)
+    if use_dual and not dual_stacked:
+      fig, ax1 = plt.subplots(sharex=True, figsize=plt_size)  #plots them on top of each other.
+
+    elif use_dual and dual_stacked:
+      fig, (ax2, ax1) = plt.subplots(2, 1, sharex=True, figsize=plt_size, gridspec_kw={'height_ratios': [1, plt_params.subplot_ratio]})  #plots them on top of each other.
+    else:
+      fig, ax1 = plt.subplots(figsize=plt_size)
 
     i = 0
-    for y_l in y_ll:
-      if i == 0:
-        j = 0
-        for ys in y_l:
-          if len(y_ll) > 1:
-            ax_colour = colours[str(i)][str(j)]
-          try:
-            colour = colours[str(i)][str(j)]
-          except:
-            colour = colour
-          if j == 0:
-            marker = "o"
-            color = colour
-          else:
-            marker = "x"
-          try:
-            label = labels[i]['series'][j]
-          except:
-            label = ""
-          ax1.plot(xs,
-                  ys,
-                  marker,
-                  color=colour,
-                  markersize=marker_size,
-                  linewidth=1,
-                  label=label,
-                  markerfacecolor='white',
-                  markeredgecolor=colour,
-                  markeredgewidth=1,
-                  )
-          ax1.tick_params(axis='y', labelcolor=ax_colour)
-          ax1.grid(False)
-          if labels:
-            ax1.set_xlabel(labels[i]['x-label'])
-            ax1.set_ylabel(labels[i]['y-label'])
-          j += 1
-      if i == 1:
-        ax2 = ax1.twinx()
-        j = 0
-        for ys in y_l:
-          if len(y_ll) > 1:
-            ax_colour = colours[str(i)][str(j)]
-          try:
-            colour = colours[str(i)][str(j)]
-          except:
-            colour = colour
-          if j == 0:
-            marker = "o"
-            color = colour
-          else:
-            marker = "x"
-            color = colours
-          try:
-            label = labels[i]['series'][j]
-          except:
-            label = ""
-          ax2.plot(xs,
-                  ys,
-                  marker,
-                  color=colour,
-                  markersize=marker_size,
-                  linewidth=1,
-                  label=labels[i]['series'][j],
-                  markerfacecolor='white',
-                  markeredgecolor=colour,
-                  markeredgewidth=1)
-          ax2.tick_params(axis='y', labelcolor=ax_colour)
-          ax2.grid(False)
-          if labels:
-            ax2.set_xlabel(labels[i]['x-label'])
-            ax2.set_ylabel(labels[i]['y-label'])
-          j += 1
+    for y in ys:
+      if not use_dual or i not in use_dual:
+        if plt_params.ax1.colour == "auto_scale":
+          colour = colours[i]
+        if i in use_highlight:
+          colour = plt_params.highlight_colour
+        label = "n"
+        if type(xs) == 'list' and len(xs) == 1:
+          xses = xs[0]
+        else:
+          xses = xs[i]
+        ax1.plot(xses,
+                 y,
+                 marker=marker,
+                 color=colour,
+                 markersize=markersize,
+                 linewidth=plt_params.ax1.line_width,
+                 label=label,
+                 linestyle=linestyle,
+                 markerfacecolor=plt_params.ax1.marker_face_colour,
+                 markeredgecolor=colour,
+                 markeredgewidth=plt_params.ax1.marker_edge_width,
+                 )
+        if plt_params.ax1.style == 'bar':
+          ax1.bar(xs, ys, colour)
+          plt.xlim(-0.5, len(xs) - .5)
+        ax1.tick_params(axis='y', labelcolor=ax_colour)
+        ax1.set_xlabel(label, fontweight='bold')
+        ax1.set_ylabel(ylabel, fontweight='bold')
+        ax1.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
+        ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+        ax1.grid(plt_params.grid)
+      elif i in use_dual:
+        if not dual_stacked:
+          ax2 = ax1.twinx()
+        if plt_params.ax2.colour == "auto_scale":
+          ax2_colour = ax2_colours[i]
+        if use_highlight and i in use_highlight:
+          colour = plt_params.highlight_colour
+        label = "ax2"
+        xses = xs
+        if len(xs) != len(y):
+          xses = xs[:len(y)][0]
+
+        ax2.plot(xses,
+                 y,
+                 marker=ax2_marker,
+                 color=ax2_colour,
+                 markersize=ax2_markersize,
+                 linewidth=1,
+                 label=label,
+                 linestyle=ax2_linestyle,
+                 markerfacecolor='white',
+                 markeredgecolor=colour,
+                 markeredgewidth=plt_params.ax2.line_width,
+                 )
+        if plt_params.ax2.style == 'bar':
+          ax2.bar(np.array(xs[0], dtype='str'), np.array(ys[0]), colour)
+          plt.xlim(-0.5, len(xs) - .5)
+        ax2.tick_params(axis='y', labelcolor=ax_colour)
+        #ax2.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f'))
+        ax2.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+        ax2.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
+        ax2.grid(plt_params.grid)
+        ax2.set_ylabel(ax2_ylabel, fontweight='bold')
       i += 1
 
-    loc = "%s %s %s" %(plot_params.legend_in_out,  plot_params.legend_vertical, plot_params.legend_horizontal)
-    loc = loc.strip()
-
-    ax1.set_title(title)
-    lines2, labels2 = ax1.get_legend_handles_labels()
-    if len(y_ll) > 1:
-      lines3, labels3 = ax2.get_legend_handles_labels()
-      ax1.legend(lines2 + lines3, labels2 + labels3, loc=loc, bbox_to_anchor=(1, 0.25))
+    if use_dual:
+      ax1.set_zorder(ax2.get_zorder() + 1)
+      ax1.set_frame_on(True)
+      ax2.set_frame_on(True)
     else:
-      ax1.legend(lines2, labels2 , loc=loc, bbox_to_anchor=(1, 0.25))
+      ax1.set_frame_on(True)
 
+    #loc = "%s %s %s" %(plt_params.legend_in_out,  plt_params.legend_vertical, plt_params.legend_horizontal)
+    #loc = loc.strip()
+    #ax1.set_title(title, fontname=plt_params.font_name, loc="Left")
+
+    i = 0
+
+    if terms:
+      for term in terms:
+        term = term.strip("'")
+        plt.text(0.02, 0.95 - i * 0.045, term, color=colours[i + 1], fontname="Consolas", fontsize=10, ha='left', transform=plt.gca().transAxes)
+        i += 1
+
+    #lines2, labels2 = ax1.get_legend_handles_labels()
+    #if len(y_ll) > 1 and use_dual:
+      #lines3, labels3 = ax2.get_legend_handles_labels()
+      #ax1.legend(lines2 + lines3, labels2 + labels3, loc=loc, bbox_to_anchor=(1, 0.25))
+    #else:
+      #ax1.legend(lines2, labels2 , loc=loc, bbox_to_anchor=(1, 0.25))
+
+    #plt.figure(figsize=(plt_params.fig_width, plt_params.fig_height))
+    if dual_stacked:
+      plt.suptitle(title, fontsize=12, fontname=plt_params.font_name)
+    else:
+      plt.title(title, fontsize=12, fontname=plt_params.font_name)
+    if lim_x:
+      plt.xlim(-1 * lim_x, lim_x)
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     #olx.Shell(p)
@@ -2425,6 +2600,18 @@ def get_polyhedra_tau():
 
 OV.registerFunction(get_polyhedra_tau, False, "tools")
 
+def get_refinement_stats_value(which):
+  try:
+    stats = olx.xf.RefinementInfo()
+    d1 = dict(x.split("=") for x in stats.split(";"))
+    d2 = olex_core.GetHklStat()
+    d = {**d1, **d2}
+    return d.get(which, "n/a")
+  except:
+    return ("...")
+OV.registerFunction(get_refinement_stats_value, False, "tools")
+
+
 
 def label_rsa():
   import olx
@@ -2441,14 +2628,18 @@ def label_rsa():
 
 OV.registerFunction(label_rsa, False, "tools")
 
+
 def set_data_parameter_stats_display(target):
   parameters = get_refinement_stats('Parameters')
   #reflections_all = get_refinement_stats('Reflections_all')
   #data_count = get_refinement_stats('DataCount')
   if OV.IsControl(target):
     olx.html.SetLabel(target, f"Parameters: {parameters}")
+
+
 OV.registerFunction(set_data_parameter_stats_display, False, "tools")
-    
+
+
 def get_refinement_stats(which):
   try:
     stats = olx.xf.RefinementInfo()
@@ -2459,6 +2650,7 @@ def get_refinement_stats(which):
   except:
     return ("...")
 
+
 def copy_directory(src, dst):
   try:
     shutil.copytree(src, dst)
@@ -2467,3 +2659,182 @@ def copy_directory(src, dst):
     print(f"Error: {e}")
 
 
+def get_N_HexCol(N=5, a=1, b=0.5, c=0.5):
+  import colorsys
+  HSV_tuples = [(x * a / N, b, c) for x in range(N)]
+  hex_out = []
+  for rgb in HSV_tuples:
+    rgb = map(lambda x: int(x * 255), colorsys.hsv_to_rgb(*rgb))
+    hex_out.append('#%02x%02x%02x' % tuple(rgb))
+  return hex_out
+
+
+def generate_color_palette(n):
+  import colorsys
+  """Generate a color palette with n colors distributed evenly around the color wheel."""
+  hues = [i * (360 / n) for i in range(n)]  # Distribute hues evenly
+
+  # Convert HSL colors to RGB colors
+  colors = [colorsys.hsv_to_rgb(hue / 360, 1.0, 1.0) for hue in hues]
+
+  return colors
+
+
+class PlotIt():
+  def __init__(self):
+    self.plt_params = OV.GetParam('user.graphs.matplotlib')
+
+  def plot_it(self, dd):
+    if OV.HasGUI():
+      import olex_gui
+      dpi = olex_gui.GetPPI()[0]
+
+    self.plt = load_matplotlib()
+    
+    self.plt.rcParams['xtick.labelsize'] = 11
+    self.plt.rcParams['ytick.labelsize'] = 11
+
+    
+    self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    
+    self.plt.style.use(self.plt_params.style)
+    plt_size = dd.get("plt_size")
+    if not plt_size:
+      plt_size = (self.plt_params.fig_width, self.plt_params.fig_height)
+    elif plt_size == "gui":
+      w = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      h = w
+      plt_size = (2 * w / dpi, 2 * h / dpi)
+
+    filename = dd["filename"]
+    title= dd["title"]
+    second_title = dd.get("second_title", "")
+    comment = dd.get('comment', "")
+    gap = self.plt_params.subplot_top_gap
+    gap_facor = 0.05
+    if comment:
+      gap = gap - gap * 0.05
+
+    n_plots = len(dd['data'])
+    stack_type = dd.get("stack_type", None)
+    if stack_type:
+      if stack_type == "stacked":
+        subplot_ratio = dd["subplot_ratio"]
+        if n_plots != len(subplot_ratio):
+          subplot_ratio = [1] * n_plots
+        self.fig, axes = self.plt.subplots(n_plots, 1, sharex=True, figsize=plt_size, dpi=dpi, gridspec_kw={'height_ratios': subplot_ratio})  #plots them on top of each other.
+
+      elif stack_type == "combined":
+        pass
+    else:
+      self.fig, axes = self.plt.subplots(figsize=plt_size, dpi=dpi)
+      axes = [axes]
+
+    if len(dd['data']) > 1:
+      self.fig.suptitle(f"{title}", fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
+#      self.plt.text(.8, 1, 'right title', transform=self.fig.transFigure, horizontalalignment='center')
+#      self.plt.text(.2, 1, 'left title', transform=self.fig.transFigure, horizontalalignment='center')
+
+      #self.plt.text(0.5, 0.92, second_title, 
+               #fontsize=12, ha='center')
+      #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
+
+
+    else:
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+
+    i = 0
+    for series in dd['data']:
+      d =  dd['data'][series]
+      self.get_ax(axes[i], **d)
+      i += 1
+
+    self.plt.tight_layout(rect=[0, 0, 1, gap])
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    if comment:
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+            
+    p = os.path.join(OV.FilePath(), filename)
+    self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+    #olx.Shell(p)
+    self.plt.close()
+    return p
+
+  def get_ax(self,
+             ax,
+             xs,
+             ys,
+             label=None,
+             filename='test.png',
+             title="",
+             graphing="matplotlib",
+             colour=None,
+             max_major_ticks=6,
+             terms=None,
+             use_highlight=[],
+             lim_x=False,
+             marker=None,
+             markersize=None,
+             linestyle=None,
+             ylabel="",
+             labels=[],
+             x_type="",
+             y_type="",
+             ):
+
+    from matplotlib.ticker import MaxNLocator
+    import matplotlib.ticker as ticker
+    import numpy as np
+    self.plt_params = OV.GetParam('user.graphs.matplotlib')
+    self.plt.style.use(self.plt_params.style)
+    self.plt.grid(self.plt_params.grid)
+
+    ax_colour = self.plt_params.ax_colour
+
+    if not marker:
+      marker = self.plt_params.ax1.marker
+    if not markersize:
+      markersize = self.plt_params.ax1.marker_size
+    if not linestyle:
+      linestyle = self.plt_params.ax1.linestyle
+
+    if not isinstance(xs[0], list):
+      xs = ([xs])
+      ys = ([ys])
+
+    colour =  OV.GetParam('user.graphs.matplotlib.%s.colour' % colour, None)
+    i = 0
+    for x, y in zip(xs, ys):
+      if not colour or colour == "auto_scale":
+        colour = get_N_HexCol(len(xs))[i]
+      i += 1
+      label = None
+      ax.plot(x,
+              y,
+              marker=marker,
+              color=colour,
+              markersize=markersize,
+              linewidth=self.plt_params.ax1.line_width,
+              linestyle=linestyle,
+              markerfacecolor=self.plt_params.ax1.marker_face_colour,
+              markeredgecolor=colour,
+              markeredgewidth=self.plt_params.ax1.marker_edge_width,
+              )
+
+      #if labels and len(labels)==len(xs):
+        #for x, label in zip(y, labels):
+          #self.plt.plot(x, y, label=label)
+      #self.plt.legend()
+      colour = None
+      ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
+      #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    if lim_x:
+      self.plt.xlim(-1 * lim_x, lim_x)
+    ax.tick_params(axis='y', labelcolor=ax_colour)
+
+ #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
+    ax.grid(self.plt_params.grid)

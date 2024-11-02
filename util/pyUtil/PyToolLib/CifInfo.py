@@ -4,6 +4,7 @@ import glob
 from io import StringIO
 import datetime
 import math
+import pickle
 
 import olx
 import olex
@@ -34,49 +35,19 @@ sum_totals = 0
 
 class MetacifFiles:
   def __init__(self):
-    self.curr_smart = None
-    self.curr_saint = None
-    self.curr_integ = None
-    self.curr_cad4 = None
-    self.curr_sad = None
-    self.curr_pcf = None
-    self.curr_frames = None
-    self.curr_p4p = None
-    self.curr_cif_od = None
-    self.curr_crystal_images = None
-    self.curr_crystal_clear = None
-    self.curr_cif_def = None
-    self.curr_twin = None
-    self.curr_abs = None
+    self.tools = [
+      'smart', 'saint', 'integ', 'cad4', 'sad', 'pcf', 'frames', 'p4p', 'cif_od',
+      'crystal_images', 'crystal_clear', 'cif_def', 'twin', 'abs', 'cfx', 'cfx_LANA']
 
-    self.prev_smart = None
-    self.prev_saint = None
-    self.prev_integ = None
-    self.prev_cad4 = None
-    self.prev_sad = None
-    self.prev_pcf = None
-    self.prev_frames = None
-    self.prev_p4p = None
-    self.prev_cif_od = None
-    self.prev_crystal_images = None
-    self.prev_crystal_clear = None
-    self.prev_cif_def = None
-    self.prev_twin = None
-    self.prev_abs = None
+    for t in self.tools:
+      setattr(self, "curr_" + t, None)
+      setattr(self, "list_" + t, None)
 
-    self.list_smart = None
-    self.list_saint = None
-    self.list_integ = None
-    self.list_cad4 = None
-    self.list_sad = None
-    self.list_pcf = None
-    self.list_frames = None
-    self.list_p4p = None
-    self.list_cif_od = None
-    self.list_crystal_images = None
-    self.list_crystal_clear = None
-    self.list_twin = None
-    self.list_abs = None
+  def fix_attrs(self):
+    for t in self.tools:
+      if "curr_" + t not in self.__dict__:
+        setattr(self, "curr_" + t, None)
+        setattr(self, "list_" + t, None)
 
 class ValidateCif(object):
   def __init__(self, filepath=None, cif_dic='cif_core.dic', show_warnings=True):
@@ -436,6 +407,7 @@ class ExtractCifInfo(CifTools):
   conflict_d = {}
 
   def __init__(self, evaluate_conflicts=True, run=False):
+    self.state_file = os.path.join(OV.StrDir(), "matacif_cache.pickle")
     ext = OV.FileExt()
     if ext and ext.lower() == "cif":
       return
@@ -453,7 +425,13 @@ class ExtractCifInfo(CifTools):
     self.computing_citations_d = {}
     self.get_computing_citation_d()
     self.metacif = {}
-    self.metacifFiles = MetacifFiles()
+    # restore state
+    if os.path.exists(self.state_file):
+      self.metacifFiles = pickle.load(open(self.state_file, "rb"))
+      self.metacifFiles.fix_attrs()
+    else:
+      self.metacifFiles = MetacifFiles()
+
     self.evaluate_conflicts=evaluate_conflicts
     OV.registerFunction(self.conflict_evaluation,True,'extractcifinfo')
     if run:
@@ -466,18 +444,9 @@ class ExtractCifInfo(CifTools):
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
     basename = self.filename
     path = self.filepath
-    merge_cif_file = "%s/%s" %(path, "fileextract.cif")
-    cif_file = "%s/%s%s" %(path, basename, ".cif")
-    tmp = "%s/%s" %(path, "tmp.cif")
-
-    info = ""
-    for p in OV.ListFiles(os.path.join(path, basename + ".cif")):
-      info = os.stat(p)
-
-    versions = self.get_def()
 
     import History
-    active_solution = History.tree.active_child_node
+    active_solution = None if  History.tree is None else History.tree.active_child_node
     all_sources_d = {}
 
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
@@ -531,7 +500,7 @@ class ExtractCifInfo(CifTools):
         '_atom_sites_solution_primary': atom_sites_solution_primary
       }, force = force)
 
-    active_node = History.tree.active_node
+    active_node = None if History.tree is None else History.tree.active_node
 
     if active_node is not None and not active_node.is_solution:
       ## Backwards Compatibility
@@ -556,7 +525,7 @@ class ExtractCifInfo(CifTools):
 
     ##RANDOM THINGS
     # OD Data Collection Date
-    p, pp = self.sort_out_path(path, "od_frame_date")
+    p, pp, update = self.sort_out_path(path, "od_frame_date")
     if p:
       try:
         info = os.stat(p)
@@ -577,7 +546,7 @@ class ExtractCifInfo(CifTools):
           l.append(pp[idx])
         return l
 
-    p, pp = self.sort_out_path(path, "od_frame_images")
+    p, pp, update = self.sort_out_path(path, "od_frame_images")
     if p:
       try:
         OV.SetParam('snum.report.frame_image', p)
@@ -587,169 +556,24 @@ class ExtractCifInfo(CifTools):
           print("Error processing OD frame image %s" %p)
         pass
 
-    # OD Crystal Image
-    p, pp = self.sort_out_path(path, "od_crystal_images")
+    # Crystal Image
+    p, pp, update = self.sort_out_path(path, "crystal_images")
     if pp:
       try:
         OV.SetParam('snum.report.crystal_image', p)
         OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
       except:
-        print("Error processing OD crystal image %s" %p)
+        print("Error processing crystal images %s" %p)
 
     # OD Notes File
-    p, pp = self.sort_out_path(path, "notes_file")
+    p, pp, update = self.sort_out_path(path, "notes_file")
     if p:
       try:
         OV.SetParam('snum.report.data_collection_notes', p)
       except:
         print("Error processing notes file %s" %p)
 
-    # Bruker Crystal Image
-    p, pp = self.sort_out_path(path, "bruker_crystal_images")
-    if pp:
-      try:
-        OV.SetParam('snum.report.crystal_image', p)
-        OV.SetParam('snum.report.crystal_images', choose_max_6(pp))
-      except:
-        print("Error processing Bruker crystal image %s" %p)
-
-    ##THINGS IN CIF FORMAT
-    p, pp = self.sort_out_path(path, "smart")
-    if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
-      try:
-        import bruker_smart
-        smart = bruker_smart.reader(p).cifItems()
-        computing_data_collection = self.prepare_computing(smart, versions, "smart")
-        smart.setdefault("_computing_data_collection", computing_data_collection)
-        self.update_cif_block(smart)
-        all_sources_d[p] = smart
-      except Exception as err:
-        print("Error reading Bruker SMART file %s: %s" %(p, err))
-
-    p, pp = self.sort_out_path(path, "p4p")
-    if p and self.metacifFiles != self.metacifFiles.prev_p4p:
-      try:
-        from p4p_reader import p4p_reader
-        p4p = p4p_reader(p).read_p4p()
-        self.update_cif_block(p4p)
-        all_sources_d[p] = p4p
-      except:
-        print("Error reading p4p file %s" %p)
-
-    p, pp = self.sort_out_path(path, "integ")
-    if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
-      try:
-        import bruker_saint_listing
-        integ = bruker_saint_listing.reader(p).cifItems()
-        computing_data_reduction = self.prepare_computing(integ, versions, "saint")
-        computing_data_reduction = computing_data_reduction.split("=")[0].strip()
-        integ.setdefault("_computing_data_reduction", computing_data_reduction)
-        integ.setdefault("_computing_cell_refinement", computing_data_reduction)
-        integ["computing_data_reduction"] = computing_data_reduction
-        self.update_cif_block(integ)
-        all_sources_d[p] = integ
-      except:
-        print("Error reading Bruker Saint integration file %s" %p)
-
-    p, pp = self.sort_out_path(path, "saint")
-    if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
-      try:
-        import bruker_saint
-        saint = bruker_saint.reader(p).cifItems()
-        computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
-        saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
-        computing_data_reduction = self.prepare_computing(saint, versions, "saint")
-        saint.setdefault("_computing_data_reduction", computing_data_reduction)
-        self.update_cif_block(saint)
-        all_sources_d[p] = saint
-      except:
-        print("Error reading Bruker saint.ini")
-
-    p, pp = self.sort_out_path(path, "abs")
-    if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-      try:
-        import abs_reader
-        abs_type = abs_reader.abs_type(p)
-        if abs_type == "SADABS":
-          sad = abs_reader.reader(p).cifItems()
-          sad.setdefault('abs_file', p)
-          version = self.prepare_computing(sad, versions, "sad")
-          version = version.split("=")[0].strip()
-          sad.setdefault('version', version)
-          t = self.prepare_exptl_absorpt_process_details(sad, version)
-          sad.setdefault("_exptl_absorpt_process_details", t)
-          self.update_cif_block(sad, force=False)
-          all_sources_d[p] = sad
-        elif abs_type == "TWINABS":
-          twin = abs_reader.reader(p).twin_cifItems()
-          twin.setdefault('abs_file', p)
-          version = self.prepare_computing(twin, versions, "twin")
-          version = version.split("=")[0].strip()
-          twin.setdefault('version', version)
-          t = self.prepare_exptl_absorpt_process_details(twin, version)
-          twin.setdefault("_exptl_absorpt_process_details", t)
-          self.update_cif_block(twin, force=True)
-          all_sources_d[p] = twin
-      except Exception as e:
-        if 'Unsupported program version' in str(e):
-          print("%s for SADABS" %e)
-        else:
-          import traceback
-          traceback.print_exc()
-          print("There was an error reading the SADABS/TWINABS output file\n" +\
-                "'%s'" %p + ".\nThe file may be incomplete.")
-    else:
-      sad = {'_exptl_absorpt_correction_T_max':'.',
-             '_exptl_absorpt_correction_T_min':'.',
-             '_exptl_absorpt_correction_type':'.',
-             '_exptl_absorpt_process_details':'.'}
-      self.update_cif_block(sad, force=True)
-
-    p, pp = self.sort_out_path(path, "pcf")
-    if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
-      try:
-        from pcf_reader import pcf_reader
-        pcf = pcf_reader(p).read_pcf()
-        self.update_cif_block(pcf)
-        all_sources_d[p] = pcf
-      except:
-        print("Error reading pcf file %s" %p)
-
-    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA']
-    for manu_cif in manu_cifs:
-      p,pp  = self.sort_out_path(path, manu_cif)
-      if p:
-        try:
-          with open(p, 'r') as f:
-            cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
-            self.exclude_cif_items(cif_s)
-            self.update_cif_block(cif_s, force=False)
-            all_sources_d[p] = cif_s
-        except Exception as e:
-          print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
-
-
-    # Rigaku data collection CIF
-    p, pp = self.sort_out_path(path, "crystal_clear")
-    sidefile = False
-    if p:
-      try:
-        if sidefile:
-          ciflist = OV.GetCifMergeFilesList()
-          if p not in ciflist and os.path.exists(p):
-            ## Add this file to list of merged files
-            import gui
-            gui.report.publication.add_cif_to_merge_list.__func__(p)
-        else:
-          with open(p, 'r') as f:
-            crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
-            self.exclude_cif_items(crystal_clear)
-          self.update_cif_block(crystal_clear, force=False)
-          all_sources_d[p] = crystal_clear
-
-      except:
-        print("Error reading Rigaku CIF %s" %p)
-
+    all_sources_d.update(self.read_files(path, save_state=True))
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
     try:
@@ -869,6 +693,150 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
     self.conflict_evaluation()
+
+  def read_files(self, path, save_state):
+    all_sources_d = {}
+    versions = self.get_def()
+    ##THINGS IN CIF FORMAT
+    p, pp, update = self.sort_out_path(path, "smart")
+    if update:
+      try:
+        import bruker_smart
+        smart = bruker_smart.reader(p).cifItems()
+        computing_data_collection = self.prepare_computing(smart, versions, "smart")
+        smart.setdefault("_computing_data_collection", computing_data_collection)
+        self.update_cif_block(smart)
+        all_sources_d[p] = smart
+      except Exception as err:
+        print("Error reading Bruker SMART file %s: %s" %(p, err))
+
+    p, pp, update = self.sort_out_path(path, "p4p")
+    if update:
+      try:
+        from p4p_reader import p4p_reader
+        p4p = p4p_reader(p).read_p4p()
+        self.update_cif_block(p4p)
+        all_sources_d[p] = p4p
+      except:
+        print("Error reading p4p file %s" %p)
+
+    p, pp, update = self.sort_out_path(path, "integ")
+    if update:
+      try:
+        import bruker_saint_listing
+        integ = bruker_saint_listing.reader(p).cifItems()
+        computing_data_reduction = self.prepare_computing(integ, versions, "saint")
+        computing_data_reduction = computing_data_reduction.split("=")[0].strip()
+        integ.setdefault("_computing_data_reduction", computing_data_reduction)
+        integ.setdefault("_computing_cell_refinement", computing_data_reduction)
+        integ["computing_data_reduction"] = computing_data_reduction
+        self.update_cif_block(integ)
+        all_sources_d[p] = integ
+      except:
+        print("Error reading Bruker Saint integration file %s" %p)
+
+    p, pp, update = self.sort_out_path(path, "saint")
+    if update:
+      try:
+        import bruker_saint
+        saint = bruker_saint.reader(p).cifItems()
+        computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
+        saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
+        computing_data_reduction = self.prepare_computing(saint, versions, "saint")
+        saint.setdefault("_computing_data_reduction", computing_data_reduction)
+        self.update_cif_block(saint)
+        all_sources_d[p] = saint
+      except:
+        print("Error reading Bruker saint.ini")
+
+    p, pp, update = self.sort_out_path(path, "abs")
+    if update:
+      try:
+        import abs_reader
+        abs_type = abs_reader.abs_type(p)
+        if abs_type == "SADABS":
+          sad = abs_reader.reader(p).cifItems()
+          sad.setdefault('abs_file', p)
+          version = self.prepare_computing(sad, versions, "sad")
+          version = version.split("=")[0].strip()
+          sad.setdefault('version', version)
+          t = self.prepare_exptl_absorpt_process_details(sad, version)
+          sad.setdefault("_exptl_absorpt_process_details", t)
+          self.update_cif_block(sad, force=False)
+          all_sources_d[p] = sad
+        elif abs_type == "TWINABS":
+          twin = abs_reader.reader(p).twin_cifItems()
+          twin.setdefault('abs_file', p)
+          version = self.prepare_computing(twin, versions, "twin")
+          version = version.split("=")[0].strip()
+          twin.setdefault('version', version)
+          t = self.prepare_exptl_absorpt_process_details(twin, version)
+          twin.setdefault("_exptl_absorpt_process_details", t)
+          self.update_cif_block(twin, force=True)
+          all_sources_d[p] = twin
+      except Exception as e:
+        if 'Unsupported program version' in str(e):
+          print("%s for SADABS" %e)
+        else:
+          import traceback
+          traceback.print_exc()
+          print("There was an error reading the SADABS/TWINABS output file\n" +\
+                "'%s'" %p + ".\nThe file may be incomplete.")
+    else:
+      sad = {'_exptl_absorpt_correction_T_max':'.',
+             '_exptl_absorpt_correction_T_min':'.',
+             '_exptl_absorpt_correction_type':'.',
+             '_exptl_absorpt_process_details':'.'}
+      self.update_cif_block(sad, force=True)
+
+    p, pp, update = self.sort_out_path(path, "pcf")
+    if update:
+      try:
+        from pcf_reader import pcf_reader
+        pcf = pcf_reader(p).read_pcf()
+        self.update_cif_block(pcf)
+        all_sources_d[p] = pcf
+      except:
+        print("Error reading pcf file %s" %p)
+
+    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA']
+    for manu_cif in manu_cifs:
+      p, pp, update  = self.sort_out_path(path, manu_cif)
+      if update:
+        try:
+          with open(p, 'r') as f:
+            cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
+            self.exclude_cif_items(cif_s)
+            self.update_cif_block(cif_s, force=False)
+            all_sources_d[p] = cif_s
+        except Exception as e:
+          print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
+
+
+    # Rigaku data collection CIF
+    p, pp, update = self.sort_out_path(path, "crystal_clear")
+    sidefile = False
+    if update:
+      try:
+        if sidefile: # what is this supposed to be???
+          ciflist = OV.GetCifMergeFilesList()
+          if p not in ciflist and os.path.exists(p):
+            ## Add this file to list of merged files
+            import gui
+            gui.report.publication.add_cif_to_merge_list.__func__(p)
+        else:
+          with open(p, 'r') as f:
+            crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
+            self.exclude_cif_items(crystal_clear)
+          self.update_cif_block(crystal_clear, force=False)
+          all_sources_d[p] = crystal_clear
+
+      except:
+        print("Error reading Rigaku CIF %s" %p)
+
+    if save_state:
+      pickle.dump(self.metacifFiles, open(self.state_file, "wb"))
+    return all_sources_d
 
   def conflict_evaluation(self, force=False):
     if self.evaluate_conflicts or force:
@@ -1143,49 +1111,23 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*"
       extension = "*.jpg"
       directory = os.sep.join(directory_l[:-3] + ["frames", "jpg"])
-    elif tool == "bruker_crystal_images":
-      name = OV.FileName()
-      directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
-      g = glob.glob(directory)
-      i = 1
-      while not g:
-        directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
-        g = glob.glob(directory)
-        i += 1
-        if i > 3:
-          return None, None
-
-      zip_file = g[0]
-      import zipfile
-      l = []
-      try:
-        with zipfile.ZipFile(zip_file, "r") as z:
-          for filename in z.namelist():
-            if filename and ".jpg" in filename:
-              l.append(r'%s/%s' %(g[0], filename))
-        OV.SetParam("snum.metacif.list_crystal_images_files", l)
-        setattr(self.metacifFiles, "list_crystal_images_files", l)
-        return l[0], l
-      except:
-        return None, None
-
-    elif tool == "od_crystal_images":
+    elif tool == "crystal_images" or tool == "crystal_images":
       l0, l = gui.tools.find_movie_folder(directory, directory_l)
-      setattr(self.metacifFiles, "list_crystal_images_files", (l))
-      return l0, l
+      setattr(self.metacifFiles, "list_crystal_images_files", l)
+      return l0, l, None
 
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"
       directory = os.sep.join(directory_l[:-3])
     else:
-      return None, None
+      return None, None, None
 
+    #normalise name if the SQUEEZEd version is used.
+    while name.endswith("_sq"):
+      name = name[:-3]
     files = []
     for path in OV.ListFiles(os.path.join(directory, name+extension)):
-      info = os.stat(path)
-      files.append((info.st_mtime, path))
-    for path in OV.ListFiles(os.path.join(directory, name.replace("_sq","") + extension)): #find the files even if the SQUEEZEd version is used.
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
@@ -1199,8 +1141,7 @@ If more than one file is present, the path of the most recent file is returned b
       if files:
         return self.file_choice(files,tool)
       else:
-        return None, None
-
+        return None, None, None
 
   def file_choice(self, info, tool, multiple=False):
     """Given a list of files, it will return the most recent file.
@@ -1217,35 +1158,37 @@ If more than one file is present, the path of the most recent file is returned b
     info.reverse()
 
     returnvalue = ""
+    curr_date = None
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
       files = ';'.join([FILE for date, FILE in info])
       try:
-        setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
+        curr_date = getattr(self.metacifFiles, "curr_%s" %tool)
+        if curr_date:
+          curr_date = curr_date[0]
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
-        setattr(self.metacifFiles, "list_%s" %tool, files)
         OV.SetParam("snum.metacif.%s_file" %tool, info[0][1])
+        setattr(self.metacifFiles, "list_%s" %tool, files)
         setattr(self.metacifFiles, "curr_%s" %tool, info[0])
       except:
         pass
-      returnvalue = info[0][1]
+      returnvalue = info[0]
     else:
       x = OV.GetParam("snum.metacif.%s_file" %tool)
       if not x:
-        return None, None
+        return None, None, False
       x = os.path.normpath(x)
       if x is not None:
         for date, FILE in info:
           if x in FILE:
             setattr(self.metacifFiles,"curr_%s" %tool, (date,FILE))
-            returnvalue = FILE
+            returnvalue = (date, FILE)
     if not returnvalue:
-      returnvalue = info[0][1]
+      returnvalue = info[0]
     if returnvalue:
-      returnvalue = OV.standardizePath(returnvalue)
-    return returnvalue, pp
+      returnvalue = (OV.standardizePath(returnvalue[1]), returnvalue[0])
+    return returnvalue[0], pp, returnvalue[1] != curr_date
 
   def get_def(self):
-    olexdir = self.basedir
     versions = self.versions
     afile = os.path.join(OV.DataDir(), "cif_info.def")
     if not os.path.exists(afile):
@@ -1264,7 +1207,6 @@ If more than one file is present, the path of the most recent file is returned b
           versions[prgname].setdefault(versionnumber, versiontext)
     return versions
 
-
   def get_computing_citation_d(self):
     file_path = "%s/etc/site/computing_citations.def" %self.basedir
     with open(file_path, 'r') as rfile:
@@ -1275,10 +1217,7 @@ If more than one file is present, the path of the most recent file is returned b
         li = line.split("::")
         self.computing_citations_d.setdefault(li[0].strip(), li[1].strip())
 
-
-
 ############################################################
-
 OV.registerFunction(ExtractCifInfo)
 
 def reloadMetadata(force=False):
@@ -1301,7 +1240,6 @@ def reloadMetadata(force=False):
     print("Failed to reload matadata: %s", e)
 
 OV.registerFunction(reloadMetadata, False, "cif")
-
 
 def getOrUpdateDimasVar(getOrUpdate):
   for var in [('snum_dimas_crystal_colour_base','exptl_crystal_colour_primary'),

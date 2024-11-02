@@ -59,9 +59,6 @@
     <_exptl_crystal_density_diffrn>
     <_exptl_crystal_F_000>
     <_chemical_formula_*>
-    <_diffrn_oxdiff_ac3_digest_hkl>
-    <_diffrn_oxdiff_ac3_digest_frames>
-    <_diffrn_oxdiff_digest_hkl>
     <_diffrn_oxdiff_digest_frames>
     <_olex2_refinement_description>
     <_olex2_refine_details>
@@ -82,9 +79,13 @@
     <_diffrn_detector_*>
     <_computing_*>
     <_olex2_*>
+    <*_oxdiff_*>
     <_local_*>
     <_publ_*>
+    <_audit_contact_*>
+    <_audit_author>
     <_refine_* skip="true">
+    <_refine_special_details>
     <_exptl_crystal_F_000 skip="true">
     <_exptl_crystal_density_diffrn skip="true">
     <_exptl_absorpt_coefficient_mu skip="true">

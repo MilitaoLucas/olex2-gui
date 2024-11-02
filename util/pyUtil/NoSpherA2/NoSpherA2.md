@@ -141,6 +141,9 @@ This option sets the convergence criterion for the self-consistent field (SCF) w
 ## SCF Conv. Strategy (For ORCA)
 Selects the mechanism by which the SCF calculation converges to the energy minimum. Refers to the step size used in applying calculated gradients to the wavefunction.
 
+## Dyn. Damp (For ORCA)
+This Option allows ORCA to dynamically change the damping factor between calculation steps. This option can help in tricky cases when the wavefunction does not want to converge normally or might allow to go with an option "one up", that is Easy instead of NormalConv in some cases, sicne the damping factor will "breathe".
+
 # NoSpherA2 Options Grouped Parts
 
 ## Grouped Parts (for disordered structures with PART instructions)
@@ -190,7 +193,7 @@ Calculates the Electron Localisation Function, arbitrarily scaled between 0 and 
 ## ESP
 Calculation of the total electrostatic potential. This is a complex calculation, since the potential *V* involves an integral over the whole wavefunction:<br>
 * <math>
-	V<sub>tot</sub>(<b>r</b>) = V<sub>nuc</sub>(<b>r</b>) + V<sub>tot</sub>(<b>r</b>) = Σ<sub>A</sub> (Z<sub>A</sub> / |<b>r</b>-<b>R</b><sub>A</sub>|) - ∫ ρ(<b>r</b>') / |<b>r</b>-<b>r</b>'| <i>d<b>r</b>'</i>
+	V<sub>tot</sub>(<b>r</b>) = V<sub>nuc</sub>(<b>r</b>) + V<sub>tot</sub>(<b>r</b>) = Î£<sub>A</sub> (Z<sub>A</sub> / |<b>r</b>-<b>R</b><sub>A</sub>|) - âˆ« Ï�(<b>r</b>') / |<b>r</b>-<b>r</b>'| <i>d<b>r</b>'</i>
 </math> &nbsp; 
 <br>
 The ESP represents the potential at each point in space due to all other electrons in the wavefunction. The calculation of the ESP does not scale with the third power of the grid resolution, but rather the 9th power, which makes it really time consuming.

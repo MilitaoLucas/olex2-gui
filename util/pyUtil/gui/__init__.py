@@ -392,8 +392,31 @@ def get_default_notification(txt="", txt_col='green_text'):
     poly = " | Polymeric structure"
   set_notification("<font color='%s'>%s</font>%s;%s;%s" %(txt_col, txt, poly, table_col,'#888888'))
 
+#https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
+def strip_html_tags(html):
+  from io import StringIO
+  from html.parser import HTMLParser
+
+  class MLStripper(HTMLParser):
+    def __init__(self):
+      super().__init__()
+      self.reset()
+      self.strict = False
+      self.convert_charrefs= True
+      self.text = StringIO()
+    def handle_data(self, d):
+      self.text.write(d)
+    def get_data(self):
+      return self.text.getvalue()
+  s = MLStripper()
+  s.feed(html)
+  return s.get_data()
+
 def set_notification(string):
   if not OV.HasGUI():
+    olx.Echo(strip_html_tags(string.split(';')[0]), m="error")
+    with open(os.path.join(OV.StrDir(), "refinement.check"), "w") as out:
+      out.write(string)
     return
   if string is None:
     get_default_notification()
@@ -490,3 +513,57 @@ def NamingMode():
   olx.Mode("Name", *args, a=auto, t=elm, s=suffix)
 
 olex.registerFunction(NamingMode, False, "gui")
+
+def FixFree(target):
+  from gui.tools import GetNParams
+  target = target.upper()
+  if target == "FIX ALL":
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu>>fix HUiso")
+  elif target == "FREE XYZ":
+    olx.Run("sel -u>>sel $*,H>>free xyz")
+  elif target == "FREE ADP":
+    olx.Run("sel -u>>sel $*,H>>free adp")
+  elif target == "FREE H XYZ":
+    olx.Run("sel -u>>sel $H>>free xyz -cs>>afix 0")
+  elif target == "FREE H UISO":
+    olx.Run("sel -u>>sel $H>>free Uiso")
+  elif target == "AFIX":
+    cmd = "kill $H>>HAdd"
+    if OV.IsEDData():
+      cmd += ">>NeutronHDist"
+    olx.Run(cmd)
+  olx.Labels(f=True, h=True, a=True, r=True)
+  GetNParams()
+
+olex.registerFunction(FixFree, False, "gui")
+
+def get_refinement_lists():
+  if OV.IsEDRefinement():
+    return "None<-n/a;Other<-other;4: Fc_sq, Fo_sq, sig_Fo_sq<-4"
+  return "None<-n/a;Other<-other;3: Fo, sig_Fo, A_re and B_im<-3;4: Fc_sq, Fo_sq, sig_Fo_sq<-4;6: Fo_sq, sig_Fo_sq, Fc, phase<-6"
+
+def set_refinement_list(val):
+  if "other" == val:
+    return
+  if "n/a" == val:
+    olx.DelIns("list")
+  else:
+    olx.DelIns("list")
+    olx.AddIns("list", val)
+
+olex.registerFunction(get_refinement_lists, False, "gui")
+olex.registerFunction(set_refinement_list, False, "gui")
+
+def get_thread_n_selection():
+  cpu_n = os.cpu_count()
+  rv_l = []
+  cpu_n = os.cpu_count()
+  while cpu_n > 1:
+    if cpu_n % 2 == 0:
+      rv_l.append(int(cpu_n))
+    cpu_n -= 2
+  rv_l.sort()
+  rv_l = ["Def<--1;1"] + [str(item) for item in rv_l]
+  return ";".join(rv_l)
+
+olex.registerFunction(get_thread_n_selection, False, "gui")

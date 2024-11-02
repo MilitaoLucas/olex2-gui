@@ -1,32 +1,21 @@
-<td width='65%' align='left' bgcolor="$GetVar('HtmlTableFirstcolColour')">
+<!-- #include group-begin gui\blocks\group_begin.htm;width=70;1 -->
+
+<td width='100%' align='left'>
 $spy.MakeElementButtonsFromFormula('mode')
 </td>
+<!-- #include group-end gui\blocks\group_end.htm;1 -->
 
-<td width='5%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
-  <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    bgcolor="GetVar('HtmlTableFirstcolColour')"
-    name='USER_AUTO_REFINE_AFTER_ANIS'
-    checked="spy.GetParam('user.auto_refine_after_anis')"
-    oncheck="spy.SetParam('user.auto_refine_after_anis','true')"
-    onuncheck="spy.SetParam('user.auto_refine_after_anis','false')"
-    target="Automatically refine if anis/isot or HADD is changed"
-    onclick="echo 'Automatically refine after anis/isot or HADD:' html.GetState('~name~')"
-    value=''
-  >
-  </font>
-</td>
-
+<!-- #include group-begin gui\blocks\group_begin.htm;width=15;1 -->
     $+
     html.Snippet(GetVar(default_link),
     "value=Add H",
-    "onclick=showH a true>>HADD>>autorefine",
+    "onclick=showH a true >> HADD",
     )$-
+<!-- #include group-end gui\blocks\group_end.htm;1 -->
 
-<td width='10%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
+<!-- #include group-begin gui\blocks\group_begin.htm;width=15;1 -->
+<td width='40%' align='right' valign='center'>
   $spy.MakeHoverButton('toolbar-anis',"anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine")
-</td>
-<td width='10%' align='center' valign='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   $spy.MakeHoverButton('toolbar-isot',"isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine")
 </td>
+<!-- #include group-end gui\blocks\group_end.htm;1 -->

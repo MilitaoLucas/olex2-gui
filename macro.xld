@@ -71,6 +71,7 @@
     <onabort
      <cmd "ceiling off">
      <cmd "freeze false">
+     <cmd  "if strcmp(lasterror(),'Cancelled') then 'abort -q'">
      <cmd "echo lasterror() -m=error">
      <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually.'">
      <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there.'">
@@ -128,6 +129,7 @@
   <cmd
     <cmd "stop logging">
     <cmd "flush history">
+    <cmd "spy.onexit()">
     <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
           spy.SaveCifInfo()>>mode off'">
     <cmd "spy.SaveUserParams()">
@@ -137,8 +139,7 @@
     <cmd "storeparam last_version GetVar(last_version, '')">
     <cmd "spy.threading.joinAll()">
     <cmd "user_onexit">
-    <cmd "spy.onexit()">
-    <cmd "echo Good Bye">
+    <cmd "echo 'Good Bye'">
   >
  >
 >
@@ -294,6 +295,7 @@
       <arg1 name="SOLVE" def='SOLVE'>
     >
     <cmd
+      <cmd0 "spy.SetParam user.refinement.client_mode False">
       <cmd1 "spy.RunSolutionPrg()">
       <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
         spy.GetParam(snum.refinement.method),true)">
@@ -1523,13 +1525,19 @@
     <args
       <arg1 name="p1" def="">
       <arg1 name="p2" def="">
-    \>
+    >
     <cmd
       <cmd1 "showp %1 %2">
-    \>
-  \>
-\>
+    >
+  >
+>
 
+<py_path help="Prints Python PATH"
+  <body
+    <args>
+    <cmd
+      <cmd1 "@py 'import sys\nfor x in sys.path:\n  print(x)'">
+>>>
 
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >

@@ -104,7 +104,7 @@ class NewsImageRetrivalThread(ThreadEx):
           _ = res.split(',')
           if len(_) == 2:
             if "-ac" in self.olex2tag:
-              continue 
+              continue
             img_url, url = _
             tags = None
           elif len(_) > 2:
@@ -160,13 +160,14 @@ class NewsImageRetrivalThread(ThreadEx):
     isZip = False
     if not url:
       url = OV.GetParam('olex2.samples.url')
-      
+
     if ".zip" not in name:
       url = '%s/%s.cif' %(url, name)
     else:
       url = '%s/%s' %(url, name)
       isZip = True
 
+    reap_base = None
     if not isZip:
       p = os.path.join(OV.DataDir(), 'samples', name)
       if not os.path.exists(p):
@@ -179,11 +180,12 @@ class NewsImageRetrivalThread(ThreadEx):
         cont = _.read().decode()
         with open(pp, 'w') as wFile:
           wFile.write(cont)
-      olex.m("reap '%s'" %pp)
-      return
+      reap_base = os.path.splitext(pp)[0]
     else:
-      pp = os.path.join(OV.DataDir(), 'samples', name)
-      p = pp.rstrip(".zip")
+      bare_name = os.path.splitext(name)[0]
+      p = os.path.join(OV.DataDir(), 'samples', bare_name)
+      pp = p + ".zip"
+      reap_base = os.path.join(p, bare_name)
       if not os.path.exists(p):
         _ = self.make_call(url)
         if _ is None:
@@ -195,7 +197,12 @@ class NewsImageRetrivalThread(ThreadEx):
         import zipfile
         with zipfile.ZipFile(pp, 'r') as zip_ref:
           zip_ref.extractall(p)
-    olex.m("reap '%s/%s.cif'" %(p,name.rstrip(".zip")))
+    if reap_base:
+      for ext in ['res', 'ins', 'cif']:
+        fn = "%s.%s" %(reap_base, ext)
+        if os.path.exists(fn):
+          olex.m("reap '%s'" %fn)
+          return
 
   def get_styles_from_url(self, name, url=None):
     if not url:

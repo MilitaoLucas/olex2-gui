@@ -244,7 +244,7 @@ def ele_to_vdw_rad(ele):
       ex=True
   if ex==False:
     r = False
-  return r 
+  return r
 
 class Atom:
 # discribes an atom read from a *.res file
@@ -280,7 +280,7 @@ class Atom:
 
 class Res:
 #defines one residue
-  def __init__(self,line):    
+  def __init__(self,line):
     self.res_nam = line[1]
     self.res_num = int(line[2])
     self.alter = False
@@ -589,9 +589,9 @@ def write_cif(res, cif_head, cif_sym, path="", name=""):
 
   string='''loop_
    _space_group_symop_id
-   _space_group_symop_operation_xyz 
+   _space_group_symop_operation_xyz
 '''
-  file.write(string) 
+  file.write(string)
   for i in range(len(cif_sym)):
     file.write(cif_sym[i])
   file.write("\n")
@@ -607,7 +607,7 @@ def write_cif(res, cif_head, cif_sym, path="", name=""):
   _atom_site_occupancy
   _atom_site_disorder_group
 '''
-  file.write(string) 
+  file.write(string)
   for i in range(len(res.cif_atoms)):
     string = res.cif_atoms[i].to_string()
     file.write(string)
@@ -785,7 +785,7 @@ def find_second_shell(mol, cap1, res, part, cap2, hbond_ex, minHbond):
 #                           ring=check_in_ring(add,l_res)
 #                        add.print()
 
-  return anums 
+  return anums
 
 
 # def check_if_plan(atom,res):
@@ -1152,7 +1152,8 @@ def read_qS(file,mol):
 
 def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
   import shutil
-  from utilities import run_with_bitmap, cuqct_tsc
+  from utilities import cuqct_tsc
+  from decors import run_with_bitmap
   test_frag = OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
 
   import time
@@ -1184,7 +1185,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
       print(name_frag)
     print("No further calculation")
     return
-  for i in range(len(frag)):  
+  for i in range(len(frag)):
     @run_with_bitmap('WFN %d/%d  ' % (i + 1, len(frag)))
     def make_wfn():
       path = os.path.join(OV.FilePath(),work_folder,"residue_"+str(i+1))
@@ -1192,7 +1193,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
         os.mkdir(path)
       write_xyz(frag[i], path=path, name=wfn_object.name)
       write_cif(frag[i], cif_head, cif_sym, path=path, name=wfn_object.name)
-      
+
       wfn_object.full_dir = path
       wfn_object.write_orca_input(False, charge=str(frag[i].q), mult=str(frag[i].s))
       try:
@@ -1201,7 +1202,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
         print("The following error occured during QM Calculation # %d: "%i,error)
         OV.SetVar('NoSpherA2-Error',error)
         raise NameError(' ')
-      
+
       base_name = os.path.join(path,wfn_object.name)
       if os.path.exists(base_name + ".gbw"):
         wfn_fn = base_name + ".gbw"

@@ -16,7 +16,6 @@ class Method_cctbx_refinement(Method_refinement):
       self.version = _
 
   def pre_refinement(self, RunPrgObject):
-    import gui
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
     self.table_file_name = None
@@ -42,6 +41,10 @@ class Method_cctbx_refinement(Method_refinement):
       OV.SetParam('snum.auto_hydrogen_naming', False)
       print("Using tabulated atomic form factors")
 
+    fin_fn = os.path.join(OV.StrDir(), OV.FileName()) + ".fin"
+    if os.path.exists(fin_fn):
+      os.remove(fin_fn)
+
     Method_refinement.pre_refinement(self, RunPrgObject)
 
 
@@ -49,19 +52,20 @@ class Method_cctbx_refinement(Method_refinement):
     import time
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
-    import gui
 
     timer = OV.IsDebugging()
     self.failure = True
     print('\n+++ STARTING olex2.refine +++++ %s' %self.version)
 
     verbose = OV.GetParam('olex2.verbose')
+
     RunPrgObject.cctbx = cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose,
       on_completion=self.writeRefinementInfoForGui)
     try:
+      olx.SetOlex2RefinementListener(True)
       if timer:
         t1 = time.time()
       cctbx.run(table_file_name=self.table_file_name,
@@ -78,8 +82,23 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.SetVar('cctbx_wR2',cctbx.wR2_factor())
         OV.File('%s.res' %OV.FileName())
+      # happens in the case of external interrupt
+      elif cctbx.failure and OV.IsRemoteMode():
+        try :
+          if cctbx.cycles.n_iterations > 0:
+            olx.Echo(
+"""Saving model after %s cycles, some details will be unavailable.
+The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning")
+            from collections import defaultdict
+            self.cif = defaultdict(str)
+            self.cif.update(cctbx.cycles.non_linear_ls.step_info)
+            OV.File('%s.res' %OV.FileName())
+            self.post_refinement(RunPrgObject=RunPrgObject)
+        except AttributeError:
+          pass
     finally:
       #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
+      olx.SetOlex2RefinementListener(False)
       OV.DeleteBitmap('refine')
       self.interrupted = cctbx.interrupted
 
@@ -117,6 +136,14 @@ class Method_cctbx_refinement(Method_refinement):
     f.close()
     OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
+
+  def deal_with_AAFF(self, RunPrgObject):
+    from aaff import deal_with_AAFF
+    return deal_with_AAFF(RunPrgObject)
+
+  def extraHtml(self):
+    html = "<!-- #include olex2.refine-extra gui/tools/olex2.refine-extra.htm;1 -->"
+    return html
 
 
 class Method_cctbx_ChargeFlip(Method_solution):
@@ -215,3 +242,47 @@ name = 'NSFF'
 display = 'NSFF'
   .type=str
 """)
+
+##########################################################################
+# this is how a refinement thread could look like
+
+# from threading import Thread
+# from threads import ThreadEx
+# from threads import ThreadRegistry
+# class RefinementThread(ThreadEx):
+#   instance = None
+#   def RefinementThread(self):
+#     ThreadRegistry().register(RefinementThread)
+#     Thread.__init__(self)
+#     RefinementThread.instance = self
+
+#   def init(self, cctbx, table_file_name):
+#     self.cctbx = cctbx
+#     self.table_file_name = table_file_name
+#     return self
+
+#   def run(self):
+#     import olex_core
+#     try:
+#       olex_core.IncRunningThreadsCount()
+#       def EndUpdate(clear_meta=False):
+#         olx.Schedule("xf.EndUpdate %s" %clear_meta)
+#       def Compaq(**opts):
+#         co = ""
+#         for k,v in opts.items():
+#           co += " -%s=%s" %(k, v)
+#         olx.Schedule("compaq %s" %co)
+
+#       self.EndUpdate_ = olx.xf.EndUpdate
+#       self.Compaq_ = olx.Compaq
+#       olx.xf.EndUpdate = EndUpdate
+#       olx.Compaq = Compaq
+#       self.cctbx.run(table_file_name=self.table_file_name,
+#         ed_refinement=OV.IsEDRefinement())
+#     finally:
+#       olex_core.DecRunningThreadsCount()
+#       olx.xf.EndUpdate = self.EndUpdate_
+#       olx.Compaq = self.Compaq_
+#       if OV.HasGUI():
+#         import olex_gui
+#         olex_gui.StopWaiting()

@@ -1,8 +1,5 @@
-import string
-import sys
 import os
 import hashlib
-import glob
 import os.path
 import shutil
 import FileSystem as FS
@@ -18,8 +15,6 @@ from olexFunctions import OV
 
 import time
 import zlib
-import lst_reader
-import ires_reader
 
 tree = None
 
@@ -81,7 +76,7 @@ class History(ArgumentParser):
     if not tree:
       tree = HistoryTree()
     # don't attempt to make a history if a cif is loaded
-    if os.path.splitext(self.filefull)[-1].lower() == '.cif':
+    if os.path.splitext(self.filefull)[-1].lower() == '.cif' or OV.IsClientMode():
       return
     files = HistoryFiles(OV.HKLSrc(), self.filefull)
     if self.solve or not tree.children:
@@ -131,9 +126,19 @@ class History(ArgumentParser):
       ## remove lst file if no lst file was saved in history
       if os.path.exists(lstFile):
         os.remove(lstFile)
+    try:
+      if node.phil:
+        phil = zlib.decompress(node.phil) #.decode("utf-8")
+        phil_fn = os.path.join(OV.StrDir(), OV.ModelSrc()) + ".phil"
+        with open(phil_fn, "wb") as out:
+          out.write(phil)
+    except AttributeError:
+      node.phil = None
+    except:
+      print("Failed to revert SNUM PHIL")
 
     original_sg = olex.f("sg()")
-    olex.m("reap '%s'" %resFile)
+    olex.m("reap '%s' -no_save=true" %resFile)
     hklSrc = OV.HKLSrc()
     if not tree.isTheSameHklDigest(node, hklSrc):
       olx.Echo("Current HKL does not match the one from history - updating!", m='warning')
@@ -296,6 +301,15 @@ class Node(object):
           self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
         except:
           pass
+      try:
+        from io import StringIO
+        out = StringIO()
+        olx.phil_handler.save_param_file(
+          file_name=None, out_stream=out,
+           scope_name='snum', diff_only=True)
+        self.phil = zlib.compress(out.getvalue().encode("utf-8"))
+      except:
+        self.phil = None
 
   def get_node_index(self, node):
     if node not in self.link_table:
@@ -309,7 +323,6 @@ class Node(object):
     if self._active_child_node is None:
       return None
     return self.link_table[self._active_child_node]
-
   @active_child_node.setter
   def active_child_node(self, node):
     self._active_child_node = self.get_node_index(node)
@@ -388,7 +401,8 @@ class HistoryTree(Node):
     # 2.3 - fixing the digests as the other would stop when sum hkl=0, not abs
     # 2.4 - fixing so that 2.2-3 actually proceed to the end
     # 2.5 - add dyn support, use cif_od register
-    self.version = 2.5
+    # 2.6 - added snum phil
+    self.version = 2.6
     self.hklFiles, self.dynFiles, self.cif_odFiles = {}, {}, {}
     #maps simple digest of the file timestamp and path to full one
     self.hklFilesMap, self.dynFilesMap, self.cif_odFilesMap = {}, {}, {}
@@ -533,7 +547,7 @@ class HistoryTree(Node):
       self._build_cif_od_register_etc(c, call_id=call_id)
 
   def upgrade(self):
-    current_version = 2.5 # current version
+    current_version = 2.6 # current version
     if self.version == current_version:
       return
     start_time = time.time()
@@ -609,13 +623,29 @@ def saveOriginals(originals: HistoryFiles):
   for filePath in originals.files:
     dest_base = os.path.join(backupFolder, os.path.basename(filePath))
     dest_file = dest_base
+    src_stat = os.stat(filePath)
+    src_sha256 =None
     #find unique backup name
     inc = 1
+    do_copy = True
     while os.path.exists(dest_file):
+      dest_stat = os.stat(dest_file)
+      if src_stat.st_size == dest_stat.st_size:
+        if src_stat.st_mtime == dest_stat.st_mtime:
+          do_copy = False
+          break
+        else: # fall back to digests
+          import hashlib
+          if src_sha256 is None:
+            src_sha256 = hashlib.sha256(open(filePath, 'rb').read()).hexdigest()
+          if src_sha256 == hashlib.sha256(open(dest_file, 'rb').read()).hexdigest():
+            do_copy = False
+            break
       dest_file = "%s_%s" %(dest_base, inc)
       inc += 1
       duplicates += 1
-    shutil.copyfile(filePath, dest_file)
+    if do_copy:
+      shutil.copy2(filePath, dest_file)
   if duplicates > 0:
     olx.Echo("%s Previous backups found!" %(duplicates), m="warning")
 

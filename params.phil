@@ -225,11 +225,6 @@ routines requiring structure refinement
     .short_caption = Structure Refinement
     {
 
-    completeness{
-      target = ""
-        .type = str
-      }
-
     ata = 0
       .type = float
     data_parameter_ratio = None
@@ -238,6 +233,8 @@ routines requiring structure refinement
       .type = int
     data = None
       .type = int
+    coverge_max_shift = 0.001
+      .type = float
     max_shift_over_esd = None
       .type = float
     max_shift_over_esd_atom = None
@@ -280,7 +277,7 @@ routines requiring structure refinement
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine' \
+    program = XL XH ShelXH-1997 ShelXL ShelXL-1997 '*olex2.refine'\
       Unknown 
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
@@ -354,8 +351,6 @@ routines requiring structure refinement
       command_line = ''
         .type = str
     }
-
-
 
     auto
       .short_caption = Autotidy
@@ -534,8 +529,6 @@ routines requiring structure refinement
       .expert_level = 2
     condensed_tree = True
       .type = bool
-    revert_hkl = False
-      .type = bool
   }
 
   autochem_current_solution = "Autochem 01"
@@ -600,12 +593,6 @@ routines requiring structure refinement
     cad4_file = None
       .type = path
       .expert_level = 1
-    cif_od_file = None
-      .type = path
-      .expert_level = 1
-    crystal_image_file = None
-      .type = path
-      .expert_level = 1
     crystal_clear_file = None
       .type = path
       .expert_level = 1
@@ -648,12 +635,6 @@ routines requiring structure refinement
       .type = strings
       .expert_level = 2
     list_crystal_clear_files = None
-      .type = strings
-      .expert_level = 2
-    list_cif_od_files = None
-      .type = strings
-      .expert_level = 2
-    list_crystal_images_files = None
       .type = strings
       .expert_level = 2
     list_result_cif_files = None
@@ -700,10 +681,6 @@ routines requiring structure refinement
       .type = str
     total_time = 0
       .type = int
-    crystal_images = None
-      .type = strings
-    crystal_image = None
-      .type = str
     frame_images = None
       .type = strings
     notes_file = None
@@ -950,6 +927,10 @@ olex2
     pyl = True
      .type = bool
   }
+  refinement {
+    stop_ED_ASAP = True
+      .type = bool
+  }
 }
 
 
@@ -1106,9 +1087,19 @@ user
       .type = bool
     use_openmp = False
       .type = bool
+    use_HT = False
+      .type = bool
     openmp_mem = 2000
       .type = int
+    thread_n = -1
+      .type = int
     diagnostics = False
+      .type = bool
+    client_mode = False
+      .type = bool
+    shelxl_convergence = 0.000
+      .type = float
+    shelxl_convergence_use = True
       .type = bool
   }
 
@@ -1129,12 +1120,81 @@ user
     {
 
     matplotlib{
+      style = 'seaborn-whitegrid'
+        .type = str
       legend_in_out =  * outside best
         .type = choice
       legend_vertical = *upper center lower
         .type = choice
       legend_horizontal = left center *right
         .type = choice
+      grid = False
+        .type = bool
+      ax_colour = #666666
+        .type = str
+      fig_width = 8
+        .type = int
+      fig_height = 8
+        .type = int
+      font_name = 'Consolas'
+        .type = str
+      title_fontsize = 20
+        .type=int
+      subtitle_fontsize = 14
+        .type=int
+      subplot_top_gap = 0.95
+        .type=float
+      tick_fontsize = 14
+        .type=int
+      axis_fontsize = 14
+        .type=int
+      highlight_colour = #FFAC1C
+        .type = str
+      subplot_ratio = 3
+        .type = int
+      stack = False
+        .type = bool
+      ax1{
+        colour = auto_scale
+          .type = str
+        style = 'line'
+          .type = str
+        marker = "."
+          .type = str
+        marker_size = 1
+          .type = int
+        marker_face_colour = #ff88ff
+          .type = str
+        marker_edge_colour = #ff0000
+          .type = str
+        marker_edge_width = 1
+          .type = int
+        line_width = 1
+          .type = int
+        linestyle = solid
+          .type = str
+        
+        }
+      ax2{
+        colour = auto_scale
+          .type = str
+        style = 'line'
+          .type = str
+        marker = "."
+          .type = str
+        marker_size = 1
+          .type = int
+        marker_face_colour = #ff88ff
+          .type = str
+        marker_edge_colour = #ff0000
+          .type = str
+        marker_edge_width = 1
+          .type = int
+        line_width = 1
+          .type = int
+        linestyle = solid
+          .type = str
+        }
     }
 
 
@@ -2120,6 +2180,8 @@ user
   diagnostics{
     pin_scopes = True
       .type = bool
+    use_matplotlib = False
+      .type = bool
     use_plotly = False
       .type = bool
     plotly_username = ""
@@ -2331,6 +2393,18 @@ user
       .type = bool
     discamb_exe = "discambMATTS2tsc"
       .type = str
+    salted_models_list = ""
+      .type = str
+  }
+  Server{
+    host=localhost
+      .type=str
+    port=8899
+      .type=int
+    debug=*None Wing VCS Eclipse
+      .type=choice
+    shared_localhost=False
+      .type=bool
   }
 }
 

@@ -5,6 +5,7 @@ import shutil
 import time
 import olx
 import olex
+import olex_core
 import sys
 from olexFunctions import OV
 import OlexVFS
@@ -13,7 +14,7 @@ from ImageTools import IT
 from PilTools import timage
 from cctbx import adptbx
 from cctbx.array_family import flex
-
+from decors import run_with_bitmap
 try:
   from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
@@ -26,39 +27,6 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
-def run_with_bitmap(bitmap_text):
-  if OV.HasGUI():
-    timage.info_bitmaps(timage, bitmap_text, '#ff4444')
-  def decorator(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-      OV.CreateBitmap(bitmap_text)
-      olx.html.Update()
-      olx.xf.EndUpdate()
-      olex.m('refresh')
-      try:
-        return func(*args, **kwargs)
-      except Exception as e:
-        raise e
-      finally:
-        OV.DeleteBitmap(bitmap_text)
-        olx.html.Update()
-        olx.xf.EndUpdate()
-        olex.m('refresh')
-    return wrapper
-  def headless_decorator(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-      try:
-        return func(*args, **kwargs)
-      except Exception as e:
-        raise e
-    return wrapper  
-  if OV.HasGUI():
-    return decorator
-  else:
-    return headless_decorator
-
 def write_merged_hkl():
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -70,7 +38,7 @@ def write_merged_hkl():
     f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
     f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
   print("Done!")
-OV.registerFunction(write_merged_hkl, True, "NoSpherA2")
+OV.registerFunction(write_merged_hkl, False, "NoSpherA2")
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
@@ -84,23 +52,26 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         txt_col='black_text')
     if OV.HasGUI():
       olx.html.Update()
-      olx.xf.EndUpdate()
-      olex.m('refresh')
+      olx.Refresh()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
   args = []
   wfn_2_fchk = OV.GetVar("Wfn2Fchk")
   args.append(wfn_2_fchk)
-  from cctbx_olex_adapter import OlexCctbxAdapter
-  cctbx_adaptor = OlexCctbxAdapter()
-  f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+  if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
+    salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+    args.append("-SALTED")
+    args.append(salted_model_dir)
   if not hkl_file is None:
     if not os.path.exists(hkl_file):
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      cctbx_adaptor = OlexCctbxAdapter()
+      f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
       with open(hkl_file, "w") as out:
         f_sq_obs = f_sq_obs.complete_array(d_min_tolerance=0.01, d_min=f_sq_obs.d_min() * 0.95, d_max=f_sq_obs.d_max_min()[0], new_data_value=-1, new_sigmas_value=-1)
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-  if (int(ncpus) > 1):
+  if (int(ncpus) >= 1):
     args.append('-cpus')
     args.append(ncpus)
   if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
@@ -124,14 +95,18 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if(read_k_pts):
     args.append('-rkpts')
   software = OV.GetParam('snum.NoSpherA2.source')
-  if "ECP" in basis_name:
+  if "xTB" in software or "pTB" in software:
+    args.append("-ECP")
+    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
+    if "xTB" in software:
+      args.append(str(2))
+    elif "pTB" in software:
+      args.append(str(3))
+  elif "ECP" in basis_name:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
     args.append(str(mode))
-  elif "xTB" in software:
-    args.append("-ECP")
-    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
-    args.append(str(2))    
+
   olex_refinement_model = OV.GetRefinementModel(False)
 
   if olex_refinement_model['hklf']['value'] >= 5:
@@ -155,10 +130,36 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  # args.append("-hkl")
-  # args.append(hkl_file)
-  args.append("-dmin")
-  args.append(str(f_sq_obs.d_min() * 0.95))
+  d2 = olex_core.GetHklStat()
+  args.append("-hkl_min_max")
+  args.append(str(d2['FileMinIndices'][0]))
+  args.append(str(d2['FileMaxIndices'][0]))
+  args.append(str(d2['FileMinIndices'][1]))
+  args.append(str(d2['FileMaxIndices'][1]))
+  args.append(str(d2['FileMinIndices'][2]))
+  args.append(str(d2['FileMaxIndices'][2]))
+  #shel = olx.Ins('SHEL')
+  #omit = olx.Ins('OMIT')
+  #d_min = d2['MinD']
+  #if shel != "n/a":
+  #  d = float(shel.split()[-1])
+  #  if d > d_min:
+  #    d_min = d
+  #if omit != "n/a":
+  #  from cctbx import uctbx
+  #  d = uctbx.two_theta_as_d(float(omit.split()[-1]),float(olx.xf.exptl.Radiation()),deg=True)
+  #  if d > d_min:
+  #    d_min = d
+  #args.append("-dmin")
+  #args.append(str(d_min * 0.95))
+  if OV.IsEDRefinement():
+    try:
+      top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d"))
+      if top_up_d < d2['MinD']:
+        args.append("-dmin")
+        args.append(str(top_up_d))
+    except:
+      print("Failed to set dmin for TSC")
   if type([]) == type(wfn_file):
     if type([]) == type(cif):
       args.append("-cmtc")
@@ -183,6 +184,26 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
+    if software == "Hybrid":
+      args.append("-mtc_mult")
+      for i in range(min(6, len(groups))):
+        m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
+        if m is None or m == 'None':
+          m = 1
+        args.append(str(m))
+      args.append("-mtc_charge")
+      for i in range(min(6, len(groups))):
+        args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
+    else:
+      args.append("-mtc_mult")
+      for i in range(len(groups)):
+        m =  OV.GetParam('snum.NoSpherA2.muliplicity')
+        if m is None or m == 'None':
+          m = 1
+        args.append(str(m))
+      args.append("-mtc_charge")
+      for i in range(len(groups)):
+        args.append(str(OV.GetParam('snum.NoSpherA2.charge')))
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:
@@ -197,6 +218,16 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append(wfn_file)
     args.append("-cif")
     args.append(cif)
+    args.append("-mult")
+    m = OV.GetParam('snum.NoSpherA2.multiplicity')
+    if m == 0:
+      m = 1
+    if m is None:
+      m = 1
+    args.append(str(m))
+    args.append("-charge")
+    c = OV.GetParam('snum.NoSpherA2.charge')
+    args.append(str(c))
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
@@ -242,7 +273,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if p.poll() is None:
       time.sleep(1)
       tries += 1
-      if tries >= 5:
+      if tries >= 10:
         if "python" in args[2] and tries <=10:
           continue
         print("Failed to locate the output file")
@@ -306,8 +337,8 @@ def get_ncen():
   values = line.split()
   return values[6]
 
-OV.registerFunction(get_nmo,True,'NoSpherA2')
-OV.registerFunction(get_ncen, True, 'NoSpherA2')
+OV.registerFunction(get_nmo, False, 'NoSpherA2')
+OV.registerFunction(get_ncen, False, 'NoSpherA2')
 
 @run_with_bitmap("Combining .tsc")
 def combine_tscs(match_phrase="_part_", no_check=False):
@@ -384,7 +415,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     olx.html.Update()
   return True
 
-OV.registerFunction(combine_tscs,True,'NoSpherA2')
+OV.registerFunction(combine_tscs, False, 'NoSpherA2')
 
 def deal_with_parts():
   parts = OV.ListParts()
@@ -427,7 +458,7 @@ def deal_with_parts():
     # I will return only a simple sequence which maps onto the calculations to be done
     olex.m("showp")
     return result, groups
-OV.registerFunction(deal_with_parts, True, 'NoSpherA2')
+OV.registerFunction(deal_with_parts, False, 'NoSpherA2')
 
 def check_for_matching_fcf():
   p = OV.FilePath()
@@ -437,7 +468,7 @@ def check_for_matching_fcf():
     return True
   else:
     return False
-OV.registerFunction(check_for_matching_fcf,True,'NoSpherA2')
+OV.registerFunction(check_for_matching_fcf, False, 'NoSpherA2')
 
 def check_for_matching_wfn():
   p = OV.FilePath()
@@ -453,7 +484,7 @@ def check_for_matching_wfn():
     return True
   else:
     return False
-OV.registerFunction(check_for_matching_wfn,True,'NoSpherA2')
+OV.registerFunction(check_for_matching_wfn, False, 'NoSpherA2')
 
 def read_disorder_groups():
   inp = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
@@ -473,7 +504,7 @@ def read_disorder_groups():
       else:
         result[i].append(int(part))
   return result
-OV.registerFunction(read_disorder_groups, True, 'NoSpherA2')
+OV.registerFunction(read_disorder_groups, False, 'NoSpherA2')
 
 def is_disordered():
   parts = OV.ListParts()
@@ -481,7 +512,7 @@ def is_disordered():
     return False
   else:
     return True
-OV.registerFunction(is_disordered, True, 'NoSpherA2')
+OV.registerFunction(is_disordered, False, 'NoSpherA2')
 
 def software():
   return OV.GetParam('snum.NoSpherA2.source')
@@ -491,7 +522,10 @@ def org_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+    else:
+      OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
     OV.SetParam('snum.NoSpherA2.method', "PBE")
   OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
@@ -505,13 +539,14 @@ def org_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
+
 def org_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -527,13 +562,14 @@ def org_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_small, False, "NoSpherA2")
+
 def org_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -555,8 +591,8 @@ def light_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -572,13 +608,14 @@ def light_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_min, False, "NoSpherA2")
+
 def light_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -594,13 +631,14 @@ def light_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
+
 def light_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -622,8 +660,8 @@ def heavy_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -639,13 +677,14 @@ def heavy_min():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_min, False, "NoSpherA2")
+
 def heavy_small():
   OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -661,13 +700,14 @@ def heavy_small():
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_small, False, "NoSpherA2")
+
 def heavy_final():
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software():
-      OV.SetParam('snum.NoSpherA2.method', "R2SCAN")
+    if "5.0" in software() or "6.0" in software():
+      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
@@ -841,7 +881,7 @@ def write_precise_model_file():
       if 'fdp' in annotations[matrix_run]:
         matrix_run += 2
     f.write("\n")
-    
+
   connectivity_full = fmr.reparametrisation.connectivity_table
   xs = fmr.xray_structure()
   from scitbx import matrix
@@ -851,7 +891,7 @@ def write_precise_model_file():
   cell_errors = fmr.olx_atoms.getCellErrors()
   cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
   dist_stats = {}
-  dist_errs = {}    
+  dist_errs = {}
   for i in range(3):
     for j in range(i+1,3):
       if (cell_params[i] == cell_params[j] and
@@ -870,7 +910,7 @@ def write_precise_model_file():
   cm = norm_eq.covariance_matrix_and_annotations().matrix
   pm = xs.parameter_map()
   pat = connectivity_full.pair_asu_table
-    
+
   # calculate the distances using the prepared information
   distances = calculate_distances(
               pat,
@@ -878,16 +918,166 @@ def write_precise_model_file():
               covariance_matrix=cm,
               cell_covariance_matrix=cell_vcv,
               parameter_map=pm)
-    
+
   #The distances only exist once we iterate over them! Therefore build them and save them in this loop
   for i,d in enumerate(distances):
     bond = sl[d.i_seq]+"-"+sl[d.j_seq]
     dist_stats[bond] = distances.distances[i]
     dist_errs[bond] = math.sqrt(distances.variances[i])
-  
+
   f.write("\n\nBondlengths and errors:\n")
   for key in dist_stats:
     f.write(f"{key} {dist_stats[key]} {dist_errs[key]}\n")
-  
+
   f.close()
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
+
+def get_tsc_file_dropdown_items():
+    res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
+    t = res.split(";")
+    if len(t[0]) == 0:
+        OV.SetParam('snum.NoSpherA2.file', 'No .tsc/.tscb files found')
+        return "No .tsc/.tscb files found"
+    else:
+        return res
+OV.registerFunction(get_tsc_file_dropdown_items, False, "NoSpherA2")
+
+@run_with_bitmap("Polarizibilities")
+def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
+  from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+  from . import Wfn_Job
+  pol_fol =  os.path.join("olex2", "Polarizability")
+  if not os.path.exists(pol_fol):
+    try:
+      os.mkdir(pol_fol)
+    except:
+      pass
+  OV.SetVar("Run_number", 0)
+  wfn_job = Wfn_Job.wfn_Job(nsp2, olx.FileName(), dir="olex2\\Polarizability")
+  wfn_job.write_orca_input(True, efield="00")
+  wfn_job.run(copy=False)
+  gbw_name = os.path.join(pol_fol, olx.FileName() + ".gbw")
+  zero =  os.path.join(pol_fol, "zero.gbw")
+  shutil.move(gbw_name, zero)
+  wfn_job.write_orca_input(True, efield=f"x{efield}")
+  wfn_job.run(copy=False)
+  xp = os.path.join(pol_fol, "xp.gbw")
+  shutil.move(gbw_name, xp)
+  wfn_job.write_orca_input(True, efield=f"x-{efield}")
+  wfn_job.run(copy=False)
+  xm = os.path.join(pol_fol, "xm.gbw")
+  shutil.move(gbw_name, xm)
+  wfn_job.write_orca_input(True, efield=f"y{efield}")
+  wfn_job.run(copy=False)
+  yp = os.path.join(pol_fol, "yp.gbw")
+  shutil.move(gbw_name, yp)
+  wfn_job.write_orca_input(True, efield=f"y-{efield}")
+  wfn_job.run(copy=False)
+  ym = os.path.join(pol_fol, "ym.gbw")
+  shutil.move(gbw_name, ym)
+  wfn_job.write_orca_input(True, efield=f"z{efield}")
+  wfn_job.run(copy=False)
+  zp = os.path.join(pol_fol, "zp.gbw")
+  shutil.move(gbw_name, zp)
+  wfn_job.write_orca_input(True, efield=f"z-{efield}")
+  wfn_job.run(copy=False)
+  zm = os.path.join(pol_fol, "zm.gbw")
+  shutil.move(gbw_name, zm)
+  args = []
+  NSP2_exe = OV.GetVar("Wfn2Fchk")
+  args.append(NSP2_exe)
+  args.append("-polarizabilities")
+  args.append(zero)
+  args.append(xp)
+  args.append(xm)
+  args.append(yp)
+  args.append(ym)
+  args.append(zp)
+  args.append(zm)
+  args.append("-e_field")
+  args.append(str(efield))
+  args.append("-resolution")
+  args.append(str(resolution))
+  args.append("-radius")
+  args.append(str(radius))
+  args.append("-cpus")
+  args.append(OV.GetParam("snum.NoSpherA2.ncpus"))
+
+  startinfo = None
+
+  from subprocess import Popen, PIPE
+  from sys import stdout
+  if sys.platform[:3] == 'win':
+    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW, SW_HIDE
+    startinfo = STARTUPINFO()
+    startinfo.dwFlags |= STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = SW_HIDE
+
+  if startinfo == None:
+    with Popen(args, stdout=PIPE) as p:
+      for c in iter(lambda: p.stdout.read(1), b''):
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+  else:
+    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+      for c in iter(lambda: p.stdout.read(1), b''):
+        string = c.decode()
+        stdout.write(string)
+        stdout.flush()
+
+  NSA2_log = "NoSpherA2.log"
+  if os.path.exists(NSA2_log):
+    shutil.copy(NSA2_log, olx.FileName()+".polarizability")
+
+OV.registerFunction(calc_polarizabilities, namespace="NoSpherA2")
+
+#CHOOSE FOLDER UTILITIES! (Used in SALTED)
+def setDir(phil_value) -> None:
+  """Choose a directory and set the given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  a = olex.f('choosedir("Choose your data folder")')
+  OV.SetParam(phil_value, a)
+OV.registerFunction(setDir, False, "NoSpherA2")
+
+def appendDir(phil_value) -> None:
+  """Choose a directory and set teh given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  a = olex.f('choosedir("Choose your data folder")')
+  old = OV.GetParam(phil_value)
+  if old is None:
+    pass
+  else:
+    old += ";"+a
+  OV.SetParam(phil_value, old)
+OV.registerFunction(appendDir, False, "NoSpherA2")
+
+def removeDir(phil_value, item_to_remove) -> None:
+  """Choose a directory and set the given phil value to the result.
+
+      Args:
+          None
+
+      Returns:
+          str: The chosen directory path.
+      """
+  if item_to_remove == "" or item_to_remove == "Please Select":
+    return
+  item_to_remove = ";" + item_to_remove
+  old = OV.GetParam(phil_value)
+  old = old.replace(item_to_remove,"")
+
+  OV.SetParam(phil_value, old)
+OV.registerFunction(removeDir, False, "NoSpherA2")

@@ -25,7 +25,7 @@ t:part_0_and_n{
   value="0 | %(part)s"
   width="100%%"
   height="GetVar('HtmlInputHeight')"
-  onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s)>>freeze false>>focus"
+  onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
   bgcolor="GetVar('linkButton.bgcolor')"
   fgcolor="GetVar('linkButton.fgcolor')"
   custom="#custom"
@@ -183,12 +183,12 @@ t:R_factor_display{
         <b><i>R</i><sub>1&nbsp;</sub></b>
       </font>
     </td>
-    
+
     <td align='right'>
       <font size='%(font_size_R1)s' color='%(font_colour_R1)s'>
         <b>%(R1)s</b>
       </font>
-        $spy.MakeHoverButton('tiny-%%','spy.make_reflection_graph(fobs_fcalc)')
+        $spy.MakeHoverButton('tiny-%%','spy.make_reflection_graph(gui_fobs_fcalc)')
     </td>
   </tr>
 
@@ -201,7 +201,7 @@ t:R_factor_display{
       <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'>
         <b>%(wR2)s</b>&nbsp;
       </font>
-      
+
       <font size='%(font_size_wR2)s' color='%(grey)s'>
         <b>%%</b>
       </font>
@@ -253,7 +253,7 @@ t:conflicts_header_row_files{
     "td1=<td align='right'>",
     )
             $-
-        </tr>      
+        </tr>
       </table>
     </td>
 }
@@ -291,9 +291,9 @@ t:conflicts_display_2{
     "name=%(conflict)s_edit",
     "value=?",
     )
-  $-    
+  $-
     </td>
-   
+
   $+
     html.Snippet(GetVar(default_link),
     "value=Use",
@@ -303,7 +303,7 @@ t:conflicts_display_2{
     "fgcolor=#ffffff",
     "onclick=spy.gui.metadata.add_resolved_conflict_item_to_phil('%(conflict)s', html.GetValue('~popup_name~.%(conflict)s_edit'))",
     )
-  $-    
+  $-
   </tr>
 </table>
 }
@@ -419,9 +419,10 @@ $run(Focus)
 
 t:gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+
   <tr>
     <td bgcolor='%(col_bg)s'>
-      <font color='%(col_fg)s'><b> %(txt)s </b></font>	
+      <font color='%(col_fg)s'><b> %(txt)s </b></font>
     </td>
   </tr>
 </table>
@@ -460,7 +461,7 @@ t:restraints_top{
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type='checkbox'
-      bgcolor="GetVar('HtmlTableBgColour')"
+      bgcolor="GetVar('HtmlTableGroupBgColour')"
       name='SHOW_RESTRAINTS'
       checked="GetVar('show_restraints_table','false')"
       oncheck="SetVar('show_restraints_table','true')>>spy.gui.restraints.make_restraints_table()>>html.update"
@@ -484,6 +485,89 @@ t:restraints_top{
 >  </td>
 }
 
+t:EDT_gui{
+    <td width='6%' align='right'>
+      <b>EDT</b>
+    </td>
+
+    <td width='4%'>
+      <input
+        type="checkbox"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
+        name="ED_EDT"
+        checked="not(strcmp(xf.rm.Exti(),'n/a'))"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+      >
+    </td>
+
+    <td width="10%" align="left">
+      <input
+        type = "input-text"
+        name="ED_EDT_VAL"
+        value="spy.ED.get_stored_param('thickness.value', sd=1000)"
+        onchange="spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))"
+      >
+    </td>
+}
+
+t:go_dynamic{
+
+<table cellpadding='0' cellspacing='0' width='100%%'>
+<tr>
+<td width='50%%'>
+%(exti)s%(esd)s
+</td>
+<td width='50%%' align='right'>
+<input
+  type="button"
+  name=GO_DYNAMIC"
+  value="DYN"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="%(href)s"
+  bgcolor="GetVar(ed_fg)"
+  fgcolor="GetVar(ed_bg)"
+  custom="#custom"
+>
+</td>
+</tr>
+</table>
+}
+
+t:chiral_first_atom_button{
+<table cellpadding='0' cellspacing='0' width='100%%'>
+<tr>
+<td width='50%%'>
+<input
+  type="button"
+  name=CHIRAL_FIRST_ATOM"
+  value="%s"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="spy.tools.label_rsa()"
+  bgcolor="GetVar(ed_fg)"
+  fgcolor="GetVar(ed_bg)"
+  custom="#custom"
+>
+</td>
+<td width='50%%' align='right'>
+<input
+  type="button"
+  name=CHIRAL_INVERT"
+  value="Invert"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="inv -f >> spy.tools.label_rsa()"
+  bgcolor="GetVar(gui.red)"
+  fgcolor="#ffffff"
+  custom="#custom"
+>
+</td>
+</tr>
+</table>
+}
+
 t:exti_gui{
     <td width='5%' align='right'>
       <b>EXTI </b>
@@ -492,7 +576,7 @@ t:exti_gui{
     <td width='4%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
@@ -500,7 +584,7 @@ t:exti_gui{
       >
     </td>
 
-    <td width='18%'>
+    <td width='22%'>
       <b>$spy.gui.tools.refine_extinction()<b>
     </td>
 }
@@ -512,8 +596,8 @@ t:swat_gui{
 
     <td width='4%'>
       <input
-        type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        type="checkbox"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
@@ -534,7 +618,7 @@ t:exti_or_swat_gui{
     <td width='5%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
@@ -549,7 +633,7 @@ t:exti_or_swat_gui{
     <td width='5%'>
       <input
         type='checkbox'
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        bgcolor="GetVar('HtmlTableGroupBgColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
@@ -558,8 +642,34 @@ t:exti_or_swat_gui{
     </td>
 }
 
+t:edt_gui{
+  <td width="4%" align="left">
+    EDT
+  </td>
+  <td width="10%" align="left">
+    $+
+     html.Snippet("gui/snippets/input-text",
+     "name=ED_ThicknessVal_B@Refine",
+     "value=spy.ED.get_stored_param('thickness.value', sd=0)",
+     "onchange=spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))",
+     "disabled=not(spy.ED.is_dynamic())")
+    $-
+  </td>
+  <td width="10%" align='left'>
+    $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=rthickness_B@Refine",
+     "bgcolor=GetVar(HtmlTableFirstcolColour)",
+     "value=Refine",
+     "checked=spy.ED.get_stored_param('thickness.grad')",
+     "onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",
+     "disabled=not(spy.ED.is_dynamic())")
+   $-
+  </td>
+}
+
 t:snum_cell_display{
-  <tr bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr bgcolor=$GetVar(HtmlTableGroupBgColour)>
     <td width='34%%'>
        <b>a</b> = %(a)s
     </td>
@@ -573,7 +683,7 @@ t:snum_cell_display{
     </td>
   </tr>
 
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
 
     <td>
        <b>b</b> = %(b)s
@@ -588,7 +698,7 @@ t:snum_cell_display{
     </td>
   </tr>
 
-  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
     <td>
        <b>c</b> = %(c)s
     </td>
@@ -599,4 +709,64 @@ t:snum_cell_display{
        <b>V</b> = %(volume)s
     </td>
   </tr>
+}
+
+t:battery_gui{
+  <table border="0" cellpadding="0" cellspacing="0" align='center' width='100%%' >
+    <tr align='center' width="100%%">
+      <td align='center'>
+        <a target="%(hint)s" href="echo '%(hint)s'"><zimg src="%(img_name)s"></a>
+      </td>
+      
+      <td align='center'>
+  <table border="0" cellpadding="1" cellspacing="1" align='center' width='100%%'>
+<tr>
+            <td width='100%%'>
+              <b>
+              <input
+                type="label"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                name="DPR"
+                value="%(dpr)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+              </b>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input
+                name="NData"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                type="label"
+                value="%(data)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input
+                name="NParameters"
+                bgcolor="$GetVar(HtmlTableGroupBgColour)"
+                type="label"
+                value="%(parameters)s"
+                valign="bottom"
+                width="100%%"
+                height="11"
+                halign="middle"
+              >
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 }

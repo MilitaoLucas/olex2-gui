@@ -1,15 +1,17 @@
 import os
 import sys
+import shutil
+from datetime import datetime
 
 import olx
 
-def setup_cctbx():
+def setup_cctbx(run_cold_start=False):
   build_path = ""
   basedir = olx.BaseDir()
   cctbx_dir = os.environ.get('OLEX2_CCTBX_DIR')
   if cctbx_dir and os.path.isdir(cctbx_dir):
-    # check if the build is given, the ../modules/cctbx_project will beset as  sources
-    if os.path.exists(os.path.join(cctbx_dir, "libtbx_env")):
+    # check if the build is given, the ../modules/cctbx_project will be set as sources
+    if os.path.exists(os.path.join(cctbx_dir, "SConstruct")):
       build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(cctbx_dir)
       import pathlib
       cctbxRoot = pathlib.Path(cctbx_dir).parent.absolute()
@@ -17,7 +19,7 @@ def setup_cctbx():
     else:
       cctbxRoot = cctbx_dir
   else:
-    cctbxRoot = "%s/cctbx" %basedir
+    cctbxRoot = os.path.join(basedir, "cctbx")
   if not build_path:
     build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(
       "%s/cctbx_build" % cctbxRoot)
@@ -54,28 +56,27 @@ def setup_cctbx():
     else:
       TAG_file_path = "%s/TAG" %build_path
       ENV_file_path = "%s/libtbx_env" %build_path
-      need_cold_start =\
-        os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime
+      need_cold_start = not os.path.exists(ENV_file_path) or\
+         (os.path.exists(TAG_file_path) and
+            os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime)
       if not need_cold_start:
         raise
-  cctbx_TAG_file_path = "%s/TAG" %cctbxSources
-  if not os.path.isdir('%s/.svn' %cctbxSources)\
-     and os.path.exists(cctbx_TAG_file_path):
-    cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
-    cctbx_compile_date = cctbx_TAG_file.readline().strip()
-    cctbx_TAG_file.close()
-    cctbx_compatible_version = "2011_10_10_0000"
-    if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
-      sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
-Please update to cctbx build '%s' or later.
-Current cctbx build: '%s'
-""" %(cctbx_compatible_version, cctbx_compile_date))
-  if need_cold_start:
+  if need_cold_start or run_cold_start:
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
     reload(libtbx.load_env)
-  for i in libtbx.env.pythonpath:
-    sys.path.append(abs(i))
+  cctbxRoot = os.path.realpath(cctbxRoot)
+  if sys.platform.startswith('win'):
+    root = str(cctbxRoot).lower()
+    for i in libtbx.env.pythonpath:
+      i = os.path.realpath(abs(i)).lower()
+      if not i.startswith(root):
+        print("skpping '%s'" %i)
+        continue
+      sys.path.append(i)
+  else:
+    for i in libtbx.env.pythonpath:
+      sys.path.append(abs(i))
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
   elif sys.platform.startswith('darwin'):
@@ -96,6 +97,14 @@ Current cctbx build: '%s'
       os.environ[lib_path] += lib_sep + abs(libtbx.env.lib_path)
   else:
     os.environ[lib_path] = abs(libtbx.env.lib_path)
+  # double check!
+  if not need_cold_start and not run_cold_start and False:
+    try:
+      from cctbx import xray
+    except Exception as err:
+      print("IMPORT FAILD" + str(err))
+      if "boost_python_meta_ext" in str(err):
+        setup_cctbx(True)
 
 def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwd()
@@ -120,10 +129,7 @@ def cleanup_files(file_ext):
   except:
     pass
 
-def Cleanup():
-  import shutil
-  cleanup_files(".tmp")
-  base_dir = olx.BaseDir()
+def _cleanup_ac5(base_dir):
   ac5_dir = os.path.join(base_dir, "util", "pyUtil", "AC5")
   if os.path.exists(ac5_dir):
     try:
@@ -141,6 +147,44 @@ def Cleanup():
           os.remove(f)
     except Exception as e:
       print(e)
+
+def _cleanup_ac6(base_dir):
+  ac6_root_dir = os.path.join(base_dir, "util", "pyUtil")
+  ac6_dir = os.path.join(ac6_root_dir, "AC6")
+  if os.path.exists(ac6_dir):
+    try:
+      shutil.rmtree(ac6_dir)
+      ac6_files = [
+        "lib/ac6util.so",
+        "_ac6util.so",
+        "_ac6util.pyd",
+        "ac6util.dll",
+      ]
+      for f in ac6_files:
+        f = os.path.join(base_dir, f)
+        if os.path.exists(f):
+          print("->%s" %f)
+          os.remove(f)
+    except Exception as e:
+      print(e)
+
+def Cleanup():
+  compilation_date = datetime.strptime(
+    olx.GetCompilationInfo("yyyy.MM.dd").split()[0], "%Y.%m.%d")
+  #print(compilation_date)
+  cleanup_files(".tmp")
+  base_dir = olx.BaseDir()
+  # clean up old AC files
+  ac6_dir = os.path.join(base_dir, "util", "pyUtil", "AC6")
+  ac7_dir = os.path.join(base_dir, "util", "pyUtil", "AC7")
+  if os.path.exists(ac7_dir):
+    ac6d_dir = os.path.join(base_dir, "util", "pyUtil", "AC6d")
+    if not os.path.exists(ac6d_dir): # abort if development environment
+      _cleanup_ac5(base_dir)
+      _cleanup_ac6(base_dir)
+  elif os.path.exists(ac6_dir):
+    _cleanup_ac5(base_dir)
+
   vi = sys.version_info
   if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
     try:

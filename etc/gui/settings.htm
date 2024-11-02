@@ -367,28 +367,4 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=OpenMP;1 -->
-  <td width='23%'>
-    <b>%OpenMP%:</b>
-  </td>
-  <td width='20%'>
-  Use OpenMP in olex2.refine
-  <td width="5%" align='right'>$+
-    html.Snippet("gui/snippets/input-checkbox", "name=use_openmp",
-     "checked=spy.GetParam('user.refinement.use_openmp')",
-     "onclick=spy.SetParam('user.refinement.use_openmp', html.GetState('~name~'))")
-   $-</td>
-  </td>
-  <td width='20%'>
-  Max. Memory (MB)
-  <td width="5%" align='right'>
-    $+
-    html.Snippet("gui/snippets/input-text", "name=openmp_mem",
-     "value=spy.GetParam('user.refinement.openmp_mem')",
-     "onchange=spy.SetParam('user.refinement.openmp_mem', html.GetValue('~name~'))")
-   $-</td>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

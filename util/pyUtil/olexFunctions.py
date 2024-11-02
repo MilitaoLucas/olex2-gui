@@ -9,8 +9,7 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
-import socket
-import pickle
+from decors import gui_only
 
 import time
 
@@ -72,6 +71,9 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      if not handler.param_exists(variable):
+        olx.structure_params[variable] = value
+        return
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
@@ -123,6 +125,8 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      if variable in olx.structure_params:
+        return olx.structure_params[variable]
 
       retVal = handler.get_validated_param(variable)
 
@@ -153,6 +157,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
+  @gui_only()
   def HtmlGetValue(self, control, default=None):
     '''
     returns the value of a html control.
@@ -241,13 +246,6 @@ class OlexFunctions(inheritFunctions):
         except Exception as ex:
           print(ex)
     return default
-  #used in RunPrg to update the HKL digest ifHKL changes after ShelXT
-  def get_AC_digests(self):
-    acd = self.get_cif_item("_diffrn_oxdiff_digest_hkl").strip("\r\n ")
-    if not acd:
-      acd = self.get_cif_item("_diffrn_oxdiff_ac3_digest_hkl").strip("\r\n ")
-    acedd = self.get_cif_item("_diffrn_oxdiff_ac6_digest_hkl_ed").strip("\r\n ")
-    return (acd, acedd)
 
   def update_crystal_size(self):
     vals = [self.get_cif_item('_exptl_crystal_size_min'),
@@ -329,7 +327,7 @@ class OlexFunctions(inheritFunctions):
 
   def have_nsff(self):
     retVal = False
-    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program') == 'olex2.refine':
+    if not OV.GetParam('user.refinement.hide_nsff') and OV.GetParam('snum.refinement.program').startswith("olex2.refine"):
       retVal = True
     return retVal
 
@@ -495,7 +493,6 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-
   def CurrentLanguageEncoding(self):
     try:
       retStr = olx.CurrentLanguageEncoding()
@@ -507,7 +504,7 @@ class OlexFunctions(inheritFunctions):
 
   def CifMerge(self, filepath, update_atoms_loop=None, report=True):
     try:
-      olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
+      olex2_refine = (OV.GetParam('snum.refinement.program', '').startswith("olex2.refine"))
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
       ires = olx.IsFileType('IRES') == 'true'
       finalise_value = None
@@ -602,9 +599,11 @@ class OlexFunctions(inheritFunctions):
   def Reset(self):
     olx.Reset()
 
+  @gui_only()
   def htmlUpdate(self):
     olex.m("html.Update")
 
+  @gui_only()
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
 
@@ -886,14 +885,18 @@ class OlexFunctions(inheritFunctions):
 
   def IsEDRefinement(self):
     return self.IsEDData() and\
-      self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+      self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic" and\
+      self.GetParam("snum.refinement.program").startswith("olex2.refine")
+
+  def IsRemoteMode(self):
+    return 'true' == olx.GetVar('olex2.remote_mode', 'false')
+
+  def IsClientMode(self):
+    return self.GetParam('user.refinement.client_mode', False)
 
   def GetACI(self):
-    import AC6 as ac6
-    try:
-      return ac6.AC_instance
-    except:
-      return ac6.AC6.AC_instance
+    import AC7 as ac
+    return ac.get_aci()
 
   def ListParts(self):
     import olexex
@@ -1248,6 +1251,13 @@ class OlexFunctions(inheritFunctions):
     if gui_encoding:
       return t.encode(gui_encoding)
     return t
+
+  def writeShelxFinFile(self):
+    shelx_dir = os.path.join(self.StrDir(), "temp")
+    if os.path.exists(shelx_dir):
+      open(os.path.join(shelx_dir,
+        self.FileName().replace(' ', '').lower()) + ".fin", 'w')\
+      .close()
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.

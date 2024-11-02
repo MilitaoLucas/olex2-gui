@@ -199,10 +199,26 @@ def LoadParams():
         pass
 OV.registerFunction(LoadParams)
 
+def set_params_from_ires():
+  params = {
+    'R1_gt': 'snum.refinement.last_R1',
+    'wR_ref': 'snum.refinement.last_wR2',
+    'Peak': 'snum.refinement.max_peak',
+    'Hole': 'snum.refinement.max_hole',
+    'Shift_max': 'snum.refinement.max_shift_over_esd',
+    'Flack': 'snum.refinement.hooft_str',
+    'GOOF': 'snum.refinement.goof',
+  }
+  for p in olx.xf.RefinementInfo().split(';'):
+    t = p.split('=')
+    if len(t) != 2 or t[0] not in params or t[1].lower() == 'n/a': continue
+    OV.SetParam(params[t[0]], t[1])
+
 def LoadStructureParams():
   import olexex
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
+  olx.structure_params = {}
   # read current setting - to use for the new structures
   solutionPrg = OV.GetParam('user.solution.default_program')
   solutionMethod = OV.GetParam('user.solution.default_method')
@@ -276,35 +292,23 @@ def LoadStructureParams():
       solutionMethod = 'Patterson Method' # work-around for bug #48
     if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
       refinementMethod = 'CGLS' # work-around for bug #26
-    params = {
-      'R1_gt': 'snum.refinement.last_R1',
-      'wR_ref': 'snum.refinement.last_wR2',
-      'Peak': 'snum.refinement.max_peak',
-      'Hole': 'snum.refinement.max_hole',
-      'Shift_max': 'snum.refinement.max_shift_over_esd',
-      'Flack': 'snum.refinement.hooft_str',
-      'GOOF': 'snum.refinement.goof',
-    }
-    for p in olx.xf.RefinementInfo().split(';'):
-      t = p.split('=')
-      if len(t) != 2 or t[0] not in params or t[1].lower() == 'n/a': continue
-      OV.SetParam(params[t[0]], t[1])
+    set_params_from_ires()
 
   olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
   olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
 
 OV.registerFunction(LoadStructureParams)
 
-def SaveStructureParams():
-  if OV.FileName() != 'none':
-    structure_phil_file = "%s/%s.phil" %(OV.StrDir(), OV.ModelSrc())
+def SaveStructureParams(no_save='false'):
+  if OV.FileName() != 'none' and no_save != 'true':
+    structure_phil_file = os.path.join(OV.StrDir(), OV.ModelSrc()) + ".phil"
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
     auto_save_view = OV.GetParam('user.auto_save_view', False)
     if auto_save_view and olx.IsFileType('oxm') != 'true':
       oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
       olex.m("save gview '%s'" %oxvf)
-OV.registerFunction(SaveStructureParams)
+OV.registerMacro(SaveStructureParams, "no_save")
 
 def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
@@ -335,14 +339,19 @@ def OnStructureLoaded(previous):
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin
     #gui.skin.change_bond_colour()
-
-  if previous != OV.FileFull() and olx.FileExt() != "cif":
+  if olx.IsFileType('cif') == 'true':
+    import History
+    History.tree = None
+  elif previous != OV.FileFull() or OV.IsClientMode():
     import History
     History.hist.loadHistory()
     OV.ResetMaskHKLWarning()
   if olx.IsFileType('ires') == 'true':
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
     call_listener('structure')
+  elif olx.IsFileType('cif'):
+    if olx.GetVar("cif_uses_masks", 'false') == 'true':
+      OV.SetParam("snum.refinement.use_solvent_mask", True)
 
 OV.registerFunction(OnStructureLoaded)
 

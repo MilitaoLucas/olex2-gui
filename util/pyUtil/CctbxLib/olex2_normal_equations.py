@@ -28,6 +28,7 @@ def normal_equation_class():
   class normal_eqns(get_base_class()):
     log = None
     std_observations = None
+    step_info = {}
 
     def __init__(self, observations, refinement, olx_atoms,
                 table_file_name=None, **kwds):
@@ -101,11 +102,19 @@ def normal_equation_class():
       OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
       self.analyse_shifts()
       print_tabular = True
+      # store step info
+      self.step_info['_refine_ls_shift/su_mean'] = self.mean_shift_esd
+      self.step_info['_refine_ls_shift/su_max'] = self.max_shift_esd
+      self.step_info['_refine_ls_R_factor_all'] = self.r1_factor()[0]
+      R1_4sig = self.r1_factor(cutoff_factor=2)[0]
+      self.step_info['_refine_ls_R_factor_gt'] = R1_4sig
+      self.step_info['_refine_ls_wR_factor_ref'] = self.wR2()
+      self.step_info['_refine_ls_goodness_of_fit_ref'] = self.goof()
 
       if print_tabular:
         header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
         params = (self.n_current_cycle,
-            self.r1_factor(cutoff_factor=2)[0] * 100,
+            R1_4sig * 100,
             self.wR2() * 100,
             self.goof(),
             self.max_shift_esd,
