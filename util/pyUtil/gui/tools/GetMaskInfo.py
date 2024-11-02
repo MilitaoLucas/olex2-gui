@@ -66,7 +66,7 @@ def get_mask_info():
 
 #  print ".. %s .." %template_path
   global current_sNum
-  current_sNum = OV.ModelSrc()
+  current_sNum = OV.ModelSrc().replace(" ", "")
 
   prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
   if prg == "Platon":

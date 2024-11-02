@@ -335,11 +335,11 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_calc_filtered = None
       if NoSpherA2:
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        f_sq_obs, f_calc = self.get_fo_sq_fc(
+        f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name),
           filtered=False)
       else:
-        f_sq_obs, f_calc = self.get_fo_sq_fc(filtered=False)
+        f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(filtered=False)
       f_sq_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered)
       f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
       f_obs_omitted = f_sq_obs.lone_set(f_obs_filtered).f_sq_as_f()
@@ -368,6 +368,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         except:
           junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
           f_calc_merged = f_calc_temp.common_set(f_obs_filtered)
+          f_calc_filtered = f_calc_merged
           print("WARNING! It was not possible to obtain all values of Fc values\n for the plot, so omitted values are skipped!")
           f_calc_omitted = None
       else:

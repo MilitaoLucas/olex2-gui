@@ -1,0 +1,30 @@
+#value=
+#hint=
+#width=100%
+#height=GetVar(HtmlComboHeight)
+#name=#value
+#onclick=#onclick
+#fit=false
+#focus=>>focus
+#flat=GetVar(linkButton.flat)
+#disabled=false
+#bgcolor=GetVar(linkButton.bgcolor)
+#fgcolor=GetVar(linkButton.fgcolor)
+#custom=$GetVar(custom_button)
+  <font size="$GetVar('HtmlFontSizeControls')"><b>
+    <input
+      type="button"
+      name="#name"
+      value="#value"
+      width="#width"
+      height="#height"
+      onclick="#onclick#focus"
+      bgcolor="#bgcolor"
+      fgcolor="#fgcolor"
+      fit="#fit"
+      flat="#flat"
+      hint="#hint"
+      disabled="#disabled"
+      custom="GetVar(custom_button)"
+    >
+  </b></font>

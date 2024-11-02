@@ -230,6 +230,10 @@ gui
       .type = colour
     table_bg_colour = #eaeaea
       .type = colour
+    table_group_bg_colour = #e6e6e6
+    .type = colour
+    table_group_header_colour = #dedede
+      .type = colour
     table_row_bg_colour = #dadada
       .type = colour
     table_firstcol_colour = #dedede

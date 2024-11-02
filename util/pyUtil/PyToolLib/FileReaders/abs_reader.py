@@ -80,7 +80,7 @@ class reader(object):
       self._cifItems.setdefault("lambda_correction", "Not present")
 
     elif abs_type == "TWINABS":
-      self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
+      self._twin_cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
       for i in range(0, len(lines)):
         line = lines[i].strip()
         try:
@@ -146,10 +146,15 @@ class reader(object):
             min = txt[0].strip()
             max = txt[2].strip()
             ratio = float(min)/float(max)
-            self._twin_cifItems.setdefault(twin_component,{})
-            self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
-            self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
-            self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
+            if not twin_component:
+              self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
+              self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
+              self._twin_cifItems.setdefault("ratiominmax", "%.4f" %ratio)
+            else:
+              self._twin_cifItems.setdefault(twin_component,{})
+              self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
+              self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
+              self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
           elif "Rint =" in line and "I > 3sigma(I)" in line:
             txt = line.split('=')[1].split()
             self._twin_cifItems.setdefault("Rint_3sig", txt[0].strip())
@@ -159,7 +164,7 @@ class reader(object):
             self._twin_cifItems.setdefault("Rint", txt[0].strip())
             self._twin_cifItems.setdefault("Rint_refnum", txt[3].strip())
           if "HKLF 5" in line:
-            break
+            twin_component = None
         except (RuntimeError, TypeError, NameError):
           print("there was an error")
           pass

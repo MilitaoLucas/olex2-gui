@@ -208,12 +208,6 @@ def make_hybrid_GUI(softwares_list_string):
                 "spy.GetParam(\'snum.NoSpherA2.h_afix\')",
                 "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'True\')",
                 "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'False\')")
-  t += checkbox("DISP",
-                "DISP",
-                "spy.GetParam(\'snum.NoSpherA2.add_disp\')",
-                "spy.SetParam(\'snum.NoSpherA2.add_disp\',\'True\')",
-                "spy.SetParam(\'snum.NoSpherA2.add_disp\',\'False\')"
-                )  
   t += end_line()
   for i in parts:
     if i == 0:
@@ -257,7 +251,7 @@ def make_hybrid_GUI(softwares_list_string):
 '''
         t += input_combo(
           "NoSpherA2_method_Part%d@refine"%i, 
-          "spy.NoSpherA2.get_functional_list(spy.GetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\'))"%i, 
+          "spy.NoSpherA2.get_functional_list(spy.GetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\'))"%i, 
           "spy.GetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\')"%i,
           "spy.SetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\',html.GetValue(\'~name~\'))"%i)
         t += '''

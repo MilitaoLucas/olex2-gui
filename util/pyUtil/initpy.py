@@ -57,8 +57,21 @@ stdout_redirection = True
 import os
 import locale
 def onexit():
-  pass
-olex.registerFunction(onexit,False)
+  sps = OV.GetVar("launched_server.ports", "")
+  host = OV.GetParam("user.Server.host")
+  share = OV.GetParam("user.Server.shared_localhost")
+  if not share and host == "localhost" and sps:
+    print("Shutting down the server(s)")
+    import socket
+    for sp in sps.split(','):
+      with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+          s.connect((host, int(sp)))
+          s.sendall(b"stop\n")
+        except:
+          pass
+
+olex.registerFunction(onexit, False)
 
 # we need to use the user's locale for proper functioning of functions working
 # with multi-byte strings
@@ -186,7 +199,7 @@ def set_olex_paths():
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   olx.InstalledPlugins = set()
-  import AC6
+  import AC7
   if not OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
     return
 
@@ -241,6 +254,8 @@ except Exception as e:
 if timer:
   tt.append("%.3f s == import olx" %(time.time() - t))
   t = time.time()
+#!! transient structure parameters, cleared on loading a structure
+olx.structure_params = {}
 
 basedir = olx.BaseDir()
 datadir = olx.DataDir()
@@ -436,3 +451,7 @@ from RunPrg import RunPrg
 #if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
 from HAR import HARp
 from NoSpherA2 import NoSpherA2
+
+if 'OLEX2_DEBUG_IN_VSC' in os.environ:
+  from olexex import debugInVSC
+  debugInVSC()

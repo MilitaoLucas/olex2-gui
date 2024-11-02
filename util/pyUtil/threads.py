@@ -3,13 +3,13 @@ import olex
 import olx
 from threading import Thread
 
-# All threads are implemented as singletons - only once instance should be
-# running at any given time. So the implementation must contain a static 'instance;
+# All threads are implemented as singletons - only one instance should be
+# running at any given time. So the implementation must contain a static 'instance'
 # variable
 
 class ThreadRegistry:
   threads = set()
-#must be called before destroying host application  
+#must be called before destroying host application
   def __init__(self):
     pass
 

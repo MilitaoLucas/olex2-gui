@@ -94,7 +94,6 @@ def defineExternalPrograms():
 
   # define solution programs
 
-
   ShelXS = Program(
     name='ShelXS',
     program_type='solution',
@@ -401,7 +400,7 @@ def get_program_dictionaries(cRPD=None, cSPD=None):
     if RPD and SPD:
       return SPD, RPD
     else:
-      SPD, RPD =  defineExternalPrograms()
+      SPD, RPD = defineExternalPrograms()
   return SPD, RPD
 
 def get_managed_reference_set():

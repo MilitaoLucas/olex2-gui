@@ -54,8 +54,17 @@ class Method_shelx(Method):
           x.write(l)
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
+    set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl']#, 'shelxt', 'xt']
+    thread_n = int(OV.GetParam("user.refinement.thread_n", 0))
     if self.command_line_options:
-      commands += self.command_line_options.split()
+      cmds = self.command_line_options.split()
+      if not set_thread_n or thread_n < 1:
+        commands += cmds
+      else:
+        commands += [x for x in cmds if not x.startswith("-t")]
+    if set_thread_n and thread_n >= 1:
+      commands.append("-t%s" %thread_n)
+
     success = olx.Exec(prgName, *commands, q=(not RunPrgObject.params.snum.shelx_output))
     if not success:
       raise RuntimeError(
@@ -131,8 +140,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
               import shutil
               shutil.copy2(OV.HKLSrc(), fn)
             OV.HKLSrc(fn)
-            
-              
+
+
         COA.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
@@ -212,6 +221,10 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     import Analysis
     self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
     OV.registerCallback("procout", self.observer.observe)
+
+  def extraHtml(self):
+    html = "<!-- #include shelxl-extra gui/tools/shelxl-extra.htm;1 -->"
+    return html
 
 class Method_shelxt(Method_shelx_solution):
   def pre_solution(self, RunPrgObject):

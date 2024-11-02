@@ -13,8 +13,8 @@ os.chdir(hart_dir)
 args = os.getenv("hart_cmd", "").split('+&-')
 print("Running: '" + ' '.join(args) + "'")
 p = Popen(args)
-err_fn = hart_file + ".out"
-out_fn = hart_file + ".out"
+err_fn = hart_file + "_tonto.out"
+out_fn = hart_file + "_tonto.out"
 tries = 0
 while not os.path.exists(out_fn):
   time.sleep(1)

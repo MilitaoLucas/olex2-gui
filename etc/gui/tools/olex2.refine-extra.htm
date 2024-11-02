@@ -1,0 +1,74 @@
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=OpenMP;1 -->
+  <td width='25%'>
+    <b>%OpenMP%:</b>
+  </td>
+  <td width='25%'>
+  Use in olex2.refine
+  </td>
+  <td width="5%" align='right'>$+
+    html.Snippet("gui/snippets/input-checkbox", "name=use_openmp",
+     "checked=spy.GetParam('user.refinement.use_openmp')",
+     "onclick=spy.SetParam('user.refinement.use_openmp', html.GetState('~name~'))")
+   $-</td>
+  <td />
+  <td width="25%">
+  Max. Memory (MB)
+  </td>
+  <td width="12%" align='right'>
+    $+
+    html.Snippet("gui/snippets/input-text", "name=openmp_mem",
+     "value=spy.GetParam('user.refinement.openmp_mem')",
+     "onchange=spy.SetParam('user.refinement.openmp_mem', html.GetValue('~name~'))")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
+<td width='25%'>
+  <b>CH<sub>2</sub></b>
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-combo"
+     name="CH2"
+     items="Idealise<-idealise;Refine<-refine;Shelx<-shelxl"
+     readonly="true"
+     value="spy.GetParam('snum.smtbx.secondary_ch2_angle')"
+     onchange="spy.SetParam('snum.smtbx.secondary_ch2_angle', html.GetValue('~name~'))" />
+</td>
+
+<td width='25%'>
+  <b>SUMP</b>
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-combo"
+     name="SUMP"
+     items="Constraint<-constraint;Restraint<-restraint"
+     readonly="true"
+     value="spy.GetParam('snum.smtbx.sump')"
+     onchange="spy.SetParam('snum.smtbx.sump', html.GetValue('~name~'))" />
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+
+<!-- #include second-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
+<td width='25%'>
+  <b>Inelastic form factor table</b>
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-combo"
+     name="FPFDP"
+     items="Henke<-henke;Sasaki<-sasaki;Brennan<-brennan"
+     readonly="true"
+     value="spy.GetParam('snum.smtbx.inelastic_form_factor_table')"
+     onchange="spy.SetParam('snum.smtbx.inelastic_form_factor_table', html.GetValue('~name~'))" />
+</td>
+
+<td width='45%'>
+  <b>Break ED refinement ASAP</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-checkbox-plain"
+     name="terminate_ASAP"
+     checked="spy.GetParam('olex2.refinement.stop_ED_ASAP')"
+     onclick="spy.SetParam('olex2.refinement.stop_ED_ASAP', html.GetState('~name~'))" />
+</td>
+
+<!-- #include second-row-table-off gui\balanced\row-table-off.htm;1; -->

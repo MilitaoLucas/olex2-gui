@@ -1,3 +1,4 @@
+import gui.tools
 import olex
 import olx
 import os
@@ -277,8 +278,7 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   else:
     current_image = p
   if not current_image:
-    from CifInfo import ExtractCifInfo
-    ExtractCifInfo(run=True)
+    gui.tools.find_movie_folder()
     current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
 
   if get_path_only:
@@ -430,17 +430,12 @@ def get_reflections_stats_dictionary():
 
 def create_report():
   try:
-    ac4i = None
-    import AC6 as ac6
-    try:
-      ac4i = ac6.AC_instance
-    except:
-      ac4i = ac6.AC6.AC_instance
-    if ac4i.HasAC():
+    aci = OV.GetACI()
+    if aci.HasAC():
       try:
-        olex.m('spy.ac6.create_report()')
+        olex.m('spy.ac.create_report()')
       except:
-        print("Tried to make AC6 report and failed. Making default report instead")
+        print("Tried to make AC report and failed. Making default report instead")
         olex.m("report")
     else:
       olex.m("report")

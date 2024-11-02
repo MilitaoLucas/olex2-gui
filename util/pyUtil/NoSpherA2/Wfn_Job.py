@@ -72,7 +72,7 @@ class wfn_Job(object):
   def write_xyz_file(self):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
-    olx.File(coordinates_fn,p=10)    
+    olx.File(coordinates_fn,p=10)
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -261,7 +261,7 @@ class wfn_Job(object):
           line = line.replace("D", "H")
         if atom[0] == "T":
           atom[0] = "H"
-          line = line.replace("T", "H")        
+          line = line.replace("T", "H")
         com.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
@@ -275,7 +275,7 @@ class wfn_Job(object):
       while True:
         line = basis.readline()
         if not line:
-          raise RecursionError("Atom not found in the basis set!")        
+          raise RecursionError("Atom not found in the basis set!")
         if line[0] == "!":
           continue
         if "keys=" in line:
@@ -379,19 +379,16 @@ class wfn_Job(object):
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
     charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')    
+    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     olx.Kill("$Q")
     if xyz:
-      olx.File(coordinates_fn1,p=10)
-    olx.File(os.path.join(self.full_dir, self.name + ".cif"))
-    xyz1 = open(coordinates_fn1,"r")
+      olx.File(coordinates_fn1, p=10)
+    xyz1 = open(coordinates_fn1, "r")
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
     radius = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS")
-    olex.m("pack %s -c"%radius)
-    if xyz:
-      olx.File(coordinates_fn2,p=10)
+    olex.m("XYZCluster_4NoSpherA2 %s"%radius)
+    shutil.move(self.name + ".xyz", os.path.join(self.full_dir, self.name) + ".xyz")
     xyz2 = open(coordinates_fn2,"r")
-    olex.m("fuse")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -412,19 +409,20 @@ class wfn_Job(object):
       control += " 3-21G "
     else:
       control += basis_name.replace("ECP-", "") + ' '
-    
+
     if qmmmtype == "Mol":
       control += "MOL-CRYSTAL-QMMM "
     else:
       control += "IONIC-CRYSTAL-QMMM "
     method = OV.GetParam('snum.NoSpherA2.method')
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    mp2_block = ""
     if method == "HF":
       control += "rhf "
       grids = ""
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
-        control += " ROKS "      
+        control += " ROKS "
       SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
       if SCNL == True:
         if method != "wB97X":
@@ -432,9 +430,13 @@ class wfn_Job(object):
         else:
           control += method + '-V SCNL '
       else:
-        control += method + ' '
+        if method == "DSD-BLYP":
+          control += method + ' D3BJ def2-TZVPP/C '
+          mp2_block += "%mp2 Density relaxed RI true end"
+        else:
+          control += method + ' '
       software = OV.GetParam("snum.NoSpherA2.source")
-      if software == "ORCA 5.0":
+      if software == "ORCA 5.0" or software == "ORCA 6.0":
         grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
@@ -443,18 +445,12 @@ class wfn_Job(object):
       conv = " LooseSCF"
     else:
       conv = convergence
-    control = control + grids + ' ' + conv + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+    control += grids + ' ' + conv + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-    if method == "BP86" or method == "PBE" or method == "PWLDA":
-      if relativistic == True:
-        control = control + " DKH2 SARC/J RI RIJCOSX"
-      else:
-        control = control + " def2/J RI RIJCOSX"
+    if relativistic == True:
+      control += " DKH2 SARC/J RIJCOSX"
     else:
-      if relativistic == True:
-        control = control + " DKH2 SARC/J RIJCOSX"
-      else:
-        control = control + " def2/J RIJCOSX"
+      control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM("+Solvation+") "
@@ -470,11 +466,13 @@ class wfn_Job(object):
           line = line.replace("D", "H")
         if atom[0] == "T":
           atom[0] = "H"
-          line = line.replace("T", "H")        
+          line = line.replace("T", "H")
         inp.write(line)
         if not atom[0] in atom_list:
           atom_list.append(atom[0])
     inp.write("   end\nend\n")
+    if mp2_block != "":
+      inp.write(mp2_block+"\n")
     el_list = atom_list
     if ECP == False:
       basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
@@ -520,7 +518,6 @@ class wfn_Job(object):
         inp.write("end\n")
       basis.close()
       inp.write("end\n")
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
     hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
     ecplayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')
@@ -566,12 +563,7 @@ class wfn_Job(object):
   ORCAFFFilename "%s"
 end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
-      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend"%(float(conv),hflayer))      
-    run = None
-    if Full_HAR == True:
-      run = OV.GetVar('Run_number')
-      if run > 1:
-        inp.write("%scf\n   Guess MORead\n   MOInp \""+self.name+"2.gbw\"\nend\n")
+      inp.write("  Conv_Charges_MaxNCycles 30\n  Conv_Charge_UseQMCoreOnly true\n  Conv_Charges_ConvThresh %f\n  HFLayers %d\nend" % (float(conv), hflayer))
     inp.close()
     if qmmmtype == "Ion":
       import subprocess
@@ -592,16 +584,16 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startinfo.wShowWindow = 7
-        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(mm_prep_args, cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE,
                              startupinfo=startinfo)
       else:
-        m = subprocess.Popen(mm_prep_args, 
-                             cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(mm_prep_args,
+                             cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
@@ -610,7 +602,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         OV.SetVar('NoSpherA2-Error', "NoORCAMMFile")
         raise NameError("No MM File for ORCA file generated!")
 
-  def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None):
+  def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     ECP = False
     if basis_name == None:
@@ -640,6 +632,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       control += basis_name.replace("ECP-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    mp2_block = ""
     if method == "HF":
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
         control += " ROHF "
@@ -654,7 +647,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       elif software == "fragHAR":
         software = "ORCA 5.0"
-      if software == "ORCA 5.0":
+      if software == "ORCA 5.0" or software == "ORCA 6.0":
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL == True:
           if method != "wB97X":
@@ -662,7 +655,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           else:
             control += method + '-V SCNL '
         else:
-          control += method + ' '
+          if method == "DSD-BLYP":
+            control += method + ' D3BJ def2-TZVPP/C '
+            mp2_block += "%mp2 Density relaxed RI true end"
+          else:
+            control += method + ' '
         grids = self.write_grids_5(method, grid)
       else:
         control += method + ' '
@@ -687,6 +684,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           control += " ZORA SARC/J RI"
         elif t == "ZORA/RI":
           control += " ZORA/RI SARC/J RI"
+        elif t == "IORA":
+          control += " IORA SARC/J RI"
         else:
           control += " IORA/RI SARC/J RI"
       else:
@@ -698,6 +697,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           control += " DKH2 SARC/J RIJCOSX"
         elif t == "ZORA":
           control += " ZORA SARC/J RIJCOSX"
+        elif t == "IORA":
+          control += " IORA SARC/J RIJCOSX"        
         elif t == "ZORA/RI":
           control += " ZORA/RI SARC/J RIJCOSX"
         elif t == "IORA/RI":
@@ -711,7 +712,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if Solvation != "Vacuum" and Solvation != None:
       control += " CPCM(" + Solvation + ") "
     GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
-    if "5.0" not in OV.GetParam("snum.NoSpherA2.source"):
+    if "5.0" not in OV.GetParam("snum.NoSpherA2.source") and "6.0" not in OV.GetParam("snum.NoSpherA2.source"):
       GBW_file = False
     if GBW_file == False:
       control += " AIM "
@@ -721,7 +722,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     if mult == 0:
       mult = 1
-    inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    inp.write(control + ' NOTRAH\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
     for line in xyz:
@@ -739,9 +740,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           atom_list.append(atom[0])
     xyz.close()
     inp.write("   end\nend\n")
+    if mp2_block != "":
+      inp.write(mp2_block+'\n')
     if ECP == False:
       basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
-      basis = open(basis_set_fn,"r")      
+      basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
       for i in range(0, len(atom_list)):
         atom_type = "newgto " + atom_list[i] + '\n'
@@ -785,6 +788,29 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
+    damping = OV.GetParam('snum.NoSpherA2.ORCA_DAMP')
+    scf_block = ""
+    if damping:
+      scf_block += "   CNVZerner true\n"
+      if strategy == "SlowConv":
+        scf_block += "   DampMax 0.9\n"
+      elif strategy == "VerySlowConv":
+        scf_block += "   DampMax 0.975\n"
+      elif strategy == "NormalConv":
+        scf_block += "   DampMax 0.8\n"
+      elif strategy == "EasyConv":
+        scf_block += "   DampMax 0.72\n"
+    if not efield == None:
+      amp = float(efield[1:])
+      direction = efield[0]
+      if direction == "x":
+        scf_block += f"    EField {amp}, 0.0, 0.0"
+      elif direction == "y":
+        scf_block += f"    EField 0.0, {amp}, 0.0"
+      elif direction == "z":
+        scf_block += f"    EField 0.0, 0.0, {amp}"
+      if direction != "0":
+        scf_block += f"   Guess MORead\n   MOInp \"zero.gbw\"\n"
     if Full_HAR == True:
       run = OV.GetVar('Run_number')
       source = OV.GetParam('snum.NoSpherA2.source')
@@ -792,19 +818,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         run = 0
       if run > 1:
         if os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw")):
-          inp.write("%scf\n   Guess MORead\n   MOInp \"" + self.name + "2.gbw\"")
+          scf_block += f"   Guess MORead\n   MOInp \"{self.name}2.gbw\""
           if convergence == "NoSpherA2SCF":
-            inp.write("\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
+            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
         elif convergence == "NoSpherA2SCF":
-          inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
       else:
         if convergence == "NoSpherA2SCF":
-          inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4")
-      if (run > 1 and os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw"))) or convergence == "NoSpherA2SCF":
-        inp.write("\nend\n")
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     else:
       if convergence == "NoSpherA2SCF":
-        inp.write("%scf\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4\nend\n")
+        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+    if scf_block != "":
+      inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()
 
   def write_psi4_input(self,xyz):
@@ -852,7 +878,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           while True:
             line = basis.readline()
             if not line:
-              raise RecursionError("Atom not found in the basis set!")          
+              raise RecursionError("Atom not found in the basis set!")
             if line[0] == "!":
               continue
             if "keys=" in line:
@@ -892,7 +918,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           inp.write("],\n")
         basis.close()
         inp.write("\n}\nmol.build()\n")
-  
+
         model_line = None
         if method == None:
           method = OV.GetParam('snum.NoSpherA2.method')
@@ -906,7 +932,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             model_line = "dft.RKS(mol)"
           else:
             model_line = "dft.UKS(mol)"
-        
+
         if relativistic == None:
           relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
         if relativistic == True:
@@ -921,9 +947,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         elif method == "BLYP":
           inp.write("mf.xc = 'b88,lyp'\n")
         elif method == "M062X":
-          inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+          inp.write("mf.xc = 'M062X'\n")
         elif method == "PBE0":
           inp.write("mf.xc = 'PBE0'\n")
+        elif method == "R2SCAN":
+          inp.write("mf.xc = 'R2SCAN'\n")
         grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
         grid = None
         if grid_accuracy == "Low":
@@ -966,11 +994,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   mf.kernel()"""
         rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
         inp.write(rest)
-        inp.close()    
+        inp.close()
 
-  def write_xtb_input(self):
-    #coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
-    self.write_xyz_file()
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
     solv_epsilon = {
@@ -1337,7 +1362,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
         while True:
           line = basis.readline()
           if not line:
-            raise RecursionError("Atom not found in the basis set!")          
+            raise RecursionError("Atom not found in the basis set!")
           if line[0] == "!":
             continue
           if "keys=" in line:
@@ -1391,7 +1416,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
           model_line = "dft.RKS(mol)"
         else:
           model_line = "dft.UKS(mol)"
-      
+
       if relativistic == None:
         relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
       if relativistic == True:
@@ -1406,9 +1431,11 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
       elif method == "BLYP":
         inp.write("mf.xc = 'b88,lyp'\n")
       elif method == "M062X":
-        inp.write("mf.xc = 'M06X2X,M06X2C'\n")
+        inp.write("mf.xc = 'M062X'\n")
       elif method == "PBE0":
         inp.write("mf.xc = 'PBE0'\n")
+      elif method == "R2SCAN":
+        inp.write("mf.xc = 'R2SCAN'\n")
       grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
       grid = None
       if grid_accuracy == "Low":
@@ -1589,7 +1616,7 @@ ener = cf.kernel()"""
       inp.close()
 
   @run_with_bitmap('Calculating WFN')
-  def run(self,part=0,software=None,basis_name=None):
+  def run(self,part=0,software=None,basis_name=None, copy = True):
     args = []
     if basis_name == None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -1609,7 +1636,7 @@ ener = cf.kernel()"""
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
       args.append(input_fn)
-    if software == "ORCA 5.0" or software == "fragHAR":
+    if software == "ORCA 5.0" or software == "fragHAR" or software == "ORCA 6.0":
       args.append(self.parent.orca_exe)
       input_fn = self.name + ".inp"
       args.append(input_fn)
@@ -1682,9 +1709,18 @@ ener = cf.kernel()"""
       if acc == "Low":
         args.append("--acc")
         args.append("30")
-      elif acc == "High" or acc == "Max":
+      elif acc == "Normal":
+        args.append("--acc")
+        args.append("1")
+      elif acc == "High":
+        args.append("--acc")
+        args.append("0.2")
+      elif acc == "Max":
         args.append("--acc")
         args.append("0.1")
+      temperature = OV.GetParam("snum.NoSpherA2.temperature")
+      args.append("--etemp")
+      args.append(str(temperature))
       args.append("--molden")
       args.append(self.name+".xyz")
       charge = OV.GetParam("snum.NoSpherA2.charge")
@@ -1693,6 +1729,23 @@ ener = cf.kernel()"""
       mult = OV.GetParam("snum.NoSpherA2.multiplicity")
       if mult != 1:
         args.append("--uhf")
+        args.append(str(int(mult)-1))
+    elif software == "pTB":
+      method = OV.GetParam('snum.NoSpherA2.method')
+      charge = OV.GetParam("snum.NoSpherA2.charge")
+      mult = OV.GetParam("snum.NoSpherA2.multiplicity")
+      base = os.path.dirname(self.parent.ptb_exe)
+      args.append(self.parent.ptb_exe)
+      args.append(self.name+".xyz")
+      args.append("-stda")
+      args.append("-par")
+      args.append(os.path.join(base, ".atompara"))
+      args.append("-bas")
+      args.append(os.path.join(base, ".basis_vDZP"))
+      args.append("-chrg")
+      args.append(str(charge))
+      if mult != 1:
+        args.append("-uhf")
         args.append(str(int(mult)-1))
 
     out_fn = None
@@ -1795,34 +1848,43 @@ ener = cf.kernel()"""
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
     shutil.copy(out_fn, wfnlog, follow_symlinks=False)
 
-    if software == "ORCA" or software == "ORCA 5.0":
+    if software == "ORCA 6.0" or software == "ORCA 5.0":
       if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
-        with open(os.path.join(self.full_dir, self.name+"_orca.log")) as file:
+        with open(wfnlog) as file:
           lines = file.readlines()
         for line in lines:
           if "Error" in line:
             print(line)
         raise NameError('Orca did not terminate normally!')
-    elif "Gaussian" in software:   
+    elif "Gaussian" in software:
       if 'Normal termination of Gaussian' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-    elif software == "ELMOdb":     
+    elif software == "ELMOdb":
       if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
-        with open(os.path.join(self.full_dir, self.name+".out")) as file:
-          lines = file.readlines()
+        lines = open(wfnlog).readlines()
         for line in lines:
           if "Error" in line:
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
+    elif software == "pTB":
+      if 'cpu  time for all' in open(wfnlog).read():
+        pass
+      else:
+        OV.SetVar('NoSpherA2-Error',"pTB")
+        lines = open(wfnlog).readlines()
+        for line in lines:
+          if "Error" in line:
+            print(line)
+        raise NameError('pTB did not terminate normally!')
     embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
     if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding == True):
       molden_args = []
@@ -1835,16 +1897,16 @@ ener = cf.kernel()"""
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startinfo.wShowWindow = 7
-        m = subprocess.Popen(molden_args, cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(molden_args, cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE,
                              startupinfo=startinfo)
       else:
-        m = subprocess.Popen(molden_args, 
-                             cwd=self.full_dir, 
-                             stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT, 
+        m = subprocess.Popen(molden_args,
+                             cwd=self.full_dir,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE)
       while m.poll() is None:
         time.sleep(1)
@@ -1854,56 +1916,60 @@ ener = cf.kernel()"""
       else:
         OV.SetVar('NoSpherA2-Error', "NoMoldenFile")
         raise NameError("No molden file generated!")
+    if copy == True:
+      if("g03" in args[0]):
+        shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
+        shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
+        if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("g09" in args[0]):
+        shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+        shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g09.log"))
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("g16" in args[0]):
+        shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
+        shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g16.log"))
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif("orca" in args[0]):
+        if software == "ORCA 5.0" or software == "ORCA 6.0":
+          if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
+            shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
+      elif("xtb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
+          shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
+          shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
+      elif("ptb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
+          shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
+          shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))
+      elif("elmodb" in args[0]):
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
+      elif(software == "Psi4"):
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
+      elif software == "pySCF":
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 
-    if("g03" in args[0]):
-      shutil.move(os.path.join(self.full_dir,"Test.FChk"),os.path.join(self.full_dir,self.name+".fchk"))
-      shutil.move(os.path.join(self.full_dir,self.name + ".log"),os.path.join(self.full_dir,self.name+"_g03.log"))
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir,self.name + ".wfn"), self.name+".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir,self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("g09" in args[0]):
-      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
-      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g09.log"))
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("g16" in args[0]):
-      shutil.move(os.path.join(self.full_dir, "Test.FChk"), os.path.join(self.full_dir, self.name + ".fchk"))
-      shutil.move(os.path.join(self.full_dir, self.name + ".log"), os.path.join(self.full_dir, self.name + "_g16.log"))
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif("orca" in args[0]):
-      if software == "ORCA 5.0":
-        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
-          shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".molden"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".molden"), self.name + ".molden")
-    elif("xtb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, "molden.input"))):
-        shutil.copy(os.path.join(self.full_dir, "molden.input"), self.name + ".molden")
-        shutil.move(os.path.join(self.full_dir, "molden.input"), os.path.join(self.full_dir, self.name + ".molden"))
-    elif("elmodb" in args[0]):
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-    elif(software == "Psi4"):
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
-    elif software == "pySCF":
-      if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
-        shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
 
-    experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
-
-    if (experimental_SF == False) and ("g" not in args[0]):
-      self.convert_to_fchk()
+      if (experimental_SF == False) and ("g" not in args[0]):
+        self.convert_to_fchk()
   @run_with_bitmap("Converting to .fchk")
   def convert_to_fchk(self):
     move_args = []

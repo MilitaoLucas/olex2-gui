@@ -22,7 +22,7 @@ if OV.HasGUI():
 
 import NoSpherA2
 import Wfn_Job
-from utilities import run_with_bitmap
+from decors import run_with_bitmap
 
 a2b = 0.529177210903
 
@@ -99,6 +99,9 @@ hermite_polynomials_of_3rd_and_4th_order = \
   [HermitePolynomial(c) for c in HermitePolynomial.THIRD_ORDER_COEFFICIENTS] +\
   [HermitePolynomial(c) for c in HermitePolynomial.FOURTH_ORDER_COEFFICIENTS]
 
+hermite_polynomials_of_3rd_order = \
+  [HermitePolynomial(c) for c in HermitePolynomial.THIRD_ORDER_COEFFICIENTS]
+
 
 def kuhs_limit(order: int, adp: np.ndarray) -> float:
   """Resolution required to model anharmonic ADP; see doi: 10.1071/PH880369"""
@@ -174,7 +177,7 @@ def calculate_cubes():
     print("A problem with pyl is encountered, aborting.")
     return
   subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
-OV.registerFunction(calculate_cubes,True,'NoSpherA2')
+OV.registerFunction(calculate_cubes,False,'NoSpherA2')
 
 def get_map_types():
   name = OV.ModelSrc()
@@ -216,7 +219,7 @@ def get_map_types():
   if list == "":
     return "None;"
   return list
-OV.registerFunction(get_map_types,True,'NoSpherA2')
+OV.registerFunction(get_map_types,False,'NoSpherA2')
 
 def change_map():
   Type = OV.GetParam('snum.NoSpherA2.map.type')
@@ -261,12 +264,12 @@ def change_map():
   else:
     print("Sorry, no map type available or selected map type not correct!")
     return
-OV.registerFunction(change_map,True,'NoSpherA2')
+OV.registerFunction(change_map,False,'NoSpherA2')
 
 def change_pointsize():
   PS = OV.GetParam('snum.NoSpherA2.gl_pointsize')
   olex.m('gl.PointSize ' + PS)
-OV.registerFunction(change_pointsize,True,'NoSpherA2')
+OV.registerFunction(change_pointsize,False,'NoSpherA2')
 
 def plot_cube(name, color_cube):
   if not os.path.isfile(name):
@@ -341,7 +344,7 @@ def plot_cube(name, color_cube):
         z_size2 = int(values[0])
         total_size = x_size2 * y_size2 * z_size2
         data2 = flex.double()
-    
+
     data2.reshape(flex.grid(x_size, y_size, z_size))
     del cube2
     del values
@@ -450,7 +453,7 @@ def plot_cube(name, color_cube):
     olex_xgrid.SetSurfaceScale(iso)
   OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
-OV.registerFunction(plot_cube,True,'NoSpherA2')
+OV.registerFunction(plot_cube,False,'NoSpherA2')
 
 def plot_cube_single(name):
   if not os.path.isfile(name):
@@ -474,7 +477,7 @@ def plot_cube_single(name):
     if (run > na + 6):
       if drun + len(values) > total_size:
         print("ERROR! Mismatched indices while reading!")
-        return      
+        return
       data.extend(flex.double(np.array(values, dtype=float).tolist()))
       drun += len(values)
       continue
@@ -512,11 +515,11 @@ def plot_cube_single(name):
     else:
       olex_xgrid.InitSurface(True, -100)
     iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
-    olex_xgrid.SetSurfaceScale(iso)  
+    olex_xgrid.SetSurfaceScale(iso)
     OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
     olex.m("html.Update()")
 
-OV.registerFunction(plot_cube_single,True,'NoSpherA2')
+OV.registerFunction(plot_cube_single,False,'NoSpherA2')
 
 def save_map_cube(map_type, resolution):
   olex.m('CalcFourier -fcf -%s -r=%s'%(map_type,resolution))
@@ -532,7 +535,7 @@ def save_map_cube(map_type, resolution):
   cm = list(uc.orthogonalization_matrix())
   for i in range(9):
     cm[i] /= a2b
-  cm = tuple(cm)  
+  cm = tuple(cm)
   for a in range(n_atoms):
     coord = olx.xf.au.GetAtomCrd(a)
     pos = olx.xf.au.Orthogonalise(coord).split(',')
@@ -581,7 +584,7 @@ def save_map_cube(map_type, resolution):
 
   print("Saved Fourier map successfully")
 
-OV.registerFunction(save_map_cube, True, 'NoSpherA2')
+OV.registerFunction(save_map_cube, False, 'NoSpherA2')
 
 def get_color(value):
   a = 127
@@ -629,7 +632,7 @@ def get_color(value):
   if value == "0.00101":
     print(rgba)
   return rgba
-OV.registerFunction(get_color,True,'NoSpherA2')
+OV.registerFunction(get_color,False,'NoSpherA2')
 
 def is_colored():
   Type = OV.GetParam('snum.NoSpherA2.map.type')
@@ -639,7 +642,7 @@ def is_colored():
     return True
   else:
     return False
-OV.registerFunction(is_colored,True,'NoSpherA2')
+OV.registerFunction(is_colored,False,'NoSpherA2')
 
 def plot_fft_map(fft_map):
   if fft_map is None:
@@ -668,7 +671,7 @@ def plot_fft_map(fft_map):
   print("Map max val %.3f min val %.3f RMS: %.3f"%(max_v,min_v,sigma))
   print("Map size: %d x %d x %d"%(fft_map.n_real()[0],fft_map.n_real()[1],fft_map.n_real()[2]))
 
-OV.registerFunction(plot_fft_map, True, 'NoSpherA2')
+OV.registerFunction(plot_fft_map, False, 'NoSpherA2')
 
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   if not OV.HasGUI():
@@ -706,7 +709,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
   cm = list(uc.orthogonalization_matrix())
   for i in range(9):
     cm[i] /= a2b
-  cm = tuple(cm)  
+  cm = tuple(cm)
   for a in range(n_atoms):
     position = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
     positions[a] = [float(position[i]) / a2b for i in range(3)]
@@ -752,12 +755,13 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
   use_tsc = OV.IsNoSpherA2()
+  one_h = None
   if use_tsc == True:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
-      return      
+      return
     one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
@@ -769,7 +773,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     if not f_mask:
       OlexCctbxMasks()
       if olx.current_mask.flood_fill.n_voids() > 0:
-        f_mask = olx.current_mask.f_mask()      
+        f_mask = olx.current_mask.f_mask()
     if f_mask:
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
@@ -782,10 +786,28 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     f_obs = f_sq_obs.f_sq_as_f()
     k = math.sqrt(OV.GetOSF())
     f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
-  f_diff = f_diff.expand_to_p1()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
-    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
+
+  if OV.IsEDRefinement():
+    I_obs, I_calc = OV.GetACI().EDI.compute_Io_Ic(merge=True)
+    f_calc = cctbx_adapter.f_calc(I_obs, None, True, False,
+                       one_h_function=one_h, twin_data=False)
+    Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+    new_data = []
+    for i in range(I_obs.size()):
+      mfc = math.sqrt(I_calc.data()[i])
+      if mfc == 0:
+        s = 1
+      else:
+        s = abs(f_calc.data()[i])/mfc
+      Io = I_obs.data()[i]
+      new_data.append(0 if Io < 0 else math.sqrt(Io)*s)
+    I_obs = I_obs.customized_copy(data=flex.double(new_data))
+    f_diff = I_obs.f_obs_minus_f_calc(1. , f_calc)
+    f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
+    f_diff = f_diff.expand_to_p1()
+  else:
+    f_diff = f_diff.expand_to_p1()
+
   print("Using %d reflections for Fourier synthesis"%f_diff.size())
   diff_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                             resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
@@ -876,16 +898,26 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
       if atom.anharmonic_adp == None:
         anharms.append(None)
       else:
+        order = atom.anharmonic_adp.get_order()
         anharmonic_values = np.array(atom.anharmonic_adp.data())
-        anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
+        if order == 3:
+          anharmonic_use = np.array([third, ] * 10, dtype=float)
+        elif order == 4:
+          anharmonic_use = np.array([third, ] * 10 + [fourth, ] * 15, dtype=float)
         anharms.append(anharmonic_use * anharmonic_values)
       sigmas.append(adp_list_to_sigma_inv(adp_star))
-      pre_temp = linalg.det(sigmas[-1])
-      if pre_temp < 0:
-        print("Skipping NPD Atom %s"%atom.label)
-        pre_temp = -math.sqrt(-pre_temp) / fixed
-      else:
-        pre_temp = math.sqrt(pre_temp) / fixed
+      #check for problems in sigmas
+      try:
+        pre_temp = linalg.det(sigmas[-1])
+        if pre_temp < 0:
+          print("Skipping NPD Atom %s"%atom.label)
+          pre_temp = -math.sqrt(-pre_temp) / fixed
+        else:
+          pre_temp = math.sqrt(pre_temp) / fixed
+      except:
+        print("Problem with atom %s"%atom.label)
+        pre_temp = 0
+        pass
       pre.append(pre_temp)
 
     gridding = cctbx_adapter.xray_structure().gridding(step=float(resolution))
@@ -948,7 +980,7 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
     for a in range(n_atoms):
       if (second is False or only_anh is True) and anharms[a] is None:
         pdf = np.zeros(1)
-      elif pre[a] < 0:  # Skip NPD atoms
+      elif pre[a] <= 0:  # Skip NPD atoms
         pdf = np.zeros(1)
       else:
         u = np.vstack([xi[masks[a]] / size[0] - posn[a][0],
@@ -960,7 +992,12 @@ def PDF_map(resolution=0.1, dist=1.0, second=True, third=True, fourth=True, only
         p0[abs(p0) < 1E-30] = 0
         fact = float(second)
         if anharms[a] is not None:
-          for i, h in enumerate(hermite_polynomials_of_3rd_and_4th_order):
+          poly = 0
+          if len(anharms[a]) == 10:
+              poly = hermite_polynomials_of_3rd_order
+          elif len(anharms[a]) == 25:
+              poly = hermite_polynomials_of_3rd_and_4th_order
+          for i, h in enumerate(poly):
             if anharms[a][i] != 0:
               fact += anharms[a][i] * h(u, sigmas[a]) / h.order_factorial
         pdf = p0 * fact
@@ -1046,7 +1083,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     xray_structure = cctbx_adapter.xray_structure()
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
-      return      
+      return
     one_h = direct.f_calc_modulus_squared(
                        xray_structure, table_file_name=table_name)
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
@@ -1058,7 +1095,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     if not f_mask:
       OlexCctbxMasks()
       if olx.current_mask.flood_fill.n_voids() > 0:
-        f_mask = olx.current_mask.f_mask()      
+        f_mask = olx.current_mask.f_mask()
     if f_mask:
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
@@ -1071,11 +1108,11 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     f_obs = f_sq_obs.f_sq_as_f()
     k = math.sqrt(OV.GetOSF())
     f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
-  
+
   f_diff = f_diff.expand_to_p1()
   wavelength = float(olx.xf.exptl.Radiation())
   if wavelength < 0.1:
-    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1  
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
     tomc_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -1112,7 +1149,7 @@ def deformation_map(resolution=0.1, return_map=False):
   f_diff = f_diff.expand_to_p1()
   wavelength = float(olx.xf.exptl.Radiation())
   if wavelength < 0.1:
-    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1  
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
   if return_map==True:
@@ -1130,7 +1167,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
     xray_structure = cctbx_adapter.xray_structure()
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
-      return      
+      return
     one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)

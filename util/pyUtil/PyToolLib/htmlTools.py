@@ -1188,7 +1188,7 @@ def CheckForImage(name):
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
 OV.registerFunction(CheckForImage)
 
-def MakeHoverButton(name, cmds, onoff="off", btn_bg='table_firstcol_colour'):
+def MakeHoverButton(name, cmds, onoff="off", btn_bg='HtmlTableGroupBgColour'):
   from PilTools import TI
   #global time_add
   #t = time.time()
@@ -1222,7 +1222,7 @@ def MakeHoverButton(name, cmds, onoff="off", btn_bg='table_firstcol_colour'):
 
 OV.registerFunction(MakeHoverButton)
 
-def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+def MakeHoverButtonOff(name, cmds, btn_bg='HtmlTableGroupBgColour'):
   if "None" in name:
     return ""
   global hover_buttons
@@ -1283,7 +1283,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   return txt
 OV.registerFunction(MakeHoverButtonOff)
 
-def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+def MakeHoverButtonOn(name,cmds,btn_bg='HtmlTableGroupBgColour'):
   if "None" in name:
     return ""
   global hover_buttons

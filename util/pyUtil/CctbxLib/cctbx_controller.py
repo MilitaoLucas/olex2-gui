@@ -110,15 +110,40 @@ class reflections(object):
     f_hklf_code = hklf_code
     if f_hklf_code != 3:
       f_hklf_code = 4
-    reflections_server = reflection_file_utils.reflection_file_server(
-      crystal_symmetry = cs,
-      reflection_files = [
-        reflection_file_reader.any_reflection_file(
-          'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
-      ]
-    )
+    if reflection_file:
+      reflections_server = reflection_file_utils.reflection_file_server(
+        crystal_symmetry = cs,
+        reflection_files = [
+          reflection_file_reader.any_reflection_file(
+            'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
+        ]
+      )
+      miller_arrays = reflections_server.get_miller_arrays(None)
+    else:
+      import olex_core
+      from cctbx.xray import observation_types as obs_t
+      refs = olex_core.GetReflections()
+      hklf_matrix = None
+      miller_set = miller.set(
+        crystal_symmetry=cs,
+        indices=flex.miller_index(refs[0])).auto_anomalous()
+      miller_arrays = []
+      base_array_info = miller.array_info(source_type="shelx_hklf")
+      miller_arrays.append(
+        miller.array(
+          miller_set=miller_set,
+          data=flex.double(refs[1]),
+          sigmas=flex.double(refs[2])))
+      miller_arrays[0].set_info(base_array_info.customized_copy(labels=["obs", "sigmas"]))
+      miller_arrays[0].set_observation_type(obs_t.amplitude() if hklf_code == 3 else obs_t.intensity())
+      if refs[3]:
+        miller_arrays.append(
+          miller.array(
+            miller_set=miller_set,
+            data=flex.int(refs[3])))
+        miller_arrays[1].set_info(base_array_info.customized_copy(labels=["batch_numbers"]))
+
     self.crystal_symmetry = cs
-    miller_arrays = reflections_server.get_miller_arrays(None)
     for array in miller_arrays:
       array.info().source = reflection_file.encode("utf-8")
 
@@ -180,18 +205,30 @@ class reflections(object):
     else:
       return merging
 
-  def filter(self, omit, shel, wavelength):
+  def filter(self, omit, shel, wavelength, doFilter=True):
+    if not doFilter:
+      self.f_sq_obs_filtered = self.f_sq_obs_merged
+      if self.hklf_code == 5:
+        self.batch_numbers = self.batch_numbers_array.data()
+      return
     self._omit = omit
     self._shel = shel
     two_theta = omit['2theta']
+    if shel and two_theta != 180:
+      import olx
+      olx.Echo("Warning - mixing SHEL and OMIT. Using low resolution limit from SHEL and high resolution from OMIT",
+               m="warning")
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     hkl = omit.get('hkl')
-    f_sq_obs_filtered = self.f_sq_obs_merged
+    f_sq_obs_filtered = self.f_sq_obs_merged.treat_negative_amplitudes_shelx(omit['s'])
     if hkl is None: hkl = ()
     if self._shel is None:
       self._shel = {'high' : self.d_min, 'low': -1}
-    elif self._shel['high'] > self._shel['low']:
-      self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
+    else:
+      if self._shel['high'] > self._shel['low']:
+        self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
+      if two_theta != 180:
+        self._shel['high'] = self.d_min
 
     if self.hklf_code >= 5 or self.merge_code == 0:
       space_group = sgtbx.space_group("P1")
@@ -290,7 +327,10 @@ class create_cctbx_xray_structure(object):
                            occupancy=occupancy,
                            scattering_type=scattering_type)
         if anharmonic_u:
-          a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
+          if 'D' in anharmonic_u:
+            a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'], anharmonic_u['D'])
+          else:
+            a.anharmonic_adp = anharmonic.gram_charlier(anharmonic_u['C'])
         behaviour_of_variable.pop(5)
       else:
         a = xray.scatterer(label=label,

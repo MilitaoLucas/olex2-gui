@@ -109,6 +109,39 @@ $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=REFINE_FIX; help_ext=FixFree;1; -->
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Fix all",
+      "onclick=spy.gui.FixFree(fix all)",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=AFIX",
+      "onclick=spy.gui.FixFree(AFIX)",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Free XYZ",
+      "onclick=spy.gui.FixFree(free xyz)",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Free ADP",
+      "onclick=spy.gui.FixFree(free adp)",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Free H XYZ",
+      "onclick=spy.gui.FixFree(free H xyz)",
+    )$-
+    $+
+    html.Snippet(GetVar(default_link),
+      "value=Free H ADP",
+      "onclick=spy.gui.FixFree(free H Uiso)",
+    )$-
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 

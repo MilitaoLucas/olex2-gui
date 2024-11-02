@@ -2,8 +2,6 @@ snum{
   NoSpherA2{
     use_aspherical = False
       .type = bool
-    add_disp = False
-      .type = bool
     dir = ""
       .type = str
     name = ""
@@ -86,9 +84,9 @@ snum{
     }
     gl_pointsize = "1"
       .type = str
-    h_afix = True
+    h_afix = False
       .type = bool
-    h_aniso = True
+    h_aniso = False
       .type = bool
     Hybrid{
       software_Part0 = 'Please Select'
@@ -139,17 +137,17 @@ snum{
         .type = str
       charge_Part5 = '0'
         .type = str
-      multiplicity_Part0 = '0'
+      multiplicity_Part0 = '1'
         .type = str
-      multiplicity_Part1 = '0'
+      multiplicity_Part1 = '1'
         .type = str
-      multiplicity_Part2 = '0'
+      multiplicity_Part2 = '1'
         .type = str
-      multiplicity_Part3 = '0'
+      multiplicity_Part3 = '1'
         .type = str
-      multiplicity_Part4 = '0'
+      multiplicity_Part4 = '1'
         .type = str
-      multiplicity_Part5 = '0'
+      multiplicity_Part5 = '1'
         .type = str
       Relativistic_Part0 = False
         .type = bool
@@ -222,6 +220,8 @@ snum{
       .type = int
     ORCA_CRYSTAL_QMMM_ECP_LAYERS = 2
       .type = int
+    ORCA_DAMP = False
+      .type = bool
     ORCA_FORCE_ROKS = False
       .type = bool
     ORCA_Relativistic = "ZORA"
@@ -266,6 +266,8 @@ snum{
       .type = bool
     run_refine = True
       .type = bool
+    selected_salted_model = ""
+      .type = str
     source = "'Please Select'"
       .type = str
     temperature = 100
@@ -320,6 +322,8 @@ snum{
 }
 
 NoSpherA2{
+  ORCA_Version = "5"
+  .type = str
 
 }
 

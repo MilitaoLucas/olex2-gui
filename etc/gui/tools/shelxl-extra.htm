@@ -1,0 +1,17 @@
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=BreakOnConvergency;1 -->
+<td width='75%'>
+  <b>Stop refinement when convergence reaches</b>
+</td>
+<td width="25%">
+  <snippet src="gui/snippets/input-text"
+    name="Convergence_Shelxl"
+    value="spy.GetParam(user.refinement.shelxl_convergence)"
+    onchange="spy.SetParam(user.refinement.shelxl_convergence, html.GetValue('~name~'))" />
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-checkbox-plain"
+     name="terminate_ASAP"
+     checked="spy.GetParam(user.refinement.shelxl_convergence_use)"
+     onclick="spy.SetParam(user.refinement.shelxl_convergence_use, html.GetState('~name~'))" />
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->

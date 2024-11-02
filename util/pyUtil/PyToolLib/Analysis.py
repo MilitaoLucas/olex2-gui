@@ -14,7 +14,7 @@ from ImageTools import ImageTools
 from PIL import ImageFilter
 from ArgumentParser import ArgumentParser
 import math
-import os
+import os, sys
 import gui
 
 try:
@@ -112,6 +112,8 @@ class Graph(ArgumentParser):
     self.graphInfo = {
       "TopRightTitle":self.TopRightTitle,
     }
+    # added this to fix functionality where it is used!!!
+    self.gui_green = guiParams.green.hexadecimal
 
   def plot_function(self, function, locals=None, width=1, n_points=50):
     if locals is None:
@@ -2781,7 +2783,7 @@ class MuPlot(Analysis):
     from brennan import brennan
     from cctbx.array_family import flex
     br = brennan()
-    steps = 100
+    steps = 250
     self.x = flex.double(steps)
     for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
       self.x[i] = v
@@ -2806,8 +2808,16 @@ class MuPlot(Analysis):
     colours_mark = []
     for n, e in enumerate(elements):
       y = flex.double(steps)
+      problem = False
       for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
-        y[i] = br.get_mu_at_angstrom(v, e) / 1000
+        try:
+          y[i] = br.get_mu_at_angstrom(v, e) / 1000
+        except:
+          print(f"Error getting Value for {e}; No Conoversion to µ possible!")
+          problem = True
+          break
+      if problem == True:
+        continue
       data = Dataset(self.x, y)
       self.data.setdefault(e, data)
       col = IT.decimalColorToRGB(int(olx.GetMaterial("{}.Sphere".format(e)).split(";")[1]))
@@ -2891,7 +2901,7 @@ class AnomDispPlot(Analysis):
     from brennan import brennan
     from cctbx.array_family import flex
     br = brennan()
-    steps = 200
+    steps = 250
     self.x = flex.double(steps)
     for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
       self.x[i] = v
@@ -2920,8 +2930,20 @@ class AnomDispPlot(Analysis):
     for n, e in enumerate(elements):
       y = flex.double(steps)
       y2 = flex.double(steps)
+      t = br.table(e)
       for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
-        y[i], y2[i] = br.at_angstrom(v, e)
+        try:
+          r = t.at_angstrom(v)
+          y[i] = r.fp()
+          y2[i] = r.fdp()
+        except:
+          print(f"Error getting Value for {e}; Switching to Sasaki; Carefull with interpreting the Plot for {e}!")
+          from cctbx.eltbx import sasaki
+          tables = sasaki
+          t = tables.table(e)
+          r = t.at_angstrom(v)
+          y[i] = r.fp()
+          y2[i] = r.fdp()
         min_y = min(min_y, y[i])
         max_y = max(max_y, y2[i])
       data = Dataset(self.x, y)
@@ -3763,12 +3785,10 @@ def makeReflectionGraphGui():
 OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
-  if not OV.HKLSrc():
-    print("To make the %s graph, the reflection file must be accessible." % name)
-    print("Are you looking at a CIF file?")
-    print("Try typing 'export' to extract the embedded files from the CIF.")
-    return
   name = name.lower().replace(" ", "_").replace("-", "_")
+  if name == "gui_fobs_fcalc":
+    name = "iobs_icalc" if OV.IsEDRefinement() else "fobs_fcalc"
+
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
@@ -3799,6 +3819,8 @@ def make_reflection_graph(name):
         func()
       except Exception as e:
         print(e)
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
@@ -3864,7 +3886,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
- 
+
     res = self.initialise_HOS(force=force)
 
     self.hos_text = ""
@@ -4028,8 +4050,6 @@ class HealthOfStructure():
         OV.SetParam('snum.refinement.Rint.target', target)
       except:
         pass
-
-
 
     except Exception as err:
       print(err)

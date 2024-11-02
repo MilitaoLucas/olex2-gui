@@ -335,7 +335,31 @@ class OlexRefinementModel(object):
     #        %(self._atoms[k]['label'], self._atoms[v]['label']))
 
     for shelxl_restraint in self.restraint_types:
-      for restraint in self.model.get(shelxl_restraint, ()):
+      restraints = self.model.get(shelxl_restraint, ())
+      restrained_set = set()
+      filtered_restraints = []
+      for restraint in restraints:
+        restraint_type = self.restraint_types.get(shelxl_restraint)
+        if shelxl_restraint in ('rigu', 'simu', 'delu'):
+          i_seqs = [i[0] for i in restraint['atoms']]
+          if not i_seqs:
+            if restrained_set:
+              i_seqs = set(range(1, len(self._atoms)))-restrained_set
+              restrained_set.update(i_seqs)
+              i_seqs = [(x, None) for x in i_seqs]
+              restraint['atoms'] = i_seqs
+            filtered_restraints.append(restraint)
+            break
+          else:
+            new_i_seqs = [x for x in i_seqs if x not in restrained_set]
+            if not new_i_seqs:
+              continue
+            restrained_set.update(new_i_seqs)
+          filtered_restraints.append(restraint)
+        else:
+          filtered_restraints.append(restraint)
+
+      for restraint in filtered_restraints:
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
 
@@ -427,38 +451,27 @@ class OlexRefinementModel(object):
             i_seqs = []
             sym_ops = []
             # looking for the pivot atom in the model
-            for residue in self.model['aunit']['residues']:
-              for atom in residue['atoms']:
-                if(atom['aunit_id']==atom_restraint[0]):
-                  # found the pivot atom
-                  i_seqs.append(atom_restraint[0])
-                  sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1])
-                    if atom_restraint[1] is not None else None) )
-                  pivot_name = atom['label']
+            atom = self._atoms[atom_restraint[0]]
+            i_seqs.append(atom_restraint[0])
+            sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1])
+              if atom_restraint[1] is not None else None) )
+            pivot_name = atom['label']
 
-                  # if symmetry related we have a tuple, not an int
-                  for neighbour in atom['neighbours']:
-                    if(type(neighbour)==type(())):
-                      neighbour_id=neighbour[0]
-                    else:
-                      neighbour_id=neighbour
+            # if symmetry related we have a tuple, not an int
+            for neighbour in atom['neighbours']:
+              if(type(neighbour)==type(())):
+                neighbour_id=neighbour[0]
+              else:
+                neighbour_id=neighbour
 
-                    # now finding the type of the neighbour
-                    getmeout=False
-                    for residuebis in self.model['aunit']['residues']:
-                      for atombis in residuebis['atoms']:
-                        if(atombis['aunit_id']==neighbour_id):
-                          if(atombis['type']!='H'): # only non hydrogen atom are considered
-                            i_seqs.append(neighbour_id)
-                            if(type(neighbour)==type(())):
-                              sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
-                            else:
-                              sym_ops.append(None)
-                            getmeout=True
-                            break
-                      if(getmeout): break
-                  # end loop over neighbours
-            # end search of pivot atom
+              # now finding the type of the neighbour
+              atombis = self._atoms[neighbour_id]
+              if(atombis['type']!='H'): # only non hydrogen atom are considered
+                i_seqs.append(neighbour_id)
+                if(type(neighbour)==type(())):
+                  sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
+                else:
+                  sym_ops.append(None)
 
             if(len(i_seqs)==4):
               yield restraint_type, dict(
@@ -493,7 +506,7 @@ class OlexRefinementModel(object):
           yield restraint_type, kwds
 
   def same_iterator(self):
-    groups = self.model['same']
+    groups = self.model.get('same', None)
     if not groups:
       return
     for group in groups:
@@ -1768,6 +1781,8 @@ def EditIns():
     from Analysis import HOS_instance
     HOS_instance.make_HOS()
   OV.UpdateHtml()
+  olx.Focus()
+
 OV.registerFunction(EditIns)
 
 def FixMACQuotes(text):
