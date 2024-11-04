@@ -161,15 +161,17 @@ def get_phil_file_path(which):
   else:
     return None
 
-def LoadParams():
+def LoadParams(scopes=None):
+  if not scopes:
+    scopes = ['olex2', 'user', 'custom', 'snum']
+  elif str == type(scopes):
+    scopes = scopes.split(",")
   # snum params
-
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
     parse=phil_interface.parse)
 
-  scopes = ['olex2', 'user', 'custom', 'snum']
   for scope in scopes:
     phil_p = get_phil_file_path(scope)
     if phil_p and os.path.exists(phil_p):
