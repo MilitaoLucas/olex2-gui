@@ -41,6 +41,10 @@ class Method_client_refinement(Method_refinement):
     port = OV.GetParam("user.Server.port")
     debug = OV.GetParam("user.Server.debug")
     share = OV.GetParam("user.Server.shared_localhost")
+    # flush settings
+    from variableFunctions import SaveOlex2Params, SaveUserParams
+    SaveOlex2Params()
+    SaveUserParams()
     try:
         reserve_ = ("reserve:%s\n" %self.job_id).encode()
         data = self.send_cmd(host, port, reserve_, handle=False).decode("utf-8").rstrip('\n')
@@ -68,6 +72,7 @@ class Method_client_refinement(Method_refinement):
         raise Exception("No running server found!")
       print("Launching Olex2 server...")
       cd = os.curdir
+
       os.chdir(olx.BaseDir())
       my_env = os.environ.copy()
       if "OLEX2_ATTACHED_WITH_PYDEBUGGER" in my_env and debug != "Wing":
@@ -75,6 +80,8 @@ class Method_client_refinement(Method_refinement):
       headless_name = "olex2c"
       if sys.platform[:3] == 'win':
         headless_name += ".dll"
+      elif sys.platform == 'darwin':
+        headless_name += "_exe"
       subprocess.Popen(
         [os.path.join(olx.BaseDir(), headless_name), "server", str(port), self.job_id],
         env=my_env)
@@ -132,6 +139,7 @@ class Method_client_refinement(Method_refinement):
             "spy.DebugInVSC" if debug=="VSC" else "",
             "SetVar server.job_id " + self.job_id,
             "SetVar olex2.remote_mode true",
+            "spy.Loadparams 'user,olex2'",
             "spy.SetParam user.refinement.client_mode False",
             "SetOlex2RefinementListener(True)",
             "reap '%s.ins' -no_save=true" %inp_fn,

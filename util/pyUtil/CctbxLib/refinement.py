@@ -106,6 +106,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         config = str(env.build_config)
         max_ob_th = int(config.split("MAX_THREADS=")[1].split()[0])
         env.threads = min(max_ob_th, max_threads)
+        if OV.IsDebugging():
+          print("Set OpenBLAS threads to: %s" %env.threads)
     except:
       pass
     print("Using %s threads. Using OpenMP: %s." %(
