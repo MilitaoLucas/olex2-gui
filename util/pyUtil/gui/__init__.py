@@ -555,7 +555,6 @@ olex.registerFunction(get_refinement_lists, False, "gui")
 olex.registerFunction(set_refinement_list, False, "gui")
 
 def get_thread_n_selection():
-  cpu_n = os.cpu_count()
   rv_l = []
   cpu_n = os.cpu_count()
   while cpu_n > 1:
@@ -567,3 +566,35 @@ def get_thread_n_selection():
   return ";".join(rv_l)
 
 olex.registerFunction(get_thread_n_selection, False, "gui")
+
+def get_openblas_thread_n_selection():
+  try:
+    max_ob_th = int(olx.app.OptValue("openblas.thread_n_max", 24))
+    rv_l = [max_ob_th]
+    for fract in (3./4, 2./3, 1./2, 1./3, 1./4, 1./max_ob_th):
+      v  = int(max_ob_th * fract)
+      if v in rv_l: break
+      rv_l.append(v)
+    rv_l = ["Def<--1;"] + [str(item) for item in rv_l]
+    return ";".join(rv_l)
+  except:
+    return "1"
+
+olex.registerFunction(get_openblas_thread_n_selection, False, "gui")
+
+def set_openblas_thread_n(val):
+  if not val:
+    return
+  olx.app.SetOption('openblas.thread_n', val)
+  olx.app.SaveOptions()
+  try:
+    import fast_linalg
+    val = int(val)
+    if val < 1:
+      val = int(int(olx.app.OptValue("openblas.thread_n_max", 24)) * 2 /3)
+    if fast_linalg.env.initialised:
+      fast_linalg.env.threads = int(val)
+  except:
+    olx.Echo("Failed to set OpenBlas thread number", m="error")
+
+olex.registerFunction(set_openblas_thread_n, False, "gui")
