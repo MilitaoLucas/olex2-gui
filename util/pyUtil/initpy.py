@@ -1,8 +1,6 @@
 # initpy.py
-import sys
+import os, sys, time
 import olex
-import os
-import time
 timer = True
 if timer:
   t = time.time()
@@ -54,8 +52,6 @@ sys.path.append(datadir)
 sys.path.append("%s/site-packages" %datadir)
 stdout_redirection = True
 
-import os
-import locale
 def onexit():
   sps = OV.GetVar("launched_server.ports", "")
   host = OV.GetParam("user.Server.host")
@@ -87,8 +83,7 @@ if timer:
   tt.append("Initial imports took %.3f s" %(time.time() - t))
   t = time.time()
 
-
-def get_wing():
+def attach_debugger():
   debug = 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
   if debug == True:
     print("Trying to connect to WING.")
@@ -97,6 +92,8 @@ def get_wing():
     except Exception as err:
       print("Wing has failed: %s" %err)
       pass
+  elif 'OLEX2_DEBUG_IN_VSC' in os.environ:
+    indep.debugInVSC()
 
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
@@ -251,6 +248,10 @@ except Exception as e:
   import olx
   os.chdir(x)
 
+# sets max number of threads...
+import indep
+indep.setup_openblas()
+
 if timer:
   tt.append("%.3f s == import olx" %(time.time() - t))
   t = time.time()
@@ -274,6 +275,8 @@ olx.Clear()
 import urllib.request, urllib.error, urllib.parse
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
+
+attach_debugger()
 
 t = time.time()
 try:
@@ -358,7 +361,6 @@ if timer:
   t = time.time()
   tt.append("IMPORTING PLUGINS...")
 
-get_wing()
 set_plugins_paths()
 
 
@@ -451,7 +453,3 @@ from RunPrg import RunPrg
 #if OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
 from HAR import HARp
 from NoSpherA2 import NoSpherA2
-
-if 'OLEX2_DEBUG_IN_VSC' in os.environ:
-  from olexex import debugInVSC
-  debugInVSC()
