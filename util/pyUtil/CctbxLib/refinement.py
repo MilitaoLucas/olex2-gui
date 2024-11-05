@@ -94,24 +94,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """
     timer = OV.IsDebugging()
     import time
+    open_blas_tn = 1
     try:
       if timer:
         t1 = time.time()
       from fast_linalg import env
+      if env.initialised:
+        open_blas_tn = env.threads
       max_threads = int(OV.GetParam("user.refinement.thread_n", 0))
       if max_threads <= 0:
         max_threads = max(1, int(os.cpu_count() *3/4))
       if max_threads is not None:
         ext.build_normal_equations.available_threads = max_threads
-        config = str(env.build_config)
-        max_ob_th = int(config.split("MAX_THREADS=")[1].split()[0])
-        env.threads = min(max_ob_th, max_threads)
-        if OV.IsDebugging():
-          print("Set OpenBLAS threads to: %s" %env.threads)
     except:
       pass
-    print("Using %s threads. Using OpenMP: %s." %(
+    print("Using %s refinement and %s OpenBlas threads. Using OpenMP: %s." %(
       ext.build_normal_equations.available_threads,
+      open_blas_tn,
       OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
@@ -262,7 +261,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=self.weighting,
       log=self.log,
-      may_parallelise=env.threads > 1,
+      may_parallelise=ext.build_normal_equations.available_threads > 1,
       use_openmp=use_openmp,
       max_memory=max_mem,
       std_observations=self.std_obserations

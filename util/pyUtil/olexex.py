@@ -19,7 +19,6 @@ import HttpTools
 global _is_online
 _is_online = False
 
-sys.path.append(r".\src")
 import History
 
 import ExternalPrgParameters
