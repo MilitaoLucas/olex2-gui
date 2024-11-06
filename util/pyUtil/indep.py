@@ -25,5 +25,5 @@ def setup_openblas():
     tn_max = int(olx.app.OptValue("openblas.thread_n_max", 24))
     tn = int(olx.app.OptValue("openblas.thread_n", -1))
     if tn < 1:
-      tn = int(tn_max * 2 /3)
+      tn = int(min(os.cpu_count(), tn_max) * 2 /3)
     os.environ[vn] = str(tn)
