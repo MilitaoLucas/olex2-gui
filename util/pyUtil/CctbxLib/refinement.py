@@ -1066,19 +1066,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
     anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
     list_code = abs(list_code)
+    # list 4 data should match the refinement - not detwinned set!!
     if list_code == 4:
-      weights = None
-      need_Fc = False
+      weights = self.normal_eqns.weights
       rescale = self.exti is not None or self.swat is not None
-      if rescale or (add_weights and self.reflections._merge == 0):
-        need_Fc = True
-      fo_sq, fc_ = self.get_fcf_data(anomalous_flag=False, use_fc_sq=not need_Fc)
-
-      if need_Fc or rescale:
-        weights = self.compute_weights(fo_sq, fc_)
-        fc_sq = fc_.as_intensity_array()
-      else:
-        fc_sq = fc_
+      fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+        data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+        sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
+        anomalous_flag=anomalous_flag)
+      fc_sq = self.normal_eqns.fc_sq
 
       if self.exti is not None:
         fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
