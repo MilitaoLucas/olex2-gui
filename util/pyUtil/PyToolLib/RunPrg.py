@@ -17,7 +17,6 @@ from olexex import OlexRefinementModel
 from olexFunctions import OV, SilentException
 
 debug = OV.IsDebugging()
-timer = debug
 
 green = OV.GetParam('gui.green')
 red = OV.GetParam('gui.red')
@@ -28,7 +27,6 @@ table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
-import TimeWatch
 import time
 
 import shutil
@@ -65,6 +63,9 @@ class RunPrg(ArgumentParser):
   running = None
 
   def __init__(self):
+    if olx.stopwatch is None:
+       import olxtm
+       olx.stopwatch = olxtm.olxtm(OV.IsDebugging())
     super(RunPrg, self).__init__()
     self.demote = False
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
@@ -110,9 +111,8 @@ class RunPrg(ArgumentParser):
       self.method.unregisterCallback()
 
   def run(self):
-    import time
     import gui
-
+    stopwatch = olx.stopwatch
     gui.set_notification(OV.GetVar('gui_notification'))
     OV.SetVar('gui_notification', "Refining...;%s;%s" %(green,white))
     if RunPrg.running:
@@ -126,22 +126,13 @@ class RunPrg(ArgumentParser):
         os.remove(res_file)
     caught_exception = None
     try:
-      token = TimeWatch.start("Running %s" %self.program.name)
-      if timer:
-        t1 = time.time()
+      evt = stopwatch.start_scope("Running %s" %self.program.name)
       res = self.method.run(self)
-      if timer:
-        print("REFINEMENT: %.3f" %(time.time() - t1))
+      evt.stop()
       if not res:
         return False
       if not self.method.failure:
-        if timer:
-          t1 = time.time()
-        self.runAfterProcess()
-        if timer:
-          print("runAfterProcess: %.3f" %(time.time() - t1))
-      if timer:
-        t1 = time.time()
+        stopwatch.run(self.runAfterProcess)
       return True
     except Exception as e:
       e_str = str(e)
@@ -153,16 +144,14 @@ class RunPrg(ArgumentParser):
         print("Error!: ")
       caught_exception = e
     finally:
-      self.endRun()
-      TimeWatch.finish(token)
+      stopwatch.run(self.endRun)
       sys.stdout.refresh = False
       sys.stdout.graph = False
-      if timer:
-        print("endRun: %.3f" %(time.time() - t1))
       RunPrg.running = False
-
       if self.please_run_auto_vss:
         self.run_auto_vss()
+      stopwatch.log()
+      olx.stopwatch = None
       if caught_exception:
         raise SilentException(caught_exception)
 
@@ -211,8 +200,6 @@ class RunPrg(ArgumentParser):
       if self.broadcast_mode:
         self.doBroadcast()
       for ext in extensions:
-        if timer:
-          t = time.time()
         if "xt" in self.program.name.lower() and ext != 'lst' and ext != 'lxt':
           copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
         else:
@@ -221,9 +208,6 @@ class RunPrg(ArgumentParser):
         if os.path.isfile(copy_from) and\
           copy_from.lower() != copy_to.lower(): # could this ever be true??
           shutil.copyfile(copy_from, copy_to)
-        if timer:
-          pass
-          #print "---- copying %s: %.3f" %(copy_from, time.time() -t)
     finally:
       OV.deleteFileLock(file_lock)
 
@@ -304,35 +288,19 @@ class RunPrg(ArgumentParser):
       self.method.runAfterProcess(self)
       return
     if self.program.name != "olex2.refine":
-      if timer:
-        t = time.time()
       if self.program.name != "olex2.refine":
-        self.doFileResInsMagic()
-      if timer:
-        print("--- doFilseResInsMagic: %.3f" %(time.time() - t))
-
-      if timer:
-        t = time.time()
+        olx.stopwatch.run(self.doFileResInsMagic)
       if self.HasGUI:
         olx.Freeze(True)
-      OV.reloadStructureAtreap(self.filePath, self.curr_file, update_gui=False)
+      olx.stopwatch.run(OV.reloadStructureAtreap, self.filePath, self.curr_file, update_gui=False)
       if self.HasGUI:
         olx.Freeze(False)
-      if timer:
-        print("--- reloadStructureAtreap: %.3f" %(time.time() - t))
-
       # XT changes the HKL file - so it *will* match the file name
       if 'xt' not in self.program.name.lower():
         OV.HKLSrc(self.hkl_src)
-
     else:
       if self.broadcast_mode:
-        if timer:
-          t = time.time()
-        self.doBroadcast()
-        if timer:
-          print("--- doBroacast: %.3f" %(time.time() - t))
-
+        olx.stopwatch.run(self.doBroadcast)
       lstFile = '%s/%s.lst' %(self.filePath, self.original_filename)
       if os.path.exists(lstFile):
         os.remove(lstFile)
@@ -665,20 +633,12 @@ class RunRefinementPrg(RunPrg):
     if self.terminate:
       return
     RunPrg.runAfterProcess(self)
-    if timer:
-      t = time.time()
+    evt = olx.stopwatch.start_scope("Post-refinement")
     self.method.post_refinement(self)
-    if timer:
-      print("-- self.method.post_refinement(self): %.3f" %(time.time()-t))
-
     delete_stale_fcf()
-
-    if timer:
-      t = time.time()
     self.post_prg_html()
     self.doHistoryCreation()
-    if timer:
-      print("-- self.method.post_refinement(self): %3f" %(time.time()-t))
+    evt.stop()
 
     if self.R1 == 'n/a':
       return
@@ -689,10 +649,11 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement') and\
       not OV.IsEDRefinement():
       try:
-        self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
+        olx.stopwatch.run(self.isInversionNeeded, force=self.params.snum.refinement.auto.invert)
       except Exception as e:
         print("Could not determine whether structure inversion is needed: %s" % e)
     if self.program.name == "olex2.refine" and not self.IsClientMode():
+      evt = olx.stopwatch.start_scope("Checks")
       from refinement_checks import RefinementChecks
       rc = RefinementChecks(self.cctbx)
       if OV.GetParam('snum.refinement.check_PDF'):
@@ -703,22 +664,21 @@ class RunRefinementPrg(RunPrg):
       rc.check_disp()
       rc.check_occu()
       rc.check_mu() #This is the L-M mu!
+      evt.stop()
       self.refinement_has_failed = rc.refinement_has_failed
 
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
 
-    if timer:
-      t = time.time()
     if self.params.snum.refinement.cifmerge_after_refinement:
+      evt = olx.stopwatch.start_scope("CifMerge")
       try:
         MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
       except Exception as e:
         if debug:
           sys.stdout.formatExceptionInfo()
         print("Failed in CifMerge: '%s'" %str(e))
-    if timer:
-      print("-- MergeCif: %.3f" %(time.time()-t))
+      evt.stop()
 
 
   class  convergency_listener(object):
