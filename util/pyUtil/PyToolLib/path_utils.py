@@ -71,7 +71,7 @@ def setup_cctbx(run_cold_start=False):
     for i in libtbx.env.pythonpath:
       i = os.path.realpath(abs(i)).lower()
       if not i.startswith(root):
-        print("skpping '%s'" %i)
+        #print("skpping '%s'" %i)
         continue
       sys.path.append(i)
   else:
