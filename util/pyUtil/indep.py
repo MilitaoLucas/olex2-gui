@@ -1,12 +1,13 @@
 import sys, os
 
 def debugInVSC():
-  import olx
+  import olex
   cd = os.getcwd()
   try:
-    os.chdir(os.path.join(olx.BaseDir(), "util", "pyUtil"))
+    basedir = olex.f("BaseDir()")
+    os.chdir(os.path.join(basedir, "util", "pyUtil"))
     import ptvsd
-    sys.argv = [olx.app.GetArg(0)]
+    sys.argv = [olex.f("app.GetArg(0)")]
     # 5678 is the default attach port in the VS Code debug configurations
     print("Waiting for debugger attach")
     ptvsd.enable_attach(address=('localhost', 5678), redirect_output=False)
@@ -27,3 +28,9 @@ def setup_openblas():
     if tn < 1:
       tn = int(min(os.cpu_count(), tn_max) * 2 /3)
     os.environ[vn] = str(tn)
+
+def run_timed(func, *args, **kwds):
+  import olx
+  if olx.stopwatch:
+    return olx.stopwatch.run(func, *args, **kwds)
+  return func(*args, **kwds)

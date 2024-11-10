@@ -197,8 +197,8 @@ class OlexCctbxAdapter(object):
                 fp_fdp = br.at_angstrom(self.wavelength, scattering_type)
                 sc.fp, sc.fdp = fp_fdp
                 custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
-          except:
-            print("Error: Brennan & Cowan failed, switching to Sasaki!")
+          except Exception as exc:
+            print("Error: Brennan & Cowan failed (%s), switching to Sasaki!" %str(exc))
             inelastic_table = "sasaki"
             try:
               self._xray_structure.set_inelastic_form_factors(
