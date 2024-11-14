@@ -99,7 +99,8 @@ class olxtm(object):
     try:
       exec(txt)
     finally:
-      evt.stop()
+      if evt is not None: #not active
+        evt.stop()
 
   def log(self):
     if self.silent:
