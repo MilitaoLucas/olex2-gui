@@ -432,6 +432,11 @@ def make_fcf(self: RunRefinementPrg):
 
 def get_refinement_details(cif_block, acta_stuff):
   tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  if not os.path.exists(tsc_file_name):
+    t = os.path.join(OV.FilePath(), OV.GetParam('snum.NoSpherA2.file'))
+    if os.path.exists(t):
+      tsc_file_name = t
+      
   if os.path.exists(tsc_file_name):
     #tsc = open(tsc_file_name, 'r').readlines()
     #cif_block_found = False
@@ -473,22 +478,26 @@ The following options were used:
       accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
       if partitioning == True:
         details_text += "   PARTITIONING:   NoSpherA2\n"
-        details_text += "   INT ACCURACY:   %s\n"%accuracy
+        details_text += f"   INT ACCURACY:   {accuracy}\n"
       else:
         details_text += "   PARTITIONING:   Tonto\n"
-      details_text += "   METHOD:         %s\n"%method
-      details_text += "   BASIS SET:      %s\n"%basis_set
-      details_text += "   CHARGE:         %s\n"%charge
-      details_text += "   MULTIPLICITY:   %s\n"%mult
+      details_text += f"   METHOD:         {method}\n"
+      details_text += f"   BASIS SET:      {basis_set}\n"
+      details_text += f"   CHARGE:         {charge}\n"
+      details_text += f"   MULTIPLICITY:   {mult}\n"
       solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
       if solv != "Vacuum":
-        details_text += "   SOLVATION:      %s\n"%solv
+        details_text += f"   SOLVATION:      {solv}\n"
       if relativistic == True:
-        details_text = details_text + "   RELATIVISTIC:   DKH2\n"
+        if "ORCA" in software:
+          details_text += f"   RELATIVISTIC:   {ORCA_Relativistic}\n"
+        else:
+          details_text += "   RELATIVISTIC:   DKH2\n"
       if software == "Tonto":
         radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
-        details_text = details_text + "   CLUSTER RADIUS: %s\n"%radius
-    tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+        details_text += f"   CLUSTER RADIUS: {radius}\n"
+        complete = OV.GetParam('snum.NoSpherA2.cluster_grow')
+        details_text += f"   CLUSTER GROW:   {complete}\n"
     if os.path.exists(tsc_file_name):
       f_time = os.path.getctime(tsc_file_name)
     import datetime
