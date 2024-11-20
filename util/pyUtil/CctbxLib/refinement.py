@@ -1052,26 +1052,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # list 4 data should match the refinement - not detwinned set!!
     if list_code == 4:
       weights = self.normal_eqns.weights
-      rescale = self.exti is not None or self.swat is not None
       fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
         data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
         sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
         anomalous_flag=anomalous_flag)
       fc_sq = self.normal_eqns.fc_sq
 
-      if self.exti is not None:
-        fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
-        rescale = True
-      elif self.swat is not None:
-        fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
-        rescale = True
+      #rescale = self.exti is not None or self.swat is not None
+      # if self.exti is not None:
+      #   fo_sq, fc_sq = self.transfer_exti(self.exti, self.wavelength, fo_sq, fc_sq)
+      #   pass
+      # elif self.swat is not None:
+      #   fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
 
-      if rescale:
-        scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
-             / flex.sum(weights * flex.pow2(fc_sq.data()))
-        fo_sq = fo_sq.customized_copy(
-          data=fo_sq.data()*scale,
-          sigmas=fo_sq.sigmas()*scale)
+      # if rescale:
+      #   scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+      #        / flex.sum(weights * flex.pow2(fc_sq.data()))
+      #   fo_sq = fo_sq.customized_copy(
+      #     data=fo_sq.data()*scale,
+      #     sigmas=fo_sq.sigmas()*scale)
 
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc', format="coreCIF")
