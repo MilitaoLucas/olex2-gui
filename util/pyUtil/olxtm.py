@@ -1,5 +1,11 @@
 import time, inspect
 
+class dummy_evt(object):
+  def __init__(self):
+    pass
+  def stop(self):
+    pass
+
 class evt_reg(object):
   def __init__(self, manager, evt, parent=None, scope=False):
     self.manager = manager
@@ -74,7 +80,8 @@ class olxtm(object):
     self.active = active
 
   def start(self, evt=None, scope=False):
-    if not self.active: return
+    if not self.active:
+      return dummy_evt()
     if not evt:
       try:
         evt = inspect.stack()[0][3]
