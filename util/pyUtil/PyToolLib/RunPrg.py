@@ -151,7 +151,6 @@ class RunPrg(ArgumentParser):
       if self.please_run_auto_vss:
         self.run_auto_vss()
       stopwatch.log()
-      olx.stopwatch = None
       if caught_exception:
         raise SilentException(caught_exception)
 
