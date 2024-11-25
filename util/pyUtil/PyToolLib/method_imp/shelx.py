@@ -140,9 +140,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
               import shutil
               shutil.copy2(OV.HKLSrc(), fn)
             OV.HKLSrc(fn)
-
-
-        COA.OlexCctbxMasks()
+        olx.stopwatch.run(COA.OlexCctbxMasks)
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
         else:

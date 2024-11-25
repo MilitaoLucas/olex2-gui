@@ -73,11 +73,18 @@ class evt_reg(object):
 
 class olxtm(object):
   def __init__(self, active=True):
+    self.active = active
+    self.reset()
+
+  def reset(self):
     self.st = time.time()
     self.root = evt_reg(self, "= T I M I N G S ============================================", scope=True)
     self.current = self.root
-    self.silent = not active
-    self.active = active
+
+  def get_current(self):
+    if self.root is None:
+      self.reset()
+    return self.current
 
   def start(self, evt=None, scope=False):
     if not self.active:
@@ -87,29 +94,32 @@ class olxtm(object):
         evt = inspect.stack()[0][3]
       except:
         evt = "ROOT"
-    return self.current.start(evt, scope=scope)
+    return self.get_current().start(evt, scope=scope)
 
   def start_scope(self, evt=None):
     return self.start(evt, scope=True)
 
   def stop(self):
-    if not self.active: return
+    if not self.active or self.current is None:
+      return
     self.current.stop()
 
   def run(self, func, *args, **kwds):
     if not self.active:
       return func(*args, **kwds)
-    return self.current.run(func, *args, **kwds)
+    return self.get_current().run(func, *args, **kwds)
 
   def exec(self, txt):
     evt = self.start(txt)
     try:
       exec(txt)
     finally:
-      if evt is not None: #not active
-        evt.stop()
+      evt.stop()
 
-  def log(self):
-    if self.silent:
+  def log(self, reset=True):
+    if not self.active:
       return
     self.root.log()
+    if reset:
+      # need use None, otherwise timing will not start at first 'start' but here
+      self.current = self.root = None

@@ -63,9 +63,6 @@ class RunPrg(ArgumentParser):
   running = None
 
   def __init__(self):
-    if olx.stopwatch is None:
-       import olxtm
-       olx.stopwatch = olxtm.olxtm(OV.IsDebugging())
     super(RunPrg, self).__init__()
     self.demote = False
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
@@ -534,11 +531,11 @@ class RunRefinementPrg(RunPrg):
           from aaff import make_fcf
           result = make_fcf(self)
         else:
-          result = self.method.deal_with_AAFF(self)
+          result = olx.stopwatch.run(self.method.deal_with_AAFF, self)
       else:
-        self.startRun()
+        olx.stopwatch.run(self.startRun)
         try:
-          self.setupRefine()
+          olx.stopwatch.run(self.setupRefine)
           OV.File(os.path.join(OV.FilePath(), self.original_filename) + ".ins")
           self.setupFiles()
         except Exception as err:
@@ -550,7 +547,7 @@ class RunRefinementPrg(RunPrg):
           return
         if self.params.snum.refinement.graphical_output and self.HasGUI:
           self.method.observe(self)
-        RunPrg.run(self)
+        olx.stopwatch.run(RunPrg.run, self)
     except Exception as err:
       sys.stderr.formatExceptionInfo()
       self.terminate = True

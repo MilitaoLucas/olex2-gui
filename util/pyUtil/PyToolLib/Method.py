@@ -10,9 +10,6 @@ class Method(object):
   running = False
 
   def __init__(self, phil_object):
-    if olx.stopwatch is None:
-       import olxtm
-       olx.stopwatch = olxtm.olxtm(OV.IsDebugging())
     self.phil_index = phil_interface.phil_handler(phil_object)
     params = self.phil_index.params
     self.name = params.name
@@ -46,7 +43,7 @@ class Method(object):
         self.command_line_options = OV.GetParam(name, None)
       else:
         self.command_line_options = None
-      olx.stopwatch.run(self.do_run, RunPrgObject)
+      self.do_run(RunPrgObject)
       return True
     finally:
       Method.running = False
