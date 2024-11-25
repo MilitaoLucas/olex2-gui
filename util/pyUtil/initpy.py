@@ -107,7 +107,9 @@ def do_init():
 
   if OV.IsDebugging():
     olx.stopwatch.log()
-  olx.stopwatch = None
+  else:
+    olx.stopwatch.actvive = False
+    olx.stopwatch.reset()
 
   print("Welcome to Olex2")
   print("\nWe are grateful to our users for testing and supporting Olex2")
