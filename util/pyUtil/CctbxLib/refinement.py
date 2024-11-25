@@ -48,9 +48,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
   solvers_default_method = 'Gauss-Newton'
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
-    if olx.stopwatch is None:
-      import olxtm
-      olx.stopwatch = olxtm.olxtm(OV.IsDebugging())
     olx.stopwatch.run(OlexCctbxAdapter.__init__ , self)
     # try to initialise openblas
     OV.init_fast_linalg()
@@ -138,7 +135,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
         else:
-          OlexCctbxMasks()
+          stopwatch.run(OlexCctbxMasks)
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
           if olx.current_mask.flood_fill.n_voids() > 0:
             self.f_mask = olx.current_mask.f_mask()
