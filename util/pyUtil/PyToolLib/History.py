@@ -576,7 +576,7 @@ class HistoryTree(Node):
           for hkl_d in r_index[k]:
             self.hklFilesMap[hkl_d] = md
       self.hklFiles = new_index
-    elif self.version < 2.5: # create cif_od register
+    if self.version < 2.5: # create cif_od register
       self.dynFiles, self.cif_odFiles = {}, {}
       self.dynFilesMap, self.cif_odFilesMap = {}, {}
       self._build_cif_od_register_etc(self)

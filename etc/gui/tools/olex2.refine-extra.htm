@@ -1,3 +1,19 @@
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenBlas';help_ext=OpenBlas;1 -->
+
+  <td width='25%'>
+   <b>OpenBlas threads #</b>
+  </td>
+  <td width="10%" align='right'>
+    <snippet src="gui/snippets/input-combo"
+     name="ob_cpus@refine"
+     items="spy.gui.get_openblas_thread_n_selection()"
+     value="app.OptValue('openblas.thread_n', -1)"
+     onchange="spy.gui.set_openblas_thread_n(html.GetValue('~name~'))" />
+  </td>
+  <td/>
+  <td>Olex2 restart is required. Only has effect when OPENBLAS_NUM_THREADS is not set</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OpenMP';help_ext=OpenMP;1 -->
   <td width='25%'>
     <b>%OpenMP%:</b>

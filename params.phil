@@ -2401,7 +2401,7 @@ user
       .type=str
     port=8899
       .type=int
-    debug=*None Wing VCS Eclipse
+    debug=*None Wing VSC Eclipse
       .type=choice
     shared_localhost=False
       .type=bool

@@ -555,7 +555,6 @@ olex.registerFunction(get_refinement_lists, False, "gui")
 olex.registerFunction(set_refinement_list, False, "gui")
 
 def get_thread_n_selection():
-  cpu_n = os.cpu_count()
   rv_l = []
   cpu_n = os.cpu_count()
   while cpu_n > 1:
@@ -567,3 +566,55 @@ def get_thread_n_selection():
   return ";".join(rv_l)
 
 olex.registerFunction(get_thread_n_selection, False, "gui")
+
+def get_openblas_thread_n_selection():
+  try:
+    max_ob_th = int(olx.app.OptValue("openblas.thread_n_max", 24))
+    th_n = int(olx.app.OptValue('openblas.thread_n', "-1"))
+    max_ob_th_actual = 0
+    try:
+      from fast_linalg import env
+      if env.initialised:
+        config = str(env.build_config)
+        max_ob_th_actual = int(config.split("MAX_THREADS=")[1].split()[0])
+    except:
+      pass
+    # update max if needed
+    if max_ob_th_actual > 0 and max_ob_th_actual != max_ob_th:
+      olx.app.SetOption("openblas.thread_n_max", max_ob_th_actual)
+      olx.app.SaveOptions()
+      max_ob_th = max_ob_th_actual
+    max_ob_th = min(os.cpu_count(), max_ob_th)
+
+    rv_l_ = [max_ob_th]
+    for fract in (3./4, 2./3, 1./2, 1./3, 1./4, 1./max_ob_th):
+      v  = int(max_ob_th * fract)
+      if v in rv_l_: break
+      rv_l_.append(v)
+    rv_l = ["Def<--1"]
+    if th_n > 1 and th_n not in rv_l_:
+      rv_l.append(str(th_n))
+    rv_l += [str(item) for item in rv_l_]
+    return ";".join(rv_l)
+  except Exception as e:
+    print(e)
+    return "1"
+
+olex.registerFunction(get_openblas_thread_n_selection, False, "gui")
+
+def set_openblas_thread_n(val):
+  if not val:
+    return
+  olx.app.SetOption('openblas.thread_n', val)
+  olx.app.SaveOptions()
+  try:
+    import fast_linalg
+    val = int(val)
+    if val < 1:
+      val = int(min(os.cpu_count(), int(olx.app.OptValue("openblas.thread_n_max", 24))) * 2 /3)
+    if fast_linalg.env.initialised:
+      fast_linalg.env.threads = int(val)
+  except:
+    olx.Echo("Failed to set OpenBlas thread number", m="error")
+
+olex.registerFunction(set_openblas_thread_n, False, "gui")
