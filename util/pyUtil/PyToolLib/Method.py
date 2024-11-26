@@ -33,9 +33,6 @@ class Method(object):
     assert 0, 'do_run must be defined!'
 
   def run(self, RunPrgObject):
-    debug = OV.IsDebugging()
-    timer = debug
-    import time
     if Method.running:
       return False
     Method.running = True
@@ -46,11 +43,7 @@ class Method(object):
         self.command_line_options = OV.GetParam(name, None)
       else:
         self.command_line_options = None
-      if timer:
-        t1 = time.time()
       self.do_run(RunPrgObject)
-      if timer:
-        print("-- self.do_run(RunPrgObject): %.3f" %(time.time() - t1))
       return True
     finally:
       Method.running = False
