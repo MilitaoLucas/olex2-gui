@@ -55,7 +55,7 @@ class Method_shelx(Method):
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl']#, 'shelxt', 'xt']
-    thread_n = int(OV.GetParam("user.refinement.thread_n", 0))
+    thread_n = OV.GetThreadN()
     if self.command_line_options:
       cmds = self.command_line_options.split()
       if not set_thread_n or thread_n < 1:

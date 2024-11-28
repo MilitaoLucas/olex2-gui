@@ -554,18 +554,44 @@ def set_refinement_list(val):
 olex.registerFunction(get_refinement_lists, False, "gui")
 olex.registerFunction(set_refinement_list, False, "gui")
 
+def set_client_mode(v):
+  v = str(v).lower()
+  if v == "true":
+    v = True
+  elif v == "false":
+    v = False
+  else:
+    return
+  OV.SetParam("user.refinement.client_mode", v)
+  if olx.html.IsItem("cpus_label@refine"):
+    olx.html.SetLabel("cpus_label@refine", get_thread_n_label())
+    olx.html.SetItems("cpus@refine", get_thread_n_selection())
+    cpu_n = "-1%" if v else "-1"
+    olx.html.SetValue("cpus@refine", cpu_n)
+    OV.SetParam("user.refinement.thread_n", cpu_n)
+
+olex.registerFunction(set_client_mode, False, "gui")
+
 def get_thread_n_selection():
-  rv_l = []
-  cpu_n = os.cpu_count()
-  while cpu_n > 1:
-    if cpu_n % 2 == 0:
-      rv_l.append(int(cpu_n))
-    cpu_n -= 2
-  rv_l.sort()
-  rv_l = ["Def<--1;1"] + [str(item) for item in rv_l]
-  return ";".join(rv_l)
+  if OV.IsClientMode():
+    return "Def<--1%;100<-100%;75<-75%;50<-50%;25<-25%;1"
+  else:
+    rv_l = []
+    cpu_n = os.cpu_count()
+    while cpu_n > 1:
+      if cpu_n % 2 == 0:
+        rv_l.append(int(cpu_n))
+      cpu_n -= 2
+    rv_l.sort()
+    rv_l = ["Def<--1;1"] + [str(item) for item in rv_l]
+    return ";".join(rv_l)
 
 olex.registerFunction(get_thread_n_selection, False, "gui")
+
+def get_thread_n_label():
+  return "Threads " + ('%' if OV.IsClientMode() else '#')
+
+olex.registerFunction(get_thread_n_label, False, "gui")
 
 def get_openblas_thread_n_selection():
   try:
