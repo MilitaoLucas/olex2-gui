@@ -49,7 +49,6 @@ class Method_cctbx_refinement(Method_refinement):
 
 
   def do_run(self, RunPrgObject):
-    import time
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
 
