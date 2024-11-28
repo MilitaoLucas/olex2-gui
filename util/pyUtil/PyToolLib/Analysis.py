@@ -1308,14 +1308,19 @@ class Graph(ArgumentParser):
             target = '(%.3f,%.3f)' %(xr, yr*scale)
         else:
           xl = self.metadata.get("x_label", "F calc")
-          graph_type = "Iobs_Icalc" if xl == "I calc" else "fobs_fcalc"
+          if xl == "I calc":
+            graph_type = "Iobs_Icalc"
+            options = ""
+          else:
+            graph_type = "fobs_fcalc"
+            options = "-a"
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           href = "OMIT %s>>spy.make_reflection_graph(%s)" %(idx, graph_type)
           target = 'OMIT %s' %(idx)
           if 'hkl' in self.model['omit']:
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
-              href = "OMIT -u %s>>spy.make_reflection_graph(%s)" %(idx, graph_type)
+              href = "OMIT -u %s %s>>spy.make_reflection_graph(%s)" %(options, idx, graph_type)
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
