@@ -894,6 +894,22 @@ class OlexFunctions(inheritFunctions):
   def IsClientMode(self):
     return self.GetParam('user.refinement.client_mode', False)
 
+  def GetThreadN(self):
+    v = self.GetParam('user.refinement.thread_n')
+    if v.endswith("%"):
+      v = int(v[:-1])
+      if v < 0:
+        v = 75
+      v = os.cpu_count() * v / 100
+      if v < 1:
+        v = 1
+      return int(v)
+    else:
+      v = int(v)
+      if v <= 0:
+        v = max(1, int(os.cpu_count() *3/4))
+      return v
+
   def GetACI(self):
     import AC7 as ac
     return ac.get_aci()

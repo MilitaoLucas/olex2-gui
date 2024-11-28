@@ -58,7 +58,7 @@ $spy.gui.cif.check_for_embedded_hkl()
         "height=0",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "td1=<td align='left' width="22%">",
-        "onclick=spy.SetParam(user.refinement.client_mode, html.GetState(~name~))")
+        "onclick=spy.gui.set_client_mode(html.GetState(~name~))")
       $-
     </td>
 
@@ -183,7 +183,11 @@ $-
   </td>
   <td />
   <td width='12%'>
-   <b>Threads #</b>
+   <b><snippet 
+        src="gui/snippets/input-label"
+        name="cpus_label@refine" height="math.eval(GetVar('HtmlInputHeight')-6)"
+        bgcolor="GetVar(HtmlTableFirstcolColour)"
+        value="spy.gui.get_thread_n_label()"/></b>
   </td>
   <td width="10%" align='right'>
     <snippet src="gui/snippets/input-combo"
