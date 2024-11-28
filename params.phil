@@ -1092,7 +1092,7 @@ user
     openmp_mem = 2000
       .type = int
     thread_n = -1
-      .type = int
+      .type = str
     diagnostics = False
       .type = bool
     client_mode = False
