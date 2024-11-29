@@ -99,11 +99,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       if env.initialised:
         open_blas_tn = env.threads
-      max_threads = int(OV.GetParam("user.refinement.thread_n", 0))
-      if max_threads <= 0:
-        max_threads = max(1, int(os.cpu_count() *3/4))
-      if max_threads is not None:
-        ext.build_normal_equations.available_threads = max_threads
+      ext.build_normal_equations.available_threads = OV.GetThreadN()
     except:
       pass
     print("Using %s refinement and %s OpenBlas threads. Using OpenMP: %s." %(

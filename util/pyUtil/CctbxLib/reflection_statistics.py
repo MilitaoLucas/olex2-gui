@@ -379,7 +379,6 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
     k = math.sqrt(OV.GetOSF())
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      from smtbx import masks
       f_mask = self.load_mask()
       if f_mask:
         if not self.reflections.f_sq_obs.space_group().is_centric() and\
@@ -462,7 +461,10 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       I_calc_omitted = None
       do_scale = True
       if OV.IsEDRefinement():
-        I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic()
+        I_obs_all, I_calc_all = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=False)
+        I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=True)
+        I_obs_omitted = I_obs_all.lone_set(I_obs_filtered)
+        I_calc_omitted = I_calc_all.lone_set(I_calc_filtered)
         do_scale = False
       else:
         if NoSpherA2:
@@ -485,7 +487,6 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
         I_obs_filtered = self.reflections.f_sq_obs_filtered
 
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      from smtbx import masks
       f_mask = self.load_mask()
       if f_mask:
         if not self.reflections.f_sq_obs.space_group().is_centric() and\
@@ -517,7 +518,10 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     if I_calc_omitted:
       plot.I_calc_omitted = flex.abs(I_calc_omitted.data())
       if I_obs_omitted:
-        plot.I_obs_omitted = flex.abs(I_obs_omitted.data()) / k
+        if do_scale:
+          plot.I_obs_omitted = flex.abs(I_obs_omitted.data()) / k
+        else:
+          plot.I_obs_omitted = I_obs_omitted.data()
         plot.indices_omitted = I_obs_omitted.indices()
       else:
         plot.I_obs_omitted = None

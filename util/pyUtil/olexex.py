@@ -222,8 +222,8 @@ class OlexRefinementModel(object):
     'exyz':'site',
   }
 
-  def __init__(self):
-    olex_refinement_model = OV.GetRefinementModel(True)
+  def __init__(self, need_connectivity=True):
+    olex_refinement_model = OV.GetRefinementModel(need_connectivity)
     self._atoms = []
     self._fixed_variables = {}
     self.atom_ids = []

@@ -1,9 +1,10 @@
 #value=
 #width=100%
 #height=GetVar('HtmlInputHeight')
-#disabled=false
-#bgcolor=GetVar('HtmlTableFirstcolColour')
+#bgcolor=GetVar(HtmlTableBgColour)
 #fgcolor=GetVar(HtmlFontColour)
+#valign="bottom"
+#halign="right"
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -11,12 +12,11 @@
   height="#height"
   bgcolor="#bgcolor"
   fgcolor="#fgcolor"
-  valign="bottom"
-  halign="right"
+  valign="#valign"
+  halign="#halign"
   label="#label"
   name="#name"
   width="#width"
   value="#value"
-  disabled="#disabled"
 >
 </font>
