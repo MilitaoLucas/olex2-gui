@@ -662,7 +662,7 @@ t:edt_gui{
      "bgcolor=GetVar(HtmlTableFirstcolColour)",
      "value=Refine",
      "checked=spy.ED.get_stored_param('thickness.grad')",
-     "onclick=spy.ED.set_stored_param('thickness.grad', html.GetState('~name~'))",
+     "onclick=spy.ED.set_thickness_grad(html.GetState('~name~'))",
      "disabled=not(spy.ED.is_dynamic())")
    $-
   </td>
@@ -717,7 +717,7 @@ t:battery_gui{
       <td align='center'>
         <a target="%(hint)s" href="echo '%(hint)s'"><zimg src="%(img_name)s"></a>
       </td>
-      
+
       <td align='center'>
   <table border="0" cellpadding="1" cellspacing="1" align='center' width='100%%'>
 <tr>
