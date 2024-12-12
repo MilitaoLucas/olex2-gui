@@ -47,6 +47,26 @@ class GuiFunctions(object):
       print("An error occurred.", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  def SetControlBG(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetBG(ctrl_name, val)
+
+  def SetControlFG(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetFG(ctrl_name, val)
+
+  def SetControlValue(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetValue(ctrl_name, val)
+
+  def SetControlState(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetState(ctrl_name, val)
+
+  def SetControlEnabled(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetEnabled(ctrl_name, val)
+
   def TranslatePhrase(self, text):
     try:
       retStr = olx.TranslatePhrase(text)
@@ -57,7 +77,7 @@ class GuiFunctions(object):
     return retStr
 
   def UpdateHtml(self, html_name='', force=False):
-      olx.html.Update(html_name)
+    olx.html.Update(html_name)
 
   def HtmlLoad(self, path):
     olx.html.Load(path)
