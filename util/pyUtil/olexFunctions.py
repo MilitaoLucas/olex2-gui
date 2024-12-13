@@ -634,11 +634,28 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return newPath
 
-  def File(self, filename=None):
+  def File(self, filename=None, append_refinement_info=False):
     if filename is not None:
-      olx.File("\"%s\"" %filename)
+      olx.File(filename)
     else:
       olx.File()
+    if append_refinement_info and olx.FileExt().lower() == 'res':
+      saved_file = olx.FileFull()
+      ri = olx.xf.RefinementInfo()
+      if not ri: return
+      ri = ri.split(";")
+      out_strings = [
+        "  REM The information below was added by Olex2.",
+        "REM +++ Tabular Listing of Refinement Information +++"
+      ]
+      for i in ri:
+        if not i: continue
+        out_strings.append("REM %s = %s" %tuple(i.split('=')))
+      with open(saved_file, "a") as out:
+        out.write('\n')
+        out.write('\n  '.join(out_strings))
+        out.write('\n')
+
 
   def timer_wrap(self,f,*args, **kwds):
     import time
@@ -1287,21 +1304,21 @@ def GetFormattedCompilationInfo():
   if "svn" in raw:
     d['Date'] = l[0].rstrip(",")
     d['SVN'] = l[1].split(".")[1].rstrip(",")
-    d['MSC'] = l[2].split(":")[1].rstrip(",")
+    d['MSC'] = l[2].rstrip(",")
     d['OS'] = l[4].rstrip(",")
     d['Python'] = l[6].rstrip(",")
     d['wxWidgets'] = l[8].rstrip(",")
     d['Vendor'] = " ".join(l[10:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>SVN</b>: %(SVN)s,  <b>MSC</b>: %(MSC)s</td></tr>" %d
+    t += "<tr><td><b>Date</b>: %(Date)s, <b>SVN</b>: %(SVN)s,  <b>Compiler</b>: %(MSC)s</td></tr>" %d
     t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   else:
     d['Date'] = " ".join(l[0:3]).rstrip(",")
-    d['MSC'] = l[4].split(":")[1].rstrip(",")
+    d['MSC'] = l[4].rstrip(",")
     d['OS'] = l[6].rstrip(",")
     d['Python'] = l[8].rstrip(",")
     d['wxWidgets'] = l[10].rstrip(",")
     d['Vendor'] = " ".join(l[12:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>MSC</b>: %(MSC)s</td></tr>" %d
+    t += "<tr><td><b>Date</b>: %(Date)s, <b>Compiler</b>: %(MSC)s</td></tr>" %d
     t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   t += "</table></font>"
   return t
