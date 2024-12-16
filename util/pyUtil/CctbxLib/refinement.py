@@ -1019,7 +1019,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_sq = fo_sq.sort(by_value="packed_indices")
       return fo_sq, fc
 
-  def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
+  def create_fcf_content(self, list_code, add_weights=False, fixed_format=True):
     anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
     list_code = abs(list_code)
     # list 4 data should match the refinement - not detwinned set!!
@@ -1115,13 +1115,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     return cif, fmt_str
 
-  def output_fcf(self, fcf_content=None):
+  def output_fcf(self, fcf_l4_content=None):
     try: list_code = int(olx.Ins('list'))
     except: return
     if OV.IsEDRefinement() and list_code != 4:
       olx.Echo("Only LIST 4 is currently supported for the ED refinement", m="warning")
       return
-    if fcf_content is None:
+    if fcf_l4_content and list_code == 4:
+      fcf_content = fcf_l4_content
+    else:
       import io
       f = io.StringIO()
       fcf_cif, fmt_str = self.create_fcf_content(list_code, fixed_format=False)
