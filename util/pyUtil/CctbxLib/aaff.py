@@ -490,6 +490,7 @@ The following options were used:
         details_text += f"   SOLVATION:      {solv}\n"
       if relativistic == True:
         if "ORCA" in software:
+          ORCA_Relativistic = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
           details_text += f"   RELATIVISTIC:   {ORCA_Relativistic}\n"
         else:
           details_text += "   RELATIVISTIC:   DKH2\n"
