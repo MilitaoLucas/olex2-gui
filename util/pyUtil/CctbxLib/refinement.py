@@ -215,7 +215,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.std_obserations = None
     if ed_refinement:
       try:
-        OV.GetACI().EDI.setup_refinement(self, reparametrisation_only=reparametrisation_only)
+        OV.GetACI().EDI.setup_refinement(self,
+         reparametrisation_only=reparametrisation_only,
+         table_file_name=table_file_name)
       except Exception as e:
         olx.Echo(str(e), m="error")
         self.failure = True
@@ -268,10 +270,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     method = OV.GetParam('snum.refinement.method')
     iterations_class = FullMatrixRefine.solvers.get(method)
     if iterations_class == None:
-      method = solvers_default_method
+      method = FullMatrixRefine.solvers_default_method
       iterations_class = FullMatrixRefine.solvers.get(method)
       print("WARNING: unsupported method: '%s' is replaced by '%s'"\
-        %(method, solvers_default_method))
+        %(method, FullMatrixRefine.solvers_default_method))
     assert iterations_class is not None
     if fcf_only:
       self.max_cycles = 0
@@ -280,33 +282,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not fcf_only:
         self.print_table_header()
         self.print_table_header(self.log)
-
-      class refinementWrapper(iterations_class):
-        def __init__(self, parent, normal_eqs, *args, **kwds):
-          self.parent = parent
-          parent.cycles = self
-          normal_eqs.iterations_object = self
-          super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
-        def do(self):
-          if self.n_max_iterations == 0:
-            self.n_iterations = 0
-            self.non_linear_ls.build_up()
-            self.non_linear_ls.solve()
-            self.analyse_shifts()
-          else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
-            iterations_class.do(self)
-        @property
-        def interrupted(self):
-          return self.parent.interrupted
-        @interrupted.setter
-        def interrupted(self, val):
-          self.parent.interrupted = val
-
       try:
         convergence_as_shift_over_esd = OV.GetVar('convergence_as_shift_over_esd', 1e-3)
         if(method=='Levenberg-Marquardt'):
 #          normal_eqns_solving.levenberg_marquardt_iterations.tau=1e-4
-          refinementWrapper(self, self.normal_eqns,
+          self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
               track_all=True,
               gradient_threshold=None,
@@ -315,7 +295,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               convergence_as_shift_over_esd=convergence_as_shift_over_esd,
               )
         else:
-          refinementWrapper(self, self.normal_eqns,
+          self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
               track_all=True,
               damping_value=damping[0],
@@ -1039,7 +1019,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_sq = fo_sq.sort(by_value="packed_indices")
       return fo_sq, fc
 
-  def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
+  def create_fcf_content(self, list_code, add_weights=False, fixed_format=True):
     anomalous_flag = list_code < 0 and not self.xray_structure().space_group().is_centric()
     list_code = abs(list_code)
     # list 4 data should match the refinement - not detwinned set!!
@@ -1135,13 +1115,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     return cif, fmt_str
 
-  def output_fcf(self, fcf_content=None):
+  def output_fcf(self, fcf_l4_content=None):
     try: list_code = int(olx.Ins('list'))
     except: return
     if OV.IsEDRefinement() and list_code != 4:
       olx.Echo("Only LIST 4 is currently supported for the ED refinement", m="warning")
       return
-    if fcf_content is None:
+    if fcf_l4_content and list_code == 4:
+      fcf_content = fcf_l4_content
+    else:
       import io
       f = io.StringIO()
       fcf_cif, fmt_str = self.create_fcf_content(list_code, fixed_format=False)
@@ -1722,6 +1704,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.fo_sq_fc_merge = merge
     return self.fo_sq_fc
 
+  def get_refinement_wrapper(self, iterations_class):
+    class refinementWrapper(iterations_class):
+      def __init__(self, parent, normal_eqs, *args, **kwds):
+        self.parent = parent
+        parent.cycles = self
+        normal_eqs.iterations_object = self
+        super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
+      def do(self):
+        if self.n_max_iterations == 0:
+          self.n_iterations = 0
+          self.non_linear_ls.build_up()
+          self.non_linear_ls.solve()
+          self.analyse_shifts()
+        else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
+          iterations_class.do(self)
+      @property
+      def interrupted(self):
+        return self.parent.interrupted
+      @interrupted.setter
+      def interrupted(self, val):
+        self.parent.interrupted = val
+
+    return refinementWrapper
 
 def write_diagnostics_stuff(f_calc):
   txt = ""
