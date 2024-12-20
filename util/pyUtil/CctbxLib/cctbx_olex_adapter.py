@@ -1162,10 +1162,12 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
         ts = [x.strip() for x in l.split(',')]
         if ts[1] not in elements:
           continue
-        rv.append("%s,%s,%s,%s" %(ts[1],
+        val = "%s,%s,%s" %(ts[1],
           ts[3].split(':')[1].strip(),
-          ts[4].split(':')[1].strip(),
-          ts[5].split(':')[1].strip()))
+          ts[4].split(':')[1].strip())
+        if len(ts) > 5: #mu
+          val += ",%s" %(ts[5].split(':')[1].strip())
+        rv.append(val)
     return ';'.join(rv)
 
   if "sasaki" == table_name:
