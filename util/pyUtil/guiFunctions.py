@@ -59,6 +59,12 @@ class GuiFunctions(object):
     if self.IsControl(ctrl_name):
       olx.html.SetValue(ctrl_name, val)
 
+  def SetControlItems(self, ctrl_name, items, val=None):
+    if self.IsControl(ctrl_name):
+      olx.html.SetItems(ctrl_name, items)
+      if val is not None:
+        olx.html.SetValue(ctrl_name, val)
+
   def SetControlState(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetState(ctrl_name, val)
