@@ -634,11 +634,15 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return newPath
 
-  def File(self, filename=None, append_refinement_info=False):
+  def File(self, filename=None, append_refinement_info=False, save_params=False):
     if filename is not None:
       olx.File(filename)
     else:
       olx.File()
+    if save_params:
+      from variableFunctions import SaveStructureParams
+      SaveStructureParams()
+
     if append_refinement_info and olx.FileExt().lower() == 'res':
       saved_file = olx.FileFull()
       ri = olx.xf.RefinementInfo()
