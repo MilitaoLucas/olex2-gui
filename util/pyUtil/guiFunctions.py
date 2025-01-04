@@ -41,6 +41,8 @@ class GuiFunctions(object):
     return retStr
 
   def IsControl(self, ctrl_name):
+    if not self.HasGUI():
+      return False
     try:
       return bool(olex_gui.IsControl(ctrl_name))
     except Exception as ex:

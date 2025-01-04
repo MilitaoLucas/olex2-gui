@@ -3885,7 +3885,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False, supplied_cif=False):
     #self.set_ED_phil()
-    force = bool(force)
+    force = OV.get_bool_from_any(force)
     self.width = int(IT.skin_width*0.98)
     self.supplied_cif = supplied_cif
     self.scopes = OV.GetParam('user.diagnostics.scopes')

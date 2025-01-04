@@ -215,6 +215,13 @@ def set_params_from_ires():
     t = p.split('=')
     if len(t) != 2 or t[0] not in params or t[1].lower() == 'n/a': continue
     OV.SetParam(params[t[0]], t[1])
+  # update max peaks/cycles in snum
+  peaks = olx.Ins("plan")
+  if peaks != "n/a":
+    OV.SetParam('snum.refinement.max_peaks', peaks.split()[0])
+  cycles = olx.Ins(olx.LSM())
+  if cycles != "n/a":
+    OV.SetParam('snum.refinement.max_cycles', cycles.split()[0])
 
 def LoadStructureParams():
   import olexex
@@ -426,3 +433,4 @@ def ShowParams(expert_level=0, attributes_level=0):
   olx.phil_handler.working_phil.show(
     expert_level=int(expert_level), attributes_level=int(attributes_level))
 OV.registerFunction(ShowParams)
+
