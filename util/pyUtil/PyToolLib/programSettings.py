@@ -226,16 +226,19 @@ def onMaxCyclesChange(max_cycles):
   except KeyError:
     return
 
+  is_set = False
   for instruction in method.instructions():
     for item in ['ls', 'cgls']:
       if instruction.name == item:
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
-        if OV.HasGUI() and OV.IsControl(ctrl_name):
+        if OV.IsControl(ctrl_name):
           olx.html.SetValue(ctrl_name, max_cycles)
         addInstruction(prg.name, method.name, item)
-        return
-OV.registerFunction(OV.SetMaxCycles)
+        is_set = True
+        break
+  if not is_set: # olex2.refine? still update the INS
+    olx.LS(max_cycles)
 
 def onMaxPeaksChange(max_peaks):
   if not OV.IsFileType('ires'):
@@ -246,16 +249,19 @@ def onMaxPeaksChange(max_peaks):
   except KeyError:
     return
 
+  is_set = False
   for instruction in method.instructions():
     if instruction.name == 'plan':
       OV.SetVar('settings_plan_npeaks', max_peaks)
       ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
-      if OV.HasGUI() and OV.IsControl(ctrl_name):
+      if OV.IsControl(ctrl_name):
         olx.html.SetValue(ctrl_name, max_peaks)
         OV.SetParam('snum.refinement.max_peaks', max_peaks)
       addInstruction(prg.name, method.name, 'plan')
-      return
-OV.registerFunction(OV.SetMaxPeaks)
+      is_set = True
+      break
+  if not is_set: # olex2.refine? still update the INS
+    olx.AddIns("plan", max_peaks)
 
 def stopProcess():
   """Writes the file name.fin to the directory in which shelx is run.
