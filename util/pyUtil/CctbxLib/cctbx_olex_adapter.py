@@ -1534,7 +1534,7 @@ def calculate_brennan_mu():
   for ec in formula.split(','):
     e,c = ec.split(':')
     mu += tables.get_mu_at_angstrom(wavelength, e) * float(c)
-  return mu * float(olx.xf.au.GetZprime())/ (10*float(olx.xf.au.GetVolume()))
+  return mu * float(olx.xf.au.GetZprime())/ (10*float(olx.xf.au.GetAUVolume()))
 OV.registerFunction(calculate_brennan_mu, False, "disp")
 
 
