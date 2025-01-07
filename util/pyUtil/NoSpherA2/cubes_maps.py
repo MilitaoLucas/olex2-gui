@@ -710,7 +710,11 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
   for i in range(9):
     cm[i] /= a2b
   cm = tuple(cm)
-  for a in range(n_atoms):
+  nat = n_atoms
+  for a in range(nat):
+    if olx.xf.au.GetAtomType(a) == 'Q':
+      n_atoms -= 1
+      continue
     position = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
     positions[a] = [float(position[i]) / a2b for i in range(3)]
 
