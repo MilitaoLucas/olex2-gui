@@ -923,7 +923,14 @@ def write_precise_model_file():
   for i,d in enumerate(distances):
     bond = sl[d.i_seq]+"-"+sl[d.j_seq]
     dist_stats[bond] = distances.distances[i]
-    dist_errs[bond] = math.sqrt(distances.variances[i])
+    var = distances.variances[i]
+    if (var > 0) :
+      dist_errs[bond] = math.sqrt(var)
+    else:
+      if abs(var) > 1E-12:
+        dist_errs[bond] = math.sqrt(var)
+      else:
+        dist_errs[bond] = 0.0
 
   f.write("\n\nBondlengths and errors:\n")
   for key in dist_stats:
