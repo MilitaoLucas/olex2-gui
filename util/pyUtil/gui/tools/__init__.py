@@ -2691,7 +2691,7 @@ def get_news_image_src():
       olx.SetVar('olex2.news_img_link_url', "www.olexsys.org")
       from PilTools import TI
       TI.resize_news_image(vfs=True)
-      return img_path
+    return img_path
   else:
     return disk_image
 
