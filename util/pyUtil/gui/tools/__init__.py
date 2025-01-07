@@ -2679,6 +2679,25 @@ def generate_color_palette(n):
 
   return colors
 
+def get_news_image_src():
+  import olex_fs
+  img_path = "news/news-1.5"
+  disk_image = os.path.join(OV.BaseDir(), "etc", "news", "news-1.5.png")
+  if olex_fs.Exists(img_path):
+    d = time.time() -  olex_fs.Timestamp(img_path)
+    days = d / (60 * 60 * 24)
+    if days > 7:
+      OlexVFS.write_to_olex(img_path + "_tmp", open(disk_image, 'br').read(), 2)
+      olx.SetVar('olex2.news_img_link_url', "www.olexsys.org")
+      from PilTools import TI
+      TI.resize_news_image(vfs=True)
+      return img_path
+  else:
+    return disk_image
+
+olex.registerFunction(get_news_image_src, False, "gui.tools")
+
+
 
 class PlotIt():
   def __init__(self):
@@ -2694,7 +2713,6 @@ class PlotIt():
     self.plt.rcParams['xtick.labelsize'] = 11
     self.plt.rcParams['ytick.labelsize'] = 11
 
-    
     self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
     self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
     
@@ -2712,6 +2730,7 @@ class PlotIt():
     second_title = dd.get("second_title", "")
     comment = dd.get('comment', "")
     gap = self.plt_params.subplot_top_gap
+ 
     gap_facor = 0.05
     if comment:
       gap = gap - gap * 0.05
@@ -2751,10 +2770,25 @@ class PlotIt():
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
-    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
-      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
-            
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+
+    #_ = dd['legend']
+    #if _:
+      #for i in range(len(_)):
+        #self.fig.plot([], [], color=_[1][i], label=_[0][i])
+        #self.plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        ##self.plt.legend(loc='upper right')
+
+
+    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
+    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+    pos = self.self.plt_params.legend_manual_position
+    self.fig.legend(lines, labels, bbox_to_anchor=pos.split(), 
+           loc='right', ncol=1)
+
+    self.fig.align_ylabels()
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     #olx.Shell(p)
@@ -2779,8 +2813,10 @@ class PlotIt():
              linestyle=None,
              ylabel="",
              labels=[],
+             colours=[],
              x_type="",
              y_type="",
+             legend=[], 
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2803,11 +2839,26 @@ class PlotIt():
       xs = ([xs])
       ys = ([ys])
 
-    colour =  OV.GetParam('user.graphs.matplotlib.%s.colour' % colour, None)
+    colour = False
+    if colours:
+      cmap = colours
+    else:
+      cmap = OV.GetParam('user.graphs.matplotlib.colour_map', 'get_N_HexCol')
+      if cmap ==  'get_N_HexCol':
+        cmap = False
+      else:
+        cmap = self.plt.cm.get_cmap(cmap)
+
     i = 0
     for x, y in zip(xs, ys):
       if not colour or colour == "auto_scale":
-        colour = get_N_HexCol(len(xs))[i]
+        if not cmap:
+          colour = get_N_HexCol(len(xs))[i]
+        else:
+          if type(cmap) is list:
+            colour = cmap[i]
+          else:
+            colour = cmap(i)
       i += 1
       label = None
       ax.plot(x,
@@ -2826,6 +2877,7 @@ class PlotIt():
         #for x, label in zip(y, labels):
           #self.plt.plot(x, y, label=label)
       #self.plt.legend()
+
       colour = None
       ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
       ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
@@ -2838,3 +2890,7 @@ class PlotIt():
 
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
+
+    if legend:
+      for j in range(len(legend)):
+        self.plt.plot([], [], color=colours[j], label=legend[j])
