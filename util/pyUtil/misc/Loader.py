@@ -45,7 +45,7 @@ def getModulesDir():
 
 def getAuthenticationToken(force=False):
   global at
-  force = force in [True, 'True', 'true']
+  force = OV.get_bool_from_any(force)
   if force:
     at = None
   elif at:

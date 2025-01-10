@@ -137,6 +137,8 @@ class NewsImageRetrivalThread(ThreadEx):
           img_url = None
           continue
         else:
+          if "-ac" in self.olex2tag:
+            continue
           break
 
     if not img_url:
@@ -293,7 +295,7 @@ def GetCheckcifReport(send_fcf=False):
   if not OV.canNetwork():
     return
   if CheckCifRetrivalThread.instance is None:
-    CheckCifRetrivalThread(send_fcf in [True, 'true']).start()
+    CheckCifRetrivalThread(OV.get_bool_from_any(send_fcf)).start()
   else:
     olx.Alert("Please wait", "The Checkcif request is in progress", "IO")
 olex.registerFunction(GetCheckcifReport, False, 'cif')

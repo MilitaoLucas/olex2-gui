@@ -105,7 +105,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       #TODO Check if WFN is new, otherwise skip this!
       energy = None
       if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB" or "MATTS" in source or "hakkar" in source:
-        HAR_log.write("{:24}".format(" "))
+        HAR_log.write("{:^24}".format("---"))
       else:
         if (wfn_file != None) and (calculate == True):
           if ".gbw" not in wfn_file:
@@ -129,10 +129,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if energy is not None:
             HAR_log.write("{:^24.10f}".format(energy))
           else:
-            HAR_log.write("{:24}".format("---"))
+            HAR_log.write("{:^24}".format("---"))
           fread = None
         else:
-          HAR_log.write("{:24}".format("---"))
+          HAR_log.write("{:^24}".format("---"))
       if OV.GetParam('snum.NoSpherA2.run_refine') == True:
         # Run Least-Squares
         self.startRun()

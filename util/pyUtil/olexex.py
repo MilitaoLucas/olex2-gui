@@ -590,20 +590,15 @@ class OlexRefinementModel(object):
       curr_form[atom_type] += atom_occu
     return curr_form
 
-  def getExpectedPeaks(self):
-    cell_volume = float(olx.xf.au.GetVolume())
-    expected_atoms = cell_volume/17
-    present_atoms = self.number_non_hydrogen_atoms()
-    expected_peaks = expected_atoms - present_atoms
-    return int(round(expected_peaks))
-
   def getExpectedPeaks_and_AtomsPresent(self):
-    cell_volume = float(olx.xf.au.GetVolume())
-    expected_atoms = cell_volume/15
+    cell_volume = float(olx.xf.au.GetAUVolume())
+    expected_atoms = cell_volume/17
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
     return int(round(expected_peaks)), int(round(present_atoms))
 
+  def getExpectedPeaks(self):
+    return self.getExpectedPeaks_and_AtomsPresent()[0]
 
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
@@ -745,7 +740,7 @@ def get_auto_q_peaks():
   ctrl_name = 'SET_SNUM_REFINEMENT_MAX_PEAKS'
   manual_q = OV.GetParam('snum.refinement.manual_q_peak_override',0)
   if manual_q:
-    if OV.HasGUI() and OV.IsControl(ctrl_name):
+    if OV.IsControl(ctrl_name):
       olx.html.SetBG(ctrl_name,'#ffeeee')
       olx.html.SetValue(ctrl_name,manual_q)
     return manual_q
