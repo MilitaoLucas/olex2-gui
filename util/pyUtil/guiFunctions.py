@@ -41,6 +41,8 @@ class GuiFunctions(object):
     return retStr
 
   def IsControl(self, ctrl_name):
+    if not self.HasGUI():
+      return False
     try:
       return bool(olex_gui.IsControl(ctrl_name))
     except Exception as ex:
@@ -58,6 +60,12 @@ class GuiFunctions(object):
   def SetControlValue(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetValue(ctrl_name, val)
+
+  def SetControlItems(self, ctrl_name, items, val=None):
+    if self.IsControl(ctrl_name):
+      olx.html.SetItems(ctrl_name, items)
+      if val is not None:
+        olx.html.SetValue(ctrl_name, val)
 
   def SetControlState(self, ctrl_name, val):
     if self.IsControl(ctrl_name):

@@ -347,22 +347,22 @@ class OlexFunctions(inheritFunctions):
     except:
       return
     self.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
-    auto_peaks = OV.GetVar('auto_q',None)
+    auto_peaks = OV.GetVar('auto_q', None)
     if not auto_peaks:
       import olexex
       auto_peaks = olexex.get_auto_q_peaks()
 
     if not max_peaks:
-      OV.SetVar('snum.refinement.manual_q_peak_override',0)
+      OV.SetParam('snum.refinement.manual_q_peak_override', 0)
       max_peaks = auto_peaks
-      if OV.HasGUI() and OV.IsControl(ctrl_name):
+      if OV.IsControl(ctrl_name):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
         olx.html.SetFG(ctrl_name,'#ffffff')
         olx.html.SetValue(ctrl_name,0)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
-      OV.SetVar('snum.refinement.manual_q_peak_override', max_peaks)
-      if OV.HasGUI() and OV.IsControl(ctrl_name):
+      OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
+      if OV.IsControl(ctrl_name):
         olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
         olx.html.SetFG(ctrl_name, '#ffffff')
         olx.html.SetValue(ctrl_name,max_peaks)
@@ -634,11 +634,15 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return newPath
 
-  def File(self, filename=None, append_refinement_info=False):
+  def File(self, filename=None, append_refinement_info=False, save_params=False):
     if filename is not None:
       olx.File(filename)
     else:
       olx.File()
+    if save_params:
+      from variableFunctions import SaveStructureParams
+      SaveStructureParams()
+
     if append_refinement_info and olx.FileExt().lower() == 'res':
       saved_file = olx.FileFull()
       ri = olx.xf.RefinementInfo()
@@ -1292,6 +1296,9 @@ class OlexFunctions(inheritFunctions):
         self.FileName().replace(' ', '').lower()) + ".fin", 'w')\
       .close()
 
+  def get_bool_from_any(self, val):
+    return val in [True, 'true', 'True']
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
@@ -1387,3 +1394,5 @@ OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
 OV.registerFunction(OV.IsEDData)
 OV.registerFunction(OV.get_diag)
+OV.registerFunction(OV.SetMaxCycles)
+OV.registerFunction(OV.SetMaxPeaks)
