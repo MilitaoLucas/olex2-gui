@@ -1087,7 +1087,7 @@ user
       .type = bool
     use_openmp = False
       .type = bool
-    use_HT = False
+    has_HT = True
       .type = bool
     openmp_mem = 2000
       .type = int
