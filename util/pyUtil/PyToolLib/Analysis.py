@@ -3916,6 +3916,9 @@ class HealthOfStructure():
       print("HOS took %.4f seconds" %(time.time() - t1))
 
   def get_info_from_hkl_stats(self):
+    #hkl_src = olx.HKLSrc() cannot rely purely on HklSrc as the file might have data (as CIF does)
+    if 'Rsigma' not in self.hkl_stats:
+      return
     try:
       self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
       self.theta_max = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi

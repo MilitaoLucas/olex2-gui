@@ -348,7 +348,7 @@ def OnStructureLoaded(previous):
   #if olx.IsFileType('oxm') == 'false':
     #import gui.skin
     #gui.skin.change_bond_colour()
-  if olx.IsFileType('cif') == 'true':
+  if olx.FileExt().lower() in ('cif', 'oxm'):
     import History
     History.tree = None
   elif previous != OV.FileFull() or OV.IsClientMode():
