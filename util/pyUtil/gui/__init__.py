@@ -644,3 +644,18 @@ def set_openblas_thread_n(val):
     olx.Echo("Failed to set OpenBlas thread number", m="error")
 
 olex.registerFunction(set_openblas_thread_n, False, "gui")
+
+def create_history_branch():
+  name = OV.describe_refinement()
+  branch_name = OV.GetUserInput(1, "Branch name", name)
+  if not branch_name:
+    return
+  from History import hist
+  hist.create_history(True, branch_name)
+
+olex.registerFunction(create_history_branch, False, "gui")
+
+def create_snapshot(label):
+  print("Creating snapshot for: %s" %label)
+
+olex.registerFunction(create_snapshot, False, "gui")
