@@ -645,13 +645,18 @@ def set_openblas_thread_n(val):
 
 olex.registerFunction(set_openblas_thread_n, False, "gui")
 
-def create_history_branch():
+def create_history_branch(switch):
+  switch = OV.get_bool_from_any(switch)
   name = OV.describe_refinement()
   branch_name = OV.GetUserInput(1, "Branch name", name)
   if not branch_name:
     return
-  from History import hist
+  from History import hist, tree
+  current_node = tree.active_node
   hist.create_history(True, branch_name)
+  if not switch:
+    tree.active_node = current_node
+  OV.htmlUpdate()
 
 olex.registerFunction(create_history_branch, False, "gui")
 

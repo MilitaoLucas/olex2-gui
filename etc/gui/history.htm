@@ -13,7 +13,14 @@ $spy.make_history_bars()
      <td>
        <snippet src="gui/snippets/input-button"
          value="%Create branch%"
-         onclick="spy.gui.create_history_branch()"
+         onclick="spy.gui.create_history_branch(true)"
+       />
+    </td>
+    <td width="10%"/>
+    <td>
+       <snippet src="gui/snippets/input-button"
+         value="%Create snapshot%"
+         onclick="spy.gui.create_history_branch(false)"
        />
     </td>
     </tr></table>
