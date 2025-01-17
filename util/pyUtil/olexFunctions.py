@@ -1283,7 +1283,7 @@ class OlexFunctions(inheritFunctions):
     return d_o(**d)
 
   #Somehow on localised Linux Unicode does not work
-  # may be wrongly assebled Python?
+  # may be wrongly assembled Python?
   def correct_rendered_text(self, t):
     if gui_encoding:
       return t.encode(gui_encoding)
@@ -1298,6 +1298,29 @@ class OlexFunctions(inheritFunctions):
 
   def get_bool_from_any(self, val):
     return val in [True, 'true', 'True']
+
+  def describe_refinement(self):
+    edr = self.IsEDRefinement()
+    nsf = self.GetParam("snum.NoSpherA2.use_aspherical")
+    name = ""
+    if edr or nsf: #only olex2.refine
+      name = "Dyn-" + self.GetACI().EDI.get_method_name()
+    else:
+      rp = self.GetParam("snum.refinement.program")
+      name += rp
+    if self.GetParam("snum.refinement.use_solvent_mask"):
+      name += "-mask"
+    if nsf:
+      name += "-NSF"
+
+    r1 = self.GetParam('snum.refinement.last_R1')
+    if r1 is not None:
+      name += "-R-%.2f" %(float(r1)*100)
+      wr2 = self.GetParam('snum.refinement.last_wR2')
+      if wr2 is not None:
+        name += "(%.2f)" %(float(wr2)*100)
+
+    return name
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
