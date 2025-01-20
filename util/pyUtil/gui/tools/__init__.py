@@ -6,6 +6,7 @@ import os
 import sys
 import OlexVFS
 from olexFunctions import OV
+import numpy as np
 
 debug = OV.IsDebugging()
 timer = debug
@@ -2169,8 +2170,6 @@ Do you want to install this now?""", "YN", False)
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
 
-  import numpy as np
-
   xs = np.array(xy[0][:])
   y_l = []
   for i in range(len(xy) - 1):
@@ -2729,6 +2728,9 @@ class PlotIt():
     title= dd["title"]
     second_title = dd.get("second_title", "")
     comment = dd.get('comment', "")
+    byline = ""
+    if self.plt_params.print_byline:
+      byline = dd.get('byline', "")
     gap = self.plt_params.subplot_top_gap
  
     gap_facor = 0.05
@@ -2759,20 +2761,35 @@ class PlotIt():
                #fontsize=12, ha='center')
       #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
 
-
     else:
       self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+      axes = [axes]
+    
 
     i = 0
     for series in dd['data']:
       d =  dd['data'][series]
-      self.get_ax(axes[i], **d)
+      try:
+        self.get_ax(axes[i], **d)
+      except:
+        try:
+          self.get_ax(axes[0][i], **d)
+        except:
+          print("No data suitable for plotting has been found")
+          return
+        
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
-    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
-      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+
+    if byline:
+      self.plt.rcParams['font.family'] = 'Arial'
+      self.plt.rcParams['font.stretch'] = 'condensed'
+      self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color = "#bebebe")
+
 
     #_ = dd['legend']
     #if _:
@@ -2781,16 +2798,10 @@ class PlotIt():
         #self.plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
         ##self.plt.legend(loc='upper right')
 
-
-    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
-    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-    pos = self.self.plt_params.legend_manual_position
-    self.fig.legend(lines, labels, bbox_to_anchor=pos.split(), 
-           loc='right', ncol=1)
-
     self.fig.align_ylabels()
     p = os.path.join(OV.FilePath(), filename)
-    self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
+    self.plt.ylim()
+    self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     #olx.Shell(p)
     self.plt.close()
     return p
@@ -2816,7 +2827,8 @@ class PlotIt():
              colours=[],
              x_type="",
              y_type="",
-             legend=[], 
+             legend=[],
+             colourscheme='auto',
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2827,6 +2839,12 @@ class PlotIt():
     self.plt.grid(self.plt_params.grid)
 
     ax_colour = self.plt_params.ax_colour
+
+    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
+    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+    #pos = self.plt_params.legend_manual_position
+    #self.fig.legend(lines, legend, bbox_to_anchor= [float(value) + top for value in pos.split()], loc='right', ncol=1) 
+    #self.fig.legend(lines, legend, loc='right', ncol=1)
 
     if not marker:
       marker = self.plt_params.ax1.marker
@@ -2848,30 +2866,41 @@ class PlotIt():
         cmap = False
       else:
         cmap = self.plt.cm.get_cmap(cmap)
+    
+    if colourscheme == "auto":
+      cmap = False
+      colour = None
 
     i = 0
+    c_count =  0
+    #cmap = create_green_yellow_colormap()
+    #N = len(xs)
+    #colours = cmap(np.linspace(0, 1, N))
     for x, y in zip(xs, ys):
       if not colour or colour == "auto_scale":
         if not cmap:
-          colour = get_N_HexCol(len(xs))[i]
+          colour = get_N_HexCol(len(xs))[c_count]
+          #colour = colours[i]
         else:
           if type(cmap) is list:
-            colour = cmap[i]
+            colour = cmap[c_count]
           else:
-            colour = cmap(i)
-      i += 1
+            colour = cmap(c_count)
+        c_count += 1
       label = None
+
       ax.plot(x,
               y,
-              marker=marker,
-              color=colour,
-              markersize=markersize,
+              marker=get_property(marker, i),
+              color=get_property(colour, i),
+              markersize=get_property(markersize, i),
               linewidth=self.plt_params.ax1.line_width,
-              linestyle=linestyle,
+              linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
-              markeredgecolor=colour,
+              markeredgecolor=get_property(colour, i),
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
               )
+      i += 1
 
       #if labels and len(labels)==len(xs):
         #for x, label in zip(y, labels):
@@ -2884,13 +2913,30 @@ class PlotIt():
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
+    if legend:
+      ax.margins(y=0.25)
+      ax.legend(legend, loc='upper right', ncol=2)
     if lim_x:
       self.plt.xlim(-1 * lim_x, lim_x)
     ax.tick_params(axis='y', labelcolor=ax_colour)
-
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
 
     if legend:
       for j in range(len(legend)):
         self.plt.plot([], [], color=colours[j], label=legend[j])
+
+def get_property(prop, i):
+  retVal = prop
+  if type(prop) == list:
+    retVal = prop[i]
+  return retVal
+  
+
+def create_green_yellow_colormap():
+  import numpy as np
+  from matplotlib.cm import ScalarMappable
+  from matplotlib.colors import LinearSegmentedColormap
+  colors = [(0, 1, 0), (1, 1, 0)]  # Green to yellow
+  return LinearSegmentedColormap.from_list("GreenYellow", colors)
+  
