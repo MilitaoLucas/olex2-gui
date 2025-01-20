@@ -53,6 +53,8 @@ class GetHelp(VFSDependent):
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
     self.p_path = p_path
     self.get_templates()
+    OV.registerFunction(self.git_help, True, "githelp")
+    
     #try:
       #self.get_help()
     #except:
@@ -134,7 +136,7 @@ class GetHelp(VFSDependent):
 
   def git_help(self, quick=True, specific=False):
     if specific:
-      self.source_dir = specific
+      self.source_dir = os.path.dirname(specific)
       all_help = ""
     else:
       builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
@@ -190,6 +192,7 @@ class GetHelp(VFSDependent):
       if debug:
         print(md_path)
       with open(md_path, encoding="utf8", errors='ignore') as f:
+        file_source_dir =  os.path.dirname(md_path)
         fc = f.read()
       fc = fc.replace("####", "@@@@")
       fc = fc.replace("###", "@@@")
@@ -220,23 +223,52 @@ class GetHelp(VFSDependent):
           val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
           html = markdown2.markdown(val, extras=["wiki-tables", "fenced-code-blocks"])
           if "img" in html:
-            #src = os.sep.join(md_path.split("\\")[:-1])
-            #img_src = os.path.join(builtin_help_location, 'images')
-            img_src = os.path.join('BaseDir()', 'util', 'pyUtil', 'gui', 'help')
+            regex= r'(<img[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]+)"[^>]*>)'
+            matches = re.findall(regex, html)
+            results = []
+            for full_match, src, alt in matches:
+              width = 1
+              if " " in alt:
+                try:
+                  width = float(alt.split(" ")[0])
+                  alt =  " ".join(alt.split(" ")[1:])
+                except:
+                  pass
+              results.append({
+                'full_match': full_match,
+                'src': src,
+                'alt': alt,
+                'width': width, 
+              })
+            for result in results:
+              img_src = os.path.join(file_source_dir, result['src'])
+              if not os.path.exists(img_src):
+                img_src = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
+              else:
+                pass
 
-            #html = html.replace(r'<img src="', r'<zimg width="%s" src="%s%s'%(self.box_width, src , os.sep))
+              result.setdefault('img_src', img_src)
+              width =  int(int(self.box_width) * width)
+              result['width'] = width
+              help_image_html = gui.tools.TemplateProvider.get_template('help_image_html') % result
+              html = html.replace(f"{result['full_match']}", help_image_html)
 
-            regex = re.compile(r'<img src\="(?P<URL>.*?)" alt\="(?P<ALT>.*?)" />', re.S)
-            m = regex.findall(html)
-            for url, alt in m:
-              width = alt.split(" ")[0]
-              try:
-                _ = float(width)
-                if float(width) < 1:
-                  width = self.box_width * float(width)
-                html = html.replace(r'<img src="', r'<br><br><zimg width="%s" src="%s%s' %(width, img_src, os.sep), 1)
-              except:
-                html = html.replace(r'<img src="', r'<zimg src="%s%s' %(img_src, os.sep), 1)
+              
+            
+            #img_src = os.path.join('BaseDir()', 'util', 'pyUtil', 'gui', 'help')
+
+
+            #regex = re.compile(r'<img src\="(?P<URL>.*?)" alt\="(?P<ALT>.*?)" />', re.S)
+            #m = regex.findall(html)
+            #for url, alt in m:
+              #width = alt.split(" ")[0]
+              #try:
+                #_ = float(width)
+                #if float(width) < 1:
+                  #width = self.box_width * float(width)
+                #html = html.replace(r'<img src="', r'<br><br><zimg width="%s" src="%s%s' %(width, img_src, os.sep), 1)
+              #except:
+                #html = html.replace(r'<img src="', r'<zimg src="%s%s' %(img_src, os.sep), 1)
           html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
           help = self.format_html(html)
 
@@ -263,13 +295,18 @@ class GetHelp(VFSDependent):
           p = p_path
           gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', base=p, path=p, mask="*.html")
           edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p)%md_path
-          compile_help = gui.tools.TemplateProvider.get_template('compile_help')%md_path
+          compile_help = gui.tools.TemplateProvider.get_template('compile_help')%(md_path)
           help = edit_help + compile_help + help
         OV.SetVar(var, help)
 #        self.help[var] = help
         if debug:
           print("  - %s" %var)
-    #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
+          #_ = OV.GetVar('last_help_box')
+          #if _:
+            #import gui
+            #gui.help.make_help_box(name=_)
+            #OV.SetVar('last_help_box', "")
+  #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
 
 
 if have_help:
@@ -279,8 +316,8 @@ def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', to
   global tutorial_box_initialised
   if not helpIsInitialised:
     gh.get_help()
-  name = getGenericSwitchName(name).replace("h3-", "")
   OV.SetVar('last_help_box', name)
+  name = getGenericSwitchName(name).replace("h3-", "")
   _= ""
   md_box = True
   if helpTxt == '#helpTxt':
@@ -647,6 +684,16 @@ def pandoc(kind='pdf', md_path=None, out_path=None):
   else:
     os.system('pandoc %s -o %s' % (md, out_pdf))
     #log = "C:/Users/Horst/AppData/Local/MiKTeX/2.9/miktex/log"
+
+def md_image_insert(t):
+  _ = re.findall(r"\!\[(.*?)\]\((.*?)\)", t)
+  for item in _:
+    caption = item[0]
+    #src = item[1]
+    src = md_image_prefixes(item[1])
+    insert = make_image_insert(src, caption=caption, do_trim=True, ID=item[1])
+    t = t.replace("![%s](%s)" %(caption, item[1]), insert)
+  return t
 
 OV.registerFunction(pandoc, False, 'help')
 
