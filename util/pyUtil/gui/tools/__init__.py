@@ -2762,7 +2762,7 @@ class PlotIt():
       #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, pad=20)
       axes = [axes]
     
 
