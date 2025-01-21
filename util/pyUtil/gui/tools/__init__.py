@@ -2876,6 +2876,7 @@ class PlotIt():
     #cmap = create_green_yellow_colormap()
     #N = len(xs)
     #colours = cmap(np.linspace(0, 1, N))
+    y_list = []
     for x, y in zip(xs, ys):
       if not colour or colour == "auto_scale":
         if not cmap:
@@ -2888,7 +2889,7 @@ class PlotIt():
             colour = cmap(c_count)
         c_count += 1
       label = None
-
+      y_list.append(y)
       ax.plot(x,
               y,
               marker=get_property(marker, i),
@@ -2902,6 +2903,9 @@ class PlotIt():
               )
       i += 1
 
+
+
+
       #if labels and len(labels)==len(xs):
         #for x, label in zip(y, labels):
           #self.plt.plot(x, y, label=label)
@@ -2912,6 +2916,16 @@ class PlotIt():
       ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+
+    margin = 0.03  # Add 3% margin
+    data_min = min(min(y) for y in y_list)
+    data_max = max(max(y) for y in y_list)
+  
+    # Adjust for margin if necessary
+    data_min -= margin * (data_max - data_min)
+    data_max += margin * (data_max - data_min)
+    self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
 
     if legend:
       ax.margins(y=0.25)
