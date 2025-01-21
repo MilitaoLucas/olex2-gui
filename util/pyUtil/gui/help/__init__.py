@@ -15,6 +15,7 @@ import pickle as pickle
 import olex
 import olx
 import gui
+import olex_core
 
 p_path = os.path.dirname(os.path.abspath(__file__))
 OV.SetVar('help_path', p_path)
@@ -53,12 +54,13 @@ class GetHelp(VFSDependent):
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
     self.p_path = p_path
     self.get_templates()
+    self.all_help_d = {}
+    self.all_help_d.setdefault("paths", [])
+    self.all_help_d_file = os.path.join(OV.DataDir(), 'all_help_d.pickle')
     OV.registerFunction(self.git_help, True, "githelp")
-    
-    #try:
-      #self.get_help()
-    #except:
-      #pass
+    OV.registerMacro(self.make_help_box, '''name-Name of the Box&;popout-True/False&;
+    type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&'''
+    )
 
   def get_help_item(self, help_id):
     help_id = help_id.replace(" ", "_")
@@ -89,28 +91,36 @@ class GetHelp(VFSDependent):
     if helpIsInitialised:
       return
     language = 'EN'
+
+    if os.path.exists(self.all_help_d_file):
+      with open(self.all_help_d_file,'rb') as rFile:
+        self.all_help_d = pickle.load(rFile)
+      for item in self.all_help_d:
+        olex_core.SetVar(item, self.all_help_d[item])
+    else:
+      self.get_help_from_text_file()
+      with open(self.all_help_d_file, 'wb') as pickle_file:
+        pickle.dump(self.all_help_d, pickle_file)
+    helpIsInitialised = True
+
+  def get_help_from_text_file(self):
+
     help_file_n = 'HELP_%s.htm' %language
     builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui')
     base = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
     rFile = self.get_latest_help_file('HELP_%s' %language)
-    all_help = os.path.join(OV.DataDir(), help_file_n)
+    self.all_help = os.path.join(OV.DataDir(), help_file_n)
+
     if rFile:
-      with open(all_help, 'wb') as wFile:
+      with open(self.all_help, 'wb') as wFile:
         wFile.write(rFile)
     else:
-      if not os.path.exists(all_help):
-        all_help = os.path.join(builtin_help_location, help_file_n)
-      rFile = gui.file_open(path=all_help, base=base)
+      if not os.path.exists(self.all_help):
+        self.all_help = os.path.join(builtin_help_location, help_file_n)
+      rFile = gui.file_open(path=self.all_help, base=base)
       if not rFile:
         return
-    helpIsInitialised = True
-    #if os.path.exists(all_help):
-      #rFile = gui.file_open(all_help).read()
-      ##rFile = open(all_help, 'rb').read()
-    #else:
-      #print "No help file installed"
-      #return
-#    OV.SetVar('All-Inline-Help', rFile)
+
     help_l = rFile.split("<h1>")
     for help in help_l:
       help = help.strip()
@@ -120,7 +130,8 @@ class GetHelp(VFSDependent):
         continue
       var = help.split("</h1>")[0].strip()
       help = help.split("</h1>")[1].strip()
-      OV.SetVar(var, help)
+      olex_core.SetVar(var, help)
+      self.all_help_d[var] = help
       if debug:
         print("  - %s" %var)
 
@@ -134,13 +145,13 @@ class GetHelp(VFSDependent):
     txt = txt.replace("GetVar(gui_link)",gui_link)
     return txt
 
-  def git_help(self, quick=True, specific=False):
+  def git_help(self, quick=True, specific=False, force=False):
     if specific:
       self.source_dir = os.path.dirname(specific)
-      all_help = ""
+      self.all_help = ""
     else:
       builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
-      all_help = os.path.join(builtin_help_location, 'gui', 'HELP_EN.htm')
+      self.all_help = os.path.join(builtin_help_location, 'gui', 'HELP_EN.htm')
       if not hasattr(self, 'source_dir'):
         self.source_dir = specific
 
@@ -166,362 +177,364 @@ class GetHelp(VFSDependent):
           "Something went wrong with pickling the help file"
 
 
-      if os.path.exists(all_help):
-        print("Deleting builtin help at %s" %all_help)
+      if os.path.exists(self.all_help):
+        print("Deleting builtin help at %s" %self.all_help)
         try:
-          os.remove(all_help)
+          os.remove(self.all_help)
         except Exception as err:
-          print("Can not remove all_help: %s" %err)
+          print("Can not remove self.all_help: %s" %err)
 
-    matches = []
-
-    for root, dirnames, filenames in os.walk(self.source_dir):
-      if ".git" in root:
-        continue
-      for filename in fnmatch.filter(filenames, '*.md'):
-        matches.append((root.replace(str(self.source_dir), 'help').replace("\\", "_") + "_" + filename.replace('.md', ""),os.path.join(root, filename)))
-
-    if not matches:
-      return
+    matches = get_md_files_by_folder(self.source_dir)
 
     if debug:
       print("Building help icon text")
       print("=======================")
 
-    for var,md_path in matches:
+    for fPath in matches:
+      if not matches[fPath]:
+        continue
+      srcDir = os.path.join(self.source_dir, fPath)
+      if srcDir not in self.all_help_d['paths']:
+        force = True
+      help_done_marker_file = os.path.join(srcDir, "help_done.txt")
+      
       if debug:
-        print(md_path)
-      with open(md_path, encoding="utf8", errors='ignore') as f:
-        file_source_dir =  os.path.dirname(md_path)
-        fc = f.read()
-      fc = fc.replace("####", "@@@@")
-      fc = fc.replace("###", "@@@")
-      fc = fc.replace("##", "@@")
-
-      l = fc.split("\n#")
-
-      help_type = ""
-      target_marker = "-target\n"
-      help_marker = "-help\n"
-      info_marker = "-info\n"
-      for item in l:
-        if not item:
-          continue
-        item = item.strip()
-        try:
-          var = item.split("\n")[0].lstrip("#").strip().replace(" ", "_").upper()
-          val = "\n".join(item.split("\n")[1:])
-        except:
-          var = md_path
-          val = item
-        if target_marker in item:
-          help_type = 'target'
-          help = item.split(target_marker)[1].strip()
-
+        print(srcDir)
+      if os.path.exists(help_done_marker_file):
+        if force:
+          print(": Help already compiled, but recompilation is forcred")
         else:
-          help_type = 'help'
-          val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
-          html = markdown2.markdown(val, extras=["wiki-tables", "fenced-code-blocks"])
-          if "img" in html:
-            regex= r'(<img[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]+)"[^>]*>)'
-            matches = re.findall(regex, html)
-            results = []
-            for full_match, src, alt in matches:
-              width = 1
-              if " " in alt:
-                try:
-                  width = float(alt.split(" ")[0])
-                  alt =  " ".join(alt.split(" ")[1:])
-                except:
-                  pass
-              results.append({
-                'full_match': full_match,
-                'src': src,
-                'alt': alt,
-                'width': width, 
-              })
-            for result in results:
-              img_src = os.path.join(file_source_dir, result['src'])
-              if not os.path.exists(img_src):
-                img_src = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
-              else:
+          if debug:
+            print(": Help already compiled")
+          continue
+      for fFile in matches[fPath]:
+        md_file = os.path.join(srcDir, fFile)
+        with open(md_file, encoding="utf8", errors='ignore') as f:
+          fc = f.read()
+        
+        self.parse_help(fc, srcDir, md_file)
+
+      self.all_help_d['paths'].append(srcDir)
+      wFile = open(help_done_marker_file, 'w')
+      wFile.close()
+      
+    with open(self.all_help_d_file, 'wb') as pickle_file:
+      pickle.dump(self.all_help_d, pickle_file)
+        
+  def parse_help(self, fc, fDir, md_file):
+    fc = fc.replace("####", "@@@@")
+    fc = fc.replace("###", "@@@")
+    fc = fc.replace("##", "@@")
+    l = fc.split("\n#")
+    self.help_type = ""
+    target_marker = "-target\n"
+    help_marker = "-help\n"
+    info_marker = "-info\n"
+    for item in l:
+      if not item:
+        continue
+      item = item.strip()
+      try:
+        var = item.split("\n")[0].lstrip("#").strip().replace(" ", "_").upper()
+        val = "\n".join(item.split("\n")[1:])
+      except:
+        var = md_path
+        val = item
+      if target_marker in item:
+        self.help_type = 'target'
+        help = item.split(target_marker)[1].strip()
+  
+      else:
+        self.help_type = 'help'
+        val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
+        html = markdown2.markdown(val, extras=["wiki-tables", "fenced-code-blocks"])
+        if "img" in html:
+          regex= r'(<img[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]+)"[^>]*>)'
+          matches = re.findall(regex, html)
+          results = []
+          for full_match, src, alt in matches:
+            width = 1
+            if " " in alt:
+              try:
+                width = float(alt.split(" ")[0])
+                alt =  " ".join(alt.split(" ")[1:])
+              except:
                 pass
-
-              result.setdefault('img_src', img_src)
-              width =  int(int(self.box_width) * width)
-              result['width'] = width
-              help_image_html = gui.tools.TemplateProvider.get_template('help_image_html') % result
-              html = html.replace(f"{result['full_match']}", help_image_html)
-
-              
-            
-            #img_src = os.path.join('BaseDir()', 'util', 'pyUtil', 'gui', 'help')
-
-
-            #regex = re.compile(r'<img src\="(?P<URL>.*?)" alt\="(?P<ALT>.*?)" />', re.S)
-            #m = regex.findall(html)
-            #for url, alt in m:
-              #width = alt.split(" ")[0]
-              #try:
-                #_ = float(width)
-                #if float(width) < 1:
-                  #width = self.box_width * float(width)
-                #html = html.replace(r'<img src="', r'<br><br><zimg width="%s" src="%s%s' %(width, img_src, os.sep), 1)
-              #except:
-                #html = html.replace(r'<img src="', r'<zimg src="%s%s' %(img_src, os.sep), 1)
-          html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
-          help = self.format_html(html)
-
-        help = help.strip().replace("<p>","").replace("</p>","")
-        help = help.replace("<zimg", "<zimg")
-        help = help.replace("<table><tbody><tr><td>", "<table width='100%%'><tbody><tr><td width='25%%'>")
-
-        if all_help:
-          try:
-            wFile = open(all_help, 'ab')
-            var_dis = "\n\n<h1>" + var + "</h1>\n"
-            wFile.write(var_dis)
-            wFile.write(help)
-            wFile.close()
-          except Exception as err:
-            print("-->> " + var + "--" + repr(err))
-            try:
-              wFile.write(repr(help))
-              wFile.close()
-            except:
+            results.append({
+              'full_match': full_match,
+              'src': src,
+              'alt': alt,
+              'width': width, 
+            })
+          for result in results:
+            img_src = os.path.join(fDir, result['src'])
+            if not os.path.exists(img_src):
+              img_src = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
+            else:
               pass
+  
+            result.setdefault('img_src', img_src)
+            width =  int(int(self.box_width) * width)
+            result['width'] = width
+            help_image_html = gui.tools.TemplateProvider.get_template('help_image_html') % result
+            html = html.replace(f"{result['full_match']}", help_image_html)
+  
+        html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
+        help = gh.format_html(html)
+  
+      help = help.strip().replace("<p>","").replace("</p>","")
+      help = help.replace("<zimg", "<zimg")
+      help = help.replace("<table><tbody><tr><td>", "<table width='100%%'><tbody><tr><td width='25%%'>")
 
-        if debug and help_type == 'help':
-          p = p_path
-          gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', base=p, path=p, mask="*.html")
-          edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p)%md_path
-          compile_help = gui.tools.TemplateProvider.get_template('compile_help')%(md_path)
-          help = edit_help + compile_help + help
-        OV.SetVar(var, help)
-#        self.help[var] = help
-        if debug:
-          print("  - %s" %var)
-          #_ = OV.GetVar('last_help_box')
-          #if _:
-            #import gui
-            #gui.help.make_help_box(name=_)
-            #OV.SetVar('last_help_box', "")
-  #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
+
+      if self.all_help:
+        try:
+          wFile = open(self.all_help, 'ab')
+          var_dis = "\n\n<h1>" + var + "</h1>\n"
+          wFile.write(var_dis)
+          wFile.write(help)
+          wFile.close()
+        except Exception as err:
+          print("-->> " + var + "--" + repr(err))
+          try:
+            wFile.write(repr(help))
+            wFile.close()
+          except:
+            pass
+
+      if debug and self.help_type == 'help':
+        p = p_path
+        gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', base=p, path=p, mask="*.html")
+        edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p) % md_file
+        compile_help = gui.tools.TemplateProvider.get_template('compile_help') % md_file
+        help = edit_help + compile_help + help
+
+      OV.SetVar(var, help)
+      self.all_help_d[var] = help
+
+      if debug:
+        print("  - %s" %var)
+        #_ = OV.GetVar('last_help_box')
+        #if _:
+          #import gui
+          #gui.help.make_help_box(name=_)
+          #OV.SetVar('last_help_box', "")
+          
+          
+  def make_help_box(self, d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
+    global helpIsInitialised
+    if not helpIsInitialised:
+      gh.get_help()
+    OV.SetVar('last_help_box', name)
+    name = getGenericSwitchName(name).replace("h3-", "")
+    _= ""
+    md_box = True
+    if helpTxt == '#helpTxt':
+      hid =  name.upper().replace("-", "_")
+      try:
+        _ = self.all_help_d.get(hid, False)
+        if not _:
+          _ = OV.GetVar(name.upper().replace("-", "_"))
+        if _:
+          md_box = True
+      except:
+        pass
+  
+    if not _:
+      if helpTxt and os.path.exists(helpTxt):
+        _ = open(helpTxt, 'r').read()
+  
+      elif helpTxt:
+        _ = olx.GetVar(helpTxt,helpTxt)
+  
+      elif not helpTxt or helpTxt == "#helpTxt":
+        _ = olx.GetVar(name,None)
+        _ = olx.GetVar(name.upper().replace("-", "_"),None)
+  
+    helpTxt = _
+  
+    if popout == 'false':
+      popout = False
+    else:
+      popout = True
+  
+    if not name:
+      return
+    if "-h3-" in name:
+      t = name.split("-h3-")
+      help_src = t[1]
+      title = help_src.replace("-", " ")
+  
+    if "h3-" in name:
+      t = name.split("h3-")
+      help_src = name
+      title = t[1].replace("-", " ")
+  
+    elif "-" in name:
+      title = name.replace("-", " ")
+      help_src = name
+    else:
+      title = name
+      help_src = name
+  #  titleTxt = OV.TranslatePhrase("%s" %title.title())
+    titleTxt = title
+    if box_type == "tutorial":
+      titleTxt = titleTxt
+      t = titleTxt.split("_")
+      if len(t) > 1:
+        titleTxt = "%s: %s" %(t[0], t[1])
+  
+    title = title.title()
+    if not helpTxt or helpTxt == "None":
+      helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
+    helpTxt = helpTxt.replace("\r", "")
+    helpTxt, d = format_help(helpTxt)
+    d.setdefault('next',name)
+    d.setdefault('previous',name)
+  
+    editLink = make_edit_link(name, box_type)
+  
+    if box_type != "help":
+      banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" %box_type
+      banner_include += """
+  
+  <map name="map_tutorial">
+  <!-- Button PREVIOUS -->
+      <area shape="rect" usemap="#map_setup"
+        coords="290,0,340,60"
+        href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
+  
+  <!-- Button NEXT-->
+      <area shape="rect"
+        coords="340,0,400,60"
+        href='spy.make_help_box -name=%(next)s -type=tutorial' target='%%next%%: %(next)s'>
+  </map>
+      """ %d
+  
+    else:
+      banner_include = ""
+    if not popout:
+      return_items = r'''
+    <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
+      <zimg border='0' src='popout.png'>
+    </a>
+    <a href=htmlhome><zimg border='0' src='return.png'>
+    </a>
+  ''' %name
+  
+    else:
+      return_items = ""
+  
+    if md_box:
+      d = {'title':titleTxt.replace("_", " "),
+           'body':helpTxt,
+           'font_size_base':OV.GetParam('gui.help.base_font_size','3'),
+           'font_colour':OV.GetParam('gui.help.font_colour').hexadecimal,
+           'bg_colour':OV.GetParam('gui.help.bg_colour').hexadecimal,
+           'h1_colour':OV.GetParam('gui.help.h1_colour').hexadecimal,
+           'h2_colour':OV.GetParam('gui.help.h2_colour').hexadecimal,
+           'h3_colour':OV.GetParam('gui.help.h3_colour').hexadecimal,
+           'highlight_colour':OV.GetParam('gui.help.highlight_colour').hexadecimal,
+           }
+      template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
+      p = OV.GetParam('gui.help.src', os.path.join(OV.BaseDir(), 'etc', 'help', 'gui'))
+      txt = get_template(template)%d
+  
+    else:
+      txt = get_template('pop_help', base_path=p)
+      txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
+  
+    wFilePath = r"%s-%s.htm" %(name, box_type)
+    wFilePath = wFilePath.replace(" ", "_")
+    #from ImageTools import ImageTools
+    #IT = ImageTools()
+    #txt = IT.get_unicode_characters(txt)
+    OV.write_to_olex(wFilePath, txt)
+  
+    if box_type == 'help':
+      if md_box:
+        ws = olx.GetWindowSize('gl').split(',')
+        boxWidth = int(int(ws[2])*OV.GetParam('gui.help.width_fraction',0.3))
+        if boxWidth < 500:
+          boxWidth = 500
+        boxHeight = int(ws[3]) - 30
+        ws = olx.GetWindowSize().split(',')
+        x = int(ws[0]) + int(ws[2])//2 - boxWidth - 2
+        y = int(ws[1]) + 50
+  
+      else:
+        boxWidth = OV.GetParam('gui.help_box.width')
+        length = len(helpTxt)
+        tr = helpTxt.count('<br>')
+  
+        boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
+        if boxHeight > OV.GetParam('gui.help_box.height_max'):
+          boxHeight = OV.GetParam('gui.help_box.height_max')
+        if boxHeight < 150:
+          boxHeight = 150
+  
+        x = 10
+        y = 50
+        mouse = True
+        if mouse:
+          mouseX = int(olx.GetMouseX())
+          mouseY = int(olx.GetMouseY())
+          y = mouseY
+          if mouseX > 300:
+            x = mouseX + 10 - boxWidth
+          else:
+            x = mouseX - 10
+    else:
+      if box_type == 'tutorial' and tutorial_box_initialised:
+        pass
+      else:
+        ws = olx.GetWindowSize().split(',')
+        x = int(ws[0])
+        y = int(ws[1]) + 50
+        ws = olx.GetWindowSize('gl').split(',')
+        boxWidth = int(400)
+        boxHeight = int(ws[3]) - 90
+  
+    if popout:
+      if box_type == 'tutorial':
+        pop_name = "Tutorial"
+        name = "Tutorial"
+      else:
+        pop_name = "%s-%s"%(name, box_type)
+      if box_type == 'tutorial' and tutorial_box_initialised:
+        olx.Popup(tutorial_box_initialised, wFilePath)
+      else:
+        if md_box:
+          pop_name = "md_box"
+        pop_name = pop_name.replace(" ", "_")
+        title = 'Olex2 Help'
+        webview = False
+        if webview:
+          t = '''
+          <input type=webview value='%s' width='%s' height='%s'>
+          ''' %(wFilePath, boxWidth, boxHeight)
+          webView = r"md_web.htm"
+          OV.write_to_olex(webView, t)
+          wFilePath = webView
+  
+        if "true" in olx.html.IsPopup(pop_name).lower():
+          olx.Popup(pop_name, wFilePath)
+        else:
+  
+          olx.Popup(pop_name, wFilePath,
+            b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
+          olx.html.SetBorders(pop_name,5)
+        if box_type == 'tutorial':
+          tutorial_box_initialised = pop_name
+  
+    else:
+      olx.html.Load(wFilePath)
+  #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
+  
 
 
 if have_help:
   gh = GetHelp()
-
-def make_help_box(d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
-  global tutorial_box_initialised
-  if not helpIsInitialised:
-    gh.get_help()
-  OV.SetVar('last_help_box', name)
-  name = getGenericSwitchName(name).replace("h3-", "")
-  _= ""
-  md_box = True
-  if helpTxt == '#helpTxt':
-    try:
-      _ = OV.GetVar(name.upper().replace("-", "_"))
-      if _:
-        md_box = True
-    except:
-      pass
-
-  if not _:
-    if helpTxt and os.path.exists(helpTxt):
-      _ = open(helpTxt, 'r').read()
-
-    elif helpTxt:
-      _ = olx.GetVar(helpTxt,helpTxt)
-
-    elif not helpTxt or helpTxt == "#helpTxt":
-      _ = olx.GetVar(name,None)
-      _ = olx.GetVar(name.upper().replace("-", "_"),None)
-
-  helpTxt = _
-
-  if popout == 'false':
-    popout = False
-  else:
-    popout = True
-
-  if not name:
-    return
-  if "-h3-" in name:
-    t = name.split("-h3-")
-    help_src = t[1]
-    title = help_src.replace("-", " ")
-
-  if "h3-" in name:
-    t = name.split("h3-")
-    help_src = name
-    title = t[1].replace("-", " ")
-
-  elif "-" in name:
-    title = name.replace("-", " ")
-    help_src = name
-  else:
-    title = name
-    help_src = name
-#  titleTxt = OV.TranslatePhrase("%s" %title.title())
-  titleTxt = title
-  if box_type == "tutorial":
-    titleTxt = titleTxt
-    t = titleTxt.split("_")
-    if len(t) > 1:
-      titleTxt = "%s: %s" %(t[0], t[1])
-
-  title = title.title()
-  if not helpTxt or helpTxt == "None":
-    helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
-  helpTxt = helpTxt.replace("\r", "")
-  helpTxt, d = format_help(helpTxt)
-  d.setdefault('next',name)
-  d.setdefault('previous',name)
-
-  editLink = make_edit_link(name, box_type)
-
-  if box_type != "help":
-    banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" %box_type
-    banner_include += """
-
-<map name="map_tutorial">
-<!-- Button PREVIOUS -->
-    <area shape="rect" usemap="#map_setup"
-      coords="290,0,340,60"
-      href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
-
-<!-- Button NEXT-->
-    <area shape="rect"
-      coords="340,0,400,60"
-      href='spy.make_help_box -name=%(next)s -type=tutorial' target='%%next%%: %(next)s'>
-</map>
-    """ %d
-
-  else:
-    banner_include = ""
-  if not popout:
-    return_items = r'''
-  <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
-    <zimg border='0' src='popout.png'>
-  </a>
-  <a href=htmlhome><zimg border='0' src='return.png'>
-  </a>
-''' %name
-
-  else:
-    return_items = ""
-
-  if md_box:
-    d = {'title':titleTxt.replace("_", " "),
-         'body':helpTxt,
-         'font_size_base':OV.GetParam('gui.help.base_font_size','3'),
-         'font_colour':OV.GetParam('gui.help.font_colour').hexadecimal,
-         'bg_colour':OV.GetParam('gui.help.bg_colour').hexadecimal,
-         'h1_colour':OV.GetParam('gui.help.h1_colour').hexadecimal,
-         'h2_colour':OV.GetParam('gui.help.h2_colour').hexadecimal,
-         'h3_colour':OV.GetParam('gui.help.h3_colour').hexadecimal,
-         'highlight_colour':OV.GetParam('gui.help.highlight_colour').hexadecimal,
-         }
-    template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
-    p = OV.GetParam('gui.help.src', os.path.join(OV.BaseDir(), 'etc', 'help', 'gui'))
-    txt = get_template(template)%d
-
-  else:
-    txt = get_template('pop_help', base_path=p)
-    txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
-
-  wFilePath = r"%s-%s.htm" %(name, box_type)
-  wFilePath = wFilePath.replace(" ", "_")
-  #from ImageTools import ImageTools
-  #IT = ImageTools()
-  #txt = IT.get_unicode_characters(txt)
-  OV.write_to_olex(wFilePath, txt)
-
-  if box_type == 'help':
-    if md_box:
-      ws = olx.GetWindowSize('gl').split(',')
-      boxWidth = int(int(ws[2])*OV.GetParam('gui.help.width_fraction',0.3))
-      if boxWidth < 500:
-        boxWidth = 500
-      boxHeight = int(ws[3]) - 30
-      ws = olx.GetWindowSize().split(',')
-      x = int(ws[0]) + int(ws[2])//2 - boxWidth - 2
-      y = int(ws[1]) + 50
-
-    else:
-      boxWidth = OV.GetParam('gui.help_box.width')
-      length = len(helpTxt)
-      tr = helpTxt.count('<br>')
-
-      boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
-      if boxHeight > OV.GetParam('gui.help_box.height_max'):
-        boxHeight = OV.GetParam('gui.help_box.height_max')
-      if boxHeight < 150:
-        boxHeight = 150
-
-      x = 10
-      y = 50
-      mouse = True
-      if mouse:
-        mouseX = int(olx.GetMouseX())
-        mouseY = int(olx.GetMouseY())
-        y = mouseY
-        if mouseX > 300:
-          x = mouseX + 10 - boxWidth
-        else:
-          x = mouseX - 10
-  else:
-    if box_type == 'tutorial' and tutorial_box_initialised:
-      pass
-    else:
-      ws = olx.GetWindowSize().split(',')
-      x = int(ws[0])
-      y = int(ws[1]) + 50
-      ws = olx.GetWindowSize('gl').split(',')
-      boxWidth = int(400)
-      boxHeight = int(ws[3]) - 90
-
-  if popout:
-    if box_type == 'tutorial':
-      pop_name = "Tutorial"
-      name = "Tutorial"
-    else:
-      pop_name = "%s-%s"%(name, box_type)
-    if box_type == 'tutorial' and tutorial_box_initialised:
-      olx.Popup(tutorial_box_initialised, wFilePath)
-    else:
-      if md_box:
-        pop_name = "md_box"
-      pop_name = pop_name.replace(" ", "_")
-      title = 'Olex2 Help'
-      webview = False
-      if webview:
-        t = '''
-        <input type=webview value='%s' width='%s' height='%s'>
-        ''' %(wFilePath, boxWidth, boxHeight)
-        webView = r"md_web.htm"
-        OV.write_to_olex(webView, t)
-        wFilePath = webView
-
-      if "true" in olx.html.IsPopup(pop_name).lower():
-        olx.Popup(pop_name, wFilePath)
-      else:
-
-        olx.Popup(pop_name, wFilePath,
-          b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
-        olx.html.SetBorders(pop_name,5)
-      if box_type == 'tutorial':
-        tutorial_box_initialised = pop_name
-
-  else:
-    olx.html.Load(wFilePath)
-#  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
-
-OV.registerMacro(make_help_box, '''name-Name of the Box&;popout-True/False&;
-type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&'''
-)
 
 def get_template(name, base_path=None):
   return gui.tools.TemplateProvider.get_template(name)
@@ -674,27 +687,26 @@ def pandoc(kind='pdf', md_path=None, out_path=None):
   md = os.path.join(ac_path, 'AC5_classes.md')
   if kind == "tex":
     os.system('pandoc -o %s -f markdown -t latex %s' % (out_tex, md))
-    # temp_p = "D: \Users\Horst\Documents\Olex2-1.5-dev\util\pyUtil\PluginLib\plugin -StructureChecking"
-    #t_file = os.path.join(temp_p, "template.tex")
-    #tex = open(t_file, 'r').read() % d
-    #wFile = open(outfile, 'w')
-    # wFile.write(tex)
-    # wFile.close()
 
   else:
     os.system('pandoc %s -o %s' % (md, out_pdf))
-    #log = "C:/Users/Horst/AppData/Local/MiKTeX/2.9/miktex/log"
-
-def md_image_insert(t):
-  _ = re.findall(r"\!\[(.*?)\]\((.*?)\)", t)
-  for item in _:
-    caption = item[0]
-    #src = item[1]
-    src = md_image_prefixes(item[1])
-    insert = make_image_insert(src, caption=caption, do_trim=True, ID=item[1])
-    t = t.replace("![%s](%s)" %(caption, item[1]), insert)
-  return t
 
 OV.registerFunction(pandoc, False, 'help')
 
+
+def get_md_files_by_folder(root_folder):
+  md_files_dict = {}
+
+  # Walk through the directory tree
+  for folder_path, _, files in os.walk(root_folder):
+    if ".git" in folder_path:
+      continue
+    # Filter for .md files in the current folder
+    md_files = [file for file in files if file.endswith('.md')]
+
+    # Use the relative path of the folder as the key
+    relative_path = os.path.relpath(folder_path, root_folder)
+    md_files_dict[relative_path] = md_files
+
+  return md_files_dict
 
