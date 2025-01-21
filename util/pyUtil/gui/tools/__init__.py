@@ -2762,7 +2762,7 @@ class PlotIt():
       #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
       axes = [axes]
     
 
@@ -2800,7 +2800,7 @@ class PlotIt():
 
     self.fig.align_ylabels()
     p = os.path.join(OV.FilePath(), filename)
-    self.plt.ylim()
+    #self.plt.ylim(-0.0001, self.plt.ylim()[1])
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     #olx.Shell(p)
     self.plt.close()
