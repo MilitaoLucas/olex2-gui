@@ -98,21 +98,22 @@ class OlexFunctions(inheritFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
-  def GetHeaderParam(self, param, default=None):
-    ed = self.GetRefinementModel(False)['Generic']
-    if ed is None:
+  def GetHeaderParam(self, param, default=None, src=None):
+    if src == None:
+      src =  self.GetRefinementModel(False)['Generic']
+    if src is None:
       return default
     toks = param.split(".")
     for i, t in enumerate(toks):
       if (i+1) == len(toks):
         if t == 'value':
-          return ed.get('value', default)
+          return src.get('value', default)
         if t == 'fields':
-          return ed.get('fields', default)
+          return src.get('fields', default)
         else:
-          return ed['fields'].get(t, default)
-      ed = ed.get(t)
-      if ed is None:
+          return src['fields'].get(t, default)
+      src = src.get(t)
+      if src is None:
         return default
     return default
 
@@ -1283,7 +1284,7 @@ class OlexFunctions(inheritFunctions):
     return d_o(**d)
 
   #Somehow on localised Linux Unicode does not work
-  # may be wrongly assebled Python?
+  # may be wrongly assembled Python?
   def correct_rendered_text(self, t):
     if gui_encoding:
       return t.encode(gui_encoding)
@@ -1298,6 +1299,41 @@ class OlexFunctions(inheritFunctions):
 
   def get_bool_from_any(self, val):
     return val in [True, 'true', 'True']
+
+  def describe_refinement(self):
+    edr = self.IsEDRefinement()
+    nsf = self.GetParam("snum.NoSpherA2.use_aspherical")
+    name = ""
+    if edr or nsf: #only olex2.refine
+      name = "Dyn-" + self.GetACI().EDI.get_method_name()
+    else:
+      rp = self.GetParam("snum.refinement.program")
+      name += rp
+    if self.GetParam("snum.refinement.use_solvent_mask"):
+      name += "-mask"
+    if nsf:
+      name += "-NSF"
+
+    r1 = self.GetParam('snum.refinement.last_R1')
+    if r1 is not None:
+      name += "-R-%.2f" %(float(r1)*100)
+      wr2 = self.GetParam('snum.refinement.last_wR2')
+      if wr2 is not None:
+        name += "(%.2f)" %(float(wr2)*100)
+
+    return name
+
+  def update_HklSrc(self, lines: list, new_value: str):
+    for i in range(len(lines)):
+      if not lines[i].startswith("REM <HklSrc"):
+        continue
+      st = i
+      while lines[i].startswith("REM") and not lines[i].strip().endswith(">"):
+        if i >= len(lines):
+          break
+        del lines[i]
+      lines[st] = "REM <HklSrc \".\\\\%s\">" %new_value
+      return
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.

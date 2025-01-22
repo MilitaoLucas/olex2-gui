@@ -644,3 +644,33 @@ def set_openblas_thread_n(val):
     olx.Echo("Failed to set OpenBlas thread number", m="error")
 
 olex.registerFunction(set_openblas_thread_n, False, "gui")
+
+def create_history_branch(switch):
+  switch = OV.get_bool_from_any(switch)
+  name = OV.describe_refinement()
+  branch_name = OV.GetUserInput(1, "Branch name", name)
+  if not branch_name:
+    return
+  from History import hist, tree
+  current_node = tree.active_node
+  hist.create_history(True, branch_name)
+  if not switch:
+    tree.active_node = current_node
+  OV.htmlUpdate()
+
+olex.registerFunction(create_history_branch, False, "gui")
+
+def create_archive(node_id=None):
+  from datetime import datetime
+  from History import hist
+  now = datetime.now()
+  description = hist.describe_node(node_id) if node_id else OV.describe_refinement()
+  name = now.strftime("%Y-%m-%d_%H_%M-") + description + ".zip"
+  file_name = olx.FileSave("Archive name", "*.zip", olx.FilePath(), name)
+  #file_name = OV.GetUserInput(1, "File name", name)
+  if not file_name:
+    return
+  hist.create_archive(name, node_id)
+  print("%s data archive has been created" %name)
+
+olex.registerFunction(create_archive, False, "gui")

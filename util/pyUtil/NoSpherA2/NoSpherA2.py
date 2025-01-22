@@ -1113,7 +1113,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     import multiprocessing
     max_cpu = multiprocessing.cpu_count()
     cpu_list = ['1',]
-    hyperthreading = OV.GetParam('user.refinement.use_HT')
+    hyperthreading = OV.GetParam('user.refinement.has_HT')
     if not hyperthreading:
       max_cpu /= 2
     for n in range(1, int(max_cpu)):
@@ -1697,7 +1697,7 @@ def set_default_cpu_and_mem():
   import multiprocessing
   parallel = OV.GetVar("Parallel")
   max_cpu = multiprocessing.cpu_count()
-  hyperthreading = OV.GetParam('user.refinement.use_HT')
+  hyperthreading = OV.GetParam('user.refinement.has_HT')
   if not hyperthreading:
     max_cpu /= 2
   current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')

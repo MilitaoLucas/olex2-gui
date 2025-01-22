@@ -94,7 +94,7 @@ if __name__ == '__main__':
   plat = sys.platform + '-' + platform.architecture()[0]
   print('Compiling for: ' + plat)
   zip_names = compile(plat)
-  if len(zip_names) == 0:
+  if zip_names == False or len(zip_names) == 0:
     print('Compilation failed. Aborting...')
     sys.exit(1)
 
