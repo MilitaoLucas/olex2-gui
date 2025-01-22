@@ -1,4 +1,4 @@
-import os
+import sys, os
 import hashlib
 import os.path
 import shutil
@@ -94,9 +94,126 @@ class History(ArgumentParser):
 
   def rename_history(self, name, label=None):
     if label is None: return
+    label = label.strip()
+    if not label: return
     node = tree._full_index.get(name)
     assert node is not None
     node.label = label
+
+  def describe_node(self, node_id):
+    try:
+      node = tree._full_index.get(node_id)
+      assert node is not None
+      if node.is_root:
+        return node_id
+      if node.is_solution:
+        return "%s-%s" %(node.program, node.method)
+      else:
+        import olex_core
+        import phil_interface
+        from phil_interface import phil_handler
+        name = ""
+        res = decompressFile(node.res).decode("utf-8")
+        st = res.index("<olex2.extras>")
+        end = res.index("</olex2.extras>")
+        edr = src = None
+        if st >= 0 and end >=0:
+          params = res[st+14:end].replace("REM", "").replace("\n", "").replace("\r", "").strip()
+          src = olex_core.GetStoredParams(params).get('Generic', None)
+        if src:
+          edr = OV.GetHeaderParam("ED.refinement.method", "Kinematic", src=src) != "Kinematic" and\
+              node.program.startswith("olex2.refine")
+        phil = None
+        try:
+          phil = phil_handler(master_phil=phil_interface.parse(
+            file_name=os.path.join(olx.BaseDir(), "params.phil")),
+            parse=phil_interface.parse)
+          phil.adopt_phil(phil_file=os.path.join(olx.BaseDir(), "util", "pyUtil", "NoSpherA2", "NoSpherA2.phil"))
+          phil.update(phil_string=zlib.decompress(node.phil).decode("utf-8"))
+          olx.phil_handler.rebuild_index()
+        except:
+          phil = None
+          if OV.IsDebugging():
+            sys.stdout.formatExceptionInfo()
+        if phil:
+          nsf = phil.get_validated_param("snum.NoSpherA2.use_aspherical")
+          if (edr or nsf) and src: #only olex2.refine
+            name = "Dyn-" + OV.GetACI().EDI.get_method_name(src=src)
+          else:
+            rp = phil.get_validated_param("snum.refinement.program")
+            name += rp
+          if phil.get_validated_param("snum.refinement.use_solvent_mask"):
+            name += "-mask"
+          if nsf:
+            name += "-NSF"
+        else:
+          if node.is_solution:
+            name = node.program
+          else:
+            sn = node.solution_node
+            name = "%s-%s" %(sn.program, node.program)
+        if not node.is_solution:
+          name += "-R-%.2f(%.2f)" %(node.R1*100, node.wR2*100)
+        return name
+    except:
+      if OV.IsDebugging():
+        sys.stdout.formatExceptionInfo()
+      return node_id
+
+
+  def create_archive(self, name, node_id):
+    import zipfile
+    if node_id:
+      node = tree._full_index.get(node_id)
+      assert node is not None
+      filename = OV.FileName()
+      with zipfile.ZipFile(name, 'w') as zout:
+        res = decompressFile(node.res).decode("utf-8").split("\n")
+        OV.update_HklSrc(res, filename+".hkl")
+        zout.writestr(filename+".res", "\n".join(res), zipfile.ZIP_DEFLATED)
+        zout.writestr(filename+".hkl", decompressFile(tree.getHklData(node)), zipfile.ZIP_DEFLATED)
+        try:
+          if node.dyn is not None:
+            zout.writestr(filename+"_dyn_.cif_cap", decompressFile(tree.getDynData(node)), zipfile.ZIP_DEFLATED)
+        except AttributeError:
+          pass
+        try:
+          if node.cif_od is not None:
+            zout.writestr(filename+".cif_od", decompressFile(tree.getCifODData(node)), zipfile.ZIP_DEFLATED)
+        except AttributeError:
+          pass
+        try:
+          if node.phil:
+            zout.writestr("olex2/"+filename+".phil", zlib.decompress(node.phil), zipfile.ZIP_DEFLATED)
+        except AttributeError:
+          pass
+        if node.lst is not None:
+          zout.writestr(filename+".lst", decompressFile(node.lst), zipfile.ZIP_DEFLATED)
+    else:
+      file_exts = [".cif", ".fcf", ".cif_od", "_dyn_.cif_cap", ".lst", ".log", ".tsc", ".tscb"]
+      filename = OV.FileName()
+      filepath = OV.FilePath()
+      ffilename = os.path.join(filepath, filename)
+      with zipfile.ZipFile(name, 'w') as zout:
+        res_fn = ffilename + ".res"
+        if os.path.exists(res_fn):
+          res = [l.rstrip('\r\n') for l in open(res_fn, "r").readlines()]
+          OV.update_HklSrc(res, filename+".hkl")
+          zout.writestr(filename+".res", '\n'.join(res), zipfile.ZIP_DEFLATED)
+        try:
+          zout.writestr("olex2/"+filename+".phil", get_snum_data(), zipfile.ZIP_DEFLATED)
+        except:
+          pass
+        metacif = os.path.join(filepath, "olex2", filename) + ".metacif"
+        if os.path.exists(metacif):
+          zout.write(metacif, "olex2/"+filename+".metacif", zipfile.ZIP_DEFLATED)
+        hklSrc = OV.HKLSrc()
+        if os.path.exists(hklSrc):
+          zout.write(hklSrc, filename + ".hkl", zipfile.ZIP_DEFLATED)
+        for e in file_exts:
+          fn = ffilename + e
+          if os.path.exists(fn):
+            zout.write(fn, filename + e, zipfile.ZIP_DEFLATED)
 
   def revert_to_original(self):
     node = tree._full_index.get(OV.FileName())
@@ -291,7 +408,6 @@ class Node(object):
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
-
       else:
         self.program = OV.GetParam('snum.refinement.program')
         self.method = OV.GetParam('snum.refinement.method')
@@ -302,12 +418,7 @@ class Node(object):
         except:
           pass
       try:
-        from io import StringIO
-        out = StringIO()
-        olx.phil_handler.save_param_file(
-          file_name=None, out_stream=out,
-           scope_name='snum', diff_only=True)
-        self.phil = zlib.compress(out.getvalue().encode("utf-8"))
+        self.phil = zlib.compress(get_snum_data())
       except:
         self.phil = None
 
@@ -691,6 +802,17 @@ def digestData(fileData):
 def digestPath(filePath):
   return hashlib.md5(b'%f%s' %(os.path.getmtime(filePath),
                                filePath.encode('utf-8'))).hexdigest()
+def get_snum_data():
+  try:
+    from io import StringIO
+    out = StringIO()
+    olx.phil_handler.save_param_file(
+      file_name=None, out_stream=out,
+        scope_name='snum', diff_only=True)
+    return out.getvalue().encode("utf-8")
+  except:
+    return None
+
 def make_history_bars():
   if olx.GetVar("update_history_bars", 'true') == 'false':
     olx.UnsetVar("update_history_bars")
