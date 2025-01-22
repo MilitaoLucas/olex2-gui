@@ -98,21 +98,22 @@ class OlexFunctions(inheritFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
-  def GetHeaderParam(self, param, default=None):
-    ed = self.GetRefinementModel(False)['Generic']
-    if ed is None:
+  def GetHeaderParam(self, param, default=None, src=None):
+    if src == None:
+      src =  self.GetRefinementModel(False)['Generic']
+    if src is None:
       return default
     toks = param.split(".")
     for i, t in enumerate(toks):
       if (i+1) == len(toks):
         if t == 'value':
-          return ed.get('value', default)
+          return src.get('value', default)
         if t == 'fields':
-          return ed.get('fields', default)
+          return src.get('fields', default)
         else:
-          return ed['fields'].get(t, default)
-      ed = ed.get(t)
-      if ed is None:
+          return src['fields'].get(t, default)
+      src = src.get(t)
+      if src is None:
         return default
     return default
 
@@ -1321,6 +1322,18 @@ class OlexFunctions(inheritFunctions):
         name += "(%.2f)" %(float(wr2)*100)
 
     return name
+
+  def update_HklSrc(self, lines: list, new_value: str):
+    for i in range(len(lines)):
+      if not lines[i].startswith("REM <HklSrc"):
+        continue
+      st = i
+      while lines[i].startswith("REM") and not lines[i].strip().endswith(">"):
+        if i >= len(lines):
+          break
+        del lines[i]
+      lines[st] = "REM <HklSrc \".\\\\%s\">" %new_value
+      return
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.

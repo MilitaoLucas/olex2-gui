@@ -660,7 +660,17 @@ def create_history_branch(switch):
 
 olex.registerFunction(create_history_branch, False, "gui")
 
-def create_snapshot(label):
-  print("Creating snapshot for: %s" %label)
+def create_archive(node_id=None):
+  from datetime import datetime
+  from History import hist
+  now = datetime.now()
+  description = hist.describe_node(node_id) if node_id else OV.describe_refinement()
+  name = now.strftime("%Y-%m-%d_%H_%M-") + description + ".zip"
+  file_name = olx.FileSave("Archive name", "*.zip", olx.FilePath(), name)
+  #file_name = OV.GetUserInput(1, "File name", name)
+  if not file_name:
+    return
+  hist.create_archive(name, node_id)
+  print("%s data archive has been created" %name)
 
-olex.registerFunction(create_snapshot, False, "gui")
+olex.registerFunction(create_archive, False, "gui")
