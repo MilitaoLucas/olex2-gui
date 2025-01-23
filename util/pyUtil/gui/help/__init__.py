@@ -136,6 +136,8 @@ class GetHelp(VFSDependent):
     return txt
 
   def _initialise_all_help_d(self):
+    if olexex.check_for_recent_update():
+      os.remove(self.all_help_d_file)
     if not self.all_help_d:
       if os.path.exists(self.all_help_d_file):
         with open(self.all_help_d_file, 'rb') as rFile:
