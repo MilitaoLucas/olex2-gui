@@ -222,6 +222,11 @@ class OlexRefinementModel(object):
     'exyz':'site',
   }
 
+  def is_adp_restraint(self, r):
+    return r in (
+          'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
+          'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
+
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
     self._atoms = []
@@ -323,6 +328,19 @@ class OlexRefinementModel(object):
     from cctbx import sgtbx
     from smtbx.refinement.constraints import adp, site
     redundant_adp = {}
+    fixed_adp = []
+    fixed_xyz = []
+    for i, a in enumerate(self._atoms):
+      behaviour_of_variable = [True]*12
+      fixed_vars = self._fixed_variables.get(i)
+      if fixed_vars is not None:
+        for var in fixed_vars:
+          behaviour_of_variable[var['index']] = False
+      if not all(behaviour_of_variable[:3]):
+        fixed_xyz.append(i)
+      if not all(behaviour_of_variable[-6:]):
+        fixed_adp.append(i)
+
     if shared_parameters: # filter out shared ADP
       for sp in shared_parameters:
         if isinstance(sp, adp.shared_u):
@@ -343,17 +361,23 @@ class OlexRefinementModel(object):
           i_seqs = [i[0] for i in restraint['atoms']]
           if not i_seqs:
             if restrained_set:
-              i_seqs = set(range(1, len(self._atoms)))-restrained_set
-              restrained_set.update(i_seqs)
-              i_seqs = [(x, None) for x in i_seqs]
-              restraint['atoms'] = i_seqs
+              i_seqs = set(range(1, len(self._atoms))) - restrained_set - set(fixed_adp)
+              if not i_seqs:
+                continue
+              restraint['atoms'] = [(x, None) for x in i_seqs]
+            elif fixed_adp:
+              all_atoms = set(range(1, len(self._atoms))) - set(fixed_adp)
+              if not all_atoms:
+                continue
+              restraint['atoms'] = [(x, None) for x in all_atoms]
             filtered_restraints.append(restraint)
             break
           else:
-            new_i_seqs = [x for x in i_seqs if x not in restrained_set]
+            new_i_seqs = [x for x in i_seqs if x not in restrained_set and x not in fixed_adp]
             if not new_i_seqs:
               continue
             restrained_set.update(new_i_seqs)
+            restraint['atoms'] = [(x, None) for x in new_i_seqs]
           filtered_restraints.append(restraint)
         else:
           filtered_restraints.append(restraint)
@@ -361,23 +385,18 @@ class OlexRefinementModel(object):
       for restraint in filtered_restraints:
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
-
-        if restraint_type == 'rigu':
-          # removed isotropic atoms from RIGU restraint
-          i_seqs = []
-          for atom_restraint in restraint['atoms']:
-            if 'adp' in self._atoms[atom_restraint[0]]:
-              i_seqs.append(atom_restraint[0])
-          if len( restraint['atoms']) > 0 and len(i_seqs) < 2:
-            print("Skipping invalid RIGU restraint - more than 2 anisotropic atoms expected")
-            continue
-        else:
-          i_seqs = [i[0] for i in restraint['atoms']]
-
+        i_seqs = [i[0] for i in restraint['atoms']]
         kwds = dict(i_seqs=i_seqs)
-        if restraint_type not in (
-          'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
-          'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp'):
+        if not self.is_adp_restraint(restraint_type):
+          fixed_count = 0
+          for i in restraint['atoms']:
+            if i[0] in fixed_xyz:
+              fixed_count += 1
+          if fixed_count == len(restraint['atoms']):
+            if OV.IsDebugging():
+              print("Skipping geometrical restraint (all atoms have fixed coordinates): %s %s" %(
+                restraint_type, " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
+            continue
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
