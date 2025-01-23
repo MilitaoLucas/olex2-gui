@@ -117,18 +117,6 @@ class hydrogen_atom_constraints_customisation(object):
     self.reparametrisation = reparametrisation
     scatterers = reparametrisation.structure.scatterers()
     self.pivot_site = scatterers[i_pivot].site
-    if not scatterers[i_pivot].flags.grad_site():
-      if OV.IsDebugging():
-        print("Skipping conflicting AFIX for %s" %scatterers[i_pivot].label)
-      return
-    # check for fixed coordinates
-    for i_sc in self.src.constrained_site_indices:
-      sc = scatterers[i_sc]
-      if not sc.flags.grad_site():
-        if OV.IsDebugging():
-          print("Skipping conflicting AFIX for %s" %scatterers[i_pivot].label)
-        return
-
     self.pivot_site_param = reparametrisation.add_new_site_parameter(i_pivot)
     self.pivot_neighbour_sites = ()
     self.pivot_neighbour_site_params = ()
