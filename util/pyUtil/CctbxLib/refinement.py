@@ -73,13 +73,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
     self.weighting = weighting
     if self.weighting is None:
-      weight = self.olx_atoms.model['weight']
-      params = dict(a=0.1, b=0,
-                    #c=0, d=0, e=0, f=1./3,
-                    )
-      for param, value in zip(list(params.keys())[:min(2,len(weight))], weight):
-        params[param] = value
-      self.weighting = least_squares.mainstream_shelx_weighting(**params)
+      self.weighting = self.get_shelxl_weighting()
 
   def run(self,
           build_only=False, #return normal normal equations object
@@ -1384,6 +1378,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       # pivot_neighbours excludes dependent atoms
       if len(dependent) == 0: continue
+      if not (m == 0 or m in rigid_body): continue
       valid = True
       if not scatterers[pivot].flags.grad_site():
         valid = False
@@ -1410,44 +1405,44 @@ class FullMatrixRefine(OlexCctbxAdapter):
         new_crd = i_f.fit(frag, sites)
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
-      if m == 0 or m in rigid_body:
-        current = None
-        if n in(6, 9):
-          current = rigid.rigid_rotatable_expandable_group(
-            pivot, dependent, n == 9, True)
-        elif n in (3,4,7,8):
-          if n in (3,4):
-            current = rigid.rigid_riding_expandable_group(
-              pivot, dependent, n == 4)
-          elif len(pivot_neighbours) < 1:
-            print("Invalid rigid group for " + scatterers[pivot].label)
-          else:
-            neighbour = pivot_neighbours[0]
-            for n in pivot_neighbours[1:]:
-              if type(n) != tuple:
-                neighbour = n
-                break
-            if type(neighbour) == tuple:
-              olx.Echo("Could not create rigid rotating group based on '%s' " %(
-                        scatterers[pivot].label) +
-                       "because the pivot base is symmetry generated, creating " +
-                       "rigid riding group instead - use 'compaq -a' to avoid "+
-                       "this warning", m="warning")
-              current = rigid.rigid_riding_expandable_group(
-                pivot, dependent, False)
-            else:
-              current = rigid.rigid_pivoted_rotatable_group(
-                pivot, neighbour, dependent,
-                sizeable=n in (4,8),  #nm 4 never coming here from the above
-                rotatable=n in (7,8))
 
-        if current and current not in rigid_body_constraints:
-          rigid_body_constraints.append(current)
-          sizable = (n==4 or n==8 or n== 9)
-          if pivot_neighbours:
-            self.fix_rigid_group_params(pivot_neighbours[0], pivot, dependent, sizable)
+      current = None
+      if n in(6, 9):
+        current = rigid.rigid_rotatable_expandable_group(
+          pivot, dependent, n == 9, True)
+      elif n in (3,4,7,8):
+        if n in (3,4):
+          current = rigid.rigid_riding_expandable_group(
+            pivot, dependent, n == 4)
+        elif len(pivot_neighbours) < 1:
+          print("Invalid rigid group for " + scatterers[pivot].label)
+        else:
+          neighbour = pivot_neighbours[0]
+          for n in pivot_neighbours[1:]:
+            if type(n) != tuple:
+              neighbour = n
+              break
+          if type(neighbour) == tuple:
+            olx.Echo("Could not create rigid rotating group based on '%s' " %(
+                      scatterers[pivot].label) +
+                      "because the pivot base is symmetry generated, creating " +
+                      "rigid riding group instead - use 'compaq -a' to avoid "+
+                      "this warning", m="warning")
+            current = rigid.rigid_riding_expandable_group(
+              pivot, dependent, False)
           else:
-            self.fix_rigid_group_params(None, pivot, dependent, sizable)
+            current = rigid.rigid_pivoted_rotatable_group(
+              pivot, neighbour, dependent,
+              sizeable=n in (4,8),  #nm 4 never coming here from the above
+              rotatable=n in (7,8))
+
+      if current and current not in rigid_body_constraints:
+        rigid_body_constraints.append(current)
+        sizable = (n==4 or n==8 or n== 9)
+        if pivot_neighbours:
+          self.fix_rigid_group_params(pivot_neighbours[0], pivot, dependent, sizable)
+        else:
+          self.fix_rigid_group_params(None, pivot, dependent, sizable)
 
     return rigid_body_constraints
 
@@ -1467,7 +1462,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       15: ("polyhedral_bh_site"                      , 5),
       16: ("terminal_linear_ch_site"                 , 1),
     }
-
+    scatterers = self.xray_structure().scatterers()
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       if len(dependent) == 0: continue
       info = constraints.get(m)
@@ -1477,6 +1472,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
           geometrical.hydrogens, constraint_name)
         rotating = n in (7, 8)
         stretching = n in (4, 8)
+        valid = True
+        if not scatterers[pivot].flags.grad_site() and n not in(4, 7, 8):
+          valid = False
+        if valid:
+          # check for fixed coordinates
+          for i_sc in dependent:
+            sc = scatterers[i_sc]
+            if not sc.flags.grad_site():
+              valid = False
+              break
+        if not valid:
+          print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+          continue
         if bond_length == 0:
           bond_length = None
         kwds = {
