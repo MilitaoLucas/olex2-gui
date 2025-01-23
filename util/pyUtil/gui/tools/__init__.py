@@ -2877,6 +2877,7 @@ class PlotIt():
     #N = len(xs)
     #colours = cmap(np.linspace(0, 1, N))
     y_list = []
+    x_list = []
     for x, y in zip(xs, ys):
       if not colour or colour == "auto_scale":
         if not cmap:
@@ -2890,10 +2891,12 @@ class PlotIt():
         c_count += 1
       label = None
       y_list.append(y)
+      x_list.append(x)
+            
       ax.plot(x,
               y,
               marker=get_property(marker, i),
-              color=get_property(colour, i),
+              #color=get_property(colour, i),
               markersize=get_property(markersize, i),
               linewidth=self.plt_params.ax1.line_width,
               linestyle=get_property(linestyle, i),
@@ -2902,14 +2905,6 @@ class PlotIt():
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
               )
       i += 1
-
-
-
-
-      #if labels and len(labels)==len(xs):
-        #for x, label in zip(y, labels):
-          #self.plt.plot(x, y, label=label)
-      #self.plt.legend()
 
       colour = None
       ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
@@ -2921,17 +2916,29 @@ class PlotIt():
     margin = 0.03  # Add 3% margin
     data_min = min(min(y) for y in y_list)
     data_max = max(max(y) for y in y_list)
-  
     # Adjust for margin if necessary
     data_min -= margin * (data_max - data_min)
     data_max += margin * (data_max - data_min)
     self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
 
+    ax.margins(x=0.1)
+    
+    if lim_x != 1:
+      self.plt.xlim(-1* lim_x, lim_x)
+      
+    else:
+      ax.margins(x=0.1)
+      data_min = min(min(x) for x in x_list)
+      data_max = max(max(x) for x in x_list)
+      # Adjust for margin if necessary
+      data_min -= margin * (data_max - data_min)
+      data_max += margin * (data_max - data_min)
+      self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+
     if legend:
       ax.margins(y=0.25)
       ax.legend(legend, loc='upper right', ncol=2)
-    if lim_x:
-      self.plt.xlim(-1 * lim_x, lim_x)
     ax.tick_params(axis='y', labelcolor=ax_colour)
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
