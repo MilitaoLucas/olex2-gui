@@ -703,3 +703,77 @@ t:battery_gui{
   </table>
 }
 
+
+t:md_box{
+<body link="#585886" bgcolor='%(bg_colour)s'>
+<font size='%(font_size_base)s' color='#333355' face="$GetVar(HtmlFontName)">
+<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
+  <tr bgcolor='%(bg_colour)s'>
+    <td bgcolor='%(bg_colour)s'>
+      <font color='white' size='6' >
+      <b>
+      %(title)s
+      </b>
+      </font>
+    </td>
+  </tr>
+</table>
+
+<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
+  <tr bgcolor='%(bg_colour)s'>
+    <td bgcolor='%(bg_colour)s'>
+      <font color='%(font_colour)s'>
+        %(body)s
+      </font>
+    </td>
+  </tr>
+</table>
+</body>
+}
+
+
+}
+
+t:edit_help{
+<a href='shell %s'><font color="$GetVar('HtmlHighlightColour')">Edit</font></a> |
+}
+
+t:compile_help{
+<a href="spy.githelp.git_help(False, '%s', True)>>spy.make_help_box -name=$GetVar(last_help_box)>>$SetVar(last_help_box,' ')"
+"><font color="$GetVar('HtmlHighlightColour')">Recompile</font></a><p>
+}
+
+
+t:gui_link{
+#value=
+#width=100%
+#height=$GetVar('HtmlComboHeight')
+#name=#value
+#fit=false
+#flat=false
+#disabled=false
+#fgcolor=#ffffbb
+#bgcolor=#222222
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="#name"
+  value="#value"
+  width="#width"
+  height="#height"
+  onclick="#onclick"
+  fgcolor="#fgcolor"
+  bgcolor="#bgcolor"
+  fit="#fit"
+  flat="true"
+  disabled="#disabled"
+></b>
+</font>}
+
+t:help_image_html{
+<p align='center'>
+<p align="center"><zimg width='%(width)s' src='%(img_src)s'></p>
+<br>
+<p>%(alt)s</p>
+}
+
