@@ -209,10 +209,7 @@ class GetHelp(VFSDependent):
       if debug:
         print(f"Help for: {srcDir}")
       if os.path.exists(help_done_marker_file):
-        if force:
-          os.remove(help_done_marker_file)
-        else:
-          continue
+        os.remove(help_done_marker_file)
       for fFile in matches[fPath]:
         md_file = os.path.join(srcDir, fFile)
         with open(md_file, encoding="utf8", errors='ignore') as f:
@@ -221,18 +218,18 @@ class GetHelp(VFSDependent):
         self.parse_help(fc, srcDir, md_file)
 
       self.all_help_d['paths'].append(srcDir)
-      try:
-        wFile = open(help_done_marker_file, 'w')
-        wFile.close()
-      except:
-        t = f'''
-        ==========================================================================
-        The help system tried to write a file, but this file could not be written:\n
-        {os.path.exists(help_done_marker_file)}\n
-        Please restart Olex2 in Admin mode.
-        ==========================================================================
-        '''
-        print(t)
+      #try:
+        #wFile = open(help_done_marker_file, 'w')
+        #wFile.close()
+      #except:
+        #t = f'''
+        #==========================================================================
+        #The help system tried to write a file, but this file could not be written:\n
+        #{os.path.exists(help_done_marker_file)}\n
+        #Please restart Olex2 in Admin mode.
+        #==========================================================================
+        #'''
+        #print(t)
 
     with open(self.all_help_d_file, 'wb') as pickle_file:
       pickle.dump(self.all_help_d, pickle_file)

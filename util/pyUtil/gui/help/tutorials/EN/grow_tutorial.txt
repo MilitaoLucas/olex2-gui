@@ -1,0 +1,120 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+c:showq false
+
+p:This tutorial will show you how to use **grow** on a molecule. Sometimes the asymmetric unit consists only of part of the molecular unit and this needs to be expanded to see the whole picture.
+
+p:First we need to load an extended structure model, so for this we will use <b>Timmy</b> from the <b>Sample Structures</b>.
+c:freeze(true)
+c:reap DataDir()/samples/Timmy/Timmy.cif
+c:spy.revert_to_original()
+c:mpln -n
+c:freeze(false)
+c:refresh
+
+p:The next thing to do is to set the command window to automatic zoom so that all atoms in the structure always remain in view.
+
+p:First, enter `echo extrazoom()` in the command line to check what the current value is (it is usually **1.25**).
+c:echo extrazoom()
+
+p:Once you've checked this value you can change it to any value you want. Here we are going to change it to **1**, so enter in `echo extrazoom(1)`. (This is optional, and the exact value varies from structure to structure.)
+c:echo extrazoom(1)
+
+p:Before the **extrazoom** command takes effect, you need to type in `<c>fuse</c>` at the command line to display only the asymmetric unit. This is a very frequently used command.
+c:fuse
+
+p:This should now make the screen automatically zoom in or out to fit all the atoms.
+
+p:In order to make the molecule grow we need to click on the tab marked <b>View</b>.
+h:tab-view
+c:spy.demo.switch_tab_for_tutorials(view)
+
+p:Then click on the tab marked <b>Symmetry Generation</b>.
+h:h2-symmetry-generation
+c:html.ItemState h2-view-symmetry-generation 1
+
+p:Click on the tab marked <b>Growing</b> in order to access some of the different grow modes.
+h:h3-Growing
+c:html.ItemState h3-Growing 1
+
+p:In the expanded tab you can select three different modes of growing.
+
+p:<b>Short</b> allows you to grow the molecule by one extra molecule each time, in order to show short intermolecular interactions.
+c:html.setbg(GROW_SHORT,red)
+c:html.setstate(GROW_SHORT,true)
+
+p:In order to expand the structure on the screen to include nearby molecules, select one of the options under the <b>Mode Grow</b> drop-down menu.
+h:button-Grow_Mode
+c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
+
+p:You can now make the structure on the screen grow by one molecular unit whenever you click on any dashed line bond. The screen may not auto zoom if you select one of the methods from the <b>Growing</b> tool tab...
+
+p:...but you can use the command line '<c>grow</c>' which will make the molecule grow by one each time the command is entered, and the screen will auto zoom.
+c:mode off
+c:grow
+c:html.setstate(GROW_SHORT,false)
+c:refresh
+
+p:To return the model back to a single molecule, simply click on the tab <b>Symmetry Tools</b>, then click on the button <b>Fuse</b> or you could simply type in the command '<c>fuse</c>'.
+h:h3-Symmetry-Tools
+c:html.ItemState h3-symmetry-tools 1
+h:three-Fuse
+c:fuse
+c:refresh
+
+p:The next mode to look at is <b>Selection</b>, which requires you to select an atom before you choose <b>Selection</b> from the <b>Mode Grow</b> drop-down menu. Then, when you click on a dashed line bond, another molecule will be generated from the position of the selected atom.
+c:html.ItemState h3-symmetry-tools 2
+c:html.setbg(GROW_SELECTION,red)
+c:html.setstate(GROW_SELECTION,true)
+c:sel N3
+c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
+
+p:You can also use line commands for this mode as well. Simply select an atom in the structure or use the line command '<c>sel [atom]</c>', then type '<c>mode grow -r</c>'.
+c:mode grow -r
+
+p:Selecting a dashed line bond will then cause the structure to grow using the selection mode.
+c:sgen 1+X,+Y,+Z
+c:mode off
+c:zoom(-0.052994)
+c:html.setstate(GROW_SELECTION,false)
+c:html.setbg(GROW_SELECTION,lightgrey)
+c:rota y 90
+
+p:Another mode you can use is the <b>VdW (Van der Waals)</b> which will show weak intermolecular forces occurring among the molecules.
+c:fuse
+c:html.setbg(GROW_VDW,red)
+c:html.setstate(GROW_VDW,true)
+
+p:You do this by selecting <b>VdW</b> from the <b>Mode Grow</b> drop-down menu.
+c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
+
+p:You can now, using the dashed line bonds, grow another molecule that has a weak interaction with the current model.
+c:sgen 3-X,-Y,,2-Z
+c:zoom(-0.045)
+
+p:There is also another grow command that doesn't appear on the GUI, which allows you to grow nearby fragments atom by atom as opposed to growing the structure by entire molecules.
+c:mode off
+c:fuse
+c:mpln -n
+c:html.setstate(GROW_VDW,false)
+c:html.ItemState h3-growing 2
+c:html.ItemState h2-view-symmetry-generation 2
+
+p:In order to do this, enter in the command '<c>grow -s</c>'. You can keep repeating the command quickly using the up arrow on the keyboard (which repeats the previous command) rather than typing it out repeatedly.
+c:grow -s
+
+p:The screen display should still auto zoom since you are using a command and not the GUI to grow the structure.
+c:grow -s
+
+p:And again the '<c>fuse</c>' command can be used in order to revert back to the asymmetric unit.
+c:fuse
+
+p:End of tutorial. Press 'Next' to repeat the tutorial or 'Cancel' to exit.
