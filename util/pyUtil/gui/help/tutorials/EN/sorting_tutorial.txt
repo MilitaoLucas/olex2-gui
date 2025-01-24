@@ -1,0 +1,127 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState tab* 2
+c:html.ItemState index-home 1
+c:lines 10
+c:showq false
+
+p:This tutorial will show you how to use the sorting options in Olex2. The first thing this tutorial will do is to load <b>Sucrose</b> as an example to show this.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:mpln -n
+c:showQ a false
+c:showQ b false
+c:freeze(false)
+
+p:Click on the <b>Work</b> tab in the top toolbar.
+h:tab-work
+c:spy.demo.switch_tab_for_tutorials(work)
+
+p:Then select the <b>Sorting</b> tool tab.
+h:h2-sorting
+c:html.ItemState h2-work-sorting 1
+
+p:The four drop-down menus under <b>Sort Order</b> in this tool tab allow atoms to be sorted in any desired order, e.g., by part number first, then by atomic number (<i>Z</i>), and finally by atomic label. For now, we will select 'None' under the <b>Moiety</b> drop-down menu (we will return to this later in the tutorial).
+c:html.setvalue(sorting_cat1, Part)
+c:html.setvalue(sorting_cat2, Z)
+c:html.setvalue(sorting_cat3, Label)
+c:html.setvalue(sorting_cat4, None)
+c:spy.SetParam('user.sorting.cat1', html.GetValue('sorting_cat1'))
+c:spy.SetParam('user.sorting.cat2', html.GetValue('sorting_cat2'))
+c:spy.SetParam('user.sorting.cat3', html.GetValue('sorting_cat3'))
+c:spy.SetParam('user.sorting.cat4', html.GetValue('sorting_cat4'))
+c:html.setvalue(sorting_moiety, None)
+c:spy.SetParam('user.sorting.moiety', html.GetValue('sorting_moiety'))
+
+p:Clicking the <b>Sort</b> button will re-sort the atoms in the structure according to your preferences selected from the drop-down menu and output the sorted list on the screen.<br>Note that hydrogen atoms will generally be listed immediately after the atoms they're attached to in the instruction file.
+h:small-Sort
+c:spy.gui.do_sort()
+c:refresh
+
+p:After sorting, select all atoms and type 'info' in the command line to print out a table of results (atomic coordinates, Ueq's, etc.) in the command window.
+c:sel $*
+c:info
+c:refresh
+
+p:In order to see all the lines of text in the command window, type the command '<c>lines -1</c>' (used to display all lines).
+c:lines -1
+c:refresh
+
+p:If there is still insufficient space on the screen to view the entire table, you can open a text file containing all the screen output by clicking on the notepad icon at the top of the GUI window. You can also open this text file by typing '<c>text</c>'.
+h:toolbar-text
+c:text
+
+p:To remove the clutter from the output in the text file, type in the command '<c>clear</c>' first to clear the display screen.
+c:clear
+
+p:Next, select all atoms and sort them as desired.
+#c:html.call(IMG_BUTTON-SORT.onclick)
+c:sel $*
+c:spy.gui.do_sort()
+
+p:Now type '<c>info</c>' again to display the table.
+c:info
+
+p:To open the whole data table in a new, uncluttered text file, click on the notepad icon as before or type '<c>text</c>'.
+c:text
+
+p:It is also possible to sort from the command line. For example, '<c>sort +al</c>' will sort the table alphabetically by atom label, after which the results can be displayed with the '<c>info</c>' command as before.<br><br>Note that the order of atoms in alphabetical sorting is C, H, then all other atoms in alphabetical order.
+c:sort +al
+c:sel $*
+c:info
+c:refresh
+
+p:To sort by atomic mass, type '<c>sort +m</c>'. The '<c>info</c>' command will again display the re-sorted table.
+c:sort +m
+c:sel $*
+c:info
+c:refresh
+
+p:The last function in the <b>Sorting</b> tab is <b>Moieties</b>, which allows you to sort atoms in structures like <b>ZP2</b>, that have more than one molecular entity in the asymmetric unit, in a split format. <b>ZP2</b> will now be loaded.
+c:freeze(true)
+c:reap 'DataDir()/samples/ZP2/ZP2'
+c:spy.revert_to_original()
+c:freeze(false)
+
+p:Select an option such as 'Mass' from the <b>Moiety</b> drop-down menu to sort the moieties by mass first. (In this case, both moieties have the same mass.) Next, click on the <b>Sort</b> button as before to sort atoms <i>separately in each moiety</i>.
+c:html.setvalue(sorting_moiety, Mass)
+c:spy.SetParam('user.sorting.moiety', html.GetValue('sorting_moiety'))
+c:spy.gui.do_sort()
+c:refresh
+
+p:You can view the resulting data table (after selecting all the atoms) with the '<c>info</c>' (or '<c>text</c>') command as above. Within each moiety, the atoms will be sorted according to the sort order chosen in the GUI, e.g., by part, then by atomic number, then by atom label.
+c:clear
+c:sel $*
+c:info
+c:refresh
+
+p:You can combine these sorting options to get various types of sorted tables. For example, sorting by moiety can be combined with sorting by mass and label by typing into the command line '<c>sort +ml moiety</c>'.
+c:sort +ml moiety
+c:refresh
+
+p:Selecting all atoms and typing '<c>info</c>' displays the usual atomic information as a table containing atoms sorted by their respective masses and labels but still ordered by moiety.
+c:sel $*
+c:info
+c:refresh
+
+p:The order of appearance of molecules in the moiety list can also be rearranged as follows. In the example we are using, enter '<c>sort +ml moiety F2 F1</c>' to switch the moiety order.
+c:sort +ml moiety F2 F1
+c:refresh
+
+p:As before, select all atoms and type '<c>info</c>' (or '<c>text</c>') to view the resulting table.
+c:sel $*
+c:info
+c:refresh
+
+p:Type '<c>help sort</c>' to see all the options available.
+c:help sort
+c:refresh
+
+p:End of tutorial. Press 'Next' to repeat the tutorial or 'Cancel' to exit.
