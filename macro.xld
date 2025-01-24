@@ -1539,6 +1539,13 @@
       <cmd1 "@py 'import sys\nfor x in sys.path:\n  print(x)'">
 >>>
 
+<NeutronHDist help="Updates AFIX n=3,7 with distances in BaseDir()/etc/neutron.dist + app.SharedDir()/etc/neutron.dist"
+  <body
+    <args>
+    <cmd
+      <cmd1 "UpdateAfix BaseDir()/etc/neutron.dist app.SharedDir()/etc/neutron.dist">
+>>>
+
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
