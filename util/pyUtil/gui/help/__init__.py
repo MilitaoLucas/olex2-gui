@@ -210,12 +210,8 @@ class GetHelp(VFSDependent):
         print(f"Help for: {srcDir}")
       if os.path.exists(help_done_marker_file):
         if force:
-          print(f" (force)")
           os.remove(help_done_marker_file)
         else:
-          print(f".")
-          if debug:
-            pass
           continue
       for fFile in matches[fPath]:
         md_file = os.path.join(srcDir, fFile)
