@@ -1,0 +1,100 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+c:showq false
+
+p:This tutorial will explain how to set up different types of maps in order to help understand the structure better. The first thing this tutorial will do is to load <b>Sucrose</b> as an example to show this.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
+
+p:First <b>Tools</b> needs to be opened by clicking on it.
+h:tab-tools
+c:spy.demo.switch_tab_for_tutorials(tools)
+
+p:You then need to click on the <b>Maps</b> tab.
+h:h2-Maps
+c:html.ItemState h2-tools-maps 1
+
+p:From this screen you can create a map for your 3D model. Let's start by creating a mask for the model.
+
+p:To run a mask you first need to click on the <b>Masks</b> tab.
+h:h3-Masks
+c:html.ItemState h3-masks 1
+
+p:Once in the tab, leave all the numbers at their default values.
+
+p:Now click on the button marked <b>Mask</b>.
+h:small-Mask
+c:spy.gui.maps.MaskView()
+c:spy.OlexCctbxMasks()
+c:refresh
+
+p:Once you have generated a mask you can then go back to the <b>Maps</b> part of the tab and select a different type of plane to view by selecting the drop down box next to 'View'.
+c:html.setbg(SET_SNUM_XGRID_VIEW_maps,red)
+c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,plane)
+c:xgrid.rendermode(plane)
+c:html.call(SET_SNUM_XGRID_VIEW_maps.onchange)
+c:refresh
+
+p:You can then select the type of map you would like. The default selection is normally 'plane' which will be a dark square but let's try selecting 'contour+plane' and see what happens.
+c:html.ItemState h3-masks 2
+c:html.setbg(SET_SNUM_XGRID_VIEW_maps,white)
+c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,contour+plane)
+c:xgrid.rendermode(contour+plane)
+c:refresh
+
+p:It is recommended to try the different views in order to find one suited to your needs.
+
+p:You can change the depth of the plane by using the slider. For example, let's change this to a value of <b>2.4</b>.
+c:html.setbg(snum_xgrid_depth_slide,red)
+c:html.setvalue(snum_xgrid_depth_slide,12)
+c:html.setvalue(snum_xgrid_depth_value,2.4)
+c:xgrid.depth(math.eval(html.getvalue(snum_xgrid_depth_slide)/5))
+c:html.setvalue(snum_xgrid_depth_value,math.eval(html.getvalue(snum_xgrid_depth_slide)/5))
+c:refresh
+
+p:You can also alter the depth of the plane by holding the 'Ctrl' key and using the left mouse button to click on the plane, while making sure not to select any of the molecule.
+
+p:Then, moving the mouse while holding these buttons, you can alter the depth of the plane.
+
+p:You may also want to change the colour of the plane in order to make it more obvious when a part of the molecule is behind it.
+
+p:To do this right-click on the plane and select <b>Draw Style</b>. This then allows you to alter the colours and choose a darker shade through the options on the window.
+c:html.setvalue(snum_xgrid_depth_slide,0)
+c:html.setvalue(snum_xgrid_depth_value,0)
+c:xgrid.depth(math.eval(html.getvalue(snum_xgrid_depth_slide)/5))
+c:html.setvalue(snum_xgrid_depth_value,math.eval(html.getvalue(snum_xgrid_depth_slide)/5))
+c:refresh
+
+p:There are also other types of maps you can use by selecting one of the other tabs, such as <b>Electron Density</b>.
+h:h3-Electron-Density
+c:html.ItemState h3-electron-density 1
+
+p:This will allow you to see the electron densities in the maps and will also change as you move the molecule through the plane.
+
+p:To do this all you need to do is click on the button marked <b>Map</b>.
+h:button_small-Map
+#c:spy.mapview()
+c:spy.gui.maps.MapView()
+c:refresh
+
+p:To change the way the densities are shown, click on the drop down box marked 'View' in <b>Maps</b>.
+c:html.setbg(SET_SNUM_XGRID_VIEW_maps,red)
+
+p:Let's see what happens when we change it to <b>contour</b>.
+c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,contour)
+c:xgrid.rendermode(contour)
+c:refresh
+
+p:End of tutorial. Press 'Next' to repeat the tutorial or 'Cancel' to exit.
+c:spy.gui.maps.mapview()
+c:refresh

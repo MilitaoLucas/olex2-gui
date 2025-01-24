@@ -1,0 +1,158 @@
+## Please note that all actions from all_tutorials_preamble.txt will be added here!
+
+c:html.ItemState home-start 2
+c:showQ a True
+c:showQ b False
+
+p:Welcome to this introductory <font color="rgb(255,100,50)">Olex2</font color="rgb(255,100,50)"> tutorial. Press 'Next' to advance to the next screen in the tutorial or 'Cancel' to leave the tutorial.<br><br>Structures are loaded from the <b>Start</b> tool tab, which will be highlighted when you press 'Next'.
+h:h2-Start;3
+c:html.ItemState home-start 1
+
+p:The files needed for solving and refining a crystal structure with Olex2 are a reflections file (<b>name.hkl</b>) and an instructions file (<b>name.ins</b>) containing information about the unit cell, radiation type, etc. These files should have the same name and reside in the same folder, normally accessed with the <b>Open</b> button in this tool tab.
+
+p:Olex2 comes with several sample structures, which are shown as buttons in this tool tab. The <b>Sucrose</b> structure will be solved and refined in this tutorial. Press 'Next' to load it.
+c:refresh
+c:freeze(true)
+c:reap DataDir()/samples/sucrose/sucrose.res
+c:spy.revert_to_original()
+c:spy.gui.get_Z_prime_from_fraction(1)
+c:html.Update
+c:SetVar(solution_output, strcat(FileName(),_solution_output.html))
+c:reset
+c:freeze(false)
+c:refresh
+
+p:At this starting point in the solution and refinement process, no atoms or electron density peaks will be visible; the graphics screen will be blank. To access the main solution and refinement tools in Olex2, click the <b>Work</b> tab.
+h:tab-work;3
+c:html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1
+
+p:From this tab, one can <b>Solve</b>, <b>Refine</b>, <b>Draw</b> and produce a final <b>Report</b> for a structure. This tutorial is mainly about the first two of these functions.
+h:btn-solve;1
+h:btn-refine;1
+h:btn-draw;1
+h:btn-report;1
+
+p:Click on the arrow next to the <b>Solve</b> button to set the solve options.
+h:cbtn-solve;3
+c:html.ItemState cbtn* 1 cbtn-solve 2 *settings 0 solve-settings 1
+
+p:In this tool tab area the solution program (e.g., ShelXT, olex2.solve) is chosen and other solve options are set.
+h:SET_snum_solution_PROGRAM_bg
+h:SET_snum_solution_METHOD_bg
+
+p:This is also where the expected molecular formula is entered in the <b>Composition</b> box and where the <b>Space Group</b> is determined.
+h:SET_SNUM_REFINEMENT_FORMULA_bg
+h:SET_SNUM_REFINEMENT_SPACE_GROUP_bg
+
+p:Clicking the <b>Suggest SG</b> link generates a table of possible space groups and their relative merits.
+c:sg
+c:refresh
+
+p:Alternatively, one could type '<c>sg</c>' at the command prompt in the graphics window to suggest a space group.<br><br>As an aside, Olex2 has many such line commands. Every line command has a help entry describing its function and listing any switches that the command may take. Type '<c>help sg</c>' to see the entry for the '<c>sg</c>' command.
+c:help sg
+c:refresh
+
+p:In order to see all the console output in the graphics window, type '<c>lines -1</c>'.
+c:lines -1
+c:refresh
+
+p:To show only 10 lines, type '<c>lines 10</c>'.
+c:lines 10
+c:refresh
+
+p:Click on the notepad icon near the top of the GUI to open a complete transcript of the console output in your text editor. Or, simply type '<c>text</c>'.
+h:toolbar-text
+c:text
+c:refresh
+
+p:To clear the console output, type '<c>clear</c>'.
+c:clear
+c:refresh
+
+p:We now return to the solution process.<br><br>Now that we have the correct space group (P21 has the best figures of merit for this structure of sucrose), in the <b>Solve</b> tool tab area, choose a solution program from the <b>Program</b> drop-down menu, make sure <b>name.hkl</b> is loaded as the <b>Reflections</b> file, and enter the expected molecular formula in <b>Composition</b>. For this tutorial, the olex2.solve program is chosen.
+c:spy.set_solution_program(olex2.solve,,snum)
+c:html.Update
+c:SetVar(solution_output, strcat(FileName(),_solution_output.html))
+
+p:Now click the <b>Solve</b> button.
+h:btn-solve;3
+c:solve
+c:waitfor process
+c:refresh
+
+p:The gold spheres that appear after solution are regions of high electron density (i.e., likely positions of atoms) and are called 'Q peaks'. Tidy up this solution by clicking the <b>Clean</b> button or by typing '<c>clean</c>' at the command prompt.
+h:toolbar-tidy
+c:clean
+c:refresh
+
+p:It is often helpful at this stage, especially if molecular fragments appear scattered across the screen, to compact them together in the center. To do this, click the <b>Center</b> button or type '<c>compaq -a</c>'.
+h:toolbar-center
+c:compaq -a
+c:legend -r
+c:refresh
+
+p:A recognizable skeleton structure of sucrose is displayed on the screen, but all the atoms are carbon! This structure now needs to be 'refined' (correct atoms and atomic positions need to be assigned in the model). Click on the arrow next to the <b>Refine</b> button to view the refine options.
+h:cbtn-refine;3
+c:html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1
+c:spy.set_refinement_program(olex2.refine,,snum)
+c:html.Update
+c:SetVar(refinement_output, strcat(FileName(),_refinement_output.html))
+
+p:This tool tab is where you select the refinement program, the number of refinement cycles, etc. For this tutorial, we will use the olex2.refine refinement program. To start refining the model, click the <b>Refine</b> button. Alternatively, type '<c>refine</c>' at the command prompt.
+h:btn-refine;3
+c:refine 12 4
+
+p:Tidy up this refined structure again by clicking <b>Clean</b> or typing '<c>clean</c>' at the command prompt, as before.
+c:clean
+
+p:To identify all the non-hydrogen atoms correctly, the <b>Uiso Slider</b> in the <b>Toolbox Work</b> tool tab is first used to select carbons in the skeleton that look relatively small (these are likely to be oxygens).
+c:html.ItemState work-main-toolbar 1
+c:html.ItemState h3-peak-and-uiso-sliders 1
+c:html.setBG(UISO_SELECT_SLIDER,#ff0000)
+c:html.setvalue(UISO_SELECT_SLIDER,-7)
+c:html.setvalue(UisoSelectVal,<0.035)
+c:sel atoms where xatom.uiso < 0.035&&xatom.type!='Q'
+c:refresh
+
+p:Convert the selected atoms to oxygens by clicking the <b>O</b> button.
+#c:spy.ElementButtonStates(O)
+c:name sel O
+c:sel -u
+c:refresh
+
+p:The Uiso slider method is a coarse technique, and can miss some atom assignments. Select any incorrect carbons that were not identified as oxygens, and convert them to oxygen as well. Try it now!
+c:ata(1)
+c:refresh
+
+p:Refine this updated structure containing the correct atoms.
+c:refine 12 4
+
+p:Click the <b>Clean</b> button after the refinement, as before.
+c:clean
+c:refresh
+
+p:These non-hydrogen atoms are spherical. To make them anisotropic, click on the button showing the anisotropic atom in the <b>Toolbox Work</b> tool tab, or just type '<c>anis</c>'.
+h:toolbar-anis
+c:anis
+c:refine 12 4
+
+p:Click the <b>Clean</b> button after this refinement once again.
+c:clean
+c:refresh
+
+p:The hydrogen atoms will finally be added as appropriate (in 'riding positions'). Click on the <b>Add H</b> button in the <b>Toolbox Work</b> tool tab or type '<c>hadd</c>' and refine again.
+#h:small-Add_H
+c:hadd
+c:refine 12 4
+c:refresh
+
+p:A satisfactory model of sucrose now appears on the screen. The display of Q peaks, which now represent regions of residual electron density in the model, can be toggled by repeatedly clicking the <b>Q peaks</b> button. The equivalent line command is either '<c>Q</c>' or '<c>CTRL+Q</c>'. R1 is a low value, and the largest Q peak has a negligible electron density, indicating that this is a satisfactory model for the structure (although some further refinements can still be carried out).
+h:toolbar-Q
+c:showQ a True
+c:showQ b False
+c:refresh
+
+p:We hope you found this introduction to Olex2 helpful. Please let us know if we missed any essential steps in this tutorial by visiting www.olex2.org and getting engaged in the development of Olex2.
+c:spy.demo.switch_tab_for_tutorials(home)
+
+p:End of tutorial. Press 'Next' to repeat the tutorial or 'Cancel' to exit.<br><br><font size='1'>Written by Stefanie Freitag-Pohl and modified by Tim Royappa.</font>

@@ -1,0 +1,62 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+c:showq false
+
+p:This tutorial will show you how to use the overlay feature in Olex2, the first thing this tutorial will do is to load sucrose as an example to show this.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
+
+p:First you need to click on the <b>Tools</b> tab.
+h:tab-tools
+c:spy.demo.switch_tab_for_tutorials(tools)
+c:refresh
+
+p:Then you need to click on the <b>Overlay</b> tab.
+h:h2-overlay
+c:html.ItemState h2-tools-overlay 1
+c:refresh
+
+p:Once the tab has been opened you need to select the link that says <b>Overlay Structure</b> this will allow you to open another model and open it in the same screen, this allows you test if multiple data sets give a similar model.
+c:@reap -* sucrose.ins
+c:refresh
+
+p:You should now see two models of sucrose on the screen these are the same model so they should overlay perfectly to test this theory out we need to click on the link called <b>Match All Fragments</b>
+c:match
+c:refresh
+
+p:The two models should now be overlaid on top of each other perfectly so that it appears that there is only one model there
+
+p:Once you are satisfied that the two models match up you can select the link <b>Unmatch</b> which will separate the models.
+c:fuse
+c:refresh
+
+p:To get rid of the overlay model you can click on the link called <b>Remove Overlay</b>
+c:ofiledel 0
+c:refresh
+
+p:To show how this function could be useful there is a sample sucrose model that is exactly the same as the other but the Oxygen atoms have been replaced with Nitrogen
+c:@reap -* overlay_tutorial.ins
+
+p:Now to see what happens when the two models are overlaid when the <b>Match All Fragments</b> link is clicked.
+c:match
+c:refresh
+
+p:As you should be able to see the structures do not match up correctly which obviously shows that something is not right between the two structures.
+
+p:One way you can get the structures to overlay completely to see if the shape of both is pretty much the same is to select an atom on one structure and select the same atom on the opposite structure
+
+p:Repeat this a couple of times and this will give you a good idea as to whether or not the basic structure of the molecules are similar. Sadly this can not be shown on the tutorial as you are unable to select the atoms without clicking on them with a mouse.
+c:ofiledel 0
+
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.

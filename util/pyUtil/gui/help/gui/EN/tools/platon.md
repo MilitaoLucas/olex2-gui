@@ -1,0 +1,2 @@
+# Platon
+Select a ~Platon~ routine to run from the menu at right. The ~Platon~ software has to be installed and the PATH environment variable properly set for these routines to work. The **Pton** button will show at the top of the Olex2 GUI if ~Platon~ has been correctly installed. See **Ilia Guzei's Manual** linked in the **Home** tab for detailed instructions on installing ~Platon~ for Olex2. For instructions on how to use a specific ~Platon~ routine, please refer to the URL[http://www.platonsoft.nl/platon/pl000000.html, Platon web page].

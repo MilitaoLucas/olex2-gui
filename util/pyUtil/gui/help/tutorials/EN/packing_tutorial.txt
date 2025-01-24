@@ -1,0 +1,68 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+
+p:This tutorial will look at how to use the packing features in Olex2, in order to show how the molecules in a crystal structure interact with one another. The <b>Sucrose</b> example structure will first be loaded.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:showQ a false
+c:showQ b false
+c:freeze(false)
+
+p:First, click on the <b>View</b> tab toolbar.
+h:tab-view
+c:spy.demo.switch_tab_for_tutorials(view)
+
+p:Next, click on the <b>Symmetry Generation</b> tool tab to show the available commands.
+h:h2-symmetry-generation
+c:html.ItemState h2-view-symmetry-generation 1
+
+p:Now open the <b>Packing</b> tool tab.
+h:h3-Packing
+c:html.ItemState h3-packing 1
+
+p:One tool for specifying how many repeating units to pack onto the screen is the <b>Pack Radius</b> slider. Slide it to the right to see more molecular units.
+c:html.setbg(slidepackradius,red)
+c:html.setvalue(slidepackradius,15)
+c:html.setvalue(packradius,15)
+c:html.setvalue(packradius,html.getvalue(slidepackradius))
+c:pack html.getvalue(packradius)
+c:refresh
+
+p:In order to reduce this packed structure back down to a single unit again, first click on the <b>Symmetry Tools</b> tool tab.
+c:html.ItemState h3-packing 2
+h:h3-Symmetry-Tools
+c:html.ItemState h3-symmetry-tools 1
+
+p:Then click on <b>Fuse</b>, or just type the command '<c>fuse</c>'. (This is a much-used line command.)
+h:three-Fuse
+c:fuse
+c:refresh
+
+p:To display the unit cell, type '<c>cell</c>'. (The display can be switched off by typing '<c>cell</c>' again.)
+c:cell
+c:refresh
+
+p:To fill the unit cell now displayed, click <b>Fill Unit Cell</b> in the <b>Packing</b> tool tab, or type '<c>pack cell</c>'.
+c:html.ItemState h3-packing 1
+c:pack cell
+c:refresh
+
+p:To display the structure out to the currently defined limits set for <i>a</i>, <i>b</i>, and <i>c</i>, click on <b>Pack to limits</b> or type '<c>pack</c>'.
+c:pack
+c:refresh
+
+p:Packed structures can be moved, rotated, and manipulated as normal molecular units. For example, here is the structure rotated 90 degrees about the <i>x</i> axis with the '<c>rota x 90</c>' line command.
+c:rota x 90
+c:refresh
+
+p:End of tutorial. Press 'Next' to repeat the tutorial or 'Cancel' to exit.
