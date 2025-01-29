@@ -8,22 +8,29 @@
 $spy.make_history_bars()
 <!-- #include history history-info.htm;1; -->
 <tr>
-  <td><table width='100%' border='0' cellpadding='0'><tr>
-     <td width='42%' align='left'><a href="reap FilePath()/FileName().ins">Reload INS</a></td>
-     <td>
-       <snippet src="gui/snippets/input-button"
-         value="%Create branch%"
-         onclick="spy.gui.create_history_branch(true)"
-       />
-    </td>
-    <td width="10%"/>
-    <td>
-       <snippet src="gui/snippets/input-button"
-         value="%Create snapshot%"
-         onclick="spy.gui.create_history_branch(false)"
-       />
-    </td>
-    </tr></table>
+  <td>
+    <table width='100%' border='0' cellpadding='0'>
+      <tr>
+        $+
+          html.Snippet(GetVar(default_link),
+          "value=Reload .ins",
+          "onclick=reap 'FilePath()/FileName().ins'",
+        )
+        $-
+        $+
+          html.Snippet(GetVar(default_link),
+          "value=Create Branch",
+          "onclick=spy.gui.create_history_branch(true)",
+        )
+        $-
+        $+
+          html.Snippet(GetVar(default_link),
+          "value=Create Snapshot",
+          "onclick=spy.gui.create_history_branch(false)",
+        )
+        $-
+    </tr>
+  </table>
   </td></tr>
 </table>
 </td></tr>
