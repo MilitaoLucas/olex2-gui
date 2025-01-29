@@ -1122,12 +1122,18 @@ user
     matplotlib{
       style = 'seaborn-whitegrid'
         .type = str
+      colour_map = "tab20c"
+        .type = str
       legend_in_out =  * outside best
         .type = choice
       legend_vertical = *upper center lower
         .type = choice
       legend_horizontal = left center *right
         .type = choice
+      legend_manual_position = 1 0.8
+        .type = str
+      print_byline = True
+        .type = bool
       grid = False
         .type = bool
       ax_colour = #666666
@@ -1163,9 +1169,9 @@ user
           .type = str
         marker_size = 1
           .type = int
-        marker_face_colour = #ff88ff
+        marker_face_colour = #ffffff
           .type = str
-        marker_edge_colour = #ff0000
+        marker_edge_colour = #888888
           .type = str
         marker_edge_width = 1
           .type = int
@@ -1194,9 +1200,8 @@ user
           .type = int
         linestyle = solid
           .type = str
-        }
+      }
     }
-
 
     program_analysis {
       font_scale = 0.03
