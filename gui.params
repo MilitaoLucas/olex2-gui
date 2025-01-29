@@ -47,6 +47,8 @@ gui
     .type = colour
   red = #bd2010
     .type = colour
+  dark_red = #bd2010
+    .type = colour
   green = #00b400
     .type = colour
   dark_green = #307125
@@ -800,7 +802,7 @@ gui
       .type = colour
     page_colour = #ffffff
       .type = colour
-    axislabel_colour = #666666
+    axislabel_colour = #888888
       .type = colour
   }
 

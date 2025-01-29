@@ -313,7 +313,7 @@ class Graph(ArgumentParser):
     self.fillColour = guiParams.graph.fill_colour.hexadecimal
     self.outlineColour = guiParams.graph.outline_colour.hexadecimal
     self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
-    self.pageColour = guiParams.graph.page_colour.hexadecimal
+    self.pageColour = "#ffffff"
     self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
@@ -1083,16 +1083,16 @@ class Graph(ArgumentParser):
   min="2"
   height="$GetVar('HtmlSpinHeight')"
   value="$spy.GetParam('user.graphs.program_analysis.y_scale_factor')"
-  onchange="spy.SetParam('user.graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
+  onchange="spy.SetParam('user.graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy.make_history_bars()>>html.Update"
 >
 </font>'''
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
+          all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy.make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>
+<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy.make_history_bars()>>html.Update">Show All Bars</a>
 '''
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
@@ -1127,22 +1127,22 @@ class Graph(ArgumentParser):
           label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
         except (ValueError, TypeError):
           pass
-        self.draw_legend(label, font_size=self.font_size_normal)
+        self.draw_legend(label, font_size=self.font_size_small, height_adjust=4)
         OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
         OV.write_to_olex('history-info_%s.htm' %img_no, historyText)
         OV.write_to_olex('history-info.htm', historyText)
 
-  def draw_legend(self, txt, font_size=None):
+  def draw_legend(self, txt, font_size=None, height_adjust = 20):
     if not font_size:
       self.font_size_large
     height = self.graph_bottom - self.graph_top
     width = self.params.size_x
-    legend_top = height + 20
-    legend_bottom = self.graph_bottom + 2
+    legend_top = height + height_adjust
+    legend_bottom = self.graph_bottom + 40
     #m_offset = 5
     ## Wipe the legend area
     if legend_top < legend_bottom:
-      box = (0,legend_top,width,legend_bottom)
+      box = (10,legend_top,width,legend_bottom)
     else:
       box = (0,legend_bottom,width,legend_top)
     self.draw.rectangle(box, fill=self.pageColour)
