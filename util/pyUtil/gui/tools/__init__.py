@@ -2701,6 +2701,12 @@ olex.registerFunction(get_news_image_src, False, "gui.tools")
 class PlotIt():
   def __init__(self):
     self.plt_params = OV.GetParam('user.graphs.matplotlib')
+    self.fontname_proc =  self.plt_params.font_name
+    if self.fontname_proc == "default":
+      self.fontname_proc = None
+    self.fontsizetitle_proc =  self.plt_params.title_fontsize
+    if self.fontsizetitle_proc == "default":
+      self.fontsizetitle_proc = None
 
   def plot_it(self, dd):
     if OV.HasGUI():
@@ -2709,11 +2715,12 @@ class PlotIt():
 
     self.plt = load_matplotlib()
     
-    self.plt.rcParams['xtick.labelsize'] = 11
-    self.plt.rcParams['ytick.labelsize'] = 11
+    self.plt.rcParams['xtick.labelsize'] = 12
+    self.plt.rcParams['ytick.labelsize'] = 12
+    
 
-    self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
-    self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
@@ -2753,7 +2760,7 @@ class PlotIt():
       axes = [axes]
 
     if len(dd['data']) > 1:
-      self.fig.suptitle(f"{title}", fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
+      self.fig.suptitle(f"{title}", fontsize=self.fontsizetitle_proc, fontname=self.fontname_proc, y=0.96)
 #      self.plt.text(.8, 1, 'right title', transform=self.fig.transFigure, horizontalalignment='center')
 #      self.plt.text(.2, 1, 'left title', transform=self.fig.transFigure, horizontalalignment='center')
 
@@ -2762,7 +2769,7 @@ class PlotIt():
       #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, pad=20)
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
       axes = [axes]
     
 
@@ -2772,18 +2779,14 @@ class PlotIt():
       try:
         self.get_ax(axes[i], **d)
       except:
-        try:
-          self.get_ax(axes[0][i], **d)
-        except:
-          print("No data suitable for plotting has been found")
-          return
+        self.get_ax(axes[0][i], **d)
         
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
-    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
-      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize - 2)
 
     if byline:
       self.plt.rcParams['font.family'] = 'Arial'
@@ -2879,25 +2882,30 @@ class PlotIt():
     y_list = []
     x_list = []
     for x, y in zip(xs, ys):
-      if not colour or colour == "auto_scale":
-        if not cmap:
-          colour = get_N_HexCol(len(xs))[c_count]
-          #colour = colours[i]
-        else:
-          if type(cmap) is list:
-            colour = cmap[c_count]
-          else:
-            colour = cmap(c_count)
-        c_count += 1
+      #if not colour or colour == "auto_scale":
+        #if not cmap:
+          #colour = get_N_HexCol(len(xs))[c_count]
+          ##colour = colours[i]
+        #else:
+          #if type(cmap) is list:
+            #colour = cmap[c_count]
+          #else:
+            #colour = cmap(c_count)
+        #c_count += 1
+
       label = None
       y_list.append(y)
       x_list.append(x)
+
+      colour_proc =  get_property(colours, i)
+      if colour_proc == "default":
+        colour_proc = None
             
       ax.plot(x,
               y,
               marker=get_property(marker, i),
-              #color=get_property(colour, i),
               markersize=get_property(markersize, i),
+              color=colour_proc, 
               linewidth=self.plt_params.ax1.line_width,
               linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
@@ -2907,33 +2915,33 @@ class PlotIt():
       i += 1
 
       colour = None
-      ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
-      ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
+    if lim_x:
 
-    margin = 0.03  # Add 3% margin
-    data_min = min(min(y) for y in y_list)
-    data_max = max(max(y) for y in y_list)
-    # Adjust for margin if necessary
-    data_min -= margin * (data_max - data_min)
-    data_max += margin * (data_max - data_min)
-    self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
-
-    ax.margins(x=0.1)
-    
-    if lim_x != 1:
-      self.plt.xlim(-1* lim_x, lim_x)
-      
-    else:
-      ax.margins(x=0.1)
-      data_min = min(min(x) for x in x_list)
-      data_max = max(max(x) for x in x_list)
+      margin = 0.03  # Add 3% margin
+      data_min = min(min(y) for y in y_list)
+      data_max = max(max(y) for y in y_list)
       # Adjust for margin if necessary
       data_min -= margin * (data_max - data_min)
       data_max += margin * (data_max - data_min)
-      self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+      self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+
+      if lim_x != 1:
+        self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
+        
+      else:
+        ax.margins(x=0.15)
+        data_min = min(min(x) for x in x_list)
+        data_max = max(max(x) for x in x_list)
+        # Adjust for margin if necessary
+        data_min -= margin * (data_max - data_min)
+        data_max += margin * (data_max - data_min)
+        self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
 
 
     if legend:
@@ -2945,12 +2953,14 @@ class PlotIt():
 
     if legend:
       for j in range(len(legend)):
-        self.plt.plot([], [], color=colours[j], label=legend[j])
+        self.plt.plot([], [], color=get_property(colours, j), label=legend[j])
 
 def get_property(prop, i):
   retVal = prop
   if type(prop) == list:
     retVal = prop[i]
+  if retVal == "default":
+    retVal = None
   return retVal
   
 
