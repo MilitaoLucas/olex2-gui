@@ -545,9 +545,7 @@ if have_help:
 def get_template(name, base_path=None):
   return gui.tools.TemplateProvider.get_template(name)
 
-
 from .Tutorials import AutoDemo
-
 
 class AutoDemoTemp(AutoDemo):
   def __init__(self, name='default_auto_tutorial', reading_speed=2):
@@ -564,7 +562,8 @@ class AutoDemoTemp(AutoDemo):
     t = ""
     for item in g:
       if debug:
-        print(item)
+        pass
+        #print(item + "..")
       item_name = os.path.basename(item).split(".txt")[0]
 
       href = "spy.demo.run_autodemo(item_name)"

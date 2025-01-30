@@ -2896,10 +2896,11 @@ class PlotIt():
       label = None
       y_list.append(y)
       x_list.append(x)
-
-      colour_proc =  get_property(colours, i)
-      if colour_proc == "default":
-        colour_proc = None
+      colour_proc = None
+      if colours:
+        colour_proc =  get_property(colours, i)
+        if colour_proc == "default" or not colour_proc:
+          colour_proc = None
             
       ax.plot(x,
               y,
@@ -2921,6 +2922,8 @@ class PlotIt():
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     if lim_x:
+      if lim_x == "auto":
+        lim_x = 1
 
       margin = 0.03  # Add 3% margin
       data_min = min(min(y) for y in y_list)
@@ -2930,10 +2933,9 @@ class PlotIt():
       data_max += margin * (data_max - data_min)
       self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
 
-
       if lim_x != 1:
         self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
-        
+
       else:
         ax.margins(x=0.15)
         data_min = min(min(x) for x in x_list)

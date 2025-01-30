@@ -1120,8 +1120,8 @@ user
     {
 
     matplotlib{
-      style = 'seaborn-whitegrid'
-        .type = str
+      style = *seaborn-whitegrid fivethirtyeight
+        .type = choice
       colour_map = "tab20c"
         .type = str
       legend_in_out =  * outside best
