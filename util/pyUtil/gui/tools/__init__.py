@@ -2761,12 +2761,6 @@ class PlotIt():
 
     if len(dd['data']) > 1:
       self.fig.suptitle(f"{title}", fontsize=self.fontsizetitle_proc, fontname=self.fontname_proc, y=0.96)
-#      self.plt.text(.8, 1, 'right title', transform=self.fig.transFigure, horizontalalignment='center')
-#      self.plt.text(.2, 1, 'left title', transform=self.fig.transFigure, horizontalalignment='center')
-
-      #self.plt.text(0.5, 0.92, second_title, 
-               #fontsize=12, ha='center')
-      #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
 
     else:
       self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
@@ -2793,19 +2787,9 @@ class PlotIt():
       self.plt.rcParams['font.stretch'] = 'condensed'
       self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color = "#bebebe")
 
-
-    #_ = dd['legend']
-    #if _:
-      #for i in range(len(_)):
-        #self.fig.plot([], [], color=_[1][i], label=_[0][i])
-        #self.plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        ##self.plt.legend(loc='upper right')
-
     self.fig.align_ylabels()
     p = os.path.join(OV.FilePath(), filename)
-    #self.plt.ylim(-0.0001, self.plt.ylim()[1])
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
-    #olx.Shell(p)
     self.plt.close()
     return p
 
@@ -2845,9 +2829,6 @@ class PlotIt():
 
     lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-    #pos = self.plt_params.legend_manual_position
-    #self.fig.legend(lines, legend, bbox_to_anchor= [float(value) + top for value in pos.split()], loc='right', ncol=1) 
-    #self.fig.legend(lines, legend, loc='right', ncol=1)
 
     if not marker:
       marker = self.plt_params.ax1.marker
@@ -2876,23 +2857,9 @@ class PlotIt():
 
     i = 0
     c_count =  0
-    #cmap = create_green_yellow_colormap()
-    #N = len(xs)
-    #colours = cmap(np.linspace(0, 1, N))
     y_list = []
     x_list = []
     for x, y in zip(xs, ys):
-      #if not colour or colour == "auto_scale":
-        #if not cmap:
-          #colour = get_N_HexCol(len(xs))[c_count]
-          ##colour = colours[i]
-        #else:
-          #if type(cmap) is list:
-            #colour = cmap[c_count]
-          #else:
-            #colour = cmap(c_count)
-        #c_count += 1
-
       label = None
       y_list.append(y)
       x_list.append(x)
@@ -2924,6 +2891,8 @@ class PlotIt():
     if lim_x:
       if lim_x == "auto":
         lim_x = 1
+      else:
+        lim_x = float(lim_x)
 
       margin = 0.03  # Add 3% margin
       data_min = min(min(y) for y in y_list)
@@ -2964,12 +2933,3 @@ def get_property(prop, i):
   if retVal == "default":
     retVal = None
   return retVal
-  
-
-def create_green_yellow_colormap():
-  import numpy as np
-  from matplotlib.cm import ScalarMappable
-  from matplotlib.colors import LinearSegmentedColormap
-  colors = [(0, 1, 0), (1, 1, 0)]  # Green to yellow
-  return LinearSegmentedColormap.from_list("GreenYellow", colors)
-  
