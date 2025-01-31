@@ -731,7 +731,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         hbonds.append(
           iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
       if len(hbonds):
-        max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 2.9))
+        # allow custom HTAB to go through by distance, yet stil have the angle limit
+        max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 4.0))
         min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle', 120))
         hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
           hbonds,
