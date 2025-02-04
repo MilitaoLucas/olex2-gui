@@ -615,6 +615,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cell_errors = self.olx_atoms.getCellErrors()
     acta_stuff = olx.Ins('ACTA') != "n/a"
     xs = self.xray_structure()
+    site_labels = xs.scatterers().extract_labels()
     if not acta_stuff:
       from iotbx.cif import model
       cif_block = model.block()
@@ -645,7 +646,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       bond_h = olx.Ins('bond $h') == 'true'
       distances = iotbx.cif.geometry.distances_as_cif_loop(
         connectivity_full.pair_asu_table,
-        site_labels=xs.scatterers().extract_labels(),
+        site_labels=site_labels,
         sites_frac=xs.sites_frac(),
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv,
@@ -654,7 +655,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fixed_distances=self.reparametrisation.fixed_distances)
       angles = iotbx.cif.geometry.angles_as_cif_loop(
         connectivity_full.pair_asu_table,
-        site_labels=xs.scatterers().extract_labels(),
+        site_labels=site_labels,
         sites_frac=xs.sites_frac(),
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv,
@@ -718,27 +719,37 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
           angles,
           space_group_info=space_group_info,
-          site_labels=xs.scatterers().extract_labels(),
+          site_labels=site_labels,
           include_bonds_to_hydrogen=False)
         cif_block.add_loop(cif_dihedrals.loop)
       htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
       hbonds = []
+      max_da_d = 0
       for htab in htabs:
+        sites_frac = xs.sites_frac()
         atoms = htab['atoms']
         rt_mx = None
+        site_d = sites_frac[atoms[0][0]]
+        site_a = sites_frac[atoms[1][0]]
         if atoms[1][1] > -1:
           rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
+          site_a = rt_mx * site_a
+        da_d = xs.unit_cell().distance(site_d, site_a)
+        if da_d > max_da_d:
+          max_da_d = da_d
         hbonds.append(
           iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
       if len(hbonds):
-        # allow custom HTAB to go through by distance, yet stil have the angle limit
-        max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 4.0))
-        min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle', 120))
+        max_da_distance=float(OV.GetParam('snum.cif.htab_max_d'))
+        if max_da_distance < max_da_d:
+          olx.Echo("Overriding max D-A distance for reporting from %.2fA to %.2fA" %(max_da_distance, max_da_d), m="warning")
+          max_da_distance = max_da_d
+        min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle'))
         hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
           hbonds,
           connectivity_full.pair_asu_table,
-          site_labels=xs.scatterers().extract_labels(),
-          sites_frac=xs.sites_frac(),
+          site_labels=site_labels,
+          sites_frac=sites_frac,
           min_dha_angle=min_dha_angle,
           max_da_distance=max_da_distance,
           covariance_matrix=self.covariance_matrix_and_annotations.matrix,
