@@ -1286,7 +1286,7 @@ def make_DISP_Table():
         if e in entry[0]:
           table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
     except:
-      print(f"Error getting value of B & C for {e}")
+      print(f"Error getting value of Brennan & Cowan for {e}")
       f_H = table_H.at_angstrom(wavelength)
 
       table.append(row(["Henke", f_H.fp(), f_H.fdp()]))

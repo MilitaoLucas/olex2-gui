@@ -106,6 +106,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
     args.append(str(mode))
+  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT') == True):
+    auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
+    args.append("-RI_FIT")
+    args.append(auxiliary_basis)
+    mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
+    args.append("-mem")
+    args.append(str(mem))  
 
   olex_refinement_model = OV.GetRefinementModel(False)
 
