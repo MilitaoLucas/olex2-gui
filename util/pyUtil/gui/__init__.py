@@ -528,10 +528,7 @@ def FixFree(target):
   elif target == "FREE H UISO":
     olx.Run("sel -u>>sel $H>>free Uiso")
   elif target == "AFIX":
-    cmd = "kill $H>>HAdd"
-    if OV.IsEDData():
-      cmd += ">>NeutronHDist"
-    olx.Run(cmd)
+    olx.Run("kill $H>>HAdd")
   olx.Labels(f=True, h=True, a=True, r=True)
   GetNParams()
 
