@@ -1,0 +1,144 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+
+p:This tutorial deals with modifying the Olex2 GUI to suit one's preferences. The sample structure for Co110 will now be loaded.
+c:freeze(true)
+c:reap 'DataDir()/samples/Co110/Co110.ins'
+c:spy.revert_to_original()
+c:load style default.glds
+c:showQ a false
+c:showQ b false
+c:freeze(false)
+
+p:Most of the functions in this tutorial are invoked with line commands (entered in the graphics window), as they are not in the GUI.
+
+p:The '<c>setfont</c>' command can be used to specify the font in any area of Olex2. The particular area for which the font is to be specified immediately follows '<c>setfont</c>' in the command.
+
+p:For example, to change the font in pictures and labels, type '<c>setfont picture_labels choosefont()</c>'. This brings up a menu from which to select the font, font style, size and script. Select <b>OK</b> or <b>Cancel</b> in the menu to continue.
+c:setfont picture_labels choosefont()
+
+p:The '<c>editmaterial</c>' command allows the colour properties of any specified area in the software to be customised, with the name of the area immediately following '<c>editmaterial</c>', as before.
+
+p:For example, in order to edit the colour and other properties of the command name in the help window, enter '<c>editmaterial helpcmd</c>'. This will bring up a window in which font colours, backgrounds, transparency, etc. can be set. Select <b>OK</b> or <b>Cancel</b> in the menu to continue.
+c:editmaterial helpcmd
+
+p:Similarly, '<c>editmaterial helptxt</c>' specifies the properties of the body of help items.
+
+p:The colour properties of the console output are modified with '<c>editmaterial execout</c>', while '<c>editmaterial error</c>' and '<c>editmaterial exception</c>' modify the colour properties of errors and exceptions reported in the console, respectively.
+
+p:Frequently used display styles, scene properties, etc. can be conveniently saved with the '<c>save</c>' command. For example, '<c>save style</c>' saves the current style. Select <b>Save</b> or <b>Cancel</b> in the menu to continue.
+c:save style
+
+p:In the same way, one can also use 'scene', 'view', or 'model' with the save command. (The view will be saved as a .xlv file and the model as a .oxm file in the working directory for the structure.)
+
+p:The '<c>load</c>' command is used to reapply any saved style, scene, etc. For example, '<c>load style</c>' opens a menu to apply a previously saved style. Select <b>Open</b> or <b>Cancel</b> in the menu to continue.
+c:load style
+
+p:A previously saved view or model is recalled by typing '<c>load view</c>' or '<c>load model</c>', respectively.
+
+p:To change the colours of the background gradient, enter '<c>grad</c>'. This will open up a window in which the four corner colours of the background can be set as desired. Select <b>OK</b> or <b>Cancel</b> in the menu to continue.
+c:grad
+
+p:It is possible to use an image as the background by adding '-p=' to the '<c>grad</c>' command, followed by the name of the image file, as '<c>grad -p="[file path]"</c>'. This can be useful for simultaneously displaying two different views of the model on the screen.
+
+p:To return to the normal background, type '<c>grad -p=default</c>'. When Olex2 is restarted, the default background will be shown.
+
+p:The '<c>brad</c>' command adjusts bond radii. So, for example, '<c>brad 3</c>' will make the displayed bonds three times thicker than normal.
+c:brad 3
+c:refresh
+
+p:To redisplay all bonds with their default thickness of 1, type '<c>brad 1</c>'.
+c:brad 1
+c:refresh
+
+p:A number of structure drawing styles are available in Olex2. To see these options, first click the <b>View</b> tab.
+h:tab-view
+c:spy.demo.switch_tab_for_tutorials(view)
+
+p:Now open the <b>Quick Drawing Styles</b> tool tab.
+h:h2-quick-drawing-styles
+c:html.ItemState h2-view-quick-drawing-styles 1
+
+p:To display atoms as perfect spheres, click the <b>Balls and Sticks</b> icon in this tool tab or type '<c>pers</c>'.
+h:toolbar-ball-and-stick@#name
+c:pers
+c:refresh
+
+p:To return to the standard thermal ellipsoid display click the <b>Ellipsoid</b> icon or enter '<c>telp</c>' at the command prompt. (The ellipsoid icon with an 'H' on it gives a very similar view.)
+h:toolbar-anis@#name
+c:telp
+c:refresh
+
+p:A wire-frame display is sometimes helpful in viewing large or congested structures. To show the model in this view, click the <b>Wire Frame</b> icon.
+h:toolbar-wireframe@#name
+c:proj
+c:refresh
+
+p:Other views such as the space-filling mode and the tube mode are also available from this tool tab. The line commands for these views are '<c>sfil</c>' and '<c>tubes</c>', respectively.
+h:toolbar-sphere-packing@#name; 1
+h:toolbar-bicoloured-bonds@#name; 1
+c:load style default.glds
+c:refresh
+
+p:A display style not in the GUI shows atoms with one octant cut out of each ellipsoid. Type '<c>ads ort</c>' to access this view.
+c:ads ort
+c:refresh
+
+#p:The next command that is going to be looked at is '<b>arad</b>' which applies different radii to all/selected atoms.
+#
+#p:The first command is '<c>arad sfil</c>' which will cause sphere packing radii (as in ShelXTL XP). 
+#c:arad sfil
+#c:refresh
+#
+#p:The next command is '<c>arad pers</c>' which is a fixed radii for model viewing.
+#c:arad pers
+#c:refresh
+#
+#p:The next command is '<c>arad isot</c>' which gives each atom its own radius depending on the value of the Uiso or ADP.
+#c:arad isot
+#c:refresh
+#
+#p:The next command is '<c>arad isoth</c>' this is the same as 'isot', but the H atoms are also displayed with their real Uiso's.
+#c:arad isoth
+#c:refresh
+#
+#p:The next command is '<c>arad bond</c>' this will cause all atoms to get the same radii as the default bond radius. 
+#c:arad bond
+#c:refresh
+#
+#p:The last command is '<c>arad vdw</c>' the default/loaded Van der Waals radii used in most of the calculations. 
+#c:arad vdw
+#c:refresh
+#
+p:The '<c>azoom</c>' command adjusts the zoom on the selected atoms to a given percentage. <i>Be very careful with this command, as it can play havoc with the ORTEP 50% probability convention.</i>
+c:load style default.glds
+c:refresh
+
+p:For example, to display the carbons in this structure at 50% zoom, select them and type '<c>azoom 50</c>'.
+c:sel $C
+c:azoom 50
+c:sel -u
+c:refresh
+
+p:To make the carbons 50% bigger, select them and enter the command '<c>azoom 150</c>'.
+c:sel $C
+c:azoom 150
+c:sel -u
+c:refresh
+
+p:To return all the atoms back to their actual size, select them again and type '<c>azoom 100</c>'.
+c:sel $C
+c:azoom 100
+c:sel -u
+c:refresh
+
+p:End of tutorial. Click on the 'Next' button to replay the tutorial or the 'Cancel' button to exit.

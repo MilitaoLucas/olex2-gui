@@ -725,104 +725,6 @@ class MakeAllRBars(BarGenerator):
 MakeAllRBars_instance = MakeAllRBars()
 OV.registerMacro(MakeAllRBars_instance.run_MakeAllRBars, '')
 
-##greyed out on 1/11/12
-#class sNumTitle(ImageTools):
-  #def __init__(self, width=None, tool_arg=None):
-    #super(sNumTitle, self).__init__()
-    #self.params = OV.GuiParams()
-    #self.have_connection = False
-    #width = self.params.htmlpanelwidth
-    #if not width:
-      #width = 290
-    #try:
-      #width = float(width)
-    #except:
-      #width = float(tool_arg)
-
-    #if self.have_connection:
-      #try:
-        #import SQLFactories
-        #self.ds = SQLFactories.SQLFactory()
-      #except:
-        #self.have_connection = False
-        #pass
-
-    #self.sNum = self.filename
-
-  #def run_sNumTitle(self, force=False):
-    ##self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-
-    #self.basedir = OV.BaseDir()
-    #self.filefull = OV.FileFull()
-    #self.filepath = OV.FilePath()
-    #self.filename = OV.FileName()
-    #self.datadir = OV.DataDir()
-    #self.sNum = self.filename
-    #self.space_group = OV.olex_function('sg(%h)')
-    #id_string = self.space_group+self.filefull
-    #curr_id = OV.GetParam("olex2.sNum_id_string")
-
-    #if id_string == curr_id:
-      #if not force:
-        #return
-    #OV.SetParam("olex2.sNum_id_string",id_string)
-
-    #items = {}
-    #if self.filename != 'none':
-      #if self.have_connection:
-        #try:
-          #from DimasInfo import dimas_info
-          #self.getInfo = dimas_info("info")
-          #items = self.getInfo.run()
-          #items.setdefault("sNum", olx.FileName())
-        #except Exception, ex:
-          #raise ex
-
-    #if not items:
-      #items.setdefault("operator", "n/a")
-      #items.setdefault("submitter", "no info")
-      #items.setdefault("type", "none")
-      #items.setdefault("sNum", "none")
-      #try:
-        #items["type"] = olx.FileExt()
-        #items["sNum"] = olx.FileName()
-      #except Exception, ex:
-        #raise ex
-    #image = self.sNumTitleStyle1(items)
-
-    #name = r"sNumTitle.png"
-    #OlexVFS.save_image_to_olex(image, name, 1)
-    #OV.CopyVFSFile(name, 'SNUMTITLE',2)
-
-
-
-  #def own_sql(self): #not currently used
-    #sNum = self.sNum
-    #sql = """SELECT people_status.Nickname
-#FROM submission INNER JOIN people_status ON submission.OperatorID = people_status.ID
-#WHERE (((submission.ID)="%s"));""" %sNum
-    #rs = self.ds.run_select_sql(sql)
-    #nickname = ""
-    #for record in rs:
-      #nickname = record[0]
-    #items.setdefault("nickname", nickname)
-
-    #record = ""
-    #sql = """SELECT people_fullnames.display
-#FROM submission INNER JOIN people_fullnames ON submission.SubmitterID = people_fullnames.ID
-#WHERE (((submission.ID)="%s"));""" %sNum
-    #rs = self.ds.run_select_sql(sql)
-    #submitter = ""
-    #for record in rs:
-      #submitter = record[0]
-    #items.setdefault("submitter", submitter)
-
-  #def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
-    #sNum = items["sNum"]
-    #a = timage()
-    #return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
-
-
 class timage(ArgumentParser):
 
   def __init__(self, width=None, tool_arg=None):
@@ -3149,7 +3051,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       try:
         txt = OV.olex_function('sg(%h)')
       except:
-        pass
+        return
       if not txt:
         txt="ERROR"
       txt = txt.replace(" 1", "")

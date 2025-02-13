@@ -6,6 +6,7 @@ import os
 import sys
 import OlexVFS
 from olexFunctions import OV
+import numpy as np
 
 debug = OV.IsDebugging()
 timer = debug
@@ -2169,8 +2170,6 @@ Do you want to install this now?""", "YN", False)
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
 
-  import numpy as np
-
   xs = np.array(xy[0][:])
   y_l = []
   for i in range(len(xy) - 1):
@@ -2702,6 +2701,12 @@ olex.registerFunction(get_news_image_src, False, "gui.tools")
 class PlotIt():
   def __init__(self):
     self.plt_params = OV.GetParam('user.graphs.matplotlib')
+    self.fontname_proc =  self.plt_params.font_name
+    if self.fontname_proc == "default":
+      self.fontname_proc = None
+    self.fontsizetitle_proc =  self.plt_params.title_fontsize
+    if self.fontsizetitle_proc == "default":
+      self.fontsizetitle_proc = None
 
   def plot_it(self, dd):
     if OV.HasGUI():
@@ -2710,11 +2715,12 @@ class PlotIt():
 
     self.plt = load_matplotlib()
     
-    self.plt.rcParams['xtick.labelsize'] = 11
-    self.plt.rcParams['ytick.labelsize'] = 11
+    self.plt.rcParams['xtick.labelsize'] = 12
+    self.plt.rcParams['ytick.labelsize'] = 12
+    
 
-    self.plt.yticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
-    self.plt.xticks(fontname=self.plt_params.font_name, fontsize=self.plt_params.tick_fontsize)
+    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
@@ -2729,6 +2735,9 @@ class PlotIt():
     title= dd["title"]
     second_title = dd.get("second_title", "")
     comment = dd.get('comment', "")
+    byline = ""
+    if self.plt_params.print_byline:
+      byline = dd.get('byline', "")
     gap = self.plt_params.subplot_top_gap
  
     gap_facor = 0.05
@@ -2751,47 +2760,36 @@ class PlotIt():
       axes = [axes]
 
     if len(dd['data']) > 1:
-      self.fig.suptitle(f"{title}", fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name, y=0.96)
-#      self.plt.text(.8, 1, 'right title', transform=self.fig.transFigure, horizontalalignment='center')
-#      self.plt.text(.2, 1, 'left title', transform=self.fig.transFigure, horizontalalignment='center')
-
-      #self.plt.text(0.5, 0.92, second_title, 
-               #fontsize=12, ha='center')
-      #self.plt.tight_layout(rect=[0, 0, 1, 0.86])
-
+      self.fig.suptitle(f"{title}", fontsize=self.fontsizetitle_proc, fontname=self.fontname_proc, y=0.96)
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.plt_params.font_name)
+      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
+      axes = [axes]
+    
 
     i = 0
     for series in dd['data']:
       d =  dd['data'][series]
-      self.get_ax(axes[i], **d)
+      try:
+        self.get_ax(axes[i], **d)
+      except:
+        self.get_ax(axes[0][i], **d)
+        
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
-    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize)
+    self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
-      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='left', fontname=self.plt_params.font_name, fontsize=self.plt_params.subtitle_fontsize - 2)
+      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize - 2)
 
-    #_ = dd['legend']
-    #if _:
-      #for i in range(len(_)):
-        #self.fig.plot([], [], color=_[1][i], label=_[0][i])
-        #self.plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        ##self.plt.legend(loc='upper right')
-
-
-    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
-    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-    pos = self.self.plt_params.legend_manual_position
-    self.fig.legend(lines, labels, bbox_to_anchor=pos.split(), 
-           loc='right', ncol=1)
+    if byline:
+      self.plt.rcParams['font.family'] = 'Arial'
+      self.plt.rcParams['font.stretch'] = 'condensed'
+      self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color = "#bebebe")
 
     self.fig.align_ylabels()
     p = os.path.join(OV.FilePath(), filename)
-    self.plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
-    #olx.Shell(p)
+    self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
     return p
 
@@ -2816,7 +2814,8 @@ class PlotIt():
              colours=[],
              x_type="",
              y_type="",
-             legend=[], 
+             legend=[],
+             colourscheme='auto',
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2827,6 +2826,9 @@ class PlotIt():
     self.plt.grid(self.plt_params.grid)
 
     ax_colour = self.plt_params.ax_colour
+
+    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
+    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 
     if not marker:
       marker = self.plt_params.ax1.marker
@@ -2848,49 +2850,86 @@ class PlotIt():
         cmap = False
       else:
         cmap = self.plt.cm.get_cmap(cmap)
+    
+    if colourscheme == "auto":
+      cmap = False
+      colour = None
 
     i = 0
+    c_count =  0
+    y_list = []
+    x_list = []
     for x, y in zip(xs, ys):
-      if not colour or colour == "auto_scale":
-        if not cmap:
-          colour = get_N_HexCol(len(xs))[i]
-        else:
-          if type(cmap) is list:
-            colour = cmap[i]
-          else:
-            colour = cmap(i)
-      i += 1
       label = None
+      y_list.append(y)
+      x_list.append(x)
+      colour_proc = None
+      if colours:
+        colour_proc =  get_property(colours, i)
+        if colour_proc == "default" or not colour_proc:
+          colour_proc = None
+            
       ax.plot(x,
               y,
-              marker=marker,
-              color=colour,
-              markersize=markersize,
+              marker=get_property(marker, i),
+              markersize=get_property(markersize, i),
+              color=colour_proc, 
               linewidth=self.plt_params.ax1.line_width,
-              linestyle=linestyle,
+              linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
-              markeredgecolor=colour,
+              markeredgecolor=get_property(colour, i),
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
               )
-
-      #if labels and len(labels)==len(xs):
-        #for x, label in zip(y, labels):
-          #self.plt.plot(x, y, label=label)
-      #self.plt.legend()
+      i += 1
 
       colour = None
-      ax.set_xlabel(label, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
-      ax.set_ylabel(ylabel, fontweight='bold', fontname=self.plt_params.font_name, fontsize=self.plt_params.axis_fontsize)
+      ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     if lim_x:
-      self.plt.xlim(-1 * lim_x, lim_x)
-    ax.tick_params(axis='y', labelcolor=ax_colour)
+      if lim_x == "auto":
+        lim_x = 1
+      else:
+        lim_x = float(lim_x)
 
+      margin = 0.03  # Add 3% margin
+      data_min = min(min(y) for y in y_list)
+      data_max = max(max(y) for y in y_list)
+      # Adjust for margin if necessary
+      data_min -= margin * (data_max - data_min)
+      data_max += margin * (data_max - data_min)
+      self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+      if lim_x != 1:
+        self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
+
+      else:
+        ax.margins(x=0.15)
+        data_min = min(min(x) for x in x_list)
+        data_max = max(max(x) for x in x_list)
+        # Adjust for margin if necessary
+        data_min -= margin * (data_max - data_min)
+        data_max += margin * (data_max - data_min)
+        self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+
+    if legend:
+      ax.margins(y=0.25)
+      ax.legend(legend, loc='upper right', ncol=2)
+    ax.tick_params(axis='y', labelcolor=ax_colour)
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
 
     if legend:
       for j in range(len(legend)):
-        self.plt.plot([], [], color=colours[j], label=legend[j])
+        self.plt.plot([], [], color=get_property(colours, j), label=legend[j])
+
+def get_property(prop, i):
+  retVal = prop
+  if type(prop) == list:
+    retVal = prop[i]
+  if retVal == "default":
+    retVal = None
+  return retVal

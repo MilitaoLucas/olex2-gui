@@ -382,6 +382,16 @@ class OlexCctbxAdapter(object):
   def get_one_h_function(self, table_file_name):
     return get_one_h_function(self.xray_structure(), table_file_name)
 
+  def get_shelxl_weighting(self):
+    from smtbx.refinement import least_squares
+    weight = self.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0,
+                  #c=0, d=0, e=0, f=1./3,
+                  )
+    for param, value in zip(list(params.keys())[:min(2, len(weight))], weight):
+      params[param] = value
+    return least_squares.mainstream_shelx_weighting(**params)
+
   def compute_weights(self, fo2, fc):
     weight = self.olx_atoms.model['weight']
     params = [0.1, 0, 0, 0, 0, 1./3]
