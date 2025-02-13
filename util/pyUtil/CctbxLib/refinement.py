@@ -1546,6 +1546,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
+    #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
       Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
       new_data = []
