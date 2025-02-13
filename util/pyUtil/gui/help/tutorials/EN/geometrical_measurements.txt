@@ -1,0 +1,110 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+
+p:This tutorial will demonstrate how to get geometrical measurements and analyses from your 3D model using the Olex2 system and the sample structure <b>THPP</b>.
+c:freeze(true)
+c:reap 'DataDir()/samples/THPP/THPP.res'
+c:spy.revert_to_original()
+c:mpln -n
+c:showQ a false
+c:showQ b false
+c:freeze(false)
+
+p:To start, click on the <b>View</b> tab.
+h:tab-view
+c:spy.demo.switch_tab_for_tutorials(view)
+
+p:Next, select the <b>Geometry</b> tool tab.
+h:h2-geometry
+c:html.ItemState h2-view-geometry 1
+
+p:In this tab there are six different buttons to analyse a model and gather geometric data from it. The first one we will look at is <b>Mean Plane</b> (of active selection).
+
+p:To see how this feature is used, highlight one of the rings in the structure. To do this, hold <b>shift</b> and draw a box over one of the rings with the mouse, or click on each ring atom to select it manually.
+c:sel N3 C2 C1 C10 C9 C4
+c:refresh
+
+p:Once the atoms are highlighted, click on the <b>Mean Plane</b> button and the average plane for the selected atoms will be produced on the model. Alternatively, enter the command '<c>mpln sel</c>'.
+c:mpln -n=DEMO_PLANE
+c:refresh
+
+p:Once the mean plane has been worked out, a table containing the results appears in the text output along with the data for the plane normal (hkl direction) and the rms deviation (in &Aring) of the atomic positions from the mean plane.
+
+p:To remove the plane, first click on it to select it. Then either press the <b>Delete</b> key or right-click on the plane and choose to either hide it or delete it from there.
+c:sel collection DEMO_PLANE
+c:kill
+c:refresh
+
+p:The next function will produce a best-fit line through selected atoms by clicking on <b>Best Line</b> (of active selection).
+
+p:To get an overall best line through the whole molecule, select all atoms with <b>ctrl+A</b> and click <b>Best Line</b>.
+c:sel -a
+c:line -n=DEMO_LINE_ALL_ATOMS
+
+p:To align the molecule along the best line use '<c>line -n</c>'.
+c:sel -a
+c:line -n
+
+p:The view will now have changed so as to look along the best line of the active selection. The '<c>direction</c>' command prints the current orientation of the model (in fractional coordinates).
+c:direction
+
+p:The view may be rotated around the *x*, *y*, or *z* axis using the 'rota' command, e.g., '<c>rota y 90</c>' provides a view perpendicular to the Best Line. To delete a line, click on it and press the delete key.
+c:rota y 90
+c:refresh
+
+p:Alternatively, a line can be drawn through a minimum of two selected atoms in the structure.
+c:kill DEMO_LINE_ALL_ATOMS
+c:sel N5 C10
+c:line sel -n=DEMO_LINE_TWO_ATOMS
+
+p:The next function in the Geometry tool tab is <b>Distances and Angles</b> (of selection).
+c:kill DEMO_LINE_TWO_ATOMS
+
+p:Select up to four atoms, then click the <b>Distances and Angles</b> button or type '<c>sel</c>'; the geometric data pertaining to the selection will appear in the command window.
+c:sel -u
+c:sel C11 C10 C1 F1
+c:sel
+c:refresh
+
+p:The <b>Refine and Save e.s.d. Info</b> button needs to be clicked once to refine the model and calculate needed e.s.d.'s.
+c:sel -u
+c:delins more
+c:addins more -3
+c:refine
+
+p:Select up to four atoms. (Here, we will select the same four atoms as before.) Typing '<c>esd</c>' will then cause the e.s.d. data for the selection to appear in the command window.
+c:sel -u
+c:sel C11 C10 C1 F1
+c:esd
+c:refresh
+
+p:Now the same geometric parameters are displayed as before, with their respective e.s.d.'s.
+
+p:To use the <b>Analyse &pi;-&pi; Interactions</b> function, simply click on the button without highlighting anything.
+c:pipi -g
+c:rota x 90
+c:refresh
+
+p:This will duplicate the molecules to show interactions between adjacent aromatic rings and print the relevant geometric data, such as the distance between ring centroids, in the command window.
+c:fuse
+c:refresh
+
+p:The last button, <b>Analyse Hydrogen Bonds</b> provides a view of the hydrogen bonds in a structure. The model for <b>Sucrose</b> will be used to demonstrate this feature.
+c:reap 'DataDir()/samples/Sucrose/Sucrose.res'
+
+p:Clicking the <b>Analyse Hydrogen Bonds</b> button shows both the intra- and intermolecular hydrogen bonds in the structure. The line command "htab -g" may also be used instead. These hydrogen bonds will be entered in the list for the refinement programme to be added to the CIF file.
+c:fuse
+c:htab -g
+c:refresh
+
+p:Another useful command for analysing nonbonding interactions is '<c>htab -t</c>'. For example, '<c>htab -t=Br,I</c>' displays any Br---I halogen bonds present in the structure.
+
+p:End of tutorial. Click on the 'Next' button to replay the tutorial or the 'Cancel' button to exit.

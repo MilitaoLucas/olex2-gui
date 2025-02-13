@@ -308,74 +308,6 @@ t:conflicts_display_2{
 </table>
 }
 
-t:md_box{
-<body link="#585886" bgcolor='%(bg_colour)s'>
-<font size='%(font_size_base)s' color='#333355' face='Vera'>
-<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
-  <tr bgcolor='%(bg_colour)s'>
-    <td bgcolor='%(bg_colour)s'>
-      <font color='white' size='6' >
-      <b>
-      %(title)s
-      </b>
-      </font>
-    </td>
-  </tr>
-</table>
-
-<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
-  <tr bgcolor='%(bg_colour)s'>
-    <td bgcolor='%(bg_colour)s'>
-      <font color='%(font_colour)s'>
-        %(body)s
-      </font>
-    </td>
-  </tr>
-</table>
-
-<hr>
-<table width='100%%' bgcolor='%(bg_colour)s' border='0' cellspacing='5' cellpadding='2'>
-  <tr>
-  <td name='View on GITHUB' width='50%%'>
-  <font color=white><b>
-    $+
-    html.Snippet("gui/snippets/input-button",
-    "name=VIEW_HELP_ON_GITHUB",
-    "bgcolor=spy.GetParam(gui.light_blue)",
-    "height=GetVar('HtmlComboHeight')",
-    "width=100%%",
-    "flat=True",
-    "value=View on GitHub",
-    "onclick=shell https://github.com/Olex2/help/tree/master/gui/EN",
-    )$-
-  </b></font>
-  </td>
-
-  <td name='View on GITHUB' width='50%%'>
-  <font color=white><b>
-    $+
-    html.Snippet("gui/snippets/input-button",
-    "name=CONTRIBUTE_TO_HELP",
-    "bgcolor=spy.GetParam(gui.green)",
-    "height=GetVar('HtmlComboHeight')",
-    "width=100%%",
-    "flat=True",
-    "value=Contribute to the Help System",
-    "onclick=shell mailto:info@olexsys.org",
-    )$-
-  </b></font>
-  </td>
-  </tr>
-</table>
-}
-
-t:edit_help{
-<a href='shell %s'>Edit</a> |
-}
-
-t:compile_help{
-<a href="spy.githelp.git_help(False, '%s')">Recompile</a><p>
-}
 
 t:input_html_tool{
 <html>
@@ -770,3 +702,78 @@ t:battery_gui{
     </tr>
   </table>
 }
+
+
+t:md_box{
+<body link="#585886" bgcolor='%(bg_colour)s'>
+<font size='%(font_size_base)s' color='#333355' face="$GetVar(HtmlFontName)">
+<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
+  <tr bgcolor='%(bg_colour)s'>
+    <td bgcolor='%(bg_colour)s'>
+      <font color='white' size='6' >
+      <b>
+      %(title)s
+      </b>
+      </font>
+    </td>
+  </tr>
+</table>
+
+<table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
+  <tr bgcolor='%(bg_colour)s'>
+    <td bgcolor='%(bg_colour)s'>
+      <font color='%(font_colour)s'>
+        %(body)s
+      </font>
+    </td>
+  </tr>
+</table>
+</body>
+}
+
+
+}
+
+t:edit_help{
+<a href='shell %s'><font color="$GetVar('HtmlHighlightColour')">Edit</font></a> |
+}
+
+t:compile_help{
+<a href="spy.githelp.git_help(False, '%s', True)>>spy.make_help_box -name=$GetVar(last_help_box)>>$SetVar(last_help_box,' ')"
+"><font color="$GetVar('HtmlHighlightColour')">Recompile</font></a><p>
+}
+
+
+t:gui_link{
+#value=
+#width=100%
+#height=$GetVar('HtmlComboHeight')
+#name=#value
+#fit=false
+#flat=false
+#disabled=false
+#fgcolor=#ffffbb
+#bgcolor=#222222
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="#name"
+  value="#value"
+  width="#width"
+  height="#height"
+  onclick="#onclick"
+  fgcolor="#fgcolor"
+  bgcolor="#bgcolor"
+  fit="#fit"
+  flat="true"
+  disabled="#disabled"
+></b>
+</font>}
+
+t:help_image_html{
+<p align='center'>
+<p align="center"><zimg width='%(width)s' src='%(img_src)s'></p>
+<br>
+<p>%(alt)s</p>
+}
+

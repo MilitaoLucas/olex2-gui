@@ -137,10 +137,43 @@ Merge CIF:
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr align = 'center' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-HTAB;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="10%"><b>HTAB:</b><td>
+  <td width="20%">Max D-A</td>
+  <td width="10%">
+    <snippet src="gui/snippets/input-text"
+     name="htab_d"
+     value="spy.GetParam('snum.cif.htab_max_d')"
+     onchange="spy.SetParam('snum.cif.htab_max_d', html.GetValue('~name~'))"  />
+  </td>
+
+  <td width="20%">Min D-H-A angle<td>
+  <td width="10%">
+    <snippet src="gui/snippets/input-text"
+     name="htab_ang"
+     value="spy.GetParam('snum.cif.htab_min_angle')"
+     onchange="spy.SetParam('snum.cif.htab_min_angle', html.GetValue('~name~'))"  />
+  </td>
+
+  <td width="15%">
+    <snippet src="gui/snippets/gui-link-plain"
+     name="htab_cmd"
+     value="HTAB"
+     onclick="fuse>>delins htab>>htab spy.GetParam('snum.cif.htab_max_d') spy.GetParam('snum.cif.htab_min_angle') -g=html.GetState('htab_display')"  />
+  </td>
+  <td width="5%" align="right">
+    <snippet src="gui/snippets/input-checkbox-plain"
+     value="Display"
+     name="htab_display" />
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr align = 'center' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-4;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
    <td width="5%" align="right">$+
-     html.Snippet("gui/snippets/input-checkbox", "name=report_rtabs",
+     html.Snippet("gui/snippets/input-checkbox-plain", "name=report_rtabs",
       "checked=spy.GetParam('snum.cif.report_rtabs')",
       "onclick=spy.SetParam('snum.cif.report_rtabs', html.GetState('~name~'))")
    $-</td>
@@ -149,7 +182,7 @@ Merge CIF:
   <td>
 
   <td width="5%">$+
-    html.Snippet("gui/snippets/input-checkbox", "name=report_vars",
+    html.Snippet("gui/snippets/input-checkbox-plain", "name=report_vars",
      "checked=spy.GetParam('snum.cif.report_vars')",
      "onclick=spy.SetParam('snum.cif.report_vars', html.GetState('~name~'))")
   $-</td>

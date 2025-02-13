@@ -1,0 +1,55 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+
+p:This tutorial will go over the different 3D settings that are available in Olex2.
+
+p:In order to access the different settings click the <b>View</b> tab in the GUI.
+h:tab-view
+c:spy.demo.switch_tab_for_tutorials(view)
+
+p:Now click the <b>Stereo View</b> tool tab.
+h:h2-Stereo-View
+c:html.ItemState h2-view-stereo-view 1
+
+p:In this tool tab there are four different 3D options available, the first of which is <b>Stereo (Colour)</b>.
+h:two-Stereo_(Colour)
+c:gl.stereo(color)
+c:refresh
+
+p:This mode allows the model to be viewed in 3D via a pair of red/blue 3D glasses.
+
+p:To go back to the normal 2D view click on the button marked <b>Normal View</b>.
+h:two-Normal_View
+c:gl.stereo(normal)
+c:refresh
+
+p:Another 3D view that uses red/blue 3D glasses is produced by clicking <b>Stereo Anaglyph</b>.
+h:two-Stereo_(Anaglyph)
+c:gl.stereo(anaglyph)
+c:refresh
+
+p:If you have a 3D monitor and the 3D glasses to go with it, the <b>Stereo (Hardware)</b> button or the <b>Stereo (Interlaced)</b> button may be used to view the structure in 3D.
+c:gl.stereo(normal)
+h:two-Stereo_(Hardware);1
+h:two-Stereo_(Interlaced);1
+c:gl.stereo(interlace)
+c:refresh
+
+p:There is a way to view a structure without 3D glasses, using the 'cross-eyed' technique (as with magic eye books). Enter the command '<c>gl.stereo(cross)</c>' at the prompt.
+c:gl.stereo(normal)
+c:gl.stereo(cross)
+c:refresh
+
+p:This viewing method works best when the graphics display is small. Resize the Olex2 window until the graphics display is about 10 cm x 10 cm and try it!
+c:gl.stereo(normal)
+
+p:End of tutorial. Click on the 'Next' button to replay the tutorial or the 'Cancel' button to exit.

@@ -348,7 +348,7 @@ class Skin():
     if OV.FileFull() != "none":
       from History import hist
       try:
-        hist._make_history_bars()
+        hist.make_history_bars()
       except:
         pass
 
@@ -443,7 +443,10 @@ class Skin():
       if timing:
         print("run_skin sNumTitle took %.4fs" % (time.time() - t))
       self.sNum = OV.FileName()
-      self.sg = olex.f('sg()')
+      try:
+        self.sg = olex.f('sg()')
+      except:
+        self.sg = None
       try:
         self.data_index = olx.xf.CurrentData()
       except:

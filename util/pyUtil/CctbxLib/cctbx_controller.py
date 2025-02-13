@@ -231,15 +231,13 @@ class reflections(object):
         self._shel['high'] = self.d_min
 
     if self.hklf_code >= 5 or self.merge_code == 0:
-      space_group = sgtbx.space_group("P1")
       anomalous_flag = True
     else:
-      space_group = f_sq_obs_filtered.crystal_symmetry().space_group()
       anomalous_flag = f_sq_obs_filtered.anomalous_flag()
 
     filter = observations.filter(
       f_sq_obs_filtered.unit_cell(),
-      space_group,
+      f_sq_obs_filtered.crystal_symmetry().space_group(),
       anomalous_flag,
       flex.miller_index(hkl),
       float(self._shel['high']),

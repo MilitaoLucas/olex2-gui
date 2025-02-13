@@ -1,0 +1,85 @@
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+c:lines 10
+
+p:Welcome to Olex2, used to create 3D models for small-molecule structure solution and refinement. This tutorial for new users of Olex2 will go over some of the basic controls used for navigation and display. On startup, Olex2 automatically opens the last crystal structure used, but when the software is opened for the first time, the model for sucrose is loaded. This will take a few moments.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:refine 1
+c:refine 1
+c:refine 1
+c:showq a false
+c:showq b false
+c:freeze(false)
+
+p:One of the most useful things to start using is the left mouse button, which is used to rotate the structure on the screen. Drag with the left mouse button to rotate the structure.
+c:rota 1 1 1 60 1
+c:refresh
+
+p:To rotate the structure in small increments, hold down <b>SHIFT</b> and press the arrow keys.
+c:rota 0 1 0 10 1
+c:refresh
+
+p:The structure can also be rotated by typing '<c>rota</c>' on the command line. A direction such as <i>x</i>, <i>y</i> or <i>z</i> must be specified along with the degrees of rotation. For example, '<c>rota x 90</c>' rotates the structure about the <i>x</i> axis by 90&deg.
+c:rota 1 0 0 90 10
+c:refresh
+
+p:Hold down the <b>CTRL</b> key and drag with the left mouse button to rotate the structure about the <i>z</i> axis. This rotates the structure in the plane of the screen. Try it!
+c:rota 0 0 1 90 10
+c:refresh
+
+p:Dragging the <i>right</i> mouse button, however, zooms the view in or out.
+c:gl.zoom
+c:gl.zoom -0.01
+c:refresh
+
+p:To move the entire structure on the screen, hold down <b>CTRL</b> and <b>SHIFT</b> while dragging with the left mouse button. Or, drag with both mouse buttons pressed. Try translating the molecule on the screen!
+c:gl.zoom
+c:center
+c:refresh
+
+p:To change the colour of the screen background, press <b>F2</b>.
+c:swapbg
+c:refresh
+
+p:Use the <b>F4</b> key to change the screen background to a gradient.
+c:grad -i
+c:refresh
+
+p:Another helpful keyboard shortcut is <b>CTRL+Q</b>, which toggles the display of the residual electron density spheres ('Q peaks'). Press <b>CTRL+Q</b> repeatedly to see how the display of Q peaks changes.
+c:showq a true
+c:showq b false
+c:refresh
+
+p:You can also toggle the display of hydrogen atoms in the structure by pressing <b>CTRL+H</b>, which will cause them to disappear, reappear, or appear with internal H bonds shown.
+c:showq a false
+c:showq b false
+c:showh a true
+c:refresh
+
+p:If a mistake occurs while constructing your model, it is possible to revert to a previous point in the solution and refinement process. Click on the tab at the top called <b>Work</b>.
+h:tab-work
+c:spy.demo.switch_tab_for_tutorials(work)
+
+p:Then click on the <b>History</b> tool tab.
+h:h2-history
+c:html.ItemState h2-work-history 1
+
+p:A few coloured columns are now displayed in a bar graph. The furthest column on the right represents the latest stage in the refinement, and columns to its left represent previous stages. Clicking on a column (the arrow cursor first turns to a hand symbol) will revert to that previous structure model.
+
+p:If more than one model has been created from the same data, it is possible to view past solutions. Click on the <b>History Tree</b> tool tab.
+h:h3-History-Tree
+c:html.ItemState h3-history-tree 1
+
+p:Now any past solution can be selected by first <i>double</i> clicking on one of the lines labeled 'refinements', then on one of the coloured columns in the bar graph.
+
+p:End of tutorial. Press next to repeat the tutorial or cancel to exit.
