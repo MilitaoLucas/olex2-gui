@@ -211,7 +211,7 @@ $-
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
-        "td1=<td width=22%>"
+        "td1=<td width=16%>"
         )
       $-
 
@@ -240,7 +240,6 @@ Use a solvent mask (smtbx.mask or SQUEEZE)
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT",
     "label=Update Mask",
-    "heigth=50",
     "checked=spy.GetParam('snum.refinement.recompute_mask_before_refinement')",
     "oncheck=spy.SetMasking(html.GetState(~name~))>>
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
