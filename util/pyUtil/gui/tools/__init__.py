@@ -2788,6 +2788,14 @@ class PlotIt():
       self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color = "#bebebe")
 
     self.fig.align_ylabels()
+
+    _ = dd.get('vertical_line', None)
+    if _ is not None:
+      if type(_) != list:
+        _ = [_]
+      for x in _:
+        self.plt.axvline(x=x, color='lightgray', linestyle='dashdot', linewidth=1.5)
+    
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
