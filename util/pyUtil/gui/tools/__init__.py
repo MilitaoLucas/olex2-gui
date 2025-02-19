@@ -2553,10 +2553,8 @@ def get_polyhedra_tau():
   angles = []
   order = int(len(l) - 1)
 
-  if order == 4:
-    ks = [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
-  elif order == 5:
-      ks = [(1, 2), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
+  if order in (4, 5):
+    ks = [(i,j) for i in range(1,order+1) for j in range(i+1,order+1)]
   else:
     print("Sorry, only 4-coordinate or 5-coordinate Geometry indices are currently implemented")
     return
