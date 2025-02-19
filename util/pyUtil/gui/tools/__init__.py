@@ -1344,7 +1344,7 @@ def get_battery_image(colour, colourize=True):
 
   bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
   im = Image.alpha_composite(bg, IM_battery)
-  
+
   draw = ImageDraw.Draw(im)
   width, height = bg.size
 
@@ -1471,14 +1471,14 @@ def GetDPRInfo():
   d = {
     'dpr': disp_dpr,
     'img_name': img_name,
-    'hint': text_output[idx], 
-    'label': f"{data}/{parameters}", 
-    'data': f"{data}", 
+    'hint': text_output[idx],
+    'label': f"{data}/{parameters}",
+    'data': f"{data}",
     'parameters': f"{parameters}"
     }
 
   t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
- 
+
   retVal = t
   cache[dpr] = t
   return retVal
@@ -2573,7 +2573,7 @@ def get_polyhedra_tau():
     olex.m(cmd)
     cmd = "sel"
     _ = gui.tools.scrub(cmd)[1:]
-    angle = float(_[3].split(":")[1].split("(")[1].split(")")[0])
+    angle = float(_[3].split(":")[1])
     angles.append(angle)
 
   cmd = "sel -u"
@@ -2714,14 +2714,14 @@ class PlotIt():
       dpi = olex_gui.GetPPI()[0]
 
     self.plt = load_matplotlib()
-    
+
     self.plt.rcParams['xtick.labelsize'] = 12
     self.plt.rcParams['ytick.labelsize'] = 12
-    
+
 
     self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
-    
+
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
     if not plt_size:
@@ -2739,7 +2739,7 @@ class PlotIt():
     if self.plt_params.print_byline:
       byline = dd.get('byline', "")
     gap = self.plt_params.subplot_top_gap
- 
+
     gap_facor = 0.05
     if comment:
       gap = gap - gap * 0.05
@@ -2765,7 +2765,7 @@ class PlotIt():
     else:
       self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
       axes = [axes]
-    
+
 
     i = 0
     for series in dd['data']:
@@ -2774,7 +2774,7 @@ class PlotIt():
         self.get_ax(axes[i], **d)
       except:
         self.get_ax(axes[0][i], **d)
-        
+
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
@@ -2795,7 +2795,7 @@ class PlotIt():
         _ = [_]
       for x in _:
         self.plt.axvline(x=x, color='lightgray', linestyle='dashdot', linewidth=1.5)
-    
+
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
@@ -2858,7 +2858,7 @@ class PlotIt():
         cmap = False
       else:
         cmap = self.plt.cm.get_cmap(cmap)
-    
+
     if colourscheme == "auto":
       cmap = False
       colour = None
@@ -2876,12 +2876,12 @@ class PlotIt():
         colour_proc =  get_property(colours, i)
         if colour_proc == "default" or not colour_proc:
           colour_proc = None
-            
+
       ax.plot(x,
               y,
               marker=get_property(marker, i),
               markersize=get_property(markersize, i),
-              color=colour_proc, 
+              color=colour_proc,
               linewidth=self.plt_params.ax1.line_width,
               linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
