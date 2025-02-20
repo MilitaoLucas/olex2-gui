@@ -211,15 +211,28 @@ $-
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
+        "disabled=spy.ED.is_dynamic()",
         "td1=<td width=16%>"
         )
       $-
 
 <ignore test="not strcmp(spy.GetParam('snum.refinement.use_solvent_mask'), True)">
+
+<ignore test="strcmp(spy.ED.is_dynamic(), False)">
 <td>
 Use a solvent mask (smtbx.mask or SQUEEZE)
 </td>
 </ignore>
+</ignore>
+
+<ignore test="strcmp(spy.ED.is_dynamic(), True)">
+<td>
+Solvent masking is currently ignored for ED Dynamical Refinement
+</td>
+</ignore>
+
+
+<ignore test="strcmp(spy.ED.is_dynamic(), False)">
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
 
@@ -231,6 +244,7 @@ Use a solvent mask (smtbx.mask or SQUEEZE)
     "items=Olex2;Platon",
     "onchange=spy.change_hklsrc_according_to_mask_prg(html.GetValue('~name~'))",
     "bgcolor=GetVar(HtmlTableGroupBgColour)",
+    "disabled=spy.ED.is_dynamic()",
     "td1=<td width=20%>"
     )
   $-
@@ -246,6 +260,7 @@ spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
 html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     "onuncheck=spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')",
     "bgcolor=GetVar(HtmlTableGroupBgColour)",
+    "disabled=spy.ED.is_dynamic()",
     )
   $-
 
@@ -292,9 +307,12 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     </font>
   </td>
 #ignoreif -->
+</ignore>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+
+<ignore test="strcmp(spy.ED.is_dynamic(), False)">
 
 <tr ALIGN='left' width='100%%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Masking-Info;1 -->
@@ -309,6 +327,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
+</ignore>
 
 
 <!-- ========================================== NOSPHERA2 INTERFACE BEGIN == -->
