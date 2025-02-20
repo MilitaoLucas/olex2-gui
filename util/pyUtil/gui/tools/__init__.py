@@ -1344,7 +1344,7 @@ def get_battery_image(colour, colourize=True):
 
   bg = Image.new('RGBA', IM_battery.size, OV.GetParam('gui.html.table_bg_colour').rgb)
   im = Image.alpha_composite(bg, IM_battery)
-
+  
   draw = ImageDraw.Draw(im)
   width, height = bg.size
 
@@ -1471,14 +1471,14 @@ def GetDPRInfo():
   d = {
     'dpr': disp_dpr,
     'img_name': img_name,
-    'hint': text_output[idx],
-    'label': f"{data}/{parameters}",
-    'data': f"{data}",
+    'hint': text_output[idx], 
+    'label': f"{data}/{parameters}", 
+    'data': f"{data}", 
     'parameters': f"{parameters}"
     }
 
   t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
-
+ 
   retVal = t
   cache[dpr] = t
   return retVal
@@ -2326,6 +2326,8 @@ def plot_xy(xs,
           colour = colours[i]
         if i in use_highlight:
           colour = plt_params.highlight_colour
+        else:
+          colour = "#ababab"
         label = "n"
         if type(xs) == 'list' and len(xs) == 1:
           xses = xs[0]
@@ -2359,6 +2361,7 @@ def plot_xy(xs,
           ax2_colour = ax2_colours[i]
         if use_highlight and i in use_highlight:
           colour = plt_params.highlight_colour
+          
         label = "ax2"
         xses = xs
         if len(xs) != len(y):
@@ -2553,8 +2556,10 @@ def get_polyhedra_tau():
   angles = []
   order = int(len(l) - 1)
 
-  if order in (4, 5):
-    ks = [(i,j) for i in range(1,order+1) for j in range(i+1,order+1)]
+  if order == 4:
+    ks = [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
+  elif order == 5:
+      ks = [(1, 2), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)]
   else:
     print("Sorry, only 4-coordinate or 5-coordinate Geometry indices are currently implemented")
     return
@@ -2571,7 +2576,7 @@ def get_polyhedra_tau():
     olex.m(cmd)
     cmd = "sel"
     _ = gui.tools.scrub(cmd)[1:]
-    angle = float(_[3].split(":")[1])
+    angle = float(_[3].split(":")[1].split("(")[1].split(")")[0])
     angles.append(angle)
 
   cmd = "sel -u"
@@ -2712,14 +2717,14 @@ class PlotIt():
       dpi = olex_gui.GetPPI()[0]
 
     self.plt = load_matplotlib()
-
+    
     self.plt.rcParams['xtick.labelsize'] = 12
     self.plt.rcParams['ytick.labelsize'] = 12
-
+    
 
     self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
-
+    
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
     if not plt_size:
@@ -2737,7 +2742,7 @@ class PlotIt():
     if self.plt_params.print_byline:
       byline = dd.get('byline', "")
     gap = self.plt_params.subplot_top_gap
-
+ 
     gap_facor = 0.05
     if comment:
       gap = gap - gap * 0.05
@@ -2763,16 +2768,17 @@ class PlotIt():
     else:
       self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
       axes = [axes]
-
+    
 
     i = 0
     for series in dd['data']:
       d =  dd['data'][series]
+      d['lim_x'] = dd.get('lim_x', 1)
       try:
         self.get_ax(axes[i], **d)
       except:
         self.get_ax(axes[0][i], **d)
-
+        
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
@@ -2793,7 +2799,7 @@ class PlotIt():
         _ = [_]
       for x in _:
         self.plt.axvline(x=x, color='lightgray', linestyle='dashdot', linewidth=1.5)
-
+    
     p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
@@ -2856,7 +2862,7 @@ class PlotIt():
         cmap = False
       else:
         cmap = self.plt.cm.get_cmap(cmap)
-
+    
     if colourscheme == "auto":
       cmap = False
       colour = None
@@ -2865,6 +2871,20 @@ class PlotIt():
     c_count =  0
     y_list = []
     x_list = []
+
+    j = 0
+    if use_highlight:
+      highlight_idx_l = []
+      use_highlight = use_highlight[::-1]
+      for item in use_highlight:
+        xs = move_nth_to_end(xs, item[1]['idx'])
+        ys = move_nth_to_end(ys, item[1]['idx'])
+        highlight_idx_l.append((item[1]['idx'], item[1]['legend']))
+        j += 1
+        
+    lenx = len(xs)
+    labl = None
+    legend_handles = []
     for x, y in zip(xs, ys):
       label = None
       y_list.append(y)
@@ -2874,20 +2894,26 @@ class PlotIt():
         colour_proc =  get_property(colours, i)
         if colour_proc == "default" or not colour_proc:
           colour_proc = None
-
-      ax.plot(x,
+      if use_highlight:
+        colour_proc = "#ababab"
+        if lenx - i <= j:
+          colour_proc = None
+          labl = repr(highlight_idx_l[lenx - i - 1][1])
+      _, = ax.plot(x,
               y,
               marker=get_property(marker, i),
               markersize=get_property(markersize, i),
-              color=colour_proc,
+              color=colour_proc, 
               linewidth=self.plt_params.ax1.line_width,
               linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
               markeredgecolor=get_property(colour, i),
               markeredgewidth=self.plt_params.ax1.marker_edge_width,
+              label=labl
               )
+      if j and lenx - i <= j:
+        legend_handles.append(_)
       i += 1
-
       colour = None
       ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
@@ -2920,7 +2946,9 @@ class PlotIt():
         data_max += margin * (data_max - data_min)
         self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
 
-
+    if legend_handles:
+      ax.legend(handles=legend_handles, loc='upper right', ncol=1)
+      legend = ""
     if legend:
       ax.margins(y=0.25)
       ax.legend(legend, loc='upper right', ncol=2)
@@ -2939,3 +2967,8 @@ def get_property(prop, i):
   if retVal == "default":
     retVal = None
   return retVal
+
+def move_nth_to_end(lst, n):
+  if 0 <= n < len(lst):  # Ensure n is within valid range
+    lst.append(lst.pop(n))  # Remove the nth element and append it to the end
+  return lst

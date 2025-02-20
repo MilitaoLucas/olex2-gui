@@ -869,7 +869,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
             continue
         mask.f_000 += f_000
         prev_x[j] = f_000_s
-        mask._electron_counts_per_void[j] = f_000_s
+        if OV.IsEDData():
+          mask._electron_counts_per_void[j] = f_000_s * 3.324943664
+        else:
+          mask._electron_counts_per_void[j] = f_000_s
 
       #mask.f_000 = flex.sum(masked_diff_map) * mask.fft_scale
       f_000_s = mask.f_000 * grid_scale
