@@ -33,9 +33,14 @@ from PluginTools import VFSDependent
 class GetHelp(VFSDependent):
 
   def load_ressources(self):
-    p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "help.zip")
+    p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "images")
     if os.path.exists(p):
-      gui.zipToOlexVFS(p)
+      gui.helpImagesToOlexVFS(p, base="images")
+    else:
+      p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "help.zip")
+      if os.path.exists(p):
+        gui.zipToOlexVFS(p)
+    
 
   def __init__(self):
     super(GetHelp, self).__init__()
@@ -539,8 +544,8 @@ class GetHelp(VFSDependent):
   #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
 
 
-if have_help:
-  gh = GetHelp()
+gh = GetHelp()
+gh._initialise_all_help_d()
 
 
 def get_template(name, base_path=None):
@@ -718,5 +723,3 @@ def get_md_files_by_folder(root_folder):
 
   return md_files_dict
 
-gh = GetHelp()
-gh._initialise_all_help_d()

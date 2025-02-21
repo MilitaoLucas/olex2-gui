@@ -369,6 +369,16 @@ def escape_for_html(s):
   return s
 olex.registerFunction(escape_for_html, False, "gui")
 
+def helpImagesToOlexVFS(p, base='images'):
+  import glob
+  import OlexVFS
+  file_l =  glob.glob(f"{p}/*.[jJpP][pPnN][gG]")
+  for item in file_l:
+    with open(item, 'rb') as fc:
+      fc = fc.read()
+      fn =  f"{base}/{os.path.basename(item)}"
+      OlexVFS.write_to_olex(fn, fc)
+
 def zipToOlexVFS(zip_path, base=None):
   import OlexVFS
   import zipfile
