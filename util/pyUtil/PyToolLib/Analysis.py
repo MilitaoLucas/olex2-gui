@@ -503,7 +503,7 @@ class Graph(ArgumentParser):
     if write_text:
       txt = self.metadata.get("y_label", "y Axis Label")
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-      wX_axis, wY_axis = get_text_size(draw, txt, font=self.font_small)
+      wX_axis, wY_axis = get_text_size(self.draw, txt, font=self.font_small)
       text = OV.correct_rendered_text(write_text)
       wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
