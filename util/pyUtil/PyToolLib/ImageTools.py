@@ -46,6 +46,14 @@ else:
 # self.params.green.rgb = self.params.green.rgb
 # self.params.red.rgb = self.params.red.rgb
 
+# Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
+def get_text_size(draw, text, font):
+    if hasattr(draw, 'textbbox'):
+        bbox = draw.textbbox((0, 0), text, font=font)
+        return bbox[2] - bbox[0], bbox[3] - bbox[1]
+    else:
+        return draw.textsize(text, font=font)
+
 
 class ImageTools(FontInstances):
   def __init__(self):
@@ -162,8 +170,8 @@ class ImageTools(FontInstances):
           except:
             sub = ""
           norm = item.split("<sub>")[0]
-          tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
-          tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+          tw_s = (get_text_size(draw, sub, font=font_sub)[0]) + sub_kern
+          tw_n = (get_text_size(draw, norm, font=font_number)[0]) + norm_kern
           txt_sub.append((sub, tw_s))
           txt_norm.append((norm, tw_n))
           textwidth += (tw_s + tw_n)
@@ -206,16 +214,16 @@ class ImageTools(FontInstances):
               norm_kern = 0
               after_kern = 0
               draw.text((cur_pos - 2, -3), "/", font=font_slash, fill=font_colour)
-              advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+              advance = ((get_text_size(draw, "/", font=font_slash)[0]) + norm_kern) - 1
             else:
               draw.text((cur_pos + norm_kern, top), "%s" % character, font=font, fill=font_colour)
-              advance = (draw.textsize(character, font=font)[0]) + norm_kern
+              advance = (get_text_size(draw, character, font=font)[0]) + norm_kern
 
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
             draw.text((cur_pos + sub_kern, 5), "%s" % text_in_superscript, font=font_sub, fill=font_colour)
-            advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+            advance = (get_text_size(draw, text_in_superscript, font=font_sub)[0]) + sub_kern
             after_kern = -2
             cur_pos += advance
         i += 1
@@ -275,17 +283,17 @@ class ImageTools(FontInstances):
 
 
   def centre_text(self, draw, txt, font, maxWidth):
-    txt_size = draw.textsize(txt, font=font)
+    txt_size = get_text_size(draw, txt, font=font)
     hStart = self.txt_left + int((maxWidth - txt_size[0]) / 2)
     return hStart
 
   def align_text(self, draw, txt, font, maxWidth, align):
     if align == "centre":
-      txt_size = draw.textsize(txt, font=font)
+      txt_size = get_text_size(draw, txt, font=font)
       hStart = int((maxWidth - txt_size[0]) / 2)
       retVal = hStart
     if align == "right":
-      txt_size = draw.textsize(txt, font=font)
+      txt_size = get_text_size(draw, txt, font=font)
       hStart = int((maxWidth - txt_size[0]))
       retVal = hStart
     return retVal
@@ -478,7 +486,7 @@ class ImageTools(FontInstances):
             #print "--- Return %s from Cache!" %name
           #return _
 
-    image = image.resize((width,height), Image.ANTIALIAS)
+    image = image.resize((width,height), Image.LANCZOS)
     if debug:
       print("+++ Resize %s (%s)!" %(name, s))
     #if name:
@@ -924,7 +932,7 @@ class ImageTools(FontInstances):
       self.txt_top += self.top_adjust + OV.GetParam('gui.font_top_system_adjust', 0)
       return
     try:
-      letting_width, lettering_height = self.draw.textsize(self.txt, font=self.font)
+      letting_width, lettering_height = get_text_size(self.draw, self.txt, font=self.font)
       rel_size = self.valign[1]
       position = self.valign[0]
       self.font_size = int(rel_size * self.image_size[1])
@@ -939,7 +947,7 @@ class ImageTools(FontInstances):
       print(err)
 
   def _shorten_text(self, txt, draw, left_start, width, font):
-    tw = (draw.textsize(txt, font)[0])
+    tw = (get_text_size(draw, txt, font)[0])
     if tw < width:
       return txt
 
@@ -956,7 +964,7 @@ class ImageTools(FontInstances):
     while tw > width - left_start - 5 * self.scale:
       txtbeg = txt[:n]
       txtend = txt [-n:]
-      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      tw = (get_text_size(draw, "%s...%s" %(txtbeg, txtend), font)[0])
       n -= 1
       xx += 1
       if xx > 100 * self.scale:
@@ -1016,7 +1024,7 @@ class ImageTools(FontInstances):
     elif align == "right":
       self.txt_left = (self.align_text(draw, txt, font, max_width, 'right'))
 
-    wX, wY = draw.textsize(txt, font=font)
+    wX, wY = get_text_size(draw, txt, font=font)
     if getXY_only:
       return wX, wY
 
@@ -1027,7 +1035,7 @@ class ImageTools(FontInstances):
       txt_in = txt.split()
 
       for word in txt_in:
-        wX, wY = draw.textsize(word, font=font)
+        wX, wY = get_text_size(draw, word, font=font)
         wXT += wX
         if wXT < max_width-1:
           t += " %s" % word
@@ -1073,7 +1081,7 @@ class ImageTools(FontInstances):
                 f = self.get_font(font_name, int(font_size * 0.7))
                 top += int(font_size / 2)
               j += 1
-              wX, wY = draw.textsize(item, font=f)
+              wX, wY = get_text_size(draw, item, font=f)
               draw.text((left, top), item, font=f, fill=font_colour)
               left += wX
           else:
@@ -1111,7 +1119,7 @@ class ImageTools(FontInstances):
             item = item.strip("</b>")
           else:
             f = self.font
-          bX, bY = self.draw.textsize(item, font=f)
+          bX, bY = get_text_size(self.draw, item, font=f)
           self.draw.text((l, top), item, font=f, fill=self.font_colour)
           l += bX
         top += self.line_height
@@ -1153,7 +1161,7 @@ class ImageTools(FontInstances):
     font = self.fonts[font_name]["fontInstance"].get(font_size, None)
     if not font:
       font = self.registerFontInstance(font_name, font_size)
-    wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
+    wX, wY = get_text_size(sizedraw_dummy_draw, txt, font=font)
     try:
       offset = font.getoffset(txt)[1]
     except Exception as e:
@@ -1204,7 +1212,7 @@ class ImageTools(FontInstances):
       font = self.fonts[font_name]["fontInstance"].get(font_size, None)
       if not font:
         font = self.registerFontInstance(font_name, font_size)
-      wX, wY = draw.textsize(txt, font=font)
+      wX, wY = get_text_size(draw, txt, font=font)
 
       self.write_text_to_draw(
         draw,
@@ -1364,7 +1372,7 @@ class ImageTools(FontInstances):
         watermark = True
         if watermark:
           _ = image.size[1] - (pad*scale*2)
-          mark = mark.resize((_,_), Image.ANTIALIAS)
+          mark = mark.resize((_,_), Image.LANCZOS)
           image = self.watermark(image, mark, (int(round(l)), int(round(t))), opacity=1)
         else:
           mark_colouriszed = self.colourize(mark, (0, 0, 0), self.params.html.base_colour.rgb)

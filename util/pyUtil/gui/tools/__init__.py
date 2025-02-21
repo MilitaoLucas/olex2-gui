@@ -1364,7 +1364,7 @@ def get_battery_image(colour, colourize=True):
     draw.rectangle(box, fill=col)
   new_width = 18
   new_height = int(im.size[1] / im.size[0] * 20)
-  IM = im.resize((new_width, new_height), Image.ANTIALIAS)
+  IM = im.resize((new_width, new_height), Image.LANCZOS)
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
 
