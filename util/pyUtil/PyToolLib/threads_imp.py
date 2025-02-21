@@ -160,7 +160,7 @@ class NewsImageRetrivalThread(ThreadEx):
     import gui
     from gui import help
     cont = _.read().decode()
-    help.GetHelp().make_help_box(helpTxt=cont, name="Sample_list")
+    help.gh.make_help_box(helpTxt=cont, name="Sample_list")
 
   def get_structure_from_url(self, name, url=None):
     isZip = False
