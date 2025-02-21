@@ -1,22 +1,16 @@
 #import PngImagePlugin
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
-from PIL import Image
 import glob, os
 import copy
-from PIL import ImageDraw, ImageChops, ImageColor, ImageEnhance
+from PIL import Image, ImageDraw, ImageChops, ImageColor, ImageEnhance
 import OlexVFS
-#import olex_core
 import pickle
 import RoundedCorners
 import sys
-#from olexex import OlexVariables
-#OV = OlexVariables()
-#OV = olexex.OlexFunctions()
 import gui
 import olexex
-from ImageTools import ImageTools
-from ImageTools import IT
+from ImageTools import ImageTools, IT, get_text_size
 from ArgumentParser import ArgumentParser
 from olexFunctions import OV
 #debug = OV.IsDebugging()
@@ -375,7 +369,7 @@ class MatrixMaker(ImageTools):
 
     for item in matrix:
       use_font = font_small
-      txt_size = draw.textsize(str(item), font=use_font)
+      txt_size = get_text_size(draw, str(item), font=use_font)
       w = txt_size[0]
       if w > max_width:
         max_width = w
@@ -400,10 +394,10 @@ class MatrixMaker(ImageTools):
       else:
         j = (i-6)
         
-      txt_size = draw.textsize(str(item), font=font)
+      txt_size = get_text_size(draw, str(item), font=font)
       if "." in str(item):
         use_font = font_small
-        txt_size = draw.textsize(str(item), font=use_font)
+        txt_size = get_text_size(draw, str(item), font=use_font)
       beg_adjust = 0
       if j == 0:
         beg_adjust = 2*scale
@@ -424,7 +418,7 @@ class MatrixMaker(ImageTools):
     for i in range(len(text_def)):
       item = text_def[i].get('txt',"")
       colour = text_def[i].get('font_colour',"")
-      w = draw.textsize(str(item), font=font)[0]
+      w = get_text_size(draw, str(item), font=font)[0]
       draw.text(((width*scale-w)/2, 40*scale + line_heigth * i), "%s" %item, font=font, fill=(colour))
     _ = 3*scale  
     arrows = 'bar:left:%s'%_
@@ -438,7 +432,7 @@ class MatrixMaker(ImageTools):
 
     underground = self.params.html.bg_colour.rgb
     im = self.TI.make_corners('1111', im, 3*scale, underground)
-    im = im.resize((width, height),Image.ANTIALIAS)
+    im = im.resize((width, height),Image.LANCZOS)
     
     namestate = r"%s%s.png" %(name, state)
     name = r"%s" %(name)
@@ -1891,7 +1885,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw.polygon((begin, m1, m2, end), IT.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 0.8))
 
 
-    image = image.resize((width, height),Image.ANTIALIAS)
+    image = image.resize((width, height),Image.LANCZOS)
     name = "qwedges.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
@@ -2767,15 +2761,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
     #if self.scale != 1:
-      #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+      #image = image.resize((int(width), int(height)), Image.LANCZOS)
     #return image
 
 
     #if self.scale != 1 or dpi_scale != 1:
       #if dpi_scaling:
-        #image = image.resize((int(width*IT.dpi_scale), int(height*IT.dpi_scale)), Image.ANTIALIAS)
+        #image = image.resize((int(width*IT.dpi_scale), int(height*IT.dpi_scale)), Image.LANCZOS)
       #else:
-        #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+        #image = image.resize((int(width), int(height)), Image.LANCZOS)
 
     return image
 
@@ -2921,7 +2915,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         oSize = img.size
         s = oSize[1]/image.size[1]
         nSize = (int(oSize[0]/s), int(oSize[1]/s))
-        img = img.resize(nSize, Image.ANTIALIAS)
+        img = img.resize(nSize, Image.LANCZOS)
         image.paste(img,(0,0))
 
     if 'bar' in arrows:
@@ -3018,9 +3012,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if txt == "none":
       return
     font = IT.registerFontInstance(font_name, font_size)
-    tw = (draw.textsize(txt, font)[0])
+    tw = (get_text_size(draw, txt, font)[0])
 
-    wX, wY  = draw.textsize(txt, font)
+    wX, wY  = get_text_size(draw, txt, font)
     #left_start =  (self.width-wX) - right_margin
     top = height - wY - 2 * self.scale
     IT.write_text_to_draw(draw,
@@ -3091,8 +3085,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           except:
             sub = ""
           norm = item.split("<sub>")[0]
-          tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
-          tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+          tw_s = (get_text_size(draw, sub, font=font_sub)[0]) + sub_kern
+          tw_n = (get_text_size(draw, norm, font=font_number)[0]) + norm_kern
           txt_sub.append((sub, tw_s))
           txt_norm.append((norm, tw_n))
           textwidth += (tw_s + tw_n)
@@ -3140,16 +3134,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                 cur_pos += upon_advance
                 upon_advance = None
               draw.text((cur_pos -2 * fscale, top - int(0.5 * fscale)), "/", font=font_slash, fill=font_colour)
-              advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+              advance = ((get_text_size(draw, "/", font=font_slash)[0]) + norm_kern) - 1
             else:
               draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
-              advance = (draw.textsize(character, font=font)[0]) + norm_kern
+              advance = (get_text_size(draw, character, font=font)[0]) + norm_kern
 
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
             draw.text((cur_pos + sub_kern, sub_lower), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
-            advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+            advance = (get_text_size(draw, text_in_superscript, font=font_sub)[0]) + sub_kern
             after_kern = -2 * fscale
             upon_advance = advance
 #            cur_pos += advance
@@ -3311,7 +3305,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     lines = []
 
     for txt in text:
-      txt_size = dummy_draw.textsize(txt + " ", font=font)
+      txt_size = get_text_size(dummy_draw, txt + " ", font=font)
       text_width += txt_size[0]
       if text_width > (width - inner_border):
         number_of_lines += 1
@@ -3340,7 +3334,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     i = 0
     for txt in lines:
-      txt_size = draw.textsize(txt, font=font)
+      txt_size = get_text_size(draw, txt, font=font)
       text_width = txt_size[0]
       IT.write_text_to_draw(draw,
                    txt,
@@ -3411,7 +3405,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           fontName = "DefaultFont"
           left = total_text_width
         font = IT.registerFontInstance(fontName, font_size)
-        tw = draw.textsize(f" {txt}", font=font)[0]
+        tw = get_text_size(draw, f" {txt}", font=font)[0]
         ttw += tw
         text_l.append([txt, fontName, tw])
         
@@ -3446,7 +3440,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       border_colour = font_colour
       image = self.make_timage_border(image, fill= border_colour, weight = border)
 
-    image =  image.resize((int(width/scale), int(height/scale)),Image.ANTIALIAS)
+    image =  image.resize((int(width/scale), int(height/scale)),Image.LANCZOS)
     return image
 
 
@@ -3840,8 +3834,8 @@ def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times B
         except:
           sub = ""
         norm = item.split("<sub>")[0]
-        tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
-        tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+        tw_s = (get_text_size(draw, sub, font=font_sub)[0]) + sub_kern
+        tw_n = (get_text_size(draw, norm, font=font_number)[0]) + norm_kern
         txt_sub.append((sub, tw_s))
         txt_norm.append((norm, tw_n))
         textwidth += (tw_s + tw_n)
@@ -3884,16 +3878,16 @@ def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times B
             norm_kern = 0
             after_kern = 0
             draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
-            advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+            advance = ((get_text_size(draw, "/", font=font_slash)[0]) + norm_kern) - 1
           else:
             draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
-            advance = (draw.textsize(character, font=font)[0]) + norm_kern
+            advance = (get_text_size(draw, character, font=font)[0]) + norm_kern
 
         text_in_superscript = txt_sub[i][0]
         if text_in_superscript:
           cur_pos += advance
           draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
-          advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+          advance = (get_text_size(draw, text_in_superscript, font=font_sub)[0]) + sub_kern
           after_kern = -2
           cur_pos += advance
       i+= 1

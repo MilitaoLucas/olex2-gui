@@ -802,6 +802,47 @@ $-
 #ignoreif -->
 
 
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_RIFIT' width='100%'></tr>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_RIFit;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width='2%' align="left">
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Ri_Fit",
+    "label=RI-Fit ",
+    "checked=spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','True')>>html.Update()",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','False')>>html.Update()"
+    )
+  $-
+</td>
+<!-- ======= RI-SWITCH ===================== -->
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT'),'False')
+<td width="30%">
+<b>Auxiliary Basis </b>
+</td>
+<td width="40%">
+$+
+  html.Snippet("gui/snippets/input-combo",
+  "name=NoSpherA2_ORCA_RIFIT@refine",
+  "items='combo_basis_fit;def2_universal_JKfit;def2_SVP_JKfit;HGBSP3_7;def2_qzvppd_rifit;TZVP_JKfit;cc-pvqz-jkfit'",
+  "value=spy.GetParam('snum.NoSpherA2.auxiliary_basis')",
+  "onchange=spy.SetParam('snum.NoSpherA2.auxiliary_basis', html.GetValue('~name~'))")
+$-
+</td>
+#ignoreif -->
+
+<!-- ======= RI-SWITCH END ===================== -->
+ <!-- THIS ONLY CREATES EMPTY SPACE TO FILL THE SPACE ON THE RIGHT -->
+</td>
+<td width="40%" align="left">
+<b> </b>
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 <!-- ======= pySCF SPECIFIC START ===================== -->
 
