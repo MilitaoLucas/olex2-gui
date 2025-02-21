@@ -34,7 +34,7 @@ def create_corner(radius=100,fill=255,factor=50):
   corner  = Image.new('L',(factor*radius,factor*radius),0)
   draw    = ImageDraw.Draw(corner)
   draw.pieslice((0,0,2*factor*radius,2*factor*radius),180,270,fill=fill)
-  corner  = corner.resize((radius,radius),Image.ANTIALIAS)
+  corner  = corner.resize((radius,radius),Image.LANCZOS)
   return corner
 
 def create_rounded_rectangle(size=(600,400),cache={},radius=100,fill=255,
