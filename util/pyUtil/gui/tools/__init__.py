@@ -2775,10 +2775,9 @@ class PlotIt():
       d =  dd['data'][series]
       d['lim_x'] = dd.get('lim_x', 1)
       try:
-        self.get_ax(axes[i], **d)
-      except:
         self.get_ax(axes[0][i], **d)
-        
+      except:
+        self.get_ax(axes[i], **d)
       i += 1
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
@@ -2877,14 +2876,18 @@ class PlotIt():
       highlight_idx_l = []
       use_highlight = use_highlight[::-1]
       for item in use_highlight:
-        xs = move_nth_to_end(xs, item[1]['idx'])
-        ys = move_nth_to_end(ys, item[1]['idx'])
+        xs.append(xs[item[1]['idx']])
+        ys.append(ys[item[1]['idx']])
         highlight_idx_l.append((item[1]['idx'], item[1]['legend']))
         j += 1
-        
+      for item in use_highlight:
+        xs.remove(xs[item[1]['idx']])
+        ys.remove(ys[item[1]['idx']])
+
     lenx = len(xs)
     labl = None
     legend_handles = []
+    lw = self.plt_params.ax1.line_width
     for x, y in zip(xs, ys):
       label = None
       y_list.append(y)
@@ -2895,16 +2898,18 @@ class PlotIt():
         if colour_proc == "default" or not colour_proc:
           colour_proc = None
       if use_highlight:
-        colour_proc = "#ababab"
+        colour_proc = "#dedede"
+        lw = self.plt_params.ax1.line_width
         if lenx - i <= j:
           colour_proc = None
           labl = repr(highlight_idx_l[lenx - i - 1][1])
+          lw = self.plt_params.ax1.line_width * 2
       _, = ax.plot(x,
               y,
               marker=get_property(marker, i),
               markersize=get_property(markersize, i),
               color=colour_proc, 
-              linewidth=self.plt_params.ax1.line_width,
+              linewidth=lw,
               linestyle=get_property(linestyle, i),
               markerfacecolor=self.plt_params.ax1.marker_face_colour,
               markeredgecolor=get_property(colour, i),
