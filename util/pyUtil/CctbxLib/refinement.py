@@ -667,9 +667,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block.add_loop(angles.loop)
       equivs = self.olx_atoms.model['equivalents']
       confs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'CONF']
-      if len(confs): #fix me!
+      if len(confs):
         all_conf = None
-        angles = []
         angle_defs = []
         for conf in confs:
           atoms = conf['atoms']
@@ -685,36 +684,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
               rt_mxs.append(sgtbx.rt_mx())
             seqs.append(atom[0])
           angle_defs.append(crystal.dihedral_angle_def(seqs, rt_mxs))
+        max_d = 1.9
+        max_angle = 170
         if all_conf:
-          max_d = 1.7
-          max_angle = 170
           if len(all_conf.args) > 0:
             max_d = all_conf.args[0]
           if len(all_conf.args) > 1:
             max_angle = all_conf.args[1]
-          angles += crystal.calculate_dihedrals(
-            pair_asu_table=connectivity_full.pair_asu_table,
-            sites_frac=xs.sites_frac(),
-            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-            cell_covariance_matrix=cell_vcv,
-            parameter_map=xs.parameter_map(),
-            conformer_indices=self.reparametrisation.connectivity_table.conformer_indices,
-            max_d=max_d,
-            max_angle=max_angle)
-        if len(angle_defs):
-          defined_angles = crystal.calculate_dihedrals(
-            pair_asu_table=connectivity_full.pair_asu_table,
-            sites_frac=xs.sites_frac(),
-            dihedral_defs=angle_defs,
-            covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-            cell_covariance_matrix=cell_vcv,
-            parameter_map=xs.parameter_map())
-          if all_conf:
-            for a in defined_angles:
-              if a not in angles:
-                angles.append(a)
-          else:
-            angles = defined_angles
+        angles = crystal.calculate_dihedrals(
+          pair_asu_table=connectivity_full.pair_asu_table,
+          sites_frac=xs.sites_frac(),
+          dihedral_defs=angle_defs,
+          generate_all=all_conf is not None,
+          covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+          cell_covariance_matrix=cell_vcv,
+          parameter_map=xs.parameter_map(),
+          conformer_indices=self.reparametrisation.connectivity_table.conformer_indices,
+          max_d=max_d,
+          max_angle=max_angle)
         space_group_info = sgtbx.space_group_info(group=xs.space_group())
         cif_dihedrals = iotbx.cif.geometry.dihedral_angles_as_cif_loop(
           angles,
