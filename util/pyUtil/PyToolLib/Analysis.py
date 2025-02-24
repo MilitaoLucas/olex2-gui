@@ -3920,7 +3920,7 @@ class HealthOfStructure():
     if 'Rsigma' not in self.hkl_stats:
       return
     try:
-      self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
+      self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma'] if self.hkl_stats['Rsigma'] else 0
       self.theta_max = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
       if olx.IsFileType("ires") == 'true':
         try:
