@@ -40,7 +40,7 @@ class GetHelp(VFSDependent):
       p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "help.zip")
       if os.path.exists(p):
         gui.zipToOlexVFS(p)
-    
+
 
   def __init__(self):
     super(GetHelp, self).__init__()
@@ -409,13 +409,13 @@ class GetHelp(VFSDependent):
     if box_type != "help":
       banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" % box_type
       banner_include += """
-  
+
   <map name="map_tutorial">
   <!-- Button PREVIOUS -->
       <area shape="rect" usemap="#map_setup"
         coords="290,0,340,60"
         href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
-  
+
   <!-- Button NEXT-->
       <area shape="rect"
         coords="340,0,400,60"
@@ -542,10 +542,6 @@ class GetHelp(VFSDependent):
     else:
       olx.html.Load(wFilePath)
   #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
-
-
-gh = GetHelp()
-gh._initialise_all_help_d()
 
 
 def get_template(name, base_path=None):
@@ -688,10 +684,6 @@ class AutoDemoTemp(AutoDemo):
     self.items = self.items + gui.tools.TemplateProvider.get_template('all_tutorials_end').split("\n")
 
 
-if have_help:
-  AutoDemoTemp_instance = AutoDemoTemp()
-
-
 def pandoc(kind='pdf', md_path=None, out_path=None):
   ac_path = "D:\\Users\\Horst\\Documents\\Olex2-1.5-dev\\util\\pyUtil\\AC5d\\"
   out_tex = os.path.join(ac_path, 'fred.tex')
@@ -723,3 +715,8 @@ def get_md_files_by_folder(root_folder):
 
   return md_files_dict
 
+gh = GetHelp()
+gh._initialise_all_help_d()
+
+if have_help:
+  AutoDemoTemp()
