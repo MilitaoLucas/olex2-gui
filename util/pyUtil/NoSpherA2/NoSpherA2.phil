@@ -8,6 +8,8 @@ snum{
       .type = str
     cmd = ""
       .type = str
+    auxilary_basis = "combo_basis_fit"
+      .type = str
     basis_name = "def2-SVP"
       .type = str
     becke_accuracy = "Normal"
@@ -282,6 +284,8 @@ snum{
       .type = bool
     wfn2fchk_ECP = 1
       .type = int
+    wfn2fchk_RI_FIT = False
+      .type = bool
     wfn2fchk_SF = True
       .type = bool
     wfn2fchk_debug = False

@@ -869,7 +869,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
             continue
         mask.f_000 += f_000
         prev_x[j] = f_000_s
-        mask._electron_counts_per_void[j] = f_000_s
+        if OV.IsEDData():
+          mask._electron_counts_per_void[j] = f_000_s * 3.324943664
+        else:
+          mask._electron_counts_per_void[j] = f_000_s
 
       #mask.f_000 = flex.sum(masked_diff_map) * mask.fft_scale
       f_000_s = mask.f_000 * grid_scale
@@ -1286,7 +1289,7 @@ def make_DISP_Table():
         if e in entry[0]:
           table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
     except:
-      print(f"Error getting value of B & C for {e}")
+      print(f"Error getting value of Brennan & Cowan for {e}")
       f_H = table_H.at_angstrom(wavelength)
 
       table.append(row(["Henke", f_H.fp(), f_H.fdp()]))

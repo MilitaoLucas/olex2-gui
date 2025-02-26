@@ -10,7 +10,7 @@ import ExternalPrgParameters
 import OlexVFS
 from PIL import Image
 from PIL import ImageFont, ImageDraw, ImageChops
-from ImageTools import ImageTools
+from ImageTools import ImageTools, get_text_size
 from PIL import ImageFilter
 from ArgumentParser import ArgumentParser
 import math
@@ -241,7 +241,7 @@ class Graph(ArgumentParser):
       assert key_type in ("function", "marker")
       label = OV.correct_rendered_text(key['label'])
       left = 0
-      wX, wY = draw.textsize(label, font=self.font_tiny)
+      wX, wY = get_text_size(draw, label, self.font_tiny)
       if key_type == "function":
         if "colour" in key:
           fill = key['colour']
@@ -338,15 +338,15 @@ class Graph(ArgumentParser):
       y = self.bTop
       top_left = (x,y)
       IT.write_text_to_draw(draw, txt, font_name=font_name, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour, max_width=self.imX)
-      currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
+      currX, currY = get_text_size(self.draw, txt, font=self.font_bold_large)
       # Write something in the right-hand top spot on the graph
       txt = OV.correct_rendered_text(self.graphInfo.get("TopRightTitle", ""))
       font = self.font_bold_large
-      txtX, txtY = self.draw.textsize(txt, font=font)
+      txtX, txtY = get_text_size(self.draw, txt, font=font)
       x = (self.imX - self.bSides - txtX) # align text right
       y = self.bTop
       draw.text((x, y), txt, font=font, fill=self.filenameColour)
-      currX, currY = draw.textsize(txt, font=self.font_bold_large)
+      currX, currY = get_text_size(draw, txt, font=self.font_bold_large)
       self.currX += currX
       self.currY += currY
 
@@ -503,7 +503,7 @@ class Graph(ArgumentParser):
     if write_text:
       txt = self.metadata.get("y_label", "y Axis Label")
       txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-      wX_axis, wY_axis = self.draw.textsize(txt, font=self.font_small)
+      wX_axis, wY_axis = get_text_size(self.draw, txt, font=self.font_small)
       text = OV.correct_rendered_text(write_text)
       wX, wY = IT.textsize(self.draw, text, font_size=self.font_size_tiny)
       if rotate_text:
@@ -1426,7 +1426,7 @@ class Graph(ArgumentParser):
       else:
         txt = format_string %(item*100)
 
-      wX, wY = self.draw.textsize(txt, font=self.font_small)
+      wX, wY = get_text_size(self.draw, txt, font=self.font_small)
       x = self.graph_left - wX - self.imX * 0.01
       if self.reverse_y:
         y = (self.boxYoffset + wY/2
@@ -1457,7 +1457,7 @@ class Graph(ArgumentParser):
 
     txt = self.metadata.get("y_label", "y Axis Label")
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-    wX, wY = self.draw.textsize(txt, font=self.font_small)
+    wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
     new = Image.new('RGB', size, self.fillColour)
     draw = ImageDraw.Draw(new)
@@ -1493,7 +1493,7 @@ class Graph(ArgumentParser):
 
     format_string = "%5d"
     temp_txt = format_string %y_axis[-1]
-    temp_wX, temp_wY = self.draw.textsize(temp_txt, font=self.font_small)
+    temp_wX, temp_wY = get_text_size(self.draw, temp_txt, font=self.font_small)
     self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX,colour='#ffffff')
     for item in y_axis:
       val = float(item)
@@ -1501,7 +1501,7 @@ class Graph(ArgumentParser):
         continue
       txt = format_string %item
 
-      wX, wY = self.draw.textsize(txt, font=self.font_small)
+      wX, wY = get_text_size(self.draw, txt, font=self.font_small)
       x = self.graph_right + self.imX * 0.01
       if self.reverse_y:
         y = (self.boxYoffset + wY/2
@@ -1531,7 +1531,7 @@ class Graph(ArgumentParser):
 
     txt = label
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-    wX, wY = self.draw.textsize(txt, font=self.font_small)
+    wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
     new = Image.new('RGB', size, self.fillColour)
     draw = ImageDraw.Draw(new)
@@ -1579,7 +1579,7 @@ class Graph(ArgumentParser):
         _ = val
       txt = format_string %_
 
-      wX, wY = self.draw.textsize(txt, font=self.font_small)
+      wX, wY = get_text_size(self.draw, txt, font=self.font_small)
       y = self.graph_bottom + self.imX * 0.01
 
       if self.reverse_x:
@@ -1607,7 +1607,7 @@ class Graph(ArgumentParser):
 
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
-    wX, wY = self.draw.textsize(txt, font=self.font_small)
+    wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     x = self.graph_right - wX - self.bSides
     y = self.boxY  - self.imY * 0.002
 
@@ -2256,16 +2256,16 @@ class WilsonPlot(Analysis):
         top_left = (i - int(wX / 2), 0)
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
         txt = "0.736"
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
+        wX, wY = get_text_size(draw, txt, font=self.font_tiny)
         draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       if i == (margin_right):
         txt = "centric"
         txt = OV.TranslatePhrase(txt)
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
+        wX, wY = get_text_size(draw, txt, font=self.font_tiny)
         top_left = (i-int(wX/2), 0)
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
         txt = "0.968"
-        wX, wY = draw.textsize(txt, font=self.font_small)
+        wX, wY = get_text_size(draw, txt, font=self.font_small)
         draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       top =  int(boxTopOffset+1)
       bottom = int(boxTopOffset+boxHeight-2)
@@ -2301,7 +2301,7 @@ class WilsonPlot(Analysis):
         draw.line(((i, top),(i, bottom)), fill=fill)
     val = int((value - begin) / scale)
     txt = chr(8226)
-    wX, wY = draw.textsize(txt, font=self.font_bold_normal)
+    wX, wY = get_text_size(draw, txt, font=self.font_bold_normal)
     draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
     draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
     image_location = "%s.png" %("grad")
@@ -2405,7 +2405,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
 
       ## Draw Current Numbers
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      wX, wY = get_text_size(self.draw, txt, font=self.font_large)
       x = width - wX - self.bSides
       self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
       self.update_image()
@@ -3920,7 +3920,7 @@ class HealthOfStructure():
     if 'Rsigma' not in self.hkl_stats:
       return
     try:
-      self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
+      self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma'] if self.hkl_stats['Rsigma'] else 0
       self.theta_max = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
       if olx.IsFileType("ires") == 'true':
         try:
