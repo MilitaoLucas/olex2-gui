@@ -7,6 +7,7 @@ import olx
 import olex
 import olex_core
 import sys
+import subprocess
 from olexFunctions import OV
 import OlexVFS
 from PIL import ImageDraw, Image
@@ -249,10 +250,6 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
 
-  os.environ['cuqct_cmd'] = '+&-'.join(args)
-  os.environ['cuqct_dir'] = folder
-  import subprocess
-
   p = None
   if sys.platform[:3] == 'win':
     startinfo = subprocess.STARTUPINFO()
@@ -262,16 +259,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "cuqct-launch.py")],
-                          startupinfo=startinfo)
+    p = subprocess.Popen(args, startupinfo=startinfo)
   else:
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "cuqct-launch.py")])
+    p = subprocess.Popen(args)
 
   out_fn = "NoSpherA2.log"
 
@@ -385,26 +379,23 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     return False
   startinfo = None
 
-  from subprocess import Popen, PIPE
-  from sys import stdout
   if sys.platform[:3] == 'win':
-    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW, SW_HIDE
-    startinfo = STARTUPINFO()
-    startinfo.dwFlags |= STARTF_USESHOWWINDOW
-    startinfo.wShowWindow = SW_HIDE
+    startinfo = subprocess.STARTUPINFO()
+    startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = subprocess.SW_HIDE
 
   if startinfo == None:
-    with Popen(args, stdout=PIPE) as p:
+    with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
-        stdout.write(string)
-        stdout.flush()
+        sys.stdout.write(string)
+        sys.stdout.flush()
   else:
-    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+    with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
-        stdout.write(string)
-        stdout.flush()
+        sys.stdout.write(string)
+        sys.stdout.flush()
 
   if os.path.exists("combined.tsc"):
     tsc_dst = sfc_name + "_total.tsc"
