@@ -194,14 +194,23 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(','.join(groups[i]))
     if software == "Hybrid":
       args.append("-mtc_mult")
-      for i in range(min(6, len(groups))):
+      for i in range(1, min(6, len(groups)+1)):
         m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")
-      for i in range(min(6, len(groups))):
+      for i in range(1, min(6, len(groups) + 1)):
         args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
+      args.append("-mtc_ECP")
+      for i in range(1, min(6, len(groups) + 1)):
+        ECP_m_C = 0
+        sftw = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d' % i)
+        if sftw == "xTB":
+          ECP_m_C = 2
+        elif sftw == "pTB":
+          ECP_m_C = 3
+        args.append(str(ECP_m_C))
     else:
       args.append("-mtc_mult")
       for i in range(len(groups)):
@@ -212,6 +221,17 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       args.append("-mtc_charge")
       for i in range(len(groups)):
         args.append(str(OV.GetParam('snum.NoSpherA2.charge')))
+      args.append("-mtc_ECP")
+      for i in range(len(groups)):
+        if software == "xTB":
+          args.append("2")
+        elif software == "pTB":
+          args.append("3")
+        elif "ECP" in basis_name:
+          args.append("1")
+        else:
+          args.append("0")
+
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:

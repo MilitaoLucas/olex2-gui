@@ -432,48 +432,26 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               OV.SetVar('NoSpherA2-Error',error)
               return False
             path_base = os.path.join(OV.FilePath(), wfn_job_dir, self.name)
-            if os.path.exists(path_base + ".gbw"):
-              wfn_fn = path_base + ".gbw"
-            elif os.path.exists(path_base+".wfx"):
-              wfn_fn = path_base + ".wfx"
-            elif os.path.exists(path_base+".fchk"):
-              wfn_fn = path_base + ".fchk"
-            elif os.path.exists(path_base+".wfn"):
-              wfn_fn = path_base + ".wfn"
-            elif hybrid_part_wfn_code == "Thakkar IAM":
+            if hybrid_part_wfn_code == "Thakkar IAM":
               wfn_fn = path_base + ".xyz"
               try:
-                shutil.copy(os.path.join(wfn_job_dir, "%s.xyz" % (self.name)), "%s_part%s.xyz" % (self.name, parts[i]))
+                shutil.copy(os.path.join(wfn_job_dir, "%s.xyz" % (self.name)), "%s.xyz" % self.name)
               except:
                 pass
-            else:
-              return False
             wfn_fn = None
-            #groups[i-groups_counter].append(0)
-            #groups[i-groups_counter].append(parts[i])
-            for file in os.listdir(wfn_job_dir):
+            # groups[i-groups_counter].append(0)
+            # groups[i-groups_counter].append(parts[i])
+            endings = [".gbw", ".ffn", ".molden", ".fchk", ".xtb", ".xyz", ".wfn", ".wfx"]
+            for file in os.listdir(os.getcwd()):
+              if "_part" in file:
+                continue
               temp = None
-              if file.endswith(".wfn"):
-                temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfn"
-              elif file.endswith(".wfx"):
-                temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".wfx"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
-                  wfn_fn = temp
-              elif file.endswith(".gbw"):
-                temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + ".gbw"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".fchk")):
-                  wfn_fn = temp
-              elif file.endswith(".ffn"):
-                temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".ffn"
-              elif file.endswith(".fchk"):
-                temp = os.path.splitext(file)[0] + "_part%d"%parts[i] + ".fchk"
-                if (wfn_fn == None or wfn_fn.endswith(".wfn")):
-                  wfn_fn = temp
+              if any(file.endswith(x) for x in endings):
+                temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + os.path.splitext(file)[1]
               if temp != None:
                 shutil.move(file, temp)
-            if hybrid_part_wfn_code == "Thakkar IAM" and wfn_fn == None:
-              wfn_fn = "%s_part%s.xyz" % (self.name, parts[i])
-            wfn_files.append(wfn_fn)
+                wfn_files.append(temp)
+                break
         else:
           # Neither Hybrid nor DISCAMB are used, so ORCA; g16; pySCF etc
           need_to_partition = True
@@ -483,8 +461,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               mutation = OV.GetParam('snum.NoSpherA2.ELMOdb.mutation')
               pdb_name = job.name + ".pdb"
               if mutation == True:
-                pdb_name += "_mut"+str(parts[i])
-              if os.path.exists(os.path.join(OV.FilePath(),pdb_name)):
+                pdb_name += "_mut" + str(parts[i])
+              if os.path.exists(os.path.join(OV.FilePath(), pdb_name)):
                 shutil.copy(os.path.join(OV.FilePath(), pdb_name), os.path.join(wfn_job_dir, self.name + ".pdb"))
               else:
                 OV.SetVar('NoSpherA2-Error',"ELMOdb")
@@ -533,10 +511,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = path_base + ".molden"
             elif os.path.exists(path_base + ".xtb"):
               wfn_fn = path_base + ".xtb"
+            elif os.path.exists(path_base + ".xyz"):
+              wfn_fn = path_base + ".xyz"
             else:
               return False
           wfn_files.append(wfn_fn)
-          endings = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog", ".xtb"]
+          endings = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog", ".xtb", ".xyz"]
           for file in os.listdir(os.getcwd()):
             if "_part" in file:
               continue
