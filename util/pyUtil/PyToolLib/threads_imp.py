@@ -47,7 +47,11 @@ class NewsImageRetrivalThread(ThreadEx):
         else:
           img = self.make_call(img_url)
           if img:
-            img_data = img.read()
+            try:
+              img_data = img.read()
+            except:
+              print("Could not read image data from news list")
+              return
             if self.name == "splash":
               with open(os.path.join(olx.app.SharedDir(), 'splash.jpg'),'wb') as wFile:
                 wFile.write(img_data)
@@ -156,7 +160,7 @@ class NewsImageRetrivalThread(ThreadEx):
     import gui
     from gui import help
     cont = _.read().decode()
-    help.make_help_box(helpTxt=cont, name="Sample_list")
+    help.gh.make_help_box(helpTxt=cont, name="Sample_list")
 
   def get_structure_from_url(self, name, url=None):
     isZip = False
