@@ -2400,6 +2400,8 @@ user
       .type = str
     salted_models_list = ""
       .type = str
+    show_ri_fit = False
+      .type = bool
   }
   Server{
     host=localhost
