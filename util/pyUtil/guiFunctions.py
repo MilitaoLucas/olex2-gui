@@ -3,10 +3,11 @@
 import sys
 import olx
 import olex
+from decors import gui_only
 if olx.HasGUI() == 'true': import olex_gui
 
 class GuiFunctions(object):
-
+  @gui_only()
   def GetUserInput(self, arg, title, contentText):
     """If first argument is 1 (number one) brings up one line input box, anything else brings up a multiline input."""
     try:
@@ -18,6 +19,7 @@ class GuiFunctions(object):
       retStr = None
     return retStr
 
+  @gui_only()
   def Alert(self, title, text, buttons=None, tickboxText=None):
     '''
     Opens an alert window.
@@ -40,41 +42,47 @@ class GuiFunctions(object):
       retStr = None
     return retStr
 
+  @gui_only()
   def IsControl(self, ctrl_name):
-    if not self.HasGUI():
-      return False
     try:
       return bool(olex_gui.IsControl(ctrl_name))
     except Exception as ex:
       print("An error occurred.", file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  @gui_only()
   def SetControlBG(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetBG(ctrl_name, val)
 
+  @gui_only()
   def SetControlFG(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetFG(ctrl_name, val)
 
+  @gui_only()
   def SetControlValue(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetValue(ctrl_name, val)
 
+  @gui_only()
   def SetControlItems(self, ctrl_name, items, val=None):
     if self.IsControl(ctrl_name):
       olx.html.SetItems(ctrl_name, items)
       if val is not None:
         olx.html.SetValue(ctrl_name, val)
 
+  @gui_only()
   def SetControlState(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetState(ctrl_name, val)
 
+  @gui_only()
   def SetControlEnabled(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetEnabled(ctrl_name, val)
 
+  @gui_only()
   def TranslatePhrase(self, text):
     try:
       retStr = olx.TranslatePhrase(text)
@@ -84,34 +92,43 @@ class GuiFunctions(object):
       retStr = None
     return retStr
 
+  @gui_only()
   def UpdateHtml(self, html_name='', force=False):
     olx.html.Update(html_name)
 
+  @gui_only()
   def HtmlLoad(self, path):
     olx.html.Load(path)
 
+  @gui_only()
   def HtmlDefineControl(self, d):
     olx.html.DefineControl('%(name)s %(type)s -v=%(value)s -i=%(items)s' %d)
 
+  @gui_only()
   def Cursor(self, state="", text=""):
     if state:
       olx.Cursor(state, text)
     else:
       olx.Cursor()
 
+  @gui_only()
   def Refresh(self):
     olx.Refresh()
 
+  @gui_only()
   def CreateBitmap(self, bitmap):
     olx.CreateBitmap(bitmap, bitmap, r=True)
 
+  @gui_only()
   def DeleteBitmap(self, bitmap):
     olx.DeleteBitmap('%s' %bitmap)
 
+  @gui_only()
   def Listen(self, listenFile):
     pass
     #olx.Listen(listenFile)
 
+  @gui_only()
   def SetGrad(self, f=None):
     from ImageTools import IT
     l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
@@ -124,6 +141,7 @@ class GuiFunctions(object):
       v.append(val)
     olex.m("Grad %i %i %i %i" %(v[0], v[1], v[2], v[3]))
 
+  @gui_only()
   def GetFormulaDisplay(self):
     rv = ""
     s = olx.xf.GetFormula('list')
@@ -139,16 +157,20 @@ class GuiFunctions(object):
       rv+="%s<sub>%s</sub>" %(ele, num)
     return rv
 
+  @gui_only()
   def GetHtmlPanelwidth(self):
     return olx.HtmlPanelWidth()
 
+  @gui_only()
   def setItemstate(self, txt):
     olx.html.ItemState(*tuple(txt.split()))
 
+  @gui_only()
   def SetImage(self, zimg_name, image_file):
     if self.olex_gui.IsControl(zimg_name):
       olx.html.SetImage(zimg_name,image_file)
 
+  @gui_only()
   def setDisplayQuality(self, q=None):
     if not q:
       q = self.GetParam('snum.display_quality')
@@ -159,39 +181,3 @@ class GuiFunctions(object):
 a = GuiFunctions()
 olex.registerMacro(a.SetGrad, 'f')
 olex.registerFunction(a.GetFormulaDisplay)
-
-class NoGuiFunctions(object):
-  def GetUserInput(self,arg,title,contentText):
-    print('%s:' %title)
-    print(contentText)
-    return contentText
-
-  def Alert(self, title, text, buttons=None, tickboxText=None):
-    return ''
-
-  def UpdateHtml(self):
-    return ''
-
-  def HtmlLoad(self, path):
-    return ''
-
-  def HtmlDefineControl(self, d):
-    return ''
-
-  def Cursor(self, state=None, text=None):
-    return ''
-
-  def CreateBitmap(self, bitmap):
-    return ''
-
-  def DeleteBitmap(self, bitmap):
-    return ''
-
-  def Listen(self, listenFile):
-    return ''
-
-  def TranslatePhrase(self,text):
-    return ''
-
-  def Refresh(self):
-    return ''

@@ -7,6 +7,7 @@ import olx
 import olex
 import olex_core
 import sys
+import subprocess
 from olexFunctions import OV
 import OlexVFS
 from PIL import ImageDraw, Image
@@ -193,14 +194,23 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(','.join(groups[i]))
     if software == "Hybrid":
       args.append("-mtc_mult")
-      for i in range(min(6, len(groups))):
+      for i in range(1, min(6, len(groups)+1)):
         m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")
-      for i in range(min(6, len(groups))):
+      for i in range(1, min(6, len(groups) + 1)):
         args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
+      args.append("-mtc_ECP")
+      for i in range(1, min(6, len(groups) + 1)):
+        ECP_m_C = 0
+        sftw = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d' % i)
+        if sftw == "xTB":
+          ECP_m_C = 2
+        elif sftw == "pTB":
+          ECP_m_C = 3
+        args.append(str(ECP_m_C))
     else:
       args.append("-mtc_mult")
       for i in range(len(groups)):
@@ -211,6 +221,17 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       args.append("-mtc_charge")
       for i in range(len(groups)):
         args.append(str(OV.GetParam('snum.NoSpherA2.charge')))
+      args.append("-mtc_ECP")
+      for i in range(len(groups)):
+        if software == "xTB":
+          args.append("2")
+        elif software == "pTB":
+          args.append("3")
+        elif "ECP" in basis_name:
+          args.append("1")
+        else:
+          args.append("0")
+
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
       if Cations != "" and Cations != None:
@@ -249,10 +270,6 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
 
-  os.environ['cuqct_cmd'] = '+&-'.join(args)
-  os.environ['cuqct_dir'] = folder
-  import subprocess
-
   p = None
   if sys.platform[:3] == 'win':
     startinfo = subprocess.STARTUPINFO()
@@ -262,16 +279,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "cuqct-launch.py")],
-                          startupinfo=startinfo)
+    p = subprocess.Popen(args, startupinfo=startinfo)
   else:
     pyl = OV.getPYLPath()
     if not pyl:
       print("A problem with pyl is encountered, aborting.")
       return
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "cuqct-launch.py")])
+    p = subprocess.Popen(args)
 
   out_fn = "NoSpherA2.log"
 
@@ -385,26 +399,23 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     return False
   startinfo = None
 
-  from subprocess import Popen, PIPE
-  from sys import stdout
   if sys.platform[:3] == 'win':
-    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW, SW_HIDE
-    startinfo = STARTUPINFO()
-    startinfo.dwFlags |= STARTF_USESHOWWINDOW
-    startinfo.wShowWindow = SW_HIDE
+    startinfo = subprocess.STARTUPINFO()
+    startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = subprocess.SW_HIDE
 
   if startinfo == None:
-    with Popen(args, stdout=PIPE) as p:
+    with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
-        stdout.write(string)
-        stdout.flush()
+        sys.stdout.write(string)
+        sys.stdout.flush()
   else:
-    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+    with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
-        stdout.write(string)
-        stdout.flush()
+        sys.stdout.write(string)
+        sys.stdout.flush()
 
   if os.path.exists("combined.tsc"):
     tsc_dst = sfc_name + "_total.tsc"

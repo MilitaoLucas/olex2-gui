@@ -324,8 +324,9 @@ class Skin():
       t2 = t
 
     self.TI.run_timage(force_images=False)
-    im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
-    OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
+    if olx.IsFileLoaded() =='true':
+      im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
+      OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
     #import initpy
     # initpy.set_plugins_paths()
 
@@ -365,7 +366,8 @@ class Skin():
     export_parameters(load_phil=False)
     deal_with_gui_phil('save')
 
-    olex.m("spy.make_HOS()")
+    if olx.IsFileLoaded() =='true':
+      olex.m("spy.make_HOS()")
 
     try:
       for item in olx.VFSDependent:
@@ -424,6 +426,7 @@ class Skin():
       if timing:
         print("run_skin timage took %.4fs" % (time.time() - t))
     elif f == 'sNumTitle':
+      if olx.IsFileLoaded() =='false': return
       try:
         data_idx = olx.xf.CurrentData() + olx.FileExt()
       except:
