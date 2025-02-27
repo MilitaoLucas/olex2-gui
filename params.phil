@@ -1119,6 +1119,13 @@ user
     .short_caption = Analysis Graphs
     {
 
+    non_highlight_colour = "#ababab"
+      .type = str
+    non_highlight_width_factor = 2
+      .type = float
+    highlight_colour = "auto"
+      .type = str
+
     matplotlib{
       style = *seaborn-whitegrid fivethirtyeight
         .type = choice
@@ -2400,6 +2407,8 @@ user
       .type = str
     salted_models_list = ""
       .type = str
+    show_ri_fit = False
+      .type = bool
   }
   Server{
     host=localhost
