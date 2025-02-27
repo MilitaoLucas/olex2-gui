@@ -22,16 +22,12 @@ except:
 gui_encoding = olx.app.OptValue('gui.encoding')
 
 HasGUI = olx.HasGUI() == 'true'
-if HasGUI:
-  inheritFunctions = guiFunctions.GuiFunctions
-else:
-  inheritFunctions = guiFunctions.NoGuiFunctions
 
 class SilentException(Exception):
   def __init__(self, cause):
     self.cause = cause
 
-class OlexFunctions(inheritFunctions):
+class OlexFunctions(guiFunctions.GuiFunctions):
   def __init__(self):
     if HasGUI:
       import olex_gui
