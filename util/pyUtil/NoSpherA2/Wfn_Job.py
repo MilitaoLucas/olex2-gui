@@ -35,11 +35,6 @@ class wfn_Job(object):
     self.parent = parent
     self.status = 0
     self.name = name
-    self.parallel = parent.parallel
-    if self.name.endswith('_HAR'):
-      self.name = self.name[:-4]
-    elif self.name.endswith('_input'):
-      self.name = self.name[:-6]
     full_dir = '.'
     self.full_dir = full_dir
     if dir != '':
