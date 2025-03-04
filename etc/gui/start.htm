@@ -6,9 +6,13 @@
 <font size="+2">Welcome to Olex2!</font>
 </td>
 
-<td><a href='spy.make_help_box -name=ChangeLog'>CHANGELOG</a></td>
-<td width='11%'>&nbsp;</td>
-<td> </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=ChangeLog",
+    "onclick=spy.internal.get_server_content(changelog, md, defaultURL)",
+    "td1=<td width='25%'>"
+    )$-
+
 
     $+
     html.Snippet(GetVar(default_link),
@@ -82,7 +86,7 @@
     $+
     html.Snippet(GetVar(default_link),
     "value=...",
-    "onclick=spy.internal.get_sample_list()",
+    "onclick=spy.internal.get_server_content()",
     "hint=More examples",
     )$-
 

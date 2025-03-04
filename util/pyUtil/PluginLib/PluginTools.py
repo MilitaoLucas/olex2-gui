@@ -31,7 +31,7 @@ class PluginTools(VFSDependent):
     p = os.path.join(self.p_path, self.p_htm + ".htm")
     if OV.HasGUI() and make_gui:
       try:
-        gui.help.gh.git_help(quick=True, specific=self.p_path)
+        #gui.help.gh.git_help(quick=True, specific=self.p_path)
         t = gui.file_open(p, 'r')
         OlexVFS.write_to_olex(p, t)
         olx.html.Update()
@@ -45,6 +45,7 @@ class PluginTools(VFSDependent):
     print("Loading %s (Version %s)\n" % (self.p_name, self.get_plugin_date()), end=' ')
 
   def deal_with_phil(self, operation='read', which='user_local'):
+    return
     # define paths
     user_phil_file = os.path.join(OV.DataDir(), "%s.phil" % self.p_scope)
     phil_file_p = os.path.join(self.p_path, "%s.phil" % self.p_scope)
