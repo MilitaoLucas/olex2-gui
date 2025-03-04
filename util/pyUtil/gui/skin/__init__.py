@@ -16,7 +16,7 @@ if OV.HasGUI():
   import olex_gui
   ppi = olex_gui.GetPPI()[0]
 else:
-  ppi = 92
+  ppi = 96
 
 
 timing = False  # bool(OV.GetParam('gui.timing'))
@@ -180,6 +180,7 @@ def export_parameters(load_phil=True):
     from gui import tools as gtools
     gtools.cache = {}
     table_width = int(olx.html.ClientWidth('self')) - 2 * int(olx.html.GetBorders())
+    table_width = int(table_width * 96 / ppi)
     OV.SetParam('HtmlTableWidth', table_width)
     OV.SetVar('HtmlTableWidth', table_width)
 
