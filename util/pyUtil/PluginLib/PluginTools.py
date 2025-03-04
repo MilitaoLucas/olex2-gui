@@ -45,7 +45,6 @@ class PluginTools(VFSDependent):
     print("Loading %s (Version %s)\n" % (self.p_name, self.get_plugin_date()), end=' ')
 
   def deal_with_phil(self, operation='read', which='user_local'):
-    return
     # define paths
     user_phil_file = os.path.join(OV.DataDir(), "%s.phil" % self.p_scope)
     phil_file_p = os.path.join(self.p_path, "%s.phil" % self.p_scope)
