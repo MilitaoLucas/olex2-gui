@@ -66,6 +66,23 @@ class GetHelp(VFSDependent):
     type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&'''
                      )
 
+  def convert_md_to_html_pandoc(self, md_input):
+    import subprocess
+    """Convert Markdown content to HTML using Pandoc."""
+    creation_flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0  # Windows fix
+    result = subprocess.run(
+        ["pandoc", "-f", "markdown", "-t", "html"],
+          input=md_input,
+          text=True,
+          capture_output=True,
+          creationflags=creation_flags  # Prevents black box on Windows
+      )
+    return result.stdout
+
+  def convert_md_to_html(self, md_input):
+    """Convert Markdown content to HTML using markdown2 (no external process)."""
+    return gh.format_html(markdown2.markdown(md_input, extras=["fenced-code-blocks"]))
+
   def get_help_item(self, help_id):
     help_id = help_id.replace(" ", "_")
     help_id = help_id.upper()
@@ -438,6 +455,8 @@ class GetHelp(VFSDependent):
       return_items = ""
 
     if md_box:
+      from ImageTools import ImageTools
+      IT = ImageTools()
       d = {'title': titleTxt.replace("_", " "),
            'body': helpTxt,
            'font_size_base': OV.GetParam('gui.help.base_font_size', '3'),
@@ -532,9 +551,7 @@ class GetHelp(VFSDependent):
         if "true" in olx.html.IsPopup(pop_name).lower():
           olx.Popup(pop_name, wFilePath)
         else:
-
-          olx.Popup(pop_name, wFilePath,
-                    b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
+          olx.Popup(pop_name, wFilePath, b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
           olx.html.SetBorders(pop_name, 5)
         if box_type == 'tutorial':
           tutorial_box_initialised = pop_name
@@ -695,7 +712,6 @@ def pandoc(kind='pdf', md_path=None, out_path=None):
   else:
     os.system('pandoc %s -o %s' % (md, out_pdf))
 
-
 OV.registerFunction(pandoc, False, 'help')
 
 
@@ -720,3 +736,4 @@ gh._initialise_all_help_d()
 
 if have_help:
   AutoDemoTemp()
+

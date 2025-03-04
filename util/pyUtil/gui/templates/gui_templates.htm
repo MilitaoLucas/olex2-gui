@@ -651,6 +651,7 @@ t:battery_gui{
       </td>
 
       <td align='center'>
+  <font size="2">
   <table border="0" cellpadding="1" cellspacing="1" align='center' width='100%%'>
 <tr>
             <td width='100%%'>
@@ -662,7 +663,7 @@ t:battery_gui{
                 value="%(dpr)s"
                 valign="bottom"
                 width="100%%"
-                height="11"
+                fit="true"
                 halign="middle"
               >
               </b>
@@ -677,7 +678,7 @@ t:battery_gui{
                 value="%(data)s"
                 valign="bottom"
                 width="100%%"
-                height="11"
+                fit="true"
                 halign="middle"
               >
             </td>
@@ -691,13 +692,14 @@ t:battery_gui{
                 value="%(parameters)s"
                 valign="bottom"
                 width="100%%"
-                height="11"
+                fit="true"
                 halign="middle"
               >
             </td>
           </tr>
 
         </table>
+  </font>
       </td>
     </tr>
   </table>
@@ -705,7 +707,7 @@ t:battery_gui{
 
 
 t:md_box{
-<body link="#585886" bgcolor='%(bg_colour)s'>
+<body link="#ababff" bgcolor='%(bg_colour)s'>
 <font size='%(font_size_base)s' color='#333355' face="$GetVar(HtmlFontName)">
 <table bgcolor='%(bg_colour)s' width='100%%' border='0' cellspacing='5' cellpadding='5'>
   <tr bgcolor='%(bg_colour)s'>
@@ -729,9 +731,6 @@ t:md_box{
   </tr>
 </table>
 </body>
-}
-
-
 }
 
 t:edit_help{
