@@ -169,12 +169,12 @@ class NoSpherA2(PT):
       self.mpihome = self.mpiexec[:-11]
       if 'LD_LIBRARY_PATH' in os.environ:
         if self.mpihome + 'lib' not in os.environ['LD_LIBRARY_PATH']:
-          os.environ['LD_LIBRARY_PATH'] = self.mpihome + 'lib:' + self.mpihome + 'lib/openmpi' + os.environ['LD_LIBRARY_PATH']
+          os.environ['LD_LIBRARY_PATH'] = self.mpihome + 'lib:' + self.mpihome + 'lib/openmpi:' + os.environ['LD_LIBRARY_PATH']
       else:
         os.environ['LD_LIBRARY_PATH'] = self.mpihome + 'lib:' + self.mpihome + 'lib/openmpi'
       if 'LD_RUN_PATH' in os.environ:
         if self.mpihome + 'lib/openmpi' not in os.environ['LD_RUN_PATH']:
-          os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi' + os.environ['LD_RUN_PATH']
+          os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi:' + os.environ['LD_RUN_PATH']
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
 

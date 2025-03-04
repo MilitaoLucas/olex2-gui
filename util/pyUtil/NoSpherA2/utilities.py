@@ -194,7 +194,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(','.join(groups[i]))
     if software == "Hybrid":
       args.append("-mtc_mult")
-      for i in range(1, min(6, len(groups)+1)):
+      for i in range(1, min(6, len(groups) + 1)):
         m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
         if m is None or m == 'None':
           m = 1
