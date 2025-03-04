@@ -1094,7 +1094,7 @@ def deal_with_gui_phil(action):
 
   gui_phil_path = "%s/gui.phil" % (OV.DataDir())
   if action == 'load':
-    OV.SetHtmlFontSize()
+    #OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
     olx.gui_phil_handler.reset_scope('gui')
     gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_name)
@@ -2896,12 +2896,14 @@ class PlotIt():
         if colour_proc == "default" or not colour_proc:
           colour_proc = None
       if use_highlight:
-        colour_proc = "#dedede"
+        colour_proc = OV.GetParam('user.graphs.non_highlight_colour', '#dedede')
         lw = self.plt_params.ax1.line_width
         if lenx - i <= j:
-          colour_proc = None
+          colour_proc = OV.GetParam('user.graphs.highlight_colour', 'auto')
+          if colour_proc == 'auto':
+            colour_proc = None
           labl = repr(highlight_idx_l[lenx - i - 1][1])
-          lw = self.plt_params.ax1.line_width * 2
+          lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
       _, = ax.plot(x,
               y,
               marker=get_property(marker, i),
