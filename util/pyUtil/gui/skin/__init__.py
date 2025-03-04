@@ -136,7 +136,6 @@ def check_for_first_run():
     return True
   return False
 
-
 def deal_with_gui_phil(action):
   skin_name = OV.GetParam('gui.skin.name', 'default')
   skin_extension = OV.GetParam('gui.skin.extension', None)
@@ -144,7 +143,6 @@ def deal_with_gui_phil(action):
   if timing:
     t = time.time()
 
-  gui_phil_path = "%s/gui.phil" % (OV.DataDir())
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
@@ -162,11 +160,11 @@ def deal_with_gui_phil(action):
         gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
   else:
+    gui_phil_path = "%s/gui.phil" % (OV.DataDir())
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
   if timing:
     print("After 'Reading/Saving PHIL Stuff': %.2f s" % (time.time() - t))
-
 
 def export_parameters(load_phil=True):
   if timing:
@@ -197,9 +195,9 @@ def export_parameters(load_phil=True):
     for step, s in zip(font_size_steps, font_size_rel_size):
       step = int(step)
       s = int(s)
-      if ppi > 96:
-        s += OV.GetParam('gui.ppi_font_adjust_amount')
       if _ >= step:
+        #if ppi > 96:
+          #s += OV.GetParam('gui.ppi_font_adjust_amount')
         OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size') + s)
         OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls') + s)
         OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large') + s)
@@ -432,8 +430,12 @@ class Skin():
         data_idx = olx.xf.CurrentData() + olx.FileExt()
       except:
         data_idx = False
+      try:
+        sg =  olex.f('sg()')
+      except:
+        return
       if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\
-         and self.sg == olex.f('sg()') and self.data_index == data_idx:
+         and self.sg == sg and self.data_index == data_idx:
         if timing:
           print("run_skin sNumTitle took %.4fs (not run)" % (time.time() - t))
         return
