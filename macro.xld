@@ -669,15 +669,15 @@
   >
 >
 
-
 <htmguifontsize help="Set the default font for the html gui"
   <body
     <args
       <arg0 name="size" def="2">
     >
     <cmd
-      <cmd1 "setVar(gui_html_font_size, %1)">
-      <cmd2 "html.update">
+      <cmd1 "setVar(HtmlGuiFontSize, %1)">
+      <cmd2 "setVar(HtmlFontSizeControls, %1)">
+      <cmd3 "html.update">
     >
   >
 >

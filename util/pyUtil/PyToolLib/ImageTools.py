@@ -48,12 +48,11 @@ else:
 
 # Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
 def get_text_size(draw, text, font):
-    if hasattr(draw, 'textbbox'):
-        bbox = draw.textbbox((0, 0), text, font=font)
-        return bbox[2] - bbox[0], bbox[3] - bbox[1]
-    else:
-        return draw.textsize(text, font=font)
-
+  if hasattr(draw, 'textbbox'):
+    bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+  else:
+    return draw.textsize(text, font=font)
 
 class ImageTools(FontInstances):
   def __init__(self):
@@ -121,114 +120,6 @@ class ImageTools(FontInstances):
 
     if debug:
       print("====== dpi_scaling set to %s ======" %self.dpi_scale)
-
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold", font_colour=None):
-    base_colour = OV.GetParam('gui.html.base_colour').rgb
-    left_start = 120
-    if not font_colour:
-      font_colour = OV.GetParam('gui.html.font_colour').rgb
-    self.width = self.skin_width_margin
-    try:
-      txt_l = []
-      txt_sub = []
-      txt_norm = []
-      try:
-        txt = OV.olex_function('sg(%h)')
-      except:
-        pass
-      if not txt:
-        txt = "ERROR"
-      txt = txt.replace(" 1", "")
-      txt = txt.replace(" ", "")
-      txt_l = txt.split("</sub>")
-      if len(txt_l) == 1:
-        txt_norm = [(txt, 0)]
-      try:
-        font_base = "Times"
-        font_bar = self.registerFontInstance("%s Bold" % font_base, 11)
-        font_slash = self.registerFontInstance("%s Bold" % font_base, 18)
-        font_number = self.registerFontInstance("%s Bold" % font_base, 14)
-        font_letter = self.registerFontInstance("%s Bold Italic" % font_base, 15)
-        font_sub = self.registerFontInstance("%s Bold" % font_base, 10)
-        norm_kern = 2
-        sub_kern = 0
-      except:
-        font_name = "Arial"
-        font_bar = self.registerFontInstance("%s Bold" % font_base, 12)
-        font_slash = self.registerFontInstance("%s Bold" % font_base, 18)
-        font_number = self.registerFontInstance("%s Bold" % font_base, 14)
-        font_letter = self.registerFontInstance("%s Bold Italic" % font_base, 15)
-        font_norm = self.registerFontInstance(font_name, 13)
-        font_sub = self.registerFontInstance(font_name, 10)
-        norm_kern = 0
-        sub_kern = 0
-      textwidth = 0
-      for item in txt_l:
-        if item:
-          try:
-            sub = item.split("<sub>")[1]
-          except:
-            sub = ""
-          norm = item.split("<sub>")[0]
-          tw_s = (get_text_size(draw, sub, font=font_sub)[0]) + sub_kern
-          tw_n = (get_text_size(draw, norm, font=font_number)[0]) + norm_kern
-          txt_sub.append((sub, tw_s))
-          txt_norm.append((norm, tw_n))
-          textwidth += (tw_s + tw_n)
-    except:
-      txt_l = []
-    if txt_l:
-      i = 0
-      left_start = (self.width - textwidth) - right_margin - 5
-      cur_pos = left_start
-      advance = 0
-      after_kern = 0
-      for item in txt_l:
-        if item:
-          text_normal = txt_norm[i][0]
-          for character in text_normal:
-            if character == "":
-              continue
-            cur_pos += advance
-            cur_pos += after_kern
-            after_kern = 2
-            advance = 0
-            try:
-              int(character)
-              font = font_number
-              top = 0
-              after_kern = 2
-            except:
-              font = font_letter
-              top = -1
-              if character == "P" or character == "I" or character == "C":
-                norm_kern = -2
-                after_kern = 0
-                character = " %s" % character
-            if character == "-":
-              draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
-              advance = -1
-              norm_kern = 0
-            elif character == "/":
-              norm_kern = 0
-              after_kern = 0
-              draw.text((cur_pos - 2, -3), "/", font=font_slash, fill=font_colour)
-              advance = ((get_text_size(draw, "/", font=font_slash)[0]) + norm_kern) - 1
-            else:
-              draw.text((cur_pos + norm_kern, top), "%s" % character, font=font, fill=font_colour)
-              advance = (get_text_size(draw, character, font=font)[0]) + norm_kern
-
-          text_in_superscript = txt_sub[i][0]
-          if text_in_superscript:
-            cur_pos += advance
-            draw.text((cur_pos + sub_kern, 5), "%s" % text_in_superscript, font=font_sub, fill=font_colour)
-            advance = (get_text_size(draw, text_in_superscript, font=font_sub)[0]) + sub_kern
-            after_kern = -2
-            cur_pos += advance
-        i += 1
-
-
 
   def show_image(self, IM):
     import sys
@@ -768,7 +659,15 @@ class ImageTools(FontInstances):
       nc = tuple(l)
     return nc
 
-
+  def is_lighter_than_gray(self, hex_color):
+    """Check if a given hex color is lighter than medium gray (#808080)."""
+    hex_color = hex_color.lstrip("#")  # Remove '#' if present
+    r, g, b = [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]  # Convert to RGB
+  
+    # Compute luminance (brightness)
+    luminance = 0.299 * r + 0.587 * g + 0.114 * b
+  
+    return luminance > 128  # True if lighter, False if darker
 
   def gradient_bgr(self, draw, width, height, colour=(237, 237, 235), fraction=0.85, increment=10, step=1):
     inc = increment

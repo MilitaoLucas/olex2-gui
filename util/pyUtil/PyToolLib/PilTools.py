@@ -221,7 +221,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
     olex.m("SetFont Default #olex2.fnt:frb_12")
-    olex.m("htmguifontsize %s" %OV.GetParam('HtmlGuiFontSize'))
+    olex.m("htmguifontsize %s" %OV.GetVar('HtmlGuiFontSize'))
     olex.m("showwindow help false")
     #olex.m("grad true")
 
@@ -3044,7 +3044,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt_norm = []
       try:
         txt = OV.olex_function('sg(%h)')
-      except:
+      except Exception as err:
+        print(err)
         return
       if not txt:
         txt="ERROR"
