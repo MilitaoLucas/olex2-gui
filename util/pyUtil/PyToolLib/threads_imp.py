@@ -19,6 +19,7 @@ class NewsImageRetrivalThread(ThreadEx):
     self.name = name
     self.olex2tag = get_tag()
     NewsImageRetrivalThread.instance = self
+    olex.registerFunction(self.get_server_content, False, 'internal')
     olex.registerFunction(self.get_sample_list, False, 'internal')
     olex.registerFunction(self.get_structure_from_url, False, 'internal')
     olex.registerFunction(self.get_styles_from_url, False, 'internal')
@@ -151,16 +152,24 @@ class NewsImageRetrivalThread(ThreadEx):
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
+  
+  def get_sample_list(self, which='samples', ext="html", urlbase="defaultURL"):
+    self.get_server_content(which=which, ext=ext, urlbase=urlbase)
 
-  def get_sample_list(self, which='samples'):
-    url = OV.GetParam('olex2.samples.url') + r"/%s"%which + ".html"
+  def get_server_content(self, which='samples', ext="html", urlbase="defaultURL"):
+    if urlbase == "defaultURL":
+      urlbase = OV.GetParam('olex2.samples.url')
+    url = f"{urlbase}/{which}.{ext}"
     _ = self.make_call(url)
     if _ is None:
+      print(f"{url} can not be reached")
       return ""
-    import gui
     from gui import help
+
     cont = _.read().decode()
-    help.gh.make_help_box(helpTxt=cont, name="Sample_list")
+    if ext == "md":
+      cont = help.gh.convert_md_to_html(md_input=cont)
+    help.gh.make_help_box(helpTxt=cont, name=f"{which}")
 
   def get_structure_from_url(self, name, url=None):
     isZip = False
