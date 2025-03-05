@@ -592,12 +592,15 @@ class ExtractCifInfo(CifTools):
       self.update_cif_block(diffractometer_def, force=False)
       all_sources_d[p] = diffractometer_def
 
-    # smtbx solvent masks output file
-    mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
-    # cleanup any if masks are not in use
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg')
+    if prg == "Platon":
+      mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + "_sqd.sqf"
+    else:
+      mask_cif_path = os.path.splitext(OV.HKLSrc())[0] + ".sqf"
+    # cleanup any and all mask entries -- then put updated values back if the mask is used.
     for i in ('_smtbx_masks_void', '_smtbx_masks_special_details',
               '_smtbx_masks_void_probe_radius', '_smtbx_masks_void_truncation_radius',
-              '_platon_squeeze_void', '_platon_squeeze_details'):
+              '_platon_squeeze_void', '_platon_squeeze_details', '_platon_squeeze_void_probe_radius'):
       if i in self.cif_block:
         del self.cif_block[i]
     if os.path.isfile(mask_cif_path) and OV.GetParam('snum.refinement.use_solvent_mask'):
