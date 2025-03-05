@@ -201,7 +201,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(str(m))
       args.append("-mtc_charge")
       for i in range(1, min(6, len(groups) + 1)):
-        args.append(str(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i)))
+        c = int(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i))
+        if c < 0:
+          args.append("n"+str(c))
+        else:
+          args.append(str(c))
       args.append("-mtc_ECP")
       for i in range(1, min(6, len(groups) + 1)):
         ECP_m_C = 0
@@ -220,7 +224,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(str(m))
       args.append("-mtc_charge")
       for i in range(len(groups)):
-        args.append(str(OV.GetParam('snum.NoSpherA2.charge')))
+        c = int(OV.GetParam('snum.NoSpherA2.charge'))
+        if c < 0:
+          args.append("n"+str(c))
+        else:
+          args.append(str(c))
       args.append("-mtc_ECP")
       for i in range(len(groups)):
         if software == "xTB":
