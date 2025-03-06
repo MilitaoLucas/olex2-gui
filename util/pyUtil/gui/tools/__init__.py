@@ -1467,14 +1467,15 @@ def GetDPRInfo():
     disp_dpr = "%.2f" % dpr
   else:
     disp_dpr = "%.1f" % dpr
-
+  font_size = max(OV.GetVar('HtmlGuiFontSize') + OV.GetParam('gui.battery_font_adjust', 1), 1)
   d = {
     'dpr': disp_dpr,
     'img_name': img_name,
     'hint': text_output[idx],
     'label': f"{data}/{parameters}",
     'data': f"{data}",
-    'parameters': f"{parameters}"
+    'parameters': f"{parameters}", 
+    'font_size': f"{font_size}"
     }
 
   t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
