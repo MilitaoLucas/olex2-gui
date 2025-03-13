@@ -438,8 +438,8 @@ class OlexCctbxAdapter(object):
       crystal_symmetry=self.xray_structure().crystal_symmetry(),
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
-
-  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True):
+  # complete - detwins the who index range rather than just measured refs, used in masking
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if filtered:
       fo2 = self.reflections.f_sq_obs_filtered
     else:
@@ -460,7 +460,7 @@ class OlexCctbxAdapter(object):
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
       fc.indices(),
-      fc.as_intensity_array().data())
+      fc.as_intensity_array().data(), complete)
     fo2 = miller.array(
         miller_set=miller.set(
           crystal_symmetry=fo2.crystal_symmetry(),
@@ -815,19 +815,24 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    use_tsc = OV.IsNoSpherA2()
-    if use_tsc == True:
+    one_h = None
+    if OV.IsNoSpherA2():
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+    #if self.hklf_code >= 5 or self.twin_components:
+    if self.hklf_code >= 5:
+      mask.use_set_completion = False
+      mask.scale_factor = OV.GetOSF()
+      mask.fo2,mask.f_calc = self.get_fo_sq_fc(one_h_function=one_h, complete=True)
     else:
-      mask.f_calc = f_calc_set.structure_factors_from_scatterers(
-        mask.xray_structure, algorithm="direct").f_calc()
+      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+
     f_obs = mask.f_obs()
-    mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
-      flex.abs(mask.f_calc.data()))
+    if mask.scale_factor is None:
+      mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
+        flex.abs(mask.f_calc.data()))
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(
       1/mask.scale_factor, mask.f_calc)
     mask.fft_scale = mask.xray_structure.unit_cell().volume()\
