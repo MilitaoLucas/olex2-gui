@@ -828,6 +828,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.fo2,mask.f_calc = self.get_fo_sq_fc(one_h_function=one_h, complete=True)
     else:
       mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+      mask.scale_factor = None
 
     f_obs = mask.f_obs()
     if mask.scale_factor is None:
