@@ -456,7 +456,7 @@ class OlexCctbxAdapter(object):
       fc = self.f_calc(miller_set, self.exti is not None, True,
        ignore_inversion_twin=False,
        twin_data=False)
-    obs = self.observations.detwin(
+    dtw = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
       fc.indices(),
@@ -464,10 +464,10 @@ class OlexCctbxAdapter(object):
     fo2 = miller.array(
         miller_set=miller.set(
           crystal_symmetry=fo2.crystal_symmetry(),
-          indices=obs.indices,
+          indices=dtw.indices,
           anomalous_flag=fo2.anomalous_flag()),
-        data=obs.data,
-        sigmas=obs.sigmas).set_observation_type(fo2)
+        data=dtw.data,
+        sigmas=dtw.sigmas).set_observation_type(fo2)
     if self.hklf_code < 5 or merge:
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
       fc = fc.common_set(fo2)
@@ -825,7 +825,37 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if self.hklf_code >= 5:
       mask.use_set_completion = False
       mask.scale_factor = OV.GetOSF()
-      mask.fo2,mask.f_calc = self.get_fo_sq_fc(one_h_function=one_h, complete=True)
+      fo2 = self.reflections.f_sq_obs
+      miller_set = miller.set(
+        crystal_symmetry=fo2.crystal_symmetry(),
+        indices=fo2.indices(),
+        anomalous_flag=fo2.anomalous_flag())\
+          .unique_under_symmetry().map_to_asu()
+      fc = self.f_calc(miller_set, self.exti is not None, True, False,
+                      one_h_function=one_h, twin_data=False)
+      obs = fo2.as_xray_observations(
+        scale_indices=self.reflections.batch_numbers_array.data(),
+        twin_fractions=self.twin_fractions,
+        twin_components=self.twin_components)
+      dtw = obs.detwin(
+        fo2.crystal_symmetry().space_group(),
+        fo2.anomalous_flag(),
+        fc.indices(),
+        fc.as_intensity_array().data(), True)
+      fo2 = miller.array(
+          miller_set=miller.set(
+            crystal_symmetry=fo2.crystal_symmetry(),
+            indices=dtw.indices,
+            anomalous_flag=fo2.anomalous_flag()),
+          data=dtw.data,
+          sigmas=dtw.sigmas).set_observation_type(fo2)
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array()\
+        .average_bijvoet_mates().map_to_asu()
+      fc = fc.common_set(fo2)
+      if fc.size() != fo2.size():
+        fo2 = fo2.common_set(fc)
+
+      mask.fo2, mask.f_calc = fo2, fc
     else:
       mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
       mask.scale_factor = None
