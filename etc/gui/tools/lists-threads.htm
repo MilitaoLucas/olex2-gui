@@ -1,0 +1,30 @@
+<!-- ==================================== LISTS/THREADS BEGIN == -->
+<tr ALIGN='left' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-List;1 -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="12%"><b>List</b></td>
+  <td width="45%">
+     <snippet src="gui/snippets/input-combo"
+     name="LIST"
+     items="spy.gui.get_refinement_lists()"
+     readonly="true"
+     value="ins(list)"
+     onchange="spy.gui.set_refinement_list(html.GetValue('~name~'))" />
+  </td>
+  <td />
+  <td width='12%'>
+   <b><snippet 
+        src="gui/snippets/input-label"
+        name="cpus_label@refine" height="math.eval(GetVar('HtmlInputHeight')-6)"
+        bgcolor="GetVar(HtmlTableFirstcolColour)"
+        value="spy.gui.get_thread_n_label()"/></b>
+  </td>
+  <td width="10%" align='right'>
+    <snippet src="gui/snippets/input-combo"
+     name="cpus@refine"
+     items="spy.gui.get_thread_n_selection()"
+     value="spy.GetParam('user.refinement.thread_n')"
+     onchange="spy.SetParam('user.refinement.thread_n', html.GetValue('~name~'))" />
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ==================================== LISTS/THREADS END == -->

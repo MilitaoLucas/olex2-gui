@@ -46,6 +46,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
     </table>
     <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<!-- #include lists-thread gui\tools\lists-threads.htm;1; -->
 """
 # mind first %s formatting - as it could be <!-- icnlude etc!
   if program.name.lower().startswith("superflip"):
