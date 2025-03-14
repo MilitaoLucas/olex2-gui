@@ -600,7 +600,7 @@ class ExtractCifInfo(CifTools):
     # cleanup any and all mask entries -- then put updated values back if the mask is used.
     for i in ('_smtbx_masks_void', '_smtbx_masks_special_details',
               '_smtbx_masks_void_probe_radius', '_smtbx_masks_void_truncation_radius',
-              '_platon_squeeze_void', '_platon_squeeze_details', '_platon_squeeze_void_probe_radius'):
+              '_platon_squeeze_void', '_platon_squeeze_details', '_platon_squeeze_void_probe_radius', '_platon_squeeze_special_details'):
       if i in self.cif_block:
         del self.cif_block[i]
     if os.path.isfile(mask_cif_path) and OV.GetParam('snum.refinement.use_solvent_mask'):

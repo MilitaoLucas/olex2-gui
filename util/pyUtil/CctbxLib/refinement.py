@@ -110,6 +110,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.fo_sq_fc_merge = None
     self.fo_sq_fc_complete = None
     if OV.GetParam("snum.refinement.use_solvent_mask") and not reparametrisation_only:
+      #OV.SetVar('current_mask_sqf', "")
+      ### If the original filename already ends in _sq (i.e. the files come from outside Olex2, things get very confusing. Maybe one way of dealing with it is to leave the original files all untouched, and rename sNum to the filename without the _sq bit, alongside with the HKLSrc(). But will metadata get lost? Should all files get copied/renamed?
+      #fn = OV.HKLSrc()
+      #nfn = fn.replace("_sq.hkl", '.hkl')
+      #if "_sq.hkl" in fn:
+        #olx.file.Copy(fn, nfn)
+        #OV.HKLSrc(nfn)
+        #olex.m(f"file {OV.file_ChangeExt(nfn, 'res')}")
+        #olex.m(f"reap {OV.file_ChangeExt(nfn, 'res')}")
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
@@ -125,6 +134,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olex.m("spy.OlexPlaton(q,.ins)")
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
+          if not self.f_mask:
+            self.failure = True
+            return
         else:
           stopwatch.run(OlexCctbxMasks)
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
@@ -1408,7 +1420,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             valid = False
             break
       if not valid:
-        print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+        print("Skipping conflicting AFIX for %s (refinement.py)" %scatterers[pivot].label)
         continue
 
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry

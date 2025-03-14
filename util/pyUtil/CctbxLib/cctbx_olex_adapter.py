@@ -406,23 +406,33 @@ class OlexCctbxAdapter(object):
     return weighting.weights
 
   def load_mask(self):
-    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+    import gui
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+    _ =  os.path.splitext(OV.HKLSrc())[0]
+    indices = []
+    data = []
+    if prg == "Olex2":
+      fab_path = f"{_}.fab"
+    else:
+      fab_path = f"{_}_sq.fab"
     if os.path.exists(fab_path):
-      with open(fab_path) as fab:
-        indices = []
-        data = []
-        for l in fab.readlines():
-          fields = l.split()
-          if len(fields) < 5:
+      OV.SetVar('masking_dte', time.ctime(os.path.getmtime(fab_path)))
+      OV.SetVar('masking_src', os.path.basename(fab_path))
+      lines, fab_path, prg = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
+      if not lines:
+        return
+      for l in lines:
+        fields = l.split()
+        if len(fields) < 5:
+          break
+        try:
+          idx = (int(fields[0]), int(fields[1]), int(fields[2]))
+          if idx == (0,0,0):
             break
-          try:
-            idx = (int(fields[0]), int(fields[1]), int(fields[2]))
-            if idx == (0,0,0):
-              break
-            indices.append(idx)
-            data.append(complex(float(fields[3]), float(fields[4])))
-          except:
-            pass
+          indices.append(idx)
+          data.append(complex(float(fields[3]), float(fields[4])))
+        except:
+          pass
       miller_set = miller.set(
         crystal_symmetry=self.xray_structure().crystal_symmetry(),
         indices=flex.miller_index(indices)).auto_anomalous()
@@ -509,8 +519,17 @@ class OlexCctbxAdapter(object):
     return True
 
 def write_fab(f_mask, fab_path=None):
+  import shutil
+  import gui
   if not fab_path:
     fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+  if os.path.exists(fab_path):
+    ## if there is already a fab file of this name, but it doesn't originate from the current masking program, then get it out of the way and make a backup.
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+    lines = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
+    if not lines:
+      shutil.copyfile(fab_path, f"{fab_path}_bak")
+
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)

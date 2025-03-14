@@ -584,7 +584,7 @@ t:edt_gui{
      "name=ED_ThicknessVal_B@Refine",
      "value=spy.ED.get_stored_param('thickness.value', sd=0)",
      "onchange=spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))",
-     "disabled=not(spy.ED.is_dynamic())")
+     "disabled=not(spy.gui.IsEDRefinement())")
     $-
   </td>
   <td width="10%" align='left'>
@@ -595,7 +595,7 @@ t:edt_gui{
      "value=Refine",
      "checked=spy.ED.get_stored_param('thickness.grad')",
      "onclick=spy.ED.set_thickness_grad(html.GetState('~name~'))",
-     "disabled=not(spy.ED.is_dynamic())")
+     "disabled=not(spy.gui.IsEDRefinement())")
    $-
   </td>
 }
