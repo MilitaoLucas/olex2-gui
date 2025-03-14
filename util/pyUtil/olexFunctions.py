@@ -905,7 +905,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return self.IsEDData() and\
       self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic" and\
       self.GetParam("snum.refinement.program").startswith("olex2.refine")
-
+  
+  def IsDynamic(self):
+    return OV.GetVar('isDynamic', False)
+    
   def IsRemoteMode(self):
     return 'true' == olx.GetVar('olex2.remote_mode', 'false')
 
@@ -1425,6 +1428,8 @@ OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
 OV.registerFunction(OV.IsEDData)
+OV.registerFunction(OV.IsDynamic, False, 'gui')
+OV.registerFunction(OV.IsEDRefinement, False, 'gui')
 OV.registerFunction(OV.get_diag)
 OV.registerFunction(OV.SetMaxCycles)
 OV.registerFunction(OV.SetMaxPeaks)
