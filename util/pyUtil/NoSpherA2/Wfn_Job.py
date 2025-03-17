@@ -599,6 +599,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    software = OV.GetParam("snum.NoSpherA2.source")
     ECP = False
     if basis_name == None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -637,7 +638,6 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS") == True:
         control += " ROKS "
-      software = OV.GetParam("snum.NoSpherA2.source")
       if software == "Hybrid":
         software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
       elif software == "fragHAR":
@@ -717,7 +717,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     if mult == 0:
       mult = 1
-    inp.write(control + ' NOTRAH\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    if "5.0" in software or "6.0" in software:
+        inp.write(control + ' NOTRAH\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    else:
+        inp.write(control + '\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     atom_list = []
     i = 0
     for line in xyz:
