@@ -100,8 +100,7 @@ def do_init():
   stopwatch.run(initpy.import_caustom_and_user_sripts)
   ## These imports will register macros and functions for spy.
   stopwatch.exec("from RunPrg import RunPrg")
-  stopwatch.start("HARp and NSF")
-  from HAR import HARp
+  stopwatch.start("NSF")
   from NoSpherA2 import NoSpherA2
   stopwatch.stop()
 

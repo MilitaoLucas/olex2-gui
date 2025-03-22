@@ -45,8 +45,8 @@ p_scope = d['p_scope']
 
 from PluginTools import PluginTools as PT
 
-from gui.images import GuiImages
-GI=GuiImages()
+#from gui.images import GuiImages
+#GI=GuiImages()
 
 class NoSpherA2(PT):
   def __init__(self):
@@ -55,10 +55,22 @@ class NoSpherA2(PT):
     self.p_path = p_path
     self.p_scope = p_scope
     self.p_htm = p_htm
+    self.deal_with_phil(operation='read')    
+    
+    self.p_htm = "harp"
+    self.p_name = "HARp"
     self.p_img = p_img
-    self.deal_with_phil(operation='read')
+    self.p_scope = "harp"
+    
+    if not from_outside:
+      self.setup_gui()
+
+    self.p_name = p_name
+    self.p_path = p_path
+    self.p_scope = p_scope
+    self.p_htm = p_htm
+    # self.deal_with_phil(operation='read')
     self.print_version_date()
-    self.jobs = []
     self.parallel = False
     self.softwares = ""
     self.wfn_2_fchk = ""
@@ -68,13 +80,15 @@ class NoSpherA2(PT):
     self.reflection_date = None
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
-
-    if not from_outside:
-      self.setup_gui()
+    import platform
+    if platform.architecture()[0] != "64bit":
+      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")        
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
     if sys.platform[:3] == "win":
       self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu2404.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
         self.ubuntu_exe = olx.file.Which("ubuntu2204.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
@@ -83,6 +97,7 @@ class NoSpherA2(PT):
         self.ubuntu_exe = olx.file.Which("ubuntu2004.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
         self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")
+
     self.setup_har_executables()
     self.setup_pyscf()
     self.setup_discamb()
@@ -95,10 +110,6 @@ class NoSpherA2(PT):
     self.setup_wfn_2_fchk()
     self.setup_xtb_executables()
     self.setup_ptb_executables()
-
-    import platform
-    if platform.architecture()[0] != "64bit":
-      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
 
     if os.path.exists(self.wfn_2_fchk):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")

@@ -1,5 +1,0 @@
-
-  p_name = HARp
-  p_htm = harp
-  p_img = [("HARt",'h1')]
-  p_scope = harp
