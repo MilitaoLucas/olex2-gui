@@ -474,7 +474,7 @@ The following options were used:
       charge = OV.GetParam('snum.NoSpherA2.charge')
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
       relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-      partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+      partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
       accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
       if partitioning == True:
         details_text += "   PARTITIONING:   NoSpherA2\n"

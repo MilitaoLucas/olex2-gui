@@ -280,16 +280,6 @@ snum{
       .type = str
     tsc_mode = "First"
       .type = str
-    wfn2fchk_ED = False
-      .type = bool
-    wfn2fchk_ECP = 1
-      .type = int
-    wfn2fchk_RI_FIT = False
-      .type = bool
-    wfn2fchk_SF = True
-      .type = bool
-    wfn2fchk_debug = False
-      .type = bool
     make_fcf_only = False
       .type = bool
     make_fcf_only_h_limit = 20
@@ -321,6 +311,16 @@ snum{
     ncpus = 1
       .type = str
     no_backup = False
+      .type = bool
+    NoSpherA2_ED = False
+      .type = bool
+    NoSpherA2_ECP = 1
+      .type = int
+    NoSpherA2_RI_FIT = False
+      .type = bool
+    NoSpherA2_SF = True
+      .type = bool
+    NoSpherA2_debug = False
       .type = bool
   }
 }

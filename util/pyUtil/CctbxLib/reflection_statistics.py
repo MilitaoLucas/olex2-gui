@@ -678,8 +678,8 @@ class fractal_dimension(OlexCctbxAdapter):
     olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
     print("Made residual density map\nAnalyzing...")
 
-    wfn_2_fchk = OV.GetVar("Wfn2Fchk")
-    args = [wfn_2_fchk]
+    NoSpherA2 = OV.GetVar("NoSpherA2")
+    args = [NoSpherA2]
     args.append("-fractal")
     args.append("%s_%s.cube"%(self.info,map_type))
     import subprocess

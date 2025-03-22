@@ -226,7 +226,7 @@ $-
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'True')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'True')
 <td width="16%" align="left">
   $+
     html.Snippet("gui/snippets/input-combo",
@@ -238,7 +238,7 @@ $-
   $-
 </td> 
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'False')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'False')
 <td width="16%">
 N/A 
 </td>
@@ -811,16 +811,16 @@ $-
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=Ri_Fit",
     "label=RI-Fit ",
-    "checked=spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','True')>>html.Update()",
+    "checked=spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','True')>>html.Update()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','False')>>html.Update()"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','False')>>html.Update()"
     )
   $-
 </td>
 <!-- ======= RI-SWITCH ===================== -->
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT'),'False')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'),'False')
 <td width="30%">
 <b>Auxiliary Basis </b>
 </td>

@@ -30,16 +30,18 @@ class wfn_Job(object):
   completed = None
   full_dir = None
   exe_fn = None
+  oftware = None
 
-  def __init__(self, parent, name, dir):
+  def __init__(self, parent, name, _dir, software=None):
     self.parent = parent
     self.status = 0
     self.name = name
     full_dir = '.'
     self.full_dir = full_dir
-    if dir != '':
-      self.full_dir = dir
-      full_dir = dir
+    if _dir != '':
+      self.full_dir = _dir
+      full_dir = _dir
+    self.software = software
 
     if not os.path.exists(full_dir):
       return
@@ -68,6 +70,32 @@ class wfn_Job(object):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     olx.File(coordinates_fn,p=10)
+    
+  def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None):
+    if self.software == "ORCA":
+      self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
+    elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0":
+      embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+      if embedding == True:
+        self.write_orca_crystal_input(xyz)
+      else:
+        self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
+    elif self.software == "Gaussian03" or self.software == "Gaussian09" or self.software == "Gaussian16":
+      self.write_gX_input(xyz, basis, method, relativistic, charge, mult, part)
+    elif self.software == "pySCF":
+      self.write_pyscf_script(xyz, basis, method, relativistic, charge, mult, damp, part)
+    elif self.software == "ELMOdb":
+      self.write_elmodb_input(xyz)
+    elif self.software == "Psi4":
+      self.write_psi4_input(xyz)
+    elif self.software == "Thakkar IAM" or self.software == "SALTED":
+      self.write_xyz_file()
+    elif self.software == "xTB":
+      if xyz == True:
+        self.write_xyz_file()
+    elif self.software == "pTB":
+      if xyz == True:
+        self.write_xyz_file()
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -1964,7 +1992,7 @@ ener = cf.kernel()"""
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 
-      experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+      experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
 
       if (experimental_SF == False) and ("g" not in args[0]):
         self.convert_to_fchk()
@@ -1972,7 +2000,7 @@ ener = cf.kernel()"""
   def convert_to_fchk(self):
     move_args = []
     basis_dir = self.parent.basis_dir
-    move_args.append(self.parent.wfn_2_fchk)
+    move_args.append(self.parent.NoSpherA2)
     move_args.append("-wfn")
     move_args.append(self.name + ".wfn")
     move_args.append("-mult")

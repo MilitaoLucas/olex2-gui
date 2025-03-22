@@ -58,8 +58,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
   args = []
-  wfn_2_fchk = OV.GetVar("Wfn2Fchk")
-  args.append(wfn_2_fchk)
+  NoSpherA2 = OV.GetVar("NoSpherA2")
+  args.append(NoSpherA2)
   if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
@@ -75,9 +75,9 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if (int(ncpus) >= 1):
     args.append('-cpus')
     args.append(ncpus)
-  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True):
+  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_debug') == True):
     args.append('-v')
-  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_ED') == True):
+  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_ED') == True):
     args.append('-ED')
   else:
     wavelength = float(olx.xf.exptl.Radiation())
@@ -98,16 +98,16 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   software = OV.GetParam('snum.NoSpherA2.source')
   if "xTB" in software or "pTB" in software:
     args.append("-ECP")
-    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
+    mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     if "xTB" in software:
       args.append(str(2))
     elif "pTB" in software:
       args.append(str(3))
   elif "ECP" in basis_name:
     args.append("-ECP")
-    mode = OV.GetParam('snum.NoSpherA2.wfn2fchk_ECP')
+    mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     args.append(str(mode))
-  if (OV.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT') == True):
+  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT') == True):
     auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
     args.append("-RI_FIT")
     args.append(auxiliary_basis)
@@ -373,7 +373,7 @@ OV.registerFunction(get_ncen, False, 'NoSpherA2')
 def combine_tscs(match_phrase="_part_", no_check=False):
   gui.get_default_notification(txt="Combining .tsc files", txt_col='black_text')
   args = []
-  NSP2_exe = OV.GetVar("Wfn2Fchk")
+  NSP2_exe = OV.GetVar("NoSpherA2")
   args.append(NSP2_exe)
   if (no_check):
     args.append("-merge_nocheck")
@@ -1017,7 +1017,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
   zm = os.path.join(pol_fol, "zm.gbw")
   shutil.move(gbw_name, zm)
   args = []
-  NSP2_exe = OV.GetVar("Wfn2Fchk")
+  NSP2_exe = OV.GetVar("NoSpherA2")
   args.append(NSP2_exe)
   args.append("-polarizabilities")
   args.append(zero)
