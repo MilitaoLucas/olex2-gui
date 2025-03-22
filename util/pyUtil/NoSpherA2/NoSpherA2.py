@@ -1266,11 +1266,17 @@ OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
   if "x2c" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic',True)
+    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic',True)
+    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
-    OV.SetParam('snum.NoSpherA2.Relativistic',False)
+    OV.SetParam('snum.NoSpherA2.Relativistic', False)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'False')
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):

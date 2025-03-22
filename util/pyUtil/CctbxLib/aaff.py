@@ -363,7 +363,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       HAR_log.close()
     raise e
   # Done with the while !Converged
-  OV.SetParam('snum.NoSpherA2.Calculate',False)
+  OV.SetParam('snum.NoSpherA2.Calculate', False)
+  olex.m("html.ItemState h3-NoSpherA2-extras 2")
   if converged == False:
     HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
     self.refinement_has_failed.append("Warning: Unconverged Model!")
