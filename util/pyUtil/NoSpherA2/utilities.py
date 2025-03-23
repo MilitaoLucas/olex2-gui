@@ -1075,7 +1075,11 @@ def setDir(phil_value) -> None:
       Returns:
           str: The chosen directory path.
       """
-  a = olex.f('choosedir("Choose your data folder")')
+  try:
+    a = olex.f('choosedir("Choose your data folder")')
+  except:
+    print("No selection made, Aborting!")
+    return
   OV.SetParam(phil_value, a)
 OV.registerFunction(setDir, False, "NoSpherA2")
 
@@ -1088,7 +1092,11 @@ def appendDir(phil_value) -> None:
       Returns:
           str: The chosen directory path.
       """
-  a = olex.f('choosedir("Choose your data folder")')
+  try:
+    a = olex.f('choosedir("Choose your data folder")')
+  except:
+    print("No selection made, Aborting")
+    return
   old = OV.GetParam(phil_value)
   if old is None:
     pass
@@ -1114,3 +1122,12 @@ def removeDir(phil_value, item_to_remove) -> None:
 
   OV.SetParam(phil_value, old)
 OV.registerFunction(removeDir, False, "NoSpherA2")
+
+def toggle_full_HAR():
+  if OV.GetParam('snum.NoSpherA2.full_HAR') == True:
+    OV.SetParam('snum.NoSpherA2.full_HAR', False)
+  else:
+    OV.SetParam('snum.NoSpherA2.full_HAR', True)
+  OV.setItemstate("h3-NoSpherA2-extras 2")
+  OV.setItemstate("h3-NoSpherA2-extras 1")
+OV.registerFunction(toggle_full_HAR, False, "NoSpherA2")

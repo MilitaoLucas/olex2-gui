@@ -1494,6 +1494,10 @@ Home -> Settings -> PATH""", "O", False)
     olx.Shell("https://psicode.org/installs/v18/")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
+    _ = olx.html.GetItemState('h3-NoSpherA2-extras')
+    if _ == "0":
+      OV.setItemstate("h3-NoSpherA2-extras 2")
+      OV.setItemstate("h3-NoSpherA2-extras 1")  # This is a hack to force the update of the GUI without doing all of html
     if input != "discambMATT" and input != "Thakkar IAM":
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
