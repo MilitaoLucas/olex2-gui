@@ -364,7 +364,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     raise e
   # Done with the while !Converged
   OV.SetParam('snum.NoSpherA2.Calculate', False)
-  olex.m("html.ItemState h3-NoSpherA2-extras 2")
+  ext_name = "h3-NoSpherA2-extras"
+  if OV.IsHtmlItem(ext_name):
+    olex.m("html.ItemState %s 2" %ext_name)
   if converged == False:
     HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
     self.refinement_has_failed.append("Warning: Unconverged Model!")

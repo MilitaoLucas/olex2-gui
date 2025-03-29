@@ -22,22 +22,32 @@ import olex
 import olex_core
 import olx
 
-class leverage_normal_eqns(least_squares.crystallographic_ls_class()):
-  log = None
-  std_reparametrisation = None
-  std_observations = None
+def leverage_normal_eqns_builder():
+  def get_base_class():
+    OpenMP = OV.GetParam('user.refinement.use_openmp')
+    if OpenMP == True:
+      from scitbx.lstbx import normal_eqns
+      return least_squares.crystallographic_ls_class(
+        normal_eqns.non_linear_ls_with_separable_scale_factor_BLAS_2)
+    return least_squares.crystallographic_ls_class()
 
-  def __init__(self, observations, refinement, olx_atoms, table_file_name=None, **kwds):
-    super(leverage_normal_eqns, self).__init__(
-      observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
-    if table_file_name:
-      one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, table_file_name=table_file_name)
-    else:
-      one_h_linearisation = direct.f_calc_modulus_squared(
-        self.xray_structure, reflections=self.observations)
-    self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
+  class leverage_normal_eqns(get_base_class()):
+    log = None
+    std_reparametrisation = None
+    std_observations = None
 
+    def __init__(self, observations, refinement, olx_atoms, table_file_name=None, **kwds):
+      super(leverage_normal_eqns, self).__init__(
+        observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
+      if table_file_name:
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, table_file_name=table_file_name)
+      else:
+        one_h_linearisation = direct.f_calc_modulus_squared(
+          self.xray_structure, reflections=self.observations)
+      self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
+
+  return leverage_normal_eqns
 
 class Leverage(object):
   def __init__(self):
@@ -74,7 +84,7 @@ class Leverage(object):
         fo2.crystal_symmetry().space_group(),
         fo2.anomalous_flag(),
         fc.indices(),
-        fc.as_intensity_array().data())
+        fc.as_intensity_array().data(), False)
       obs.fo_sq = fo2
 
     if refine:
@@ -83,7 +93,7 @@ class Leverage(object):
       fmr.twin_components = (it,)
       fmr.twin_fractions = ()
 
-    normal_eqns = fmr.run(build_only=True, normal_equations_class=leverage_normal_eqns)
+    normal_eqns = fmr.run(build_only=True, normal_equations_class_builder=leverage_normal_eqns_builder)
 
 # need to refine if invertion twin has been added
     if refine:

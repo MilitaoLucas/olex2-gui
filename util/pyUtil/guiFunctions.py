@@ -43,6 +43,10 @@ class GuiFunctions(object):
     return retStr
 
   @gui_only()
+  def IsHtmlItem(self, name):
+    return olx.html.IsItem(name) == 'true'
+
+  @gui_only()
   def IsControl(self, ctrl_name):
     try:
       return bool(olex_gui.IsControl(ctrl_name))
