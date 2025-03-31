@@ -70,6 +70,11 @@ class GuiFunctions(object):
       olx.html.SetValue(ctrl_name, val)
 
   @gui_only()
+  def SetControlLabel(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetLabel(ctrl_name, val)
+
+  @gui_only()
   def SetControlItems(self, ctrl_name, items, val=None):
     if self.IsControl(ctrl_name):
       olx.html.SetItems(ctrl_name, items)
