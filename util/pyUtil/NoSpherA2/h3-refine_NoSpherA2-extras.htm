@@ -131,7 +131,7 @@ $-
     "name=NoSpherA2_basis@refine",
     "items='6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'",
     "value=spy.GetParam('snum.NoSpherA2.basis_name')",
-    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1")
+    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>> html.Update()")
   $-
   </td>
 #ignoreif -->
@@ -580,8 +580,8 @@ N/A
     "label=Embed.",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
     "checked=spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','True') >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1"
+    "oncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','True') >> html.Update()",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.Update()"
     )
   $-
 </td>
@@ -592,7 +592,7 @@ N/A
     "name=NoSpherA2_ORCA_CRYSTAL_QMMM_TYPE@refine",
     "items='Mol;Ion'",
     "value=spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1")
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()")
   $-
 </td>
 <td width="13%" align="left">
@@ -722,8 +722,8 @@ $+
   "label=Embed.",
   "bgcolor=GetVar(HtmlTableFirstcolColour)",
   "checked=spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')",
-  "oncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','True') >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1",
-  "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1"
+  "oncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','True') >> html.Update()",
+  "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.Update()"
   )
 $-
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
@@ -733,7 +733,7 @@ $+
   "name=NoSpherA2_ORCA_CRYSTAL_QMMM_TYPE@refine",
   "items='Mol;Ion'",
   "value=spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE')",
-  "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1")
+  "onchange=spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()")
 $-
 </td>
 <td width="13%" align="left">
@@ -809,9 +809,9 @@ $-
     "name=Ri_Fit",
     "label=RI-Fit ",
     "checked=spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','True')>> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1",
+    "oncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','True')>> html.Update()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','False')>> html.ItemState #switch_name 1 2 >>  html.ItemState #switch_name 2 1"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','False')>> html.Update()"
     )
   $-
 <!-- ======= RI-SWITCH ===================== -->
@@ -824,7 +824,7 @@ $-
 $+
   html.Snippet("gui/snippets/input-combo",
   "name=NoSpherA2_ORCA_RIFIT@refine",
-  "items='combo_basis_fit;def2_universal_JKfit;def2_SVP_JKfit;HGBSP3_7;def2_qzvppd_rifit;TZVP_JKfit;cc-pvqz-jkfit'",
+  "items='combo_basis_fit;def2_universal_jkfit;def2_svp_jkfit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit'",
   "value=spy.GetParam('snum.NoSpherA2.auxiliary_basis')",
   "onchange=spy.SetParam('snum.NoSpherA2.auxiliary_basis', html.GetValue('~name~'))")
 $-
@@ -1010,10 +1010,10 @@ $spy.NoSpherA2.hybrid_GUI()
 </td>
 
 <td width='5%' align='left' colspan="#colspan">
-  $spy.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >> html.ItemState #switch_name 1 2>>#onclick >>  html.ItemState #switch_name 2 1', 'on')
+  $spy.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >>#onclick >> html.Update()', 'on')
 </td>
 <td width='5%' align='left' colspan="#colspan">
-  $spy.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.ItemState #switch_name 1 2>>#onclick >> html.ItemState #switch_name 2 1', 'on')
+  $spy.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> #onclick >> html.Update()', 'on')
 </td>
 
 <td width="10%" align='right'>
