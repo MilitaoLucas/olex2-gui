@@ -905,10 +905,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return self.IsEDData() and\
       self.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic" and\
       self.GetParam("snum.refinement.program").startswith("olex2.refine")
-  
+
   def IsDynamic(self):
     return OV.GetVar('isDynamic', False)
-    
+
   def IsRemoteMode(self):
     return 'true' == olx.GetVar('olex2.remote_mode', 'false')
 

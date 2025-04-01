@@ -166,11 +166,15 @@ def LoadParams(scopes=None):
     scopes = ['olex2', 'user', 'custom', 'snum']
   elif str == type(scopes):
     scopes = scopes.split(",")
+
   # snum params
-  master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
-  phil_handler = phil_interface.phil_handler(
-    master_phil=master_phil,
-    parse=phil_interface.parse)
+  try:
+    phil_handler = olx.phil_handler
+  except AttributeError:
+    master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
+    phil_handler = phil_interface.phil_handler(
+      master_phil=master_phil,
+      parse=phil_interface.parse)
 
   for scope in scopes:
     phil_p = get_phil_file_path(scope)
