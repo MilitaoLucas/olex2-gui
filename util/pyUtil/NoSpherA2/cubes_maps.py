@@ -112,10 +112,10 @@ def calculate_cubes():
     print("Disordered structures not implemented!")
     return
 
-  wfn2fchk = OV.GetVar("Wfn2Fchk")
+  NoSpherA2 = OV.GetVar("NoSpherA2")
   args = []
 
-  args.append(wfn2fchk)
+  args.append(NoSpherA2)
   cpus = OV.GetParam('snum.NoSpherA2.ncpus')
   args.append("-cpus")
   args.append(cpus)
@@ -155,7 +155,7 @@ def calculate_cubes():
       args.append("all")
     else:
       args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) - 1))
-  if OV.GetParam('snum.NoSpherA2.wfn2fchk_debug') == True:
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug') == True:
     args.append("-v")
 
   radius = OV.GetParam('snum.NoSpherA2.map.radius')

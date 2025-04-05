@@ -37,7 +37,7 @@ $spy.NoSpherA2.make_quick_button_gui()
     "name=NoSpherA2_basis@refine",
     "items=spy.NoSpherA2.getBasisListStr()",
     "value=spy.GetParam('snum.NoSpherA2.basis_name')",
-    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))")
   $-
   </td>
 
@@ -98,7 +98,7 @@ $-
     "name=NoSpherA2_cpus@refine",
     "items=spy.NoSpherA2.getCPUListStr()",
     "value=spy.GetParam('snum.NoSpherA2.ncpus')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))")
   $-
 </td>
 
@@ -131,7 +131,7 @@ $-
     "name=NoSpherA2_basis@refine",
     "items='6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'",
     "value=spy.GetParam('snum.NoSpherA2.basis_name')",
-    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.NoSpherA2.change_basisset(html.GetValue('~name~'))>> html.Update()")
   $-
   </td>
 #ignoreif -->
@@ -179,9 +179,9 @@ $-
     "name=Iterative",
     "label=Iterative ",
     "checked=spy.GetParam('snum.NoSpherA2.full_HAR')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.full_HAR','True')>>html.Update()",
+    "oncheck=spy.NoSpherA2.toggle_full_HAR()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.full_HAR','False')>>html.Update()"
+    "onuncheck=spy.NoSpherA2.toggle_full_HAR()"
     )
   $-
 </td>
@@ -226,7 +226,7 @@ $-
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'True')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'True')
 <td width="16%" align="left">
   $+
     html.Snippet("gui/snippets/input-combo",
@@ -238,7 +238,7 @@ $-
   $-
 </td> 
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_SF'),'False')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'False')
 <td width="16%">
 N/A 
 </td>
@@ -704,7 +704,7 @@ $-
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width='1%' align='left'>
+
 $+
   html.Snippet("gui/snippets/input-checkbox-td",
   "name=Damp",
@@ -715,8 +715,7 @@ $+
   "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_DAMP','False')"
   )
 $-
-</td>
-<td width="0%" align="left">
+
 $+
   html.Snippet("gui/snippets/input-checkbox-td",
   "name=NoSpherA2_Embedding@refine",
@@ -727,7 +726,6 @@ $+
   "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.Update()"
   )
 $-
-</td>
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
 <td width="12%" align="left">
 $+
@@ -801,26 +799,24 @@ $-
 #ignoreif -->
 #ignoreif -->
 
-<!-- #ignoreif strcmp(spy.GetParam('user.NoSpherA2.show_ri_fit'),'False')
+<ignore test="not strcmp(spy.GetParam('user.NoSpherA2.show_ri_fit'),'False')">
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_RIFIT' width='100%'></tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_RIFit;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width='2%' align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=Ri_Fit",
     "label=RI-Fit ",
-    "checked=spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','True')>>html.Update()",
+    "checked=spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','True')>> html.Update()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.wfn2fchk_RI_FIT','False')>>html.Update()"
+    "onuncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','False')>> html.Update()"
     )
   $-
-</td>
 <!-- ======= RI-SWITCH ===================== -->
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.wfn2fchk_RI_FIT'),'False')
+<ignore test="not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'), False)">
 <td width="30%">
 <b>Auxiliary Basis </b>
 </td>
@@ -828,12 +824,12 @@ $-
 $+
   html.Snippet("gui/snippets/input-combo",
   "name=NoSpherA2_ORCA_RIFIT@refine",
-  "items='combo_basis_fit;def2_universal_JKfit;def2_SVP_JKfit;HGBSP3_7;def2_qzvppd_rifit;TZVP_JKfit;cc-pvqz-jkfit'",
+  "items='combo_basis_fit;def2_universal_jkfit;def2_svp_jkfit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit'",
   "value=spy.GetParam('snum.NoSpherA2.auxiliary_basis')",
   "onchange=spy.SetParam('snum.NoSpherA2.auxiliary_basis', html.GetValue('~name~'))")
 $-
 </td>
-#ignoreif -->
+</ignore>
 
 <!-- ======= RI-SWITCH END ===================== -->
  <!-- THIS ONLY CREATES EMPTY SPACE TO FILL THE SPACE ON THE RIGHT -->
@@ -843,12 +839,12 @@ $-
 </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
+</ignore>
 
 
 <!-- ======= pySCF SPECIFIC START ===================== -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)
+<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)">
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -877,7 +873,7 @@ $-
   $-
 </td> 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
+</ignore>
 
 <!-- #include ELMO_specific ../util/pyUtil/NoSpherA2/ELMO_specific.htm;help_ext=NoSpherA2 Extras;1; -->
 
@@ -895,9 +891,9 @@ $-
     "name=Iterative",
     "label=Iterative ",
     "checked=spy.GetParam('snum.NoSpherA2.full_HAR')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.full_HAR','True')>>html.Update()",
+    "oncheck=spy.NoSpherA2.toggle_full_HAR()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.full_HAR','False')>>html.Update()"
+    "onuncheck=spy.NoSpherA2.toggle_full_HAR()"
     )
   $-
 </td>
@@ -1009,19 +1005,17 @@ $spy.NoSpherA2.hybrid_GUI()
     "name=NoSpherA2_SALTED_model@refine",
     "items=spy.NoSpherA2.get_SALTED_model_locations()",
     "value=spy.GetParam('snum.NoSpherA2.selected_salted_model')",
-    "onchange=spy.SetParam('snum.NoSpherA2.selected_salted_model', html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.SetParam('snum.NoSpherA2.selected_salted_model', html.GetValue('~name~'))")
   $-
 </td>
 
 <td width='5%' align='left' colspan="#colspan">
-  $spy.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >> html.ItemState #switch_name 1 2>>#onclick >>  html.ItemState #switch_name 2 1', 'on')
+  $spy.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >>#onclick >> html.Update()', 'on')
 </td>
 <td width='5%' align='left' colspan="#colspan">
-  $spy.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.ItemState #switch_name 1 2>>#onclick >> html.ItemState #switch_name 2 1', 'on')
+  $spy.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> #onclick >> html.Update()', 'on')
 </td>
-<!-- <td ALIGN='left' width='10%'>
-  <b><a href="spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list)">Add Model</a>
-</td> -->
+
 <td width="10%" align='right'>
   <b>CPUs</b>
 </td>
@@ -1031,7 +1025,7 @@ $spy.NoSpherA2.hybrid_GUI()
     "name=NoSpherA2_cpus@refine",
     "items=spy.NoSpherA2.getCPUListStr()",
     "value=spy.GetParam('snum.NoSpherA2.ncpus')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))>>html.Update()")
+    "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))")
   $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

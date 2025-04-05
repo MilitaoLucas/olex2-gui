@@ -108,7 +108,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.f_mask = None
     self.fo_sq_fc = None
     self.fo_sq_fc_merge = None
+    self.fo_sq_fc_complete = None
     if OV.GetParam("snum.refinement.use_solvent_mask") and not reparametrisation_only:
+      #OV.SetVar('current_mask_sqf', "")
+      ### If the original filename already ends in _sq (i.e. the files come from outside Olex2, things get very confusing. Maybe one way of dealing with it is to leave the original files all untouched, and rename sNum to the filename without the _sq bit, alongside with the HKLSrc(). But will metadata get lost? Should all files get copied/renamed?
+      #fn = OV.HKLSrc()
+      #nfn = fn.replace("_sq.hkl", '.hkl')
+      #if "_sq.hkl" in fn:
+        #olx.file.Copy(fn, nfn)
+        #OV.HKLSrc(nfn)
+        #olex.m(f"file {OV.file_ChangeExt(nfn, 'res')}")
+        #olex.m(f"reap {OV.file_ChangeExt(nfn, 'res')}")
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
@@ -124,6 +134,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olex.m("spy.OlexPlaton(q,.ins)")
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
+          if not self.f_mask:
+            self.failure = True
+            return
         else:
           stopwatch.run(OlexCctbxMasks)
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
@@ -980,16 +993,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
         sigmas=fo_sq.sigmas()/correction)
     return fo_sq_, fc_sq_
 
-  def get_fcf_data(self, anomalous_flag, use_fc_sq=False):
+  # complete_detwin also DISABLES MASK
+  def get_fcf_data(self, anomalous_flag, use_fc_sq=False, complete_detwin=False):
     if self.hklf_code == 5 or\
       (self.twin_components is not None
         and self.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
       merge = self.hklf_code < 5
       if self.use_tsc:
-        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation, merge=merge)
+        fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation,
+          merge=merge, complete=complete_detwin)
       else:
-        fo_sq, fc = self.get_fo_sq_fc(merge=merge)
-      if self.f_mask:
+        fo_sq, fc = self.get_fo_sq_fc(merge=merge, complete=complete_detwin)
+      if self.f_mask and not complete_detwin:
         f_mask = self.f_mask.common_set(fc)
         fc = fc.array(data=fc.data()+f_mask.data())
       fo_sq = fo_sq.customized_copy(
@@ -1085,6 +1100,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       mas_as_cif_block.add_miller_array(
         fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
       fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
+    elif list_code == 8:
+      olx.Echo("Warning: experimental LIST 8", m="warning")
+      fo_sq, fc = self.get_fcf_data(anomalous_flag, complete_detwin=True)
+      #fc = fc.customized_copy(data=fc.data()*self.scale_factor**0.5)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fo_sq, column_names=['_refln_F_squared_meas', '_refln_F_squared_sigma'],
+        format="coreCIF")
+      mas_as_cif_block.add_miller_array(
+        fc, column_names=['_refln_F_squared_calc', '_refln_phase_calc'])
+      weights = self.compute_weights(fo_sq, fc)
+      _refln_weight = fc.array(data=weights*len(weights)*100/sum(weights))
+      mas_as_cif_block.add_miller_array(
+        fc.d_spacings(), column_name='_refln_d_spacing')
+      mas_as_cif_block.add_miller_array(
+        _refln_weight, column_name='_shelx_refinement_sigma')
+      fmt_str = "%i %i %i %.3f %.3f %.3f %.3f %.3f %.3f"
     else:
       print("LIST code %i not supported" %list_code)
       return None, None
@@ -1389,7 +1420,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             valid = False
             break
       if not valid:
-        print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+        print("Skipping conflicting AFIX for %s (refinement.py)" %scatterers[pivot].label)
         continue
 
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
@@ -1706,10 +1737,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
 
-  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True):
-    if self.fo_sq_fc is None or self.fo_sq_fc_merge != merge:
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
+    if self.fo_sq_fc is None or self.fo_sq_fc_merge != merge or self.fo_sq_fc_complete != complete:
       self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function, filtered=filtered, merge=merge)
       self.fo_sq_fc_merge = merge
+      self.fo_sq_fc_complete = complete
     return self.fo_sq_fc
 
   def get_refinement_wrapper(self, iterations_class):

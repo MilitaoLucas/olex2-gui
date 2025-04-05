@@ -363,7 +363,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       HAR_log.close()
     raise e
   # Done with the while !Converged
-  OV.SetParam('snum.NoSpherA2.Calculate',False)
+  OV.SetParam('snum.NoSpherA2.Calculate', False)
+  ext_name = "h3-NoSpherA2-extras"
+  if OV.IsHtmlItem(ext_name):
+    olex.m(f"html.ItemState {ext_name} 2")
   if converged == False:
     HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
     self.refinement_has_failed.append("Warning: Unconverged Model!")
@@ -474,7 +477,7 @@ The following options were used:
       charge = OV.GetParam('snum.NoSpherA2.charge')
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
       relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-      partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+      partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
       accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
       if partitioning == True:
         details_text += "   PARTITIONING:   NoSpherA2\n"

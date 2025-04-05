@@ -570,7 +570,7 @@ def set_client_mode(v):
   else:
     return
   OV.SetParam("user.refinement.client_mode", v)
-  if olx.html.IsItem("cpus_label@refine"):
+  if OV.IsControl("cpus_label@refine"):
     olx.html.SetLabel("cpus_label@refine", get_thread_n_label())
     olx.html.SetItems("cpus@refine", get_thread_n_selection())
     cpu_n = "-1%" if v else "-1"

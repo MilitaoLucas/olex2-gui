@@ -167,6 +167,53 @@ class RunPrg(ArgumentParser):
     finally:
       olx.Freeze(False)
       OV.paramStack.pop(2)
+      
+  def setup_masking(self, clean=False):
+    prg =  OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+    if prg == "Platon" and olx.HKLF() == '5' and OV.GetParam('snum.refinement.recompute_mask_before_refinement') == True and OV.GetParam('snum.refinement.use_solvent_mask') == True:
+      OV.SetParam("snum.refinement.use_solvent_mask", False)
+      olex.m('delins ABIN')
+      olex.m('delins list 8')
+      olex.m('addins list 8')
+      olex.m('refine')
+      olex.m('file')
+      olex.m('addins ABIN')
+      olex.m('delins list 8')
+      OV.SetParam("snum.refinement.use_solvent_mask", True)
+    return
+    #if OV.GetParam("snum.refinement.use_solvent_mask") and OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
+      #OV.SetVar('current_mask_sqf', "")
+      ### If the original filename already ends in _sq (i.e. the files come from outside Olex2, things get very confusing. Maybe one way of dealing with it is to leave the original files all untouched, and rename sNum to the filename without the _sq bit, alongside with the HKLSrc(). But will metadata get lost? Should all files get copied/renamed?
+      #fn = OV.HKLSrc()
+      #nfn = fn.replace("_sq.hkl", '.hkl')
+      #if "_sq.hkl" in fn:
+        #olx.file.Copy(fn, nfn)
+        #nf = OV.FileFull().replace("_sq.", ".")
+        #olex.m(f"file {nf}")
+        #olex.m(f"reap {nf}")
+        ### This looks misleading -- the 'original' filename refer to renamings once the masking process has started.
+        #self.original_filename = nfn
+        #OV.HKLSrc(nfn)
+  
+    if clean:
+      from pathlib import Path
+      # Define the folder and pattern
+      folder_path = Path(OV.FilePath())
+      prg =  OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+      if prg.lower() == 'platon':
+        patterns = ["*_sq.*",  "*_sqd.*"]
+        for pattern in patterns:
+          for file in folder_path.glob(pattern):
+            file.unlink()
+            print(f"Deleted: {file}")
+      else:
+        pattern = "*.fab"
+        for file in folder_path.glob(pattern):
+          if "_sq" not in file.name:
+            file.unlink()
+            print(f"Deleted: {file}")
+          else:
+            print(f"Skippted: {file}")
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -249,6 +296,9 @@ class RunPrg(ArgumentParser):
             continue
 
     self.hkl_src = OV.HKLSrc()
+    if OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg') == "Platon" and not  OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
+      self.hkl_src = f"{os.path.splitext(OV.FileFull())[0]}_sq.hkl"
+    
     if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
       if os.path.exists(self.hkl_src):
@@ -516,12 +566,14 @@ class RunRefinementPrg(RunPrg):
       print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
   def run(self):
+    self.setup_masking()
+    self.run_pre_run_macro()
     if RunRefinementPrg.running:
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
-    self.run_pre_run_macro()
     self.reset_params()
+
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
     try:
@@ -560,7 +612,9 @@ class RunRefinementPrg(RunPrg):
       RunRefinementPrg.running = None
 
   def setupRefine(self):
-    self.method.pre_refinement(self)
+    self.terminate = self.method.pre_refinement(self)
+    if self.terminate:
+      return
     self.shelx = self.which_shelx(self.program)
     if self.params.snum.refinement.auto.assignQ:
       _ = olexex.get_auto_q_peaks()

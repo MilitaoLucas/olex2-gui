@@ -406,23 +406,33 @@ class OlexCctbxAdapter(object):
     return weighting.weights
 
   def load_mask(self):
-    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+    import gui
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+    _ =  os.path.splitext(OV.HKLSrc())[0]
+    indices = []
+    data = []
+    if prg == "Olex2":
+      fab_path = f"{_}.fab"
+    else:
+      fab_path = f"{_}_sq.fab"
     if os.path.exists(fab_path):
-      with open(fab_path) as fab:
-        indices = []
-        data = []
-        for l in fab.readlines():
-          fields = l.split()
-          if len(fields) < 5:
+      OV.SetVar('masking_dte', time.ctime(os.path.getmtime(fab_path)))
+      OV.SetVar('masking_src', os.path.basename(fab_path))
+      lines, fab_path, prg = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
+      if not lines:
+        return
+      for l in lines:
+        fields = l.split()
+        if len(fields) < 5:
+          break
+        try:
+          idx = (int(fields[0]), int(fields[1]), int(fields[2]))
+          if idx == (0,0,0):
             break
-          try:
-            idx = (int(fields[0]), int(fields[1]), int(fields[2]))
-            if idx == (0,0,0):
-              break
-            indices.append(idx)
-            data.append(complex(float(fields[3]), float(fields[4])))
-          except:
-            pass
+          indices.append(idx)
+          data.append(complex(float(fields[3]), float(fields[4])))
+        except:
+          pass
       miller_set = miller.set(
         crystal_symmetry=self.xray_structure().crystal_symmetry(),
         indices=flex.miller_index(indices)).auto_anomalous()
@@ -438,8 +448,8 @@ class OlexCctbxAdapter(object):
       crystal_symmetry=self.xray_structure().crystal_symmetry(),
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
-
-  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True):
+  # complete - detwins the who index range rather than just measured refs, used in masking
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if filtered:
       fo2 = self.reflections.f_sq_obs_filtered
     else:
@@ -456,18 +466,18 @@ class OlexCctbxAdapter(object):
       fc = self.f_calc(miller_set, self.exti is not None, True,
        ignore_inversion_twin=False,
        twin_data=False)
-    obs = self.observations.detwin(
+    dtw = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
       fc.indices(),
-      fc.as_intensity_array().data())
+      fc.as_intensity_array().data(), complete)
     fo2 = miller.array(
         miller_set=miller.set(
           crystal_symmetry=fo2.crystal_symmetry(),
-          indices=obs.indices,
+          indices=dtw.indices,
           anomalous_flag=fo2.anomalous_flag()),
-        data=obs.data,
-        sigmas=obs.sigmas).set_observation_type(fo2)
+        data=dtw.data,
+        sigmas=dtw.sigmas).set_observation_type(fo2)
     if self.hklf_code < 5 or merge:
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
       fc = fc.common_set(fo2)
@@ -509,8 +519,17 @@ class OlexCctbxAdapter(object):
     return True
 
 def write_fab(f_mask, fab_path=None):
+  import shutil
+  import gui
   if not fab_path:
     fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+  if os.path.exists(fab_path):
+    ## if there is already a fab file of this name, but it doesn't originate from the current masking program, then get it out of the way and make a backup.
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+    lines = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
+    if not lines:
+      shutil.copyfile(fab_path, f"{fab_path}_bak")
+
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
@@ -815,19 +834,55 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_calc_set = mask.complete_set
     else:
       f_calc_set = mask.fo2.set()
-    use_tsc = OV.IsNoSpherA2()
-    if use_tsc == True:
+    one_h = None
+    if OV.IsNoSpherA2():
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+    #if self.hklf_code >= 5 or self.twin_components:
+    if self.hklf_code >= 5:
+      mask.use_set_completion = False
+      mask.scale_factor = OV.GetOSF()
+      fo2 = self.reflections.f_sq_obs
+      miller_set = miller.set(
+        crystal_symmetry=fo2.crystal_symmetry(),
+        indices=fo2.indices(),
+        anomalous_flag=fo2.anomalous_flag())\
+          .unique_under_symmetry().map_to_asu()
+      fc = self.f_calc(miller_set, self.exti is not None, True, False,
+                      one_h_function=one_h, twin_data=False)
+      obs = fo2.as_xray_observations(
+        scale_indices=self.reflections.batch_numbers_array.data(),
+        twin_fractions=self.twin_fractions,
+        twin_components=self.twin_components)
+      dtw = obs.detwin(
+        fo2.crystal_symmetry().space_group(),
+        fo2.anomalous_flag(),
+        fc.indices(),
+        fc.as_intensity_array().data(), True)
+      fo2 = miller.array(
+          miller_set=miller.set(
+            crystal_symmetry=fo2.crystal_symmetry(),
+            indices=dtw.indices,
+            anomalous_flag=fo2.anomalous_flag()),
+          data=dtw.data,
+          sigmas=dtw.sigmas).set_observation_type(fo2)
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array()\
+        .average_bijvoet_mates().map_to_asu()
+      fc = fc.common_set(fo2)
+      if fc.size() != fo2.size():
+        fo2 = fo2.common_set(fc)
+
+      mask.fo2, mask.f_calc = fo2, fc
     else:
-      mask.f_calc = f_calc_set.structure_factors_from_scatterers(
-        mask.xray_structure, algorithm="direct").f_calc()
+      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+      mask.scale_factor = None
+
     f_obs = mask.f_obs()
-    mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
-      flex.abs(mask.f_calc.data()))
+    if mask.scale_factor is None:
+      mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
+        flex.abs(mask.f_calc.data()))
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(
       1/mask.scale_factor, mask.f_calc)
     mask.fft_scale = mask.xray_structure.unit_cell().volume()\

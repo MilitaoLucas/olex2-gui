@@ -139,7 +139,7 @@ class Method_client_refinement(Method_refinement):
             "spy.DebugInVSC" if debug=="VSC" else "",
             "SetVar server.job_id " + self.job_id,
             "SetVar olex2.remote_mode true",
-            "spy.Loadparams 'user,olex2'",
+            "spy.LoadParams 'user,olex2'",
             "spy.SetParam user.refinement.client_mode False",
             "SetOlex2RefinementListener(True)",
             "reap '%s.ins' -no_save=true" %inp_fn,

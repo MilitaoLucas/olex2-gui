@@ -45,8 +45,8 @@ p_scope = d['p_scope']
 
 from PluginTools import PluginTools as PT
 
-from gui.images import GuiImages
-GI=GuiImages()
+#from gui.images import GuiImages
+# GI=GuiImages()
 
 class NoSpherA2(PT):
   def __init__(self):
@@ -55,26 +55,40 @@ class NoSpherA2(PT):
     self.p_path = p_path
     self.p_scope = p_scope
     self.p_htm = p_htm
+    self.deal_with_phil(operation='read')    
+    
+    self.p_htm = "harp"
+    self.p_name = "HARp"
     self.p_img = p_img
-    self.deal_with_phil(operation='read')
+    self.p_scope = "harp"
+    
+    if not from_outside:
+      self.setup_gui()
+
+    self.p_name = p_name
+    self.p_path = p_path
+    self.p_scope = p_scope
+    self.p_htm = p_htm
+    # self.deal_with_phil(operation='read')
     self.print_version_date()
-    self.jobs = []
     self.parallel = False
     self.softwares = ""
-    self.wfn_2_fchk = ""
+    self.NoSpherA2 = ""
     self.f_calc = None
     self.f_obs_sq = None
     self.one_h_linearisation = None
     self.reflection_date = None
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
-
-    if not from_outside:
-      self.setup_gui()
+    import platform
+    if platform.architecture()[0] != "64bit":
+      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")        
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
     if sys.platform[:3] == "win":
       self.ubuntu_exe = olx.file.Which("ubuntu.exe")
+      if self.ubuntu_exe == None or self.ubuntu_exe == "":
+        self.ubuntu_exe = olx.file.Which("ubuntu2404.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
         self.ubuntu_exe = olx.file.Which("ubuntu2204.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
@@ -83,24 +97,21 @@ class NoSpherA2(PT):
         self.ubuntu_exe = olx.file.Which("ubuntu2004.exe")
       if self.ubuntu_exe == None or self.ubuntu_exe == "":
         self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")
+
+    self.setup_NoSpherA2()
     self.setup_har_executables()
     self.setup_pyscf()
     self.setup_discamb()
     self.setup_elmodb()
     self.setup_psi4()
-    self.setup_g03_executables()
-    self.setup_g09_executables()
-    self.setup_g16_executables()
+    self.g09_exe = self.setup_software("Gaussian09", "g09")
+    self.g09_exe = self.setup_software("Gaussian03", "g03")
+    self.g09_exe = self.setup_software("Gaussian16", "g16")
     self.setup_orca_executables()
-    self.setup_wfn_2_fchk()
     self.setup_xtb_executables()
     self.setup_ptb_executables()
 
-    import platform
-    if platform.architecture()[0] != "64bit":
-      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
-
-    if os.path.exists(self.wfn_2_fchk):
+    if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
@@ -272,7 +283,7 @@ class NoSpherA2(PT):
     self.name = olx.FileName()
     basis = OV.GetParam('snum.NoSpherA2.basis_name')
     update = OV.GetParam('snum.NoSpherA2.Calculate')
-    experimental_SF = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+    experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
     if "Please S" in wfn_code and update == True:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
@@ -286,7 +297,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
     if not update:
       return
-    if self.wfn_2_fchk == "":
+    if self.NoSpherA2 == "":
       print("Could not locate usable NoSpherA2 executable")
       return
 
@@ -679,8 +690,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if not self.basis_list_str:
       print("Could not locate usable HARt executable")
       return
-    wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), dir=folder)
     software = OV.GetParam('snum.NoSpherA2.source')
+    wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), folder, software)
     if software == "fragHAR":
       from .fragHAR import run_frag_HAR_wfn
       main_folder = OV.FilePath()
@@ -690,64 +701,26 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       qS_file = os.path.join(main_folder, fn + ".qS")
       run_frag_HAR_wfn(res_file, cif_file, qS_file, wfn_object, part)
       return
-    elif software == "ORCA":
-      wfn_object.write_orca_input(xyz)
-    elif software == "ORCA 5.0" or software == "ORCA 6.0":
-      embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
-      if embedding == True:
-        wfn_object.write_orca_crystal_input(xyz)
-      else:
-        wfn_object.write_orca_input(xyz)
-    elif software == "Gaussian03":
-      wfn_object.write_gX_input(xyz)
-    elif software == "Gaussian09":
-      wfn_object.write_gX_input(xyz)
-    elif software == "Gaussian16":
-      wfn_object.write_gX_input(xyz)
-    elif software == "pySCF":
-      wfn_object.write_pyscf_script(xyz)
-    elif software == "ELMOdb":
-      wfn_object.write_elmodb_input(xyz)
-    elif software == "Psi4":
-      wfn_object.write_psi4_input(xyz)
-    elif software == "Thakkar IAM" or software == "SALTED":
-      wfn_object.write_xyz_file()
-    elif software == "xTB":
-      if xyz == True:
-        wfn_object.write_xyz_file()
-    elif software == "pTB":
-      if xyz == True:
-        wfn_object.write_xyz_file()
     elif software == "Hybrid":
-      software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
-      basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d"%part)
-      method_part = OV.GetParam("snum.NoSpherA2.Hybrid.method_Part%d"%part)
-      relativistc = OV.GetParam("snum.NoSpherA2.Hybrid.Relativistic_Part%d"%part)
-      charge = OV.GetParam("snum.NoSpherA2.Hybrid.charge_Part%d"%part)
+      software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d" % part)
+      basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d" % part)
+      method_part = OV.GetParam("snum.NoSpherA2.Hybrid.method_Part%d" % part)
+      relativistc = OV.GetParam("snum.NoSpherA2.Hybrid.Relativistic_Part%d" % part)
+      charge = OV.GetParam("snum.NoSpherA2.Hybrid.charge_Part%d" % part)
       mult = OV.GetParam("snum.NoSpherA2.Hybrid.multiplicity_Part%d" % part)
-      conv = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d"%part)
-      strategy = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d"%part)
-      damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d"%part)
-      if software_part == "ORCA":
-        wfn_object.write_orca_input(xyz,basis_part,method_part,relativistc,charge,mult,strategy,conv,part)
-      elif software_part == "ORCA 5.0" or software_part == "ORCA 6.0":
-        wfn_object.write_orca_input(xyz,basis_part,method_part,relativistc,charge,mult,strategy,conv,part)
-      elif software_part == "Gaussian03":
-        wfn_object.write_gX_input(xyz,basis_part,method_part,relativistc,charge,mult,part)
-      elif software_part == "Gaussian09":
-        wfn_object.write_gX_input(xyz,basis_part,method_part,relativistc,charge,mult,part)
-      elif software_part == "Gaussian16":
-        wfn_object.write_gX_input(xyz,basis_part,method_part,relativistc,charge,mult,part)
-      elif software_part == "pySCF":
-        wfn_object.write_pyscf_script(xyz,basis_part,method_part,relativistc,charge,mult,damping,part)
-      elif software_part == "ELMOdb":
+      conv = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d" % part)
+      strategy = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d" % part)
+      damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d" % part)
+      wfn_object.software = software_part
+      if software_part == "ELMOdb":
         print("ELMO not yet fully implemented for Hybrid!!! Sorry!!")
         return False
       elif software_part == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
-        return False
-      elif software_part == "Thakkar IAM" or software == "SALTED":
-        wfn_object.write_xyz_file()
+        return False      
+      wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
+    else:
+      wfn_object.write_input(xyz)
     if software == "Hybrid":
       if software_part != "Thakkar IAM" and software_part != "SALTED":
         try:
@@ -764,32 +737,28 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetVar('NoSpherA2-Error',error)
         raise NameError('Unsuccesfull Wavefunction Calculation!')
 
-  def setup_wfn_2_fchk(self):
+  def setup_NoSpherA2(self):
+    self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
     exe_pre ="NoSpherA2"
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.wfn_2_fchk = _
-      else:
-        self.wfn_2_fchk = olx.file.Which("%s.exe" %exe_pre)
-    else:
+    if not os .path.exists(self.NoSpherA2):
       base_dir = OV.BaseDir()
-      if os.path.exists(os.path.join(base_dir,exe_pre)):
-        self.wfn_2_fchk = os.path.join(base_dir,exe_pre)
+      _ = os.path.join(base_dir, exe_pre)
+      if os.path.exists(_):
+        self.NoSpherA2 = _
       else:
         _ = os.path.join(self.p_path, "%s" %exe_pre)
         if os.path.exists(_):
-          self.wfn_2_fchk = _
+          self.NoSpherA2 = _
         else:
-          self.wfn_2_fchk = olx.file.Which("%s" %exe_pre)
-      print ("NoSpherA2 executable is:")
-      print (self.wfn_2_fchk)
-    if self.wfn_2_fchk == "":
+          self.NoSpherA2 = olx.file.Which("%s" % exe_pre)
+    print("NoSpherA2 executable is:")
+    print(self.NoSpherA2)
+    if self.NoSpherA2 == "":
       print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
       raise NameError('No NoSpherA2 Executable')
     self.softwares += ";Thakkar IAM"
-    OV.SetVar("Wfn2Fchk",self.wfn_2_fchk)
+    OV.SetVar("NoSpherA2", self.NoSpherA2)
 
   def setup_pyscf(self):
     self.has_pyscf = OV.GetParam('user.NoSpherA2.has_pyscf')
@@ -830,28 +799,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.softwares = self.softwares + ";Get Psi4"
 
   def setup_elmodb(self):
-    self.elmodb_exe = ""
-    exe_pre = "elmodb"
-    self.elmodb_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.elmodb_exe = _
-      else:
-        self.elmodb_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      self.ubuntu_exe = None
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.elmodb_exe = _
-      else:
-        self.elmodb_exe = olx.file.Which("%s.exe" %exe_pre)
-    if os.path.exists(self.elmodb_exe):
-      if "ELMOdb" not in self.softwares:
-        self.softwares = self.softwares + ";ELMOdb"
-
+    self.elmodb_exe = self.setup_software("ELMOdb", "elmodb")
     self.elmodb_lib = ""
     lib_name = "LIBRARIES_AND_BASIS-SETS/"
     self.elmodb_lib_name = lib_name
@@ -859,100 +807,39 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if os.path.exists(_):
       self.elmodb_lib = _
     else:
-      self.elmodb_lib = olx.file.Which("%s" %lib_name)
-
-  def setup_g09_executables(self):
-    self.g09_exe = ""
-    exe_pre = "g09"
-    self.g09_exe_pre = exe_pre
-
+      self.elmodb_lib = olx.file.Which("%s" % lib_name)
+      
+  def setup_software(self, name, exe_pre):
+    exe = ""
     if sys.platform[:3] == 'win':
       _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
       if os.path.exists(_):
-        self.g09_exe = _
+        exe = _
       else:
-        self.g09_exe = olx.file.Which("%s.exe" %exe_pre)
+        exe = olx.file.Which("%s.exe" % exe_pre)
 
     else:
       _ = os.path.join(self.p_path, "%s" %exe_pre)
       if os.path.exists(_):
-        self.g09_exe = _
+        exe = _
       else:
-        self.g09_exe = olx.file.Which("%s" %exe_pre)
-    if os.path.exists(self.g09_exe):
-      if "Gaussian09" not in self.softwares:
-        self.softwares = self.softwares + ";Gaussian09"
-
-  def setup_g03_executables(self):
-    self.g03_exe = ""
-    exe_pre = "g03"
-    self.g03_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.g03_exe = _
-      else:
-        self.g03_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.g03_exe = _
-      else:
-        self.g03_exe = olx.file.Which("%s" %exe_pre)
-    if os.path.exists(self.g03_exe):
-      if "Gaussian03" not in self.softwares:
-        self.softwares = self.softwares + ";Gaussian03"
-
-  def setup_g16_executables(self):
-    self.g16_exe = ""
-    exe_pre = "g16"
-    self.g16_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.g16_exe = _
-      else:
-        self.g16_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.g16_exe = _
-      else:
-        self.g16_exe = olx.file.Which("%s" %exe_pre)
-    if os.path.exists(self.g16_exe):
-      if "Gaussian16" not in self.softwares:
-        self.softwares = self.softwares + ";Gaussian16"
+        exe = olx.file.Which("%s" % exe_pre)
+    if name:
+      if os.path.exists(exe):
+        if name not in self.softwares:
+          self.softwares = self.softwares + ";" + name
+    return exe
 
   def setup_orca_executables(self):
-    self.orca_exe = ""
-    exe_pre = "orca"
-    self.orca_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.orca_exe = _
-      else:
-        self.orca_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.orca_exe = _
-      else:
-        self.orca_exe = olx.file.Which("%s" %exe_pre)
+    self.orca_exe = self.setup_software(None, "orca")
     if os.path.exists(self.orca_exe):
       try:
         import subprocess
         creationflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
         p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=creationflags)
         idx = p.stdout.index("Version")
-        result = p.stdout[idx:idx+50].split('\n')[0].split()[1]
-        print("ORCA VERSION: ", result) #print the version
+        result = p.stdout[idx:idx + 50].split('\n')[0].split()[1]
+        print("ORCA VERSION: ", result)  # print the version
         OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
       except:
         print("Failed to evaluate ORCA version")
@@ -960,106 +847,43 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if "ORCA" not in self.softwares:
         if Orca_Vers == "4":
           self.softwares = self.softwares + ";ORCA"
-          OV.SetParam('snum.NoSpherA2.source',"ORCA")
+          OV.SetParam('snum.NoSpherA2.source', "ORCA")
         elif Orca_Vers == "5":
           self.softwares = self.softwares + ";ORCA 5.0"
-          OV.SetParam('snum.NoSpherA2.source',"ORCA 5.0")
+          OV.SetParam('snum.NoSpherA2.source', "ORCA 5.0")
         elif Orca_Vers == "6":
           self.softwares = self.softwares + ";ORCA 6.0"
-          OV.SetParam('snum.NoSpherA2.source',"ORCA 6.0")
+          OV.SetParam('snum.NoSpherA2.source', "ORCA 6.0")
     else:
       self.softwares = self.softwares + ";Get ORCA"
 
   def setup_xtb_executables(self):
     if debug == False:
       return
-    self.xtb_exe = ""
-    exe_pre = "xtb"
-    self.xtb_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.xtb_exe = _
-      else:
-        self.xtb_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.xtb_exe = _
-      else:
-        self.xtb_exe = olx.file.Which("%s" %exe_pre)
+    self.xtb_exe = self.setup_software(None, "xtb")
     if os.path.exists(self.xtb_exe):
       if "xTB" not in self.softwares:
         self.softwares = self.softwares + ";xTB"
     else:
       self.softwares = self.softwares + ";Get xTB"
-
+      
   def setup_ptb_executables(self):
     if debug == False:
       return
-    self.ptb_exe = ""
-    exe_pre = "ptb"
-    self.ptb_exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.ptb_exe = _
-      else:
-        self.ptb_exe = olx.file.Which("%s.exe" %exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        self.ptb_exe = _
-      else:
-        self.ptb_exe = olx.file.Which("%s" %exe_pre)
+    self.ptb_exe = self.setup_software(None, "xtb")
     if os.path.exists(self.ptb_exe):
       if "pTB" not in self.softwares:
         self.softwares = self.softwares + ";pTB"
 
   def setup_discamb(self):
-    self.discamb_exe = ""
-    exe_pre = OV.GetParam('user.NoSpherA2.discamb_exe')
-
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" % exe_pre)
-      if os.path.exists(_):
-        self.discamb_exe = _
-      else:
-        self.discamb_exe = olx.file.Which("%s.exe" % exe_pre)
-
-    else:
-      _ = os.path.join(self.p_path, "%s" % exe_pre)
-      if os.path.exists(_):
-        self.discamb_exe = _
-      else:
-        self.discamb_exe = olx.file.Which("%s" % exe_pre)
+    self.discamb_exe = self.setup_software(None, OV.GetParam('user.NoSpherA2.discamb_exe'))
+    if not os.path.exists(self.discamb_exe):
+      self.discamb_exe = self.setup_software(None, "discambMATTS2tsc")
     if os.path.exists(self.discamb_exe):
       if "discambMATTS" not in self.softwares:
         self.softwares = self.softwares + ";discambMATTS"
     else:
-      exe_pre = "discambMATTS2tsc"
-      if sys.platform[:3] == 'win':
-        _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-        if os.path.exists(_):
-          self.discamb_exe = _
-        else:
-          self.discamb_exe = olx.file.Which("%s.exe" %exe_pre)
-
-      else:
-        _ = os.path.join(self.p_path, "%s" %exe_pre)
-        if os.path.exists(_):
-          self.discamb_exe = _
-        else:
-          self.discamb_exe = olx.file.Which("%s" % exe_pre)
-      if os.path.exists(self.discamb_exe):
-        if "discambMATTS" not in self.softwares:
-          self.softwares = self.softwares + ";discambMATTS"
-      else:
-        self.softwares = self.softwares + ";Get discambMATTS"
+      self.softwares = self.softwares + ";Get discambMATTS"
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -1128,7 +952,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     return self.softwares + ";"
 
   def available(self):
-    return os.path.exists(self.wfn_2_fchk)
+    return os.path.exists(self.NoSpherA2)
 
   def check_for_atom_in_basis_set(self, name, x_ray_struct, elements):
     BD = self.basis_dir
@@ -1305,7 +1129,7 @@ class Job(object):
     if OV.GetParam('snum.NoSpherA2.keep_wfn') == False:
       args.append("-wfn")
       args.append("f")
-    if OV.GetParam('snum.NoSpherA2.wfn2fchk_SF') == True:
+    if OV.GetParam('snum.NoSpherA2.NoSpherA2_SF') == True:
       args.append("-scf-only")
       args.append("t")
 
@@ -1386,7 +1210,7 @@ The following options were used:
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-    partitioning = OV.GetParam('snum.NoSpherA2.wfn2fchk_SF')
+    partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
     accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if partitioning == True:
       details_text = details_text + "   PARTITIONING:   NoSpherA2\n"
@@ -1442,11 +1266,17 @@ OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
   if "x2c" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic',True)
+    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic',True)
+    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
-    OV.SetParam('snum.NoSpherA2.Relativistic',False)
+    OV.SetParam('snum.NoSpherA2.Relativistic', False)
+    if OV.HasGUI():
+      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'False')
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
@@ -1664,6 +1494,10 @@ Home -> Settings -> PATH""", "O", False)
     olx.Shell("https://psicode.org/installs/v18/")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
+    _ = olx.html.GetItemState('h3-NoSpherA2-extras')
+    if _ == "0":
+      OV.setItemstate("h3-NoSpherA2-extras 2")
+      OV.setItemstate("h3-NoSpherA2-extras 1")  # This is a hack to force the update of the GUI without doing all of html
     if input != "discambMATT" and input != "Thakkar IAM":
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
@@ -1825,7 +1659,7 @@ H  5.3388863094 8.1423113280 6.6742541538
   E, wfn = psi4.energy('pbe/cc-pVDZ', return_wfn=True)
   psi4.fchk(wfn, os.path.join(OV.FilePath(), sfc_name + ".fchk"))
   return None
-OV.registerFunction(psi4, False, "NoSpherA2")
+#OV.registerFunction(psi4, False, "NoSpherA2")
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

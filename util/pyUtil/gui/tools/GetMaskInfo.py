@@ -50,6 +50,12 @@ def get_mask_info():
   import gui
 
   output_fn = '%s_masking_info.htm' % OV.ModelSrc()
+  if OV.GetVar("current_mask_sqf"):
+    if bool(OlexVFS.exists(output_fn)):
+      return output_fn
+    else:
+      return return_note(note="A mask has been applied, but no masking information is available.", col=gui_red)
+
   get_template = gui.tools.TemplateProvider.get_template
 
   if olx.IsFileLoaded() != 'true':
@@ -84,6 +90,10 @@ def get_mask_info():
   d['table_begin'] = get_template('table_begin', path=template_path, force=debug) % d
   d["note"] = "No Masking Information"
   d["note_bg"] = OV.GetVar('HtmlHighlightCOlour')
+  d["masking_info_src"] = OV.GetVar("masking_info_src", "")
+  d["masking_src"] = OV.GetVar("masking_info_src", "")
+  d["masking_info_dte"] = OV.GetVar("masking_info_dte", "")
+  d["masking_dte"] = OV.GetVar("masking_dte", "")
 
   _ = escape_param_names(name=OV.ModelSrc())
   mask_special_details_vn = "%s_%s" % (_, "mask_special_details")
@@ -100,16 +110,17 @@ def get_mask_info():
 
   else:
     try:
-      sqf_f = get_sqf_name(base=base)
+      sqf_f = get_sqf_name()
       rFile = open(sqf_f, 'r').read()
       if "platon_squeeze" in rFile:
-        base = "platon_squeeze"
+        if base != "platon_squeeze":
+          return return_note(note="SQUEEZE output found, but was looking for olex2.mask output", col=gui_green)
       if not rFile.startswith("data_"):
         rFile = "data_%s\n" % str(current_sNum) + rFile
 
       sqf = iotbx.cif.fast_reader(input_string=rFile).model()
     except Exception as err:
-      return return_note(note="No masking info yet! ", col=gui_green)
+      return return_note(note="No masking info yet! ", col=gui_orange)
     if sqf:
       if current_sNum not in sqf:
         sqf_block = sqf[sqf.keys()[0]]
@@ -622,24 +633,32 @@ def update_metacif(sNum, file_name):
   # olex.m('cifmerge')
 
 
-def get_sqf_name(full=True, base=None):
-  if not base:
-    base = _get_mask_base()
-  if full:
-    l = [".sqf", "_sq.sqf", "_sqd.sqf"]
-    for ending in l:
-      if "platon" in base.lower():
-        if "_sq" not in ending:
-          continue
-      retVal = os.path.splitext(OV.HKLSrc())[0] + ending
-      if os.path.exists(retVal):
-        return retVal
+#def get_sqf_name(full=True, base=None):
+  #if val := OV.GetVar("current_mask_sqf"):
+    #return val
+  #if not base:
+    #base = _get_mask_base()
+  #hklsrc = OV.HKLSrc()
+  #if "_sq" in hklsrc or "_sqd" in hklsrc:
+    #retVal = olx.file.ChangeExt(hklsrc, ".sqf")
+  #else:
+    #retVal = "%s.sqf" % (current_sNum)
+  #return retVal
+
+def get_sqf_name(base=None):
+  import time
+  prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+  HKLSrc_base = os.path.splitext(OV.HKLSrc())[0]
+  if prg == "Platon":
+    retVal = f"{HKLSrc_base}_sqd.sqf"
   else:
-    retVal = "%s.sqf" % (current_sNum)
+    retVal = f"{HKLSrc_base}.sqf"
+  OV.SetVar('masking_info_dte',  time.ctime(os.path.getmtime(retVal)))
+  OV.SetVar('masking_info_src', os.path.basename(retVal))
   return retVal
 
-
 def edit_mask_special_details(txt, base, sNum):
+  OV.SetVar('current_mask_sqf', "")
   user_value = str(OV.GetUserInput(0, "Edit _mask_special_details", txt))
   if user_value == "None":
     return
@@ -649,13 +668,19 @@ def edit_mask_special_details(txt, base, sNum):
     OV.SetParam('snum.masks.special_detail_colour', gui_green)
     OV.SetParam('snum.masks.special_detail_button_text', 'Edit')
     OV.UpdateHtml(force=True)
-
+    ## After the special details text has been edited, switch off the mask updating.
+    if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT'):
+      olx.html.SetState('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT', False)
+    OV.SetParam('snum.refinement.recompute_mask_before_refinement','false')
+    
 
 OV.registerFunction(edit_mask_special_details)
 
 
 def update_sqf_file(current_sNum, scope, scope2=None):
+  OV.SetVar('current_mask_sqf', "")
   sqf_file = get_sqf_name()
+  OV.SetVar('current_mask_sqf', "")
   if os.path.exists(sqf_file):
     with open(sqf_file, 'r') as original:
       data = original.read()
@@ -671,9 +696,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
     with open(sqf_file, 'w') as f:
       print(cif_block, file=f)
-
-    if os.path.exists(sqf_file.replace(".sqf", ".cif")):
-      CifInfo.MergeCif()
+    CifInfo.MergeCif()
 
 
 def _get_mask_base():
@@ -867,8 +890,9 @@ def status_bg(var, val, status='on'):
 
 OV.registerFunction(status_bg)
 
-
-def return_note(note, note_details="", col=OV.GetVar('HtmlHighlightCOlour')):
+def return_note(note, note_details="", col=OV.GetVar('HtmlHighlightColour')):
+  if "#" not in col:
+    col = OV.GetParam(col, OV.GetVar('HtmlHighlightColour')).hexadecimal
   output_fn = '%s_masking_info.htm' % OV.ModelSrc()
   d = {"note": note,
        "note_details": note_details,
@@ -888,6 +912,7 @@ def escape_param_names(name):
 def change_hklsrc_according_to_mask_prg(prg):
   OV.SetParam('snum.refinement.recompute_mask_before_refinement_prg', prg)
   target = ""
+  OV.SetVar('current_mask_sqf', "")
 
   # sort_out_masking_hkl()
   #import glob
@@ -924,6 +949,13 @@ def change_based_on_button_states():
         olx.html.SetBG(btn, 'gui_light_grey')
       break
 
+def get_masking_method():
+  prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+  method = "smbtx"
+  if prg == "Platon":
+    method = "SQUEEZE"
+  return method
+
 def sort_out_masking_hkl():
   pass
   #_ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
@@ -940,7 +972,48 @@ def sort_out_masking_hkl():
         #shutil.copy2(OV.HKLSrc(), fn)
       # OV.HKLSrc(fn)
 
+def get_and_check_mask_origin(fab_path=None, prg=None, check_time = False):
+  ## Checking whether a given .fab file has actually been generated by the method that is to be used. Returns the contents of the fab file as lines if the fab file is from the correct program
+  import shutil
+
+  try:
+    hkl_base = os.path.splitext(OV.HKLSrc())[0]
+  except:
+    return [], None, None
+  
+  if not prg:
+    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+  
+  if not fab_path:
+    if prg == "Olex2":
+      fab_path = f"{hkl_base}.fab"
+    else:
+      fab_path = f"{hkl_base}_sq.fab"
+
+  print(f"Getting the fab information from {fab_path}")
+  if not os.path.exists(fab_path):
+    print(f"-- alas, no such file exists")
+    return [], None, None
+  
+  with open(fab_path) as fab:
+    lines = []
+    lines = fab.readlines()
+    ## The following is necessary to find whether the mask is from the program shown in the GUI
+    find = "_platon_squeeze"
+    platon_in_file = any(find in line for line in reversed(lines))
+    if prg == "Platon" and platon_in_file:
+      print(f"-- This was created by PLATON, and we want a {prg} mask. Good")
+      return lines, fab_path, prg
+    elif prg != "Platon" and platon_in_file:
+      print(f"-- This was created by PLATON, and we want a {prg} mask. Not Good")
+      print(f"-- Creating backup of the original file as {fab_path}_bak")
+      shutil.copyfile(fab_path, f"{fab_path}_bak")
+      return [], fab_path, prg
+  print(f"-- Returning contehts from this file, generated by {prg}")
+  return lines, fab_path, prg
+
 OV.registerFunction(change_based_on_button_states)
 OV.registerFunction(change_hklsrc_according_to_mask_prg)
 OV.registerFunction(add_mask_content)
 OV.registerFunction(formula_cleaner)
+

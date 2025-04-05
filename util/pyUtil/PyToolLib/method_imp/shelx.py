@@ -10,7 +10,6 @@ import OlexVFS
 import ntpath
 import cctbx_olex_adapter as COA
 
-
 class Method_shelx(Method):
 
   def do_run(self, RunPrgObject):
@@ -100,20 +99,20 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     self.cif = {}
 
   def pre_refinement(self, RunPrgObject):
+    import gui
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       import cctbx_olex_adapter
       from smtbx import masks
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
-      fab_path = ""
-      if OV.HKLSrc():
-        fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
-
-      _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
-      method = "smbtx"
-      if _ == "Platon":
-        method = "SQUEEZE"
+      
+      prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
+      method = gui.tools.GetMaskInfo.get_masking_method()
+      lines, fab_path, fab_origin = gui.tools.GetMaskInfo.get_and_check_mask_origin()
+      if not lines and not OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
+        print ("The existing solvent mask does not match your masking program")
+        return True
       f_mask = None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
@@ -121,25 +120,26 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       else:
         olx.SetVar('snum.masks.original_hklsrc', '')
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
+        OV.SetVar('current_mask_sqf', "")
         if OV.HKLSrc() == modified_hkl_path:
           _ = "You can't calculate a mask on an already masked file!"
           OlexVFS.write('mask_notification.htm',_,1)
           raise Exception(_)
 
         if method == "SQUEEZE":
-          olex.m("spy.OlexPlaton(q,.ins)")
+          olex.m("spy.OlexPlaton(q,.cif)")
           fn = OV.HKLSrc().replace(".", "_sq.")
           if os.path.exists(fn):
             OV.HKLSrc(fn)
           Method_refinement.pre_refinement(self, RunPrgObject)
           return
-        else:
-          if "_sq" in OV.HKLSrc():
-            fn = OV.HKLSrc().replace("_sq.", ".")
-            if not os.path.exists(fn):
-              import shutil
-              shutil.copy2(OV.HKLSrc(), fn)
-            OV.HKLSrc(fn)
+        #else:
+          #if "_sq" in OV.HKLSrc():
+            #fn = OV.HKLSrc().replace("_sq.", ".")
+            #if not os.path.exists(fn):
+              #import shutil
+              #shutil.copy2(OV.HKLSrc(), fn)
+            #OV.HKLSrc(fn)
         olx.stopwatch.run(COA.OlexCctbxMasks)
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
