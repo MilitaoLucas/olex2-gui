@@ -1301,9 +1301,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def describe_refinement(self):
     edr = self.IsEDRefinement()
-    nsf = self.GetParam("snum.NoSpherA2.use_aspherical")
+    nsf = self.IsNoSpherA2()
     name = ""
-    if edr or nsf: #only olex2.refine
+    if edr: #only olex2.refine
       name = "Dyn-" + self.GetACI().EDI.get_method_name()
     else:
       rp = self.GetParam("snum.refinement.program")
