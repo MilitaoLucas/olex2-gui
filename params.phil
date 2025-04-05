@@ -830,9 +830,9 @@ routines requiring structure refinement
       .type = float
     htab_min_angle = 120
       .type = float
-    report_rtabs = False
+    report_rtabs = True
       .type = bool
-    report_vars = False
+    report_vars = True
       .type = bool
     dataname = ''
       .type = str
