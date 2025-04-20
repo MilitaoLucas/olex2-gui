@@ -55,13 +55,13 @@ class NoSpherA2(PT):
     self.p_path = p_path
     self.p_scope = p_scope
     self.p_htm = p_htm
-    self.deal_with_phil(operation='read')    
-    
+    self.deal_with_phil(operation='read')
+
     self.p_htm = "harp"
     self.p_name = "HARp"
     self.p_img = p_img
     self.p_scope = "harp"
-    
+
     if not from_outside:
       self.setup_gui()
 
@@ -82,7 +82,7 @@ class NoSpherA2(PT):
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
     import platform
     if platform.architecture()[0] != "64bit":
-      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")        
+      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
     if sys.platform[:3] == "win":
@@ -681,7 +681,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       elif software_part == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
-        return False      
+        return False
       wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
     else:
       wfn_object.write_input(xyz)
@@ -704,14 +704,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_NoSpherA2(self):
     self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
     print("NoSpherA2 executable is:", self.NoSpherA2)
-    import stat
-    if not (os.stat(self.NoSpherA2)[stat.ST_MODE] & stat.S_IXUSR):
-      print("The pyl is not executable, trying to fix")
-      try:
-        os.chmod(self.NoSpherA2, stat.S_IXUSR)
-      except:
-        print("Failed to make NoSpherA2 executable. Please fix manually.")
-        return None
     if self.NoSpherA2 == "" or self.NoSpherA2 is None:
       print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
@@ -767,7 +759,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.elmodb_lib = _
     else:
       self.elmodb_lib = olx.file.Which("%s" % lib_name)
-      
+
   def setup_software(self, name, exe_pre:str, get = False):
     # Determine platform-specific executable name
     exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
@@ -781,7 +773,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         # If the executable is not found, add the "Get" to the software list
         if "Get " + name not in self.softwares:
             self.softwares = f"{self.softwares};Get {name}"
-    
+
     return exe_path or ""
 
   def setup_orca_executables(self):
@@ -815,7 +807,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if debug == False:
       return
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
-      
+
   def setup_ptb_executables(self):
     if debug == False:
       return
