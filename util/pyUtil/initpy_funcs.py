@@ -223,13 +223,17 @@ class initpy_funcs():
       return
     import stat
     to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "olex2c"]
+    if sys.platform == 'darwin':
+      to_check[-1] = to_check[-1] + "_exe"
     for f in to_check:
       f = os.path.join(self.basedir, f)
-      if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
-        try:
+      if not os.path.exists(f):
+        continue
+      try:
+        if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
           os.chmod(f, stat.S_IXUSR)
-        except:
-          self.olx.Echo(
-            "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
-            m="error")
-          return
+      except:
+        self.olx.Echo(
+          "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
+          m="error")
+        return

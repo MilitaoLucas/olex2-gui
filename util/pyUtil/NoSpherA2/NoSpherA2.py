@@ -779,7 +779,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_orca_executables(self):
     # search PATH
     self.orca_exe = shutil.which("orca" + (".exe" if sys.platform.startswith("win") else ""))
-    if os.path.exists(self.orca_exe):
+    if self.orca_exe and os.path.exists(self.orca_exe):
       try:
         import subprocess
         creationflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
