@@ -921,12 +921,6 @@ olex2
         .type = int
     }
   }
-  executable_check
-   .help = "Instructs to check the particular file is executable on non-Win platforms"
-  {
-    pyl = True
-     .type = bool
-  }
   refinement {
     stop_ED_ASAP = True
       .type = bool
