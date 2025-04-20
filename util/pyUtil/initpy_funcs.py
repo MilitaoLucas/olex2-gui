@@ -222,7 +222,7 @@ class initpy_funcs():
     if sys.platform[:3] == 'win':
       return
     import stat
-    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi"]
+    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "olex2c"]
     for f in to_check:
       f = os.path.join(self.basedir, f)
       if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
