@@ -55,13 +55,13 @@ class NoSpherA2(PT):
     self.p_path = p_path
     self.p_scope = p_scope
     self.p_htm = p_htm
-    self.deal_with_phil(operation='read')    
-    
+    self.deal_with_phil(operation='read')
+
     self.p_htm = "harp"
     self.p_name = "HARp"
     self.p_img = p_img
     self.p_scope = "harp"
-    
+
     if not from_outside:
       self.setup_gui()
 
@@ -82,7 +82,7 @@ class NoSpherA2(PT):
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
     import platform
     if platform.architecture()[0] != "64bit":
-      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")        
+      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
     if sys.platform[:3] == "win":
@@ -105,14 +105,14 @@ class NoSpherA2(PT):
     self.setup_elmodb()
     self.setup_psi4()
     self.g09_exe = self.setup_software("Gaussian09", "g09")
-    self.g09_exe = self.setup_software("Gaussian03", "g03")
-    self.g09_exe = self.setup_software("Gaussian16", "g16")
+    self.g03_exe = self.setup_software("Gaussian03", "g03")
+    self.g16_exe = self.setup_software("Gaussian16", "g16")
     self.setup_orca_executables()
     self.setup_xtb_executables()
     self.setup_ptb_executables()
 
     if os.path.exists(self.NoSpherA2):
-      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
+      self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
         basis_list.sort()
@@ -149,34 +149,10 @@ class NoSpherA2(PT):
     self.reflection_date = None
 
   def setup_har_executables(self):
-    self.exe = None
-    exe_pre = "hart"
-    self.exe_pre = exe_pre
-
-    if sys.platform[:3] == 'win':
-      mpiloc = os.path.join(self.p_path, "mpiexec.exe")
-      if os.path.exists(mpiloc):
-        self.mpiexec = mpiloc
-      else:
-        self.mpiexec = olx.file.Which("mpiexec.exe")
-
-      _ = os.path.join(self.p_path, "%s_mpi.exe" %exe_pre)
-      if os.path.exists(_):
-        self.mpi_har = _
-      else:
-        self.mpi_har = olx.file.Which("%s_mpi.exe" %exe_pre)
-
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        self.exe = _
-      else:
-        self.exe = olx.file.Which("%s.exe" %exe_pre)
-    else:
-      mpiloc = os.path.join(self.p_path, "mpiexec")
-      if os.path.exists(mpiloc):
-        self.mpiexec = mpiloc
-      else:
-        self.mpiexec = olx.file.Which("mpiexec")
+    self.mpiexec = self.setup_software(None, "mpiexec")
+    self.mpi_har = self.setup_software(None, "hart_mpi")
+    self.exe = self.setup_software(None, "hart")
+    if sys.platform[:3] != 'win':
       self.mpihome = self.mpiexec[:-11]
       if 'LD_LIBRARY_PATH' in os.environ:
         if self.mpihome + 'lib' not in os.environ['LD_LIBRARY_PATH']:
@@ -188,18 +164,6 @@ class NoSpherA2(PT):
           os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi:' + os.environ['LD_RUN_PATH']
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
-
-      _ = os.path.join(self.p_path[:-16], "%s_mpi" %exe_pre)
-      if os.path.exists(_):
-        self.mpi_har = _
-      else:
-        self.mpi_har = olx.file.Which("%s_mpi" %exe_pre)
-
-      _ = os.path.join(self.p_path[:-16], "%s" %exe_pre)
-      if os.path.exists(_):
-        self.exe = _
-      else:
-        self.exe = olx.file.Which("%s" %exe_pre)
 
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
@@ -717,7 +681,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       elif software_part == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
-        return False      
+        return False
       wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
     else:
       wfn_object.write_input(xyz)
@@ -739,21 +703,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def setup_NoSpherA2(self):
     self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
-    exe_pre ="NoSpherA2"
-    if not os .path.exists(self.NoSpherA2):
-      base_dir = OV.BaseDir()
-      _ = os.path.join(base_dir, exe_pre)
-      if os.path.exists(_):
-        self.NoSpherA2 = _
-      else:
-        _ = os.path.join(self.p_path, "%s" %exe_pre)
-        if os.path.exists(_):
-          self.NoSpherA2 = _
-        else:
-          self.NoSpherA2 = olx.file.Which("%s" % exe_pre)
-    print("NoSpherA2 executable is:")
-    print(self.NoSpherA2)
-    if self.NoSpherA2 == "":
+    print("NoSpherA2 executable is:", self.NoSpherA2)
+    if self.NoSpherA2 == "" or self.NoSpherA2 is None:
       print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
       raise NameError('No NoSpherA2 Executable')
@@ -808,30 +759,26 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.elmodb_lib = _
     else:
       self.elmodb_lib = olx.file.Which("%s" % lib_name)
-      
-  def setup_software(self, name, exe_pre):
-    exe = ""
-    if sys.platform[:3] == 'win':
-      _ = os.path.join(self.p_path, "%s.exe" %exe_pre)
-      if os.path.exists(_):
-        exe = _
-      else:
-        exe = olx.file.Which("%s.exe" % exe_pre)
 
-    else:
-      _ = os.path.join(self.p_path, "%s" %exe_pre)
-      if os.path.exists(_):
-        exe = _
-      else:
-        exe = olx.file.Which("%s" % exe_pre)
-    if name:
-      if os.path.exists(exe):
+  def setup_software(self, name, exe_pre:str, get = False):
+    # Determine platform-specific executable name
+    exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
+    # search PATH
+    exe_path = shutil.which(exe_name)
+    # Update software list if requested and executable exists
+    if name and exe_path:
         if name not in self.softwares:
-          self.softwares = self.softwares + ";" + name
-    return exe
+            self.softwares = f"{self.softwares};{name}" if self.softwares else name
+    elif get and exe_path is None:
+        # If the executable is not found, add the "Get" to the software list
+        if "Get " + name not in self.softwares:
+            self.softwares = f"{self.softwares};Get {name}"
+
+    return exe_path or ""
 
   def setup_orca_executables(self):
-    self.orca_exe = self.setup_software(None, "orca")
+    # search PATH
+    self.orca_exe = shutil.which("orca" + (".exe" if sys.platform.startswith("win") else ""))
     if os.path.exists(self.orca_exe):
       try:
         import subprocess
@@ -846,44 +793,30 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
       if "ORCA" not in self.softwares:
         if Orca_Vers == "4":
-          self.softwares = self.softwares + ";ORCA"
-          OV.SetParam('snum.NoSpherA2.source', "ORCA")
+          orca_string = "ORCA"
         elif Orca_Vers == "5":
-          self.softwares = self.softwares + ";ORCA 5.0"
-          OV.SetParam('snum.NoSpherA2.source', "ORCA 5.0")
+          orca_string = "ORCA 5.0"
         elif Orca_Vers == "6":
-          self.softwares = self.softwares + ";ORCA 6.0"
-          OV.SetParam('snum.NoSpherA2.source', "ORCA 6.0")
+          orca_string = "ORCA 6.0"
+        self.softwares = self.softwares + ";" + orca_string
+        OV.SetParam('snum.NoSpherA2.source', orca_string)
     else:
-      self.softwares = self.softwares + ";Get ORCA"
+      self.softwares = f"{self.softwares};Get ORCA"
 
   def setup_xtb_executables(self):
     if debug == False:
       return
-    self.xtb_exe = self.setup_software(None, "xtb")
-    if os.path.exists(self.xtb_exe):
-      if "xTB" not in self.softwares:
-        self.softwares = self.softwares + ";xTB"
-    else:
-      self.softwares = self.softwares + ";Get xTB"
-      
+    self.xtb_exe = self.setup_software("xTB", "xtb", True)
+
   def setup_ptb_executables(self):
     if debug == False:
       return
-    self.ptb_exe = self.setup_software(None, "xtb")
-    if os.path.exists(self.ptb_exe):
-      if "pTB" not in self.softwares:
-        self.softwares = self.softwares + ";pTB"
+    self.ptb_exe = self.setup_software("pTB", "ptb")
 
   def setup_discamb(self):
-    self.discamb_exe = self.setup_software(None, OV.GetParam('user.NoSpherA2.discamb_exe'))
+    self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
-      self.discamb_exe = self.setup_software(None, "discambMATTS2tsc")
-    if os.path.exists(self.discamb_exe):
-      if "discambMATTS" not in self.softwares:
-        self.softwares = self.softwares + ";discambMATTS"
-    else:
-      self.softwares = self.softwares + ";Get discambMATTS"
+      self.discamb_exe = self.setup_software("discambMATTS2tsc", "discambMATTS2tsc", True)
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')

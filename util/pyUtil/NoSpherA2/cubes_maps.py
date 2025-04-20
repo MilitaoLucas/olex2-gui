@@ -21,6 +21,7 @@ if OV.HasGUI():
   import olex_xgrid
 
 import NoSpherA2
+from utilities import is_disordered
 import Wfn_Job
 from decors import run_with_bitmap
 
@@ -108,7 +109,7 @@ def kuhs_limit(order: int, adp: np.ndarray) -> float:
   return (2. * np.pi) ** -1.5 * (2. * order * np.log(2) / adp) ** 0.5
 
 def calculate_cubes():
-  if NoSpherA2.is_disordered == True:
+  if is_disordered() == True:
     print("Disordered structures not implemented!")
     return
 

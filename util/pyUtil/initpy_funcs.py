@@ -217,3 +217,19 @@ class initpy_funcs():
       import userScripts
     except ImportError as err:
       print("Could not import userScripts: %s" %err)
+
+  def check_exec_flag(self):
+    if sys.platform[:3] == 'win':
+      return
+    import stat
+    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "olex2c"]
+    for f in to_check:
+      f = os.path.join(self.basedir, f)
+      if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
+        try:
+          os.chmod(f, stat.S_IXUSR)
+        except:
+          self.olx.Echo(
+            "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
+            m="error")
+          return

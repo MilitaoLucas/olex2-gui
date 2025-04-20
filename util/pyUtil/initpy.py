@@ -32,6 +32,8 @@ def do_init():
   initpy.set_python_paths()
   initpy.set_redirectoin()
   initpy.attach_debugger()
+  #make pyl, hart, NSF executable on non-Windows platforms
+  initpy.check_exec_flag()
 
   # we need to use the user's locale for proper functioning of functions working
   # with multi-byte strings

@@ -1786,9 +1786,9 @@ ener = cf.kernel()"""
     else:
       if "orca" in args[0]:
         out_fn = os.path.join(path, self.name + "_orca.log")
-      elif "elmo" in args[nr]:
+      elif software == "ELMOdb" and "elmo" in args[nr]:
         out_fn = os.path.join(path, self.name + ".out")
-      elif "python" in args[nr]:
+      elif software == "pySCF" and"python" in args[nr]:
         out_fn = os.path.join(path, self.name + "_pyscf.log")
       if "ubuntu" in args[0]:
         print("Starting Ubuntu for wavefunction calculation, please be patient for start")
