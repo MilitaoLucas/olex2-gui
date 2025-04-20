@@ -1205,7 +1205,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return True
 
   def getPYLPath(self):
-    pyl = os.path.join(self.BaseDir, "pyl")
+    pyl = os.path.join(self.BaseDir(), "pyl")
     if sys.platform[:3] == 'win':
       pyl += '.exe'
     return pyl
