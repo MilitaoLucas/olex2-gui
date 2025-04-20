@@ -102,8 +102,12 @@ def do_init():
   stopwatch.run(initpy.import_caustom_and_user_sripts)
   ## These imports will register macros and functions for spy.
   stopwatch.exec("from RunPrg import RunPrg")
+
   stopwatch.start("NSF")
-  from NoSpherA2 import NoSpherA2
+  try:
+    from NoSpherA2 import NoSpherA2
+  except Exception as e:
+    olx.Echo(e, m="error")
   stopwatch.stop()
 
   if OV.IsDebugging():
