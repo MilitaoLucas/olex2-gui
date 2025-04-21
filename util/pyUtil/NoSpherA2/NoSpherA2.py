@@ -1086,7 +1086,16 @@ class Job(object):
     import subprocess
     p = subprocess.Popen([pyl,
                           os.path.join(p_path, "HARt-launch.py")])
-    time.sleep(3)
+    tries = 0
+    while tries < 20:
+      if os.path.exists(self.out_fn):
+        break
+      tries += 1
+      time.sleep(0.5)
+    if not os.path.exists(self.out_fn):
+      OV.SetVar('NoSpherA2-Error',"Tonto")
+      raise NameError("Tonto Error! No output file!")
+    
     with open(self.out_fn, "r") as stdout:
       while p.poll() is None:
         x = None
