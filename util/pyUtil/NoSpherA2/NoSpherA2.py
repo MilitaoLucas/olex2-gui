@@ -1095,17 +1095,17 @@ class Job(object):
     if not os.path.exists(self.out_fn):
       OV.SetVar('NoSpherA2-Error',"Tonto")
       raise NameError("Tonto Error! No output file!")
-    
-    with open(self.out_fn, "r") as stdout:
-      while p.poll() is None:
-        x = None
-        try:
-          x = stdout.read()
-        except:
-          pass
-        if x:
-          print(x, end='')
-        time.sleep(0.5)
+    else:
+      with open(self.out_fn, "r") as stdout:
+        while p.poll() is None:
+          x = None
+          try:
+            x = stdout.read()
+          except:
+            pass
+          if x:
+            print(x, end='')
+          time.sleep(0.5)
 
     if 'Error in' in open(self.error_fn).read():
       OV.SetVar('NoSpherA2-Error',"TontoError")
