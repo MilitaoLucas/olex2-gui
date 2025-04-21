@@ -1719,7 +1719,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       bad_refs.append((
         result.indices[i][0], result.indices[i][1], result.indices[i][2],
         result.fo_sq.data()[i], result.fc_sq.data()[i], sig))
-    olex_core.SetBadReflections(bad_refs.__iter__())
+    olex_core.SetBadReflections(bad_refs.__iter__(), not OV.IsEDRefinement())
 
   def show_comprehensive_summary(self, log=None):
     if log is None: log = sys.stdout
