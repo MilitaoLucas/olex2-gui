@@ -816,7 +816,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_discamb(self):
     self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
-      self.discamb_exe = self.setup_software("discambMATTS2tsc", "discambMATTS2tsc", True)
+      self.discamb_exe = self.setup_software("discambMATTS2", "discambMATTS2tsc", True)
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -1086,17 +1086,26 @@ class Job(object):
     import subprocess
     p = subprocess.Popen([pyl,
                           os.path.join(p_path, "HARt-launch.py")])
-    time.sleep(3)
-    with open(self.out_fn, "r") as stdout:
-      while p.poll() is None:
-        x = None
-        try:
-          x = stdout.read()
-        except:
-          pass
-        if x:
-          print(x, end='')
-        time.sleep(0.5)
+    tries = 0
+    while tries < 20:
+      if os.path.exists(self.out_fn):
+        break
+      tries += 1
+      time.sleep(0.5)
+    if not os.path.exists(self.out_fn):
+      OV.SetVar('NoSpherA2-Error',"Tonto")
+      raise NameError("Tonto Error! No output file!")
+    else:
+      with open(self.out_fn, "r") as stdout:
+        while p.poll() is None:
+          x = None
+          try:
+            x = stdout.read()
+          except:
+            pass
+          if x:
+            print(x, end='')
+          time.sleep(0.5)
 
     if 'Error in' in open(self.error_fn).read():
       OV.SetVar('NoSpherA2-Error',"TontoError")

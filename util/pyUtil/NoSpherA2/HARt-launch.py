@@ -17,9 +17,9 @@ err_fn = hart_file + "_tonto.out"
 out_fn = hart_file + "_tonto.out"
 tries = 0
 while not os.path.exists(out_fn):
-  time.sleep(1)
+  time.sleep(0.5)
   tries += 1
-  if tries >= 5:
+  if tries >= 20:
     print("Failed to locate the output file")
     exit(1)
 with open(out_fn, "r") as stdout:
