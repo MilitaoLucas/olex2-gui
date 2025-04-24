@@ -816,7 +816,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_discamb(self):
     self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
-      self.discamb_exe = self.setup_software("discambMATTS2tsc", "discambMATTS2tsc", True)
+      self.discamb_exe = self.setup_software("discambMATTS2", "discambMATTS2tsc", True)
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
