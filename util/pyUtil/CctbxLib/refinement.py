@@ -987,9 +987,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   #moves SWAT from Fc_sq to Fo_sq
   def  transfer_swat(self, g, U, fo_sq, fc_sq):
-    stol_sqs = fc_sq.unit_cell().stol_sq(fc_sq.indices())
-    correction = flex.double([1 - g*math.exp(-8*math.pi**2*U*stol_sq) for stol_sq in stol_sqs])
-    correction = flex.pow(correction, 2.0)
+    #stol_sqs = fc_sq.unit_cell().stol_sq(fc_sq.indices())
+    #correction = flex.double([1 - g*math.exp(-8*math.pi**2*U*stol_sq) for stol_sq in stol_sqs])
+    #correction = flex.pow(correction, 2.0)
+    correction = flex.double([self.fc_correction.compute(h, 0, False) for h in fc_sq.indices()])
+    # # #test
+    # for i, fc_sq_v in enumerate(fc_sq.data()):
+    #   fc_k =self.fc_correction.compute(fc_sq.indices()[i], 0, False)
+    #   if abs(correction[i] - fc_k) > 1e-3:
+    #     raise Exception("Assert!")
+    # # #end test
     fc_sq_ = fc_sq.customized_copy(data=fc_sq.data() / correction)
     fo_sq_ = fo_sq.customized_copy(
         data=fo_sq.data()/correction,
@@ -1041,9 +1048,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if self.exti is not None or self.swat is not None:
         if self.exti is not None:
           fo_sq, fc_sq = self.transfer_exti(self.fc_correction.value, self.wavelength, fo_sq, fc_sq)
-        elif self.swat is not None:
-          fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+        elif self.swat is not None: # swat should not be transferred...
+          #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+          pass
 
+      #   scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+      #       / flex.sum(weights * flex.pow2(fc_sq.data()))
+
+      #   fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+      #     data=fo_sq.data()*(1/scale),
+      #     sigmas=fo_sq.sigmas()*(1/scale),
+      #     anomalous_flag=anomalous_flag)
+      # else:
       fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
         sigmas=fo_sq.sigmas()*(1/self.scale_factor),

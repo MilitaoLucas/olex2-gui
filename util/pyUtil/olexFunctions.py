@@ -1333,23 +1333,22 @@ def GetFormattedCompilationInfo():
   l = raw.split()
   if "svn" in raw:
     d['Date'] = l[0].rstrip(",")
-    d['SVN'] = l[1].split(".")[1].rstrip(",")
+    d['SVN'] = l[1].split(".")[1].rstrip(",") + "/" + OV.GetVar("last_version")
     d['MSC'] = l[2].rstrip(",")
     d['OS'] = l[4].rstrip(",")
     d['Python'] = l[6].rstrip(",")
     d['wxWidgets'] = l[8].rstrip(",")
     d['Vendor'] = " ".join(l[10:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>SVN</b>: %(SVN)s,  <b>Compiler</b>: %(MSC)s</td></tr>" %d
-    t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   else:
     d['Date'] = " ".join(l[0:3]).rstrip(",")
     d['MSC'] = l[4].rstrip(",")
+    d['SVN'] = OV.GetVar("last_version")
     d['OS'] = l[6].rstrip(",")
     d['Python'] = l[8].rstrip(",")
     d['wxWidgets'] = l[10].rstrip(",")
     d['Vendor'] = " ".join(l[12:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>Compiler</b>: %(MSC)s</td></tr>" %d
-    t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
+  t += "<tr><td><b>Date</b>: %(Date)s, <b>Ver.</b>: %(SVN)s,  <b>Compiler</b>: %(MSC)s</td></tr>" %d
+  t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   t += "</table></font>"
   return t
 
