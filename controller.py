@@ -1,10 +1,13 @@
 import os, sys
 import subprocess, socket, time
 
-basedir = os.path.split(os.path.abspath(__file__))[0]
-os.environ["PYTHONHOME"] = os.path.join(basedir, "Python38")
-#!!
-os.environ["OLEX2_CCTBX_DIR"] = r"D:\devel\cctbx\cctbx_latest\build_win64_py38"
+basedir = os.path.split(os.path.abspath("__file__"))[0]
+#basedir = os.path.split(os.path.abspath(__file__))[0]
+#!! this should be set in the batch file
+if "PYTHONHOME" not in os.environ:
+  os.environ["PYTHONHOME"] = os.path.join(basedir, "Python38")
+  if "OLEX2_CCTBX_DIR" not in os.environ:
+    os.environ["OLEX2_CCTBX_DIR"] = r"D:\devel\cctbx\cctbx_latest\build_win64_py38"
 
 WARNING = '\033[93m'
 start_port = 8889
@@ -70,7 +73,9 @@ class HeadlessController(object):
       elif sys.platform == 'darwin':
         headless_name += "_exe"
       subprocess.Popen(
-        [os.path.join(basedir, headless_name), "server", str(self.port), self.job_id],
+        [os.path.join(basedir, headless_name), "server", str(self.port),
+          self.job_id,
+          "-tm=300"], #auto-shutdown on idle in sec
         env=my_env)
       os.chdir(cd)
 
@@ -86,6 +91,10 @@ class HeadlessController(object):
       txt = log.readline()
     return rv
 
+  def print(self, txt):
+    #print(txt)
+    pass
+
   def read_log(self, log):
     while True:
       out = log.readline()
@@ -99,18 +108,41 @@ class HeadlessController(object):
           if marker == "info":
             continue
           if marker in ("error", "warning", "exception"):
-            print(WARNING + '\n'.join(txt))
+            self.print(WARNING + '\n'.join(txt))
           else:
-            print('\n'.join(txt))
+            self.print('\n'.join(txt))
         else:
-          print(out)
+          self.print(out)
 
-  def do_run(self, command):
+  def do_run(self, command, program):
     self.pre_refinement()
     log_fn = os.path.join(self.str_dir, "olex2.refine_srv.log")
     if os.path.exists(log_fn):
       os.remove(log_fn)
     inp_fn = os.path.join(self.str_path, self.str_name)
+    normalised = {
+      "shelxl": "ShelXL",
+      "shelxs": "ShelXS",
+      "shelxt": "ShelXT"
+    }
+
+    set_program = ""
+    if program:
+      if "refine" == command:
+        if "olex2" == program.lower():
+          program = "olex2.refine"
+        else:
+          program = normalised.get(program.lower(), program)
+        set_program = "spy.set_refinement_program " + program
+      elif "solve" == command:
+        if "olex2" == program.lower():
+          program = "olex2.solve"
+        else:
+          program = normalised.get(program.lower(), program)
+        set_program = "spy.set_solution_program " + program
+      else:
+        print("Unknown command: %s" %command)
+        return
     cmds = ["run:%s" %self.job_id,
             "xlog:%s" %log_fn,
             "spy.DebugInVSC" if self.debug=="VSC" else "",
@@ -120,7 +152,8 @@ class HeadlessController(object):
             "spy.SetParam user.refinement.client_mode False",
             "SetOlex2RefinementListener(True)",
             "reap '%s' -no_save=true" %inp_fn,
-            "spy.ac.diagnose",
+            #"spy.ac.diagnose",
+            set_program,
             command,
             #"spy.saveHistory",
             "@close",
@@ -142,6 +175,7 @@ class HeadlessController(object):
     data = "busy"
     with open(log_fn, "r") as log:
       while data == "busy":
+        time.sleep(0.5)
         self.read_log(log)
         time.sleep(0.5)
         data = self.send_cmd(host=self.host, port=self.port, cmd=b"status\n")
@@ -151,12 +185,14 @@ class HeadlessController(object):
       self.read_log(log)
 
 if __name__ == '__main__':
-  if len(sys.argv) < 2 or (sys.argv[1] == "/?" or sys.argv[1] == "/h"):
+  import shlex
+  argv = shlex.split(os.environ['PYL_CMD'], posix=False)
+  if len(argv) < 2 or (argv[1] == "/?" or argv[1] == "/h"):
     print("Olex2c command line controller")
     print("Available commands: solve, refine, stop")
     sys.exit(0)
 
-  cmd = sys.argv[1]
+  cmd = argv[1]
   if cmd == "stop":
     print("Shutting down the server(s)")
     import socket
@@ -171,8 +207,8 @@ if __name__ == '__main__':
           break
     sys.exit(0)
 
-  if len(sys.argv) < 3:
+  if len(argv) < 3:
     print("Please provide a structure to process")
     sys.exit(1)
-  c = HeadlessController(sys.argv[2])
-  c.do_run(sys.argv[1])
+  c = HeadlessController(os.path.abspath(argv[2]))
+  c.do_run(argv[1], "" if len(argv) < 4 else argv[3])
