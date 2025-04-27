@@ -104,6 +104,7 @@ class NoSpherA2(PT):
     self.setup_discamb()
     self.setup_elmodb()
     self.setup_psi4()
+    self.setup_occ_executables()
     self.g09_exe = self.setup_software("Gaussian09", "g09")
     self.g03_exe = self.setup_software("Gaussian03", "g03")
     self.g16_exe = self.setup_software("Gaussian16", "g16")
@@ -803,6 +804,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       self.softwares = f"{self.softwares};Get ORCA"
 
+  def setup_occ_executables(self):
+    # search PATH
+    self.occ_exe = shutil.which("occ" + (".exe" if sys.platform.startswith("win") else ""))
+    if self.occ_exe and os.path.exists(self.occ_exe):
+      if "occ" not in self.softwares:
+        occ_string = "occ"
+        self.softwares = self.softwares + ";" + occ_string
+        OV.SetParam('snum.NoSpherA2.source', occ_string)
+    else:
+      self.softwares = f"{self.softwares};Get occ"
+
   def setup_xtb_executables(self):
     if debug == False:
       return
@@ -1209,16 +1221,25 @@ def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
   if "x2c" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    OV.SetParam('snum.NoSpherA2.DisableRelativistic', False)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    OV.SetParam('snum.NoSpherA2.DisableRelativistic', False)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
+    OV.SetParam('snum.NoSpherA2.DisableRelativistic', False)
     OV.SetParam('snum.NoSpherA2.Relativistic', False)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'False')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'False')
+
+
+
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
