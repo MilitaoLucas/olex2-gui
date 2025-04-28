@@ -631,6 +631,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     ECP = False
     if basis_name == None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    print("Selected base name", basis_name)
     if "ECP" in basis_name:
       ECP = True
     if xyz:
