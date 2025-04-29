@@ -814,11 +814,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetParam('snum.NoSpherA2.source', occ_string)
     else:
       self.softwares = f"{self.softwares};Get occ"
-    OV.SetParam('snum.NoSpherA2.NoRel', "True")
 
   def setup_xtb_executables(self):
     if debug == False:
       return
+
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
   def setup_ptb_executables(self):
@@ -1241,6 +1241,7 @@ def change_basisset(input):
 
 
 
+
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
@@ -1458,6 +1459,10 @@ Home -> Settings -> PATH""", "O", False)
     olx.Shell("https://psicode.org/installs/v18/")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
+    if input == "occ":
+      OV.SetParam('snum.NoSpherA2.NoRel', "True")
+    else:
+      OV.SetParam('snum.NoSpherA2.NoRel', "False")
     _ = olx.html.GetItemState('h3-NoSpherA2-extras')
     if _ == "0":
       OV.setItemstate("h3-NoSpherA2-extras 2")
@@ -1470,6 +1475,8 @@ Home -> Settings -> PATH""", "O", False)
           OV.SetParam('snum.NoSpherA2.multiplicity',1)
         elif (ne % 2 != 0):
           OV.SetParam('snum.NoSpherA2.multiplicity',2)
+
+
 OV.registerFunction(change_tsc_generator,False,'NoSpherA2')
 
 def set_default_cpu_and_mem():
