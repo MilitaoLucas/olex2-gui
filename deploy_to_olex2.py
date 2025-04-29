@@ -7,12 +7,14 @@ import shutil
 import argparse
 
 def main(olex2_path: str) -> None:
+    print(f"Deploying to {olex2_path}")
     temp = os.listdir()
     itens = temp.copy()
     for i in temp:
         if i.endswith(".docx") or i.endswith(".md") or i.startswith(".") or i.endswith("txt"):
             itens.remove(i)
 
+    print(itens)
     for i in itens:
         if os.path.isdir(i):
             shutil.copytree(i, os.path.join(olex2_path, i), dirs_exist_ok=True)
