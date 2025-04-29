@@ -1,4 +1,25 @@
 from tomli_w import dump
+def treat_xyz(path: str) -> None:
+    atom_list = []
+    i = 0
+    with open(path, "r") as f:
+        xyz = f.read().splitlines()
+    fixed_lines = [xyz[0], xyz[1]]
+    for i, line in enumerate(xyz):
+        if i > 1:
+            atom = line.split()
+            if atom[0] == "D":
+                atom[0] = "H"
+                line = line.replace("D", "H")
+            if atom[0] == "T":
+                atom[0] = "H"
+                line = line.replace("T", "H")
+            fixed_lines.append(line)
+            if not atom[0] in atom_list:
+                atom_list.append(atom[0])
+    with open(path, "w") as f:
+        f.write("\n".join(fixed_lines))
+
 def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     output_toml = dict()
     output_toml["verbosity"] = 2
@@ -11,15 +32,12 @@ def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,char
         ECP = True
     if xyz:
         self.write_xyz_file()
-    xyz = open(coordinates_fn,"r")
-    self.input_fn = os.path.join(self.full_dir, f"{self.name}.inp")
+    self.input_fn = os.path.join(self.full_dir, f"{self.name}.toml")
     inp = open(self.input_fn,"w")
     if method == None:
         method = OV.GetParam('snum.NoSpherA2.method')
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     output_toml["threads"] = int(ncpus)
-    control = "! NoPop MiniPrint "
-
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     mp2_block = ""
@@ -115,23 +133,7 @@ def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,char
         inp.write(control + ' NOTRAH\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
     else:
         inp.write(control + '\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
-    atom_list = []
-    i = 0
-    for line in xyz:
-        i = i+1
-        if i > 2:
-            atom = line.split()
-            if atom[0] == "D":
-                atom[0] = "H"
-                line = line.replace("D", "H")
-            if atom[0] == "T":
-                atom[0] = "H"
-                line = line.replace("T", "H")
-            inp.write(line)
-            if not atom[0] in atom_list:
-                atom_list.append(atom[0])
-    xyz.close()
-    inp.write("   end\nend\n")
+    atom_list = treat_xyz(coordinates_fn)
     if mp2_block != "":
         inp.write(mp2_block+'\n')
     if ECP == False:
