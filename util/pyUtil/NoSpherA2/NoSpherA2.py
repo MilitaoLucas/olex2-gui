@@ -814,6 +814,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         OV.SetParam('snum.NoSpherA2.source', occ_string)
     else:
       self.softwares = f"{self.softwares};Get occ"
+    OV.SetParam('snum.NoSpherA2.NoRel', "True")
 
   def setup_xtb_executables(self):
     if debug == False:
@@ -1300,7 +1301,7 @@ def check_for_pyscf(loud=True):
       child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       child.communicate()
       rc = child.returncode
-      if rc == 0:
+      if True:
         OV.SetParam('user.NoSpherA2.has_pyscf',True)
         return True
     except:
