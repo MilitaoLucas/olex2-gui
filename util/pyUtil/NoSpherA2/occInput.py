@@ -1,4 +1,6 @@
 from tomli_w import dump
+
+
 def treat_xyz(path: str) -> None:
     atom_list = []
     i = 0
@@ -20,7 +22,7 @@ def treat_xyz(path: str) -> None:
     with open(path, "w") as f:
         f.write("\n".join(fixed_lines))
 
-def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
+def write_occ_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     output_toml = dict()
     output_toml["verbosity"] = 2
     coordinates_fn = os.path.join(self.full_dir, f"{self.name}.xyz") 
