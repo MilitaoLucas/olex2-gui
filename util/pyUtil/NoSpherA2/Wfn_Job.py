@@ -847,15 +847,15 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         if os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw")):
           scf_block += f"   Guess MORead\n   MOInp \"{self.name}2.gbw\""
           if convergence == "NoSpherA2SCF":
-            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n    Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
         elif convergence == "NoSpherA2SCF":
-          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
       else:
         if convergence == "NoSpherA2SCF":
-          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     else:
       if convergence == "NoSpherA2SCF":
-        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     if scf_block != "":
       inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()
@@ -1771,6 +1771,8 @@ ener = cf.kernel()"""
       args.append(os.path.join(base, ".basis_vDZP"))
       args.append("-chrg")
       args.append(str(charge))
+      if OV.GetParam("snum.NoSpherA2.PTB_use_purify"):
+        args.append("-purify")
       if mult != 1:
         args.append("-uhf")
         args.append(str(int(mult)-1))

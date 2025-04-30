@@ -262,6 +262,8 @@ snum{
       .type = int
     Property_all_MOs = False
       .type = bool
+    PTB_use_purify = False
+      .type = bool
     pySCF_PBC = False
       .type = bool
     pySCF_Damping = "0.6"

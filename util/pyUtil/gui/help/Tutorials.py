@@ -218,7 +218,7 @@ class AutoDemo(object):
   def end_tutorial(self):
     OV.SetParam('olex2.stop_current_process',False)
     olx.Freeze(False)
-    olx.Echo('Tutorial Ended or Interrupted')
+    olx.Echo('Tutorial Ended or Interrupted', m='info')
     olx.gl.Stereo('normal')
     olx.OFileDel(0)
     olx.Fuse()
