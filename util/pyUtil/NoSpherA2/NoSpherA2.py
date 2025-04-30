@@ -1211,14 +1211,17 @@ def change_basisset(input):
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
     OV.SetParam('snum.NoSpherA2.Relativistic', False)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'False')
+      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'False')
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
@@ -1258,7 +1261,7 @@ def check_for_pyscf(loud=True):
   if ubuntu_exe != None and os.path.exists(ubuntu_exe):
     import subprocess
     try:
-      child = subprocess.Popen([ubuntu_exe,'run',"python -c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      child = subprocess.Popen([ubuntu_exe,'run',"python -c 'import pyscf'"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       child.communicate()
       rc = child.returncode
       if rc == 0:
@@ -1276,7 +1279,7 @@ def check_for_pyscf(loud=True):
   elif ubuntu_exe == None :
     import subprocess
     try:
-      child = subprocess.Popen(['python',  "-c 'import pyscf' && echo $?"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+      child = subprocess.Popen(['python',  "-c 'import pyscf'"],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
       child.communicate()
       rc = child.returncode
       if rc == 0:
