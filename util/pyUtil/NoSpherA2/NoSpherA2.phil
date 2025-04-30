@@ -2,6 +2,8 @@ snum{
   NoSpherA2{
     use_aspherical = False
       .type = bool
+    NoRel = "True"
+      .type = str
     dir = ""
       .type = str
     name = ""
