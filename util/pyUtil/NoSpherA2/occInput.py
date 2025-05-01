@@ -1,27 +1,29 @@
 from tomli_w import dump
+import json 
+with open("periodic_table.json", "r") as pt:
+    PERIODIC_TABLE = json.load(pt)
 
-
-
-def treat_xyz(path: str) -> None:
-    atom_list = []
-    i = 0
+def get_atoms_from_xyz(xyz: str) -> set:
+    with open(xyz, "r") as f:
+        xyz_list = f.readlines()
+    return {atom for i in xyz_list if (atom := i.split()[0]) in PERIODIC_TABLE.keys()}
+    
+def treat_xyz(path: str) -> set:
+    atom_set = set()
     with open(path, "r") as f:
         xyz = f.read().splitlines()
+        
     fixed_lines = [xyz[0], xyz[1]]
     for i, line in enumerate(xyz):
         if i > 1:
+            line = line.replace("D", "H").replace("T", "H")
             atom = line.split()
-            if atom[0] == "D":
-                atom[0] = "H"
-                line = line.replace("D", "H")
-            if atom[0] == "T":
-                atom[0] = "H"
-                line = line.replace("T", "H")
             fixed_lines.append(line)
-            if not atom[0] in atom_list:
-                atom_list.append(atom[0])
+            atom_set.add(atom[0])
+            
     with open(path, "w") as f:
         f.write("\n".join(fixed_lines))
+    return atom_set
 
 
 def write_occ_input(
@@ -96,43 +98,6 @@ def write_occ_input(
     if strategy == None:
         strategy = OV.GetParam("snum.NoSpherA2.ORCA_SCF_Strategy")
     control += grids + conv + " " + strategy
-    if relativistic == None:
-        relativistic = OV.GetParam("snum.NoSpherA2.Relativistic")
-    if method == "BP86" or method == "PBE" or method == "PWLDA":
-        if relativistic == True:
-            t = OV.GetParam("snum.NoSpherA2.ORCA_Relativistic")
-            if t == "DKH2":
-                control += " DKH2 SARC/J RI"
-            elif t == "ZORA":
-                control += " ZORA SARC/J RI"
-            elif t == "ZORA/RI":
-                control += " ZORA/RI SARC/J RI"
-            elif t == "IORA":
-                control += " IORA SARC/J RI"
-            else:
-                control += " IORA/RI SARC/J RI"
-        else:
-            control += " def2/J RI"
-    else:
-        if relativistic == True:
-            t = OV.GetParam("snum.NoSpherA2.ORCA_Relativistic")
-            if t == "DKH2":
-                control += " DKH2 SARC/J RIJCOSX"
-            elif t == "ZORA":
-                control += " ZORA SARC/J RIJCOSX"
-            elif t == "IORA":
-                control += " IORA SARC/J RIJCOSX"
-            elif t == "ZORA/RI":
-                control += " ZORA/RI SARC/J RIJCOSX"
-            elif t == "IORA/RI":
-                control += " IORA/RI SARC/J RIJCOSX"
-            else:
-                print(
-                    "============= Relativity kind not known! Will use ZORA! ================="
-                )
-                control += " ZORA SARC/J RIJCOSX"
-        else:
-            control += " def2/J RIJCOSX"
     Solvation = OV.GetParam("snum.NoSpherA2.ORCA_Solvation")
     if Solvation != "Vacuum" and Solvation != None:
         control += " CPCM(" + Solvation + ") "
