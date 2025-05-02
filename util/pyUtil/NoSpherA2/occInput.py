@@ -46,8 +46,6 @@ def write_occ_input(
     ECP = False
     if basis_name == None:
         basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
-    if "ECP" in basis_name:
-        ECP = True
     if xyz:
         self.write_xyz_file()
     self.input_fn = os.path.join(self.full_dir, f"{self.name}.toml")
