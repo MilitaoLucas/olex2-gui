@@ -101,7 +101,7 @@ $-
     "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))")
   $-
 </td>
-
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'occ')
 <td width="30%" align='right'>
   <b>Mem(Gb) </b>
 </td>
@@ -113,6 +113,7 @@ $-
     "onchange=spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))")
   $-
 </td>
+#ignoreif -->
 #ignoreif -->
 <!-- =======!= ELMO / discambMATT=================== HAR NOSPHERA2 INTERFACE END == -->
 
@@ -222,7 +223,7 @@ $-
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_3;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'occ')
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
@@ -236,7 +237,8 @@ $-
     "onchange=spy.SetParam('snum.NoSpherA2.becke_accuracy', html.GetValue('~name~'))"
     )
   $-
-</td> 
+</td>
+#ignoreif -->
 #ignoreif -->
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'False')
 <td width="16%">
@@ -303,7 +305,7 @@ N/A
 </td>
 #ignoreif -->
 <!-- ======= xTB SPECIFIC END ===================== -->
-
+<!-- This controls the general H Aniso row -->
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),xTB)
 <td width='1%' align='left'>
   $+
@@ -317,7 +319,7 @@ N/A
     )
   $-
 </td>
-<td width='1%' align='left'>
+<td width='1%' align='left' >
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=H_Afix 0",
@@ -377,6 +379,27 @@ N/A
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
+<!-- ======= OCC SPECIFIC START ===================== -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),occ)
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width="13%" align='right'>
+    <b>Solvation </b>
+</td>
+<td width="20%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_occ_solvation@refine",
+    "items='vaccum;water;methanol;ethanol;1,1,1-trichloroethane;1,1,2-trichloroethane;1,2,4-trimethylbenzene;1,2-dibromoethane;1,2-dichloroethane;1,2-ethanediol;1,4-dioxane;1-bromo-2-methylpropane;1-bromooctane;1-bromopentane;1-bromopropane;1-butanol;1-chlorohexane;1-chloropentane;1-chloropropane;1-decanol;1-fluorooctane;1-heptanol;1-hexanol;1-hexene;1-hexyne;1-iodobutane;1-iodohexadecane;1-iodopentane;1-iodopropane;1-nitropropane;1-nonanol;1-octanol;1-pentanol;1-pentene;1-propanol;2,2,2-trifluoroethanol;2,2,4-trimethylpentane;2,4-dimethylpentane;2,4-dimethylpyridine;2,6-dimethylpyridine;2-bromopropane;2-butanol;2-chlorobutane;2-heptanone;2-hexanone;2-methoxyethanol;2-methyl-1-propanol;2-methyl-2-propanol;2-methylpentane;2-methylpyridine;2-nitropropane;2-octanone;2-pentanone;2-propanol;2-propen-1-ol;3-methylpyridine;3-pentanone;4-heptanone;4-methyl-2-pentanone;4-methylpyridine;5-nonanone;E-1,2-dichloroethene;E-2-pentene;N,N-dimethylacetamide;N,N-dimethylformamide;N-methylaniline;N-methylformamide(E-Zmixture);Z-1,2-dichloroethene;a-chlorotoluene;acetic acid;acetone;acetonitrile;acetophenone;aniline;anisole;benzaldehyde;benzene;benzonitrile;benzylalcohol;bromobenzene;bromoethane;bromoform;butanal;butanoic acid;butanone;butanonitrile;butylamine;butylethanoate;butylether;carbon disulfide;carbon tetrachloride;chlorobenzene;chloroform;cis-1,2-dimethylcyclohexane;cis-decalin;cyclohexane;cyclohexanone;cyclopentane;cyclopentanol;cyclopentanone;decalin (cis-trans mixture);dibromomethane;dichloromethane;diethylamine;diethylether;diethylsulfide;diiodomethane;diisopropyl ether;dimethyldisulfide;dimethylsulfoxide;diphenylether;dipropylamine;ethanethiol;ethylbenzene;ethylethanoate;ethylmethanoate;ethylphenylether;fluorobenzene;formamide;formicacid;hexanoicacid;iodobenzene;iodoethane;iodomethane;isopropylbenzene;m-cresol;m-xylene;mesitylene;methylbenzoate;methylbutanoate;methylcyclohexane;methylethanoate;methylmethanoate;methylpropanoate;n-butylbenzene;n-decane;n-dodecane;n-heptane;n-hexadecane;n-hexane;n-nonane;n-octane;n-pentadecane;n-pentane;n-undecane;nitrobenzene;nitroethane;nitromethane;o-chlorotoluene;o-cresol;o-dichlorobenzene;o-nitrotoluene;o-xylene;p-isopropyltoluene;p-xylene;pentanal;pentanoic acid;pentyl ethanoate;pentylamine;perfluorobenzene;propanal;propanoic acid;propanonitrile;propyl ethanoate;propylamine;pyridine;sec-butylbenzene;tert-butylbenzene;tetrachloroethene;tetrahydrofuran;tetrahydrothiophene-S,S-dioxide;tetralin;thiophene;thiophenol;toluene;trans-decalin;tributylphosphate;trichloroethene;triethylamine;xylene (mixture)'",
+    "value=spy.GetParam('snum.NoSpherA2.occ_solvation')",
+    "onchange=spy.SetParam('snum.NoSpherA2.occ_solvation', html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
 <!-- ======= ORCA SPECIFIC START ===================== -->
 
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),ORCA)
