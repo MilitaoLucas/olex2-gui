@@ -82,11 +82,6 @@ class Basis:
 with open("periodic_table.json", "r") as pt:
     PERIODIC_TABLE = json.load(pt)
 
-def get_atoms_from_xyz(xyz: str) -> set:
-    with open(xyz, "r") as f:
-        xyz_list = f.readlines()
-    return {atom for i in xyz_list if (atom := i.split()[0]) in PERIODIC_TABLE.keys()}
-    
 def treat_xyz(path: str) -> set:
     atom_set = set()
     with open(path, "r") as f:
@@ -120,19 +115,28 @@ def write_occ_input(
 ):
     output_toml = dict()
     output_toml["verbosity"] = 2
+    if xyz:
+        self.write_xyz_file()
     coordinates_fn = os.path.join(self.full_dir, f"{self.name}.xyz")
+    atoms = treat_xyz(coordinates_fn)
+    output_toml["scf"]["input"] = coordinates_fn
     ECP = False
     if basis_name is None:
         basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
-    if xyz:
-        self.write_xyz_file()
+    output_toml["scf"]["basis"] = basis_name
     self.input_fn = os.path.join(self.full_dir, f"{self.name}.toml")
-    inp = open(self.input_fn, "w")
     if method is None:
         method = OV.GetParam("snum.NoSpherA2.method")
+    output_toml["scf"]["method"] = method
     ncpus = OV.GetParam("snum.NoSpherA2.ncpus")
     output_toml["threads"] = int(ncpus)
+    solvation = OV.GetParam('snum.NoSpherA2.occ_solvation')
+    if solvation != "vacuum" and not solvation is None:
+        output_toml["scf"]["solvent"] = solvation.lower()
+    if charge is None:
+        charge = OV.GetParam('snum.NoSpherA2.charge')
+    output_toml["scf"]["charge"] = int(charge)
+    if mult is None:
+        mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    output_toml["scf"]["multiplicity"] = int(mult)
 
-    solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
-    if solvation != "Vacuum" and not solvation is None:
-        output_toml["solvent"] = solvation.lower()

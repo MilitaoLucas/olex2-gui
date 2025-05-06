@@ -310,6 +310,8 @@ snum{
       type = ""
         .type = str
     }
+    occ_solvation = "vaccum"
+        .type = str
     mem = 2
       .type = str
     ncpus = 1
