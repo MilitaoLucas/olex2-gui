@@ -681,3 +681,31 @@ def create_archive(node_id=None):
   print("%s data archive has been created" %name)
 
 olex.registerFunction(create_archive, False, "gui")
+
+
+def set_ofile(idx):
+  idx = int(idx)
+  olx.OFileSwap(idx)
+  if olx.FileName() != "none": #oxm overlay?
+    cmd = ">>".join(
+      ["spy.OnStructureLoaded('%s')" %olx.FileFull(0),
+       "spy.run_skin sNumTitle",
+       "spy.make_HOS(True)",
+       "html.update"])
+    olex.m("run(%s)" %cmd)
+
+def create_overlay_gui():
+  fc = int(olx.OFileCount())
+  rv = "<table>"
+  for i in range(fc):
+    rv += "<tr><td>"
+    if i == 0:
+      rv += olx.FileName(i)
+    else:
+      rv += "<a href='ofiledel %s>>html.update'a> X </>" %(i)
+      rv += "<a href='spy.gui.set_ofile(%s)'>%s</a>" %(i, olx.FileName(i))
+    rv += "</td></tr>"
+  return rv + "</table>"
+
+olex.registerFunction(create_overlay_gui, False, "gui")
+olex.registerFunction(set_ofile, False, "gui")
