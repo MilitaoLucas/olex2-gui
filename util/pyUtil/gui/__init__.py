@@ -690,9 +690,9 @@ def set_ofile(idx):
     cmd = ">>".join(
       ["spy.OnStructureLoaded('%s')" %olx.FileFull(0),
        "spy.run_skin sNumTitle",
-       "spy.make_HOS(True)",
-       "html.update"])
+       "spy.make_HOS(True)"])
     olex.m("run(%s)" %cmd)
+  olx.html.Update()
 
 def create_overlay_gui():
   fc = int(olx.OFileCount())
