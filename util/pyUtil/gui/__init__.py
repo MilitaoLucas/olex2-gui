@@ -528,7 +528,17 @@ def FixFree(target):
   from gui.tools import GetNParams
   target = target.upper()
   if target == "FIX ALL":
-    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu>>fix HUiso")
+    fvar = ""
+    if OV.have_linked_occu():
+      r = olx.Alert("Please choose?",
+                "There are occupancies in your structure linked to FVAR, clear them?",
+                 "YNC")
+      if r == "N":
+        fvar = "-fvar"
+      if r == "C":
+        return
+
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s>>fix HUiso" %fvar)
   elif target == "FREE XYZ":
     olx.Run("sel -u>>sel $*,H>>free xyz")
   elif target == "FREE ADP":

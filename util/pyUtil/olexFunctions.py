@@ -1322,6 +1322,16 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       lines[st] = "REM <HklSrc \".\\\\%s\">" %new_value
       return
 
+  def have_linked_occu(self):
+    import olexex
+    olx_atoms = olexex.OlexRefinementModel(False)
+    vars = olx_atoms.model['variables']['variables']
+    for i, var in enumerate(vars):
+      for ref in var['references']:
+        if ref['index'] == 4 and 'var' in ref['relation']:
+          return True
+    return False
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
@@ -1392,6 +1402,7 @@ class ParamStack():
       OV.SetParam(v[0], v[1])
       OV.SetParam(v[2], v[3])
 
+
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
@@ -1420,3 +1431,4 @@ OV.registerFunction(OV.IsEDRefinement, False, 'gui')
 OV.registerFunction(OV.get_diag)
 OV.registerFunction(OV.SetMaxCycles)
 OV.registerFunction(OV.SetMaxPeaks)
+OV.registerFunction(OV.have_linked_occu)
