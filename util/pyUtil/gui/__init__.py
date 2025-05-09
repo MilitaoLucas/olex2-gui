@@ -704,18 +704,28 @@ def set_ofile(idx):
     olex.m("run(%s)" %cmd)
   olx.html.Update()
 
+def delete_ofile(idx):
+  res = olx.Alert("Please confirm", "Do you really want to delete this ovelray?", "YCQ")
+  if res != "Y":
+    return
+  olx.OFileDel(idx)
+  OV.UpdateHtml()
+
 def create_overlay_gui():
   fc = int(olx.OFileCount())
   rv = "<table>"
   for i in range(fc):
-    rv += "<tr><td>"
+    rv += "<tr>"
     if i == 0:
-      rv += olx.FileName(i)
+      rv += "<td width='30'><zimg src='toolbar-dot-arrow-right.png' /></td><td>%s</td>" %olx.FileName(i)
     else:
-      rv += "<a href='ofiledel %s>>html.update'a> X </>" %(i)
-      rv += "<a href='spy.gui.set_ofile(%s)'>%s</a>" %(i, olx.FileName(i))
-    rv += "</td></tr>"
+      rv += "<td>$spy.MakeHoverButton('toolbar-delete', 'spy.gui.delete_ofile(%s)')</td>" %(i)
+      #rv += "<a href='ofiledel %s>>html.update'a> X </>" %(i)
+      rv += "<td><a href='spy.gui.set_ofile(%s)'>%s</a></td>" %(i, olx.FileName(i))
+    rv += "</tr>"
   return rv + "</table>"
 
 olex.registerFunction(create_overlay_gui, False, "gui")
+olex.registerFunction(delete_ofile, False, "gui")
 olex.registerFunction(set_ofile, False, "gui")
+
