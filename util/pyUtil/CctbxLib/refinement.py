@@ -86,6 +86,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
      equations object.
      If reparametrisation_only is True - only constructs and returns the reparametrisation object
     """
+    self.ed_refinement = ed_refinement
     stopwatch = olx.stopwatch
     open_blas_tn = 1
     try:
@@ -181,18 +182,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if ed_refinement:
       msg = "ED refinement"
       msg_l = len(msg)
-      #if self.weighting.a != 0 or self.weighting.b != 0:
-        #self.weighting.a, self.weighting.b = 0, 0
-      #  msg += ", resetting weighting to sigma weights"
-      if self.exti is not None:
+      if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
+        self.exti = None
         msg +=", ignoring EXTI"
+      if self.swat is not None:
+        self.swat = None
+        msg +=", ignoring SWAT"
       if len(msg) != msg_l:
         print(msg)
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
       #disable weights auto-update
       OV.SetParam('snum.refinement.update_weight', False)
-    elif self.exti is not None:
+    if self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
       self.fc_correction.grad = True
@@ -1045,7 +1047,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       weights = self.normal_eqns.weights
       fc_sq = self.normal_eqns.fc_sq
       fo_sq = self.normal_eqns.observations.fo_sq
-      if self.exti is not None or self.swat is not None:
+      if (self.exti is not None or self.swat is not None) and\
+          type(self.fc_correction) is not xray.dummy_fc_correction:
         if self.exti is not None:
           fo_sq, fc_sq = self.transfer_exti(self.fc_correction.value, self.wavelength, fo_sq, fc_sq)
         elif self.swat is not None: # swat should not be transferred...

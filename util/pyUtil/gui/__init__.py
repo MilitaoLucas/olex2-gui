@@ -530,7 +530,7 @@ def FixFree(target):
   if target == "FIX ALL":
     fvar = ""
     if OV.have_linked_occu():
-      r = olx.Alert("Please choose?",
+      r = olx.Alert("Fix All: please choose",
                 "There are occupancies in your structure linked to FVAR, clear them?",
                  "YNC")
       if r == "N":
@@ -540,11 +540,11 @@ def FixFree(target):
 
     olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s>>fix HUiso" %fvar)
   elif target == "FREE XYZ":
-    olx.Run("sel -u>>sel $*,H>>free xyz")
+    olx.Run("sel -u>>free xyz")
   elif target == "FREE ADP":
     olx.Run("sel -u>>sel $*,H>>free adp")
-  elif target == "FREE H XYZ":
-    olx.Run("sel -u>>sel $H>>free xyz -cs>>afix 0")
+  elif target == "CLEAR HFIX":
+    olx.Run("sel -u>>sel $H>>afix 0")
   elif target == "FREE H UISO":
     olx.Run("sel -u>>sel $H>>free Uiso")
   elif target == "AFIX":
