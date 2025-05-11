@@ -143,8 +143,7 @@ class NewsImageRetrivalThread(ThreadEx):
           continue
         else:
           if "-ac" in self.olex2tag:
-            continue
-          break
+            break
 
     if not img_url:
       return None, None
