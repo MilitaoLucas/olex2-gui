@@ -95,8 +95,8 @@ def do_init():
   if sys.platform[:3] == 'win':
     OV.SetVar('defeditor','notepad')
     OV.SetVar('defexplorer','shell')
-  #else:
-    #olx.SetVar('defeditor','gedit')
+  else:
+    olx.SetVar('defeditor','gedit')
     #olx.SetVar('defexplorer','nautilus')
 
   stopwatch.run(initpy.import_caustom_and_user_sripts)
