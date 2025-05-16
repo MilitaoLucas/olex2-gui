@@ -433,7 +433,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     shutil.move("combined.tscb", tsc_dst)
   elif os.path.exists("experimental.tscb"):
     tsc_dst = sfc_name + "_total.tscb"
-    shutil.move("combined.tscb", tsc_dst)
+    shutil.move("experimental.tscb", tsc_dst)
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)

@@ -266,7 +266,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return
 
     # This checks ne multiplicity and Number of electrons
-    if (wfn_code != "discambMATTS") and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
+    if (wfn_code != OV.GetParam('user.NoSpherA2.discamb_exe')) and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and is_disordered() == False:
       ne, adapter = calculate_number_of_electrons()
       heavy = False
       for sc in adapter.xray_structure().scatterers():
@@ -325,7 +325,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       cif = False
       if wfn_code == "Tonto":
         cif = True
-      elif wfn_code == "discambMATTS":
+      elif wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
         cif = True
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
@@ -381,7 +381,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               out_cif.write(line)
 
         out_cif.close()
-        if wfn_code == "discambMATTS":
+        if wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
           #DISCMAB is used
           discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
           shutil.copy(os.path.join(wfn_job_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
@@ -390,7 +390,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
           hybrid_part_wfn_code = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%(parts[i]))
-          if hybrid_part_wfn_code == "discambMATTS":
+          if hybrid_part_wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
             groups.pop(i-groups_counter)
             groups_counter+=1
             discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
@@ -529,7 +529,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       shutil.move(self.name + ".cif_NoSpherA2",os.path.join(self.jobs_dir, self.name + ".cif"))
       # Make a wavefunction (in case of tonto wfn code and tonto tsc file do it at the same time)
 
-      if "discambMATTS" in wfn_code:
+      if wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
         cif = str(os.path.join(self.jobs_dir, self.name + ".cif"))
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(), self.jobs_dir), self.name, self.discamb_exe)
@@ -816,7 +816,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_discamb(self):
     self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
-      self.discamb_exe = self.setup_software("discambMATTS2", "discambMATTS2tsc", True)
+      self.discamb_exe = self.setup_software("discambMATTS", "discambMATTS2tsc", True)
 
   def getBasisListStr(self):
     source = OV.GetParam('snum.NoSpherA2.source')
@@ -1146,7 +1146,7 @@ The following options were used:
 """
   software = OV.GetParam('snum.NoSpherA2.source')
   details_text = details_text + "   SOFTWARE:       %s\n"%software
-  if software != "DISCAMB":
+  if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
     method = OV.GetParam('snum.NoSpherA2.method')
     basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
     charge = OV.GetParam('snum.NoSpherA2.charge')
@@ -1443,7 +1443,7 @@ Home -> Settings -> PATH""", "O", False)
     if _ == "0":
       OV.setItemstate("h3-NoSpherA2-extras 2")
       OV.setItemstate("h3-NoSpherA2-extras 1")  # This is a hack to force the update of the GUI without doing all of html
-    if input != "discambMATT" and input != "Thakkar IAM":
+    if input != OV.GetParam('user.NoSpherA2.discamb_exe') and input != "Thakkar IAM":
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if mult == 0:

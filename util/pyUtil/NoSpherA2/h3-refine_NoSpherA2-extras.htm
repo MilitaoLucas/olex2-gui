@@ -7,7 +7,7 @@
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid')
 
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATTS')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe'))
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
 
 <!-- =======!= ELMO / discambMATTS =================== HAR NOSPHERA2 INTERFACE BEGIN == -->
@@ -893,7 +893,7 @@ $-
 <!-- ============ END != discambMATTS ====================-->
 
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATTS')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe'))
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
