@@ -834,7 +834,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < max_peaks:
         a = olx.xf.uc.Closest(*xyz).split(',')
-        if OV.IsEDRefinement():
+        if OV.IsEDData():
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
         else:
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
