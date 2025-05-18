@@ -1115,8 +1115,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
 
   f_diff = f_diff.expand_to_p1()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDRefinement():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1152,8 +1151,7 @@ def deformation_map(resolution=0.1, return_map=False):
   print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
   f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
   f_diff = f_diff.expand_to_p1()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDRefinement():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
@@ -1183,8 +1181,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   k = math.sqrt(OV.GetOSF())
   f_obs.apply_scaling(factor=1./k)
   f_obs = f_obs.phase_transfer(f_calc)
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDRefinement():
     f_obs = f_obs.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1217,8 +1214,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDRefinement():
     f_calc = f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1247,8 +1243,7 @@ def mask_map(resolution=0.1, return_map=False, use_f000=False):
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
       f_mask = f_mask.common_set(f_sq_obs)
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDRefinement():
     f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
