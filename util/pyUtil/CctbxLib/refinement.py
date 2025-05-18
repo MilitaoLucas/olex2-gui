@@ -1637,8 +1637,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < 3:
         a = olx.xf.uc.Closest(*xyz).split(',')
-        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
-            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if OV.IsEDData():
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])          
+        else:
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
         if self.verbose or i == 0:
           print(pi)
         self.log.write(pi + '\n')

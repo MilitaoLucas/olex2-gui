@@ -811,6 +811,8 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
     f_diff = f_diff.expand_to_p1()
   else:
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)    
     f_diff = f_diff.expand_to_p1()
 
   print("Using %d reflections for Fourier synthesis"%f_diff.size())
@@ -832,8 +834,11 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < max_peaks:
         a = olx.xf.uc.Closest(*xyz).split(',')
-        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
-            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if OV.IsEDRefinement():
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
+        else:
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
         print(pi)
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
@@ -1115,7 +1120,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
 
   f_diff = f_diff.expand_to_p1()
-  if OV.IsEDRefinement():
+  if OV.IsEDData():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1151,7 +1156,7 @@ def deformation_map(resolution=0.1, return_map=False):
   print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
   f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
   f_diff = f_diff.expand_to_p1()
-  if OV.IsEDRefinement():
+  if OV.IsEDData():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
@@ -1181,7 +1186,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   k = math.sqrt(OV.GetOSF())
   f_obs.apply_scaling(factor=1./k)
   f_obs = f_obs.phase_transfer(f_calc)
-  if OV.IsEDRefinement():
+  if OV.IsEDData():
     f_obs = f_obs.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1214,7 +1219,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
-  if OV.IsEDRefinement():
+  if OV.IsEDData():
     f_calc = f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1243,7 +1248,7 @@ def mask_map(resolution=0.1, return_map=False, use_f000=False):
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
       f_mask = f_mask.common_set(f_sq_obs)
-  if OV.IsEDRefinement():
+  if OV.IsEDData():
     f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())

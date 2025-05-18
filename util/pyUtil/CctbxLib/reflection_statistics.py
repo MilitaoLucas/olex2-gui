@@ -727,8 +727,12 @@ class fractal_dimension(OlexCctbxAdapter):
     r.y = self.y
     r.e_net = self.e_net
     r.e_gross = self.e_gross
-    r.xLegend = "rho /eA^(-3)"
-    r.yLegend = "df(rho)"
+    if OV.IsEDData():
+      r.xLegend = "rho /eA^(-1)"
+      r.yLegend = "df(phi)"
+    else:
+      r.xLegend = "rho /eA^(-3)"
+      r.yLegend = "df(rho)"      
     return r
 
 class bijvoet_differences_NPP:
