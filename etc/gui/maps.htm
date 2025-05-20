@@ -19,7 +19,7 @@ $spy.gui.maps.SetXgridView()
 #ignoreif -->
 
 
-<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";1; -->
+<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Fourier-Maps;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";1; -->
 
 <!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-Calculate-Voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";2; -->
 
