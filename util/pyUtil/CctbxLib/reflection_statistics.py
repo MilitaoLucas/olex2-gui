@@ -728,7 +728,7 @@ class fractal_dimension(OlexCctbxAdapter):
     r.e_net = self.e_net
     r.e_gross = self.e_gross
     if OV.IsEDData():
-      r.xLegend = "rho /eA^(-1)"
+      r.xLegend = "phi /eA^(-1)"
       r.yLegend = "df(phi)"
     else:
       r.xLegend = "rho /eA^(-3)"

@@ -236,6 +236,12 @@ snum{
       .type = str
     ORCA_Solvation = "Vacuum"
       .type = str
+    ORCA_Solvation_CPCM_epsilon = 80.0
+      .type = float
+    ORCA_Solvation_CPCM_refrac = 1.0
+      .type = float
+    ORCA_Solvation_CPCM_rsolv = 1.3
+      .type = float
     precise_output = False
       .type = bool
     Property_Elf = False

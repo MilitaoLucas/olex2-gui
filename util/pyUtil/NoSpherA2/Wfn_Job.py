@@ -5,6 +5,8 @@ import olx
 import gui
 import shutil
 import time
+import textwrap
+
 import subprocess
 
 from olexFunctions import OV
@@ -724,8 +726,16 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       else:
         control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
-    if Solvation != "Vacuum" and Solvation != None:
-      control += " CPCM(" + Solvation + ") "
+    cpcm_block = ""
+    if Solvation == "Custom":
+      cpcm_block = f"""
+      %cpcm
+        epsilon {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')}
+        refrac  {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')}
+        rsolv   {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')}
+      end"""
+    elif Solvation != "Vacuum" and Solvation is not None:
+      control += f" CPCM({Solvation}) "
     GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
     if "5.0" not in OV.GetParam("snum.NoSpherA2.source") and "6.0" not in OV.GetParam("snum.NoSpherA2.source"):
       GBW_file = False
@@ -737,10 +747,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     if mult == 0:
       mult = 1
-    if "5.0" in software or "6.0" in software:
-        inp.write(control + ' NOTRAH\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
-    else:
-        inp.write(control + '\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    inp.write(textwrap.dedent(f"""\
+      {control}{' NOTRAH' if ('5.0' in software or '6.0' in software) else ''}
+      %pal
+        {cpu}
+      end
+      {mem}{cpcm_block}
+      %coords
+        CTyp xyz
+        charge {charge}
+        mult {mult}
+        units angs
+        coords
+    """))
     atom_list = []
     i = 0
     for line in xyz:

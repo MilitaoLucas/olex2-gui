@@ -564,12 +564,54 @@ N/A
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_ORCA_Solvation@refine",
-    "items='Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene'",
+    "items='Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
     "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~')) >> html.Update()")
   $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_Solvation'),Custom)
+<tr ALIGN='left' NAME='SNUM_SOLVATION_CUSTOM' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width="10%" align="left">
+  <b>Epsilon</b>
+</td>
+<td width='8%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_epsilon",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))")
+   $-
+ </td>
+<td width="35%" align="right">
+  <b>Refractive index</b>
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_refrac",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="35%" align="right">
+  <b>Solvent probe radius</b>
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_rsolv",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))")
+  $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
 
 <!-- #ignoreif spy.NoSpherA2.is_disordered()
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -707,12 +749,55 @@ $-
 $+
   html.Snippet("gui/snippets/input-combo",
   "name=NoSpherA2_ORCA_Solvation@refine",
-  "items='Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene'",
+  "items='Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
   "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
-  "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
+  "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~')) >> html.Update()")
 $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_Solvation'),Custom)
+<tr ALIGN='left' NAME='SNUM_SOLVATION_CUSTOM' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<td width="10%" align="left">
+  <b>Epsilon</b>
+</td>
+<td width='8%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_epsilon",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="35%" align="right">
+  <b>Refractive index</b>
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_refrac",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))")
+  $-
+</td>
+<td width="35%" align="right">
+  <b>Solvent probe radius</b>
+</td>
+<td width='6%' align='left'>
+  $+
+    html.Snippet("gui/snippets/input-text",
+    "name=NoSpherA2_ORCA_Solvation_CPCM_rsolv",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))")
+  $-
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 
 <!-- #ignoreif spy.NoSpherA2.is_disordered()
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>

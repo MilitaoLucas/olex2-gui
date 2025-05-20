@@ -442,17 +442,17 @@ def plot_cube(name, color_cube):
   mmm = data.as_1d().min_max_mean()
   mi = mmm.min
   ma = mmm.max
+  iso = float((abs(mi)+abs(ma))*2/3)
+  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mmm.min, mmm.max)
+    olex_xgrid.SetSurfaceScale(iso)
     olex_xgrid.SetVisible(True)
     mask = OV.GetParam('snum.map.mask')
     if mask == True:
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
-    iso = float((abs(mi)+abs(ma))*2/3)
-    olex_xgrid.SetSurfaceScale(iso)
-  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
 OV.registerFunction(plot_cube,False,'NoSpherA2')
 
@@ -463,39 +463,49 @@ def plot_cube_single(name):
   with open(name) as cub:
     cube = cub.readlines()
 
-  run = 0
-  na = 0
   x_size = 0
   y_size = 0
   z_size = 0
   total_size = 0
-  drun = 0
   data = None
+  mmm = None
+  rms = None
+  lines = iter(cube)
+  
+  try:
+    # Skip the first two lines (header)
+    next(lines)
+    next(lines)
 
-  for line in cube:
-    run += 1
-    values = line.split()
-    if (run > na + 6):
-      if drun + len(values) > total_size:
-        print("ERROR! Mismatched indices while reading!")
-        return
-      data.extend(flex.double(np.array(values, dtype=float).tolist()))
-      drun += len(values)
-      continue
-    elif (run == 3):
-      na = int(values[0])
-    elif (run == 4):
-      x_size = int(values[0])
-    elif (run == 5):
-      y_size = int(values[0])
-    elif (run == 6):
-      z_size = int(values[0])
-      total_size = x_size * y_size * z_size
-      data = flex.double()
+    # Read the number of atoms (na)
+    na = int(next(lines).split()[0])
 
-  mmm = data.min_max_mean()
-  rms = data.rms()
-  data.reshape(flex.grid(x_size, y_size, z_size))
+    # Read grid dimensions
+    x_size, y_size, z_size = (int(next(lines).split()[0]) for _ in range(3))
+    total_size = x_size * y_size * z_size
+    
+    #Skip atoms
+    for _ in range(na):
+        next(lines)
+    
+    # Initialize data container
+    data = flex.double()
+
+    # Process the remaining lines
+    all_values = np.fromiter((float(value) for line in lines for value in line.split()), dtype=float)
+    data = flex.double(all_values)
+
+    # Reshape the data to match the grid dimensions
+    if len(data) != total_size:
+      cube = None
+      raise ValueError(f"ERROR! Mismatched indices while reading! len(data) = {len(data)}, total_size = {total_size}")
+    mmm = data.min_max_mean()
+    rms = data.rms()
+    data.reshape(flex.grid(x_size, y_size, z_size))
+
+  except StopIteration:
+      raise ValueError("ERROR! Unexpected end of cube file!")
+  
   del cube
 
   gridding = data.accessor()
@@ -515,7 +525,7 @@ def plot_cube_single(name):
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
-    iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
+    iso = float(rms * 2.)
     olex_xgrid.SetSurfaceScale(iso)
     OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
     olex.m("html.Update()")
@@ -674,6 +684,17 @@ def plot_fft_map(fft_map):
 
 OV.registerFunction(plot_fft_map, False, 'NoSpherA2')
 
+def SetSurface(iso):
+    try:
+        iso = float(iso)
+    except:
+        print("Invalid iso value!")
+        return
+    if OV.HasGUI():
+        olex_xgrid.SetSurfaceScale(iso)
+
+OV.registerFunction(SetSurface, False, 'NoSpherA2')
+
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   if not OV.HasGUI():
     return
@@ -745,14 +766,13 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
         print("ATOM NOT FOUND!")
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
-
+    cube.write('\n')
     for x in range(size[0]):
       for y in range(size[1]):
         slice_values = values[(x*size[1]+y)*size[2]:(x*size[1]+y+1)*size[2]]
-        slice_list = [f'{v:13.5e}' for v in slice_values]
-        slice_text = '\n'.join([''.join(s for s in slice_list[6*n:6*n+6])
-                                for n in range(-(-len(slice_values) // 6))])
-        cube.write('\n' + slice_text)
+        for n in range(0, len(slice_values), 6):
+            chunk = slice_values[n:n + 6]
+            cube.write(''.join(f'{v:13.5e}' for v in chunk) + '\n')
     print(f'Saved {map_name}-type map as {os.path.realpath(cube.name)}')
 
 
