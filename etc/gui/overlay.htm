@@ -31,9 +31,8 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_4';help_ext=match-4;1 -->
   <td width='100%'>
-    <a href="@reap -*>>mode match">%Overlay Structure%</a>&nbsp;|&nbsp;
-    <a href="mode match">%Mode Match%</a>&nbsp;|&nbsp;
-    <a href="ofiledel -1>>mode off">%Remove Overlay%</a>
+    <a href="@reap -*>>mode match>>html.update">%Overlay Structure%</a>&nbsp;|&nbsp;
+    <a href="mode match">%Mode Match%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -42,5 +41,13 @@
     %Mode Match-help%
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif math.eval_bool(ofilecount()==1) -->
+<!-- #include tool-row gui\blocks\tool-row.htm;name='MATCH_5';1 -->
+  <td width='100%'>
+    $spy.gui.create_overlay_gui()
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ignoreif# -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

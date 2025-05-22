@@ -86,6 +86,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
      equations object.
      If reparametrisation_only is True - only constructs and returns the reparametrisation object
     """
+    self.ed_refinement = ed_refinement
     stopwatch = olx.stopwatch
     open_blas_tn = 1
     try:
@@ -181,18 +182,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if ed_refinement:
       msg = "ED refinement"
       msg_l = len(msg)
-      #if self.weighting.a != 0 or self.weighting.b != 0:
-        #self.weighting.a, self.weighting.b = 0, 0
-      #  msg += ", resetting weighting to sigma weights"
-      if self.exti is not None:
+      if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
+        self.exti = None
         msg +=", ignoring EXTI"
+      if self.swat is not None:
+        self.swat = None
+        msg +=", ignoring SWAT"
       if len(msg) != msg_l:
         print(msg)
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
       #disable weights auto-update
       OV.SetParam('snum.refinement.update_weight', False)
-    elif self.exti is not None:
+    if self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
       self.fc_correction.grad = True
@@ -987,9 +989,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   #moves SWAT from Fc_sq to Fo_sq
   def  transfer_swat(self, g, U, fo_sq, fc_sq):
-    stol_sqs = fc_sq.unit_cell().stol_sq(fc_sq.indices())
-    correction = flex.double([1 - g*math.exp(-8*math.pi**2*U*stol_sq) for stol_sq in stol_sqs])
-    correction = flex.pow(correction, 2.0)
+    #stol_sqs = fc_sq.unit_cell().stol_sq(fc_sq.indices())
+    #correction = flex.double([1 - g*math.exp(-8*math.pi**2*U*stol_sq) for stol_sq in stol_sqs])
+    #correction = flex.pow(correction, 2.0)
+    correction = flex.double([self.fc_correction.compute(h, 0, False) for h in fc_sq.indices()])
+    # # #test
+    # for i, fc_sq_v in enumerate(fc_sq.data()):
+    #   fc_k =self.fc_correction.compute(fc_sq.indices()[i], 0, False)
+    #   if abs(correction[i] - fc_k) > 1e-3:
+    #     raise Exception("Assert!")
+    # # #end test
     fc_sq_ = fc_sq.customized_copy(data=fc_sq.data() / correction)
     fo_sq_ = fo_sq.customized_copy(
         data=fo_sq.data()/correction,
@@ -1038,12 +1047,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       weights = self.normal_eqns.weights
       fc_sq = self.normal_eqns.fc_sq
       fo_sq = self.normal_eqns.observations.fo_sq
-      if self.exti is not None or self.swat is not None:
+      if (self.exti is not None or self.swat is not None) and\
+          type(self.fc_correction) is not xray.dummy_fc_correction:
         if self.exti is not None:
           fo_sq, fc_sq = self.transfer_exti(self.fc_correction.value, self.wavelength, fo_sq, fc_sq)
-        elif self.swat is not None:
-          fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+        elif self.swat is not None: # swat should not be transferred...
+          #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+          pass
 
+      #   scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+      #       / flex.sum(weights * flex.pow2(fc_sq.data()))
+
+      #   fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+      #     data=fo_sq.data()*(1/scale),
+      #     sigmas=fo_sq.sigmas()*(1/scale),
+      #     anomalous_flag=anomalous_flag)
+      # else:
       fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
         sigmas=fo_sq.sigmas()*(1/self.scale_factor),
@@ -1618,8 +1637,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < 3:
         a = olx.xf.uc.Closest(*xyz).split(',')
-        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
-            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if OV.IsEDData():
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])          
+        else:
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
         if self.verbose or i == 0:
           print(pi)
         self.log.write(pi + '\n')
@@ -1715,7 +1738,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       bad_refs.append((
         result.indices[i][0], result.indices[i][1], result.indices[i][2],
         result.fo_sq.data()[i], result.fc_sq.data()[i], sig))
-    olex_core.SetBadReflections(bad_refs.__iter__())
+    olex_core.SetBadReflections(bad_refs.__iter__(), not OV.IsEDRefinement())
 
   def show_comprehensive_summary(self, log=None):
     if log is None: log = sys.stdout

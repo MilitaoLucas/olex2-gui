@@ -1322,6 +1322,16 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       lines[st] = "REM <HklSrc \".\\\\%s\">" %new_value
       return
 
+  def have_linked_occu(self):
+    import olexex
+    olx_atoms = olexex.OlexRefinementModel(False)
+    vars = olx_atoms.model['variables']['variables']
+    for i, var in enumerate(vars):
+      for ref in var['references']:
+        if ref['index'] == 4 and 'var' in ref['relation']:
+          return True
+    return False
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
@@ -1333,23 +1343,22 @@ def GetFormattedCompilationInfo():
   l = raw.split()
   if "svn" in raw:
     d['Date'] = l[0].rstrip(",")
-    d['SVN'] = l[1].split(".")[1].rstrip(",")
+    d['SVN'] = l[1].split(".")[1].rstrip(",") + "/" + OV.GetVar("last_version")
     d['MSC'] = l[2].rstrip(",")
     d['OS'] = l[4].rstrip(",")
     d['Python'] = l[6].rstrip(",")
     d['wxWidgets'] = l[8].rstrip(",")
     d['Vendor'] = " ".join(l[10:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>SVN</b>: %(SVN)s,  <b>Compiler</b>: %(MSC)s</td></tr>" %d
-    t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   else:
     d['Date'] = " ".join(l[0:3]).rstrip(",")
     d['MSC'] = l[4].rstrip(",")
+    d['SVN'] = OV.GetVar("last_version")
     d['OS'] = l[6].rstrip(",")
     d['Python'] = l[8].rstrip(",")
     d['wxWidgets'] = l[10].rstrip(",")
     d['Vendor'] = " ".join(l[12:]).rstrip(",")
-    t += "<tr><td><b>Date</b>: %(Date)s, <b>Compiler</b>: %(MSC)s</td></tr>" %d
-    t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
+  t += "<tr><td><b>Date</b>: %(Date)s, <b>Ver.</b>: %(SVN)s,  <b>Compiler</b>: %(MSC)s</td></tr>" %d
+  t += "<tr><td><b>Python</b>: %(Python)s, <b>wxWidgets</b>: %(wxWidgets)s,  <b>OS</b>: %(OS)s</td></tr>" %d
   t += "</table></font>"
   return t
 
@@ -1393,6 +1402,7 @@ class ParamStack():
       OV.SetParam(v[0], v[1])
       OV.SetParam(v[2], v[3])
 
+
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
@@ -1421,3 +1431,4 @@ OV.registerFunction(OV.IsEDRefinement, False, 'gui')
 OV.registerFunction(OV.get_diag)
 OV.registerFunction(OV.SetMaxCycles)
 OV.registerFunction(OV.SetMaxPeaks)
+OV.registerFunction(OV.have_linked_occu)

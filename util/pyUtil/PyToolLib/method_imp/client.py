@@ -83,7 +83,8 @@ class Method_client_refinement(Method_refinement):
       elif sys.platform == 'darwin':
         headless_name += "_exe"
       subprocess.Popen(
-        [os.path.join(olx.BaseDir(), headless_name), "server", str(port), self.job_id],
+        [os.path.join(olx.BaseDir(), headless_name), "server", str(port), self.job_id,
+          "-tm=300"], #shut unused server after sec
         env=my_env)
       os.chdir(cd)
       OV.SetVar("server.port", str(port))

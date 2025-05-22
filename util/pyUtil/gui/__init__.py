@@ -528,13 +528,23 @@ def FixFree(target):
   from gui.tools import GetNParams
   target = target.upper()
   if target == "FIX ALL":
-    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu>>fix HUiso")
+    fvar = ""
+    if OV.have_linked_occu():
+      r = olx.Alert("Fix All: please choose",
+                "There are occupancies in your structure linked to FVAR, clear them?",
+                 "YNC")
+      if r == "N":
+        fvar = "-fvar"
+      if r == "C":
+        return
+
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s>>fix HUiso" %fvar)
   elif target == "FREE XYZ":
-    olx.Run("sel -u>>sel $*,H>>free xyz")
+    olx.Run("sel -u>>free xyz")
   elif target == "FREE ADP":
     olx.Run("sel -u>>sel $*,H>>free adp")
-  elif target == "FREE H XYZ":
-    olx.Run("sel -u>>sel $H>>free xyz -cs>>afix 0")
+  elif target == "CLEAR HFIX":
+    olx.Run("sel -u>>sel $H>>afix 0")
   elif target == "FREE H UISO":
     olx.Run("sel -u>>sel $H>>free Uiso")
   elif target == "AFIX":
@@ -681,3 +691,41 @@ def create_archive(node_id=None):
   print("%s data archive has been created" %name)
 
 olex.registerFunction(create_archive, False, "gui")
+
+
+def set_ofile(idx):
+  idx = int(idx)
+  olx.OFileSwap(idx)
+  if olx.FileName() != "none": #oxm overlay?
+    cmd = ">>".join(
+      ["spy.OnStructureLoaded('%s')" %olx.FileFull(0),
+       "spy.run_skin sNumTitle",
+       "spy.make_HOS(True)"])
+    olex.m("run(%s)" %cmd)
+  olx.html.Update()
+
+def delete_ofile(idx):
+  res = olx.Alert("Please confirm", "Do you really want to delete this ovelray?", "YCQ")
+  if res != "Y":
+    return
+  olx.OFileDel(idx)
+  OV.UpdateHtml()
+
+def create_overlay_gui():
+  fc = int(olx.OFileCount())
+  rv = "<table>"
+  for i in range(fc):
+    rv += "<tr>"
+    if i == 0:
+      rv += "<td width='30'><zimg src='toolbar-dot-arrow-right.png' /></td><td>%s</td>" %olx.FileName(i)
+    else:
+      rv += "<td>$spy.MakeHoverButton('toolbar-delete', 'spy.gui.delete_ofile(%s)')</td>" %(i)
+      #rv += "<a href='ofiledel %s>>html.update'a> X </>" %(i)
+      rv += "<td><a href='spy.gui.set_ofile(%s)'>%s</a></td>" %(i, olx.FileName(i))
+    rv += "</tr>"
+  return rv + "</table>"
+
+olex.registerFunction(create_overlay_gui, False, "gui")
+olex.registerFunction(delete_ofile, False, "gui")
+olex.registerFunction(set_ofile, False, "gui")
+

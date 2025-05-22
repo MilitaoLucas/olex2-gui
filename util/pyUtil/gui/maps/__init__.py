@@ -125,8 +125,9 @@ class MapUtil:
 
       NoSpherA2 = OV.IsNoSpherA2()
       # override for ED refinement, people still can use kinematic maps from the GUI
-      if OV.IsEDRefinement():
+      if OV.IsEDData():
         map_source = "cctbx"
+        OV.SetParam("snum.map.source", "cctbx")
       if map_source == "fcf":
         olex.m(cf_cmd + " -fcf")
       elif map_source == "olex":

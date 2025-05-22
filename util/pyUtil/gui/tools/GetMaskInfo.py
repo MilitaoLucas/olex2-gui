@@ -649,13 +649,19 @@ def get_sqf_name(base=None):
   import time
   prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
   HKLSrc_base = os.path.splitext(OV.HKLSrc())[0]
+  sqfs = []
   if prg == "Platon":
-    retVal = f"{HKLSrc_base}_sqd.sqf"
+    sqfs.append( f"{HKLSrc_base}_sqd.sqf")
+    sqfs.append( f"{HKLSrc_base}_sq.sqf")
   else:
-    retVal = f"{HKLSrc_base}.sqf"
-  OV.SetVar('masking_info_dte',  time.ctime(os.path.getmtime(retVal)))
-  OV.SetVar('masking_info_src', os.path.basename(retVal))
-  return retVal
+    sqfs = [ f"{HKLSrc_base}.sqf" ]
+  for sqf in sqfs:
+    if not os.path.exists(sqf):
+      continue
+    OV.SetVar('masking_info_dte',  time.ctime(os.path.getmtime(sqf)))
+    OV.SetVar('masking_info_src', os.path.basename(sqf))
+    return sqf
+  return sqf
 
 def edit_mask_special_details(txt, base, sNum):
   OV.SetVar('current_mask_sqf', "")

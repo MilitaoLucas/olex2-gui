@@ -442,17 +442,17 @@ def plot_cube(name, color_cube):
   mmm = data.as_1d().min_max_mean()
   mi = mmm.min
   ma = mmm.max
+  iso = float((abs(mi)+abs(ma))*2/3)
+  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mmm.min, mmm.max)
+    olex_xgrid.SetSurfaceScale(iso)
     olex_xgrid.SetVisible(True)
     mask = OV.GetParam('snum.map.mask')
     if mask == True:
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
-    iso = float((abs(mi)+abs(ma))*2/3)
-    olex_xgrid.SetSurfaceScale(iso)
-  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
 
 OV.registerFunction(plot_cube,False,'NoSpherA2')
 
@@ -463,39 +463,49 @@ def plot_cube_single(name):
   with open(name) as cub:
     cube = cub.readlines()
 
-  run = 0
-  na = 0
   x_size = 0
   y_size = 0
   z_size = 0
   total_size = 0
-  drun = 0
   data = None
+  mmm = None
+  rms = None
+  lines = iter(cube)
+  
+  try:
+    # Skip the first two lines (header)
+    next(lines)
+    next(lines)
 
-  for line in cube:
-    run += 1
-    values = line.split()
-    if (run > na + 6):
-      if drun + len(values) > total_size:
-        print("ERROR! Mismatched indices while reading!")
-        return
-      data.extend(flex.double(np.array(values, dtype=float).tolist()))
-      drun += len(values)
-      continue
-    elif (run == 3):
-      na = int(values[0])
-    elif (run == 4):
-      x_size = int(values[0])
-    elif (run == 5):
-      y_size = int(values[0])
-    elif (run == 6):
-      z_size = int(values[0])
-      total_size = x_size * y_size * z_size
-      data = flex.double()
+    # Read the number of atoms (na)
+    na = int(next(lines).split()[0])
 
-  mmm = data.min_max_mean()
-  rms = data.rms()
-  data.reshape(flex.grid(x_size, y_size, z_size))
+    # Read grid dimensions
+    x_size, y_size, z_size = (int(next(lines).split()[0]) for _ in range(3))
+    total_size = x_size * y_size * z_size
+    
+    #Skip atoms
+    for _ in range(na):
+        next(lines)
+    
+    # Initialize data container
+    data = flex.double()
+
+    # Process the remaining lines
+    all_values = np.fromiter((float(value) for line in lines for value in line.split()), dtype=float)
+    data = flex.double(all_values)
+
+    # Reshape the data to match the grid dimensions
+    if len(data) != total_size:
+      cube = None
+      raise ValueError(f"ERROR! Mismatched indices while reading! len(data) = {len(data)}, total_size = {total_size}")
+    mmm = data.min_max_mean()
+    rms = data.rms()
+    data.reshape(flex.grid(x_size, y_size, z_size))
+
+  except StopIteration:
+      raise ValueError("ERROR! Unexpected end of cube file!")
+  
   del cube
 
   gridding = data.accessor()
@@ -515,7 +525,7 @@ def plot_cube_single(name):
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
-    iso = float((abs(mmm.min) + abs(mmm.max)) * 2 / 3)
+    iso = float(rms * 2.)
     olex_xgrid.SetSurfaceScale(iso)
     OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
     olex.m("html.Update()")
@@ -674,6 +684,17 @@ def plot_fft_map(fft_map):
 
 OV.registerFunction(plot_fft_map, False, 'NoSpherA2')
 
+def SetSurface(iso):
+    try:
+        iso = float(iso)
+    except:
+        print("Invalid iso value!")
+        return
+    if OV.HasGUI():
+        olex_xgrid.SetSurfaceScale(iso)
+
+OV.registerFunction(SetSurface, False, 'NoSpherA2')
+
 def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   if not OV.HasGUI():
     return
@@ -745,14 +766,13 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
         print("ATOM NOT FOUND!")
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
-
+    cube.write('\n')
     for x in range(size[0]):
       for y in range(size[1]):
         slice_values = values[(x*size[1]+y)*size[2]:(x*size[1]+y+1)*size[2]]
-        slice_list = [f'{v:13.5e}' for v in slice_values]
-        slice_text = '\n'.join([''.join(s for s in slice_list[6*n:6*n+6])
-                                for n in range(-(-len(slice_values) // 6))])
-        cube.write('\n' + slice_text)
+        for n in range(0, len(slice_values), 6):
+            chunk = slice_values[n:n + 6]
+            cube.write(''.join(f'{v:13.5e}' for v in chunk) + '\n')
     print(f'Saved {map_name}-type map as {os.path.realpath(cube.name)}')
 
 
@@ -811,6 +831,8 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
     f_diff = f_diff.expand_to_p1()
   else:
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)    
     f_diff = f_diff.expand_to_p1()
 
   print("Using %d reflections for Fourier synthesis"%f_diff.size())
@@ -832,8 +854,11 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < max_peaks:
         a = olx.xf.uc.Closest(*xyz).split(',')
-        pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" %(
-            i+1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        if OV.IsEDData():
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
+        else:
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
         print(pi)
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
@@ -1115,8 +1140,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
 
   f_diff = f_diff.expand_to_p1()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDData():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1152,8 +1176,7 @@ def deformation_map(resolution=0.1, return_map=False):
   print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
   f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
   f_diff = f_diff.expand_to_p1()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDData():
     f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
@@ -1183,8 +1206,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   k = math.sqrt(OV.GetOSF())
   f_obs.apply_scaling(factor=1./k)
   f_obs = f_obs.phase_transfer(f_calc)
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDData():
     f_obs = f_obs.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1217,8 +1239,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDData():
     f_calc = f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
@@ -1247,8 +1268,7 @@ def mask_map(resolution=0.1, return_map=False, use_f000=False):
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
       f_mask = f_mask.common_set(f_sq_obs)
-  wavelength = float(olx.xf.exptl.Radiation())
-  if wavelength < 0.1:
+  if OV.IsEDData():
     f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
     f000 = float(olx.xf.GetF000())
