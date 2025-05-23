@@ -111,7 +111,9 @@ class RunPrg(ArgumentParser):
     import gui
     stopwatch = olx.stopwatch
     gui.set_notification(OV.GetVar('gui_notification'))
-    OV.SetVar('gui_notification', "Refining...;%s;%s" %(green,white))
+    action = "Solving" if self.prgType == "solution" else "Refining"
+    gui_notification = "%s...;%s;%s" %(action, green,white)
+    OV.SetVar("gui_notification", gui_notification)
     if RunPrg.running:
       OV.SetVar('gui_notification', "Already running. Please wait...")
       print("Already running. Please wait...")
@@ -141,6 +143,8 @@ class RunPrg(ArgumentParser):
         print("Error!: ")
       caught_exception = e
     finally:
+      if gui_notification == OV.GetVar("gui_notification"):
+        OV.SetVar("gui_notification", "")
       stopwatch.run(self.endRun)
       sys.stdout.refresh = False
       sys.stdout.graph = False
@@ -167,7 +171,7 @@ class RunPrg(ArgumentParser):
     finally:
       olx.Freeze(False)
       OV.paramStack.pop(2)
-      
+
   def setup_masking(self, clean=False):
     prg =  OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
     if prg == "Platon" and olx.HKLF() == '5' and OV.GetParam('snum.refinement.recompute_mask_before_refinement') == True and OV.GetParam('snum.refinement.use_solvent_mask') == True:
@@ -194,7 +198,7 @@ class RunPrg(ArgumentParser):
         ### This looks misleading -- the 'original' filename refer to renamings once the masking process has started.
         #self.original_filename = nfn
         #OV.HKLSrc(nfn)
-  
+
     if clean:
       from pathlib import Path
       # Define the folder and pattern
@@ -298,7 +302,7 @@ class RunPrg(ArgumentParser):
     self.hkl_src = OV.HKLSrc()
     if OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg') == "Platon" and not  OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
       self.hkl_src = f"{os.path.splitext(OV.FileFull())[0]}_sq.hkl"
-    
+
     if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
       if os.path.exists(self.hkl_src):
