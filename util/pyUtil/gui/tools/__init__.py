@@ -359,6 +359,24 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile, True, 'gui.tools')
 
 
+def checkCAP():
+  if sys.platform[:3] != "win":
+    return
+
+  cap_version = OV.GetParam("autochem_21.cap_version", "171.44.103a")
+  exp_path = OV.GetParam("autochem_21.cap_experiment_path", "")
+  exp_name = OV.GetParam("autochem_21.cap_experiment_name", "")
+
+  cap_exe =  f"C:\Xcalibur\CrysAlisPro{cap_version}\pro.exe"
+  cap_args = os.path.join(exp_path, exp_name)
+
+  retVal = '''
+  $spy.MakeHoverButton('toolbar-cap', "shell %s %s")
+  ''' %(cap_exe, cap_args)
+  return retVal
+
+OV.registerFunction(checkCAP, True, 'gui.tools')
+
 def checkPlaton():
   retVal = '''
   $spy.MakeHoverButton('toolbar-platon', "platon")
@@ -380,8 +398,6 @@ def checkPlaton():
   else:
     olx.SetVar("HavePlaton", False)
     return ""
-
-
 OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 
@@ -1565,7 +1581,7 @@ def get_chiral_atom_info(return_what=""):
   try:
     atominfos = olex.f("rsa()").split('\n')
     if not atominfos:
-      t = "This structure is in chiral space group, but there are no chiral atoms"
+      t = "There are no chiral atoms in this structure"
       d.update({
         "chiral_atoms": t,
         "chiral_atoms_listing": "",
@@ -2330,8 +2346,10 @@ def plot_xy(xs,
         else:
           colour = "#ababab"
         label = "n"
-        if type(xs) == 'list' and len(xs) == 1:
+        if len(xs) == 1:
           xses = xs[0]
+        #if type(xs) == 'list' and len(xs) == 1:
+          #xses = xs[0]
         else:
           xses = xs[i]
         ax1.plot(xses,
@@ -2938,7 +2956,10 @@ class PlotIt():
       # Adjust for margin if necessary
       data_min -= margin * (data_max - data_min)
       data_max += margin * (data_max - data_min)
-      self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+      
+      _ =  data_max - data_min
+      if _:
+        self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
 
       if lim_x != 1:
         self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
