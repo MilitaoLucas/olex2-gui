@@ -2,18 +2,18 @@
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2-Properties-Details;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #ignoreif not spy.NoSpherA2.check_for_matching_wfn()
+<!-- #ignoreif not spy.NoSpherA2.check_for_matching_wfn() -->
 <td width="13%" align='left'>
   <b>CPUs</b>
 </td>
 <td width="9%" align='center'>
-$+
+  $+
     html.Snippet("gui/snippets/input-combo",
     "name=NoSpherA2_cpus@refine",
     "items=spy.NoSpherA2.getCPUListStr()",
     "value=spy.GetParam('snum.NoSpherA2.ncpus')",
     "onchange=spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))")
-   $-
+  $-
 </td>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -98,7 +98,7 @@ $+
     "onuncheck=spy.SetParam('snum.NoSpherA2.Property_MO','False')>>html.Update()"
     )
   $-
-<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_MO)
+<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_MO) -->
 <td width="13%" align='left'>
   <b>MO #</b>
 </td>
@@ -128,11 +128,11 @@ $+
     "onuncheck=spy.SetParam('snum.NoSpherA2.Property_all_MOs','False')"
     )
   $-
-#ignoreif -->
+<!-- ignoreif# -->
 
-<!-- #ignoreif spy.GetParam(snum.NoSpherA2.Property_MO)
+<!-- #ignoreif spy.GetParam(snum.NoSpherA2.Property_MO) -->
   <td width=30%> </td>
-#ignoreif -->
+<!-- ignoreif# -->
 
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -145,7 +145,7 @@ $+
     "onuncheck=spy.SetParam('snum.NoSpherA2.Property_ATOM','False') >> html.Update()"
     )
   $-
-<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_ATOM)
+<!-- #ignoreif not spy.GetParam(snum.NoSpherA2.Property_ATOM) -->
   <td width="13%" align='left'>
     <b>ATOM #</b>
   </td>
@@ -164,7 +164,7 @@ $+
     > 
 
   </td>
-#ignoreif -->
+<!-- ignoreif# -->
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -192,20 +192,20 @@ $+
     "td1=<td width='15%'>",
     )
   $-
-#ignoreif -->
-<!-- #ignoreif spy.NoSpherA2.is_disordered()
-<!-- #ignoreif spy.NoSpherA2.check_for_matching_wfn()
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT')
+<!-- ignoreif# -->
+<!-- #ignoreif spy.NoSpherA2.is_disordered() -->
+<!-- #ignoreif spy.NoSpherA2.check_for_matching_wfn() -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT') -->
 <td width="50%" align="center"><b>No .wfn found!</b> (run NoSpherA2 maybe?)</td>
-#ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT')
+<!-- ignoreif# -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT') -->
 <td width="50%" align="center">Wavefunction properties not accessible</td>
-#ignoreif -->
-#ignoreif -->
-#ignoreif -->
-<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<!-- ignoreif# -->
+<!-- ignoreif# -->
+<!-- ignoreif# -->
+<!-- #ignoreif not spy.NoSpherA2.is_disordered() -->
 <td width="50%" align="center">Wfn properties not accessible with disorder</td>
-#ignoreif -->
+<!-- ignoreif# -->
   <td width="10%" align="center"> <b>Res /&Aring</b></td>
   <td width="10%" align='center'>
     $+
@@ -235,9 +235,9 @@ $+
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #ignoreif strcmp(xgrid.Visible(), false)
+<!-- #ignoreif strcmp(xgrid.Visible(), false) -->
   <td width="15%" align="left"><b>Color Scale (Min/Max)</b></td>
-<!-- #ignoreif not spy.NoSpherA2.is_colored()
+<!-- #ignoreif not spy.NoSpherA2.is_colored() -->
   <td width="10%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
@@ -272,10 +272,10 @@ $+
       )
     $-
   </td>
-#ignoreif -->
-<!-- #ignoreif spy.NoSpherA2.is_colored()
+<!-- ignoreif# -->
+<!-- #ignoreif spy.NoSpherA2.is_colored() -->
   <td width='61%' align='center'>No Coloured Map selected</td>
-#ignoreif -->
+<!-- ignoreif# -->
   $+
     html.Snippet("gui/snippets/gui-link-button",
     "value='Disable Map'",
@@ -283,14 +283,14 @@ $+
     "bgcolor=\$GetVar(HtmlTableRowBgColour)",
     )
   $-
-#ignoreif -->
-<!-- #ignoreif strcmp(xgrid.Visible(), true)
+<!-- ignoreif# -->
+<!-- #ignoreif strcmp(xgrid.Visible(), true) -->
   <td width='20%'> </td>
-#ignoreif -->
+<!-- ignoreif# -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #ignoreif strcmp(xgrid.Visible(), false)
+<!-- #ignoreif strcmp(xgrid.Visible(), false) -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=map-header;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -310,7 +310,7 @@ $+
 
 </td>
 
-<!-- #ignoreif not strcmp(spy.GetParam(snum.xgrid.view), points)
+<!-- #ignoreif not strcmp(spy.GetParam(snum.xgrid.view), points) -->
   <td width='5%'>
 
     <input 
@@ -325,7 +325,7 @@ $+
     > 
 
   </td>
-<!-- #ignoreif strcmp(xgrid.Visible(), false)
+<!-- #ignoreif strcmp(xgrid.Visible(), false) -->
     <td width='16%' align='center'>
       min:
       <b>
@@ -339,11 +339,11 @@ $+
       \$spy.SetParam('snum.NoSpherA2.map.max',$spy.gui.maps.Round(xgrid.GetMax(),2))
       </b>
     </td>
-#ignoreif -->
-#ignoreif -->
+<!-- ignoreif# -->
+<!-- ignoreif# -->
 
-<!-- #ignoreif strcmp(spy.GetParam(snum.xgrid.view), points)
-<!-- #ignoreif strcmp(xgrid.Visible(), false)
+<!-- #ignoreif strcmp(spy.GetParam(snum.xgrid.view), points) -->
+<!-- #ignoreif strcmp(xgrid.Visible(), false) -->
   <td width='23%' align='center'>
     min:
     <b>
@@ -357,17 +357,17 @@ $+
     \$spy.SetParam('snum.NoSpherA2.map.max',$spy.gui.maps.Round(xgrid.GetMax(),2))
     </b>
   </td>
-#ignoreif -->
-#ignoreif -->
+<!-- ignoreif# -->
+<!-- ignoreif# -->
 
 
-<!-- #ignoreif strcmp(xgrid.Visible(), true)
+<!-- #ignoreif strcmp(xgrid.Visible(), true) -->
 <td width='45%'>
 <b>
 No map loaded!
 </b>
 </td>
-#ignoreif -->
+<!-- ignoreif# -->
   $+
     html.Snippet("gui/snippets/gui-link-button",
     "value=Edit Style",
@@ -377,13 +377,13 @@ No map loaded!
   $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'))
+<!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')) -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;name='MAP_3D';help_ext=map-3D;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td width="10%"><b>Level</b></td>
-<!-- #ignoreif not spy.NoSpherA2.is_colored()
+<!-- #ignoreif not spy.NoSpherA2.is_colored() -->
   <td witdh="83%" align='center'>
     <input
       align="right"
@@ -413,8 +413,8 @@ No map loaded!
       onreturn="xgrid.scale(math.eval(html.GetValue(~name~))) >> spy.SetParam(snum.xgrid.scale,html.GetValue(SNUM_XGRID_SCALE_VALUE)*100)"
     >
   </td>
-#ignoreif -->
-<!-- #ignoreif spy.NoSpherA2.is_colored()
+<-- ignoreif# -->
+<!-- #ignoreif spy.NoSpherA2.is_colored() -->
   $+
     html.Snippet("gui/snippets/input-slider",
     "param=snum.xgrid.scale",
@@ -429,12 +429,12 @@ No map loaded!
     "swidth=90"
     )
   $-
-#ignoreif -->
+<!-- ignoreif# -->
   
   <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
+<!-- ignoreif# -->
 
-<!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')))
+<!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'))) -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;name='2D_MAP_CONTPURS';help_ext=2D-Map-Contours;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -571,6 +571,6 @@ No map loaded!
   $-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-#ignoreif -->
+<!-- ignoreif# -->
 
-#ignoreif -->
+<!-- ignoreif# -->
