@@ -49,6 +49,7 @@ from PluginTools import PluginTools as PT
 # from gui.images import GuiImages
 # GI=GuiImages()
 
+
 def update_section_hack():
     _ = olx.html.GetItemState("h3-NoSpherA2-extras")
     if _ == "0":
@@ -130,6 +131,8 @@ class NoSpherA2(PT):
                 self.basis_list_str = ";".join(basis_list)
             else:
                 self.basis_list_str = None
+
+
         else:
             self.basis_list_str = None
             self.basis_dir = None
@@ -962,6 +965,7 @@ Please select one of the generators from the drop-down menu.""",
             raise NameError("No NoSpherA2 Executable")
         self.softwares += ";Thakkar IAM"
         OV.SetVar("NoSpherA2", self.NoSpherA2)
+
 
     def setup_pyscf(self):
         self.has_pyscf = OV.GetParam("user.NoSpherA2.has_pyscf")
@@ -1880,15 +1884,20 @@ Home -> Settings -> PATH""",
     else:
         OV.SetParam("snum.NoSpherA2.source", input)
         if input == "occ":
+            OV.setItemstate(
+                "occ-refine_NoSpherA2-extras 1"
+            )  # This is a hack to force the update of the GUI without doing all of html
+
             OV.SetParam("snum.NoSpherA2.NoRel", "True")
         else:
             OV.SetParam("snum.NoSpherA2.NoRel", "False")
         _ = olx.html.GetItemState("h3-NoSpherA2-extras")
         if _ == "0":
-            OV.setItemstate("h3-NoSpherA2-extras 2")
-            OV.setItemstate(
-                "h3-NoSpherA2-extras 1"
-            )  # This is a hack to force the update of the GUI without doing all of html
+            pass
+            # OV.setItemstate("h3-NoSpherA2-extras 2")
+            # OV.setItemstate(
+            #     "h3-NoSpherA2-extras 1"
+            # )  # This is a hack to force the update of the GUI without doing all of html
         if input != "discambMATT" and input != "Thakkar IAM":
             ne, adapter = calculate_number_of_electrons()
             mult = int(OV.GetParam("snum.NoSpherA2.multiplicity"))
