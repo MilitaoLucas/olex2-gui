@@ -729,3 +729,42 @@ olex.registerFunction(create_overlay_gui, False, "gui")
 olex.registerFunction(delete_ofile, False, "gui")
 olex.registerFunction(set_ofile, False, "gui")
 
+
+def run_CAP():
+  if olx.IsFileLoaded() == "false":
+    olx.Echo("No file is loaded", m="error")
+    return
+  import glob
+  path = OV.FilePath()
+  par_files = glob.glob(path + "\\*.par")
+  if not par_files:
+    par_files = glob.glob(path + "\\..\\..\\*.par")
+  par_files = [f for f in par_files if "cracker" not in f]
+  if not par_files:
+    olx.Echo("No par files have been located", m="error")
+    return
+  if len(par_files) > 1:
+    OV.SetVar("par_files", "&;".join(par_files))
+    sw, sh = 400, 250
+    x,y = GetBoxPosition(sw, sh)
+    olx.Popup("par_files", OV.BaseDir()+ "/etc/gui/blocks/templates/pop_par_files.htm",
+              x=x, y=y, w=sw, h=sh,
+              t="Multiple PAR files have been detected",
+              b="tscr", s=False)
+    olx.html.ShowModal("par_files")
+  else:
+    olx.Shell(par_files[0])
+
+def par_files_table():
+  def fn(x):
+    if '..' in x:
+      return x[x.index('..'):]
+    return os.path.split(x)[1]
+  files = OV.GetVar("par_files").split("&;")
+  rv = "<table width='100%'>"
+  for f in files:
+    rv += "<tr><td><a href=\"shell '%s'>>html.endModal par_files 0\">%s</a></td></tr>" %(f, fn(f))
+  return rv + "</table>"
+
+olex.registerFunction(run_CAP, False, "gui")
+olex.registerFunction(par_files_table, False, "gui")

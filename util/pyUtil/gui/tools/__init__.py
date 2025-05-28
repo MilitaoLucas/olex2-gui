@@ -358,24 +358,28 @@ def checkErrLogFile():
 
 OV.registerFunction(checkErrLogFile, True, 'gui.tools')
 
-
-def checkCAP():
+_have_CAP = None
+def haveCAP():
   if sys.platform[:3] != "win":
-    return
+    return False
+  global _have_CAP
+  if _have_CAP:
+    return True
+  if _have_CAP is None:
+    try:
+      import olex_reg as reg
+      par_association = reg.Read(".par", "", "HKCR")
+      if not par_association:
+        return ""
+      if par_association:
+        if not reg.ListKeys("Software\\Rigaku\\", "HKLM"):
+          return ""
+        _have_CAP = True
+    except:
+      return ""
+  return _have_CAP
 
-  cap_version = OV.GetParam("autochem_21.cap_version", "171.44.103a")
-  exp_path = OV.GetParam("autochem_21.cap_experiment_path", "")
-  exp_name = OV.GetParam("autochem_21.cap_experiment_name", "")
-
-  cap_exe =  f"C:\Xcalibur\CrysAlisPro{cap_version}\pro.exe"
-  cap_args = os.path.join(exp_path, exp_name)
-
-  retVal = '''
-  $spy.MakeHoverButton('toolbar-cap', "shell %s %s")
-  ''' %(cap_exe, cap_args)
-  return retVal
-
-OV.registerFunction(checkCAP, True, 'gui.tools')
+OV.registerFunction(haveCAP, True, 'gui.tools')
 
 def checkPlaton():
   retVal = '''
@@ -1490,7 +1494,7 @@ def GetDPRInfo():
     'hint': text_output[idx],
     'label': f"{data}/{parameters}",
     'data': f"{data}",
-    'parameters': f"{parameters}", 
+    'parameters': f"{parameters}",
     'font_size': f"{font_size}"
     }
 
@@ -2956,7 +2960,7 @@ class PlotIt():
       # Adjust for margin if necessary
       data_min -= margin * (data_max - data_min)
       data_max += margin * (data_max - data_min)
-      
+
       _ =  data_max - data_min
       if _:
         self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
