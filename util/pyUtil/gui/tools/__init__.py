@@ -371,13 +371,14 @@ def haveCAP():
       par_association = reg.Read(".par", "", "HKCR")
       if not par_association or "CrysAlis" not in par_association:
         _have_CAP = False
-        return ""
+        return False
       if par_association:
         if not reg.ListKeys("Software\\Rigaku\\", "HKLM"):
-          return ""
-        _have_CAP = True
+          _have_CAP = False
+        else:
+          _have_CAP = True
     except:
-      return ""
+      _have_CAP = False
   return _have_CAP
 
 OV.registerFunction(haveCAP, True, 'gui.tools')

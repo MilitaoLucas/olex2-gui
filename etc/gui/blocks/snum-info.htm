@@ -31,11 +31,11 @@ $spy.MakeHoverButton('toolbar-twins', "spy.find_2_fold_olex2()>>spy.gui.SwitchTo
       <td align='right' width='7%'>
 $spy.gui.tools.checkPlaton() 
       </td>  
-<ignoreif test="not(spy.tools.HaveCAP())">
+<ignore test="spy.gui.tools.HaveCAP()">
       <td align='right' width='7%'>
 $spy.MakeHoverButton('toolbar-cap', "spy.gui.run_CAP") 
       </td>  
-</ignoreif>
+</ignore>
       <td align='right' width='7%'>
 $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
      </td>
