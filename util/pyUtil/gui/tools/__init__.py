@@ -369,7 +369,8 @@ def haveCAP():
     try:
       import olex_reg as reg
       par_association = reg.Read(".par", "", "HKCR")
-      if not par_association:
+      if not par_association or "CrysAlis" not in par_association:
+        _have_CAP = False
         return ""
       if par_association:
         if not reg.ListKeys("Software\\Rigaku\\", "HKLM"):
