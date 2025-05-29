@@ -1,1 +1,9 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+<script>
+    function load() {
+        html.ItemState('~name~',0)
+    }
+</script>
+
+<div onload="html.ItemState('~name~',0)" class="div"></div>
+<div onload="load()" class="div"></div>

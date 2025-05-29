@@ -51,8 +51,8 @@ class Basis:
     def __init__(self):
         self.elements = {}
 
-    def add_shell(self, atom: int, shell: dict):
-        atom = str(atom)
+    def add_shell(self, atom: str, shell: dict):
+        atom = atom
         if not atom in self.elements:
             self.elements[atom] = dict()
         if not "electron_shells" in self.elements[atom]:
@@ -78,9 +78,6 @@ class Basis:
                 atom: self.elements[atom] for atom in self.elements
             }
         }
-
-with open("periodic_table.json", "r") as pt:
-    PERIODIC_TABLE = json.load(pt)
 
 def treat_xyz(path: str) -> set:
     atom_set = set()

@@ -137,6 +137,7 @@ class NoSpherA2(PT):
             self.basis_list_str = None
             self.basis_dir = None
             print("No NoSpherA2 executable found!")
+
         print(" ")
 
     def set_f_calc(self, f_calc):
@@ -1893,7 +1894,8 @@ Home -> Settings -> PATH""",
             )  # This is a hack to force the update of the GUI without doing all of html
 
             OV.SetParam("snum.NoSpherA2.NoRel", "True")
-        elif input == "ORCA 6.0":
+        else:
+
             OV.setItemstate(
                 "occ-NoSpherA2-extras 0"
             )  # This is a hack to force the update of the GUI without doing all of html
@@ -1901,7 +1903,6 @@ Home -> Settings -> PATH""",
             OV.setItemstate(
                 "h3-NoSpherA2-extras 2"
             )  # This is a hack to force the update of the GUI without doing all of html
-        else:
             OV.SetParam("snum.NoSpherA2.NoRel", "False")
 
         _ = olx.html.GetItemState("h3-NoSpherA2-extras")
