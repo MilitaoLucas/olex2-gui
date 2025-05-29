@@ -1885,19 +1885,34 @@ Home -> Settings -> PATH""",
         OV.SetParam("snum.NoSpherA2.source", input)
         if input == "occ":
             OV.setItemstate(
-                "occ-refine_NoSpherA2-extras 1"
+                "occ-NoSpherA2-extras 2"
+            )  # This is a hack to force the update of the GUI without doing all of html
+
+            OV.setItemstate(
+                "h3-NoSpherA2-extras 0"
             )  # This is a hack to force the update of the GUI without doing all of html
 
             OV.SetParam("snum.NoSpherA2.NoRel", "True")
+        elif input == "ORCA 6.0":
+            OV.setItemstate(
+                "occ-NoSpherA2-extras 0"
+            )  # This is a hack to force the update of the GUI without doing all of html
+
+            OV.setItemstate(
+                "h3-NoSpherA2-extras 2"
+            )  # This is a hack to force the update of the GUI without doing all of html
         else:
             OV.SetParam("snum.NoSpherA2.NoRel", "False")
+
         _ = olx.html.GetItemState("h3-NoSpherA2-extras")
         if _ == "0":
-            pass
-            # OV.setItemstate("h3-NoSpherA2-extras 2")
-            # OV.setItemstate(
-            #     "h3-NoSpherA2-extras 1"
-            # )  # This is a hack to force the update of the GUI without doing all of html
+            OV.setItemstate("h3-NoSpherA2-extras 2")
+            OV.setItemstate(
+                "h3-NoSpherA2-extras 1"
+            )  # This is a hack to force the update of the GUI without doing all of html
+            OV.setItemstate(
+                "occ-NoSpherA2-extras 2"
+            )  # This is a hack to force the update of the GUI without doing all of html
         if input != "discambMATT" and input != "Thakkar IAM":
             ne, adapter = calculate_number_of_electrons()
             mult = int(OV.GetParam("snum.NoSpherA2.multiplicity"))
