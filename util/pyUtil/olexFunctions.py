@@ -1346,6 +1346,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
           return True
     return False
 
+  def SetDataParamN(self, data, params):
+    self.SetParam('snum.refinement.parameters', params)
+    self.SetParam('snum.refinement.data', data)
+    self.DelVar(olx.var_name_param_N)
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)

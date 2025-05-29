@@ -1423,6 +1423,10 @@ olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
 
 
 def get_parameter_number():
+  var_v = OV.GetVar(olx.var_name_param_N, "")
+  if var_v:
+    return int(var_v)
+
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
     try:
@@ -1436,14 +1440,17 @@ def GetNParams():
     return
   from refinement import FullMatrixRefine
   fmr = FullMatrixRefine()
-  dyn = bool(OV.GetVar("isDynamic", False))
-  rpm = fmr.run(reparametrisation_only=True, ed_refinement=dyn)
+  is_dyn = OV.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+  rpm = fmr.run(reparametrisation_only=True, ed_refinement=is_dyn)
   if rpm is None:
     retVal = 0
   try:
     retVal = rpm.jacobian_transpose_matching_grad_fc().n_rows
   except:
     retVal = 0
+
+  OV.SetVar(olx.var_name_param_N, retVal)
+
   if OV.IsControl("NParameters"):
     olx.html.SetLabel("NParameters", retVal)
     olx.html.SetFG("NParameters", gui_red)

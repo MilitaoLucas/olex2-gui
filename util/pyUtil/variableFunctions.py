@@ -326,7 +326,10 @@ def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
   auto_save_view = OV.GetParam('user.auto_save_view', False)
+
   OV.DelVar(olx.var_name_par_files)
+  OV.DelVar(olx.var_name_param_N)
+
   if auto_save_view and olx.IsFileType('oxm') != 'true':
     oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
     if os.path.exists(oxvf):

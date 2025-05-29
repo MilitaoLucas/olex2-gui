@@ -160,6 +160,7 @@ class initpy_funcs():
 
     # define global var names here
     self.olx.var_name_par_files = "par_files"
+    self.olx.var_name_param_N = "param_N"
 
     import leverage
     import userDictionaries
