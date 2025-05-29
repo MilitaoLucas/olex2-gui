@@ -31,7 +31,7 @@ $spy.MakeHoverButton('toolbar-twins', "spy.find_2_fold_olex2()>>spy.gui.SwitchTo
       <td align='right' width='7%'>
 $spy.gui.tools.checkPlaton() 
       </td>  
-<ignore test="spy.gui.tools.HaveCAP()">
+<ignore test="and(spy.gui.tools.HaveCAP(), spy.gui.have_par_files())">
       <td align='right' width='7%'>
 $spy.MakeHoverButton('toolbar-cap', "spy.gui.run_CAP") 
       </td>  

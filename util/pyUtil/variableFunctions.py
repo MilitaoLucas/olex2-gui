@@ -17,7 +17,6 @@ import phil_interface
 import iotbx.phil
 import libtbx.phil.command_line
 
-
 def getOlex2VersionInfo():
   txt = 'Olex2, OlexSys Ltd (compiled %s)' %OV.GetCompilationInfo()
   return txt
@@ -327,6 +326,7 @@ def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
   auto_save_view = OV.GetParam('user.auto_save_view', False)
+  OV.DelVar(olx.var_name_par_files)
   if auto_save_view and olx.IsFileType('oxm') != 'true':
     oxvf = os.path.join(OV.StrDir(), OV.ModelSrc() + '.oxv')
     if os.path.exists(oxvf):

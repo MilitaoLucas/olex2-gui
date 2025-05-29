@@ -692,7 +692,7 @@ def create_archive(node_id=None):
 
 olex.registerFunction(create_archive, False, "gui")
 
-
+########################### OVERLAYS ##########################################
 def set_ofile(idx):
   idx = int(idx)
   olx.OFileSwap(idx)
@@ -729,11 +729,13 @@ olex.registerFunction(create_overlay_gui, False, "gui")
 olex.registerFunction(delete_ofile, False, "gui")
 olex.registerFunction(set_ofile, False, "gui")
 
-
-def run_CAP():
+########################### CAP and PAR FILES #################################
+def have_par_files():
   if olx.IsFileLoaded() == "false":
-    olx.Echo("No file is loaded", m="error")
-    return
+    return False
+  if OV.IsVar(olx.var_name_par_files):
+    return len(OV.GetVar(olx.var_name_par_files)) > 0
+
   import glob
   path = OV.FilePath()
   par_files = glob.glob(path + "\\*.par")
@@ -741,10 +743,18 @@ def run_CAP():
     par_files = glob.glob(path + "\\..\\..\\*.par")
   par_files = [f for f in par_files if "cracker" not in f]
   if not par_files:
+    OV.SetVar(olx.var_name_par_files, "")
+    return False
+  OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
+  return True
+
+def run_CAP():
+  par_files = OV.GetVar(olx.var_name_par_files).split("&;")
+  if not par_files:
     olx.Echo("No par files have been located", m="error")
     return
   if len(par_files) > 1:
-    OV.SetVar("par_files", "&;".join(par_files))
+    OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
     sw, sh = 400, 250
     x,y = GetBoxPosition(sw, sh)
     olx.Popup("par_files", OV.BaseDir()+ "/etc/gui/blocks/templates/pop_par_files.htm",
@@ -760,11 +770,12 @@ def par_files_table():
     if '..' in x:
       return x[x.index('..'):]
     return os.path.split(x)[1]
-  files = OV.GetVar("par_files").split("&;")
+  files = OV.GetVar(olx.var_name_par_files).split("&;")
   rv = "<table width='100%'>"
   for f in files:
     rv += "<tr><td><a href=\"shell '%s'>>html.endModal par_files 0\">%s</a></td></tr>" %(f, fn(f))
   return rv + "</table>"
 
+olex.registerFunction(have_par_files, False, "gui")
 olex.registerFunction(run_CAP, False, "gui")
 olex.registerFunction(par_files_table, False, "gui")

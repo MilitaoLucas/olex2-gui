@@ -158,6 +158,9 @@ class initpy_funcs():
     self.OV.SetVar('cbtn_refine_on','false')
     self.OV.SetVar('cbtn_report_on','false')
 
+    # define global var names here
+    self.olx.var_name_par_files = "par_files"
+
     import leverage
     import userDictionaries
     if not userDictionaries.people:
