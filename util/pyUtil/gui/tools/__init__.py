@@ -358,6 +358,30 @@ def checkErrLogFile():
 
 OV.registerFunction(checkErrLogFile, True, 'gui.tools')
 
+_have_CAP = None
+def haveCAP():
+  if sys.platform[:3] != "win":
+    return False
+  global _have_CAP
+  if _have_CAP:
+    return True
+  if _have_CAP is None:
+    try:
+      import olex_reg as reg
+      par_association = reg.Read(".par", "", "HKCR")
+      if not par_association or "CrysAlis" not in par_association:
+        _have_CAP = False
+        return False
+      if par_association:
+        if not reg.ListKeys("Software\\Rigaku\\", "HKLM"):
+          _have_CAP = False
+        else:
+          _have_CAP = True
+    except:
+      _have_CAP = False
+  return _have_CAP
+
+OV.registerFunction(haveCAP, True, 'gui.tools')
 
 def checkPlaton():
   retVal = '''
@@ -380,8 +404,6 @@ def checkPlaton():
   else:
     olx.SetVar("HavePlaton", False)
     return ""
-
-
 OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 
@@ -1401,6 +1423,10 @@ olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
 
 
 def get_parameter_number():
+  var_v = OV.GetVar(olx.var_name_param_N, "")
+  if var_v:
+    return int(var_v)
+
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
     try:
@@ -1414,14 +1440,17 @@ def GetNParams():
     return
   from refinement import FullMatrixRefine
   fmr = FullMatrixRefine()
-  dyn = bool(OV.GetVar("isDynamic", False))
-  rpm = fmr.run(reparametrisation_only=True, ed_refinement=dyn)
+  is_dyn = OV.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+  rpm = fmr.run(reparametrisation_only=True, ed_refinement=is_dyn)
   if rpm is None:
     retVal = 0
   try:
     retVal = rpm.jacobian_transpose_matching_grad_fc().n_rows
   except:
     retVal = 0
+
+  OV.SetVar(olx.var_name_param_N, retVal)
+
   if OV.IsControl("NParameters"):
     olx.html.SetLabel("NParameters", retVal)
     olx.html.SetFG("NParameters", gui_red)
@@ -1474,7 +1503,7 @@ def GetDPRInfo():
     'hint': text_output[idx],
     'label': f"{data}/{parameters}",
     'data': f"{data}",
-    'parameters': f"{parameters}", 
+    'parameters': f"{parameters}",
     'font_size': f"{font_size}"
     }
 
@@ -1565,7 +1594,7 @@ def get_chiral_atom_info(return_what=""):
   try:
     atominfos = olex.f("rsa()").split('\n')
     if not atominfos:
-      t = "This structure is in chiral space group, but there are no chiral atoms"
+      t = "There are no chiral atoms in this structure"
       d.update({
         "chiral_atoms": t,
         "chiral_atoms_listing": "",
@@ -2330,8 +2359,10 @@ def plot_xy(xs,
         else:
           colour = "#ababab"
         label = "n"
-        if type(xs) == 'list' and len(xs) == 1:
+        if len(xs) == 1:
           xses = xs[0]
+        #if type(xs) == 'list' and len(xs) == 1:
+          #xses = xs[0]
         else:
           xses = xs[i]
         ax1.plot(xses,
@@ -2938,7 +2969,10 @@ class PlotIt():
       # Adjust for margin if necessary
       data_min -= margin * (data_max - data_min)
       data_max += margin * (data_max - data_min)
-      self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+      _ =  data_max - data_min
+      if _:
+        self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
 
       if lim_x != 1:
         self.plt.xlim(-0.94*lim_x, 0.95*lim_x)

@@ -52,6 +52,20 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       print("Variable %s could not be retrieved" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  def IsVar(self, variable):
+    try:
+      return olex_core.IsVar(variable)
+    except Exception as ex:
+      print("Variable %s could not be queried" %(variable), file=sys.stderr)
+      sys.stderr.formatExceptionInfo()
+
+  def DelVar(self, variable):
+    try:
+      return olex_core.UnsetVar(variable)
+    except Exception as ex:
+      print("Variable %s could not be removed" %(variable), file=sys.stderr)
+      sys.stderr.formatExceptionInfo()
+
   def _replace_object(self, scope, object):
     for i, tobj in enumerate(scope.objects):
       if tobj.name == object.name:
@@ -1331,6 +1345,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         if ref['index'] == 4 and 'var' in ref['relation']:
           return True
     return False
+
+  def SetDataParamN(self, data, params):
+    self.SetParam('snum.refinement.parameters', params)
+    self.SetParam('snum.refinement.data', data)
+    self.DelVar(olx.var_name_param_N)
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.

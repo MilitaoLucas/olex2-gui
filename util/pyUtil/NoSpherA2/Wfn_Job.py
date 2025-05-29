@@ -2,11 +2,10 @@ import os
 import sys
 import olex
 import olx
-import olex_core
 import gui
 import shutil
 import time
-import math
+import textwrap
 
 import subprocess
 
@@ -14,10 +13,8 @@ from olexFunctions import OV
 from utilities import run_with_bitmap
 
 try:
-  from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
 except:
-  from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 class wfn_Job(object):
@@ -52,14 +49,14 @@ class wfn_Job(object):
 
     try:
       os.mkdir(self.full_dir)
-    except:
+    except Exception:
       pass
     tries = 0
     while not os.path.exists(self.full_dir) and tries < 5:
       try:
         os.mkdir(self.full_dir)
         break
-      except:
+      except Exception:
         time.sleep(0.1)
         tries += 1
         pass
@@ -76,7 +73,7 @@ class wfn_Job(object):
       self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0":
       embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
-      if embedding == True:
+      if embedding:
         self.write_orca_crystal_input(xyz)
       else:
         self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
@@ -90,11 +87,8 @@ class wfn_Job(object):
       self.write_psi4_input(xyz)
     elif self.software == "Thakkar IAM" or self.software == "SALTED":
       self.write_xyz_file()
-    elif self.software == "xTB":
-      if xyz == True:
-        self.write_xyz_file()
-    elif self.software == "pTB":
-      if xyz == True:
+    elif self.software == "xTB" or self.software == "pTB":
+      if xyz:
         self.write_xyz_file()
 
   def write_elmodb_input(self,xyz):
@@ -122,15 +116,15 @@ class wfn_Job(object):
     if charge != '0':
       inp.write("   icharge=" + charge + '\n')
     ssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.ssbond')
-    if ssbond == True:
+    if ssbond:
       nssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.nssbond')
       inp.write("   nssbond=" + nssbond + '\n')
     cycl = OV.GetParam('snum.NoSpherA2.ELMOdb.cycl')
-    if cycl == True:
+    if cycl:
       ncycl = OV.GetParam('snum.NoSpherA2.ELMOdb.ncycl')
       inp.write("   ncycl=" + ncycl + '\n')
     tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-    if tail == True:
+    if tail:
       maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
       inp.write("   ntail=" + str(maxtail) + '\n')
       resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
@@ -153,12 +147,12 @@ class wfn_Job(object):
         inp.write("   max_atail=" + str(max(nat)) + '\n')
     spect = OV.GetParam('snum.NoSpherA2.ELMOdb.spect')
     nspect = OV.GetParam('snum.NoSpherA2.ELMOdb.nspect')
-    if spect == True:
+    if spect:
       inp.write("   nspec=" + str(nspect) + '\n')
     inp.write(" $END" + '\n')
     inp.write(" " + '\n')
 
-    if tail == True:
+    if tail:
       # use default values if lists are too short
       if len(resnames) < maxtail:
         diff = maxtail - len(resnames)
@@ -733,8 +727,16 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       else:
         control += " def2/J RIJCOSX"
     Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
-    if Solvation != "Vacuum" and Solvation != None:
-      control += " CPCM(" + Solvation + ") "
+    cpcm_block = ""
+    if Solvation == "Custom":
+      cpcm_block = f"""
+      %cpcm
+        epsilon {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')}
+        refrac  {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')}
+        rsolv   {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')}
+      end"""
+    elif Solvation != "Vacuum" and Solvation is not None:
+      control += f" CPCM({Solvation}) "
     GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
     if "5.0" not in OV.GetParam("snum.NoSpherA2.source") and "6.0" not in OV.GetParam("snum.NoSpherA2.source"):
       GBW_file = False
@@ -746,10 +748,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
     if mult == 0:
       mult = 1
-    if "5.0" in software or "6.0" in software:
-        inp.write(control + ' NOTRAH\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
-    else:
-        inp.write(control + '\n%pal\n' + cpu + '\nend\n' + mem + '\n%coords\n        CTyp xyz\n        charge ' + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
+    inp.write(textwrap.dedent(f"""\
+      {control}{' NOTRAH' if ('5.0' in software or '6.0' in software) else ''}
+      %pal
+        {cpu}
+      end
+      {mem}{cpcm_block}
+      %coords
+        CTyp xyz
+        charge {charge}
+        mult {mult}
+        units angs
+        coords
+    """))
     atom_list = []
     i = 0
     for line in xyz:
@@ -1795,7 +1806,7 @@ ener = cf.kernel()"""
         out_fn = os.path.join(path, self.name + "_pyscf.log")
       if "ubuntu" in args[0]:
         print("Starting Ubuntu for wavefunction calculation, please be patient for start")
-      if out_fn == None:
+      if out_fn is None:
         if "ubuntu" in args[0]:
           out_fn = os.path.join(path, self.name + "_pyscf.log")
         else:

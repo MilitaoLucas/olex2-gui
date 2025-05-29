@@ -188,11 +188,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       hkl_stats = olex_core.GetHklStat()
       data = hkl_stats.get('DataCount', None)
       parameters = float(olx.Lst('param_n'))
-      OV.SetParam('snum.refinement.parameters', parameters)
-      OV.SetParam('snum.refinement.data', data)
+      OV.SetDataParamN(data, parameters)
     except:
-      OV.SetParam('snum.refinement.parameters', None)
-      OV.SetParam('snum.refinement.data', None)
+      OV.SetDataParamN(None, None)
 
   def gather_refinement_information(self):
     cif = {}

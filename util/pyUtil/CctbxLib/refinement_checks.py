@@ -1,5 +1,7 @@
 import olex, olx
 from olexex import OlexRefinementModel
+from scitbx.array_family import flex
+import numpy as np
 
 from olexFunctions import OV
 
@@ -109,3 +111,42 @@ class RefinementChecks(object):
         self.refinement_has_failed.append("Mu of LM is very large!")
     except AttributeError:
       return
+  
+  def check_corr(self):
+    try:      
+      m_and_a = self.cctbx.normal_eqns.covariance_matrix_and_annotations()
+      annotations = m_and_a.annotations
+      n = len(annotations)
+      
+      nf = m_and_a.matrix.as_numpy_array()
+
+      counter = 0
+      cov_array = []
+      arr_counter = 0
+      for i in range(n):
+        for j in range(n-counter):
+          cov_array.append(nf[arr_counter])
+          arr_counter += 1
+        counter +=1
+        for k in range(counter):
+          cov_array.append(0)
+      cov_Array2 = np.array(cov_array[:-n])
+      cov_array = cov_Array2.reshape((n,n))
+      corrMat = np.corrcoef(cov_array)
+      iu_nodiag = np.triu_indices(n, k=1)
+      strong_mask = np.abs(corrMat[iu_nodiag]) > 0.75
+      strong_corr_count = np.sum(strong_mask)
+
+      print(f"List of correlations > 0.75:\nThere are {strong_corr_count} strong correlations")
+      print("==================================")
+      for i,j,corr in zip(iu_nodiag[0][strong_mask], iu_nodiag[1][strong_mask], corrMat[iu_nodiag][strong_mask]):
+          print(f" {annotations[i]:<10} v {annotations[j]:<10}: {corr:>6.3f}")
+      print("==================================")
+      
+    except Exception as e:
+      import traceback
+      traceback.print_exc()
+      print(f"Error reading vcv matrix for calculation of correlations {e}")
+      return
+
+      
