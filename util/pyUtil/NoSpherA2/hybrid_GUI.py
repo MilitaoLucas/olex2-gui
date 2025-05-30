@@ -93,6 +93,7 @@ def make_hybrid_GUI(softwares_list_string):
   parts = OV.ListParts()
   if parts != None:
     parts = list(parts)
+
   if len(parts) <= 1:
     return begin_new_line() + "Hybrid is not possible with less than two parts!" + end_line()
   t = begin_new_line() + \
