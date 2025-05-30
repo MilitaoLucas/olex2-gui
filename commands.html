@@ -1,0 +1,3691 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html class="pageview">
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<base target="_top">
+<style type="text/css">
+
+
+/* default css */
+
+table {
+  font-size: 1em;
+  line-height: inherit;
+  border-collapse: collapse;
+}
+
+
+tr {
+
+  text-align: left;
+
+}
+
+
+div, address, ol, ul, li, option, select {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+p {
+  margin: 0px;
+}
+
+
+pre {
+  font-family: Courier New;
+  white-space: pre-wrap;
+  margin:0;
+}
+
+body {
+  margin: 6px;
+  padding: 0px;
+  font-family: Verdana, sans-serif;
+  font-size: 10pt;
+  background-color: #ffffff;
+  color: #000;
+}
+
+
+img {
+  -moz-force-broken-image-icon: 1;
+}
+
+@media screen {
+  html.pageview {
+    background-color: #f3f3f3 !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+
+
+
+  body {
+    min-height: 1100px;
+
+    counter-reset: __goog_page__;
+  }
+
+  * html body {
+    height: 1100px;
+  }
+  /* Prevent repaint errors when scrolling in Safari. This "Star-7" css hack
+     targets Safari 3.1, but not WebKit nightlies and presumably Safari 4.
+     That's OK because this bug is fixed in WebKit nightlies/Safari 4 :-). */
+  html*#wys_frame::before {
+    content: '\A0';
+    position: fixed;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+  }
+
+  .pageview body {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 2px solid #bbb;
+    border-bottom: 2px solid #bbb;
+    width: 648px !important;
+    margin: 15px auto 25px;
+    padding: 40px 50px;
+  }
+  /* IE6 */
+  * html {
+    overflow-y: scroll;
+  }
+  * html.pageview body {
+    overflow-x: auto;
+  }
+
+
+
+
+
+    .writely-callout-data {
+      display: inline-block;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      margin-left: -1px;
+    }
+
+
+    .writely-footnote-marker {
+      background-image: url('MISSING');
+      background-color: transparent;
+      background-repeat: no-repeat;
+      width: 7px;
+      overflow: hidden;
+      height: 16px;
+      vertical-align: top;
+
+
+      -moz-user-select: none;
+    }
+    .editor .writely-footnote-marker {
+      cursor: move;
+    }
+    .writely-footnote-marker-highlight {
+      background-position: -15px 0;
+      -moz-user-select: text;
+    }
+    .writely-footnote-hide-selection ::-moz-selection, .writely-footnote-hide-selection::-moz-selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection ::selection, .writely-footnote-hide-selection::selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection {
+      cursor: move;
+    }
+
+    /* Comments */
+    .writely-comment-yellow {
+      background-color: #ffffd7;
+    }
+    .writely-comment-orange {
+      background-color: #ffe3c0;
+    }
+    .writely-comment-pink {
+      background-color: #ffd7ff;
+    }
+    .writely-comment-green {
+      background-color: #d7ffd7;
+    }
+    .writely-comment-blue {
+      background-color: #d7ffff;
+    }
+    .writely-comment-purple {
+      background-color: #eed7ff;
+    }
+
+
+
+
+
+  .br_fix span+br:not(:-moz-last-node) {
+
+    position:relative;
+
+    left: -1ex
+
+  }
+
+
+  #cb-p-tgt {
+    font-size: 8pt;
+    padding: .4em;
+    background-color: #ddd;
+    color: #333;
+  }
+  #cb-p-tgt-can {
+    text-decoration: underline;
+    color: #36c;
+    font-weight: bold;
+    margin-left: 2em;
+  }
+  #cb-p-tgt .spin {
+    width: 16px;
+    height: 16px;
+    background: url(//ssl.gstatic.com/docs/clipboard/spin_16o.gif) no-repeat;
+  }
+}
+
+h6 { font-size: 8pt }
+h5 { font-size: 8pt }
+h4 { font-size: 10pt }
+h3 { font-size: 12pt }
+h2 { font-size: 14pt }
+h1 { font-size: 18pt }
+
+blockquote {padding: 10px; border: 1px #DDD dashed }
+
+.webkit-indent-blockquote { border: none; }
+
+a img {border: 0}
+
+.pb {
+  border-width: 0;
+  page-break-after: always;
+  /* We don't want this to be resizeable, so enforce a width and height
+     using !important */
+  height: 1px !important;
+  width: 100% !important;
+}
+
+.editor .pb {
+  border-top: 1px dashed #C0C0C0;
+  border-bottom: 1px dashed #C0C0C0;
+}
+
+div.google_header, div.google_footer {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+
+/* Table of contents */
+.editor div.writely-toc {
+  background-color: #f3f3f3;
+  border: 1px solid #ccc;
+}
+.writely-toc > ol {
+  padding-left: 3em;
+  font-weight: bold;
+}
+ol.writely-toc-subheading {
+  padding-left: 1em;
+  font-weight: normal;
+}
+/* IE6 only */
+* html writely-toc ol {
+  list-style-position: inside;
+}
+.writely-toc-none {
+  list-style-type: none;
+}
+.writely-toc-decimal {
+  list-style-type: decimal;
+}
+.writely-toc-upper-alpha {
+  list-style-type: upper-alpha;
+}
+.writely-toc-lower-alpha {
+  list-style-type: lower-alpha;
+}
+.writely-toc-upper-roman {
+  list-style-type: upper-roman;
+}
+.writely-toc-lower-roman {
+  list-style-type: lower-roman;
+}
+.writely-toc-disc {
+  list-style-type: disc;
+}
+
+/* Ordered lists converted to numbered lists can preserve ordered types, and
+   vice versa. This is confusing, so disallow it */
+ul[type="i"], ul[type="I"], ul[type="1"], ul[type="a"], ul[type="A"] {
+  list-style-type: disc;
+}
+
+ol[type="disc"], ol[type="circle"], ol[type="square"] {
+  list-style-type: decimal;
+}
+
+/* end default css */
+
+
+  /* default print css */
+  @media print {
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    div.google_header, div.google_footer {
+      display: block;
+      min-height: 0;
+      border: none;
+    }
+
+    div.google_header {
+      flow: static(header);
+    }
+
+    /* used to insert page numbers */
+    div.google_header::before, div.google_footer::before {
+      position: absolute;
+      top: 0;
+    }
+
+    div.google_footer {
+      flow: static(footer);
+    }
+
+    /* always consider this element at the start of the doc */
+    div#google_footer {
+      flow: static(footer, start);
+    }
+
+    span.google_pagenumber {
+      content: counter(page);
+    }
+
+    span.google_pagecount {
+      content: counter(pages);
+    }
+
+    .endnotes {
+      page: endnote;
+    }
+
+    /* MLA specifies that endnotes title should be 1" margin from the top of the page. */
+    @page endnote {
+      margin-top: 1in;
+    }
+
+    callout.google_footnote {
+
+      display: prince-footnote;
+      footnote-style-position: inside;
+      /* These styles keep the footnote from taking on the style of the text
+         surrounding the footnote marker. They can be overridden in the
+         document CSS. */
+      color: #000;
+      font-family: Georgia;
+      font-size: 10.0pt;
+      font-weight: normal;
+    }
+
+    /* Table of contents */
+    #WritelyTableOfContents a::after {
+      content: leader('.') target-counter(attr(href), page);
+    }
+
+    #WritelyTableOfContents a {
+      text-decoration: none;
+      color: black;
+    }
+
+    /* Comments */
+    .writely-comment-yellow {
+      background-color: #ffffd7;
+    }
+    .writely-comment-orange {
+      background-color: #ffe3c0;
+    }
+    .writely-comment-pink {
+      background-color: #ffd7ff;
+    }
+    .writely-comment-green {
+      background-color: #d7ffd7;
+    }
+    .writely-comment-blue {
+      background-color: #d7ffff;
+    }
+    .writely-comment-purple {
+      background-color: #eed7ff;
+    }
+  }
+
+  @page {
+    @top {
+      content: flow(header);
+    }
+    @bottom {
+      content: flow(footer);
+    }
+    @footnotes {
+      border-top: solid black thin;
+      padding-top: 8pt;
+    }
+  }
+  /* end default print css */
+
+
+/* custom css */
+
+body {
+  counter-reset: level1;
+  text-align: justify !important;
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  color: #666 !important;
+  font-size: 62.5%;
+}
+.container {
+  margin: 0 auto;
+  padding-top: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 50px;
+  position: relative;
+  width: 650px;
+  background-color: #ffffff !important;
+}
+.outside {
+  background-color: #efefef;
+}
+h1:before {
+  content: counter(level1) ". ";
+  counter-increment: level1;
+  font-weight: bold;
+  color: #ff7800;
+  /* text-shadow: #bbb 2px 2px; */
+}
+h1 {
+  margin: 0px;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #6b6b89;
+  counter-reset: level2;
+}
+h2:before {
+  content: counter(level1) ". " counter(level2) " ";
+  font-weight: bold;
+  color: #ff7800;
+  /* text-shadow: #bbb 2px 2px; */
+}
+h2 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  color: #6b6b89;
+  counter-increment: level2;
+}
+h3:before {
+  content: counter(level1) ". " counter(level2) ". " counter(level3) " ";
+  font-weight: bold;
+  color: #ff7800;
+  /* text-shadow: #bbb 2px 2px; */
+}
+h3 {
+  margin-top: 1.2em;
+  margin-bottom: 1.1em;
+  color: #6b6b89;
+  counter-increment: level3;
+}
+h4:before {
+  content: counter(level1) ". " counter(level2) ". " counter(level3) ". " counter(level4) ". ";
+  font-weight: bold;
+  color: #ff7800;
+  /* text-shadow: #bbb 2px 2px; */
+}
+h4 {
+  margin-top: 1.2em;
+  margin-bottom: 1.1em;
+  color: #6b6b89;
+  counter-increment: level4;
+}
+.note {
+  margin: 0px;
+  color: #222222;
+  font-size: x-small;
+  font-weight: normal;
+}
+ul {
+}
+.highlight {
+  color: #448844;
+  background: #eeeeee;
+}
+.console {
+  color: #882222;
+  font-weight: bold;
+  font-family: "Courier",Georgia,Serif;
+}
+blockquote {
+  border: 3px single #aaaaaa;
+  font-family: Garamond;
+  padding: 10px 10px 10px 100px;
+  margin: 0 0px;
+  background-image: url('ad8wdwbvms_887fk6jk2hh_b.gif');
+  background-repeat: no-repeat;
+}
+.caps {
+  font-variant: small-caps;
+  font-weight: bold;
+}
+.orangeBox {
+  background: #fff6bf;
+  text-align: justify;
+  padding: 5px 15px 5px 15px;
+  border-top: 2px solid #ffd324;
+  border-bottom: 2px solid #ffd324;
+  border-left: 2px solid #ffd324;
+  border-right: 2px solid #ffd324;
+  border-radius: 5px;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.blueBox {
+  background: #f8fafc;
+  text-align: center;
+  padding: 5px 15px 5px 15px;
+  border-top: 2px solid #b5d4fe;
+  border-bottom: 2px solid #b5d4fe;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+a:link {
+  color: #6b6b89;
+  text-decoration: underline;
+}
+a:active {
+  color: #6b6b89;
+  text-decoration: underline;
+}
+a:visited {
+  color: #6b6b89;
+  text-decoration: underline;
+}
+a:hover {
+  color: #ff7800;
+  text-decoration: none;
+}
+/* Das hier versteht der IE 6 nicht :) */
+html>body {
+  font-size: 10px;
+}
+p {
+  font-size: 1.1em;
+  line-height: 1.5em;
+  margin-bottom: 1.2em;
+}
+div {
+  font-size: 1.1em;
+  line-height: 1.5em;
+  margin-bottom: 1.2em;
+}
+.haupttext p, .haupttext h1 {
+  margin: 1em 0;
+}
+.tables {
+}
+.tables ul {
+  font-size: 1.0em;
+  margin-left: 0.2em;
+  padding-top: 0.2em;
+  margin-bottom: 0.2em;
+  padding-left: 1.2em;
+  line-height: 1em;
+}
+.tables li {
+  margin-bottom: 0.5em;
+  margin-left: 0.2em;
+  font-size: 90%;
+}
+.tables ol {
+  margin-left: 0em;
+  margin-left: 0.2em;
+}
+.haupttext {
+  font-size: 1.4em;
+  text-indent: 1.5em;
+}
+.haupttext div {
+  font-size: 90%;
+}
+.haupttext h1 {
+  text-indent: 0;
+  margin-bottom: 1.2em;
+}
+.haupttext h2 {
+  text-indent: 0;
+}
+.haupttext h3 {
+  text-indent: 0;
+  margin-bottom: 1.2em;
+}
+.haupttext p:first-letter {
+  /* font-size: 1.5em; */
+}
+.haupttext ul {
+  font-size: 1.1em;
+  line-height: 1em;
+}
+.haupttext li {
+  margin-bottom: 0.5em;
+  margin-left: 0.3em;
+  line-height: 1.2em;
+  font-size: 80%;
+  text-indent: 0.2em;
+}
+.haupttext ol {
+  margin-left: 0em;
+}
+.haupttext .orangeBox {
+  margin-left: 0em;
+  text-indent: 0em;
+}
+
+/* end custom css */
+
+/* ui edited css */
+
+body {
+  font-family: Georgia;
+
+  font-size: 10.0pt;
+  line-height: 1.5;
+  background-color: #ffffff;
+}
+/* end ui edited css */
+
+
+/* editor CSS */
+.editor a:visited {color: #551A8B}
+.editor table.zeroBorder {border: 1px dotted gray}
+.editor table.zeroBorder td {border: 1px dotted gray}
+.editor table.zeroBorder th {border: 1px dotted gray}
+
+
+.editor div.google_header, .editor div.google_footer {
+  border: 2px #DDDDDD dashed;
+  position: static;
+  width: 100%;
+  min-height: 2em;
+}
+
+.editor .misspell {background-color: yellow}
+
+.editor .writely-comment {
+  font-size: 9pt;
+  line-height: 1.4;
+  padding: 1px;
+  border: 1px dashed #C0C0C0
+}
+
+
+/* end editor CSS */
+
+</style>
+
+
+  <title>olex2 commands</title>
+
+</head>
+
+<body
+
+    >
+
+
+
+<div class=outside>
+  <div class=container>
+    <div id=ayap style=TEXT-ALIGN:right>
+      <br>
+      <br>
+    </div>
+    <div id=b-v- style=TEXT-ALIGN:center>
+      <b>&nbsp;</b>
+    </div>
+    <b><font color=#6b6b89><font size=6>Olex2 Manual (Commands)</font></font></b>
+  </div>
+  <div class=container>
+    <b><font color=#ff0000><font size=2>Draft: December, 2010</font></font></b>
+  </div>
+  <div class=container>
+    <div class=writely-toc id=WritelyTableOfContents toctype=decimal+none>
+      <ol class=writely-toc-decimal>
+        <li>
+          <a href=#Introduction_28545915335416794_5313180042430758 target=_self>Introduction</a>
+        </li>
+        <li>
+          <a href=#Understanding_the_Syntax_70771 target=_self>Understanding the Syntax</a>
+        </li>
+        <li>
+          <a href=#Tables_of_Olex2_Commands_94725 target=_self>Tables of Olex2 Commands</a>
+        </li>
+        <ol class="writely-toc-none writely-toc-subheading" style=MARGIN-LEFT:0px>
+          <li>
+            <a href=#Changing_the_Model_View_583167 target=_self>Changing the Model View</a>
+          </li>
+          <li>
+            <a href=#Keyboard_Shortcuts_82907393109 target=_self>Keyboard Shortcuts</a>
+          </li>
+          <li>
+            <a href=#Fixed_Refined_Parameters_16242 target=_self>Fixed/Refined Parameters</a>
+          </li>
+          <li>
+            <a href=#Atom_Connectivity_Table_Manipu target=_self>Atom Connectivity Table Manipulation</a>
+          </li>
+          <li>
+            <a href=#Symmetry_Operations_3757403371 target=_self>Symmetry Operations</a>
+          </li>
+          <li>
+            <a href=#Disorder_Modelling_Constraints target=_self>Disorder Modelling: Constraints and Restraints</a>
+          </li>
+          <li>
+            <a href=#Selection_Syntax_7956895129755 target=_self>Selection Syntax</a>
+          </li>
+          <li>
+            <a href=#HKL_file_Operations_5438779126 target=_self>HKL file Operations</a>
+          </li>
+          <li>
+            <a href=#Customising_the_Olex2_GUI_8897 target=_self>Customising the Olex2 GUI</a>
+          </li>
+          <li>
+            <a href=#Output_Tables_Reports_and_Imag target=_self>Output: Tables, Reports and Images</a>
+          </li>
+          <li>
+            <a href=#Structure_Analysis_77378220390 target=_self>Structure Analysis</a>
+          </li>
+        </ol>
+        <li>
+          <a href=#How_to_7525797616690397_248763_4196302304044366 target=_self>How to...?</a>
+        </li>
+        <ol class="writely-toc-none writely-toc-subheading" style=MARGIN-LEFT:0px>
+          <li>
+            <a href=#Overlay_molecules_795407803729_051836892031133175 target=_self>Overlay molecules</a>
+          </li>
+          <li>
+            <a href=#Copy_naming_scheme_from_one_fr target=_self>Copy naming scheme from one fragment to another</a>
+          </li>
+          <li>
+            <a href=#Get_esd_s_on_geometric_measure_06445521675050259 target=_self>Get esd's on geometric measurements</a>
+          </li>
+          <li>
+            <a href=#Get_a_stereo_view_487458711490 target=_self>Get a stereo view</a>
+          </li>
+          <li>
+            <a href=#Pack_or_grow_molecule_s_761062_2766848988831043 target=_self>Pack or grow molecule(s)</a>
+          </li>
+          <li>
+            <a href=#Change_P1_space_group_to_P_1_9 target=_self>Change P1 space group to P-1</a>
+          </li>
+          <li>
+            <a href=#Change_space_group_settings_20_3541402528062463 target=_self>Change space group settings</a>
+          </li>
+          <li>
+            <a href=#To_control_console_and_graphic target=_self>To control console and graphics visibility</a>
+          </li>
+          <li>
+            <a href=#Select_atoms_that_became_too_s target=_self>Select atoms that became 'too small'</a>
+          </li>
+          <li>
+            <a href=#Use_ShelX_programs_in_Olex2_86 target=_self>Use ShelX programs in Olex2</a>
+          </li>
+          <li>
+            <a href=#Change_default_programs_824793141335249 target=_self>Change default programs</a>
+          </li>
+          <li>
+            <a href=#Working_with_the_Maps_display_8926176372915506 target=_self>Working with the Maps display</a>
+          </li>
+          <li>
+            <a href=#Fix_tooltips_problems_9572209371253848 target=_self>Fix tooltips problems</a>
+          </li>
+        </ol>
+        <li>
+          <a href=#Appendix_745303314179182_74507 target=_self>Appendix</a>
+        </li>
+        <ol class="writely-toc-none writely-toc-subheading" style=MARGIN-LEFT:0px>
+          <li>
+            <a href=#About_Versions_and_Tags_243735 target=_self>About Versions and Tags</a>
+          </li>
+          <li>
+            <a href=#Installing_Olex2_6555415214970 target=_self>Installing Olex2</a>
+          </li>
+          <ol class="writely-toc-none writely-toc-subheading" style=MARGIN-LEFT:0px>
+            <li>
+              <a href=#Windows_08184444066137075_3901 target=_self>Windows:</a>
+            </li>
+          </ol>
+          <li>
+            <a href=#External_Progams_7345755221322 target=_self>External Programs</a>
+          </li>
+          <ol class="writely-toc-none writely-toc-subheading" style=MARGIN-LEFT:0px>
+            <li>
+              <a href=#SHELX_9969458160921931_5693663_12589809857308865 target=_self>SHELX</a>
+            </li>
+            <li>
+              <a href=#Platon_054015377536416054_5722_4298744183033705 target=_self>Platon</a>
+            </li>
+            <li>
+              <a href=#SuperFlip_5879412144422531_308_19718943536281586 target=_self>SuperFlip</a>
+            </li>
+          </ol>
+          <li>
+            <a href=#About_Macros_and_Scripting_in_ target=_self>About Macros and Scripting in Olex2</a>
+          </li>
+        </ol>
+      </ol>
+    </div>
+    <br>
+    <blockquote>
+      <font size=2>This document describes some of the commands that are available in Olex2. Many of these commands are also available directly from the Olex2 Graphical User Interface. Most items on the GUI have a small 'info' symbol next to them, where you can find out more about any of these items.</font>
+    </blockquote>
+    <br>
+    <div class=haupttext>
+      <h1>
+        <a id=Introduction_28545915335416794_5313180042430758 name=Introduction_28545915335416794_5313180042430758></a>Introduction
+      </h1>
+      <div>
+        There is no special console window in Olex2 – the commands described in this document can be typed where ever you are in Olex2 and the text you type (as well as the program response) will appear in the bottom left hand corner of the main window. The text will then scroll up behind the displayed molecule. The number of lines of text that are visible can be set with the command <span class=console>lines <i>n</i></span><i><b>. </b><span style=FONT-STYLE:normal>You can also toggle between showing the </span><span style=FONT-STYLE:normal><b>molecule only</b></span><span style=FONT-STYLE:normal>, showing the </span><span style=FONT-STYLE:normal><b>text only</b></span><span style=FONT-STYLE:normal> and showing both at the same time (default) using </span><span style=FONT-STYLE:normal><font class=caps>Ctr+T</font></span><span style=FONT-STYLE:normal>. You can always examine the text output in your default text editor by typing </span><span style=FONT-STYLE:normal><font class=console>text</font><font color=#000000 face=Verdana>.</font></span></i>
+      </div>
+      <div>
+        Many commands in Olex2 are modelled on the syntax that may be familiar from SHELX: four letter commands, where the letters often provide a hint about the function of the command. Many commands that are available in ShelXP, for example, can be used in Olex2. Also, all commands of the ShelXL and ShelXS syntax are interpreted by Olex2 and used to construct the internal Olex2 structure model. This model is then used directly to carry out a olex2.refine refinement, whereas a shelx.ins file is generated on the fly if ShelXL/XH is chosen for the refinement.
+      </div>
+      <div>
+        All commands in Olex2 will <b>auto-complete</b> when pressing the TAB key. If the completion is not possible, because there is more than one command starting with the letters that have been typed, a list of these commands will be printed. It is good practice to use the auto-complete feature!
+      </div>
+    </div>
+    <div class=tables>
+      <h1>
+        <a id=Understanding_the_Syntax_70771 name=Understanding_the_Syntax_70771></a>Understanding the Syntax
+      </h1>
+      <font size=2><br>
+      </font>
+      <div class=orangeBox>
+        <b><font size=2>Selection: </font></b><font size=2>If one or more atoms are selected on the screen, then any command that acts on a selection will apply to the </font><i><b><font size=2>selected atoms only</font></b></i><font size=2>. If there is no selection, it will apply to </font><b><i><font size=2>all</font></i> </b><font size=2>atoms. Instead of making a selection on the screen, a list of atom names can also be supplied. </font><i><font size=2>If a command has been successful, the selection will disappear. (Although there are a couple of exceptions to this rule)</font></i>
+      </div>
+      <div>
+        <b><font size=2>Mode: </font></b><font size=2>If Olex2 is in a</font><b><font size=2> Mode</font></b><font size=2>, the chosen action will be applied to all subsequently clicked atoms. The mouse pointer will change from the default arrow symbol to signify that Olex2 is in a mode. To get out of a mode, simply press the </font><font class=caps><font size=2>Esc</font></font><font size=2> key.</font>
+      </div>
+      <div>
+        <b><font size=2>Syntax used in this document:</font></b>
+      </div>
+      <div>
+        <b><font size=2>{a, b, c}</font></b><font size=2>: choice of a, b or c. For example: fix {occu, xyz, Uiso} [atoms] means 'fix occu [atoms]', 'fix xyz [atoms]', 'fix Uiso [atoms]'. </font>
+      </div>
+      <div>
+        <b><font size=2>[val=2]</font></b><font size=2>: optional parameter. This parameter is not required for the command to work, and if it is not supplied, the default value will be used. </font>
+      </div>
+      <div>
+        <font size=2>-</font><b><font size=2>k: </font></b><font size=2>This is an option switch.</font>
+      </div>
+      <br>
+      <div>
+        <i><b><font size=2>i: </font></b><span style=FONT-STYLE:normal><font size=2>Italic characters are used for variables.</font></span></i>
+      </div>
+      <div>
+        <b><font size=2>[atoms]</font></b><font size=2> means an optional list of atoms. Any atoms that are selected will automatically be present in this list. If there are no selected atoms, </font><b><font size=2>all</font></b><font size=2> atoms will be in this list. Alternatively, the atom names of the atoms that should appear in this list can be typed by hand.&nbsp; </font>
+      </div>
+      <p>
+        <b><font size=2>atoms</font></b><font size=2>&nbsp;means a compulsory list of atoms. Any atoms that are selected will automatically be present in this list. Alternatively, the atom names of the atoms that should appear in this list can be typed by hand.</font>
+      </p>
+      <div>
+        <b><font size=2>Capital Letters</font></b><font size=2> are used for commands that will directly affect the structure model in the refinement. These commands will become part of the structure model and will appear in the ShelX input file. Please note that these commands can be typed either in upper or lower case. </font>
+      </div>
+      <div>
+        <b><font size=2>Example Commands </font></b><font size=2>are represented in this format: </font><font class=console><font size=2>refine 4 20</font></font><font size=2> and can be typed exactly as they are given. In this example, the structure will be refined with 4 refinement cycles and 20 electron density peaks will be returned from the electron density map integration.</font>
+      </div>
+      <h1>
+        <a id=Tables_of_Olex2_Commands_94725 name=Tables_of_Olex2_Commands_94725></a>Tables of Olex2 Commands
+      </h1>
+      <table border=1 bordercolor=#999999 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#ffffff colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Changing_the_Model_View_583167 name=Changing_the_Model_View_583167></a>Changing the Model View
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>matr</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[1,2,3 or abc] or [abc a1b1c1] or [x11 x12 x13 y11 y12 y13 z11 z12 z13]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Orients the model along a (1 or 100), b (2 or 010), c (3 or 001) or any other crystallographic direction, like 123, which sets current normal along (1*a+2*b+3*c) vector. Two crystallographic directions (from and to) may be specified align current view normal along the (to-from) vector. Also a full Cartesian matrix can be specified. If the directions are signed or consist of multiple digits all components should be of the same length like in 120101 or -1+1+1 (same as -10101). If no arguments given, prints current Cartesian orientation matrix.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Examples</font></b><font size=2>:</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font class=console><font size=2>matr 1</font></font><font size=2> or </font><font class=console><font size=2>matr </font></font><i><font color=#990000><font size=2>a</font></font></i><font size=2> or </font><font class=console><font size=2>matr 100</font></font><font size=2> - sets current normal along the crystallographic </font><i><b><font size=2>a</font></b></i><font size=2> direction</font>
+              </li>
+              <li>
+                <font class=console><font size=2>matr 100 011</font></font><font size=2> sets current normal along (011-100) direction (the normal direction changes if from and to are swapped)&nbsp;</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>rota</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[axis angle] or [x y z angle increment]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Changes current view by rotating around given axis (x, y or z) when two arguments are provided and makes a continuous rotation around give axis when 5 arguments are provided. Note that X axis is aligned horizontally, Y - vertically and Z is out of the screen plane.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Examples</font></b><font size=2>:</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font class=console><font size=2>rota x 90</font></font><font size=2> rotates the structure 90 degrees around X axis</font>
+              </li>
+              <li>
+                <font class=console><font size=2>rota 0 0 1 90 1</font></font><font size=2> rotates model in the screen plane (around Z) 90 degrees with 1 degree increment.&nbsp;</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>direction</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <br>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>The command prints current normal in crystallographic coordinates and tries to match it to a crystallographic direction.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>mpln</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font size=2><font size=2>[</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font color=#448844><font style=BACKGROUND-COLOR:#eeeeee><font size=2>atoms</font></font></font></span></font><font style=BACKGROUND-COLOR:#eeeeee><font size=2>]</font></font>] [</font><b><font size=2>-n</font></b><font size=2>] [</font><b><font size=2>-r</font></b><font size=2>]</font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Finds the best plane through the current selection or given atoms, or out of all visible atoms if none are given.<br>
+            </font>
+            <ul>
+              <li>
+                <font size=2><b>-n</b>:<b>&nbsp;</b></font><font size=2>sets the view along the normal of the plane</font>
+              </li>
+              <li>
+                <font size=2>-<b>r</b>: creates a regular plane</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <div>
+        <font size=2>The model can be </font><i><b><font size=2>rotated</font></b></i><font size=2> using by moving the mouse pointer while holding the left mouse button down (also Shift+arrow keys); </font><i><b><font size=2>rotated around Z</font></b></i><font size=2> by pressing the </font><font class=caps><font size=2>Ctrl</font></font><font size=2> key down while rotating; </font><i><b><font size=2>zoomed</font></b></i><font size=2> using the right mouse button (also Shift+Home/End or Alt key+left mouse button); <i><b>shifted in the viewing plane</b></i> by pressing Ctrl+Shift and holding the right mouse button down. The default mouse behaviour can be overridden in some modes (look at mode split) also some objects, like cell basis or text boxes can override some mouse operations (like zooming on the cell basis) or extend it (moving the basis while holding Shift key down).</font>
+      </div>
+      <br>
+      <table border=1 bordercolor=#999999 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#ffffff colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Keyboard_Shortcuts_82907393109 name=Keyboard_Shortcuts_82907393109></a>Keyboard Shortcuts
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=caps><font size=2>Ctrl+Q</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=console><font size=2>ShowQ</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Toggles between three states:</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>show electron density peaks</font>
+              </li>
+              <li>
+                <font size=2>show electron density peaks with bonds</font>
+              </li>
+              <li>
+                <font size=2>hides electron density peaks</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=caps><font size=2>Ctrl+H</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=console><font size=2>ShowH</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Toggles between three states:</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>show hydrogen atoms</font>
+              </li>
+              <li>
+                <font size=2>show hydrogens with internal h-bonds</font>
+              </li>
+              <li>
+                <font size=2>hides hydrogen atoms</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=caps><font size=2>Ctrl+T</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=console><font size=2>ShowStr</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Toggles between three states:</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>show structure only</font>
+              </li>
+              <li>
+                <font size=2>show show structure and text</font>
+              </li>
+              <li>
+                <font size=2>show text only</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=caps><font size=2>Ctrl+I</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=console><font size=2>sel -i</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Inverts the current selection.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=caps><font size=2>Ctrl+A</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font class=console><font size=2>sel -a</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Selects all atoms currently visible, however if labels are active (i.e. one or more label is selected) then this selects all labels.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <font class=caps><font size=2>Ctrl+U</font></font>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>sel -u</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Deselects all of current selection.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <font class=caps><font size=2>Ctrl+G</font></font>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>mode grow</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Enters mode grow. &nbsp;See also&nbsp;</font><a href=#mode_grow id=z:-8 target=_self title="mode grow"><font size=2>symmetry operations</font></a><font size=2>.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <font class=caps><font size=2>Ctrl+O</font></font>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>reap</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Brings up the Open File dialogue.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F2</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>swapbg</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Swaps the background between white and coloured.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F3</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>labels</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Toggles labels on/off.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F4</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font class=console><font size=2>grad -i</font></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Toggles gradient background on/off.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F5</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Go to the </font><b><font size=2>work </font></b><font size=2>menu.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F6</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Go to the </font><b><font size=2>view </font></b><font size=2>menu.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F7</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Go to the&nbsp;</font><b><font size=2>tools&nbsp;</font></b><font size=2>menu.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F8</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Go to the&nbsp;</font><b><font size=2>info&nbsp;</font></b><font size=2>menu.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>F11</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font color=#882222 face="courier, georgia, serif"><b><font size=2>Fullscreen(true/false)</font></b></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Toggles full screen mode on/off.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>Shift+F11</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font color=#882222 face="Courier, Georgia, serif"><b><font size=2>HtmlPanelVisible</font></b></font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Toggles html panel on/off.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <font class=caps><font size=2>Esc</font></font>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Exits current mode (some modes, like mode </font><i><font size=2>match</font></i><font size=2>, can override this), clears current selection and text in the command line</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>Break</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Interrupts the solution/refinement after the current cycle.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b>Del</b> (Ctrl+Backspace on Mac)
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <b><font color=#990000>kill</font></b>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Deletes selected object
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      </p>
+      <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      </p>
+      <p>
+      </p>
+      <p>
+      </p>
+      <br>
+      <br>
+      <table border=1 bordercolor=#999999 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#ffffff colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Fixed_Refined_Parameters_16242 name=Fixed_Refined_Parameters_16242></a>Fixed/Refined Parameters
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>fix</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>{occu, xyz, Uiso} [</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span></font><font style=BACKGROUND-COLOR:#eeeeee><font size=2>]</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Fixes the specified refinement parameter, ie these parameters will not be refined in subsequent refinement cycles.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>occu</font></b><font size=2>: will fix the occupancy&nbsp;</font>
+              </li>
+              <li>
+                <b><font size=2>xyz</font></b><font size=2>: will fix the xyz coordinates</font>
+              </li>
+              <li>
+                <b><font size=2>Uiso</font></b><font size=2>: will fix the whole ADP</font>
+              </li>
+            </ul>
+            <b><font size=2>Examples:<br>
+            </font></b>
+            <ul>
+              <li>
+                <font class=console><font size=2>fix occu 0.5</font></font><font size=2>: will set and fix the occupancy of the current selection to 0.5</font>
+              </li>
+              <li>
+                <font class=console><font size=2>fix xyz</font></font><font size=2>: will fix the x, y and z co-ordinates of the currently selected atoms, ie not refine them.&nbsp;</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>free</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>{occu, xyz, Uiso} [</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span><font size=2>]</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>The opposite of fix - makes the specified parameters for the given atoms refineable. Feeing the occupancy is also available from the context menu.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>fixu</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Fixes Uiso or ADP for subsequently clicked atoms.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>fixxyz</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Fixes coordinates for subsequently clicked atoms.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>occu occupancy_to_set</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Sets atoms occupancy to the povided value for subsequently clicked atoms.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <span class=note><a id=labels_f_show_currently_fixed_ name=labels_f_show_currently_fixed_></a><span class=console><font size=2>labels -f</font></span><font size=2> show currently fixed atomic parameters, </font><span class=console><font size=2>labels -f -r</font></span><font size=2> show labels for fixed atoms and also the number at which the occupancy of riding atoms is fixed</font></span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+      </p>
+      <p>
+        <br>
+      </p>
+      <p>
+        <br>
+      </p>
+      <p>
+      </p>
+      <table bgcolor=#ffffff border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Atom_Connectivity_Table_Manipu name=Atom_Connectivity_Table_Manipu></a>Atom Connectivity Table Manipulation
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>conn</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <i><b><font size=2>n</font></b></i><font size=2> [</font><i><b><font size=2>r</font></b></i><font size=2>] </font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Sets the maximum number of bonds for the specified &nbsp;atoms to </font><i><b><font size=2>n</font></b></i><font size=2>&nbsp;and changes the default bond radius for the given atom type to </font><i><b><font size=2>r.</font></b></i>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Examples:</font></b>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <span class=console><font size=2>conn 5 $C</font></span><font size=2>&nbsp;sets the maximum number of bonds all C atoms can have to 5,</font>
+              </li>
+              <li>
+                <b><span class=console><font size=2>conn 1.3 $C</font></span></b><font size=2>&nbsp;changes the bonding radius for C atoms to 1.3 (the floating point is used to distinguish between </font><b><i><font size=2>n</font></i></b><font size=2> and </font><b><i><font size=2>r</font></i></b><font size=2> in this case!),</font>
+              </li>
+              <li>
+                <b><span class=console><font size=2>conn 5 1.3 $C</font></span></b><font size=2>&nbsp;combines the two commands above</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#ffffff style=WIDTH:59.4pt valign=top width=79>
+            <b><font style=BACKGROUND-COLOR:#ffffff><font size=2>compaq</font></font></b><br>
+          </td>
+          <td bgcolor=#ffffff style=WIDTH:126pt valign=top width=168>
+            <font size=2>[</font><b><font size=2>-a</font></b><font size=2>] [</font><b><font size=2>-c</font></b><font size=2>] [</font><b><font size=2>-q</font></b><font size=2>]</font>
+          </td>
+          <td bgcolor=#ffffff style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>Moves all atoms or fragments of the asymmetric unit as close to each other as possible. If no options are provided, all fragments are assembled around the largest one.<br>
+            </font>
+            <ul>
+              <li>
+                <font size=2>-</font><b><font size=2>a:</font></b><font size=2>&nbsp;assembles broken fragments </font>
+              </li>
+              <li>
+                <font size=2>-</font><b><font size=2>c:</font></b><font size=2>&nbsp;similar to the default behaviour, but considers atom-to-atom distances and will move all atoms to the closest possible position to the largest fragment in the structure. </font>
+              </li>
+              <li>
+                <b><font size=2>-q:</font></b><font size=2>&nbsp;moves the electron density peaks close to the atoms.</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>addbond</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>A1</font></b> <b><font size=2>A2</font></b> <i><font size=2>or </font></i><span class=highlight><font size=2>atoms</font></span>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Adds a bond to the connectivity list for the specified atoms. This operation will also be successful if symmetry equivalent atoms are specified.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>delbond</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>A1</font></b> <b><font size=2>A2</font></b>&nbsp;<i><font size=2>or </font></i><font size=2>Selected bond(s)</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Removes selected bonds from the connectivity list.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b><font size=2>sort</font></b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>[</font><b><font size=2>m</font></b><font size=2>] [</font><b><font size=2>l</font></b><font size=2>] [</font><b><font size=2>p</font></b><font size=2>] [</font><b><font size=2>h</font></b><font size=2>] atoms<br>
+            [</font><b><font size=2>s</font></b><font size=2>] [</font><b><font size=2>h</font></b><font size=2>] [</font><b><font size=2>m</font></b><font size=2>] moiety</font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>The sorting of atoms in the atom list is very powerful, but also quite complex .<br>
+            </font>
+            <div>
+              <ul>
+                <li>
+                  <b><font size=2>-m</font></b><font size=2>: atomic weight</font>
+                </li>
+                <li>
+                  <b><font size=2>-l</font></b><font size=2>: label, considering numbers</font>
+                </li>
+                <li>
+                  <b><font size=2>-p</font></b><font size=2>: part, 0 is first followed by all positive parts in ascending order and then negative ones</font>
+                </li>
+                <li>
+                  <b><font size=2>-h</font></b><font size=2>: to treat hydrogen atoms independent of the pivot atom.</font>
+                </li>
+              </ul>
+              <font size=2><br>
+              Sorting of moieties</font>
+            </div>
+            <ul>
+              <li>
+                <b><font size=2>-s</font></b><font size=2>: by size</font>
+              </li>
+              <li>
+                <b><font size=2>-h</font></b><font size=2>: by heaviest atom</font>
+              </li>
+              <li>
+                <b><font size=2>-m</font></b><font size=2>: by molecular weight</font>
+              </li>
+            </ul>
+            <br>
+            <div>
+              <b><font size=2>Usage:</font></b>
+            </div>
+            <div>
+              <ul style=MARGIN-LEFT:18px>
+                <li>
+                  <div style=TEXT-ALIGN:justify>
+                    <font size=2>sort [+atom_sort_type] TBA</font>
+                  </div>
+                  <div style=TEXT-ALIGN:justify>
+                    <font size=2>sort [Atoms] [moiety [+moiety_sort_type] [moiety_atoms]] If just 'moiety' is provided - the atoms will be split into the moieties without sorting.</font>
+                  </div>
+                </li>
+              </ul>
+              <br>
+              <b><font size=2>Examples:</font></b>
+            </div>
+            <ul style=MARGIN-LEFT:18px>
+              <li>
+                <span class=console><font face="courier, georgia, serif"><font color=#882222><font size=2>sort +m1 F2 F1 moiety +s</font></font></font></span><font size=2>&nbsp;will sort atoms by atomic </font><b><font size=2>m</font></b><font size=2>ass and </font><b><font size=2>l</font></b><font size=2>abel, put F1 after F2 and form moieties sorted by </font><b><font size=2>s</font></b><font size=2>ize. Note that when sorting atoms, any subsequent sort type operates inside the groups created by the preceeding sort types.</font><br>
+              </li>
+            </ul>
+            <br>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <span class=note><a id=Olex2_will_display_the_altered name=Olex2_will_display_the_altered></a><font size=2>Olex2 will display the altered connectivity table in the case if structure is grown or packed</font></span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Symmetry_Operations_3757403371 name=Symmetry_Operations_3757403371></a>Symmetry Operations
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3>
+            <br>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>lstsymm</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              &nbsp;
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Prints symmetry operations and their codes for current structure.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>envi</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <i><font size=2>[<b>r=</b></font></i><font size=2>2.7 Å] </font><b><font size=2>A1</font></b> <i><font size=2>or</font></i>&nbsp;<font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>one selected atom</font></span></font><font size=2> [</font><b><font size=2>-h</font></b><font size=2>] [</font><b><font size=2>-q</font></b><font size=2>] </font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Note:</font></b><font size=2> if more than one atom is selected the first one is used</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Prints a list of those atoms within a sphere of radius </font><b><i><font size=2>r</font></i></b><font size=2>&nbsp;around the specified atom.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>-h</font></b><font size=2>: adds hydrogen atoms to the list</font>
+              </li>
+              <li>
+                <b><font size=2>-q</font></b><font size=2>: option adds Q-peaks to the list</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><a id=mode_grow name=mode_grow></a><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>grow</font></b><font size=2> [-</font><i><span style=FONT-STYLE:normal><b><font size=2>s</font></b></span><span style=FONT-STYLE:normal><font size=2>]</font></span><b>&nbsp;</b></i><font size=2>[-</font><i><b><font size=2>v</font></b><span style=FONT-STYLE:normal><font size=2>] [-</font><b><font size=2>b</font></b><font size=2>]</font></span></i>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Displays the directions in which the molecule can be grown</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>-</font><b><i><font size=2>s</font></i><font size=2>:</font></b><font size=2>&nbsp;also shows the short interaction directions</font>
+              </li>
+              <li>
+                <font size=2>-</font><b><i><font size=2>v:&nbsp;</font></i></b><font size=2>[2.0 Å] shows directions to the molecules within </font><b><i><font size=2>v</font></i></b><font size=2>&nbsp;value of the Van der Waals radii of the selected atoms which can be generated by clicking on the direction representations, only unique symmetry operations (producing shortest contacts are displayed)</font>
+              </li>
+              <li>
+                <font size=2>-</font><b><i><font size=2>r</font></i><font size=2>:</font></b><font size=2>&nbsp;shows directions to all symmetry equivalent atoms atoms of the selected one(s) within 15 Å</font>
+              </li>
+              <li>
+                <font size=2>shortcut </font><font class=caps><font size=2>Ctrl+g</font></font><font size=2>&nbsp;is used to enter the '</font><b><font size=2>mode grow</font></b><font size=2>'</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pack</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Displays the position of symmetry equivalent asymmetric units as tetrahedra. These asymmetric units can be generated by clicking on the corresponding tetrahedron.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>sgen</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <span class=highlight><font size=2>atoms</font></span>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>The Symmetry operation is represented as 1_555, 1555 or -1+X,Y,Z and atoms as a selection or a names list</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Generates symmetry equivalents of the provided (or all atoms, if there is no selection) using the provided symmetry operation.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Note:</font></b><font size=2> For symmetry operations starting with '-' and letter, a leading zero must be added, for example, </font><b><font size=2>0-x,-y,-z</font></b><font size=2>, otherwise Olex2 confuses this with an option.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pack</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>a_from a_to b_from b_to c_from c_to</font></b><font size=2> [</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span><font size=2>]</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Packs all or specified atoms within given dimensions</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>-c</font><font size=2>:</font></b><font size=2>&nbsp;prevents clearing existing model</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Example:</font></b>&nbsp;&nbsp;<b><span class=console><font size=2>pack $O</font></span></b><font size=2>&nbsp;will pack all O atoms with the default of -1.5 to 1.5 cells range.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b>pack</b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <b>from to</b>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Equivalent to '<b>pack from to from to from to</b>', like '<b>pack 0 1</b>' is expanded to <b>'pack 0 1 0 1 0 1</b>'
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pack</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>cell</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Shows content of the unit cell. In conjunction with '</font><b><font size=2>grow -w</font></b><font size=2>' allows the creation of views where all asymmetric units contributing to the unit cell are shown.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pack</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><i><font size=2>r</font></i></b>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Packs fragments within radius&nbsp;</font><b><i><font size=2>r</font></i></b><font size=2>&nbsp;of the selected atom(s) or the centre of gravity of the asymmetric unit.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>grow</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span><font size=2>] [</font><b><font size=2>-w</font></b><font size=2>]</font></font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Grows all possible/given atoms; for polymeric structures or structures that require to be grown several times Olex2 will continue grow until the operation results in a symmetry element that has been used previously.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>-w</font><font size=2>:</font></b><font size=2>&nbsp;permits the application of symmetry previously used operations to other fragments of the asymmetric unit</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Example:</font></b><font size=2> If the main molecule is grown, but only one solvent molecule is shown, using '</font><b><font size=2>grow -w</font></b><font size=2>' will produce other solvent molecules using symmetry operators used to grow the main molecule</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <span class=note><a id=If_some_atoms_are_deleted_afte name=If_some_atoms_are_deleted_afte></a><font size=2>If some atoms are deleted after growing operations, Olex2 will use existing unique atoms as the asymmetric unit atoms; this can be helpful to avoid a sequence of sgen/kill commands.<br>
+            </font></span>
+            <div>
+              <span class=note><b><font size=2>labels -l -i</font></b><font size=2>: Adds labels only to the 'original' - i.e. not created by symmetry - molecule.</font></span>
+            </div>
+            <span class=note><font size=2>In a packed structure:&nbsp;</font><b><font size=2>Right-click on a bond &gt; Graphics &gt; Select the Groups(s)</font></b><font size=2>: Will select all bonds (or atoms) of that type in the grown structure.</font></span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Disorder_Modelling_Constraints name=Disorder_Modelling_Constraints></a>Disorder Modelling: Constraints and Restraints
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>EXYZ</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atom types</font></span></font><font size=2>&nbsp;(to add for the selected atom)<br>
+              [-</font><b><font size=2>EADP</font></b><font size=2>]<br>
+              [-</font><b><font size=2>lo</font></b><font size=2>] </font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Makes the selected site shared by atoms of several atom types.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>-EADP</font><font size=2>:</font></b><font size=2>&nbsp;adds the equivalent ADPs command for all atoms sharing one site.</font>
+              </li>
+              <li>
+                <b><font size=2>-lo</font><font size=2>:</font></b><font size=2>&nbsp;links the occupancy of the atoms sharing the site through a free variable.</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>EADP</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <span class=highlight><font size=2>atoms</font></span>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Makes the ADP of the specified atoms equivalent.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>SADI</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font color=#38761d><font size=2>atoms </font><i><font color=#000000><font size=2>or</font></font></i><font size=2> bonds&nbsp;</font></font><font size=2>[<b>esd</b>=0.02]</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>For selected bonds or atom pairs </font><b><font size=2>SADI</font></b><font size=2> makes the distances specified by selecting bonds or atom pairs similar within the esd.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>If only </font><b><font size=2>one</font></b><font size=2> atom is selected it is considered to belong to a regular molecule (like PF</font><sub><font size=2>6</font></sub><font size=2>) and adds similarity restraints for P-F and F-F distances.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>For </font><b><font size=2>three</font></b><font size=2> selected atoms (</font><b><font size=2>A1</font></b><font size=2>,</font><b><font size=2>A2</font></b><font size=2>,</font><b><font size=2>A3</font></b><font size=2>) it creates similarity restraint for </font><b><font size=2>A1-A2</font></b><font size=2> and </font><b><font size=2>A2-A3</font></b><font size=2> distances.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>DFIX</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <i><b><font size=2>d&nbsp;</font></b><span style=FONT-STYLE:normal><span class=highlight><font size=2>atom pairs</font></span><font size=2> or </font><span class=highlight><font size=2>pairwise selection</font></span><font size=2> in order&nbsp;</font></span></i><font size=2>[<b>esd</b>=0.02]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>For selected bonds or atom pairs </font><b><font size=2>DFIX</font></b><font size=2> will generate length fixing restraint with the given esd.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>If only </font><b><font size=2>one</font></b><font size=2> atom is selected, all outgoing bonds of that atom will be fixed to the given length with provided esd. For </font><b><font size=2>three</font></b><font size=2> selected atoms (</font><b><font size=2>A1</font></b><font size=2>,</font><b><font size=2>A2</font></b><font size=2>,</font><b><font size=2>A3</font></b><font size=2>) the A1-A2 and A2-A3 restraints will be generated.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>DANG</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><i><font size=2>d</font></i></b> <span class=highlight><font size=2>atom pairs</font></span> <i><font size=2>or</font></i> <span class=highlight><font size=2>pairwise selection</font></span><font size=2> in order&nbsp; [<b>esd</b>=0.04] </font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>For selected bonds or atom pairs, distance restraints similar to dfix will be generated.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>tria</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><i><font size=2>d1</font></i></b> <b><i><font size=2>d2</font></i></b> <i><b><font size=2>angle&nbsp;</font></b><span style=FONT-STYLE:normal><font size=2>[<b>esd</b>=0.02]</font></span></i>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>For given set of bond pairs sharing an atom or atom triplets generates two dfix commands and one dang command.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Example:</font></b> <b><span class=console><font size=2>tria 1 1 180 C1 C2 C3</font></span></b><font size=2>&nbsp;will generate 'DFIX 1 0.02 C1 C2 &nbsp;C2 C3' and 'DANG 2 0.04 C1 C3' it will calculate the distance for dang from d1 d2 and the angle.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>FLAT</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span></font><font size=2>][<b>esd</b>=0.1]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Restrains given fragment to be flat (can be used on the grown structure) within given esd.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>CHIV</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><font style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span></font><font size=2>][</font><b><i><font size=2>val</font></i></b><font size=2>=0] [<b>esd</b>=0.1] </font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Restrains the chiral volume of the provided group to be </font><b><i><font size=2>val</font></i></b><font size=2>&nbsp;within given esd</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>SIMU</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><b><i><font size=2>d</font></i></b><font size=2>=1.7] [<b>esd12</b>=0.04] [<b>esd13</b>=0.08]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Restrains the ADPs of all 1,2 and 1,3 pairs within the given atoms to be similar with the given esd.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>DELU&nbsp;&nbsp; &nbsp;</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[<b>esd12</b>=0.01] [<b>esd13</b>=0.01]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>'rigid bond' restraint</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>ISOR</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[<b>esd</b>=0.1] [<b>esd_terminal</b>=0.2]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Restrains the ADP of the given atom(s) to be approximately isotropic</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>SAME</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>N</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Splits the selected atoms into the N groups and applies the SAME restraint to them. Olex2 will manage the order of atoms within the ins file, however mixing rigid group constraints and the 'same' instructions might lead to an erroneous instruction file.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#ffffff style=WIDTH:59.4pt valign=top width=79>
+            <b><font style=BACKGROUND-COLOR:#ffffff><font size=2>showp</font></font></b><br>
+          </td>
+          <td bgcolor=#ffffff style=WIDTH:126pt valign=top width=168>
+            <font style=BACKGROUND-COLOR:#ffffff><font size=2>[any]; space separate</font></font><font size=2>d part number(s)<br>
+            </font>
+          </td>
+          <td bgcolor=#ffffff style=WIDTH:240.7pt valign=top width=321>
+            <font style=BACKGROUND-COLOR:#ffffff><font size=2>Shows only the parts requested: </font><b><font size=2>showp 0 1</font></b><font size=2> will show parts 0 and 1, </font><b><font size=2>showp 0</font></b><font size=2> just part 0. </font><b><font size=2>showp</font></b><font size=2>&nbsp;by itself will display all parts.</font></font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>split</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[-</font><b><font size=2>r</font></b><font size=2>={eadp, isor, simu}]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Splits selected atom(s) along the longest ADP axis into two groups and links their occupancy through a free variable.&nbsp;</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2><b>-r: </b><font size=2>adds specific restraints/constraints (<font size=2>EADP</font><font size=2>,&nbsp;</font><font size=2>ISOR</font><font size=2>&nbsp;or&nbsp;</font><font size=2>SIMU</font>) for the generated atoms</font></font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>AFIX</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>shelx afix number{mn}<br>
+              </font><font size=2>[-<b>n</b>]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>If no are atoms provided and afix corresponds to a fitted group where n is 6 or 9 (such as 106 or 79), all the rings which satisfy the given afix will be automatically made rigid (this is useful in the case of many PPh3 fragments); alternatively a single ring atom can be selected to make that ring rigid. In other cases, depending on afix either 5,6 or 10 atoms will be expected. Special cases of afix 0, 1 and 2 can be used to remove afix, fix all parameters or leave just the coordinates refinable, all other afix instructions will consider the first atom as a pivot atom and the rest - dependent atom.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>-<b>n:</b>&nbsp;&nbsp;consider N-atoms as parts of rings</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>part</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[<b>part</b>=new_part] [</font><span class=highlight><font size=2>atoms</font></span><font size=2>]<br>
+              </font><font size=2>[-<b>p</b>=1]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Changes part number for given/selected atom;</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>&nbsp;<b>-lo</b>: links occupancies of the atoms through a +/-variable or linear equation (SUMP) depending on the -<b>p</b>[=1]</font>
+              </li>
+              <li>
+                <font size=2><b>-p</b>: &nbsp; specifies how many parts to create. If -<b>p</b>=1, -<b>lo</b> is ignored and the given or new part is assigned to the provided atoms.</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>fvar</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><b><i><font size=2>value</font></i></b><font size=2>] [</font><span class=highlight><font size=2>atoms</font></span><font size=2>]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>This command links two or more atoms through a free variable.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2>If </font><b><font size=2>no </font></b><i><b><font size=2>atoms</font></b></i><font size=2> are given the current free variables are printed.</font>
+              </li>
+              <li>
+                <font size=2>If </font><b><font size=2>no </font></b><i><b><font size=2>value</font></b></i><font size=2> is given but two atom names are give, the occupancies of those atoms are linked through a new free variable.</font>
+              </li>
+              <li>
+                <font size=2>If a </font><b><font size=2>value of 0</font></b><font size=2> is given, the occupancy of the specified atoms will be refined freely</font>
+              </li>
+              <li>
+                <font size=2>if the </font><b><font size=2>value is not 0</font></b><font size=2>, the occupancy value of the specified atoms is set to the given value.</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>sump</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[</font><b><i><font size=2>val</font></i></b><font size=2>=1] [<b>esd</b>=0.01]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Creates a new linear equation. If any of the selected atoms has refinable or fixed occupancy, a new variable is added with value 1/(number of given atoms), otherwise already used variable is used with weight of 1.0.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>Example: </font></b><font size=2>If 3 atoms (A1, A2, A3) are selected this command will generate three free variables and insert the </font><b><span class=console><font size=2>r2 1.0 var 3</font></span></b><font size=2>&nbsp;instruction (equivalent to 1.0 = 1.0*occu(A1) + 1.0*occu(A2) + 1.0*occu(A3).</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>mode</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>split [-</font><b><font size=2>r</font></b><font size=2>={eadp, isor, simu}]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Splits subsequently clicked atoms into parts, or in combination with the Shift key can be used to drag an atom to change its position. While in the mode the newly generated atoms can be selected and moved as a group with Shift down or rotated when dragging the selection. The original and generated atoms will be placed into different parts.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <font size=2><b>-r</b>: can be used to generate extra restraints or constraints for original and generated atoms (see also the '<i><b>split</b></i>' command); values EADP, ISOR or SIMU are allowed</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+      </p>
+      <p>
+        <br>
+      </p>
+      <p>
+      </p>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Selection_Syntax_7956895129755 name=Selection_Syntax_7956895129755></a>Selection Syntax
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>sel</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>sel atoms where xatom.bai.mw &gt; 20</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Will select all atoms where the atomic mass is larger than 20</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p>
+              <b><font size=2>sel</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p>
+              <font size=2>Symmetry operation (represented by 1_555 or 1555)</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p>
+              <font size=2>Will select all currently shown symmetry generated atoms which were generated by the symmetry operation given.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b>sel</b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            sel rings NC5
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Will select all NC5 rings in the structure
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <font size=2><b>sel</b></font><br>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            sel part 1
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Will select part 1 of the structure
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <p>
+      </p>
+      <p>
+        <br>
+      </p>
+      <p>
+      </p>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=HKL_file_Operations_5438779126 name=HKL_file_Operations_5438779126></a>HKL file Operations
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>hklstat</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <br>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Prints detailed information about reflections used in the refinement.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b><font size=2>omit</font></b>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>h k l </font>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Inserts 'OMIT h k l' instruction in the ins file</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>omit</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>val</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Inserts 'OMIT h k l' for all reflections with <img alt="|F{o}^{2} -F{c}^{2}| > val" class="ee_img tr_noresize" eeimg=1 height=15 src="images/EXTERN_0000.png" style=VERTICAL-ALIGN:middle>&nbsp;.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b><font size=2>omit</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <font size=2>s 2theta</font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Inserts 'OMIT s 2theta' instruction in the ins file</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>edithkl</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>[h k l]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Brings up a dialogue, where 'bad' reflections from the Shelx lst file and all its constituent symmetry equivalents can be inspected and flagged to be excluded from the refinement.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>In constrast to the OMIT h k l instruction, which &nbsp;excludes the reflection and </font><i><font size=2>all it equivalents</font></i><font size=2>, this dialogue allows to exclude those equivalents that are actually outliers.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>If a particular reflection is specified, this particular reflection and all its constituent equivalents can be viewed.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>excludehkl</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>-h=h1;h2;.. -k=k1;k2.. -l=l1;l2.. [-c]</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>This function provides a mechanism to reversibly exclude some reflections from refinement (these reflections will be moved to the end of the hkl file so they appear after the 0 0 0 reflection).</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul>
+              <li>
+                <b><font size=2>-c:</font></b><font size=2>&nbsp;option controls how the given indices are treated, if not -c option is provided, then any reflection having any of the given h, k or l indices will be excluded, otherwise only reflections with indices within provided h, k and l will be excluded.</font>
+              </li>
+            </ul>
+            <p>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>appendhkl</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>-h=h1;h2;.. -k=k1;k2.. -l=l1;l2..</font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Acts in the opposite way to excludehkl</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <p>
+              <font size=2>For more advanced HKL processing, a Python script may be used. A sample hklf5.py script is provided in {Olex2 folder}/etc/scripts. The script can be copied and modified to accommodate any particular twinning law and run inside Olex2. The script allows creating an HKLF 5 file where reflections which belong to different twin components are assigned different batch numbers. To run a python script in Olex2 use the following command to load the script:</font>
+            </p>
+            <p>
+              <font size=2>&gt;&gt;@py -l</font>
+            </p>
+            <p>
+              <font size=2>This command shows a 'File Open' dialog, a python script can be selected. After loading the script can be modified and executed by pressing OK.</font>
+            </p>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <p>
+      </p>
+      <br>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Customising_the_Olex2_GUI_8897 name=Customising_the_Olex2_GUI_8897></a>Customising the Olex2 GUI
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>setfont</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>{Console, Picture_labels}&nbsp;<br>
+              </font>
+            </p>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Brings up the dialog to choose font for the Console or Labels which end up on the picture. Built in function&nbsp;<font size=2>choosefont([olex2]) to choose system &nbsp;or&nbsp;<font size=2>&nbsp;specially prepared/portable font can be used to specify the font.&nbsp;</font></font></font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>EditMaterial</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>{helpcmd, helptxt, execout, error, exception, any object name available with <i>lstgo</i>}</font><br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Brings up a dialog to change properties of the specified text section or graphical object.<br>
+            <ul>
+              <li>
+                <font size=2>helpcmd - material for the command name in the help window</font>
+              </li>
+              <li>
+                <font size=2>helptxt - material for the body of the help item</font>
+              </li>
+              <li>
+                <font size=2>execout - material for the output text printed in the console of external programs</font>
+              </li>
+              <li>
+                <font size=2>error - material for reporting errors in the console</font>
+              </li>
+              <li>
+                <font size=2>exception - material for reporting exception in the console</font>
+              </li>
+            </ul>
+            This command can be used to edit properties of any objects printed by '<i>lstgo</i>' macro. An example of that could be editing material of the console text:<br>
+            <font style=BACKGROUND-COLOR:#ffffff><font color=#990000><b>EditMaterial Console</b><br>
+            <font color=#666666>Note that the object name is case sensitive.</font></font></font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>save</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            {scene, style, view, model} [file_name]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            If the file name is not provided, the 'Save as...' dialog will be shown which allows to save current settings to file. The scene save current font names/sizes as well as the materials for the specific console output, like external programs output, error and exception reporting.<br>
+            The style saves information about the appearance of objects in the scene.<br>
+            The view saves current zoom and the scene orientation.<br>
+            The model saves current view including the crystallographic mode and style.
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>load</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            {scene, style, view model} [file_name]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Load one of the previously saved items. If no file name is provided, the 'Open file...' dialog will appear, otherwise if just a file name is provided (the extension will be guessed by Olex2), for styles and scene the last used folders will be used by default, whereas the current folder will be used for the views and models.
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b><font size=2>grad</font></b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>[C1 C2 C3 C4]<br>
+            [-<b>p</b>]</font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>Choose the colour of the four corners of the graduated background.<br>
+            </font>
+            <ul>
+              <li>
+                <font size=2><b>-p</b>: a file name for the picture to be placed at the background&nbsp;</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b><font size=2>brad</font></b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <i><font size=2><b>&nbsp;r&nbsp;</b><font size=2><span style=FONT-STYLE:normal>[hbonds]</span></font><br>
+            <span style=FONT-STYLE:normal>operates on all or selected bonds</span></font></i>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <font size=2>Adjust the bond radii in the display. If the 'hbonds' is provided the second argument, the given radius is applied to all hydrogen bonds.</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>ads</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            {elp, sph, ort, std}
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            A function for drawing styles development. Changes atom draw style for all/selected atoms.<br>
+            <ul>
+              <li>
+                <font size=2>elp - represents atoms as ellipsoids (if ADP is available)</font>
+              </li>
+              <li>
+                <font size=2>sph - represents atoms as spheres</font>
+              </li>
+              <li>
+                <font size=2>ort - same as elp, but spheres have one of the quadrants cut out</font>
+              </li>
+              <li>
+                <font size=2>std - a standalone atom (i.e. grown as a cross in wire-frame mode)</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>arad</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            {sfil, pers, isot, isoth, bond, vdw}
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            A function for drawing styles development; applies different radii to all/selected atoms.<br>
+            <ul>
+              <li>
+                <font size=2>sfil - sphere packing radii (as in ShelXTL XP)</font>
+              </li>
+              <li>
+                <font size=2>pers - a fixed radii for model viewing</font>
+              </li>
+              <li>
+                <font size=2>isot - each atom has it's own radius depending on the value of the Uiso or ADP</font>
+              </li>
+              <li>
+                <font size=2>isoth - same as isot, but the H atoms are also displayed with their real Uiso's</font>
+              </li>
+              <li>
+                <font size=2>bond - all atoms get same radii as default bond radius</font>
+              </li>
+              <li>
+                <font size=2>vdw - the default/loaded Van der Waals radii used in most of the calculations</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b>azoom</b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            % [atoms]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Changes the radii of all/given atoms, the change is given in percents.&nbsp;
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Output_Tables_Reports_and_Imag name=Output_Tables_Reports_and_Imag></a>Output: Tables, Reports and Images
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pictPS&nbsp;&nbsp; &nbsp;</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>filename.ps</font><br>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <font size=2>Generates a post-script file of what is visible in the molecule display.</font>
+            </p>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+            <ul style=MARGIN-LEFT:18px>
+              <li>
+                <font size=2>-<b>atom_outline_color </b></font><font size=2>- the colour of the atom outline, used for extra 3D effect for the intersecting objects [0xFFFFFF]</font>
+              </li>
+              <li>
+                <font size=2>-<b>atom_outline_oversize </b></font><font size=2>- the size of the outline [5]%</font>
+              </li>
+              <li>
+                <font size=2>-<b>bond_outline_color </b></font><font size=2>- same as for the atom, can be changed to black to highlight bond boundaries&nbsp;</font>
+              </li>
+              <li>
+                <font size=2>-<b>bond_outline_oversize </b></font><font size=2>- the size of the outline [10]%</font>
+              </li>
+              <li>
+                <font size=2>-<b>color_fill:</b></font><font size=2>&nbsp;Fills the ellipses with colour.</font>
+              </li>
+              <li>
+                <font size=2>-<b>color_bond</b></font><font size=2><b>:</b></font><font size=2>&nbsp;Bonds will be in colour.</font>
+              </li>
+              <li>
+                <font size=2>-<b>color_line</b></font><font size=2><b>:</b></font><font size=2>&nbsp;Lines representing the ellipses will be in colour.</font>
+              </li>
+              <li>
+                <font size=2>-<b>div_pie</b></font><font size=2><b>:</b></font><font size=2>&nbsp;number [4] of stripes in the octant</font>
+              </li>
+              <li>
+                <font size=2>-<b>lw_ellipse</b></font><font size=2><b>:</b></font><font size=2>&nbsp;line width [0.5] of the ellipse</font>
+              </li>
+              <li>
+                <font size=2>-<b>lw_font</b></font><font size=2><b>:</b></font><font size=2>&nbsp;line width [1] for the vector font</font>
+              </li>
+              <li>
+                <font size=2>-<b>lw_octant</b></font><font size=2><b>:</b></font><font size=2>&nbsp;line width [0.5] of the octant arcs</font>
+              </li>
+              <li>
+                <font size=2>-<b>lw_pie</b></font><font size=2><b>:</b></font><font size=2>&nbsp;line width [0.5] of the octant stripes</font>
+              </li>
+              <li>
+                <font size=2>-<b>p</b></font><font size=2><b>:</b></font><font size=2>&nbsp;perspective</font>
+              </li>
+              <li>
+                <font size=2>-<b>scale_hb</b></font><font size=2><b>:</b></font><font size=2>&nbsp;scale for H-bonds [0.5]</font>
+              </li>
+            </ul>
+            <font size=2>The bond width is taken from the display. This can be changed with </font><b><font size=2>brad</font></b>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>pict</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>filename.</font><i><font size=2>ext&nbsp;<font size=2>[</font><font size=2><b>n</b><span style=FONT-STYLE:normal>=2</span></font><font size=2>]</font><br>
+            </font></i><font size=2>[</font><font size=2>-<b>pq</b></font><font size=2>]&nbsp;</font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>Generates a bitmap image of what is visible on the molecule display. <b><i>n</i></b><font size=2>&nbsp;Refers to the size of the output image. If&nbsp;</font><b><i><font size=2>n</font></i></b><font size=2>&nbsp;is smaller than 10, it refers to a multiple of the current display size, if it is larger than 100, it refers to the width of the image in pixels.&nbsp;</font><br>
+            </font>
+            <ul>
+              <li>
+                <font size=2>ext {png, jpg, bmp}. png is best.&nbsp;</font>
+              </li>
+              <li>
+                <font size=2>-<b>pq:</b></font><font size=2> print quality</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>picta</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>filename.</font><i><font size=2>ext</font></i>&nbsp;<font size=2>[</font><i><font size=2><b>n</b><span style=FONT-STYLE:normal>=1</span></font></i><font size=2>]<br>
+            <font size=2>[</font><b><font size=2>-pq</font></b><font size=2>]</font><br>
+            </font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>A portable version of </font><b><font size=2>pict </font></b><font size=2>with limited resolution (see explanation for <i><b>n</b></i> above), which is OS and graphics card dependent. This may not be stable on some graphics cards<br>
+            </font>
+            <ul>
+              <li>
+                <font size=2>-<b>pq:</b></font><font size=2> print quality</font>
+              </li>
+              <li>
+                <font size=2>-<b>n</b>: as for 'pict'</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt width=79>
+            <b>picts</b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            filename.ext [<b><i>n</i></b>=1]<br>
+            [-<b>a</b>=6]<br>
+            [-<b>s</b>=10]<br>
+            [-<b>h</b>=n*(screen height)]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Creates a 'stereo' picture with two views taken with the +/- <b>a</b>&nbsp;option value rotation around y axis and placed onto one picture separated by s % of a single projection width.<br>
+            <ul>
+              <li>
+                <font size=3>-<b>a</b>: half of the view angle</font>
+              </li>
+              <li>
+                <font size=3>-<b>s</b>: separator width in %</font>
+              </li>
+              <li>
+                <font size=3>-<b>h</b>: the height of the output, by default equals to current screen height multiplied by the given resolution</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>label</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <b><font size=2>label</font></b><font size=2> [</font><font color=#448844><font size=2>atoms</font></font><font size=2>]</font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <font size=2>Adds labels to all/given/selected atoms. These labels can be moved by pressing the SHIFT key while holding down the left mouse button and edited by double clicking on them.<br>
+            </font>
+            <ul>
+              <li>
+                <b><font size=2>-type:&nbsp;</font></b><font size=2>{subscript, brackets, default}, the type only affects the PostScript labels and not applicable to the raster pictures</font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <br>
+      <br>
+      <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+        <tbody>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <h2>
+              <a id=Structure_Analysis_77378220390 name=Structure_Analysis_77378220390></a>Structure Analysis
+            </h2>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td colspan=3>
+            <p>
+              <font size=2>There are various tools available for the analysis of structures.</font>
+            </p>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+              <b><font size=2>htab</font></b>
+            </p>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>[minimal angle=150°] [maximum bond length 2.9 Å]<br>
+            [</font><b><font size=2>-t</font></b><font size=2>]<br>
+            [<b>-g</b>]</font>
+          </td>
+          <td style=WIDTH:240.7pt valign=top width=321>
+            <div>
+              <font size=2>Searches and adds found hydrogen bonds (like HTAB and RTAB in Shelx) into the list for the refinement program to add to the CIF. Equivalent symmetry positions are automatically inserted and merged with the existing ones. The command can be executed several times with different parameter values, only one unique instructions will be added.&nbsp;<br>
+              </font>
+              <ul>
+                <li>
+                  <b><font size=2>-t:</font></b><font size=2>&nbsp;adds extra elements (comma separated like in -t=Br,I) to the donor list. Defaults are [N,O,F,Cl,S]</font>
+                </li>
+                <li>
+                  <font size=2>-<b>g</b>: if any of the found bonds are generated by symmetry transformations, the structure is grown using those symmetry transformation</font>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b><font size=2>pipi</font></b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>[centroid-to-centroid distance 4 Å]<br>
+            [centroid-to-centroid shift 3 Å]<br>
+            [</font><b><font size=2>-g</font></b><font size=2>]<br>
+            [-<b>r</b>=C6,NC5]</font>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            <div>
+              <font size=2>The command analyses the p-p interactions (only stacking interactions for now) for flat regular C6 or NC5 rings and prints information for the ones where the intercentroid distance is smaller than [4] Å and the intercentroid shift is smaller than [3] Å.&nbsp;</font>
+            </div>
+            <ul>
+              <li>
+                <font size=2><b>-g</b>:</font><font size=2>&nbsp;if any of the rings is fully or partially constructued of symmetry generated atoms it grow the structure using those symmetry operators&nbsp;</font>
+              </li>
+              <li>
+                <font size=2>-<b>r</b>: ring content, the defaults are C6 and NC5 rings, the rings are tested for being flat and regular</font>
+              </li>
+            </ul>
+            <br>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>calcvoid</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            [radii file name]<br>
+            [all atoms/selected atoms]<br>
+            [-<b>d</b>=0]<br>
+            [-<b>p</b>]<br>
+            [-<b>r</b>=0.2<font size=2>Å</font>]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Calculates and displays the structure map. Also calculates the largest channels along crystallographic directions and the packing index.&nbsp;<br>
+            <ul>
+              <li>
+                <font size=2>-<b>d</b>: extra distance from the surface (added to the atomic radii)</font>
+              </li>
+              <li>
+                <font size=2>-<b>p</b>: precise calculation, each map voxel is tested, the default quick algorithm, uses the atom masks to find volume occupied by the molecule. The precise calculation is vectorised</font>
+              </li>
+              <li>
+                <font size=2><b>-r</b>: resolution, a resolution of at least 0.1<font size=2>Å &nbsp;and <b>-p</b> options is required to get values for publishing</font></font>
+              </li>
+            </ul>
+            <font size=2><b>Note:</b><br>
+            The radii used in the calculation are currently coming from the CSD website:<br>
+            http://www.ccdc.cam.ac.uk/products/csd/radii<br>
+            However there are several ways how the radii can be changed, one of the ways is to provide &nbsp;a file name with radii ([element radius] a line format), the other one is to load the radii from the same kind of the file using 'load radii vdw' command.&nbsp;</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>molinfo</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>[radii file name]<br>
+            </font>[atoms]<br>
+            [-<b>g</b>=5]<br>
+            [-<b>s</b>=o]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Calculates molecular volume and the surface area for all/selected atoms.<br>
+            <ul>
+              <li>
+                <font size=2>-<b>g</b>: &nbsp;generation of the triangulation process</font>
+              </li>
+              <li>
+                <font size=2>-<b>s</b>: source of the triangles for the sphere triangulation, [<i>o</i>]ctahedron or [<i>t</i>]etrahedron are available</font>
+              </li>
+            </ul>
+            Generation 5 for octahedron approximate sphere by 8192 &nbsp;triangles, for tetrahedron by 4096 triangles, each generation up increases the number of triangles by factor of 4, generation down - decreases it by the same factor. &nbsp;<br>
+            &nbsp;
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>calcfourier</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            <font size=2>{-<b>calc</b>,- <b>diff</b>, -<b>obs</b>, -<b>tomc</b>}<br>
+            </font>[-<b>r</b>=0.25<font size=2>Å</font>]<br>
+            [-<b>i</b>]<br>
+            [-<b>scale</b>=simple]<br>
+            [-<b>fcf</b>]<br>
+            <br>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Calculates Fourier for current model<br>
+            <ul>
+              <li>
+                <font size=2>-<b>r</b>: the resulting map resolution in angstrems</font>
+              </li>
+              <li>
+                <font size=2>-<b>i</b>: integrate the calculated map</font>
+              </li>
+              <li>
+                <font size=2>-<b>scale</b>: when Olex2 calculates structure factors, it uses the linear scale as a sum(Fo^2)/sum(Fc^2) by default, however a linear regression scale can be also used (use -<b>scale</b>=regression)</font>
+              </li>
+              <li>
+                <font size=2>-<b>fcf</b>: Olex2 will use an FCF with LIST 3 structure factors as a source of the structure factors. If this option is&nbsp;<font size=2>not specified, Olex2 will calculate the structure factors using the the reflection used in the refinement (use the 'hklstat' command to see more information on reflections).</font></font>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>calcpatt</b>
+          </td>
+          <td style=WIDTH:126pt width=168>
+            <br>
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            Calculates and displays Patterson map
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td style=WIDTH:59.4pt valign=top width=79>
+            <b>match</b>
+          </td>
+          <td style=WIDTH:126pt valign=top width=168>
+            [atoms]<br>
+            [-<b>a</b>]<br>
+            [-<b>c</b>=geom]<br>
+            [-<b>i</b>]<br>
+            [-<b>n</b>]<br>
+            [-<b>u</b>]<br>
+            [-<b>esd</b>]
+          </td>
+          <td style=WIDTH:240.7pt width=321>
+            This procedure find relation between the connectivity graphs of molecular fragments of loaded structure and aligns the fragments. If no arguments are given, the procedure analyses all fragments and in the case fragments with matching connectivity found, aligns<sup><a href=#FOOTNOTE-1>1</a></sup> them and prints corresponding root mean square distance (RMSD) in angstroms. If two atoms are provided (explicitly by name or through the selection) the graph relation information - orientation matrix and the matching atoms is printed, use -<b>a</b> option to align the fragments.<br>
+            <ul>
+              <li>
+                <font size=2>-<b>a</b>: align the fragments (used when a pair of atoms is provided)</font>
+              </li>
+              <li>
+                <font size=2>-<b>c</b>: specifies in which way the centre of molecule is calculated - (geom)etric or (mass). Programs like XP and Mercury use the geometric molecular centre (i.e. calculated with unit weights for the atoms), this is also the default for Olex2, however if heavier atoms &nbsp;are to be given a higher weight, the atomic mass can be used as the weight</font>
+              </li>
+              <li>
+                <font size=2>-<b>i</b>: try to invert one of the fragments</font>
+              </li>
+              <li>
+                <font size=2>-<b>n</b>: transfer labels from one fragment to another (two atoms should be provided for <i>from</i> and <i>to</i> fragments. If the value a symbol [or set of] this is appended to the label, '$xx' replaces the symbols after the atom type &nbsp;symbol with xx, leaving the ending, '-xx' - changes the ending of the label with xx. Note that if the molecules match with -<b>i</b> options, this should also be provided for the label transfer</font>
+              </li>
+              <li>
+                <font size=2>-<b>u</b>: restores the coordinates of the matched fragments, this is useful if grown structure is matched</font>
+              </li>
+              <li>
+                <font size=2>-<b>esd</b>: if the variance-covariance matrix can be located (after the refinement with the negative MORE option in the xl), the esd on the RMSD can be calculated using this option</font>
+              </li>
+            </ul>
+            <font size=2>See the 'How to...?' section for more information. &nbsp;</font>
+          </td>
+        </tr>
+        <tr style=TEXT-ALIGN:left>
+          <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+            <font color=#222222><font size=2>Notes etc about Structure Analysis</font></font>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class=container>
+      <br>
+    </div>
+    <h1>
+      <a id=How_to_7525797616690397_248763_4196302304044366 name=How_to_7525797616690397_248763_4196302304044366></a>How to...?
+    </h1>
+    <br>
+    <h2>
+      <a id=Overlay_molecules_795407803729_051836892031133175 name=Overlay_molecules_795407803729_051836892031133175></a>Overlay molecules
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>Olex2 provides several tools to match/align/overlay fragments or molecules. If the fragments have the same connectivity, the user can just type 'match' for automatic matching of the molecules. Olex2 will search for molecular graphs of the same connectivity* and align them, printing corresponding RMSD in angstroms. If the structure has more than two fragments, one atom of pair of fragments can be selected and the following command issued to match the selected fragments only:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;match</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>The match macro also takes the '-</font><b><font style=BACKGROUND-COLOR:#ffffff>i</font></b><font style=BACKGROUND-COLOR:#ffffff>' option. When this option is given, the procedure &nbsp;will try to match the first fragment and the second one with the inverted coordinates. The result will be printed as the RMSD and the transformation matrix, use the '-</font><b><font style=BACKGROUND-COLOR:#ffffff>a</font></b><font style=BACKGROUND-COLOR:#ffffff>' option to align the fragments.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>Note that if your molecule is disordered or has high symmetry, the automatic matching might fail. Also if there are Q-peaks in the structure, they should be hidden (Ctrl+Q) or deleted using the following commands:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;kill $Q<br>
+      </font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>Since graph matching algorithm implementation does not use any pattern recognition for the optimisation, high symmetry may introduce huge number of possible graph permutations (like each CH3 group increases the number of permutations by a factor of 6 (3!)), it is recommended to hide the H atoms (Ctrl+H). If this does not help, a manual change of atom types may be required to break the symmetry.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>If automatic alignment fails due to the difference in the connectivity of the fragments, the user might select at least three atoms of one fragment and the same number of atoms in another fragment in matching sequence and type</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;match</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>to match fragments using only the selected atoms.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>There is also a matching mode, which can be activated by typing:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;mode match</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>This mode enables interactive matching by a maximum of three pairs of atoms. The first pair of atoms are superimposed, the second one causes the rotation to minimize the distance between the atoms of the second pair, the third pair causes rotation around the line formed by the first and second pair to minimize the difference between the atoms of the third pair.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&nbsp;</font><font style=BACKGROUND-COLOR:#ffffff>Olex2 also provides a way to load an extra structure on screen. That structure can also be used in all the matching procedures described above. To load an extra structure, type:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;reap -* [file_name]</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>if the file name is not given, the 'File Open' dialog will apear.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>*The fragment connectivity can be adjusted using the AddBond, DelBond and the Conn commands. For example if the compound under the consideration is a metal complex with two or more identical ligands, the ligands can be 'detached' from the metal by selecting the metal atom and typing</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&gt;&gt;conn 0</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font style=BACKGROUND-COLOR:#ffffff>&nbsp;&nbsp;</font>
+    </p>
+    <h2>
+      <a id=Copy_naming_scheme_from_one_fr name=Copy_naming_scheme_from_one_fr></a>Copy naming scheme from one fragment to another
+    </h2>
+    <p>
+      Section above describes how to match/overlay fragments. This section describes how to transfer labelling scheme from one fragment to another for consistent labelling. &nbsp;Note that if the '-<b>i</b>' option was used for the matching, it also should be used for the naming.
+    </p>
+    <p>
+      An atom of the fragment with the original naming scheme and an atom of the fragment to which the naming scheme to be transferred should be selected, then the following command have to be typed:
+    </p>
+    <p>
+      &gt;&gt;match -n=mask
+    </p>
+    <p>
+      If the mask starts from '$' or '-' a special action is taken. The '$' character instructs the procedure to replace the give number of characters after the '$' in atom labels with the characters, for example:
+    </p>
+    <p>
+      match -n=$2
+    </p>
+    <p>
+      will replace labels like C101, Cu10, C10a to C201, C20a and Cu20.
+    </p>
+    <p>
+      The '-' instructs the procedure to replace the ending chars of the labels with the give characters, for example:
+    </p>
+    <p>
+      match -n=-b
+    </p>
+    <p>
+      <font size=2>will replace labels like C101, Cu10, C10a to C10b, C10b and Cu1b.</font>
+    </p>
+    <p>
+      Any other values of 'mask' are simply added to the labels, like
+    </p>
+    <p>
+      match -n=a &nbsp;
+    </p>
+    <p>
+      <font size=2>will replace labels like C101, Cu10, C10a to C201a, C10a and Cu10a.</font>
+    </p>
+    <p>
+      <font size=2>Note that the labels may become invalid for the use with some programs and will be trimmed/changed on the next file input/output operation.</font>
+    </p>
+    <p>
+      Atom name suffix* can be changed by the following command:
+    </p>
+    <p>
+      &gt;&gt;name [atoms] -s=[suffix]
+    </p>
+    <p>
+      if no atom names provided, suffix of all atoms will be changed to the provided one or removed (if no value is provide for the '-<b>s</b>' option)
+    </p>
+    <p>
+      *The suffix here is assumed the ending of the atom name following the atom symbol or any number, e.g.:<br>
+      for C12a, suffix is 'a'<br>
+      for C12 the suffix is empty<br>
+      for Cz the suffix is 'z'
+    </p>
+    <p>
+      <br>
+    </p>
+    <h2>
+      <a id=Get_esd_s_on_geometric_measure_06445521675050259 name=Get_esd_s_on_geometric_measure_06445521675050259></a>Get esd's on geometric measurements
+    </h2>
+    <div>
+      Olex2 can calculate esd's on a variety of geometric measurements, also if a CIF is loaded into Olex2 &nbsp;then esd's available in the CIF (bond lengths and the angles) will be displayed in the tooltip when hovering over the bonds or selection of the bonds; use the 'sel' command to print the values in the console.
+    </div>
+    <div>
+      To calculate the esd's Olex2 need the variance-covariance matrix. This can be readily produced by shelxl when refining with a negative MORE instruction (like MORE -1). It also will be soon available from the smtbx refinement. Once the matrix file is available, the geometric parameters can be easily calculated by selecting:
+    </div>
+    <div>
+      a bond or two atoms - length<br>
+      two bonds or three atoms - angle<br>
+      four atoms - torsion angle and the tetrahedron volume<br>
+      a plane - RMSD and the centroid coordinates in fractional and Cartesian coordinates<br>
+      a plane and an atom - atom to plane and atom to plane centroid distances<br>
+      a plane and a bond - angle between the plane normal and the bond<br>
+      two planes - angle between the plane normals, plane centroid to plane centroid, plane to centroid and the shift between the plane centroids distances<br>
+      three planes - the angle between the plane centroids
+    </div>
+    <div>
+      Then type:
+    </div>
+    <div>
+      &gt;&gt;esd
+    </div>
+    <div>
+      to get the measurements with esd's.
+    </div>
+    <div>
+      Note that the current implementation of the esd calculation procedure does not consider symmetry constraints and gives esd's even for the symmetry related parameters.
+    </div>
+    <br>
+    <h2>
+      <a id=Get_a_stereo_view_487458711490 name=Get_a_stereo_view_487458711490></a>Get a stereo view
+    </h2>
+    <p>
+      There are four stereo modes available in Olex2:
+    </p>
+    <ul style=LIST-STYLE-TYPE:square;MARGIN-LEFT:1.5em;MARGIN-RIGHT:0px type=disc>
+      <li>
+        <p>
+          Color stereo (resulting in monochrome stereo image)
+        </p>
+      </li>
+      <li>
+        <p>
+          Anaglyph stereo (resulting in grey-scale color for colors matching with colors of the glasses)
+        </p>
+      </li>
+      <li>
+        <p>
+          Rendering of two spatially separated projections
+        </p>
+      </li>
+      <li>
+        <p>
+          Hardware stereo
+        </p>
+      </li>
+    </ul>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The first three modes do not put any constraints on the hardware besides that the graphics card should be able to render two image of the scene with convenient frames per second (fsp). These modes work with ‘standard’ red-green or cyan-blue glasses.&nbsp;
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The hardware 3D stereo requires special graphics card and 3D stereo glasses. A test stand we have to demonstrate the hardware 3D stereo is built using the following components:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      -&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 120Hz refresh rate display (we have Samsung)
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      -&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NVIDIA® 3D active shutter glasses (we have NVIDIA 3D vision kit)
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      -&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NVIDIA® Quadro FX graphics card (we have the low end FX580)
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The standard NVIDIA® 3D vision kit is designed for the games and works only with the DirectX® based games (it is Windows® specific too). The Quadro series of the graphics cards provide a generic, OpenGL® based, portable mechanism for the 3D stereo rendering.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      To switching stereo mode on/off use either the View tab of the GUI, or the following command:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <b>&gt;&gt;gl.Stereo(</b>{<i>none, cross, color ,anaglyph, hardware</i>}, [angle=3]<b>),</b>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      by providing the angle argument the viewing angle can be changes, the angle is signed and by inverting the sign the left and right projections are swapped.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      To change the projection colours use the following command:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;<b>gl.StereoColor(</b>{lef,right}, R,G,B[,A]<b>)</b>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      R,G,B and A (optional) are the color components, floating point numbers in range of [0,1]. For example to set color of the left (mind the note above about the viewing angle) projection to red and of the right projection to cyan colors:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <i>gl.StereoColor(left,1,0,0)<br>
+      gl.StereoColor(right,0,1,1)</i>
+    </p>
+    <h2>
+      <a id=Pack_or_grow_molecule_s_761062_2766848988831043 name=Pack_or_grow_molecule_s_761062_2766848988831043></a>Pack or grow molecule(s)
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      There are several commands in Olex2 to grow and pack molecules. First command is 'grow', this command grows all atoms in the asymmetric unit. Grow command will generate the molecule until all newly available growing matrices differ only by translation part, this will create complete set of atoms for discrete molecules and generate quite a large fragment for polymeric structures. If a particular symmetry operator needs to be used, the 'sgen' command might be useful, for example:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;sgen 1556 $N<br>
+      or<br>
+      &gt;&gt;sgen x,y,z+1 $N
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      will generate all nitrogen atoms using the x,y,z+1 symmetry operator (the identity operator, x,y,z is always the first operator in Olex2). If no atoms provided, all atoms will be generated. It is also possible to click on an atom which can be grown, and choose the 'Grow' option from the menu.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      To find out the set of operators for loaded structure, use:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;lstsymm
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      There is also growing mode (look in the table for all related options of this mode), which provides visual and metric information about bonds which can be generated. The mode allows using one symmetry operator a time:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;mode grow
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The growing command generates only fragments which can grow; sometimes it is needed to generate the rest of the asymmetric unit as well, like after growing the main fragment all related solvent molecules need to be generated. For this use the 'grow -w' command, which will apply already existing symmetry matrices to whole asymmetric unit. &nbsp;
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The information about matrices which can grow an atom (if on a special position) or a bond can also be found using the 'envi' command. To find out atoms in special position, use the 'degen' command, which prints the atomic position multiplicity (unless it is 1).
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The pack command can be used to pack molecules or particular atoms. For example:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;pack R
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      generates molecules which centre of mass is within sphere of R radius
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt; pack cell
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      Shows the content of the unit cell. Use 'grow -w' to show all molecules contributing atoms to the unit cell.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;pack $Fe
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      packs only specified atoms, '-c' option can be added to specify that current model should not be cleared.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;mode move [-c]
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      once a fragment atom is selected this mode will copy (if '-c' is provided) or move any other fragment (which is clicked) as close to the selected atom as possible.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;mode pack
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      Displays asymmetric units as a set of tetrahedron, clicking on which generates the asymmetric unit using that particular transformation. &nbsp;
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      The structure analysis commands like 'pipi' and 'htab' provided with '-g' option can also be used to grow molecules and visualise some particular interactions.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      Finally, to show the asymmetric unit, type
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;fuse
+    </p>
+    <h2>
+      <a id=Change_P1_space_group_to_P_1_9 name=Change_P1_space_group_to_P_1_9></a>Change P1 space group to P-1
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>Identify two atoms related by the center of inversion, select them and type</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt; echo ccrd()</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>to get coordinates of the point between the selected atoms. This will be fractional coordinates of the proposed centre of &nbsp;inversion as 'x,y,z'. The&nbsp;</font><font color=#666666>type:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt; push -x -y -z</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>to move the content of the asymmetric unit so that the centre of inversion now is at (0,0,0). Then&nbsp;</font><font color=#666666>type: &gt;&gt;changesg P-1</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>to change the space group. Olex2 will try to remove the symmetry related atoms, however if the atoms do not overlap within some value, they have to be removed manually or by typing:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;fuse&nbsp;</font><i><font color=#666666>r</font></i>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&nbsp;command, where&nbsp;</font><i><font color=#666666>r&nbsp;</font></i><font color=#666666>is the radius within which atoms of the same type get merged into a single one.</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>Sometimes the molecule looks 'broken' after this operation and the command 'compaq -a' has to be executed to assemble the molecule .</font>
+    </p>
+    <h2>
+      <a id=Change_space_group_settings_20_3541402528062463 name=Change_space_group_settings_20_3541402528062463></a>Change space group settings
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      Olex2 provides the 'sgs' command to change the space group settings (cell choice and the axis). For a monoclinic space group, type:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;sgs axis_cellchoice&nbsp;<font size=2>&nbsp;[output HKL file name]</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      For example:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;sgs<b>&nbsp;</b>b1 b1.hkl
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      changes the current space group setting to make the 'b' the principal axis and &nbsp;for the cell choice '1' and creates the b1.hkl file with transformed reflections. It is also possible to enter just the principle axis, like 'a' or 'c'. Please note that the cell esd's will be estimated since no variance-covariance matrix is available for the transformation.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      For orthorhombic space groups, at the moment, only 'sgs abc' is valid to transform settings to standard. Olex2 will change the cell settings accordingly, modify all the atomic coordinates and the APS's (if any) and, if the output HKL file name is provided, creates the new HKL file according to the transformation. You will have to choose that file for the refinement if needed.
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      To find out current space group settings, type:
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &gt;&gt;echo sgs()
+    </p>
+    <h2>
+      <a id=To_control_console_and_graphic name=To_control_console_and_graphic></a>To control console and graphics visibility
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>Olex2 has a built in console for typing commands. Sometimes it is desirable to see only the text (output) or the structure. There are several commands and shortcuts to help with this.&nbsp;</font><font color=#666666>&lt;Ctrl&gt;+T toggles whether the molecule is displayed or not. So, if your molecule has inexplicably disappeared, it's always worth pressing this key combination...</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>The program output of Olex2 happens 'behind' the molecule. The wisdom of doing things this way can be debated, but it means that there are fewer windows cluttering your screen. It is possible to adjust the number of lines of output you see by typing:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;lines n</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&nbsp;(e.g.&nbsp;</font><b><font color=#666666>lines 5</font></b><font color=#666666>) to see only 5 lines of the output a time, it may be confusing for procedures producing more that 5 lines (like calcvoid). If you want to see all lines, type:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;lines -1</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font size=2>Alternatively, you can type 'text' in the console (or use corresponding GUI links) to view the text output in an external text editor. You can always use PgUp and PgDn keys to scroll the console output. There is a limited buffer to hold the console output, however a full transcript of the Olex2 session is available in the log file, which can be displayed using:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font size=2>&gt;&gt;log</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font size=2>command.&nbsp;</font>
+    </p>
+    <h2>
+      <a id=Select_atoms_that_became_too_s name=Select_atoms_that_became_too_s></a>Select atoms that became 'too small'
+    </h2>
+    <div>
+      By default, the size of the atom displayed on the screen is proportional to its ADP or Uiso. If the atom type is wrong, and the real element is much heavier, the Ueq will become very small and therefore the <font size=2>displayed&nbsp;</font>sphere will be too small to select by mouse.&nbsp;<br>
+      <br>
+      There are two solutions to this problem:&nbsp;<br>
+      <br>
+      1) You can select an area that includes the atom you wish to select by drawing a box around the atom with the Shift key and the left mouse button pressed simultaneously.&nbsp;<br>
+      <br>
+      2) You can switch the view to a Ball and Sticks display (View&gt;Quick Drawing Styles) or type:
+    </div>
+    <div>
+      &gt;&gt;pers
+    </div>
+    <div>
+      Also use (or the GUI):
+    </div>
+    <div>
+      &gt;&gt; telp
+    </div>
+    <div>
+      to switch back to the view when the atoms' proportional Uiso and ADP's are displayed.
+    </div>
+    <h2>
+      <a id=Use_ShelX_programs_in_Olex2_86 name=Use_ShelX_programs_in_Olex2_86></a>Use ShelX programs in Olex2
+    </h2>
+    <div>
+      ShelXL, ShelXLMP, ShelXS and ShelXM executables are available free for academic use from&nbsp;<a class=external-link href=http://shelx.uni-ac.gwdg.de/SHELX/index.html style=BACKGROUND-COLOR:transparent;TEXT-DECORATION:none title="George Sheldrick"><font color=#666666>George Sheldrick</font></a>. &nbsp;If ShelX programs are on the system path, then Olex2 will be know that ShelX is installed. &nbsp;You should not put the (use a folder which is on the PATH) the ShelX executables alongside the Olex2 executable (on Windows or Linux) or in the olex2.app/Content/MacOS folder (on Mac).<br>
+    </div>
+    <div>
+      All ShelX commands are – or at lease should be – processed by Olex2 correctly. Please let us know immediately if any correct ShelX command does not behave the way you expect it to behave.
+    </div>
+    <h2>
+      <a id=Change_default_programs_824793141335249 name=Change_default_programs_824793141335249></a>Change default programs
+    </h2>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666><font size=2><font face=Georgia>To change default text editor, html editor or folder browser, you need to set the Olex2 variables associated with these programs. To keep the changes permanent, create the file 'custom.xld' in the Olex2 installation directory. For example the following construct placed in that file sets programs for KDE:</font></font></font>
+    </p>
+    <p>
+      <font color=#000000><font size=2><font face=Georgia>&lt;user_onstartup help="Executes on program start"<br>
+      &nbsp;&nbsp;&lt;body &lt;args&gt;<br>
+      &nbsp;&nbsp; &nbsp;&lt;cmd<br>
+      &nbsp;&nbsp; &nbsp; &nbsp;&lt;cmd1 "setvar(defeditor,'kate')"&gt;<br>
+      &nbsp;&nbsp; &nbsp; &nbsp;&lt;cmd2 "setvar(defexplorer,'konqueror')"&gt;<br>
+      &nbsp;&nbsp; &nbsp; &nbsp;&lt;cmd3 "setvar(defbrowser,'konqueror')"&gt;&nbsp;<br>
+      </font></font><font size=2><font face=georgia>&nbsp;&nbsp; &nbsp; &gt;<br>
+      &nbsp;&gt;</font></font></font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666><font size=2><font face=Georgia>This defines a function which is called when Olex2 starts up, please note if there are several functions with the same name are found in the files - the last one will be used. Please avoid overriding any functions in the macro.xld file as that may cause Olex2 to function incorrectly.</font></font></font>
+    </p>
+    <h2>
+      <a id=Working_with_the_Maps_display_8926176372915506 name=Working_with_the_Maps_display_8926176372915506></a>Working with the Maps display
+    </h2>
+    <div>
+      The 2D map can be operated by the following controls:<br>
+      <ul>
+        <li>
+          Expand/Shrink – Ctr l+ right mouse button
+        </li>
+        <li>
+          Level change – Shift + right mouse button (only in the Contour view)
+        </li>
+        <li>
+          Z change – Ctrl + left mouse button
+        </li>
+        <li>
+          xgrid.PlaneSize() - prints or sets the plane size. The default value of the plane - is the 128x128 pixels, if you have a high performing graphics card, you can set the value to 256, 512, 1024 or other power of two values.
+        </li>
+      </ul>
+      <h2>
+        <a id=Fix_tooltips_problems_9572209371253848 name=Fix_tooltips_problems_9572209371253848></a>Fix tooltips problems
+      </h2>
+    </div>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>Functionality :</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;GlTooltips(bool)</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;echo GlTooltips()</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>These two commands allow modifying or querying current tooltip management. By default there are native tooltips for Windows and OpenGL emulated ones fo the other platforms. The reason in the distinction is that native tooltips on Mac are rendered not at the time they were set (at least with wxMac), but after. This leads to displayig previous tooltip instead of current. The case of GTK is still under the investigation, but on older versions of tooltips would not be rendered. This can be overriden using the GlTooltip(true/false) command, the setting will be saved upon normal program termination. Rendering of the native tooltips on platforms, other than Windows will degrade the performace, since all mouse movement events (unless a mouse button is pressed) will cause the scene re-drawing. Using the OpenGl emulation of the tooltip will render the scene only when the mose movement stopped for at least 1/2 of the second.&nbsp;</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>To control the OpenGl tooltip emulation appearence the use can use the following command:</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      <font color=#666666>&gt;&gt;editmaterial Tooltip</font>
+    </p>
+    <p style=MARGIN-LEFT:0px;MARGIN-RIGHT:0px>
+      &nbsp;
+    </p>
+  </div>
+  <div class=container>
+    <h1>
+      Appendix
+    </h1>
+    <br>
+    <div class=haupttext>
+      <h2>
+        <a id=About_Versions_and_Tags_243735 name=About_Versions_and_Tags_243735></a>About Versions and Tags
+      </h2>
+      <div>
+        The Olex2 distribution system has undergone many changes since the project was started in 2004. We have always aimed at providing program updates as soon as possible to the Olex2 user community. We think that one of the best ways to encourage bug reports and suggestions is to translate this user feedback as soon as possible into real improvements in the software.
+      </div>
+      <div>
+        For a while - up to about December 2009 - we have made updates available on a very frequent basis. This has met with a warm welcome from many of our users, but has also caused some problems: Not all updates did <i>only</i> do what they were supposed to do! At that point, we have decided to change the policy somewhat, and have come up with the following system for the distribution of Olex2.&nbsp;
+      </div>
+      <div>
+        There are now distinct versions of Olex2. Before Version 1.0, everything consisted of continuously updated files. At some point, this became no longer supportable, and we decided to introduce proper versions into the Olex2 distribution system. Any new version requires a complete re-install. However different versions of Olex2 can exist next to each other without causing any interference. For each version of Olex2, there are three 'tags', referring to different source repositories. For example, for Version 1.1 there are the following tags:
+      </div>
+      <ul>
+        <li>
+          1.1-alpha
+        </li>
+        <li>
+          1.1-beta
+        </li>
+        <li>
+          1.1
+        </li>
+      </ul>
+      <div>
+        <b>Alpha:</b> Whenever we made some changes, we 'make' an <i>alpha</i> distribution of Olex2. We use this version for in-house testing (although you are very welcome to use this version too, as long as you are aware of the fact that this version is typically very experimental and will very likely cause some problems. However, if you have suggested a new feature, or reported a bug fix, you may well find that we have implemented your suggestions already!
+      </div>
+      <div>
+        <b>Beta:</b> Once we've done some testing of this alpha version, we 'promote' it to the <i>beta </i>distribution. This version is tested by a wider group of testers - these tend to be those users with whom we have a lot of contact.
+      </div>
+      <div>
+        <b>Release: </b>Once a distribution has been tested in the <i>beta</i> stage, a proper release is made. This can be expected to be stable and if you encounter any problems with release version, please tell us about this! It doesn't matter how small the problem is, we'd like to know.
+      </div>
+      <h2>
+        <a id=Installing_Olex2_6555415214970 name=Installing_Olex2_6555415214970></a>Installing Olex2
+      </h2>
+      <h3>
+        <a id=Windows_08184444066137075_3901 name=Windows_08184444066137075_3901></a>Windows:
+      </h3>
+      <p>
+      </p>
+      <ul>
+        <li>
+          Please download the Olex2 installer from the Windows tab and run it. Select the destination folder to which to install Olex2 (typically <b>C:\Program Files\Olex2</b>). If you do not have administrator privileges<font size=2>*</font>, please select a folder where you have full access rights.
+        </li>
+        <li>
+          Make sure you select the latest version of Olex2—Version 1.1—from the download repository.
+        </li>
+        <li>
+          Click on <b>Install. </b>This will install Olex2 on your computer. When it is done, there will be a ‘Run’ button on the installer form. Click this to run Olex2. The first time Olex2 runs on your computer, it will take some time to start up (up to one minute!).
+        </li>
+      </ul>
+      <div>
+        Olex2 should now be opened, there should be no red (error) lines in the main window and there should be a molecule of sucrose displayed on the screen. Olex2 does not require any third party programs to perform structure analyses—Structure Solution as well as Structure Refinement—but, if you have a ShelX licence, you may want to make sure that Olex2 can interact with the ShelXS, ShelXL and ShelXM. If you do not have a ShelX licence, and would like to obtain one, please go to the <a href=http://shelx.uni-ac.gwdg.de/SHELX/ title="ShelX Pages">ShelX Pages</a>&nbsp;for more information.
+      </div>
+      <div class=orangeBox>
+        Please note that the ShelX executables that are shipped with WinGX do not work with Olex2.
+      </div>
+      <div>
+        You can either copy your ShelX executables into the Olex2 installation folder, or—better—you can copy your executables into a folder which you then add to the PATH variable of Windows. For example, create a folder <b>C:\Program Files\Shelx</b>, then Right-Click on ‘My Computer’ (XP) or ‘Computer’ (Vista and 7) and select <i>Properties</i>. Then select <i>Advanced. </i>There you can add the location of your ShelX executables to the PATH variable.
+      </div>
+    </div>
+  </div>
+</div>
+<div class=outside>
+  <div class=container>
+    <div class=haupttext>
+      <h2>
+        <a id=External_Progams_7345755221322 name=External_Progams_7345755221322></a>External Programs
+      </h2>
+      <h3>
+        <a id=SHELX_9969458160921931_5693663_12589809857308865 name=SHELX_9969458160921931_5693663_12589809857308865></a>SHELX
+      </h3>
+      <div>
+        All programs of the SHELX family can interact seamlessly with Olex2. There is no need for registering any of these programs with Olex2, it is enough if the folder containing the ShelX programs are on the system PATH. This is normally the case if ShelXTL has been installed on a system. Otherwise, you will need to set you system PATH variable to include the folder where you keep your SHELX executables.
+      </div>
+      <div>
+        Please note that the SHELX executables that are shipped with WinGX do not work with Olex2. These executables have been modified in such a way that they will only work properly with WinGX. Since WinGX puts the folder that contains these executables on the system PATH, you might find that SHELX appears in Olex2 - and then doesn't work. In this case, you will need to get new SHELX executables and put them in the same folder where Olex2 is installed - executables found there will be used by Olex2 preferentially.
+      </div>
+      <h3>
+        <a id=Platon_054015377536416054_5722_4298744183033705 name=Platon_054015377536416054_5722_4298744183033705></a>Platon
+      </h3>
+      <div>
+        John Warren has provided an interface to PLATON.
+      </div>
+      <h3>
+        <a id=SuperFlip_5879412144422531_308_19718943536281586 name=SuperFlip_5879412144422531_308_19718943536281586></a>SuperFlip
+      </h3>
+      <div>
+        Arie van der Lee has provided an interface to SuperFlip.
+      </div>
+      <h2>
+        <a id=About_Macros_and_Scripting_in_ name=About_Macros_and_Scripting_in_></a>About Macros and Scripting in Olex2
+      </h2>
+      <div>
+        Olex2 supports two different tpes of external scripting: Macros and Python scripts.
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+<div class=endnotes>
+  <p style="page-break-before:always; TEXT-ALIGN:center">
+    References
+  </p>
+  <br>
+  <br>
+  <sup>1 </sup><a name=FOOTNOTE-1></a>&nbsp;Acta A45 (1989), 208
+</div></body>
+</html>
