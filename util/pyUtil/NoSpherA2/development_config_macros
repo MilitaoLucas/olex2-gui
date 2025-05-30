@@ -1,0 +1,362 @@
+// Development and Configuration Macros for NoSpherA2
+// These macros are used for setup, configuration, and development purposes
+
+// System and GUI operations
+@py - @py arguments [any]; valid options - i;l;
+@update - @update arguments [any]
+Abort - Abort arguments [none]; valid options - q;
+AddBond - AddBond arguments [any]
+AddLabel - AddLabel arguments [3 or 5]
+AddObject - AddObject arguments [any except none, 1 or 2]; valid options - g;
+AdjustStyle - AdjustStyle arguments [any except none or 1]; valid options - a;b;
+ARad - ARad arguments [any except none]
+AZoom - AZoom arguments [any except none]
+BaseDir - BaseDir arguments [none]
+BRad - BRad arguments [any except none]; valid options - a;
+Callback - Callback arguments [any except none] [any options]
+CheckMenu - CheckMenu arguments [1]
+CheckState - CheckState arguments [1 or 2]
+ChooseDir - ChooseDir arguments [none, 1 or 2]
+ChooseElement - ChooseElement arguments [none]
+ChooseFont - ChooseFont arguments [none, 1 or 2]
+ChooseMaterial - ChooseMaterial arguments [none or 1]
+Clear - Clear arguments [none or 1]
+cmds - cmds arguments [any] [any options]
+Color - Color arguments [none, 1 or 2]
+CreateBitmap - CreateBitmap arguments [2]; valid options - r;
+CreateMenu - CreateMenu arguments [1, 2 or 3]; valid options - c;m;r;s;
+CreateShortcut - CreateShortcut arguments [2]
+Cursor - Cursor arguments [none, 1, 2 or 3]
+DataDir - DataDir arguments [none]
+DeleteBitmap - DeleteBitmap arguments [1]
+DeleteMenu - DeleteMenu arguments [1]
+DelBond - DelBond arguments [any]
+DelObject - DelObject arguments [1]
+Delta - Delta arguments [none or 1]
+DeltaI - DeltaI arguments [none or 1]
+Dir - Dir arguments [none or 1]
+dire - dire arguments [any] [any options]
+Direction - Direction arguments [none]
+dires - dires arguments [any] [any options]
+DisableMenu - DisableMenu arguments [1]
+Echo - Echo arguments [any]; valid options - c;m;
+edit - edit arguments [any] [any options]
+EditMaterial - EditMaterial arguments [1]
+edt - edt arguments [any] [any options]
+edthelp - edthelp arguments [any] [any options]
+Elevate - Elevate arguments [none or 1]
+emf - emf arguments [any] [any options]
+EnableMenu - EnableMenu arguments [1]
+Envi - Envi arguments [none, 1 or 2]; valid options - c;cs;h;p;q;
+Exec - Exec arguments [any except none]; valid options - d;o;q;s;t;
+Exit - Exit arguments [none]
+expand - expand arguments [any] [any options]
+ExportFont - ExportFont arguments [2]
+external_edit - external_edit arguments [any] [any options]
+ExtraZoom - ExtraZoom arguments [none or 1]
+Fade - Fade arguments [3]
+FileDrive - FileDrive arguments [none or 1]
+FileExt - FileExt arguments [none or 1]
+FileFull - FileFull arguments [none or 1]
+FileLast - FileLast arguments [none or 1]
+FileName - FileName arguments [none or 1]
+FileOpen - FileOpen arguments [3 or 4]
+FilePath - FilePath arguments [none or 1]
+FileSave - FileSave arguments [3 or 4]
+Flush - Flush arguments [none, 1 or 2]
+FlushFS - FlushFS arguments [none or 1]
+Focus - Focus arguments [none]
+FPS - FPS arguments [none]
+Freeze - Freeze arguments [none or 1]
+FullScreen - FullScreen arguments [none or 1]
+GetCompilationInfo - GetCompilationInfo arguments [any]
+GetEnv - GetEnv arguments [none or 1]
+GetFont - GetFont arguments [1]
+GetMAC - GetMAC arguments [none or 1]
+GetMaterial - GetMaterial arguments [1 or 2]
+GetParam - GetParam arguments [any] [any options]
+gst - gst arguments [any] [any options]
+Help - Help arguments [any]; valid options - c;
+Hide - Hide arguments [any]; valid options - b;
+history - history arguments [any] [any options]
+html - html arguments [any] [any options]
+HtmlPanelSwap - HtmlPanelSwap arguments [none or 1]
+HtmlPanelVisible - HtmlPanelVisible arguments [none, 1 or 2]
+HtmlPanelWidth - HtmlPanelWidth arguments [none or 1]
+ImportFont - ImportFont arguments [2]
+Info - Info arguments [any]; valid options - c;f;p;s;
+InstallPlugin - InstallPlugin arguments [1]; valid options - "l;
+Kill - Kill arguments [any]; valid options - au;
+Legend - Legend arguments [none or 1]; valid options - r;
+Line - Line arguments [any]; valid options - e;f;n;
+Lines - Lines arguments [1]
+Link - Link arguments [none or 1]
+Listen - Listen arguments [any]
+LstFS - LstFS arguments [any]
+LstFun - LstFun arguments [any]; valid options - h;
+LstGO - LstGO arguments [none]
+LstMac - LstMac arguments [any]; valid options - h;
+LstVar - LstVar arguments [any]
+Mask - Mask arguments [any except none]
+MSDSView - MSDSView arguments [none]; valid options - a;q;s;t;
+OFileDel - OFileDel arguments [1]
+OFileSwap - OFileSwap arguments [none or 1]
+onexit - onexit arguments [any] [any options]
+onstartup - onstartup arguments [any] [any options]
+panel - panel arguments [any] [any options]
+Pict - Pict arguments [1 or 2]; valid options - bw;c;dpi;nbg;pq;
+Picta - Picta arguments [1 or 2]; valid options - dpi;nbg;pq;
+PictPR - PictPR arguments [1] states - [Loaded file is expected]
+PictPS - PictPS arguments [1] states - [Loaded file is expected]; valid options - atom_outline_color;atom_outline_oversize;bond_outline_color;bond_outline_oversize;color_bond;color_fill;color_line;color_plane;div_ellipse;div_pie;lw_ellipse;lw_font;lw_octant;lw_pie;multiple_bond_width;octants;p;scale_hb;stipple_disorder;
+PictS - PictS arguments [1 or 2] states - [Loaded file is expected]; valid options - a;h;s;
+PictTEX - PictTEX arguments [1] states - [Loaded file is expected]; valid options - color_fill;color_line;
+Popup - Popup arguments [2]; valid options - b;h;ondblclick;onsize;s;t;w;x;y;
+Post - Post arguments [any]
+ProcessCmd - ProcessCmd arguments [any except none or 1]
+py_path - py_path arguments [any] [any options]
+Qual - Qual arguments [1]
+quit - quit arguments [none]
+Refresh - Refresh arguments [none]
+RegisterFonts - RegisterFonts arguments [1]
+Reload - Reload arguments [1]
+Reset - Reset arguments [any] states - [Loaded file is expected]; valid options - atoms;c;f;rem;s;sfac;
+Restart - Restart arguments [none]; valid options - u;
+Run - Run arguments [any except none]
+Scene - Scene arguments [none or 1]; valid options - s;
+Schedule - Schedule arguments [any except none]; valid options - g;r;
+Sel - Sel arguments [any]; valid options - a;c;i;l;p;u;
+SelBack - SelBack arguments [none]; valid options - a;o;x;
+SetCmd - SetCmd arguments [any]
+SetEnv - SetEnv arguments [2]
+SetFont - SetFont arguments [any except none or 1]; valid options - b;i;ps;
+SetMaterial - SetMaterial arguments [2 or 3]
+SetParam - SetParam arguments [any] [any options]
+setup - setup arguments [any] [any options]
+SetView - SetView arguments [any]; valid options - c;
+ShowWindow - ShowWindow arguments [1 or 2]
+SignPlugin - SignPlugin arguments [any except none or 1]
+Silent - Silent arguments [none or 1]
+skin - skin arguments [any] [any options]
+starter - starter arguments [any] [any options]
+StartLogging - StartLogging arguments [1]; valid options - c;
+startupPanel - startupPanel arguments [any] [any options]
+Stop - Stop arguments [1]
+StoreParam - StoreParam arguments [2 or 3]
+Style - Style arguments [none or 1]; valid options - s;
+SwapBg - SwapBg arguments [none]
+Test - Test arguments [any]
+TestHKLF - TestHKLF arguments [2]; valid options - e;
+TestMT - TestMT arguments [any]
+TestStat - TestStat arguments [1]
+text - text arguments [any] [any options]
+Textm - Textm arguments [1]
+txt - txt arguments [any] [any options]
+UncheckMenu - UncheckMenu arguments [1]
+Undo - Undo arguments [none]
+UninstallPlugin - UninstallPlugin arguments [1]
+Update - Update arguments [none]; valid options - f;reinstall;
+UpdateFile - UpdateFile arguments [1]; valid options - f;
+UpdateOptions - UpdateOptions arguments [none]
+User - User arguments [none or 1]
+user_onexit - user_onexit arguments [any] [any options]
+user_onstartup - user_onstartup arguments [any] [any options]
+ViewGrid - ViewGrid arguments [none or 1]
+ViewLattice - ViewLattice arguments [1]
+Wait - Wait arguments [1]; valid options - r;
+WaitFor - WaitFor arguments [1]
+
+// File and data management
+@Close - @Close arguments [none] states - [Loaded file is expected]
+@Export - @Export arguments [none or 1] states - [CIF file is expected]
+AddIns - AddIns arguments [any except none] states - [INS file is expected]; valid options - q;
+AddSE - AddSE arguments [any except none] states - [Loaded file is expected]
+bw - bw arguments [any] [any options]
+CalcCHN - CalcCHN arguments [none or 1]
+CalcMass - CalcMass arguments [none or 1]
+calcms - calcms arguments [any] [any options]
+CalcPatt - CalcPatt arguments [none] states - [Loaded file is expected]; valid options - i;
+CalcSurf - CalcSurf arguments [any]; valid options - c;pr;
+CalcVol - CalcVol arguments [none or 1]; valid options - cs;n;
+Cif - Cif arguments [1 or 2] states - [CIF file is expected]
+Cif2Doc - Cif2Doc arguments [none or 1] states - [Loaded file is expected]; valid options - n;
+Cif2Tab - Cif2Tab arguments [any] states - [Loaded file is expected]; valid options - l;n;t;
+CifExtract - CifExtract arguments [none, 1 or 2] states - [Loaded file is expected]; valid options - ;i;
+cifm - cifm arguments [any] [any options]
+CifMerge - CifMerge arguments [any] states - [Loaded file is expected]; valid options - dn;f;fcf;resolve;rtab;u;vars;
+Close - Close arguments [any] [any options]
+Crd - Crd arguments [any] states - [Loaded file is expected]
+Crs - Crs arguments [1] states - [CRS file is expected]
+custom_on_report - custom_on_report arguments [any] [any options]
+D2CG - D2CG arguments [any] states - [Loaded file is expected]; valid options - c;
+default - default arguments [any] [any options]
+defaultu - defaultu arguments [any] [any options]
+DelIns - DelIns arguments [any except none] states - [INS file is expected]
+EditAtom - EditAtom arguments [any] states - [Loaded file is expected]; valid options - cs;
+EditIns - EditIns arguments [none] states - [Loaded file is expected]
+export - export arguments [any] [any options]
+ExportFrag - ExportFrag arguments [none] states - [Loaded file is expected]
+FBond - FBond arguments [none or 1]
+FcfCreate - FcfCreate arguments [any except none] states - [Loaded file is expected]; valid options - c;scale;
+File - File arguments [none or 1] states - [Loaded file is expected]; valid options - a;p;s;
+Fmol - Fmol arguments [none] states - [Loaded file is expected]
+GenDisp - GenDisp arguments [none or 1] states - [Loaded file is expected]; valid options - f;force;n;source;
+GraphPD - GraphPD arguments [none] states - [Loaded file is expected]; valid options - fcf;r;
+GraphSR - GraphSR arguments [none or 1] states - [Loaded file is expected]; valid options - b;
+Group - Group arguments [none or 1] states - [Loaded file is expected]; valid options - n;u;
+Grow - Grow arguments [any] states - [Loaded file is expected]; valid options - b;s;t;w;
+HklAppend - HklAppend arguments [any]; valid options - c;h;k;l;
+HklBrush - HklBrush arguments [any]; valid options - f;
+HKLCreate - HKLCreate arguments [3]
+HklEdit - HklEdit arguments [none, 1 or 3]
+HklExclude - HklExclude arguments [any]; valid options - c;h;k;l;
+HklExtract - HklExtract arguments [1] states - [Loaded file is expected]
+HKLF5 - HKLF5 arguments [any] states - [Loaded file is expected]; valid options - e;
+HklImport - HklImport arguments [any except none, 1, 2 or 3]; valid options - batch;
+HklMerge - HklMerge arguments [any] states - [Loaded file is expected]; valid options - m;z;
+HklSplit - HklSplit arguments [2]; valid options - b;
+HklView - HklView arguments [none or 1]
+htmguifontsize - htmguifontsize arguments [any] [any options]
+ImportFrag - ImportFrag arguments [none or 1] states - [Loaded file is expected]; valid options - a;c;d;i;o;p;rr;
+Inv - Inv arguments [any] states - [Loaded file is expected]; valid options - au;f;
+IT - IT arguments [any]; valid options - o;
+Label - Label arguments [any]; valid options - a;gbond;resi;symm;type;
+Labels - Labels arguments [any] [any options]; registered options - a;ao;b;c;ch;co;f;h;i;l;o;p;qi;r;rc;rn;s;sm;u;v;
+LstIns - LstIns arguments [none] states - [INS file is expected]
+LstSymm - LstSymm arguments [none] states - [Loaded file is expected]
+Load - Load arguments [any except none]; valid options - c;
+log - log arguments [any] [any options]
+lookAt - lookAt arguments [any] [any options]
+Lpln - Lpln arguments [3]
+mbacif - mbacif arguments [any] [any options]
+mode_grow - mode_grow arguments [any] [any options]
+MolInfo - MolInfo arguments [any] states - [Loaded file is expected]; valid options - g;o;s;
+Move - Move arguments [none or 2]; valid options - c;cs;
+mspy - mspy arguments [any] [any options]
+my_report - my_report arguments [any] [any options]
+Name - Name arguments [none, 1, 2 or 3]; valid options - cs;ns;r;s;
+NextSolution - NextSolution arguments [none]
+note - note arguments [any] [any options]
+oda - oda arguments [any] [any options]
+options - options arguments [any] [any options]
+Pack - Pack arguments [any] states - [Loaded file is expected]; valid options - a;c;
+partitionlog - partitionlog arguments [any] [any options]
+Patt - Patt arguments [none] states - [INS file is expected]
+PDF - PDF arguments [any] [any options]
+pers - pers arguments [any] [any options]
+pers_a - pers_a arguments [any] [any options]
+pers_b - pers_b arguments [any] [any options]
+PiM - PiM arguments [any] states - [Loaded file is expected]; valid options - l;
+pip - pip arguments [any] [any options]
+PiPi - PiPi arguments [any] states - [Loaded file is expected]; valid options - g;n;r;s;
+PiSig - PiSig arguments [none or 2] states - [Loaded file is expected]; valid options - g;r;
+platon - platon arguments [any] [any options]
+Poly - Poly arguments [any except none] states - [Loaded file is expected]
+profile - profile arguments [any] [any options]
+proj - proj arguments [any] [any options]
+proj_a - proj_a arguments [any] [any options]
+proj_b - proj_b arguments [any] [any options]
+ProjSph - ProjSph arguments [any] states - [Loaded file is expected]; valid options - a;e;g;group;
+Push - Push arguments [1 or 3] states - [Loaded file is expected]
+reap - reap arguments [any] [any options]
+reap_fade - reap_fade arguments [any] [any options]
+reap_listen - reap_listen arguments [any] [any options]
+report - report arguments [any] [any options]
+Rota - Rota arguments [2 or 5]
+RRings - RRings arguments [any]; valid options - cs;i;t;
+RSA - RSA arguments [any] states - [Loaded file is expected]; valid options - c;d;
+RTab - RTab arguments [any] states - [INS file is expected]; valid options - p;
+sadabs - sadabs arguments [any] [any options]
+SAInfo - SAInfo arguments [any]
+saint - saint arguments [any] [any options]
+Save - Save arguments [any except none]
+ScaleN - ScaleN arguments [none or 1]
+SetCharge - SetCharge arguments [any except none]
+sfil - sfil arguments [any] [any options]
+sfil_a - sfil_a arguments [any] [any options]
+sfil_b - sfil_b arguments [any] [any options]
+SG - SG arguments [none or 1]; valid options - a;
+sgd - sgd arguments [any] [any options]
+SGE - SGE arguments [none or 1] states - [Loaded file is expected]; valid options - f;
+Sgen - Sgen arguments [any except none] states - [Loaded file is expected]; valid options - m;
+SGInfo - SGInfo arguments [none or 1]; valid options - c;i ;s;
+SGS - SGS arguments [any except none] states - [Loaded file is expected]; valid options - f;
+Shell - Shell arguments [any]
+ShowP - ShowP arguments [any]; valid options - m;v;
+ShowR - ShowR arguments [any]; valid options - m;v;
+ShowSymm - ShowSymm arguments [none or 1]
+Sort - Sort arguments [any] states - [Loaded file is expected]; valid options - r;rn;
+sp - sp arguments [any] [any options]
+Spec - Spec arguments [any] states - [Loaded file is expected]
+systematic_absences - systematic_absences arguments [any] [any options]
+tbx - tbx arguments [any] [any options]
+tbxh - tbxh arguments [any] [any options]
+tbxs - tbxs arguments [any] [any options]
+telp - telp arguments [any] [any options]
+telp_a - telp_a arguments [any] [any options]
+telp_b - telp_b arguments [any] [any options]
+telph - telph arguments [any] [any options]
+TelpV - TelpV arguments [1]
+TestR - TestR arguments [any] states - [Loaded file is expected]; valid options - s;t;
+TestSymm - TestSymm arguments [none] states - [Loaded file is expected]; valid options - e;
+tidy - tidy arguments [any] [any options]
+Tolman - Tolman arguments [none or 5] states - [Loaded file is expected]; valid options - chd;mpd;
+Transform - Transform arguments [any] states - [Loaded file is expected]
+Tria - Tria arguments [any]; valid options - cs;i;
+tubes - tubes arguments [any] [any options]
+tubes_a - tubes_a arguments [any] [any options]
+tubes_b - tubes_b arguments [any] [any options]
+TwinView - TwinView arguments [any]; valid options - c;t;
+Uniq - Uniq arguments [any] states - [Loaded file is expected]
+ValidateCif - ValidateCif arguments [any] [any options]
+wfnlog - wfnlog arguments [any] [any options]
+Wigl - Wigl arguments [none, 1 or 2] states - [Loaded file is expected]
+WBox - WBox arguments [any] states - [Loaded file is expected]; valid options - s;w;
+weight - weight arguments [any] [any options]
+
+// NoSpherA2 and plugins specific operations
+@reap - @reap arguments [any]; valid options - *;b;r;
+_anisotropic - _anisotropic arguments [any] [any options]
+_defaultw - _defaultw arguments [any] [any options]
+_get - _get arguments [any] [any options]
+_reap_li - _reap_li arguments [any] [any options]
+_reapa - _reapa arguments [any] [any options]
+_report - _report arguments [any] [any options]
+_table - _table arguments [any] [any options]
+_tutorial - _tutorial arguments [any] [any options]
+_xphadd - _xphadd arguments [any] [any options]
+Adopt - Adopt arguments [1] states - [Loaded file is expected]; valid options - c;z;
+atreap_fader - atreap_fader arguments [any] [any options]
+atreap_no_fader - atreap_no_fader arguments [any] [any options]
+Basis - Basis arguments [none or 1]
+Bind - Bind arguments [2]
+CalcAbs - CalcAbs arguments [none or 1] states - [Loaded file is expected]
+CCrd - CCrd arguments [any] states - [Loaded file is expected]
+Ceiling - Ceiling arguments [1]
+Cent - Cent arguments [any]; valid options - n;rings;
+Center - Center arguments [any] states - [Loaded file is expected]; valid options - z;
+ChangeSG - ChangeSG arguments [any except none] states - [Loaded file is expected]; valid options - c;f;g;s;
+changesgs - changesgs arguments [any] [any options]
+ChemDraw - ChemDraw arguments [any] states - [Loaded file is expected]; valid options - u;
+Clean - Clean arguments [none]; valid options - aq;at;cs;d;f;npd;
+Collectivise - Collectivise arguments [any]
+Compaq - Compaq arguments [none] states - [Loaded file is expected]; valid options - a;c;m;q;
+Conn - Conn arguments [any except none]
+Convert - Convert arguments [2]
+CurrentLanguage - CurrentLanguage arguments [none or 1]
+CurrentLanguageEncoding - CurrentLanguageEncoding arguments [none]
+DefineVar - DefineVar arguments [1 or 2] states - [Loaded file is expected]
+Degen - Degen arguments [any] states - [Loaded file is expected]; valid options - cs;
+Detach - Detach arguments [any] states - [Loaded file is expected]; valid options - m;u;
+Env - Env arguments [1] states - [Loaded file is expected]
+FixHL - FixHL arguments [none] states - [Loaded file is expected]
+FixUnit - FixUnit arguments [none or 1] states - [Loaded file is expected]
+fractal_dimnesion - fractal_dimnesion arguments [any] [any options]
+Fuse - Fuse arguments [none or 1] states - [Loaded file is expected]
+getID - getID arguments [any] [any options]
+getIDs - getIDs arguments [any] [any options]
+Grad - Grad arguments [none, 1 or 4]; valid options - i;p;
+hho - hho arguments [any] [any options]
+Individualise - Individualise arguments [any]
+link_parts_occupancies_with - link_parts_occupancies_with arguments [any] [any options]
+Matr - Matr arguments [none, 1, 2, 3 or 9]; valid options - r;
+zsgh - zsgh arguments [any] [any options]
