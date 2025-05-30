@@ -1,4 +1,3 @@
-```markdown
 # Olex2 Client-Server Architecture and Component Roles
 
 This document outlines the client-server architecture involving `controller.py` and the Olex2 system, detailing the roles of various components and how commands are processed.
@@ -87,4 +86,4 @@ The typical flow of commands and their processing is as follows:
 9.  **Connection Termination:** The connection might be kept alive for multiple commands or closed after each interaction, depending on the design of `controller.py` and the Olex2 server's capabilities.
 
 This architecture allows for flexible and automatable control of Olex2's powerful crystallographic functionalities from an external Python environment.
-```
+
