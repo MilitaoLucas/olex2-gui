@@ -698,56 +698,85 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
       dest_zip.write(k, v)
   dest_zip.close()
   return
+
+import threading
+threads = []
 ####################################################################################################
 if platforms.get("win32"):
-  create_portable_distro(
-    port_props=set([win32_sse2_port_name,win32_port_name]),
-    zip_name=win32_sse2_port_zip_name,
-    port_zips=win32_sse2_zip_files,
-    prefix=win32_sse2_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/VC_redist.x86.exe' : 'vcredist_x86.exe'
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": set([win32_sse2_port_name,win32_port_name]),
+      "zip_name": win32_sse2_port_zip_name,
+      "port_zips": win32_sse2_zip_files,
+      "prefix": win32_sse2_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/VC_redist.x86.exe' : 'vcredist_x86.exe'
+      }
     }
   )
+  threads.append(t)
 if platforms.get("win64"):
-  create_portable_distro(
-    port_props=set([win64_port_name]),
-    zip_name=win64_port_zip_name,
-    port_zips=win64_zip_files,
-    prefix=win64_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/VC_redist.x64.exe' : 'vcredist_x64.exe'
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": set([win64_port_name]),
+      "zip_name": win64_port_zip_name,
+      "port_zips": win64_zip_files,
+      "prefix": win64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/VC_redist.x64.exe' : 'vcredist_x64.exe'
+      }
     }
   )
+  threads.append(t)
 #create linux and mac distro only in releases
 if platforms.get("lin64"):
-  create_portable_distro(
-    port_props=set([linux64_port_name]),
-    zip_name=linux64_port_zip_name,
-    port_zips=linux64_zip_files,
-    prefix=linux64_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/linux-distro/start' : 'olex2/start',
-      bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": set([linux64_port_name]),
+      "zip_name": linux64_port_zip_name,
+      "port_zips": linux64_zip_files,
+      "prefix": linux64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/linux-distro/start' : 'olex2/start',
+        bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
+      }
     }
   )
+  threads.append(t)
 if platforms.get("mac64"):
-  create_portable_distro(
-    port_props=set([mac64_port_name]),
-    zip_name=mac64_port_zip_name,
-    port_zips=mac64_zip_files,
-    prefix=mac64_port_prefix,
-    extra_files =
-    {
-      bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
-      bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-      bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
-      bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": set([mac64_port_name]),
+      "zip_name": mac64_port_zip_name,
+      "port_zips": mac64_zip_files,
+      "prefix": mac64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+        bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+        bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+        bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+      }
     }
   )
+  threads.append(t)
+
+thread_n = 4
+while threads:
+  started = []
+  for i in range (thread_n):
+    if len(threads) <= i:
+      break
+    threads[i].start()
+    started.append(threads[i])
+    del threads[i]
+  if not started:
+    break
+  for t in started:
+    t.join()
 
 #init plugin relations
 plugins_to_del = set()
