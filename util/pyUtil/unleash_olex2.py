@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from __future__ import print_function
 """ Olex 2 distro management """
+import threading
 
 if __name__ == '__main__':
   import sys
@@ -276,6 +277,48 @@ def is_distro_uptodate(src, dest):
   dest_mt = os.path.getmtime(dest)
   return src_mt - dest_mt < 5 # 5 seconds
 
+def run_threads(threads, thread_n=None):
+  if thread_n is None:
+    import os
+    thread_n = max(1, os.cpu_count-1)
+  while threads:
+    started = []
+    for i in range (thread_n):
+      if len(threads) <= i:
+        break
+      threads[i].start()
+      started.append(threads[i])
+    if not started:
+      break
+    threads = [t for t in threads if t not in started]
+    for t in started:
+      t.join()
+
+def process_zip_1(dest, zipfi, tag_file_name):
+  full_zn = dest + '/' + zipfi[0]
+  if os.path.exists(full_zn):
+    print('Updating ' + zipfi[0] + '...')
+  else:
+    print('Skipping ' + zipfi[0] + '...')
+    return
+  src_zfile = zipfile.ZipFile(full_zn, mode='r', compression=zipfile.ZIP_DEFLATED)
+  dest_zfile = zipfile.ZipFile(full_zn + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
+  prefix = zipfi[1]
+  if not prefix:  prefix = ''
+  zip_tag_name = prefix + 'olex2.tag'
+  zip_splash_name = prefix + 'splash.jpg'
+  for zi in src_zfile.infolist():
+    if zi.filename == zip_tag_name:
+      dest_zfile.write(tag_file_name, zip_tag_name)
+    elif zi.filename == zip_splash_name:
+      dest_zfile.write(splash_file, zip_splash_name)
+    else:
+      dest_zfile.writestr(zi, src_zfile.read(zi.filename))
+  src_zfile.close()
+  dest_zfile.close()
+  os.remove(full_zn)
+  os.rename(full_zn + '_', full_zn)
+
 def promote_distro(src, dest, forward=True):
   if not os.path.exists(src):
     print("Source distribution does not exist, exiting...")
@@ -304,30 +347,19 @@ def promote_distro(src, dest, forward=True):
     dest_splash_file = os.path.join(dest, "update", "splash.jpg")
     shutil.copy2(splash_file, dest_splash_file)
   #end creating the tag file
+  threads = []
   for zipfi in distro_zips:
-    full_zn = dest + '/' + zipfi[0]
-    if os.path.exists(full_zn):
-      print('Updating ' + zipfi[0] + '...')
-    else:
-      print('Skipping ' + zipfi[0] + '...')
-      continue
-    src_zfile = zipfile.ZipFile(full_zn, mode='r', compression=zipfile.ZIP_DEFLATED)
-    dest_zfile = zipfile.ZipFile(full_zn + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
-    prefix = zipfi[1]
-    if not prefix:  prefix = ''
-    zip_tag_name = prefix + 'olex2.tag'
-    zip_splash_name = prefix + 'splash.jpg'
-    for zi in src_zfile.infolist():
-      if zi.filename == zip_tag_name:
-        dest_zfile.write(tag_file_name, zip_tag_name)
-      elif zi.filename == zip_splash_name:
-        dest_zfile.write(splash_file, zip_splash_name)
-      else:
-        dest_zfile.writestr(zi, src_zfile.read(zi.filename))
-    src_zfile.close()
-    dest_zfile.close()
-    os.remove(full_zn)
-    os.rename(full_zn + '_', full_zn)
+    t = threading.Thread(target=process_zip_1,
+      kwargs={
+        "dest": dest,
+        "zipfi": zipfi,
+        "tag_file_name": tag_file_name
+        }
+      )
+    threads.append(t)
+
+  run_threads(threads)
+
   update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
@@ -699,7 +731,6 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 
-import threading
 threads = []
 ####################################################################################################
 if platforms.get("win32"):
@@ -764,19 +795,7 @@ if platforms.get("mac64"):
   )
   threads.append(t)
 
-thread_n = 4
-while threads:
-  started = []
-  for i in range (thread_n):
-    if len(threads) <= i:
-      break
-    threads[i].start()
-    started.append(threads[i])
-    del threads[i]
-  if not started:
-    break
-  for t in started:
-    t.join()
+run_threads(threads)
 
 #init plugin relations
 plugins_to_del = set()
