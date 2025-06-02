@@ -102,7 +102,7 @@ html.GetBorders - GetBorders arguments [none or 1]
 html.GetData - GetData arguments [1]
 html.GetFontName - GetFontName arguments [none or 1]
 html.GetImage - GetImage arguments [1]
-html.GetItems - GetItems arguments [1]
+html.GetItems - GetItems arguments [1] // Returns items from combobox or list
 html.GetItemState - GetItemState arguments [1]
 html.GetLabel - GetLabel arguments [1]
 html.GetState - GetState arguments [1 or 2]

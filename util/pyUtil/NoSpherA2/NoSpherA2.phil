@@ -334,7 +334,7 @@ snum{
       .type = bool
     NoSpherA2_debug = False
       .type = bool
-    gui_extras_path = "../util/pyUtil/NoSpherA2/h3-refine_NoSpherA2_occ-extras.htm"
+    gui_extras_path = "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm"
         .type = str
   }
 }

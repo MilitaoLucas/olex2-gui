@@ -1,6 +1,7 @@
 import os
 import sys
 import olex
+import olexex
 import olx
 import olex_core
 import gui
@@ -8,7 +9,8 @@ import shutil
 import time
 
 from olexFunctions import OV
-
+ENV = os.environ.copy()
+OLEX_DIR = ENV["OLEX2_DIR"]
 debug = OV.IsDebugging()
 
 # Local imports for NoSpherA2 functions
@@ -1539,10 +1541,10 @@ def change_tsc_generator(input):
         olx.Shell("https://psicode.org/installs/v18/")
     else:
         if input == 'occ':
-            OV.SetParam('snum.NoSpherA2.gui_extras_path', '../util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-occ-extras.htm')
+            OV.SetParam('snum.NoSpherA2.gui_extras_path', f'{OLEX_DIR}/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-oc-extras.htm')
         else:
-            OV.SetParam('snum.NoSpherA2.gui_extras_path', '../util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm')
-
+            OV.SetParam('snum.NoSpherA2.gui_extras_path', f'{OLEX_DIR}/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm')
+        print("OLEX_DIR:", OLEX_DIR)
         OV.SetParam('snum.NoSpherA2.source',input)
         _ = olx.html.GetItemState('h3-NoSpherA2-extras')
         if _ == "0":

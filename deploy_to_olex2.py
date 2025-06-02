@@ -5,6 +5,8 @@ This script deploys the Olex2-gui to the Olex2 application directory.
 import os
 import shutil
 import argparse
+from shutil import ignore_patterns
+
 
 def main(olex2_path: str, run: bool, start_script: str) -> None:
     temp = os.listdir()
@@ -15,7 +17,7 @@ def main(olex2_path: str, run: bool, start_script: str) -> None:
 
     for i in itens:
         if os.path.isdir(i):
-            shutil.copytree(i, os.path.join(olex2_path, i), dirs_exist_ok=True)
+            shutil.copytree(i, os.path.join(olex2_path, i), dirs_exist_ok=True, ignore=ignore_patterns(".git"))
         else:
             shutil.copy2(i, os.path.join(olex2_path, i))
     

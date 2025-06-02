@@ -40,3 +40,17 @@
     \>
   \>
 \>
+
+<html_reload help="Reloads an html file"
+  <body
+    <args
+      <arg1 name="File path" def="filepath()">
+    \>
+    <cmd
+      <cmd1 cmd1="silent on">
+      <cmd2 cmd1="echo reloading %1">
+      <cmd3 "html.Load %1">
+      <cmd4 "html.Load basedir()/etc/index.htm">
+    \>
+  \>
+\>
