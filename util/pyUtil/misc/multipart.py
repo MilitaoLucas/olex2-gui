@@ -7,7 +7,11 @@
 #   http://code.activestate.com/recipes/146306/
 
 from email.generator import Generator
-from ssl import SSLCertVerificationError
+try:
+  from ssl import SSLCertVerificationError
+except ImportError:
+  SSLCertVerificationError = Exception("Failed to validate cert")
+  
 import uuid
 import mimetypes
 import os
