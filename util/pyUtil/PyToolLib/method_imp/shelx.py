@@ -54,9 +54,13 @@ class Method_shelx(Method):
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl']#, 'shelxt', 'xt']
-    thread_n = OV.GetThreadN()
+    thread_n = OV.GetThreadN(get_default=False)
     if self.command_line_options:
-      cmds = self.command_line_options.split()
+      if "!-t" in self.command_line_options: # AC override
+        set_thread_n = False
+        cmds = self.command_line_options.replace("!-t", "-t").split()
+      else:
+        cmds = self.command_line_options.split()
       if not set_thread_n or thread_n < 1:
         commands += cmds
       else:
@@ -106,7 +110,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
-      
+
       prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
       method = gui.tools.GetMaskInfo.get_masking_method()
       lines, fab_path, fab_origin = gui.tools.GetMaskInfo.get_and_check_mask_origin()

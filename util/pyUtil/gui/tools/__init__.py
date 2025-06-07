@@ -3012,3 +3012,12 @@ def move_nth_to_end(lst, n):
   if 0 <= n < len(lst):  # Ensure n is within valid range
     lst.append(lst.pop(n))  # Remove the nth element and append it to the end
   return lst
+
+def on_sg_change(args):
+  if not OV.HasGUI():
+    return
+  #print("changing sg:" " ".join(args))
+  olex.m("spy.run_skin sNumTitle")
+  olx.html.Refresh("SNUMTITLE")
+
+OV.registerCallback("sgchange", on_sg_change)

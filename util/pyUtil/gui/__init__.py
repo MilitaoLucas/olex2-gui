@@ -748,6 +748,12 @@ def have_par_files():
   OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
   return True
 
+def activate_or_run_CAP(fn):
+  import olex_gui
+  fn = os.path.abspath(fn)
+  if not olex_gui.ActivateCAP(fn):
+    olx.Shell(fn)
+
 def run_CAP():
   par_files = OV.GetVar(olx.var_name_par_files).split("&;")
   if not par_files:
@@ -763,7 +769,7 @@ def run_CAP():
               b="tscr", s=False)
     olx.html.ShowModal("par_files")
   else:
-    olx.Shell(par_files[0])
+    activate_or_run_CAP(par_files[0])
 
 def par_files_table():
   def fn(x):
@@ -773,9 +779,10 @@ def par_files_table():
   files = OV.GetVar(olx.var_name_par_files).split("&;")
   rv = "<table width='100%'>"
   for f in files:
-    rv += "<tr><td><a href=\"shell '%s'>>html.endModal par_files 0\">%s</a></td></tr>" %(f, fn(f))
+    rv += "<tr><td><a href=\"spy.gui.activate_or_run_CAP '%s'>>html.endModal par_files 0\">%s</a></td></tr>" %(f, fn(f))
   return rv + "</table>"
 
 olex.registerFunction(have_par_files, False, "gui")
+olex.registerFunction(activate_or_run_CAP, False, "gui")
 olex.registerFunction(run_CAP, False, "gui")
 olex.registerFunction(par_files_table, False, "gui")

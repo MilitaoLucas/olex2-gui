@@ -929,7 +929,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def IsClientMode(self):
     return self.GetParam('user.refinement.client_mode', False)
 
-  def GetThreadN(self):
+  def GetThreadN(self, get_default=True):
     v = self.GetParam('user.refinement.thread_n')
     if v.endswith("%"):
       v = int(v[:-1])
@@ -941,7 +941,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       return int(v)
     else:
       v = int(v)
-      if v <= 0:
+      if v <= 0 and get_default:
         v = max(1, int(os.cpu_count() *3/4))
       return v
 
