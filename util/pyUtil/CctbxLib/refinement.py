@@ -94,10 +94,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       if env.initialised:
         open_blas_tn = env.threads
-      th_n = int(OV.GetVar("refine.max_threads", "0"))
-      if th_n == 0:
-        th_n = OV.GetThreadN()
-      ext.build_normal_equations.available_threads = th_n
+      # refine.max_threads is set and reset by AC
+      thread_n = int(OV.GetVar("refine.max_threads", "0"))
+      if thread_n == 0:
+        thread_n = OV.GetThreadN()
+      ext.build_normal_equations.available_threads = thread_n
     except:
       pass
     if not (reparametrisation_only or build_only):

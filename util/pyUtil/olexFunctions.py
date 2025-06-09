@@ -929,7 +929,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def IsClientMode(self):
     return self.GetParam('user.refinement.client_mode', False)
 
-  def GetThreadN(self, get_default=True):
+  def GetThreadN(self, ext=False):
+    """ when ext is True - a tuple is returned, the first one - is the number of threads
+    and the second one - if the value has been set by the user or default (for value <= 0)
+    is returned
+    """
     v = self.GetParam('user.refinement.thread_n')
     if v.endswith("%"):
       v = int(v[:-1])
@@ -938,12 +942,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       v = os.cpu_count() * v / 100
       if v < 1:
         v = 1
-      return int(v)
+      return (int(v), True) if ext else int(v)
     else:
       v = int(v)
-      if v <= 0 and get_default:
+      if v <= 0:
         v = max(1, int(os.cpu_count() *3/4))
-      return v
+        return (v, False) if ext else v
+      return (v, True) if ext else v
 
   def GetACI(self):
     import AC7 as ac

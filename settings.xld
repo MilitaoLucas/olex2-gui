@@ -41,8 +41,11 @@
 <menus
     <item title="Help;About" macro="spy.gui.About()">
     <item title="Help;Update options" macro="updateoptions">
-    <item title="Help;Documentation (HTML)" macro="shell BaseDir()/etc/documentation/Commands.html">
     <item title="Help;Documentation (PDF)" macro="shell BaseDir()/etc/documentation/Commands.pdf">
+    <item title="Help;Online documentation (HTML)" macro="shell https://www.olexsys.org/olex2/docs/">
+    <item title="Help;Ilia Guzei's Manual" macro="shell https://uwmadison.app.box.com/s/2qq12zzw893vc3n1rspefv9h9p6gw83k">
+
+
 
     <item title="Select;All \tCtrl+A" macro="sel -a" before="Help">
     <item title="Select;None \tCtrl+U" macro="sel -u">
