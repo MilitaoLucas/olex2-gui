@@ -279,8 +279,8 @@ def is_distro_uptodate(src, dest):
 
 def run_threads(threads, thread_n=None):
   if thread_n is None:
-    import os
-    thread_n = max(1, os.cpu_count-1)
+    import multiprocessing
+    thread_n = max(1, multiprocessing.cpu_count()-1)
   while threads:
     started = []
     for i in range (thread_n):
