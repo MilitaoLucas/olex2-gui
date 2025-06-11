@@ -6,6 +6,7 @@ import olx
 import gui
 import shutil
 import time
+import subprocess
 
 from olexFunctions import OV
 from PluginTools import PluginTools as PT
@@ -125,11 +126,28 @@ class NoSpherA2(PT):
         self.WSLAdapter = None
       else:
         self.conda_adapter = CondaAdapter(self.WSLAdapter)
-        print("Available conda envs:", self.conda_adapter.get_available_conda_envs())
-        olx.stopwatch.start("xharpy exe")
-        self.setup_xharpy()
-        olx.stopwatch.start("pyscf exe")
-        self.setup_pyscf()
+        if not self.conda_adapter.have_conda:
+          sel = olx.Alert("Conda not available",\
+"""Error: Conda is not available.
+Do you want me to install conda for you?""", "YN", False)
+          if sel == "Y":
+            print("Installing micro-mamba using the official installation script...")
+            try:
+              self.WSLAdapter.call_command("curl -L micro.mamba.pm/install.sh | bash")
+              print("Micro-mamba installed successfully.")
+              print("Please restart Olex2 to use it.")
+            except subprocess.CalledProcessError as e:
+              print(f"Error installing micro-mamba: {e}")
+              print("Please install conda manually and restart Olex2.")
+          else:
+            print("Conda is not available, xharpy and pyscf will not be available!")
+          self.conda_adapter = None
+        else:
+          print("Available conda envs:", self.conda_adapter.get_available_conda_envs())
+          olx.stopwatch.start("xharpy exe")
+          self.setup_xharpy()
+          olx.stopwatch.start("pyscf exe")
+          self.setup_pyscf()
     except Exception as e:
       print(f"Error setting up xharpy: {e}")
       print("WSL or Conda not available, xharpy and pyscf will not be available!")

@@ -47,7 +47,6 @@
       <arg7 name="filefull" def="filefull()">>
     <cmd
       <cmd0  "xgrid.Visible(false)">
-      <cmd0a "run spy.NoSpherA2.delete_f_calc_f_obs_one_h" hint="does not break the macro if fails!">
       <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  "spy.SaveStructureParams()">
       <cmd3  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
