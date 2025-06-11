@@ -1345,8 +1345,8 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         print("Available Distros: ", distros)
         print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
         return
-      wsl_adapter.copy_to_possible_wsl(script, "/tmp/pySCF.sh")
-      wsl_adapter.call_command("bash -i -c /tmp/pySCF.sh")
+      wsl_adapter.copy_from_possible_wsl(script, "/tmp/pySCF.sh")
+      wsl_adapter.call_command("bash -i -c '/tmp/pySCF.sh -y'")
   elif input == "Get XHARPy":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
@@ -1371,8 +1371,8 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         print("Available Distros: ", distros)
         print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
         return
-      wsl_adapter.copy_to_possible_wsl(script, "~/XHARPy.sh")
-      wsl_adapter.call_command("bash -i -c ~/XHARPy.sh")
+      wsl_adapter.copy_from_possible_wsl(script, "~/XHARPy.sh")
+      wsl_adapter.call_command("bash -i -c '~/XHARPy.sh -y'")
 
   elif input == "Get Psi4":
     olx.Alert("Please install Psi4 manually",\

@@ -88,9 +88,15 @@ if [ "$CONDA_FOUND" = false ]; then
     
     # Using the official installation method
     echo "Installing micromamba using the official installation script..."
+
+    # Set environment variables to accept defaults
+    export MAMBA_ROOT_PREFIX="${HOME}/.micromamba"
+    export MAMBA_BIN_DIR="~/.local/bin"
+    export MAMBA_INIT_SHELL="yes"
+    export MAMBA_CONDA_FORGE="yes"
     
     # Run the official installation script
-    "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+    curl -L micro.mamba.pm/install.sh | bash -s -- -p
     
     # Set conda alias
     if [ -f "$HOME/.bashrc" ]; then
