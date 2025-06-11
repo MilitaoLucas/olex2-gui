@@ -227,6 +227,7 @@ class OlexRefinementModel(object):
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
           'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
 
+
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
     self._atoms = []
@@ -356,8 +357,8 @@ class OlexRefinementModel(object):
       restrained_set = set()
       filtered_restraints = []
       for restraint in restraints:
-        restraint_type = self.restraint_types.get(shelxl_restraint)
-        if shelxl_restraint in ('rigu', 'simu', 'delu'):
+        restraint_type = self.restraint_types[shelxl_restraint]
+        if self.is_adp_restraint(shelxl_restraint):
           i_seqs = [i[0] for i in restraint['atoms']]
           if not i_seqs:
             if restrained_set:
