@@ -29,7 +29,7 @@ if OV.HasGUI():
 try:
   from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
-except:
+except Exception as e:
   from_outside = True
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
@@ -224,10 +224,10 @@ Do you want me to install conda for you?""", "YN", False)
     to_backup = self.jobs_dir
     wfn_job_dir = self.jobs_dir
     if os.path.exists(to_backup):
-      l = 1
-      while (os.path.exists(backup + "_%d" % l)):
-        l = l + 1
-      backup = backup + "_%d" % l
+      _l = 1
+      while (os.path.exists(f"{backup}_{_l}")):
+        _l += 1
+      backup += f"_{_l}"
 
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
     run = None
@@ -854,8 +854,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         result = p.stdout[idx:idx + 50].split('\n')[0].split()[1]
         print("ORCA VERSION: ", result)  # print the version
         OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
-      except:
-        print("Failed to evaluate ORCA version")
+      except Exception as e:
+        print("Failed to evaluate ORCA version", e)
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
       if "ORCA" not in self.softwares:
         if Orca_Vers == "4":
@@ -1039,19 +1039,12 @@ def discamb(folder, name, discamb_exe):
     OV.htmlUpdate()
 
 class Job(object):
-  origin_folder = " "
-  date = None
   out_fn = None
   error_fn = None
-  result_fn = None
-  analysis_fn = None
-  completed = None
   full_dir = None
-  wait = "false"
 
   def __init__(self, parent, name):
     self.parent = parent
-    self.status = 0
     self.name = name
     self.parallel = parent.parallel
     if self.name.endswith('_HAR'):
@@ -1063,17 +1056,11 @@ class Job(object):
 
     if not os.path.exists(full_dir):
       return
-    self.date = os.path.getctime(full_dir)
-    self.result_fn = os.path.join(full_dir, name) + ".archive.cif"
     self.error_fn = os.path.join(full_dir, name) + ".err"
     self.out_fn = os.path.join(full_dir, name) + ".out"
-    self.dump_fn = os.path.join(full_dir, "hart.exe.stackdump")
-    self.analysis_fn = os.path.join(full_dir, "stdout.fit_analysis")
-    self.completed = os.path.exists(self.result_fn)
     #initialised = False
 
   def launch(self,wfn_dir=''):
-    self.origin_folder = OV.FilePath()
 
     if wfn_dir == '':
       model_file_name = os.path.join(self.full_dir, self.name) + "_tonto.cif"
@@ -1154,8 +1141,6 @@ class Job(object):
     self.error_fn = os.path.join(self.full_dir, self.name) + "_tonto.err"
     self.out_fn = os.path.join(self.full_dir, self.name) + "_tonto.out"
     self.wfn_name = os.path.join(self.full_dir, self.name) + "_tonto.ffn"
-    self.dump_fn = os.path.join(self.full_dir, "hart.exe.stackdump")
-    self.analysis_fn = os.path.join(self.full_dir, "stdout.fit_analysis")
     os.environ['hart_cmd'] = '+&-'.join(args)
     os.environ['hart_file'] = self.name
     os.environ['hart_dir'] = os.path.join(OV.FilePath(),self.full_dir)
