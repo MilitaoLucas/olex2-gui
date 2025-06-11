@@ -581,9 +581,9 @@ class RunRefinementPrg(RunPrg):
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
     try:
-      if use_aspherical == True:
+      if use_aspherical:
         make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
-        if make_fcf_only == True:
+        if make_fcf_only:
           from aaff import make_fcf
           result = make_fcf(self)
         else:
@@ -608,9 +608,9 @@ class RunRefinementPrg(RunPrg):
       sys.stderr.formatExceptionInfo()
       self.terminate = True
     finally:
-      if result == False:
+      if not result:
         self.terminate = True
-        if use_aspherical == True:
+        if use_aspherical:
           self.refinement_has_failed.append("Error during NoSpherA2")
       # remove res if failed but only for remote run
       RunRefinementPrg.running = None

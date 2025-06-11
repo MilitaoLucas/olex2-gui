@@ -152,6 +152,14 @@ class initpy_funcs():
     import cctbx_olex_adapter
     import cctbx_controller
     import olex_twinning
+    
+  def NoSpherA2(self):
+    try:
+      self.olx.stopwatch.exec("from NoSpherA2 import NoSpherA2")
+    except Exception as e:
+      self.olx.Echo(e, m="error")
+      print("Failed to load NoSpherA2 plugin. Please check your installation.")
+      return
 
   def onstartup(self):
     self.OV.SetVar('cbtn_solve_on','false')

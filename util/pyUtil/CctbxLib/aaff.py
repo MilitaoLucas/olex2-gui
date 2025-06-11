@@ -30,18 +30,18 @@ def deal_with_AAFF(self: RunRefinementPrg):
 Please select one of the generators from the drop-down menu.""", "O", False)
       OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
       return
-    if energy == None:
+    if energy is None:
       HAR_log.write("{:^24}".format("---"))
     else:
       HAR_log.write("{:^24.10f}".format(energy))
     HAR_log.write("{:>70}".format(" "))
     r1_old = OV.GetParam('snum.refinement.last_R1')
     wr2_old = OV.GetParam('snum.refinement.last_wR2')
-    if r1_old != "n/a" and r1_old != None:
+    if r1_old != "n/a" and r1_old is not None:
       HAR_log.write("{:>6.2f}".format(float(r1_old) * 100))
     else:
       HAR_log.write("{:>6}".format("N/A"))
-    if wr2_old != "n/a" and wr2_old != None:
+    if wr2_old != "n/a" and wr2_old is not None:
       HAR_log.write("{:>7.2f}".format(float(wr2_old) * 100))
     else:
       HAR_log.write("{:>7}".format("N/A"))
@@ -49,16 +49,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     HAR_log.flush()
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
     calculate = OV.GetParam('snum.NoSpherA2.Calculate')
-    if calculate == True:
-      if OV.GetParam('snum.NoSpherA2.h_aniso') == True:
+    if calculate:
+      if OV.GetParam('snum.NoSpherA2.h_aniso'):
         olx.Anis("$D", h=True)
         olx.Anis("$H", h=True)
-      if OV.GetParam('snum.NoSpherA2.h_afix') == True:
+      if OV.GetParam('snum.NoSpherA2.h_afix'):
         olex.m("Afix 0 $H")
       else:
         print("Setting all AFIX H Atoms to Neutron distances")
         olex.m("NeutronHDist")
-    while converged == False:
+    while not converged:
       run += 1
       HAR_log.write("{:3d}".format(run))
       old_model = OlexRefinementModel()
@@ -68,7 +68,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       try:
         from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
         v = nsp2.launch()
-        if v == False:
+        if not v:
           print("Error during NoSpherA2! Abnormal Ending of program!")
           HAR_log.close()
           return False
@@ -96,18 +96,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           wfn_file = file
         elif file.endswith(".tscb"):
           tsc_exists = True
-      if tsc_exists == False:
+      if not tsc_exists:
         print("Error during NoSpherA2: No .tsc file found")
         RunRefinementPrg.running = None
         HAR_log.close()
         return False
       # get energy from wfn file
-      #TODO Check if WFN is new, otherwise skip this!
       energy = None
       if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB" or "MATTS" in source or "hakkar" in source:
         HAR_log.write("{:^24}".format("---"))
       else:
-        if (wfn_file != None) and (calculate == True):
+        if (wfn_file is not None) and calculate:
           if ".gbw" not in wfn_file:
             with open(wfn_file, "rb") as f:
               f.seek(-2000, os.SEEK_END)
@@ -133,7 +132,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           fread = None
         else:
           HAR_log.write("{:^24}".format("---"))
-      if OV.GetParam('snum.NoSpherA2.run_refine') == True:
+      if OV.GetParam('snum.NoSpherA2.run_refine'):
         # Run Least-Squares
         self.startRun()
         try:
@@ -153,9 +152,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           self.method.observe(self)
         try:
           RunPrg.run(self)
-          f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
-          if f_obs_sq != None and f_calc != None:
-            nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
+          #f_obs_sq,f_calc = self.cctbx.get_fo_sq_fc(self.cctbx.normal_eqns.one_h_linearisation)
+          #if f_obs_sq is not None and f_calc is not None:
+          #  nsp2.set_f_calc_obs_sq_one_h_linearisation(f_calc,f_obs_sq,self.cctbx.normal_eqns.one_h_linearisation)
         except Exception as e:
           e_str = str(e)
           if ("stoks.size() == scatterer" in e_str):
@@ -312,17 +311,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               matrix_run += size
 
           HAR_log.write("{:>16.4f}".format(results.max_dxyz))
-          if results.label_xyz != None:
+          if results.label_xyz is not None:
             HAR_log.write("{:>10}".format(results.label_xyz))
           else:
             HAR_log.write("{:>10}".format("N/A"))
           HAR_log.write("{:>10.4f}".format(results.max_duij))
-          if results.label_uij != None:
+          if results.label_uij is not None:
             HAR_log.write("{:>12}".format(results.label_uij))
           else:
             HAR_log.write("{:>12}".format("N/A"))
           HAR_log.write("{:>10.4f}".format(results.max_overall))
-          if results.label_overall != None:
+          if results.label_overall is not None:
             HAR_log.write("{:>12}".format(results.label_overall))
           else:
             HAR_log.write("{:>12}".format("N/A"))
@@ -339,10 +338,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           raise e
       r = results()
       analyze_shifts(r)
-      if calculate == False:
+      if not calculate:
         converged = True
         break
-      elif Full_HAR == False:
+      elif not Full_HAR:
         converged = True
         break
       elif (r.max_overall <= 0.01):
@@ -359,7 +358,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         r1_old = r.r1
         wr2_old = r.wr2
   except Exception as e :
-    if HAR_log != None:
+    if HAR_log is not None:
       HAR_log.close()
     raise e
   # Done with the while !Converged
@@ -367,7 +366,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   ext_name = "h3-NoSpherA2-extras"
   if OV.IsHtmlItem(ext_name):
     olex.m(f"html.ItemState {ext_name} 2")
-  if converged == False:
+  if not converged:
     HAR_log.write(" !!! WARNING: UNCONVERGED MODEL! PLEASE INCREASE MAX_CYCLE OR CHECK FOR MISTAKES !!!\n")
     self.refinement_has_failed.append("Warning: Unconverged Model!")
   if "DISCAMB" in source or "MATTS" in source:
@@ -383,9 +382,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         for i in discamb_log.readlines():
           if "unassigned atom types" in i:
             unknown_sources = True
-          if unknown_sources == True:
+          if unknown_sources:
             HAR_log.write(i)
-    if unknown_sources == True:
+    if unknown_sources:
       HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
       self.refinement_has_failed.append("Unassigned Atom Types!")
   HAR_log.write("*" * 110 + "\n")
@@ -397,7 +396,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   HAR_log.write(str(datetime.datetime.now()))
   HAR_log.write("\n")
   precise = OV.GetParam('snum.NoSpherA2.precise_output')
-  if precise == True:
+  if precise:
     olex.m("spy.NoSpherA2.write_precise_model_file()")
   HAR_log.flush()
   HAR_log.close()

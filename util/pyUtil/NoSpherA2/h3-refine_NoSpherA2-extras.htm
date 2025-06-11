@@ -1,7 +1,7 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
-
+<!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'XHARPy')-->
 <!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'Thakkar IAM')-->
 <!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'SALTED')-->
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid')
@@ -898,6 +898,51 @@ $-
 #ignoreif -->
 #ignoreif -->
 
+<!-- ======= pySCF SPECIFIC START ===================== -->
+
+<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)">
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="10%" align='right'>
+    <b>Damping </b>
+</td>
+<td width="10%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_pySCF_Damping@refine",
+    "items='0.6;0.7;0.85;0.93'",
+    "value=spy.GetParam('snum.NoSpherA2.pySCF_Damping')",
+    "onchange=spy.SetParam('snum.NoSpherA2.pySCF_Damping', html.GetValue('~name~'))")
+  $-
+</td> 
+<td width="13%" align='right'>
+    <b>Solvation </b>
+</td>
+<td width="30%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_ORCA_Solvation@refine",
+    "items='Vacuum;Water;Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene'",
+    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
+    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
+  $-
+</td> 
+<td width="15%" align='right'>
+    <b>WSL Distro </b>
+</td>
+<td width="30%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=WSLDistro",
+    "items=spy.NoSpherA2.get_distro_list()",
+    "value=spy.GetParam('snum.NoSpherA2.distro')",
+    "onchange=spy.SetParam('snum.NoSpherA2.distro', html.GetValue('~name~'))")
+  $-
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</ignore>
+
 <ignore test="not strcmp(spy.GetParam('user.NoSpherA2.show_ri_fit'),'False')">
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_RIFIT' width='100%'></tr>
@@ -937,40 +982,6 @@ $-
 <b> </b>
 </td>
 
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</ignore>
-
-
-<!-- ======= pySCF SPECIFIC START ===================== -->
-
-<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.source'),pySCF)">
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<td width="10%" align='right'>
-    <b>Damping </b>
-</td>
-<td width="10%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=NoSpherA2_pySCF_Damping@refine",
-    "items='0.6;0.7;0.85;0.93'",
-    "value=spy.GetParam('snum.NoSpherA2.pySCF_Damping')",
-    "onchange=spy.SetParam('snum.NoSpherA2.pySCF_Damping', html.GetValue('~name~'))")
-  $-
-</td> 
-<td width="13%" align='right'>
-    <b>Solvation </b>
-</td>
-<td width="30%">
-  $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=NoSpherA2_ORCA_Solvation@refine",
-    "items='Vacuum;Water;Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene'",
-    "value=spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))")
-  $-
-</td> 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </ignore>
 
@@ -1174,6 +1185,121 @@ $spy.NoSpherA2.hybrid_GUI()
     )
   $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
+#ignoreif -->
+
+<!-- #ignoreif not strcmp(spy.getParam('snum.NoSpherA2.source'),'XHARPy')
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=xharpy_2; help_ext=xharpy_2;1; -->
+ <td width="20%" align='left'>
+  <b>Functional </b>
+  </td>
+  <td width="30%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=xharpy_functional",
+    "items=spy.NoSpherA2.get_functional_list()",
+    "value=spy.GetParam('snum.NoSpherA2.method')",
+    "onchange=spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))")
+  $-
+  </td>
+
+  <td width="30%" align='right'>
+    <b>Grid spacing (Ang)
+  </td>
+  <td width="20%" align='left'>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=xharpy_GSp",
+      "value=spy.GetParam('snum.NoSpherA2.xharpy.grid_spacing')",
+      "onchange=spy.SetParam('snum.NoSpherA2.xharpy.grid_spacing', html.GetValue('~name~'))")
+    $-
+  </td>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=xharpy_3; help_ext=xharpy_3;1; -->
+  <td width="20%" align='left'>
+    <b>K-Point grid: </b>
+  </td>
+
+  <td width="20%" align='left'>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=xharpy_kpoints1",
+      "value=spy.GetParam('snum.NoSpherA2.xharpy.k_points1')",
+      "onchange=spy.SetParam('snum.NoSpherA2.xharpy.k_points1', html.GetValue('~name~'))")
+    $-
+  </td>
+
+  <td width="20%" align='left'>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=xharpy_kpoints2",
+      "value=spy.GetParam('snum.NoSpherA2.xharpy.k_points2')",
+      "onchange=spy.SetParam('snum.NoSpherA2.xharpy.k_points2', html.GetValue('~name~'))")
+    $-
+  </td>
+
+  <td width="20%" align='left'>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=xharpy_kpoints3",
+      "value=spy.GetParam('snum.NoSpherA2.xharpy.k_points3')",
+      "onchange=spy.SetParam('snum.NoSpherA2.xharpy.k_points3', html.GetValue('~name~'))")
+    $-
+  </td>
+
+  <td width="10%" align='left'>
+    $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+      "name=CenterGamma",
+      "label=Center Gamma",
+      "checked=spy.GetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma')",
+      "oncheck=spy.SetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma','True')",
+      "bgcolor=GetVar(HtmlTableFirstcolColour)",
+      "td1=<td align='center'>",
+      "onuncheck=spy.SetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma','False')"
+      )
+    $-
+  </td>
+
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=xharpy_3; help_ext=xharpy_3;1; -->
+<td width="5%" align='left'>
+  $+
+  html.Snippet("gui/snippets/input-checkbox-td",
+    "name=CenterGamma",
+    "label=Reload",
+    "checked=spy.GetParam('snum.NoSpherA2.xharpy.reload')",
+    "oncheck=spy.SetParam('snum.NoSpherA2.xharpy.reload','True')",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.SetParam('snum.NoSpherA2.xharpy.reload','False')"
+    )
+  $-
+</td>
+  <td width="30%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=WSLDistro",
+    "items=spy.NoSpherA2.get_distro_list()",
+    "value=spy.GetParam('snum.NoSpherA2.distro')",
+    "onchange=spy.SetParam('snum.NoSpherA2.distro', html.GetValue('~name~'))")
+  $-
+  </td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Update .tsc",
+    "onclick=spy.NoSpherA2.launch()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='80%'>",
+    )
+  $-
+
+</>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
 #ignoreif -->
 
 #ignoreif -->

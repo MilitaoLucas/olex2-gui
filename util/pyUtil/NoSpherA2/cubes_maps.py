@@ -20,9 +20,9 @@ from cctbx.eltbx import tiny_pse
 if OV.HasGUI():
   import olex_xgrid
 
-import NoSpherA2
+#import NoSpherA2
 from utilities import is_disordered
-import Wfn_Job
+#import Wfn_Job
 from decors import run_with_bitmap
 
 a2b = 0.529177210903
