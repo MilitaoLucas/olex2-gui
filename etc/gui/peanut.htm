@@ -9,7 +9,7 @@
     "name=Type@Peanut",
     "items='rmsd;msd'",
     "value=GetVar('Peanut_type','rmsd')",
-    "onchange=SetVar('Peanut_type',html.GetValue('~name~'))")
+    "onchange=SetVar('Peanut_type',html.GetValue('~name~'))>>spy.Peanut.show_MSDS()")
   $-
   </td>
   <td width="10%" align='left'>
@@ -25,7 +25,7 @@
       min='1'
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       value="$GetVar(Peanut_quality, 5)"
-      onchange="SetVar('Peanut_quality',html.GetValue('~name~'))"
+      onchange="SetVar('Peanut_quality',html.GetValue('~name~'))>>spy.Peanut.show_MSDS()"
     >
   </td>
   <td width="10%" align='right'>
@@ -36,7 +36,7 @@
       html.Snippet("gui/snippets/input-text",
       "name=scale@Peanut",
       "value=GetVar('Peanut_scale','1.0')",
-      "onchange=SetVar('Peanut_scale', html.GetValue('~name~'))")
+      "onchange=SetVar('Peanut_scale', html.GetValue('~name~'))>>spy.Peanut.show_MSDS()")
     $-
   </td>
   <td width="10%" align='left'>
@@ -47,7 +47,7 @@
     "name=Anharm@Peanut",
     "items='all;anh;none'",
     "value=GetVar('Peanut_anh','all')",
-    "onchange=SetVar('Peanut_anh',html.GetValue('~name~'))")
+    "onchange=SetVar('Peanut_anh',html.GetValue('~name~'))>>spy.Peanut.show_MSDS()")
   $-
   </td>
 

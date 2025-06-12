@@ -1,15 +1,9 @@
 import os
-import sys
 import olex
 import olx
-import olex_core
 import gui
-import shutil
-import time
 from iotbx.cif import reader
-import numpy as np
 from cctbx import uctbx, adptbx
-from scitbx import matrix
 from cctbx_olex_adapter import OlexCctbxAdapter
 
 from olexFunctions import OV
@@ -43,9 +37,7 @@ class Peanut():
     Make a difference CIF file between two CIF files.
     """
     from iotbx.cif import reader
-    import numpy as np
     from cctbx import uctbx, adptbx
-    from scitbx import matrix
     
     # Read the CIF files
     cif1_data = reader(file_path=cif1).model()
@@ -256,25 +248,27 @@ class Peanut():
     return results
 
   def show_MSDS(self):
-    scale = OV.GetVar('Peanut_scale',"1.0")
-    anh = OV.GetVar('Peanut_anh','all')
-    typ = OV.GetVar('Peanut_type',"rmsd")
-    qual = OV.GetVar('Peanut_quality', "5")
     self.old_arad = OV.GetParam("user.atoms.azoom",1)
     self.old_brad = OV.GetParam("user.bonds.bzoom",1)
     olex.m("AZoom 0")
     olex.m("BRad 0.1")
-    olex.m(f"MSDSView -s={scale} -a={anh} -t={typ} -q={qual}")
-    
+    s = OV.GetVar('Peanut_scale',"1.0")
+    a = OV.GetVar('Peanut_anh','all')
+    t = OV.GetVar('Peanut_type',"rmsd")
+    q = OV.GetVar('Peanut_quality', "5")
+    olex.m(f"MSDSView -s={s} -a={a} -t={t} -q={q}")
+
   def remove_MSDS(self):
-    if self.showing_diff == True:
+    if self.showing_diff:
       self.hide_diff()
     else:
       try:
         olex.m("kill MSDS")
         olex.m(f"AZoom {self.old_arad}")
         olex.m(f"BRad {self.old_brad/100}")
-      except:
+      except Exception as e:
+        if debug:
+          print(e)
         print("MSDS is not running, nothing to hide")
   
   def show_diff(self, cif1 = None):
@@ -299,7 +293,6 @@ class Peanut():
     ]
     unit_cell1 = uctbx.unit_cell(cell_params1)
     
-    atoms1 = cif1_data[block1].get('_atom_site_label')
     aniso_atoms1 = cif1_data[block1].get('_atom_site_aniso_label')
     # Get Uij parameters
     u11_1 = cif1_data[block1].get('_atom_site_aniso_U_11')
@@ -364,12 +357,13 @@ class Peanut():
             if a.is_anharmonic_adp():
               u += a.anharmonic_adp.data()
           #u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
-        self.old_adps.append(u)
+        self.old_adps.append(u.copy())
         # find the position in the ADP loop of the cif and subtract the ADPs
         idx1 = -1
         for i,a_ in enumerate(aniso_atoms1):
               if a_ == label:
                 idx1 = i
+                break
         if idx1 != -1:
             # Create Uij tensor
             u_cif1 = (
@@ -380,7 +374,7 @@ class Peanut():
                 float(str(u13_1[idx1]).split('(')[0]), 
                 float(str(u23_1[idx1]).split('(')[0])
             )
-            u_cart = adptbx.u_cif_as_u_cart(uc, u_cif1)
+            u_cart = adptbx.u_cif_as_u_cart(unit_cell1, u_cif1)
             for i,u_val in enumerate(u_cart):
                 u[i] -= u_val
         if C_anharm_site is not None:
@@ -447,7 +441,7 @@ class Peanut():
     
   def hide_diff(self):
     olex.m("kill MSDS")
-    if self.showing_diff == False:
+    if not self.showing_diff:
         print("Not showing a difference model")
         return
     cctbx_adapter = OlexCctbxAdapter()
