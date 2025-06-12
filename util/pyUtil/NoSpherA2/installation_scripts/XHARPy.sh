@@ -11,6 +11,7 @@ fi
 echo "XHARPy Installation Script"
 echo "=========================="
 echo
+cd /tmp
 
 # Function to prompt user for confirmation
 confirm() {
@@ -37,7 +38,7 @@ prompt_with_default() {
     local default="$2"
     
     if [ "$NONINTERACTIVE" = true ]; then
-        echo "$prompt [$default] (Using default: $default)"
+        #echo "$prompt [$default] (Using default: $default)"
         echo "$default"
         return
     fi
@@ -89,14 +90,43 @@ if [ "$CONDA_FOUND" = false ]; then
     # Using the official installation method
     echo "Installing micromamba using the official installation script..."
 
-    # Set environment variables to accept defaults
+        # Set environment variables to accept defaults
     export MAMBA_ROOT_PREFIX="${HOME}/.micromamba"
     export MAMBA_BIN_DIR="~/.local/bin"
     export MAMBA_INIT_SHELL="yes"
     export MAMBA_CONDA_FORGE="yes"
+    export MICROMAMBA_ROOT_PREFIX="${HOME}/.micromamba"
+    export MICROMAMBA_BIN_DIR="~/.local/bin"
+    export MICROMAMBA_INIT_SHELL="yes"
+    export MICROMAMBA_CONDA_FORGE="yes"
     
     # Run the official installation script
     curl -L micro.mamba.pm/install.sh | bash -s -- -p
+
+    # Add micromamba to PATH for this session
+    export PATH="${HOME}/.local/bin:$PATH"
+
+    # Create required directories if they don't exist
+    mkdir -p "${HOME}/.local/bin"
+
+    # Check if micromamba is now in PATH
+    if ! command -v micromamba >/dev/null 2>&1; then
+        echo "Warning: micromamba not found in PATH. Trying to locate it..."
+        
+        # Try to find micromamba binary
+        MICROMAMBA_BIN=$(find "${HOME}" -name "micromamba" -type f 2>/dev/null | head -n 1)
+        
+        if [ -n "$MICROMAMBA_BIN" ]; then
+            echo "Found micromamba at: $MICROMAMBA_BIN"
+            # Create a symlink in a directory that's in PATH
+            ln -sf "$MICROMAMBA_BIN" "${HOME}/.local/bin/micromamba"
+            export PATH="${HOME}/.local/bin:$PATH"
+        else
+            echo "Error: Could not find micromamba executable. Installation may have failed."
+            echo "Please install micromamba manually and try again."
+            exit 1
+        fi
+    fi
     
     # Set conda alias
     if [ -f "$HOME/.bashrc" ]; then
