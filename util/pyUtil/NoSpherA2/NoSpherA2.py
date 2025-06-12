@@ -118,10 +118,14 @@ class NoSpherA2(PT):
     self.setup_xtb_executables()
     olx.stopwatch.start("pTB exe")
     self.setup_ptb_executables()
-    if OV.IsDebugging():
+    if OV.GetParam('olex2.wsl_conda', 'False'):
       try:
         olx.stopwatch.start("WSL adapter")
         self.WSLAdapter = WSLAdapter()
+        if self.WSLAdapter.get_wsl_distro_list() == []:
+          print("There seems to be a problem with the distro recognition!")
+          print("Please check your WSL installation and make sure you have at least one distro installed.\nYou can install one using the Microsoft Store or 'wsl --install Ubuntu'.")
+          raise RuntimeError("No WSL adapter available, hence no Conda support!")
         if self.WSLAdapter.is_windows and not self.WSLAdapter.is_wsl:
           print("WSL is not available, xharpy and pyscf will not be available!")
           self.WSLAdapter = None
@@ -134,7 +138,7 @@ Do you want me to install conda for you?""", "YN", False)
             if sel == "Y":
               print("Installing micro-mamba using the official installation script...")
               try:
-                self.WSLAdapter.call_command("curl -L micro.mamba.pm/install.sh | bash")
+                self.WSLAdapter.call_command("curl -L micro.mamba.pm/install.sh | bash -s -- -p")
                 print("Micro-mamba installed successfully.")
                 print("Please restart Olex2 to use it.")
               except subprocess.CalledProcessError as e:
@@ -150,8 +154,7 @@ Do you want me to install conda for you?""", "YN", False)
             olx.stopwatch.start("pyscf exe")
             self.setup_pyscf()
       except Exception as e:
-        print(f"Error setting up xharpy: {e}")
-        print("WSL or Conda not available, xharpy and pyscf will not be available!")
+        print(f"Error setting up WSL Adapter: {e}")
 
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):

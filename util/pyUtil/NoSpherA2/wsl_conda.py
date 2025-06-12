@@ -12,7 +12,12 @@ class WSLAdapter(object):
   def __init__(self, is_wsl=None, disto_list=None):
     self.is_windows = (sys.platform[:3] == "win")
     self.disto_list = []
-    self.is_wsl = is_wsl if is_wsl is not None else self.check_wsl()
+    try:
+      self.is_wsl = is_wsl if is_wsl is not None else self.check_wsl()
+    except RuntimeError as e:
+      print(f"Error checking WSL status: {e}")
+      self.is_wsl = False
+      return
     self.creationflags = subprocess.CREATE_NO_WINDOW if sys.platform[:3] == "win" else 0
     if disto_list is not None:
       self.disto_list = disto_list
@@ -28,7 +33,7 @@ class WSLAdapter(object):
       return False
     # Check if WSL is installed
     try:
-      result = subprocess.run(["wsl", "--version"], capture_output=True, text=True, check=True)
+      subprocess.run(["wsl", "--version"], capture_output=True, text=True, check=True)
       return True
     except (subprocess.CalledProcessError, FileNotFoundError):
       raise RuntimeError("WSL is not installed or not configured properly. Please install WSL to use this feature.")
@@ -50,6 +55,9 @@ class WSLAdapter(object):
       return self.disto_list
     try:
       result = subprocess.run(["wsl", "--list", "--verbose"], capture_output=True, text=True, check=True)
+      if "no installed distributions" in result.stdout:
+        print("No WSL distributions are installed.")
+        return []
       lines = result.stdout.strip().splitlines()
       if len(lines) > 0:
           lines = lines[1:]  # Skip header line

@@ -15,20 +15,19 @@ if OV.HasGUI():
 instance_path = OV.DataDir()
 
 try:
-  from_outside = False
   p_path = os.path.dirname(os.path.abspath(__file__))
-except:
-  from_outside = True
+except Exception as e:
+  if debug:
+    print(f"Error getting __file__: {e}")
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 class Peanut():
   def __init__(self):
     self.p_path = p_path
-    self.jobs_dir = os.path.join("olex2","Peanut")
     self.old_adps = []
     self.showing_diff = False
-    self.old_aradius = -1
-    self.old_bradius = -1
+    self.old_arad = -1
+    self.old_brad = -1
 
     print("Init sucessfull")
     

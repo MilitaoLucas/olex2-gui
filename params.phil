@@ -872,6 +872,8 @@ olex2
     .type = str
   debug = False
     .type = bool
+  wsl_conda = False
+    .type = bool
   dev_mode = False
     .type = bool
   force_images = False
