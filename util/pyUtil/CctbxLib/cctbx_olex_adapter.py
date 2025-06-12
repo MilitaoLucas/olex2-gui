@@ -522,7 +522,7 @@ def write_fab(f_mask, fab_path=None):
   import shutil
   import gui
   if not fab_path:
-    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+    fab_path = os.path.splitext(OV.HKLSrc())[0] + "_olx.fab"
   if os.path.exists(fab_path):
     ## if there is already a fab file of this name, but it doesn't originate from the current masking program, then get it out of the way and make a backup.
     prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
