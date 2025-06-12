@@ -2,6 +2,7 @@ import os
 import olex
 import olx
 import gui
+import numpy as np
 from iotbx.cif import reader
 from cctbx import uctbx, adptbx
 from cctbx_olex_adapter import OlexCctbxAdapter
@@ -20,6 +21,58 @@ except Exception as e:
   if debug:
     print(f"Error getting __file__: {e}")
   p_path = os.path.dirname(os.path.abspath("__file__"))
+
+
+def list_to_matrix(U):
+    """Convert 6-element ADP list to 3x3 symmetric matrix."""
+    U11, U22, U33, U12, U13, U23 = U
+    return np.array([
+        [U11, U12, U13],
+        [U12, U22, U23],
+        [U13, U23, U33]
+    ])
+
+def similarity_index(U1_list, U2_list):
+    U1 = list_to_matrix(U1_list)
+    U2 = list_to_matrix(U2_list)
+    
+    # Check if matrices are positive definite
+    try:
+        # Attempt Cholesky decomposition (only works for positive definite matrices)
+        np.linalg.cholesky(U1)
+        np.linalg.cholesky(U2)
+    except np.linalg.LinAlgError:
+        # Return a sentinel value or handle specially
+        print("Non-positive definite ADP tensor detected")
+        return float('nan')  # or some other indicator
+
+    # Rest of the function proceeds safely
+    try:
+        U1_inv = np.linalg.inv(U1)
+        U2_inv = np.linalg.inv(U2)
+        
+        det_U1_inv = np.linalg.det(U1_inv)
+        det_U2_inv = np.linalg.det(U2_inv)
+        
+        if det_U1_inv <= 0 or det_U2_inv <= 0:
+            print("Negative determinant in ADP calculation")
+            return float('nan')
+            
+        sum_inv = U1_inv + U2_inv
+        det_sum_inv = np.linalg.det(sum_inv)
+        
+        if det_sum_inv <= 0:
+            print("Negative determinant in sum of inverse ADPs")
+            return float('nan')
+            
+        R12 = (2**1.5) * (det_U1_inv * det_U2_inv)**0.25 / det_sum_inv**0.5
+        S12 = 100 * (1 - R12)
+        return S12
+    except Exception as e:
+        if debug:
+          print(f"Exception in similarity index calculation: {e}")
+        print("Error in similarity index calculation")
+        return float('nan')
 
 class Peanut():
   def __init__(self):
@@ -374,6 +427,7 @@ class Peanut():
                 float(str(u23_1[idx1]).split('(')[0])
             )
             u_cart = adptbx.u_cif_as_u_cart(unit_cell1, u_cif1)
+            print(f"{label:<6} | {similarity_index(u_cart, u):>14.2f}")
             for i,u_val in enumerate(u_cart):
                 u[i] -= u_val
         if C_anharm_site is not None:
@@ -424,10 +478,14 @@ class Peanut():
     olex.m("AZoom 0")
     olex.m("BRad 0.1")
     self.showing_diff = True
+    print("Table of Similarity Indices S12 (harmonic part only):")
+    print("\n{:<6} {:^14}".format("Atom", "S12 /%"))
+    print("-" * 23)  # Separator line
     for u in iter_scatterers():
       id = olx_atoms.atom_ids[this_atom_id]
       this_atom_id += 1
       olx.xf.au.SetAtomU(id, *u)
+    print("-" * 23)  # Separator line
 
     olx.xf.EndUpdate()
     if OV.HasGUI():
