@@ -116,7 +116,7 @@ class WSLAdapter(object):
       if selected_distro is not None and selected_distro != "None":
         wsl_cmd.extend(["-d", selected_distro])
       if not tail_output:
-        result = subprocess.run(
+        return subprocess.run(
           " ".join(wsl_cmd + [command]),
           shell=True,
           capture_output=True,
@@ -268,7 +268,7 @@ class CondaAdapter:
       if self.ran_check:
         print("No Conda environments found. Please create a conda environment before using this feature.\nTry 'Get pyscf' or 'Get XHARPy' ")
         return self.envs
-      output = self.wsl_adapter.call_command_return("bash -i -c 'conda env list'")
+      output = self.wsl_adapter.call_command_return("bash -i -c 'micromamba env list'")
       for line in output.splitlines():
         line = line.strip()
         if line.startswith("#") or not line.strip() or line.startswith("base") or line.startswith("Name"):
@@ -286,50 +286,10 @@ class CondaAdapter:
 
   def call_command(self, command, in_folder=None, tail_output=False, output_file=None):
     """Runs a command in the specified conda environment."""
-    conda_command = f"conda run -n {self.conda_env_name} {command}"
+    conda_command = f"micromamba run -n {self.conda_env_name} {command}"
     if in_folder is not None:
       command = f"cd {in_folder} && {conda_command}"
     else:
       command = conda_command
     self.wsl_adapter.call_command(f'bash -i -c "{command}"', tail_output=tail_output, output_file=output_file)
-
-
-def add_conda_alias(WSLAdapter):
-  """Add micromamba alias as conda to user's shell configuration in WSL."""
-  if not WSLAdapter or not WSLAdapter.is_windows:
-      print("WSL adapter not available or not running on Windows")
-      return False
-  
-  try:
-      # Script to check for shell config files and add alias
-      script = '''
-      if [ -f "$HOME/.bashrc" ]; then
-          # Check if alias already exists to avoid duplicate entries
-          if ! grep -q "alias conda=\"micromamba\"" "$HOME/.bashrc"; then
-              echo 'alias conda="micromamba"' >> "$HOME/.bashrc"
-              echo "Created conda alias in .bashrc"
-          else
-              echo "Conda alias already exists in .bashrc"
-          fi
-      elif [ -f "$HOME/.zshrc" ]; then
-          # Check if alias already exists to avoid duplicate entries
-          if ! grep -q "alias conda=\"micromamba\"" "$HOME/.zshrc"; then
-              echo 'alias conda="micromamba"' >> "$HOME/.zshrc"
-              echo "Created conda alias in .zshrc"
-          else
-              echo "Conda alias already exists in .zshrc"
-          fi
-      else
-          echo "Warning: Could not find .bashrc or .zshrc to add conda alias. Please add manually:"
-          echo 'alias conda="micromamba"'
-          exit 1
-      fi
-      '''
-      
-      # Execute the script in WSL
-      result = WSLAdapter.call_command(f"bash -c '{script}'")
-      print(result)
-      return True
-  except Exception as e:
-      print(f"Error adding conda alias: {e}")
-      return False
+    

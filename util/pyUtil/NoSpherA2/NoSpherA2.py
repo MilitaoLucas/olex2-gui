@@ -15,7 +15,7 @@ from PluginTools import PluginTools as PT
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI
-from wsl_conda import WSLAdapter, CondaAdapter, add_conda_alias
+from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
 import ELMO # noqa: F401
@@ -140,17 +140,21 @@ Do you want me to install conda for you?""", "YN", False)
               try:
                 exports = """
 export MAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
-export MAMBA_BIN_DIR="~/.local/bin" &&
-export MAMBA_INIT_SHELL="yes" &&
-export MAMBA_CONDA_FORGE="yes" &&
-export MICROMAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
-export MICROMAMBA_BIN_DIR="~/.local/bin" &&
-export MICROMAMBA_INIT_SHELL="yes" &&
-export MICROMAMBA_CONDA_FORGE="yes" &&"""
-                self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -p")
-                add_conda_alias(self.WSLAdapter)
-                print("Micromamba installed successfully.")
-                print("Please restart Olex2 to use it.")
+export BIN_FOLDER="${HOME}/.local/bin" &&
+export INIT_YES="yes" &&
+export CONDA_FORGE_YES="yes" &&
+export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
+                result = self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -b")
+                if result.returncode != 0:
+                  print("Failed to install micromamba.")
+                  raise subprocess.CalledProcessError(result.returncode, "micromamba installation")
+                result = self.WSLAdapter.call_command("${HOME}/.local/bin/micromamba shell init -s bash")
+                if result.returncode != 0:
+                  print("Failed to initialize micromamba shell.")
+                  raise subprocess.CalledProcessError(result.returncode, "micromamba shell init")
+                else:
+                  print("Micromamba installed successfully.")
+                  print("Please restart Olex2 to use it.")
               except subprocess.CalledProcessError as e:
                 print(f"Error installing micromamba: {e}")
                 print("Please install conda manually and restart Olex2.")
@@ -163,6 +167,8 @@ export MICROMAMBA_CONDA_FORGE="yes" &&"""
             self.setup_xharpy()
             olx.stopwatch.start("pyscf exe")
             self.setup_pyscf()
+            olx.stopwatch.start("psi4 exe")
+            self.setup_psi4()
       except Exception as e:
         print(f"Error setting up WSL Adapter: {e}")
 
@@ -798,6 +804,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.pyscf_adapter = None
       if "Get pySCF" not in self.softwares:
         self.softwares += ";Get pySCF"
+        
+  def setup_psi4(self):
+    try:
+      self.psi4_adapter = psi4.psi4(self.WSLAdapter, self.conda_adapter)
+      self.psi4_adapter.conda_adapter.set_conda_env_name('psi4')
+      self.softwares += ";Psi4" if "Psi4" not in self.softwares else ""
+    except Exception as e:
+      print("Error setting up Psi4:", e)
+      self.psi4_adapter = None
+      if "Get Psi4" not in self.softwares:
+        self.softwares += ";Get Psi4"
 
   def setup_psi4(self):
     self.psi4_exe = ""
@@ -1338,31 +1355,30 @@ def change_tsc_generator(input):
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
     if wsl_adapter.is_wsl:
-      script = os.path.join(olex2_folder, "util", "pyUtil", "NoSpherA2", "installation_scripts", "pySCF.sh")
-      res = olx.Alert("Please confirm", f"""Do you want to automatically install pySCF using the script in {script}?
-This will use conda/micromamba to install a virtual environemnt with pySCF in your user folder!
-Please make sure that you understand the implications of this script.
-On windows this will use WSL to install pySCF, so you need to have a WSL Distro installed and configured.
-OlexSys and the Olex2-Team do not take any responsibility for damage done to your installation from executing scripts.""", "YCQ")
+      res = olx.Alert("Please confirm", """Do you want to automatically install pySCF using conda?
+This will use conda/micromamba to install a virtual environment with pySCF in your user folder!
+OlexSys and the Olex2-Team do not take any responsibility for damage done to your installation from this action.""", "YCQ")
       if res != "Y":
         print("User did not confirm the installation of pySCF, aborting.")
         return
       distros = wsl_adapter.get_wsl_distro_list()
-      if len(distros) == 0:
+      if len(distros) == 0 and not wsl_adapter.is_windows:
         olx.Alert("No WSL Distros found", """Please install a WSL Distro first!
 For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         return
-      distro = OV.GetParam('snum.NoSpherA2.distro')
+      distro = OV.GetParam('snum.NoSpherA2.distro', "Ubuntu")
       if distro == "Select Distro to use<-None" and wsl_adapter.is_windows:
         print("No WSL Distro selected.")
         print("Available Distros: ", distros)
         print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
         return
-      wsl_adapter.copy_from_possible_wsl(script, "/tmp/pySCF.sh")
-      print("Installing pySCF in WSL Distro: ", distro)
+      elif wsl_adapter.is_windows:
+        print("Installing pySCF in WSL Distro: ", distro)
       print("This will take a while, please be patient.")
-      wsl_adapter.call_command("bash -i -c '/tmp/pySCF.sh -y'")
-      print("pySCF installation finished, please restart Olex2 to use it.")
+      wsl_adapter.call_command("bash -i -c 'micromamba create -y -n pyscf pyscf python=3.12 -c conda-forge'")
+      NoSpherA2_instance.softwares.replace("Get pySCF", "pySCF")
+      OV.SetParam('snum.NoSpherA2.source', "pySCF")
+      olex.m("html.Update()")
   elif input == "Get XHARPy":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
@@ -1391,18 +1407,38 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       print("Installing XHARPy in WSL Distro: ", distro)
       print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c '~/XHARPy.sh -y'")
-      print("XHARPy installation finished, please restart Olex2 to use it.")
+      NoSpherA2_instance.softwares.replace("Get XHARPy", "XHARPy")
+      OV.SetParam('snum.NoSpherA2.source', "XHARPy")
+      olex.m("html.Update()")
 
   elif input == "Get Psi4":
-    olx.Alert("Please install Psi4 manually",\
-"""Psi4 is an open source QM Package, that you can use inside NoSpherA2.
-After clicking OK on this dialog a browser will open with the Download page for Psi4.
-The Download is around 500 MB.
-Please select the Operating System suitable for you and donwload the installer.
-Please do not change the default Path of the installation.
-If you do so, you will have tell Olex2 where to look for the executable psi4(.exe) in
-Home -> Settings -> PATH""", "O", False)
-    olx.Shell("https://psicode.org/installs/v18/")
+    wsl_adapter = NoSpherA2_instance.WSLAdapter
+    olex2_folder = OV.BaseDir()
+    if wsl_adapter.is_wsl:
+      res = olx.Alert("Please confirm", """Do you want to automatically install Psi4 using conda?
+This will use conda/micromamba to install a virtual environment with Psi4 in your user folder!
+OlexSys and the Olex2-Team do not take any responsibility for damage done to your installation from this action.""", "YCQ")
+      if res != "Y":
+        print("User did not confirm the installation of Psi4, aborting.")
+        return
+      distros = wsl_adapter.get_wsl_distro_list()
+      if len(distros) == 0 and not wsl_adapter.is_windows:
+        olx.Alert("No WSL Distros found", """Please install a WSL Distro first!
+For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
+        return
+      distro = OV.GetParam('snum.NoSpherA2.distro', "Ubuntu")
+      if distro == "Select Distro to use<-None" and wsl_adapter.is_windows:
+        print("No WSL Distro selected.")
+        print("Available Distros: ", distros)
+        print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
+        return
+      elif wsl_adapter.is_windows:
+        print("Installing Psi4 in WSL Distro: ", distro)
+      print("This will take a while, please be patient.")
+      wsl_adapter.call_command("bash -i -c 'micromamba create -y -n psi4 psi4 python=3.12 -c conda-forge/label/libint_dev -c conda-forge'")
+      NoSpherA2_instance.softwares.replace("Get Psi4", "Psi4")
+      OV.SetParam('snum.NoSpherA2.source', "Psi4")
+      olex.m("html.Update()")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
     _ = olx.html.GetItemState('h3-NoSpherA2-extras')

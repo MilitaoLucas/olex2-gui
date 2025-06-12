@@ -78,7 +78,7 @@ elif command_exists micromamba; then
     echo "Found micromamba installation."
 fi
 
-# If no conda/mamba is found, install micromamba
+# If no conda/mamba is found, install micromamba !SHOULD NOT BE NEEDED
 if [ "$CONDA_FOUND" = false ]; then
     echo "No conda/mamba/micromamba installation found."
     echo "Micromamba will be installed in $HOME/.micromamba"
@@ -89,16 +89,6 @@ if [ "$CONDA_FOUND" = false ]; then
     
     # Using the official installation method
     echo "Installing micromamba using the official installation script..."
-
-        # Set environment variables to accept defaults
-    export MAMBA_ROOT_PREFIX="${HOME}/.micromamba"
-    export MAMBA_BIN_DIR="~/.local/bin"
-    export MAMBA_INIT_SHELL="yes"
-    export MAMBA_CONDA_FORGE="yes"
-    export MICROMAMBA_ROOT_PREFIX="${HOME}/.micromamba"
-    export MICROMAMBA_BIN_DIR="~/.local/bin"
-    export MICROMAMBA_INIT_SHELL="yes"
-    export MICROMAMBA_CONDA_FORGE="yes"
     
     # Run the official installation script
     curl -L micro.mamba.pm/install.sh | bash -s -- -p
