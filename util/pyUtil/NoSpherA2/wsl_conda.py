@@ -266,7 +266,8 @@ class CondaAdapter:
       return self.envs
     try:
       if self.ran_check:
-        raise RuntimeError("Conda is not installed or not configured properly. Please install Conda to use this feature.")
+        print("No Conda environments found. Please create a conda environment before using this feature.\nTry 'Get pyscf' or 'Get XHARPy' ")
+        return self.envs
       output = self.wsl_adapter.call_command_return("bash -i -c 'conda env list'")
       for line in output.splitlines():
         line = line.strip()
