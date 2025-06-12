@@ -13,8 +13,6 @@ debug = OV.IsDebugging()
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
 
-instance_path = OV.DataDir()
-
 try:
   p_path = os.path.dirname(os.path.abspath(__file__))
 except Exception as e:

@@ -15,7 +15,7 @@ from PluginTools import PluginTools as PT
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI
-from wsl_conda import WSLAdapter, CondaAdapter
+from wsl_conda import WSLAdapter, CondaAdapter, add_conda_alias
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
 import ELMO # noqa: F401
@@ -136,14 +136,23 @@ class NoSpherA2(PT):
 """Error: Conda is not available.
 Do you want me to install conda for you?""", "YN", False)
             if sel == "Y":
-              print("Installing micro-mamba using the official installation script...")
+              print("Installing micromamba using the official installation script...")
               try:
-                self.WSLAdapter.call_command("curl -L micro.mamba.pm/install.sh | bash -s -- -p")
-                #To do: Add alias to bshrc etc
-                print("Micro-mamba installed successfully.")
+                exports = """
+export MAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
+export MAMBA_BIN_DIR="~/.local/bin" &&
+export MAMBA_INIT_SHELL="yes" &&
+export MAMBA_CONDA_FORGE="yes" &&
+export MICROMAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
+export MICROMAMBA_BIN_DIR="~/.local/bin" &&
+export MICROMAMBA_INIT_SHELL="yes" &&
+export MICROMAMBA_CONDA_FORGE="yes" &&"""
+                self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -p")
+                add_conda_alias(self.WSLAdapter)
+                print("Micromamba installed successfully.")
                 print("Please restart Olex2 to use it.")
               except subprocess.CalledProcessError as e:
-                print(f"Error installing micro-mamba: {e}")
+                print(f"Error installing micromamba: {e}")
                 print("Please install conda manually and restart Olex2.")
             else:
               print("Conda is not available, xharpy and pyscf will not be available!")
@@ -899,7 +908,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.softwares += ";Get XHARPy" if "Get XHARPy" not in self.softwares else ""
 
   def get_distro_list(self):
-    list = self.xharpy_adapter.wsl_adapter.get_wsl_distro_list()
+    list = self.WSLAdapter.get_wsl_distro_list()
     cleaned_list = ["Select Distro to use<-None"]
     for item in list:
       cleaned_item = item.strip().replace('\00','')
@@ -1350,7 +1359,10 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
         return
       wsl_adapter.copy_from_possible_wsl(script, "/tmp/pySCF.sh")
+      print("Installing pySCF in WSL Distro: ", distro)
+      print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c '/tmp/pySCF.sh -y'")
+      print("pySCF installation finished, please restart Olex2 to use it.")
   elif input == "Get XHARPy":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
@@ -1376,7 +1388,10 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
         return
       wsl_adapter.copy_from_possible_wsl(script, "~/XHARPy.sh")
+      print("Installing XHARPy in WSL Distro: ", distro)
+      print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c '~/XHARPy.sh -y'")
+      print("XHARPy installation finished, please restart Olex2 to use it.")
 
   elif input == "Get Psi4":
     olx.Alert("Please install Psi4 manually",\
