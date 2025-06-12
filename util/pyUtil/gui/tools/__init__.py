@@ -781,22 +781,25 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
       d.setdefault('target', "Update Formula with current model")
     else:
-      img_name = 'toolbar-blank'
-      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
-      formula = olx.xf.au.GetFormula()
-      d.setdefault('target', "Everything is up-to-date")
+      d = {}
+      refresh_button = ""
+      #img_name = 'toolbar-blank'
+      #OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
+      #formula = olx.xf.au.GetFormula()
+      #d.setdefault('target', "Everything is up-to-date")
 
-  d.setdefault('img_name', img_name)
-  d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
-  refresh_button = '''
-  <input
-    name=IMG_TOOLBAR-REFRESH
-    type="button"
-    image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
-    hint="%(target)s"
-    onclick="%(cmds)s"
-    bgcolor="%(bgcolor)s"
-  >''' % d
+  if d:
+    d.setdefault('img_name', img_name)
+    d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
+    refresh_button = '''
+    <input
+      name=IMG_TOOLBAR-REFRESH
+      type="button"
+      image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
+      hint="%(target)s"
+      onclick="%(cmds)s"
+      bgcolor="%(bgcolor)s"
+    >''' % d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>' % (formula_string, refresh_button)
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
