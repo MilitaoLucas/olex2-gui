@@ -143,8 +143,8 @@ if [ "$CONDA_FOUND" = false ]; then
     CONDA_FOUND=true
     
     # Initialize the shell with micromamba
-    if [[ -f "${HOME}/micromamba/etc/profile.d/micromamba.sh" ]]; then
-        source "${HOME}/micromamba/etc/profile.d/micromamba.sh"
+    if [[ -f "${HOME}/.micromamba/etc/profile.d/micromamba.sh" ]]; then
+        source "${HOME}/.micromamba/etc/profile.d/micromamba.sh"
     elif [[ -f "${MICROMAMBA_ROOT_PREFIX}/etc/profile.d/micromamba.sh" ]]; then
         source "${MICROMAMBA_ROOT_PREFIX}/etc/profile.d/micromamba.sh"
     else
