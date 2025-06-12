@@ -139,6 +139,7 @@ Do you want me to install conda for you?""", "YN", False)
               print("Installing micro-mamba using the official installation script...")
               try:
                 self.WSLAdapter.call_command("curl -L micro.mamba.pm/install.sh | bash -s -- -p")
+                #To do: Add alias to bshrc etc
                 print("Micro-mamba installed successfully.")
                 print("Please restart Olex2 to use it.")
               except subprocess.CalledProcessError as e:

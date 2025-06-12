@@ -223,6 +223,8 @@ class CondaAdapter:
     if conda_env_name is not None:
       self.set_conda_env_name(conda_env_name)
     if not self.check_conda_installed(True):
+      if len(self.envs) == 0:
+        print("No conda environments found. Please create a conda environment before using this feature.\nTry 'Get pyscf' or 'Get XHARPy' ")
       raise RuntimeError("Conda is not installed or not configured properly. Please install Conda to use this feature.")
     
   def copy(self, conda_env_name=None):
