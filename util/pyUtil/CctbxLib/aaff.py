@@ -470,7 +470,7 @@ The following options were used:
 """
     software = OV.GetParam('snum.NoSpherA2.source')
     details_text = details_text + "   SOFTWARE:       %s\n"%software
-    if software != "DISCAMB":
+    if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
       method = OV.GetParam('snum.NoSpherA2.method')
       basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
       charge = OV.GetParam('snum.NoSpherA2.charge')

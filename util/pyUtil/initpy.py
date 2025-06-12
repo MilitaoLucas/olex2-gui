@@ -109,6 +109,13 @@ def do_init():
   #except Exception as e:
   #  olx.Echo(e, m="error")
   stopwatch.stop()
+  
+  stopwatch.start("Peanut")
+  try:
+    from peanut import Peanut
+  except Exception as e:
+    olx.Echo(e, m="error")
+  stopwatch.stop()
 
   if OV.IsDebugging():
     olx.stopwatch.log()
