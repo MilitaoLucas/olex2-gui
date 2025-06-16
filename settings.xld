@@ -32,6 +32,7 @@
   <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>html.Update">
   <shortcut key="break" macro="echo ++INTERRUPT++>>spy.stopProcess()">
   <shortcut key="Ctrl+#" macro="echo ++INTERRUPT++>>spy.stopProcess()">
+  <shortcut key="Ctrl+Shift+3" macro="echo ++INTERRUPT++>>spy.stopProcess()">
   <shortcut key="Ctrl+Shift+u" macro="echo interrupt!>>spy.SetParam(olex2.stop_current_process,True)">
   <shortcut key="Ctrl+Shift+T" macro="spy.run_autodemo(test)">
   <shortcut key="Ctrl+Shift+A" macro="spy.gui.About()">

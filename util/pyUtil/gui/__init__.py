@@ -538,7 +538,7 @@ def FixFree(target):
       if r == "C":
         return
 
-    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s>>fix HUiso" %fvar)
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s" %fvar)
   elif target == "FREE XYZ":
     olx.Run("sel -u>>free xyz")
   elif target == "FREE ADP":
@@ -786,3 +786,16 @@ olex.registerFunction(have_par_files, False, "gui")
 olex.registerFunction(activate_or_run_CAP, False, "gui")
 olex.registerFunction(run_CAP, False, "gui")
 olex.registerFunction(par_files_table, False, "gui")
+
+def cbtn_on(cmds: str):
+  if "cbtn-solve" in cmds:
+    if not OV.IsFileType("ires"):
+      if OV.IsFileType("cif"):
+        cmds = cmds.replace("solve", "refine")
+        olx.Echo("Switching to the Refine tab - no valid input for Solve", m="warning")
+      else:
+        olx.Alert("Wrong file type", "Please load an INS/RES file for structure solution", "OI")
+        return
+  olx.Run(cmds)
+
+olex.registerFunction(cbtn_on, False, "gui")
