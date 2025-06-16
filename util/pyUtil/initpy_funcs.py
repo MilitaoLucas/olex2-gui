@@ -152,7 +152,7 @@ class initpy_funcs():
     import cctbx_olex_adapter
     import cctbx_controller
     import olex_twinning
-    
+
   def NoSpherA2(self):
     try:
       self.olx.stopwatch.exec("from NoSpherA2 import NoSpherA2")
@@ -234,7 +234,9 @@ class initpy_funcs():
     if sys.platform[:3] == 'win':
       return
     import stat
-    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "olex2c"]
+    # leave olex2c as the last one!
+    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "restart.sh",
+                "olex2c"]
     if sys.platform == 'darwin':
       to_check[-1] = to_check[-1] + "_exe"
     for f in to_check:
