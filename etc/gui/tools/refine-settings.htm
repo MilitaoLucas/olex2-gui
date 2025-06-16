@@ -210,7 +210,7 @@ Solvent masking is currently ignored for ED Dynamical Refinement
     "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG",
     "value=spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg')",
     "items=Olex2;Platon",
-    "onchange=spy.change_hklsrc_according_to_mask_prg(html.GetValue('~name~'))",
+    "onchange=spy.change_hklsrc_according_to_mask_prg(html.GetValue('~name~'), gui)",
     "bgcolor=GetVar(HtmlTableGroupBgColour)",
     "disabled=spy.gui.IsEDRefinement()",
     "td1=<td width=20%>"

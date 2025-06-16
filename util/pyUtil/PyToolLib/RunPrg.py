@@ -517,10 +517,18 @@ class RunRefinementPrg(RunPrg):
     OV.unregisterCallback("procout", self.refinement_observer)
     if use_convergence:
       OV.unregisterCallback("procout", cl.listen_for_convergency)
+      
     if self.refinement_has_failed:
+      notes = []
       bg = red
       fg = white
-      msg = " | ".join(self.refinement_has_failed)
+      for note in self.refinement_has_failed:
+        if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
+          bg = green
+          fg = white
+          note += "-Mask INFO exists"
+        notes.append(note)
+      msg = " | ".join(notes)
       if "warning" in msg.lower():
         bg = orange
       gui.set_notification("%s;%s;%s" % (msg, bg, fg))

@@ -769,11 +769,12 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
       d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
       d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
-
+      OV.SetVar("mask_but_same", True)
     else:
       img_name = 'toolbar-mask_ok'
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
       d.setdefault('target', "A solvent mask has been used, and therefore the formula should differ from what is in the model. Nothing to do!")
+      OV.SetVar("mask_but_same", False)
 
   else:
     if not isSame:

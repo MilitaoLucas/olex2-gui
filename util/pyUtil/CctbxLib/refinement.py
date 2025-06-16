@@ -138,8 +138,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
         if _ == "Platon":
           olex.m("spy.OlexPlaton(q,.ins)")
-          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           if not self.f_mask:
             self.failure = True
             return

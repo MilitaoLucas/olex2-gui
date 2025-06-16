@@ -411,10 +411,7 @@ class OlexCctbxAdapter(object):
     _ =  os.path.splitext(OV.HKLSrc())[0]
     indices = []
     data = []
-    if prg == "Olex2":
-      fab_path = f"{_}.fab"
-    else:
-      fab_path = f"{_}_sq.fab"
+    fab_path = f"{_}.fab"
     if os.path.exists(fab_path):
       OV.SetVar('masking_dte', time.ctime(os.path.getmtime(fab_path)))
       OV.SetVar('masking_src', os.path.basename(fab_path))
@@ -522,13 +519,11 @@ def write_fab(f_mask, fab_path=None):
   import shutil
   import gui
   if not fab_path:
-    fab_path = os.path.splitext(OV.HKLSrc())[0] + "_olx.fab"
+    fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
   if os.path.exists(fab_path):
     ## if there is already a fab file of this name, but it doesn't originate from the current masking program, then get it out of the way and make a backup.
     prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
     lines = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
-    if not lines:
-      shutil.copyfile(fab_path, f"{fab_path}_bak")
 
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):

@@ -1733,6 +1733,10 @@ if not haveGUI:
   #OV.registerFunction(tbxs)
 
 def SetMasking(v):
+  if type(v) == bool:
+    v = str(v).lower()
+    if OV.HasGUI() and OV.IsControl("SNUM_REFINEMENT_USE_SOLVENT_MASK"):
+      olx.html.SetValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
   if v == 'true':
     olx.AddIns('ABIN', q=True)
   else:
