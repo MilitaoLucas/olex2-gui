@@ -552,9 +552,9 @@ def save_map_cube(map_type, resolution):
     pos = olx.xf.au.Orthogonalise(coord).split(',')
     positions[a] = [float(pos[0]) / a2b, float(pos[1]) / a2b, float(pos[2]) / a2b]
 
-  vecs = [(cm[0] / (size[0] - 1), cm[1] / (size[0] - 1), cm[2] / (size[0] - 1)),
-          (cm[3] / (size[1] - 1), cm[4] / (size[1] - 1), cm[5] / (size[1] - 1)),
-          (cm[6] / (size[2] - 1), cm[7] / (size[2] - 1), cm[8] / (size[2] - 1))]
+  vecs = [(cm[0] / (size[0] - 1), cm[1] / (size[1] - 1), cm[2] / (size[2] - 1)),
+          (cm[3] / (size[0] - 1), cm[4] / (size[1] - 1), cm[5] / (size[2] - 1)),
+          (cm[6] / (size[0] - 1), cm[7] / (size[1] - 1), cm[8] / (size[2] - 1))]
 
   print("start writing a %4d x %4d x %4d cube" % (size[0], size[1], size[2]))
 
