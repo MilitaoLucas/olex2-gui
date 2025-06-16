@@ -245,7 +245,7 @@ class initpy_funcs():
         continue
       try:
         if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
-          os.chmod(f, stat.S_IXUSR)
+          os.chmod(f, stat.S_IXUSR | stat.S_IREAD)
       except:
         self.olx.Echo(
           "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
