@@ -558,7 +558,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             elif os.path.exists(path_base + ".wfn"):
               wfn_fn = path_base + ".wfn"
             elif os.path.exists(path_base + ".gbw"):
-              if (wfn_fn is None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk") and "5.0" in wfn_code or "6.0" in wfn_code):
+              if (wfn_fn is None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk") and Wfn_Job.is_orca_new()):
                 wfn_fn = path_base + ".gbw"
             elif os.path.exists(path_base + ".molden"):
               wfn_fn = path_base + ".molden"
@@ -669,7 +669,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               wfn_fn = wfn_code
             else:
               endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
-              if "5.0" in wfn_code or "6.0" in wfn_code:
+              if Wfn_Job.is_orca_new():
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
                 wfn_fn = path_base + ".xyz"

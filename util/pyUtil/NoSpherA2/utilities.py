@@ -16,6 +16,7 @@ from ImageTools import IT
 from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
+from Wfn_Job import is_orca_new
 
 def scrub(cmd):
   log = gui.tools.LogListen()
@@ -545,7 +546,7 @@ def org_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -568,7 +569,7 @@ def org_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -591,7 +592,7 @@ def org_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -614,7 +615,7 @@ def light_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -637,7 +638,7 @@ def light_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -660,7 +661,7 @@ def light_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -683,7 +684,7 @@ def heavy_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -706,7 +707,7 @@ def heavy_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -729,7 +730,7 @@ def heavy_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
