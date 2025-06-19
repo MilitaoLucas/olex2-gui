@@ -729,7 +729,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     elif Solvation != "Vacuum" and Solvation is not None:
       control += f" CPCM({Solvation}) "
     GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
-    if "5.0" not in OV.GetParam("snum.NoSpherA2.source") and "6.0" not in OV.GetParam("snum.NoSpherA2.source"):
+    if not is_orca_new():
       GBW_file = False
     if not GBW_file:
       control += " AIM "
