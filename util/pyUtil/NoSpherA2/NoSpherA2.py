@@ -275,7 +275,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
                 shutil.move(f_work, f_dest)
               else:
                 shutil.move(os.path.join(wfn_job_dir, f), os.path.join(wfn_job_dir, self.name + "2.gbw"))
-            elif self.wfn_code == "ORCA 6.0":
+            elif self.wfn_code == "ORCA 6.0" or self.wfn_code == "ORCA 6.1":
               if ".gbw" not in f:
                 shutil.move(f_work, f_dest)
               else:
@@ -884,16 +884,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         result = p.stdout[idx:idx + 50].split('\n')[0].split()[1]
         print("ORCA VERSION: ", result)  # print the version
         OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
+        OV.SetParam('NoSpherA2.ORCA_Version_Minor', result.split(".")[1])
       except Exception as e:
         print("Failed to evaluate ORCA version", e)
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
+      Orca_Vers_Minor = OV.GetParam('NoSpherA2.ORCA_Version_Minor')
       if "ORCA" not in self.softwares:
         if Orca_Vers == "4":
           orca_string = "ORCA"
         elif Orca_Vers == "5":
           orca_string = "ORCA 5.0"
-        elif Orca_Vers == "6":
-          orca_string = "ORCA 6.0"
+        else:
+          orca_string = f"ORCA {Orca_Vers}.{Orca_Vers_Minor}"
         self.softwares = self.softwares + ";" + orca_string
         OV.SetParam('snum.NoSpherA2.source', orca_string)
     else:
@@ -950,7 +952,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     for basis in BL:
       if self.check_for_atom_in_basis_set(basis, XRS, elements):
         final_string += basis + ";"
-    if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0":
+    if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0" or source == "ORCA 6.1":
       if max_Z <= 86 and max_Z > 36:
         return final_string + ";ECP-def2-SVP;ECP-def2-TZVP;ECP-def2-TZVPP;ECP-def2-QZVP;ECP-def2-QZVPP"
     return final_string
@@ -1333,7 +1335,7 @@ def get_functional_list(wfn_code=None):
     list = "HF;PBE;B3LYP;BLYP;M062X;R2SCAN;PBE0"
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;r2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
-  elif wfn_code == "ORCA 6.0":
+  elif wfn_code == "ORCA 6.0" or wfn_code == "ORCA 6.1":
     list = "HF;BP;PWLDA;r2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
