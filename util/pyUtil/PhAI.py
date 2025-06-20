@@ -289,7 +289,7 @@ def get_PhAI_phases(f_sq_obs, randomize_phases = 0, cycles = 1):
               amplitudes_ord.append(amplitudes[0][h+max_index][k][l])
 
     if randomize_phases :
-      init_phases = randomize_phases(torch.zeros_like(amplitudes))
+      init_phases = randomize_output(torch.zeros_like(amplitudes))
     else:
       init_phases = torch.zeros_like(amplitudes)
         
@@ -316,28 +316,31 @@ def get_PhAI_phases(f_sq_obs, randomize_phases = 0, cycles = 1):
     )
     return miller_set
 
-def create_solution_map(max_peaks=15):
+def create_solution_map(cycles = 1, resolution = 0.2, max_peaks=15):
   cctbx_adapter = OlexCctbxAdapter()
   f_sq_obs = cctbx_adapter.reflections.f_sq_obs_merged
-  guess = get_PhAI_phases(f_sq_obs, randomize_phases=randomize_output, cycles=1)
+  guess = get_PhAI_phases(f_sq_obs, randomize_phases=1, cycles=int(cycles))
   guess = guess.expand_to_p1().set_observation_type_xray_amplitude()
   obs_map = guess.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                           resolution_factor=1,
                           grid_step=0.2,
-                          f_000=1200).apply_volume_scaling()
+                          f_000=1.0).apply_volume_scaling()
   cubes_maps.plot_fft_map(obs_map)
   peaks = obs_map.peak_search(
     parameters=maptbx.peak_search_parameters(
-      peak_search_level=2,
-      interpolate=False,
-      min_distance_sym_equiv=1.0,
+      peak_search_level=1,
+      peak_cutoff=0.5,
+      interpolate=True,
+      min_distance_sym_equiv=resolution,
+      general_positions_only=False,
+      min_cross_distance=guess.d_min()/2,
       max_clusters=max_peaks),
     verify_symmetry=True
     ).all()
   i = 0
   olx.Kill('$Q', au=True)
   for xyz, height in zip(peaks.sites(), peaks.heights()):
-    if i < max_peaks:
+    if i < int(max_peaks):
       a = olx.xf.uc.Closest(*xyz).split(',')
       if OV.IsEDData():
         pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
