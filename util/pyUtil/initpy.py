@@ -116,6 +116,13 @@ def do_init():
   except Exception as e:
     olx.Echo(e, m="error")
   stopwatch.stop()
+  
+  stopwatch.start("PhAI")
+  try:
+    import PhAI
+  except Exception as e:
+    olx.Echo(e, m="error")
+  stopwatch.stop()
 
   if OV.IsDebugging():
     olx.stopwatch.log()

@@ -2172,7 +2172,7 @@ Do you want to install this now?""", "YN", False)
     if selection == 'Y':
       if sys.platform[:3] == 'win':
         from olexex import GetHttpFile
-        import zipfile
+        #import zipfile
         from zipfile import ZipFile
         import platform
         architecture = platform.architecture()[0]

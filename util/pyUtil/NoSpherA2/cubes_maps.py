@@ -109,7 +109,7 @@ def kuhs_limit(order: int, adp: np.ndarray) -> float:
   return (2. * np.pi) ** -1.5 * (2. * order * np.log(2) / adp) ** 0.5
 
 def calculate_cubes():
-  if is_disordered() == True:
+  if is_disordered():
     print("Disordered structures not implemented!")
     return
 
@@ -136,27 +136,27 @@ def calculate_cubes():
   ATOM = OV.GetParam('snum.NoSpherA2.Property_ATOM')
   DEF = OV.GetParam('snum.NoSpherA2.Property_DEF')
   all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
-  if Lap == True:
+  if Lap:
     args.append("-lap")
-  if Eli == True:
+  if Eli:
     args.append("-eli")
-  if Elf == True:
+  if Elf:
     args.append("-elf")
-  if RDG == True:
+  if RDG:
     args.append("-rdg")
-  if ESP == True:
+  if ESP:
     args.append("-esp")
-  if ATOM == True:
+  if ATOM:
     args.append("-HDEF")
-  if DEF == True:
+  if DEF:
     args.append("-def")
-  if MO == True:
+  if MO:
     args.append("-MO")
-    if all_MOs == True:
+    if all_MOs:
       args.append("all")
     else:
       args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) - 1))
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug') == True:
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug'):
     args.append("-v")
 
   radius = OV.GetParam('snum.NoSpherA2.map.radius')
@@ -207,7 +207,7 @@ def get_map_types():
     for i in range(int(nmo) + 1):
       if os.path.isfile(os.path.join(folder,name+"_MO_"+str(i)+".cube")):
         exists = True
-    if exists == True:
+    if exists:
       list += "MO;"
   ncen = get_ncen()
   if ncen != -1:
@@ -215,7 +215,7 @@ def get_map_types():
     for i in range(int(ncen)+1):
       if os.path.isfile(os.path.join(folder, name + "_HDEF_" + str(i) + ".cube")):
         exists = True
-    if exists == True:
+    if exists:
       list += "HDEF;"
   if list == "":
     return "None;"
@@ -314,7 +314,7 @@ def plot_cube(name, color_cube):
   del cube
 
   make_colorfull = (color_cube != None)
-  if make_colorfull == True:
+  if make_colorfull:
     print("WARNING! COLORED MAPS AURE CURRENTLY ONLY FOR TESTING PURPOSES!")
     with open(color_cube) as cub:
       cube2 = cub.readlines()
@@ -449,7 +449,7 @@ def plot_cube(name, color_cube):
     olex_xgrid.SetSurfaceScale(iso)
     olex_xgrid.SetVisible(True)
     mask = OV.GetParam('snum.map.mask')
-    if mask == True:
+    if mask:
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
@@ -521,7 +521,7 @@ def plot_cube_single(name):
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mmm.min, mmm.max)
     olex_xgrid.SetVisible(True)
-    if OV.GetParam('snum.map.mask') == True:
+    if OV.GetParam('snum.map.mask'):
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
@@ -673,7 +673,7 @@ def plot_fft_map(fft_map):
     olex_xgrid.SetMinMax(min_v, max_v)
     olex_xgrid.SetVisible(True)
     mask = OV.GetParam('snum.map.mask')
-    if mask == True:
+    if mask:
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
@@ -781,7 +781,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   xray_structure = cctbx_adapter.xray_structure()
   use_tsc = OV.IsNoSpherA2()
   one_h = None
-  if use_tsc == True:
+  if use_tsc:
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
