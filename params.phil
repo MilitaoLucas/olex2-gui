@@ -332,6 +332,8 @@ routines requiring structure refinement
       .type = bool
     check_PDF = True
       .type = bool
+    check_corr = False
+      .type = bool
 
     ShelXL
       .short_caption = 'Program specific command line'

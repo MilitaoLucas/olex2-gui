@@ -1856,6 +1856,7 @@ def pip(package):
   import numpy as np
   import scipy as sp
   import PIL as PIL
+  import locale
   np_version = np.__version__
   sp_version = sp.__version__
   PIL_version = PIL.__version__
@@ -1871,5 +1872,11 @@ def pip(package):
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
+  saved_locale = locale.getlocale(locale.LC_ALL)
+  #print(f"{saved_locale}")
+  try:
+    pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
+    #print(f"{locale.getlocale(locale.LC_ALL)}")
+  finally:
+    locale.setlocale(locale.LC_ALL, saved_locale)
 OV.registerFunction(pip, False)

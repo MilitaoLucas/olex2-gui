@@ -234,6 +234,8 @@ def make_single_gui_image(img_txt="", img_type='h2', force=False):
       alias = img_type
       img_type = "h2"
     image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False, force=force)
+    if image is None:
+      continue
     name = "%s-%s%s.png" % (img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
