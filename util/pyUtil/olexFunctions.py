@@ -1281,9 +1281,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       print("Could not initialise OpenBlas: %s" %e)
       return False
 
-  #https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
-  # constructs an object from dict
   def dict_obj(self, d):
+    """ Constructs an object from dict
+    https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
+    """
     class d_o:
       def __init__(self, **entries):
         self.__dict__.update(entries)

@@ -736,17 +736,25 @@ def have_par_files():
   if OV.IsVar(olx.var_name_par_files):
     return len(OV.GetVar(olx.var_name_par_files)) > 0
 
-  import glob
-  path = OV.FilePath()
-  par_files = glob.glob(path + "\\*.par")
-  if not par_files:
-    par_files = glob.glob(path + "\\..\\..\\*.par")
-  par_files = [f for f in par_files if "cracker" not in f]
-  if not par_files:
-    OV.SetVar(olx.var_name_par_files, "")
-    return False
-  OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
-  return True
+  par_name = OV.get_cif_item('_diffrn_oxdiff_measurement_exp_name', None)
+  if par_name:
+    par_name = os.path.abspath(os.path.join(OV.FilePath(), "..", "..", par_name))
+    if not os.path.exists(par_name):
+      par_name = None
+  if not par_name:
+    import glob
+    path = OV.FilePath()
+    par_files = glob.glob(path + "\\*.par")
+    if not par_files:
+      par_files = glob.glob(path + "\\..\\..\\*.par")
+    par_files = [f for f in par_files if "cracker" not in f]
+    if not par_files:
+      OV.SetVar(olx.var_name_par_files, "")
+      return False
+    OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
+    return True
+  else:
+    OV.SetVar(olx.var_name_par_files, par_name)
 
 def activate_or_run_CAP(fn):
   import olex_gui

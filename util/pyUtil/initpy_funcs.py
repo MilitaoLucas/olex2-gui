@@ -218,6 +218,7 @@ class initpy_funcs():
       #load_user_gui_phil()
       #export_parameters()
       self.olx.stopwatch.exec("import Analysis")
+      self.olx.stopwatch.exec("from gui import dimas")
 
   def import_caustom_and_user_sripts(self):
     try:

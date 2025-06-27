@@ -104,19 +104,14 @@ def do_init():
   stopwatch.exec("from RunPrg import RunPrg")
 
   stopwatch.run(initpy.NoSpherA2)
-  #try:
-  #  stopwatch.run("from NoSpherA2 import NoSpherA2")    
-  #except Exception as e:
-  #  olx.Echo(e, m="error")
-  stopwatch.stop()
-  
+
   stopwatch.start("Peanut")
   try:
     from peanut import Peanut
   except Exception as e:
     olx.Echo(e, m="error")
   stopwatch.stop()
-  
+
   stopwatch.start("PhAI")
   try:
     import PhAI

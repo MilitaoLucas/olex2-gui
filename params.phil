@@ -929,6 +929,18 @@ olex2
     stop_ED_ASAP = True
       .type = bool
   }
+
+  dimas {
+    url = None
+      .type = str
+    username = None
+      .type = str
+    passwdd = None
+      .type = str
+      .help = SHA256 password digest
+    apiKey = None
+     .type = str
+  }
 }
 
 
