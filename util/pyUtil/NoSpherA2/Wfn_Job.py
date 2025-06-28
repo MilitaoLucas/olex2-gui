@@ -383,8 +383,16 @@ class wfn_Job(object):
       "Br": -1.0,
       "K": 1.0,
       "Li": 1.0,
+      "Rb": 1.0,
+      "Cs": 1.0,
+      "Sr": 2.0,
       "Be": 2.0,
-      "O": -2.0
+      "O": -2.0,
+      "Te": -2.0,
+      "Se": -2.0,
+      "S": -2.0,
+      "Pr": 3.0,
+      "I": -1.0,
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
     charge = OV.GetParam('snum.NoSpherA2.charge')

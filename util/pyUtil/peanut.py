@@ -6,6 +6,7 @@ import numpy as np
 from iotbx.cif import reader
 from cctbx import uctbx, adptbx
 from cctbx_olex_adapter import OlexCctbxAdapter
+from scitbx import matrix
 
 from olexFunctions import OV
 debug = OV.IsDebugging()
@@ -343,6 +344,10 @@ class Peanut():
     ]
     unit_cell1 = uctbx.unit_cell(cell_params1)
     
+    iso_atoms = cif1_data[block1].get('_atom_site_label')
+    # Check if we have anisotropic displacement parameters
+    ueq = cif1_data[block1].get('_atom_site_U_iso_or_equiv')
+    
     aniso_atoms1 = cif1_data[block1].get('_atom_site_aniso_label')
     # Get Uij parameters
     u11_1 = cif1_data[block1].get('_atom_site_aniso_U_11')
@@ -391,14 +396,18 @@ class Peanut():
     xray_structure = cctbx_adapter.xray_structure()
     olx_atoms = cctbx_adapter.olx_atoms
     uc = xray_structure.unit_cell()
+    labels = []
+    anis_flags = []
     
     ## Feed Model
     def iter_scatterers():
       for a in xray_structure.scatterers():
         label = a.label 
         if a.flags.use_u_iso():
-          u = (a.u_iso,)
-          u_eq = u[0]
+          u = list(adptbx.u_iso_as_u_cart(a.u_iso))
+          #u_eq = u[0]
+          self.old_adps.append(a.u_iso)
+          anis_flags.append(False)
         if a.flags.use_u_aniso():
           u_cif = adptbx.u_star_as_u_cart(uc, a.u_star)
           u = u_cif
@@ -407,7 +416,8 @@ class Peanut():
             if a.is_anharmonic_adp():
               u += a.anharmonic_adp.data()
           #u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
-        self.old_adps.append(u.copy())
+          self.old_adps.append(u.copy())
+          anis_flags.append(True)
         # find the position in the ADP loop of the cif and subtract the ADPs
         idx1 = -1
         for i,a_ in enumerate(aniso_atoms1):
@@ -426,8 +436,19 @@ class Peanut():
             )
             u_cart = adptbx.u_cif_as_u_cart(unit_cell1, u_cif1)
             print(f"{label:<6} | {similarity_index(u_cart, u):>14.2f}")
+            labels.append(label)
             for i,u_val in enumerate(u_cart):
                 u[i] -= u_val
+        else:
+            for i,a_ in enumerate(iso_atoms):
+                if a_ == label:
+                    idx1 = i
+                    break
+            if idx1 != -1:
+                u_eq = float(str(ueq[idx1]).split('(')[0])
+                u_ = [u_eq, u_eq, u_eq, 0., 0., 0.]
+                print(f"{label:<6} | {similarity_index(u_, u):>14.2f}")
+                labels.append(label)
         if C_anharm_site is not None:
             idx1 = -1
             for i,a_ in enumerate(C_anharm_site):
@@ -481,8 +502,13 @@ class Peanut():
     print("-" * 23)  # Separator line
     for u in iter_scatterers():
       id = olx_atoms.atom_ids[this_atom_id]
+      if not anis_flags[this_atom_id]:
+        #olex.m("anis -h {labels[this_atom_id]}")
+        olx.Anis(f"{labels[this_atom_id]}", h=True)
       this_atom_id += 1
-      olx.xf.au.SetAtomU(id, *u)
+      u_temp = (u[0], u[1], u[2], u[3], u[4], u[5])
+      temp = adptbx.u_cart_as_u_star(uc, u_temp)
+      olx.xf.au.SetAtomU(id, *temp)
     print("-" * 23)  # Separator line
 
     olx.xf.EndUpdate()
@@ -503,14 +529,14 @@ class Peanut():
     xray_structure = cctbx_adapter.xray_structure()
     olx_atoms = cctbx_adapter.olx_atoms
     ## Feed Model
-    this_atom_id = 0
     self.showing_diff = False
     olex.m(f"AZoom {self.old_arad}")
     olex.m(f"BRad {self.old_brad/100}")
-    for u in range(len(xray_structure.scatterers())):
+    for this_atom_id in range(len(xray_structure.scatterers())):
       id = olx_atoms.atom_ids[this_atom_id]
+      if len(self.old_adps[this_atom_id]) == 1:
+          olex.m("isot {olx_atoms.atom_labels[this_atom_id]}")
       olx.xf.au.SetAtomU(id, *self.old_adps[this_atom_id])
-      this_atom_id += 1
     self.old_adps = []
 
     olx.xf.EndUpdate()
