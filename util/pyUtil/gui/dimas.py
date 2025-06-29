@@ -128,8 +128,15 @@ class DimasClient(object):
   def list_experiments(self):
     self.raise_auth()
     self.headers['Authorization'] = self.jwt
-    return RestClient(self.base_url, self.headers).get("/lims/experiment-list",
+    return RestClient(self.base_url, self.headers).get("/lims/experiment/list",
         params={"start": 0, "size": 10})
+
+  @api_call
+  def list_experiment_files(self, exp_id):
+    self.raise_auth()
+    self.headers['Authorization'] = self.jwt
+    return RestClient(self.base_url, self.headers).get("/lims/experiment/files/list",
+        params={"id": exp_id})
 
   @api_call
   def get_experiment(self, endpoint):
@@ -151,11 +158,28 @@ class DimasClient(object):
           out.write(ch)
       return out_fn
 
+  @api_call
+  def upload_experiment_file(self, exp_id, filename):
+    self.raise_auth()
+    # !!! DO NOT SET Content-Type HERE, spends almost a day hunting it down!!!!
+    headers = {'Authorization': self.jwt}
+
+    url = f"{self.base_url}" + "/lims/experiment/files/put"
+    with open(filename, "rb") as f:
+      with requests.put(url, headers=headers,
+                        files = {"stream": f},
+                        params={"id": exp_id, "replace": 2}) as response:
+        response.raise_for_status()
+        return response.json()
+
   def ready(self):
     self.read_def()
     if self.base_url and self.username and self.passwdd:
       return True
     return False
+
+  def get_jwt(self):
+    return self.jwt
 
 dc = DimasClient()
 
@@ -191,8 +215,20 @@ def get_experiment_files(url, id):
   out_fn = dc.get_experiment_files(url, id)
   print(f"Files have been saved to {out_fn}")
 
+def list_experiment_files(id):
+  fs = dc.list_experiment_files(id)
+  for f in fs:
+    print(f)
+
+def upload_current_file(exp_id):
+  # retunns 3 if file already exists, 0 - if added/updated
+  dc.upload_experiment_file(exp_id, OV.FileFull())
+
 OV.registerFunction(connect, False, "dimas")
 OV.registerFunction(dc.ready, False, "dimas")
+OV.registerFunction(dc.get_jwt, False, "dimas")
 OV.registerFunction(settings_status, False, "dimas")
 OV.registerFunction(list_experiments, False, "dimas")
 OV.registerFunction(get_experiment_files, False, "dimas")
+OV.registerFunction(list_experiment_files, False, "dimas")
+OV.registerFunction(upload_current_file, False, "dimas")
