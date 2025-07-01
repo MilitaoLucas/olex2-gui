@@ -186,8 +186,9 @@ dc = DimasClient()
 def connect(passwd):
   from hashlib import sha256
   import base64
-  passwdd = base64.b64encode(sha256(passwd.encode("utf8")).digest()).decode()
-  OV.SetParam("olex2.dimas.passwdd", passwdd)
+  if passwd:
+    passwdd = base64.b64encode(sha256(passwd.encode("utf8")).digest()).decode()
+    OV.SetParam("olex2.dimas.passwdd", passwdd)
   dc.create_jwt_token()
   if dc.jwt:
     print("Successfully created an access token")
