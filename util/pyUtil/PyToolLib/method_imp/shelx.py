@@ -53,16 +53,32 @@ class Method_shelx(Method):
           x.write(l)
     commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
-    set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl']#, 'shelxt', 'xt']
-    thread_n = OV.GetThreadN()
+    set_thread_n = RunPrgObject.program.name.lower() in ['shelxl', 'xl', 'shelxt', 'xt']
+    # refine.max_threads is set and reset by AC
+    ac_thread_n = int(OV.GetVar("refine.max_threads", "0"))
+    usr_thread_n, usr_thread_n_set = OV.GetThreadN(ext=True)
+    def_thread_n = ac_thread_n if ac_thread_n > 0 else usr_thread_n
     if self.command_line_options:
-      cmds = self.command_line_options.split()
-      if not set_thread_n or thread_n < 1:
-        commands += cmds
-      else:
-        commands += [x for x in cmds if not x.startswith("-t")]
-    if set_thread_n and thread_n >= 1:
-      commands.append("-t%s" %thread_n)
+      args = self.command_line_options.split()
+      if set_thread_n:
+        args_no_t = [x for x in args if not x.startswith("-t")]
+        # not set in the CMD, set to AC or GUI
+        if len(args) == len(args_no_t):
+          commands += args
+          commands.append("-t%s" %def_thread_n)
+        else:
+          if ac_thread_n > 0: # override CMD with AC
+            commands += args_no_t
+            commands.append("-t%s" %ac_thread_n)
+          elif usr_thread_n_set: # set in the GUI
+            commands += args_no_t
+            commands.append("-t%s" %usr_thread_n)
+          else: # use CMD
+            commands += args
+      else: # ShelXD or something
+        commands += args
+    elif set_thread_n: # no CMD - set to AC or GUI
+      commands.append("-t%s" %def_thread_n)
 
     success = olx.Exec(prgName, *commands, q=(not RunPrgObject.params.snum.shelx_output))
     if not success:
@@ -106,7 +122,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
-      
+
       prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
       method = gui.tools.GetMaskInfo.get_masking_method()
       lines, fab_path, fab_origin = gui.tools.GetMaskInfo.get_and_check_mask_origin()
@@ -188,11 +204,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       hkl_stats = olex_core.GetHklStat()
       data = hkl_stats.get('DataCount', None)
       parameters = float(olx.Lst('param_n'))
-      OV.SetParam('snum.refinement.parameters', parameters)
-      OV.SetParam('snum.refinement.data', data)
+      OV.SetDataParamN(data, parameters)
     except:
-      OV.SetParam('snum.refinement.parameters', None)
-      OV.SetParam('snum.refinement.data', None)
+      OV.SetDataParamN(None, None)
 
   def gather_refinement_information(self):
     cif = {}

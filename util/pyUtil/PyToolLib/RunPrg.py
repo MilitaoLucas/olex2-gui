@@ -185,19 +185,6 @@ class RunPrg(ArgumentParser):
       olex.m('delins list 8')
       OV.SetParam("snum.refinement.use_solvent_mask", True)
     return
-    #if OV.GetParam("snum.refinement.use_solvent_mask") and OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
-      #OV.SetVar('current_mask_sqf', "")
-      ### If the original filename already ends in _sq (i.e. the files come from outside Olex2, things get very confusing. Maybe one way of dealing with it is to leave the original files all untouched, and rename sNum to the filename without the _sq bit, alongside with the HKLSrc(). But will metadata get lost? Should all files get copied/renamed?
-      #fn = OV.HKLSrc()
-      #nfn = fn.replace("_sq.hkl", '.hkl')
-      #if "_sq.hkl" in fn:
-        #olx.file.Copy(fn, nfn)
-        #nf = OV.FileFull().replace("_sq.", ".")
-        #olex.m(f"file {nf}")
-        #olex.m(f"reap {nf}")
-        ### This looks misleading -- the 'original' filename refer to renamings once the masking process has started.
-        #self.original_filename = nfn
-        #OV.HKLSrc(nfn)
 
     if clean:
       from pathlib import Path
@@ -300,8 +287,6 @@ class RunPrg(ArgumentParser):
             continue
 
     self.hkl_src = OV.HKLSrc()
-    if OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg') == "Platon" and not  OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
-      self.hkl_src = f"{os.path.splitext(OV.FileFull())[0]}_sq.hkl"
 
     if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
@@ -532,10 +517,18 @@ class RunRefinementPrg(RunPrg):
     OV.unregisterCallback("procout", self.refinement_observer)
     if use_convergence:
       OV.unregisterCallback("procout", cl.listen_for_convergency)
+      
     if self.refinement_has_failed:
+      notes = []
       bg = red
       fg = white
-      msg = " | ".join(self.refinement_has_failed)
+      for note in self.refinement_has_failed:
+        if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
+          bg = green
+          fg = white
+          note += "-Mask INFO exists"
+        notes.append(note)
+      msg = " | ".join(notes)
       if "warning" in msg.lower():
         bg = orange
       gui.set_notification("%s;%s;%s" % (msg, bg, fg))
@@ -581,9 +574,9 @@ class RunRefinementPrg(RunPrg):
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
     try:
-      if use_aspherical == True:
+      if use_aspherical:
         make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
-        if make_fcf_only == True:
+        if make_fcf_only:
           from aaff import make_fcf
           result = make_fcf(self)
         else:
@@ -608,9 +601,9 @@ class RunRefinementPrg(RunPrg):
       sys.stderr.formatExceptionInfo()
       self.terminate = True
     finally:
-      if result == False:
+      if not result:
         self.terminate = True
-        if use_aspherical == True:
+        if use_aspherical:
           self.refinement_has_failed.append("Error during NoSpherA2")
       # remove res if failed but only for remote run
       RunRefinementPrg.running = None

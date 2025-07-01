@@ -94,13 +94,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       from fast_linalg import env
       if env.initialised:
         open_blas_tn = env.threads
-      ext.build_normal_equations.available_threads = OV.GetThreadN()
+      # refine.max_threads is set and reset by AC
+      thread_n = int(OV.GetVar("refine.max_threads", "0"))
+      if thread_n == 0:
+        thread_n = OV.GetThreadN()
+      ext.build_normal_equations.available_threads = thread_n
     except:
       pass
-    print("Using %s refinement and %s OpenBlas threads. Using OpenMP: %s." %(
-      ext.build_normal_equations.available_threads,
-      open_blas_tn,
-      OV.GetParam("user.refinement.use_openmp")))
+    if not (reparametrisation_only or build_only):
+      print("Using %s refinement and %s OpenBlas threads. Using OpenMP: %s." %(
+        ext.build_normal_equations.available_threads,
+        open_blas_tn,
+        OV.GetParam("user.refinement.use_openmp")))
     fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.normal_equations_class = normal_equations_class_builder()
@@ -133,8 +138,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         _ = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
         if _ == "Platon":
           olex.m("spy.OlexPlaton(q,.ins)")
-          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           self.f_mask = self.load_mask()
+          gui.tools.GetMaskInfo.sort_out_masking_hkl()
           if not self.f_mask:
             self.failure = True
             return
@@ -188,7 +193,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if self.swat is not None:
         self.swat = None
         msg +=", ignoring SWAT"
-      if len(msg) != msg_l:
+      if len(msg) != msg_l and not(reparametrisation_only or build_only):
         print(msg)
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
@@ -232,7 +237,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.failure = True
         return
     elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
-      olx.Echo("Nothing to refine!", m="error")
+      if not (reparametrisation_only or build_only):
+        olx.Echo("Nothing to refine!", m="error")
       self.failure = True
       return
     if reparametrisation_only:
@@ -451,8 +457,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
      pass
 
-    OV.SetParam('snum.refinement.parameters', parameters)
-    OV.SetParam('snum.refinement.data', data)
+    OV.SetDataParamN(data, parameters)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
@@ -1639,7 +1644,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         a = olx.xf.uc.Closest(*xyz).split(',')
         if OV.IsEDData():
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s" % (
-            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])          
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
         else:
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
             i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])

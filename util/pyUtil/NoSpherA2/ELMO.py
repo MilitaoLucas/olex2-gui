@@ -3,7 +3,7 @@ from olexFunctions import OV
 def get_ntail_list():
   # for tailor made residues in ELMOdb
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     ntail_list = ['1',]
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
     if maxtail == 1:
@@ -17,7 +17,7 @@ OV.registerFunction(get_ntail_list,False,'NoSpherA2')
 
 def get_resname():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
     resnames = resnames.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -32,7 +32,7 @@ OV.registerFunction(get_resname,False,'NoSpherA2')
 
 def get_nat():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
     nat = nat.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -47,7 +47,7 @@ OV.registerFunction(get_nat,False,'NoSpherA2')
 
 def get_nfrag():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')
     nfrag = nfrag.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -62,7 +62,7 @@ OV.registerFunction(get_nfrag,False,'NoSpherA2')
 
 def get_ncltd():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')
     ncltd = ncltd.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -77,7 +77,7 @@ OV.registerFunction(get_ncltd,False,'NoSpherA2')
 
 def get_specac():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
     specac = specac.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -92,7 +92,7 @@ OV.registerFunction(get_specac,False,'NoSpherA2')
 
 def get_exbsinp():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')
     exbsinp = exbsinp.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -107,7 +107,7 @@ OV.registerFunction(get_exbsinp,False,'NoSpherA2')
 
 def get_fraginp():
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
     fraginp = fraginp.split(';')
     maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
@@ -122,7 +122,7 @@ OV.registerFunction(get_fraginp,False,'NoSpherA2')
 
 def change_resname(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
     resnames = resnames.split(';')
 
@@ -142,7 +142,7 @@ OV.registerFunction(change_resname,False,'NoSpherA2')
 
 def change_nat(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
     nat = nat.split(';')
 
@@ -162,7 +162,7 @@ OV.registerFunction(change_nat,False,'NoSpherA2')
 
 def change_nfrag(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')
     nfrag = nfrag.split(';')
 
@@ -182,7 +182,7 @@ OV.registerFunction(change_nfrag,False,'NoSpherA2')
 
 def change_ncltd(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')
     ncltd = ncltd.split(';')
 
@@ -202,7 +202,7 @@ OV.registerFunction(change_ncltd,False,'NoSpherA2')
 
 def change_specac(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
     specac = specac.split(';')
 
@@ -222,7 +222,7 @@ OV.registerFunction(change_specac,False,'NoSpherA2')
 
 def change_exbsinp(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')
     exbsinp = exbsinp.split(';')
 
@@ -242,7 +242,7 @@ OV.registerFunction(change_exbsinp,False,'NoSpherA2')
 
 def change_fraginp(input):
   tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
-  if tail == True:
+  if tail:
     fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
     fraginp = fraginp.split(';')
 

@@ -355,6 +355,18 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX2_WSL';help_ext=WSL_Mode;1 -->
+  <td width='23%'><b>%WSL/Conda%:</b></td>
+  <td width='75%'>
+  Use WSL Adapter and Conda (Restart required)
+  <td width="22%" align='right'>$+
+    html.Snippet("gui/snippets/input-checkbox", "name=settings_wsl_conda",
+     "checked=spy.GetParam('olex2.wsl_conda', 'False')",
+     "onclick=spy.SetParam('olex2.wsl_conda', html.GetState('~name~'))")
+   $-</td>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='PATH';help_ext=Path;1 -->
   <td width='23%'>
     <b>%PATH%:</b>

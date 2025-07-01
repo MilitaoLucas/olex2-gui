@@ -227,6 +227,7 @@ class OlexRefinementModel(object):
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
           'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
 
+
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
     self._atoms = []
@@ -356,8 +357,8 @@ class OlexRefinementModel(object):
       restrained_set = set()
       filtered_restraints = []
       for restraint in restraints:
-        restraint_type = self.restraint_types.get(shelxl_restraint)
-        if shelxl_restraint in ('rigu', 'simu', 'delu'):
+        restraint_type = self.restraint_types[shelxl_restraint]
+        if self.is_adp_restraint(shelxl_restraint):
           i_seqs = [i[0] for i in restraint['atoms']]
           if not i_seqs:
             if restrained_set:
@@ -1732,6 +1733,10 @@ if not haveGUI:
   #OV.registerFunction(tbxs)
 
 def SetMasking(v):
+  if type(v) == bool:
+    v = str(v).lower()
+    if OV.HasGUI() and OV.IsControl("SNUM_REFINEMENT_USE_SOLVENT_MASK"):
+      olx.html.SetValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
   if v == 'true':
     olx.AddIns('ABIN', q=True)
   else:
@@ -1851,6 +1856,7 @@ def pip(package):
   import numpy as np
   import scipy as sp
   import PIL as PIL
+  import locale
   np_version = np.__version__
   sp_version = sp.__version__
   PIL_version = PIL.__version__
@@ -1866,5 +1872,11 @@ def pip(package):
     from pip import main as pipmain
   except:
     from pip._internal import main as pipmain
-  pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
+  saved_locale = locale.getlocale(locale.LC_ALL)
+  #print(f"{saved_locale}")
+  try:
+    pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
+    #print(f"{locale.getlocale(locale.LC_ALL)}")
+  finally:
+    locale.setlocale(locale.LC_ALL, saved_locale)
 OV.registerFunction(pip, False)

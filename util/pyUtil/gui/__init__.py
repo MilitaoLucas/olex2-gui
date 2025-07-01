@@ -538,7 +538,7 @@ def FixFree(target):
       if r == "C":
         return
 
-    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s>>fix HUiso" %fvar)
+    olx.Run("sel -u>>sel $*>>fix xyz,adp,occu %s" %fvar)
   elif target == "FREE XYZ":
     olx.Run("sel -u>>free xyz")
   elif target == "FREE ADP":
@@ -692,7 +692,7 @@ def create_archive(node_id=None):
 
 olex.registerFunction(create_archive, False, "gui")
 
-
+########################### OVERLAYS ##########################################
 def set_ofile(idx):
   idx = int(idx)
   olx.OFileSwap(idx)
@@ -729,3 +729,81 @@ olex.registerFunction(create_overlay_gui, False, "gui")
 olex.registerFunction(delete_ofile, False, "gui")
 olex.registerFunction(set_ofile, False, "gui")
 
+########################### CAP and PAR FILES #################################
+def have_par_files():
+  if olx.IsFileLoaded() == "false":
+    return False
+  if OV.IsVar(olx.var_name_par_files):
+    return len(OV.GetVar(olx.var_name_par_files)) > 0
+
+  par_name = OV.get_cif_item('_diffrn_oxdiff_measurement_exp_name', None)
+  if par_name:
+    par_name = os.path.abspath(os.path.join(OV.FilePath(), "..", "..", par_name))
+    if not os.path.exists(par_name):
+      par_name = None
+  if not par_name:
+    import glob
+    path = OV.FilePath()
+    par_files = glob.glob(path + "\\*.par")
+    if not par_files:
+      par_files = glob.glob(path + "\\..\\..\\*.par")
+    par_files = [f for f in par_files if "cracker" not in f]
+    if not par_files:
+      OV.SetVar(olx.var_name_par_files, "")
+      return False
+    OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
+    return True
+  else:
+    OV.SetVar(olx.var_name_par_files, par_name)
+
+def activate_or_run_CAP(fn):
+  import olex_gui
+  fn = os.path.abspath(fn)
+  if not olex_gui.ActivateCAP(fn):
+    olx.Shell(fn)
+
+def run_CAP():
+  par_files = OV.GetVar(olx.var_name_par_files).split("&;")
+  if not par_files:
+    olx.Echo("No par files have been located", m="error")
+    return
+  if len(par_files) > 1:
+    OV.SetVar(olx.var_name_par_files, "&;".join(par_files))
+    sw, sh = 400, 250
+    x,y = GetBoxPosition(sw, sh)
+    olx.Popup("par_files", OV.BaseDir()+ "/etc/gui/blocks/templates/pop_par_files.htm",
+              x=x, y=y, w=sw, h=sh,
+              t="Multiple PAR files have been detected",
+              b="tscr", s=False)
+    olx.html.ShowModal("par_files")
+  else:
+    activate_or_run_CAP(par_files[0])
+
+def par_files_table():
+  def fn(x):
+    if '..' in x:
+      return x[x.index('..'):]
+    return os.path.split(x)[1]
+  files = OV.GetVar(olx.var_name_par_files).split("&;")
+  rv = "<table width='100%'>"
+  for f in files:
+    rv += "<tr><td><a href=\"spy.gui.activate_or_run_CAP '%s'>>html.endModal par_files 0\">%s</a></td></tr>" %(f, fn(f))
+  return rv + "</table>"
+
+olex.registerFunction(have_par_files, False, "gui")
+olex.registerFunction(activate_or_run_CAP, False, "gui")
+olex.registerFunction(run_CAP, False, "gui")
+olex.registerFunction(par_files_table, False, "gui")
+
+def cbtn_on(cmds: str):
+  if "cbtn-solve" in cmds:
+    if not OV.IsFileType("ires"):
+      if OV.IsFileType("cif"):
+        cmds = cmds.replace("solve", "refine")
+        olx.Echo("Switching to the Refine tab - no valid input for Solve", m="warning")
+      else:
+        olx.Alert("Wrong file type", "Please load an INS/RES file for structure solution", "OI")
+        return
+  olx.Run(cmds)
+
+olex.registerFunction(cbtn_on, False, "gui")

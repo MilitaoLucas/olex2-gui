@@ -1,0 +1,56 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DIMAS_Settings';help_ext=DIMAS Settings;1 -->
+  <td width="25%">
+    <b>URL</b>
+  </td>
+  <td>
+    <snippet src="gui/snippets/input-text" name="url@dimas"
+      value="spy.GetParam(olex2.dimas.url)"
+      onchange="spy.SetParam(olex2.dimas.url, html.GetValue('~name~'))" />
+  </td>
+
+  </tr><tr>
+
+  <td width="25%">
+    <b>API key</b>
+  </td>
+  <td>
+    <snippet src="gui/snippets/input-text" name="apiKey@dimas"
+      value="spy.GetParam(olex2.dimas.apiKey)"
+      onchange="spy.SetParam(olex2.dimas.apiKey, html.GetValue('~name~'))" />
+  </td>
+
+  </tr><tr>
+
+  <td>
+    <b>Username </b>
+  </td>
+  <td>
+    <snippet src="gui/snippets/input-text" name="username@dimas"
+      value="spy.GetParam(olex2.dimas.username)"
+      onchange="spy.SetParam(olex2.dimas.username, html.GetValue('~name~'))" />
+  </td>
+
+  </tr><tr>
+
+  <td>
+    <b>Password </b>
+  </td>
+  <td>
+    <snippet src="gui/snippets/input-text"
+      name="passwd@dimas"
+      value="" password="true"
+      />
+  </td>
+  </tr><tr>
+  <td>
+    &nbsp;
+  </td>
+  <td>
+    <snippet src="gui/snippets/gui-link-plain"
+    value="Connect"
+    onclick="spy.dimas.connect(html.GetValue(passwd@dimas))" />
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

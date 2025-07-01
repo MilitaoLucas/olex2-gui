@@ -19,7 +19,7 @@
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
       <cmd7 "if file.Exists(app.ConfigDir()/radii.xld) then 'Load radii app.ConfigDir()/radii.xld'">
       <cmd8 "if not(spy.GetParam('user.remember_last')) then 'unsetvar startup'">
-      <cmd9 "if not(file.Exists(app.getarg(1))) then
+      <cmd9 obsolete="if not(file.Exists(app.getarg(1))) then
         'if and(IsVar(startup),file.Exists(file.AbsolutePath(GetVar(startup)))) then
               \"reap file.AbsolutePath(GetVar(startup))\"'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
@@ -47,7 +47,6 @@
       <arg7 name="filefull" def="filefull()">>
     <cmd
       <cmd0  "xgrid.Visible(false)">
-      <cmd0a "run spy.NoSpherA2.delete_f_calc_f_obs_one_h" hint="does not break the macro if fails!">
       <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  "spy.SaveStructureParams()">
       <cmd3  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">

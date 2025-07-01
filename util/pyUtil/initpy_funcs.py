@@ -153,10 +153,22 @@ class initpy_funcs():
     import cctbx_controller
     import olex_twinning
 
+  def NoSpherA2(self):
+    try:
+      self.olx.stopwatch.exec("from NoSpherA2 import NoSpherA2")
+    except Exception as e:
+      self.olx.Echo(e, m="error")
+      print("Failed to load NoSpherA2 plugin. Please check your installation.")
+      return
+
   def onstartup(self):
     self.OV.SetVar('cbtn_solve_on','false')
     self.OV.SetVar('cbtn_refine_on','false')
     self.OV.SetVar('cbtn_report_on','false')
+
+    # define global var names here
+    self.olx.var_name_par_files = "par_files"
+    self.olx.var_name_param_N = "param_N"
 
     import leverage
     import userDictionaries
@@ -206,6 +218,8 @@ class initpy_funcs():
       #load_user_gui_phil()
       #export_parameters()
       self.olx.stopwatch.exec("import Analysis")
+      if self.OV.IsDeveloping():
+        self.olx.stopwatch.exec("from gui import dimas")
 
   def import_caustom_and_user_sripts(self):
     try:
@@ -222,7 +236,11 @@ class initpy_funcs():
     if sys.platform[:3] == 'win':
       return
     import stat
-    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi", "olex2c"]
+    # leave olex2c as the last one!
+    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi",
+                "etc/bin/restart.sh",
+                "etc/bin/restart-mac.sh",
+                "olex2c"]
     if sys.platform == 'darwin':
       to_check[-1] = to_check[-1] + "_exe"
     for f in to_check:
@@ -231,7 +249,7 @@ class initpy_funcs():
         continue
       try:
         if not (os.stat(f)[stat.ST_MODE] & stat.S_IXUSR):
-          os.chmod(f, stat.S_IXUSR)
+          os.chmod(f, stat.S_IXUSR | stat.S_IREAD)
       except:
         self.olx.Echo(
           "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),

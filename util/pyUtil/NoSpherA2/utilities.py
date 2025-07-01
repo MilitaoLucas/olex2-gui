@@ -1,4 +1,4 @@
-import functools
+#import functools
 import gui
 import os
 import shutil
@@ -9,19 +9,14 @@ import olex_core
 import sys
 import subprocess
 from olexFunctions import OV
-import OlexVFS
-from PIL import ImageDraw, Image
+#import OlexVFS
+#from PIL import ImageDraw, Image
 from ImageTools import IT
-from PilTools import timage
+#from PilTools import timage
 from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
-try:
-  from_outside = False
-  p_path = os.path.dirname(os.path.abspath(__file__))
-except:
-  from_outside = True
-  p_path = os.path.dirname(os.path.abspath("__file__"))
+from Wfn_Job import is_orca_new
 
 def scrub(cmd):
   log = gui.tools.LogListen()
@@ -47,7 +42,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   folder = OV.FilePath()
   name = OV.ModelSrc()
   final_log_name = name + ".partitionlog"
-  if type([]) != type(wfn_file):
+  if not isinstance(wfn_file, list):
     gui.get_default_notification(
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
@@ -64,7 +59,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
     args.append(salted_model_dir)
-  if not hkl_file is None:
+  if hkl_file is not None:
     if not os.path.exists(hkl_file):
       from cctbx_olex_adapter import OlexCctbxAdapter
       cctbx_adaptor = OlexCctbxAdapter()
@@ -75,9 +70,9 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if (int(ncpus) >= 1):
     args.append('-cpus')
     args.append(ncpus)
-  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_debug') == True):
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug'):
     args.append('-v')
-  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_ED') == True):
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_ED'):
     args.append('-ED')
   else:
     wavelength = float(olx.xf.exptl.Radiation())
@@ -107,7 +102,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     args.append(str(mode))
-  if (OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT') == True):
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'):
     auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
     args.append("-RI_FIT")
     args.append(auxiliary_basis)
@@ -168,8 +163,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(str(top_up_d))
     except:
       print("Failed to set dmin for TSC")
-  if type([]) == type(wfn_file):
-    if type([]) == type(cif):
+  if isinstance(wfn_file, list):
+    if isinstance(cif, list):
       args.append("-cmtc")
       if len(wfn_file) != len(groups) or len(wfn_file) != len(groups):
         print("Inconsistant size of parameters! ERROR!")
@@ -242,11 +237,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
 
     if any(".xyz" in f for f in wfn_file):
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
-      if Cations != "" and Cations != None:
+      if Cations != "" and Cations is not None:
         args.append("-Cations")
         args.append(Cations)
       Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
-      if Anions != "" and Anions != None:
+      if Anions != "" and Anions is not None:
         args.append("-Anions")
         args.append(Anions)
   else:
@@ -270,11 +265,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append(groups[i])
     if ".xyz" in wfn_file:
       Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
-      if Cations != "" and Cations != None:
+      if Cations != "" and Cations is not None:
         args.append("-Cations")
         args.append(Cations)
       Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
-      if Anions != "" and Anions != None:
+      if Anions != "" and Anions is not None:
         args.append("-Anions")
         args.append(Anions)
 
@@ -327,11 +322,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   sucess = False
   shutil.move(out_fn, final_log_name)
   with open(final_log_name, "r") as f:
-    l = f.readlines()
-    if "Writing tsc file...  ... done!\n" in l or "Writing tsc file...\n" in l:
+    lines = f.readlines()
+    if "Writing tsc file...  ... done!\n" in lines or "Writing tsc file...\n" in lines:
       sucess = True
 
-  if sucess == True:
+  if sucess:
     print("\n.tsc calculation ended!")
   else:
     print ("\nERROR during tsc calculation!")
@@ -339,7 +334,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
 
 def get_nmo():
   line = ""
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+  if not os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")):
     part_log_path =  os.path.join(OV.FilePath(),OV.ModelSrc()+".partitionlog")
     if os.path.exists(part_log_path):
       with open(part_log_path) as partlog:
@@ -357,7 +352,7 @@ def get_nmo():
     return int(values[1])
 
 def get_ncen():
-  if os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")) == False:
+  if not os.path.isfile(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn")):
     return -1
   wfn = open(os.path.join(OV.FilePath(),OV.ModelSrc()+".wfn"))
   line = ""
@@ -412,7 +407,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     startinfo.wShowWindow = subprocess.SW_HIDE
 
-  if startinfo == None:
+  if startinfo is None:
     with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
@@ -517,7 +512,7 @@ OV.registerFunction(check_for_matching_wfn, False, 'NoSpherA2')
 
 def read_disorder_groups():
   inp = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
-  if inp == None or inp == "":
+  if inp is None or inp == "":
     return []
   groups = inp.split(';')
   result = []
@@ -551,7 +546,7 @@ def org_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -574,7 +569,7 @@ def org_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -597,7 +592,7 @@ def org_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -620,7 +615,7 @@ def light_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -643,7 +638,7 @@ def light_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -666,7 +661,7 @@ def light_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -689,7 +684,7 @@ def heavy_min():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -712,7 +707,7 @@ def heavy_small():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -735,7 +730,7 @@ def heavy_final():
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
-    if "5.0" in software() or "6.0" in software():
+    if is_orca_new():
       OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
     else:
       OV.SetParam('snum.NoSpherA2.method', "PBE")
@@ -817,9 +812,8 @@ def calculate_number_of_electrons():
 def write_precise_model_file():
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
-  use_tsc = OV.IsNoSpherA2()
   table_name = ""
-  if use_tsc == True:
+  if OV.IsNoSpherA2():
     table_name = str(OV.GetParam("snum.NoSpherA2.file"))
   try:
     fmr = FullMatrixRefine()
@@ -852,7 +846,7 @@ def write_precise_model_file():
       f.write("{:12.8f}".format(esds[matrix_run + x]))
     matrix_run += 3
     has_adp = atom.get('adp')
-    if has_adp != None:
+    if has_adp is not None:
       matrix_run += 6
     else:
       matrix_run += 1
@@ -872,7 +866,7 @@ def write_precise_model_file():
     has_adp = atom.get('adp')
     f.write("{:5}".format(atom['label']))
     matrix_run += 3
-    if has_adp != None:
+    if has_adp is not None:
       adp = has_adp[0]
       adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
       uiso = adptbx.u_cart_as_u_iso(adp)
@@ -1049,7 +1043,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
     startinfo.dwFlags |= STARTF_USESHOWWINDOW
     startinfo.wShowWindow = SW_HIDE
 
-  if startinfo == None:
+  if startinfo is None:
     with Popen(args, stdout=PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
@@ -1127,7 +1121,7 @@ def removeDir(phil_value, item_to_remove) -> None:
 OV.registerFunction(removeDir, False, "NoSpherA2")
 
 def toggle_full_HAR():
-  if OV.GetParam('snum.NoSpherA2.full_HAR') == True:
+  if OV.GetParam('snum.NoSpherA2.full_HAR'):
     OV.SetParam('snum.NoSpherA2.full_HAR', False)
   else:
     OV.SetParam('snum.NoSpherA2.full_HAR', True)

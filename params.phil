@@ -332,6 +332,8 @@ routines requiring structure refinement
       .type = bool
     check_PDF = True
       .type = bool
+    check_corr = False
+      .type = bool
 
     ShelXL
       .short_caption = 'Program specific command line'
@@ -872,6 +874,10 @@ olex2
     .type = str
   debug = False
     .type = bool
+  developing = False
+    .type = bool
+  wsl_conda = False
+    .type = bool
   dev_mode = False
     .type = bool
   force_images = False
@@ -924,6 +930,18 @@ olex2
   refinement {
     stop_ED_ASAP = True
       .type = bool
+  }
+
+  dimas {
+    url = None
+      .type = str
+    username = None
+      .type = str
+    passwdd = None
+      .type = str
+      .help = SHA256 password digest
+    apiKey = None
+     .type = str
   }
 }
 

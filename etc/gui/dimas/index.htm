@@ -1,0 +1,12 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include dimas-settings gui\dimas\settings.htm;gui\blocks\tool-h3-off.htm;name='DIMAS_SETTINGS';image=h3-Settings;onclick=#onclick;$spy.dimas.settings_status() -->
+
+<!-- #ignoreof not(spy.dimas.reasy()) -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Experiments';help_ext=Experiments;1 -->
+<td>
+$spy.dimas.list_experiments()
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- ignoreif# DIMAS ready -->

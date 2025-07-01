@@ -26,6 +26,8 @@ snum{
       .type = str
     Disorder_Groups = ""
       .type = str
+    distro = "None"
+      .type = str
     ELMOdb{
       cycl = False
         .type = bool
@@ -330,6 +332,20 @@ snum{
       .type = bool
     NoSpherA2_debug = False
       .type = bool
+    xharpy{
+      grid_spacing = 0.16
+        .type = float
+      k_points1 = 1
+        .type = int
+      k_points2 = 1
+        .type = int
+      k_points3 = 1
+        .type = int
+      k_points_centre_gamma = True
+        .type = bool
+      reload = False
+        .type = bool
+    }
   }
 }
 

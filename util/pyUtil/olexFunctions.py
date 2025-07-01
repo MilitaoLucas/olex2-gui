@@ -52,6 +52,20 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       print("Variable %s could not be retrieved" %(variable), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
 
+  def IsVar(self, variable):
+    try:
+      return olex_core.IsVar(variable)
+    except Exception as ex:
+      print("Variable %s could not be queried" %(variable), file=sys.stderr)
+      sys.stderr.formatExceptionInfo()
+
+  def DelVar(self, variable):
+    try:
+      return olex_core.UnsetVar(variable)
+    except Exception as ex:
+      print("Variable %s could not be removed" %(variable), file=sys.stderr)
+      sys.stderr.formatExceptionInfo()
+
   def _replace_object(self, scope, object):
     for i, tobj in enumerate(scope.objects):
       if tobj.name == object.name:
@@ -880,6 +894,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsDeveloping(self):
+    return self.GetParam("olex2.developing", False)
+
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
       self.GetParam("snum.refinement.program") == "olex2.refine"
@@ -915,7 +932,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def IsClientMode(self):
     return self.GetParam('user.refinement.client_mode', False)
 
-  def GetThreadN(self):
+  def GetThreadN(self, ext=False):
+    """ when ext is True - a tuple is returned, the first one - is the number of threads
+    and the second one - if the value has been set by the user or default (for value <= 0)
+    is returned
+    """
     v = self.GetParam('user.refinement.thread_n')
     if v.endswith("%"):
       v = int(v[:-1])
@@ -924,12 +945,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       v = os.cpu_count() * v / 100
       if v < 1:
         v = 1
-      return int(v)
+      return (int(v), True) if ext else int(v)
     else:
       v = int(v)
       if v <= 0:
         v = max(1, int(os.cpu_count() *3/4))
-      return v
+        return (v, False) if ext else v
+      return (v, True) if ext else v
 
   def GetACI(self):
     import AC7 as ac
@@ -1262,9 +1284,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       print("Could not initialise OpenBlas: %s" %e)
       return False
 
-  #https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
-  # constructs an object from dict
   def dict_obj(self, d):
+    """ Constructs an object from dict
+    https://stackoverflow.com/questions/1305532/convert-nested-python-dict-to-object
+    """
     class d_o:
       def __init__(self, **entries):
         self.__dict__.update(entries)
@@ -1331,6 +1354,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         if ref['index'] == 4 and 'var' in ref['relation']:
           return True
     return False
+
+  def SetDataParamN(self, data, params):
+    self.SetParam('snum.refinement.parameters', params)
+    self.SetParam('snum.refinement.data', data)
+    self.DelVar(olx.var_name_param_N)
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
@@ -1432,3 +1460,5 @@ OV.registerFunction(OV.get_diag)
 OV.registerFunction(OV.SetMaxCycles)
 OV.registerFunction(OV.SetMaxPeaks)
 OV.registerFunction(OV.have_linked_occu)
+OV.registerFunction(OV.IsDebugging)
+OV.registerFunction(OV.IsDeveloping)

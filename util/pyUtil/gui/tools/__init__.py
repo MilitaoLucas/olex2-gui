@@ -234,6 +234,8 @@ def make_single_gui_image(img_txt="", img_type='h2', force=False):
       alias = img_type
       img_type = "h2"
     image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False, force=force)
+    if image is None:
+      continue
     name = "%s-%s%s.png" % (img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
@@ -358,6 +360,30 @@ def checkErrLogFile():
 
 OV.registerFunction(checkErrLogFile, True, 'gui.tools')
 
+_have_CAP = None
+def haveCAP():
+  if sys.platform[:3] != "win":
+    return False
+  global _have_CAP
+  if _have_CAP:
+    return True
+  if _have_CAP is None:
+    try:
+      import olex_reg as reg
+      par_association = reg.Read(".par", "", "HKCR")
+      if not par_association or "CrysAlis" not in par_association:
+        _have_CAP = False
+        return False
+      if par_association:
+        if not reg.ListKeys("Software\\Rigaku\\", "HKLM"):
+          _have_CAP = False
+        else:
+          _have_CAP = True
+    except:
+      _have_CAP = False
+  return _have_CAP
+
+OV.registerFunction(haveCAP, True, 'gui.tools')
 
 def checkPlaton():
   retVal = '''
@@ -380,8 +406,6 @@ def checkPlaton():
   else:
     olx.SetVar("HavePlaton", False)
     return ""
-
-
 OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 
@@ -747,11 +771,12 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_same.png,down=toolbar-mask_same.png,hover=toolbar-mask_same.png")
       d.setdefault('target', "A solvent mask has been used, but your sum formula only shows what is in your model. Please make sure include what has been masked in the formula!")
       d['cmds'] = "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1>>html.ItemState cbtn* 1 cbtn-refine 2 *settings 0 refine-settings 1"
-
+      OV.SetVar("mask_but_same", True)
     else:
       img_name = 'toolbar-mask_ok'
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-mask_ok.png,down=toolbar-mask_ok.png,hover=toolbar-mask_ok.png")
       d.setdefault('target', "A solvent mask has been used, and therefore the formula should differ from what is in the model. Nothing to do!")
+      OV.SetVar("mask_but_same", False)
 
   else:
     if not isSame:
@@ -759,22 +784,25 @@ def makeFormulaForsNumInfo():
       OV.SetImage("IMG_TOOLBAR-REFRESH", "up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
       d.setdefault('target', "Update Formula with current model")
     else:
-      img_name = 'toolbar-blank'
-      OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
-      formula = olx.xf.au.GetFormula()
-      d.setdefault('target', "Everything is up-to-date")
+      d = {}
+      refresh_button = ""
+      #img_name = 'toolbar-blank'
+      #OV.SetImage("IMG_TOOLBAR-REFRESH", "up=blank.png,down=blank.png,hover=blank.png")
+      #formula = olx.xf.au.GetFormula()
+      #d.setdefault('target', "Everything is up-to-date")
 
-  d.setdefault('img_name', img_name)
-  d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
-  refresh_button = '''
-  <input
-    name=IMG_TOOLBAR-REFRESH
-    type="button"
-    image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
-    hint="%(target)s"
-    onclick="%(cmds)s"
-    bgcolor="%(bgcolor)s"
-  >''' % d
+  if d:
+    d.setdefault('img_name', img_name)
+    d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
+    refresh_button = '''
+    <input
+      name=IMG_TOOLBAR-REFRESH
+      type="button"
+      image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
+      hint="%(target)s"
+      onclick="%(cmds)s"
+      bgcolor="%(bgcolor)s"
+    >''' % d
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>' % (formula_string, refresh_button)
   #fn = "%s_snumformula.htm" %OV.ModelSrc()
@@ -1401,6 +1429,10 @@ olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
 
 
 def get_parameter_number():
+  var_v = OV.GetVar(olx.var_name_param_N, "")
+  if var_v:
+    return int(var_v)
+
   parameters = OV.GetParam('snum.refinement.parameters', None)
   if not parameters:
     try:
@@ -1414,14 +1446,17 @@ def GetNParams():
     return
   from refinement import FullMatrixRefine
   fmr = FullMatrixRefine()
-  dyn = bool(OV.GetVar("isDynamic", False))
-  rpm = fmr.run(reparametrisation_only=True, ed_refinement=dyn)
+  is_dyn = OV.GetHeaderParam("ED.refinement.method", "Kinematic") != "Kinematic"
+  rpm = fmr.run(reparametrisation_only=True, ed_refinement=is_dyn)
   if rpm is None:
     retVal = 0
   try:
     retVal = rpm.jacobian_transpose_matching_grad_fc().n_rows
   except:
     retVal = 0
+
+  OV.SetVar(olx.var_name_param_N, retVal)
+
   if OV.IsControl("NParameters"):
     olx.html.SetLabel("NParameters", retVal)
     olx.html.SetFG("NParameters", gui_red)
@@ -1474,7 +1509,7 @@ def GetDPRInfo():
     'hint': text_output[idx],
     'label': f"{data}/{parameters}",
     'data': f"{data}",
-    'parameters': f"{parameters}", 
+    'parameters': f"{parameters}",
     'font_size': f"{font_size}"
     }
 
@@ -1565,7 +1600,7 @@ def get_chiral_atom_info(return_what=""):
   try:
     atominfos = olex.f("rsa()").split('\n')
     if not atominfos:
-      t = "This structure is in chiral space group, but there are no chiral atoms"
+      t = "There are no chiral atoms in this structure"
       d.update({
         "chiral_atoms": t,
         "chiral_atoms_listing": "",
@@ -2137,7 +2172,7 @@ Do you want to install this now?""", "YN", False)
     if selection == 'Y':
       if sys.platform[:3] == 'win':
         from olexex import GetHttpFile
-        import zipfile
+        #import zipfile
         from zipfile import ZipFile
         import platform
         architecture = platform.architecture()[0]
@@ -2330,8 +2365,10 @@ def plot_xy(xs,
         else:
           colour = "#ababab"
         label = "n"
-        if type(xs) == 'list' and len(xs) == 1:
+        if len(xs) == 1:
           xses = xs[0]
+        #if type(xs) == 'list' and len(xs) == 1:
+          #xses = xs[0]
         else:
           xses = xs[i]
         ax1.plot(xses,
@@ -2938,7 +2975,10 @@ class PlotIt():
       # Adjust for margin if necessary
       data_min -= margin * (data_max - data_min)
       data_max += margin * (data_max - data_min)
-      self.plt.ylim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+      _ =  data_max - data_min
+      if _:
+        self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
 
       if lim_x != 1:
         self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
@@ -2978,3 +3018,12 @@ def move_nth_to_end(lst, n):
   if 0 <= n < len(lst):  # Ensure n is within valid range
     lst.append(lst.pop(n))  # Remove the nth element and append it to the end
   return lst
+
+def on_sg_change(args):
+  if not OV.HasGUI():
+    return
+  #print("changing sg:" " ".join(args))
+  olex.m("spy.run_skin sNumTitle")
+  olx.html.Refresh("SNUMTITLE")
+
+OV.registerCallback("sgchange", on_sg_change)

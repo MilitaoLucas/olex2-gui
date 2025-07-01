@@ -103,9 +103,18 @@ def do_init():
   ## These imports will register macros and functions for spy.
   stopwatch.exec("from RunPrg import RunPrg")
 
-  stopwatch.start("NSF")
+  stopwatch.run(initpy.NoSpherA2)
+
+  stopwatch.start("Peanut")
   try:
-    from NoSpherA2 import NoSpherA2
+    from peanut import Peanut
+  except Exception as e:
+    olx.Echo(e, m="error")
+  stopwatch.stop()
+
+  stopwatch.start("PhAI")
+  try:
+    import PhAI
   except Exception as e:
     olx.Echo(e, m="error")
   stopwatch.stop()
@@ -113,7 +122,7 @@ def do_init():
   if OV.IsDebugging():
     olx.stopwatch.log()
   else:
-    olx.stopwatch.actvive = False
+    olx.stopwatch.active = False
     olx.stopwatch.reset()
 
   print("Welcome to Olex2")
