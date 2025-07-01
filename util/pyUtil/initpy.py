@@ -116,7 +116,8 @@ def do_init():
   try:
     import PhAI
   except Exception as e:
-    olx.Echo(e, m="error")
+    if OV.IsDebugging() or OV.IsDeveloping():
+      olx.Echo(e, m="error")
   stopwatch.stop()
 
   if OV.IsDebugging():
