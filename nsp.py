@@ -8,7 +8,7 @@ p_name = "NoSpherA2"
 zips_dir = r"D:\tmp\NoSpherA2"
 downloads = [
   (p_name, "hart-lin64", p_name),
-  (p_name + "_Mac_universal", "hart-mac64", p_name),
+  (p_name + "_Mac", "hart-mac64", p_name),
   (p_name+".exe", "hart-win64", p_name + ".exe"),
 ]
 

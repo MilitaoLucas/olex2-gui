@@ -874,6 +874,8 @@ olex2
     .type = str
   debug = False
     .type = bool
+  developing = False
+    .type = bool
   wsl_conda = False
     .type = bool
   dev_mode = False

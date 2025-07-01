@@ -894,6 +894,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
 
+  def IsDeveloping(self):
+    return self.GetParam("olex2.developing", False)
+
   def IsNoSpherA2(self):
     return self.GetParam("snum.NoSpherA2.use_aspherical") and\
       self.GetParam("snum.refinement.program") == "olex2.refine"
@@ -1457,3 +1460,5 @@ OV.registerFunction(OV.get_diag)
 OV.registerFunction(OV.SetMaxCycles)
 OV.registerFunction(OV.SetMaxPeaks)
 OV.registerFunction(OV.have_linked_occu)
+OV.registerFunction(OV.IsDebugging)
+OV.registerFunction(OV.IsDeveloping)
