@@ -206,8 +206,7 @@ def ResolvePrograms():
       hs.active_child_node.method = olx.html.GetValue("%s.solution_method" %pop_name)
     if olex_gui.IsControl('refinement_method', pop_name):
       if hs.active_node.is_solution:
-        hs.add_node(OV.HKLSrc(), OV.FileFull(),
-                    os.path.splitext(OV.FileFull())[0] + '.lst')
+        History.hist.create_history()
       hs.active_node.program = olx.html.GetValue("%s.refinement_program" %pop_name)
       hs.active_node.method = olx.html.GetValue("%s.refinement_method" %pop_name)
     History.make_history_bars()

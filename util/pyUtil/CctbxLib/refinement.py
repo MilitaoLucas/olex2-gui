@@ -969,6 +969,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   #moves EXTI from Fc_sq to Fo_sq
   def  transfer_exti(self, exti, wavelength, fo_sq, fc_sq):
+    #return fo_sq, fc_sq
     sin_2_theta = fc_sq.unit_cell().sin_two_theta(fc_sq.indices(), wavelength)
     correction = 0.001 * exti * fc_sq.data() * math.pow(wavelength, 3) / sin_2_theta
     # recover original Fc_sq
@@ -1507,6 +1508,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       4:  ("secondary_planar_xh_site"                , 2),
       8:  ("staggered_terminal_tetrahedral_xh_site"  , 1),
       9:  ("terminal_planar_xh2_sites"               , 1),
+      12: ("terminal_tetrahedral_xh6_sites"          , 1),
       13: ("terminal_tetrahedral_xh3_sites"          , 1),
       14: ("terminal_tetrahedral_xh_site"            , 1),
       15: ("polyhedral_bh_site"                      , 5),
@@ -1603,6 +1605,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
     if OV.IsEDData() and not OV.IsEDRefinement():
+      #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
