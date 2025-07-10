@@ -412,7 +412,7 @@ class Peanut():
           u_cif = adptbx.u_star_as_u_cart(uc, a.u_star)
           u = u_cif
           if len(u) == 6:
-            u = [u[0], u[1], u[2], u[5], u[4], u[3]]
+            u = [u[0], u[1], u[2], u[3], u[4], u[5]]
             if a.is_anharmonic_adp():
               u += a.anharmonic_adp.data()
           #u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
