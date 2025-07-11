@@ -294,7 +294,7 @@ def run_threads(threads, thread_n=None):
     for t in started:
       t.join()
 
-def process_zip_1(dest, zipfi, tag_file_name):
+def process_zip_1(dest, splash_file, zipfi, tag_file_name):
   full_zn = dest + '/' + zipfi[0]
   if os.path.exists(full_zn):
     print('Updating ' + zipfi[0] + '...')
@@ -353,6 +353,7 @@ def promote_distro(src, dest, forward=True):
       kwargs={
         "dest": dest,
         "zipfi": zipfi,
+        "splash_file": splash_file,
         "tag_file_name": tag_file_name
         }
       )
