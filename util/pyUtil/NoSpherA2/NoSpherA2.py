@@ -7,7 +7,6 @@ import gui
 import shutil
 import time
 import subprocess
-
 from olexFunctions import OV
 from PluginTools import PluginTools as PT
 
@@ -209,6 +208,22 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   #  self.f_obs_sq = None
   #  self.one_h_linearisation = None
   #  self.reflection_date = None
+
+
+  # error if status different than 200
+  @staticmethod
+  def fetch_basis(basis_name: str):
+    import basis_set_exchange as bse
+    import requests
+    BASE_URL = "https://www.basissetexchange.org/"
+    basis_name = basis_name.upper()
+    r = requests.get(BASE_URL + f'/api/basis/{basis_name}/format/gaussian94')
+    r.raise_for_status()
+    basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
+    basis = bse.convert_formatted_basis_str(r.text, "gaussian94", "tonto").replace("unknown_basis",
+                                                                                   basis_name)
+    with open(basis_set_fn, "w") as f:
+      f.write(basis)
 
   def setup_har_executables(self):
     self.mpiexec = self.setup_software(None, "mpiexec")
@@ -1620,7 +1635,7 @@ OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
-
+OV.registerFunction(NoSpherA2_instance.fetch_basis, False, 'NoSpherA2')
 def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   return t
