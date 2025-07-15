@@ -212,9 +212,12 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
 
   # error if status different than 200
   @staticmethod
-  def fetch_basis(basis_name: str):
+  def fetch_basis(basis_name: str = None):
     import basis_set_exchange as bse
     import requests
+    if basis_name is None:
+       OV.GetParam('snum.NoSpherA2.basis_name')
+    print(basis_name)
     BASE_URL = "https://www.basissetexchange.org/"
     basis_name = basis_name.upper()
     r = requests.get(BASE_URL + f'/api/basis/{basis_name}/format/gaussian94')
