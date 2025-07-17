@@ -1,4 +1,5 @@
 import os
+import json
 import sys
 import olex
 import olx
@@ -21,6 +22,7 @@ import ELMO # noqa: F401
 import cubes_maps # noqa: F401
 import xharpy
 import pyscf
+BASIS_DICT = {}
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -174,10 +176,9 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+      import json
       if os.path.exists(self.basis_dir):
-        basis_list = os.listdir(self.basis_dir)
-        basis_list.sort()
-        self.basis_list_str = ';'.join(basis_list)
+        self.check_basis()
       else:
         self.basis_list_str = None
     else:
@@ -209,24 +210,54 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   #  self.one_h_linearisation = None
   #  self.reflection_date = None
 
+  def check_basis(self):
+    global BASIS_DICT
+    self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+    import json
+    if os.path.exists(self.basis_dir):
+      with open(os.path.join(self.basis_dir, "basis.json"), "r") as bf:
+        json_dict = json.load(bf)
+        od = json_dict["original"]
+        add = json_dict["added"]
+        basis_list = od["normal"] + od["relativistic"] + add["normal"] + add["relativistic"]
+      basis_list.sort()
+      BASIS_DICT = json_dict
+      self.basis_list_str = ';'.join(basis_list)
 
   # error if status different than 200
-  @staticmethod
-  def fetch_basis(basis_name: str = None):
+  def fetch_basis(self, basis_name: str, relativistic: str):
     import basis_set_exchange as bse
     import requests
-    if basis_name is None:
-       OV.GetParam('snum.NoSpherA2.basis_name')
-    print(basis_name)
+    print("Trying to download", basis_name)
+    print(f"Relativistic type: {type(relativistic)}, str: {relativistic}")
     BASE_URL = "https://www.basissetexchange.org/"
     basis_name = basis_name.upper()
     r = requests.get(BASE_URL + f'/api/basis/{basis_name}/format/gaussian94')
-    r.raise_for_status()
+    try:
+      r.raise_for_status()
+    except:
+      olx.Alert("Error", "Failed to Download basisset from BSE", "OKE")
+      return
     basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
     basis = bse.convert_formatted_basis_str(r.text, "gaussian94", "tonto").replace("unknown_basis",
                                                                                    basis_name)
+
     with open(basis_set_fn, "w") as f:
       f.write(basis)
+    rel_str = "relativistic" if relativistic == "true" else "normal"
+    with open(os.path.join(self.basis_dir, "basis.json"), "r") as bf:
+      json_dict = json.load(bf)
+    if basis_name not in json_dict["added"][rel_str]:
+      json_dict["added"][rel_str].append(basis_name)
+    else:
+      olx.Alert("Error", "Already installed.", "OKE")
+      return
+    with open(os.path.join(self.basis_dir, "basis.json"), "w") as bf:
+      json.dump(json_dict, bf, indent=2)
+
+    olx.Alert("Sucess!", "Finished downloading!\nNo errors!", "OKI")
+    self.check_basis()
+    olx.html.Update()
 
   def setup_har_executables(self):
     self.mpiexec = self.setup_software(None, "mpiexec")
@@ -977,9 +1008,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def disable_relativistics(self):
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    if "DKH" in basis_name:
-      return False
-    if "x2c" in basis_name:
+    if basis_name in BASIS_DICT["original"]["normal"] or basis_name in BASIS_DICT["added"]["normal"]:
       return False
     else:
       return True
@@ -1324,14 +1353,9 @@ The following options were used:
 
 OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
-def change_basisset(input):
-  OV.SetParam('snum.NoSpherA2.basis_name',input)
-  if "x2c" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic', True)
-    if OV.HasGUI():
-      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
-      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
-  elif "DKH" in input:
+def change_basisset(basis_name):
+  OV.SetParam('snum.NoSpherA2.basis_name',basis_name)
+  if basis_name in BASIS_DICT["original"]["relativistic"] or basis_name in BASIS_DICT["added"]["relativistic"]:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
