@@ -1156,7 +1156,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
     #cif_block['_shelx_F_squared_multiplier'] = "%.3f" %(multiplier)
-    dn = OV.GetParam("snum.cif.dataname", OV.FileName().replace(' ', ''))
+    dn = OV.GetParam("snum.cif.dataname", None)
+    if not dn:
+      dn = OV.FileName().replace(' ', '')
     cif[dn] = cif_block
 
     return cif, fmt_str
