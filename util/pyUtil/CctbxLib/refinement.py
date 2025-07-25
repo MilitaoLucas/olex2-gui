@@ -1634,18 +1634,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
       olex_xgrid.InitSurface(True)
     ###
     #have to get more peaks than max_peaks - cctbx often returns peaks on the atoms
-    peaks = fft_map.peak_search(
-      parameters=maptbx.peak_search_parameters(
-        peak_search_level=3,
-        interpolate=False,
-        peak_cutoff=-1,
-        min_distance_sym_equiv=1.0,
-        max_clusters=max_peaks+len(self.xray_structure().scatterers())),
-      verify_symmetry=False
-      ).all()
+    parameters=maptbx.peak_search_parameters(
+      peak_search_level=3,
+      interpolate=False,
+      peak_cutoff=-1,
+      min_distance_sym_equiv=1.0,
+      max_clusters=max_peaks+len(self.xray_structure().scatterers()))
+    peaks = fft_map.peak_search(parameters=parameters,verify_symmetry=False).all()
+    fmap = olx.Ins("FMAP")
+    if fmap.startswith('-'):
+      peaks.p_sites = [s for s in peaks.sites()]
+      peaks.p_heights = [p for p in peaks.heights()]
+
+      fft_map = fft_map.apply_scaling(-1)
+      n_peaks = fft_map.peak_search(parameters=parameters,verify_symmetry=False).all()
+      peaks.p_sites += n_peaks.sites()
+      peaks.p_heights += [-x for x in n_peaks.heights()]
+      peaks.p_sites, peaks.p_heights = zip(*sorted(zip(peaks.p_sites, peaks.p_heights), key=lambda x: -abs(x[1])))
+    else:
+      peaks.p_sites = peaks.sites()
+      peaks.p_heights = peaks.heights()
     i = 0
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
-    for xyz, height in zip(peaks.sites(), peaks.heights()):
+    for xyz, height in zip(peaks.p_sites, peaks.p_heights):
       if i < 3:
         a = olx.xf.uc.Closest(*xyz).split(',')
         if OV.IsEDData():
