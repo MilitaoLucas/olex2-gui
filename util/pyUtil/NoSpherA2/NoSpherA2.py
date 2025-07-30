@@ -118,7 +118,7 @@ class NoSpherA2(PT):
     self.setup_xtb_executables()
     olx.stopwatch.start("pTB exe")
     self.setup_ptb_executables()
-    if OV.GetParam('olex2.wsl_conda', 'False'):
+    if OV.GetParam('olex2.wsl_conda'):
       try:
         olx.stopwatch.start("WSL adapter")
         self.WSLAdapter = WSLAdapter()
