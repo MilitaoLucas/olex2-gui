@@ -332,7 +332,6 @@ snum{
       .type = bool
     NoSpherA2_debug = False
       .type = bool
-    gui_extras_path = "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm"
     xharpy{
       grid_spacing = 0.16
         .type = float
@@ -346,6 +345,11 @@ snum{
         .type = bool
       reload = False
         .type = bool
+    }
+    scf_sources{
+      extras_htm_path = "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm"
+        .type = str
+        .help = Location of the properties htm path
     }
   }
 }

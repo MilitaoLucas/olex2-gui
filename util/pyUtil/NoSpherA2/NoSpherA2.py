@@ -1501,7 +1501,9 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       olex.m("html.Update()")
   else:
     if input == 'occ':
-      pass
+      OV.SetParam('snum.NoSpherA2.scf_sources.extras_htm_path', '/home/lucas/PycharmProjects/PyOLXGUI/h3-refine_NoSpherA2-extras.htm')
+    else:
+      OV.SetParam('snum.NoSpherA2.scf_sources.extras_htm_path', 'BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm')
     OV.SetParam('snum.NoSpherA2.source',input)
     _ = olx.html.GetItemState('h3-NoSpherA2-extras')
     if _ == "0":
