@@ -115,6 +115,8 @@ class NoSpherA2(PT):
     self.g16_exe = self.setup_software("Gaussian16", "g16")
     olx.stopwatch.start("ORCA exe")
     self.setup_orca_executables()
+    olx.stopwatch.start("occ exe")
+    self.setup_occ_executables()
     olx.stopwatch.start("xTB exe")
     self.setup_xtb_executables()
     olx.stopwatch.start("pTB exe")
@@ -950,6 +952,20 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       self.softwares = f"{self.softwares};Get ORCA"
 
+  def setup_occ_executables(self):
+      # search PATH
+      self.occ_exe = shutil.which(
+          "occ" + (".exe" if sys.platform.startswith("win") else "")
+      )
+      if self.occ_exe and os.path.exists(self.occ_exe):
+          if "occ" not in self.softwares:
+              occ_string = "occ"
+              self.softwares = self.softwares + ";" + occ_string
+              OV.SetParam("snum.NoSpherA2.source", occ_string)
+      else:
+          self.softwares = f"{self.softwares};Get occ"
+
+
   def setup_xtb_executables(self):
     if not OV.IsDebugging():
       return
@@ -1484,6 +1500,8 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       OV.SetParam('snum.NoSpherA2.source', "Psi4")
       olex.m("html.Update()")
   else:
+    if input == 'occ':
+      pass
     OV.SetParam('snum.NoSpherA2.source',input)
     _ = olx.html.GetItemState('h3-NoSpherA2-extras')
     if _ == "0":
