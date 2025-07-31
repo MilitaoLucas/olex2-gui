@@ -1,20 +1,20 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate')
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.Calculate') -->
 <!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'XHARPy')-->
 <!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'Thakkar IAM')-->
 <!-- #ignoreif strcmp(spy.getParam('snum.NoSpherA2.source'),'SALTED')-->
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid') -->
 
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe'))
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe')) -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb') -->
 
 <!-- =======!= ELMO / discambMATTS =================== HAR NOSPHERA2 INTERFACE BEGIN == -->
 
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB')
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Quick_Buttons;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -62,7 +62,7 @@ $spy.NoSpherA2.make_quick_button_gui()
 #ignoreif -->
 
 <!-- ======= xTB SPECIFIC START ===================== -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -82,8 +82,8 @@ $-
 #ignoreif -->
 <!-- ======= xTB SPECIFIC END ===================== -->
 
-<!-- == pTB SPEICIFIC START =================== -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB')
+<!-- == pTB SPECIFIC START =================== -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -113,7 +113,7 @@ $-
     "onchange=spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))")
   $-
 </td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB') -->
 <td width='2%' align="left">
     $+
       html.Snippet("gui/snippets/input-checkbox-td",
@@ -131,7 +131,7 @@ $-
 <!-- =======!= ELMO / discambMATT=================== HAR NOSPHERA2 INTERFACE END == -->
 
 <!-- ======= = ELMO =================== HAR-ELMO NOSPHERA2 INTERFACE BEGIN == -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Options 1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -202,7 +202,7 @@ $-
 
 <!-- ======= FULL HAR SWITCH ===================== -->
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False') -->
 <td width="18%">
 <b>Max Cycles </b>
 </td>
@@ -218,7 +218,7 @@ $-
   > 
 </td>
 #ignoreif -->
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True') -->
   $+
     html.Snippet("gui/snippets/gui-link-button",
     "value='Update .tsc & .wfn'",
@@ -240,7 +240,7 @@ $-
 <td width="13%" align='left'>
     <b>Integr. Accuracy</b>
 </td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'True')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'True') -->
 <td width="16%" align="left">
   $+
     html.Snippet("gui/snippets/input-combo",
@@ -252,13 +252,14 @@ $-
   $-
 </td> 
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'False')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_SF'),'False') -->
 <td width="16%">
 N/A 
 </td>
 #ignoreif -->
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),xTB)
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB') -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb') -->
 <td width="2%" align="left">
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -275,7 +276,7 @@ N/A
 #ignoreif -->
 
 <!-- ======= xTB SPECIFIC START ===================== -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),xTB)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
 <td width="15%" align='right'>
   <b>Temp. (K) </b>
 </td>
@@ -315,7 +316,7 @@ N/A
 #ignoreif -->
 <!-- ======= xTB SPECIFIC END ===================== -->
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),xTB)
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
 <td width='1%' align='left'>
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -346,7 +347,7 @@ N/A
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <!-- ======= TONTO SPECIFIC START ===================== -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),Tonto)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'Tonto') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -390,7 +391,7 @@ N/A
 
 <!-- ======= ORCA SPECIFIC START ===================== -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),ORCA)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ORCA') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -434,7 +435,7 @@ N/A
 #ignoreif -->
 
 <!-- ========= fragHAR specific ========== -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),fragHAR)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'fragHAR') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -529,7 +530,7 @@ N/A
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-<!-- #ignoreif not spy.NoSpherA2.is_orca_new()
+<!-- #ignoreif not spy.NoSpherA2.is_orca_new() -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -571,7 +572,7 @@ $-
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_Solvation'),Custom)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_Solvation'),Custom) -->
 <tr ALIGN='left' NAME='SNUM_SOLVATION_CUSTOM' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -614,7 +615,7 @@ $-
 #ignoreif -->
 
 
-<!-- #ignoreif spy.NoSpherA2.is_disordered()
+<!-- #ignoreif spy.NoSpherA2.is_disordered() -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -640,7 +641,7 @@ $+
   "onuncheck=spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM','False') >> html.Update()"
   )
 $-
-<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM') -->
 <td width="12%" align="left">
 $+
   html.Snippet("gui/snippets/input-combo",
@@ -687,7 +688,7 @@ $-
   onchange="spy.SetParam(snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS,html.GetValue(~name~))"
 > 
 </td>
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE'),Ion)
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE'),Ion) -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
@@ -806,7 +807,7 @@ $-
 <!-- ============ END != discambMATTS ====================-->
 
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe'))
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),spy.GetParam('user.NoSpherA2.discamb_exe')) -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -823,7 +824,7 @@ $-
   $-
 </td>
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'True') -->
 <td width="18%">
 <b>Max Cycles </b>
 </td>
@@ -839,7 +840,7 @@ $-
   > 
 </td>
 #ignoreif -->
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.full_HAR'),'False') -->
 <td width="18%">
  
 </td>
@@ -878,7 +879,7 @@ $-
 
 
 
-<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<!-- #ignoreif not spy.NoSpherA2.is_disordered() -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_Grouped_Parts;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -898,7 +899,7 @@ $-
 #ignoreif -->
 
 #ignoreif -->
-<!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate')
+<!-- #ignoreif spy.GetParam('snum.NoSpherA2.Calculate') -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -909,7 +910,7 @@ No Settings available.
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid')
+<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'Hybrid') -->
 $spy.NoSpherA2.hybrid_GUI()
 #ignoreif -->
 
@@ -1004,7 +1005,7 @@ $spy.NoSpherA2.hybrid_GUI()
 
 #ignoreif -->
 
-<!-- #ignoreif not strcmp(spy.getParam('snum.NoSpherA2.source'),'XHARPy')
+<!-- #ignoreif not strcmp(spy.getParam('snum.NoSpherA2.source'),'XHARPy') -->
 <!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=xharpy_2; help_ext=xharpy_2;1; -->
  <td width="20%" align='left'>
   <b>Functional </b>
@@ -1114,6 +1115,8 @@ $spy.NoSpherA2.hybrid_GUI()
 
 </>
 <!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+#ignoreif -->
 
 #ignoreif -->
 
