@@ -238,6 +238,8 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         self.softwares = self.softwares + ";Tonto"
       print("No MPI implementation found in PATH!\nTonto, ORCA and other software relying on it will only have 1 CPU available!\n")
 
+    self.softwares += ";OCC"
+
   def tidy_wfn_jobs_folder(self):
     backup = os.path.join(self.jobs_dir, "backup")
     to_backup = self.jobs_dir
@@ -1443,6 +1445,10 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       olex.m("html.Update()")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
+    if input == "OCC":
+       OV.SetParam('snum.NoSpherA2.gui_extras_path', "/home/lucas/PycharmProjects/PyOLXGUI/h3-refine_NoSpherA2-extras.htm")
+    else:
+      OV.SetParam('snum.NoSpherA2.gui_extras_path', "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm")
     _ = olx.html.GetItemState('h3-NoSpherA2-extras')
     if _ == "0":
       OV.setItemstate("h3-NoSpherA2-extras 2")

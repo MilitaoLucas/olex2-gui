@@ -333,6 +333,7 @@ snum{
     NoSpherA2_debug = False
       .type = bool
     gui_extras_path = "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm"
+      .type = str
     xharpy{
       grid_spacing = 0.16
         .type = float
