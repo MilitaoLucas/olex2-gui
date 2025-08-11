@@ -25,6 +25,7 @@
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 "deletemenu 'Structure;Export picture (experimental)'">
       <cmd12 "spy.get_news_image_from_server('splash')'">
+        <cmd13 "ListenCmd '/tmp/olexcmd'">
     >
 
   <onterminate
