@@ -204,17 +204,16 @@ def make_fvar_table(*kwds):
 
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->"""
   footer = """<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->"""
-  filling = """<td align="left"><b>FVAR:</b></td>"""
+  filling = """<td width="10%" align="left"><b>FVAR:</b></td><td align="left">| """
   fvars = []
   try:
-    for i in range(20):
+    for i in range(1, 20):
       fvars.append(olx.xf.rm.FVar(i))
   except:
     pass
   for i, var in enumerate(fvars):
-    filling += """<td align="center"><b>""" + "%d:</b> %s </td>" % (i + 1, var)
-  
-  filling += "</b></td>"
+    filling += """<b>""" + "%d1:</b> %s </b>| " % (i + 2, round(float(var), 3))
+  filling += "</td>"
   fvar_table = header + filling + footer
   return fvar_table
 
