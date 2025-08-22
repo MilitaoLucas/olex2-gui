@@ -17,6 +17,7 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
 from Wfn_Job import is_orca_new
+import numpy as np
 
 def scrub(cmd):
   log = gui.tools.LogListen()
@@ -103,12 +104,17 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     args.append(str(mode))
   if OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'):
-    auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
-    args.append("-RI_FIT")
-    args.append(auxiliary_basis)
-    mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
-    args.append("-mem")
-    args.append(str(mem))  
+    if is_orca_new():
+      auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
+      args.append("-RI_FIT")
+      args.append(auxiliary_basis)
+      mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
+      args.append("-mem")
+      args.append(str(mem))
+    else:
+      print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
+      print("Performing refinement without RI fit!")
+      time.sleep(10)
 
   olex_refinement_model = OV.GetRefinementModel(False)
 
@@ -1128,3 +1134,36 @@ def toggle_full_HAR():
   OV.setItemstate("h3-NoSpherA2-extras 2")
   OV.setItemstate("h3-NoSpherA2-extras 1")
 OV.registerFunction(toggle_full_HAR, False, "NoSpherA2")
+
+def cov_mat():
+  with open(os.path.join(olx.FilePath(), olx.FileName()) + ".npy", "rb") as x:
+    l = x.readline()
+    if l != b"VCOV\n":
+      print("Wrong file %s" %l)
+    ann = x.readline().split()
+    nf = np.load(x)
+    header_string =""
+    for anno in ann: 
+      header_string = header_string  + str(anno.decode('UTF-8'))+ ","
+    sqrt_size = len(ann)
+    cov_array = np.zeros((sqrt_size, sqrt_size))
+    idx = 0
+    for i in range(sqrt_size):
+        for j in range(i, sqrt_size):
+            cov_array[i, j] = nf[idx]
+            cov_array[j, i] = nf[idx]
+            idx += 1
+    np.savetxt("numpy.csv", cov_array, delimiter=',')
+    corrMat = np.corrcoef(cov_array)
+    np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)  
+    
+    # After calculating corrMat
+    threshold = 0.75
+    iu_nodiag = np.triu_indices(sqrt_size, k=1)
+    strong_mask = np.abs(corrMat[iu_nodiag]) > threshold
+
+    print(f"Correlations above {threshold}:")
+    for i, j, corr in zip(iu_nodiag[0][strong_mask], iu_nodiag[1][strong_mask], corrMat[iu_nodiag][strong_mask]):
+        print(f"{ann[i].decode('utf-8')} <-> {ann[j].decode('utf-8')}: {corr:.3f}")
+
+OV.registerFunction(cov_mat, False, "NoSpherA2")
