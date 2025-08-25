@@ -323,11 +323,19 @@ class Peanut():
         print("MSDS is not running, nothing to hide")
   
   def show_diff(self, cif1 = None):
+      
+    if olx.IsFileType('CIF') == 'true' or olx.IsFileType('CIF') == 'cif' or olx.IsFileType('CIF') == 'True':
+      # If the file is a CIF, ask user to first export it to a file
+      print("Please export the CIF to a file first, then use this command again.")
+      return
     # If there is no cif given, select a file using file dialog
     if cif1 is None:
       fn = olx.FileName()
       folder = os.path.dirname(os.path.abspath(fn))
       cif1 = olx.FileOpen("Select cif to subtract", "*.cif", folder, "")
+    if cif1 == '':
+        print("No CIF file selected, cannot show difference.")
+        return
     # Read the CIF files
     cif1_data = reader(file_path=cif1).model()
     
@@ -409,13 +417,13 @@ class Peanut():
           self.old_adps.append(a.u_iso)
           anis_flags.append(False)
         if a.flags.use_u_aniso():
-          u_cif = adptbx.u_star_as_u_cart(uc, a.u_star)
-          u = u_cif
+          u_cart = adptbx.u_star_as_u_cart(uc, a.u_star)
+          u = u_cart
           if len(u) == 6:
             u = [u[0], u[1], u[2], u[3], u[4], u[5]]
             if a.is_anharmonic_adp():
               u += a.anharmonic_adp.data()
-          #u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
+
           self.old_adps.append(u.copy())
           anis_flags.append(True)
         # find the position in the ADP loop of the cif and subtract the ADPs
@@ -511,7 +519,8 @@ class Peanut():
       olx.xf.au.SetAtomU(id, *temp)
     print("-" * 23)  # Separator line
 
-    olx.xf.EndUpdate()
+    if olx.IsFileType('CIF') == 'false':
+      olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
     scale = OV.GetVar('Peanut_scale',"1.0")
@@ -539,7 +548,8 @@ class Peanut():
       olx.xf.au.SetAtomU(id, *self.old_adps[this_atom_id])
     self.old_adps = []
 
-    olx.xf.EndUpdate()
+    if olx.IsFileType('CIF') == 'false':
+      olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
     
