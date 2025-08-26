@@ -1,4 +1,5 @@
 import os
+import json
 import sys
 import olex
 import olx
@@ -22,6 +23,7 @@ import ELMO # noqa: F401
 import cubes_maps # noqa: F401
 import xharpy
 import pyscf
+BASIS_DICT = {}
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -114,6 +116,8 @@ class NoSpherA2(PT):
     self.g16_exe = self.setup_software("Gaussian16", "g16")
     olx.stopwatch.start("ORCA exe")
     self.setup_orca_executables()
+    olx.stopwatch.start("occ exe")
+    self.setup_occ_executables()
     olx.stopwatch.start("xTB exe")
     self.setup_xtb_executables()
     olx.stopwatch.start("pTB exe")
@@ -176,9 +180,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):
-        basis_list = os.listdir(self.basis_dir)
-        basis_list.sort()
-        self.basis_list_str = ';'.join(basis_list)
+        self.check_basis()
       else:
         self.basis_list_str = None
     else:
@@ -210,6 +212,55 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   #  self.one_h_linearisation = None
   #  self.reflection_date = None
 
+  def check_basis(self):
+    global BASIS_DICT
+    self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+    import json
+    if os.path.exists(self.basis_dir):
+      with open(os.path.join(self.basis_dir, "basis.json"), "r") as bf:
+        json_dict = json.load(bf)
+        od = json_dict["original"]
+        add = json_dict["added"]
+        basis_list = od["normal"] + od["relativistic"] + add["normal"] + add["relativistic"]
+      basis_list.sort()
+      BASIS_DICT = json_dict
+      self.basis_list_str = ';'.join(basis_list)
+
+  # error if status different than 200
+  def fetch_basis(self, basis_name: str, relativistic: str):
+    import basis_set_exchange as bse
+    import requests
+    print("Trying to download", basis_name)
+    print(f"Relativistic type: {type(relativistic)}, str: {relativistic}")
+    BASE_URL = "https://www.basissetexchange.org/"
+    basis_name = basis_name.upper()
+    r = requests.get(BASE_URL + f'/api/basis/{basis_name}/format/gaussian94')
+    try:
+      r.raise_for_status()
+    except:
+      olx.Alert("Error", "Failed to Download basisset from BSE", "OKE")
+      return
+    basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
+    basis = bse.convert_formatted_basis_str(r.text, "gaussian94", "tonto").replace("unknown_basis",
+                                                                                   basis_name)
+
+    with open(basis_set_fn, "w") as f:
+      f.write(basis)
+    rel_str = "relativistic" if relativistic == "true" else "normal"
+    with open(os.path.join(self.basis_dir, "basis.json"), "r") as bf:
+      json_dict = json.load(bf)
+    if basis_name not in json_dict["added"][rel_str]:
+      json_dict["added"][rel_str].append(basis_name)
+    else:
+      olx.Alert("Error", "Already installed.", "OKE")
+      return
+    with open(os.path.join(self.basis_dir, "basis.json"), "w") as bf:
+      json.dump(json_dict, bf, indent=2)
+
+    olx.Alert("Sucess!", "Finished downloading!\nNo errors!", "OKI")
+    self.check_basis()
+    olx.html.Update()
+
   def setup_har_executables(self):
     self.mpiexec = self.setup_software(None, "mpiexec")
     self.mpi_har = self.setup_software(None, "hart_mpi")
@@ -238,7 +289,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         self.softwares = self.softwares + ";Tonto"
       print("No MPI implementation found in PATH!\nTonto, ORCA and other software relying on it will only have 1 CPU available!\n")
 
-    self.softwares += ";OCC"
+    self.softwares += ";occ"
 
   def tidy_wfn_jobs_folder(self):
     backup = os.path.join(self.jobs_dir, "backup")
@@ -903,6 +954,20 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       self.softwares = f"{self.softwares};Get ORCA"
 
+  def setup_occ_executables(self):
+      # search PATH
+      self.occ_exe = shutil.which(
+          "occ" + (".exe" if sys.platform.startswith("win") else "")
+      )
+      if self.occ_exe and os.path.exists(self.occ_exe):
+          if "occ" not in self.softwares:
+              occ_string = "occ"
+              self.softwares = self.softwares + ";" + occ_string
+              OV.SetParam("snum.NoSpherA2.source", occ_string)
+      else:
+          self.softwares = f"{self.softwares};Get occ"
+
+
   def setup_xtb_executables(self):
     if not OV.IsDebugging():
       return
@@ -961,9 +1026,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def disable_relativistics(self):
     basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    if "DKH" in basis_name:
-      return False
-    if "x2c" in basis_name:
+    if basis_name in BASIS_DICT["original"]["normal"] or basis_name in BASIS_DICT["added"]["normal"]:
       return False
     else:
       return True
@@ -1308,14 +1371,9 @@ The following options were used:
 
 OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
-def change_basisset(input):
-  OV.SetParam('snum.NoSpherA2.basis_name',input)
-  if "x2c" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic', True)
-    if OV.HasGUI():
-      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
-      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
-  elif "DKH" in input:
+def change_basisset(basis_name):
+  OV.SetParam('snum.NoSpherA2.basis_name',basis_name)
+  if basis_name in BASIS_DICT["original"]["relativistic"] or basis_name in BASIS_DICT["added"]["relativistic"]:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
       olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
@@ -1445,7 +1503,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       olex.m("html.Update()")
   else:
     OV.SetParam('snum.NoSpherA2.source',input)
-    if input == "OCC":
+    if input == "occ":
        OV.SetParam('snum.NoSpherA2.gui_extras_path', "/home/lucas/PycharmProjects/PyOLXGUI/h3-refine_NoSpherA2-extras.htm")
     else:
       OV.SetParam('snum.NoSpherA2.gui_extras_path', "BaseDir()/util/pyUtil/NoSpherA2/h3-refine_NoSpherA2-extras.htm")
@@ -1626,7 +1684,7 @@ OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
-
+OV.registerFunction(NoSpherA2_instance.fetch_basis, False, 'NoSpherA2')
 def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   return t
