@@ -1,0 +1,26 @@
+{
+  "methods": [
+    "B3LYP",
+    "B3PW91",
+    "PBEH",
+    "B97",
+    "B3LYP5",
+    "PBE1PBE",
+    "PBE",
+    "PBEPBE",
+    "PBE0",
+    "SVWN",
+    "LDA",
+    "LSDA",
+    "SVWN5",
+    "BLYP",
+    "BPBE",
+    "BP86",
+    "M062X",
+    "TPSS",
+    "r2SCAN",
+    "wB97X",
+    "wB97M",
+    "wB97M-V"
+  ]
+}
