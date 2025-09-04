@@ -673,20 +673,15 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
 
         if "charge" in inputf_scf:
-            OV.SetParam('snum.NoSpherA2.charge', inputf_scf)
+            OV.SetParam('snum.NoSpherA2.charge', inputf_scf["charge"])
 
-        if "multiplicity" in inputf_scf:
-            OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["multiplicity"])
-
-    def edit_occ_input(self) -> None:
-        fdir = Path(self.full_dir)
-        olx.edit(fdir / self.input_fn)
+        if "mult" in inputf_scf:
+            OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["mult"])
 
     def write_occ_input(self, basis_name: Optional[str] = None, method: Optional[str] = None,
                         ncpus: Optional[int] = None, charge: Optional[int] = None,
                         mult: Optional[int] = None) -> None:
         fdir = Path(self.full_dir)
-        print(fdir)
         if not os.path.isdir(fdir):
             os.makedirs(fdir)
         coordinates_fn = fdir / f"{self.name}.xyz"
@@ -704,13 +699,13 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             input_dict["scf"]["method"] = OV.GetParam('snum.NoSpherA2.method')
 
         if ncpus is None:
-            input_dict["threads"] = OV.GetParam('snum.NoSpherA2.ncpus')
+            input_dict["threads"] = int(OV.GetParam('snum.NoSpherA2.ncpus'))
 
         if charge is None:
-            input_dict["scf"]["charge"] = OV.GetParam('snum.NoSpherA2.charge')
+            input_dict["scf"]["charge"] = int(OV.GetParam('snum.NoSpherA2.charge'))
 
         if mult is None:
-            input_dict["scf"]["mult"] = OV.GetParam('snum.NoSpherA2.multiplicity')
+            input_dict["scf"]["mult"] = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
 
         with open(self.input_fn, "wb") as f:
             tomli_w.dump(input_dict, f)
@@ -2103,6 +2098,7 @@ ener = cf.kernel()"""
 
             if (not experimental_SF) and ("g" not in args[0]):
                 self.convert_to_fchk()
+
     @run_with_bitmap("Converting to .fchk")
     def convert_to_fchk(self):
         move_args = []
@@ -2141,4 +2137,4 @@ ener = cf.kernel()"""
 
 @ov_register
 def test_register():
-    OV.GetUserInput(0, "test", "test")
+    OV.GetUserStyledInput(0, "test", "test", "toml")

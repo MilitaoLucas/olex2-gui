@@ -972,11 +972,18 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
             self.softwares = f"{self.softwares};Get occ"
 
     def edit_occ_input(self) -> None:
-        print("result: ", OV.GetUserInput(0, "test", "\033[92mHello \033[91mWorld\033[0m"))
         fdir =  Path(self.jobs_dir)
         wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), olx.FilePath() / fdir, "occ")
         wfn_object.write_occ_input()
-        # olx.Run(f'edit {fdir / olx.FileName()}.toml')
+        input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
+        with open(input_file_path, "r") as f:
+            occ_input_old = f.read()
+        occ_input = OV.GetUserStyledInput(0, "test", occ_input_old, "toml")
+        if occ_input is None:
+            occ_input = occ_input_old
+        with open(input_file_path, "w") as f:
+            f.write(occ_input)
+        wfn_object.update_gui_occ_parameters()
 
     def setup_xtb_executables(self):
         if not OV.IsDebugging():
