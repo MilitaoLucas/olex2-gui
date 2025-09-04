@@ -2141,4 +2141,4 @@ ener = cf.kernel()"""
 
 @ov_register
 def test_register():
-    print("It worked!")
+    OV.GetUserInput(0, "test", "test")
