@@ -162,6 +162,8 @@ class OlexCctbxAdapter(object):
         self._restraints_manager = restraints.manager(**kwds)
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
+      if self.olx_atoms.exptl.get("radiation_type", "xray") == "neutrons":
+        OV.SetParam("snum.smtbx.atomic_form_factor_table", "neutron")
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
       null_disp = table == "electron" or table == "neutron"
       sfac = self.olx_atoms.model.get('sfac')
