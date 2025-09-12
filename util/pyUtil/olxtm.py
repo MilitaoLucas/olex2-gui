@@ -53,7 +53,11 @@ class evt_reg(object):
     return evt
 
   def run(self, func, *args, **kwds):
-    evt = self.start(func.__qualname__ , scope=True)
+    if hasattr(func, "__qualname__"):
+      name = func.__qualname__
+    else:
+      name = str(func)
+    evt = self.start(name , scope=True)
     try:
       return func(*args, **kwds)
     finally:

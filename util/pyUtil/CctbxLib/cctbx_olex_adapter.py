@@ -557,7 +557,7 @@ class hooft_analysis(absolute_structure.hooft_analysis):
         "_refln_F_squared_calc is expected')
         return
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
-      if self.hklf_code == 5:
+      if self.olex2_adaptor.hklf_code == 5:
         fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
         fc = fc.common_set(fo2)
       scale = 1

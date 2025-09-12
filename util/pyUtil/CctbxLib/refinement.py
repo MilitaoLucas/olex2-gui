@@ -351,8 +351,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1_all_data = self.normal_eqns.r1_factor()
       try:
         stopwatch.run(self.check_hooft)
-      except:
+      except Exception as e:
         print("Failed to evaluate Hooft parameter")
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
       OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
       #extract SU on BASF and extinction
       stopwatch.start("Extracting scalars")
@@ -531,7 +533,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis
       try:
-        self.hooft = hooft_analysis(self)
+        self.hooft = hooft_analysis(self, use_fcf=True)
         self.hooft_str = utils.format_float_with_standard_uncertainty(
           self.hooft.hooft_y, self.hooft.sigma_y)
       except utils.Sorry as e:
@@ -1589,27 +1591,36 @@ class FullMatrixRefine(OlexCctbxAdapter):
       k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
+    #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
+    scaling_factor = 3.324943664 # scales from A-2 to eA-1
     #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
-      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
       new_data = []
-      fc_sq = self.normal_eqns.fc_sq
+      dyn_I = self.normal_eqns.fc_sq
+      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+      f_calc = f_calc.customized_copy(data=f_calc.data()/Fc2Ug)
+      fc_sq_kin = f_calc.as_amplitude_array()
       for i in range(f_obs.size()):
-        mfc = math.sqrt(fc_sq.data()[i])
+        mfc = math.sqrt(dyn_I.data()[i])
         if mfc == 0:
           s = 1
         else:
           s = abs(f_calc.data()[i])/mfc
-        new_data.append(f_obs.data()[i]*s)
+        fo = f_obs.data()[i] * s
+        new_data.append(fo)
       f_obs = f_obs.customized_copy(data=flex.double(new_data))
+      scale = flex.sum(self.normal_eqns.weights * f_obs.data() *fc_sq_kin.data()) \
+              / flex.sum(self.normal_eqns.weights * flex.pow2(fc_sq_kin.data()))
+
+      dyn_I = dyn_I.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_obs = dyn_I.f_sq_as_f()
+      f_calc = f_calc.map_to_asu().common_set(f_obs)
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
-      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664/Fc2Ug)
     else:
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
-    if OV.IsEDData() and not OV.IsEDRefinement():
-      #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
-      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
+    if OV.IsEDData():
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=scaling_factor)
     print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
