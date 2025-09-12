@@ -543,6 +543,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       OV.SetParam('snum.refinement.flack_str', flack)
 
   def get_radiation_type(self):
+    radiation_type = self.olx_atoms.exptl.get("radiation_type", "xray")
+    if radiation_type != "xray":
+      return radiation_type
     from cctbx.eltbx import wavelengths
     for x in wavelengths.characteristic_iterator():
       if abs(self.wavelength-x.as_angstrom()) < 1e-4:
