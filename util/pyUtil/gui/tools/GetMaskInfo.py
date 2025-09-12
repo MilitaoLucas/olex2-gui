@@ -179,6 +179,9 @@ def get_mask_info():
   total_void_accounted_for_electrons = 0
   total_void_no = 0
   f = get_adjust_for_base_factor()
+  content_disp_all_l = []
+  content_disp_all = "No content!"
+
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
     multi_idx = []
     electrons_accounted_for = 0
@@ -241,9 +244,9 @@ def get_mask_info():
 
     _ = content.split(",")
 
-    content_disp_l = []
-
     for entry in _:
+      content_disp_l = []
+      content_disp = "No content"
       if not entry or entry == "?":
         continue
       sum_content.append((multiplicity, entry))
@@ -262,13 +265,15 @@ def get_mask_info():
       if entity and entity != "?":
         _ = "%s %s" % (format_number(multiplicity * user_number / f), entity)
         if ent:
-          content_disp_l.append(_)
+          if entry[0] != ' ':
+            content_disp_l.append(_)
         else:
           content_disp_l.append("<font color=%s><b>%s</b></font>" % (gui.red, _))
       else:
         _ = "<font color=%s><b>%s</b></font>" % (gui.red, entity)
         content_disp_l.append(_)
-    content_disp = ", ".join(content_disp_l)
+      content_disp = ", ".join(content_disp_l)
+      content_disp_all_l.extend(content_disp_l)
 
     electrons_accounted_for = electrons_accounted_for * multiplicity
     non_h_accounted_for = non_h_accounted_for * multiplicity
@@ -329,9 +334,15 @@ def get_mask_info():
     d['volume_disp'] = volume / f
     d['e_accounted_for_raw'] = electrons_accounted_for
     t += get_template('mask_output_table_row_rp', path=template_path, force=debug) % d
+
   t += get_template('mask_output_based_on', path=template_path, force=debug) % d
 
   #-- FINAL BLOCK ###############
+
+  if content_disp_all_l:
+    content_disp_all = " and ".join([", ".join(content_disp_all_l[:-1]), content_disp_l[-1]]) if len(content_disp_all_l) > 1 else content_disp_all_l[0]
+    content_disp_all =  re.sub(r"<.*?>", "", content_disp_all)
+  d['content_disp_all'] = content_disp_all
 
   total_formula = get_rounded_formula()
   total_electrons_accounted_for = 0
@@ -886,7 +897,8 @@ def change_hklsrc_according_to_mask_prg(prg, where='internal'):
       shutil.move(src, dst)
       tidy_l = ["_sqd.hkl", "_sq.hkl"] #,  "_sqd.ins", "_sq.ins", "_pl.spf"]
       for f in tidy_l:
-        os.remove(hkl_base + f)
+        if os.path.exists(f):
+          os.remove(hkl_base + f)
     else:
       if where == "internal":
         import olexex
