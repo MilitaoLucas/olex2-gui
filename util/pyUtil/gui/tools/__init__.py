@@ -2757,7 +2757,6 @@ class PlotIt():
     self.plt.rcParams['xtick.labelsize'] = 12
     self.plt.rcParams['ytick.labelsize'] = 12
 
-
     self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
 
@@ -2777,13 +2776,19 @@ class PlotIt():
     byline = ""
     if self.plt_params.print_byline:
       byline = dd.get('byline', "")
-    gap = self.plt_params.subplot_top_gap
-
-    gap_facor = 0.05
-    if comment:
-      gap = gap - gap * 0.05
 
     n_plots = len(dd['data'])
+    if n_plots > 1:
+      gap = self.plt_params.subplot_top_gap
+      gap_facor = 0.05
+      if comment:
+        gap = gap - gap * 0.05
+    else:
+      gap = self.plt_params.subplot_top_gap
+      gap_facor = 0.05
+      if comment:
+        gap = gap - gap * 0.05
+
     stack_type = dd.get("stack_type", None)
     if stack_type:
       if stack_type == "stacked":
@@ -2802,19 +2807,22 @@ class PlotIt():
       self.fig.suptitle(f"{title}", fontsize=self.fontsizetitle_proc, fontname=self.fontname_proc, y=0.96)
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
+      self.plt.suptitle(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, y=0.96)
       axes = [axes]
-
 
     i = 0
     for series in dd['data']:
-      d =  dd['data'][series]
-      d['lim_x'] = dd.get('lim_x', 1)
       try:
-        self.get_ax(axes[0][i], **d)
+        d =  dd['data'][series]
+        d['lim_x'] = dd.get('lim_x', 1)
+        try:
+          self.get_ax(axes[0][i], **d)
+        except:
+          self.get_ax(axes[i], **d)
+        i += 1
       except:
-        self.get_ax(axes[i], **d)
-      i += 1
+        d['lim_x'] = 1
+        print("Something went wrong with lim_x")
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
     self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
@@ -2863,6 +2871,7 @@ class PlotIt():
              y_type="",
              legend=[],
              colourscheme='auto',
+             plot_type=None, 
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2873,9 +2882,6 @@ class PlotIt():
     self.plt.grid(self.plt_params.grid)
 
     ax_colour = self.plt_params.ax_colour
-
-    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
-    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
 
     if not marker:
       marker = self.plt_params.ax1.marker
@@ -2920,40 +2926,67 @@ class PlotIt():
         xs.remove(xs[item[1]['idx']])
         ys.remove(ys[item[1]['idx']])
 
-    lenx = len(xs)
-    labl = None
-    legend_handles = []
-    lw = self.plt_params.ax1.line_width
-    for x, y in zip(xs, ys):
-      label = None
-      y_list.append(y)
-      x_list.append(x)
-      colour_proc = None
-      if colours:
-        colour_proc =  get_property(colours, i)
-        if colour_proc == "default" or not colour_proc:
-          colour_proc = None
-      if use_highlight:
-        colour_proc = OV.GetParam('user.graphs.non_highlight_colour', '#dedede')
-        lw = self.plt_params.ax1.line_width
-        if lenx - i <= j:
-          colour_proc = OV.GetParam('user.graphs.highlight_colour', 'auto')
-          if colour_proc == 'auto':
+    if plot_type == "scatter":
+      x = xs[0]
+      ys =  ys[0]
+      #fig, ax = self.plt.subplots(figsize=(12, 12))
+      for i, y in enumerate(ys):
+        ax.scatter(x, y, s=2, label=f"{legend[i]}")
+        coeffs = np.polyfit(x, y, 1)
+        trend = np.poly1d(coeffs)
+        self.plt.plot(x, trend(x), linestyle="--", lw=0.5, label="_nolegend_")
+
+      ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
+      self.plt.xlabel(labels[0])
+      self.plt.ylabel(labels[1])
+      self.plt.legend()
+      
+    else:
+      lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
+      lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+      lenx = len(xs)
+      labl = None
+      legend_handles = []
+      lw = self.plt_params.ax1.line_width
+      for x, y in zip(xs, ys):
+        label = None
+        y_list.append(y)
+        x_list.append(x)
+        colour_proc = None
+        if colours:
+          colour_proc =  get_property(colours, i)
+          if colour_proc == "default" or not colour_proc:
             colour_proc = None
-          labl = repr(highlight_idx_l[lenx - i - 1][1])
-          lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
-      _, = ax.plot(x,
-              y,
-              marker=get_property(marker, i),
-              markersize=get_property(markersize, i),
-              color=colour_proc,
-              linewidth=lw,
-              linestyle=get_property(linestyle, i),
-              markerfacecolor=self.plt_params.ax1.marker_face_colour,
-              markeredgecolor=get_property(colour, i),
-              markeredgewidth=self.plt_params.ax1.marker_edge_width,
-              label=labl
-              )
+        if use_highlight:
+          colour_proc = OV.GetParam('user.graphs.non_highlight_colour', '#dedede')
+          lw = self.plt_params.ax1.line_width
+          if lenx - i <= j:
+            colour_proc = OV.GetParam('user.graphs.highlight_colour', 'auto')
+            if colour_proc == 'auto':
+              colour_proc = None
+            labl = repr(highlight_idx_l[lenx - i - 1][1])
+            lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
+        _, = ax.plot(x,
+                y,
+                marker=get_property(marker, i),
+                markersize=get_property(markersize, i),
+                color=colour_proc,
+                linewidth=lw,
+                linestyle=get_property(linestyle, i),
+                markerfacecolor=self.plt_params.ax1.marker_face_colour,
+                markeredgecolor=get_property(colour, i),
+                markeredgewidth=self.plt_params.ax1.marker_edge_width,
+                label=labl
+                )
+      try:
+        ## LAbel datapiont?
+        ax.plot.xticks(range(len(x)), y) # Redefining x-axis labels
+        for i, v in enumerate(y):
+          ax.text(i, v+25, "%d" %v, ha="center")
+      except:
+        pass
+        
+
       if j and lenx - i <= j:
         legend_handles.append(_)
       i += 1
@@ -2990,7 +3023,9 @@ class PlotIt():
         # Adjust for margin if necessary
         data_min -= margin * (data_max - data_min)
         data_max += margin * (data_max - data_min)
-        self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+        _ = data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min)
+        if _[0] != _[1]:
+          self.plt.xlim(_)
 
     if legend_handles:
       ax.legend(handles=legend_handles, loc='upper right', ncol=1)
