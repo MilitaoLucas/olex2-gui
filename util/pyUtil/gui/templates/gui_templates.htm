@@ -186,7 +186,7 @@ t:R_factor_display{
 
     <td align='right'>
       <font size='%(font_size_R1)s' color='%(font_colour_R1)s'>
-
+        <b>
         <input
           type='button'
           align='right'
@@ -194,9 +194,13 @@ t:R_factor_display{
           name='R1_GUI'
           weight='bold'
           height='38'
+          flat="#flat"
           value='%(R1)s%%'
           onclick='spy.make_reflection_graph(gui_fobs_fcalc)'
+          border='#ffffff
+          custom="GetVar(R1_button)"
         >
+        </b>
         <!--<b>%(R1)s</b>-->
       </font>
         <!--$spy.MakeHoverButton('tiny-%%','spy.make_reflection_graph(gui_fobs_fcalc)')-->

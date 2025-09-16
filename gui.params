@@ -158,6 +158,10 @@ gui
       .type = int
     button.border.lightness = 120
       .type = int
+    R1.border.lightness = 220
+      .type = int
+    R1.highlight.lightness = 20
+      .type = int
     link_type = 'gui-link-button'
       .type = str
     default_link = 'gui/snippets/gui-link-button'

@@ -800,8 +800,8 @@
 <default help="Change the style to default"
   <body
     <cmd
-      <cmd1 "load style basedir()/etc/styles/default.glds">
-      <cmd2 "load scene basedir()/etc/styles/default.glps">
+      <cmd1 "load style basedir()/etc/styles/light_g.glds">
+      <cmd2 "load scene basedir()/etc/styles/light_g.glps">
       <cmd3 "spy.SetParam(user.bonds.bzoom,80)">
       <cmd3 "spy.SetParam(user.bonds.mask,48)">
       <cmd3 "spy.SetParam(user.bonds.colour,elements)">
@@ -1543,6 +1543,17 @@
     <args>
     <cmd
       <cmd1 "UpdateAfix BaseDir()/etc/neutron.dist app.SharedDir()/etc/neutron.dist">
+>>>
+
+<hch help="hide carbon hydrogen atoms"
+  <body
+    <args
+	>
+    <cmd
+      <cmd1 "sel bonds where bond.b.bai.z==1 && bond.a.bai.z==6">
+      <cmd2 "sel bond atoms">
+      <cmd3 "sel -u $*,H">
+      <cmd4 "detach">
 >>>
 
 <user_onstartup help="dummy definition" <body > >
