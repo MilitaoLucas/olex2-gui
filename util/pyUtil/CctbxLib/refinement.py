@@ -525,6 +525,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def check_hooft(self):
     #this will fail!
     if OV.IsEDData():
+      # just an idea - needs to be thought through as both hands ae needed!
+      # from smtbx import absolute_structure
+      # cs = crystal.symmetry(self.normal_eqns.fc_sq.crystal_symmetry().unit_cell(), "P1")
+      # fc_sq = self.normal_eqns.fc_sq.customized_copy(crystal_symmetry=cs)
+      # fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(crystal_symmetry=cs)
+      # fc = fc_sq.f_sq_as_f().phase_transfer(flex.double(fc_sq.size(), 0))
+      # self.hooft = absolute_structure.hooft_analysis(
+      #    fo_sq, fc, probability_plot_slope=None, scale_factor=self.normal_eqns.scale_factor())
+      # self.hooft_str = utils.format_float_with_standard_uncertainty(
+      #   self.hooft.hooft_y, self.hooft.sigma_y)
       print("Skipping Hooft parameter evaluation for ED data")
       return
     if self.hooft:
@@ -1598,27 +1608,33 @@ class FullMatrixRefine(OlexCctbxAdapter):
     scaling_factor = 3.324943664 # scales from A-2 to eA-1
     #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
-      new_data = []
-      dyn_I = self.normal_eqns.fc_sq
-      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
-      f_calc = f_calc.customized_copy(data=f_calc.data()/Fc2Ug)
-      fc_sq_kin = f_calc.as_amplitude_array()
-      for i in range(f_obs.size()):
-        mfc = math.sqrt(dyn_I.data()[i])
-        if mfc == 0:
-          s = 1
-        else:
-          s = abs(f_calc.data()[i])/mfc
-        fo = f_obs.data()[i] * s
-        new_data.append(fo)
-      f_obs = f_obs.customized_copy(data=flex.double(new_data))
-      scale = flex.sum(self.normal_eqns.weights * f_obs.data() *fc_sq_kin.data()) \
-              / flex.sum(self.normal_eqns.weights * flex.pow2(fc_sq_kin.data()))
-
-      dyn_I = dyn_I.merge_equivalents(algorithm="shelx").array().map_to_asu()
-      f_obs = dyn_I.f_sq_as_f()
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_obs = fo2.f_sq_as_f()
+      # scale Fc back from Ug
       f_calc = f_calc.map_to_asu().common_set(f_obs)
-      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+      f_calc =  f_calc.customized_copy(data=f_calc.data()/OV.GetACI().EDI.get_Fc2Ug())
+      f_calc_sq = f_calc.as_intensity_array()
+
+      if OV.GetParam("snum.refinement.use_dynI_in_diffmap"):
+        new_data = []
+        #merge the dynamic intensities and match to f_obs
+        dyn_I = self.normal_eqns.fc_sq.merge_equivalents(algorithm="shelx")\
+          .array().map_to_asu().common_set(f_obs)
+        for i in range(f_obs.size()):
+          mfc = math.sqrt(dyn_I.data()[i])
+          if mfc == 0:
+            s = 1
+          else:
+            s = abs(f_calc.data()[i])/mfc
+          fo = f_obs.data()[i] * s
+          new_data.append(fo)
+        f_obs = f_obs.customized_copy(data=flex.double(new_data))
+        fo2 = f_obs.as_intensity_array()
+
+      weights = self.compute_weights(fo2, f_calc, reset_scale_factor=True)
+      scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
+              / flex.sum(weights * flex.pow2(f_calc_sq.data()))
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
     else:
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 

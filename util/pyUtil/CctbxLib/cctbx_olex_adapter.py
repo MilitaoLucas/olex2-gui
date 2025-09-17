@@ -394,15 +394,17 @@ class OlexCctbxAdapter(object):
       params[param] = value
     return least_squares.mainstream_shelx_weighting(**params)
 
-  def compute_weights(self, fo2, fc):
+  def compute_weights(self, fo2, fc, reset_scale_factor=False):
     weight = self.olx_atoms.model['weight']
     params = [0.1, 0, 0, 0, 0, 1./3]
     for i, v in enumerate(weight):
       params[i] = v
     weighting = xray.weighting_schemes.shelx_weighting(*params,
       wavelength=self.wavelength)
-    #scale_factor = fo2.scale_factor(fc)
-    scale_factor = OV.GetOSF()
+    if reset_scale_factor:
+      scale_factor = fo2.scale_factor(fc)
+    else:
+      scale_factor = OV.GetOSF()
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights
