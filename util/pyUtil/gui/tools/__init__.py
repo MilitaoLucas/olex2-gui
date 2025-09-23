@@ -2736,7 +2736,6 @@ def get_news_image_src():
 olex.registerFunction(get_news_image_src, False, "gui.tools")
 
 
-
 class PlotIt():
   def __init__(self):
     self.plt_params = OV.GetParam('user.graphs.matplotlib')
@@ -2822,7 +2821,6 @@ class PlotIt():
         i += 1
       except:
         d['lim_x'] = 1
-        print("Something went wrong with lim_x")
 
     self.plt.tight_layout(rect=[0, 0, 1, gap])
     self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
@@ -2861,17 +2859,22 @@ class PlotIt():
              terms=None,
              use_highlight=[],
              lim_x=False,
+             lim_y=False,
+             xlim=False, 
+             ylim=False, 
              marker=None,
              markersize=None,
              linestyle=None,
              ylabel="",
+             series={}, 
              labels=[],
              colours=[],
              x_type="",
              y_type="",
              legend=[],
              colourscheme='auto',
-             plot_type=None, 
+             plot_type=None,
+             **kwargs
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2931,12 +2934,18 @@ class PlotIt():
       ys =  ys[0]
       #fig, ax = self.plt.subplots(figsize=(12, 12))
       for i, y in enumerate(ys):
-        ax.scatter(x, y, s=2, label=f"{legend[i]}")
+        ax.scatter(x, y, s=markersize, label=f"{legend[i]}")
         coeffs = np.polyfit(x, y, 1)
         trend = np.poly1d(coeffs)
         self.plt.plot(x, trend(x), linestyle="--", lw=0.5, label="_nolegend_")
 
       ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
+      
+      if xlim:
+        ax.set_xlim(0, xlim)
+      if ylim:
+        ax.set_ylim(0, ylim)
+      
       self.plt.xlabel(labels[0])
       self.plt.ylabel(labels[1])
       self.plt.legend()
