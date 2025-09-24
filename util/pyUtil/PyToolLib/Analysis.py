@@ -4175,20 +4175,23 @@ class HealthOfStructure():
           value = value[0]
       elif self.scope == "refinement":
         if item == "hooft_str":
-          hooft_src = "Flack"
-          if item == 'hooft_str':
-            try:
-              value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
-              value = olx.Cif('_refine_ls_abs_structure_Flack')
-              _ = olx.Cif('_refine_ls_abs_structure_details')
-
-              if "parsons" in _.lower():
-                hooft_src = "Parsons"
-              elif "hooft" in _.lower():
-                hooft_src = "Hooft"
-              OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
-            except:
-              value = OV.GetParam('snum.refinement.%s' %item)
+          if OV.IsEDData():
+            OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), ".")
+          else:
+            hooft_src = "Flack"
+            if item == 'hooft_str':
+              try:
+                value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
+                value = olx.Cif('_refine_ls_abs_structure_Flack')
+                _ = olx.Cif('_refine_ls_abs_structure_details')
+  
+                if "parsons" in _.lower():
+                  hooft_src = "Parsons"
+                elif "hooft" in _.lower():
+                  hooft_src = "Hooft"
+                OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
+              except:
+                value = OV.GetParam('snum.refinement.%s' %item)
 
         if self.is_CIF:
           try:
@@ -4234,46 +4237,49 @@ class HealthOfStructure():
       bg_colour = None
       flack_esd_f = 0
       if item == "hooft_str":
-        if "(" not in str(value):
-          value = str(value) + "()"
-        flack_val = value.split("(")[0]
-        flack_esd = value.split("(")[1].strip(")")
-
-        if len(flack_val.strip("-")) == 1:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("%s" %flack_esd)
-
-        if len(flack_val.strip("-")) == 3:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
-
-        elif len(flack_val.strip("-")) == 4:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.0%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("0.%s" %flack_esd)
-
-        elif len(flack_val.strip("-")) == 5:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.00%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("0.0%s" %flack_esd)
-
-        bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
-
-        if len(flack_esd) == 1:
-          _ = 0.75
+        if OV.IsEDData():
+          bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
         else:
-          _ = 0.63
-
-        if len(flack_esd) == 0:
-          bg_val = "#000000"
-          bg_esd = "#000000"
-        else:
-          bg_val = self.get_bg_colour('flack_val', flack_val)
-        bg_colour = (bg_val,_,bg_esd)
+          if "(" not in str(value):
+            value = str(value) + "()"
+          flack_val = value.split("(")[0]
+          flack_esd = value.split("(")[1].strip(")")
+  
+          if len(flack_val.strip("-")) == 1:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("%s" %flack_esd)
+  
+          if len(flack_val.strip("-")) == 3:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
+  
+          elif len(flack_val.strip("-")) == 4:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.0%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("0.%s" %flack_esd)
+  
+          elif len(flack_val.strip("-")) == 5:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.00%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("0.0%s" %flack_esd)
+  
+          bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
+  
+          if len(flack_esd) == 1:
+            _ = 0.75
+          else:
+            _ = 0.63
+  
+          if len(flack_esd) == 0:
+            bg_val = "#000000"
+            bg_esd = "#000000"
+          else:
+            bg_val = self.get_bg_colour('flack_val', flack_val)
+          bg_colour = (bg_val,_,bg_esd)
 
 
       if not bg_colour:
@@ -4444,13 +4450,15 @@ class HealthOfStructure():
 
     top = OV.get_diag('hkl.%s.top' %item)
 
-
     if item == "hooft_str":
-      x = boxWidth * second_colour_begin
-      box = (x,0,boxWidth,boxHeight)
-      fill = second_colour
-      draw.rectangle(box, fill=fill)
-      value_display = value_display.replace("0.",".")
+      if OV.IsEDData():
+        value_display = "ED"
+      else:
+        x = boxWidth * second_colour_begin
+        box = (x,0,boxWidth,boxHeight)
+        fill = second_colour
+        draw.rectangle(box, fill=fill)
+        value_display = value_display.replace("0.",".")
 
     if item == "Completeness":
       laue_name = 'Completeness_laue_full'
