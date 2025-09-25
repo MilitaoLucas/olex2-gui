@@ -2932,12 +2932,17 @@ class PlotIt():
     if plot_type == "scatter":
       x = xs[0]
       ys =  ys[0]
+      polyfit = kwargs.get('polyfit', 2)
       #fig, ax = self.plt.subplots(figsize=(12, 12))
+      
       for i, y in enumerate(ys):
         ax.scatter(x, y, s=markersize, label=f"{legend[i]}")
-        coeffs = np.polyfit(x, y, 1)
+        coeffs = np.polyfit(x, y, polyfit)
         trend = np.poly1d(coeffs)
-        self.plt.plot(x, trend(x), linestyle="--", lw=0.5, label="_nolegend_")
+      
+        # Make a smooth set of x values for the trendline
+        x_fit = np.linspace(min(x), max(x), 200)
+        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=0.5, label="_nolegend_")      
 
       ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
       
