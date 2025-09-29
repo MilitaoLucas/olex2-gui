@@ -70,6 +70,14 @@ snum{
       tail = False
         .type = bool
     }
+    occ{
+    	method = ""
+    		.type = str
+    	solvent = "Vaccum"
+    		.type = str
+    	solvation = False
+    		.type = bool
+    }
     fchk_file = ""
       .type = str
     file = ""

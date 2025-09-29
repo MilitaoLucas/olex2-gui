@@ -1696,11 +1696,18 @@ H  5.3388863094 8.1423113280 6.6742541538
 
 @ov_register
 def get_occ_methods() -> str:
-    from pathlib import Path
     occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_methods.json"
     with open(occ_path) as f:
         mdict = json.load(f)
     return ";".join(mdict["methods"])
+
+@ov_register
+def get_occ_solvents() -> str:
+    occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_solvents.json"
+    with open(occ_path) as f:
+        solvl = json.load(f)
+    return ";".join(solvl)
+
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
