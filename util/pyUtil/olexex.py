@@ -227,6 +227,7 @@ class OlexRefinementModel(object):
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
           'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
 
+  adp_constraints = set(('eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'))
 
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
@@ -244,7 +245,6 @@ class OlexRefinementModel(object):
           else:
             nl = "%s_%s" %(atom['label'], residue['number'])
           atom['label'] = nl
-        element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
     vars = olex_refinement_model['variables']['variables']
     if len(vars) > 0:
@@ -329,8 +329,9 @@ class OlexRefinementModel(object):
     from cctbx import sgtbx
     from smtbx.refinement.constraints import adp, site
     redundant_adp = {}
-    fixed_adp = []
+    fixed_adp = [] # fixed or constrained
     fixed_xyz = []
+    adp_atoms = set()
     for i, a in enumerate(self._atoms):
       behaviour_of_variable = [True]*12
       fixed_vars = self._fixed_variables.get(i)
@@ -341,6 +342,17 @@ class OlexRefinementModel(object):
         fixed_xyz.append(i)
       if not all(behaviour_of_variable[-6:]):
         fixed_adp.append(i)
+      if a.get('adp') != None:
+        adp_atoms.add(i)
+
+    for adp_constraint in (self.adp_constraints):
+      for constraint in self.model[adp_constraint]:
+        if adp_constraint.startswith('olex2'):
+          fixed_adp.append(constraint[0])
+          fixed_adp.append(constraint[1])
+        else:
+          for i in constraint['atoms']:
+            fixed_adp.append(i[1])
 
     if shared_parameters: # filter out shared ADP
       for sp in shared_parameters:
@@ -358,16 +370,16 @@ class OlexRefinementModel(object):
       filtered_restraints = []
       for restraint in restraints:
         restraint_type = self.restraint_types[shelxl_restraint]
-        if self.is_adp_restraint(shelxl_restraint):
+        if self.is_adp_restraint(restraint_type):
           i_seqs = [i[0] for i in restraint['atoms']]
           if not i_seqs:
             if restrained_set:
-              i_seqs = set(range(1, len(self._atoms))) - restrained_set - set(fixed_adp)
+              i_seqs = adp_atoms - restrained_set - set(fixed_adp)
               if not i_seqs:
                 continue
               restraint['atoms'] = [(x, None) for x in i_seqs]
             elif fixed_adp:
-              all_atoms = set(range(1, len(self._atoms))) - set(fixed_adp)
+              all_atoms = adp_atoms - set(fixed_adp)
               if not all_atoms:
                 continue
               restraint['atoms'] = [(x, None) for x in all_atoms]
@@ -576,8 +588,6 @@ class OlexRefinementModel(object):
 
 
   def constraints_iterator(self):
-    from libtbx.utils import flat_list
-    from cctbx import sgtbx
     for shelxl_constraint in (self.constraint_types):
       for constraint in self.model[shelxl_constraint]:
         constraint_type = self.constraint_types.get(shelxl_constraint)
