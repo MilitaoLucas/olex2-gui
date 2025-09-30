@@ -1859,7 +1859,7 @@ def debugInEclipse():
     print("Failed to attach the debugger")
 OV.registerFunction(debugInEclipse)
 
-def pip(package):
+def pip(package:str):
   import sys
   sys.stdout.isatty = lambda: False
   sys.stdout.encoding = sys.getdefaultencoding()

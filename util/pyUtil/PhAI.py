@@ -331,7 +331,7 @@ def create_solution_map(cycles = 1, resolution = 0.2, max_peaks=15):
       peak_search_level=1,
       peak_cutoff=0.5,
       interpolate=True,
-      min_distance_sym_equiv=resolution,
+      min_distance_sym_equiv=float(resolution),
       general_positions_only=False,
       min_cross_distance=guess.d_min()/2,
       max_clusters=max_peaks),
