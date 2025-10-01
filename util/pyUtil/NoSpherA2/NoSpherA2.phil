@@ -12,6 +12,10 @@ snum{
       .type = str
     basis_name = "def2-SVP"
       .type = str
+    basis_adv = False
+      .type = bool
+    basis_adv_string = ""
+      .type = str
     becke_accuracy = "Normal"
       .type = str
     Calculate = True

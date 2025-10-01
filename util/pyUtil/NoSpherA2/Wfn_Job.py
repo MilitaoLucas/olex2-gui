@@ -6,6 +6,8 @@ import gui
 import shutil
 import time
 import textwrap
+import basis_set_api
+BSE = basis_set_api.GetBSEThread()                    
 
 import subprocess
 
@@ -26,6 +28,25 @@ OV.registerFunction(is_orca_new, False, "NoSpherA2")
 class wfn_Job(object):
   """This class is used to create a job for a specific wavefunction software."""
   def __init__(self, parent, name, _dir, software=None):
+    self.ELEMENTS = {
+  1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O", 9: "F", 10: "Ne",
+  11: "Na", 12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar",
+  19: "K", 20: "Ca", 21: "Sc", 22: "Ti", 23: "V", 24: "Cr", 25: "Mn", 26: "Fe",
+  27: "Co", 28: "Ni", 29: "Cu", 30: "Zn", 31: "Ga", 32: "Ge", 33: "As", 34: "Se",
+  35: "Br", 36: "Kr", 37: "Rb", 38: "Sr", 39: "Y", 40: "Zr", 41: "Nb", 42: "Mo",
+  43: "Tc", 44: "Ru", 45: "Rh", 46: "Pd", 47: "Ag", 48: "Cd", 49: "In", 50: "Sn",
+  51: "Sb", 52: "Te", 53: "I", 54: "Xe", 55: "Cs", 56: "Ba", 57: "La", 58: "Ce",
+  59: "Pr", 60: "Nd", 61: "Pm", 62: "Sm", 63: "Eu", 64: "Gd", 65: "Tb", 66: "Dy",
+  67: "Ho", 68: "Er", 69: "Tm", 70: "Yb", 71: "Lu", 72: "Hf", 73: "Ta", 74: "W",
+  75: "Re", 76: "Os", 77: "Ir", 78: "Pt", 79: "Au", 80: "Hg", 81: "Tl", 82: "Pb",
+  83: "Bi", 84: "Po", 85: "At", 86: "Rn", 87: "Fr", 88: "Ra", 89: "Ac", 90: "Th",
+  91: "Pa", 92: "U", 93: "Np", 94: "Pu", 95: "Am", 96: "Cm", 97: "Bk", 98: "Cf",
+  99: "Es", 100: "Fm", 101: "Md", 102: "No", 103: "Lr", 104: "Rf", 105: "Db",
+  106: "Sg", 107: "Bh", 108: "Hs", 109: "Mt", 110: "Ds", 111: "Rg", 112: "Cn",
+  113: "Nh", 114: "Fl", 115: "Mc", 116: "Lv", 117: "Ts", 118: "Og"
+}
+
+    self.ELEMENTS_BY_SYMBOL = {symbol: z for z, symbol in self.ELEMENTS.items()}                 
     self.parent = parent
     self.name = name
     full_dir = '.'
@@ -783,6 +804,48 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
+      if OV.GetParam("snum.NoSpherA2.basis_adv"):
+        import re
+        try:
+            gto = OV.GetParam("snum.NoSpherA2.basis_adv_string")
+
+            # Split input string on any of these separators: , ; : . or whitespace
+            tokens = re.split(r"[,\.;:\s]+", gto.strip())
+            # Remove empty entries
+            tokens = [t for t in tokens if t]
+            print("Tokens:", tokens)
+
+            # Expect pairs: Element Basis Element Basis ...
+            if len(tokens) % 2 != 0:
+                raise ValueError("Basis specification must be given as pairs: 'Element Basis'.")
+
+            for i in range(0, len(tokens), 2):
+                el_token, basis_BSE = tokens[i], tokens[i+1]
+                print("Element token / basis:", el_token, basis_BSE)
+
+                # Normalize element token -> atomic number
+                try:
+                    Z = int(el_token)
+                except ValueError:
+                    Z = int(self.ELEMENTS_BY_SYMBOL[el_token])
+
+                # Fetch basis from BSE
+                gtoinp = BSE.get_BSE_Z_basis_source(Z, basis_BSE)
+                print("BSE input for Z =", Z, ":", gtoinp)
+
+                # Write to input
+                for line in gtoinp:
+                    inp.write(line)
+                inp.write("\n")
+
+                # Remove from atom list
+                elem_symbol = self.ELEMENTS[Z]
+                if elem_symbol in atom_list:
+                    atom_list.remove(elem_symbol)
+                    print(f"Removed {elem_symbol} from list, remaining: {atom_list}")
+
+        except Exception as error:
+            print("Error parsing basis string:", error)                   
       for i in range(0, len(atom_list)):
         atom_type = "newgto " + atom_list[i] + '\n'
         inp.write(atom_type)
@@ -791,7 +854,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         while True:
           line = basis.readline()
           if not line:
-            raise RecursionError("Atom not found in the basis set!")
+            raise RecursionError(f"Atom {atom_type} not found in the basis set!")
           if line == '':
             continue
           if line[0] == "!":

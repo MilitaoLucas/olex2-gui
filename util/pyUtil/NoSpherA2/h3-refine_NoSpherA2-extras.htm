@@ -40,7 +40,21 @@ $spy.NoSpherA2.make_quick_button_gui()
   $-
   </td>
 
-<td width="22%" align='right'>
+<td width="2%" align='left'>
+    <b>Adv. </b>
+</td>
+<td width="1%"align="left">
+    $+
+      html.Snippet("gui/snippets/input-checkbox-td",
+      "name=NoSpherA2_ORCA_Relativistics@refine",
+      "bgcolor=GetVar(HtmlTableFirstcolColour)",
+      "checked=spy.GetParam('snum.NoSpherA2.basis_adv')",
+      "oncheck=spy.SetParam('snum.NoSpherA2.basis_adv','True')>> html.Update()",
+      "onuncheck=spy.SetParam('snum.NoSpherA2.basis_adv','False')>> html.Update()"
+      )
+    $-
+</td> 
+<td width="13%" align="left">			 
   <b>Method</b>
 </td>
 <td width="28%">
@@ -104,7 +118,7 @@ $-
 <td width="10%" align='right'>
   <b>Mem(Gb) </b>
 </td>
-<td width="20%" align='center'>
+<td width="15%" align='center'>
   $+
     html.Snippet("gui/snippets/input-text",
     "name=NoSpherA2_mem",
@@ -125,7 +139,34 @@ $-
       )
     $-
   </td>
-#ignoreif -->  
+#ignoreif -->
+
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'pTB') -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xTB') -->
+<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'xHARPY') -->
+<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.basis_adv')
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'></tr>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Advanced_Basis';help_ext=AdvBasis;1 -->
+<td width='40%'>
+  <b>%Advanced Basis Input:%:</b>
+</td>
+
+<td width='40%' align='left'>
+  $+
+  html.Snippet("gui/snippets/input-text",
+  "name=basis_adv_string",
+  "width=100%",
+  "value=spy.GetParam('snum.NoSpherA2.basis_adv_string')",
+  "onchange=spy.SetParam('snum.NoSpherA2.basis_adv_string', html.GetValue('~name~'))")
+  $-
+</td>	
+</tr>
+#ignoreif -->
+#ignoreif -->
+#ignoreif -->
+#ignoreif -->
+
 #ignoreif -->
 <!-- =======!= ELMO / discambMATT=================== HAR NOSPHERA2 INTERFACE END == -->
 

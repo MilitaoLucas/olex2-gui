@@ -950,7 +950,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         max_Z = sc.electron_count()
     final_string = ""
     for basis in BL:
-      if self.check_for_atom_in_basis_set(basis, XRS, elements):
+      if OV.GetParam("snum.NoSpherA2.basis_adv"): 
+        final_string += basis + ";"                                                                                                                                                                                       
+      elif self.check_for_atom_in_basis_set(basis, XRS, elements):
         final_string += basis + ";"
     if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0" or source == "ORCA 6.1":
       if max_Z <= 86 and max_Z > 36:
@@ -1336,7 +1338,7 @@ def get_functional_list(wfn_code=None):
   elif wfn_code == "ORCA 5.0" or wfn_code == "fragHAR":
     list = "HF;BP;BP86;PWLDA;r2SCAN;B3PW91;TPSS;PBE;PBE0;M062X;B3LYP;BLYP;wB97;wB97X;wB97X-V;DSD-BLYP"
   elif wfn_code == "ORCA 6.0" or wfn_code == "ORCA 6.1":
-    list = "HF;BP;PWLDA;r2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
+    list = "HF;BP;BP86;PWLDA;r2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
   elif wfn_code == "XHARPy":
