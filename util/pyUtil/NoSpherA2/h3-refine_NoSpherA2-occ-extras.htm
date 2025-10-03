@@ -4,7 +4,7 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Quick_Buttons;1 -->
   <td colspan="#colspan">
     <table Xbgcolor="#ffaaaa" border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr Xbgcolor="#ffffaa">
+      <tr Xbgcolor="#ffffaa" bgcolor="$GetVar(HtmlTableGroupBgColour)">
         <td align="left" width="100">
           <table cellpadding="0" cellspacing="2" width="100%">
             <tr>
@@ -20,7 +20,7 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_1;1 -->
   <td colspan="#colspan">
     <table Xbgcolor="#ffaaaa" border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr Xbgcolor="#ffffaa">
+      <tr Xbgcolor="#ffffaa" bgcolor="$GetVar(HtmlTableGroupBgColour)">
         <td align="left" width="100">
           <table cellpadding="0" cellspacing="2">
             <tr>
@@ -71,7 +71,7 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_2;1 -->
   <td colspan="#colspan">
     <table Xbgcolor="#ffaaaa" border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr Xbgcolor="#ffffaa">
+      <tr Xbgcolor="#ffffaa" bgcolor="$GetVar(HtmlTableGroupBgColour)">
         <td align="left" width="100">
           <table cellpadding="0" cellspacing="2" width="100%">
             <tr>
@@ -121,7 +121,7 @@
                         <td valign="middle" width="100%">
                           <b>Max Cycles</b>
                           <font size="$GetVar('HtmlFontSizeControls')" valign="middle">
-                            <input bgcolor="spy.GetParam(gui.html.input_bg_colour)" custom="arrow_width: -10" disabled="false" fgcolor="GetVar(HtmlFontColour)" height="GetVar('HtmlComboHeight')" hidden="hidden" manage="false" max="1000" min="1" name="SET_SNUM_MULTIPLICITY" onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))" onchangealways="false" readonly="false" setdefault="false" type="spin" valign="center" value="$spy.GetParam(snum.NoSpherA2.multiplicity)" width="100%">
+                            <input bgcolor="spy.GetParam(gui.html.input_bg_colour)" custom="arrow_width: -10" disabled="false" fgcolor="GetVar(HtmlFontColour)" height="GetVar('HtmlComboHeight')" hidden="hidden" manage="false" max="1000" min="1" name="SET_SNUM_MAX_HAR" onchange="spy.SetParam(snum.NoSpherA2.Max_HAR_Cycles,html.GetValue(~name~))" onchangealways="false" readonly="false" setdefault="false" type="spin" valign="center" value="$spy.GetParam(snum.NoSpherA2.Max_HAR_Cycles)" width="100%">
                           </font>
                         </td>
                       </tr>
@@ -152,11 +152,54 @@
     </table>
   </td>
 </tr>
+<tr ALIGN="left" NAME="line4" width="100%">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_3;1 -->
+  <td colspan="#colspan">
+    <table Xbgcolor="#ffaaaa" border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr Xbgcolor="#ffffaa" bgcolor="$GetVar(HtmlTableGroupBgColour)">
+        <td align="left" width="100">
+          <table cellpadding="0" cellspacing="2" width="100%">
+            <tr>
+              <td align="center" width="50%">
+                <table cellpadding="2" cellspacing="0">
+                  <tr valign="middle">
+                    <td valign="middle">
+                      <font size="$GetVar('HtmlFontSizeControls')" valign="middle">
+                        <input bgcolor="GetVar(HtmlTableFirstcolColour)" checked="spy.GetParam('snum.NoSpherA2.h_aniso')" fgcolor="GetVar(HtmlFontColour)" height="20" name="H_Aniso" oncheck="spy.SetParam('snum.NoSpherA2.h_aniso','True')" onuncheck="spy.SetParam('snum.NoSpherA2.h_aniso','False')" type="checkbox" valign="middle">
+                      </font>
+                    </td>
+                    <td align="left" valign="middle">
+                      <b>H Aniso</b>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td align="center" width="50%">
+                <table cellpadding="2" cellspacing="0">
+                  <tr valign="middle">
+                    <td valign="middle">
+                      <font size="$GetVar('HtmlFontSizeControls')" valign="middle">
+                        <input bgcolor="GetVar(HtmlTableFirstcolColour)" checked="spy.GetParam('snum.NoSpherA2.h_afix')" fgcolor="GetVar(HtmlFontColour)" height="20" name="H_Afix 0" oncheck="spy.SetParam('snum.NoSpherA2.h_afix','True')" onuncheck="spy.SetParam('snum.NoSpherA2.h_afix','False')" type="checkbox" valign="middle">
+                      </font>
+                    </td>
+                    <td align="left" valign="middle">
+                      <b>No Afix</b>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
 <tr ALIGN="left" NAME="line5" width="100%">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=#help_ext;1 -->
   <td colspan="#colspan">
     <table Xbgcolor="#ffaaaa" border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr Xbgcolor="#ffffaa">
+      <tr Xbgcolor="#ffffaa" bgcolor="$GetVar(HtmlTableGroupBgColour)">
         <td align="left" width="100">
           <table cellpadding="0" cellspacing="2" width="100%">
             <tr>

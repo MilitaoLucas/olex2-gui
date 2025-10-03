@@ -1,20 +1,32 @@
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
-<tr align="left" name="NAME" width="100%">
-    <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2-Properties-Details;1; -->
- <td colspan="2">
-  <table border="0" cellpadding="0" cellspacing="0" width="100%" xbgcolor="#ffaaaa">
-   <tr xbgcolor="#ffffaa">
-    <tr bgcolor="$GetVar(HtmlTableGroupBgColour)">
-     $+
-    html.Snippet(
-        "gui/snippets/input-text",
-        "name=NoSpherA2_mem",
-        "value=spy.GetParam('snum.NoSpherA2.mem')",
-        "onchange=spy.SetParam('snum.NoSpherA2.mem',html.GetValue('~name~'))",
-    )
-$-
-    </tr>
-   </tr>
-  </table>
- </td>
+<!-- #include tool-h3 gui/blocks/tool-h3.htm;colspan=1;image=#image;1 -->
+<tr align="center" name="SNUM_REFINEMENT_NSFF">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Add_Basissets_1;1 -->
+<!-- #include row-table-on gui\blocks\row_table_on.htm;width=100;colspan=#colspan;1 -->
+ <div width="100%">
+  <tr>
+   <td width="100%" valign="middle">
+    <input bgcolor="GetVar('HtmlInputBgColour')" disabled="false" fgcolor="GetVar(HtmlFontColour)" height="GetVar('HtmlInputHeight')" label="Basis Name: " manage="false" multiline="false" name="NoSpherA2_add_basis" onchange="spy.SetParam('snum.NoSpherA2.basis_name',html.GetValue('~name~'))" onleave="" onreturn="" password="false" type="text" valign="center" value="spy.GetParam('snum.NoSpherA2.basis_name')" width="100%"/>
+   </td>
+   <td align="center" valign="bottom" width="100%">
+    <table cellpadding="1px" cellspacing="0">
+     <tr>
+      <td valign="middle">
+       <font size="$GetVar('HtmlFontSizeControls')">
+        <input bgcolor="GetVar(HtmlTableBgColour)" fgcolor="GetVar(HtmlFontColour)" height="20" name="NoSpherA2_bse_is_relativistic" type="checkbox"/>
+       </font>
+      </td>
+      <td align="left" valign="middle">
+       <b>
+        Relativistic
+       </b>
+      </td>
+     </tr>
+    </table>
+   </td>
+   <td align="left" valign="bottom" width="33.3%">
+    <input bgcolor="#8C8C8F" custom="GetVar(custom_button)" disabled="false" fgcolor="#ffffff" fit="false" flat="GetVar(linkButton.flat)" height="20" name="DownloadBasis" onclick="spy.NoSpherA2.fetch_basis(html.GetValue(NoSpherA2_add_basis),html.GetState(NoSpherA2_bse_is_relativistic))" type="button" valign="bottom" value="Get Basis"/>
+   </td>
+  </tr>
+
+<!-- #include td-table-off gui\balanced\td-table-off.htm;1 -->
 </tr>

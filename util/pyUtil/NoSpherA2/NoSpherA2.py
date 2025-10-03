@@ -725,7 +725,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
                                 wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
                             wfn_fn = wfn_code
                         else:
-                            endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
+                            endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb", ".owf.fchk"]
                             if Wfn_Job.is_orca_new():
                                 endings.append(".gbw")
                             if wfn_code == "Thakkar IAM":
@@ -973,9 +973,9 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
 
     def edit_occ_input(self) -> None:
         fdir =  Path(self.jobs_dir)
+        input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
         wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), olx.FilePath() / fdir, "occ")
         wfn_object.write_occ_input()
-        input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
         with open(input_file_path, "r") as f:
             occ_input_old = f.read()
         occ_input = OV.GetUserStyledInput(0, "test", occ_input_old, "toml")
@@ -1023,6 +1023,15 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
 
     def getBasisListStr(self):
         source = OV.GetParam('snum.NoSpherA2.source')
+        if source == "occ":
+            try:
+                occ_data_path = Path(os.environ["OCC_DATA_PATH"])
+                occ_basis_path = occ_data_path / "basis"
+            except Exception:
+                raise EnvironmentError("Please, set the OCC_DATA_PATH environment variable.")
+            BL = [i.replace(".json", "") for i in os.listdir(occ_basis_path) if i.endswith(".json")]
+            return ";".join(BL)
+
         BL = self.basis_list_str.split(";")
         from cctbx_olex_adapter import OlexCctbxAdapter
         XRS = OlexCctbxAdapter().xray_structure()

@@ -1,3 +1,6 @@
+import glob
+import os
+
 from olexFunctions import OV
 def ov_register(func=None, flag=False, scope=None):
     """
@@ -28,3 +31,15 @@ def ov_register(func=None, flag=False, scope=None):
         return _decorate(func)
     return _decorate
 
+def find_basis_file(basis_name: str, json: bool = True):
+    basis_dir = os.path.join(OV.BaseDir(), "basis_sets")
+    if json:
+        basis_list = [os.path.basename(i) for i in glob.glob(os.path.join(basis_dir, "*.json"))]
+    else:
+        basis_list = [i for i in os.listdir(basis_dir) if os.path.isfile(os.path.join(basis_dir, i)) and not i.endswith(".json")]
+
+    for i in basis_list:
+        if i.replace(".json", "").lower() == basis_name.lower():
+            return os.path.join(basis_dir, i)
+
+    raise FileNotFoundError("Couldn't find the basis file")

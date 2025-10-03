@@ -16,6 +16,7 @@ from utilities import run_with_bitmap
 from pathlib import Path
 import extra_utils.tomli as tomli
 import extra_utils.tomli_w as tomli_w
+from extra_utils.utils import find_basis_file
 try:
     p_path = os.path.dirname(os.path.abspath(__file__))
 except Exception as e:
@@ -115,6 +116,7 @@ class wfn_Job(object):
             if xyz:
                 self.write_xyz_file()
         elif self.software == "occ":
+            self.write_xyz_file()
             self.write_occ_input(basis, method, charge=charge, mult=mult)
 
     def write_elmodb_input(self,xyz):
@@ -669,14 +671,14 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         if "method" in inputf_scf:
             OV.SetParam("snum.NoSpherA2.method", inputf_scf["method"])
 
-        if "basis" in inputf_scf:
-            OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
+        # if "basis" in inputf_scf:
+        #     OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
 
         if "charge" in inputf_scf:
             OV.SetParam('snum.NoSpherA2.charge', inputf_scf["charge"])
 
         if "mult" in inputf_scf:
-            OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["mult"])
+            OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["multiplicity"])
 
     def write_occ_input(self, basis_name: Optional[str] = None, method: Optional[str] = None,
                         ncpus: Optional[int] = None, charge: Optional[int] = None,
@@ -684,12 +686,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         fdir = Path(self.full_dir)
         if not os.path.isdir(fdir):
             os.makedirs(fdir)
-        coordinates_fn = fdir / f"{self.name}.xyz"
+        coordinates_fn = f"{self.name}.xyz"
         self.input_fn = fdir / f"{self.name}.toml"
-        input_dict = dict(
-            verbosity = 2,
-            scf = dict(spherical=True)
-        )
+        if os.path.isfile(self.input_fn):
+            with open(self.input_fn, "rb") as f:
+                input_dict = tomli.load(f)
+        else:
+            input_dict = dict(
+                verbosity = 2,
+                scf = dict(
+                    spherical=True,
+                    output = "fchk"
+                )
+            )
 
         input_dict["scf"]["input"] = str(coordinates_fn)
         if basis_name is None:
@@ -705,7 +714,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             input_dict["scf"]["charge"] = int(OV.GetParam('snum.NoSpherA2.charge'))
 
         if mult is None:
-            input_dict["scf"]["mult"] = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+            input_dict["scf"]["multiplicity"] = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
 
         with open(self.input_fn, "wb") as f:
             tomli_w.dump(input_dict, f)
@@ -1873,6 +1882,14 @@ ener = cf.kernel()"""
                     args.append("-uhf")
                     args.append(str(int(mult)-1))
 
+            elif software == "occ":
+                # Run OCC with the TOML config: occ --config <input.toml>
+                occ_exe = getattr(self.parent, "occ_exe", None) or "occ"
+                args.append(occ_exe)
+                args.append("scf")
+                args.append("--config")
+                args.append(os.path.join(OV.FilePath(), self.input_fn))
+
             out_fn = None
             path = self.full_dir
             nr = 0
@@ -2093,6 +2110,10 @@ ener = cf.kernel()"""
             elif software == "pySCF":
                 if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
                     shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+            elif("occ" in args[0]):
+                src = os.path.join(self.full_dir, self.name + ".owf.fchk")
+                if os.path.isfile(src):
+                    shutil.copy(src, self.name + ".owf.fchk")
 
             experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
 
