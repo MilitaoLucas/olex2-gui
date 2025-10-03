@@ -596,7 +596,7 @@ t:edt_gui{
   <td width="10%" align="left">
     $+
      html.Snippet("gui/snippets/input-text",
-     "name=ED_ThicknessVal_B@Refine",
+     "name=thickness.value@ED",
      "value=spy.ED.get_stored_param('thickness.value', sd=0)",
      "onchange=spy.ED.set_stored_param('thickness.value', html.GetValue('~name~'))",
      "disabled=not(spy.gui.IsEDRefinement())")
@@ -605,7 +605,7 @@ t:edt_gui{
   <td width="10%" align='left'>
     $+
      html.Snippet("gui/snippets/input-checkbox",
-     "name=rthickness_B@Refine",
+     "name=rthickness_B@ED",
      "bgcolor=GetVar(HtmlTableFirstcolColour)",
      "value=Refine",
      "checked=spy.ED.get_stored_param('thickness.grad')",

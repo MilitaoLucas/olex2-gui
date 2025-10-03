@@ -3010,37 +3010,41 @@ class PlotIt():
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    if lim_x:
-      if lim_x == "auto":
-        lim_x = 1
-      else:
-        lim_x = float(lim_x)
-
-      margin = 0.03  # Add 3% margin
-      data_min = min(min(y) for y in y_list)
-      data_max = max(max(y) for y in y_list)
-      # Adjust for margin if necessary
-      data_min -= margin * (data_max - data_min)
-      data_max += margin * (data_max - data_min)
-
-      _ =  data_max - data_min
-      if _:
-        self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
-
-      if lim_x != 1:
-        self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
-
-      else:
-        ax.margins(x=0.15)
-        data_min = min(min(x) for x in x_list)
-        data_max = max(max(x) for x in x_list)
+      
+    try:
+      if lim_x:
+        if lim_x == "auto":
+          lim_x = 1
+        else:
+          lim_x = float(lim_x)
+  
+        margin = 0.03  # Add 3% margin
+        data_min = min(min(y) for y in y_list)
+        data_max = max(max(y) for y in y_list)
         # Adjust for margin if necessary
         data_min -= margin * (data_max - data_min)
         data_max += margin * (data_max - data_min)
-        _ = data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min)
-        if _[0] != _[1]:
-          self.plt.xlim(_)
-
+  
+        _ =  data_max - data_min
+        if _:
+          self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
+  
+        if lim_x != 1:
+          self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
+  
+        else:
+          ax.margins(x=0.15)
+          data_min = min(min(x) for x in x_list)
+          data_max = max(max(x) for x in x_list)
+          # Adjust for margin if necessary
+          data_min -= margin * (data_max - data_min)
+          data_max += margin * (data_max - data_min)
+          _ = data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min)
+          if _[0] != _[1]:
+            self.plt.xlim(_)
+    except:
+      pass
+    
     if legend_handles:
       ax.legend(handles=legend_handles, loc='upper right', ncol=1)
       legend = ""
