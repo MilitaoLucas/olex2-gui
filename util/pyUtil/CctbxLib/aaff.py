@@ -258,7 +258,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 res = abs(new_disp - old_disp) / disp_esd
                 if res > results.max_overall:
                   results.update_overall(res, annotations[matrix_run])
-              matrix_run += 1            
+              matrix_run += 1
             elif '.u' in an:
               adp = new_atom['adp'][0]
               adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
@@ -438,7 +438,7 @@ def get_refinement_details(cif_block, acta_stuff):
     t = os.path.join(OV.FilePath(), OV.GetParam('snum.NoSpherA2.file'))
     if os.path.exists(t):
       tsc_file_name = t
-      
+
   if os.path.exists(tsc_file_name):
     #tsc = open(tsc_file_name, 'r').readlines()
     #cif_block_found = False
@@ -513,10 +513,8 @@ The following options were used:
       for sl in ['a', 'b']:
         for sn in range(1, 5):
           key = '_atom_type_scat_Cromer_Mann_%s%s' % (sl, sn)
-          if key in cif_block:
-            cif_block.pop(key)
-      if '_atom_type_scat_Cromer_Mann_c' in cif_block:
-        cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          cif_block.pop(key, None)
+      cif_block.pop('_atom_type_scat_Cromer_Mann_c', None)
       if '_atom_type_scat_source' in cif_block:
         for i in range(cif_block['_atom_type_scat_source'].size()):
           cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"
