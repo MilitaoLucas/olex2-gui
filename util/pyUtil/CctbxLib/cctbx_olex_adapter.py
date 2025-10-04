@@ -548,7 +548,7 @@ class hooft_analysis(absolute_structure.hooft_analysis):
     if use_fcf:
       fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
       if not os.path.exists(fcf_path):
-        print("No fcf file is present")
+        olx.Echo("No fcf file is present", m="error")
         return
       reflections = list(miller.array.from_cif(file_path=str(fcf_path)).values())[0]
       try:

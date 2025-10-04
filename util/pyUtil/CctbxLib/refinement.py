@@ -543,11 +543,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis
       try:
-        self.hooft = hooft_analysis(self, use_fcf=True)
+        self.hooft = hooft_analysis(self)
         self.hooft_str = utils.format_float_with_standard_uncertainty(
           self.hooft.hooft_y, self.hooft.sigma_y)
-      except utils.Sorry as e:
-        print(e)
+      except Exception as e:
+        self.hooft = None
+        self.hooft_str = "N/A"
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
       # people still would want to see this...
       flack = self.calc_flack()
       OV.SetParam('snum.refinement.flack_str', flack)
