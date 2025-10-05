@@ -111,8 +111,8 @@ def normal_equation_class():
       self.step_info['_refine_ls_wR_factor_ref'] = self.wR2()
       self.step_info['_refine_ls_goodness_of_fit_ref'] = self.goof()
       
-      if OV.IsControl('R1_GUI'):
-        olx.html.SetValue('R1_GUI', f"{R1_4sig * 100:.2f}%")
+      #if OV.IsControl('R1_GUI'):
+        #olx.html.SetValue('R1_GUI', f"{R1_4sig * 100:.2f}%")
 
       if print_tabular:
         header = "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.3f %-11s  % 8.2e %-11s  % 8.2e %-11s"
