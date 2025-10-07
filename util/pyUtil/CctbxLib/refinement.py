@@ -1725,11 +1725,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     if log is None: log = sys.stdout
 
-    last = float(OV.GetParam('snum.refinement.last_R1'))
+    last = OV.GetParam('snum.refinement.last_R1')
+    try:
+      last =  f"{last:.4f}"
+    except:
+      last = last
+
     pad = 2 - len(str(self.cycles.n_iterations))
     print("\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural), file=log)
     #print >> log, " +"
-    print(f"  +  R1:       {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last:.4f}", file=log)
+    print(f"  +  R1:       {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last}", file=log)
     print("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data, file=log)
 
     print("  +  wR2:      %.4f, GooF:  %.4f" % (
