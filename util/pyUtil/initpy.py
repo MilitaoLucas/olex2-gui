@@ -63,9 +63,14 @@ def do_init():
   except Exception as err:
     print("There is a problem with the cctbx: %s" %str(err))
 
+###############################################################################
+  phil_extensions = [
+    "util/pyUtil/ACED/ACED.phil",
+  ]
   stopwatch.start("import variableFunctions")
   import variableFunctions
-  stopwatch.run(variableFunctions.LoadParams)
+  stopwatch.run(variableFunctions.LoadParams, extensions=phil_extensions)
+###############################################################################
 
   stopwatch.start("import olexex")
   import olexex
