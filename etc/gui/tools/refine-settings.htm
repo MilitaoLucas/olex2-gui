@@ -137,19 +137,7 @@ $-
     <td width='12%'>
       <b>Weight </b>
     </td>
-    <td width='4%' align='left'>
-      $+
-        html.Snippet("gui/snippets/input-checkbox",
-        "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
-        "checked=spy.GetParam('snum.refinement.update_weight')",
-        "bgcolor=GetVar(HtmlTableFirstcolColour)",
-        "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))",
-        )
-       $-
-    </td>
-    <td width='31%' align='left'>
-      $spy.gui.tools.weightGuiDisplay()
-    </td>
+    $spy.gui.tools.weightGuiDisplay()
     
     $spy.gui.tools.make_exti_swat_gui()
 

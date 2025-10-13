@@ -73,7 +73,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
     self.weighting = weighting
     if self.weighting is None:
-      self.weighting = self.get_shelxl_weighting()
+      weighting_choice = OV.GetParam('snum.refinement.weighting_scheme')
+      if weighting_choice == 'shelx' or weighting_choice == "default":
+        self.weighting = self.get_shelxl_weighting()
+      elif weighting_choice == 'new_shelx':
+        self.weighting = self.get_new_shelxl_weighting()
+      elif weighting_choice == 'unity':
+        self.weighting = self.get_unit_weighting()
+      elif weighting_choice == 'sigma':
+        self.weighting = self.get_sigma_weighting()
+      elif weighting_choice == 'stl':
+        self.weighting = self.get_sin_theta_over_lambda_weighting()
+      else:
+        print("WARNING: unsupported weighting scheme: '%s' is replaced by 'shelx'"\
+            %weighting_choice)
+        self.weighting = self.get_shelxl_weighting()
 
   def run(self,
           build_only=False, #return normal normal equations object
@@ -435,9 +449,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independents)
-      if not OV.IsEDRefinement():
+      if not OV.IsEDRefinement() and 'shelx' in OV.GetParam('snum.refinement.weighting_scheme'):
         OV.SetParam(
           'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+        if OV.GetParam('snum.refinement.update_weight'):
+          nv = [new_weighting.a, new_weighting.b]
+          olx.UpdateWght(*nv)
       if self.on_completion:
         stopwatch.start("on_completion")
         self.on_completion(cif[block_name])
@@ -510,7 +527,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         from smtbx import absolute_structure
         fc_cr = None
         if self.fc_correction.grad:
-          fc_cr = self.fc_correction.fork()
+          fc_cr = self.fc_correction#.fork()
           fc_cr.grad = False
         flack = absolute_structure.flack_analysis(
           self.normal_eqns.xray_structure,

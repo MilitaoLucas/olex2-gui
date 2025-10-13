@@ -906,7 +906,15 @@ OV.registerFunction(weightGuiDisplay_new, True, "gui.tools")
 def weightGuiDisplay():
   if olx.IsFileType('ires').lower() == 'false':
     return ''
-  html_scheme = ""
+  if 'shelx' not in OV.GetParam('snum.refinement.weighting_scheme').lower() and 'default' not in OV.GetParam('snum.refinement.weighting_scheme').lower():
+      return "<td width='35%' align='left'>No parameters applicable</td>"
+  total = """
+    <td width='4%' align='left'>
+      BUTTON
+    </td>
+    <td width='31%' align='left'>
+      TEMPLATE
+    </td>"""
   tol_green, tol_orange = 0.01, 0.1
   current_weight = olx.Ins('weight')
   if current_weight == "n/a":
@@ -921,20 +929,15 @@ def weightGuiDisplay():
   if len(suggested_weight) < length_current:
     for i in range(length_current - len(suggested_weight)):
       suggested_weight.append(0)
+  d = {}
   if suggested_weight:
-    d = {}
-    i = 0
-    for curr, sugg in zip(current_weight, suggested_weight):
-      i += 1
+    for i, (curr, sugg) in enumerate(zip(current_weight, suggested_weight)):
       curr = float(curr)
-      if curr < 1:
+      _curr = abs(curr)
+      if _curr == 0:
         prec = 3
-      elif curr < 10:
-        prec = 2
-      elif curr < 100:
-        prec = 1
       else:
-        prec = 0
+        prec = min(3, max(0, 2 - int(math.floor(math.log10(_curr)))))
 
       if sugg >= curr * (1 - tol_green) and sugg <= curr * (1 + tol_green):
         colour = gui_green
@@ -947,26 +950,16 @@ def weightGuiDisplay():
       curr = (_ % curr).lstrip('0')
       sugg = (_ % sugg).lstrip('0')
 
-      dd = {'curr_%i' % i: curr,
-            'sugg_%i' % i: sugg,
-            'col_%i' % i: colour,
+      dd = {'curr_%i' % (i+1): curr,
+            'sugg_%i' % (i+1): sugg,
+            'col_%i' % (i+1): colour,
             }
       d.update(dd)
-      if html_scheme:
-        html_scheme += "|&nbsp;"
-      html_scheme += "<font color='%s'>%s(%s)</font>" % (colour, curr, sugg)
-  else:
-    html_scheme = current_weight
-  html_scheme = "<b>%s</b>" % html_scheme
-
-  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  txt_Weight = OV.TranslatePhrase("Weight")
-  html = '''
-    <a target="%s" href="UpdateWght>>html.Update">%s</a>
-    ''' % ("Update Weighting Scheme", html_scheme)
 
   weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
-  return weight_display
+  weight_button = gui.tools.TemplateProvider.get_template('weight_toggle')
+  new = total.replace("TEMPLATE", weight_display).replace("BUTTON", weight_button)
+  return new
 
 
 OV.registerFunction(weightGuiDisplay, True, "gui.tools")

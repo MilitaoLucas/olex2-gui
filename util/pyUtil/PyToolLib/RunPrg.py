@@ -711,6 +711,11 @@ class RunRefinementPrg(RunPrg):
       rc.check_disp()
       rc.check_occu()
       rc.check_mu() #This is the L-M mu!
+      if OV.GetParam('snum.refinement.check_corr'):
+        try:
+            rc.check_corr()
+        except Exception as e:
+            print("Could not check Correlsations: %s" % e)
       evt.stop()
       self.refinement_has_failed = rc.refinement_has_failed
 

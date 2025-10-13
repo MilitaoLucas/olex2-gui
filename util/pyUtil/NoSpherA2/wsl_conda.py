@@ -22,9 +22,7 @@ class WSLAdapter(object):
     if disto_list is not None:
       self.disto_list = disto_list
     else:
-      if self.is_wsl:
-        self.disto_list = self.get_wsl_distro_list()
-      else:
+      if not self.is_wsl:
         self.disto_list = ["native"]
 
   def check_wsl(self):
@@ -33,7 +31,7 @@ class WSLAdapter(object):
       return False
     # Check if WSL is installed
     try:
-      subprocess.run(["wsl", "--version"], capture_output=True, text=True, check=True)
+      self.disto_list = self.get_wsl_distro_list()
       return True
     except (subprocess.CalledProcessError, FileNotFoundError):
       raise RuntimeError("WSL is not installed or not configured properly. Please install WSL to use this feature.")
@@ -257,7 +255,7 @@ class CondaAdapter:
     if not conda_env_name.strip():
       raise ValueError("Conda environment name cannot be an empty string.")
     if conda_env_name not in self.get_available_conda_envs():
-      raise ValueError(f"Conda environment '{conda_env_name}' does not exist.\nAvailable environments: {self.get_available_conda_envs()}")
+      raise ValueError(f"Conda environment '{conda_env_name}' does not exist.")
     self.conda_env_name = conda_env_name
 
   def get_available_conda_envs(self) -> list:

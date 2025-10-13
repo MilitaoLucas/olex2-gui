@@ -22,6 +22,7 @@ import ELMO # noqa: F401
 import cubes_maps # noqa: F401
 import xharpy
 import pyscf
+import psi4
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -59,7 +60,6 @@ class NoSpherA2(PT):
     if not from_outside:
       self.setup_gui()
 #revert back to the original NoSpherA2 values
-
     olx.stopwatch.start("Initial variables  & Phil")
     self.p_name = p_name
     self.p_path = p_path
@@ -67,6 +67,7 @@ class NoSpherA2(PT):
     self.p_htm = p_htm
     self.deal_with_phil(operation='read')
     self.print_version_date()
+    print("")
     self.parallel = False
     self.softwares = ""
     self.NoSpherA2 = ""
@@ -81,96 +82,51 @@ class NoSpherA2(PT):
     self.pyscf_adapter = None
     import platform
     if platform.architecture()[0] != "64bit":
-      print ("Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
+      print ("-- Warning: Detected 32bit Olex2, NoSpherA2 only works on 64 bit OS.")
+
+    file_search_probes = {
+        "ubuntu": ["ubuntu", "ubuntu2404", "ubuntu2204", "ubuntu2004", "ubuntu1804"],
+        "Gaussian09": ["g09"],
+        "Gaussian03": ["g03"],
+        "Gaussian16": ["g16"],
+    }
+    
+    def probe_file(file, names):
+        ret = ""
+        for name in names:
+            ret = self.setup_software(file, name[0])
+            if ret != "" and ret is not None:
+                break
+        setattr(self,f"{file}_exe", ret)
 
 #   Attempts to find all known types of software to be used during NoSpherA2 runs
-    olx.stopwatch.start("Ubuntu exe")
-    if sys.platform[:3] == "win":
-      self.ubuntu_exe = olx.file.Which("ubuntu.exe")
-      if self.ubuntu_exe is None or self.ubuntu_exe == "":
-        self.ubuntu_exe = olx.file.Which("ubuntu2404.exe")
-      if self.ubuntu_exe is None or self.ubuntu_exe == "":
-        self.ubuntu_exe = olx.file.Which("ubuntu2204.exe")
-      if self.ubuntu_exe is None or self.ubuntu_exe == "":
-        self.ubuntu_exe = olx.file.Which("ubuntu2004.exe")
-      if self.ubuntu_exe is None or self.ubuntu_exe == "":
-        self.ubuntu_exe = olx.file.Which("ubuntu1804.exe")
+    olx.stopwatch.start("Interfaced executables")
 
-    olx.stopwatch.start("NSA2 exe")
-    self.setup_NoSpherA2()
-    olx.stopwatch.start("tonto exe")
-    self.setup_har_executables()
-
-    olx.stopwatch.start("discamb exe")
-    self.setup_discamb()
-    olx.stopwatch.start("ELMO exe")
-    self.setup_elmodb()
-    #self.setup_psi4()
-    olx.stopwatch.start("G09 exe")
-    self.g09_exe = self.setup_software("Gaussian09", "g09")
-    olx.stopwatch.start("G03 exe")
-    self.g03_exe = self.setup_software("Gaussian03", "g03")
-    olx.stopwatch.start("G16 exe")
-    self.g16_exe = self.setup_software("Gaussian16", "g16")
-    olx.stopwatch.start("ORCA exe")
-    self.setup_orca_executables()
-    olx.stopwatch.start("xTB exe")
-    self.setup_xtb_executables()
-    olx.stopwatch.start("pTB exe")
-    self.setup_ptb_executables()
-    if OV.GetParam('olex2.wsl_conda'):
-      try:
-        olx.stopwatch.start("WSL adapter")
-        self.WSLAdapter = WSLAdapter()
-        if self.WSLAdapter.get_wsl_distro_list() == []:
-          print("There seems to be a problem with the distro recognition!")
-          print("Please check your WSL installation and make sure you have at least one distro installed.\nYou can install one using the Microsoft Store or 'wsl --install Ubuntu'.")
-          raise RuntimeError("No WSL adapter available, hence no Conda support!")
-        if self.WSLAdapter.is_windows and not self.WSLAdapter.is_wsl:
-          print("WSL is not available, xharpy and pyscf will not be available!")
-          self.WSLAdapter = None
-        else:
-          self.conda_adapter = CondaAdapter(self.WSLAdapter)
-          if not self.conda_adapter.have_conda:
-            sel = olx.Alert("Conda not available",\
-"""Error: Conda is not available.
-Do you want me to install conda for you?""", "YN", False)
-            if sel == "Y":
-              print("Installing micromamba using the official installation script...")
-              try:
-                exports = """
-export MAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
-export BIN_FOLDER="${HOME}/.local/bin" &&
-export INIT_YES="yes" &&
-export CONDA_FORGE_YES="yes" &&
-export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
-                result = self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -b")
-                if result.returncode != 0:
-                  print("Failed to install micromamba.")
-                  raise subprocess.CalledProcessError(result.returncode, "micromamba installation")
-                result = self.WSLAdapter.call_command("${HOME}/.local/bin/micromamba shell init -s bash")
-                if result.returncode != 0:
-                  print("Failed to initialize micromamba shell.")
-                  raise subprocess.CalledProcessError(result.returncode, "micromamba shell init")
-                else:
-                  print("Micromamba installed successfully.")
-                  print("Please restart Olex2 to use it.")
-              except subprocess.CalledProcessError as e:
-                print(f"Error installing micromamba: {e}")
-                print("Please install conda manually and restart Olex2.")
-            else:
-              print("Conda is not available, xharpy and pyscf will not be available!")
-            self.conda_adapter = None
-          else:
-            print("Available conda envs:", self.conda_adapter.get_available_conda_envs())
-            olx.stopwatch.start("xharpy exe")
-            self.setup_xharpy()
-            olx.stopwatch.start("pyscf exe")
-            self.setup_pyscf()
-            olx.stopwatch.start("psi4 exe")
-            self.setup_psi4()
-      except Exception as e:
-        print(f"Error setting up WSL Adapter: {e}")
+    calls = {
+        'wsl_conda': self.setup_WSL_softwares,
+        'NSA2': self.setup_NoSpherA2,
+        'har_exe': self.setup_har_executables,
+        'discamb_exe': self.setup_discamb,
+        'elmodb_exe': self.setup_elmodb,
+        'orca_exe': self.setup_orca_executables,
+        'xtb_exe': self.setup_xtb_executables,
+        'ptb_exe': self.setup_ptb_executables,
+    }
+    
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=min(8, len(calls))) as ex:
+      futures = {}
+      for name, func in calls.items():
+        futures[ex.submit(func)] = ("call", name)
+      for name, files in file_search_probes.items():
+        futures[ex.submit(probe_file, name, files)] = ("probe", f"{name}_exe")
+      for fut in as_completed(futures):
+        kind, name = futures[fut]
+        try:
+            res = fut.result()
+        except Exception as e:
+            print(f"Error setting up {name}: {e}")
+            res = e
 
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
@@ -184,11 +140,63 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     else:
       self.basis_list_str = None
       self.basis_dir = None
-      print("No NoSpherA2 executable found!")
+      print("-- No NoSpherA2 executable found!")
     print(" ")
 
-  #def set_f_calc(self, f_calc):
-  #  self.f_calc = f_calc
+  def setup_WSL_softwares(self):
+    try:
+      self.WSLAdapter = WSLAdapter()
+      if self.WSLAdapter.get_wsl_distro_list() == []:
+        print("-- There seems to be a problem with the distro recognition!")
+        print("-- Please check your WSL installation and make sure you have at least one distro installed.\nYou can install one using the Microsoft Store or 'wsl --install Ubuntu'.")
+        raise RuntimeError("No WSL adapter available, hence no Conda support!")
+      if self.WSLAdapter.is_windows and not self.WSLAdapter.is_wsl:
+        print("-- WSL is not available, xharpy and pyscf will not be available!")
+        self.WSLAdapter = None
+      else:
+        self.conda_adapter = CondaAdapter(self.WSLAdapter)
+        if not self.conda_adapter.have_conda:
+          sel = olx.Alert("Conda not available",\
+"""Error: Conda is not available.
+Do you want me to install conda for you?""", "YN", False)
+          if sel == "Y":
+            print("-- Installing micromamba using the official installation script...")
+            try:
+              exports = """
+export MAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
+export BIN_FOLDER="${HOME}/.local/bin" &&
+export INIT_YES="yes" &&
+export CONDA_FORGE_YES="yes" &&
+export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
+              result = self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -b")
+              if result.returncode != 0:
+                print("-- Failed to install micromamba.")
+                raise subprocess.CalledProcessError(result.returncode, "micromamba installation")
+              result = self.WSLAdapter.call_command("${HOME}/.local/bin/micromamba shell init -s bash")
+              if result.returncode != 0:
+                print("-- Failed to initialize micromamba shell.")
+                raise subprocess.CalledProcessError(result.returncode, "micromamba shell init")
+              else:
+                print("-- Micromamba installed successfully.")
+                print("-- Please restart Olex2 to use it.")
+            except subprocess.CalledProcessError as e:
+              print(f"-- Error installing micromamba: {e}")
+              print("-- Please install conda manually and restart Olex2.")
+          else:
+            print("-- Conda is not available, xharpy and pyscf will not be available!")
+          self.conda_adapter = None
+        else:
+          print("-- Available conda envs:", self.conda_adapter.get_available_conda_envs())
+          #olx.stopwatch.start("xharpy exe")
+          self.setup_xharpy()
+          #olx.stopwatch.start("pyscf exe")
+          self.setup_pyscf()
+          #olx.stopwatch.start("psi4 exe")
+          self.setup_psi4()
+    except Exception as e:
+      print(f"-- Error setting up WSL Adapter: {e}")
+      self.WSLAdapter = None
+      self.conda_adapter = None
 
   #def set_f_obs_sq(self, f_obs_sq):
   #  self.f_obs_sq = f_obs_sq
@@ -236,7 +244,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";Tonto"
-      print("No MPI implementation found in PATH!\nTonto, ORCA and other software relying on it will only have 1 CPU available!\n")
+      print("-- No MPI implementation found in PATH!\n-- Tonto, ORCA and other software relying on it will only have 1 CPU available!\n")
 
   def tidy_wfn_jobs_folder(self):
     backup = os.path.join(self.jobs_dir, "backup")
@@ -786,9 +794,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def setup_NoSpherA2(self):
     self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
-    print("NoSpherA2 executable is:", self.NoSpherA2)
+    print("-- NoSpherA2 executable is:", self.NoSpherA2)
     if self.NoSpherA2 == "" or self.NoSpherA2 is None:
-      print ("ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
+      print ("-- ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
       raise NameError('No NoSpherA2 Executable')
     self.softwares += ";Thakkar IAM"
@@ -800,7 +808,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.pyscf_adapter.conda_adapter.set_conda_env_name('pyscf')
       self.softwares += ";pySCF" if "pySCF" not in self.softwares else ""
     except Exception as e:
-      print("Error setting up pySCF:", e)
+      print("-- Error setting up pySCF:", e)
       self.pyscf_adapter = None
       if "Get pySCF" not in self.softwares:
         self.softwares += ";Get pySCF"
@@ -811,39 +819,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.psi4_adapter.conda_adapter.set_conda_env_name('psi4')
       self.softwares += ";Psi4" if "Psi4" not in self.softwares else ""
     except Exception as e:
-      print("Error setting up Psi4:", e)
+      print("-- Error setting up Psi4:", e)
       self.psi4_adapter = None
       if "Get Psi4" not in self.softwares:
         self.softwares += ";Get Psi4"
-
-  def setup_psi4(self):
-    self.psi4_exe = ""
-    exe_pre = "psi4"
-    exe_post = ""
-    from pathlib import Path
-
-    if sys.platform[:3] == 'win':
-      exe_post = ".exe"
-    _ = os.path.join(self.p_path, "%s%s" %(exe_pre, exe_post))
-    if os.path.exists(_):
-      self.psi4_exe = _
-    elif os.path.exists(os.path.join(Path.home(), "psi4conda")):
-      p4c =  os.path.join(Path.home(), "psi4conda")
-      if sys.platform[:3] == 'win':
-        scripts = os.path.join(p4c, "Scripts")
-      else:
-        scripts = os.path.join(p4c, "bin")
-      self.psi4_exe = os.path.join(scripts, "%s%s" %(exe_pre, exe_post))
-    else:
-      self.psi4_exe = olx.file.Which("%s%s" %(exe_pre, exe_post))
-    if not OV.GetParam('user.NoSpherA2.enable_psi4'):
-      pass
-    if os.path.exists(self.psi4_exe):
-      if "Psi4" not in self.softwares:
-        self.softwares = self.softwares + ";Psi4"
-    else:
-      if "Get Psi4" not in self.softwares:
-        self.softwares = self.softwares + ";Get Psi4"
 
   def setup_elmodb(self):
     self.elmodb_exe = self.setup_software("ELMOdb", "elmodb")
@@ -882,11 +861,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=creationflags)
         idx = p.stdout.index("Version")
         result = p.stdout[idx:idx + 50].split('\n')[0].split()[1]
-        print("ORCA VERSION: ", result)  # print the version
+        print("-- ORCA VERSION: ", result)  # print the version
         OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
         OV.SetParam('NoSpherA2.ORCA_Version_Minor', result.split(".")[1])
       except Exception as e:
-        print("Failed to evaluate ORCA version", e)
+        print("-- Failed to evaluate ORCA version", e)
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
       Orca_Vers_Minor = OV.GetParam('NoSpherA2.ORCA_Version_Minor')
       if "ORCA" not in self.softwares:
@@ -922,7 +901,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.xharpy_adapter.conda_adapter.set_conda_env_name('xharpy')
       self.softwares += ";XHARPy" if "XHARPy" not in self.softwares else ""
     except Exception as e:
-      print("XHARPy setup failed:", e)
+      print("-- XHARPy setup failed:", e)
       self.xharpy_adapter = None
       self.softwares += ";Get XHARPy" if "Get XHARPy" not in self.softwares else ""
 
@@ -997,9 +976,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if not parts:
         return self.softwares + ";fragHAR;SALTED;"
       elif len(parts) > 1:
-        return self.softwares + ";Hybrid;fragHAR;"
+        return self.softwares + ";Hybrid;fragHAR;SALTED;"
       else:
-        return self.softwares + ";fragHAR;"
+        return self.softwares + ";fragHAR;SALTED;"
     else:
       if parts and len(parts) > 1:
         return self.softwares + ";Hybrid;"
@@ -1540,7 +1519,7 @@ def sample_folder(input_name):
   olex.m(load_input_cif)
 OV.registerFunction(sample_folder, False, "NoSpherA2")
 
-def psi4():
+def run_psi4():
   import psi4
   geom = """
 nocom

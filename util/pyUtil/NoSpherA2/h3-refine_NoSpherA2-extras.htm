@@ -799,40 +799,42 @@ $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </ignore>
 
-<ignore test="strcmp(spy.GetParam('user.NoSpherA2.show_ri_fit'),'False')">
+<ignore test="strcmp(spy.GetParam('user.NoSpherA2.show_partitioning'),'False')">
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_RIFIT' width='100%'></tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2_Options_RIFit;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="25%" align='right'>
+    <b>Partitioning Scheme</b>
+</td> 
+<td width="15%">
   $+
-    html.Snippet("gui/snippets/input-checkbox-td",
-    "name=Ri_Fit",
-    "label=RI-Fit ",
-    "checked=spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','True')>> html.Update()",
-    "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.NoSpherA2_RI_FIT','False')>> html.Update()"
-    )
+    html.Snippet("gui/snippets/input-combo",
+    "name=NoSpherA2_Partitioning_scheme@refine",
+    "items='Hirshfeld;RI-Fit;TFVC;Becke'",
+    "value=spy.GetParam('snum.NoSpherA2.NoSpherA2_Partition')",
+    "onchange=spy.SetParam('snum.NoSpherA2.NoSpherA2_Partition', html.GetValue('~name~')) >> html.Update()")
   $-
+  </td>
 <!-- ======= RI-SWITCH ===================== -->
 
-<ignore test="not strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'), False)">
-<td width="20%" align='left'>
-<b>Auxiliary Basis </b>
+<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.NoSpherA2_Partition'), RI-Fit)">
+<td width="18%" align='left'>
+  <b>Auxiliary Basis</b>
 </td>
-<td width="35%" align='left'>
+<td width="25%" align='left'>
 $+
   html.Snippet("gui/snippets/input-combo",
   "name=NoSpherA2_ORCA_RIFIT@refine",
-  "items='auto_aux;combo_basis_fit;def2_universal_jkfit;def2_universal_jfit;def2_svp_rifit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit'",
+  "items='auto;combo_basis_fit;def2_universal_jkfit;def2_universal_jfit;def2_svp_rifit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit'",
   "value=spy.GetParam('snum.NoSpherA2.auxiliary_basis')",
   "onchange=spy.SetParam('snum.NoSpherA2.auxiliary_basis', html.GetValue('~name~')) >> html.Update()")
 $-
 </td>
 
-<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.auxiliary_basis'), auto_aux)">
+<ignore test="strcmp(spy.GetParam('snum.NoSpherA2.auxiliary_basis'), auto)">
 <td width="8%" align='right'>
-<b>Beta </b>
+<b>Beta</b>
 </td>
 <td width="10%" align='right'>
   $+

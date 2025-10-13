@@ -20,7 +20,7 @@ class psi4:
     
     if input is None:
       raise ValueError("Input cannot be None. Please provide a valid input file or path.")
-    work_folder_wsl = PurePosixPath("/tmp/.pyscf_olex2") / olx.FileName()
+    work_folder_wsl = PurePosixPath("/tmp/.psi4_olex2") / olx.FileName()
     
     try:
       self.wsl_adapter.call_command(f"mkdir -p {work_folder_wsl.parent}")
@@ -31,23 +31,23 @@ class psi4:
     except subprocess.CalledProcessError:
       print(f"Failed to create directory {work_folder_wsl}. It may already exist.")
     
-    self.wsl_adapter.copy_from_possible_wsl(input, work_folder_wsl / "pyscf_script.py")
+    self.wsl_adapter.copy_from_possible_wsl(input, work_folder_wsl / "psi4_script.py")
     
     print("Cleaning up old files in WSL...")
     try:
-      self.wsl_adapter.call_command(f"rm -f {work_folder_wsl}/*_pyscf.log")
+      self.wsl_adapter.call_command(f"rm -f {work_folder_wsl}/*_psi4.log")
     except subprocess.CalledProcessError as e:
       print(f"Error cleaning up old files: {e}")
     # copy script to WSL
-    script_path_work_folder = work_folder_wsl / "pyscf_script.py"
-    print("running pySCF calculation in WSL...")
-    self.conda_adapter.call_command(f"python {script_path_work_folder}", in_folder=work_folder_wsl, tail_output=True, output_file=work_folder_wsl / f"{olx.FileName()}_pyscf.log")
+    script_path_work_folder = work_folder_wsl / "psi4_script.py"
+    print("running psi4 calculation in WSL...")
+    self.conda_adapter.call_command(f"python {script_path_work_folder}", in_folder=work_folder_wsl, tail_output=True, output_file=work_folder_wsl / f"{olx.FileName()}_psi4.log")
 
     output_wfn_path = os.path.join(OV.FilePath(), olx.FileName() + ".wfn")
     for try_n in range(10):
       try:
         self.wsl_adapter.copy_to_possible_wsl(work_folder_wsl / f"{olx.FileName()}.wfn", output_wfn_path)
-        self.wsl_adapter.copy_to_possible_wsl(work_folder_wsl / f"{olx.FileName()}_pyscf.log", os.path.join(OV.FilePath(), olx.FileName() + ".wfnlog"))
+        self.wsl_adapter.copy_to_possible_wsl(work_folder_wsl / f"{olx.FileName()}_psi4.log", os.path.join(OV.FilePath(), olx.FileName() + ".wfnlog"))
         break
       except subprocess.CalledProcessError as e:
         print(f"Attempt {try_n + 1}: Failed to copy output WFN file. Retrying...")

@@ -92,7 +92,6 @@ class MapUtil:
     if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
       self.SetXgridView(True)
       return
-    update_controls = True
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):
       # set calcvoid button to 'up' state
       olx.html.SetState('SNUM_CALCVOID_BUTTON','up')
@@ -144,7 +143,7 @@ class MapUtil:
         else:
           olex.m(cf_cmd)
 
-    self.SetXgridView(update_controls)
+    self.SetXgridView(True)
 
 
   def SetXgridView(self, update_controls=False):
@@ -167,7 +166,7 @@ class MapUtil:
       _ = olx.GetVar('map_slider_scale')
     except:
       _ = None
-    if update_controls in (True, 'true') or not _:
+    if update_controls or not _:
 
       self.deal_with_controls()
       olx.html.Update()
@@ -232,10 +231,6 @@ class MapUtil:
   def get_map_scale(self):
     SCALED_TO = 50
 
-    olx.SetVar('map_slider_scale', 10)
-    olx.SetVar('map_min',1)
-    olx.SetVar('map_max',0)
-    olx.SetVar('map_value',0)
     self.value = 0
     self.scale = 0
     map_type = None
@@ -246,8 +241,8 @@ class MapUtil:
     if olx.xgrid.Visible() == "false":
       return
 
-    val_min = float(olx.xgrid.GetMin())  #* -1
-    val_max = float(olx.xgrid.GetMax())  # * -1
+    val_min = float(olx.xgrid.GetMin())
+    val_max = float(olx.xgrid.GetMax())
 
     if abs(val_min) > abs(val_max):
       difference = val_min
@@ -256,7 +251,6 @@ class MapUtil:
       difference = val_max
 
     slider_scale = int(SCALED_TO/difference)
-    olx.SetVar('map_slider_scale', slider_scale)
     self.scale = slider_scale
 
     map_max = int(round((val_min * slider_scale * 0.1),0)) * 10
@@ -296,12 +290,12 @@ class MapUtil:
     elif 275 <= s < 325:
       slider_scale = 300
 
-    olx.SetVar('map_slider_scale', slider_scale* -1)
+    olx.SetVar('map_slider_scale', slider_scale*-1)
 
     _ = round(float(olx.xgrid.Scale()),3)
     OV.SetParam('snum.xgrid.scale', _)
     olx.SetVar('snum.xgrid.scale', _)
-    olx.SetVar('map_value', olx.xgrid.Scale())
+    olx.SetVar('map_value', map_value)
 
 if OV.HasGUI():
   mu = MapUtil()

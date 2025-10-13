@@ -103,11 +103,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     args.append(str(mode))
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'):
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "RI-Fit":
     if is_orca_new():
       auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
       args.append("-RI_FIT")
       args.append(auxiliary_basis)
+      if auxiliary_basis == "auto" or auxiliary_basis == "auto_aux":
+        args.append(OV.GetParam('snum.NoSpherA2.auxiliary_basis_beta'))
       mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))
@@ -115,6 +117,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
       print("Performing refinement without RI fit!")
       time.sleep(10)
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "TFVC":
+    args.append("-TFVC")
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "Becke":
+    args.append("-Becke")
 
   olex_refinement_model = OV.GetRefinementModel(False)
 

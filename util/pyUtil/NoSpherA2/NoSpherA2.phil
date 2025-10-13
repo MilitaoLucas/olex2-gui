@@ -330,8 +330,8 @@ snum{
       .type = bool
     NoSpherA2_ECP = 1
       .type = int
-    NoSpherA2_RI_FIT = False
-      .type = bool
+    NoSpherA2_Partition = '*Hirshfeld' 'RI-Fit' 'TFVC' 'Becke'
+      .type = choice
     NoSpherA2_SF = True
       .type = bool
     NoSpherA2_debug = False

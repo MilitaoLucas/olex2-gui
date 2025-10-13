@@ -136,7 +136,7 @@ routines requiring structure refinement
   smtbx
     .short_caption = Solution & Refinement
     {
-    inelastic_form_factor_table = henke sasaki *brennan
+    resonant_form_factor_table = henke sasaki *brennan
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
@@ -307,6 +307,8 @@ routines requiring structure refinement
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
         program in a previous cycle
+    weighting_scheme = '*default' 'shelx' 'new_shelx' 'unity' 'sigma' 'stl'
+        .type = choice
     refine_extinction = 1
       .type = int
     refine_extinction_tickbox = False
@@ -2421,7 +2423,7 @@ user
       .type = str
     salted_models_list = ""
       .type = str
-    show_ri_fit = False
+    show_partitioning = False
       .type = bool
   }
   Server{

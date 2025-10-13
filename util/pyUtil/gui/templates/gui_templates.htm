@@ -375,6 +375,29 @@ t:gui_notification{
 </table>
 }
 
+t:weight_toggle{
+   <table cellpadding="0" cellspacing="0">
+    <tr>
+      <td>
+        <font size="$GetVar('HtmlFontSizeControls')">
+          <input
+            type="checkbox"
+            height="GetVar(HtmlComboHeight)"
+            fgcolor="GetVar(HtmlFontColour)"
+            bgcolor="GetVar(HtmlTableFirstcolColour)"
+            name="SET_SNUM_REFINEMENT_UPDATE_WEIGHT"
+            checked="spy.GetParam('snum.refinement.update_weight')"
+            onclick="spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))"
+            manage="false"
+            disabled="false"
+            custom="GetVar(custom_button);arrow_width: 20"
+          >
+        </font>
+      </td>
+    </tr>
+  </table>
+}
+
 t:weight_button{
 <b>
 <input
