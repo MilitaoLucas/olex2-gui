@@ -708,6 +708,9 @@ def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
     olex_xgrid.InitSurface(True, dist)
   else:
     olex_xgrid.InitSurface(True, -100)
+  OV.SetVar('map_min', min_v)
+  OV.SetVar('map_max', max_v)
+  OV.SetVar('map_slider_scale', -max_v/2)
   olex.m("xgrid.RenderMode(line)")
   olex_xgrid.SetSurfaceScale(iso)
   olex_xgrid.SetVisible(True)
