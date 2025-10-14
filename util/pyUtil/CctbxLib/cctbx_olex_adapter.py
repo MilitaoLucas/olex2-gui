@@ -415,7 +415,7 @@ class OlexCctbxAdapter(object):
   def get_sin_theta_over_lambda_weighting(self):
     from smtbx.refinement import least_squares
     weight = self.olx_atoms.model['weight']
-    params = dict(a=weight[0] if len(weight) > 0 else 0.1)
+    params = dict(unit_cell = self._xray_structure._unit_cell, a=weight[0] if len(weight) > 0 else 0.1)
     return least_squares.stl_weighting(**params)
 
   def compute_weights(self, fo2, fc, reset_scale_factor = False):
@@ -432,6 +432,8 @@ class OlexCctbxAdapter(object):
       scheme = OV.GetParam("snum.refinement.weighting_scheme", "shelx")
       if scheme == "shelx":
         weighting = self.get_shelxl_weighting()
+      elif scheme.lower() == "default":
+        weighting = self.get_shelxl_weighting()
       elif scheme == "new_shelx":
         weighting = self.get_new_shelxl_weighting()
       elif scheme == "unit":
@@ -446,12 +448,12 @@ class OlexCctbxAdapter(object):
         print("Unknown weighting scheme %s, using shelx!" %scheme)
         weighting = self.get_shelxl_weighting()
       fc2 = fc.as_amplitude_array().data()
-      stl = fo2.sin_theta_over_lambda().data()
+      indices = fo2.indices()
       fo2_d = fo2.data()
       sigmas = fo2.sigmas()
       weights = flex.double(fo2.size(), 1.0)
       for i in range(fo2.size()):
-        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2[i], scale_factor, stl[i])
+        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2[i], indices[i], scale_factor)
       return weights
     else:
       weighting = xray.weighting_schemes.shelx_weighting(*params,
