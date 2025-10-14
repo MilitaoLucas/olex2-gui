@@ -37,7 +37,7 @@ class RefinementChecks(object):
             print(label)
             olex.m("anis %s" % label)
       if Kuhs == True:
-        err_list.append("Kuhs' rule not fulfilled")
+        err_list.append("Warning: Kuhs' rule not fulfilled")
       if err_list:
         self.refinement_has_failed.extend(err_list)
 

@@ -522,14 +522,19 @@ class RunRefinementPrg(RunPrg):
       notes = []
       bg = red
       fg = white
-      for note in self.refinement_has_failed:
+      warning_counter = 0
+      for i, note in enumerate(self.refinement_has_failed):
         if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
           bg = green
           fg = white
           note += "-Mask INFO exists"
+        if "warning" in note.lower():
+          warning_counter += 1
+        if i > 0 and warning_counter > 1:
+          note = note.strip("Warning:").strip("warning:").strip()
         notes.append(note)
       msg = " | ".join(notes)
-      if "warning" in msg.lower():
+      if warning_counter == len(self.refinement_has_failed):
         bg = orange
       gui.set_notification("%s;%s;%s" % (msg, bg, fg))
     elif self.IsClientMode():
@@ -541,7 +546,7 @@ class RunRefinementPrg(RunPrg):
         txt_col='green_text')
     else:
       gui.get_default_notification(
-        txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
+        txt="Refinement Finished\t\tPlease Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
 
   def reset_params(self):
