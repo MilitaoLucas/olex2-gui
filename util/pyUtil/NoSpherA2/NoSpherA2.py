@@ -104,7 +104,6 @@ class NoSpherA2(PT):
 		olx.stopwatch.start("Interfaced executables")
 
 		calls = {
-			'wsl_conda': self.setup_WSL_softwares,
 			'NSA2': self.setup_NoSpherA2,
 			'har_exe': self.setup_har_executables,
 			'discamb_exe': self.setup_discamb,
@@ -113,6 +112,8 @@ class NoSpherA2(PT):
 			'xtb_exe': self.setup_xtb_executables,
 			'ptb_exe': self.setup_ptb_executables,
 		}
+		if sys.platform == "win32":
+			calls["wsl_conda"] = self.setup_WSL_softwares
 
 		from concurrent.futures import ThreadPoolExecutor, as_completed
 		with ThreadPoolExecutor(max_workers=min(8, len(calls))) as ex:
@@ -123,11 +124,11 @@ class NoSpherA2(PT):
 				futures[ex.submit(probe_file, name, files)] = ("probe", f"{name}_exe")
 			for fut in as_completed(futures):
 				kind, name = futures[fut]
-			try:
-				res = fut.result()
-			except Exception as e:
-				print(f"Error setting up {name}: {e}")
-				res = e
+				try:
+					res = fut.result()
+				except Exception as e:
+					print(f"Error setting up {name}: {e}")
+					res = e
 
 		olx.stopwatch.start("basis sets")
 		if os.path.exists(self.NoSpherA2):
