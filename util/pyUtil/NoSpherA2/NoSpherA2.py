@@ -60,6 +60,7 @@ class NoSpherA2(PT):
     if not from_outside:
       self.setup_gui()
 #revert back to the original NoSpherA2 values
+
     olx.stopwatch.start("Initial variables  & Phil")
     self.p_name = p_name
     self.p_path = p_path
@@ -112,7 +113,7 @@ class NoSpherA2(PT):
         'xtb_exe': self.setup_xtb_executables,
         'ptb_exe': self.setup_ptb_executables,
     }
-    
+
     from concurrent.futures import ThreadPoolExecutor, as_completed
     with ThreadPoolExecutor(max_workers=min(8, len(calls))) as ex:
       futures = {}
@@ -122,7 +123,7 @@ class NoSpherA2(PT):
         futures[ex.submit(probe_file, name, files)] = ("probe", f"{name}_exe")
       for fut in as_completed(futures):
         kind, name = futures[fut]
-        try:
+      try:
             res = fut.result()
         except Exception as e:
             print(f"Error setting up {name}: {e}")
@@ -145,54 +146,54 @@ class NoSpherA2(PT):
 
   def setup_WSL_softwares(self):
     try:
-      self.WSLAdapter = WSLAdapter()
-      if self.WSLAdapter.get_wsl_distro_list() == []:
-        print("-- There seems to be a problem with the distro recognition!")
-        print("-- Please check your WSL installation and make sure you have at least one distro installed.\nYou can install one using the Microsoft Store or 'wsl --install Ubuntu'.")
-        raise RuntimeError("No WSL adapter available, hence no Conda support!")
-      if self.WSLAdapter.is_windows and not self.WSLAdapter.is_wsl:
-        print("-- WSL is not available, xharpy and pyscf will not be available!")
-        self.WSLAdapter = None
-      else:
-        self.conda_adapter = CondaAdapter(self.WSLAdapter)
-        if not self.conda_adapter.have_conda:
-          sel = olx.Alert("Conda not available",\
+        self.WSLAdapter = WSLAdapter()
+        if self.WSLAdapter.get_wsl_distro_list() == []:
+          print("-- There seems to be a problem with the distro recognition!")
+          print("-- Please check your WSL installation and make sure you have at least one distro installed.\nYou can install one using the Microsoft Store or 'wsl --install Ubuntu'.")
+          raise RuntimeError("No WSL adapter available, hence no Conda support!")
+        if self.WSLAdapter.is_windows and not self.WSLAdapter.is_wsl:
+          print("-- WSL is not available, xharpy and pyscf will not be available!")
+          self.WSLAdapter = None
+        else:
+          self.conda_adapter = CondaAdapter(self.WSLAdapter)
+          if not self.conda_adapter.have_conda:
+            sel = olx.Alert("Conda not available",\
 """Error: Conda is not available.
 Do you want me to install conda for you?""", "YN", False)
-          if sel == "Y":
-            print("-- Installing micromamba using the official installation script...")
-            try:
-              exports = """
+            if sel == "Y":
+              print("-- Installing micromamba using the official installation script...")
+              try:
+                exports = """
 export MAMBA_ROOT_PREFIX="${HOME}/.micromamba" &&
 export BIN_FOLDER="${HOME}/.local/bin" &&
 export INIT_YES="yes" &&
 export CONDA_FORGE_YES="yes" &&
 export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
-              result = self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -b")
-              if result.returncode != 0:
-                print("-- Failed to install micromamba.")
-                raise subprocess.CalledProcessError(result.returncode, "micromamba installation")
-              result = self.WSLAdapter.call_command("${HOME}/.local/bin/micromamba shell init -s bash")
-              if result.returncode != 0:
-                print("-- Failed to initialize micromamba shell.")
-                raise subprocess.CalledProcessError(result.returncode, "micromamba shell init")
-              else:
-                print("-- Micromamba installed successfully.")
-                print("-- Please restart Olex2 to use it.")
-            except subprocess.CalledProcessError as e:
-              print(f"-- Error installing micromamba: {e}")
-              print("-- Please install conda manually and restart Olex2.")
+                result = self.WSLAdapter.call_command(f"{exports} curl -L micro.mamba.pm/install.sh | bash -s -- -b")
+                if result.returncode != 0:
+                  print("-- Failed to install micromamba.")
+                  raise subprocess.CalledProcessError(result.returncode, "micromamba installation")
+                result = self.WSLAdapter.call_command("${HOME}/.local/bin/micromamba shell init -s bash")
+                if result.returncode != 0:
+                  print("-- Failed to initialize micromamba shell.")
+                  raise subprocess.CalledProcessError(result.returncode, "micromamba shell init")
+                else:
+                  print("-- Micromamba installed successfully.")
+                  print("-- Please restart Olex2 to use it.")
+              except subprocess.CalledProcessError as e:
+                print(f"-- Error installing micromamba: {e}")
+                print("-- Please install conda manually and restart Olex2.")
+            else:
+              print("-- Conda is not available, xharpy and pyscf will not be available!")
+              self.conda_adapter = None
           else:
-            print("-- Conda is not available, xharpy and pyscf will not be available!")
-          self.conda_adapter = None
-        else:
-          print("-- Available conda envs:", self.conda_adapter.get_available_conda_envs())
-          #olx.stopwatch.start("xharpy exe")
-          self.setup_xharpy()
-          #olx.stopwatch.start("pyscf exe")
-          self.setup_pyscf()
-          #olx.stopwatch.start("psi4 exe")
-          self.setup_psi4()
+            print("-- Available conda envs:", self.conda_adapter.get_available_conda_envs())
+            #olx.stopwatch.start("xharpy exe")
+            self.setup_xharpy()
+            #olx.stopwatch.start("pyscf exe")
+            self.setup_pyscf()
+            #olx.stopwatch.start("psi4 exe")
+            self.setup_psi4()
     except Exception as e:
       print(f"-- Error setting up WSL Adapter: {e}")
       self.WSLAdapter = None
