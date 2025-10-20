@@ -124,10 +124,10 @@ class NoSpherA2(PT):
       for fut in as_completed(futures):
         kind, name = futures[fut]
       try:
-            res = fut.result()
-        except Exception as e:
-            print(f"Error setting up {name}: {e}")
-            res = e
+          res = fut.result()
+      except Exception as e:
+          print(f"Error setting up {name}: {e}")
+          res = e
 
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
