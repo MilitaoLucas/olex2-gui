@@ -255,3 +255,8 @@ class initpy_funcs():
           "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
           m="error")
         return
+  def get_phil_extensions(self):
+    dev_path = os.path.join(self.basedir, "util", "pyUtil", "AC7d")
+    if os.path.exists(dev_path):
+      return [os.path.join(dev_path, "ACED.phil")]
+    return [os.path.join(self.basedir, "util", "pyUtil", "AC7", "ACED.phil")]
