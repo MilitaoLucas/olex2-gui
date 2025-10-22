@@ -146,7 +146,7 @@
     <item title="File;Save \tCtrl+S" macro="file">
     <item title="File;Save With Sorting" macro="file -s">
     <item title="File;Save model as... \tCtrl+Shift+S" macro="spy.gui.dialog.SaveModel">
-    <item title="File;Archive... \tCtrl+Shift+Z" macro="spy.gui.create_archive">
+    <item title="File;Archive... \tCtrl+Shift+J" macro="spy.gui.create_archive">
 
     <item title="File;Close" macro="Close">
     <item title="File;Exit" macro="quit">
