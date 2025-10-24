@@ -76,7 +76,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
     self.weighting = weighting
     if self.weighting is None:
-      self.weighting = self.get_shelxl_weighting()
+      weighting_choice = OV.GetParam('snum.refinement.weighting_scheme')
+      if weighting_choice == 'shelx' or weighting_choice == "default":
+        self.weighting = self.get_shelxl_weighting()
+      elif weighting_choice == 'new_shelx':
+        self.weighting = self.get_new_shelxl_weighting()
+      elif weighting_choice == 'unity':
+        self.weighting = self.get_unit_weighting()
+      elif weighting_choice == 'sigma':
+        self.weighting = self.get_sigma_weighting()
+      elif weighting_choice == 'stl':
+        self.weighting = self.get_sin_theta_over_lambda_weighting()
+      else:
+        print("WARNING: unsupported weighting scheme: '%s' is replaced by 'shelx'"\
+            %weighting_choice)
+        self.weighting = self.get_shelxl_weighting()
 
   def run(self,
           build_only=False, #return normal normal equations object
