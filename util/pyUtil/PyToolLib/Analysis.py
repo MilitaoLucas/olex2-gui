@@ -4238,7 +4238,22 @@ class HealthOfStructure():
       flack_esd_f = 0
       if item == "hooft_str":
         if OV.IsEDData():
-          bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
+          value = OV.GetParam('snum.refinement.hooft_str', "ED")
+          if value == "ED" or "(" in value:
+            bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
+          else:
+            _ = float(value)
+            if _ < 1:
+              bg_colour = OV.GetParam('gui.red').hexadecimal
+            elif _ < 3:
+              bg_colour = OV.GetParam('gui.orange').hexadecimal
+            elif _ < 5:  
+              bg_colour = OV.GetParam('gui.green').hexadecimal
+            else:
+              bg_colour = OV.GetParam('gui.dark_green').hexadecimal
+            value = f"{_:.2f}"
+            display = "Z Score"
+
         else:
           if "(" not in str(value):
             value = str(value) + "()"
@@ -4452,7 +4467,7 @@ class HealthOfStructure():
 
     if item == "hooft_str":
       if OV.IsEDData():
-        value_display = "ED"
+        pass
       else:
         x = boxWidth * second_colour_begin
         box = (x,0,boxWidth,boxHeight)
@@ -4553,6 +4568,14 @@ class HealthOfStructure():
           value_display_extra = "m=%.2f" %(multi)
       except:
         pass
+
+    if item == "hooft_str":
+      if value_raw != "ED":
+        _ = OV.GetParam('aced.snum.zscore.delta_R1', None)
+        if _:
+          _ = _.replace("-", "")
+          value_display_extra = f"DeltaR={_}%"
+          value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)

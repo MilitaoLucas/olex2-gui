@@ -8,16 +8,11 @@ import OlexVFS
 import gui
 import olex
 
-
 from ArgumentParser import ArgumentParser
 from History import hist
-
 from olexex import OlexRefinementModel
-
 from olexFunctions import OV, SilentException
-
 debug = OV.IsDebugging()
-
 green = OV.GetParam('gui.green')
 red = OV.GetParam('gui.red')
 orange = OV.GetParam('gui.orange')
@@ -25,18 +20,16 @@ white = "#ffffff"
 black = "#000000"
 table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
-
 from CifInfo import MergeCif
 import time
-
 import shutil
-
 # The listeners expect a function
-
 class ListenerManager(object):
+
   def __init__(self):
     self.onStart_listeners = []
     self.onEnd_listeners = []
+
   def register_listener(self, listener,event):
     if event == "onEnd":
       for l in self.onEnd_listeners:
@@ -56,9 +49,7 @@ class ListenerManager(object):
   def endRun(self, caller):
     for item in self.onEnd_listeners:
       item(caller)
-
 LM = ListenerManager()
-
 class RunPrg(ArgumentParser):
   running = None
 
@@ -80,16 +71,12 @@ class RunPrg(ArgumentParser):
     self.please_run_auto_vss = False
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
-
     if self.demo_mode:
       OV.demo_mode = True
-
     if self.HasGUI:
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
-
     OV.registerFunction(self.run_auto_vss,False,'runprg')
-
     self.params = olx.phil_handler.get_python_object()
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
@@ -185,7 +172,6 @@ class RunPrg(ArgumentParser):
       olex.m('delins list 8')
       OV.SetParam("snum.refinement.use_solvent_mask", True)
     return
-
     if clean:
       from pathlib import Path
       # Define the folder and pattern
@@ -273,7 +259,6 @@ class RunPrg(ArgumentParser):
       olx.phil_handler.save_param_file(
         file_name=snum_phil_fn,
         scope_name='snum', diff_only=True)
-
     ## clear temp folder to avoid problems
     if os.path.exists(self.tempPath) and \
           self.program.name != "olex2.refine" and\
@@ -285,9 +270,7 @@ class RunPrg(ArgumentParser):
               os.remove(r'%s/%s' %(self.tempPath,file_n))
           except OSError:
             continue
-
     self.hkl_src = OV.HKLSrc()
-
     if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
       if os.path.exists(self.hkl_src):
@@ -298,16 +281,13 @@ class RunPrg(ArgumentParser):
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     if self.program.name == "olex2.refine" or self.IsClientMode():
       return
-
     if not os.path.exists(self.tempPath):
       os.mkdir(self.tempPath)
-
     if olx.xf.GetIncludedFiles():
       files = [(os.path.join(self.filePath, x),os.path.join(self.tempPath, x))
         for x in olx.xf.GetIncludedFiles().split('\n')]
     else:
       files = []
-
     files.append((self.hkl_src,
       os.path.join(self.tempPath, self.shelx_alias) + ".hkl"))
     files.append((os.path.join(self.filePath, self.curr_file) + ".ins",
@@ -340,7 +320,6 @@ class RunPrg(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
       olx.DelIns("TREF")
-
     if self.params.snum.refinement.auto.max_peaks:
       max_peaks = olexex.OlexRefinementModel().getExpectedPeaks()
       if max_peaks <= 5:
@@ -389,32 +368,26 @@ class RunPrg(ArgumentParser):
     if not OV.HasGUI():
       return
     import gui.tools
-
     typ = self.prgType.lower()
-
     if typ=='refinement':
       return
-
     extra_msg = ""
     if typ == "refinement":
       extra_msg = "$spy.MakeHoverButton('small-Assign@refinement','ATA(1)')"
     elif typ == "solution" and self.program.name.lower() != "shelxt":
       extra_msg = gui.tools.TemplateProvider.get_template('run_auto_vss_box', force=debug)
-
     message = "<td>%s</td><td align='right'>%s</td>" %(self.post_prg_output_html_message, extra_msg)
-
     d = {
       'program_output_type':"PROGRAM_OUTPUT_%s" %self.prgType.upper(),
       'program_output_name':self.program.name,
       'program_output_content': message
     }
-
     t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
     f_name = OV.FileName() + "_%s_output.html" %self.prgType
     OlexVFS.write_to_olex(f_name, t)
 #    olx.html.Update()
-
 class RunSolutionPrg(RunPrg):
+
   def __init__(self):
     RunPrg.__init__(self)
     self.bitmap = 'solve'
@@ -432,7 +405,6 @@ class RunSolutionPrg(RunPrg):
           if "Y" not in r: # N/C
             self.terminate = True
             return
-
     OV.SetParam('snum.refinement.data_parameter_ratio', 0)
     OV.SetParam('snum.NoSpherA2.use_aspherical', False)
     self.startRun()
@@ -493,9 +465,9 @@ class RunSolutionPrg(RunPrg):
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
-
 class RunRefinementPrg(RunPrg):
   running = None
+
   def __init__(self):
     RunPrg.__init__(self)
     self.bitmap = 'refine'
@@ -522,19 +494,14 @@ class RunRefinementPrg(RunPrg):
       notes = []
       bg = red
       fg = white
-      warning_counter = 0
-      for i, note in enumerate(self.refinement_has_failed):
+      for note in self.refinement_has_failed:
         if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
           bg = green
           fg = white
           note += "-Mask INFO exists"
-        if "warning" in note.lower():
-          warning_counter += 1
-        if i > 0 and warning_counter > 1:
-          note = note.strip("Warning:").strip("warning:").strip()
         notes.append(note)
       msg = " | ".join(notes)
-      if warning_counter == len(self.refinement_has_failed):
+      if "warning" in msg.lower():
         bg = orange
       gui.set_notification("%s;%s;%s" % (msg, bg, fg))
     elif self.IsClientMode():
@@ -546,7 +513,7 @@ class RunRefinementPrg(RunPrg):
         txt_col='green_text')
     else:
       gui.get_default_notification(
-        txt="Refinement Finished\t\tPlease Cite NoSpherA2: DOI 10.1039/D0SC05526C",
+        txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
 
   def reset_params(self):
@@ -575,7 +542,6 @@ class RunRefinementPrg(RunPrg):
       return False
     RunRefinementPrg.running = self
     self.reset_params()
-
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = False
     try:
@@ -691,10 +657,8 @@ class RunRefinementPrg(RunPrg):
     self.post_prg_html()
     self.doHistoryCreation()
     evt.stop()
-
     if self.R1 == 'n/a':
       return
-
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
@@ -716,17 +680,10 @@ class RunRefinementPrg(RunPrg):
       rc.check_disp()
       rc.check_occu()
       rc.check_mu() #This is the L-M mu!
-      if OV.GetParam('snum.refinement.check_corr'):
-        try:
-            rc.check_corr()
-        except Exception as e:
-            print("Could not check Correlsations: %s" % e)
       evt.stop()
       self.refinement_has_failed = rc.refinement_has_failed
-
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
-
     if self.params.snum.refinement.cifmerge_after_refinement:
       evt = olx.stopwatch.start_scope("CifMerge")
       try:
@@ -737,13 +694,11 @@ class RunRefinementPrg(RunPrg):
         print("Failed in CifMerge: '%s'" %str(e))
       evt.stop()
 
-
   class  convergency_listener(object):
     done = False
     convergence_value = 1e3
     def __init__(self) -> None:
       self.convergence_value = OV.GetParam("user.refinement.shelxl_convergence")
-
     def listen_for_convergency(self, line):
       if self.done or self.convergence_value < 0:
         return
@@ -794,7 +749,6 @@ class RunRefinementPrg(RunPrg):
         wR2 = float(olx.Lst('wR2'))
       except:
         pass
-
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
       OV.SetParam('snum.refinement.last_wR2',wR2)
@@ -816,6 +770,8 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, self.R1
 
   def isInversionNeeded(self, force=False):
+    if OV.IsEDData():
+      return
     if self.params.snum.init.skip_routine:
       print ("Skipping absolute structure validation")
       return
@@ -841,9 +797,7 @@ class RunRefinementPrg(RunPrg):
         if twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
           flack = olx.xf.rm.BASF(0)
           OV.SetParam('snum.refinement.flack_str', flack)
-
     parson = OV.GetParam('snum.refinement.parson_str')
-
     hooft = self.method.getHooft()
     if hooft and hasattr(hooft, 'p3_racemic_twin'):
       if (hooft.p3_racemic_twin is not None and
@@ -872,9 +826,7 @@ class RunRefinementPrg(RunPrg):
       output.append("Parson's q: %s" %parson)
     if flack:
       output.append("Flack x: %s" %flack)
-
     print(', '.join(output))
-
     if force and inversion_needed:
       olex.m('Inv -f')
       OV.File('%s.res' %OV.FileName())
@@ -920,7 +872,6 @@ def AnalyseRefinementSource():
       print('HKL file is not in the CIF')
       return False
   return True
-
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)

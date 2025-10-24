@@ -155,6 +155,7 @@ class ImageTools(FontInstances):
     txt = txt.replace("lambda", chr(955))
     txt = txt.replace("theta", chr(952))
     txt = txt.replace("Theta", chr(920))
+    txt = txt.replace("Delta", chr(916))
     txt = txt.replace("sigma", chr(963))
     txt = txt.replace("^2", chr(178))
     txt = txt.replace("^3", chr(179))

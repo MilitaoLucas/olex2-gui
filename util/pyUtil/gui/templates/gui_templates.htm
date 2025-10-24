@@ -375,54 +375,52 @@ t:gui_notification{
 </table>
 }
 
+
+t:weight_total{
+    <td width='12%'>
+      <b>Weight </b>
+    </td>
+    <td width='4%%' align='left'>
+      BUTTON
+    </td>
+    <td width='10%%' align='left'>
+      TEMPLATE
+    </td>
+    }
+
 t:weight_toggle{
-   <table cellpadding="0" cellspacing="0">
-    <tr>
-      <td>
-        <font size="$GetVar('HtmlFontSizeControls')">
-          <input
-            type="checkbox"
-            height="GetVar(HtmlComboHeight)"
-            fgcolor="GetVar(HtmlFontColour)"
-            bgcolor="GetVar(HtmlTableFirstcolColour)"
-            name="SET_SNUM_REFINEMENT_UPDATE_WEIGHT"
-            checked="spy.GetParam('snum.refinement.update_weight')"
-            onclick="spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))"
-            manage="false"
-            disabled="false"
-            custom="GetVar(custom_button);arrow_width: 20"
-          >
-        </font>
-      </td>
-    </tr>
-  </table>
+  <td width='4%' align='left'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+      <input
+        type="checkbox"
+        height="GetVar(HtmlComboHeight)"
+        fgcolor="GetVar(HtmlFontColour)"
+        bgcolor="GetVar(HtmlTableFirstcolColour)"
+        name="SET_SNUM_REFINEMENT_UPDATE_WEIGHT"
+        checked="spy.GetParam('snum.refinement.update_weight')"
+        onclick="spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))>>>>spy.gui.tools.weightGuiDisplay()"
+        manage="false"
+        disabled="false"
+        custom="GetVar(custom_button);arrow_width: 20"
+      >
+    </font>
+  </td>
 }
 
 t:weight_button{
 <b>
 <input
   type="button"
-  name="Weight_1"
-  value="%(curr_1)s | %(sugg_1)s"
-  width="45%%"
+  name="%(name)s"
+  value="%(curr)s | %(sugg)s"
+  width="%(width)s%%"
   height="math.eval(GetVar('HtmlInputheight')-3)"
-  fgcolor="%(col_1)s"
-  bgcolor="GetVar(HtmlTableFirstcolColour)"
-  onclick="UpdateWght>>html.Update"
+  fgcolor="%(fg)s"
+  bgcolor="%(bg)s"
+  onclick="%(click)s"
   custom="border.lightness: 80;highlight.lightness: 110"
 >
 &nbsp;
-<input
-  type="button"
-  name="Weight_2"
-  value="%(curr_2)s | %(sugg_2)s"
-  width="45%%"
-  height="math.eval(GetVar('HtmlInputheight')-3)"
-  fgcolor="%(col_2)s"
-  bgcolor="GetVar(HtmlTableFirstcolColour)"
-  onclick="UpdateWght>>html.Update"
-  custom="border.lightness: 80;highlight.lightness: 110"
->
 </b>}
 
 

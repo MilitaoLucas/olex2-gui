@@ -134,14 +134,12 @@ $-
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-    <td width='12%'>
-      <b>Weight </b>
-    </td>
+
     $spy.gui.tools.weightGuiDisplay()
-    
+
     $spy.gui.tools.make_exti_swat_gui()
 
-    <td width='12%'>
+    <td width='18%'>
       $+
         html.Snippet("gui/snippets/input-combo",
         "name=REFINEMENT_ACTA",
@@ -416,10 +414,8 @@ $spy.MakeHoverButton('toolbar-delete', 'spy.NoSpherA2.wipe_wfn_jobs_folder()')
 <!-- #ignoreif not(spy.IsEDData())
 <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
-<!-- #ignoreif strcmp(spy.GetParam('olex2.debug'),False) -->
 <!-- #includeif strcmp(GetVar(ACED_DEV),True) ed_gui_testing basedir()/util/pyUtil/ACED7d/ED_refine_interface_testing.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Testing;onclick=;2; -->
 <!-- #includeif strcmp(GetVar(ACED_DEV),False) ed_gui_testing basedir()/util/pyUtil/ACED/ED_refine_interface_testing.htm;gui\blocks\tool-h3-off.htm;image=h3-ED-Testing;onclick=;2; -->
-<!-- ignoreif# olex2.debug -->
 
 </table>
 #ignoreif -->
