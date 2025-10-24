@@ -108,6 +108,30 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
+  def GetHeaderParam(self, param, default=None, src=None):
+    if src == None:
+      src =  self.GetRefinementModel(False)['Generic']
+    if src is None:
+      return default
+    toks = param.split(".")
+    for i, t in enumerate(toks):
+      if (i+1) == len(toks):
+        if t == 'value':
+          retVal = src.get('value', default)
+        if t == 'fields':
+          retVal = src.get('fields', default)
+        else:
+          retVal = src['fields'].get(t, default)
+        return (True if retVal.lower() == 'true' \
+                else False if retVal.lower() == 'false' \
+                else retVal) \
+                if isinstance(retVal, str)\
+                else retVal
+      src = src.get(t)
+      if src is None:
+        return default
+    return default
+
   def GetParam(self, variable, default=None, get_list=False):
     retVal = default
     try:
@@ -892,6 +916,31 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
     #v = OV.GetParam(f"user.diagnostics_ed.{param}") if OV.IsEDData() else OV.GetParam(f"user.diagnostics.{param}")
 
+  def IsAcentric(self):
+    from cctbx import sgtbx
+    try:
+      space_group = sgtbx.space_group(str(olx.xf.au.GetCellSymm("hall")))
+      return not space_group.is_centric()
+    except:
+      return False
+
+  def IsChiral(self):
+    from cctbx import sgtbx
+    try:
+      space_group = sgtbx.space_group(str(olx.xf.au.GetCellSymm("hall")))
+      return space_group.is_chiral()
+    except:
+      return False
+
+  def GetStoredParameter(self, keys):
+    from functools import reduce
+    import operator
+    data = olex_core.GetStoredParams()
+    if not data:
+      return
+    value = reduce(operator.getitem, keys.split('.'), data)
+    retVal = True if value.lower() == 'true' else False if value.lower() == 'false' else value
+    return retVal
 
   def IsEDData(self):
     try:
@@ -1341,28 +1390,6 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     self.SetParam('snum.refinement.data', data)
     self.DelVar(olx.var_name_param_N)
 
-  def SetHeaderParam(self, param, value):
-    olx.xf.rm.StoreParam(param, value)
-
-  def GetHeaderParam(self, param, default=None, src=None):
-    if src == None:
-      src = olex_core.GetStoredParams()
-    if src is None:
-      return default
-    toks = param.split(".")
-    for i, t in enumerate(toks):
-      if (i+1) == len(toks):
-        if t == 'value':
-          return src.get('value', default)
-        if t == 'fields':
-          return src.get('fields', default)
-        else:
-          return src['fields'].get(t, default)
-      src = src.get(t)
-      if src is None:
-        return default
-    return default
-
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
@@ -1456,6 +1483,9 @@ OV.registerFunction(OV.GetTag)
 OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
+OV.registerFunction(OV.GetStoredParameter)
+OV.registerFunction(OV.IsChiral)
+OV.registerFunction(OV.IsAcentric)
 OV.registerFunction(OV.IsEDData)
 OV.registerFunction(OV.IsDynamic, False, 'gui')
 OV.registerFunction(OV.IsEDRefinement, False, 'gui')
@@ -1465,5 +1495,3 @@ OV.registerFunction(OV.SetMaxPeaks)
 OV.registerFunction(OV.have_linked_occu)
 OV.registerFunction(OV.IsDebugging)
 OV.registerFunction(OV.IsDeveloping)
-OV.registerFunction(OV.GetHeaderParam)
-OV.registerFunction(OV.SetHeaderParam)
