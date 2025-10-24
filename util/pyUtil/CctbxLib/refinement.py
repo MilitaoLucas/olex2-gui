@@ -556,7 +556,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #   self.hooft.hooft_y, self.hooft.sigma_y)
 
       method = OV.GetHeaderParam('ED.refinement.method', 'Kinematic')
-      _ = OV.GetHeaderParam('ED.z.auto_after_refine', True)
+      _ = OV.GetHeaderParamBool('ED.z.auto_after_refine', True)
     
       if _ and method == 'N-Beam' and OV.IsChiral():
         olex.m('spy.ED.gui_compute_enantiomers()')

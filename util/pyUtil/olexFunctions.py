@@ -108,29 +108,34 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
-  def GetHeaderParam(self, param, default=None, src=None):
+  def GetHeaderParamBool(self, param, default=None) -> bool:
+    rv = self.GetHeaderParam(param, default)
+    if rv and rv.lower() == 'true':
+      return True
+    return False
+
+  def SetHeaderParam(self, param, value):
+    olx.xf.rm.StoreParam(param, value)
+
+  def GetHeaderParam(self, param, default=None, src=None, asBool=False):
     if src == None:
-      src =  self.GetRefinementModel(False)['Generic']
+      src = olex_core.GetStoredParams()
     if src is None:
       return default
     toks = param.split(".")
     for i, t in enumerate(toks):
       if (i+1) == len(toks):
         if t == 'value':
-          retVal = src.get('value', default)
+          return src.get('value', default)
         if t == 'fields':
-          retVal = src.get('fields', default)
+          return src.get('fields', default)
         else:
-          retVal = src['fields'].get(t, default)
-        return (True if retVal.lower() == 'true' \
-                else False if retVal.lower() == 'false' \
-                else retVal) \
-                if isinstance(retVal, str)\
-                else retVal
+          return src['fields'].get(t, default)
       src = src.get(t)
       if src is None:
         return default
     return default
+
 
   def GetParam(self, variable, default=None, get_list=False):
     retVal = default
@@ -1495,3 +1500,7 @@ OV.registerFunction(OV.SetMaxPeaks)
 OV.registerFunction(OV.have_linked_occu)
 OV.registerFunction(OV.IsDebugging)
 OV.registerFunction(OV.IsDeveloping)
+OV.registerFunction(OV.GetHeaderParam)
+OV.registerFunction(OV.GetHeaderParamBool)
+OV.registerFunction(OV.SetHeaderParam)
+
