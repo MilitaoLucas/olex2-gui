@@ -327,7 +327,7 @@ class Method_refinement(Method):
        round(wave_length, 2) == round(1.5414, 2):
       pass
     elif OV.GetParam("olex2.auto_gen_disp"):
-      olx.GenDisp(source='auto')
+      olx.GenDisp(source='auto', f=OV.IsEDData())
 
   def post_refinement(self, RunPrgObject):
     pass

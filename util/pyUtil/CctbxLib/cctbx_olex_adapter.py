@@ -407,7 +407,7 @@ class OlexCctbxAdapter(object):
   def get_unit_weighting(self):
     from smtbx.refinement import least_squares
     return least_squares.unit_weighting()
-  
+
   def get_sigma_weighting(self):
     from smtbx.refinement import least_squares
     return least_squares.sigma_weighting()
@@ -502,7 +502,7 @@ class OlexCctbxAdapter(object):
       crystal_symmetry=self.xray_structure().crystal_symmetry(),
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
-  
+
   # complete - detwins the who index range rather than just measured refs, used in masking
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if filtered:
@@ -1517,7 +1517,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   rm = olexex.OlexRefinementModel()
   sfac = rm.model.get('sfac')
   if sfac:
-    sfac_elms = set([x.lower() for x in sfac.keys()])
+    sfac_elms = set([x.lower() for x in sfac.keys() if 'gaussian' in sfac[x]])
   else:
     sfac_elms = set()
   elms = set([x.lower() for x in rm.get_unique_types(use_charges=True)])
