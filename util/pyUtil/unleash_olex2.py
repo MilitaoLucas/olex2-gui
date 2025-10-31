@@ -123,7 +123,7 @@ set(  ['olex2_fonts.zip',
    )
 win32_sse2_zip_files = \
 set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
-      'python38-win32.zip',    #Pyhton38/..., ..., + python38.dll!!!
+      'python39-win32.zip',    #Pyhton39/..., ..., + python39.dll!!!
       'launch-win32.zip',  #olex2.exe
       'plgl-win32-sse2.zip',
       'olex2-win32-sse2.zip',   #olex2.dll, it will be veryfied first of all
@@ -132,7 +132,7 @@ set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
    ) | portable_zip_files
 win64_zip_files = \
 set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
-      'python38-win64.zip',   #Pyhton38/..., ..., + python38.dll!!!
+      'python39-win64.zip',   #Pyhton39/..., ..., + python39.dll!!!
       'plgl-win64.zip',
       'olex2-win64.zip',  #olex2.dll
       'launch-win64.zip',  #olex2.exe
