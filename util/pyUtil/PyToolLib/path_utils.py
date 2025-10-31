@@ -196,7 +196,7 @@ def Cleanup():
       if sys.platform[:3] == 'win':
         dirs.append("Python38")
         files.append(os.path.join("cctbx", "cctbx_build", "libtbx_env"))
-        files.append(os.path.join("cctbx", "cctbx_sources", "libtbx", "command_line", "chucnk.py"))
+        files.append(os.path.join("cctbx", "cctbx_sources", "libtbx", "command_line", "chunk.py"))
         files.append("python38.dll")
         for f in files:
           f = os.path.join(base_dir, f)
