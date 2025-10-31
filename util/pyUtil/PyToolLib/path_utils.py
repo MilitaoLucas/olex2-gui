@@ -193,6 +193,7 @@ def Cleanup():
       if sys.platform[:3] == 'win':
         dirs.append("Python38")
         files.append("python38.dll")
+        files.append(os.path.join("cctbx", "cctbx_build", "libtbx_env"))
         for f in files:
           f = os.path.join(base_dir, f)
           if os.path.exists(f):
