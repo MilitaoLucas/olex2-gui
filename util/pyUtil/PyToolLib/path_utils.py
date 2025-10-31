@@ -185,6 +185,9 @@ def Cleanup():
   elif os.path.exists(ac6_dir):
     _cleanup_ac5(base_dir)
 
+  cp = os.path.join(base_dir, "_clean.3.9")
+  if os.path.exists(cp):
+    return
   vi = sys.version_info
   if vi.major == 3 and vi.minor == 9:
     try:
@@ -192,8 +195,9 @@ def Cleanup():
       files = []
       if sys.platform[:3] == 'win':
         dirs.append("Python38")
+        dirs.append(os.path.join("cctbx", "cctbx_build", "libtbx_env"))
+        files.append(os.path.join("cctbx", "cctbx_sources", "libtbx", "command_line", "chuck.py"))
         files.append("python38.dll")
-        files.append(os.path.join("cctbx", "cctbx_build", "libtbx_env"))
         for f in files:
           f = os.path.join(base_dir, f)
           if os.path.exists(f):
@@ -222,3 +226,8 @@ def Cleanup():
           print(e)
     except Exception as e:
       print(e)
+  try:
+     f = open(cp, "w")
+     f.close()
+  except Exception:
+    pass
