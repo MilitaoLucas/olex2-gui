@@ -186,44 +186,36 @@ def Cleanup():
     _cleanup_ac5(base_dir)
 
   vi = sys.version_info
-  if vi.major == 3 and vi.minor == 8 and vi.micro == 10:
+  if vi.major == 3 and vi.minor == 9:
     try:
       dirs = []
+      files = []
       if sys.platform[:3] == 'win':
-        import platform
-        sp_dir = os.path.join( "Python38", "Lib", "site-packages")
-        dirs = [
-          os.path.join(sp_dir, r"scipy\sparse\linalg\dsolve"),
-          os.path.join(sp_dir, r"scipy\sparse\linalg\eigen"),
-          os.path.join(sp_dir, r"scipy\sparse\linalg\isolve"),
-        ]
-        if platform.architecture()[0] != "32bit":
-          dirs.append(os.path.join(sp_dir, r"scipy\.libs"))
-        files = [
-          "libopenblas.PYQHXLVVQ7VESDPUVUADXEVJOBGHJPAY.gfortran-win_amd64.dll",
-          "libopenblas.SVHFG5YE3RK3Z27NVFUDAPL2O3W6IMXW.gfortran-win32.dll",
-          ]
-        files.append(os.path.join(sp_dir, "numpy", ".libs", files[0]))
-        files.append(os.path.join(sp_dir, "numpy", ".libs", files[1]))
+        dirs.append("Python38")
+        files.append("python38.dll")
         for f in files:
           f = os.path.join(base_dir, f)
           if os.path.exists(f):
             print("Cleaning up: %s" %f)
             os.remove(f)
       elif sys.platform[:3] == 'lin':
-        sp_dir = os.path.join("lib", "python3.8", "site-packages")
-        dirs = [os.path.join(sp_dir, x) for x in ("scipy-1.2.3-py3.8-linux-x86_64.egg",
-                                                  "numpy-1.18.2-py3.8-linux-x86_64.egg")]
+        dirs.append(os.path.join("lib", "python3.8"))
+        files.append(os.path.join("lib", "libpython3.8.so.1.0"))
       else:
-        sp_dir = os.path.join("lib", "python3.8", "site-packages")
-        #dirs = [os.path.join(sp_dir, x) for x in ("scipy", "numpy")]
+        dirs.append(os.path.join("lib", "python3.8"))
+        files.append(os.path.join("lib", "libpython3.8.dylib"))
+      for f in files:
+        f = os.path.join(base_dir, f)
+        if os.path.exists(f):
+          print("RM: %s" %f)
+          os.remove(f)
       #clean up old numpy/scipy
       for d in dirs:
         d = os.path.join(base_dir, d)
         if not os.path.exists(d):
           continue
         try:
-          print("->%s" %d)
+          print("RMDIR ->%s" %d)
           shutil.rmtree(d)
         except Exception as e:
           print(e)
