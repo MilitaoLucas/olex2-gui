@@ -65,13 +65,15 @@ external_files = {
   'python39-win32.zip': ('olex-port', win32_port_name,
     'action:rmdir Python38', 'action:rm python38.dll', 'action:extract', 'action:delete'),
   #SSE2
-  'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
+  'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name,
+     'action:extract', 'action:rmdir cctbx', 'action:delete'),
   'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   #windows 64
   'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'python39-win64.zip': ('olex-port', win64_port_name,
      'action:rmdir Python38', 'action:rm python38.dll', 'action:extract', 'action:delete'),
-  'cctbx-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-win64.zip': ('olex-port', win64_port_name,
+    'action:extract', 'action:rmdir cctbx', 'action:delete'),
   'olex2-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
