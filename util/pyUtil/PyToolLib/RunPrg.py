@@ -513,7 +513,7 @@ class RunRefinementPrg(RunPrg):
         txt_col='green_text')
     else:
       gui.get_default_notification(
-        txt="Refinement Finished<br>Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
+        txt="Refinement Finished    Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
 
   def reset_params(self):
