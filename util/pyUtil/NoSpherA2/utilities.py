@@ -1108,7 +1108,7 @@ def appendDir(phil_value) -> None:
     return
   old = OV.GetParam(phil_value)
   if old is None:
-    pass
+    old = a
   else:
     old += ";"+a
   OV.SetParam(phil_value, old)

@@ -12,9 +12,9 @@ from olexFunctions import OV
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
-from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs
+from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
@@ -144,6 +144,9 @@ class NoSpherA2(PT):
     print(" ")
 
   def setup_WSL_softwares(self):
+    use = OV.GetParam('olex2.wsl_conda')
+    if not use:
+      return
     try:
       self.WSLAdapter = WSLAdapter()
       if self.WSLAdapter.get_wsl_distro_list() == []:
@@ -1606,6 +1609,35 @@ def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   return t
 OV.registerFunction(hybrid_GUI, False, "NoSpherA2")
+
+def make_NSA2_GUI(method):
+  if method == "Hybrid":
+    return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
+  elif method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
+    return make_ORCA_GUI(is_orca_new())
+  elif method == "pySCF":
+    return make_pySCF_GUI()
+  elif method == "xTB":
+    return make_xtb_GUI()
+  elif method == "XHARPy":
+    return make_xHARPY_GUI()
+  elif method == "pTB":
+    return make_ptb_GUI()
+  elif method == "SALTED":
+    return make_SALTED_GUI()
+  elif method == "Tonto":
+    return make_tonto_GUI()
+  elif method == "fragHAR":
+    return make_frag_HAR_GUI()
+  elif method == "Thakkar IAM":
+    return make_Thakkar_GUI()
+  elif method == OV.GetParam('user.NoSpherA2.discamb_exe'):
+    return make_discambMATT_GUI()
+  elif method == "ELMOdb":
+    return make_ELMOdb_GUI()
+  
+  return "Unknown .tsc source selected."
+OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
 
 def get_NoSpherA2_instance():
   return NoSpherA2_instance
