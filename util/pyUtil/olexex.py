@@ -1862,19 +1862,19 @@ OV.registerFunction(debugInEclipse)
 def pip(package:str):
   import sys
   import os
-  
+
   sys.stdout.isatty = lambda: False
   sys.stdout.encoding = sys.getdefaultencoding()
-  
+
   # Also fix stdin for pip's interactive check
-  if not hasattr(sys.stdin, 'isatty'):
+  if sys.stdin and not hasattr(sys.stdin, 'isatty'):
     sys.stdin.isatty = lambda: False
-  
+
   import numpy as np
   import scipy as sp
   import PIL as PIL
   import locale
-  
+
   np_version = np.__version__
   sp_version = sp.__version__
   PIL_version = PIL.__version__
@@ -1883,18 +1883,22 @@ def pip(package:str):
   dd = OV.DataDir()
   c_fn = os.path.join(dd, "pip_constraints.txt")
   print("Using constraints file: ", c_fn)
-  
+
   with open(c_fn, "w") as c_f:
     c_f.write(f"scipy=={sp_version}\nnumpy=={np_version}\npillow=={PIL_version}")
   from pip._internal import main as pipmain
-  
+
   saved_locale = locale.getlocale(locale.LC_CTYPE)
-  
+  os_get_terminal_size = os.get_terminal_size
   try:
-    pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
+    def get_terminal_size():
+      return 100,100
+    os.get_terminal_size = get_terminal_size
+    pipmain(['install', f'--target={dd}/site-packages-39', package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
     #print(f"{locale.getlocale(locale.LC_ALL)}")
   except Exception as e:
     print("\nFailed to install package %s: %s" %(package, e))
   finally:
+    os.get_terminal_size = os_get_terminal_size
     locale.setlocale(locale.LC_CTYPE, saved_locale)
 OV.registerFunction(pip, False)

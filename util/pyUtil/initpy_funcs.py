@@ -15,7 +15,7 @@ class initpy_funcs():
       if _:
         python_dir = _
       else:
-        python_dir = r"%s\Python38" %self.basedir
+        python_dir = r"%s\Python39" %self.basedir
       sys.path.append(python_dir)
       sys.path.append(r"%s\DLLs" %python_dir)
       sys.path.append(r"%s\Lib" %python_dir)
@@ -28,11 +28,11 @@ class initpy_funcs():
       #it looks like we do not want to set the sys PATH on Linux or Mac!
       set_sys_path = True
       try:
-        set_sys_path = os.path.exists(self.basedir + '/lib/python3.8_')
+        set_sys_path = os.path.exists(self.basedir + '/lib/python3.9_')
       except:
         pass
       if set_sys_path:
-        sys.prefix = self.basedir + '/lib/python3.8'
+        sys.prefix = self.basedir + '/lib/python3.9'
         sys.path = ['',
           sys.prefix,
           sys.prefix + '/lib-tk',
@@ -46,7 +46,7 @@ class initpy_funcs():
           sys.path.append(sys.prefix + '/plat-mac')
         elif sys.platform == 'linux2':
           sys.path.append(sys.prefix + '/plat-linux2')
-    sys.path.append(os.path.join(self.datadir, "site-packages"))
+    sys.path.append(os.path.join(self.datadir, "site-packages-39"))
 
   def onexit(self):
     sps = self.OV.GetVar("launched_server.ports", "")

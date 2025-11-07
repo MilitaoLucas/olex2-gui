@@ -2129,7 +2129,7 @@ Do you want to install this now?""", "YN", False)
           pass
         elif architecture == '64bit':
           arch = '64'
-        fn = "site-packages-x%s.zip" % arch
+        fn = "site-packages-39x%s.zip" % arch
         fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
                          fn,
                          os.path.join(OV.DataDir(), "tmp"))
@@ -2691,6 +2691,8 @@ class PlotIt():
 
     self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+
+    #print(self.plt.style.available)
 
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")

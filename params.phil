@@ -1143,7 +1143,7 @@ user
       .type = str
 
     matplotlib{
-      style = *seaborn-whitegrid fivethirtyeight
+      style = *seaborn-v0_8-whitegrid fivethirtyeight classic seaborn-v0_8-darkgrid
         .type = choice
       colour_map = "tab20c"
         .type = str
