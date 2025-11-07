@@ -1464,6 +1464,9 @@ def GetDPRInfo():
   if data and parameters:
     dpr = data / parameters
 
+  else:
+    dpr = data
+    parameters = 0
   if dpr:
     if dpr in cache:
       return cache[dpr]
@@ -2686,11 +2689,12 @@ class PlotIt():
 
     self.plt = load_matplotlib()
 
-    self.plt.rcParams['xtick.labelsize'] = 12
-    self.plt.rcParams['ytick.labelsize'] = 12
+    self.plt.rcParams['xtick.labelsize'] = self.plt_params.tick_fontsize
+    self.plt.rcParams['ytick.labelsize'] = self.plt_params.tick_fontsize
+    self.plt.rcParams['font.family'] = self.plt_params.font_name
 
-    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
-    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    #self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    #self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
 
     #print(self.plt.style.available)
 
