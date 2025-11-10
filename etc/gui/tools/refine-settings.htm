@@ -313,6 +313,10 @@ Use non-spherical atomic scattering factors
 
 <!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
 
+<td width='20%' align='right'>
+<b>Source of .tsc:</b> 
+</td>
+
 <td width='35%' align='left'>
   
   <font size="$GetVar('HtmlFontSizeControls')">
@@ -338,12 +342,17 @@ Use non-spherical atomic scattering factors
   </font>
 </td>
 
-<td width='20%' align='right'>
-<b>Source of .tsc</b> 
-</td>
 <td>
-$spy.MakeHoverButton('toolbar-delete', 'spy.NoSpherA2.wipe_wfn_jobs_folder()')
+$+
+  html.Snippet("gui/snippets/gui-link-button",
+   "name=reset-wfn",
+   "value=Clear tmp files",
+   "fgcolor=GetVar(gui.red)",
+   "onclick=spy.NoSpherA2.wipe_wfn_jobs_folder()",
+   )
+$-
 </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
