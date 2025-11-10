@@ -678,7 +678,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
         control += " ROKS "
       if soft == "Hybrid":
-        soft = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
+        soft = str(OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part))
+        soft = soft.lstrip()
       elif soft == "fragHAR":
         soft = "ORCA 5.0"
       if is_orca_new():
