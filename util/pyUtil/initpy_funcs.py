@@ -158,7 +158,7 @@ class initpy_funcs():
       self.olx.stopwatch.exec("from NoSpherA2 import NoSpherA2")
     except Exception as e:
       self.olx.Echo(e, m="error")
-      print("Failed to load NoSpherA2 plugin. Please check your installation.")
+      print("Failed to load NoSpherA2. Please check your installation.")
       return
 
   def onstartup(self):

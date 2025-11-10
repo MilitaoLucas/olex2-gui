@@ -16,7 +16,6 @@ from ImageTools import IT
 from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
-from Wfn_Job import is_orca_new
 import numpy as np
 
 def scrub(cmd):
@@ -56,7 +55,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   args = []
   NoSpherA2 = OV.GetVar("NoSpherA2")
   args.append(NoSpherA2)
-  if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
+  if software() == "SALTED":
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
     args.append(salted_model_dir)
@@ -91,13 +90,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append('-skpts')
   if(read_k_pts):
     args.append('-rkpts')
-  software = OV.GetParam('snum.NoSpherA2.source')
-  if "xTB" in software or "pTB" in software:
+  soft = software()
+  if "xTB" in soft or "pTB" in soft:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
-    if "xTB" in software:
+    if "xTB" in soft:
       args.append(str(2))
-    elif "pTB" in software:
+    elif "pTB" in soft:
       args.append(str(3))
   elif "ECP" in basis_name:
     args.append("-ECP")
@@ -551,7 +550,9 @@ def is_disordered():
 OV.registerFunction(is_disordered, False, 'NoSpherA2')
 
 def software():
-  return OV.GetParam('snum.NoSpherA2.source')
+  t = OV.GetParam('snum.NoSpherA2.source')
+  t = t.lstrip().rstrip()
+  return t
 
 def org_min():
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
@@ -577,7 +578,7 @@ def org_min():
 OV.registerFunction(org_min, False, "NoSpherA2")
 
 def org_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
@@ -790,7 +791,7 @@ def make_quick_button_gui():
         name="nosphera2_quick_button_%(type)s_%(qual)s"
         value="%(value)s"
         height="GetVar(HtmlComboHeight)"
-        onclick="spy.SetParam('snum.NoSpherA2.Calculate',True)>>spy.NoSpherA2.%(type)s_%(qual)s()"
+        onclick="spy.NoSpherA2.%(type)s_%(qual)s()"
         bgcolor="%(col)s"
         fgcolor="#ffffff"
         fit="false"
@@ -821,7 +822,23 @@ def calculate_number_of_electrons():
     ne += Z
   return ne, adapter
 
-def write_precise_model_file():
+def source_is_tsc():
+  source = software()
+  if ".tsc" in source or ".tscb" in source:
+    return True
+  else:
+    return False
+OV.registerFunction(source_is_tsc, False, 'NoSpherA2')
+
+def source_is_discamb():
+  source = software()
+  if source == OV.GetParam('user.NoSpherA2.discamb_exe'):
+    return True
+  else:
+    return False
+OV.registerFunction(source_is_discamb, False, 'NoSpherA2')
+
+def write_precise_model_file(model = None, cov_matrix = None, annotations = None):
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
   table_name = ""
@@ -1173,3 +1190,8 @@ def cov_mat():
         print(f"{ann[i].decode('utf-8')} <-> {ann[j].decode('utf-8')}: {corr:.3f}")
 
 OV.registerFunction(cov_mat, False, "NoSpherA2")
+
+def is_orca_new():
+  """Check if the current wavefunction software is ORCA."""
+  return software() in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
+OV.registerFunction(is_orca_new, False, "NoSpherA2")

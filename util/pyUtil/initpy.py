@@ -117,7 +117,7 @@ def do_init():
 
   stopwatch.start("PhAI")
   try:
-    import PhAI
+    import PhAI_adapter
   except Exception as e:
     if OV.IsDebugging() or OV.IsDeveloping():
       olx.Echo(e, m="error")

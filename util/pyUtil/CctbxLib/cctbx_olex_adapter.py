@@ -890,6 +890,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     one_h = None
     if OV.IsNoSpherA2():
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = table_name.lstrip().rstrip()
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)

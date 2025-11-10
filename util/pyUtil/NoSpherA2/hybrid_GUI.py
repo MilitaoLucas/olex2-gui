@@ -114,6 +114,12 @@ def labeled_text(name,label,value,onchange,width_label=20, width_textbox=30):
   <td width="{width_textbox}%" align='center'>
     {textbox(name,value,onchange)}
   </td>'''
+  
+def standalone_text(name,value,onchange,width=20):
+  return f'''
+  <td width="{width}%" align="center">
+    {textbox(name,value,onchange)}
+  </td>'''
 
 def labeled_spin(name,label,value,onchange,width_label=20, width_spinbox=30, min_value=0, max_value=1000):
   return f'''
@@ -349,7 +355,7 @@ def make_hybrid_GUI(softwares_list_string):
       "spy.SetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\',html.GetValue(\'~name~\'))>>html.Update()"%i)
     selected_software = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d'%i)
     t += end_line() + begin_new_line()
-    if selected_software != OV.GetParam('user.NoSpherA2.discamb_exe'):
+    if selected_software != "  " + str(OV.GetParam('user.NoSpherA2.discamb_exe')):
       if selected_software != "ELMOdb":
         t += labeled_combo(
           "NoSpherA2_basis_Part%d@refine"%i,
@@ -511,12 +517,12 @@ def make_Thakkar_GUI():
                   "Cations",
                   "spy.GetParam('snum.NoSpherA2.Thakkar_Cations')",
                   "spy.SetParam('snum.NoSpherA2.Thakkar_Cations', html.GetValue('~name~'))",
-                  width_label=15, width_textbox=50) + \
+                  width_label=15, width_textbox=25) + \
     labeled_text("NoSpherA2_Thakkar_anions@refine",
                   "Anions",
                   "spy.GetParam('snum.NoSpherA2.Thakkar_Anions')",
                   "spy.SetParam('snum.NoSpherA2.Thakkar_Anions', html.GetValue('~name~'))",
-                  width_label=15, width_textbox=50) + \
+                  width_label=15, width_textbox=25) + \
     button("Update_Thakkar_Model",
             "Update Model",
             "spy.NoSpherA2.launch() >> html.Update()",
@@ -547,6 +553,19 @@ def make_ELMOdb_GUI():
   t += "<!-- #include ELMO_specific ../util/pyUtil/NoSpherA2/ELMO_specific.htm;help_ext=NoSpherA2 Extras;1; -->" + \
         partitioning_scheme_line()
   return t
+
+def make_wfn_GUI():
+  return begin_new_line() + \
+      cpu_combo() + \
+      memory_text() + \
+      update_tsc_button()+ \
+      end_line() + \
+      begin_new_line() + \
+      integration_accuracy_combo() + \
+      h_aniso_checkbox() + \
+      no_afix_checkbox() + \
+      end_line() + \
+      partitioning_scheme_line()
 
 def make_ORCA_GUI(new_ORCA = True):
   # Quick buttons
@@ -691,8 +710,7 @@ def make_tonto_GUI():
   t += begin_new_line() + \
         charge_spin() + \
         multiplicity_spin() + \
-        iterative_checkbox() + \
-        end_line()
+        iterative_checkbox()
   full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
   if full_har == False:
     t += update_tsc_button()
@@ -702,10 +720,12 @@ def make_tonto_GUI():
   # Integration Accuracy, H Aniso, No Afix
   t += begin_new_line() + \
         integration_accuracy_combo() + \
+        relativistics_checkbox() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
-  t += labeled_text("NoSpherA2_tonto_cluster_radius@refine",
+  t += begin_new_line() + \
+        labeled_text("NoSpherA2_tonto_cluster_radius@refine",
                       "Cluster r",
                       "spy.GetParam('snum.NoSpherA2.cluster_radius')",
                       "spy.SetParam('snum.NoSpherA2.cluster_radius', html.GetValue('~name~'))",
@@ -723,6 +743,7 @@ def make_tonto_GUI():
                          "spy.SetParam('snum.NoSpherA2.cluster_grow', False)",
                          width=5) + end_line()
   t += partitioning_scheme_line()
+  return t
   
 def make_frag_HAR_GUI():
   # Basis Set, Method, CPUs, Memory
@@ -882,20 +903,20 @@ def make_xHARPY_GUI():
                  "Grid spacing (Ang)",
                  "spy.GetParam('snum.NoSpherA2.xharpy.grid_spacing')",
                  "spy.SetParam('snum.NoSpherA2.xharpy.grid_spacing', html.GetValue('~name~'))",
-                 width_label=30, width_textbox=20) + \
+                 width_label=15, width_textbox=12) + \
     cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line() + labeled_text("NoSpherA2_xHARPY_k_points1",
                                        "K-point grid",
                                         "spy.GetParam('snum.NoSpherA2.xharpy.k_points1')",
                                         "spy.SetParam('snum.NoSpherA2.xharpy.k_points1', html.GetValue('~name~'))",
-                                        width_label=30, width_textbox=20) + \
-    textbox("NoSpherA2_xHARPY_k_points2",
+                                        width_label=15, width_textbox=12) + \
+    standalone_text("NoSpherA2_xHARPY_k_points2",
              "spy.GetParam('snum.NoSpherA2.xharpy.k_points2')",
-             "spy.SetParam('snum.NoSpherA2.xharpy.k_points2', html.GetValue('~name~'))") + \
-    textbox("NoSpherA2_xHARPY_k_points3",
+             "spy.SetParam('snum.NoSpherA2.xharpy.k_points2', html.GetValue('~name~'))", 12) + \
+    standalone_text("NoSpherA2_xHARPY_k_points3",
              "spy.GetParam('snum.NoSpherA2.xharpy.k_points3')",
-             "spy.SetParam('snum.NoSpherA2.xharpy.k_points3', html.GetValue('~name~'))") + \
+             "spy.SetParam('snum.NoSpherA2.xharpy.k_points3', html.GetValue('~name~'))", 12) + \
     labeled_checkbox("NoSpherA2_xHARPY_center_gamma",
                      "Center Gamma",
                      "spy.GetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma')",

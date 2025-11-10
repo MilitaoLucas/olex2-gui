@@ -140,6 +140,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fc = None
       if NoSpherA2:
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        table_name = table_name.lstrip().rstrip()
         fo2, fc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name))
       else:
@@ -275,6 +276,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     fc = None
     if NoSpherA2:
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = table_name.lstrip().rstrip()
       fo2, fc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
     else:
@@ -335,6 +337,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_calc_filtered = None
       if NoSpherA2:
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        table_name = table_name.lstrip().rstrip()
         f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name),
           filtered=False)

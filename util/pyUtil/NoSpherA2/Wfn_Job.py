@@ -12,18 +12,12 @@ BSE = basis_set_api.GetBSEThread()
 import subprocess
 
 from olexFunctions import OV
-from utilities import run_with_bitmap
+from utilities import run_with_bitmap, software, is_orca_new
 
 try:
   p_path = os.path.dirname(os.path.abspath(__file__))
 except Exception as e:
   p_path = os.path.dirname(os.path.abspath("__file__"))
-  
-  
-def is_orca_new():
-  """Check if the current wavefunction software is ORCA."""
-  return OV.GetParam('snum.NoSpherA2.source') in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
-OV.registerFunction(is_orca_new, False, "NoSpherA2")
 
 class wfn_Job(object):
   """This class is used to create a job for a specific wavefunction software."""
@@ -643,6 +637,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     software = OV.GetParam("snum.NoSpherA2.source")
+    software = software.lstrip()
     ECP = False
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -913,7 +908,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         scf_block += "   Guess MORead\n   MOInp \"zero.gbw\"\n"
     if Full_HAR:
       run = OV.GetVar('Run_number')
-      source = OV.GetParam('snum.NoSpherA2.source')
+      source = software()
       if source == "Hybrid":
         run = 0
       if run > 1:
@@ -1722,7 +1717,7 @@ ener = cf.kernel()"""
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     if software is None:
-      software = OV.GetParam('snum.NoSpherA2.source')
+      software = OV.GetParam('snum.NoSpherA2.source').lstrip()
 
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),

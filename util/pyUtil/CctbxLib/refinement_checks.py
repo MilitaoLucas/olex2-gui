@@ -32,7 +32,7 @@ class RefinementChecks(object):
       if problem == True:
         err_list.append("Negative PDF found")
         if force == True:
-          print("Making all anharmonic atoms hamrnoic again!")
+          print("Making all anharmonic atoms harmonic again!")
           for label in label_list:
             print(label)
             olex.m("anis %s" % label)
