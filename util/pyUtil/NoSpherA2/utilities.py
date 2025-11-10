@@ -1191,7 +1191,10 @@ def cov_mat():
 
 OV.registerFunction(cov_mat, False, "NoSpherA2")
 
-def is_orca_new():
+def is_orca_new(given_software = None):
   """Check if the current wavefunction software is ORCA."""
-  return software() in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
+  if given_software is None:
+    return software() in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
+  else:
+    return given_software in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
 OV.registerFunction(is_orca_new, False, "NoSpherA2")

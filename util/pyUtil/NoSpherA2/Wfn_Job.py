@@ -682,7 +682,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         soft = soft.lstrip()
       elif soft == "fragHAR":
         soft = "ORCA 5.0"
-      if is_orca_new():
+      if is_orca_new(soft):
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL:
           if method != "wB97X":
