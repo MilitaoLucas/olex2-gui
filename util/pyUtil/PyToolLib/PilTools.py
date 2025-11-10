@@ -2693,7 +2693,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
-      image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
+      top = 3 + OV.GetParam('gui.font_top_system_adjust', 0)
+      image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
 
     if self.advertise_new:
@@ -3026,7 +3027,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        font_colour=colour,
                        max_width=width
                        )
-
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif", max_height=50):
     dr = draw
@@ -3960,7 +3960,6 @@ class Boxplot(ImageTools):
 TI = timage()
 OV.registerFunction(TI.make_element_buttons, False, 'piltools')
 OV.registerFunction(TI.run_timage, False, 'piltools')
-
 
 
 if __name__ == "__main__":

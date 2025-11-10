@@ -1141,6 +1141,10 @@ user
       .type = float
     highlight_colour = "auto"
       .type = str
+    marker = 'circle'
+      .type = str
+    size = '2'
+      .type = int
 
     matplotlib{
       style = *seaborn-v0_8-whitegrid fivethirtyeight classic seaborn-v0_8-darkgrid
@@ -1169,7 +1173,7 @@ user
         .type = str
       title_fontsize = 20
         .type=int
-      subtitle_fontsize = 14
+      subtitle_fontsize = 12
         .type=int
       subplot_top_gap = 0.95
         .type=float
@@ -1249,6 +1253,8 @@ user
         .type = int(value_min=0)
       font_scale = 0.02
         .type = float(value_min=0.0)
+      marker_shape = *circle square
+        .type = choice
       marker_1 {
         fill = (255,150,50)
           .type = colour
@@ -1266,7 +1272,7 @@ user
           .type = float
       }
       marker_3 {
-        fill = (140,182,206)
+        fill = (255,0,0)
           .type = colour
         border = (80,91,103)
           .type = colour

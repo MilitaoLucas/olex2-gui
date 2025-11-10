@@ -47,9 +47,17 @@ else:
 # self.params.red.rgb = self.params.red.rgb
 
 # Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
-def get_text_size(draw, text, font):
+def get_text_size_old(draw, text, font):
   if hasattr(draw, 'textbbox'):
     bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+  else:
+    return draw.textsize(text, font=font)
+
+# Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
+def get_text_size(draw, text, font):
+  if hasattr(draw, 'textbbox'):
+    bbox = text_bbox(text=text, font=font)
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
   else:
     return draw.textsize(text, font=font)
@@ -875,7 +883,7 @@ class ImageTools(FontInstances):
   def write_text_to_draw(self,
                          draw,
                          txt,
-                         top_left=(1, 0),
+                         top_left=(0, 0),
                          font_name="DefaultFont",
                          font_size=11,
                          font_colour="#000000",
@@ -955,7 +963,8 @@ class ImageTools(FontInstances):
       txt = txt.split('<br>')
       txt_l = txt
     else:
-      txt_l.append(txt)
+      if txt not in txt_l:
+        txt_l.append(txt)
 
     if not self.abort:
       if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != str:
@@ -1630,7 +1639,88 @@ class ImageTools(FontInstances):
       im.save(p)
     else:
       return im
-
+    
+    
+    
+  from PIL import ImageFont
+  def text_bbox(self, font: ImageFont.FreeTypeFont, text: str):
+    """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
+    # 1) Pillow's getbbox (newer versions)
+    try:
+      bbox = font.getbbox(text)
+      if bbox is not None:
+        return bbox
+    except AttributeError:
+      pass
+    except Exception:
+      # some versions may raise for certain inputs; ignore and try fallback
+      pass
+  
+    # 2) Pillow's getlength + font metrics to build bbox if available
+    try:
+      # getlength gives advance width for the string (Pillow >= 8+)
+      if hasattr(font, "getlength"):
+        width = font.getlength(text)
+        ascent, descent = font.getmetrics()
+        # bounding box left, top, right, bottom in pixels relative to baseline: 
+        # we approximate top as -ascent and bottom as descent
+        return (0, -ascent, int(width), descent)
+    except Exception:
+      pass
+  
+    # 3) getmask fallback (works broadly, returns pixel bbox)
+    try:
+      mask = font.getmask(text)
+      bbox = mask.getbbox()  # may be None for empty strings or whitespace
+      if bbox:
+        return bbox
+    except Exception:
+      pass
+  
+    # 4) conservative fallback using getsize (older API)
+    try:
+      w, h = font.getsize(text)
+      ascent, descent = font.getmetrics()
+      # approximate top as 0, bottom as h (not perfect but deterministic)
+      return (0, 0, w, h)
+    except Exception:
+      pass
+  
+    return None
+  
+  def text_advance(font: ImageFont.FreeTypeFont, text: str):
+    """Return the horizontal advance width (float or int)."""
+    try:
+      if hasattr(font, "getlength"):
+        return font.getlength(text)
+    except Exception:
+      pass
+    # fallback to bbox width
+    bbox = text_bbox(font, text)
+    if bbox:
+      left, top, right, bottom = bbox
+      return right - left
+    # final fallback
+    try:
+      return font.getsize(text)[0]
+    except Exception:
+      return 0
+  
+  def line_height(font: ImageFont.FreeTypeFont):
+    """Return a reliable line height to use for multiline layout."""
+    try:
+      ascent, descent = font.getmetrics()
+      # some code adds an extra 1-2px for safety; you can tune this parameter
+      return ascent + descent
+    except Exception:
+      # fallback to getsize of capital A
+      try:
+        return font.getsize("A")[1]
+      except Exception:
+        return 0
+    
+    
+    
   def make_pie_map(self, map_l, size):
 
     width = size[0]
@@ -1695,3 +1785,83 @@ if olx.HasGUI() == 'true':
   OV.registerFunction(IT.make_pie_graph, False, 'it')
 
 OV.registerFunction(IT.trim_image, False, 'it')
+
+
+from PIL import ImageFont
+
+def text_bbox(font: ImageFont.FreeTypeFont, text: str):
+  """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
+  # 1) Pillow's getbbox (newer versions)
+  try:
+    bbox = font.getbbox(text)
+    if bbox is not None:
+      return bbox
+  except AttributeError:
+    pass
+  except Exception:
+    # some versions may raise for certain inputs; ignore and try fallback
+    pass
+
+  # 2) Pillow's getlength + font metrics to build bbox if available
+  try:
+    # getlength gives advance width for the string (Pillow >= 8+)
+    if hasattr(font, "getlength"):
+      width = font.getlength(text)
+      ascent, descent = font.getmetrics()
+      # bounding box left, top, right, bottom in pixels relative to baseline: 
+      # we approximate top as -ascent and bottom as descent
+      return (0, -ascent, int(width), descent)
+  except Exception:
+    pass
+
+  # 3) getmask fallback (works broadly, returns pixel bbox)
+  try:
+    mask = font.getmask(text)
+    bbox = mask.getbbox()  # may be None for empty strings or whitespace
+    if bbox:
+      return bbox
+  except Exception:
+    pass
+
+  # 4) conservative fallback using getsize (older API)
+  try:
+    w, h = font.getsize(text)
+    ascent, descent = font.getmetrics()
+    # approximate top as 0, bottom as h (not perfect but deterministic)
+    return (0, 0, w, h)
+  except Exception:
+    pass
+
+  return None
+
+def text_advance(font: ImageFont.FreeTypeFont, text: str):
+  """Return the horizontal advance width (float or int)."""
+  try:
+    if hasattr(font, "getlength"):
+      return font.getlength(text)
+  except Exception:
+    pass
+  # fallback to bbox width
+  bbox = text_bbox(font, text)
+  if bbox:
+    left, top, right, bottom = bbox
+    return right - left
+  # final fallback
+  try:
+    return font.getsize(text)[0]
+  except Exception:
+    return 0
+
+def line_height(font: ImageFont.FreeTypeFont):
+  """Return a reliable line height to use for multiline layout."""
+  try:
+    ascent, descent = font.getmetrics()
+    # some code adds an extra 1-2px for safety; you can tune this parameter
+    return ascent + descent
+  except Exception:
+    # fallback to getsize of capital A
+    try:
+      return font.getsize("A")[1]
+    except Exception:
+      return 0
+
