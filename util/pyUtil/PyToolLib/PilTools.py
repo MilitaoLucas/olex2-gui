@@ -2689,12 +2689,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       #filefullinfo_colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      
       self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
-      top = 3 + OV.GetParam('gui.font_top_system_adjust', 0)
+      top = 2 + OV.GetParam('gui.font_top_system_adjust', 0)
       image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
+      top -= 3
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
 
     if self.advertise_new:
@@ -3018,7 +3018,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     wX, wY  = get_text_size(draw, txt, font)
     #left_start =  (self.width-wX) - right_margin
-    top = height - wY - 2 * self.scale
+    top = height - wY - 4 * self.scale
     IT.write_text_to_draw(draw,
                        txt,
                        top_left=(left_start, top),

@@ -869,7 +869,7 @@ class ImageTools(FontInstances):
       left_start = left_start
 
     xx = 0
-    while tw > width - left_start - 5 * self.scale:
+    while tw > width - left_start - 12 * self.scale:
       txtbeg = txt[:n]
       txtend = txt [-n:]
       tw = (get_text_size(draw, "%s...%s" %(txtbeg, txtend), font)[0])

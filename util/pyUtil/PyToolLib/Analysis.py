@@ -443,6 +443,8 @@ class Graph(ArgumentParser):
                     reverse_x=False, width=2, colour=None):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
+    self.get_division_spacings_and_scale()
+
     width = width * self.scale
     if not colour:
       colour = self.fitlineColour
@@ -3139,14 +3141,20 @@ class Fobs_Fcalc_plot(Analysis):
     ## Omitted Data
     metadata = {}
     self.make_empty_graph(axis_x = True, square=False)
-    self.plot_function("x", n_points=100)
+    self.draw_fit_line(1, 0)
     have_omitted = False
     self.omit_str = ""
+    self.omit_hkl_str = ""
     if xy_plot.f_obs_omitted and xy_plot.f_obs_omitted.size():
       have_omitted = True
-      self.omit_hkl = xy_plot.omit.get('hkl')
-      self.omit_hkl_str = f"{len(self.omit_hkl)} reflections"
-      if len(xy_plot.indices_omitted) - len(self.omit_hkl) > 0:
+      self.omit_hkl = xy_plot.omit.get('hkl', None)
+      hkl_omit_n = 0
+      if self.omit_hkl:
+        self.omit_hkl_str = f"{len(self.omit_hkl)} reflections"
+        hkl_omit_n = len(self.omit_hkl)
+        
+      if len(xy_plot.indices_omitted) - hkl_omit_n > 0:
+        have_omitted = True
         metadata["name"] = "Omitted Data (OMIT)"
         metadata["idx"] = 1
         data_omitted = Dataset(
@@ -3155,7 +3163,7 @@ class Fobs_Fcalc_plot(Analysis):
           indices=xy_plot.indices_omitted,
           metadata=metadata)
         self.data.setdefault('dataset2', data_omitted)
-        self.omit_str =  f"OMIT {xy_plot.omit.get('s')} {xy_plot.omit.get('2theta')} ({len(xy_plot.indices_omitted) - (len(self.omit_hkl))})".replace(".0", "")
+        self.omit_str =  f"OMIT {xy_plot.omit.get('s')} {xy_plot.omit.get('2theta')} ({len(xy_plot.indices_omitted) - (hkl_omit_n)})".replace(".0", "")
         if " 180" in self.omit_str:
           self.omit_str = ""
       if self.omit_hkl:
@@ -4737,29 +4745,16 @@ def shift_box(box, dx, dy):
 
 def make_data_key(self):
 
+  l = [{'type': 'marker','number': 1,'label': OV.TranslatePhrase('Used Data')}]
   if self.omit_str:
-    key = self.draw_key(({'type': 'marker',
-                         'number': 1,
-                         'label': OV.TranslatePhrase('Used Data')},
-                        {'type':'marker',
-                         'number': 2,
-                         'label': f"{self.omit_str}"}, 
-                        {'type':'marker',
-                         'number': 3,
-                         'label': f"OMIT {self.omit_hkl_str}"}
-                        ))
-  else:
-    key = self.draw_key(({'type': 'marker',
-                         'number': 1,
-                         'label': OV.TranslatePhrase('Used Data')},
-                        {'type':'marker',
-                         'number': 3,
-                         'label': f"OMIT {self.omit_hkl_str}"}
-                        ))
-    
-  self.im.paste(key,
-                (int(self.graph_right - (key.size[0] + 5 * self.scale)),
-                 int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
-                )
+    l.append({'type':'marker','number': 2,'label': f"{self.omit_str}"})
+  if self.omit_hkl_str:
+    l.append({'type':'marker','number': 3,'label': f"{self.omit_hkl_str}"})
+  if self.omit_str or self.omit_hkl_str:
+    key = self.draw_key(l)
+    self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 5 * self.scale)),
+                   int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
+                  )
 
 
