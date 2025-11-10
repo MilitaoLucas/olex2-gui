@@ -21,7 +21,7 @@ except Exception as e:
 
 class wfn_Job(object):
   """This class is used to create a job for a specific wavefunction software."""
-  def __init__(self, parent, name, _dir, software=None):
+  def __init__(self, parent, name, _dir, soft=None):
     self.ELEMENTS = {
   1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O", 9: "F", 10: "Ne",
   11: "Na", 12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar",
@@ -48,7 +48,7 @@ class wfn_Job(object):
     if _dir != '':
       self.full_dir = _dir
       full_dir = _dir
-    self.software = software
+    self.software = soft
     self.input_fn = None
 
     if not os.path.exists(full_dir):
@@ -97,6 +97,8 @@ class wfn_Job(object):
     elif self.software == "xTB" or self.software == "pTB":
       if xyz:
         self.write_xyz_file()
+    else: 
+      print("ERROR: Wavefunction software not recognized.\nPlease select a valid software.\nNo Input file written.")
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -467,8 +469,8 @@ class wfn_Job(object):
           mp2_block += "%mp2 Density relaxed RI true end"
         else:
           control += method + ' '
-      software = OV.GetParam("snum.NoSpherA2.source")
-      if software == "ORCA 5.0" or software == "ORCA 6.0" or software == "ORCA 6.1":
+      soft = software()
+      if soft == "ORCA 5.0" or soft == "ORCA 6.0" or soft == "ORCA 6.1":
         grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
@@ -636,8 +638,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
-    software = OV.GetParam("snum.NoSpherA2.source")
-    software = software.lstrip()
+    soft = software()
     ECP = False
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
@@ -676,11 +677,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
         control += " ROKS "
-      if software == "Hybrid":
-        software = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
-      elif software == "fragHAR":
-        software = "ORCA 5.0"
-      if software == "ORCA 5.0" or software == "ORCA 6.0" or software == "ORCA 6.1":
+      if soft == "Hybrid":
+        soft = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part)
+      elif soft == "fragHAR":
+        soft = "ORCA 5.0"
+      if is_orca_new():
         SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
         if SCNL:
           if method != "wB97X":
@@ -764,7 +765,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if mult == 0:
       mult = 1
     inp.write(textwrap.dedent(f"""\
-      {control}{' NOTRAH' if ('5.0' in software or '6.0' in software) else ''}
+      {control}
       %pal
         {cpu}
       end
@@ -846,6 +847,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         inp.write(atom_type)
         temp_atom = atom_list[i] + ":" + basis_name
         basis.seek(0, 0)
+        typ = ""
         while True:
           line = basis.readline()
           if not line:
@@ -856,7 +858,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             continue
           if "keys=" in line:
             key_line = line.split(" ")
-            type = key_line[key_line.index("keys=") + 2]
+            typ = key_line[key_line.index("keys=") + 2]
           if temp_atom in line:
             break
         line_run = basis.readline()
@@ -864,16 +866,18 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           line_run = basis.readline()
         while ("}" not in line_run):
           shell_line = line_run.split()
-          if type == "turbomole=":
+          n_primitives = ""
+          shell_type = ""
+          if typ == "turbomole=":
             n_primitives = shell_line[0]
             shell_type = shell_line[1]
-          elif type == "gamess-us=":
+          elif typ == "gamess-us=":
             n_primitives = shell_line[1]
             shell_type = shell_line[0]
           shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
           inp.write(shell_gaussian)
           for n in range(0, int(n_primitives)):
-            if type == "turbomole=":
+            if typ == "turbomole=":
               inp.write("  " + str(n + 1) + "   " + basis.readline().replace("D", "E"))
             else:
               inp.write(basis.readline().replace("D", "E"))
@@ -907,7 +911,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if direction != "0":
         scf_block += "   Guess MORead\n   MOInp \"zero.gbw\"\n"
     if Full_HAR:
-      run = OV.GetVar('Run_number')
+      run = int(OV.GetVar('Run_number'))
       source = software()
       if source == "Hybrid":
         run = 0
@@ -928,7 +932,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()
 
-  def write_psi4_input(self,xyz):
+  def write_psi4_input(self,xyz, basis_name=None, cahrge = None):
     if xyz:
       self.write_xyz_file()
       coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
@@ -1712,15 +1716,15 @@ ener = cf.kernel()"""
       inp.close()
 
   @run_with_bitmap('Calculating WFN')
-  def run(self,part=0,software=None,basis_name=None, copy = True):
+  def run(self,part=0,softw=None,basis_name=None, copy = True):
     args = []
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    if software is None:
-      software = str(OV.GetParam('snum.NoSpherA2.source'))
-    software = software.lstrip()
+    if softw is None:
+      softw = str(OV.GetParam('snum.NoSpherA2.source'))
+    softw = softw.lstrip()
     gui.get_default_notification(
-          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
+          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,softw),
           txt_col='black_text')
     if OV.HasGUI():
       olx.html.Update()
@@ -1729,28 +1733,28 @@ ener = cf.kernel()"""
     python_script = "fchk-launch.py"
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
 
-    if software != "pySCF":
-      if software == "ORCA":
+    if softw != "pySCF":
+      if softw == "ORCA":
         args.append(self.parent.orca_exe)
         input_fn = self.name + ".inp"
         args.append(input_fn)
-      if software == "ORCA 5.0" or software == "fragHAR" or software == "ORCA 6.0" or software == "ORCA 6.1":
+      if softw == "ORCA 5.0" or softw == "fragHAR" or softw == "ORCA 6.0" or softw == "ORCA 6.1":
         args.append(self.parent.orca_exe)
         input_fn = self.name + ".inp"
         args.append(input_fn)
-      elif software == "Gaussian03":
+      elif softw == "Gaussian03":
         args.append(self.parent.g03_exe)
         input_fn = self.name + ".com"
         args.append(input_fn)
-      elif software == "Gaussian09":
+      elif softw == "Gaussian09":
         args.append(self.parent.g09_exe)
         input_fn = self.name + ".com"
         args.append(input_fn)
-      elif software == "Gaussian16":
+      elif softw == "Gaussian16":
         args.append(self.parent.g16_exe)
         input_fn = self.name + ".com"
         args.append(input_fn)
-      elif software == "Psi4":
+      elif softw == "Psi4":
         basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
         ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
         mult = OV.GetParam('snum.NoSpherA2.multiplicity')
@@ -1765,7 +1769,7 @@ ener = cf.kernel()"""
         args.append(mem)
         args.append(method)
         python_script = "psi4-launch.py"
-      elif software == "ELMOdb":
+      elif softw == "ELMOdb":
         if self.parent.ubuntu_exe is not None and os.path.exists(self.parent.ubuntu_exe):
           args.append(self.parent.ubuntu_exe)
           args.append('run')
@@ -1780,7 +1784,7 @@ ener = cf.kernel()"""
         args.append(self.name + ".inp")
         args.append(">")
         args.append(self.name + ".out")
-      elif software == "xTB":
+      elif softw == "xTB":
         method = OV.GetParam('snum.NoSpherA2.method')
         args.append(self.parent.xtb_exe)
         if method == "GFN0":
@@ -1819,7 +1823,7 @@ ener = cf.kernel()"""
         if mult != 1:
           args.append("--uhf")
           args.append(str(int(mult)-1))
-      elif software == "pTB":
+      elif softw == "pTB":
         method = OV.GetParam('snum.NoSpherA2.method')
         charge = OV.GetParam("snum.NoSpherA2.charge")
         mult = OV.GetParam("snum.NoSpherA2.multiplicity")
@@ -1840,7 +1844,7 @@ ener = cf.kernel()"""
           args.append(str(int(mult)-1))
       else:
         OV.SetVar('NoSpherA2-Error',"Wfn-Software")
-        raise NameError(f"Wavefunction software '{software}' not recognized!")
+        raise NameError(f"Wavefunction software '{softw}' not recognized!")
   
       out_fn = None
       path = self.full_dir
@@ -1849,7 +1853,7 @@ ener = cf.kernel()"""
         nr = 2
       # if part != 0:
       #  path = os.path.join(path,"Part_"+str(part))
-      if software == "Psi4":
+      if softw == "Psi4":
         out_fn = os.path.join(path, self.name + "_psi4.log")
       if len(args) < 1:
         OV.SetVar('NoSpherA2-Error',"Wfn-Software-Args")
@@ -1857,9 +1861,9 @@ ener = cf.kernel()"""
       else:
         if "orca" in args[0]:
           out_fn = os.path.join(path, self.name + "_orca.log")
-        elif software == "ELMOdb" and "elmo" in args[nr]:
+        elif softw == "ELMOdb" and "elmo" in args[nr]:
           out_fn = os.path.join(path, self.name + ".out")
-        elif software == "pySCF" and"python" in args[nr]:
+        elif softw == "pySCF" and"python" in args[nr]:
           out_fn = os.path.join(path, self.name + "_pyscf.log")
         if "ubuntu" in args[0]:
           print("Starting Ubuntu for wavefunction calculation, please be patient for start")
@@ -1948,7 +1952,7 @@ ener = cf.kernel()"""
       shutil.copy(self.name + ".wfn", os.path.join(self.full_dir, self.name + ".wfn"))
       copy = False
 
-    if software == "ORCA 6.0" or software == "ORCA 5.0" or software == "fragHAR" or software == "ORCA 6.1":
+    if softw == "ORCA 6.0" or softw == "ORCA 5.0" or softw == "fragHAR" or softw == "ORCA 6.1":
       if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
         pass
       else:
@@ -1959,13 +1963,13 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('Orca did not terminate normally!')
-    elif "Gaussian" in software:
+    elif "Gaussian" in softw:
       if 'Normal termination of Gaussian' in open(wfnlog).read():
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
-    elif software == "ELMOdb":
+    elif softw == "ELMOdb":
       if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
         pass
       else:
@@ -1975,7 +1979,7 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
-    elif software == "pTB":
+    elif softw == "pTB":
       if 'cpu  time for all' in open(wfnlog).read():
         pass
       else:
@@ -2039,7 +2043,7 @@ ener = cf.kernel()"""
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
       elif("orca" in args[0]):
-        if software == "ORCA 5.0" or software == "ORCA 6.0" or software == "ORCA 6.1":
+        if is_orca_new():
           if (os.path.isfile(os.path.join(self.full_dir, self.name + ".gbw"))):
             shutil.copy(os.path.join(self.full_dir, self.name + ".gbw"), self.name + ".gbw")
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
@@ -2059,10 +2063,10 @@ ener = cf.kernel()"""
       elif("elmodb" in args[0]):
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
-      elif(software == "Psi4"):
+      elif(softw == "Psi4"):
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
-      elif software == "pySCF":
+      elif softw == "pySCF":
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 

@@ -769,11 +769,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       conv = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d" % part)
       strategy = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d" % part)
       damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d" % part)
-      wfn_object.software = software_part
-      if software_part == "ELMOdb":
+      wfn_object.software = software_part.lstrip()
+      if wfn_object.software == "ELMOdb":
         print("ELMO not yet fully implemented for Hybrid!!! Sorry!!")
         return False
-      elif software_part == "Psi4":
+      elif wfn_object.software == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
         return False
       wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
