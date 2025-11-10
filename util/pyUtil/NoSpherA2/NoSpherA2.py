@@ -1424,6 +1424,9 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       NoSpherA2_instance.softwares.replace("Get Psi4", "Psi4")
       OV.SetParam('snum.NoSpherA2.source', "  Psi4")
       olex.m("html.Update()")
+  elif " -- " in input or "Please Select" in input:
+    print("ERROR: Invalid tsc generator selected.\nYou cannot select a header.\n Please select a valid option.")
+    return
   else:
     OV.SetParam('snum.NoSpherA2.source', input)
     _input = input.lstrip().rstrip()
