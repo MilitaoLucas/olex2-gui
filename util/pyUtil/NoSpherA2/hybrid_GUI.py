@@ -341,7 +341,7 @@ def make_hybrid_GUI(softwares_list_string):
     t += update_tsc_button()
 
   
-  t += end_line() + begin_new_line() + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
+  t += end_line() + begin_new_line() + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + partitioning_scheme_line()
   for i in parts:
     if i == 0:
       continue
@@ -771,8 +771,7 @@ def make_frag_HAR_GUI():
   t += begin_new_line() + \
         charge_spin() + \
         multiplicity_spin() + \
-        iterative_checkbox() + \
-        end_line()
+        iterative_checkbox()
   full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
   if full_har == False:
     t += update_tsc_button()

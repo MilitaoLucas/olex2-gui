@@ -1717,8 +1717,8 @@ ener = cf.kernel()"""
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     if software is None:
-      software = OV.GetParam('snum.NoSpherA2.source').lstrip()
-
+      software = str(OV.GetParam('snum.NoSpherA2.source'))
+    software = software.lstrip()
     gui.get_default_notification(
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,software),
           txt_col='black_text')
@@ -1838,6 +1838,9 @@ ener = cf.kernel()"""
         if mult != 1:
           args.append("-uhf")
           args.append(str(int(mult)-1))
+      else:
+        OV.SetVar('NoSpherA2-Error',"Wfn-Software")
+        raise NameError(f"Wavefunction software '{software}' not recognized!")
   
       out_fn = None
       path = self.full_dir
@@ -1848,6 +1851,9 @@ ener = cf.kernel()"""
       #  path = os.path.join(path,"Part_"+str(part))
       if software == "Psi4":
         out_fn = os.path.join(path, self.name + "_psi4.log")
+      if len(args) < 1:
+        OV.SetVar('NoSpherA2-Error',"Wfn-Software-Args")
+        raise NameError("Wavefunction software arguments not set!\nLikely an internal error.")
       else:
         if "orca" in args[0]:
           out_fn = os.path.join(path, self.name + "_orca.log")
