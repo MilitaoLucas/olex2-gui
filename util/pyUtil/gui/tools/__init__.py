@@ -2687,12 +2687,15 @@ class PlotIt():
       import olex_gui
       dpi = olex_gui.GetPPI()[0]
 
-    self.plt = load_matplotlib()
+    try:
+      self.plt = load_matplotlib()
+    except:
+      return
 
     self.plt.rcParams['xtick.labelsize'] = self.plt_params.tick_fontsize
     self.plt.rcParams['ytick.labelsize'] = self.plt_params.tick_fontsize
     self.plt.rcParams['font.family'] = self.plt_params.font_name
-
+    self.plt.rcParams['legend.fontsize'] = 14
     #self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
     #self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
 
@@ -2901,6 +2904,7 @@ class PlotIt():
       labl = None
       legend_handles = []
       lw = self.plt_params.ax1.line_width
+      i = 0
       for x, y in zip(xs, ys):
         label = None
         y_list.append(y)
@@ -2931,6 +2935,12 @@ class PlotIt():
                      markeredgewidth=self.plt_params.ax1.marker_edge_width,
                      label=labl
                      )
+        if j and lenx - i <= j:
+          legend_handles.append(_)
+        i += 1
+        
+        
+        
       try:
         ## LAbel datapiont?
         ax.plot.xticks(range(len(x)), y) # Redefining x-axis labels
@@ -2939,9 +2949,7 @@ class PlotIt():
       except:
         pass
 
-      if j and lenx - i <= j:
-        legend_handles.append(_)
-      i += 1
+
       colour = None
       ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)

@@ -110,6 +110,8 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def GetHeaderParamBool(self, param, default=None) -> bool:
     rv = self.GetHeaderParam(param, default)
+    if type(rv) == bool:
+      return rv
     if rv and rv.lower() == 'true':
       return True
     return False
