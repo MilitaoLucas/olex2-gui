@@ -440,7 +440,7 @@ class Graph(ArgumentParser):
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
                     x_intercept=None, write_text=False, R=None, rotate_text=False,
-                    reverse_x=False, width=2, colour=None):
+                    reverse_x=False, width=1, colour=None):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
     self.get_division_spacings_and_scale()
@@ -3141,7 +3141,6 @@ class Fobs_Fcalc_plot(Analysis):
     ## Omitted Data
     metadata = {}
     self.make_empty_graph(axis_x = True, square=False)
-    self.draw_fit_line(1, 0)
     have_omitted = False
     self.omit_str = ""
     self.omit_hkl_str = ""
@@ -3174,6 +3173,7 @@ class Fobs_Fcalc_plot(Analysis):
         data_omitted = True
         data_common = self.get_common_data(xy_plot, metadata)
         self.data.setdefault('dataset3', data_common)
+    self.draw_fit_line(1, 0, colour="#ababab")
     self.draw_pairs()
     if have_omitted:
       make_data_key(self)

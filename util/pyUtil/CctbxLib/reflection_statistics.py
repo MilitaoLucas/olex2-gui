@@ -403,8 +403,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     fc = flex.abs(f_calc_filtered.data())
     fo /= k
     fit = flex.linear_regression(fc, fo)
-    ShowFitSummary(fit)
-
+    #ShowFitSummary(fit)
     plot = empty()
     plot.indices = f_obs_filtered.indices()
     plot.f_obs = fo
@@ -649,7 +648,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.amplitudes_array = f_obs.as_amplitude_array()
     fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
     corr = flex.linear_correlation(self.x[5:-5], self.y[5:-5])
-    ShowFitSummary(fit)
+    #ShowFitSummary(fit)
     assert fit.is_well_defined()
     self.fit_y_intercept = fit.y_intercept()
     self.fit_slope = fit.slope()
