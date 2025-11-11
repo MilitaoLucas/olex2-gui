@@ -1859,6 +1859,9 @@ ener = cf.kernel()"""
       if len(args) < 1:
         OV.SetVar('NoSpherA2-Error',"Wfn-Software-Args")
         raise NameError("Wavefunction software arguments not set!\nLikely an internal error.")
+      elif nr >= len(args):
+        OV.SetVar('NoSpherA2-Error',"Wfn-Software-Args-Index")
+        raise NameError("Wavefunction software argument index out of range!\nLikely an internal error.")
       else:
         if "orca" in args[0]:
           out_fn = os.path.join(path, self.name + "_orca.log")

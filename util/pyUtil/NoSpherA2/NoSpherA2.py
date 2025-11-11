@@ -1432,10 +1432,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
     _input = input.lstrip().rstrip()
     if ".tsc" in _input:
       OV.SetParam('snum.NoSpherA2.file', _input)
-    _ = olx.html.GetItemState('h3-NoSpherA2-extras')
-    if _ == "0":
-      OV.setItemstate("h3-NoSpherA2-extras 2")
-      OV.setItemstate("h3-NoSpherA2-extras 1")  # This is a hack to force the update of the GUI without doing all of html
+    olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != OV.GetParam('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, adapter = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
