@@ -2132,7 +2132,9 @@ Do you want to install this now?""", "YN", False)
           pass
         elif architecture == '64bit':
           arch = '64'
-        fn = "site-packages-39x%s.zip" % arch
+        pv = sys.version_info
+        py_version = "%s%s" %(pv.major, pv.minor)
+        fn = "site-packages-%sx%s.zip" %(py_version, arch)
         fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
                          fn,
                          os.path.join(OV.DataDir(), "tmp"))

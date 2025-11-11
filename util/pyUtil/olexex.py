@@ -1891,10 +1891,13 @@ def pip(package:str):
   saved_locale = locale.getlocale(locale.LC_CTYPE)
   os_get_terminal_size = os.get_terminal_size
   try:
-    def get_terminal_size():
+    def get_terminal_size(handle=None):
       return 100,100
     os.get_terminal_size = get_terminal_size
-    pipmain(['install', f'--target={dd}/site-packages-39', package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
+    pv = sys.version_info
+    py_version = "%s%s" %(pv.major, pv.minor)
+    pipmain(['install', f'--target={dd}/site-packages-%s' %py_version,
+             package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
     #print(f"{locale.getlocale(locale.LC_ALL)}")
   except Exception as e:
     print("\nFailed to install package %s: %s" %(package, e))

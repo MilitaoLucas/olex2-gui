@@ -7,6 +7,9 @@ class initpy_funcs():
     self.olx = olx
     self.basedir = basedir
     self.datadir = datadir
+    pv = sys.version_info
+    self.py_version = "%s%s" %(pv.major, pv.minor)
+    self.py_ds_version = "%s.%s" %(pv.major, pv.minor)
 
   def set_python_paths(self):
     if sys.platform[:3] == 'win':
@@ -15,7 +18,7 @@ class initpy_funcs():
       if _:
         python_dir = _
       else:
-        python_dir = r"%s\Python39" %self.basedir
+        python_dir = r"%s\Python%s" %(self.basedir, self.py_version)
       sys.path.append(python_dir)
       sys.path.append(r"%s\DLLs" %python_dir)
       sys.path.append(r"%s\Lib" %python_dir)
@@ -32,7 +35,7 @@ class initpy_funcs():
       except:
         pass
       if set_sys_path:
-        sys.prefix = self.basedir + '/lib/python3.9'
+        sys.prefix = self.basedir + '/lib/python%s' %self.py_ds_version
         sys.path = ['',
           sys.prefix,
           sys.prefix + '/lib-tk',
@@ -46,7 +49,7 @@ class initpy_funcs():
           sys.path.append(sys.prefix + '/plat-mac')
         elif sys.platform == 'linux2':
           sys.path.append(sys.prefix + '/plat-linux2')
-    sys.path.append(os.path.join(self.datadir, "site-packages-39"))
+    sys.path.append(os.path.join(self.datadir, "site-packages-%s" %self.py_version))
 
   def onexit(self):
     sps = self.OV.GetVar("launched_server.ports", "")

@@ -501,7 +501,7 @@ def getAvailableModules_():
       print("No modules evailable")
       return
     xml = et.fromstring(f)
-    for m in xml.getchildren():
+    for m in xml:
       if m.tag == "module" or m.tag == "internal_module":
         try:
           module = Module(m.find("title").text,

@@ -110,16 +110,14 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def GetHeaderParamBool(self, param, default=None) -> bool:
     rv = self.GetHeaderParam(param, default)
-    if type(rv) == bool:
-      return rv
-    if rv and rv.lower() == 'true':
+    if rv and str == type(rv) and rv.lower() == 'true':
       return True
     return False
 
   def SetHeaderParam(self, param, value):
     olx.xf.rm.StoreParam(param, value)
 
-  def GetHeaderParam(self, param, default=None, src=None, asBool=False):
+  def GetHeaderParam(self, param, default=None, src=None):
     if src == None:
       src = olex_core.GetStoredParams()
     if src is None:
