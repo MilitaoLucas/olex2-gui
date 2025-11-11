@@ -250,17 +250,17 @@ def relativistics_checkbox():
 def h_aniso_checkbox():
   return labeled_checkbox("NoSpherA2_H_Aniso@refine",
                          "H Aniso",
-                         "spy.GetParam(\'snum.NoSpherA2.H_Aniso\')",
-                         "spy.SetParam(\'snum.NoSpherA2.H_Aniso\',\'True\')",
-                         "spy.SetParam(\'snum.NoSpherA2.H_Aniso\',\'False\')",
+                         "spy.GetParam(\'snum.NoSpherA2.h_aniso\')",
+                         "spy.SetParam(\'snum.NoSpherA2.h_aniso\',\'True\')",
+                         "spy.SetParam(\'snum.NoSpherA2.h_aniso\',\'False\')",
                          width=18)
   
 def no_afix_checkbox():
   return labeled_checkbox("NoSpherA2_Afix_remove@refine",
                          "No Afix",
-                         "spy.GetParam(\'snum.NoSpherA2.H_Afix\')",
-                         "spy.SetParam(\'snum.NoSpherA2.H_Afix\',\'True\')",
-                         "spy.SetParam(\'snum.NoSpherA2.H_Afix\',\'False\')",
+                         "spy.GetParam(\'snum.NoSpherA2.h_afix\')",
+                         "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'True\')",
+                         "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'False\')",
                          width=20)
 
 def disorder_groups_text():

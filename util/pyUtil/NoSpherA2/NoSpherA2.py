@@ -740,7 +740,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
     # add_info_to_tsc()
     if not OV.GetParam('snum.NoSpherA2.full_HAR'):
-      OV.SetParam('snum.NoSpherA2.source', "  " + OV.GetParam('snum.NoSpherA2.file'))
+      fn = str(OV.GetParam('snum.NoSpherA2.file'))
+      OV.SetParam('snum.NoSpherA2.source', os.path.join(job.full_dir, fn))
     
     return True
 
@@ -1651,14 +1652,16 @@ def get_sources_string():
     tsc_files_raw = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
     tsc_files_proc = ""
     for f in tsc_files_raw.split(';'):
-      tsc_files_proc += f"  {f}\n"
+      if f == "":
+        continue
+      tsc_files_proc += f"  {f};"
     calculator_header = " -- Wavefunction Calculators -- "
     calculators = NoSpherA2_instance.getwfn_softwares()
     wavefunction_files_header = " -- From Wavefunction File -- "
     existing_wfns_raw = gui.GetFileListAsDropdownItems(OV.FilePath(),'wfn;wfx;gbw;molden;xtb')
     existing_wfns = ""
     for f in existing_wfns_raw.split(';'):
-        existing_wfns += f"  {f}\n"
+        existing_wfns += f"  {f};"
     sources = ";".join([PS, tsc_header, tsc_files_proc, calculator_header, calculators, wavefunction_files_header, existing_wfns])
     return sources
 OV.registerFunction(get_sources_string, False, "NoSpherA2")
