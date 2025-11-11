@@ -94,7 +94,8 @@ external_files = {
   'licence.rtf': ('olex-install', 'olex-update'),
   'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
   'textures.zip': ('olex-update', 'action:extract', 'action:delete'),
-  'ac5.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'ac-py39.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'ac-py313.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
@@ -119,7 +120,6 @@ set(  ['olex2_fonts.zip',
        'acidb.zip',
        'documentation.zip',
        'textures.zip',
-       'ac5.zip',
        'help.zip',
        'sample_data.zip',
        'FragmentDB.zip', #HP 13/02/19
@@ -132,16 +132,18 @@ set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
       'launch-win32.zip',  #olex2.exe
       'plgl-win32-sse2.zip',
       'olex2-win32-sse2.zip',   #olex2.dll, it will be veryfied first of all
-      'hart-win32.zip'
+      'hart-win32.zip',
+       'ac-py39.zip',
       ]
    ) | portable_zip_files
 win64_zip_files = \
 set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
-      'python39-win64.zip',   #Pyhton39/..., ..., + python39.dll!!!
+      'python313-win64.zip',   #Pyhton39/..., ..., + python39.dll!!!
       'plgl-win64.zip',
       'olex2-win64.zip',  #olex2.dll
       'launch-win64.zip',  #olex2.exe
-      'hart-win64.zip'
+      'hart-win64.zip',
+       'ac-py313.zip',
       ]
    ) | portable_zip_files
 mac64_zip_files = \
@@ -151,6 +153,7 @@ set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
       'plgl-mac64.zip',
       'lib-mac64.zip',
       'hart-mac64.zip',
+       'ac-py313.zip',
       ]
    ) | portable_zip_files
 linux64_zip_files = \
@@ -159,7 +162,8 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'olex2-linux64.zip',    #olex2 executable
       'plgl-linux64.zip',
       'unirun-linux64.zip',
-      'hart-lin64.zip'
+      'hart-lin64.zip',
+       'ac-py313.zip',
       ]
    ) | portable_zip_files
 
