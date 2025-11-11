@@ -27,10 +27,10 @@ build_def = {
   'linux-64bit':
 #    (('/mnt/hgfs/cctbx/cctbx_latest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_latest/modules/cctbx_project/',
 #      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
-  (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py38/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+  (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py313/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-linux64.zip', '-j6'),),
 'darwin-64bit':
-  (('~/build/svn/cctbx/build_mac64_py38/', '~/build/svn/cctbx/modules/cctbx_project/',
+  (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64.zip', '-j3'),),
 
 'win32-32bit':
@@ -41,7 +41,7 @@ build_def = {
 'win32-64bit':
   #[('e:/cctbx/cctbx_latest/build_win64/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
   #  'e:/tmp/cctbx/', 'cctbx-win64.zip', '-j6')],
-  [('d:/devel/cctbx/cctbx_latest/build_win64_py39/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+  [('d:/devel/cctbx/cctbx_latest/build_win64_py313/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
     'd:/tmp/cctbx/', 'cctbx-win64.zip', '-j10')],
 }
 

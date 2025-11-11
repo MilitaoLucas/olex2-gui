@@ -58,7 +58,8 @@ external_files = {
   'olex2-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   'unirun-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   'cctbx-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'lib-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'lib-linux64.zip': ('olex-port', linux64_port_name,
+    'action:rmdir lib', 'action:extract', 'action:delete'),
   'hart-lin64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
