@@ -1850,7 +1850,7 @@ ener = cf.kernel()"""
       out_fn = None
       path = self.full_dir
       nr = 0
-      if sys.platform[:3] == 'win':
+      if sys.platform[:3] == 'win' and "ubuntu" in args[0]:
         nr = 2
       # if part != 0:
       #  path = os.path.join(path,"Part_"+str(part))
