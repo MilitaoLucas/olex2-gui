@@ -19,6 +19,8 @@ if __name__ == '__main__':
 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
+py313_port_name = 'port-py313'
+
 mac64_port_name = 'port-mac64'
 mac64_port_zip_name = 'olex2-mac64-intel.zip'
 mac64_port_prefix = 'olex2.app/Contents/MacOS/'
@@ -69,6 +71,7 @@ external_files = {
   'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name,
      'action:extract', 'action:rmdir cctbx', 'action:delete'),
   'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
+  'ac-py39.zip': ('olex-port', win32_port_name, 'olex-update', 'action:extract', 'action:delete'),
   #windows 64
   'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'python313-win64.zip': ('olex-port', win64_port_name,
@@ -78,6 +81,9 @@ external_files = {
   'cctbx-win64.zip': ('olex-port', win64_port_name,
     'action:extract', 'action:rmdir cctbx', 'action:delete'),
   'olex2-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  # py313 AC
+  'ac-py313.zip': ('olex-port', py313_port_name,
+      'olex-update', 'action:extract', 'action:delete'),
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -94,8 +100,6 @@ external_files = {
   'licence.rtf': ('olex-install', 'olex-update'),
   'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
   'textures.zip': ('olex-update', 'action:extract', 'action:delete'),
-  'ac-py39.zip': ('olex-update', 'action:extract', 'action:delete'),
-  'ac-py313.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
@@ -639,7 +643,7 @@ class IndexEntry:
       item.SaveToFile(idx_file, indent)
 
 def filter_installer_file(only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
-  portable_files = set([])
+  portable_files = set()
   for f in installer_files:
     stats, props = info(f, f)
     if props is None: continue
@@ -748,7 +752,7 @@ threads = []
 if platforms.get("win32"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": set([win32_sse2_port_name,win32_port_name]),
+      "port_props": {win32_sse2_port_name,win32_port_name},
       "zip_name": win32_sse2_port_zip_name,
       "port_zips": win32_sse2_zip_files,
       "prefix": win32_sse2_port_prefix,
@@ -762,7 +766,7 @@ if platforms.get("win32"):
 if platforms.get("win64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": set([win64_port_name]),
+      "port_props": {win64_port_name, py313_port_name},
       "zip_name": win64_port_zip_name,
       "port_zips": win64_zip_files,
       "prefix": win64_port_prefix,
@@ -777,7 +781,7 @@ if platforms.get("win64"):
 if platforms.get("lin64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": set([linux64_port_name]),
+      "port_props": {linux64_port_name, py313_port_name},
       "zip_name": linux64_port_zip_name,
       "port_zips": linux64_zip_files,
       "prefix": linux64_port_prefix,
@@ -792,7 +796,7 @@ if platforms.get("lin64"):
 if platforms.get("mac64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": set([mac64_port_name]),
+      "port_props": {mac64_port_name, py313_port_name},
       "zip_name": mac64_port_zip_name,
       "port_zips": mac64_zip_files,
       "prefix": mac64_port_prefix,
