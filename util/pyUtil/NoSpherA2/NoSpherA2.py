@@ -741,7 +741,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     # add_info_to_tsc()
     if not OV.GetParam('snum.NoSpherA2.full_HAR'):
       fn = str(OV.GetParam('snum.NoSpherA2.file'))
-      OV.SetParam('snum.NoSpherA2.source', os.path.join(job.full_dir, fn))
+      fol = OV.FilePath()
+      OV.SetParam('snum.NoSpherA2.source', os.path.join(fol, fn))
     
     return True
 

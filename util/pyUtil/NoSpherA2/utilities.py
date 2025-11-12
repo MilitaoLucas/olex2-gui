@@ -198,7 +198,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
-    if software == "Hybrid":
+    if soft == "Hybrid":
       args.append("-mtc_mult")
       for i in range(1, min(6, len(groups) + 1)):
         m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
@@ -237,9 +237,9 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
           args.append(str(c))
       args.append("-mtc_ECP")
       for i in range(len(groups)):
-        if software == "xTB":
+        if soft == "xTB":
           args.append("2")
-        elif software == "pTB":
+        elif soft == "pTB":
           args.append("3")
         elif "ECP" in basis_name:
           args.append("1")
