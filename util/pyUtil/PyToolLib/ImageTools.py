@@ -15,6 +15,7 @@ global sizedraw
 sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
 import math
+import sys
 
 #debug = OV.IsDebugging()
 debug = False
@@ -233,7 +234,7 @@ class ImageTools(FontInstances):
     self.gui_green = OV.GetParam('gui.green').rgb
     self.gui_blue = OV.GetParam('gui.blue').rgb
     self.gui_grey = OV.GetParam('gui.grey').rgb
-
+    
   def dec2hex(self, n):
     """return the hexadecimal string representation of integer n"""
     return "%X" % n
@@ -826,6 +827,11 @@ class ImageTools(FontInstances):
                     "rel_adjust":+0.3},
       }
     self.font_peculiarities.setdefault("DefaultFont", self.font_peculiarities["Signika"])
+
+  def sys_top_adjust(self, top, scale=1): ##PY39
+    if sys.version_info.major == 3 and sys.version_info.minor <= 8:
+      top += round(0.5 * scale)
+    return top
 
   def get_text_modifications(self):
     if self.translate:

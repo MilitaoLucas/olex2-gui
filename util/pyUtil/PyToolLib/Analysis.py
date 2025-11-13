@@ -351,7 +351,7 @@ class Graph(ArgumentParser):
     self.bTop = round(0.013 * self.imY)
     self.currX = 0
     #self.currY = 0 #PY38
-    self.currY = 13  *  self.scale#PY39
+    self.currY = 4  *  self.scale#PY39
     size = ((int(self.imX), int(self.imY)))
 
     im = Image.new('RGB', size, self.pageColour)

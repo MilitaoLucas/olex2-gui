@@ -472,13 +472,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       data = self.normal_eqns.r1_factor()[1]
     except:
       data = self.reflections.f_sq_obs_merged.size()
+    OV.SetDataParamN(data, parameters)
     try:
       retVal = f"{self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (I >= 2u(I)g) | {self.normal_eqns.r1_factor(5)[1]} (I >= 5u(I)) [hkl: {self.reflections.f_sq_obs_merged.size()}]"
       return retVal
     except:
      pass
 
-    OV.SetDataParamN(data, parameters)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
