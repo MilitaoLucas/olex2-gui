@@ -2694,7 +2694,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
       top -= 1 * self.scale
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
-      image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type="")
+      if OV.IsDebugging():
+        image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type="")
 
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
