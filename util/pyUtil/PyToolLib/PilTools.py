@@ -13,8 +13,6 @@ import olexex
 from ImageTools import ImageTools, IT, get_text_size
 from ArgumentParser import ArgumentParser
 from olexFunctions import OV
-#debug = OV.IsDebugging()
-debug = False
 
 import olex_fs
 
@@ -752,7 +750,6 @@ class timage(ArgumentParser):
 
     self.font_name = "DefaultFont"
     self.timer = False
-    self.debug = False
     if self.timer:
       import time
       self.time = time
@@ -2672,7 +2669,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-          if self.debug:
+          if OV.IsDebugging():
             print("FROM CACHE: %s (%s)" %(item, state))
 
           nam = item
@@ -2697,7 +2694,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
       top -= 1 * self.scale
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
-      #image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type)
+      image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type="")
 
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -2749,7 +2746,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-    if self.debug:
+    if OV.IsDebugging():
       print("FROM SCRATCH: %s" %item)
 
     nam = item
@@ -3701,7 +3698,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return "Done"
 
   def info_bitmaps(self, specific=None, colour='#ff4444', factor = 4):
-    if not debug and specific:
+    if not OV.IsDebugging() and specific:
       if OlexVFS.exists("%s.png" %specific):
         return
 
