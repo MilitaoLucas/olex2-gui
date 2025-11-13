@@ -129,13 +129,17 @@ external_files = {
   'ac-py313.zip': ('olex-port', win64_next_port_name, lin64_next_port_name, mac64_next_port_name,
     'action:rmdir util/pyUtil/AC7', 'action:rmdir util/pyUtil/ACED', 'action:rmdir util/pyUtil/RPAC',
     'action:extract', 'action:delete'),
+  #as it gets deleted by the above, it cannot get first in the update and then get deleted...
+  'RPAC.zip':('olex-port',
+    win32_port_name, win64_port_name, lin64_port_name, mac64_port_name,
+    win64_next_port_name, lin64_next_port_name, mac64_next_port_name,
+    'action:extract', 'action:delete'), #HP 08/03/19
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'help.zip': ('olex-update', 'action:extract', 'action:delete'),
   'sample_data.zip': ('olex-update', 'action:extract', 'action:delete'),
   'FragmentDB.zip':('olex-update', 'action:extract', 'action:delete'), #HP 13/02/19
-  'RPAC.zip':('olex-update', 'action:extract', 'action:delete'), #HP 08/03/19
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   'splash.jpg': ('olex-install', 'olex-update'),
   #'splash.png': ('olex-install', 'olex-update'),
