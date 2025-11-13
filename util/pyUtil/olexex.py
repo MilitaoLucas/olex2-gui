@@ -1894,11 +1894,12 @@ def pip(package:str):
     def get_terminal_size(handle=None):
       return 100,100
     os.get_terminal_size = get_terminal_size
-    pv = sys.version_info
-    py_version = "%s%s" %(pv.major, pv.minor)
-    pipmain(['install', f'--target={dd}/site-packages-%s' %py_version,
+    pipmain(['install', f'--target={dd}/site-packages',
              package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
     #print(f"{locale.getlocale(locale.LC_ALL)}")
+    # reset imports - to allow new imports without restart
+    import importlib
+    importlib.invalidate_caches()
   except Exception as e:
     print("\nFailed to install package %s: %s" %(package, e))
   finally:

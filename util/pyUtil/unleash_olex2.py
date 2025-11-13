@@ -6,11 +6,12 @@ import threading
 if __name__ == '__main__':
   import sys
   if len(sys.argv) == 1:
-    sys.argv.append('--web_directory=' + "D:/tmp/www/1.5")
-    sys.argv.append('--working_directory=' + "D:/tmp/test-gui-trunk")
-    sys.argv.append('--bin_directory=' + "D:/devel/bin_dir-1.5")
+    sys.argv.append('--web_directory=' + "C:/temp/distro-test/www/1.5")
+    sys.argv.append('--working_directory=' + "C:/temp/distro-test/svn-trunk")
+    sys.argv.append('--bin_directory=' + "C:/temp/distro-test/bin_dir")
     #sys.argv.append('--platform' + "=win32")
-    sys.argv.append('--beta')
+    sys.argv.append('--dev')
+    sys.argv.append('--platform=win64,win64-next')
 
 # plugin properties name-platform-architecture, like Headless-win-32
 # Headless - portables
@@ -19,15 +20,22 @@ if __name__ == '__main__':
 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-py313_port_name = 'port-py313'
 
 mac64_port_name = 'port-mac64'
 mac64_port_zip_name = 'olex2-mac64-intel.zip'
 mac64_port_prefix = 'olex2.app/Contents/MacOS/'
 
+mac64_next_port_name = 'port-mac64-next'
+mac64_next_port_zip_name = 'olex2-mac64-intel-next.zip'
+mac64_next_port_prefix = 'olex2.app/Contents/MacOS/'
+
 linux64_port_name = 'port-linux64'
 linux64_port_zip_name = 'olex2-linux64.zip'
 linux64_port_prefix = 'olex2/'
+
+linux64_next_port_name = 'port-linux64-next'
+linux64_next_port_zip_name = 'olex2-linux64-next.zip'
+linux64_next_port_prefix = 'olex2/'
 
 win32_port_name = 'port-win32-portable'
 win32_sse2_port_name = 'port-win32'
@@ -38,14 +46,23 @@ win64_port_name = 'port-win64'
 win64_port_zip_name = 'olex2-win64.zip'
 win64_port_prefix = None
 
+win64_next_port_name = 'port-win64-next'
+win64_next_port_zip_name = 'olex2-win64-next.zip'
+win64_next_port_prefix = None
+
 portable_zip_name = 'portable-gui.zip'
 portable_prefix = None
+
+py_port = 'port-py'
+py_port_38 = 'port-py38'
+py_port_313 = 'port-py313'
 # iteratable list of zips and prefixes
 distro_zips = (
   (mac64_port_zip_name, mac64_port_prefix),
   (linux64_port_zip_name, linux64_port_prefix),
   (win32_sse2_port_zip_name, win32_sse2_port_prefix),
   (win64_port_zip_name, win64_port_prefix),
+  (win64_next_port_zip_name, win64_next_port_prefix),
   (portable_zip_name, portable_prefix)
 )
 
@@ -53,36 +70,60 @@ external_files = {
   #mac64
   'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
-  'cctbx-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
-  'lib-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
+  'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac64.zip': ('olex-port', mac64_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  'lib-mac64.zip': ('olex-port', mac64_port_name,
+    'action:rmdir lib', 'action:extract', 'action:delete'),
   'hart-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
   #linux64
   'olex2-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   'unirun-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'cctbx-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'plgl-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-linux64.zip': ('olex-port', linux64_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
   'lib-linux64.zip': ('olex-port', linux64_port_name,
     'action:rmdir lib', 'action:extract', 'action:delete'),
   'hart-lin64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   #windows
+  'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
-  'python39-win32.zip': ('olex-port', win32_port_name,
-    'action:rmdir Python38', 'action:rm python38.dll', 'action:extract', 'action:delete'),
+  'plgl-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
+  'python38-win32.zip': ('olex-port', win32_port_name,
+    'action:rmdir Python38', 'action:rmdir Python',
+    'action:extract', 'action:delete'),
+  'hart-win32.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   #SSE2
   'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name,
-     'action:extract', 'action:rmdir cctbx', 'action:delete'),
-  'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
-  'ac-py39.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  # win64 shared
+  'launch-win64.zip': ('olex-port', win64_port_name, win64_next_port_name,
+     'action:extract', 'action:delete'),
+  'hart-win64.zip': ('olex-port', win64_port_name, win64_next_port_name,
+    'action:extract', 'action:delete'),
   #windows 64
-  'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'python313-win64.zip': ('olex-port', win64_port_name,
-     'action:rmdir Python38', 'action:rm python38.dll',
-     'action:rmdir Python39', 'action:rm python39.dll',
-      'action:extract', 'action:delete'),
-  'cctbx-win64.zip': ('olex-port', win64_port_name,
-    'action:extract', 'action:rmdir cctbx', 'action:delete'),
   'olex2-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  # py313 AC
-  'ac-py313.zip': ('olex-port', py313_port_name, 'action:extract', 'action:delete'),
+  'plgl-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'python38-win64.zip': ('olex-port', py_port_38,
+    'action:rmdir Python38', 'action:rmdir Python',
+    'action:extract', 'action:delete'),
+  'cctbx-win64.zip': ('olex-port', win64_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  #windows 64-next
+  'olex2-win64-next.zip': ('olex-port', win64_next_port_name, 'action:extract', 'action:delete'),
+  'plgl-win64-next.zip': ('olex-port', win64_next_port_name, 'action:extract', 'action:delete'),
+  'python313-win64.zip': ('olex-port', py_port_313,
+    'action:rmdir Python',
+    'action:extract', 'action:delete'),
+  'cctbx-win64-next.zip': ('olex-port', win64_next_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  #AC - semi-portable
+  'ac-py38.zip': ('olex-port', win32_port_name, win64_port_name, linux64_port_name, mac64_port_name,
+    'action:rmdir util/pyUtil/AC7', 'action:rmdir util/pyUtil/ACED', 'action:rmdir util/pyUtil/RPAC',
+    'action:extract', 'action:delete'),
+  'ac-py313.zip': ('olex-port', win64_next_port_name, linux64_next_port_name, mac64_next_port_name,
+    'action:rmdir util/pyUtil/AC7', 'action:rmdir util/pyUtil/ACED', 'action:rmdir util/pyUtil/RPAC',
+    'action:extract', 'action:delete'),
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -102,81 +143,97 @@ external_files = {
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
-  'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
-  'plgl-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'plgl-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
-  'plgl-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-
-  'hart-win64.zip': ('olex-port', win64_port_name,
-              'action:extract', 'action:delete'),
-
-  'hart-win32.zip': ('olex-port', win32_sse2_port_name,
-               win32_sse2_port_name,
-              'action:extract', 'action:delete'),
-
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
-portable_zip_files = \
-set(  ['olex2_fonts.zip',
-       'fonts.zip',
-       'acidb.zip',
-       'documentation.zip',
-       'textures.zip',
-       'help.zip',
-       'sample_data.zip',
-       'FragmentDB.zip', #HP 13/02/19
-       'RPAC.zip' #HP 08/03/19
-      ]
-   )
-win32_sse2_zip_files = \
-set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
-      'python39-win32.zip',    #Pyhton39/..., ..., + python39.dll!!!
-      'launch-win32.zip',  #olex2.exe
-      'plgl-win32-sse2.zip',
-      'olex2-win32-sse2.zip',   #olex2.dll, it will be veryfied first of all
-      'hart-win32.zip',
-       'ac-py39.zip',
-      ]
-   ) | portable_zip_files
-win64_zip_files = \
-set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
-      'python313-win64.zip',   #Pyhton39/..., ..., + python39.dll!!!
-      'plgl-win64.zip',
-      'olex2-win64.zip',  #olex2.dll
-      'launch-win64.zip',  #olex2.exe
-      'hart-win64.zip',
-       'ac-py313.zip',
-      ]
-   ) | portable_zip_files
-mac64_zip_files = \
-set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
-      'olex2-mac64.zip',    #olex2 executable
-      'unirun-mac64.zip',
-      'plgl-mac64.zip',
-      'lib-mac64.zip',
-      'hart-mac64.zip',
-       'ac-py313.zip',
-      ]
-   ) | portable_zip_files
-linux64_zip_files = \
-set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
-      'lib-linux64.zip',     #lib/dlls
-      'olex2-linux64.zip',    #olex2 executable
-      'plgl-linux64.zip',
-      'unirun-linux64.zip',
-      'hart-lin64.zip',
-       'ac-py313.zip',
-      ]
-   ) | portable_zip_files
+portable_zip_files = {
+  'olex2_fonts.zip',
+  'fonts.zip',
+  'acidb.zip',
+  'documentation.zip',
+  'textures.zip',
+  'help.zip',
+  'sample_data.zip',
+  'FragmentDB.zip', #HP 13/02/19
+  'RPAC.zip' #HP 08/03/19
+}
+win32_sse2_zip_files = {
+  'cctbx-win32-sse2.zip', #cctbx/cctbx_sources,...
+  'python38-win32.zip',    #Python/..., ..., + python38.dll!!!
+  'launch-win32.zip',      #olex2.exe
+  'plgl-win32-sse2.zip',
+  'olex2-win32-sse2.zip',  #olex2.dll, it will be veryfied first of all
+  'hart-win32.zip',
+  'ac-py38.zip',
+} | portable_zip_files
+
+win64_zip_files = {
+  'cctbx-win64.zip',     #cctbx/cctbx_sources,...
+  'python38-win64.zip',   #Python/..., ..., + python38.dll!!!
+  'plgl-win64.zip',
+  'olex2-win64.zip',   #olex2.dll
+  'launch-win64.zip',  #olex2.exe
+  'hart-win64.zip',
+  'ac-py38.zip',
+} | portable_zip_files
+
+win64_next_zip_files = {
+  'cctbx-win64-next.zip',  #cctbx/cctbx_sources,...
+  'python313-win64.zip',    #Python/..., ..., + python313.dll!!!
+  'plgl-win64-next.zip',
+  'olex2-win64-next.zip',   #olex2.dll
+  'launch-win64.zip',       #olex2.exe
+  'hart-win64.zip',
+  'ac-py313.zip',
+} | portable_zip_files
+
+mac64_zip_files = {
+  'cctbx-mac64.zip',  #cctbx/cctbx_sources,...
+  'olex2-mac64.zip',  #olex2 executable
+  'unirun-mac64.zip',
+  'plgl-mac64.zip',
+  'lib-mac64.zip',
+  'hart-mac64.zip',
+  'ac-py38.zip',
+} | portable_zip_files
+
+mac64_next_zip_files = {
+  'cctbx-mac64-next.zip',  #cctbx/cctbx_sources,...
+  'olex2-mac64-next.zip',  #olex2 executable
+  'unirun-mac64.zip',
+  'plgl-mac64-next.zip',
+  'lib-mac64-next.zip',
+  'hart-mac64.zip',
+  'ac-py313.zip',
+} | portable_zip_files
+
+linux64_zip_files = {
+  'cctbx-linux64.zip',  #cctbx/cctbx_sources,...
+  'lib-linux64.zip',    #lib/dlls
+  'olex2-linux64.zip',  #olex2 executable
+  'plgl-linux64.zip',
+  'unirun-linux64.zip',
+  'hart-lin64.zip',
+  'ac-py38.zip',
+} | portable_zip_files
+
+linux64_next_zip_files = {
+  'cctbx-linux64-next.zip',  #cctbx/cctbx_sources,...
+  'lib-linux64-next.zip',    #lib/dlls
+  'olex2-linux64-next.zip',  #olex2 executable
+  'plgl-linux64-next.zip',
+  'unirun-linux64.zip',
+  'hart-lin64.zip',
+  'ac-py313.zip',
+} | portable_zip_files
 
 # a set of all zip files...
-all_zip_files = win32_sse2_zip_files | win64_zip_files\
+all_zip_files = win32_sse2_zip_files | win64_zip_files | win64_next_zip_files\
               | mac64_zip_files | linux64_zip_files
 
 
-altered_files = set([])
-altered_dirs = set([])
+altered_files = set()
+altered_dirs = set()
 
 import os.path
 import sys
@@ -425,8 +482,10 @@ platforms = {
   "win32-sse": False,
   "win32": True,
   "win64": True,
+  "win64-next": False,
   "mac64": True,
-  "lin64": True,
+  "mac64-next": False,
+  "lin64-next": False,
 }
 try:
   if option.release_platform:
@@ -548,7 +607,7 @@ directories_to_create.sort()
 for d in directories_to_create:
   os.makedirs(d)
 update_directory = web_directory + '/update'
-update_directory_pat = re.compile(update_directory + '/?')
+#update_directory_pat = re.compile(update_directory + '/?')
 
 #copy the splash
 splash_file = os.path.join(bin_directory, "splash-" + current_release_tag + ".png")
@@ -572,8 +631,8 @@ for f in itertools.chain(update_files,
 def info(web_file_name, working_file_name):
   stats = os.stat(web_file_name)
   if os.path.isfile(web_file_name):
-    _file = open(web_file_name, "rb")
-    stats = (stats.st_mtime, stats.st_size, hashlib.md5(_file.read()).hexdigest())
+    with open(web_file_name, "rb") as _file:
+      stats = (stats.st_mtime, stats.st_size, hashlib.md5(_file.read()).hexdigest())
   else:
     stats = (stats.st_mtime, stats.st_size, 'dir')
 
@@ -666,7 +725,8 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
     dir_names[:] = [ d for d in dir_names if not d.startswith('.') ]
     file_names[:] = [ d for d in file_names if not d.startswith('.') ]
     dir_path = dir_path.replace('\\', '/')
-    d = update_directory_pat.sub('', dir_path)
+    #d = update_directory_pat.sub('', dir_path)
+    d = dir_path[len(update_directory)+1:]
 
     working_dir_path = os.path.join(os.path.normpath(working_directory), d)
     if d:
@@ -688,7 +748,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
       if portable and f in external_files:
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
-            continue
+          continue
       elif (enforce_only_prop or f not in all_zip_files) and\
            (only_prop and len(only_props&prop_set) == 0):
         continue
@@ -718,9 +778,11 @@ with open(olex2_tag_file_name, 'w+') as olex2_tag_file :
 #end creating the tag file
 ####################################################################################################
 # create portable distro
+lock = threading.Lock()
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
-  create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
-  inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
+  with lock: #critical section!
+    create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
+    inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
   print('Creating portable zip: ' + zip_name)
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -765,10 +827,24 @@ if platforms.get("win32"):
 if platforms.get("win64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": {win64_port_name, py313_port_name},
+      "port_props": {win64_port_name, py_port_38, py_port},
       "zip_name": win64_port_zip_name,
       "port_zips": win64_zip_files,
       "prefix": win64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/VC_redist.x64.exe' : 'vcredist_x64.exe'
+      }
+    }
+  )
+  threads.append(t)
+if platforms.get("win64-next"):
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": {win64_next_port_name, py_port_313, py_port},
+      "zip_name": win64_next_port_zip_name,
+      "port_zips": win64_next_zip_files,
+      "prefix": win64_next_port_prefix,
       "extra_files":
       {
         bin_directory + '/VC_redist.x64.exe' : 'vcredist_x64.exe'
@@ -780,7 +856,7 @@ if platforms.get("win64"):
 if platforms.get("lin64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": {linux64_port_name, py313_port_name},
+      "port_props": {linux64_port_name},
       "zip_name": linux64_port_zip_name,
       "port_zips": linux64_zip_files,
       "prefix": linux64_port_prefix,
@@ -795,7 +871,7 @@ if platforms.get("lin64"):
 if platforms.get("mac64"):
   t = threading.Thread(target=create_portable_distro,
     kwargs={
-      "port_props": {mac64_port_name, py313_port_name},
+      "port_props": {mac64_port_name},
       "zip_name": mac64_port_zip_name,
       "port_zips": mac64_zip_files,
       "prefix": mac64_port_prefix,

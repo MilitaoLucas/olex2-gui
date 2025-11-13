@@ -17,15 +17,13 @@ class initpy_funcs():
       _ = os.environ.get("PYTHONHOME")
       if _:
         python_dir = _
-      else:
+      else: # not sure this could ever happen as without PYTHONHOME exe cannot start
         python_dir = r"%s\Python%s" %(self.basedir, self.py_version)
       sys.path.append(python_dir)
       sys.path.append(r"%s\DLLs" %python_dir)
       sys.path.append(r"%s\Lib" %python_dir)
       sys.path.append(r"%s\Lib\site-packages" %python_dir)
       sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
-      sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
-      sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
       os.add_dll_directory(self.basedir)
     else:
       #it looks like we do not want to set the sys PATH on Linux or Mac!
@@ -49,7 +47,7 @@ class initpy_funcs():
           sys.path.append(sys.prefix + '/plat-mac')
         elif sys.platform == 'linux2':
           sys.path.append(sys.prefix + '/plat-linux2')
-    sys.path.append(os.path.join(self.datadir, "site-packages-%s" %self.py_version))
+    sys.path.append(os.path.join(self.datadir, "site-packages"))
 
   def onexit(self):
     sps = self.OV.GetVar("launched_server.ports", "")

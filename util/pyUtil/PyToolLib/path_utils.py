@@ -169,8 +169,8 @@ def _cleanup_ac6(base_dir):
       print(e)
 
 def Cleanup():
-  compilation_date = datetime.strptime(
-    olx.GetCompilationInfo("yyyy.MM.dd").split()[0], "%Y.%m.%d")
+  # compilation_date = datetime.strptime(
+  #   olx.GetCompilationInfo("yyyy.MM.dd").split()[0], "%Y.%m.%d")
   #print(compilation_date)
   cleanup_files(".tmp")
   base_dir = olx.BaseDir()
@@ -184,50 +184,3 @@ def Cleanup():
       _cleanup_ac6(base_dir)
   elif os.path.exists(ac6_dir):
     _cleanup_ac5(base_dir)
-
-  cp = os.path.join(base_dir, "_clean.3.9")
-  if os.path.exists(cp):
-    return
-  vi = sys.version_info
-  if vi.major == 3 and vi.minor == 9:
-    try:
-      dirs = []
-      files = []
-      if sys.platform[:3] == 'win':
-        dirs.append("Python38")
-        files.append(os.path.join("cctbx", "cctbx_build", "libtbx_env"))
-        files.append(os.path.join("cctbx", "cctbx_sources", "libtbx", "command_line", "chunk.py"))
-        files.append("python38.dll")
-        for f in files:
-          f = os.path.join(base_dir, f)
-          if os.path.exists(f):
-            print("Cleaning up: %s" %f)
-            os.remove(f)
-      elif sys.platform[:3] == 'lin':
-        dirs.append(os.path.join("lib", "python3.8"))
-        files.append(os.path.join("lib", "libpython3.8.so.1.0"))
-      else:
-        dirs.append(os.path.join("lib", "python3.8"))
-        files.append(os.path.join("lib", "libpython3.8.dylib"))
-      for f in files:
-        f = os.path.join(base_dir, f)
-        if os.path.exists(f):
-          print("RM: %s" %f)
-          os.remove(f)
-      #clean up old numpy/scipy
-      for d in dirs:
-        d = os.path.join(base_dir, d)
-        if not os.path.exists(d):
-          continue
-        try:
-          print("RMDIR ->%s" %d)
-          shutil.rmtree(d)
-        except Exception as e:
-          print(e)
-    except Exception as e:
-      print(e)
-  try:
-     f = open(cp, "w")
-     f.close()
-  except Exception:
-    pass

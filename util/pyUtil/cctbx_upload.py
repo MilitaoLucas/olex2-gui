@@ -25,30 +25,37 @@ else:
 
 build_def = {
   'linux-64bit':
-#    (('/mnt/hgfs/cctbx/cctbx_latest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_latest/modules/cctbx_project/',
-#      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
+    (('/mnt/hgfs/cctbx/cctbx_latest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_latest/modules/cctbx_project/',
+      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
+  'linux-64bit-next':
   (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py313/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    '/tmp/cctbx/', 'cctbx-linux64.zip', '-j6'),),
+    '/tmp/cctbx/', 'cctbx-linux64-py313.zip', '-j6'),),
 'darwin-64bit':
-  (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
+  (('~/build/svn/cctbx/build_mac64_py38/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64.zip', '-j3'),),
+'darwin-64bit-next':
+  (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
+    '/tmp/cctbx/', 'cctbx-mac64-next.zip', '-j3'),),
 
 'win32-32bit':
-  # [('e:/cctbx/cctbx_latest/build_win32/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
-  #   'e:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j6')],
-  [('d:/devel/cctbx/cctbx_latest/build_win32_py39/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+  [('d:/devel/cctbx/cctbx_latest/build_win32_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
     'd:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j10')],
 'win32-64bit':
-  #[('e:/cctbx/cctbx_latest/build_win64/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
-  #  'e:/tmp/cctbx/', 'cctbx-win64.zip', '-j6')],
-  [('d:/devel/cctbx/cctbx_latest/build_win64_py313/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+  [('d:/devel/cctbx/cctbx_latest/build_win64_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
     'd:/tmp/cctbx/', 'cctbx-win64.zip', '-j10')],
+'win32-64bit-next':
+  [('d:/devel/cctbx/cctbx_latest/build_win64_py313/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+    'd:/tmp/cctbx/', 'cctbx-win64-next.zip', '-j10')],
 }
 
 if option.dest == 'next':
   pass
 # build ALL win on win64
 build_def['win32-64bit'] += build_def['win32-32bit']
+build_def['win32-64bit'] += build_def['win32-64bit-next']
+
+build_def['linux-64bit'] += build_def['linux-64bit-next']
+build_def['darwin-64bit'] += build_def['darwin-64bit-next']
 
 def compile(_platform):
   cwd = os.getcwd()
