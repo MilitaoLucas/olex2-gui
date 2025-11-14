@@ -30,7 +30,7 @@ with open(out_fn, "r") as stdout:
       sys.stdout.write(x)
       sys.stdout.flush()
     time.sleep(1)
-with open(err_fn, "rU") as stderr:
+with open(err_fn, "r") as stderr:
   print(stderr.read())
 
 print("Finished")

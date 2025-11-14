@@ -318,7 +318,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("process ended before the output file was found")
       OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
       raise NameError('NoSpherA2 ended unexpectedly!')
-  with open(out_fn, "rU") as stdout:
+  with open(out_fn, "r") as stdout:
     while p.poll() is None:
       x = stdout.read()
       if x:
