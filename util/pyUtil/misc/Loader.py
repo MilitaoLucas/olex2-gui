@@ -29,8 +29,14 @@ class Module:
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
     self.interbal = False
 
-# special treatment of the AC tags
 def get_tag():
+  tag = get_tag_()
+  if sys.version_info.major >= 3 and sys.version_info.minor > 8:
+    tag = "%s-py%s%s" %(tag, sys.version_info.major, sys.version_info.minor)
+  return tag
+
+# special treatment of the AC tags
+def get_tag_():
   tag = OV.GetTag()
   if "-ac" in tag:
     t = tag.split("-")

@@ -11,16 +11,21 @@ for path, cmd, arg in cmds:
 #git needs this to be able to use pagent
 os.environ['GIT_SSH'] = "C:/Program Files/PuTTY/plink.exe"
 
-dev_dir = "c:/devel"
+dev_dir = "d:/devel"
 svn_dir = os.path.join(dev_dir, "svn")
 #public repos
 cctbx_dir = os.path.join(dev_dir, "cctbx", "cctbx_latest", "modules", "cctbx_project")
 olex2_dir_trunk = os.path.join(svn_dir, "olex2", "trunk")
 olex2_dir_release = os.path.join(svn_dir, "olex2", "branches", "1.5")
-base_dir = "c:/devel/rundir-py3"
-#Olex2 insternal repositories
+base_dir = "d:/devel/rundir-py3"
+oslims_dir = os.path.join(svn_dir, "oslims")
+jlib_dir = os.path.join(svn_dir, "jlib")
+jlib_db_dir = os.path.join(svn_dir, "jlib-db")
+#Olex2 internal repositories
 acd_dir = os.path.join(base_dir, "util", "pyUtil", "AC6d")
 aced_dir = os.path.join(base_dir, "util", "pyUtil", "ACEDd")
+acd7_dir = os.path.join(base_dir, "util", "pyUtil", "AC7d")
+aced7_dir = os.path.join(base_dir, "util", "pyUtil", "ACED7d")
 olex2_i_dir_trunk = os.path.join(svn_dir, "olex2pro", "trunk")
 olex2_i_dir_release = os.path.join(svn_dir, "olex2pro", "branches", "1.5")
 
@@ -29,8 +34,13 @@ dirs = [
   (olex2_dir_trunk, git_cmd),
   (olex2_dir_release, git_cmd),
   (base_dir, svn_cmd),
+  (oslims_dir, svn_cmd),
+  (jlib_dir, svn_cmd),
+  (jlib_db_dir, svn_cmd),
   (acd_dir, git_cmd),
   (aced_dir, svn_cmd),
+  (acd7_dir, git_cmd),
+  (aced7_dir, svn_cmd),
   (olex2_i_dir_trunk, svn_cmd),
   (olex2_i_dir_release, svn_cmd),
  ]
