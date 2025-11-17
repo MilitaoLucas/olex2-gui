@@ -26,8 +26,8 @@ def do_compile(location):
     if subprocess.call([sys.executable, '-m', 'compileall', '-l', location]) != 0:
       raise RuntimeError("Failed to compile the sources")
     print("Copying compiled files")
-    src = "./__pycache__"
-    dst = "."
+    src = os.path.join(location, "__pycache__")
+    dst = location
     print("Copying compiled files from %s to %s" %(src, dst))
     copytree(src, dst,
       search='.cpython-%s%s' %(sys.version_info.major, sys.version_info.minor), replace="")
