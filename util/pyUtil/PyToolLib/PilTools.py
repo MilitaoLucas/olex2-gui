@@ -3018,7 +3018,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     wX, wY  = get_text_size(draw, txt, font)
     #left_start =  (self.width-wX) - right_margin
-    top = height - wY + IT.sys_top_adjust(-5, self.scale)
+    top = height - wY + IT.sys_top_adjust(-8, self.scale)
     IT.write_text_to_draw(draw,
                        txt,
                        top_left=(left_start, top),

@@ -830,7 +830,7 @@ class ImageTools(FontInstances):
 
   def sys_top_adjust(self, top, scale=1): ##PY39
     if sys.version_info.major == 3 and sys.version_info.minor <= 8:
-      top += round(0.5 * scale)
+      top += round(0.6 * scale)
     return top
 
   def get_text_modifications(self):

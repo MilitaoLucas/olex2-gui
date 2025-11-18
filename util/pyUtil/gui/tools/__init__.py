@@ -2698,8 +2698,9 @@ class PlotIt():
     self.plt.rcParams['ytick.labelsize'] = self.plt_params.tick_fontsize
     self.plt.rcParams['font.family'] = self.plt_params.font_name
     self.plt.rcParams['legend.fontsize'] = 14
-    #self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
-    #self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    self.plt.rcParams['font.family'] = [self.plt_params.font_name]
+#    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+#    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
 
     #print(self.plt.style.available)
 
@@ -2766,7 +2767,7 @@ class PlotIt():
       except:
         d['lim_x'] = 1
 
-    self.plt.tight_layout(rect=[0, 0, 1, gap])
+    self.plt.tight_layout(rect=[0, 0, 0.96, gap])
     self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
       self.fig.text(.5, gap - (gap * gap_facor / 2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize - 2)
@@ -2774,7 +2775,7 @@ class PlotIt():
     if byline:
       self.plt.rcParams['font.family'] = 'Arial'
       self.plt.rcParams['font.stretch'] = 'condensed'
-      self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color="#bebebe")
+      self.fig.text(0.96, 0.08, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 2, color="#bebebe")
 
     self.fig.align_ylabels()
 
@@ -2785,7 +2786,9 @@ class PlotIt():
       for x in _:
         self.plt.axvline(x=x, color='lightgray', linestyle='dashdot', linewidth=1.5)
 
-    p = os.path.join(OV.FilePath(), filename)
+    p = filename
+    if not ":\\" in filename:
+      p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
     return p
@@ -2810,6 +2813,9 @@ class PlotIt():
              markersize=None,
              linestyle=None,
              ylabel="",
+             xlabel="",
+             y_tick_rotation=0, 
+             x_tick_rotation=0, 
              series={},
              labels=[],
              colours=[],
@@ -2877,16 +2883,115 @@ class PlotIt():
       x = xs[0]
       ys = ys[0]
       polyfit = kwargs.get('polyfit', 2)
-      #fig, ax = self.plt.subplots(figsize=(12, 12))
 
       for i, y in enumerate(ys):
-        ax.scatter(x, y, s=markersize, label=f"{legend[i]}")
         coeffs = np.polyfit(x, y, polyfit)
         trend = np.poly1d(coeffs)
 
         # Make a smooth set of x values for the trendline
         x_fit = np.linspace(min(x), max(x), 200)
-        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=0.5, label="_nolegend_")
+        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=1.0, label="_nolegend_")
+        ## --- compute R² ---
+        y_pred = trend(x)
+        ss_res = np.sum((y - y_pred)**2)
+        ss_tot = np.sum((y - np.mean(y))**2)
+        r2 = 1 - ss_res/ss_tot
+        
+        x = np.asarray(x)
+        y = np.asarray(y)
+        # --- identity-line metrics (y = x) ---
+        diff = y - x
+
+        ## RMS perpendicular distance to y=x: |y-x|/sqrt(2) per point, then RMS
+        ## RMS = sqrt(mean((y-x)^2) / 2)
+        #mean_sq_diff = np.mean(diff ** 2)
+        #rms_identity = np.sqrt(mean_sq_diff / 2.0)
+        
+        # R^2 against identity line (treat y=x as the model)
+        ss_res_id = np.sum((y - x) ** 2)
+        r2_identity = 1.0 - ss_res_id / ss_tot if ss_tot != 0 else (1.0 if ss_res_id == 0 else 0.0)
+        
+        
+        label = f"{legend[i]} (R²={r2:.3f} R²(identity)={r2_identity:.3f}" 
+        ax.scatter(x, y, s=markersize, label=label)
+      ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
+
+
+      #for i, y in enumerate(ys):
+        ## plot scatter
+        ##pts = ax.scatter(x, y, s=markersize, marker=marker, label=f"{legend[i]}")
+        ##color = pts.get_facecolor()[0]   # extract the colour of this series
+      
+        ## fit
+        #coeffs = np.polyfit(x, y, polyfit)
+        #trend = np.poly1d(coeffs)
+      
+        ## smooth line for the plot
+        #x_fit = np.linspace(min(x), max(x), 200)
+        #y_fit = trend(x_fit)
+        #ax.plot(x_fit, y_fit, linestyle="--", lw=1.5, label="_nolegend_")
+      
+        ## --- compute R² ---
+        #y_pred = trend(x)
+        #ss_res = np.sum((y - y_pred)**2)
+        #ss_tot = np.sum((y - np.mean(y))**2)
+        #r2 = 1 - ss_res/ss_tot
+        
+        #label = f"{legend[i]} (R²={r2:.3f})"
+        #ax.scatter(x, y, s=markersize, label=label)        
+
+
+      #for i, y in enumerate(ys_list):
+        #label_text = legend_list[i] if i < len(legend_list) else None
+        ## get color from cycle so scatter and trendline match
+        #color = self._get_color_from_cycle(ax) or None
+        
+        
+        ## Fit
+        #coeffs = np.polyfit(x, y, polyfit)
+        #trend = np.poly1d(coeffs)
+        #y_pred = trend(x)
+        #r2 = compute_r2(np.asarray(y), y_pred)
+        
+        
+        ## Build label including R^2 if requested
+        #r2_in_legend = kwargs.get('r2_in_legend', False)
+        #if r2_in_legend and label_text:
+        #legend_label = f"{label_text} (R²={r2:.3f})"
+        #else:
+        #legend_label = label_text
+        
+        
+        ## Plot scatter once with label (if any)
+        #ax.scatter(x, y, s=markersize, label=legend_label, color=color, marker=marker)
+        
+        
+        ## Plot trendline matching the color
+        #x_fit = np.linspace(np.min(x), np.max(x), 200)
+        #ax.plot(x_fit, trend(x_fit), linestyle='--', linewidth=0.9, color=color)
+      
+      
+      ## Annotate R^2 near last point when not in legend
+      #if not r2_in_legend:
+      #x_off = (np.max(x) - np.min(x)) * 0.02 if np.max(x) != np.min(x) else 0.1
+      #ax.text(x[-1] + x_off, y[-1], f"$R^2={r2:.3f}$", color=color, fontsize=12, va='center', ha='left')
+
+
+
+
+
+
+
+      #fig, ax = self.plt.subplots(figsize=(12, 12))
+
+      #for i, y in enumerate(ys):
+        #ax.scatter(x, y, s=markersize, label=f"{legend[i]}")
+        #coeffs = np.polyfit(x, y, polyfit)
+        #trend = np.poly1d(coeffs)
+
+        ## Make a smooth set of x values for the trendline
+        #x_fit = np.linspace(min(x), max(x), 200)
+        #ax.plot(x_fit, trend(x_fit), linestyle="--", lw=0.5, label="_nolegend_")
 
       ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
 
@@ -2894,9 +2999,19 @@ class PlotIt():
         ax.set_xlim(0, xlim)
       if ylim:
         ax.set_ylim(0, ylim)
-
-      self.plt.xlabel(labels[0])
-      self.plt.ylabel(labels[1])
+      
+      ax.tick_params(
+          axis="both",
+          which="both",
+          bottom=True,
+          left=True,
+          labelbottom=False,
+          labelleft=False
+      )
+      
+      #self.plt.tight_layout()      
+      self.plt.xlabel(labels[0], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      self.plt.ylabel(labels[1], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       self.plt.legend()
 
     else:
@@ -2945,16 +3060,16 @@ class PlotIt():
         
       try:
         ## LAbel datapiont?
-        ax.plot.xticks(range(len(x)), y) # Redefining x-axis labels
+        ax.plot.xticks(range(len(x)), y, rotation=x_tick_rotation) # Redefining x-axis labels
         for i, v in enumerate(y):
-          ax.text(i, v + 25, "%d" % v, ha="center")
+          ax.text(i, v + 25, "%d" % v, ha="center",  fontname=self.fontname_proc,)
       except:
         pass
 
 
       colour = None
-      ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
-      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      ax.set_xlabel(xlabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize, labelpad=7)
+      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize, labelpad=7)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -2998,7 +3113,8 @@ class PlotIt():
     if legend:
       ax.margins(y=0.25)
       ax.legend(legend, loc='upper right', ncol=2)
-    ax.tick_params(axis='y', labelcolor=ax_colour)
+    ax.tick_params(axis='y', labelcolor=ax_colour, rotation=y_tick_rotation)
+    ax.tick_params(axis='x', labelcolor=ax_colour, rotation=x_tick_rotation)
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
 
