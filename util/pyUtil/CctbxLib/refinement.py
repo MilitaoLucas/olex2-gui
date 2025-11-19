@@ -254,7 +254,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         olx.Echo(str(e), m="error")
         self.failure = True
         return
-    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0 and self.max_cycles != 0:
       if not (reparametrisation_only or build_only):
         olx.Echo("Nothing to refine!", m="error")
       self.failure = True
@@ -557,7 +557,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       method = OV.GetHeaderParam('ED.refinement.method', 'Kinematic')
       _ = OV.GetHeaderParamBool('ED.z.auto_after_refine', True)
-    
+
       if _ and method == 'N-Beam' and OV.IsChiral():
         olex.m('spy.ED.gui_compute_enantiomers()')
 
