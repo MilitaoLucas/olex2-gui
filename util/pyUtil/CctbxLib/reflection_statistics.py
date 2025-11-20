@@ -538,8 +538,9 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     #plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "I calc"
     plot.yLegend = "I obs"
+    plot.omit = self.reflections._omit
+    plot.omit_shel = self.reflections._shel
     self.xy_plot = plot
-
 
 class f_obs_over_f_calc(OlexCctbxAdapter):
   def __init__(self,

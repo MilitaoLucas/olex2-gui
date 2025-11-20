@@ -248,8 +248,6 @@ class Graph(ArgumentParser):
     if border:
       box = (2,2,boxWidth-2,boxHeight-2)
       draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
-    #margin_left = int((boxWidth/4))
-    #margin_right = int((boxWidth/4)*3)
 
     txt_colour = "#444444"
     top = 1 * self.scale
@@ -3082,12 +3080,12 @@ class AnomDispPlot(Analysis):
 
 OV.registerFunction(AnomDispPlot)
 
-
-class Fobs_Fcalc_plot(Analysis):
-  def __init__(self, batch_number=None):
+class Xobs_Xcalc_plot(Analysis):
+  def __init__(self, F_or_I, batch_number=None):
     Analysis.__init__(self)
-    self.item = "Fobs_Fcalc"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Fobs vs Fcalc")
+    self.F_or_I = F_or_I
+    self.item = f"{F_or_I}obs_{F_or_I}calc"
+    self.graphInfo["Title"] = OV.TranslatePhrase(f"{F_or_I}obs vs {F_or_I}calc")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
@@ -3100,7 +3098,7 @@ class Fobs_Fcalc_plot(Analysis):
     else:
       self.batch_number = batch_number
     try:
-      self.make_f_obs_f_calc_plot()
+      self.make_x_obs_x_calc_plot()
     except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
         print("You need some scatterers to do this!")
@@ -3111,14 +3109,18 @@ class Fobs_Fcalc_plot(Analysis):
     if self.params.fobs_fcalc.output_csv_file:
       self.output_data_as_csv()
 
-  def make_f_obs_f_calc_plot(self):
-    from reflection_statistics import f_obs_vs_f_calc
-    xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
+  def make_x_obs_x_calc_plot(self):
+    if self.F_or_I == "F":
+      from reflection_statistics import f_obs_vs_f_calc
+      xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
+    elif self.F_or_I == "I":
+      from reflection_statistics import I_obs_vs_I_calc
+      xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
+
     self.metadata['shapes'] = []
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
-
     equal_line = {'type':'line',
                    'xy':('0','0','%(max_x)s','%(max_x)s'),
                    'line': {
@@ -3133,8 +3135,13 @@ class Fobs_Fcalc_plot(Analysis):
     ## Included Data
     metadata["name"] = "Included Data"
     metadata["idx"] = 0
-    data = Dataset(
+    
+    if self.F_or_I == "F":
+      data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
+    elif self.F_or_I == "I":
+      data = Dataset(
+      xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
 
     self.data.setdefault('dataset1', data)
 
@@ -3144,7 +3151,19 @@ class Fobs_Fcalc_plot(Analysis):
     have_omitted = False
     self.omit_str = ""
     self.omit_hkl_str = ""
-    if xy_plot.f_obs_omitted and xy_plot.f_obs_omitted.size():
+    self.shel_str = ""
+    self.shel_hkl_str = ""
+    
+    if self.F_or_I == "F":
+      x_obs_omitted = xy_plot.f_obs_omitted
+      x_calc_omitted = xy_plot.f_calc_omitted
+      x_obs_omitted = xy_plot.f_obs_omitted
+    if self.F_or_I == "I":
+      x_obs_omitted = xy_plot.I_obs_omitted
+      x_calc_omitted = xy_plot.I_calc_omitted
+      x_obs_omitted = xy_plot.I_obs_omitted
+
+    if x_obs_omitted and x_obs_omitted.size():
       have_omitted = True
       self.omit_hkl = xy_plot.omit.get('hkl', None)
       hkl_omit_n = 0
@@ -3157,12 +3176,13 @@ class Fobs_Fcalc_plot(Analysis):
         metadata["name"] = "Omitted Data (OMIT)"
         metadata["idx"] = 1
         data_omitted = Dataset(
-          xy_plot.f_calc_omitted,
-          xy_plot.f_obs_omitted,
+          x_calc_omitted,
+          x_obs_omitted,
           indices=xy_plot.indices_omitted,
           metadata=metadata)
         self.data.setdefault('dataset2', data_omitted)
         self.omit_str =  f"OMIT {xy_plot.omit.get('s')} {xy_plot.omit.get('2theta')} ({len(xy_plot.indices_omitted) - (hkl_omit_n)})".replace(".0", "")
+        self.shel_str =  f"OMIT {xy_plot.omit_shel.get('low')} {xy_plot.omit.get('high')} ({len(xy_plot.indices_omitted) - (hkl_omit_n)})".replace(".0", "")
         if " 180" in self.omit_str:
           self.omit_str = ""
       if self.omit_hkl:
@@ -3177,6 +3197,7 @@ class Fobs_Fcalc_plot(Analysis):
     self.draw_pairs()
     if have_omitted:
       make_data_key(self)
+
 
   def get_common_data(self, xy_plot, metadata):
     from cctbx.array_family import flex
@@ -3204,84 +3225,24 @@ class Fobs_Fcalc_plot(Analysis):
     #print("Number matching omit_hkl (common):", keep_flex.size())
     
     # --- Use keep_flex (flex.size_t) for selection of miller_index and other arrays ---
-    data_common = Dataset(
-        xy_plot.f_calc_omitted.select(keep_flex),
-        xy_plot.f_obs_omitted.select(keep_flex),
-        indices=xy_plot.indices_omitted.select(keep_flex),
-        metadata=metadata
-    )
+
+    if self.F_or_I == "F":
+      data_common = Dataset(
+          xy_plot.f_calc_omitted.select(keep_flex),
+          xy_plot.f_obs_omitted.select(keep_flex),
+          indices=xy_plot.indices_omitted.select(keep_flex),
+          metadata=metadata
+      )
+
+    elif self.F_or_I == "I":
+      data_common = Dataset(
+          xy_plot.I_calc_omitted.select(keep_flex),
+          xy_plot.I_obs_omitted.select(keep_flex),
+          indices=xy_plot.indices_omitted.select(keep_flex),
+          metadata=metadata
+      )
+
     return data_common
-
-      
-class Iobs_Icalc_plot(Analysis):
-  def __init__(self, batch_number=None):
-    Analysis.__init__(self)
-    self.item = "Iobs_Icalc"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Iobs vs Icalc")
-    self.graphInfo["pop_html"] = self.item
-    self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.TopRightTitle
-
-    self.auto_axes = False
-    try:
-      batch_number = int(batch_number)
-    except (ValueError, TypeError):
-      self.batch_number = None
-    else:
-      self.batch_number = batch_number
-    try:
-      self.make_I_obs_I_calc_plot()
-    except AssertionError as e:
-      if str(e) == "model.scatterers().size() > 0":
-        print("You need some scatterers to do this!")
-        return
-      else:
-        raise
-    self.popout()
-    if self.params.iobs_icalc.output_csv_file:
-      self.output_data_as_csv()
-
-  def make_I_obs_I_calc_plot(self):
-    from reflection_statistics import I_obs_vs_I_calc
-    xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
-    self.metadata['shapes'] = []
-    self.metadata.setdefault("y_label", xy_plot.yLegend)
-    self.metadata.setdefault("x_label", xy_plot.xLegend)
-
-    equal_line = {'type':'line',
-                   'xy':('0','0','%(max_x)s','%(max_x)s'),
-                   'line': {
-                     'color': 'rgb(100, 100, 100)',
-                     'width': 4 * self.scale,
-                     'dash':'dashdot'
-                   }
-                   }
-
-    self.metadata["shapes"].append(equal_line)
-
-    ## Included Data
-    metadata = {}
-#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
-#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
-    metadata["name"] = "Included Data"
-    data = Dataset(
-      xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
-
-    self.data.setdefault('dataset1', data)
-
-    ## Omitted Data
-    metadata = {}
-    metadata["name"] = "Omitted Data"
-    data_omitted = None
-    if xy_plot.I_obs_omitted and xy_plot.I_obs_omitted.size():
-      data_omitted = Dataset(
-        xy_plot.I_calc_omitted, xy_plot.I_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
-      self.data.setdefault('dataset2', data_omitted)
-    self.make_empty_graph(axis_x = True, square=False)
-    self.plot_function("x", n_points=100)
-    self.draw_pairs()
-    if data_omitted:
-      make_data_key(self)
 
 class Fobs_over_Fcalc_plot(Analysis):
   def __init__(self):
@@ -3708,8 +3669,7 @@ OV.registerFunction(WilsonPlot)
 OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
-OV.registerFunction(Fobs_Fcalc_plot)
-OV.registerFunction(Iobs_Icalc_plot)
+OV.registerFunction(Xobs_Xcalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(item_vs_resolution_plot)
@@ -3903,8 +3863,8 @@ def make_reflection_graph(name):
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
-           'fobs_fcalc': Fobs_Fcalc_plot,
-           'iobs_icalc': Iobs_Icalc_plot,
+           'fobs_fcalc': (Xobs_Xcalc_plot, "F"), 
+           'iobs_icalc': (Xobs_Xcalc_plot, "I"), 
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
@@ -4342,7 +4302,10 @@ class HealthOfStructure():
       flack_esd_f = 0
       if item == "hooft_str":
         if OV.IsEDData():
-          value = OV.GetParam('snum.refinement.hooft_str', "ED")
+          #value = OV.GetParam('snum.refinement.hooft_str', "ED")
+          value = OV.GetHeaderParam('ED.z.value', 'ED')
+          if not value:
+            value = "ED"
           if value == "ED" or "(" in value:
             bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
           else:
@@ -4674,12 +4637,13 @@ class HealthOfStructure():
         pass
 
     if item == "hooft_str":
-      if value_raw != "ED":
-        _ = OV.GetParam('aced.snum.zscore.delta_R1', None)
-        if _:
-          _ = _.replace("-", "")
-          value_display_extra = f"DeltaR={_}%"
-          value_display_extra = IT.get_unicode_characters(value_display_extra)
+      if OV.IsEDData():
+        if value_raw != "ED":
+          _ = OV.GetHeaderParam('ED.z.deltaR1', '')
+          if _:
+            _ = _.replace("-", "")
+            value_display_extra = f"DeltaR={_}%"
+            value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)
@@ -4744,7 +4708,6 @@ def shift_box(box, dx, dy):
   return (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
 
 def make_data_key(self):
-
   l = [{'type': 'marker','number': 1,'label': OV.TranslatePhrase('Used Data')}]
   if self.omit_str:
     l.append({'type':'marker','number': 2,'label': f"{self.omit_str}"})
@@ -4756,5 +4719,3 @@ def make_data_key(self):
                   (int(self.graph_right - (key.size[0] + 5 * self.scale)),
                    int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
                   )
-
-

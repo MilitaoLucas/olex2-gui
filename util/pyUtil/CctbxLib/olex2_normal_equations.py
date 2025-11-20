@@ -184,10 +184,6 @@ def normal_equation_class():
       for i_seq in iter(i_adp_shifts_sorted):
         yield norms[i_seq], scatterers[i_seq]
 
-    def change_weighting_scheme(self, new_scheme):
-      super(normal_eqns,self).change_weighting_scheme(new_scheme)
-      return self
-
     def show_log(self, f=None):
       import sys
       if self.log is sys.stdout: return
