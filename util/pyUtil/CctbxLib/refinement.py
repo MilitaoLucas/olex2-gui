@@ -61,6 +61,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     sys.stdout.refresh = False
     self.scale_factor = None
     self.failure = False
+    self.objective_only = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.hooft = None
     self.hooft_str = ""
@@ -348,13 +349,35 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("There is nothing to refine.")
           self.failure = True
           return
-        elif use_openmp and "normal_equations.h" in str_e and  "Not implemented" in str_e:
+        elif use_openmp and "normal_equations.h" in str_e and "Not implemented" in str_e:
           olx.Echo("Please restart Olex2 to fully enable OpenMP!", m="warning")
           self.failure = True
           return
         else:
           raise e
       stopwatch.start("Analysis")
+      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
+      self.r1_all_data = self.normal_eqns.r1_factor()
+      if len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+        self.objective_only = True
+        stopwatch.start("FFT")
+        fo_minus_fc = self.f_obs_minus_f_calc_map(0.3)
+        fo_minus_fc.apply_volume_scaling()
+        self.diff_stats = fo_minus_fc.statistics()
+        self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
+        if not fcf_only:
+          self.show_summary()
+          self.show_comprehensive_summary(log=self.log)
+        else:
+          return
+        stopwatch.start("CIF")
+        block_name = OV.FileName().replace(' ', '')
+        if self.on_completion:
+          cif = iotbx.cif.model.cif()
+          cif[block_name] = self.as_cif_block()
+          stopwatch.start("on_completion")
+          self.on_completion(cif[block_name])
+        return
       # get the final shifts
       stopwatch.run(self.normal_eqns.analyse_shifts)
       self.scale_factor = self.cycles.scale_factor_history[-1]
@@ -365,8 +388,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fcf_stuff = '-' in olx.Ins('MORE')
       if fcf_stuff:
         self.export_var_covar(self.covariance_matrix_and_annotations)
-      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
-      self.r1_all_data = self.normal_eqns.r1_factor()
       try:
         stopwatch.run(self.check_hooft)
       except Exception as e:
@@ -406,7 +427,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print("Cholesky failure")
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
-        if index > 0:
+        if index >= 0:
           param_name = ""
           n_components = len(self.reparametrisation.component_annotations)
           if index >= n_components:
@@ -684,7 +705,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     acta_stuff = olx.Ins('ACTA') != "n/a"
     xs = self.xray_structure()
     site_labels = xs.scatterers().extract_labels()
-    if not acta_stuff:
+    if not acta_stuff or self.objective_only:
       from iotbx.cif import model
       cif_block = model.block()
     else:
@@ -839,7 +860,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     write_fcf = False
     acta = olx.Ins("ACTA").strip()
-    if OV.GetParam('user.cif.finalise') != 'Exclude':
+    if OV.GetParam('user.cif.finalise') != 'Exclude' and not self.objective_only:
       if not acta:
         write_fcf = True
       elif acta != "n/a" and "NOHKL" not in acta.upper():
@@ -930,9 +951,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
-    self.normal_eqns.analyse_shifts()
-    cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
-    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
+    if not self.objective_only:
+      self.normal_eqns.analyse_shifts()
+      cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
+      cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     cif_block['_refine_ls_weighting_details'] = str(
       self.normal_eqns.weighting_scheme)
@@ -1813,21 +1835,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
         max_shift_esd_item
         ))
     else:
-      self.normal_eqns.analyse_shifts()
-      max_shift_esd = self.normal_eqns.max_shift_esd
-      print_l.append("  +  Shifts:   Max/esd = %.4f for %s" %(
-        self.normal_eqns.max_shift_esd,
-        self.normal_eqns.max_shift_esd_item
-        ))
+      shifts = ["n/a", "n/a"]
+      if not self.objective_only:
+        self.normal_eqns.analyse_shifts()
+        max_shift_esd = self.normal_eqns.max_shift_esd
+        shifts = ["%.4f" %self.normal_eqns.max_shift_esd,
+                  self.normal_eqns.max_shift_esd_item]
+      print_l.append("  +  Shifts:   Max/esd = %s for %s" %(
+        shifts[0],shifts[1]))
     print_l.append(f"  +  Data:     {self.data_to_parameter_watch()}")
-    pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
+    pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints))\
+      - len(str(self.normal_eqns.n_parameters))
     n_restraints = self.normal_eqns.n_restraints +\
       len(self.normal_eqns.origin_fixing_restraint.singular_directions)
     print_l.append(f"  ++++++++++++ {self.n_constraints} Constraints | {n_restraints} Restraints | {self.normal_eqns.n_parameters} Parameters +++++++++++++{'+'*pad}")
     print('\n'.join(print_l), file=log)
 
-    OV.SetParam("snum.refinement.max_shift_over_esd",
-      max_shift_esd)
+    if not self.objective_only:
+      OV.SetParam("snum.refinement.max_shift_over_esd", max_shift_esd)
+    else:
+      OV.SetParam("snum.refinement.max_shift_over_esd", -1)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
@@ -1855,15 +1882,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def show_comprehensive_summary(self, log=None):
     if log is None: log = sys.stdout
     self.show_summary(log)
-    standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
-    if self.twin_components is not None and len(self.twin_components):
-      print(file=log)
-      print("Twin summary:", file=log)
-      print("twin_law  fraction  standard_uncertainty", file=log)
-      for i, twin in enumerate(self.twin_components):
-        if twin.grad:
-          print("%-9s %-9.4f %.4f" %(
-            twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
+    if not self.objective_only:
+      standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+      if self.twin_components is not None and len(self.twin_components):
+        print(file=log)
+        print("Twin summary:", file=log)
+        print("twin_law  fraction  standard_uncertainty", file=log)
+        for i, twin in enumerate(self.twin_components):
+          if twin.grad:
+            print("%-9s %-9.4f %.4f" %(
+              twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
@@ -1884,11 +1912,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         normal_eqs.iterations_object = self
         super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
       def do(self):
+        objective_only = len(self.parent.reparametrisation.mapping_to_grad_fc_all) == 0
+        if objective_only and self.n_max_iterations != 0:
+          olx.Echo("Nothing to refine, performing L.S. 0", m="warning")
+          self.n_max_iterations = 0
         if self.n_max_iterations == 0:
           self.n_iterations = 0
-          self.non_linear_ls.build_up()
-          self.non_linear_ls.solve()
-          self.analyse_shifts()
+          self.non_linear_ls.build_up(objective_only=objective_only)
+          if not objective_only:
+            self.non_linear_ls.solve()
+            self.analyse_shifts()
         else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
           iterations_class.do(self)
       @property

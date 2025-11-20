@@ -100,7 +100,7 @@ class Graph(ArgumentParser):
     self.decorated = False
     self.extend_x = True
     self.scale = scale
-    
+
     if OV.HasGUI() == 'True':
       self.red = OV.GetParam('gui.red').hexadecimal
       self.orange = OV.GetParam('gui.orange').hexadecimal
@@ -113,8 +113,8 @@ class Graph(ArgumentParser):
       self.green = "#00b400"
       self.grey = "#999999"
       self.blue = "#0080ff"
-    
-    
+
+
     ## This used to just be the filename; not so good for mulit-structure CIFs!
     _ = ""
     _ = OV.ModelSrc()
@@ -272,7 +272,7 @@ class Graph(ArgumentParser):
           marker = self.marker_params[key['number'] - 1]
 
         marker_width = int(self.im.size[0])*marker.size_factor
-        r =  marker_width / 2 
+        r =  marker_width / 2
         if shape == 'square':
           box =  (left, top+wY/2-r, left+marker_width, top+wY/2 + r)
           draw.rectangle(box,fill=marker.fill.rgb, outline=marker.border.rgb, width=self.scale)
@@ -282,7 +282,7 @@ class Graph(ArgumentParser):
           box =  (le, to+wY/2-r, le+marker_width, to+wY/2 + r)
           #box = shift_box(box, r, 0)
           draw.ellipse(box,fill=marker.fill.rgb, outline=marker.border.rgb, width=self.scale)
-          
+
       left = left + 22 * self.scale
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
       top += wY + 8 * self.scale
@@ -523,7 +523,7 @@ class Graph(ArgumentParser):
     a = IT.text_bbox(font=font, text=txt)
     wX = a[2]
     wY = a[3]
-    
+
     if write_equation:
       if slope > 0 or (self.reverse_x or self.reverse_y):
         x = self.graph_left + self.imX * 0.1 # write equation top left
@@ -764,7 +764,7 @@ class Graph(ArgumentParser):
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
         marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx)
       i += 1
-      
+
     self.draw_x_axis()
     self.draw_y_axis()
 
@@ -1040,7 +1040,7 @@ class Graph(ArgumentParser):
       if colour_function is not None:
         fill, bar_label = colour_function(y_value_scale)
         draw_bar_labels = True
-        
+
       else:
         fill = (0,0,0)
 
@@ -1218,7 +1218,7 @@ class Graph(ArgumentParser):
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None,
                        hrefs=None, targets=None, lt=None, gt=None, no_negatives=False,
                        scale=None, colour=None, force_draw=False, counter=0):
-    
+
     shape = self.params.marker_shape
     log = self.use_log
     max_x = self.max_x
@@ -1329,11 +1329,11 @@ class Graph(ArgumentParser):
             continue  # avoid wasting time drawing points that overlap too much
       except Exception as err:
         pass
-      
+
       #if self.omit_hkl:
         #if indices[i] in self.omit_hkl:
           #fill = "#ff0000"
-      
+
       if shape == 'square':
         box = (x,y,x+marker_width,y+marker_width)
         self.draw.rectangle(box, fill=fill, outline=outline, width=self.scale)
@@ -1342,7 +1342,7 @@ class Graph(ArgumentParser):
         box = (x - r, y - r, x + r, y + r)
         box = shift_box(box, r, 0)
         self.draw.ellipse(box, fill=fill, outline=outline, width=self.scale)
-      
+
       if self.item == "AutoChem":
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (tuple(v / self.scale for v in box) + (xr, yr)))
@@ -3170,7 +3170,7 @@ class Xobs_Xcalc_plot(Analysis):
       if self.omit_hkl:
         self.omit_hkl_str = f"{len(self.omit_hkl)} reflections"
         hkl_omit_n = len(self.omit_hkl)
-        
+
       if len(xy_plot.indices_omitted) - hkl_omit_n > 0:
         have_omitted = True
         metadata["name"] = "Omitted Data (OMIT)"
@@ -3201,29 +3201,29 @@ class Xobs_Xcalc_plot(Analysis):
 
   def get_common_data(self, xy_plot, metadata):
     from cctbx.array_family import flex
-    
+
     # --- Build a Python set of tuples for quick membership testing ---
     # If self.omit_hkl is a tuple-of-tuples, using it directly is fine:
     target_set = set(map(tuple, self.omit_hkl))
-    
+
     # xy_plot.indices_omitted is presumably a flex.miller_index-like array;
     # build a boolean mask (Python list) indicating membership in target_set
     sel_bool_py = [tuple(hkl) in target_set for hkl in xy_plot.indices_omitted]
-    
+
     # Sanity check: lengths must match
     assert len(sel_bool_py) == xy_plot.indices_omitted.size(), (
         "Selection length mismatch: sel length %d vs indices length %d"
         % (len(sel_bool_py), xy_plot.indices_omitted.size())
     )
-    
+
     # Convert to flex.bool OR to flex.size_t of kept positions
     mask_flex = flex.bool(sel_bool_py)                 # boolean mask
     keep_positions = [i for i, flag in enumerate(sel_bool_py) if flag]
     keep_flex = flex.size_t(keep_positions)            # explicit positions
-    
+
     #print("Total omitted indices (xy_plot):", xy_plot.indices_omitted.size())
     #print("Number matching omit_hkl (common):", keep_flex.size())
-    
+
     # --- Use keep_flex (flex.size_t) for selection of miller_index and other arrays ---
 
     if self.F_or_I == "F":
@@ -4248,7 +4248,7 @@ class HealthOfStructure():
                 value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
                 value = olx.Cif('_refine_ls_abs_structure_Flack')
                 _ = olx.Cif('_refine_ls_abs_structure_details')
-  
+
                 if "parsons" in _.lower():
                   hooft_src = "Parsons"
                 elif "hooft" in _.lower():
@@ -4314,7 +4314,7 @@ class HealthOfStructure():
               bg_colour = OV.GetParam('gui.red').hexadecimal
             elif _ < 3:
               bg_colour = OV.GetParam('gui.orange').hexadecimal
-            elif _ < 5:  
+            elif _ < 5:
               bg_colour = OV.GetParam('gui.green').hexadecimal
             else:
               bg_colour = OV.GetParam('gui.dark_green').hexadecimal
@@ -4326,36 +4326,36 @@ class HealthOfStructure():
             value = str(value) + "()"
           flack_val = value.split("(")[0]
           flack_esd = value.split("(")[1].strip(")")
-  
+
           if len(flack_val.strip("-")) == 1:
             if len(flack_esd) == 1:
               flack_esd_f = float("%s" %flack_esd)
-  
+
           if len(flack_val.strip("-")) == 3:
             if len(flack_esd) == 1:
               flack_esd_f = float("0.%s" %flack_esd)
             elif len(flack_esd) == 2:
               flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
-  
+
           elif len(flack_val.strip("-")) == 4:
             if len(flack_esd) == 1:
               flack_esd_f = float("0.0%s" %flack_esd)
             elif len(flack_esd) == 2:
               flack_esd_f = float("0.%s" %flack_esd)
-  
+
           elif len(flack_val.strip("-")) == 5:
             if len(flack_esd) == 1:
               flack_esd_f = float("0.00%s" %flack_esd)
             elif len(flack_esd) == 2:
               flack_esd_f = float("0.0%s" %flack_esd)
-  
+
           bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
-  
+
           if len(flack_esd) == 1:
             _ = 0.75
           else:
             _ = 0.63
-  
+
           if len(flack_esd) == 0:
             bg_val = "#000000"
             bg_esd = "#000000"
@@ -4413,6 +4413,8 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
+        elif raw_val < 0:
+          have_null = True
 
       if have_null:
         bg_colour = "#555555"
