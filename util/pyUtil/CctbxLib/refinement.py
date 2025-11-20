@@ -845,7 +845,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif acta != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
     if write_fcf:
-      fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+      list_code = 8 if self.twin_components is not None else 4
+      fcf_cif, fmt_str = self.create_fcf_content(list_code=list_code,
+        add_weights=True, fixed_format=False)
 
       import io
       f = io.StringIO()
@@ -1868,7 +1870,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if self.fo_sq_fc is None or self.fo_sq_fc_merge != merge or self.fo_sq_fc_complete != complete:
-      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function, filtered=filtered, merge=merge)
+      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function,
+        filtered=filtered, merge=merge, complete=complete)
       self.fo_sq_fc_merge = merge
       self.fo_sq_fc_complete = complete
     return self.fo_sq_fc
