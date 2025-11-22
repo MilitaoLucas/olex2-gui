@@ -1895,7 +1895,7 @@ def pip(package:str):
       return 100,100
     os.get_terminal_size = get_terminal_size
     # 3.8 will still go to site-packages, whereas later - to versioned one
-    if sys.version_info.major >= 3 and sys.version_info.minor > 8
+    if sys.version_info.major >= 3 and sys.version_info.minor > 8:
       py_version = "-%s%s" %(sys.version_info.major, sys.version_info.minor)
     else:
       py_version = ""
