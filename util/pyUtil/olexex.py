@@ -1894,7 +1894,12 @@ def pip(package:str):
     def get_terminal_size(handle=None):
       return 100,100
     os.get_terminal_size = get_terminal_size
-    pipmain(['install', f'--target={dd}/site-packages',
+    # 3.8 will still go to site-packages, whereas later - to versioned one
+    if sys.version_info.major >= 3 and sys.version_info.minor > 8
+      py_version = "-%s%s" %(sys.version_info.major, sys.version_info.minor)
+    else:
+      py_version = ""
+    pipmain(['install', f'--target={dd}/site-packages%s' %py_version,
              package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
     #print(f"{locale.getlocale(locale.LC_ALL)}")
     # reset imports - to allow new imports without restart

@@ -47,7 +47,11 @@ class initpy_funcs():
           sys.path.append(sys.prefix + '/plat-mac')
         elif sys.platform == 'linux2':
           sys.path.append(sys.prefix + '/plat-linux2')
-    sys.path.append(os.path.join(self.datadir, "site-packages"))
+    if sys.version_info.major >= 3 and sys.version_info.minor > 8:
+      py_version = "-%s%s" %(sys.version_info.major, sys.version_info.minor)
+    else:
+      py_version = ""
+    sys.path.append(os.path.join(self.datadir, "site-packages%s" %py_version))
 
   def onexit(self):
     sps = self.OV.GetVar("launched_server.ports", "")
