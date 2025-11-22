@@ -3,10 +3,10 @@ import htmlTools
 from olexFunctions import OV
 from utilities import make_quick_button_gui, is_disordered
 
-def begin_new_line(help_label="NoSpherA2 Option 1"):
+def begin_new_line(help_label="NoSpherA2_Options_1", scope="1"):
   return f'''<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
   <td valign='top' width="$GetVar(HtmlTableFirstcolWidth)" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  {htmlTools.MakeHoverButton(f'btn-info@{help_label}',f"spy.make_help_box -name='{help_label}' -popout='False' -helpTxt='Options'")}
+  {htmlTools.MakeHoverButton(f'btn-info@{help_label}{scope}',f"spy.make_help_box -name='{help_label}' -popout='False' -helpTxt='Options'")}
   </td>
   <td colspan="1">
     <table border="0" width="100%" cellpadding="1" cellspacing="1" Xbgcolor="#ffaaaa">
@@ -264,7 +264,7 @@ def no_afix_checkbox():
                          width=20)
 
 def disorder_groups_text():
-  return begin_new_line() + labeled_text("NoSpherA2_grouped_parts@refine",
+  return begin_new_line("NoSpherA2_Options_Grouped_Parts") + labeled_text("NoSpherA2_grouped_parts@refine",
                       "Grouped Parts",
                       "spy.GetParam('snum.NoSpherA2.Disorder_Groups')",
                       "spy.SetParam('snum.NoSpherA2.Disorder_Groups', html.GetValue('~name~'))",
@@ -289,7 +289,7 @@ def pyscf_solvation():
 def partitioning_scheme_line():
   if OV.GetParam('user.NoSpherA2.show_partitioning') != True:
     return ""
-  temp = begin_new_line() + \
+  temp = begin_new_line("NoSpherA2_Options_RIFit") + \
           labeled_combo("NoSpherA2_partitioning_scheme@refine",
                         "Partitioning Scheme",
                         "'Hirshfeld;RI-Fit;TFVC;Becke'",
@@ -341,7 +341,8 @@ def make_hybrid_GUI(softwares_list_string):
     t += update_tsc_button()
 
   
-  t += end_line() + begin_new_line() + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + partitioning_scheme_line()
+  t += end_line() + begin_new_line() + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
+  t += end_line() + begin_new_line("NoSpherA2_Options_3") + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + partitioning_scheme_line()
   for i in parts:
     if i == 0:
       continue
@@ -354,7 +355,7 @@ def make_hybrid_GUI(softwares_list_string):
       "spy.GetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\')"%i, 
       "spy.SetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\',html.GetValue(\'~name~\'))>>html.Update()"%i)
     selected_software = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d'%i)
-    t += end_line() + begin_new_line()
+    t += end_line() + begin_new_line("NoSpherA2_Options_2")
     if selected_software != "  " + str(OV.GetParam('user.NoSpherA2.discamb_exe')):
       if selected_software != "ELMOdb":
         t += labeled_combo(
@@ -442,7 +443,7 @@ def make_xtb_GUI():
   # Method, CPUs, Memory
   t = begin_new_line() + method_combo() + cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_2") + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
@@ -453,7 +454,7 @@ def make_xtb_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         labeled_text("NoSpherA2_xtb_temp@refine",
                       "Temp. (K)",
@@ -477,7 +478,7 @@ def make_ptb_GUI():
                      width=2) +\
     end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + charge_spin() + multiplicity_spin() + iterative_checkbox()
+  t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
   iterative = OV.GetParam('snum.NoSpherA2.full_HAR')
   if iterative == False:
     t += update_tsc_button()
@@ -485,7 +486,7 @@ def make_ptb_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
@@ -540,7 +541,7 @@ def make_ELMOdb_GUI():
                   width_label=15, width_combo=50) + \
       cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + charge_spin() + multiplicity_spin() + iterative_checkbox()
+  t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
   iterative = OV.GetParam('snum.NoSpherA2.full_HAR')
   if iterative == False:
     t += update_tsc_button()
@@ -548,7 +549,7 @@ def make_ELMOdb_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line() +integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
+  t += begin_new_line("NoSpherA2_Options_3") +integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
   # ELMO specific options
   t += "<!-- #include ELMO_specific ../util/pyUtil/NoSpherA2/ELMO_specific.htm;help_ext=NoSpherA2 Extras;1; -->" + \
         partitioning_scheme_line()
@@ -586,7 +587,7 @@ def make_ORCA_GUI(new_ORCA = True):
                        "spy.SetParam('snum.NoSpherA2.basis_adv_string', html.GetValue('~name~')) >> html.Update()",
                        width_label=15, width_textbox=50) + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_2") + \
         labeled_checkbox("NoSpherA2_baseset_adv@refine",
                          "Adv.",
                          "spy.GetParam('snum.NoSpherA2.basis_adv')",
@@ -603,14 +604,14 @@ def make_ORCA_GUI(new_ORCA = True):
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, Relativistics, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         relativistics_checkbox() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
   # ORCA specific options: SCF Thresh., SCF Strategy, Solvation
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2 Extras") + \
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",
                       "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
@@ -707,7 +708,7 @@ def make_tonto_GUI():
         memory_text() + \
         end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_2") + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
@@ -718,13 +719,13 @@ def make_tonto_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         relativistics_checkbox() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2 Extras") + \
         labeled_text("NoSpherA2_tonto_cluster_radius@refine",
                       "Cluster r",
                       "spy.GetParam('snum.NoSpherA2.cluster_radius')",
@@ -768,7 +769,7 @@ def make_frag_HAR_GUI():
                        "spy.SetParam('snum.NoSpherA2.basis_adv_string', html.GetValue('~name~'))",
                        width_label=15, width_textbox=50) + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_2") + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
@@ -779,14 +780,14 @@ def make_frag_HAR_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, Relativistics, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         relativistics_checkbox() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
   # ORCA specific options: SCF Thresh., SCF Strategy, Solvation
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2 Extras") + \
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",
                       "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
@@ -857,7 +858,7 @@ def make_pySCF_GUI():
   # Method, CPUs, Memory
   t = begin_new_line() + basis_combo() + method_combo() + cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_2") + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox() + \
@@ -869,7 +870,7 @@ def make_pySCF_GUI():
     t += cycles_spin()
   t += end_line()
   # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line() + \
+  t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
@@ -890,7 +891,7 @@ def make_discambMATT_GUI():
     t += update_tsc_button()
   else:
     t += cycles_spin()
-  t += end_line() + begin_new_line() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
+  t += end_line() + begin_new_line("NoSpherA2_Options_3") + h_aniso_checkbox() + no_afix_checkbox() + end_line()
   if is_disordered():
     t += disorder_groups_text()
   return t
