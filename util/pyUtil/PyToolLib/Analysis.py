@@ -3135,7 +3135,7 @@ class Xobs_Xcalc_plot(Analysis):
     ## Included Data
     metadata["name"] = "Included Data"
     metadata["idx"] = 0
-    
+
     if self.F_or_I == "F":
       data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
@@ -3153,7 +3153,7 @@ class Xobs_Xcalc_plot(Analysis):
     self.omit_hkl_str = ""
     self.shel_str = ""
     self.shel_hkl_str = ""
-    
+
     if self.F_or_I == "F":
       x_obs_omitted = xy_plot.f_obs_omitted
       x_calc_omitted = xy_plot.f_calc_omitted
@@ -3863,8 +3863,8 @@ def make_reflection_graph(name):
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
-           'fobs_fcalc': (Xobs_Xcalc_plot, "F"), 
-           'iobs_icalc': (Xobs_Xcalc_plot, "I"), 
+           'fobs_fcalc': (Xobs_Xcalc_plot, "F"),
+           'iobs_icalc': (Xobs_Xcalc_plot, "I"),
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
@@ -4413,7 +4413,7 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
-        elif raw_val < 0:
+        elif raw_val is None or int(raw_val) < 0:
           have_null = True
 
       if have_null:
