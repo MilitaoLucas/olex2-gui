@@ -587,7 +587,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("Skipping Hooft parameter evaluation for ED data")
         OV.SetParam('snum.refinement.hooft_str', "ED")
         OV.SetParam('snum.refinement.flack_str', "ED")
-      return
+        OV.SetHeaderParam('ED.z.value', "ED")
+        return
     if self.hooft:
       return self.hooft
     if (not self.xray_structure().space_group().is_centric()
