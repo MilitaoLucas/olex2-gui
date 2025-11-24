@@ -4644,7 +4644,7 @@ class HealthOfStructure():
           _ = OV.GetHeaderParam('ED.z.deltaR1', '')
           if _:
             _ = _.replace("-", "")
-            value_display_extra = f"DeltaR={_}%"
+            value_display_extra = f"DeltaR={float(_):.2f}%"
             value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     if item == "MinD":
