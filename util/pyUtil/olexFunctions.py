@@ -1316,8 +1316,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
           if env.initialised:
             print("Successfully initialised OpenBlas from %s:" %files[0])
             print(env.build_config)
-            return True
-        return False
+      return env.initialised
     except Exception as e:
       print("Could not initialise OpenBlas: %s" %e)
       return False
