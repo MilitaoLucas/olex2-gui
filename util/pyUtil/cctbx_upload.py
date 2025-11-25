@@ -25,27 +25,27 @@ else:
 
 build_def = {
   'linux-64bit':
-    (('/mnt/hgfs/cctbx/cctbx_latest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_latest/modules/cctbx_project/',
-      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
+    (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py38/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j7'),),
   'linux-64bit-next':
   (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py313/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    '/tmp/cctbx/', 'cctbx-linux64-py313.zip', '-j6'),),
-'darwin-64bit':
-  (('~/build/svn/cctbx/build_mac64_py38/', '~/build/svn/cctbx/modules/cctbx_project/',
+    '/tmp/cctbx/', 'cctbx-linux64-py313.zip', '-j7'),),
+  'darwin-64bit':
+    (('~/build/svn/cctbx/build_mac64_py38/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64.zip', '-j3'),),
-'darwin-64bit-next':
-  (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
+  'darwin-64bit-next':
+    (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64-next.zip', '-j3'),),
 
-'win32-32bit':
-  [('d:/devel/cctbx/cctbx_latest/build_win32_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    'd:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j10')],
-'win32-64bit':
-  [('d:/devel/cctbx/cctbx_latest/build_win64_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    'd:/tmp/cctbx/', 'cctbx-win64.zip', '-j10')],
-'win32-64bit-next':
-  [('d:/devel/cctbx/cctbx_latest/build_win64_py313/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    'd:/tmp/cctbx/', 'cctbx-win64-next.zip', '-j10')],
+  'win32-32bit':
+    [('d:/devel/cctbx/cctbx_latest/build_win32_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+      'd:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j20')],
+  'win32-64bit':
+    [('d:/devel/cctbx/cctbx_latest/build_win64_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+      'd:/tmp/cctbx/', 'cctbx-win64.zip', '-j20')],
+  'win32-64bit-next':
+    [('d:/devel/cctbx/cctbx_latest/build_win64_py313/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
+      'd:/tmp/cctbx/', 'cctbx-win64-next.zip', '-j20')],
 }
 
 if option.dest == 'next':
@@ -68,9 +68,19 @@ def compile(_platform):
       tmp_dir = os.path.expanduser(d[2])
       bin_dir = build_dir+'bin/'
       os.chdir(build_dir)
-      if os.system(bin_dir + 'libtbx.scons ' + d[4]) != 0:
-        print('Scons returned non zero...')
-        return False
+      if sys.platform[:3] == "win":
+        if os.system(bin_dir + 'libtbx.scons ' + d[4]) != 0:
+          print('Scons returned non zero...')
+          return False
+      else:
+        tmp_fn = "build_tmp.sh"
+        with open(tmp_fn, "w") as bf:
+          bf.write("source ./setpaths.sh\n")
+          bf.write("libtbx.scons " + d[4] + '\n')
+        if os.system(f"bash ./{tmp_fn}") != 0:
+          print('Scons returned non zero...')
+          return False
+
       bundle_dir = tmp_dir + 'bundle'
       if os.path.exists(bundle_dir):
         shutil.rmtree(bundle_dir)
