@@ -922,6 +922,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def getBasisListStr(self):
     source = software()
+    if self.basis_list_str is None:
+      return "No Basis Sets found!"
     BL = self.basis_list_str.split(";")
     from cctbx_olex_adapter import OlexCctbxAdapter
     XRS = OlexCctbxAdapter().xray_structure()
