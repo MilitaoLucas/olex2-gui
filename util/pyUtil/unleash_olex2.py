@@ -64,7 +64,9 @@ py_port_313 = 'port-py313'
 # iteratable list of zips and prefixes
 distro_zips = (
   (mac64_port_zip_name, mac64_port_prefix),
+  (mac64_next_port_zip_name, mac64_next_port_prefix),
   (lin64_port_zip_name, lin64_port_prefix),
+  (lin64_next_port_zip_name, lin64_next_port_prefix),
   (win32_port_zip_name, win32_port_prefix),
   (win64_port_zip_name, win64_port_prefix),
   (win64_next_port_zip_name, win64_next_port_prefix),
@@ -72,24 +74,44 @@ distro_zips = (
 )
 
 external_files = {
+  #mac64 shared
+  'unirun-mac64.zip': ('olex-port', mac64_port_name, mac64_next_port_name,
+    'action:extract', 'action:delete'),
+  'hart-mac64.zip': ('olex-port', mac64_port_name, mac64_next_port_name,
+    'action:extract', 'action:delete'),
   #mac64
   'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
-  'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac64.zip': ('olex-port', mac64_port_name,
     'action:rmdir cctbx', 'action:extract', 'action:delete'),
   'lib-mac64.zip': ('olex-port', mac64_port_name,
     'action:rmdir lib', 'action:extract', 'action:delete'),
-  'hart-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
+  #mac64-next
+  'olex2-mac64-next.zip': ('olex-port', mac64_next_port_name, 'action:extract', 'action:delete'),
+  'plgl-mac64-next.zip': ('olex-port', mac64_next_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac64-next.zip': ('olex-port', mac64_next_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  'lib-mac64-next.zip': ('olex-port', mac64_next_port_name,
+    'action:rmdir lib', 'action:extract', 'action:delete'),
+  #linux64 shared
+  'unirun-linux64.zip': ('olex-port', lin64_port_name, lin64_legacy_port_name, lin64_next_port_name,
+    'action:extract', 'action:delete'),
+  'hart-lin64.zip': ('olex-port', lin64_port_name, lin64_next_port_name,
+    'action:extract', 'action:delete'),
   #linux64
   'olex2-linux64.zip': ('olex-port', lin64_port_name, lin64_legacy_port_name, 'action:extract', 'action:delete'),
-  'unirun-linux64.zip': ('olex-port', lin64_port_name, lin64_legacy_port_name, 'action:extract', 'action:delete'),
   'plgl-linux64.zip': ('olex-port', lin64_port_name, 'action:extract', 'action:delete'),
   'cctbx-linux64.zip': ('olex-port', lin64_port_name,
     'action:rmdir cctbx', 'action:extract', 'action:delete'),
   'lib-linux64.zip': ('olex-port', lin64_port_name,
     'action:rmdir lib', 'action:extract', 'action:delete'),
-  'hart-lin64.zip': ('olex-port', lin64_port_name, 'action:extract', 'action:delete'),
+  #linux64-next
+  'olex2-linux64-next.zip': ('olex-port', lin64_next_port_name, 'action:extract', 'action:delete'),
+  'plgl-linux64-next.zip': ('olex-port', lin64_next_port_name, 'action:extract', 'action:delete'),
+  'cctbx-linux64-next.zip': ('olex-port', lin64_next_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  'lib-linux64-next.zip': ('olex-port', lin64_next_port_name,
+    'action:rmdir lib', 'action:extract', 'action:delete'),
   #windows
   'olex2-win32-sse2.zip': ('olex-port', win32_port_name, win32_legacy_port_name, 'action:extract', 'action:delete'),
   'launch-win32.zip': ('olex-port', win32_port_name, win32_legacy_port_name, 'action:extract', 'action:delete'),
@@ -216,7 +238,7 @@ mac64_next_zip_files = {
   'ac-py313.zip',
 } | portable_zip_files
 
-linux64_zip_files = {
+lin64_zip_files = {
   'cctbx-linux64.zip',  #cctbx/cctbx_sources,...
   'lib-linux64.zip',    #lib/dlls
   'olex2-linux64.zip',  #olex2 executable
@@ -226,7 +248,7 @@ linux64_zip_files = {
   'ac-py38.zip',
 } | portable_zip_files
 
-linux64_next_zip_files = {
+lin64_next_zip_files = {
   'cctbx-linux64-next.zip',  #cctbx/cctbx_sources,...
   'lib-linux64-next.zip',    #lib/dlls
   'olex2-linux64-next.zip',  #olex2 executable
@@ -238,7 +260,8 @@ linux64_next_zip_files = {
 
 # a set of all zip files...
 all_zip_files = win32_zip_files | win64_zip_files | win64_next_zip_files\
-              | mac64_zip_files | linux64_zip_files
+              | mac64_zip_files | lin64_zip_files\
+              | mac64_next_zip_files | lin64_next_zip_files
 
 
 altered_files = set()
@@ -488,12 +511,12 @@ if os.path.exists(bin_directory + '/olex2.exe'):
 client = pysvn.Client()
 
 platforms = {
-  "win32-sse": False,
   "win32": True,
   "win64": True,
   "win64-next": False,
   "mac64": True,
   "mac64-next": False,
+  "lin64": True,
   "lin64-next": False,
 }
 try:
@@ -868,8 +891,23 @@ if platforms.get("lin64"):
     kwargs={
       "port_props": {lin64_port_name},
       "zip_name": lin64_port_zip_name,
-      "port_zips": linux64_zip_files,
+      "port_zips": lin64_zip_files,
       "prefix": lin64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/linux-distro/start' : 'olex2/start',
+        bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
+      }
+    }
+  )
+  threads.append(t)
+if platforms.get("lin64-next"):
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": {lin64_next_port_name},
+      "zip_name": lin64_next_port_zip_name,
+      "port_zips": lin64_next_zip_files,
+      "prefix": lin64_next_port_prefix,
       "extra_files":
       {
         bin_directory + '/linux-distro/start' : 'olex2/start',
@@ -885,6 +923,23 @@ if platforms.get("mac64"):
       "zip_name": mac64_port_zip_name,
       "port_zips": mac64_zip_files,
       "prefix": mac64_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+        bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+        bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+        bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+      }
+    }
+  )
+  threads.append(t)
+if platforms.get("mac64-next"):
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": {mac64_next_port_name},
+      "zip_name": mac64_next_port_zip_name,
+      "port_zips": mac64_next_zip_files,
+      "prefix": mac64_next_port_prefix,
       "extra_files":
       {
         bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',

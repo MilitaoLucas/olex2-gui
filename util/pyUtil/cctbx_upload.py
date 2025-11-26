@@ -29,7 +29,7 @@ build_def = {
       '/tmp/cctbx/', 'cctbx-linux64.zip', '-j7'),),
   'linux-64bit-next':
   (('/mnt/devel/cctbx/cctbx_latest/build_lin64_py313/', '/mnt/devel/cctbx/cctbx_latest/modules/cctbx_project/',
-    '/tmp/cctbx/', 'cctbx-linux64-py313.zip', '-j7'),),
+    '/tmp/cctbx/', 'cctbx-linux64-next.zip', '-j7'),),
   'darwin-64bit':
     (('~/build/svn/cctbx/build_mac64_py38/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64.zip', '-j3'),),
@@ -84,7 +84,7 @@ def compile(_platform):
       bundle_dir = tmp_dir + 'bundle'
       if os.path.exists(bundle_dir):
         shutil.rmtree(bundle_dir)
-      os.mkdir(bundle_dir)
+      os.makedirs(bundle_dir)
       os.chdir(bundle_dir)
       if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
         print('Failed to create a distribution...')
