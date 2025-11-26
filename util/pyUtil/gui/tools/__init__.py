@@ -2775,7 +2775,10 @@ class PlotIt():
     if byline:
       self.plt.rcParams['font.family'] = 'Arial'
       self.plt.rcParams['font.stretch'] = 'condensed'
-      self.fig.text(0.96, 0.08, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 2, color="#bebebe")
+      
+      axes = self.fig.get_axes()      # all axes in the figure
+      bottom = min(ax.get_position().y0 for ax in axes)      
+      self.fig.text(0.96, bottom, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 2, color="#bebebe")
 
     self.fig.align_ylabels()
 
@@ -2812,6 +2815,7 @@ class PlotIt():
              marker=None,
              markersize=None,
              linestyle=None,
+             line_width=None,
              ylabel="",
              xlabel="",
              y_tick_rotation=0, 
@@ -2842,6 +2846,8 @@ class PlotIt():
       markersize = self.plt_params.ax1.marker_size
     if not linestyle:
       linestyle = self.plt_params.ax1.linestyle
+    if not line_width:
+      line_width = self.plt_params.ax1.line_width
 
     if not isinstance(xs[0], list):
       xs = ([xs])
@@ -2890,7 +2896,7 @@ class PlotIt():
 
         # Make a smooth set of x values for the trendline
         x_fit = np.linspace(min(x), max(x), 200)
-        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=1.0, label="_nolegend_")
+        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=line_width, label="_nolegend_")
         ## --- compute R² ---
         y_pred = trend(x)
         ss_res = np.sum((y - y_pred)**2)
@@ -2899,100 +2905,10 @@ class PlotIt():
         
         x = np.asarray(x)
         y = np.asarray(y)
-        # --- identity-line metrics (y = x) ---
-        diff = y - x
-
-        ## RMS perpendicular distance to y=x: |y-x|/sqrt(2) per point, then RMS
-        ## RMS = sqrt(mean((y-x)^2) / 2)
-        #mean_sq_diff = np.mean(diff ** 2)
-        #rms_identity = np.sqrt(mean_sq_diff / 2.0)
-        
-        # R^2 against identity line (treat y=x as the model)
         ss_res_id = np.sum((y - x) ** 2)
         r2_identity = 1.0 - ss_res_id / ss_tot if ss_tot != 0 else (1.0 if ss_res_id == 0 else 0.0)
-        
-        
         label = f"{legend[i]} (R²={r2:.3f} R²(identity)={r2_identity:.3f}" 
         ax.scatter(x, y, s=markersize, label=label)
-      ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
-
-
-      #for i, y in enumerate(ys):
-        ## plot scatter
-        ##pts = ax.scatter(x, y, s=markersize, marker=marker, label=f"{legend[i]}")
-        ##color = pts.get_facecolor()[0]   # extract the colour of this series
-      
-        ## fit
-        #coeffs = np.polyfit(x, y, polyfit)
-        #trend = np.poly1d(coeffs)
-      
-        ## smooth line for the plot
-        #x_fit = np.linspace(min(x), max(x), 200)
-        #y_fit = trend(x_fit)
-        #ax.plot(x_fit, y_fit, linestyle="--", lw=1.5, label="_nolegend_")
-      
-        ## --- compute R² ---
-        #y_pred = trend(x)
-        #ss_res = np.sum((y - y_pred)**2)
-        #ss_tot = np.sum((y - np.mean(y))**2)
-        #r2 = 1 - ss_res/ss_tot
-        
-        #label = f"{legend[i]} (R²={r2:.3f})"
-        #ax.scatter(x, y, s=markersize, label=label)        
-
-
-      #for i, y in enumerate(ys_list):
-        #label_text = legend_list[i] if i < len(legend_list) else None
-        ## get color from cycle so scatter and trendline match
-        #color = self._get_color_from_cycle(ax) or None
-        
-        
-        ## Fit
-        #coeffs = np.polyfit(x, y, polyfit)
-        #trend = np.poly1d(coeffs)
-        #y_pred = trend(x)
-        #r2 = compute_r2(np.asarray(y), y_pred)
-        
-        
-        ## Build label including R^2 if requested
-        #r2_in_legend = kwargs.get('r2_in_legend', False)
-        #if r2_in_legend and label_text:
-        #legend_label = f"{label_text} (R²={r2:.3f})"
-        #else:
-        #legend_label = label_text
-        
-        
-        ## Plot scatter once with label (if any)
-        #ax.scatter(x, y, s=markersize, label=legend_label, color=color, marker=marker)
-        
-        
-        ## Plot trendline matching the color
-        #x_fit = np.linspace(np.min(x), np.max(x), 200)
-        #ax.plot(x_fit, trend(x_fit), linestyle='--', linewidth=0.9, color=color)
-      
-      
-      ## Annotate R^2 near last point when not in legend
-      #if not r2_in_legend:
-      #x_off = (np.max(x) - np.min(x)) * 0.02 if np.max(x) != np.min(x) else 0.1
-      #ax.text(x[-1] + x_off, y[-1], f"$R^2={r2:.3f}$", color=color, fontsize=12, va='center', ha='left')
-
-
-
-
-
-
-
-      #fig, ax = self.plt.subplots(figsize=(12, 12))
-
-      #for i, y in enumerate(ys):
-        #ax.scatter(x, y, s=markersize, label=f"{legend[i]}")
-        #coeffs = np.polyfit(x, y, polyfit)
-        #trend = np.poly1d(coeffs)
-
-        ## Make a smooth set of x values for the trendline
-        #x_fit = np.linspace(min(x), max(x), 200)
-        #ax.plot(x_fit, trend(x_fit), linestyle="--", lw=0.5, label="_nolegend_")
-
       ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
 
       if xlim:
@@ -3039,13 +2955,16 @@ class PlotIt():
             if colour_proc == 'auto':
               colour_proc = None
             labl = repr(highlight_idx_l[lenx - i - 1][1])
-            lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
+            if not line_width:
+              lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
+            else:
+              lw = line_width
         _, = ax.plot(x,
                      y,
                      marker=get_property(marker, i),
                      markersize=get_property(markersize, i),
                      color=colour_proc,
-                     linewidth=lw,
+                     linewidth=get_property(line_width, i),
                      linestyle=get_property(linestyle, i),
                      markerfacecolor=self.plt_params.ax1.marker_face_colour,
                      markeredgecolor=get_property(colour, i),
@@ -3111,7 +3030,7 @@ class PlotIt():
       ax.legend(handles=legend_handles, loc='upper right', ncol=1)
       legend = ""
     if legend:
-      ax.margins(y=0.25)
+      ax.margins(y=0.45)
       ax.legend(legend, loc='upper right', ncol=2)
     ax.tick_params(axis='y', labelcolor=ax_colour, rotation=y_tick_rotation)
     ax.tick_params(axis='x', labelcolor=ax_colour, rotation=x_tick_rotation)
