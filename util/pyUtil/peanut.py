@@ -1,5 +1,6 @@
 import os
 import olex
+import olexex
 import olx
 import gui
 import numpy as np
@@ -10,6 +11,9 @@ from scitbx import matrix
 
 from olexFunctions import OV
 debug = OV.IsDebugging()
+u_list = ['11', '22', '33', '12', '13', '23']
+c_list = ['111', '112', '113', '122', '123', '133', '222', '223', '233', '333']
+d_list = ['1111', '1112', '1113', '1122', '1123', '1133', '1222', '1223', '1233', '1333', '2222', '2223', '2233', '2333', '3333']
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -31,7 +35,11 @@ def list_to_matrix(U):
         [U13, U23, U33]
     ])
 
-def similarity_index(U1_list, U2_list):
+def similarity_index(U1_list, U2_list, uc=None):
+    if uc is not None:
+      # Transform U1 and U2 to CIF coordinates
+      U1_list = adptbx.u_cart_as_u_cif(uc, U1_list)
+      U2_list = adptbx.u_cart_as_u_cif(uc, U2_list)
     U1 = list_to_matrix(U1_list)
     U2 = list_to_matrix(U2_list)
     
@@ -42,36 +50,38 @@ def similarity_index(U1_list, U2_list):
         np.linalg.cholesky(U2)
     except np.linalg.LinAlgError:
         # Return a sentinel value or handle specially
-        print("Non-positive definite ADP tensor detected")
+        eigvals1 = np.linalg.eigvals(U1)
+        eigvals2 = np.linalg.eigvals(U2)
+        print("Non-positive definite ADP tensor detected. Eigenvalues: ", eigvals1, eigvals2)
         return float('nan')  # or some other indicator
 
     # Rest of the function proceeds safely
     try:
-        U1_inv = np.linalg.inv(U1)
-        U2_inv = np.linalg.inv(U2)
-        
-        det_U1_inv = np.linalg.det(U1_inv)
-        det_U2_inv = np.linalg.det(U2_inv)
-        
-        if det_U1_inv <= 0 or det_U2_inv <= 0:
-            print("Negative determinant in ADP calculation")
-            return float('nan')
-            
-        sum_inv = U1_inv + U2_inv
-        det_sum_inv = np.linalg.det(sum_inv)
-        
-        if det_sum_inv <= 0:
-            print("Negative determinant in sum of inverse ADPs")
-            return float('nan')
-            
-        R12 = (2**1.5) * (det_U1_inv * det_U2_inv)**0.25 / det_sum_inv**0.5
-        S12 = 100 * (1 - R12)
-        return S12
-    except Exception as e:
-        if debug:
-          print(f"Exception in similarity index calculation: {e}")
-        print("Error in similarity index calculation")
+      U1_inv = np.linalg.inv(U1)
+      U2_inv = np.linalg.inv(U2)
+      
+      det_U1_inv = np.linalg.det(U1_inv)
+      det_U2_inv = np.linalg.det(U2_inv)
+      
+      if det_U1_inv <= 0 or det_U2_inv <= 0:
+        print("Negative determinant in ADP calculation")
         return float('nan')
+          
+      sum_inv = U1_inv + U2_inv
+      det_sum_inv = np.linalg.det(sum_inv)
+      
+      if det_sum_inv <= 0:
+        print("Negative determinant in sum of inverse ADPs")
+        return float('nan')
+          
+      R12 = (2**1.5) * (det_U1_inv * det_U2_inv)**0.25 / det_sum_inv**0.5
+      S12 = 100 * (1 - R12)
+      return S12
+    except Exception as e:
+      if debug:
+        print(f"Exception in similarity index calculation: {e}")
+      print("Error in similarity index calculation")
+      return float('nan')
 
 class Peanut():
   def __init__(self):
@@ -323,19 +333,19 @@ class Peanut():
         print("MSDS is not running, nothing to hide")
   
   def show_diff(self, cif1 = None):
-      
-    if olx.IsFileType('CIF') == 'true' or olx.IsFileType('CIF') == 'cif' or olx.IsFileType('CIF') == 'True':
-      # If the file is a CIF, ask user to first export it to a file
-      print("Please export the CIF to a file first, then use this command again.")
-      return
+    """
+    Show the difference between the current model and the cif given.
+    
+    cif1: path to cif file to subtract (optional, if not given, a file dialog will open)
+    """
     # If there is no cif given, select a file using file dialog
     if cif1 is None:
       fn = olx.FileName()
       folder = os.path.dirname(os.path.abspath(fn))
       cif1 = olx.FileOpen("Select cif to subtract", "*.cif", folder, "")
     if cif1 == '':
-        print("No CIF file selected, cannot show difference.")
-        return
+      print("No CIF file selected, cannot show difference.")
+      return
     # Read the CIF files
     cif1_data = reader(file_path=cif1).model()
     
@@ -343,12 +353,12 @@ class Peanut():
     block1 = list(cif1_data.keys())[0]
     
     cell_params1 = [
-        float(cif1_data[block1].get('_cell_length_a').split('(')[0]),
-        float(cif1_data[block1].get('_cell_length_b').split('(')[0]),
-        float(cif1_data[block1].get('_cell_length_c').split('(')[0]),
-        float(cif1_data[block1].get('_cell_angle_alpha').split('(')[0]),
-        float(cif1_data[block1].get('_cell_angle_beta').split('(')[0]),
-        float(cif1_data[block1].get('_cell_angle_gamma').split('(')[0])
+      float(cif1_data[block1].get('_cell_length_a').split('(')[0]),
+      float(cif1_data[block1].get('_cell_length_b').split('(')[0]),
+      float(cif1_data[block1].get('_cell_length_c').split('(')[0]),
+      float(cif1_data[block1].get('_cell_angle_alpha').split('(')[0]),
+      float(cif1_data[block1].get('_cell_angle_beta').split('(')[0]),
+      float(cif1_data[block1].get('_cell_angle_gamma').split('(')[0])
     ]
     unit_cell1 = uctbx.unit_cell(cell_params1)
     
@@ -357,170 +367,89 @@ class Peanut():
     ueq = cif1_data[block1].get('_atom_site_U_iso_or_equiv')
     
     aniso_atoms1 = cif1_data[block1].get('_atom_site_aniso_label')
+    u_1 = []
+    C_anharm_site = None
+    D_anharm_site = None
+    c_1 = []
+    d_1 = []
     # Get Uij parameters
-    u11_1 = cif1_data[block1].get('_atom_site_aniso_U_11')
-    u22_1 = cif1_data[block1].get('_atom_site_aniso_U_22')
-    u33_1 = cif1_data[block1].get('_atom_site_aniso_U_33')
-    u12_1 = cif1_data[block1].get('_atom_site_aniso_U_12')
-    u13_1 = cif1_data[block1].get('_atom_site_aniso_U_13')
-    u23_1 = cif1_data[block1].get('_atom_site_aniso_U_23')
+    for u_comp in u_list:
+      u_1.append(cif1_data[block1].get(f'_atom_site_aniso_U_{u_comp}'))
+    
     try:
-        #anharmonic contributions
-        C_anharm_site = cif1_data[block1].get('_atom_site_anharm_GC_C_label')
-        c111_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_111')
-        c112_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_112')
-        c113_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_113')
-        c122_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_122')
-        c123_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_123')
-        c133_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_133')
-        c222_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_222')
-        c223_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_223')
-        c233_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_233')
-        c333_1 = cif1_data[block1].get('_atom_site_anharm_GC_C_333')
+      #anharmonic contributions
+      C_anharm_site = cif1_data[block1].get('_atom_site_anharm_GC_C_label')
+      for c_comp in c_list:
+        c_1.append(cif1_data[block1].get(f'_atom_site_anharm_GC_C_{c_comp}'))
     except:
-        print("No anharmonic 3rd order in the cif")
+      print("No anharmonic 3rd order in the cif")
         
     try:
-        D_anharm_site = cif1_data[block1].get('_atom_site_anharm_GC_D_label')
-        d1111_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1111')
-        d1112_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1112')
-        d1113_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1113')
-        d1122_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1122')
-        d1123_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1123')
-        d1133_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1133')
-        d1222_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1222')
-        d1223_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1223')
-        d1233_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1233')
-        d1333_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_1333')
-        d2222_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_2222')
-        d2223_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_2223')
-        d2233_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_2233')
-        d2333_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_2333')
-        d3333_1 = cif1_data[block1].get('_atom_site_anharm_GC_D_3333')
+      D_anharm_site = cif1_data[block1].get('_atom_site_anharm_GC_D_label')
+      for d_comp in d_list:
+        d_1.append(cif1_data[block1].get(f'_atom_site_anharm_GC_D_{d_comp}'))
     except:
-        print("No anharmonic 4th order in the cif")
+      print("No anharmonic 4th order in the cif")
     
-    cctbx_adapter = OlexCctbxAdapter()
-    xray_structure = cctbx_adapter.xray_structure()
-    olx_atoms = cctbx_adapter.olx_atoms
-    uc = xray_structure.unit_cell()
-    labels = []
-    anis_flags = []
+    ref_mod = olexex.OlexRefinementModel(False)
+    olx_atoms = ref_mod.atoms()
+    uc = uctbx.unit_cell(ref_mod.getCell())
     
     ## Feed Model
     def iter_scatterers():
-      for a in xray_structure.scatterers():
-        label = a.label 
-        if a.flags.use_u_iso():
-          u = list(adptbx.u_iso_as_u_cart(a.u_iso))
-          #u_eq = u[0]
-          self.old_adps.append(a.u_iso)
-          anis_flags.append(False)
-        if a.flags.use_u_aniso():
-          u_cart = adptbx.u_star_as_u_cart(uc, a.u_star)
-          u = u_cart
-          if len(u) == 6:
-            u = [u[0], u[1], u[2], u[3], u[4], u[5]]
-            if a.is_anharmonic_adp():
-              u += a.anharmonic_adp.data()
-
+      for a in olx_atoms:
+        label = a['label']
+        u:list[float] = []
+        if 'uiso' in a:
+          u = list(adptbx.u_iso_as_u_cart(a['uiso'][0]))
+          self.old_adps.append([a['uiso'][0]])
+          olx.Anis(f"{label}", h=True)
+        elif 'adp' in a:
+          u = list(a['adp'][0])
           self.old_adps.append(u.copy())
-          anis_flags.append(True)
         # find the position in the ADP loop of the cif and subtract the ADPs
-        idx1 = -1
-        for i,a_ in enumerate(aniso_atoms1):
-              if a_ == label:
-                idx1 = i
-                break
+        idx1 = next((i for i, a_ in enumerate(aniso_atoms1) if a_ == label), -1)
         if idx1 != -1:
-            # Create Uij tensor
-            u_cif1 = (
-                float(str(u11_1[idx1]).split('(')[0]), 
-                float(str(u22_1[idx1]).split('(')[0]), 
-                float(str(u33_1[idx1]).split('(')[0]),
-                float(str(u12_1[idx1]).split('(')[0]), 
-                float(str(u13_1[idx1]).split('(')[0]), 
-                float(str(u23_1[idx1]).split('(')[0])
-            )
-            u_cart = adptbx.u_cif_as_u_cart(unit_cell1, u_cif1)
-            print(f"{label:<6} | {similarity_index(u_cart, u):>14.2f}")
-            labels.append(label)
-            for i,u_val in enumerate(u_cart):
-                u[i] -= u_val
+          # Create Uij tensor
+          u_cart_1 = adptbx.u_cif_as_u_cart(unit_cell1, [float(str(u_[idx1]).split('(')[0]) for u_ in u_1])
+          u_cart_1 = [u_cart_1[0], u_cart_1[1], u_cart_1[2], u_cart_1[5], u_cart_1[4], u_cart_1[3]]
+          print(f"{label:<6} | {similarity_index(u_cart_1, u, uc):>14.2f}")
+          for i,u_val in enumerate(u_cart_1):
+            u[i] -= u_val
         else:
-            for i,a_ in enumerate(iso_atoms):
-                if a_ == label:
-                    idx1 = i
-                    break
-            if idx1 != -1:
-                u_eq = float(str(ueq[idx1]).split('(')[0])
-                u_ = [u_eq, u_eq, u_eq, 0., 0., 0.]
-                print(f"{label:<6} | {similarity_index(u_, u):>14.2f}")
-                labels.append(label)
+          idx1 = next((i for i, a_ in enumerate(iso_atoms) if a_ == label), -1)
+          if idx1 != -1:
+            u_eq = float(str(ueq[idx1]).split('(')[0])
+            u_ = adptbx.u_iso_as_u_cart(u_eq)
+            print(f"{label:<6} | {similarity_index(u_, u, uc):>14.2f}")
         if C_anharm_site is not None:
-            idx1 = -1
-            for i,a_ in enumerate(C_anharm_site):
-                  if a_ == label:
-                    idx1 = i
-            if idx1 != -1:
-                if len(u) < 16:
-                    u += [0.0] * (16 - len(u))
-                u[6] -=  float(str(c111_1[idx1]).split('(')[0])
-                u[7] -=  float(str(c112_1[idx1]).split('(')[0])
-                u[8] -=  float(str(c113_1[idx1]).split('(')[0])
-                u[9] -=  float(str(c122_1[idx1]).split('(')[0])
-                u[10] -= float(str(c123_1[idx1]).split('(')[0])
-                u[11] -= float(str(c133_1[idx1]).split('(')[0])
-                u[12] -= float(str(c222_1[idx1]).split('(')[0])
-                u[13] -= float(str(c223_1[idx1]).split('(')[0])
-                u[14] -= float(str(c233_1[idx1]).split('(')[0])
-                u[15] -= float(str(c333_1[idx1]).split('(')[0])
+          idx1 = next((i for i, a_ in enumerate(C_anharm_site) if a_ == label), -1)
+          if idx1 != -1:
+            if len(u) < 16:
+              u += [0.0] * (16 - len(u))
+            for i in range(11):
+              u[i+6] -= float(str(c_1[i][idx1]).split('(')[0])
         if D_anharm_site is not None:
-            idx1 = -1
-            for i,a_ in enumerate(D_anharm_site):
-                  if a_ == label:
-                    idx1 = i
-            if idx1 != -1:
-                if len(u) < 31:
-                    u += [0.0] * (31 - len(u))
-                u[16] -= float(str(d1111_1[idx1]).split('(')[0])
-                u[17] -= float(str(d1112_1[idx1]).split('(')[0])
-                u[18] -= float(str(d1113_1[idx1]).split('(')[0])
-                u[19] -= float(str(d1122_1[idx1]).split('(')[0])
-                u[20] -= float(str(d1123_1[idx1]).split('(')[0])
-                u[21] -= float(str(d1133_1[idx1]).split('(')[0])
-                u[22] -= float(str(d1222_1[idx1]).split('(')[0])
-                u[23] -= float(str(d1223_1[idx1]).split('(')[0])
-                u[24] -= float(str(d1233_1[idx1]).split('(')[0])
-                u[25] -= float(str(d1333_1[idx1]).split('(')[0])
-                u[26] -= float(str(d2222_1[idx1]).split('(')[0])
-                u[27] -= float(str(d2223_1[idx1]).split('(')[0])
-                u[28] -= float(str(d2233_1[idx1]).split('(')[0])
-                u[29] -= float(str(d2333_1[idx1]).split('(')[0])
-                u[30] -= float(str(d3333_1[idx1]).split('(')[0])
+          idx1 = next((i for i, a_ in enumerate(D_anharm_site) if a_ == label), -1)
+          if idx1 != -1:
+            if len(u) < 31:
+              u += [0.0] * (31 - len(u))
+            for i in range(16):
+              u[i+16] -= float(str(d_1[i][idx1]).split('(')[0])
         yield (u)
-    this_atom_id = 0
     self.old_arad = OV.GetParam("user.atoms.azoom",1)
     self.old_brad = OV.GetParam("user.bonds.bzoom",1)
     olex.m("AZoom 0")
     olex.m("BRad 0.1")
     self.showing_diff = True
     print("Table of Similarity Indices S12 (harmonic part only):")
-    print("\n{:<6} {:^14}".format("Atom", "S12 /%"))
+    print("\n{:<6}|{:^14}".format("Atom", "S12 /%"))
     print("-" * 23)  # Separator line
-    for u in iter_scatterers():
-      id = olx_atoms.atom_ids[this_atom_id]
-      if not anis_flags[this_atom_id]:
-        #olex.m("anis -h {labels[this_atom_id]}")
-        olx.Anis(f"{labels[this_atom_id]}", h=True)
-      this_atom_id += 1
-      u_temp = (u[0], u[1], u[2], u[3], u[4], u[5])
-      temp = adptbx.u_cart_as_u_star(uc, u_temp)
-      olx.xf.au.SetAtomU(id, *temp)
+    for this_atom_id,u in enumerate(iter_scatterers()):
+      olx.xf.au.SetAtomU(olx_atoms[this_atom_id]['aunit_id'], *u)
     print("-" * 23)  # Separator line
 
-    if olx.IsFileType('CIF') == 'false':
-      olx.xf.EndUpdate()
+    olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
     scale = OV.GetVar('Peanut_scale',"1.0")
@@ -532,24 +461,21 @@ class Peanut():
   def hide_diff(self):
     olex.m("kill MSDS")
     if not self.showing_diff:
-        print("Not showing a difference model")
-        return
-    cctbx_adapter = OlexCctbxAdapter()
-    xray_structure = cctbx_adapter.xray_structure()
-    olx_atoms = cctbx_adapter.olx_atoms
+      print("Not showing a difference model")
+      return
+    ref_mod = olexex.OlexRefinementModel(False)
+    olx_atoms = ref_mod.atoms()
     ## Feed Model
     self.showing_diff = False
     olex.m(f"AZoom {self.old_arad}")
     olex.m(f"BRad {self.old_brad/100}")
-    for this_atom_id in range(len(xray_structure.scatterers())):
-      id = olx_atoms.atom_ids[this_atom_id]
+    for this_atom_id, a in enumerate(olx_atoms):
       if len(self.old_adps[this_atom_id]) == 1:
-          olex.m("isot {olx_atoms.atom_labels[this_atom_id]}")
-      olx.xf.au.SetAtomU(id, *self.old_adps[this_atom_id])
+        olex.m(f"isot {a['label']}")
+      olx.xf.au.SetAtomU(a['aunit_id'], *self.old_adps[this_atom_id])
     self.old_adps = []
 
-    if olx.IsFileType('CIF') == 'false':
-      olx.xf.EndUpdate()
+    olx.xf.EndUpdate()
     if OV.HasGUI():
       olx.Refresh()
     
