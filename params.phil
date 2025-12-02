@@ -1258,7 +1258,7 @@ user
       marker_1 {
         fill = (255,150,50)
           .type = colour
-        border = (127,75,25)
+        border = (200,100,75)
           .type = colour
         size_factor = 1./80
           .type = float

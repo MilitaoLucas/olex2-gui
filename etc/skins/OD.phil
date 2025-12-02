@@ -145,13 +145,13 @@ gui {
       .type = colour
     title_colour = #777777
       .type = colour
-    fill_colour = #dedede
+    fill_colour = #ffffff
       .type = colour
     outline_colour = #666666
       .type = colour
     fitline_colour = #aa0000
       .type = colour
-    page_colour = #dedede
+    page_colour = #efefef
       .type = colour
     axislabel_colour = #666666
       .type = colour
