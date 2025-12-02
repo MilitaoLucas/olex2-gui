@@ -338,7 +338,7 @@ class Graph(ArgumentParser):
     self.fillColour = guiParams.graph.fill_colour.hexadecimal
     self.outlineColour = guiParams.graph.outline_colour.hexadecimal
     self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
-    self.pageColour = "#ffffff"
+    self.pageColour = guiParams.graph.page_colour.hexadecimal
     self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
@@ -1208,7 +1208,7 @@ class Graph(ArgumentParser):
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     legend_top = self.graph_top + 20
     #legend_bottom = legend_top + 1.2*wY
-    x = width - 1.1*wX - self.bSides
+    x = width - 0.9 *wX - self.bSides
     top_left = (x, legend_top)
     #box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
@@ -2814,7 +2814,7 @@ class Fractal_Dimension(Analysis):
       self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
-    self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
+    self.draw_info("e gross: %8.2f e-\ne net:  %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
 
 class MuPlot(Analysis):
   def __init__(self):
@@ -4640,7 +4640,7 @@ class HealthOfStructure():
 
     if item == "hooft_str":
       if OV.IsEDData():
-        if value_raw != "ED":
+        if value_raw != "ED" and value_raw != 0:
           _ = OV.GetHeaderParam('ED.z.deltaR1', '')
           if _:
             _ = _.replace("-", "")
