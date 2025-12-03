@@ -794,9 +794,6 @@ def make_cell_dimensions_display():
   t1 = time.time()
 
   global current_sNum
-  # if OV.FileName() == current_sNum:
-    # return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
-
   l = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
   d = {}
   for x in l:
@@ -929,6 +926,8 @@ def weightGuiDisplay():
         #olx.html.SetValue(name, "%(curr)s | %(sugg)s" % d)
         #olx.html.SetFG(name, "%(fg)s" % d)
 
+  if not OV.GetParam('snum.refinement.weighting_scheme', None):
+    OV.SetParam('snum.refinement.weighting_scheme', 'default')
   if 'shelx' not in OV.GetParam('snum.refinement.weighting_scheme').lower() and 'default' not in OV.GetParam('snum.refinement.weighting_scheme').lower():
       return "<td width='35%' align='left'>No parameters applicable</td>"
   tol_green, tol_orange = 0.01, 0.1
