@@ -975,17 +975,15 @@ class Graph(ArgumentParser):
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
 
 
-  def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
+  def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None,
+                         draw_bar_labels=True, width=None):
     top = self.graph_top
-    marker_width = 5
-    width = self.params.size_x
+    if width is None:
+      width = self.params.size_x
     if width < 100:
       if width < 100:
         width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     height = self.graph_bottom - self.graph_top
-    legend_top = height + 20
-    labels = dataset.metadata().get('labels')
-    y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
     max_bars = self.params_hist.max_bars
@@ -3612,7 +3610,7 @@ class HistoryGraph(Analysis):
       data = Dataset(x, y, hrefs=hrefs, targets=targets)
       self.draw_history_bars(dataset=data, y_scale_factor=y_scale_factor,
                      colour_function=self.get_bar_colours,
-                     draw_bar_labels=False)
+                     draw_bar_labels=False, width=width)
 
   def get_bar_colours(self, bar_height):
     factor = self.params_hist.y_scale_factor
@@ -3674,6 +3672,7 @@ def array_scalar_multiplication(array, multiplier):
 
 def makeReflectionGraphOptions(graph, name):
   ### This is assuming that there are no more than FOUR option controls:
+  guiParams = OV.GuiParams()
   width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/4
   value = graph.short_caption
   options_gui = []
@@ -3719,7 +3718,7 @@ def makeReflectionGraphOptions(graph, name):
            'onuncheck': "spy.SetParam('user.graphs.reflections.%s.%s','False')" % (
              graph.name, obj.name),
            'width': '%s' % width,
-           'bgcolor': '%s' % graph.guiParams.html.table_bg_colour,
+           'bgcolor': '%s' % guiParams.html.table_bg_colour,
            }
       options_gui.append(htmlTools.make_tick_box_input(d))
 
