@@ -55,8 +55,6 @@ if OV.HasGUI():
 
 silent = True
 
-
-
 class Graph(ArgumentParser):
   def __init__(self, scale=4):
     super(Graph, self).__init__()
@@ -995,8 +993,8 @@ class Graph(ArgumentParser):
     y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
-    max_bars = self.params.max_bars
-    all_in_one_history = self.params.all_in_one_history
+    max_bars = self.params_hist.max_bars
+    all_in_one_history = self.params_hist.all_in_one_history
 
     if all_in_one_history:
       bar_width = math.floor((width-10)/n_bars)
@@ -2163,7 +2161,7 @@ class ShelXS_graph(PrgAnalysis):
 
 class WilsonPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "wilson"
     self.graphInfo["Title"] = OV.TranslatePhrase("Wilson Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2467,7 +2465,7 @@ class ChargeFlippingPlot(PrgAnalysis):
 
 class CumulativeIntensityDistribution(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "cumulative"
     self.graphInfo["Title"] = OV.TranslatePhrase("Cumulative Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
@@ -2531,7 +2529,7 @@ class CumulativeIntensityDistribution(Analysis):
 
 class CompletenessPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "completeness"
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2637,7 +2635,7 @@ class CompletenessPlot(Analysis):
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "sys_absences"
     self.graphInfo["Title"] = OV.TranslatePhrase("Systematic Absences Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
@@ -2672,7 +2670,7 @@ class SystematicAbsencesPlot(Analysis):
 
 class bijvoet_differences_scatter_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "bijvoet_differences_scatter"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2710,7 +2708,7 @@ class bijvoet_differences_scatter_plot(Analysis):
 
 class bijvoet_differences_NPP(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "bijvoet_differences_NPP"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2746,7 +2744,7 @@ class bijvoet_differences_NPP(Analysis):
 
 class Normal_probability_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Normal_probability_plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Normal Probability Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2779,7 +2777,7 @@ class Normal_probability_plot(Analysis):
 
 class Fractal_Dimension(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Fractal_Dimension_Plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Fractal Dimension Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2818,7 +2816,7 @@ class Fractal_Dimension(Analysis):
 
 class MuPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Mu_Plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Mu Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2941,7 +2939,7 @@ OV.registerFunction(MuPlot)
 
 class AnomDispPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "AnomDispPlot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Anomalous Dispersion Plot")
     self.graphInfo["pop_html"] = self.item
@@ -3082,7 +3080,7 @@ OV.registerFunction(AnomDispPlot)
 
 class Xobs_Xcalc_plot(Analysis):
   def __init__(self, F_or_I, batch_number=None):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.F_or_I = F_or_I
     self.item = f"{F_or_I}obs_{F_or_I}calc"
     self.graphInfo["Title"] = OV.TranslatePhrase(f"{F_or_I}obs vs {F_or_I}calc")
@@ -3246,7 +3244,7 @@ class Xobs_Xcalc_plot(Analysis):
 
 class Fobs_over_Fcalc_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Fobs_over_Fcalc"
     self.graphInfo["Title"] = OV.TranslatePhrase("Fobs/Fcalc vs resolution")
     self.graphInfo["pop_html"] = self.item
@@ -3295,7 +3293,7 @@ class Fobs_over_Fcalc_plot(Analysis):
 
 class scale_factor_vs_resolution_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "scale_factor_vs_resolution"
     self.graphInfo["Title"] = OV.TranslatePhrase("Scale factor vs resolution")
     self.graphInfo["pop_html"] = self.item
@@ -3334,7 +3332,7 @@ class scale_factor_vs_resolution_plot(Analysis):
 
 class item_vs_resolution_plot(Analysis):
   def __init__(self, item):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = item
     params = getattr(self.params, self.item)
 
@@ -3542,7 +3540,7 @@ class item_vs_resolution_plot(Analysis):
 
 class X_Y_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "X_Y_plot"
     self.series = []
     print("Good things will come to those who wait")
@@ -3571,7 +3569,7 @@ class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
     Analysis.__init__(self, scale=1)
-    self.params = OV.Params().user.graphs.program_analysis
+    self.params_hist = OV.Params().user.graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
@@ -3607,7 +3605,7 @@ class HistoryGraph(Analysis):
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
-    y_scale_factor = self.params.y_scale_factor
+    y_scale_factor = self.params_hist.y_scale_factor
 
     if len(bars) > 0:
       x = []
@@ -3625,7 +3623,7 @@ class HistoryGraph(Analysis):
                      draw_bar_labels=False)
 
   def get_bar_colours(self, bar_height):
-    factor = self.params.y_scale_factor
+    factor = self.params_hist.y_scale_factor
     text = ""
     if bar_height == factor:
       fill = (200, 100, 204)
