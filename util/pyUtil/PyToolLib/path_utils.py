@@ -89,7 +89,7 @@ def setup_cctbx(run_cold_start=False):
   if not cctbx_dir:
     os.environ['OLEX2_CCTBX_DIR'] = cctbxRoot
   if lib_path in os.environ:
-    # synchronise current values as Python anc CRT use cached values!
+    # synchronise current values as Python and CRT use cached values!
     os.environ[lib_path] = olx.GetEnv(lib_path)
     if not os.environ[lib_path] or os.environ[lib_path].endswith(lib_sep):
       os.environ[lib_path] += abs(libtbx.env.lib_path)

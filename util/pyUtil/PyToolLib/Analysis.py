@@ -37,17 +37,12 @@ debug = False
 
 timing = debug
 
-guiParams = OV.GuiParams()
-
 from scitbx.math import erf
 
-global GuiGraphChooserComboExists
 GuiGraphChooserComboExists = False
 
-global PreviousHistoryNode
 PreviousHistoryNode = None
 
-global cache
 cache = {}
 
 if OV.HasGUI():
@@ -126,7 +121,7 @@ class Graph(ArgumentParser):
       "TopRightTitle":self.TopRightTitle,
     }
     # added this to fix functionality where it is used!!!
-    self.gui_green = guiParams.green.hexadecimal
+    self.gui_green = self.guiParams.green.hexadecimal
 
   def plot_function(self, function, locals=None, width=2, n_points=50, fill="#ababab"):
     width *= self.scale
@@ -290,19 +285,19 @@ class Graph(ArgumentParser):
   def make_x_y_plot(self):
     pass
 
-  def make_empty_graph(self, axis_x=False, draw_title=True, square=False):
+  def make_empty_graph(self, axis_x=False, draw_title=True, square=False,
+                       width=None, height=None):
     from PIL import Image
     from PIL import ImageFont, ImageDraw, ImageChops
-    guiParams = OV.GuiParams()
 
-    self.imX = self.params.size_x
+    self.imX = self.params.size_x if width is None else width
     if self.imX < 100:
       self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     if square == True:
       self.imY = self.imX
       self.square = True
     else:
-      self.imY = self.params.size_y
+      self.imY = self.params.size_y if height is None else height
       self.square = False
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
@@ -328,16 +323,16 @@ class Graph(ArgumentParser):
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
-    self.light_grey = guiParams.graph.light_grey.hexadecimal
-    self.grey = guiParams.graph.grey.hexadecimal
-    self.dark_grey = guiParams.graph.grey.hexadecimal
-    self.filenameColour = guiParams.graph.filename_colour.hexadecimal
-    self.titleColour = guiParams.graph.title_colour.hexadecimal
-    self.fillColour = guiParams.graph.fill_colour.hexadecimal
-    self.outlineColour = guiParams.graph.outline_colour.hexadecimal
-    self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
-    self.pageColour = guiParams.graph.page_colour.hexadecimal
-    self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
+    self.light_grey = self.guiParams.graph.light_grey.hexadecimal
+    self.grey = self.guiParams.graph.grey.hexadecimal
+    self.dark_grey = self.guiParams.graph.grey.hexadecimal
+    self.filenameColour = self.guiParams.graph.filename_colour.hexadecimal
+    self.titleColour = self.guiParams.graph.title_colour.hexadecimal
+    self.fillColour = self.guiParams.graph.fill_colour.hexadecimal
+    self.outlineColour = self.guiParams.graph.outline_colour.hexadecimal
+    self.fitlineColour = self.guiParams.graph.fitline_colour.hexadecimal
+    self.pageColour = self.guiParams.graph.page_colour.hexadecimal
+    self.axislabelColour = self.guiParams.graph.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
@@ -1735,7 +1730,6 @@ class Analysis(Graph):
     self.fl = []
     self.item = None
     self.use_log = False
-    guiParams = OV.GuiParams()
     self.model = olexex.OlexRefinementModel().model
 
   def run_Analysis(self, f, n_bins=0, method='olex'):
@@ -3601,9 +3595,7 @@ class HistoryGraph(Analysis):
     n_bars = len(bars)
     #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     width = IT.skin_width_table - int(OV.GetParam('gui.html.table_firstcol_width')/2)
-    size = (width, 100)
-    self.params.size_x, self.params.size_y = size
-    self.make_empty_graph(draw_title=False)
+    self.make_empty_graph(draw_title=False, width=width, height=100)
 
     y_scale_factor = self.params_hist.y_scale_factor
 
@@ -3681,7 +3673,6 @@ def array_scalar_multiplication(array, multiplier):
 
 
 def makeReflectionGraphOptions(graph, name):
-  guiParams = OV.GuiParams()
   ### This is assuming that there are no more than FOUR option controls:
   width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/4
   value = graph.short_caption
@@ -3728,7 +3719,7 @@ def makeReflectionGraphOptions(graph, name):
            'onuncheck': "spy.SetParam('user.graphs.reflections.%s.%s','False')" % (
              graph.name, obj.name),
            'width': '%s' % width,
-           'bgcolor': '%s' % guiParams.html.table_bg_colour,
+           'bgcolor': '%s' % graph.guiParams.html.table_bg_colour,
            }
       options_gui.append(htmlTools.make_tick_box_input(d))
 
