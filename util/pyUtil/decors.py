@@ -44,13 +44,14 @@ def long_call(bitmap_text, use_timage=False,
   
   if not colour:
     from olexFunctions import OV
-    colour = OV.GetParam('gui.ed_bg')
+    colour = OV.GetParam('gui.ed_fg')
 
   return run_with_bitmap(bitmap_text, use_timage=use_timage,
     update_html_before=update_html_before,
     update_model_before=update_model_before,
     update_html_after=update_html_after,
-    update_model_after=update_model_after)
+    update_model_after=update_model_after,
+    colour=colour)
 
 def gui_only(returns=None):
   import olx
