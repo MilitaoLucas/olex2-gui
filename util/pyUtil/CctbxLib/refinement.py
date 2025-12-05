@@ -581,7 +581,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       if _ and method == 'N-Beam' and OV.IsChiral():
         olex.m('spy.ED.gui_compute_enantiomers()')
-
+        self.hooft = OV.GetParam('snum.refinement.hooft_str', "ED")
       else:
         if debug:
           print("Skipping Hooft parameter evaluation for ED data")
