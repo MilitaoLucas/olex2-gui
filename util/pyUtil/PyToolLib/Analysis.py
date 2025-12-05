@@ -4198,7 +4198,8 @@ class HealthOfStructure():
       else:
         l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','hooft_str']
         if not OV.GetParam('snum.refinement.hooft_str'):
-          l.remove("hooft_str")
+          if not OV.GetHeaderParam('ED.z.value'):
+            l.remove("hooft_str")
     else:
       self.scope = "hkl"
       ## If there is no CIF information and no hkl file, we don't have stats, but still have {'IsCentrosymmetric} as a single item
