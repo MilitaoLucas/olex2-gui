@@ -101,7 +101,7 @@ def UpdateWeight():
     print("No suggested weighting scheme present. Please refine and try again.")
     return ""
   olex.m("UpdateWght %s %s" %(w[0], w[1]))
-  print("Weighting scheme has been updated")
+  # print("Weighting scheme has been updated")
 olex.registerFunction(UpdateWeight, False, "gui")
 
 def GetPathParam(variable, default=None):

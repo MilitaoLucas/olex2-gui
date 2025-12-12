@@ -888,9 +888,15 @@ def weightGuiDisplay():
   weight_display = ""
   current_weight = olx.Ins('weight')
   if current_weight:
-    current_weight = current_weight.split()
-  else:
-    return "No Weights!"
+    if current_weight == "n/a":
+      olex.m('spy.gui.UpdateWeight')
+      current_weight = olx.Ins('weight')
+      if current_weight == "n/a":
+        return ""
+    try:
+      current_weight = current_weight.split()
+    except:
+      current_weight = "No Weights"
 
   total = gui.tools.TemplateProvider.get_template('weight_total', force=debug)
 
