@@ -563,34 +563,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       return None
 
   def check_hooft(self):
-    #this will fail!
     if OV.IsEDData():
-      # just an idea - needs to be thought through as both hands are needed!
-      # from smtbx import absolute_structure
-      # cs = crystal.symmetry(self.normal_eqns.fc_sq.crystal_symmetry().unit_cell(), "P1")
-      # fc_sq = self.normal_eqns.fc_sq.customized_copy(crystal_symmetry=cs)
-      # fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(crystal_symmetry=cs)
-      # fc = fc_sq.f_sq_as_f().phase_transfer(flex.double(fc_sq.size(), 0))
-      # self.hooft = absolute_structure.hooft_analysis(
-      #    fo_sq, fc, probability_plot_slope=None, scale_factor=self.normal_eqns.scale_factor())
-      # self.hooft_str = utils.format_float_with_standard_uncertainty(
-      #   self.hooft.hooft_y, self.hooft.sigma_y)
-
-      method = OV.GetHeaderParam('ED.refinement.method', 'Kinematic')
-      _ = OV.GetHeaderParamBool('ED.z.auto_after_refine', True)
-
-      if _ and method == 'N-Beam' and OV.IsChiral():
-        olex.m('spy.ED.gui_compute_enantiomers()')
-        self.hooft = OV.GetParam('snum.refinement.hooft_str', "ED")
-      else:
-        if debug:
-          print("Skipping Hooft parameter evaluation for ED data")
-        OV.SetParam('snum.refinement.hooft_str', "ED")
-        OV.SetParam('snum.refinement.flack_str', "ED")
-        OV.SetHeaderParam('ED.z.value', "ED")
-        return
-    if self.hooft:
-      return self.hooft
+      return
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis

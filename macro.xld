@@ -256,7 +256,7 @@
       <cmd4 "if not(spy.AnalyseRefinementSource()) then abort">
       <cmd5 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
       <cmd6 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
-      <cmd7 "spy.RunRefinementPrg()">
+      <cmd7 "spy.refine.do_refine()">
       <cmd8 "spy.make_HOS()">
       <cmd9 "html.Update">
     >
