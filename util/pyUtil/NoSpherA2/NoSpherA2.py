@@ -57,6 +57,7 @@ class NoSpherA2(PT):
     self.p_img = p_img
     self.p_scope = "harp"
 
+    self.mpiexec = ""
     if not from_outside:
       self.setup_gui()
 #revert back to the original NoSpherA2 values
@@ -131,10 +132,13 @@ class NoSpherA2(PT):
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+      olx.Echo("BASIS", self.basis_dir)
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
         basis_list.sort()
         self.basis_list_str = ';'.join(basis_list)
+        olx.Echo("BASIS")
+        olx.Echo(self.basis_list_str)
       else:
         self.basis_list_str = None
     else:
@@ -800,6 +804,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_NoSpherA2(self):
     self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
     print("-- NoSpherA2 executable is:", self.NoSpherA2)
+    olx.Echo(f"-- NoSpherA2 executable is: {self.NoSpherA2}")
     if self.NoSpherA2 == "" or self.NoSpherA2 is None:
       print ("-- ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
@@ -843,6 +848,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_software(self, name, exe_pre:str, get = False):
     # Determine platform-specific executable name
     exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
+    # Changedir to BaseDir() before
+    curdir = os.getcwd()
+    os.chdir(olx.BaseDir())
     # search PATH
     exe_path = olx.file.Which(exe_name)
     # Update software list if requested and executable exists
@@ -853,7 +861,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         # If the executable is not found, add the "Get" to the software list
         if "  Get " + name not in self.softwares:
             self.softwares = f"{self.softwares};  Get {name}"
-
+    os.chdir(curdir)
     return exe_path or ""
 
   def setup_orca_executables(self):
