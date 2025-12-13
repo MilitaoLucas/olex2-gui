@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 import olex
@@ -8,13 +9,14 @@ import shutil
 import time
 import subprocess
 
+from NoSpherA2.hybrid_GUI import patch_function_inplace, replace_function_in_file
 from olexFunctions import OV
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
+from hybrid_GUI import make_hybrid_GUI, make_OCC_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
@@ -242,12 +244,12 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
 
+    self.softwares += ";OCC"
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
       OV.SetVar("Parallel",True)
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";  Tonto"
-
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";  Tonto"
@@ -1618,11 +1620,56 @@ OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2"
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
 
+
+def make_gui_edit_link(wfnsrc: str):
+  debug = OV.IsDebugging()
+  if debug and wfnsrc in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1", "ORCA", "OCC"):
+    editLink = f'''
+    <a href='spy.NoSpherA2.EditGuiPython({wfnsrc})'>
+      Edit
+    </a>
+    '''
+    return editLink
+  return ''
+OV.registerFunction(make_gui_edit_link, False, "NoSpherA2")
+
+UPDATE = False
+def EditGuiPython(wfnsrc: str):
+  import importlib
+  import hybrid_GUI
+
+  importlib.reload(hybrid_GUI)
+  if wfnsrc in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1", "ORCA"):
+    func = "make_ORCA_GUI"
+    source_code = inspect.getsource(hybrid_GUI.make_ORCA_GUI)
+  elif wfnsrc == "OCC":
+    func = "make_OCC_GUI"
+    source_code = inspect.getsource(hybrid_GUI.make_OCC_GUI)
+  else:
+    raise NotImplementedError("Not implemented for anything that isn't ORCA or OCC")
+  inputText = OV.GetUserStyledInput(0,'Modify text for help entry %s' %(wfnsrc), source_code, "python")
+  if inputText is None:
+    return
+  patch_function_inplace(hybrid_GUI, func, source_code, inputText)
+  replace_function_in_file(f"{olx.BaseDir()}/util/pyUtil/NoSpherA2/hybrid_GUI.py", func, inputText)
+  UPDATE = True
+  olx.html.Update()
+
+def include_hack():
+  global UPDATE
+  if UPDATE:
+    UPDATE = False
+    return ""
+  return "..\\util\\pyUtil\\NoSpherA2\\h3-refine_NoSpherA2-extras.htm"
+
+OV.registerFunction(include_hack, False, "NoSpherA2")
 def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   return t
 OV.registerFunction(hybrid_GUI, False, "NoSpherA2")
 
+
+OV.registerFunction(EditGuiPython, False, "NoSpherA2")
 def make_NSA2_GUI(method):
   method = method.lstrip().rstrip()
   if source_is_tsc():
@@ -1653,7 +1700,8 @@ def make_NSA2_GUI(method):
     return make_discambMATT_GUI()
   elif method == "ELMOdb":
     return make_ELMOdb_GUI()
-  
+  elif method == "OCC":
+    return make_OCC_GUI()
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
 

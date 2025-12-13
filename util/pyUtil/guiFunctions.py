@@ -1,6 +1,8 @@
 # guiFunctions.py
 
 import sys
+from typing import Union
+
 import olx
 import olex
 from decors import gui_only
@@ -13,6 +15,28 @@ class GuiFunctions(object):
     try:
       import olexex
       retStr = olexex.FixMACQuotes(olex_gui.GetUserInput(arg,title,contentText))
+    except Exception as ex:
+      print("An error occurred", file=sys.stderr)
+      sys.stderr.formatExceptionInfo()
+      retStr = None
+    return retStr
+
+
+  @gui_only()
+  def GetUserStyledInput(self, arg: int, title: str, contentText: str, lexer: Union[int, str]):
+    """If first argument is 1 (number one) brings up one line input box, anything else brings up a multiline input.
+    lexer can be 'python' or 'toml' or a lexer integer compatible with wxSTC_LEX.
+    """
+    if isinstance(lexer, int):
+      lexer_code = lexer
+    else:
+      if lexer == "python":
+        lexer_code = 2
+      elif lexer == "toml":
+        lexer_code = 9
+    try:
+      import olexex
+      retStr = olexex.FixMACQuotes(olex_gui.GetUserStyledInput(arg,title,contentText, lexer_code))
     except Exception as ex:
       print("An error occurred", file=sys.stderr)
       sys.stderr.formatExceptionInfo()

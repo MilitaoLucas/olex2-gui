@@ -7,7 +7,6 @@ import olx
 import olex
 import olexex
 import OlexVFS
-import inspect
 import gui
 
 import time
