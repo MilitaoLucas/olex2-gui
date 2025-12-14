@@ -1324,6 +1324,8 @@ OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
+  if "OCC" in software():
+    return
   if "x2c" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
