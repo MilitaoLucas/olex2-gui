@@ -894,6 +894,21 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       self.softwares = f"{self.softwares};  Get ORCA"
 
+  def edit_occ_input(self) -> None:
+    return
+    fdir =  Path(self.jobs_dir)
+    input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
+    wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), olx.FilePath() / fdir, "occ")
+    wfn_object.write_occ_input()
+    with open(input_file_path, "r") as f:
+        occ_input_old = f.read()
+    occ_input = OV.GetUserStyledInput(0, "test", occ_input_old, "toml")
+    if occ_input is None:
+        occ_input = occ_input_old
+    with open(input_file_path, "w") as f:
+        f.write(occ_input)
+    wfn_object.update_gui_occ_parameters()
+
   def setup_xtb_executables(self):
     if not OV.IsDebugging():
       return
@@ -1608,6 +1623,21 @@ OV.registerFunction(sample_folder, False, "NoSpherA2")
 #  return None
 #OV.registerFunction(psi4, False, "NoSpherA2")
 
+# @ov_register
+# def get_occ_methods() -> str:
+#     occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_methods.json"
+#     with open(occ_path) as f:
+#         mdict = json.load(f)
+#     return ";".join(mdict["methods"])
+#
+# @ov_register
+# def get_occ_solvents() -> str:
+#     occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_solvents.json"
+#     with open(occ_path) as f:
+#         solvl = json.load(f)
+#     return ";".join(solvl)
+#
+
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.launch, False, "NoSpherA2")
@@ -1619,7 +1649,7 @@ OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
-
+OV.registerFunction(NoSpherA2_instance.edit_occ_input, False, 'NoSpherA2')
 
 def make_gui_edit_link(wfnsrc: str):
   debug = OV.IsDebugging()

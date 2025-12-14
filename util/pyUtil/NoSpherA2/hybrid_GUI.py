@@ -1,7 +1,8 @@
 from typing import List, Optional
 
 import htmlTools
-
+import olx
+from NoSpherA2.olx_gui.components.item_component import Ignore
 from olexFunctions import OV
 from utilities import make_quick_button_gui, is_disordered
 import ast
@@ -282,6 +283,7 @@ def labeled_spin(name,label,value,onchange,width_label=20, width_spinbox=30, min
       onchange="{onchange}"
     >
   </td>'''
+
 
 def button(name,label,onclick,width=20,hint=""):
   return f'''
@@ -843,18 +845,125 @@ def make_ORCA_GUI(new_ORCA = True):
   return t
 
 def make_OCC_GUI():
-  lines = LineManager()
-  with lines:
-    with Line():
-      lw(make_quick_button_gui())
+  from olx_gui.components.table import RowConfig, Row, RowManager
+  from olx_gui.components.item_component import raw, ComboBox, InputSpinner, InputCheckbox, InputLinkButton, Cycle
+  rows = RowManager()
+  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  with rows:
+    config = RowConfig()
+    config.tr3_parameters.pop("bgcolor")
+    with Row("AutoSelect", config=config, help_ext="NoSpherA2_Quick_Buttons"):
+      raw(make_quick_button_gui())
 
-    with Line():
-      lw(basis_combo())
-      lw(method_combo())
-      lw(cpu_combo())
-      lw(memory_text())
+    config.table2_parameters.pop("width")
+    with Row("second", config=config, help_ext="NoSpherA2_Options_1"):
+      ComboBox("NoSpherA2_basis@refine",
+               txt_label="Basis Set",
+               items="spy.NoSpherA2.getBasisListStr()",
+               value="spy.GetParam('snum.NoSpherA2.basis_name')",
+               onchange="spy.NoSpherA2.change_basisset(html.GetValue('~name~'))",
+      )
 
-  return str(lines)
+      ComboBox("NoSpherA2_method@refine",
+               txt_label="Method",
+               items="spy.NoSpherA2.get_occ_methods()",
+               value="spy.GetParam('snum.NoSpherA2.method')",
+               onchange="spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))",
+               tdwidth="25%"
+      )
+
+      ComboBox("NoSpherA2_cpus@refine",
+               txt_label="CPUs",
+               items="spy.NoSpherA2.getCPUListStr()",
+               value="spy.GetParam('snum.NoSpherA2.ncpus')",
+               onchange="spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))",
+               tdwidth="30%"
+      )
+
+    config.table2_parameters["width"] = "100%"
+    max_cycles = InputSpinner(bgcolor="spy.GetParam(gui.html.input_bg_colour)",
+                          min='1',
+                          txt_label="Max Cycles",
+                          name='SET_SNUM_MULTIPLICITY',
+                          value='$spy.GetParam(snum.NoSpherA2.multiplicity)',
+                          onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))",
+                          width="100%",
+                          hidden=True
+                          )
+    link_button = InputLinkButton(name="link_button",
+                                  value="Update .tsc & .wfn",
+                                  onclick="spy.NoSpherA2.launch() >> html.Update()",
+                                  )
+    with  Row("third", config=config, help_ext="NoSpherA2_Options_2"):
+      InputSpinner("SET_CHARGE",
+                           txt_label="Charge",
+                           value='$spy.GetParam(snum.NoSpherA2.charge)',
+                           onchange='spy.SetParam(snum.NoSpherA2.charge,html.GetValue(~name~))',
+                           width="100%"
+                           )
+      InputSpinner(bgcolor="spy.GetParam(gui.html.input_bg_colour)",
+                                 min='1',
+                                 txt_label="Multiplicity",
+                                 name='SET_SNUM_MULTIPLICITY',
+                                 value='$spy.GetParam(snum.NoSpherA2.multiplicity)',
+                                 onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))",
+                                 width="100%"
+                   )
+      InputCheckbox(name="Iterative",
+                              txt_label="Iterative",
+                              checked="spy.GetParam('snum.NoSpherA2.full_HAR')",
+                              oncheck="spy.NoSpherA2.toggle_full_HAR()",
+                              bgcolor="GetVar(HtmlTableFirstcolColour)",
+                              onuncheck="spy.NoSpherA2.toggle_full_HAR()",
+                              tdwidth="20%",
+                              label_left=False
+                              )
+      Cycle(max_cycles, link_button, "spy.GetParam('snum.NoSpherA2.full_HAR')")
+
+    with Row("line4", config=config, help_ext="NoSpherA2_Options_3"):
+      InputCheckbox(
+        name="H_Aniso",
+        txt_label="H Aniso",
+        checked="spy.GetParam('snum.NoSpherA2.h_aniso')",
+        oncheck="spy.SetParam('snum.NoSpherA2.h_aniso','True')",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.h_aniso','False')",
+      )
+
+      InputCheckbox(
+        name="H_Afix 0",
+        txt_label="No Afix",
+        checked="spy.GetParam('snum.NoSpherA2.h_afix')",
+        oncheck="spy.SetParam('snum.NoSpherA2.h_afix','True')",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.h_afix','False')",
+      )
+
+      InputCheckbox(
+        name="occ_solvation",
+        txt_label="Solvation",
+        checked="spy.GetParam('snum.NoSpherA2.occ.solvation')",
+        oncheck="spy.SetParam('snum.NoSpherA2.occ.solvation','True')>>html.Update",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.occ.solvation','False')>>html.Update",
+      )
+      Ignore(ComboBox(
+        "NoSpherA2_solv",
+        txt_label="Solvent",
+        items="spy.NoSpherA2.get_occ_solvents()",
+        value="spy.GetParam('snum.NoSpherA2.occ.solvent')",
+        onchange="spy.SetParam('snum.NoSpherA2.occ.solvent', html.GetValue('~name~'))",
+      ), "spy.GetParam('snum.NoSpherA2.occ.solvation')")
+
+    with Row("line5", config=config, help_ext="NoSpherA2_Options_3"):
+      InputLinkButton(
+        name="edit_input",
+        value="Edit_OCC_input_file",
+        align="center",
+        bgcolor="#C8C8C9",
+        onclick="spy.NoSpherA2.edit_occ_input()",
+      )
+  return str(rows)
 
 def make_tonto_GUI():
   # Basis Set, Method, CPUs, Memory
