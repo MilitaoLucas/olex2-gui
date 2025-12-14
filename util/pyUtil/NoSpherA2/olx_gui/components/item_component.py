@@ -45,9 +45,6 @@ class ignore(html_tag):
     """
     tagname = 'ignore'
 
-
-
-
 def verify_functions(args: dict) -> None:
     args2 = {k: str(v).strip() for k, v in args.items()}
     function_starts = ["spy", "snum", "strcmp"]
@@ -304,8 +301,8 @@ class InputLinkButton(LabeledGeneralComponent):
             align = kwargs["align"]
             kwargs.pop("align")
         pardict = add_default(pardict, kwargs)
-        for k, it in pardict.items():
-            pardict[k] = raw(it)
+        # for k, it in pardict.items():
+        #     pardict[k] = raw(it)
         self.input = b(input_(pardict))
         # self.input = font(b(input_(pardict)), size="$GetVar('HtmlFontSizeControls')")
         super().__init__(self.input, txt_label, label_left, label_top, align=align)
@@ -313,6 +310,13 @@ class InputLinkButton(LabeledGeneralComponent):
             self["width"] = tdwidth
             self.resizable = False
 
+class Filler(td):
+    def __init__(self):
+        super().__init__()
+        with self:
+            with td():
+                p()
+        self.is_resizable = False
 
 class Fill(td):
     tagname = "td"
@@ -337,19 +341,22 @@ class Cycle(div):
                 greater_width = int(componentA.attributes["width"].replace("%", ""))
                 componentA.attributes.pop("width")
 
-        if componentB.tagname == "td":
-            if "width" in componentB.attributes and (widthb := componentB["width"].replace("%", "")):
-                componentB.attributes.pop("width")
-                greater_width = widthb
+        if "tagname" in componentB.attributes:
+            if componentB.tagname == "td":
+                widthb = int(componentB["width"].replace("%", ""))
+                if "width" in componentB.attributes and ( widthb > greater_width):
+                    componentB.attributes.pop("width")
+                    greater_width = widthb
+        if greater_width > 0:
+            self["width"] = f"{greater_width}"
+            self.is_resizable = False
+        with self:
+            ignore(componentA, test=condition)
+            ignore(componentB, test=f"not {condition}")
 
-        self["width"] = greater_width
-        self.add(ignore(componentA, test=condition),
-                 ignore(componentB, test=f"not {condition}"))
-
-class Ignore(Cycle):
+def Ignore(component: html_tag, condition: str):
     """
     This gracefully ignores a component in a way that its space is filled by nothingness. It makes the layout consistent.
     """
-    def __init__(self, component: html_tag, condition: str):
-        componentB = LabeledGeneralComponent(p())
-        super().__init__(component, componentB, condition)
+    componentB = LabeledGeneralComponent(p())
+    return Cycle(component, componentB, condition)

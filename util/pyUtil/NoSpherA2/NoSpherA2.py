@@ -895,7 +895,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.softwares = f"{self.softwares};  Get ORCA"
 
   def edit_occ_input(self) -> None:
-    return
+    from pathlib import Path
     fdir =  Path(self.jobs_dir)
     input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
     wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), olx.FilePath() / fdir, "occ")
@@ -984,7 +984,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     max_cpu = multiprocessing.cpu_count()
     cpu_list = ['1',]
     hyperthreading = OV.GetParam('user.refinement.has_HT')
-    if not hyperthreading:
+    if hyperthreading:
       max_cpu /= 2
     for n in range(1, int(max_cpu)):
       cpu_list.append(str(n + 1))
@@ -1023,7 +1023,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     basis_file = os.path.join(BD, name)
     if not os.path.exists(basis_file):
       return False
-    basis = open(basis_file, "r")
+    basis =open(basis_file, "r")
     atoms = []
     for sc in x_ray_struct.scatterers():
       Z = sc.electron_count()
@@ -1041,10 +1041,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if any(temp_atom in line for temp_atom in atoms):
         found += 1
         if found == len(atoms):
+          basis.close()
           return True
         continue
     if found != len(atoms):
+      basis.close()
       return False  # If any atoms are missing this basis set is not OK
+
+    basis.close()
     return True  # Only true if all atom searches were succesfull
 
 @run_with_bitmap('Running DISCAMB')
@@ -1622,21 +1626,6 @@ OV.registerFunction(sample_folder, False, "NoSpherA2")
 #  psi4.fchk(wfn, os.path.join(OV.FilePath(), sfc_name + ".fchk"))
 #  return None
 #OV.registerFunction(psi4, False, "NoSpherA2")
-
-# @ov_register
-# def get_occ_methods() -> str:
-#     occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_methods.json"
-#     with open(occ_path) as f:
-#         mdict = json.load(f)
-#     return ";".join(mdict["methods"])
-#
-# @ov_register
-# def get_occ_solvents() -> str:
-#     occ_path = Path(OV.BaseDir()) / "util" / "pyUtil" / "NoSpherA2" / "occ_solvents.json"
-#     with open(occ_path) as f:
-#         solvl = json.load(f)
-#     return ";".join(solvl)
-#
 
 NoSpherA2_instance = NoSpherA2()
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")

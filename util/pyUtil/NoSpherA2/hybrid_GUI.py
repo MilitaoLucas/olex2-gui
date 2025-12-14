@@ -1,13 +1,62 @@
+from functools import lru_cache
 from typing import List, Optional
 
 import htmlTools
 import olx
-from NoSpherA2.olx_gui.components.item_component import Ignore
+from NoSpherA2.olx_gui.components.item_component import Ignore, LabeledGeneralComponent, Filler
+from NoSpherA2.olx_gui.dominate.tags import p, td
 from olexFunctions import OV
 from utilities import make_quick_button_gui, is_disordered
 import ast
 import textwrap
+from utilities import software
+import os
+import sys
 import inspect
+from contextlib import contextmanager
+
+@contextmanager
+def local_chdir(directory: str):
+  """
+  This changes the directory just for the context. So you don't change the global directory of the script
+  """
+  prev_cwd = os.getcwd()
+  os.chdir(directory)
+  try:
+    yield
+  finally:
+    os.chdir(prev_cwd)
+
+@lru_cache(maxsize=None) # This doesn't change, so there is no reason to run it more than once.
+def setup_software_static(exe_pre: str):
+  """The setup_software in NoSpherA2 class is kind of annoying to deal with, so this does the same thing but returns
+  the exe path instead of modifying the class
+  """
+  # Determine platform-specific executable name
+  exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
+  # Changedir to BaseDir() before
+  with local_chdir(OV.BaseDir()):
+    exe_path = olx.file.Which(exe_name)
+  return exe_path
+
+@lru_cache(maxsize=None) # This doesn't change, so there is no reason to run it more than once.
+def get_cpu_list_static():
+  soft = software()
+  import multiprocessing
+  max_cpu = multiprocessing.cpu_count()
+  cpu_list = ['1',]
+  hyperthreading = OV.GetParam('user.refinement.has_HT')
+  if hyperthreading:
+    max_cpu /= 2
+  for n in range(1, int(max_cpu)):
+    cpu_list.append(str(n + 1))
+  # ORCA and Tonto rely on MPI, so only make it available if mpiexec is found
+  if soft == "Tonto" or "ORCA" in soft or soft == "fragHAR":
+    if not os.path.exists(setup_software_static("mpiexec")):
+      return '1'
+  # otherwise allow more CPUs
+  return ';'.join(cpu_list)
+
 def patch_function_inplace(module, func_name, old_text, new_text):
     # 1. Get the old function object
     old_func = getattr(module, func_name)
@@ -845,10 +894,22 @@ def make_ORCA_GUI(new_ORCA = True):
   return t
 
 def make_OCC_GUI():
+  import json
   from olx_gui.components.table import RowConfig, Row, RowManager
   from olx_gui.components.item_component import raw, ComboBox, InputSpinner, InputCheckbox, InputLinkButton, Cycle
+  from pathlib import Path
   rows = RowManager()
+  occ_data_path = Path(OV.BaseDir()) / "occ_data"
   full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  with open(occ_data_path / "basis_list.json", "r") as f:
+    basis: list = json.load(f)
+
+  with open(occ_data_path / "method_list.json", "r") as f:
+    methods: list = json.load(f)
+
+  with open(occ_data_path / "solvent_list.json", "r") as f:
+    solvents: list = json.load(f)
+
   with rows:
     config = RowConfig()
     config.tr3_parameters.pop("bgcolor")
@@ -859,14 +920,14 @@ def make_OCC_GUI():
     with Row("second", config=config, help_ext="NoSpherA2_Options_1"):
       ComboBox("NoSpherA2_basis@refine",
                txt_label="Basis Set",
-               items="spy.NoSpherA2.getBasisListStr()",
+               items=f"\"{';'.join(basis)}\"", # Olex2 kind of breaks for some reason with occ basis without double quotes
                value="spy.GetParam('snum.NoSpherA2.basis_name')",
                onchange="spy.NoSpherA2.change_basisset(html.GetValue('~name~'))",
       )
 
       ComboBox("NoSpherA2_method@refine",
                txt_label="Method",
-               items="spy.NoSpherA2.get_occ_methods()",
+               items=";".join(methods),
                value="spy.GetParam('snum.NoSpherA2.method')",
                onchange="spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))",
                tdwidth="25%"
@@ -874,7 +935,7 @@ def make_OCC_GUI():
 
       ComboBox("NoSpherA2_cpus@refine",
                txt_label="CPUs",
-               items="spy.NoSpherA2.getCPUListStr()",
+               items=get_cpu_list_static(),
                value="spy.GetParam('snum.NoSpherA2.ncpus')",
                onchange="spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))",
                tdwidth="30%"
@@ -919,7 +980,15 @@ def make_OCC_GUI():
                               label_left=False
                               )
       Cycle(max_cycles, link_button, "spy.GetParam('snum.NoSpherA2.full_HAR')")
-
+    solvationCombo = ComboBox(
+      "NoSpherA2_solv",
+        txt_label="Solvent",
+        items=f"\"{';'.join(solvents)}\"",
+        value="spy.GetParam('snum.NoSpherA2.occ.solvent')",
+        onchange="spy.SetParam('snum.NoSpherA2.occ.solvent', html.GetValue('~name~'))",
+        tdwidth="25%"
+    )
+    fill =  Filler()
     with Row("line4", config=config, help_ext="NoSpherA2_Options_3"):
       InputCheckbox(
         name="H_Aniso",
@@ -947,13 +1016,7 @@ def make_OCC_GUI():
         bgcolor="GetVar(HtmlTableFirstcolColour)",
         onuncheck="spy.SetParam('snum.NoSpherA2.occ.solvation','False')>>html.Update",
       )
-      Ignore(ComboBox(
-        "NoSpherA2_solv",
-        txt_label="Solvent",
-        items="spy.NoSpherA2.get_occ_solvents()",
-        value="spy.GetParam('snum.NoSpherA2.occ.solvent')",
-        onchange="spy.SetParam('snum.NoSpherA2.occ.solvent', html.GetValue('~name~'))",
-      ), "spy.GetParam('snum.NoSpherA2.occ.solvation')")
+      Cycle(solvationCombo, fill, "spy.GetParam('snum.NoSpherA2.occ.solvation')")
 
     with Row("line5", config=config, help_ext="NoSpherA2_Options_3"):
       InputLinkButton(

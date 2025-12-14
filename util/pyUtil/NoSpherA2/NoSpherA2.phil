@@ -350,6 +350,10 @@ snum{
       reload = False
         .type = bool
     }
+    occ{
+      solvation = False
+        .type = bool
+    }
   }
 }
 
