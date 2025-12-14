@@ -353,6 +353,8 @@ snum{
     occ{
       solvation = False
         .type = bool
+      solvent = water
+        .type = str
     }
   }
 }

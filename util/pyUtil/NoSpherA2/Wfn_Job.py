@@ -657,20 +657,23 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if "method" in inputf_scf:
       OV.SetParam("snum.NoSpherA2.method", inputf_scf["method"])
 
-    # if "basis" in inputf_scf:
-    #     OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
+    if "basis" in inputf_scf:
+        OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
 
     if "charge" in inputf_scf:
       OV.SetParam('snum.NoSpherA2.charge', inputf_scf["charge"])
 
-    if "mult" in inputf_scf:
+    if "multiplicity" in inputf_scf:
       OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["multiplicity"])
+
+    if "solvent" in inputf_scf:
+      OV.SetParam('snum.NoSpherA2.occ.solvent', inputf_scf["solvent"])
 
     olx.html.Update()
 
   def write_occ_input(self, basis_name: Optional[str] = None, method: Optional[str] = None,
                       ncpus: Optional[int] = None, charge: Optional[int] = None,
-                      mult: Optional[int] = None) -> None:
+                      mult: Optional[int] = None, solvent: Optional[str] = None) -> None:
     fdir = Path(self.full_dir)
     if not os.path.isdir(fdir):
       os.makedirs(fdir)
@@ -704,6 +707,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if mult is None:
       input_dict["scf"]["multiplicity"] = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
 
+    if solvent is None:
+      input_dict["scf"]["solvent"] = OV.GetParam('snum.NoSpherA2.occ.solvent')
     with open(self.input_fn, "wb") as f:
       tomli_w.dump(input_dict, f)
     return
