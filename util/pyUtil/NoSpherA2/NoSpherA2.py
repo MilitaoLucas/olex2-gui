@@ -669,12 +669,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             else:
               OV.SetVar('NoSpherA2-Error',"ELMOdb")
               raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
-          try:
-            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-          except NameError as error:
-            print("Aborted due to: ",error)
-            OV.SetVar('NoSpherA2-Error',error)
-            return False
+
+          if wfn_code != "OCC":
+            try:
+              self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+            except NameError as error:
+              print("Aborted due to: ",error)
+              OV.SetVar('NoSpherA2-Error',error)
+              return False
 
         # make the tsc file
 
@@ -685,18 +687,23 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
             else:
-              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
+              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb", ".owf.fchk"]
               if is_orca_new():
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
                 wfn_fn = path_base + ".xyz"
               elif not any(os.path.exists(path_base + x) for x in endings):
-                print("No usefull wavefunction found!")
-                return False
+                if not wfn_code == "OCC":
+                  print("No usefull wavefunction found!")
+                  return False
+                self.wfn()
+                wfn_fn = path_base + ".toml"
               else:
                 for e in endings:
                   if os.path.exists(path_base + e):
                     wfn_fn = path_base + e
+            # if wfn_code == "OCC":
+            #   wfn_fn = path_base""
             #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
             cuqct_tsc(wfn_fn, cif_fn, [-1000])
@@ -795,7 +802,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           print("The following error occured during QM Calculation: ",error)
           OV.SetVar('NoSpherA2-Error',error)
           raise NameError('Unsuccesfull Wavefunction Calculation!')
-    elif soft != "Thakkar IAM" and soft != "SALTED":
+    elif soft != "Thakkar IAM" and soft != "SALTED" and soft != "OCC":
       try:
         wfn_object.run(part)
       except NameError as error:

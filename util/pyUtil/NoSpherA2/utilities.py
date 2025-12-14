@@ -256,7 +256,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
   else:
-    args.append("-wfn")
+    if wfn_file.endswith("OCC"):
+      args.append("-occ")
+    else:
+      args.append("-wfn")
     args.append(wfn_file)
     args.append("-cif")
     args.append(cif)

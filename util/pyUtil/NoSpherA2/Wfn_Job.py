@@ -102,6 +102,8 @@ class wfn_Job(object):
     elif self.software == "xTB" or self.software == "pTB":
       if xyz:
         self.write_xyz_file()
+    elif self.software == "OCC":
+      self.write_occ_input()
     else: 
       print("ERROR: Wavefunction software not recognized.\nPlease select a valid software.\nNo Input file written.")
 
@@ -2150,6 +2152,10 @@ ener = cf.kernel()"""
       elif softw == "pySCF":
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      elif("occ" in args[0]):
+        src = os.path.join(self.full_dir, self.name + ".owf.fchk")
+      if os.path.isfile(src):
+        shutil.copy(src, self.name + ".owf.fchk")
 
       experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
 
