@@ -235,12 +235,12 @@ class Graph(ArgumentParser):
       max_length = max(max_length, len(key['label']))
     boxWidth = int(0.6 * self.font_size_tiny * max_length) + 18 * self.scale
     boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 10 * self.scale
-    colour = self.fillColour
+    colour = self.pageColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
     if border:
       box = (2,2,boxWidth-2,boxHeight-2)
-      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+      draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
 
     txt_colour = "#444444"
     top = 1 * self.scale
@@ -332,6 +332,7 @@ class Graph(ArgumentParser):
     self.outlineColour = self.guiParams.graph.outline_colour.hexadecimal
     self.fitlineColour = self.guiParams.graph.fitline_colour.hexadecimal
     self.pageColour = self.guiParams.graph.page_colour.hexadecimal
+    self.graphBgColour = self.guiParams.graph.graph_bg_colour.hexadecimal
     self.axislabelColour = self.guiParams.graph.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
@@ -346,7 +347,6 @@ class Graph(ArgumentParser):
     size = ((int(self.imX), int(self.imY)))
 
     im = Image.new('RGB', size, self.pageColour)
-    #im = Image.new('RGB', size, '#ffffff')
     draw = ImageDraw.Draw(im)
     self.draw = draw
 
@@ -385,8 +385,8 @@ class Graph(ArgumentParser):
     #if self.line_width > 0:
       #fillColour = (200, 200, 200)
     #else:
-      #fillColour = self.fillColour
-    draw.rectangle(box,  fill=self.fillColour, outline=self.outlineColour, width = 2 * self.scale)
+      #fillColour = self.pageColour
+    draw.rectangle(box,  fill=self.graphBgColour, outline=self.outlineColour, width = 2 * self.scale)
     self.boxX = dx - self.bSides*2 + self.xSpace
     self.boxY = dy - self.currY
     self.boxXoffset = self.bSides+self.xSpace
@@ -498,7 +498,7 @@ class Graph(ArgumentParser):
       y2 = self.graph_bottom - float(y2)
 
     adj_x = 0 * self.scale
-    adj_y = 0 * self.scale
+    adj_y = 1 * self.scale
     if x_intercept:
       adj_x = 0 * self.scale
       adj_y = 0 * self.scale
@@ -561,20 +561,18 @@ class Graph(ArgumentParser):
         if len(ins) > 2:
           colour=ins[2]
         else: colour=self.axislabelColour
-        bgcolour = self.fillColour
-        #bgcolour = self.fitlineColour
-        new = Image.new('RGB', (wX + 4 * self.scale, wY + 2 * self.scale), bgcolour)
+        new = Image.new('RGB', (wX + 4 * self.scale, wY + 2 * self.scale), self.graphBgColour)
         draw = ImageDraw.Draw(new)
         draw.text((self.scale * 2, - self.scale * 2), text, font=self.font_tiny, fill=colour)
         new = new.rotate(90, expand=2)
         self.im.paste(new, (x, y))
       else:
-        adj_x = 1.55 * wY_axis
+        adj_x = 0.90 * wY_axis
         adj_y = 7
         if x1 > self.max_x*self.scale_x/2:
           adj_x = -wX - 7
         if y1 > self.max_y*self.scale_y/2:
-          adj_y = -20
+          adj_y = -20 * self.scale
         top_left = (x1 + adj_x,y1 + adj_y)
         IT.write_text_to_draw(
           self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
@@ -894,7 +892,7 @@ class Graph(ArgumentParser):
       dv_ = 5.0
     return dv_ * math.pow(10, round(pow10))
 
-  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
+  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=False):
     top = self.graph_top
     marker_width = 5
     width = self.params.size_x
@@ -976,7 +974,7 @@ class Graph(ArgumentParser):
 
 
   def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None,
-                         draw_bar_labels=True, width=None):
+                         draw_bar_labels=False, width=None):
     top = self.graph_top
     if width is None:
       width = self.params.size_x
@@ -1007,10 +1005,9 @@ class Graph(ArgumentParser):
 
     j = 0
     img_no = 0
-    colour = self.fillColour
     for i, xy in enumerate(dataset.xy_pairs()):
       if j == 0:
-        barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=colour)
+        barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=self.pageColour)
         barDraw = ImageDraw.Draw(barImage)
       last = len(dataset.x)
       x_value, y_value = xy
@@ -1030,7 +1027,7 @@ class Graph(ArgumentParser):
 
       if colour_function is not None:
         fill, bar_label = colour_function(y_value_scale)
-        draw_bar_labels = True
+        draw_bar_labels = False
 
       else:
         fill = (0,0,0)
@@ -1040,17 +1037,14 @@ class Graph(ArgumentParser):
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
 
-      outline_colour = self.outlineColour
-
       if self.decorated:
         decorated_fill = OV.GetParam('gui.html.highlight_colour')
-        barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
+        barDraw.rectangle(box, fill=decorated_fill, outline=self.outlineColour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
 
         self.decorated = False
       else:
-        barDraw.rectangle(box, fill=fill, outline=outline_colour)
-
+        barDraw.rectangle(box, fill=fill, outline=self.outlineColour)
 
       if dataset.hrefs is not None:
         href = dataset.hrefs[i]
@@ -1173,7 +1167,8 @@ class Graph(ArgumentParser):
     if not font_size:
       self.font_size_large
     height = self.graph_bottom - self.graph_top
-    width = self.params.size_x
+    #width = self.params.size_x  #Somehow the the size_x value is double of what the timage is
+    width = self.im.size[0]
     legend_top = height + height_adjust
     legend_bottom = self.graph_bottom + 40
     #m_offset = 5
@@ -1185,10 +1180,11 @@ class Graph(ArgumentParser):
     self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
-    wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size * 1.5)
     x = width - wX - self.bSides
     top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size * 1.5, font_colour=self.axislabelColour)
+    print("din")
 
   def draw_info(self, txt, font_size=None):
     #Draws text into top right corner of the plot
@@ -1505,7 +1501,7 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
-    new = Image.new('RGB', size, self.fillColour)
+    new = Image.new('RGB', size, self.graphBgColour)
     draw = ImageDraw.Draw(new)
     x = 0
     y = -3 * self.scale #PY39
@@ -1540,7 +1536,7 @@ class Graph(ArgumentParser):
     format_string = "%5d"
     temp_txt = format_string %y_axis[-1]
     temp_wX, temp_wY = get_text_size(self.draw, temp_txt, font=self.font_small)
-    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX,colour='#ffffff')
+    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX + 4*self.scale ,colour=self.pageColour)
     for item in y_axis:
       val = float(item)
       if val ==0:
@@ -1566,7 +1562,7 @@ class Graph(ArgumentParser):
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         size = (wX,wY)
-        new = Image.new('RGB', size, self.fillColour)
+        new = Image.new('RGB', size, self.pageColour)
         draw = ImageDraw.Draw(new)
         draw.text((0,0),txt,font=self.font_small, fill=self.axislabelColour)
         self.im.paste(new, (int(x),int(y)))
@@ -1579,13 +1575,13 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
-    new = Image.new('RGB', size, self.fillColour)
+    new = Image.new('RGB', size, self.graphBgColour)
     draw = ImageDraw.Draw(new)
     x = 0
     y = 0
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.graph_right-1.1*wY), int((self.graph_bottom-self.graph_top)/3)))
+    self.im.paste(new, (int(self.graph_right - 1.5 * wY), int((self.graph_bottom-self.graph_top)/3)))
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -2248,7 +2244,7 @@ class WilsonPlot(Analysis):
     #target_right = (0,255,0)
     middle = boxWidth/2
     box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
-    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+    draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -2433,7 +2429,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       m_offset = 5
       ## Wipe the legend area
       box = (0,legend_top,width,legend_top + 20)
-      self.draw.rectangle(box, fill=self.fillColour)
+      self.draw.rectangle(box, fill=self.pageColour)
 
       ## Draw CC Legend
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
@@ -3490,7 +3486,9 @@ class item_vs_resolution_plot(Analysis):
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
-        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
+        
+        write_text = IT.get_unicode_characters("3 sigma line (noise below, data above)")
+        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text=write_text, reverse_x=reverse_x)
         self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "R_merge /%":
         self.draw_data_points(
@@ -3522,7 +3520,7 @@ class item_vs_resolution_plot(Analysis):
     else:
       self.draw_y_axis()
     if plot_reflection_count:
-      self.draw_y_axis_2(0,max_y,"Nr. uniq. Refln.")
+      self.draw_y_axis_2(0,max_y,"Number of unique Reflections")
     #self.draw_legend("test")
 
     #self.draw_pairs(reverse_x=reverse_x, lt=3)

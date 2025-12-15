@@ -1,5 +1,5 @@
 gui {
-  base_colour = c6c6c6
+  base_colour = c9c9c9
   logo_colour = #014e8f
   htmlpanelwidth = 530
   red = #aa0000
@@ -23,14 +23,14 @@ gui {
   }
 
   html {
-    base_colour = #c6c6c6
-    font_colour = #222244
-    bg_colour = #eeeeee
+    base_colour = #c9c9c9
+    font_colour = #111111
+    bg_colour = #efefef
     highlight_colour = #ff7800
     input_bg_colour = #efefef
     link_colour = #585886
-    table_bg_colour = #dddddd
-    table_firstcol_colour = #cccccc
+    table_bg_colour = #dedede
+    table_firstcol_colour = #cdcdcd
     table_group_bg_colour = #d9d9d9
     table_group_header_colour = #cdcdcd
     input_height = 20
@@ -136,25 +136,16 @@ gui {
 
   graph{
     light_grey = #888888
-      .type = colour
     grey = #444444
-      .type = colour
     dark_grey = #222222
-      .type = colour
     filename_colour = #bbbbbb
-      .type = colour
-    title_colour = #777777
-      .type = colour
-    fill_colour = #ffffff
-      .type = colour
+    title_colour = #666666
+    fill_colour = #ff0000
     outline_colour = #666666
-      .type = colour
     fitline_colour = #aa0000
-      .type = colour
     page_colour = #efefef
-      .type = colour
+    graph_bg_colour = #ffffff
     axislabel_colour = #666666
-      .type = colour
   }
 
 
