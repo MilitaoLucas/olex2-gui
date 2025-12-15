@@ -32,6 +32,10 @@ mac64_next_port_name = 'mac64-py313'
 mac64_next_port_zip_name = 'olex2-mac64-intel-next.zip'
 mac64_next_port_prefix = 'olex2.app/Contents/MacOS/'
 
+mac64_arm_port_name = 'mac64-arm'
+mac64_arm_port_zip_name = 'olex2-mac64-arm.zip'
+mac64_arm_port_prefix = 'olex2.app/Contents/MacOS/'
+
 lin64_legacy_port_name = 'port-linux64' # only for upgrade support
 lin64_port_name = 'lin64-py38'
 lin64_port_zip_name = 'olex2-linux64.zip'
@@ -92,6 +96,17 @@ external_files = {
   'cctbx-mac64-next.zip': ('olex-port', mac64_next_port_name,
     'action:rmdir cctbx', 'action:extract', 'action:delete'),
   'lib-mac64-next.zip': ('olex-port', mac64_next_port_name,
+    'action:rmdir lib', 'action:extract', 'action:delete'),
+  #mac64-arm
+  'unirun-mac64-arm.zip': ('olex-port', mac64_arm_port_name,
+    'action:extract', 'action:delete'),
+  'hart-mac64-arm.zip': ('olex-port', mac64_arm_port_name,
+    'action:extract', 'action:delete'),
+  'olex2-mac64-arm.zip': ('olex-port', mac64_arm_port_name, 'action:extract', 'action:delete'),
+  'plgl-mac64-arm.zip': ('olex-port', mac64_arm_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac64-arm.zip': ('olex-port', mac64_arm_port_name,
+    'action:rmdir cctbx', 'action:extract', 'action:delete'),
+  'lib-mac64-arm.zip': ('olex-port', mac64_arm_port_name,
     'action:rmdir lib', 'action:extract', 'action:delete'),
   #linux64 shared
   'unirun-linux64.zip': ('olex-port', lin64_port_name, lin64_legacy_port_name, lin64_next_port_name,
@@ -516,6 +531,7 @@ platforms = {
   "win64-next": False,
   "mac64": True,
   "mac64-next": False,
+  "mac64-arm": False,
   "lin64": True,
   "lin64-next": False,
 }

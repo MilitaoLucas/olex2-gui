@@ -67,7 +67,6 @@ class History(ArgumentParser):
     self.history_filepath = os.path.join(self.strdir,self.filename) + ".hist6"
     self.rename = OV.FindValue('rename')
     self.his_file = None
-    OV.registerFunction(self.make_graph,False,'History')
 
   def create_history(self, solution=False, label=None):
     self._getItems()
@@ -355,6 +354,7 @@ class History(ArgumentParser):
 
 hist = History()
 #OV.registerFunction(hist.delete_history)
+OV.registerFunction(hist.make_graph, False, 'History')
 OV.registerFunction(hist.rename_history)
 OV.registerFunction(hist.revert_history)
 OV.registerFunction(hist.create_history)
