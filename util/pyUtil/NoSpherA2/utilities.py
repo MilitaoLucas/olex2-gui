@@ -256,7 +256,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
   else:
-    if wfn_file.endswith("OCC"):
+    if wfn_file.endswith("toml"):
       args.append("-occ")
     else:
       args.append("-wfn")
@@ -303,6 +303,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("A problem with pyl is encountered, aborting.")
       return
     p = subprocess.Popen(args)
+  while p.poll() is None:
+    olx.Refresh()
 
   out_fn = "NoSpherA2.log"
 

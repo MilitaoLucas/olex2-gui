@@ -6,6 +6,7 @@ try:
   pydevd_pycharm.settrace(
     'localhost',
     port=5678,
+    suspend=False
   )
 except:
   print("Failed to connect to debugger...")

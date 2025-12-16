@@ -676,7 +676,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   def write_occ_input(self, basis_name: Optional[str] = None, method: Optional[str] = None,
                       ncpus: Optional[int] = None, charge: Optional[int] = None,
                       mult: Optional[int] = None, solvent: Optional[str] = None) -> None:
+    old_fdir = self.full_dir
+    self.full_dir = Path(self.full_dir) / "olex2" /"Wfn_job"
     fdir = Path(self.full_dir)
+    self.write_xyz_file()
     if not os.path.isdir(fdir):
       os.makedirs(fdir)
     coordinates_fn = f"{self.name}.xyz"
@@ -711,6 +714,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
     if solvent is None:
       input_dict["scf"]["solvent"] = OV.GetParam('snum.NoSpherA2.occ.solvent')
+    self.full_dir = old_fdir
     with open(self.input_fn, "wb") as f:
       tomli_w.dump(input_dict, f)
     return
