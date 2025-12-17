@@ -13,6 +13,8 @@ gui
     .type = strings
   font_top_system_adjust = 0
     .type = int
+  console_offset = 6
+    .type = int
   battery_font_adjust = -1
     .type = int
   ppi_font_adjust_amount = -2

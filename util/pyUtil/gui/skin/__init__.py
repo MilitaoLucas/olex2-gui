@@ -378,6 +378,11 @@ class Skin():
     except:
       pass
 
+    try:
+      olex.m(f"console.offset {OV.GetParam('gui.console_offset', 6)}")
+    except:
+      pass
+
     #try:
       #for plugin in olx.InstalledPlugins:
         #try:
