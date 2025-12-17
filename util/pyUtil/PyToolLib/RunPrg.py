@@ -891,7 +891,7 @@ def do_refine():
   if OV.IsEDData():
     if OV.GetHeaderParamBool('ED.z.auto_after_refine', True) \
        and OV.GetHeaderParam('ED.refinement.method', 'Kinematic') == 'N-Beam' \
-       and OV.IsChiral() \
+       and OV.IsAcentric() \
        and not OV.GetHeaderParamBool("ED.z.refine_after_inversion"):
       OV.GetACI().EDI.gui_compute_enantiomers()
     else:
