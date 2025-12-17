@@ -117,9 +117,9 @@ class XPlain:
     OV.SetParam('snum.refinement.sg_list', rv)
     control_name = 'SET_SNUM_REFINEMENT_SPACE_GROUP'
     if olex_gui.IsControl(control_name):
-      v = olx.html.GetValue(control_name)
-      olx.html.SetItems(control_name, rv)
-      olx.html.SetValue(control_name, v)
+      v = OV.GetControlValue(control_name)
+      OV.SetControlItems(control_name, rv)
+      OV.SetControlValue(control_name, v)
     return True
 
   def output_exists(self):

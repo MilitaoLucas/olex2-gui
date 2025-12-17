@@ -523,8 +523,8 @@ def get_user_bond_colour(colour):
     for item in l:
       t += "%s;" % (item.split("@@")[1])
     try:
-      olx.html.SetItems("BOND_COLOUR_COMBO", t)
-      olx.html.SetValue("BOND_COLOUR_COMBO", colour)
+      OV.SetControlItems("BOND_COLOUR_COMBO", t)
+      OV.SetControlValue("BOND_COLOUR_COMBO", colour)
     except:
       pass
     OV.SetParam('user.bonds.colours', l)
@@ -548,7 +548,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
 
   import shlex
   if "[" in colour:
-    olx.html.SetValue('BOND_COLOUR_COMBO%s' % scope, "")
+    OV.SetControlValue('BOND_COLOUR_COMBO%s' % scope, "")
     return
   if "@" in colour:
     print("Please do not use the '@' character in colour names")
@@ -582,7 +582,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     olx.Sel("-u")
     olx.ShowH("b", True)
   if scope:
-    olx.html.SetValue("BOND_COLOUR_COMBO%s" % scope, colour)
+    OV.SetControlValue("BOND_COLOUR_COMBO%s" % scope, colour)
 
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')

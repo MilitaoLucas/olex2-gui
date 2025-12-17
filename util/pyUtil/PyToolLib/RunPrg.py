@@ -367,7 +367,7 @@ class RunPrg(ArgumentParser):
     t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
     f_name = OV.FileName() + "_%s_output.html" %self.prgType
     OlexVFS.write_to_olex(f_name, t)
-#    olx.html.Update()
+#    OV.UpdateHtml()
 class RunSolutionPrg(RunPrg):
 
   def __init__(self):

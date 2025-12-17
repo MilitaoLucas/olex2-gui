@@ -35,7 +35,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     self.paramStack = ParamStack()
 
   def GetValue(self, control_name):
-    retVal = olx.html.GetValue(control_name)
+    retVal = OV.GetControlValue(control_name)
     return retVal
 
   def SetVar(self,variable,value):
@@ -181,13 +181,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return retVal
 
   @gui_only()
-  def HtmlGetValue(self, control, default=None):
+  def GetControlValue(self, control, default=None):
     '''
     returns the value of a html control.
     returns provided default value if control is empty.
 
     :param control: html control element
-    :param default: returned value if olx.html.GetValue() returns false
+    :param default: returned value if OV.GetControlValue() returns false
     '''
     val = olx.html.GetValue(control)
     retVal = default
@@ -201,7 +201,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     containing characters are reset to default.
     The bond radius slider SLIDE_BRAD is set to the value simultaneously.
     '''
-    value = olx.html.GetValue(control)
+    value = OV.GetControlValue(control)
     default = float(default)
     if value:
       try:
@@ -212,11 +212,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       value = float(value)
       if value > 600:
         value = default
-        olx.html.SetValue('BRADValue', int(value))
+        OV.SetControlValue('BRADValue', int(value))
       if value < 10 or value == 0:
         value = 10.0
       OV.SetParam('user.bonds.thickness', value)
-      olx.html.SetValue('SLIDE_BZOOM', value/10)
+      OV.SetControlValue('SLIDE_BZOOM', value/10)
       OV.cmd('brad {}'.format(value/100))
     else:
       return
@@ -379,16 +379,16 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       OV.SetParam('snum.refinement.manual_q_peak_override', 0)
       max_peaks = auto_peaks
       if OV.IsControl(ctrl_name):
-        olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
-        olx.html.SetFG(ctrl_name,'#ffffff')
-        olx.html.SetValue(ctrl_name,0)
+        OV.SetControlBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
+        OV.SetControlFG(ctrl_name,'#ffffff')
+        OV.SetControlValue(ctrl_name,0)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
       OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
       if OV.IsControl(ctrl_name):
-        olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
-        olx.html.SetFG(ctrl_name, '#ffffff')
-        olx.html.SetValue(ctrl_name,max_peaks)
+        OV.SetControlBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
+        OV.SetControlFG(ctrl_name, '#ffffff')
+        OV.SetControlValue(ctrl_name,max_peaks)
 
     try:
       import programSettings
@@ -621,10 +621,6 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def Reset(self):
     olx.Reset()
-
-  @gui_only()
-  def htmlUpdate(self):
-    olex.m("html.Update")
 
   @gui_only()
   def htmlPanelWidth(self):
@@ -1225,9 +1221,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       x,y = gui.GetBoxPosition(width, height)
     pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,border)
+    OV.SetPopBorder(pop_name,border)
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,border)
+    OV.SetPopBorder(pop_name,border)
 
   def getCompatibleProgramName(self, name):
     prgs = {'ShelXS-2013' : 'ShelXS',
@@ -1473,7 +1469,6 @@ OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.GetChoices)
 OV.registerFunction(OV.SetParam)
-OV.registerFunction(OV.HtmlGetValue)
 OV.registerFunction(OV.set_bond_thicknes)
 OV.registerFunction(OV.set_cif_item)
 OV.registerFunction(OV.get_cif_item)

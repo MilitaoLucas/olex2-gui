@@ -47,7 +47,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
     if OV.HasGUI():
-      olx.html.Update()
+      OV.UpdateHtml()
       olx.Refresh()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
@@ -443,11 +443,11 @@ def combine_tscs(match_phrase="_part_", no_check=False):
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
-    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
+    OV.SetControlValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
   if OV.HasGUI():
-    olx.html.Update()
+    OV.UpdateHtml()
   return True
 
 OV.registerFunction(combine_tscs, False, 'NoSpherA2')
@@ -1154,8 +1154,8 @@ def toggle_full_HAR():
     OV.SetParam('snum.NoSpherA2.full_HAR', False)
   else:
     OV.SetParam('snum.NoSpherA2.full_HAR', True)
-  OV.setItemstate("h3-NoSpherA2-extras 2")
-  OV.setItemstate("h3-NoSpherA2-extras 1")
+  OV.SetItemState("h3-NoSpherA2-extras 2")
+  OV.SetItemState("h3-NoSpherA2-extras 1")
 OV.registerFunction(toggle_full_HAR, False, "NoSpherA2")
 
 def cov_mat():

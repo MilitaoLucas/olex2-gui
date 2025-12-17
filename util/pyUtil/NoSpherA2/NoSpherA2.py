@@ -553,7 +553,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               OV.SetVar('NoSpherA2-Error', "StructureFactor")
               return False
             if OV.HasGUI():
-              olx.html.Update()
+              OV.UpdateHtml()
             shutil.copy(os.path.join(job.full_dir, self.name + ".tsc"), self.name + "_part_" + str(parts[i]) + ".tsc")
           elif wfn_code == "Thakkar IAM" or wfn_code == "SALTED":
             wfn_fn = os.path.join(OV.FilePath(), wfn_job_dir, self.name + ".xyz")
@@ -651,7 +651,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
           if OV.HasGUI():
-            olx.html.Update()
+            OV.UpdateHtml()
           if not experimental_SF:
             shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file', job.name+".tsc")
@@ -735,7 +735,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
           if OV.HasGUI():
-            olx.html.Update()
+            OV.UpdateHtml()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
     # add_info_to_tsc()
@@ -1055,7 +1055,7 @@ def discamb(folder, name, discamb_exe):
                         os.path.join(p_path, "discamb-launch.py")])
   while p.poll() is None:
     time.sleep(5)
-    OV.htmlUpdate()
+    OV.UpdateHtml()
 
 class Job(object):
   out_fn = None
@@ -1298,18 +1298,18 @@ def change_basisset(input):
   if "x2c" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
-      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
-      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
-      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'True')
-      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'True')
+      OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
     OV.SetParam('snum.NoSpherA2.Relativistic', False)
     if OV.HasGUI():
-      olx.html.SetState('NoSpherA2_ORCA_Relativistics@refine', 'False')
-      olx.html.SetEnabled('NoSpherA2_ORCA_Relativistics@refine', 'False')
+      OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'False')
+      OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'False')
 OV.registerFunction(change_basisset,False,'NoSpherA2')
 
 def get_functional_list(wfn_code=None):
@@ -1508,7 +1508,7 @@ def toggle_GUI():
     OV.SetParam('snum.NoSpherA2.use_aspherical', True)
     set_default_cpu_and_mem()
   if OV.HasGUI():
-    olx.html.Update()
+    OV.UpdateHtml()
 OV.registerFunction(toggle_GUI,False,'NoSpherA2')
 
 def sample_folder(input_name):

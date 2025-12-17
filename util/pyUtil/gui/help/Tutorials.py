@@ -177,7 +177,7 @@ class AutoDemo(object):
 
     if OV.IsControl('%s'%self.pop_name):
       pass
-      #olx.html.ShowModal(self.pop_name)
+      #OV.ShowModal(self.pop_name)
     else:
       if self.interactive:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
@@ -335,13 +335,13 @@ class AutoDemo(object):
     OV.Refresh()
 
   def switch_tab_for_tutorials(self, tabname):
-    OV.setItemstate("index* 0")
-    OV.setItemstate("logo 0")
-    OV.setItemstate("index-%s 1" %tabname)
-    OV.setItemstate("info-title 1")
+    OV.SetItemState("index* 0")
+    OV.SetItemState("logo 0")
+    OV.SetItemState("index-%s 1" %tabname)
+    OV.SetItemState("info-title 1")
     if tabname.lower() == "work":
-      OV.setItemstate("solve-settings 2")
-      OV.setItemstate("refine-settings 2")
-      OV.setItemstate("report-settings 2")
-      OV.setItemstate("work-main-toolbar 1")
-    OV.setItemstate("tab* 2")
+      OV.SetItemState("solve-settings 2")
+      OV.SetItemState("refine-settings 2")
+      OV.SetItemState("report-settings 2")
+      OV.SetItemState("work-main-toolbar 1")
+    OV.SetItemState("tab* 2")

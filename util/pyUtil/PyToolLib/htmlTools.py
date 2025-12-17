@@ -351,7 +351,7 @@ def EditGuiItem(OXD,language="English"):
   if inputText and inputText != text:
     wFile = open(gui_file,'w')
     wFile.write(inputText)
-    olx.html.Update
+    OV.UpdateHtml()
   else:
     inputText = text
 OV.registerFunction(EditGuiItem)
@@ -749,10 +749,10 @@ def reg_command(self, txt):
   return s
 
 def changeBoxColour(ctrl_name,colour):
-  if olx.html.GetValue(ctrl_name) in ('?',''):
-    olx.html.SetBG(ctrl_name,colour)
+  if OV.GetControlValue(ctrl_name) in ('?',''):
+    OV.SetControlBG(ctrl_name,colour)
   else:
-    olx.html.SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
+    OV.SetControlBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
   return ''
 OV.registerFunction(changeBoxColour)
 def switchButton(name,state):
@@ -769,7 +769,7 @@ def switchButton(name,state):
 OV.registerFunction(switchButton)
 
 def bgcolor(ctrl_name):
-  value = olx.html.GetValue(ctrl_name)
+  value = OV.GetControlValue(ctrl_name)
   if value in ('?',''):
     colour = "#FFDCDC"
   else:
@@ -935,9 +935,9 @@ def makeHtmlBottomPop(txt=None, name='test', replace=None, modequalifiers=None,
     OV.cmd(pstr)
   else:
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,0)
+    OV.SetPopBorder(pop_name,0)
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,0)
+    OV.SetPopBorder(pop_name,0)
     OV.UpdateHtml(pop_name)
     HaveModeBox = True
 
@@ -1389,7 +1389,7 @@ def PopBanner(txt='<zimg src="banner.png">'):
 OV.registerFunction(PopBanner)
 def doBanner(i):
   i = int(i)
-  #olx.html.SetImage("BANNER_IMAGE","banner_%i.png" %i)
+  #OV.SetImage("BANNER_IMAGE","banner_%i.png" %i)
   OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
   OV.CopyVFSFile("banner_%i.htm" %i, "banner.htm")
   offset = 10
@@ -1415,7 +1415,7 @@ def doBanner(i):
   ist += d.get('html.ItemState',0)
   cmds += d.get('cmd',"").split(">>")
 
-  OV.setItemstate(ist)
+  OV.SetItemState(ist)
 
   for cmd in cmds:
     OV.cmd(cmd)

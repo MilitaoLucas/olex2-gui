@@ -1167,7 +1167,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
         else:
           OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
           if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
-            olx.html.SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
+            OV.SetControlValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
 
       elif item == 'grid':
         if not grid_step:
@@ -1175,7 +1175,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
         else:
           OV.SetParam('snum.calcsolv.%s'%item,grid_step)
           if OV.IsControl('SET_SNUM_CALCSOLV_Grid'):
-            olx.html.SetValue('SET_SNUM_CALCSOLV_GRID', grid_step)
+            OV.SetControlValue('SET_SNUM_CALCSOLV_GRID', grid_step)
     else:
       if item == 'probe':
         if not solvent_radius:

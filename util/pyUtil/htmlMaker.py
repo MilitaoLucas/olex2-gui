@@ -453,7 +453,7 @@ class GeneratedGuiMaker(object):
 
   def move(self, arg, name):
     listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
-    name_i = olx.html.GetValue(name)
+    name_i = OV.GetControlValue(name)
     i = listNames.index(name_i)
 
     if arg.lower() == 'up':
@@ -663,9 +663,9 @@ def actaGuiDisplay(val=None):
   elif not val:
     val = "ACTA"
 
-  olx.html.SetItems('REFINEMENT_ACTA', 'No ACTA;ACTA NOHKL;ACTA')
-  olx.html.SetValue('REFINEMENT_ACTA', val)
-  olx.html.SetBG('REFINEMENT_ACTA', refinement_acta_bg_colour())
+  OV.SetControlItems('REFINEMENT_ACTA', 'No ACTA;ACTA NOHKL;ACTA')
+  OV.SetControlValue('REFINEMENT_ACTA', val)
+  OV.SetControlBG('REFINEMENT_ACTA', refinement_acta_bg_colour())
   olx.SetVar('refinement_acta', val)
 
 
@@ -673,25 +673,25 @@ OV.registerFunction(actaGuiDisplay)
 
 
 def refinement_acta_bg_colour():
-  olx.html.SetFG('REFINEMENT_ACTA', '#000000')
+  OV.SetControlFG('REFINEMENT_ACTA', '#000000')
   retVal = gui_red.hexadecimal
   if OV.IsFileType('cif'):
     return retVal
   val = olx.Ins('acta')
   if not val:
     retVal = gui_green.hexadecimal
-    olx.html.SetValue('REFINEMENT_ACTA', 'ACTA')
+    OV.SetControlValue('REFINEMENT_ACTA', 'ACTA')
   elif val == "n/a":
-    olx.html.SetValue('REFINEMENT_ACTA', 'No ACTA')
-    olx.html.SetFG('REFINEMENT_ACTA', '#ffffff')
+    OV.SetControlValue('REFINEMENT_ACTA', 'No ACTA')
+    OV.SetControlFG('REFINEMENT_ACTA', '#ffffff')
   elif val == "NOHKL":
-    olx.html.SetValue('REFINEMENT_ACTA', 'ACTA NOHKL')
+    OV.SetControlValue('REFINEMENT_ACTA', 'ACTA NOHKL')
     retVal = gui_orange.hexadecimal
   else:
     try:
       float(val)
       retVal = gui_green.hexadecimal
-      olx.html.SetValue('REFINEMENT_ACTA', 'ACTA %s' % val)
+      OV.SetControlValue('REFINEMENT_ACTA', 'ACTA %s' % val)
     except:
       pass
   return retVal

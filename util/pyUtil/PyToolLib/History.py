@@ -859,7 +859,7 @@ def popout_history_tree(width=800, height=500):
     pop_name, htm_location, int(width*1.033), int(height*1.1))
   OV.write_to_olex(htm_location, html)
   olex.m(pop_str)
-  olx.html.SetBorders(pop_name,0)
+  OV.SetPopBorder(pop_name,0)
   olex.m(pop_str)
 OV.registerFunction(popout_history_tree)
 

@@ -234,7 +234,7 @@ def onMaxCyclesChange(max_cycles):
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.IsControl(ctrl_name):
-          olx.html.SetValue(ctrl_name, max_cycles)
+          OV.SetControlValue(ctrl_name, max_cycles)
         addInstruction(prg.name, method.name, item)
         is_set = True
         break
@@ -256,7 +256,7 @@ def onMaxPeaksChange(max_peaks):
       OV.SetVar('settings_plan_npeaks', max_peaks)
       ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
       if OV.IsControl(ctrl_name):
-        olx.html.SetValue(ctrl_name, max_peaks)
+        OV.SetControlValue(ctrl_name, max_peaks)
         OV.SetParam('snum.refinement.max_peaks', max_peaks)
       addInstruction(prg.name, method.name, 'plan')
       is_set = True

@@ -712,7 +712,7 @@ if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
 def SetFormulaFromInput():
-  formula = OV.GetValue('SET_FORMULA')
+  formula = OV.GetControlValue('SET_FORMULA')
   if not formula:
     return
   f = formula.split()
@@ -771,8 +771,8 @@ def get_auto_q_peaks():
   manual_q = OV.GetParam('snum.refinement.manual_q_peak_override',0)
   if manual_q:
     if OV.IsControl(ctrl_name):
-      olx.html.SetBG(ctrl_name,'#ffeeee')
-      olx.html.SetValue(ctrl_name,manual_q)
+      OV.SetControlBG(ctrl_name,'#ffeeee')
+      OV.SetControlValue(ctrl_name,manual_q)
     return manual_q
 
   heavy = OlexRefinementModel().getExpectedPeaks()
@@ -889,7 +889,7 @@ def setMainToolbarTabButtons(btn, state=""):
   for item in btns:
     if item[0] == btn:
       if not state:
-        state = olx.html.GetItemState(item[1])
+        state = OV.GetItemState(item[1])
       if state == '-1':
         state = "off"
       elif state == '0':
@@ -911,16 +911,16 @@ def setAllMainToolbarTabButtons():
     btn = item[0]
     if isCif and btn != 'report':
       state = 'inactive'
-      if olx.html.IsItem(item[1]) == 'true':
-        olx.html.ItemState(item[1],'-1')
+      if OV.IsHtmlItem(item[1]) == 'true':
+        OV.SetItemState(item[1],'-1')
     else:
       state = ''
       #state = 'off'
     if not state:
       #if OV.IsControl(item[1]):
-      if olx.html.IsItem(item[1]) == 'true':
+      if OV.IsHtmlItem(item[1]) == 'true':
         try:
-          state = olx.html.GetItemState(item[1])
+          state = OV.GetItemState(item[1])
         except RuntimeError:
           pass
         if state == '-1':
@@ -1079,7 +1079,7 @@ def get_refinement_programs(scope='snum'):
   if scope != 'snum':
     retval = 'Auto;' + retval
   if OV.IsControl('SET_snum_refinement_PROGRAM'):
-    olx.html.SetItems('SET_snum_refinement_PROGRAM', retval)
+    OV.SetControlItems('SET_snum_refinement_PROGRAM', retval)
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1095,7 +1095,7 @@ def get_refinement_methods(prg, scope='snum'):
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
   if OV.IsControl('SET_snum_refinement_METHOD'):
-    olx.html.SetItems(f'SET_{scope}_refinement_METHOD', retval)
+    OV.SetControlItems(f'SET_{scope}_refinement_METHOD', retval)
   return retval
 OV.registerFunction(get_refinement_methods)
 
@@ -1746,7 +1746,7 @@ def SetMasking(v):
   if type(v) == bool:
     v = str(v).lower()
     if OV.HasGUI() and OV.IsControl("SNUM_REFINEMENT_USE_SOLVENT_MASK"):
-      olx.html.SetValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
+      OV.SetControlValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
   if v == 'true':
     olx.AddIns('ABIN', q=True)
   else:

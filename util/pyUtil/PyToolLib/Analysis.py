@@ -1184,7 +1184,6 @@ class Graph(ArgumentParser):
     x = width - wX - self.bSides
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size * 1.5, font_colour=self.axislabelColour)
-    print("din")
 
   def draw_info(self, txt, font_size=None):
     #Draws text into top right corner of the plot
@@ -1900,11 +1899,11 @@ class Analysis(Graph):
     if mouseX < width:
       X = 10
 
-    if not olx.html.IsPopup(pop_name) == "true":
+    if not OV.IsPopup(pop_name) == "true":
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
       pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
-      olx.html.SetBorders(pop_name,0)
+      OV.SetPopBorder(pop_name,0)
     OV.UpdateHtml(html_name=pop_name, force=True)
 
   def analyse_lst(self):
@@ -2049,7 +2048,7 @@ class PrgAnalysis(Analysis):
   def update_image(self):
     OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
-      olx.html.SetImage(
+      OV.SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
     if self.new_graph:
@@ -3753,7 +3752,7 @@ def makeReflectionGraphGui():
 
   if GuiGraphChooserComboExists:
     try:
-      value = OV.GetValue('SET_REFLECTION_STATISTICS')
+      value = OV.GetControlValue('SET_REFLECTION_STATISTICS')
     except:
       value = None
   if not value:

@@ -384,9 +384,9 @@ def expired_pop(m):
   olx.Schedule(1, pstr)
   olx.Schedule(1, "html.ShowModal(%s, True)"%pop_name)
 
-  #olx.html.SetBorders(pop_name,border)
+  #OV.SetPopBorder(pop_name,border)
   #OV.cmd(pstr)
-  #olx.html.SetBorders(pop_name,border)
+  #OV.SetPopBorder(pop_name,border)
 
 def recordFeedback(email, token, plugin):
   try:
@@ -621,7 +621,7 @@ def getInfo():
   if not current_module:
     _ = 'Select a module from the drop-down menu or type the name of a custom module'
     try:
-      if olx.html.GetValue('available_modules') != "":
+      if OV.GetControlValue('available_modules') != "":
         _ = 'Install Custom Module'
     except:
       pass
@@ -657,18 +657,18 @@ def update(idx):
     if idx is None:
       return
   current_module = available_modules[idx]
-  olx.html.SetItems('available_modules', getModuleList())
+  OV.SetControlItems('available_modules', getModuleList())
   olex.writeImage(info_file_name, b"", 0)
   #except:
     #getModule(idx, OV.GetParam('user.email'))
-  olx.html.Update()
+  OV.UpdateHtml()
 
 def getAction():
   global current_module
   if current_module is None:
     action = 'Please Choose'
     try:
-      if olx.html.GetValue('available_modules') != "":
+      if OV.GetControlValue('available_modules') != "":
         action = 'Install Custom Module'
     except:
       pass
@@ -698,7 +698,7 @@ def doAct():
     rollback(current_module.folder_name)
     avaialbaleModulesRetrieved = False
     getAvailableModules_()
-    olx.html.Update()
+    OV.UpdateHtml()
 
   elif current_module.action == 0:
     pdir = os.path.join(OV.DataDir(), "modules", current_module.folder_name)
@@ -713,12 +713,12 @@ def doAct():
     shutil.rmtree(pdir)
     avaialbaleModulesRetrieved = False
     getAvailableModules_()
-    olx.html.Update()
+    OV.UpdateHtml()
 
   else:
-    getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
+    getModule(current_module.folder_name, OV.GetControlValue('modules_email'))
     #current_module = None
-    olx.html.Update()
+    OV.UpdateHtml()
 
 def getCurrentModuleName():
   global current_module
@@ -820,7 +820,7 @@ b"""
        b="t",  t="Licence agreement",
        x=sz[0] + sz[2]/2 - w/2, y=sz[1] + sz[3]/2 - h/2,
        w=w, h=h, s=False)
-    res = olx.html.ShowModal("module_licence", True)
+    res = OV.ShowModal("module_licence", True)
     olex.writeImage("module_licence_content", b"", 0)
     olex.writeImage("module_licence", b"", 0)
     if int(res) != 1:
