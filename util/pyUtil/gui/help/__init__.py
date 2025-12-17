@@ -548,7 +548,7 @@ class GetHelp(VFSDependent):
           OV.write_to_olex(webView, t)
           wFilePath = webView
 
-        if "true" in OV.IsPopup(pop_name).lower():
+        if OV.IsPopup(pop_name):
           olx.Popup(pop_name, wFilePath)
         else:
           olx.Popup(pop_name, wFilePath, b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
