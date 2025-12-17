@@ -68,12 +68,12 @@ def GetBitmapSize(px_changed=False):
   if px_changed:
     width = size/(resolution * factor)
     if OV.IsControl('IMAGE_BITMAP_width'):
-      olx.html.SetValue('IMAGE_BITMAP_width',round(width,3))
+      OV.SetControlValue('IMAGE_BITMAP_width',round(width,3))
     OV.SetParam('user.image.bitmap.resolution_width',round(width,3))
   else:
     size = resolution * width * factor
     if OV.IsControl('IMAGE_BITMAP_SIZE'):
-      olx.html.SetValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
+      OV.SetControlValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
     OV.SetParam('user.image.bitmap.size',int(round(size,0)))
   return int(round(resolution,0)), int(round(size,0))
 OV.registerFunction(GetBitmapSize,False,'gui.images')
@@ -167,7 +167,7 @@ def MakePostScriptImage(notify_listener=True, output_folder=None):
   octant_atoms = '-$C'
   import olex_gui
   if olex_gui.IsControl('IMAGE_PS_OCTANTS_ATOMS'):
-    octant_atoms = olx.html.GetValue('IMAGE_PS_OCTANTS_ATOMS')
+    octant_atoms = OV.GetControlValue('IMAGE_PS_OCTANTS_ATOMS')
 
   if image_perspective.lower() == 'true':
     image_perspective = "-p"

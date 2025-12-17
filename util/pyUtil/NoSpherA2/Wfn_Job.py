@@ -1811,7 +1811,7 @@ ener = cf.kernel()"""
           txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,softw),
           txt_col='black_text')
     if OV.HasGUI():
-      olx.html.Update()
+      OV.UpdateHtml()
       olx.xf.EndUpdate()
       olex.m('refresh')
     python_script = "fchk-launch.py"

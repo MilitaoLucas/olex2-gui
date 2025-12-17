@@ -67,8 +67,24 @@ class GuiFunctions(object):
     return retStr
 
   @gui_only()
+  def ShowModal(self, name):
+    olx.html.ShowModal(name, True)
+
+  @gui_only()
+  def EndModal(self, name):
+    olx.html.ShowModal(name, False)
+
+  @gui_only()
   def IsHtmlItem(self, name):
     return olx.html.IsItem(name) == 'true'
+
+  @gui_only()
+  def IsPopup(self, pop_name):
+    return olx.html.IsPopup(pop_name) == 'true'
+
+  @gui_only()
+  def SetPopBorder(self, pop_name, val):
+    olx.html.SetBorders(pop_name,0)
 
   @gui_only()
   def IsControl(self, ctrl_name):
@@ -94,6 +110,21 @@ class GuiFunctions(object):
       olx.html.SetValue(ctrl_name, val)
 
   @gui_only()
+  def GetControlValue(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.GetValue(ctrl_name, val)
+
+  @gui_only()
+  def SetControlData(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.SetData(ctrl_name, val)
+
+  @gui_only()
+  def GetControlData(self, ctrl_name, val):
+    if self.IsControl(ctrl_name):
+      olx.html.GetData(ctrl_name, val)
+
+  @gui_only()
   def SetControlLabel(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
       olx.html.SetLabel(ctrl_name, val)
@@ -111,9 +142,15 @@ class GuiFunctions(object):
       olx.html.SetState(ctrl_name, val)
 
   @gui_only()
+  def GetControlState(self, ctrl_name):
+    if self.IsControl(ctrl_name):
+      return olx.html.GetState(ctrl_name)
+
+  @gui_only()
   def SetControlEnabled(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
-      olx.html.SetEnabled(ctrl_name, val)
+      OV.SetControlEnabled(ctrl_name, val)
+
 
   @gui_only()
   def TranslatePhrase(self, text):
@@ -195,8 +232,12 @@ class GuiFunctions(object):
     return olx.HtmlPanelWidth()
 
   @gui_only()
-  def setItemstate(self, txt):
+  def SetItemState(self, txt):
     olx.html.ItemState(*tuple(txt.split()))
+
+  @gui_only()
+  def GetItemState(self, item):
+    olx.html.GetItemState(item)
 
   @gui_only()
   def SetImage(self, zimg_name, image_file):

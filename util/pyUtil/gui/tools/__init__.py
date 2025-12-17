@@ -147,10 +147,10 @@ def flash_def_button(control, wait, n):
   off_colour = OV.GetParam('gui.action_colour')
 
   for i in range(n):
-    olx.html.SetBG(control, highlight_c)
+    OV.SetControlBG(control, highlight_c)
     OV.Refresh()
     olx.Wait(wait)
-    olx.html.SetBG(control, off_colour)
+    OV.SetControlBG(control, off_colour)
     OV.Refresh()
     olx.Wait(wait)
 
@@ -181,34 +181,34 @@ def flash_gui_control(control, wait=300):
   for i in range(n):
     if "element" in control:
       new_image = "up=%son.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
       cmd = 'html.setBG(%s,%s)' % (control_image.rstrip('_bg'), highlight_c)
       olex.m(cmd)
     else:
       new_image = "up=%soff.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
     if "element" in control:
       new_image = "up=%soff.png" % control
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
       cmd = 'html.setBG(%s,%s)' % (control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
     elif 'cbtn' in control:
       new_image = "up=%son.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     else:
       new_image = "up=%shighlight.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
   if not control.endswith('_bg'):
     new_image = "up=%soff.png" % control_image
-    olx.html.SetImage(control_name, new_image)
+    OV.SetImage(control_name, new_image)
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
@@ -482,7 +482,7 @@ def MakeElementButtonsFromFormula(action='mode', scope=""):
       TI.make_element_buttons(symbol)
 
     if OV.IsControl(control):
-      olx.html.SetImage(control, "up=%soff.png,down=%son.png,hover=%shover.png" % (img_name, img_name, img_name))
+      OV.SetImage(control, "up=%soff.png,down=%son.png,hover=%shover.png" % (img_name, img_name, img_name))
 
     html += '''
 <input
@@ -929,8 +929,8 @@ def weightGuiDisplay():
       #d['click'] = "editins"
       #weight_display += gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
       #if OV.IsControl(name):
-        #olx.html.SetValue(name, "%(curr)s | %(sugg)s" % d)
-        #olx.html.SetFG(name, "%(fg)s" % d)
+        #OV.SetControlValue(name, "%(curr)s | %(sugg)s" % d)
+        #OV.SetControlFG(name, "%(fg)s" % d)
 
   if not OV.GetParam('snum.refinement.weighting_scheme', None):
     OV.SetParam('snum.refinement.weighting_scheme', 'default')
@@ -978,8 +978,8 @@ def weightGuiDisplay():
       weight_display += gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
 
       if OV.IsControl(name):
-        olx.html.SetValue(name, "%(curr)s | %(sugg)s" % d)
-        olx.html.SetFG(name, "%(fg)s" % d)
+        OV.SetControlValue(name, "%(curr)s | %(sugg)s" % d)
+        OV.SetControlFG(name, "%(fg)s" % d)
 
   weight_button = gui.tools.TemplateProvider.get_template('weight_toggle')
   weight_display = total.replace("TEMPLATE", weight_display).replace("BUTTON", weight_button)
@@ -1455,8 +1455,8 @@ def GetNParams():
   OV.SetVar(olx.var_name_param_N, retVal)
 
   if OV.IsControl("NParameters"):
-    olx.html.SetLabel("NParameters", retVal)
-    olx.html.SetFG("NParameters", gui_red)
+    OV.SetControlLabel("NParameters", retVal)
+    OV.SetControlFG("NParameters", gui_red)
 
 OV.registerFunction(GetNParams)
 
@@ -1928,7 +1928,7 @@ def get_custom_scripts_combo(phil_scope):
   control = phil_scope + "_SCRIPTS"
 
   if OV.IsControl(control):
-    filter_s = olx.html.GetValue(control + "_FILTER")
+    filter_s = OV.GetControlValue(control + "_FILTER")
   scopes = []
   t_l = []
   for script in custom_scripts_d:
@@ -2004,7 +2004,7 @@ def set_custom_gui(f, scope):
   except:
     _ = "--> %s is missing" % f
 
-  #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
+  #OV.SetControlValue("INFO_DOCSTRING_%s" %scope, _)
 OV.registerFunction(set_custom_gui, False, 'gui.tools')
 
 def run_custom_script(*args):
@@ -2621,7 +2621,7 @@ def set_data_parameter_stats_display(target):
   #reflections_all = get_refinement_stats('Reflections_all')
   #data_count = get_refinement_stats('DataCount')
   if OV.IsControl(target):
-    olx.html.SetLabel(target, f"Parameters: {parameters}")
+    OV.SetControlLabel(target, f"Parameters: {parameters}")
 
 OV.registerFunction(set_data_parameter_stats_display, False, "tools")
 

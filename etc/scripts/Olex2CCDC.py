@@ -92,7 +92,7 @@ class CcdcSubmit():
 
   def make_pop_box(self):
     OV.makeGeneralHtmlPop('olex2.ccdc.pop')
-    res = olx.html.ShowModal('ccdc')
+    res = OV.ShowModal('ccdc')
     return int(res)
 
   def re_refine(self):

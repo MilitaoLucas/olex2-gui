@@ -808,6 +808,8 @@ gui
       .type = colour
     page_colour = #ffffff
       .type = colour
+    graph_bg_colour = #ffffff
+      .type = colour
     axislabel_colour = #888888
       .type = colour
   }

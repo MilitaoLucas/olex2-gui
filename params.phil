@@ -155,7 +155,7 @@ routines requiring structure refinement
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
+    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 SIR2014 SIR2019 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice

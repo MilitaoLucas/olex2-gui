@@ -14,7 +14,7 @@ def run_with_bitmap(bitmap_text, use_timage=True,
     @wraps(func)
     def wrapper(*args, **kwargs):
       OV.CreateBitmap(bitmap_text)
-      if update_html_before: olx.html.Update()
+      if update_html_before: OV.UpdateHtml()
       if update_model_before: olx.xf.EndUpdate()
       olx.Refresh()
       try:
@@ -23,7 +23,7 @@ def run_with_bitmap(bitmap_text, use_timage=True,
         raise e
       finally:
         OV.DeleteBitmap(bitmap_text)
-        if update_html_after: olx.html.Update()
+        if update_html_after: OV.UpdateHtml()
         if update_model_after: olx.xf.EndUpdate()
         olx.Refresh()
     return wrapper

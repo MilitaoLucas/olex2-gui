@@ -406,14 +406,14 @@ def get_mask_info():
   # Set the background colour of the Formula + and Moiety + buttons.
   if add_to_moiety not in OV.get_cif_item('_chemical_formula_moiety'):
     if OV.IsControl("ADD_TO_MASK_MOIETY"):
-      olx.html.SetBG("ADD_TO_MASK_MOIETY", gui_red)
+      OV.SetControlBG("ADD_TO_MASK_MOIETY", gui_red)
       OV.SetVar("ADD_TO_MASK_MOIETY_BG", gui_red)
   else:
     OV.SetVar("ADD_TO_MASK_MOIETY_BG", OV.GetParam('gui.green').hexadecimal)
 
   if gui.tools.is_masked_moiety_in_formula(olx.xf.GetFormula('', 3)):
     if OV.IsControl("ADD_TO_MASK_FORMULA"):
-      olx.html.SetBG("ADD_TO_MASK_FORMULA", gui_red)
+      OV.SetControlBG("ADD_TO_MASK_FORMULA", gui_red)
       OV.SetVar("ADD_TO_MASK_FORMULA_BG", gui_red)
   else:
     OV.SetVar("ADD_TO_MASK_FORMULA_BG", gui_green)
@@ -642,11 +642,8 @@ def edit_mask_special_details(txt, base, sNum):
     OV.SetParam('snum.masks.special_detail_button_text', 'Edit')
     OV.UpdateHtml(force=True)
     ## After the special details text has been edited, switch off the mask updating.
-    if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT'):
-      olx.html.SetState('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT', False)
+    OV.SetControlState('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT', False)
     OV.SetParam('snum.refinement.recompute_mask_before_refinement','false')
-    
-
 OV.registerFunction(edit_mask_special_details)
 
 
@@ -673,7 +670,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
 def _get_mask_base():
   if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG'):
-    base = olx.html.GetValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG').lower()
+    base = OV.GetControlValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG').lower()
     if "platon" in base.lower():
       base = "platon_squeeze"
     elif "olex2" in base.lower():
@@ -924,10 +921,10 @@ def change_based_on_button_states():
       state = "false"
 
     if state == "true":
-      olx.html.SetBG(btn, 'gui_green')
+      OV.SetControlBG(btn, 'gui_green')
       l.remove(btn)
       for btn in l:
-        olx.html.SetBG(btn, 'gui_light_grey')
+        OV.SetControlBG(btn, 'gui_light_grey')
       break
 
 def get_masking_method():

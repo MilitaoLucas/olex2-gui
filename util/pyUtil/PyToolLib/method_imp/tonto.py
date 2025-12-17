@@ -221,14 +221,14 @@ class Method_tonto_HAR(Method_refinement):
   def onConvergencePresetChange(self, value):
     if value == 'strict':
       olx.SetVar('settings.tonto.convergence.value', '0.00001')
-      olx.html.SetValue('tonto_convergence_val', '0.00001')
+      OV.SetControlValue('tonto_convergence_val', '0.00001')
       olx.SetVar('settings.tonto.convergence.tolerance', '0.00001')
-      olx.html.SetValue('tonto_convergence_tol', '0.00001')
+      OV.SetControlValue('tonto_convergence_tol', '0.00001')
     elif value == 'loose':
       olx.SetVar('settings.tonto.convergence.value', '0.001')
-      olx.html.SetValue('tonto_convergence_val', '0.001')
+      OV.SetControlValue('tonto_convergence_val', '0.001')
       olx.SetVar('settings.tonto.convergence.tolerance', '0.0002')
-      olx.html.SetValue('tonto_convergence_tol', '0.0002')
+      OV.SetControlValue('tonto_convergence_tol', '0.0002')
 
   def set_defaults(self):
     olx.SetVar('settings.tonto.method', 'rhf')

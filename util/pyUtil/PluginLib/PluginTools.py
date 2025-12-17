@@ -34,7 +34,7 @@ class PluginTools(VFSDependent):
         #gui.help.gh.git_help(quick=True, specific=self.p_path)
         t = gui.file_open(p, 'r')
         OlexVFS.write_to_olex(p, t)
-        olx.html.Update()
+        OV.UpdateHtml()
       except:
         print("No GUI available")
 

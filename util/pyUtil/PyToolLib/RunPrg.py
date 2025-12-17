@@ -76,7 +76,6 @@ class RunPrg(ArgumentParser):
     if self.HasGUI:
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
-    OV.registerFunction(self.run_auto_vss,False,'runprg')
     self.params = olx.phil_handler.get_python_object()
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
@@ -141,23 +140,6 @@ class RunPrg(ArgumentParser):
       stopwatch.log()
       if caught_exception:
         raise SilentException(caught_exception)
-
-  def run_auto_vss(self):
-    OV.paramStack.push('snum.refinement.max_cycles')
-    OV.paramStack.push('snum.refinement.max_peaks')
-    olx.Freeze(True)
-    try:
-      olex.m('compaq')
-      olex.m('compaq -a')
-      olx.VSS(True)
-      olex.m('compaq')
-      olex.m('refine 2 10')
-      olex.m('compaq')
-      olx.ATA()
-      olex.m('refine 2 10')
-    finally:
-      olx.Freeze(False)
-      OV.paramStack.pop(2)
 
   def setup_masking(self, clean=False):
     prg =  OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
@@ -385,7 +367,7 @@ class RunPrg(ArgumentParser):
     t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
     f_name = OV.FileName() + "_%s_output.html" %self.prgType
     OlexVFS.write_to_olex(f_name, t)
-#    olx.html.Update()
+#    OV.UpdateHtml()
 class RunSolutionPrg(RunPrg):
 
   def __init__(self):
@@ -878,6 +860,25 @@ def AnalyseRefinementSource():
       print('HKL file is not in the CIF')
       return False
   return True
+
+def run_auto_vss():
+  OV.paramStack.push('snum.refinement.max_cycles')
+  OV.paramStack.push('snum.refinement.max_peaks')
+  olx.Freeze(True)
+  try:
+    olex.m('compaq')
+    olex.m('compaq -a')
+    olx.VSS(True)
+    olex.m('compaq')
+    olex.m('refine 2 10')
+    olex.m('compaq')
+    olx.ATA()
+    olex.m('refine 2 10')
+  finally:
+    olx.Freeze(False)
+    OV.paramStack.pop(2)
+
+OV.registerFunction(run_auto_vss, False, 'runprg')
 
 def do_refine():
   rpg = RunRefinementPrg()
