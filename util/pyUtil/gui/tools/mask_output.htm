@@ -115,6 +115,27 @@ t:mask_output_based_on{
     <td>
       <b>%(moiety)s </b>
     </td>
+    
+    
+    <td align='right'>
+      Auto+
+    </td>
+
+   <td width='4%%' align='center' valign='center' bgcolor="$GetVar('HtmlTableBgColour')">
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor=$GetVar('HtmlTableBgColour')
+      name='ADD_MASKED_MOIETY_TO_FORMULAE'
+      checked="spy.GetParam('snum.refinement.auto_add_masked_moieties')"
+      oncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties', True)>>html.Update()"
+      onuncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties', False)>>html.Update()"
+      target="Automatically add the masked moieties to the sum and moiety formulae"
+    >
+    </font>
+   </td>
+
+    
     <td>
       Based on <b>%(based_on_display)s
     </td>
@@ -163,7 +184,7 @@ t:mask_output_end_rp{
 %(row_begin)s
 %(table_begin)s
   <tr >
-    <td width="8%%" align='left'>
+    <td width="6%%" align='left'>
       <input
         type="button"
         name="ADD_TO_MASK_FORMULA"
@@ -175,13 +196,33 @@ t:mask_output_end_rp{
       >
     </td>
 
-    <td>
+    <td width = '35%%'>
         %(suggested_sum)s
     </td>
 
-     <td align='right' colspan='2'>
-        <b><font color="$GetVar('ADD_TO_MASK_FORMULA_BG', GetVar('linkButton.bgcolor'))">%(add_to_formula)s</font></b>
-    </td>
+  <!--<td width='10%%'>-->
+    <!--<b>Add</b>-->
+  <!--</td>-->
+     <!--<td align='right' colspan='2'>-->
+        <!--<b><font color="$GetVar('ADD_TO_MASK_FORMULA_BG', GetVar('linkButton.bgcolor'))">%(add_to_formula)s</font></b>-->
+    <!--</td>-->
+
+  <td ALIGN='right'>
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type='combo'
+      width='100%%'
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      name='SET_SNUM_REFINEMENT_FORMULA@Mask'
+      items="spy.GetParam('snum.refinement.original_formula')"
+      value='xf.GetFormula()'
+      onchange="xf.SetFormula(html.GetValue('~name~'))>>spy.SetParam('snum.refinement.formula',html.GetValue('~name~'))>>html.Update"
+      onreturn="html.Call(~name~.onchange)"
+    >
+    </font>
+  </td>
+
   </tr>
   
   <tr >
@@ -196,41 +237,9 @@ t:mask_output_end_rp{
         custom="#custom"
       >
     </td>
-    <td width='50%%'>
+    <td colspan='2'>
         %(suggested_moiety)s
     </td>
-
-    <td width='10%%'>
-      <!--<input-->
-        <!--type="button"-->
-        <!--name="MASK_MOIETY_EDIT"-->
-        <!--bgcolor="GetVar('linkButton.bgcolor')"-->
-        <!--width="100%%"-->
-        <!--value="Edit"-->
-        <!--onclick="spy.EditCifInfo()"-->
-        <!--custom="#custom"-->
-      <!-->-->
-    </td>
-
-    <td align='right'>
-        Auto Add
-    </td>
-
-
-   <td width='4%%' align='center' valign='center' bgcolor="$GetVar('HtmlTableBgColour')">
-    <font size=$GetVar(HtmlFontSizeControls)>
-    <input
-      type='checkbox'
-      bgcolor=$GetVar('HtmlTableBgColour')
-      name='ADD_MASKED_MOIETY_TO_FORMULAE'
-      checked="spy.GetParam('snum.refinement.auto_add_masked_moieties')"
-      oncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties','true')"
-      onuncheck="spy.SetParam('snum.refinement.auto_add_masked_moieties','false')"
-      target="Automatically add the masked moieties to the sum and moiety formulae"
-    >
-    </font>
-   </td>
-
   </tr>
 </table>
 %(row_end)s

@@ -65,7 +65,7 @@ def get_mask_info():
     return return_note("")
 
   based_on = OV.GetParam('user.masks.based_on')
-  based_on_display = "Asymmetric Unit"
+  based_on_display = "Asym. Unit"
   if based_on == "FU":
     based_on_display = "Formula Unit"
   elif based_on == "Cell":
