@@ -34,6 +34,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       self.olex_gui = olex_gui
     self.paramStack = ParamStack()
 
+  #this is used only in DP - consider replacing!
   def GetValue(self, control_name):
     retVal = OV.GetControlValue(control_name)
     return retVal
@@ -181,20 +182,6 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return retVal
 
   @gui_only()
-  def GetControlValue(self, control, default=None):
-    '''
-    returns the value of a html control.
-    returns provided default value if control is empty.
-
-    :param control: html control element
-    :param default: returned value if OV.GetControlValue() returns false
-    '''
-    val = olx.html.GetValue(control)
-    retVal = default
-    if val:
-      retVal = val
-    return retVal
-
   def set_bond_thicknes(self, control, default=100):
     '''
     sets the molecule bond thickness. Invalid values e.g. too small, too large or
@@ -615,9 +602,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     path = path.strip('"')
     path = '"%s"' %path
     olex.m('@reap %s' %path)
-    if OV.HasGUI():
+    if self.HasGUI():
       olex.m('spy.run_skin sNumTitle')
-      OV.UpdateHtml()
+      self.UpdateHtml()
 
   def Reset(self):
     olx.Reset()
@@ -632,7 +619,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       return
     fader = self.FindValue('gui_use_fader')
     try:
-      if OV.HasGUI():
+      if self.HasGUI():
         if fader == 'true':
           olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
         else:
@@ -640,7 +627,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         import gui
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
-          OV.UpdateHtml()
+          self.UpdateHtml()
     except Exception as ex:
       print("An error occured whilst trying to reload %s/%s" %(path, file), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
@@ -1188,23 +1175,24 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     rFile.close()
     return crystal_data
 
+  @gui_only()
   def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
-    pop_name=OV.GetParam('%s.name' %phil_path)
-    htm=OV.GetParam('%s.%s' %(phil_path,htm))
-    width=OV.GetParam('%s.width' %phil_path)
-    height=OV.GetParam('%s.height' %phil_path)
-    auto_height_constant=OV.GetParam('%s.auto_height_constant' %phil_path)
-    auto_height_line=OV.GetParam('%s.auto_height_line' %phil_path)
-    position=OV.GetParam('%s.position' %phil_path)
-    x=OV.GetParam('%s.x' %phil_path)
-    y=OV.GetParam('%s.y' %phil_path)
-    border=OV.GetParam('%s.border' %phil_path)
+    pop_name = self.GetParam('%s.name' %phil_path)
+    htm = self.GetParam('%s.%s' %(phil_path,htm))
+    width = self.GetParam('%s.width' %phil_path)
+    height = self.GetParam('%s.height' %phil_path)
+    auto_height_constant = self.GetParam('%s.auto_height_constant' %phil_path)
+    auto_height_line = self.GetParam('%s.auto_height_line' %phil_path)
+    position = self.GetParam('%s.position' %phil_path)
+    x = self.GetParam('%s.x' %phil_path)
+    y = self.GetParam('%s.y' %phil_path)
+    border = self.GetParam('%s.border' %phil_path)
     if x is None: x = 0
     if y is None: y = 0
-    htm = r"%s%s" %(OV.BaseDir(), htm)
+    htm = r"%s%s" %(self.BaseDir(), htm)
     htm = os.path.normpath(htm.replace('\\', '/'))
     if not os.path.exists(htm):
-      OV.write_to_olex('generalPop.htm',htm)
+      self.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
       t = htm
     else:
@@ -1219,7 +1207,8 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     if position == "center":
       import gui
       x,y = gui.GetBoxPosition(width, height)
-    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
+      pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
     OV.cmd(pstr)
     OV.SetPopBorder(pop_name,border)
     OV.cmd(pstr)
@@ -1463,7 +1452,7 @@ class ParamStack():
       OV.SetParam(v[0], v[1])
       OV.SetParam(v[2], v[3])
 
-
+# some of the GuiFunctions registered in the constructor
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
@@ -1500,4 +1489,3 @@ OV.registerFunction(OV.IsDeveloping)
 OV.registerFunction(OV.GetHeaderParam)
 OV.registerFunction(OV.GetHeaderParamBool)
 OV.registerFunction(OV.SetHeaderParam)
-

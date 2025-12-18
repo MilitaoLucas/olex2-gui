@@ -41,7 +41,7 @@ def run_with_bitmap(bitmap_text, use_timage=True,
 def long_call(bitmap_text, use_timage=False,
                     update_html_before=False, update_model_before=False,
                     update_html_after=False, update_model_after=False, colour=None):
-  
+
   if not colour:
     from olexFunctions import OV
     colour = OV.GetParam('gui.ed_fg')
@@ -55,10 +55,11 @@ def long_call(bitmap_text, use_timage=False,
 
 def gui_only(returns=None):
   import olx
+  have_gui = olx.HasGUI() == 'true'
   def decorator(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-      if olx.HasGUI() == 'true':
+      if have_gui:
         return func(*args, **kwargs)
       else:
         return returns

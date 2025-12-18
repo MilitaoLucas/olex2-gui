@@ -7,6 +7,11 @@ from decors import gui_only
 if olx.HasGUI() == 'true': import olex_gui
 
 class GuiFunctions(object):
+
+  def __init__(self):
+    olex.registerMacro(self.SetGrad, 'f')
+    olex.registerFunction(self.GetFormulaDisplay)
+
   @gui_only()
   def GetUserInput(self, arg, title, contentText):
     """If first argument is 1 (number one) brings up one line input box, anything else brings up a multiline input."""
@@ -76,56 +81,61 @@ class GuiFunctions(object):
       olx.html.SetBG(ctrl_name, val)
 
   @gui_only()
-  def SetControlFG(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlFG(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetFG(ctrl_name, val)
 
   @gui_only()
-  def SetControlValue(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlValue(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetValue(ctrl_name, val)
 
   @gui_only()
-  def GetControlValue(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def GetControlValue(self, ctrl_name, val="", check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.GetValue(ctrl_name, val)
 
   @gui_only()
-  def SetControlData(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlData(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetData(ctrl_name, val)
 
   @gui_only()
-  def GetControlData(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def GetControlData(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.GetData(ctrl_name, val)
 
   @gui_only()
-  def SetControlLabel(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlLabel(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetLabel(ctrl_name, val)
 
   @gui_only()
-  def SetControlItems(self, ctrl_name, items, val=None):
-    if self.IsControl(ctrl_name):
+  def SetControlItems(self, ctrl_name, items, val=None, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetItems(ctrl_name, items)
       if val is not None:
         olx.html.SetValue(ctrl_name, val)
 
   @gui_only()
-  def SetControlState(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlState(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetState(ctrl_name, val)
 
   @gui_only()
-  def GetControlState(self, ctrl_name):
-    if self.IsControl(ctrl_name):
+  def GetControlState(self, ctrl_name, check=True):
+    if not check or self.IsControl(ctrl_name):
       return olx.html.GetState(ctrl_name)
 
   @gui_only()
-  def SetControlEnabled(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlEnabled(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetEnabled(ctrl_name, val)
+
+  @gui_only()
+  def SetImage(self, zimg_name, image_file, check=True):
+    if not check or self.IsControl(zimg_name):
+      olx.html.SetImage(zimg_name,image_file)
 
   @gui_only()
   def TranslatePhrase(self, text):
@@ -215,18 +225,9 @@ class GuiFunctions(object):
     olx.html.GetItemState(item)
 
   @gui_only()
-  def SetImage(self, zimg_name, image_file):
-    if self.olex_gui.IsControl(zimg_name):
-      olx.html.SetImage(zimg_name,image_file)
-
-  @gui_only()
   def setDisplayQuality(self, q=None):
     if not q:
       q = self.GetParam('snum.display_quality')
       if not q:
         q = 2
     olx.Qual(q)
-
-a = GuiFunctions()
-olex.registerMacro(a.SetGrad, 'f')
-olex.registerFunction(a.GetFormulaDisplay)
