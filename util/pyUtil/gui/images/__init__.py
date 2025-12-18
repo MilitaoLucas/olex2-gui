@@ -73,7 +73,7 @@ def GetBitmapSize(px_changed=False):
   else:
     size = resolution * width * factor
     if OV.IsControl('IMAGE_BITMAP_SIZE'):
-      OV.SetControlValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
+      OV.SetControlValue('IMAGE_BITMAP_SIZE',int(round(size,0)), check=False)
     OV.SetParam('user.image.bitmap.size',int(round(size,0)))
   return int(round(resolution,0)), int(round(size,0))
 OV.registerFunction(GetBitmapSize,False,'gui.images')

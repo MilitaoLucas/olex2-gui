@@ -771,8 +771,8 @@ def get_auto_q_peaks():
   manual_q = OV.GetParam('snum.refinement.manual_q_peak_override',0)
   if manual_q:
     if OV.IsControl(ctrl_name):
-      OV.SetControlBG(ctrl_name,'#ffeeee')
-      OV.SetControlValue(ctrl_name,manual_q)
+      OV.SetControlBG(ctrl_name,'#ffeeee', check=False)
+      OV.SetControlValue(ctrl_name,manual_q, check=False)
     return manual_q
 
   heavy = OlexRefinementModel().getExpectedPeaks()
@@ -1078,8 +1078,7 @@ def get_refinement_programs(scope='snum'):
   retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
-  if OV.IsControl('SET_snum_refinement_PROGRAM'):
-    OV.SetControlItems('SET_snum_refinement_PROGRAM', retval)
+  OV.SetControlItems('SET_snum_refinement_PROGRAM', retval)
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1094,8 +1093,7 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
-  if OV.IsControl('SET_snum_refinement_METHOD'):
-    OV.SetControlItems(f'SET_{scope}_refinement_METHOD', retval)
+  OV.SetControlItems(f'SET_{scope}_refinement_METHOD', retval)
   return retval
 OV.registerFunction(get_refinement_methods)
 
@@ -1745,8 +1743,7 @@ if not haveGUI:
 def SetMasking(v):
   if type(v) == bool:
     v = str(v).lower()
-    if OV.HasGUI() and OV.IsControl("SNUM_REFINEMENT_USE_SOLVENT_MASK"):
-      OV.SetControlValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
+    OV.SetControlValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
   if v == 'true':
     olx.AddIns('ABIN', q=True)
   else:

@@ -662,38 +662,39 @@ def actaGuiDisplay(val=None):
     val = "No ACTA"
   elif not val:
     val = "ACTA"
-
-  OV.SetControlItems('REFINEMENT_ACTA', 'No ACTA;ACTA NOHKL;ACTA')
-  OV.SetControlValue('REFINEMENT_ACTA', val)
-  OV.SetControlBG('REFINEMENT_ACTA', refinement_acta_bg_colour())
+  if OV.IsControl("REFINEMENT_ACTA"):
+    OV.SetControlItems('REFINEMENT_ACTA', 'No ACTA;ACTA NOHKL;ACTA', check=False)
+    OV.SetControlValue('REFINEMENT_ACTA', val, check=False)
+    OV.SetControlBG('REFINEMENT_ACTA', refinement_acta_bg_colour(), check=False)
   olx.SetVar('refinement_acta', val)
-
 
 OV.registerFunction(actaGuiDisplay)
 
-
 def refinement_acta_bg_colour():
-  OV.SetControlFG('REFINEMENT_ACTA', '#000000')
-  retVal = gui_red.hexadecimal
-  if OV.IsFileType('cif'):
-    return retVal
-  val = olx.Ins('acta')
-  if not val:
-    retVal = gui_green.hexadecimal
-    OV.SetControlValue('REFINEMENT_ACTA', 'ACTA')
-  elif val == "n/a":
-    OV.SetControlValue('REFINEMENT_ACTA', 'No ACTA')
-    OV.SetControlFG('REFINEMENT_ACTA', '#ffffff')
-  elif val == "NOHKL":
-    OV.SetControlValue('REFINEMENT_ACTA', 'ACTA NOHKL')
-    retVal = gui_orange.hexadecimal
-  else:
-    try:
-      float(val)
+  ctrl_name = "REFINEMENT_ACTA"
+  retval = ""
+  if OV.IsControl(ctrl_name):
+    OV.SetControlFG(ctrl_name, '#000000', check=False)
+    retVal = gui_red.hexadecimal
+    if OV.IsFileType('cif'):
+      return retVal
+    val = olx.Ins('acta')
+    if not val:
       retVal = gui_green.hexadecimal
-      OV.SetControlValue('REFINEMENT_ACTA', 'ACTA %s' % val)
-    except:
-      pass
+      OV.SetControlValue(ctrl_name, 'ACTA', check=False)
+    elif val == "n/a":
+      OV.SetControlValue(ctrl_name, 'No ACTA', check=False)
+      OV.SetControlFG(ctrl_name, '#ffffff', check=False)
+    elif val == "NOHKL":
+      OV.SetControlValue(ctrl_name , 'ACTA NOHKL', check=False)
+      retVal = gui_orange.hexadecimal
+    else:
+      try:
+        float(val)
+        retVal = gui_green.hexadecimal
+        OV.SetControlValue(ctrl_name, 'ACTA %s' % val, check=False)
+      except:
+        pass
   return retVal
 
 

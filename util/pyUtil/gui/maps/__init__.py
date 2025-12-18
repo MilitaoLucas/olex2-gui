@@ -38,10 +38,8 @@ class MapUtil:
 
   def deal_with_controls(self):
     self.get_map_scale()
-    if OV.IsControl('SNUM_XGRID_SCALE_SLIDE'):
-      OV.SetControlValue('SNUM_XGRID_SCALE_SLIDE', self.value)
-    if OV.IsControl('SNUM_XGRID_SCALE_VALUE'):
-      OV.SetControlValue('SNUM_XGRID_SCALE_SLIDE', self.value)
+    OV.SetControlValue('SNUM_XGRID_SCALE_SLIDE', self.value)
+    OV.SetControlValue('SNUM_XGRID_SCALE_VALUE', self.value)
 
   def VoidView(self, recalculate='0', onoff=None):
     img_bases = ['small-Void']
@@ -49,8 +47,8 @@ class MapUtil:
       return
     if OV.IsControl('SNUM_MAP_BUTTON'):
       # set electron density map button to 'up' state
-      OV.SetControlState('SNUM_MAP_BUTTON','up')
-      OV.SetControlLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
+      OV.SetControlState('SNUM_MAP_BUTTON','up', check=False)
+      OV.SetControlLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'), check=False)
 
     resolution = OV.GetParam("snum.calcvoid.resolution")
     distance = OV.GetParam("snum.calcvoid.distance")
@@ -94,8 +92,8 @@ class MapUtil:
       return
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):
       # set calcvoid button to 'up' state
-      OV.SetControlState('SNUM_CALCVOID_BUTTON','up')
-      OV.SetControlLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
+      OV.SetControlState('SNUM_CALCVOID_BUTTON','up', check=False)
+      OV.SetControlLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'), check=False)
 
     map_type =  OV.GetParam("snum.map.type")
     map_source = OV.GetParam("snum.map.source")
@@ -221,11 +219,8 @@ class MapUtil:
       retVal =  "Show %s" %what
     else:
       retVal = "Hide %s" %what
-
     if control:
-      if OV.IsControl(control):
-        OV.SetControlLabel(control, retVal)
-
+      OV.SetControlLabel(control, retVal)
     return retVal
 
   def get_map_scale(self):

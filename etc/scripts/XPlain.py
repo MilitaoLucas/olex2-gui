@@ -118,8 +118,8 @@ class XPlain:
     control_name = 'SET_SNUM_REFINEMENT_SPACE_GROUP'
     if olex_gui.IsControl(control_name):
       v = OV.GetControlValue(control_name)
-      OV.SetControlItems(control_name, rv)
-      OV.SetControlValue(control_name, v)
+      OV.SetControlItems(control_name, rv, check=False)
+      OV.SetControlValue(control_name, v, check=False)
     return True
 
   def output_exists(self):

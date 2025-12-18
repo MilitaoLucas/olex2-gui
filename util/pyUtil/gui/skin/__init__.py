@@ -527,11 +527,9 @@ def get_user_bond_colour(colour):
     t = ""
     for item in l:
       t += "%s;" % (item.split("@@")[1])
-    try:
-      OV.SetControlItems("BOND_COLOUR_COMBO", t)
-      OV.SetControlValue("BOND_COLOUR_COMBO", colour)
-    except:
-      pass
+    if OV.IsControl("BOND_COLOUR_COMBO"):
+      OV.SetControlItems("BOND_COLOUR_COMBO", t, check=False)
+      OV.SetControlValue("BOND_COLOUR_COMBO", colour, check=False)
     OV.SetParam('user.bonds.colours', l)
   _ = "%s@@%s" % (c.replace(";", "@"), colour)
   OV.SetParam('user.bonds.colour', colour)

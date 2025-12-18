@@ -1166,16 +1166,14 @@ def calcsolv(solvent_radius=None, grid_step=None):
           solvent_radius = val
         else:
           OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
-          if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
-            OV.SetControlValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
+          OV.SetControlValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
 
       elif item == 'grid':
         if not grid_step:
           grid_step = val
         else:
           OV.SetParam('snum.calcsolv.%s'%item,grid_step)
-          if OV.IsControl('SET_SNUM_CALCSOLV_Grid'):
-            OV.SetControlValue('SET_SNUM_CALCSOLV_GRID', grid_step)
+          OV.SetControlValue('SET_SNUM_CALCSOLV_GRID', grid_step)
     else:
       if item == 'probe':
         if not solvent_radius:

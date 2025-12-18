@@ -351,13 +351,13 @@ olex.registerFunction(copy_datadir_items, False, "gui")
 
 def focus_on_control():
   highlight = OV.GetVar('HtmlHighlightColour')
-  control = OV.GetVar('set_focus_on_control_please',None)
-  if control == "None": control = None
-  if control:
-    print("focus on %s" %control)
-    if OV.IsControl(control):
-      OV.SetControlBG(control,highlight)
-      olx.html.SetFocus(control)
+  ctrl_name = OV.GetVar('set_focus_on_control_please',None)
+  if ctrl_name == "None": ctrl_name = None
+  if ctrl_name:
+    print(f"focus on {ctrl_name}")
+    if OV.IsControl(ctrl_name):
+      OV.SetControlBG(ctrl_name,highlight, check=False)
+      olx.html.SetFocus(ctrl_name, check=False)
       OV.SetVar('set_focus_on_control_please','None')
       return
   olx.Focus()
@@ -580,11 +580,12 @@ def set_client_mode(v):
   else:
     return
   OV.SetParam("user.refinement.client_mode", v)
+  
   if OV.IsControl("cpus_label@refine"):
-    OV.SetControlLabel("cpus_label@refine", get_thread_n_label())
-    OV.SetControlItems("cpus@refine", get_thread_n_selection())
+    OV.SetControlLabel("cpus_label@refine", get_thread_n_label(), check=False)
+    OV.SetControlItems("cpus@refine", get_thread_n_selection(), check=False)
     cpu_n = "-1%" if v else "-1"
-    OV.SetControlValue("cpus@refine", cpu_n)
+    OV.SetControlValue("cpus@refine", cpu_n, check=False)
     OV.SetParam("user.refinement.thread_n", cpu_n)
 
 olex.registerFunction(set_client_mode, False, "gui")

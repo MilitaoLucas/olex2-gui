@@ -1455,8 +1455,8 @@ def GetNParams():
   OV.SetVar(olx.var_name_param_N, retVal)
 
   if OV.IsControl("NParameters"):
-    OV.SetControlLabel("NParameters", retVal)
-    OV.SetControlFG("NParameters", gui_red)
+    OV.SetControlLabel("NParameters", retVal, check=False)
+    OV.SetControlFG("NParameters", gui_red, check=False)
 
 OV.registerFunction(GetNParams)
 
@@ -2620,8 +2620,7 @@ def set_data_parameter_stats_display(target):
   parameters = get_refinement_stats('Parameters')
   #reflections_all = get_refinement_stats('Reflections_all')
   #data_count = get_refinement_stats('DataCount')
-  if OV.IsControl(target):
-    OV.SetControlLabel(target, f"Parameters: {parameters}")
+  OV.SetControlLabel(target, f"Parameters: {parameters}")
 
 OV.registerFunction(set_data_parameter_stats_display, False, "tools")
 

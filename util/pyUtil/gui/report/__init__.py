@@ -237,7 +237,6 @@ def play_crystal_images():
     im_path = get_crystal_image(imagelist[idx])
     OV.SetImage('CRYSTAL_IMAGE',im_path)
     OV.SetControlValue('CURRENT_CRYSTAL_IMAGE', imagelist[idx])
-    OV.Refresh()
 OV.registerFunction(play_crystal_images, False, 'gui.report')
 
 def advance_crystal_image(direction='forward'):
