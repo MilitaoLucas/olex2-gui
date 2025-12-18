@@ -125,8 +125,7 @@ class GuiFunctions(object):
   @gui_only()
   def SetControlEnabled(self, ctrl_name, val):
     if self.IsControl(ctrl_name):
-      OV.SetControlEnabled(ctrl_name, val)
-
+      olx.html.SetEnabled(ctrl_name, val)
 
   @gui_only()
   def TranslatePhrase(self, text):
