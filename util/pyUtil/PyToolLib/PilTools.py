@@ -2669,9 +2669,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-          if OV.IsDebugging():
-            print("FROM CACHE: %s (%s)" %(item, state))
-
           nam = item
           if outside_name:
             nam = outside_name

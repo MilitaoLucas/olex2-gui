@@ -4485,8 +4485,6 @@ class HealthOfStructure():
     cache_image_large = self.im_cache.get(cache_entry_large,None)
 
     if cache_image and cache_image_large:
-      if debug:
-        print("HOS from Cache: %s" %cache_entry)
       im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
       OlexVFS.save_image_to_olex(im, item, 0)
       return txt

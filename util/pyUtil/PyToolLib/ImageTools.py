@@ -378,15 +378,6 @@ class ImageTools(FontInstances):
       width = int(size[0])
       height = int(size[1])
 
-    #if name:
-      #cache_name = "%s_%s" %(name, width)
-      #_ = self.im_cache.get(cache_name,None)
-      #if _:
-        #if repr(width) in cache_name:
-          #if debug:
-            #print "--- Return %s from Cache!" %name
-          #return _
-
     image = image.resize((width,height), Image.LANCZOS)
     if debug:
       print("+++ Resize %s (%s)!" %(name, s))
