@@ -471,7 +471,7 @@ def plot_cube_single(name):
   mmm = None
   rms = None
   lines = iter(cube)
-  
+
   try:
     # Skip the first two lines (header)
     next(lines)
@@ -483,11 +483,11 @@ def plot_cube_single(name):
     # Read grid dimensions
     x_size, y_size, z_size = (int(next(lines).split()[0]) for _ in range(3))
     total_size = x_size * y_size * z_size
-    
+
     #Skip atoms
     for _ in range(na):
         next(lines)
-    
+
     # Initialize data container
     data = flex.double()
 
@@ -505,7 +505,7 @@ def plot_cube_single(name):
 
   except StopIteration:
       raise ValueError("ERROR! Unexpected end of cube file!")
-  
+
   del cube
 
   gridding = data.accessor()
@@ -792,34 +792,35 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
       return
     one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
-    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+    if not OV.IsEDRefinement():
+      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
-  if OV.GetParam("snum.refinement.use_solvent_mask"):
-    f_mask = cctbx_adapter.load_mask()
-    if not f_mask:
-      OlexCctbxMasks()
-      if olx.current_mask.flood_fill.n_voids() > 0:
-        f_mask = olx.current_mask.f_mask()
-    if f_mask:
-      if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
-        f_mask = f_mask.generate_bijvoet_mates()
-      f_mask = f_mask.common_set(f_sq_obs)
-      f_obs = f_sq_obs.f_sq_as_f()
-      f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
-      k = math.sqrt(OV.GetOSF())
-      f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
-  else:
-    f_obs = f_sq_obs.f_sq_as_f()
-    k = math.sqrt(OV.GetOSF())
-    f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
 
-  if OV.IsEDRefinement():
+  if not OV.IsEDRefinement():
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      f_mask = cctbx_adapter.load_mask()
+      if not f_mask:
+        OlexCctbxMasks()
+        if olx.current_mask.flood_fill.n_voids() > 0:
+          f_mask = olx.current_mask.f_mask()
+      if f_mask:
+        if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask = f_mask.common_set(f_sq_obs)
+        f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+    f_obs = f_sq_obs.f_sq_as_f()
+    scale = OV.GetOSF() ** 0.5
+    f_diff = f_obs.f_obs_minus_f_calc(1.0/ scale, f_calc)
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)
+    f_diff = f_diff.expand_to_p1()
+  else:
     I_obs, I_calc = OV.GetACI().EDI.compute_Io_Ic(merge=True)
     f_calc = cctbx_adapter.f_calc(I_obs, None, True, False,
                        one_h_function=one_h, twin_data=False)
-    Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+    f_obs = I_obs.f_sq_as_f()
     new_data = []
     for i in range(I_obs.size()):
       mfc = math.sqrt(I_calc.data()[i])
@@ -827,15 +828,18 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
         s = 1
       else:
         s = abs(f_calc.data()[i])/mfc
-      Io = I_obs.data()[i]
-      new_data.append(0 if Io < 0 else math.sqrt(Io)*s)
-    I_obs = I_obs.customized_copy(data=flex.double(new_data))
-    f_diff = I_obs.f_obs_minus_f_calc(1. , f_calc)
-    f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
-    f_diff = f_diff.expand_to_p1()
-  else:
-    if OV.IsEDData():
-      f_diff = f_diff.apply_scaling(factor=3.324943664)    
+      fo = f_obs.data()[i] * s
+      new_data.append(fo)
+    f_obs = f_obs.customized_copy(data=flex.double(new_data))
+    #re-compute the scale
+    fo2 = f_obs.as_intensity_array()
+    f_calc_sq = f_calc.as_intensity_array()
+    weights = cctbx_adapter.compute_weights(fo2, f_calc, reset_scale_factor=True)
+    scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
+            / flex.sum(weights * flex.pow2(f_calc_sq.data()))
+    #
+    f_diff = f_obs.f_obs_minus_f_calc(1. / scale**0.5 , f_calc)
+    f_diff = f_diff.apply_scaling(factor=3.324943664)
     f_diff = f_diff.expand_to_p1()
 
   print("Using %d reflections for Fourier synthesis"%f_diff.size())

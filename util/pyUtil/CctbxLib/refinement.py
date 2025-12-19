@@ -1667,21 +1667,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_calc =  f_calc.customized_copy(data=f_calc.data()/OV.GetACI().EDI.get_Fc2Ug())
       f_calc_sq = f_calc.as_intensity_array()
 
-      if OV.GetParam("snum.refinement.use_dynI_in_diffmap"):
-        new_data = []
-        #merge the dynamic intensities and match to f_obs
-        dyn_I = self.normal_eqns.fc_sq.merge_equivalents(algorithm="shelx")\
-          .array().map_to_asu().common_set(f_obs)
-        for i in range(f_obs.size()):
-          mfc = math.sqrt(dyn_I.data()[i])
-          if mfc == 0:
-            s = 1
-          else:
-            s = abs(f_calc.data()[i])/mfc
-          fo = f_obs.data()[i] * s
-          new_data.append(fo)
-        f_obs = f_obs.customized_copy(data=flex.double(new_data))
-        fo2 = f_obs.as_intensity_array()
+      new_data = []
+      #merge the dynamic intensities and match to f_obs
+      dyn_I = self.normal_eqns.fc_sq.merge_equivalents(algorithm="shelx")\
+        .array().map_to_asu().common_set(f_obs)
+      for i in range(f_obs.size()):
+        mfc = math.sqrt(dyn_I.data()[i])
+        if mfc == 0:
+          s = 1
+        else:
+          s = abs(f_calc.data()[i])/mfc
+        fo = f_obs.data()[i] * s
+        new_data.append(fo)
+      f_obs = f_obs.customized_copy(data=flex.double(new_data))
+      fo2 = f_obs.as_intensity_array()
 
       weights = self.compute_weights(fo2, f_calc, reset_scale_factor=True)
       scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
