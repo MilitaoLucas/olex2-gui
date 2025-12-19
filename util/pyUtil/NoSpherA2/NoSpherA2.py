@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 import olex
@@ -8,13 +9,14 @@ import shutil
 import time
 import subprocess
 
+from NoSpherA2.hybrid_GUI import patch_function_inplace, replace_function_in_file
 from olexFunctions import OV
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
+from hybrid_GUI import make_hybrid_GUI, make_OCC_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
@@ -57,6 +59,7 @@ class NoSpherA2(PT):
     self.p_img = p_img
     self.p_scope = "harp"
 
+    self.mpiexec = ""
     if not from_outside:
       self.setup_gui()
 #revert back to the original NoSpherA2 values
@@ -131,10 +134,13 @@ class NoSpherA2(PT):
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+      olx.Echo("BASIS", self.basis_dir)
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
         basis_list.sort()
         self.basis_list_str = ';'.join(basis_list)
+        olx.Echo("BASIS")
+        olx.Echo(self.basis_list_str)
       else:
         self.basis_list_str = None
     else:
@@ -238,12 +244,12 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       else:
         os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
 
+    self.softwares += ";OCC"
     if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
       self.parallel = True
       OV.SetVar("Parallel",True)
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";  Tonto"
-
     else:
       if "Tonto" not in self.softwares:
         self.softwares = self.softwares + ";  Tonto"
@@ -663,12 +669,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             else:
               OV.SetVar('NoSpherA2-Error',"ELMOdb")
               raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
-          try:
-            self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
-          except NameError as error:
-            print("Aborted due to: ",error)
-            OV.SetVar('NoSpherA2-Error',error)
-            return False
+
+          if wfn_code != "OCC":
+            try:
+              self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
+            except NameError as error:
+              print("Aborted due to: ",error)
+              OV.SetVar('NoSpherA2-Error',error)
+              return False
 
         # make the tsc file
 
@@ -679,18 +687,23 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
               wfn_fn = wfn_code
             else:
-              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
+              endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb", ".owf.fchk"]
               if is_orca_new():
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
                 wfn_fn = path_base + ".xyz"
               elif not any(os.path.exists(path_base + x) for x in endings):
-                print("No usefull wavefunction found!")
-                return False
+                if not wfn_code == "OCC":
+                  print("No usefull wavefunction found!")
+                  return False
+                self.wfn()
+                wfn_fn = path_base + ".toml"
               else:
                 for e in endings:
                   if os.path.exists(path_base + e):
                     wfn_fn = path_base + e
+            # if wfn_code == "OCC":
+            #   wfn_fn = path_base""
             #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
             cuqct_tsc(wfn_fn, cif_fn, [-1000])
@@ -789,7 +802,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           print("The following error occured during QM Calculation: ",error)
           OV.SetVar('NoSpherA2-Error',error)
           raise NameError('Unsuccesfull Wavefunction Calculation!')
-    elif soft != "Thakkar IAM" and soft != "SALTED":
+    elif soft != "Thakkar IAM" and soft != "SALTED" and soft != "OCC":
       try:
         wfn_object.run(part)
       except NameError as error:
@@ -800,6 +813,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_NoSpherA2(self):
     self.NoSpherA2 = self.setup_software(None, "NoSpherA2")
     print("-- NoSpherA2 executable is:", self.NoSpherA2)
+    olx.Echo(f"-- NoSpherA2 executable is: {self.NoSpherA2}")
     if self.NoSpherA2 == "" or self.NoSpherA2 is None:
       print ("-- ERROR!!!! No NoSpherA2 executable found! THIS WILL NOT WORK!")
       OV.SetVar('NoSpherA2-Error',"None")
@@ -843,6 +857,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_software(self, name, exe_pre:str, get = False):
     # Determine platform-specific executable name
     exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
+    # Changedir to BaseDir() before
+    curdir = os.getcwd()
+    os.chdir(olx.BaseDir())
     # search PATH
     exe_path = olx.file.Which(exe_name)
     # Update software list if requested and executable exists
@@ -853,7 +870,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         # If the executable is not found, add the "Get" to the software list
         if "  Get " + name not in self.softwares:
             self.softwares = f"{self.softwares};  Get {name}"
-
+    os.chdir(curdir)
     return exe_path or ""
 
   def setup_orca_executables(self):
@@ -883,6 +900,21 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         self.softwares = self.softwares + ";  " + orca_string
     else:
       self.softwares = f"{self.softwares};  Get ORCA"
+
+  def edit_occ_input(self) -> None:
+    from pathlib import Path
+    fdir =  Path(self.jobs_dir)
+    input_file_path = olx.FilePath() / fdir / f"{olx.FileName()}.toml"
+    wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), olx.FilePath() / fdir, "occ")
+    wfn_object.write_occ_input()
+    with open(input_file_path, "r") as f:
+        occ_input_old = f.read()
+    occ_input = OV.GetUserStyledInput(0, "test", occ_input_old, "toml")
+    if occ_input is None:
+        occ_input = occ_input_old
+    with open(input_file_path, "w") as f:
+        f.write(occ_input)
+    wfn_object.update_gui_occ_parameters()
 
   def setup_xtb_executables(self):
     if not OV.IsDebugging():
@@ -959,7 +991,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     max_cpu = multiprocessing.cpu_count()
     cpu_list = ['1',]
     hyperthreading = OV.GetParam('user.refinement.has_HT')
-    if not hyperthreading:
+    if hyperthreading:
       max_cpu /= 2
     for n in range(1, int(max_cpu)):
       cpu_list.append(str(n + 1))
@@ -998,7 +1030,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     basis_file = os.path.join(BD, name)
     if not os.path.exists(basis_file):
       return False
-    basis = open(basis_file, "r")
+    basis =open(basis_file, "r")
     atoms = []
     for sc in x_ray_struct.scatterers():
       Z = sc.electron_count()
@@ -1016,10 +1048,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if any(temp_atom in line for temp_atom in atoms):
         found += 1
         if found == len(atoms):
+          basis.close()
           return True
         continue
     if found != len(atoms):
+      basis.close()
       return False  # If any atoms are missing this basis set is not OK
+
+    basis.close()
     return True  # Only true if all atom searches were succesfull
 
 @run_with_bitmap('Running DISCAMB')
@@ -1295,6 +1331,8 @@ OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
 def change_basisset(input):
   OV.SetParam('snum.NoSpherA2.basis_name',input)
+  if "OCC" in software():
+    return
   if "x2c" in input:
     OV.SetParam('snum.NoSpherA2.Relativistic', True)
     if OV.HasGUI():
@@ -1609,12 +1647,57 @@ OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.edit_occ_input, False, 'NoSpherA2')
 
+def make_gui_edit_link(wfnsrc: str):
+  debug = OV.IsDebugging()
+  if debug and wfnsrc in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1", "ORCA", "OCC"):
+    editLink = f'''
+    <a href='spy.NoSpherA2.EditGuiPython({wfnsrc})'>
+      Edit
+    </a>
+    '''
+    return editLink
+  return ''
+OV.registerFunction(make_gui_edit_link, False, "NoSpherA2")
+
+UPDATE = False
+def EditGuiPython(wfnsrc: str):
+  import importlib
+  import hybrid_GUI
+
+  importlib.reload(hybrid_GUI)
+  if wfnsrc in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1", "ORCA"):
+    func = "make_ORCA_GUI"
+    source_code = inspect.getsource(hybrid_GUI.make_ORCA_GUI)
+  elif wfnsrc == "OCC":
+    func = "make_OCC_GUI"
+    source_code = inspect.getsource(hybrid_GUI.make_OCC_GUI)
+  else:
+    raise NotImplementedError("Not implemented for anything that isn't ORCA or OCC")
+  inputText = OV.GetUserStyledInput(0,'Modify text for help entry %s' %(wfnsrc), source_code, "python")
+  if inputText is None:
+    return
+  patch_function_inplace(hybrid_GUI, func, source_code, inputText)
+  replace_function_in_file(f"{olx.BaseDir()}/util/pyUtil/NoSpherA2/hybrid_GUI.py", func, inputText)
+  UPDATE = True
+  olx.html.Update()
+
+def include_hack():
+  global UPDATE
+  if UPDATE:
+    UPDATE = False
+    return ""
+  return "..\\util\\pyUtil\\NoSpherA2\\h3-refine_NoSpherA2-extras.htm"
+
+OV.registerFunction(include_hack, False, "NoSpherA2")
 def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   return t
 OV.registerFunction(hybrid_GUI, False, "NoSpherA2")
 
+
+OV.registerFunction(EditGuiPython, False, "NoSpherA2")
 def make_NSA2_GUI(method):
   method = method.lstrip().rstrip()
   if source_is_tsc():
@@ -1645,7 +1728,8 @@ def make_NSA2_GUI(method):
     return make_discambMATT_GUI()
   elif method == "ELMOdb":
     return make_ELMOdb_GUI()
-  
+  elif method == "OCC":
+    return make_OCC_GUI()
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
 
