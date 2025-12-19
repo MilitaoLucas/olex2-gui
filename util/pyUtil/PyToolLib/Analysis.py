@@ -1899,7 +1899,7 @@ class Analysis(Graph):
     if mouseX < width:
       X = 10
 
-    if OV.IsPopup(pop_name):
+    if not OV.IsPopup(pop_name):
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
       pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
