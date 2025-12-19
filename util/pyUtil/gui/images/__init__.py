@@ -67,13 +67,11 @@ def GetBitmapSize(px_changed=False):
     factor = 0.393700787
   if px_changed:
     width = size/(resolution * factor)
-    if OV.IsControl('IMAGE_BITMAP_width'):
-      OV.SetControlValue('IMAGE_BITMAP_width',round(width,3))
+    OV.SetControlValue('IMAGE_BITMAP_width',round(width,3))
     OV.SetParam('user.image.bitmap.resolution_width',round(width,3))
   else:
     size = resolution * width * factor
-    if OV.IsControl('IMAGE_BITMAP_SIZE'):
-      OV.SetControlValue('IMAGE_BITMAP_SIZE',int(round(size,0)), check=False)
+    OV.SetControlValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
     OV.SetParam('user.image.bitmap.size',int(round(size,0)))
   return int(round(resolution,0)), int(round(size,0))
 OV.registerFunction(GetBitmapSize,False,'gui.images')
@@ -106,7 +104,7 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
 
   filesize = int(round(filesize,0))
-  
+
   if OV.GetParam('user.image.bitmap.trim'):
     temp_name = '%s_temp.bmp' %(filefull.strip("'"))
     temp_name = 'temp.bmp'

@@ -49,7 +49,6 @@ class MapUtil:
       # set electron density map button to 'up' state
       OV.SetControlState('SNUM_MAP_BUTTON','up', check=False)
       OV.SetControlLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'), check=False)
-
     resolution = OV.GetParam("snum.calcvoid.resolution")
     distance = OV.GetParam("snum.calcvoid.distance")
     precise = OV.GetParam("snum.calcvoid.precise")
@@ -145,7 +144,7 @@ class MapUtil:
 
 
   def SetXgridView(self, update_controls=False):
-    update_controls = bool(update_controls)
+    update_controls = OV.get_bool_from_any(update_controls)
     view = OV.GetParam("snum.xgrid.view")
     extended = OV.GetParam("snum.xgrid.extended")
     if view == "2D":
@@ -225,6 +224,8 @@ class MapUtil:
 
   def get_map_scale(self):
     SCALED_TO = 50
+    # this must be pre-set even if the map is not visible
+    olx.SetVar('map_slider_scale', 10)
 
     self.value = 0
     self.scale = 0

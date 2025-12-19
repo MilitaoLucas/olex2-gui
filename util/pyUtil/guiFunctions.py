@@ -11,6 +11,17 @@ class GuiFunctions(object):
   def __init__(self):
     olex.registerMacro(self.SetGrad, 'f')
     olex.registerFunction(self.GetFormulaDisplay)
+    self.control_set = {
+      "bg": olx.html.SetBG,
+      "fg": olx.html.SetFG,
+      "data": olx.html.SetData,
+      "enabled": olx.html.SetEnabled,
+      "items": olx.html.SetItems,
+      "state": olx.html.SetState,
+      "value": olx.html.SetValue,
+      "focus": olx.html.SetFocus,
+      "image": olx.html.SetImage,
+    }
 
   @gui_only()
   def GetUserInput(self, arg, title, contentText):
@@ -76,8 +87,8 @@ class GuiFunctions(object):
       sys.stderr.formatExceptionInfo()
 
   @gui_only()
-  def SetControlBG(self, ctrl_name, val):
-    if self.IsControl(ctrl_name):
+  def SetControlBG(self, ctrl_name, val, check=True):
+    if not check or self.IsControl(ctrl_name):
       olx.html.SetBG(ctrl_name, val)
 
   @gui_only()
@@ -126,6 +137,7 @@ class GuiFunctions(object):
   def GetControlState(self, ctrl_name, check=True):
     if not check or self.IsControl(ctrl_name):
       return olx.html.GetState(ctrl_name)
+    return None
 
   @gui_only()
   def SetControlEnabled(self, ctrl_name, val, check=True):
@@ -133,9 +145,34 @@ class GuiFunctions(object):
       olx.html.SetEnabled(ctrl_name, val)
 
   @gui_only()
+  def IsControlEnabled(self, ctrl_name, check=True):
+    if not check or self.IsControl(ctrl_name):
+      olx.html.IsEnabled(ctrl_name) == 'true'
+    return False
+
+  @gui_only()
   def SetImage(self, zimg_name, image_file, check=True):
     if not check or self.IsControl(zimg_name):
       olx.html.SetImage(zimg_name,image_file)
+
+  @gui_only()
+  def SetFocus(self, ctrl_name, check=True):
+    if not check or self.IsControl(ctrl_name):
+      olx.html.SetFocus(ctrl_name)
+
+  @gui_only()
+  def SetControl(self, ctrl_name, **kwds):
+    if not self.IsControl(ctrl_name):
+      return
+    for k,v in kwds.items():
+      if not v:
+        self.control_set[k](ctrl_name)
+      elif isinstance(v, str):
+        self.control_set[k](ctrl_name, v)
+      elif hasattr(v, "__iter__"):
+        self.control_set[k](ctrl_name, *v)
+      else:
+        self.control_set[k](ctrl_name, v)
 
   @gui_only()
   def TranslatePhrase(self, text):

@@ -1166,7 +1166,7 @@ def cov_mat():
     ann = x.readline().split()
     nf = np.load(x)
     header_string =""
-    for anno in ann: 
+    for anno in ann:
       header_string = header_string  + str(anno.decode('UTF-8'))+ ","
     sqrt_size = len(ann)
     cov_array = np.zeros((sqrt_size, sqrt_size))
@@ -1178,8 +1178,8 @@ def cov_mat():
             idx += 1
     np.savetxt("numpy.csv", cov_array, delimiter=',')
     corrMat = np.corrcoef(cov_array)
-    np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)  
-    
+    np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)
+
     # After calculating corrMat
     threshold = 0.75
     iu_nodiag = np.triu_indices(sqrt_size, k=1)

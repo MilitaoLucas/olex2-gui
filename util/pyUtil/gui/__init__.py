@@ -357,7 +357,7 @@ def focus_on_control():
     print(f"focus on {ctrl_name}")
     if OV.IsControl(ctrl_name):
       OV.SetControlBG(ctrl_name,highlight, check=False)
-      olx.html.SetFocus(ctrl_name, check=False)
+      OV.SetFocus(ctrl_name, check=False)
       OV.SetVar('set_focus_on_control_please','None')
       return
   olx.Focus()
@@ -580,7 +580,7 @@ def set_client_mode(v):
   else:
     return
   OV.SetParam("user.refinement.client_mode", v)
-  
+
   if OV.IsControl("cpus_label@refine"):
     OV.SetControlLabel("cpus_label@refine", get_thread_n_label(), check=False)
     OV.SetControlItems("cpus@refine", get_thread_n_selection(), check=False)

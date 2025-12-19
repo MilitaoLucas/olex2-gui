@@ -697,7 +697,6 @@ def refinement_acta_bg_colour():
         pass
   return retVal
 
-
 OV.registerFunction(refinement_acta_bg_colour)
 
 

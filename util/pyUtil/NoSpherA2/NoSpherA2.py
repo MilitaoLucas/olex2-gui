@@ -90,7 +90,7 @@ class NoSpherA2(PT):
         "Gaussian03": ["g03"],
         "Gaussian16": ["g16"],
     }
-    
+
     def probe_file(file, names):
         ret = ""
         for name in names:
@@ -112,7 +112,7 @@ class NoSpherA2(PT):
         'xtb_exe': self.setup_xtb_executables,
         'ptb_exe': self.setup_ptb_executables,
     }
-    
+
     from concurrent.futures import ThreadPoolExecutor, as_completed
     with ThreadPoolExecutor(max_workers=min(8, len(calls))) as ex:
       futures = {}
@@ -743,7 +743,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       fn = str(OV.GetParam('snum.NoSpherA2.file'))
       fol = OV.FilePath()
       OV.SetParam('snum.NoSpherA2.source', os.path.join(fol, fn))
-    
+
     return True
 
   def wfn(self, folder='', xyz=True, part=0):
@@ -817,7 +817,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.pyscf_adapter = None
       if "Get pySCF" not in self.softwares:
         self.softwares += ";  Get pySCF"
-        
+
   def setup_psi4(self):
     try:
       self.psi4_adapter = psi4.psi4(self.WSLAdapter, self.conda_adapter)
@@ -935,8 +935,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         max_Z = sc.electron_count()
     final_string = ""
     for basis in BL:
-      if OV.GetParam("snum.NoSpherA2.basis_adv"): 
-        final_string += basis + ";"                                                                                                                                                                                       
+      if OV.GetParam("snum.NoSpherA2.basis_adv"):
+        final_string += basis + ";"
       elif self.check_for_atom_in_basis_set(basis, XRS, elements):
         final_string += basis + ";"
     if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0" or source == "ORCA 6.1":
