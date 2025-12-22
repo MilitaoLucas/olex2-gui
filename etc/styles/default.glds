@@ -1,4 +1,4 @@
-﻿<style LinkFile="" Name="" Version="2"
+<style LinkFile="./etc/styles/default.glsp" Name="" Version="2"
  <Materials
   <Prop0 "1109;4290805760;2768240640;4281150765;5">
   <Prop1 "255;32768;32768;6283103;6283103;4294967295;4294967295;12;12">

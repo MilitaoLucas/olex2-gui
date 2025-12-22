@@ -37,6 +37,9 @@ import scipy.linalg
 import olex2_normal_equations
 from my_refine_util import hydrogen_atom_constraints_customisation
 
+debug = OV.IsDebugging()
+
+
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
     #'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
@@ -58,6 +61,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     sys.stdout.refresh = False
     self.scale_factor = None
     self.failure = False
+    self.objective_only = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.hooft = None
     self.hooft_str = ""
@@ -73,7 +77,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
     self.weighting = weighting
     if self.weighting is None:
-      self.weighting = self.get_shelxl_weighting()
+      weighting_choice = OV.GetParam('snum.refinement.weighting_scheme')
+      if weighting_choice == 'shelx' or weighting_choice == "default":
+        self.weighting = self.get_shelxl_weighting()
+      elif weighting_choice == 'new_shelx':
+        self.weighting = self.get_new_shelxl_weighting()
+      elif weighting_choice == 'unity':
+        self.weighting = self.get_unit_weighting()
+      elif weighting_choice == 'sigma':
+        self.weighting = self.get_sigma_weighting()
+      elif weighting_choice == 'stl':
+        self.weighting = self.get_sin_theta_over_lambda_weighting()
+      else:
+        print("WARNING: unsupported weighting scheme: '%s' is replaced by 'shelx'"\
+            %weighting_choice)
+        self.weighting = self.get_shelxl_weighting()
 
   def run(self,
           build_only=False, #return normal normal equations object
@@ -187,13 +205,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if ed_refinement:
       msg = "ED refinement"
       msg_l = len(msg)
-      if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
+      #if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
+      if self.exti is not None and not OV.GetHeaderParam('ED.refinement.refine.exti'):
         self.exti = None
         msg +=", ignoring EXTI"
       if self.swat is not None:
         self.swat = None
         msg +=", ignoring SWAT"
-      if len(msg) != msg_l and not(reparametrisation_only or build_only):
+      if len(msg) != msg_l and not(reparametrisation_only or build_only) and debug:
         print(msg)
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
@@ -236,7 +255,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         olx.Echo(str(e), m="error")
         self.failure = True
         return
-    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0 and self.max_cycles != 0:
       if not (reparametrisation_only or build_only):
         olx.Echo("Nothing to refine!", m="error")
       self.failure = True
@@ -330,13 +349,35 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("There is nothing to refine.")
           self.failure = True
           return
-        elif use_openmp and "normal_equations.h" in str_e and  "Not implemented" in str_e:
+        elif use_openmp and "normal_equations.h" in str_e and "Not implemented" in str_e:
           olx.Echo("Please restart Olex2 to fully enable OpenMP!", m="warning")
           self.failure = True
           return
         else:
           raise e
       stopwatch.start("Analysis")
+      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
+      self.r1_all_data = self.normal_eqns.r1_factor()
+      if len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
+        self.objective_only = True
+        stopwatch.start("FFT")
+        fo_minus_fc = self.f_obs_minus_f_calc_map(0.3)
+        fo_minus_fc.apply_volume_scaling()
+        self.diff_stats = fo_minus_fc.statistics()
+        self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
+        if not fcf_only:
+          self.show_summary()
+          self.show_comprehensive_summary(log=self.log)
+        else:
+          return
+        stopwatch.start("CIF")
+        block_name = OV.FileName().replace(' ', '')
+        if self.on_completion:
+          cif = iotbx.cif.model.cif()
+          cif[block_name] = self.as_cif_block()
+          stopwatch.start("on_completion")
+          self.on_completion(cif[block_name])
+        return
       # get the final shifts
       stopwatch.run(self.normal_eqns.analyse_shifts)
       self.scale_factor = self.cycles.scale_factor_history[-1]
@@ -347,13 +388,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fcf_stuff = '-' in olx.Ins('MORE')
       if fcf_stuff:
         self.export_var_covar(self.covariance_matrix_and_annotations)
-      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
-      self.r1_all_data = self.normal_eqns.r1_factor()
       try:
         stopwatch.run(self.check_hooft)
-      except:
+      except Exception as e:
         print("Failed to evaluate Hooft parameter")
-      OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
+      if not OV.IsEDData():
+        OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
       #extract SU on BASF and extinction
       stopwatch.start("Extracting scalars")
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
@@ -385,7 +427,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print("Cholesky failure")
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
-        if index > 0:
+        if index >= 0:
           param_name = ""
           n_components = len(self.reparametrisation.component_annotations)
           if index >= n_components:
@@ -442,7 +484,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
     finally:
-      self.data_to_parameter_watch()
       sys.stdout.refresh = True
       self.log.close()
 
@@ -452,12 +493,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       data = self.normal_eqns.r1_factor()[1]
     except:
       data = self.reflections.f_sq_obs_merged.size()
+    OV.SetDataParamN(data, parameters)
     try:
-      print (f"Data: {self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (I >= 2u(I)g) | {self.normal_eqns.r1_factor(5)[1]} (I >= 5u(I)) [hkl: {self.reflections.f_sq_obs_merged.size()}]")
+      retVal = f"{self.normal_eqns.r1_factor()[1]} (all) | {self.normal_eqns.r1_factor(2)[1]} (I >= 2u(I)g) | {self.normal_eqns.r1_factor(5)[1]} (I >= 5u(I)) [hkl: {self.reflections.f_sq_obs_merged.size()}]"
+      return retVal
     except:
      pass
 
-    OV.SetDataParamN(data, parameters)
 
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
@@ -521,12 +563,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       return None
 
   def check_hooft(self):
-    #this will fail!
     if OV.IsEDData():
-      print("Skipping Hooft parameter evaluation for ED data")
       return
-    if self.hooft:
-      return self.hooft
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       from cctbx_olex_adapter import hooft_analysis
@@ -534,13 +572,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.hooft = hooft_analysis(self)
         self.hooft_str = utils.format_float_with_standard_uncertainty(
           self.hooft.hooft_y, self.hooft.sigma_y)
-      except utils.Sorry as e:
-        print(e)
+      except Exception as e:
+        self.hooft = None
+        self.hooft_str = "N/A"
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
       # people still would want to see this...
       flack = self.calc_flack()
       OV.SetParam('snum.refinement.flack_str', flack)
 
   def get_radiation_type(self):
+    radiation_type = self.olx_atoms.exptl.get("radiation_type", "xray")
+    if radiation_type != "xray":
+      return radiation_type
     from cctbx.eltbx import wavelengths
     for x in wavelengths.characteristic_iterator():
       if abs(self.wavelength-x.as_angstrom()) < 1e-4:
@@ -636,7 +680,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     acta_stuff = olx.Ins('ACTA') != "n/a"
     xs = self.xray_structure()
     site_labels = xs.scatterers().extract_labels()
-    if not acta_stuff:
+    if not acta_stuff or self.objective_only:
       from iotbx.cif import model
       cif_block = model.block()
     else:
@@ -791,13 +835,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     write_fcf = False
     acta = olx.Ins("ACTA").strip()
-    if OV.GetParam('user.cif.finalise') != 'Exclude':
+    if OV.GetParam('user.cif.finalise') != 'Exclude' and not self.objective_only:
       if not acta:
         write_fcf = True
       elif acta != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
     if write_fcf:
-      fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+      list_code = 8 if self.twin_components is not None and\
+          not self.reparametrisation.fc_correction.grad else 4
+      fcf_cif, fmt_str = self.create_fcf_content(list_code=list_code,
+        add_weights=True, fixed_format=False)
 
       import io
       f = io.StringIO()
@@ -880,9 +927,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
-    self.normal_eqns.analyse_shifts()
-    cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
-    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
+    if not self.objective_only:
+      self.normal_eqns.analyse_shifts()
+      cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
+      cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     cif_block['_refine_ls_weighting_details'] = str(
       self.normal_eqns.weighting_scheme)
@@ -1418,6 +1466,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.fixed_distances.setdefault((a, b), 1)
 
   def setup_rigid_body_constraints(self, afix_iter):
+    output_afix = []
+    output_rigid = []
     rigid_body_constraints = []
     rigid_body = {
       # m:    type       , number of dependent
@@ -1444,7 +1494,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
             valid = False
             break
       if not valid:
-        print("Skipping conflicting AFIX for %s (refinement.py)" %scatterers[pivot].label)
+        if not output_afix:
+          output_afix.append("Skipping conflicting AFIX for: ")
+        output_afix.append(f"{scatterers[pivot].label} ")
+        #print("Skipping conflicting AFIX for %s (refinement.py)" %scatterers[pivot].label)
         continue
 
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
@@ -1469,7 +1522,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
           current = rigid.rigid_riding_expandable_group(
             pivot, dependent, n == 4)
         elif len(pivot_neighbours) < 1:
-          print("Invalid rigid group for " + scatterers[pivot].label)
+          if not output_rigid:
+            output_rigid.append("Invalid rigid group for: ")
+          output_rigid.append(f"{scatterers[pivot].label} ")
+          #print("Invalid rigid group for " + scatterers[pivot].label)
         else:
           neighbour = pivot_neighbours[0]
           for n in pivot_neighbours[1:]:
@@ -1497,10 +1553,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.fix_rigid_group_params(pivot_neighbours[0], pivot, dependent, sizable)
         else:
           self.fix_rigid_group_params(None, pivot, dependent, sizable)
+    if output_afix:
+      print(f"{' '.join(output_afix)}")
+    if output_rigid:
+      print(f"{' '.join(output_rigid)}")
 
     return rigid_body_constraints
 
   def setup_geometrical_constraints(self, afix_iter=None):
+    output_afix = []
     geometrical_constraints = []
     constraints = {
       # AFIX mn :
@@ -1538,7 +1599,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
               valid = False
               break
         if not valid:
-          print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
+          if not output_afix:
+            output_afix.append("Skipping conflicting AFIX for: ")
+          output_afix.append(f"{scatterers[pivot].label} ")
+          #print("Skipping conflicting AFIX for %s" %scatterers[pivot].label)
           continue
         if bond_length == 0:
           bond_length = None
@@ -1560,6 +1624,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current.add_to = hydrogen_atom_constraints_customisation(
           current, self.olx_atoms.atoms(), info[1]).add_to
         geometrical_constraints.append(current)
+
+    if output_afix:
+      print(f"{' '.join(output_afix)}")
 
     return geometrical_constraints
 
@@ -1589,34 +1656,50 @@ class FullMatrixRefine(OlexCctbxAdapter):
       k = OV.GetOSF()
     else:
       k = math.sqrt(scale_factor)
+    #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
+    scaling_factor = 3.324943664 # scales from A-2 to eA-1
     #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
-      Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_obs = fo2.f_sq_as_f()
+      # scale Fc back from Ug
+      f_calc = f_calc.map_to_asu().common_set(f_obs)
+      f_calc =  f_calc.customized_copy(data=f_calc.data()/OV.GetACI().EDI.get_Fc2Ug())
+      f_calc_sq = f_calc.as_intensity_array()
+
       new_data = []
-      fc_sq = self.normal_eqns.fc_sq
+      #merge the dynamic intensities and match to f_obs
+      dyn_I = self.normal_eqns.fc_sq.merge_equivalents(algorithm="shelx")\
+        .array().map_to_asu().common_set(f_obs)
       for i in range(f_obs.size()):
-        mfc = math.sqrt(fc_sq.data()[i])
+        mfc = math.sqrt(dyn_I.data()[i])
         if mfc == 0:
           s = 1
         else:
           s = abs(f_calc.data()[i])/mfc
-        new_data.append(f_obs.data()[i]*s)
+        fo = f_obs.data()[i] * s
+        new_data.append(fo)
       f_obs = f_obs.customized_copy(data=flex.double(new_data))
-      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
-      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664/Fc2Ug)
+      fo2 = f_obs.as_intensity_array()
+
+      weights = self.compute_weights(fo2, f_calc, reset_scale_factor=True)
+      scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
+              / flex.sum(weights * flex.pow2(f_calc_sq.data()))
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
     else:
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
-    if OV.IsEDData() and not OV.IsEDRefinement():
-      #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
-      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
-    print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
+    if OV.IsEDData():
+      f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=scaling_factor)
+    if debug:
+      print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())
     temp = f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
       resolution_factor=1,
       grid_step=resolution,
     )
-    print("Size of Fourier grid: %d x %d x %d" % (temp.n_real()[0], temp.n_real()[1], temp.n_real()[2]))
+    if debug:
+      print(f"Size of Fourier grid: {temp.n_real()[0]:d} x {temp.n_real()[1]:d} x {temp.n_real()[2]:d}")
     return temp
 
   def post_peaks(self, fft_map, max_peaks=5):
@@ -1692,52 +1775,61 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     if log is None: log = sys.stdout
 
+    last = OV.GetParam('snum.refinement.last_R1')
+    try:
+      last =  f"{last:.4f}"
+    except:
+      last = last
+    print_l = []
     pad = 2 - len(str(self.cycles.n_iterations))
-    print("\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural), file=log)
-    #print >> log, " +"
-    print("  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1, file=log)
-    print("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data, file=log)
-
-    print("  +  wR2:      %.4f, GooF:  %.4f" % (
+    print_l.append(f"  ++++++++++++++++++++++++++++++++++++++++++++++++{pad*'+'}++++++ After {self.cycles.n_iterations} CYCLE{plural} +++")
+    print_l.append(f"  +  R1:       {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last}")
+    print_l.append("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data)
+    print_l.append("  +  wR2:      %.4f, GooF:  %.4f" % (
       self.normal_eqns.wR2(),
       self.normal_eqns.goof()
-    ), file=log)
+    ))
 
-    print("  +  Diff:     max=%.2f, min=%.2f, RMS=%.2f" % (
+    print_l.append("  +  Diff:     max=%.2f, min=%.2f, RMS=%.2f" % (
       self.diff_stats.max(),
       self.diff_stats.min(),
       self.diff_stats.sigma()
-    ), file=log)
+    ))
 
     if(self.cycles.n_iterations>0):
       max_shift_site = self.normal_eqns.max_shift_site()
       max_shift_u = self.normal_eqns.max_shift_u()
       max_shift_esd = self.normal_eqns.max_shift_esd
       max_shift_esd_item = self.normal_eqns.max_shift_esd_item
-      print("  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
+      print_l.append("  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s, Max/esd = %.4f for %s" %(
         max_shift_site[0],
         max_shift_site[1].label,
         max_shift_u[0],
         max_shift_u[1].label,
         max_shift_esd,
         max_shift_esd_item
-        ), file=log)
+        ))
     else:
-      self.normal_eqns.analyse_shifts()
-      max_shift_esd = self.normal_eqns.max_shift_esd
-      print("  +  Shifts:   Max/esd = %.4f for %s" %(
-        self.normal_eqns.max_shift_esd,
-        self.normal_eqns.max_shift_esd_item
-        ), file=log)
-
-    pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
+      shifts = ["n/a", "n/a"]
+      if not self.objective_only:
+        self.normal_eqns.analyse_shifts()
+        max_shift_esd = self.normal_eqns.max_shift_esd
+        shifts = ["%.4f" %self.normal_eqns.max_shift_esd,
+                  self.normal_eqns.max_shift_esd_item]
+      print_l.append("  +  Shifts:   Max/esd = %s for %s" %(
+        shifts[0],shifts[1]))
+    print_l.append(f"  +  Data:     {self.data_to_parameter_watch()}")
+    pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints))\
+      - len(str(self.normal_eqns.n_parameters))
     n_restraints = self.normal_eqns.n_restraints +\
       len(self.normal_eqns.origin_fixing_restraint.singular_directions)
-    print("  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
-      %(self.n_constraints, n_restraints, self.normal_eqns.n_parameters, "+"*pad), file=log)
+    print_l.append(f"  ++++++++++++ {self.n_constraints} Constraints | {n_restraints} Restraints | {self.normal_eqns.n_parameters} Parameters +++++++++++++{'+'*pad}")
+    print('\n'.join(print_l), file=log)
 
-    OV.SetParam("snum.refinement.max_shift_over_esd",
-      max_shift_esd)
+    if not self.objective_only:
+      OV.SetParam("snum.refinement.max_shift_over_esd", max_shift_esd)
+    else:
+      OV.SetParam("snum.refinement.max_shift_over_esd", -1)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
@@ -1765,22 +1857,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def show_comprehensive_summary(self, log=None):
     if log is None: log = sys.stdout
     self.show_summary(log)
-    standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
-    if self.twin_components is not None and len(self.twin_components):
-      print(file=log)
-      print("Twin summary:", file=log)
-      print("twin_law  fraction  standard_uncertainty", file=log)
-      for i, twin in enumerate(self.twin_components):
-        if twin.grad:
-          print("%-9s %-9.4f %.4f" %(
-            twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
+    if not self.objective_only:
+      standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+      if self.twin_components is not None and len(self.twin_components):
+        print(file=log)
+        print("Twin summary:", file=log)
+        print("twin_law  fraction  standard_uncertainty", file=log)
+        for i, twin in enumerate(self.twin_components):
+          if twin.grad:
+            print("%-9s %-9.4f %.4f" %(
+              twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
     print(file=log)
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
 
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if self.fo_sq_fc is None or self.fo_sq_fc_merge != merge or self.fo_sq_fc_complete != complete:
-      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function, filtered=filtered, merge=merge)
+      self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function,
+        filtered=filtered, merge=merge, complete=complete)
       self.fo_sq_fc_merge = merge
       self.fo_sq_fc_complete = complete
     return self.fo_sq_fc
@@ -1793,11 +1887,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         normal_eqs.iterations_object = self
         super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
       def do(self):
+        objective_only = len(self.parent.reparametrisation.mapping_to_grad_fc_all) == 0
+        if objective_only and self.n_max_iterations != 0:
+          olx.Echo("Nothing to refine, performing L.S. 0", m="warning")
+          self.n_max_iterations = 0
         if self.n_max_iterations == 0:
           self.n_iterations = 0
-          self.non_linear_ls.build_up()
-          self.non_linear_ls.solve()
-          self.analyse_shifts()
+          self.non_linear_ls.build_up(objective_only=objective_only)
+          if not objective_only:
+            self.non_linear_ls.solve()
+            self.analyse_shifts()
         else: # super(iterations_class, self) somehow does not work here - calls iterations.do()
           iterations_class.do(self)
       @property

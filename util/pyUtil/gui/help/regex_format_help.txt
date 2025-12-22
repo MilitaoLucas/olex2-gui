@@ -1,4 +1,4 @@
-\*\* (.*?)  \*\* :: <b>\1</b>
+\*\* (.*?)  \*\* :: <font size '+1'>\1</font>
 <lb> :: <br>
 \|\- (.*?) \-\| :: <br><br>\1<br><br>
 -> :: <b>&rarr;</b>
@@ -25,7 +25,7 @@ VIMEO :: <zimg src='help_root/images/vimeo_s.png'>
 PAPER :: <zimg src='help_root/images/paper.png'>
 MOL :: <zimg src='help_root/images/mol.png'>
 WEB :: <zimg src='help_root/images/web.png'>
-WIKIPEDIA :: <zimg src='help_root/images/wikipedia_w.png' height='14'>
+WIKIPEDIA :: <zimg src='help_root/images/wikipedia_w.png' height='14'> Wikipedia  
 
 DOLLAR :: $
 

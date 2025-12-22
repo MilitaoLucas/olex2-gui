@@ -136,7 +136,7 @@ routines requiring structure refinement
   smtbx
     .short_caption = Solution & Refinement
     {
-    inelastic_form_factor_table = henke sasaki *brennan
+    resonant_form_factor_table = henke sasaki *brennan
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian electron neutron
       .type = choice
@@ -155,7 +155,7 @@ routines requiring structure refinement
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
+    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 SIR2014 SIR2019 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice
@@ -307,6 +307,8 @@ routines requiring structure refinement
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
         program in a previous cycle
+    weighting_scheme = '*default' 'shelx' 'new_shelx' 'unity' 'sigma' 'stl'
+        .type = choice
     refine_extinction = 1
       .type = int
     refine_extinction_tickbox = False
@@ -1137,9 +1139,13 @@ user
       .type = float
     highlight_colour = "auto"
       .type = str
+    marker = 'circle'
+      .type = str
+    size = '2'
+      .type = int
 
     matplotlib{
-      style = *seaborn-whitegrid fivethirtyeight
+      style = *seaborn-v0_8-whitegrid fivethirtyeight classic seaborn-v0_8-darkgrid
         .type = choice
       colour_map = "tab20c"
         .type = str
@@ -1165,7 +1171,7 @@ user
         .type = str
       title_fontsize = 20
         .type=int
-      subtitle_fontsize = 14
+      subtitle_fontsize = 12
         .type=int
       subplot_top_gap = 0.95
         .type=float
@@ -1245,10 +1251,12 @@ user
         .type = int(value_min=0)
       font_scale = 0.02
         .type = float(value_min=0.0)
+      marker_shape = *circle square
+        .type = choice
       marker_1 {
         fill = (255,150,50)
           .type = colour
-        border = (127,75,25)
+        border = (200,100,75)
           .type = colour
         size_factor = 1./80
           .type = float
@@ -1262,7 +1270,7 @@ user
           .type = float
       }
       marker_3 {
-        fill = (140,182,206)
+        fill = (255,0,0)
           .type = colour
         border = (80,91,103)
           .type = colour
@@ -2419,7 +2427,7 @@ user
       .type = str
     salted_models_list = ""
       .type = str
-    show_ri_fit = False
+    show_partitioning = False
       .type = bool
   }
   Server{

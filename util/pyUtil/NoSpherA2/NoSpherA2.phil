@@ -12,6 +12,10 @@ snum{
       .type = str
     basis_name = "def2-SVP"
       .type = str
+    basis_adv = False
+      .type = bool
+    basis_adv_string = ""
+      .type = str
     becke_accuracy = "Normal"
       .type = str
     Calculate = True
@@ -326,8 +330,8 @@ snum{
       .type = bool
     NoSpherA2_ECP = 1
       .type = int
-    NoSpherA2_RI_FIT = False
-      .type = bool
+    NoSpherA2_Partition = '*Hirshfeld' 'RI-Fit' 'TFVC' 'Becke'
+      .type = choice
     NoSpherA2_SF = True
       .type = bool
     NoSpherA2_debug = False

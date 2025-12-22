@@ -63,9 +63,12 @@ def do_init():
   except Exception as err:
     print("There is a problem with the cctbx: %s" %str(err))
 
+###############################################################################
   stopwatch.start("import variableFunctions")
   import variableFunctions
-  stopwatch.run(variableFunctions.LoadParams)
+  stopwatch.run(variableFunctions.LoadParams,
+                extensions=initpy.get_phil_extensions())
+###############################################################################
 
   stopwatch.start("import olexex")
   import olexex
@@ -110,14 +113,6 @@ def do_init():
     from peanut import Peanut
   except Exception as e:
     olx.Echo(e, m="error")
-  stopwatch.stop()
-
-  stopwatch.start("PhAI")
-  try:
-    import PhAI
-  except Exception as e:
-    if OV.IsDebugging() or OV.IsDeveloping():
-      olx.Echo(e, m="error")
   stopwatch.stop()
 
   if OV.IsDebugging():

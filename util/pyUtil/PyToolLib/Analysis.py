@@ -37,17 +37,12 @@ debug = False
 
 timing = debug
 
-guiParams = OV.GuiParams()
-
 from scitbx.math import erf
 
-global GuiGraphChooserComboExists
 GuiGraphChooserComboExists = False
 
-global PreviousHistoryNode
 PreviousHistoryNode = None
 
-global cache
 cache = {}
 
 if OV.HasGUI():
@@ -55,10 +50,8 @@ if OV.HasGUI():
 
 silent = True
 
-
-
 class Graph(ArgumentParser):
-  def __init__(self):
+  def __init__(self, scale=4):
     super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
     self.marker_params = (self.params.marker_1,
@@ -99,7 +92,22 @@ class Graph(ArgumentParser):
     self.max_y = None
     self.decorated = False
     self.extend_x = True
-    self.scale = 1
+    self.scale = scale
+
+    if OV.HasGUI() == 'True':
+      self.red = OV.GetParam('gui.red').hexadecimal
+      self.orange = OV.GetParam('gui.orange').hexadecimal
+      self.green = OV.GetParam('gui.green').hexadecimal
+      self.blue = OV.GetParam('gui.blue').hexadecimal
+      self.grey = OV.GetParam('gui.grey').hexadecimal
+    else:
+      self.red = "#b40000"
+      self.orange = "#ff8f00"
+      self.green = "#00b400"
+      self.grey = "#999999"
+      self.blue = "#0080ff"
+
+
     ## This used to just be the filename; not so good for mulit-structure CIFs!
     _ = ""
     _ = OV.ModelSrc()
@@ -113,9 +121,10 @@ class Graph(ArgumentParser):
       "TopRightTitle":self.TopRightTitle,
     }
     # added this to fix functionality where it is used!!!
-    self.gui_green = guiParams.green.hexadecimal
+    self.gui_green = self.guiParams.green.hexadecimal
 
-  def plot_function(self, function, locals=None, width=1, n_points=50):
+  def plot_function(self, function, locals=None, width=2, n_points=50, fill="#ababab"):
+    width *= self.scale
     if locals is None:
       locals = {}
     self.get_division_spacings_and_scale()
@@ -140,11 +149,11 @@ class Graph(ArgumentParser):
     delta_y = self.delta_y
     xy_pairs = data.xy_pairs()
     self.function_counter += 1
-    fill = self.function_params[self.function_counter-1].colour.rgb
+    if not fill:
+      fill = self.function_params[self.function_counter-1].colour.rgb
     pixel_coordinates = []
 
     for x_value,y_value in xy_pairs:
-
       if self.reverse_x:
         x = self.bX \
           - (self.boxXoffset
@@ -220,34 +229,34 @@ class Graph(ArgumentParser):
     self.draw.text((250, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
 
   def draw_key(self, keys_to_draw, border=False):
+    shape = self.params.marker_shape
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
-    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60 * self.scale
-    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 18
-    colour = self.fillColour
+    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 18 * self.scale
+    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 10 * self.scale
+    colour = self.pageColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
     if border:
       box = (2,2,boxWidth-2,boxHeight-2)
-      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
-    margin_left = int((boxWidth/4))
-    margin_right = int((boxWidth/4)*3)
+      draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
 
     txt_colour = "#444444"
-    top = 10
+    top = 1 * self.scale
     for key in keys_to_draw:
       key_type = key['type']
       assert key_type in ("function", "marker")
       label = OV.correct_rendered_text(key['label'])
-      left = 0
+      left = 5
       wX, wY = get_text_size(draw, label, self.font_tiny)
       if key_type == "function":
         if "colour" in key:
           fill = key['colour']
         else:
           fill = self.function_params[key['number'] - 1].colour.rgb
-        draw.line((left,top+wY/2,left + 30 * self.scale,top+wY/2),fill=fill,width=2*self.scale)
+        to = top + (wY/2) + 1 * self.scale
+        draw.line((left,to,left + 18 * self.scale,to),fill=fill,width=2*self.scale)
       elif key_type == "marker":
         if "colour" in key:
           marker = self.marker_params[1]
@@ -256,30 +265,39 @@ class Graph(ArgumentParser):
           marker = self.marker_params[key['number'] - 1]
 
         marker_width = int(self.im.size[0])*marker.size_factor
-        draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
-                       fill=marker.fill.rgb, outline=marker.border.rgb)
-      left = 35 * self.scale
+        r =  marker_width / 2
+        if shape == 'square':
+          box =  (left, top+wY/2-r, left+marker_width, top+wY/2 + r)
+          draw.rectangle(box,fill=marker.fill.rgb, outline=marker.border.rgb, width=self.scale)
+        else:
+          le = (left + 3) * self.scale - r
+          to = top + 3 * self.scale
+          box =  (le, to+wY/2-r, le+marker_width, to+wY/2 + r)
+          #box = shift_box(box, r, 0)
+          draw.ellipse(box,fill=marker.fill.rgb, outline=marker.border.rgb, width=self.scale)
+
+      left = left + 22 * self.scale
       draw.text((left,top), label, font=self.font_tiny, fill=txt_colour)
-      top += wY + 10
+      top += wY + 8 * self.scale
 
     return im
 
   def make_x_y_plot(self):
     pass
 
-  def make_empty_graph(self, axis_x=False, draw_title=True, square=False):
+  def make_empty_graph(self, axis_x=False, draw_title=True, square=False,
+                       width=None, height=None):
     from PIL import Image
     from PIL import ImageFont, ImageDraw, ImageChops
-    guiParams = OV.GuiParams()
 
-    self.imX = self.params.size_x
+    self.imX = self.params.size_x if width is None else width
     if self.imX < 100:
       self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     if square == True:
       self.imY = self.imX
       self.square = True
     else:
-      self.imY = self.params.size_y
+      self.imY = self.params.size_y if height is None else height
       self.square = False
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
@@ -305,16 +323,17 @@ class Graph(ArgumentParser):
     self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
-    self.light_grey = guiParams.graph.light_grey.hexadecimal
-    self.grey = guiParams.graph.grey.hexadecimal
-    self.dark_grey = guiParams.graph.grey.hexadecimal
-    self.filenameColour = guiParams.graph.filename_colour.hexadecimal
-    self.titleColour = guiParams.graph.title_colour.hexadecimal
-    self.fillColour = guiParams.graph.fill_colour.hexadecimal
-    self.outlineColour = guiParams.graph.outline_colour.hexadecimal
-    self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
-    self.pageColour = "#ffffff"
-    self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
+    self.light_grey = self.guiParams.graph.light_grey.hexadecimal
+    self.grey = self.guiParams.graph.grey.hexadecimal
+    self.dark_grey = self.guiParams.graph.grey.hexadecimal
+    self.filenameColour = self.guiParams.graph.filename_colour.hexadecimal
+    self.titleColour = self.guiParams.graph.title_colour.hexadecimal
+    self.fillColour = self.guiParams.graph.fill_colour.hexadecimal
+    self.outlineColour = self.guiParams.graph.outline_colour.hexadecimal
+    self.fitlineColour = self.guiParams.graph.fitline_colour.hexadecimal
+    self.pageColour = self.guiParams.graph.page_colour.hexadecimal
+    self.graphBgColour = self.guiParams.graph.graph_bg_colour.hexadecimal
+    self.axislabelColour = self.guiParams.graph.axislabel_colour.hexadecimal
 
     self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
@@ -323,7 +342,8 @@ class Graph(ArgumentParser):
       self.xSpace = 0.04 * self.imX
     self.bTop = round(0.013 * self.imY)
     self.currX = 0
-    self.currY = 0
+    #self.currY = 0 #PY38
+    self.currY = 4  *  self.scale#PY39
     size = ((int(self.imX), int(self.imY)))
 
     im = Image.new('RGB', size, self.pageColour)
@@ -349,13 +369,15 @@ class Graph(ArgumentParser):
       currX, currY = get_text_size(draw, txt, font=self.font_bold_large)
       self.currX += currX
       self.currY += currY
+    else:
+      self.currY = 1 * self.scale
 
     self.yAxisSpace = 5 * self.scale
     self.graphX = self.imX - (self.bSides + self.xSpace)
     self.graph_top = int(self.currY + 0.1 * self.imY) + self.yAxisSpace
     self.graphY = self.imY - 2*self.bTop - self.graph_top
     self.graph_bottom = int(self.graphY + self.currY + 0.03*self.imY - self.yAxisSpace)
-    self.line_width = int(self.imX * 0.002)
+    self.line_width = int(self.imX * 0.0018)
 
     dx = self.imX - 1*self.bSides
     dy = self.graph_bottom
@@ -363,8 +385,8 @@ class Graph(ArgumentParser):
     #if self.line_width > 0:
       #fillColour = (200, 200, 200)
     #else:
-      #fillColour = self.fillColour
-    draw.rectangle(box,  fill=self.fillColour, outline=self.outlineColour, width = 2 * self.scale)
+      #fillColour = self.pageColour
+    draw.rectangle(box,  fill=self.graphBgColour, outline=self.outlineColour, width = 2 * self.scale)
     self.boxX = dx - self.bSides*2 + self.xSpace
     self.boxY = dy - self.currY
     self.boxXoffset = self.bSides+self.xSpace
@@ -409,11 +431,14 @@ class Graph(ArgumentParser):
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True,
                     x_intercept=None, write_text=False, R=None, rotate_text=False,
-                    reverse_x=False, width=2):
+                    reverse_x=False, width=1, colour=None):
     if self.min_x is None: self.get_division_spacings_and_scale()
 
-    width = width * self.scale
+    self.get_division_spacings_and_scale()
 
+    width = width * self.scale
+    if not colour:
+      colour = self.fitlineColour
     if not x_intercept:
       y1 = slope * self.min_x + y_intercept
       y2 = slope * self.max_x + y_intercept
@@ -472,18 +497,25 @@ class Graph(ArgumentParser):
       y1 = self.graph_bottom - float(y1)
       y2 = self.graph_bottom - float(y2)
 
-    adj_x = 2
-    adj_y = 0
+    adj_x = 0 * self.scale
+    adj_y = 1 * self.scale
     if x_intercept:
-      adj_x = 0
-      adj_y = 2
-    self.draw.line((x1+adj_x, y1+adj_y, x2-adj_x, y2-adj_y), width=width, fill=self.fitlineColour)
+      adj_x = 0 * self.scale
+      adj_y = 0 * self.scale
+
+    self.draw.line((x1+adj_x, y1+adj_y, x2-adj_x, y2-adj_y), width=width, fill=colour)
 
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
     txt = "y = %.3fx %s %.3f" %(slope,sign,abs(y_intercept))
 
-    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
+
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small, )
+
+    font = IT.registerFontInstance("DefaultFont", self.font_size_small)
+    a = IT.text_bbox(font=font, text=txt)
+    wX = a[2]
+    wY = a[3]
 
     if write_equation:
       if slope > 0 or (self.reverse_x or self.reverse_y):
@@ -529,20 +561,18 @@ class Graph(ArgumentParser):
         if len(ins) > 2:
           colour=ins[2]
         else: colour=self.axislabelColour
-        bgcolour = self.fillColour
-        #bgcolour = self.fitlineColour
-        new = Image.new('RGB', (wX + 4 * self.scale, wY - 2 * self.scale), bgcolour)
+        new = Image.new('RGB', (wX + 4 * self.scale, wY + 2 * self.scale), self.graphBgColour)
         draw = ImageDraw.Draw(new)
         draw.text((self.scale * 2, - self.scale * 2), text, font=self.font_tiny, fill=colour)
         new = new.rotate(90, expand=2)
         self.im.paste(new, (x, y))
       else:
-        adj_x = 1.55 * wY_axis
+        adj_x = 0.90 * wY_axis
         adj_y = 7
         if x1 > self.max_x*self.scale_x/2:
           adj_x = -wX - 7
         if y1 > self.max_y*self.scale_y/2:
-          adj_y = -20
+          adj_y = -20 * self.scale
         top_left = (x1 + adj_x,y1 + adj_y)
         IT.write_text_to_draw(
           self.draw, text, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
@@ -714,14 +744,18 @@ class Graph(ArgumentParser):
 
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
+    i = 0
     for dataset in list(self.data.values()):
+      idx = dataset.metadata().get("idx", i)
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
         self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives)
+        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx)
+      i += 1
+
     self.draw_x_axis()
     self.draw_y_axis()
 
@@ -858,7 +892,7 @@ class Graph(ArgumentParser):
       dv_ = 5.0
     return dv_ * math.pow(10, round(pow10))
 
-  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
+  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=False):
     top = self.graph_top
     marker_width = 5
     width = self.params.size_x
@@ -939,21 +973,19 @@ class Graph(ArgumentParser):
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
 
 
-  def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
+  def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None,
+                         draw_bar_labels=False, width=None):
     top = self.graph_top
-    marker_width = 5
-    width = self.params.size_x
+    if width is None:
+      width = self.params.size_x
     if width < 100:
       if width < 100:
         width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     height = self.graph_bottom - self.graph_top
-    legend_top = height + 20
-    labels = dataset.metadata().get('labels')
-    y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
-    max_bars = self.params.max_bars
-    all_in_one_history = self.params.all_in_one_history
+    max_bars = self.params_hist.max_bars
+    all_in_one_history = self.params_hist.all_in_one_history
 
     if all_in_one_history:
       bar_width = math.floor((width-10)/n_bars)
@@ -973,10 +1005,9 @@ class Graph(ArgumentParser):
 
     j = 0
     img_no = 0
-    colour = self.fillColour
     for i, xy in enumerate(dataset.xy_pairs()):
       if j == 0:
-        barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=colour)
+        barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=self.pageColour)
         barDraw = ImageDraw.Draw(barImage)
       last = len(dataset.x)
       x_value, y_value = xy
@@ -995,7 +1026,9 @@ class Graph(ArgumentParser):
         bar_top = height - (y_value_scale * (height))
 
       if colour_function is not None:
-        fill = colour_function(y_value_scale)
+        fill, bar_label = colour_function(y_value_scale)
+        draw_bar_labels = False
+
       else:
         fill = (0,0,0)
 
@@ -1004,18 +1037,14 @@ class Graph(ArgumentParser):
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
 
-      outline_colour = self.outlineColour
-
       if self.decorated:
         decorated_fill = OV.GetParam('gui.html.highlight_colour')
-        barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
+        barDraw.rectangle(box, fill=decorated_fill, outline=self.outlineColour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
 
         self.decorated = False
       else:
-        barDraw.rectangle(box, fill=fill, outline=outline_colour)
-        barDraw.rectangle(box, fill=fill, outline=outline_colour)
-
+        barDraw.rectangle(box, fill=fill, outline=self.outlineColour)
 
       if dataset.hrefs is not None:
         href = dataset.hrefs[i]
@@ -1029,7 +1058,9 @@ class Graph(ArgumentParser):
         """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
         % (bar_left, top, bar_right, bar_bottom, href, target))
       if draw_bar_labels:
-        if bar_labels is not None:
+        if bar_label:
+          txt = bar_label
+        elif bar_labels is not None:
           txt = bar_labels[i]
         else:
           txt = "%.3f" %y_value
@@ -1127,7 +1158,7 @@ class Graph(ArgumentParser):
           label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
         except (ValueError, TypeError):
           pass
-        self.draw_legend(label, font_size=self.font_size_small, height_adjust=4)
+        self.draw_legend(label, font_size=self.font_size_small, height_adjust=5)
         OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
         OV.write_to_olex('history-info_%s.htm' %img_no, historyText)
         OV.write_to_olex('history-info.htm', historyText)
@@ -1136,7 +1167,8 @@ class Graph(ArgumentParser):
     if not font_size:
       self.font_size_large
     height = self.graph_bottom - self.graph_top
-    width = self.params.size_x
+    #width = self.params.size_x  #Somehow the the size_x value is double of what the timage is
+    width = self.im.size[0]
     legend_top = height + height_adjust
     legend_bottom = self.graph_bottom + 40
     #m_offset = 5
@@ -1148,10 +1180,10 @@ class Graph(ArgumentParser):
     self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
-    wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size * 1.5)
     x = width - wX - self.bSides
     top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size * 1.5, font_colour=self.axislabelColour)
 
   def draw_info(self, txt, font_size=None):
     #Draws text into top right corner of the plot
@@ -1162,7 +1194,7 @@ class Graph(ArgumentParser):
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     legend_top = self.graph_top + 20
     #legend_bottom = legend_top + 1.2*wY
-    x = width - 1.1*wX - self.bSides
+    x = width - 0.9 *wX - self.bSides
     top_left = (x, legend_top)
     #box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
@@ -1171,24 +1203,22 @@ class Graph(ArgumentParser):
 
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None,
                        hrefs=None, targets=None, lt=None, gt=None, no_negatives=False,
-                       scale=None, colour=None, force_draw=False):
+                       scale=None, colour=None, force_draw=False, counter=0):
+
+    shape = self.params.marker_shape
     log = self.use_log
-    #min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
     delta_x = self.delta_x
     max_y = self.max_y
-    #min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
 
     if colour == None:
       try:
-        marker = self.marker_params[self.dataset_counter]
+        marker = self.marker_params[counter]
       except IndexError:
         marker = self.marker_params[0]
-
-      self.dataset_counter += 1
       fill = marker.fill.rgb
 
     else:
@@ -1286,16 +1316,27 @@ class Graph(ArgumentParser):
       except Exception as err:
         pass
 
-      box = (x,y,x+marker_width,y+marker_width)
-      self.draw.rectangle(box, fill=fill, outline=outline)
+      #if self.omit_hkl:
+        #if indices[i] in self.omit_hkl:
+          #fill = "#ff0000"
+
+      if shape == 'square':
+        box = (x,y,x+marker_width,y+marker_width)
+        self.draw.rectangle(box, fill=fill, outline=outline, width=self.scale)
+      else:
+        r = marker_width / 2
+        box = (x - r, y - r, x + r, y + r)
+        box = shift_box(box, r, 0)
+        self.draw.ellipse(box, fill=fill, outline=outline, width=self.scale)
 
       if self.item == "AutoChem":
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
-                            % (box + (xr, yr)))
+                            % (tuple(v / self.scale for v in box) + (xr, yr)))
 
       if hrefs:
+        box = (x - r, y - r, x + r, y + r)
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (box + (hrefs[i], targets[i])))
+                            % (tuple(v / self.scale for v in box) + (hrefs[i], targets[i])))
 
       else:
         href = ""
@@ -1322,7 +1363,7 @@ class Graph(ArgumentParser):
               target = "Remove OMIT %s" %idx
               href = "OMIT -u %s %s>>spy.make_reflection_graph(%s)" %(options, idx, graph_type)
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (box + (href, target)))
+                            % (tuple(v / self.scale for v in box) + (href, target)))
 
   def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width = 1, colour=None):
     width = width * self.scale
@@ -1459,13 +1500,13 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
-    new = Image.new('RGB', size, self.fillColour)
+    new = Image.new('RGB', size, self.graphBgColour)
     draw = ImageDraw.Draw(new)
     x = 0
-    y = 0
+    y = -3 * self.scale #PY39
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
+    self.im.paste(new, (int(self.xSpace+self.bSides + wY/2 + (3 * self.scale)), int(self.graph_top +wY/2)))
 
   def draw_y_axis_2(self,y_min,y_max, label):
     delta_y = y_max - y_min
@@ -1494,7 +1535,7 @@ class Graph(ArgumentParser):
     format_string = "%5d"
     temp_txt = format_string %y_axis[-1]
     temp_wX, temp_wY = get_text_size(self.draw, temp_txt, font=self.font_small)
-    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX,colour='#ffffff')
+    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX + 4*self.scale ,colour=self.pageColour)
     for item in y_axis:
       val = float(item)
       if val ==0:
@@ -1520,7 +1561,7 @@ class Graph(ArgumentParser):
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         size = (wX,wY)
-        new = Image.new('RGB', size, self.fillColour)
+        new = Image.new('RGB', size, self.pageColour)
         draw = ImageDraw.Draw(new)
         draw.text((0,0),txt,font=self.font_small, fill=self.axislabelColour)
         self.im.paste(new, (int(x),int(y)))
@@ -1533,13 +1574,13 @@ class Graph(ArgumentParser):
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
     size = (wX, wY)
-    new = Image.new('RGB', size, self.fillColour)
+    new = Image.new('RGB', size, self.graphBgColour)
     draw = ImageDraw.Draw(new)
     x = 0
     y = 0
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
-    self.im.paste(new, (int(self.graph_right-1.1*wY), int((self.graph_bottom-self.graph_top)/3)))
+    self.im.paste(new, (int(self.graph_right - 1.5 * wY), int((self.graph_bottom-self.graph_top)/3)))
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -1658,8 +1699,8 @@ class Graph(ArgumentParser):
       #i += 1
 
 class Analysis(Graph):
-  def __init__(self, function=None, param=None):
-    Graph.__init__(self)
+  def __init__(self, function=None, param=None, scale=4):
+    Graph.__init__(self, scale)
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -1682,7 +1723,6 @@ class Analysis(Graph):
     self.fl = []
     self.item = None
     self.use_log = False
-    guiParams = OV.GuiParams()
     self.model = olexex.OlexRefinementModel().model
 
   def run_Analysis(self, f, n_bins=0, method='olex'):
@@ -1859,11 +1899,11 @@ class Analysis(Graph):
     if mouseX < width:
       X = 10
 
-    if not olx.html.IsPopup(pop_name) == "true":
+    if not OV.IsPopup(pop_name):
       pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
       pop_name, htm_location, pop_name, actual_w, actual_h, X, Y)
       olex.m(pstr)
-      olx.html.SetBorders(pop_name,0)
+      OV.SetPopBorder(pop_name,0)
     OV.UpdateHtml(html_name=pop_name, force=True)
 
   def analyse_lst(self):
@@ -2008,7 +2048,7 @@ class PrgAnalysis(Analysis):
   def update_image(self):
     OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
-      olx.html.SetImage(
+      OV.SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
     if self.new_graph:
@@ -2108,7 +2148,7 @@ class ShelXS_graph(PrgAnalysis):
 
 class WilsonPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "wilson"
     self.graphInfo["Title"] = OV.TranslatePhrase("Wilson Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2168,11 +2208,11 @@ class WilsonPlot(Analysis):
       top_left = (left, top)
       IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
 
-      top += 13
+      top += 18 * self.scale
       i += 1
       if i == 2:
         top = top_original
-        left += first_wX * 2
+        left += int(first_wX * 1.5)
     self.im = new
 
   def cctbx_wilson_statistics(self):
@@ -2203,7 +2243,7 @@ class WilsonPlot(Analysis):
     #target_right = (0,255,0)
     middle = boxWidth/2
     box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
-    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
+    draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -2302,7 +2342,7 @@ class WilsonPlot(Analysis):
     val = int((value - begin) / scale)
     txt = chr(8226)
     wX, wY = get_text_size(draw, txt, font=self.font_bold_normal)
-    draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
+    draw.ellipse(((val-int(wX/2), boxTopOffset+3*self.scale),(val+int(wX/2), boxTopOffset+boxHeight-3*self.scale)), fill=(255,235,10))
     draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
     image_location = "%s.png" %("grad")
     OlexVFS.save_image_to_olex(im, image_location,  1)
@@ -2388,7 +2428,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       m_offset = 5
       ## Wipe the legend area
       box = (0,legend_top,width,legend_top + 20)
-      self.draw.rectangle(box, fill=self.fillColour)
+      self.draw.rectangle(box, fill=self.pageColour)
 
       ## Draw CC Legend
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
@@ -2412,7 +2452,7 @@ class ChargeFlippingPlot(PrgAnalysis):
 
 class CumulativeIntensityDistribution(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "cumulative"
     self.graphInfo["Title"] = OV.TranslatePhrase("Cumulative Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
@@ -2476,7 +2516,7 @@ class CumulativeIntensityDistribution(Analysis):
 
 class CompletenessPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "completeness"
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2576,13 +2616,13 @@ class CompletenessPlot(Analysis):
                           'label': OV.TranslatePhrase('Point group')},
                           ))
       self.im.paste(key,
-                    (int(self.graph_left + 10),
-                    int(self.graph_bottom-(key.size[1]+20)))
+                    (int(self.graph_left + 10 *self.scale),
+                    int(self.graph_bottom-(key.size[1] - 20* self.scale)))
                     )
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "sys_absences"
     self.graphInfo["Title"] = OV.TranslatePhrase("Systematic Absences Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
@@ -2617,7 +2657,7 @@ class SystematicAbsencesPlot(Analysis):
 
 class bijvoet_differences_scatter_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "bijvoet_differences_scatter"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2655,7 +2695,7 @@ class bijvoet_differences_scatter_plot(Analysis):
 
 class bijvoet_differences_NPP(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "bijvoet_differences_NPP"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2691,7 +2731,7 @@ class bijvoet_differences_NPP(Analysis):
 
 class Normal_probability_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Normal_probability_plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Normal Probability Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2724,7 +2764,7 @@ class Normal_probability_plot(Analysis):
 
 class Fractal_Dimension(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Fractal_Dimension_Plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Fractal Dimension Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2759,11 +2799,11 @@ class Fractal_Dimension(Analysis):
       self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
-    self.draw_info("e_gross: %8.2f e-\ne_net: %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
+    self.draw_info("e gross: %8.2f e-\ne net:  %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
 
 class MuPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Mu_Plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Mu Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2859,13 +2899,18 @@ class MuPlot(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
+      if wl == wavelength:
+        colour = self.red
+      else:
+        colour = self.fitlineColour
       self.draw_fit_line(slope=0,
                          y_intercept=0,
                          x_intercept=wl,
                          write_equation=False,
                          write_text=self.common_wl_name[i],
                          rotate_text="top_linemiddle",
-                         width = 1)
+                         width = 1,
+                         colour = colour)
 
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
@@ -2881,7 +2926,7 @@ OV.registerFunction(MuPlot)
 
 class AnomDispPlot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "AnomDispPlot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Anomalous Dispersion Plot")
     self.graphInfo["pop_html"] = self.item
@@ -2925,7 +2970,7 @@ class AnomDispPlot(Analysis):
         fp, fdp = a['disp']
         refined_disp.append((a['label'], fp, fdp, a['type']))
     keys = []
-    self.make_empty_graph(axis_x=True)
+    self.make_empty_graph(axis_x = True, square=False)
     self.ax_marker_length = int(self.imX * 0.006)
     wavelength = float(olx.xf.exptl.Radiation())
     refined_data = {}
@@ -2993,13 +3038,18 @@ class AnomDispPlot(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
+      if wl == wavelength:
+        colour = self.red
+      else:
+        colour = self.fitlineColour
       self.draw_fit_line(slope=0,
                          y_intercept=0,
                          x_intercept=wl,
                          write_equation=False,
                          write_text=self.common_wl_name[i],
                          rotate_text="top_linemiddle",
-                         width = 1)
+                         width = 1,
+                         colour=colour)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
                   (int(self.graph_right - (key.size[0] + 10)),
@@ -3015,12 +3065,12 @@ class AnomDispPlot(Analysis):
 
 OV.registerFunction(AnomDispPlot)
 
-
-class Fobs_Fcalc_plot(Analysis):
-  def __init__(self, batch_number=None):
-    Analysis.__init__(self)
-    self.item = "Fobs_Fcalc"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Fobs vs Fcalc")
+class Xobs_Xcalc_plot(Analysis):
+  def __init__(self, F_or_I, batch_number=None):
+    Analysis.__init__(self, scale=4)
+    self.F_or_I = F_or_I
+    self.item = f"{F_or_I}obs_{F_or_I}calc"
+    self.graphInfo["Title"] = OV.TranslatePhrase(f"{F_or_I}obs vs {F_or_I}calc")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
@@ -3033,7 +3083,7 @@ class Fobs_Fcalc_plot(Analysis):
     else:
       self.batch_number = batch_number
     try:
-      self.make_f_obs_f_calc_plot()
+      self.make_x_obs_x_calc_plot()
     except AssertionError as e:
       if str(e) == "model.scatterers().size() > 0":
         print("You need some scatterers to do this!")
@@ -3044,18 +3094,23 @@ class Fobs_Fcalc_plot(Analysis):
     if self.params.fobs_fcalc.output_csv_file:
       self.output_data_as_csv()
 
-  def make_f_obs_f_calc_plot(self):
-    from reflection_statistics import f_obs_vs_f_calc
-    xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
+  def make_x_obs_x_calc_plot(self):
+    if self.F_or_I == "F":
+      from reflection_statistics import f_obs_vs_f_calc
+      xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
+    elif self.F_or_I == "I":
+      from reflection_statistics import I_obs_vs_I_calc
+      xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
+
     self.metadata['shapes'] = []
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
-
+    metadata = {}
     equal_line = {'type':'line',
                    'xy':('0','0','%(max_x)s','%(max_x)s'),
                    'line': {
                      'color': 'rgb(100, 100, 100)',
-                     'width': 1,
+                     'width': 2 * self.scale,
                      'dash':'dashdot'
                    }
                    }
@@ -3063,128 +3118,120 @@ class Fobs_Fcalc_plot(Analysis):
     self.metadata["shapes"].append(equal_line)
 
     ## Included Data
-    metadata = {}
-#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
-#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata["name"] = "Included Data"
-    data = Dataset(
+    metadata["idx"] = 0
+
+    if self.F_or_I == "F":
+      data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
-
-    self.data.setdefault('dataset1', data)
-
-    ## Omitted Data
-    metadata = {}
-    metadata["name"] = "Omitted Data"
-    if xy_plot.f_obs_omitted and xy_plot.f_obs_omitted.size():
-      data_omitted = Dataset(
-        xy_plot.f_calc_omitted, xy_plot.f_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
-      self.data.setdefault('dataset2', data_omitted)
-
-
-    self.make_empty_graph(axis_x = True, square=False)
-    self.plot_function("x", n_points=100)
-    self.draw_pairs()
-    key = self.draw_key(({'type': 'marker',
-                         'number': 1,
-                         'label': OV.TranslatePhrase('Filtered Data')},
-                        {'type':'marker',
-                         'number': 2,
-                         'label': OV.TranslatePhrase('Omitted (cut) Data')},
-                        {'type':'marker',
-                         'number': 3,
-                         'label': OV.TranslatePhrase('Omitted (hkl) Data')}
-                        ))
-    self.im.paste(key,
-                  (int(self.graph_right - (key.size[0] + 40)),
-                   int(self.graph_bottom - (key.size[1] + 40)))
-                  )
-
-class Iobs_Icalc_plot(Analysis):
-  def __init__(self, batch_number=None):
-    Analysis.__init__(self)
-    self.item = "Iobs_Icalc"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Iobs vs Icalc")
-    self.graphInfo["pop_html"] = self.item
-    self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.TopRightTitle
-
-    self.auto_axes = False
-    try:
-      batch_number = int(batch_number)
-    except (ValueError, TypeError):
-      self.batch_number = None
-    else:
-      self.batch_number = batch_number
-    try:
-      self.make_I_obs_I_calc_plot()
-    except AssertionError as e:
-      if str(e) == "model.scatterers().size() > 0":
-        print("You need some scatterers to do this!")
-        return
-      else:
-        raise
-    self.popout()
-    if self.params.iobs_icalc.output_csv_file:
-      self.output_data_as_csv()
-
-  def make_I_obs_I_calc_plot(self):
-    from reflection_statistics import I_obs_vs_I_calc
-    xy_plot = I_obs_vs_I_calc(batch_number=self.batch_number).xy_plot
-    self.metadata['shapes'] = []
-    self.metadata.setdefault("y_label", xy_plot.yLegend)
-    self.metadata.setdefault("x_label", xy_plot.xLegend)
-
-    equal_line = {'type':'line',
-                   'xy':('0','0','%(max_x)s','%(max_x)s'),
-                   'line': {
-                     'color': 'rgb(100, 100, 100)',
-                     'width': 1,
-                     'dash':'dashdot'
-                   }
-                   }
-
-    self.metadata["shapes"].append(equal_line)
-
-    ## Included Data
-    metadata = {}
-#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
-#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
-    metadata["name"] = "Included Data"
-    data = Dataset(
+    elif self.F_or_I == "I":
+      data = Dataset(
       xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
 
     self.data.setdefault('dataset1', data)
 
     ## Omitted Data
     metadata = {}
-    metadata["name"] = "Omitted Data"
-    if xy_plot.I_obs_omitted and xy_plot.I_obs_omitted.size():
-      data_omitted = Dataset(
-        xy_plot.I_calc_omitted, xy_plot.I_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
-      self.data.setdefault('dataset2', data_omitted)
-
-
     self.make_empty_graph(axis_x = True, square=False)
-    self.plot_function("x", n_points=100)
+    have_omitted = False
+    self.omit_str = ""
+    self.omit_hkl_str = ""
+    self.shel_str = ""
+    self.shel_hkl_str = ""
+
+    if self.F_or_I == "F":
+      x_obs_omitted = xy_plot.f_obs_omitted
+      x_calc_omitted = xy_plot.f_calc_omitted
+      x_obs_omitted = xy_plot.f_obs_omitted
+    if self.F_or_I == "I":
+      x_obs_omitted = xy_plot.I_obs_omitted
+      x_calc_omitted = xy_plot.I_calc_omitted
+      x_obs_omitted = xy_plot.I_obs_omitted
+
+    if x_obs_omitted and x_obs_omitted.size():
+      have_omitted = True
+      self.omit_hkl = xy_plot.omit.get('hkl', None)
+      hkl_omit_n = 0
+      if self.omit_hkl:
+        self.omit_hkl_str = f"{len(self.omit_hkl)} reflections"
+        hkl_omit_n = len(self.omit_hkl)
+
+      if len(xy_plot.indices_omitted) - hkl_omit_n > 0:
+        have_omitted = True
+        metadata["name"] = "Omitted Data (OMIT)"
+        metadata["idx"] = 1
+        data_omitted = Dataset(
+          x_calc_omitted,
+          x_obs_omitted,
+          indices=xy_plot.indices_omitted,
+          metadata=metadata)
+        self.data.setdefault('dataset2', data_omitted)
+        self.omit_str =  f"OMIT {xy_plot.omit.get('s')} {xy_plot.omit.get('2theta')} ({len(xy_plot.indices_omitted) - (hkl_omit_n)})".replace(".0", "")
+        self.shel_str =  f"OMIT {xy_plot.omit_shel.get('low')} {xy_plot.omit.get('high')} ({len(xy_plot.indices_omitted) - (hkl_omit_n)})".replace(".0", "")
+        if " 180" in self.omit_str:
+          self.omit_str = ""
+      if self.omit_hkl:
+        metadata = {}
+        have_omitted = True
+        metadata["name"] = "Omitted Data (OMIT HKL)"
+        metadata["idx"] = 2
+        data_omitted = True
+        data_common = self.get_common_data(xy_plot, metadata)
+        self.data.setdefault('dataset3', data_common)
+    self.draw_fit_line(1, 0, colour="#ababab")
     self.draw_pairs()
-    key = self.draw_key(({'type': 'marker',
-                         'number': 1,
-                         'label': OV.TranslatePhrase('Filtered Data')},
-                        {'type':'marker',
-                         'number': 2,
-                         'label': OV.TranslatePhrase('Omitted (cut) Data')},
-                        {'type':'marker',
-                         'number': 3,
-                         'label': OV.TranslatePhrase('Omitted (hkl) Data')}
-                        ))
-    self.im.paste(key,
-                  (int(self.graph_right-(key.size[0]+40)),
-                   int(self.graph_bottom-(key.size[1]+40)))
-                  )
+    if have_omitted:
+      make_data_key(self)
+
+
+  def get_common_data(self, xy_plot, metadata):
+    from cctbx.array_family import flex
+
+    # --- Build a Python set of tuples for quick membership testing ---
+    # If self.omit_hkl is a tuple-of-tuples, using it directly is fine:
+    target_set = set(map(tuple, self.omit_hkl))
+
+    # xy_plot.indices_omitted is presumably a flex.miller_index-like array;
+    # build a boolean mask (Python list) indicating membership in target_set
+    sel_bool_py = [tuple(hkl) in target_set for hkl in xy_plot.indices_omitted]
+
+    # Sanity check: lengths must match
+    assert len(sel_bool_py) == xy_plot.indices_omitted.size(), (
+        "Selection length mismatch: sel length %d vs indices length %d"
+        % (len(sel_bool_py), xy_plot.indices_omitted.size())
+    )
+
+    # Convert to flex.bool OR to flex.size_t of kept positions
+    mask_flex = flex.bool(sel_bool_py)                 # boolean mask
+    keep_positions = [i for i, flag in enumerate(sel_bool_py) if flag]
+    keep_flex = flex.size_t(keep_positions)            # explicit positions
+
+    #print("Total omitted indices (xy_plot):", xy_plot.indices_omitted.size())
+    #print("Number matching omit_hkl (common):", keep_flex.size())
+
+    # --- Use keep_flex (flex.size_t) for selection of miller_index and other arrays ---
+
+    if self.F_or_I == "F":
+      data_common = Dataset(
+          xy_plot.f_calc_omitted.select(keep_flex),
+          xy_plot.f_obs_omitted.select(keep_flex),
+          indices=xy_plot.indices_omitted.select(keep_flex),
+          metadata=metadata
+      )
+
+    elif self.F_or_I == "I":
+      data_common = Dataset(
+          xy_plot.I_calc_omitted.select(keep_flex),
+          xy_plot.I_obs_omitted.select(keep_flex),
+          indices=xy_plot.indices_omitted.select(keep_flex),
+          metadata=metadata
+      )
+
+    return data_common
 
 class Fobs_over_Fcalc_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "Fobs_over_Fcalc"
     self.graphInfo["Title"] = OV.TranslatePhrase("Fobs/Fcalc vs resolution")
     self.graphInfo["pop_html"] = self.item
@@ -3233,7 +3280,7 @@ class Fobs_over_Fcalc_plot(Analysis):
 
 class scale_factor_vs_resolution_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "scale_factor_vs_resolution"
     self.graphInfo["Title"] = OV.TranslatePhrase("Scale factor vs resolution")
     self.graphInfo["pop_html"] = self.item
@@ -3272,7 +3319,7 @@ class scale_factor_vs_resolution_plot(Analysis):
 
 class item_vs_resolution_plot(Analysis):
   def __init__(self, item):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = item
     params = getattr(self.params, self.item)
 
@@ -3328,7 +3375,7 @@ class item_vs_resolution_plot(Analysis):
                    'xy':('%(min_x)s','2','%(max_x)s','2'),
                    'line': {
                      'color': 'rgb(255, 100, 100)',
-                     'width': 1,
+                     'width': 1 * self.scale,
                      'dash':'dashdot'
                    }
                    }
@@ -3337,7 +3384,7 @@ class item_vs_resolution_plot(Analysis):
                    'xy':('50', '%(min_y)s', '50', '%(max_y)s'),
                    'line': {
                      'color': 'rgb(100, 100, 100)',
-                     'width': 1,
+                     'width': 1 * self.scale,
                      'dash':'dashdot'
                    }
                    }
@@ -3438,7 +3485,9 @@ class item_vs_resolution_plot(Analysis):
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
-        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)", reverse_x=reverse_x)
+        
+        write_text = IT.get_unicode_characters("3 sigma line (noise below, data above)")
+        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text=write_text, reverse_x=reverse_x)
         self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "R_merge /%":
         self.draw_data_points(
@@ -3450,7 +3499,9 @@ class item_vs_resolution_plot(Analysis):
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)
-        self.draw_fit_line(slope=0, y_intercept=0.95, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
+
+        self.draw_fit_line(slope=0, y_intercept=0.75, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
+
         self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
       else:
         if plot_reflection_count:
@@ -3468,7 +3519,7 @@ class item_vs_resolution_plot(Analysis):
     else:
       self.draw_y_axis()
     if plot_reflection_count:
-      self.draw_y_axis_2(0,max_y,"Nr. uniq. Refln.")
+      self.draw_y_axis_2(0,max_y,"Number of unique Reflections")
     #self.draw_legend("test")
 
     #self.draw_pairs(reverse_x=reverse_x, lt=3)
@@ -3478,7 +3529,7 @@ class item_vs_resolution_plot(Analysis):
 
 class X_Y_plot(Analysis):
   def __init__(self):
-    Analysis.__init__(self)
+    Analysis.__init__(self, scale=4)
     self.item = "X_Y_plot"
     self.series = []
     print("Good things will come to those who wait")
@@ -3506,8 +3557,8 @@ class X_Y_plot(Analysis):
 class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
-    Analysis.__init__(self)
-    self.params = OV.Params().user.graphs.program_analysis
+    Analysis.__init__(self, scale=1)
+    self.params_hist = OV.Params().user.graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
@@ -3539,11 +3590,9 @@ class HistoryGraph(Analysis):
     n_bars = len(bars)
     #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     width = IT.skin_width_table - int(OV.GetParam('gui.html.table_firstcol_width')/2)
-    size = (width, 100)
-    self.params.size_x, self.params.size_y = size
-    self.make_empty_graph(draw_title=False)
+    self.make_empty_graph(draw_title=False, width=width, height=100)
 
-    y_scale_factor = self.params.y_scale_factor
+    y_scale_factor = self.params_hist.y_scale_factor
 
     if len(bars) > 0:
       x = []
@@ -3558,17 +3607,18 @@ class HistoryGraph(Analysis):
       data = Dataset(x, y, hrefs=hrefs, targets=targets)
       self.draw_history_bars(dataset=data, y_scale_factor=y_scale_factor,
                      colour_function=self.get_bar_colours,
-                     draw_bar_labels=False)
+                     draw_bar_labels=False, width=width)
 
   def get_bar_colours(self, bar_height):
-    factor = self.params.y_scale_factor
+    factor = self.params_hist.y_scale_factor
+    text = ""
     if bar_height == factor:
-      fill = (139, 0, 204)
+      fill = (200, 100, 204)
+      text = "Solution"
     else:
       fill = (int(self.red*bar_height), int(self.green*(1.3-bar_height)), self.blue)
     self.i_bar += 1
-    return fill
-
+    return fill, text
 
 class Dataset(object):
   def __init__(self, x=None, y=None, indices=None, sigmas=None,
@@ -3604,8 +3654,7 @@ OV.registerFunction(WilsonPlot)
 OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
-OV.registerFunction(Fobs_Fcalc_plot)
-OV.registerFunction(Iobs_Icalc_plot)
+OV.registerFunction(Xobs_Xcalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(item_vs_resolution_plot)
@@ -3619,8 +3668,8 @@ def array_scalar_multiplication(array, multiplier):
 
 
 def makeReflectionGraphOptions(graph, name):
-  guiParams = OV.GuiParams()
   ### This is assuming that there are no more than FOUR option controls:
+  guiParams = OV.GuiParams()
   width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/4
   value = graph.short_caption
   options_gui = []
@@ -3703,7 +3752,7 @@ def makeReflectionGraphGui():
 
   if GuiGraphChooserComboExists:
     try:
-      value = OV.GetValue('SET_REFLECTION_STATISTICS')
+      value = OV.GetControlValue('SET_REFLECTION_STATISTICS')
     except:
       value = None
   if not value:
@@ -3799,8 +3848,8 @@ def make_reflection_graph(name):
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
            'systematic_absences': SystematicAbsencesPlot,
-           'fobs_fcalc': Fobs_Fcalc_plot,
-           'iobs_icalc': Iobs_Icalc_plot,
+           'fobs_fcalc': (Xobs_Xcalc_plot, "F"),
+           'iobs_icalc': (Xobs_Xcalc_plot, "I"),
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
@@ -4146,7 +4195,8 @@ class HealthOfStructure():
       else:
         l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','hooft_str']
         if not OV.GetParam('snum.refinement.hooft_str'):
-          l.remove("hooft_str")
+          if not OV.GetHeaderParam('ED.z.value'):
+            l.remove("hooft_str")
     else:
       self.scope = "hkl"
       ## If there is no CIF information and no hkl file, we don't have stats, but still have {'IsCentrosymmetric} as a single item
@@ -4175,20 +4225,23 @@ class HealthOfStructure():
           value = value[0]
       elif self.scope == "refinement":
         if item == "hooft_str":
-          hooft_src = "Flack"
-          if item == 'hooft_str':
-            try:
-              value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
-              value = olx.Cif('_refine_ls_abs_structure_Flack')
-              _ = olx.Cif('_refine_ls_abs_structure_details')
+          if OV.IsEDData():
+            OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), ".")
+          else:
+            hooft_src = "Flack"
+            if item == 'hooft_str':
+              try:
+                value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
+                value = olx.Cif('_refine_ls_abs_structure_Flack')
+                _ = olx.Cif('_refine_ls_abs_structure_details')
 
-              if "parsons" in _.lower():
-                hooft_src = "Parsons"
-              elif "hooft" in _.lower():
-                hooft_src = "Hooft"
-              OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
-            except:
-              value = OV.GetParam('snum.refinement.%s' %item)
+                if "parsons" in _.lower():
+                  hooft_src = "Parsons"
+                elif "hooft" in _.lower():
+                  hooft_src = "Hooft"
+                OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
+              except:
+                value = OV.GetParam('snum.refinement.%s' %item)
 
         if self.is_CIF:
           try:
@@ -4234,46 +4287,67 @@ class HealthOfStructure():
       bg_colour = None
       flack_esd_f = 0
       if item == "hooft_str":
-        if "(" not in str(value):
-          value = str(value) + "()"
-        flack_val = value.split("(")[0]
-        flack_esd = value.split("(")[1].strip(")")
+        if OV.IsEDData():
+          #value = OV.GetParam('snum.refinement.hooft_str', "ED")
+          value = OV.GetHeaderParam('ED.z.value', 'ED')
+          if not value:
+            value = "ED"
+          if value == "ED" or "(" in value:
+            bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
+          else:
+            _ = float(value)
+            if _ < 1:
+              bg_colour = OV.GetParam('gui.red').hexadecimal
+            elif _ < 3:
+              bg_colour = OV.GetParam('gui.orange').hexadecimal
+            elif _ < 5:
+              bg_colour = OV.GetParam('gui.green').hexadecimal
+            else:
+              bg_colour = OV.GetParam('gui.dark_green').hexadecimal
+            value = f"{_:.2f}"
+            display = "Z Score"
 
-        if len(flack_val.strip("-")) == 1:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("%s" %flack_esd)
-
-        if len(flack_val.strip("-")) == 3:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
-
-        elif len(flack_val.strip("-")) == 4:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.0%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("0.%s" %flack_esd)
-
-        elif len(flack_val.strip("-")) == 5:
-          if len(flack_esd) == 1:
-            flack_esd_f = float("0.00%s" %flack_esd)
-          elif len(flack_esd) == 2:
-            flack_esd_f = float("0.0%s" %flack_esd)
-
-        bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
-
-        if len(flack_esd) == 1:
-          _ = 0.75
         else:
-          _ = 0.63
+          if "(" not in str(value):
+            value = str(value) + "()"
+          flack_val = value.split("(")[0]
+          flack_esd = value.split("(")[1].strip(")")
 
-        if len(flack_esd) == 0:
-          bg_val = "#000000"
-          bg_esd = "#000000"
-        else:
-          bg_val = self.get_bg_colour('flack_val', flack_val)
-        bg_colour = (bg_val,_,bg_esd)
+          if len(flack_val.strip("-")) == 1:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("%s" %flack_esd)
+
+          if len(flack_val.strip("-")) == 3:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
+
+          elif len(flack_val.strip("-")) == 4:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.0%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("0.%s" %flack_esd)
+
+          elif len(flack_val.strip("-")) == 5:
+            if len(flack_esd) == 1:
+              flack_esd_f = float("0.00%s" %flack_esd)
+            elif len(flack_esd) == 2:
+              flack_esd_f = float("0.0%s" %flack_esd)
+
+          bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
+
+          if len(flack_esd) == 1:
+            _ = 0.75
+          else:
+            _ = 0.63
+
+          if len(flack_esd) == 0:
+            bg_val = "#000000"
+            bg_esd = "#000000"
+          else:
+            bg_val = self.get_bg_colour('flack_val', flack_val)
+          bg_colour = (bg_val,_,bg_esd)
 
 
       if not bg_colour:
@@ -4325,6 +4399,8 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
+        elif raw_val is None or int(raw_val) < 0:
+          have_null = True
 
       if have_null:
         bg_colour = "#555555"
@@ -4409,8 +4485,6 @@ class HealthOfStructure():
     cache_image_large = self.im_cache.get(cache_entry_large,None)
 
     if cache_image and cache_image_large:
-      if debug:
-        print("HOS from Cache: %s" %cache_entry)
       im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
       OlexVFS.save_image_to_olex(im, item, 0)
       return txt
@@ -4444,13 +4518,15 @@ class HealthOfStructure():
 
     top = OV.get_diag('hkl.%s.top' %item)
 
-
     if item == "hooft_str":
-      x = boxWidth * second_colour_begin
-      box = (x,0,boxWidth,boxHeight)
-      fill = second_colour
-      draw.rectangle(box, fill=fill)
-      value_display = value_display.replace("0.",".")
+      if OV.IsEDData():
+        pass
+      else:
+        x = boxWidth * second_colour_begin
+        box = (x,0,boxWidth,boxHeight)
+        fill = second_colour
+        draw.rectangle(box, fill=fill)
+        value_display = value_display.replace("0.",".")
 
     if item == "Completeness":
       laue_name = 'Completeness_laue_full'
@@ -4546,6 +4622,15 @@ class HealthOfStructure():
       except:
         pass
 
+    if item == "hooft_str":
+      if OV.IsEDData():
+        if value_raw != "ED" and value_raw != 0:
+          _ = OV.GetHeaderParam('ED.z.deltaR1', '')
+          if _:
+            _ = _.replace("-", "")
+            value_display_extra = f"DeltaR={float(_):.2f}%"
+            value_display_extra = IT.get_unicode_characters(value_display_extra)
+
     if item == "MinD":
 #      fill = self.get_bg_colour(item, value_raw)
 #      fill = '#555555'
@@ -4604,4 +4689,19 @@ def title_replace(title):
   title = title.replace("_", "-")
   return title
 
+def shift_box(box, dx, dy):
+  x0, y0, x1, y1 = box
+  return (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
 
+def make_data_key(self):
+  l = [{'type': 'marker','number': 1,'label': OV.TranslatePhrase('Used Data')}]
+  if self.omit_str:
+    l.append({'type':'marker','number': 2,'label': f"{self.omit_str}"})
+  if self.omit_hkl_str:
+    l.append({'type':'marker','number': 3,'label': f"{self.omit_hkl_str}"})
+  if self.omit_str or self.omit_hkl_str:
+    key = self.draw_key(l)
+    self.im.paste(key,
+                  (int(self.graph_right - (key.size[0] + 5 * self.scale)),
+                   int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
+                  )

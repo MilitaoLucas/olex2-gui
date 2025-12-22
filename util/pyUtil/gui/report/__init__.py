@@ -30,7 +30,7 @@ class publication:
   def OnPersonChange(self, box, param=None, person_id=None):
     import userDictionaries
     from  gui.db import userdb
-    #pid = int(olx.html.GetValue(box))
+    #pid = int(OV.GetControlValue(box))
     new = False
     if person_id:
       person = userdb.db.getPerson(int(person_id))
@@ -40,7 +40,7 @@ class publication:
     if person:
       rv = person.get_display_name()
       if new:
-        olx.html.SetValue(box, rv)
+        OV.SetControlValue(box, rv)
       if param:
         OV.SetParam(param, person.id)
       return rv
@@ -61,12 +61,12 @@ class publication:
         OV.set_cif_item(key, value)
 
   def OnPersonInfoChange(self, person_box_name, item, box_name):
-    value = olx.html.GetValue(box_name).strip()
+    value = OV.GetControlValue(box_name).strip()
     self.ChangePersonInfo(
-      olx.html.GetValue(person_box_name),
+      OV.GetControlValue(person_box_name),
       item,
       value)
-    olx.html.SetBG(box_name, BGColorForValue(value))
+    OV.SetControlBG(box_name, BGColorForValue(value))
 
   def AddNameToAuthorList(self, newName):
     oldValue = OV.GetParam("snum.metacif.publ_author_names")
@@ -91,7 +91,7 @@ class publication:
   def OnAddNameToAuthorList(self, box_name,person_id=None):
     value = self.OnPersonChange(box_name, person_id=person_id)
     if self.AddNameToAuthorList(value):
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def DisplayMergeList(self):
     ciflist = OV.GetCifMergeFilesList()
@@ -196,19 +196,19 @@ def ResolvePrograms():
   olx.Popup(pop_name, olx.BaseDir() + "/etc/gui/report-resolve-programs.htm",
    t="Missing data", b="tc",
    x=sz[0] + w//2 + sw//2, y=sz[1] + h//2 - sh//2, w=sw, h=sh, s=True)
-  res = olx.html.ShowModal(pop_name)
+  res = OV.ShowModal(pop_name)
   if not res or int(res) == 1:
     return False
   if hs.active_child_node:
     if olex_gui.IsControl('solution_method', pop_name):
       hs.active_child_node.is_solution = True
-      hs.active_child_node.program = olx.html.GetValue("%s.solution_program" %pop_name)
-      hs.active_child_node.method = olx.html.GetValue("%s.solution_method" %pop_name)
+      hs.active_child_node.program = OV.GetControlValue("%s.solution_program" %pop_name)
+      hs.active_child_node.method = OV.GetControlValue("%s.solution_method" %pop_name)
     if olex_gui.IsControl('refinement_method', pop_name):
       if hs.active_node.is_solution:
         History.hist.create_history()
-      hs.active_node.program = olx.html.GetValue("%s.refinement_program" %pop_name)
-      hs.active_node.method = olx.html.GetValue("%s.refinement_method" %pop_name)
+      hs.active_node.program = OV.GetControlValue("%s.refinement_program" %pop_name)
+      hs.active_node.method = OV.GetControlValue("%s.refinement_method" %pop_name)
     History.make_history_bars()
   return True
 
@@ -235,8 +235,8 @@ def play_crystal_images():
     if idx >= len(imagelist):
       idx = 0
     im_path = get_crystal_image(imagelist[idx])
-    olx.html.SetImage('CRYSTAL_IMAGE',im_path)
-    olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', imagelist[idx])
+    OV.SetImage('CRYSTAL_IMAGE',im_path)
+    OV.SetControlValue('CURRENT_CRYSTAL_IMAGE', imagelist[idx])
     OV.Refresh()
 OV.registerFunction(play_crystal_images, False, 'gui.report')
 
@@ -253,8 +253,8 @@ def advance_crystal_image(direction='forward'):
         else:
           p = imagelist[0]
         OV.SetParam('snum.report.crystal_image',p)
-        olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
-        olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)
+        OV.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
+        OV.SetControlValue('CURRENT_CRYSTAL_IMAGE', p)
         return
       else:
         if i != 1:
@@ -262,8 +262,8 @@ def advance_crystal_image(direction='forward'):
         else:
           p = imagelist[len(imagelist)-1]
         OV.SetParam('snum.report.crystal_image',p)
-        olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
-        olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)
+        OV.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
+        OV.SetControlValue('CURRENT_CRYSTAL_IMAGE', p)
         return
     else:
       continue

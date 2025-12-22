@@ -34,8 +34,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       self.olex_gui = olex_gui
     self.paramStack = ParamStack()
 
+  #this is used only in DP - consider replacing!
   def GetValue(self, control_name):
-    retVal = olx.html.GetValue(control_name)
+    retVal = OV.GetControlValue(control_name)
     return retVal
 
   def SetVar(self,variable,value):
@@ -108,9 +109,20 @@ class OlexFunctions(guiFunctions.GuiFunctions):
   def GetCifMergeFilesList(self):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
+  def GetHeaderParamBool(self, param, default=None) -> bool:
+    rv = self.GetHeaderParam(param, default)
+    if type(rv) == bool:
+      return rv
+    if rv and rv.lower() == 'true':
+      return True
+    return False
+
+  def SetHeaderParam(self, param, value):
+    olx.xf.rm.StoreParam(param, value)
+
   def GetHeaderParam(self, param, default=None, src=None):
     if src == None:
-      src =  self.GetRefinementModel(False)['Generic']
+      src = olex_core.GetStoredParams()
     if src is None:
       return default
     toks = param.split(".")
@@ -126,6 +138,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       if src is None:
         return default
     return default
+
 
   def GetParam(self, variable, default=None, get_list=False):
     retVal = default
@@ -169,27 +182,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return retVal
 
   @gui_only()
-  def HtmlGetValue(self, control, default=None):
-    '''
-    returns the value of a html control.
-    returns provided default value if control is empty.
-
-    :param control: html control element
-    :param default: returned value if olx.html.GetValue() returns false
-    '''
-    val = olx.html.GetValue(control)
-    retVal = default
-    if val:
-      retVal = val
-    return retVal
-
   def set_bond_thicknes(self, control, default=100):
     '''
     sets the molecule bond thickness. Invalid values e.g. too small, too large or
     containing characters are reset to default.
     The bond radius slider SLIDE_BRAD is set to the value simultaneously.
     '''
-    value = olx.html.GetValue(control)
+    value = OV.GetControlValue(control)
     default = float(default)
     if value:
       try:
@@ -200,11 +199,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       value = float(value)
       if value > 600:
         value = default
-        olx.html.SetValue('BRADValue', int(value))
+        OV.SetControlValue('BRADValue', int(value))
       if value < 10 or value == 0:
         value = 10.0
       OV.SetParam('user.bonds.thickness', value)
-      olx.html.SetValue('SLIDE_BZOOM', value/10)
+      OV.SetControlValue('SLIDE_BZOOM', value/10)
       OV.cmd('brad {}'.format(value/100))
     else:
       return
@@ -367,16 +366,16 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       OV.SetParam('snum.refinement.manual_q_peak_override', 0)
       max_peaks = auto_peaks
       if OV.IsControl(ctrl_name):
-        olx.html.SetBG(ctrl_name,OV.GetParam('gui.green').hexadecimal)
-        olx.html.SetFG(ctrl_name,'#ffffff')
-        olx.html.SetValue(ctrl_name,0)
+        OV.SetControlBG(ctrl_name,OV.GetParam('gui.green').hexadecimal, check=False)
+        OV.SetControlFG(ctrl_name,'#ffffff', check=False)
+        OV.SetControlValue(ctrl_name,0, check=False)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
-      OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
+      OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks, check=False)
       if OV.IsControl(ctrl_name):
-        olx.html.SetBG(ctrl_name,OV.GetParam('gui.red').hexadecimal)
-        olx.html.SetFG(ctrl_name, '#ffffff')
-        olx.html.SetValue(ctrl_name,max_peaks)
+        OV.SetControlBG(ctrl_name,OV.GetParam('gui.red').hexadecimal, check=False)
+        OV.SetControlFG(ctrl_name, '#ffffff', check=False)
+        OV.SetControlValue(ctrl_name,max_peaks, check=False)
 
     try:
       import programSettings
@@ -603,16 +602,12 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     path = path.strip('"')
     path = '"%s"' %path
     olex.m('@reap %s' %path)
-    if OV.HasGUI():
+    if self.HasGUI():
       olex.m('spy.run_skin sNumTitle')
-      OV.UpdateHtml()
+      self.UpdateHtml()
 
   def Reset(self):
     olx.Reset()
-
-  @gui_only()
-  def htmlUpdate(self):
-    olex.m("html.Update")
 
   @gui_only()
   def htmlPanelWidth(self):
@@ -624,7 +619,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       return
     fader = self.FindValue('gui_use_fader')
     try:
-      if OV.HasGUI():
+      if self.HasGUI():
         if fader == 'true':
           olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
         else:
@@ -632,7 +627,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         import gui
         olex.m('spy.run_skin sNumTitle')
         if update_gui:
-          OV.UpdateHtml()
+          self.UpdateHtml()
     except Exception as ex:
       print("An error occured whilst trying to reload %s/%s" %(path, file), file=sys.stderr)
       sys.stderr.formatExceptionInfo()
@@ -911,6 +906,31 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
     #v = OV.GetParam(f"user.diagnostics_ed.{param}") if OV.IsEDData() else OV.GetParam(f"user.diagnostics.{param}")
 
+  def IsAcentric(self):
+    from cctbx import sgtbx
+    try:
+      space_group = sgtbx.space_group(str(olx.xf.au.GetCellSymm("hall")))
+      return not space_group.is_centric()
+    except:
+      return False
+
+  def IsChiral(self):
+    from cctbx import sgtbx
+    try:
+      space_group = sgtbx.space_group(str(olx.xf.au.GetCellSymm("hall")))
+      return space_group.is_chiral()
+    except:
+      return False
+
+  def GetStoredParameter(self, keys):
+    from functools import reduce
+    import operator
+    data = olex_core.GetStoredParams()
+    if not data:
+      return
+    value = reduce(operator.getitem, keys.split('.'), data)
+    retVal = True if value.lower() == 'true' else False if value.lower() == 'false' else value
+    return retVal
 
   def IsEDData(self):
     try:
@@ -1155,23 +1175,24 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     rFile.close()
     return crystal_data
 
+  @gui_only()
   def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
-    pop_name=OV.GetParam('%s.name' %phil_path)
-    htm=OV.GetParam('%s.%s' %(phil_path,htm))
-    width=OV.GetParam('%s.width' %phil_path)
-    height=OV.GetParam('%s.height' %phil_path)
-    auto_height_constant=OV.GetParam('%s.auto_height_constant' %phil_path)
-    auto_height_line=OV.GetParam('%s.auto_height_line' %phil_path)
-    position=OV.GetParam('%s.position' %phil_path)
-    x=OV.GetParam('%s.x' %phil_path)
-    y=OV.GetParam('%s.y' %phil_path)
-    border=OV.GetParam('%s.border' %phil_path)
+    pop_name = self.GetParam('%s.name' %phil_path)
+    htm = self.GetParam('%s.%s' %(phil_path,htm))
+    width = self.GetParam('%s.width' %phil_path)
+    height = self.GetParam('%s.height' %phil_path)
+    auto_height_constant = self.GetParam('%s.auto_height_constant' %phil_path)
+    auto_height_line = self.GetParam('%s.auto_height_line' %phil_path)
+    position = self.GetParam('%s.position' %phil_path)
+    x = self.GetParam('%s.x' %phil_path)
+    y = self.GetParam('%s.y' %phil_path)
+    border = self.GetParam('%s.border' %phil_path)
     if x is None: x = 0
     if y is None: y = 0
-    htm = r"%s%s" %(OV.BaseDir(), htm)
+    htm = r"%s%s" %(self.BaseDir(), htm)
     htm = os.path.normpath(htm.replace('\\', '/'))
     if not os.path.exists(htm):
-      OV.write_to_olex('generalPop.htm',htm)
+      self.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
       t = htm
     else:
@@ -1186,11 +1207,12 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     if position == "center":
       import gui
       x,y = gui.GetBoxPosition(width, height)
-    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
+      pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,border)
+    OV.SetPopBorder(pop_name,border)
     OV.cmd(pstr)
-    olx.html.SetBorders(pop_name,border)
+    OV.SetPopBorder(pop_name,border)
 
   def getCompatibleProgramName(self, name):
     prgs = {'ShelXS-2013' : 'ShelXS',
@@ -1279,7 +1301,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
           if env.initialised:
             print("Successfully initialised OpenBlas from %s:" %files[0])
             print(env.build_config)
-            return True
+      return env.initialised
     except Exception as e:
       print("Could not initialise OpenBlas: %s" %e)
       return False
@@ -1430,13 +1452,12 @@ class ParamStack():
       OV.SetParam(v[0], v[1])
       OV.SetParam(v[2], v[3])
 
-
+# some of the GuiFunctions registered in the constructor
 OV = OlexFunctions()
 OV.registerFunction(GetFormattedCompilationInfo)
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.GetChoices)
 OV.registerFunction(OV.SetParam)
-OV.registerFunction(OV.HtmlGetValue)
 OV.registerFunction(OV.set_bond_thicknes)
 OV.registerFunction(OV.set_cif_item)
 OV.registerFunction(OV.get_cif_item)
@@ -1453,6 +1474,9 @@ OV.registerFunction(OV.GetTag)
 OV.registerFunction(OV.GetBaseTag)
 OV.registerFunction(OV.set_refinement_program)
 OV.registerFunction(OV.set_solution_program)
+OV.registerFunction(OV.GetStoredParameter)
+OV.registerFunction(OV.IsChiral)
+OV.registerFunction(OV.IsAcentric)
 OV.registerFunction(OV.IsEDData)
 OV.registerFunction(OV.IsDynamic, False, 'gui')
 OV.registerFunction(OV.IsEDRefinement, False, 'gui')
@@ -1462,3 +1486,6 @@ OV.registerFunction(OV.SetMaxPeaks)
 OV.registerFunction(OV.have_linked_occu)
 OV.registerFunction(OV.IsDebugging)
 OV.registerFunction(OV.IsDeveloping)
+OV.registerFunction(OV.GetHeaderParam)
+OV.registerFunction(OV.GetHeaderParamBool)
+OV.registerFunction(OV.SetHeaderParam)

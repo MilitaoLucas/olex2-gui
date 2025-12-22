@@ -227,6 +227,7 @@ class OlexRefinementModel(object):
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
           'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
 
+  adp_constraints = set(('eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'))
 
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
@@ -244,7 +245,6 @@ class OlexRefinementModel(object):
           else:
             nl = "%s_%s" %(atom['label'], residue['number'])
           atom['label'] = nl
-        element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
     vars = olex_refinement_model['variables']['variables']
     if len(vars) > 0:
@@ -329,8 +329,9 @@ class OlexRefinementModel(object):
     from cctbx import sgtbx
     from smtbx.refinement.constraints import adp, site
     redundant_adp = {}
-    fixed_adp = []
+    fixed_adp = [] # fixed or constrained
     fixed_xyz = []
+    adp_atoms = set()
     for i, a in enumerate(self._atoms):
       behaviour_of_variable = [True]*12
       fixed_vars = self._fixed_variables.get(i)
@@ -341,6 +342,17 @@ class OlexRefinementModel(object):
         fixed_xyz.append(i)
       if not all(behaviour_of_variable[-6:]):
         fixed_adp.append(i)
+      if a.get('adp') != None:
+        adp_atoms.add(i)
+
+    for adp_constraint in (self.adp_constraints):
+      for constraint in self.model[adp_constraint]:
+        if adp_constraint.startswith('olex2'):
+          fixed_adp.append(constraint[0])
+          fixed_adp.append(constraint[1])
+        else:
+          for i in constraint['atoms']:
+            fixed_adp.append(i[1])
 
     if shared_parameters: # filter out shared ADP
       for sp in shared_parameters:
@@ -358,16 +370,16 @@ class OlexRefinementModel(object):
       filtered_restraints = []
       for restraint in restraints:
         restraint_type = self.restraint_types[shelxl_restraint]
-        if self.is_adp_restraint(shelxl_restraint):
+        if self.is_adp_restraint(restraint_type):
           i_seqs = [i[0] for i in restraint['atoms']]
           if not i_seqs:
             if restrained_set:
-              i_seqs = set(range(1, len(self._atoms))) - restrained_set - set(fixed_adp)
+              i_seqs = adp_atoms - restrained_set - set(fixed_adp)
               if not i_seqs:
                 continue
               restraint['atoms'] = [(x, None) for x in i_seqs]
             elif fixed_adp:
-              all_atoms = set(range(1, len(self._atoms))) - set(fixed_adp)
+              all_atoms = adp_atoms - set(fixed_adp)
               if not all_atoms:
                 continue
               restraint['atoms'] = [(x, None) for x in all_atoms]
@@ -576,8 +588,6 @@ class OlexRefinementModel(object):
 
 
   def constraints_iterator(self):
-    from libtbx.utils import flat_list
-    from cctbx import sgtbx
     for shelxl_constraint in (self.constraint_types):
       for constraint in self.model[shelxl_constraint]:
         constraint_type = self.constraint_types.get(shelxl_constraint)
@@ -702,7 +712,7 @@ if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
 def SetFormulaFromInput():
-  formula = OV.GetValue('SET_FORMULA')
+  formula = OV.GetControlValue('SET_FORMULA')
   if not formula:
     return
   f = formula.split()
@@ -761,8 +771,8 @@ def get_auto_q_peaks():
   manual_q = OV.GetParam('snum.refinement.manual_q_peak_override',0)
   if manual_q:
     if OV.IsControl(ctrl_name):
-      olx.html.SetBG(ctrl_name,'#ffeeee')
-      olx.html.SetValue(ctrl_name,manual_q)
+      OV.SetControlBG(ctrl_name,'#ffeeee', check=False)
+      OV.SetControlValue(ctrl_name,manual_q, check=False)
     return manual_q
 
   heavy = OlexRefinementModel().getExpectedPeaks()
@@ -879,7 +889,7 @@ def setMainToolbarTabButtons(btn, state=""):
   for item in btns:
     if item[0] == btn:
       if not state:
-        state = olx.html.GetItemState(item[1])
+        state = OV.GetItemState(item[1])
       if state == '-1':
         state = "off"
       elif state == '0':
@@ -901,16 +911,16 @@ def setAllMainToolbarTabButtons():
     btn = item[0]
     if isCif and btn != 'report':
       state = 'inactive'
-      if olx.html.IsItem(item[1]) == 'true':
-        olx.html.ItemState(item[1],'-1')
+      if OV.IsHtmlItem(item[1]) == 'true':
+        OV.SetItemState(item[1],'-1')
     else:
       state = ''
       #state = 'off'
     if not state:
       #if OV.IsControl(item[1]):
-      if olx.html.IsItem(item[1]) == 'true':
+      if OV.IsHtmlItem(item[1]) == 'true':
         try:
-          state = olx.html.GetItemState(item[1])
+          state = OV.GetItemState(item[1])
         except RuntimeError:
           pass
         if state == '-1':
@@ -1068,8 +1078,7 @@ def get_refinement_programs(scope='snum'):
   retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
-  if OV.IsControl('SET_snum_refinement_PROGRAM'):
-    olx.html.SetItems('SET_snum_refinement_PROGRAM', retval)
+  OV.SetControlItems('SET_snum_refinement_PROGRAM', retval)
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1084,8 +1093,7 @@ def get_refinement_methods(prg, scope='snum'):
   for item in p:
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
-  if OV.IsControl('SET_snum_refinement_METHOD'):
-    olx.html.SetItems(f'SET_{scope}_refinement_METHOD', retval)
+  OV.SetControlItems(f'SET_{scope}_refinement_METHOD', retval)
   return retval
 OV.registerFunction(get_refinement_methods)
 
@@ -1735,8 +1743,7 @@ if not haveGUI:
 def SetMasking(v):
   if type(v) == bool:
     v = str(v).lower()
-    if OV.HasGUI() and OV.IsControl("SNUM_REFINEMENT_USE_SOLVENT_MASK"):
-      olx.html.SetValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
+    OV.SetControlValue('SNUM_REFINEMENT_USE_SOLVENT_MASK', v)
   if v == 'true':
     olx.AddIns('ABIN', q=True)
   else:
@@ -1849,14 +1856,22 @@ def debugInEclipse():
     print("Failed to attach the debugger")
 OV.registerFunction(debugInEclipse)
 
-def pip(package):
+def pip(package:str):
   import sys
+  import os
+
   sys.stdout.isatty = lambda: False
   sys.stdout.encoding = sys.getdefaultencoding()
+
+  # Also fix stdin for pip's interactive check
+  if sys.stdin and not hasattr(sys.stdin, 'isatty'):
+    sys.stdin.isatty = lambda: False
+
   import numpy as np
   import scipy as sp
   import PIL as PIL
   import locale
+
   np_version = np.__version__
   sp_version = sp.__version__
   PIL_version = PIL.__version__
@@ -1864,19 +1879,32 @@ def pip(package):
   print(f"numpy version: {np_version}, scipy version: {sp_version} will be enforced")
   dd = OV.DataDir()
   c_fn = os.path.join(dd, "pip_constraints.txt")
-  print(c_fn)
+  print("Using constraints file: ", c_fn)
+
   with open(c_fn, "w") as c_f:
     c_f.write(f"scipy=={sp_version}\nnumpy=={np_version}\npillow=={PIL_version}")
-  import pip
+  from pip._internal import main as pipmain
+
+  saved_locale = locale.getlocale(locale.LC_CTYPE)
+  os_get_terminal_size = os.get_terminal_size
   try:
-    from pip import main as pipmain
-  except:
-    from pip._internal import main as pipmain
-  saved_locale = locale.getlocale(locale.LC_ALL)
-  #print(f"{saved_locale}")
-  try:
-    pipmain(['install', f'--target={dd}/site-packages', package,"-c", f"{c_fn}"])
+    def get_terminal_size(handle=None):
+      return 100,100
+    os.get_terminal_size = get_terminal_size
+    # 3.8 will still go to site-packages, whereas later - to versioned one
+    if sys.version_info.major >= 3 and sys.version_info.minor > 8:
+      py_version = "-%s%s" %(sys.version_info.major, sys.version_info.minor)
+    else:
+      py_version = ""
+    pipmain(['install', f'--target={dd}/site-packages%s' %py_version,
+             package,"-c", f"{c_fn}", "--no-input", "--disable-pip-version-check"])
     #print(f"{locale.getlocale(locale.LC_ALL)}")
+    # reset imports - to allow new imports without restart
+    import importlib
+    importlib.invalidate_caches()
+  except Exception as e:
+    print("\nFailed to install package %s: %s" %(package, e))
   finally:
-    locale.setlocale(locale.LC_ALL, saved_locale)
+    os.get_terminal_size = os_get_terminal_size
+    locale.setlocale(locale.LC_CTYPE, saved_locale)
 OV.registerFunction(pip, False)

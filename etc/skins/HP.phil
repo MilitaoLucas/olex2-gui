@@ -10,6 +10,9 @@ gui {
   orange = #ff740e
   dark_green = #00aa00
   green = #a6cf4d
+  default_font_name = Signika-Regular.ttf
+  default_font_name_bold = Signika-Bold.ttf
+  default_font_name_italic = Signika-Italic.ttf
 
   htmlpanelwidth = 520
 
@@ -25,6 +28,7 @@ gui {
     link_colour = #ababab
     table_bg_colour = #666666
     table_firstcol_colour = #666666
+    table_group_bg_colour = #656565
     table_row_bg_colour = #555555
     htmlpanelwidth = 500
     combo_height = 24
@@ -77,14 +81,14 @@ gui {
       off_L = 1.2
       on_L = 1.0
       hover_L = 1.1
-      arrows = "bar:right:32,arrow_right:onup:offdown:hoverdown:hoveronup"
+      arrows = "bar:right:26,arrow_right:onup:offdown:hoverdown:hoveronup"
       border_colour = #656565
       }
 
     h1{
       height = 28
       font_size = 19
-      top = 2
+      top = 3
       left = 19
       font_colour = #dedede
       font_colour_L = 1.4
@@ -99,7 +103,7 @@ gui {
       shadow = False
       corner_rad = 3
       rounded = 1000
-      arrows = "bar:left:12"
+      arrows = "bar:left:10"
       
       
     }
@@ -129,7 +133,7 @@ gui {
       height = 22
       top = 2
       font_size = 13
-      base_colour = #555555
+      base_colour = #999999
       grad_colour = #787878
       grad_step = 0.3
       bg_colour_L = 1.8

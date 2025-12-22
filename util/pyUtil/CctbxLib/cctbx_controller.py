@@ -163,12 +163,17 @@ class reflections(object):
         self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
           crystal_symmetry=cs)
       self.f_obs = self.f_sq_obs.f_sq_as_f()
+    if hklf_code == 5 and len(miller_arrays) <= 1:
+      raise RuntimeError("HKLF5 file format requires batch numbers")
+    if hklf_code == 2 and len(miller_arrays) <= 2:
+      raise RuntimeError("HKLF2 file format requires batch numbers and wavelengths")
     if len(miller_arrays) > 1:
       self.batch_numbers_array = miller_arrays[1]
+      if hklf_code == 2 and len(miller_arrays) > 2:
+        self.wavelenghts = miller_arrays[2]
     else:
-      if hklf_code == 5:
-        raise RuntimeError("HKLF5 file format requires batch numbers")
       self.batch_numbers_array = None
+      self.wavelenghts = None
     self._omit = None
     self._shel = None
     self._merge = None
@@ -185,7 +190,7 @@ class reflections(object):
       obs = self.f_sq_obs
     else:
       obs = observations
-    if self.hklf_code == 5:
+    if self.hklf_code in (2,5):
       self.merging = None
       self.f_sq_obs_merged = obs
       self._merge = 0
@@ -208,7 +213,7 @@ class reflections(object):
   def filter(self, omit, shel, wavelength, doFilter=True):
     if not doFilter:
       self.f_sq_obs_filtered = self.f_sq_obs_merged
-      if self.hklf_code == 5:
+      if self.hklf_code in (2,5):
         self.batch_numbers = self.batch_numbers_array.data()
       return
     self._omit = omit
@@ -244,7 +249,7 @@ class reflections(object):
       float(self._shel['low']),
       omit['s']*0.5
     )
-    if self.hklf_code == 5:
+    if self.hklf_code in (2,5):
       batch_numbers = self.batch_numbers_array.data()
     else:
       batch_numbers = flex.int(())
@@ -255,7 +260,7 @@ class reflections(object):
       batch_numbers,
       filter)
     f_sq_obs_filtered = f_sq_obs_filtered.select(filter_res.selection)
-    if self.hklf_code == 5:
+    if self.hklf_code in (2,5):
       self.batch_numbers = self.batch_numbers_array.select(
         filter_res.selection).data()
     self.n_filtered_by_resolution = filter_res.omitted_count

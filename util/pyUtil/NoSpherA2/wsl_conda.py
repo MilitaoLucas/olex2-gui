@@ -22,9 +22,7 @@ class WSLAdapter(object):
     if disto_list is not None:
       self.disto_list = disto_list
     else:
-      if self.is_wsl:
-        self.disto_list = self.get_wsl_distro_list()
-      else:
+      if not self.is_wsl:
         self.disto_list = ["native"]
 
   def check_wsl(self):
@@ -33,27 +31,32 @@ class WSLAdapter(object):
       return False
     # Check if WSL is installed
     try:
-      subprocess.run(["wsl", "--version"], capture_output=True, text=True, check=True)
+      self.disto_list = self.get_wsl_distro_list()
       return True
     except (subprocess.CalledProcessError, FileNotFoundError):
       raise RuntimeError("WSL is not installed or not configured properly. Please install WSL to use this feature.")
-  
+
   def clean_distro_name(self, distro_name):
     """Clean up distro name by removing null bytes and extracting just the name."""
     # Remove null bytes
     cleaned = ''.join(c for c in distro_name if c != '\x00')
-    
+
     # Extract just the distro name without state info
     if '(' in cleaned:
         cleaned = cleaned.split('(')[0].strip()
-        
+
     return cleaned
-  
+
   def get_wsl_distro_list(self):
     """Get a list of installed WSL distributions."""
     if len(self.disto_list) > 0:
       return self.disto_list
     try:
+      result = subprocess.run(["wsl", "--status"], capture_output=True, text=True, check=True)
+      if "not installed" in result.stdout:
+        print("No WSL distributions are installed.")
+        return []
+      # in the headless this will hand for a minute - same as when you run it from cmd
       result = subprocess.run(["wsl", "--list", "--verbose"], capture_output=True, text=True, check=True)
       if "no installed distributions" in result.stdout:
         print("No WSL distributions are installed.")
@@ -61,7 +64,7 @@ class WSLAdapter(object):
       lines = result.stdout.strip().splitlines()
       if len(lines) > 0:
           lines = lines[1:]  # Skip header line
-      
+
       # Parse each line to extract distribution names and states
       distros = []
       for line in lines:
@@ -87,7 +90,7 @@ class WSLAdapter(object):
     except subprocess.CalledProcessError as e:
       print(f"Error retrieving WSL distributions: {e}")
       return []
-    
+
   def convert_windows_path_to_wsl(self, windows_path):
     """Convert Windows path to WSL path format."""
     path_str = str(windows_path)
@@ -99,7 +102,7 @@ class WSLAdapter(object):
     else:
       # Just convert backslashes to forward slashes
       return path_str.replace('\\', '/')
-    
+
   def call_command(self, command, tail_output = False, output_file=Path(".xharpy_olex2") / "sucrose" / "gpaw.txt"):
     """Calls a command in WSL and returns the output."""
     if not self.is_wsl:
@@ -152,12 +155,12 @@ class WSLAdapter(object):
             if x:
               print(x, end='')
             time.sleep(0.15)
-  
+
     except subprocess.CalledProcessError as e:
       print(f"Error executing WSL command: {command}")
       print(f"Error output: {e.stderr}")
       raise e
-  
+
   def call_command_return(self, command):
     """Calls a command in WSL and returns the output."""
     if not self.is_wsl:
@@ -178,14 +181,14 @@ class WSLAdapter(object):
           check=True,
           creationflags=self.creationflags
       )
-        
+
       return result.stdout.strip()
-  
+
     except subprocess.CalledProcessError as e:
       print(f"Error executing WSL command: {command}")
       print(f"Error output: {e.stderr}")
       raise e
-    
+
   def copy_from_possible_wsl(self, source, destination):
     """Copies a file or directory, handling WSL paths if necessary."""
     if self.is_wsl:
@@ -194,24 +197,24 @@ class WSLAdapter(object):
       command = f"cp {source_wsl} {destination_wsl}"
     else:
       command = f"cp {source} {destination}"
-    
+
     try:
       self.call_command(command)
     except subprocess.CalledProcessError as e:
       print(f"Error copying {source} to {destination}: {e}")
       raise e
-    
+
   def copy_to_possible_wsl(self, source, destination):
     """Copies a file or directory to WSL, handling paths if necessary."""
     destination_path = self.convert_windows_path_to_wsl(destination) if self.is_wsl else destination
     command = f"cp {source} {destination_path}"
-    
+
     try:
       self.call_command(command)
     except subprocess.CalledProcessError as e:
       print(f"Error copying {source} to {destination_path}: {e}")
       raise e
-    
+
 class CondaAdapter:
   def __init__(self, wsl_adapter, conda_env_name=None):
     """Initializes the CondaAdapter with a specific conda environment name."""
@@ -226,7 +229,7 @@ class CondaAdapter:
       if len(self.envs) == 0:
         print("No conda environments found. Please create a conda environment before using this feature.\nTry 'Get pyscf' or 'Get XHARPy' ")
       raise RuntimeError("Conda is not installed or not configured properly. Please install Conda to use this feature.")
-    
+
   def copy(self, conda_env_name=None):
     """Creates a copy of the CondaAdapter object with the same attributes."""
     new_adapter = CondaAdapter(self.wsl_adapter, self.conda_env_name)
@@ -248,7 +251,7 @@ class CondaAdapter:
       return True
     except subprocess.CalledProcessError:
       raise RuntimeError("Conda is not installed or not configured properly. Please install Conda to use this feature.")
-    
+
   def set_conda_env_name(self, conda_env_name):
     if conda_env_name is None:
       raise ValueError("Conda environment name cannot be None.")
@@ -257,7 +260,7 @@ class CondaAdapter:
     if not conda_env_name.strip():
       raise ValueError("Conda environment name cannot be an empty string.")
     if conda_env_name not in self.get_available_conda_envs():
-      raise ValueError(f"Conda environment '{conda_env_name}' does not exist.\nAvailable environments: {self.get_available_conda_envs()}")
+      raise ValueError(f"Conda environment '{conda_env_name}' does not exist.")
     self.conda_env_name = conda_env_name
 
   def get_available_conda_envs(self) -> list:
@@ -292,4 +295,3 @@ class CondaAdapter:
     else:
       command = conda_command
     self.wsl_adapter.call_command(f'bash -i -c "{command}"', tail_output=tail_output, output_file=output_file)
-    

@@ -13,8 +13,6 @@ import olexex
 from ImageTools import ImageTools, IT, get_text_size
 from ArgumentParser import ArgumentParser
 from olexFunctions import OV
-#debug = OV.IsDebugging()
-debug = False
 
 import olex_fs
 
@@ -752,7 +750,6 @@ class timage(ArgumentParser):
 
     self.font_name = "DefaultFont"
     self.timer = False
-    self.debug = False
     if self.timer:
       import time
       self.time = time
@@ -2672,9 +2669,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if state in timage_blanks[self.params.skin.name][type_key]:
           image = timage_blanks[self.params.skin.name][type_key][state]
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-          if self.debug:
-            print("FROM CACHE: %s (%s)" %(item, state))
-
           nam = item
           if outside_name:
             nam = outside_name
@@ -2689,12 +2683,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       #filefullinfo_colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      
       self.drawFileFullInfo(draw, image.size, filefullinfo_colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale, max_height=image.size[1])
       r,g,b,a = sg.split()
-      image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
+      
+      top = (IT.sys_top_adjust(1, self.scale)) + OV.GetParam('gui.font_top_system_adjust', 0)
+      image.paste(sg, ((width * self.scale) - s[0], top), mask=a)
+      top -= 1 * self.scale
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
+      if OV.IsDebugging():
+        image = self.print_text(image, f"{sys.version_info.major}.{sys.version_info.minor}", top, 300, font_name, font_size, valign, halign, int(width-s[0]), IT.adjust_colour(grad_colour, luminosity = 1.3), item_type="")
 
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -2746,7 +2744,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-    if self.debug:
+    if OV.IsDebugging():
       print("FROM SCRATCH: %s" %item)
 
     nam = item
@@ -3017,7 +3015,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     wX, wY  = get_text_size(draw, txt, font)
     #left_start =  (self.width-wX) - right_margin
-    top = height - wY - 2 * self.scale
+    top = height - wY + IT.sys_top_adjust(-8, self.scale)
     IT.write_text_to_draw(draw,
                        txt,
                        top_left=(left_start, top),
@@ -3026,7 +3024,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        font_colour=colour,
                        max_width=width
                        )
-
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif", max_height=50):
     dr = draw
@@ -3699,7 +3696,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return "Done"
 
   def info_bitmaps(self, specific=None, colour='#ff4444', factor = 4):
-    if not debug and specific:
+    if not OV.IsDebugging() and specific:
       if OlexVFS.exists("%s.png" %specific):
         return
 
@@ -3960,8 +3957,6 @@ class Boxplot(ImageTools):
 TI = timage()
 OV.registerFunction(TI.make_element_buttons, False, 'piltools')
 OV.registerFunction(TI.run_timage, False, 'piltools')
-
-
 
 if __name__ == "__main__":
   colour = "green"

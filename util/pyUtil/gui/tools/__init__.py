@@ -43,16 +43,14 @@ regex_l = {}
 global cache
 cache = {}
 
-
 gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
 gui_yellow = OV.GetParam('gui.dark_yellow')
-
+gui_light_grey = OV.GetParam('gui.light_grey')
 
 import subprocess
-
 
 class FolderView:
   root = None
@@ -122,12 +120,10 @@ class FolderView:
     if os.path.isfile(v):
       olex.m("reap '%s'" % v)
 
-
 fv = FolderView()
 olex.registerFunction(fv.list, False, "gui.tools.folder_view")
 olex.registerFunction(fv.generateHtml, False, "gui.tools.folder_view")
 olex.registerFunction(fv.loadStructure, False, "gui.tools.folder_view")
-
 
 def start_where():
   if olx.IsFileLoaded() == "false":
@@ -144,22 +140,19 @@ def start_where():
     SwitchPanel(where)
     olx.SetVar('start_where', False)
 
-
 olex.registerFunction(start_where, False, "gui.tools")
-
 
 def flash_def_button(control, wait, n):
   highlight_c = OV.GetParam('gui.html.highlight_colour', '##ff0000')
   off_colour = OV.GetParam('gui.action_colour')
 
   for i in range(n):
-    olx.html.SetBG(control, highlight_c)
+    OV.SetControlBG(control, highlight_c)
     OV.Refresh()
     olx.Wait(wait)
-    olx.html.SetBG(control, off_colour)
+    OV.SetControlBG(control, off_colour)
     OV.Refresh()
     olx.Wait(wait)
-
 
 def flash_gui_control(control, wait=300):
   ''' Flashes a control on the GUI in order to highlight it's position '''
@@ -188,38 +181,36 @@ def flash_gui_control(control, wait=300):
   for i in range(n):
     if "element" in control:
       new_image = "up=%son.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
       cmd = 'html.setBG(%s,%s)' % (control_image.rstrip('_bg'), highlight_c)
       olex.m(cmd)
     else:
       new_image = "up=%soff.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
     if "element" in control:
       new_image = "up=%soff.png" % control
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     elif control.endswith('_bg'):
       cmd = 'html.setBG(%s,%s)' % (control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
     elif 'cbtn' in control:
       new_image = "up=%son.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     else:
       new_image = "up=%shighlight.png" % control_image
-      olx.html.SetImage(control_name, new_image)
+      OV.SetImage(control_name, new_image)
     OV.Refresh()
     olx.Wait(wait)
 
   if not control.endswith('_bg'):
     new_image = "up=%soff.png" % control_image
-    olx.html.SetImage(control_name, new_image)
-
+    OV.SetImage(control_name, new_image)
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
-
 
 def make_single_gui_image(img_txt="", img_type='h2', force=False):
   import PilTools
@@ -239,7 +230,6 @@ def make_single_gui_image(img_txt="", img_type='h2', force=False):
     name = "%s-%s%s.png" % (img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
-
 def inject_into_tool(tool, t, where, befaf='before'):
   import OlexVFS
   txt = OlexVFS.read_from_olex('%s/%s' % (OV.BaseDir(), tool))
@@ -249,7 +239,6 @@ def inject_into_tool(tool, t, where, befaf='before'):
     txt = txt.replace(where, "%s%s" % (where, t))
   OlexVFS.write_to_olex('%s/%s' % (OV.BaseDir(), tool), txt)
 
-
 def __inject_into_tool(tool, t, where, befaf='before'):
   import OlexVFS
   txt = OlexVFS.read_from_olex('%s/%s' % (OV.BaseDir(), tool))
@@ -258,7 +247,6 @@ def __inject_into_tool(tool, t, where, befaf='before'):
   else:
     txt = txt.replace(where, "%s%s" % (where, t))
   OlexVFS.write_to_olex('%s%s' % (OV.BaseDir(), tool), u, txt)
-
 
 def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2", image="", onclick=""):
   import OlexVFS
@@ -339,7 +327,6 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   make_single_gui_image(link, img_type=level)
 
-
 def checkErrLogFile():
   logfile = "%s/PythonError.log" % OV.DataDir()
   logfile = logfile.replace("\\\\", "\\")
@@ -357,10 +344,10 @@ def checkErrLogFile():
   else:
     return ""
 
-
 OV.registerFunction(checkErrLogFile, True, 'gui.tools')
 
 _have_CAP = None
+
 def haveCAP():
   if sys.platform[:3] != "win":
     return False
@@ -406,8 +393,8 @@ def checkPlaton():
   else:
     olx.SetVar("HavePlaton", False)
     return ""
-OV.registerFunction(checkPlaton, True, 'gui.tools')
 
+OV.registerFunction(checkPlaton, True, 'gui.tools')
 
 def MakeElementButtonsFromFormula(action='mode', scope=""):
   # Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
@@ -495,7 +482,7 @@ def MakeElementButtonsFromFormula(action='mode', scope=""):
       TI.make_element_buttons(symbol)
 
     if OV.IsControl(control):
-      olx.html.SetImage(control, "up=%soff.png,down=%son.png,hover=%shover.png" % (img_name, img_name, img_name))
+      OV.SetImage(control, "up=%soff.png,down=%son.png,hover=%shover.png" % (img_name, img_name, img_name))
 
     html += '''
 <input
@@ -521,7 +508,6 @@ def MakeElementButtonsFromFormula(action='mode', scope=""):
   >
   ''' % d
 
-
 #  OV.write_to_olex('element_buttons.htm', html, 0)
 
   im_name = 'IMG_BTN-ELEMENT%s' % symbol
@@ -538,7 +524,6 @@ def MakeElementButtonsFromFormula(action='mode', scope=""):
   last_formula = f
   return html
 
-
 def ElementButtonStates(symbol):
   if not symbol:
     e = olx.ChooseElement()
@@ -554,12 +539,10 @@ def ElementButtonStates(symbol):
       olex.m('name sel %s' % symbol)
       olex.m('sel -u')
 
-
 global sel_element
 global sel_list
 sel_element = ""
 sel_list = []
-
 
 def ElementButtonSelectStates(symbol):
   global sel_element
@@ -580,12 +563,10 @@ def ElementButtonSelectStates(symbol):
   if OV.IsControl(control):
     OV.SetImage(control, "up=%s%s.png,hover=%son.png" % (img_name, onoff, img_name))
 
-
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
   OV.registerFunction(ElementButtonSelectStates)
   OV.registerFunction(MakeElementButtonsFromFormula)
-
 
 def add_mask_content(i, which):
   is_CIF = (olx.IsFileType('cif') == 'true')
@@ -608,13 +589,10 @@ def add_mask_content(i, which):
   olx.cif_model[current_sNum]['_%s_masks_void_content' % base] = _
   OV.UpdateHtml()
 
-
 OV.registerFunction(add_mask_content)
-
 
 def copy_mask_infro_from_comment():
   pass
-
 
 def get_mask_info_old():
 
@@ -693,9 +671,7 @@ def get_mask_info_old():
   t += "</table>"
   return t
 
-
 OV.registerFunction(get_mask_info_old, False, 'gui.tools')
-
 
 def is_masked_moiety_in_formula(txt_formula):
   isSame = False
@@ -714,9 +690,7 @@ def is_masked_moiety_in_formula(txt_formula):
     isSame = True
   return isSame
 
-
 olex.registerFunction(is_masked_moiety_in_formula, False, "gui.tools.is_masked_moiety_in_formula")
-
 
 def makeFormulaForsNumInfo():
   global current_sNum
@@ -814,17 +788,12 @@ def makeFormulaForsNumInfo():
   OV.SetVar("makeFormulaForsNumInfo_retVal", retVal)
   return retVal
 
-
 OV.registerFunction(makeFormulaForsNumInfo)
-
 
 def make_cell_dimensions_display():
   t1 = time.time()
 
   global current_sNum
-  # if OV.FileName() == current_sNum:
-    # return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
-
   l = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
   d = {}
   for x in l:
@@ -850,63 +819,20 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
     # print "Cell: %.5f" %(time.time() - t1)
   return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
-
 OV.registerFunction(make_cell_dimensions_display, True, "gui.tools")
 
-
-def weightGuiDisplay_new():
+def weightGuiDisplay_FK():
   if olx.IsFileType('ires').lower() == 'false':
     return ''
-  longest = 0
-  retVal = ""
-  current_weight = olx.Ins('weight')
-  if current_weight == "n/a":
-    return ""
-  current_weight = current_weight.split()
-  if len(current_weight) == 1:
-    current_weight = [current_weight[0], '0']
-  length_current = len(current_weight)
-  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-  if suggested_weight is None:
-    suggested_weight = []
-  if len(suggested_weight) < length_current:
-    for i in range(length_current - len(suggested_weight)):
-      suggested_weight.append(0)
-  if suggested_weight:
-    for curr, sugg in zip(current_weight, suggested_weight):
-      curr = float(curr)
-      if curr - curr * 0.01 <= sugg <= curr + curr * 0.01:
-        colour = gui_green
-      elif curr - curr * 0.1 < sugg < curr + curr * 0.1:
-        colour = gui_orange
-      else:
-        colour = gui_red
-      sign = "&#9650;"
-      if curr - sugg == 0:
-        sign = ""
-        sugg = 0
-      elif curr - sugg > 0:
-        sign = "&#9660;"
-      retVal += "%.3f&nbsp;<font color='%s'><b>%s </b></font>&nbsp;|&nbsp;" % (curr, colour, sign)
-    html_scheme = retVal.strip("|&nbsp;")
-  else:
-    html_scheme = current_weight
-
-  wght_str = ""
-  for i in suggested_weight:
-    wght_str += " %.3f" % i
-  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  html = "%s" % html_scheme
-  return html
-
-
-OV.registerFunction(weightGuiDisplay_new, True, "gui.tools")
-
-
-def weightGuiDisplay():
-  if olx.IsFileType('ires').lower() == 'false':
-    return ''
-  html_scheme = ""
+  if 'shelx' not in OV.GetParam('snum.refinement.weighting_scheme').lower() and 'default' not in OV.GetParam('snum.refinement.weighting_scheme').lower():
+      return "<td width='35%' align='left'>No parameters applicable</td>"
+  total = """
+    <td width='4%' align='left'>
+      BUTTON
+    </td>
+    <td width='31%' align='left'>
+      TEMPLATE
+    </td>"""
   tol_green, tol_orange = 0.01, 0.1
   current_weight = olx.Ins('weight')
   if current_weight == "n/a":
@@ -921,20 +847,15 @@ def weightGuiDisplay():
   if len(suggested_weight) < length_current:
     for i in range(length_current - len(suggested_weight)):
       suggested_weight.append(0)
+  d = {}
   if suggested_weight:
-    d = {}
-    i = 0
-    for curr, sugg in zip(current_weight, suggested_weight):
-      i += 1
+    for i, (curr, sugg) in enumerate(zip(current_weight, suggested_weight)):
       curr = float(curr)
-      if curr < 1:
+      _curr = abs(curr)
+      if _curr == 0:
         prec = 3
-      elif curr < 10:
-        prec = 2
-      elif curr < 100:
-        prec = 1
       else:
-        prec = 0
+        prec = min(3, max(0, 2 - int(math.floor(math.log10(_curr)))))
 
       if sugg >= curr * (1 - tol_green) and sugg <= curr * (1 + tol_green):
         colour = gui_green
@@ -947,39 +868,132 @@ def weightGuiDisplay():
       curr = (_ % curr).lstrip('0')
       sugg = (_ % sugg).lstrip('0')
 
-      dd = {'curr_%i' % i: curr,
-            'sugg_%i' % i: sugg,
-            'col_%i' % i: colour,
+      dd = {'curr_%i' % (i + 1): curr,
+            'sugg_%i' % (i + 1): sugg,
+            'col_%i' % (i + 1): colour,
             }
       d.update(dd)
-      if html_scheme:
-        html_scheme += "|&nbsp;"
-      html_scheme += "<font color='%s'>%s(%s)</font>" % (colour, curr, sugg)
-  else:
-    html_scheme = current_weight
-  html_scheme = "<b>%s</b>" % html_scheme
-
-  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  txt_Weight = OV.TranslatePhrase("Weight")
-  html = '''
-    <a target="%s" href="UpdateWght>>html.Update">%s</a>
-    ''' % ("Update Weighting Scheme", html_scheme)
 
   weight_display = gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
+  weight_button = gui.tools.TemplateProvider.get_template('weight_toggle')
+  new = total.replace("TEMPLATE", weight_display).replace("BUTTON", weight_button)
+  return new
+
+OV.registerFunction(weightGuiDisplay_FK, True, "gui.tools")
+
+def weightGuiDisplay():
+  if olx.IsFileType('ires').lower() == 'false':
+    return ''
+  d = {}
+  weight_display = ""
+  current_weight = olx.Ins('weight')
+  if current_weight:
+    if current_weight == "n/a":
+      olex.m('spy.gui.UpdateWeight')
+      current_weight = olx.Ins('weight')
+      if current_weight == "n/a":
+        return ""
+    try:
+      current_weight = current_weight.split()
+    except:
+      current_weight = "No Weights"
+
+  total = gui.tools.TemplateProvider.get_template('weight_total', force=debug)
+
+  if len(current_weight) == 1:
+    current_weight.append('0')
+  length_current = len(current_weight)
+  width = f"{int(90 / length_current)}"
+
+  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+  if suggested_weight is None:
+    suggested_weight = []
+  if len(suggested_weight) < length_current:
+    for i in range(length_current - len(suggested_weight)):
+      suggested_weight.append(0)
+
+  #if OV.GetParam('snum.refinement.update_weight') == False:
+    #for i in range(length_current):
+      #weight = current_weight[i]
+      #try:
+        #weight = f"{float(current_weight[i]):.2f}"
+      #except:
+        #pass
+      #name = f"Weight_{i + 1}"
+      #d['curr'] = weight
+      #d['sugg'] = "--"
+      #d['width'] = width
+      #d['name'] = name
+      #d['fg'] = '#000000'
+      #d['bg'] = gui_light_grey
+      #d['click'] = "editins"
+      #weight_display += gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
+      #if OV.IsControl(name):
+        #OV.SetControlValue(name, "%(curr)s | %(sugg)s" % d)
+        #OV.SetControlFG(name, "%(fg)s" % d)
+
+  if not OV.GetParam('snum.refinement.weighting_scheme', None):
+    OV.SetParam('snum.refinement.weighting_scheme', 'default')
+  if 'shelx' not in OV.GetParam('snum.refinement.weighting_scheme').lower() and 'default' not in OV.GetParam('snum.refinement.weighting_scheme').lower():
+      return "<td width='35%' align='left'>No parameters applicable</td>"
+  tol_green, tol_orange = 0.01, 0.1
+  d = {}
+  if suggested_weight:
+    for i, (curr, sugg) in enumerate(zip(current_weight, suggested_weight)):
+      try:
+        curr = float(curr)
+      except:
+        return f"{curr}"
+      _curr = abs(curr)
+      if _curr == 0:
+        prec = 3
+      else:
+        prec = min(3, max(0, 2 - int(math.floor(math.log10(_curr)))))
+
+      ## Sort out colours, black if upate is disabled
+      if OV.GetParam('snum.refinement.update_weight') == False:
+        colour = "#000000"
+      else:
+        if sugg >= curr * (1 - tol_green) and sugg <= curr * (1 + tol_green):
+          colour = gui_green
+        elif sugg >= curr * (1 - tol_orange) and sugg <= curr * (1 + tol_orange):
+          colour = gui_orange
+        else:
+          colour = gui_red
+
+      _ = "%%.%sf" % prec
+      curr = (_ % curr).lstrip('0')
+      sugg = (_ % sugg).lstrip('0')
+      name = f"Weight_{i + 1}"
+      click = "editins"
+
+      d = {'curr': curr,
+           'sugg': sugg,
+           'fg': colour,
+           'bg': gui_light_grey,
+           'click': click,
+           'width': width,
+           'name': name,
+           }
+      weight_display += gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
+
+      if OV.IsControl(name):
+        OV.SetControlValue(name, "%(curr)s | %(sugg)s" % d)
+        OV.SetControlFG(name, "%(fg)s" % d)
+
+  weight_button = gui.tools.TemplateProvider.get_template('weight_toggle')
+  weight_display = total.replace("TEMPLATE", weight_display).replace("BUTTON", weight_button)
+
   return weight_display
 
-
 OV.registerFunction(weightGuiDisplay, True, "gui.tools")
-
 
 def number_non_hydrogen_atoms():
   return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H', 'Q'))
 
-
 def getExpectedPeaks():
   orm = olexex.OlexRefinementModel()
   return orm.getExpectedPeaks()
-
 
 def make_exti_swat_gui():
   html = ""
@@ -999,9 +1013,7 @@ def make_exti_swat_gui():
       html = gui.tools.TemplateProvider.get_template('exti_or_swat_gui', force=debug)
   return html
 
-
 OV.registerFunction(make_exti_swat_gui, True, "gui.tools")
-
 
 def refine_swat():
   retVal = ""
@@ -1034,9 +1046,7 @@ def refine_swat():
     OV.SetParam('snum.refinement.refine_swat_tickbox', False)
   return retVal
 
-
 OV.registerFunction(refine_swat, True, "gui.tools")
-
 
 def refine_extinction():
 
@@ -1112,9 +1122,7 @@ def refine_extinction():
 
   # return retVal
 
-
 OV.registerFunction(refine_extinction, True, "gui.tools")
-
 
 def deal_with_gui_phil(action):
   skin_name = OV.GetParam('gui.skin.name', 'default')
@@ -1141,7 +1149,6 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
-
 def get_regex_l(src_file, base=None):
   global regex_l
   if not src_file:
@@ -1166,7 +1173,6 @@ def get_regex_l(src_file, base=None):
     re_l.append((find, replace))
   regex_l.setdefault('%s' % src_file, re_l)
   return regex_l[src_file]
-
 
 def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=None):
   try:
@@ -1195,7 +1201,6 @@ def run_regular_expressions(txt, src_file=None, re_l=None, specific="", base=Non
   finally:
     return txt
 
-
 class LogListen():
   def __init__(self):
     self.printed = []
@@ -1216,7 +1221,6 @@ class LogListen():
           for em in tem:
             l.append(em)
     return l
-
 
 class Templates():
   def __init__(self):
@@ -1297,9 +1301,7 @@ class Templates():
     else:
       return False
 
-
 TemplateProvider = Templates()
-
 
 def get_diagnostics_colour(scope, item, val, number_only=False):
   grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
@@ -1348,7 +1350,6 @@ def get_diagnostics_colour(scope, item, val, number_only=False):
 
   return retVal
 
-
 def get_battery_image(colour, colourize=True):
   from PIL import Image, ImageDraw
   from ImageTools import IT as IT
@@ -1396,7 +1397,6 @@ def get_battery_image(colour, colourize=True):
   OlexVFS.save_image_to_olex(IM, name, 0)
   return name
 
-
 def get_data_number():
   try:
     import olex_core
@@ -1416,7 +1416,6 @@ def get_data_number():
   except Exception as err:
     print("An error occured: %s" % err)
 
-
 def get_Z_prime_from_fraction(string):
   val = string
   if "/" in val:
@@ -1424,9 +1423,7 @@ def get_Z_prime_from_fraction(string):
     val = int(_[0]) / int(_[1])
   olx.xf.au.SetZprime(val)
 
-
 olex.registerFunction(get_Z_prime_from_fraction, False, "gui")
-
 
 def get_parameter_number():
   var_v = OV.GetVar(olx.var_name_param_N, "")
@@ -1458,10 +1455,10 @@ def GetNParams():
   OV.SetVar(olx.var_name_param_N, retVal)
 
   if OV.IsControl("NParameters"):
-    olx.html.SetLabel("NParameters", retVal)
-    olx.html.SetFG("NParameters", gui_red)
-OV.registerFunction(GetNParams)
+    OV.SetControlLabel("NParameters", retVal, check=False)
+    OV.SetControlFG("NParameters", gui_red, check=False)
 
+OV.registerFunction(GetNParams)
 
 def GetDPRInfo():
   hklsrc = OV.HKLSrc()
@@ -1472,6 +1469,9 @@ def GetDPRInfo():
   if data and parameters:
     dpr = data / parameters
 
+  else:
+    dpr = data
+    parameters = 0
   if dpr:
     if dpr in cache:
       return cache[dpr]
@@ -1511,17 +1511,15 @@ def GetDPRInfo():
     'data': f"{data}",
     'parameters': f"{parameters}",
     'font_size': f"{font_size}"
-    }
+  }
 
-  t =  gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
+  t = gui.tools.TemplateProvider.get_template('battery_gui', force=debug) % d
 
   retVal = t
   cache[dpr] = t
   return retVal
 
-
 OV.registerFunction(GetDPRInfo)
-
 
 def _get_R_values():
   R1 = 'n/a'
@@ -1562,10 +1560,8 @@ def _get_R_values():
           return R1, wR2
   return R1, wR2
 
-
 def has_digit(s):
   return any(char.isdigit() for char in s)
-
 
 def parse_atominfo(atominfo):
   atom = atominfo.split(":")[0].strip()
@@ -1578,7 +1574,6 @@ def parse_atominfo(atominfo):
     sort = atom
   return sort, atom, rs
 
-
 def format_chiral_atoms(chiral_list):
   if not chiral_list:
     return "", ""
@@ -1590,7 +1585,6 @@ def format_chiral_atoms(chiral_list):
     listing = ", ".join(chiral_list[:-1]) + " and " + chiral_list[-1]
   description = "The chiral atoms in this structure are: %s" % ", ".join(chiral_list)
   return description, listing
-
 
 def get_chiral_atom_info(return_what=""):
   l = []
@@ -1635,9 +1629,7 @@ def get_chiral_atom_info(return_what=""):
 
   return d.get(return_what, d)
 
-
 OV.registerFunction(get_chiral_atom_info)
-
 
 def GetRInfo(txt="", d_format='html'):
   if not OV.HasGUI():
@@ -1648,9 +1640,7 @@ def GetRInfo(txt="", d_format='html'):
       return cache.get('GetRInfo', 'XXX')
   return FormatRInfo(R1, wR2, d_format)
 
-
 OV.registerFunction(GetRInfo)
-
 
 def FormatRInfo(R1, wR2, d_format):
   cache['R1'] = R1
@@ -1706,13 +1696,11 @@ def FormatRInfo(R1, wR2, d_format):
   cache['GetRInfo'] = retVal
   return retVal
 
-
 def launchWithoutConsole(command, args):
   """Launches 'command' windowless and waits until finished"""
   startupinfo = subprocess.STARTUPINFO()
   startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
   return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
-
 
 def resize_pdf(f_in, setting='printer'):
   if ".pdf" in f_in:
@@ -1726,11 +1714,9 @@ def resize_pdf(f_in, setting='printer'):
   cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
   os.system(cmd)
 
-
 OV.registerFunction(resize_pdf, False, 'gui.tools')
 
 gett = TemplateProvider.get_template
-
 
 def make_input_html_tool(scope, tool):
   fn = "%s_%s_tool.htm" % (scope, tool)
@@ -1745,21 +1731,17 @@ def make_input_html_tool(scope, tool):
   OlexVFS.write_to_olex(fn, gett('input_html_tool') % d)
   return fn
 
-
 OV.registerFunction(make_input_html_tool, False, 'gui.tools')
-
 
 def scrub(cmd):
   log = gui.tools.LogListen()
   olex.m(cmd)
   return log.endListen()
 
-
 from .GetMaskInfo import get_mask_info
 
 global twinlawsfromhklsrc
 twinlawsfromhklsrc = {}
-
 
 def get_twin_law_from_hklf5():
   try:
@@ -1781,9 +1763,7 @@ def get_twin_law_from_hklf5():
   except:
     return "ERR: Please check 'tools.get_twin_law_from_hklf5'"
 
-
 OV.registerFunction(get_twin_law_from_hklf5, False, 'tools')
-
 
 def hklf_5_to_4(filename):
   '''
@@ -1808,13 +1788,10 @@ def hklf_5_to_4(filename):
   print("done. HKLF4 base file at %s" % hklf4name)
   return
 
-
 OV.registerFunction(hklf_5_to_4, False, 'tools')
-
 
 def record_commands():
   res = scrub()
-
 
 def show_nsff():
   retVal = False
@@ -1822,9 +1799,7 @@ def show_nsff():
     retVal = True
   return retVal
 
-
 OV.registerFunction(show_nsff, False, 'tools')
-
 
 class DisorderDisplayTools(object):
   def __init__(self):
@@ -1940,9 +1915,7 @@ class DisorderDisplayTools(object):
       olex.m('sel part %s' % parts)
       olex.m('sel atom bonds -a')
 
-
 DisorderDisplayTools_instance = DisorderDisplayTools()
-
 
 def get_custom_scripts_combo(phil_scope):
   global custom_scripts_d
@@ -1955,7 +1928,7 @@ def get_custom_scripts_combo(phil_scope):
   control = phil_scope + "_SCRIPTS"
 
   if OV.IsControl(control):
-    filter_s = olx.html.GetValue(control + "_FILTER")
+    filter_s = OV.GetControlValue(control + "_FILTER")
   scopes = []
   t_l = []
   for script in custom_scripts_d:
@@ -1972,9 +1945,7 @@ def get_custom_scripts_combo(phil_scope):
   t_l.sort()
   return ";".join(t_l)
 
-
 OV.registerFunction(get_custom_scripts_combo, False, 'gui.tools')
-
 
 def get_custom_scripts(file_name, globule, scope):
   global custom_scripts_d
@@ -2020,7 +1991,6 @@ def get_custom_scripts(file_name, globule, scope):
         except:
           print("Could not create gui for script %s" % script)
 
-
 def set_custom_gui(f, scope):
   global custom_scripts_d
   f in custom_scripts_d
@@ -2034,10 +2004,8 @@ def set_custom_gui(f, scope):
   except:
     _ = "--> %s is missing" % f
 
-
-  #olx.html.SetValue("INFO_DOCSTRING_%s" %scope, _)
+  #OV.SetControlValue("INFO_DOCSTRING_%s" %scope, _)
 OV.registerFunction(set_custom_gui, False, 'gui.tools')
-
 
 def run_custom_script(*args):
   global custom_scripts_d
@@ -2047,9 +2015,7 @@ def run_custom_script(*args):
     # custom_scripts_d[script]['obj']()
   olex.m("spy.%s()" % script)
 
-
 OV.registerFunction(run_custom_script, False, 'gui.tools')
-
 
 def find_movie_folder_b(directory, directory_l):
   directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
@@ -2074,7 +2040,6 @@ def find_movie_folder_b(directory, directory_l):
   except:
     return None
 
-
 def find_movie_folder_r(directory, directory_l):
   i = 1
   while not os.path.exists(directory + os.sep + "movie"):
@@ -2086,7 +2051,6 @@ def find_movie_folder_r(directory, directory_l):
   if OV.FileName() not in directory:
     print("Crystal images found, but structure name is not in path!")
   return gui.report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
-
 
 def find_movie_folder(directory=None, directory_l=None):
   if not directory:
@@ -2108,9 +2072,7 @@ def find_movie_folder(directory=None, directory_l=None):
   OV.SetParam('snum.report.crystal_image', l[0])
   return l[0], l
 
-
 OV.registerFunction(find_movie_folder, False, 'gui.tools')
-
 
 def load_res_from_cif():
   reapfile = "%s%s" % (olx.xf.DataName(olx.xf.CurrentData()), ".res")
@@ -2118,9 +2080,7 @@ def load_res_from_cif():
     olex.m("export")
   olex.m("reap %s" % reapfile)
 
-
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
-
 
 def set_style_and_scene(style=None, scene=None, src_dir=None, ):
   if not src_dir or "etc/styles" in src_dir:
@@ -2144,9 +2104,7 @@ def set_style_and_scene(style=None, scene=None, src_dir=None, ):
   olex.m("load style %s" % style_p)
   olex.m("load scene %s" % scene_p)
 
-
 OV.registerFunction(set_style_and_scene, False, 'gui.tools')
-
 
 def load_periodic_table():
   olex.m('Freeze True')
@@ -2157,9 +2115,7 @@ def load_periodic_table():
   olex.m("legend false")
   olex.m('Freeze False')
 
-
 OV.registerFunction(load_periodic_table, False, 'gui.tools')
-
 
 def load_matplotlib():
   try:
@@ -2181,10 +2137,12 @@ Do you want to install this now?""", "YN", False)
           pass
         elif architecture == '64bit':
           arch = '64'
-        fn = "site-packages-x%s.zip" % arch
+        pv = sys.version_info
+        py_version = "%s%s" %(pv.major, pv.minor)
+        fn = "site-packages-%sx%s.zip" %(py_version, arch)
         fn = GetHttpFile("http://www2.olex2.org/olex2-distro/",
-                          fn,
-                          os.path.join(OV.DataDir(), "tmp"))
+                         fn,
+                         os.path.join(OV.DataDir(), "tmp"))
         if not fn:
           raise Exception("matplotlib is required by this functionality!")
         with ZipFile(fn) as zip:
@@ -2202,7 +2160,6 @@ Do you want to install this now?""", "YN", False)
   else:
     print("Failed to initialise matplotlib: %s" % str(err))
     return None
-
 
 def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="matplotlib"):
 
@@ -2260,7 +2217,6 @@ def plot_xy_xy(xy=[], filename='test.png', title="", marker_size='5', graphing="
     p = os.path.join(OV.FilePath(), filename)
     plt.savefig(p, bbox_inches='tight', pad_inches=0.3)
     olx.Shell(p)
-
 
 def plot_xy(xs,
             ys,
@@ -2525,7 +2481,6 @@ def plot_xy(xs,
     fig = go.Figure(data=data, layout=layout)
     p = plotly.offline.plot(fig, filename=filename + '.html')
 
-
 def is_outlier(points, thresh=3.5):
   import numpy as np
   """
@@ -2560,13 +2515,11 @@ def is_outlier(points, thresh=3.5):
 
   return modified_z_score > thresh
 
-
 def _clean_scrub(scrub):
   t = " ".join(scrub).strip()
   while "  " in t:
     t = t.replace("  ", " ")
   return t
-
 
 def get_polyhedra_tau():
   # A very basic implementation of the Geometry Index, currently only for 4-coordinate atoms. https://en.wikipedia.org/wiki/Geometry_index
@@ -2595,7 +2548,7 @@ def get_polyhedra_tau():
   order = int(len(l) - 1)
 
   if order in (4, 5):
-    ks = [(i,j) for i in range(1,order+1) for j in range(i+1,order+1)]
+    ks = [(i, j) for i in range(1, order + 1) for j in range(i + 1, order + 1)]
   else:
     print("Sorry, only 4-coordinate or 5-coordinate Geometry indices are currently implemented")
     return
@@ -2635,7 +2588,6 @@ def get_polyhedra_tau():
     print("When tau5 is close to 0 the geometry is similar to square pyramidal, while if tau5 is close to 1 the geometry is similar to trigonal bipyramidal")
   print("Source: https://en.wikipedia.org/wiki/Geometry_index")
 
-
 OV.registerFunction(get_polyhedra_tau, False, "tools")
 
 def get_refinement_stats_value(which):
@@ -2647,9 +2599,8 @@ def get_refinement_stats_value(which):
     return d.get(which, "n/a")
   except:
     return ("...")
+
 OV.registerFunction(get_refinement_stats_value, False, "tools")
-
-
 
 def label_rsa():
   import olx
@@ -2663,20 +2614,15 @@ def label_rsa():
   if args:
     olx.Label(*args, a=True)
 
-
 OV.registerFunction(label_rsa, False, "tools")
-
 
 def set_data_parameter_stats_display(target):
   parameters = get_refinement_stats('Parameters')
   #reflections_all = get_refinement_stats('Reflections_all')
   #data_count = get_refinement_stats('DataCount')
-  if OV.IsControl(target):
-    olx.html.SetLabel(target, f"Parameters: {parameters}")
-
+  OV.SetControlLabel(target, f"Parameters: {parameters}")
 
 OV.registerFunction(set_data_parameter_stats_display, False, "tools")
-
 
 def get_refinement_stats(which):
   try:
@@ -2688,14 +2634,12 @@ def get_refinement_stats(which):
   except:
     return ("...")
 
-
 def copy_directory(src, dst):
   try:
     shutil.copytree(src, dst)
     print(f"Directory copied from {src} to {dst}")
   except OSError as e:
     print(f"Error: {e}")
-
 
 def get_N_HexCol(N=5, a=1, b=0.5, c=0.5):
   import colorsys
@@ -2705,7 +2649,6 @@ def get_N_HexCol(N=5, a=1, b=0.5, c=0.5):
     rgb = map(lambda x: int(x * 255), colorsys.hsv_to_rgb(*rgb))
     hex_out.append('#%02x%02x%02x' % tuple(rgb))
   return hex_out
-
 
 def generate_color_palette(n):
   import colorsys
@@ -2722,7 +2665,7 @@ def get_news_image_src():
   img_path = "news/news-1.5"
   disk_image = os.path.join(OV.BaseDir(), "etc", "news", "news-1.5.png")
   if olex_fs.Exists(img_path):
-    d = time.time() -  olex_fs.Timestamp(img_path)
+    d = time.time() - olex_fs.Timestamp(img_path)
     days = d / (60 * 60 * 24)
     if days > 7:
       OlexVFS.write_to_olex(img_path + "_tmp", open(disk_image, 'br').read(), 2)
@@ -2735,15 +2678,13 @@ def get_news_image_src():
 
 olex.registerFunction(get_news_image_src, False, "gui.tools")
 
-
-
 class PlotIt():
   def __init__(self):
     self.plt_params = OV.GetParam('user.graphs.matplotlib')
-    self.fontname_proc =  self.plt_params.font_name
+    self.fontname_proc = self.plt_params.font_name
     if self.fontname_proc == "default":
       self.fontname_proc = None
-    self.fontsizetitle_proc =  self.plt_params.title_fontsize
+    self.fontsizetitle_proc = self.plt_params.title_fontsize
     if self.fontsizetitle_proc == "default":
       self.fontsizetitle_proc = None
 
@@ -2752,14 +2693,20 @@ class PlotIt():
       import olex_gui
       dpi = olex_gui.GetPPI()[0]
 
-    self.plt = load_matplotlib()
+    try:
+      self.plt = load_matplotlib()
+    except:
+      return
 
-    self.plt.rcParams['xtick.labelsize'] = 12
-    self.plt.rcParams['ytick.labelsize'] = 12
+    self.plt.rcParams['xtick.labelsize'] = self.plt_params.tick_fontsize
+    self.plt.rcParams['ytick.labelsize'] = self.plt_params.tick_fontsize
+    self.plt.rcParams['font.family'] = self.plt_params.font_name
+    self.plt.rcParams['legend.fontsize'] = 14
+    self.plt.rcParams['font.family'] = [self.plt_params.font_name]
+#    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+#    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
 
-
-    self.plt.yticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
-    self.plt.xticks(fontname=self.fontname_proc, fontsize=self.plt_params.tick_fontsize)
+    #print(self.plt.style.available)
 
     self.plt.style.use(self.plt_params.style)
     plt_size = dd.get("plt_size")
@@ -2771,19 +2718,25 @@ class PlotIt():
       plt_size = (2 * w / dpi, 2 * h / dpi)
 
     filename = dd["filename"]
-    title= dd["title"]
+    title = dd["title"]
     second_title = dd.get("second_title", "")
     comment = dd.get('comment', "")
     byline = ""
     if self.plt_params.print_byline:
       byline = dd.get('byline', "")
-    gap = self.plt_params.subplot_top_gap
-
-    gap_facor = 0.05
-    if comment:
-      gap = gap - gap * 0.05
 
     n_plots = len(dd['data'])
+    if n_plots > 1:
+      gap = self.plt_params.subplot_top_gap
+      gap_facor = 0.05
+      if comment:
+        gap = gap - gap * 0.05
+    else:
+      gap = self.plt_params.subplot_top_gap
+      gap_facor = 0.05
+      if comment:
+        gap = gap - gap * 0.05
+
     stack_type = dd.get("stack_type", None)
     if stack_type:
       if stack_type == "stacked":
@@ -2802,29 +2755,34 @@ class PlotIt():
       self.fig.suptitle(f"{title}", fontsize=self.fontsizetitle_proc, fontname=self.fontname_proc, y=0.96)
 
     else:
-      self.plt.title(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, pad=20)
+      self.plt.suptitle(title, fontsize=self.plt_params.title_fontsize, fontname=self.fontname_proc, y=0.96)
       axes = [axes]
-
 
     i = 0
     for series in dd['data']:
-      d =  dd['data'][series]
-      d['lim_x'] = dd.get('lim_x', 1)
       try:
-        self.get_ax(axes[0][i], **d)
+        d = dd['data'][series]
+        d['lim_x'] = dd.get('lim_x', 1)
+        try:
+          self.get_ax(axes[0][i], **d)
+        except:
+          self.get_ax(axes[i], **d)
+        i += 1
       except:
-        self.get_ax(axes[i], **d)
-      i += 1
+        d['lim_x'] = 1
 
-    self.plt.tight_layout(rect=[0, 0, 1, gap])
+    self.plt.tight_layout(rect=[0, 0, 0.96, gap])
     self.fig.text(.5, 0.91, second_title, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize)
     if comment:
-      self.fig.text(.5, gap - (gap*gap_facor/2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize - 2)
+      self.fig.text(.5, gap - (gap * gap_facor / 2), comment, transform=self.fig.transFigure, horizontalalignment='center', fontname=self.fontname_proc, fontsize=self.plt_params.subtitle_fontsize - 2)
 
     if byline:
       self.plt.rcParams['font.family'] = 'Arial'
       self.plt.rcParams['font.stretch'] = 'condensed'
-      self.fig.text(0.996, 0.035, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 3, color = "#bebebe")
+      
+      axes = self.fig.get_axes()      # all axes in the figure
+      bottom = min(ax.get_position().y0 for ax in axes)      
+      self.fig.text(0.96, bottom, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 2, color="#bebebe")
 
     self.fig.align_ylabels()
 
@@ -2835,7 +2793,9 @@ class PlotIt():
       for x in _:
         self.plt.axvline(x=x, color='lightgray', linestyle='dashdot', linewidth=1.5)
 
-    p = os.path.join(OV.FilePath(), filename)
+    p = filename
+    if not ":\\" in filename:
+      p = os.path.join(OV.FilePath(), filename)
     self.plt.savefig(p, bbox_inches='tight', pad_inches=0.2)
     self.plt.close()
     return p
@@ -2853,16 +2813,26 @@ class PlotIt():
              terms=None,
              use_highlight=[],
              lim_x=False,
+             lim_y=False,
+             xlim=False,
+             ylim=False,
              marker=None,
              markersize=None,
              linestyle=None,
+             line_width=None,
              ylabel="",
+             xlabel="",
+             y_tick_rotation=0, 
+             x_tick_rotation=0, 
+             series={},
              labels=[],
              colours=[],
              x_type="",
              y_type="",
              legend=[],
              colourscheme='auto',
+             plot_type=None,
+             **kwargs
              ):
 
     from matplotlib.ticker import MaxNLocator
@@ -2874,15 +2844,14 @@ class PlotIt():
 
     ax_colour = self.plt_params.ax_colour
 
-    lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
-    lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-
     if not marker:
       marker = self.plt_params.ax1.marker
     if not markersize:
       markersize = self.plt_params.ax1.marker_size
     if not linestyle:
       linestyle = self.plt_params.ax1.linestyle
+    if not line_width:
+      line_width = self.plt_params.ax1.line_width
 
     if not isinstance(xs[0], list):
       xs = ([xs])
@@ -2893,7 +2862,7 @@ class PlotIt():
       cmap = colours
     else:
       cmap = OV.GetParam('user.graphs.matplotlib.colour_map', 'get_N_HexCol')
-      if cmap ==  'get_N_HexCol':
+      if cmap == 'get_N_HexCol':
         cmap = False
       else:
         cmap = self.plt.cm.get_cmap(cmap)
@@ -2903,7 +2872,7 @@ class PlotIt():
       colour = None
 
     i = 0
-    c_count =  0
+    c_count = 0
     y_list = []
     x_list = []
 
@@ -2920,85 +2889,155 @@ class PlotIt():
         xs.remove(xs[item[1]['idx']])
         ys.remove(ys[item[1]['idx']])
 
-    lenx = len(xs)
-    labl = None
-    legend_handles = []
-    lw = self.plt_params.ax1.line_width
-    for x, y in zip(xs, ys):
-      label = None
-      y_list.append(y)
-      x_list.append(x)
-      colour_proc = None
-      if colours:
-        colour_proc =  get_property(colours, i)
-        if colour_proc == "default" or not colour_proc:
-          colour_proc = None
-      if use_highlight:
-        colour_proc = OV.GetParam('user.graphs.non_highlight_colour', '#dedede')
-        lw = self.plt_params.ax1.line_width
-        if lenx - i <= j:
-          colour_proc = OV.GetParam('user.graphs.highlight_colour', 'auto')
-          if colour_proc == 'auto':
+    if plot_type == "scatter":
+      x = xs[0]
+      ys = ys[0]
+      polyfit = kwargs.get('polyfit', 2)
+
+      for i, y in enumerate(ys):
+        coeffs = np.polyfit(x, y, polyfit)
+        trend = np.poly1d(coeffs)
+
+        # Make a smooth set of x values for the trendline
+        x_fit = np.linspace(min(x), max(x), 200)
+        ax.plot(x_fit, trend(x_fit), linestyle="--", lw=line_width, label="_nolegend_")
+        ## --- compute R² ---
+        y_pred = trend(x)
+        ss_res = np.sum((y - y_pred)**2)
+        ss_tot = np.sum((y - np.mean(y))**2)
+        r2 = 1 - ss_res/ss_tot
+        
+        x = np.asarray(x)
+        y = np.asarray(y)
+        ss_res_id = np.sum((y - x) ** 2)
+        r2_identity = 1.0 - ss_res_id / ss_tot if ss_tot != 0 else (1.0 if ss_res_id == 0 else 0.0)
+        label = f"{legend[i]} (R²={r2:.3f} R²(identity)={r2_identity:.3f}" 
+        ax.scatter(x, y, s=markersize, label=label)
+      ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
+
+      if xlim:
+        ax.set_xlim(0, xlim)
+      if ylim:
+        ax.set_ylim(0, ylim)
+      
+      ax.tick_params(
+          axis="both",
+          which="both",
+          bottom=True,
+          left=True,
+          labelbottom=False,
+          labelleft=False
+      )
+      
+      #self.plt.tight_layout()      
+      self.plt.xlabel(labels[0], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      self.plt.ylabel(labels[1], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      self.plt.legend()
+
+    else:
+      lines_labels = [ax.get_legend_handles_labels() for ax in self.fig.axes]
+      lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+      lenx = len(xs)
+      labl = None
+      legend_handles = []
+      lw = self.plt_params.ax1.line_width
+      i = 0
+      for x, y in zip(xs, ys):
+        label = None
+        y_list.append(y)
+        x_list.append(x)
+        colour_proc = None
+        if colours:
+          colour_proc = get_property(colours, i)
+          if colour_proc == "default" or not colour_proc:
             colour_proc = None
-          labl = repr(highlight_idx_l[lenx - i - 1][1])
-          lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
-      _, = ax.plot(x,
-              y,
-              marker=get_property(marker, i),
-              markersize=get_property(markersize, i),
-              color=colour_proc,
-              linewidth=lw,
-              linestyle=get_property(linestyle, i),
-              markerfacecolor=self.plt_params.ax1.marker_face_colour,
-              markeredgecolor=get_property(colour, i),
-              markeredgewidth=self.plt_params.ax1.marker_edge_width,
-              label=labl
-              )
-      if j and lenx - i <= j:
-        legend_handles.append(_)
-      i += 1
+        if use_highlight:
+          colour_proc = OV.GetParam('user.graphs.non_highlight_colour', '#dedede')
+          lw = self.plt_params.ax1.line_width
+          if lenx - i <= j:
+            colour_proc = OV.GetParam('user.graphs.highlight_colour', 'auto')
+            if colour_proc == 'auto':
+              colour_proc = None
+            labl = repr(highlight_idx_l[lenx - i - 1][1])
+            if not line_width:
+              lw = int(self.plt_params.ax1.line_width * OV.GetParam('user.graphs.non_highlight_width_factor', 2))
+            else:
+              lw = line_width
+        _, = ax.plot(x,
+                     y,
+                     marker=get_property(marker, i),
+                     markersize=get_property(markersize, i),
+                     color=colour_proc,
+                     linewidth=get_property(line_width, i),
+                     linestyle=get_property(linestyle, i),
+                     markerfacecolor=self.plt_params.ax1.marker_face_colour,
+                     markeredgecolor=get_property(colour, i),
+                     markeredgewidth=self.plt_params.ax1.marker_edge_width,
+                     label=labl
+                     )
+        if j and lenx - i <= j:
+          legend_handles.append(_)
+        i += 1
+        
+        
+        
+      try:
+        ## LAbel datapiont?
+        ax.plot.xticks(range(len(x)), y, rotation=x_tick_rotation) # Redefining x-axis labels
+        for i, v in enumerate(y):
+          ax.text(i, v + 25, "%d" % v, ha="center",  fontname=self.fontname_proc,)
+      except:
+        pass
+
+
       colour = None
-      ax.set_xlabel(label, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
-      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
+      ax.set_xlabel(xlabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize, labelpad=7)
+      ax.set_ylabel(ylabel, fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize, labelpad=7)
       #ax.xaxis.set_major_locator(MaxNLocator(max_major_ticks))
       #ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-    if lim_x:
-      if lim_x == "auto":
-        lim_x = 1
-      else:
-        lim_x = float(lim_x)
+    try:
+      if lim_x:
+        if lim_x == "auto":
+          lim_x = 1
+        else:
+          lim_x = float(lim_x)
 
-      margin = 0.03  # Add 3% margin
-      data_min = min(min(y) for y in y_list)
-      data_max = max(max(y) for y in y_list)
-      # Adjust for margin if necessary
-      data_min -= margin * (data_max - data_min)
-      data_max += margin * (data_max - data_min)
-
-      _ =  data_max - data_min
-      if _:
-        self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
-
-      if lim_x != 1:
-        self.plt.xlim(-0.94*lim_x, 0.95*lim_x)
-
-      else:
-        ax.margins(x=0.15)
-        data_min = min(min(x) for x in x_list)
-        data_max = max(max(x) for x in x_list)
+        margin = 0.03  # Add 3% margin
+        data_min = min(min(y) for y in y_list)
+        data_max = max(max(y) for y in y_list)
         # Adjust for margin if necessary
         data_min -= margin * (data_max - data_min)
         data_max += margin * (data_max - data_min)
-        self.plt.xlim(data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min))
+
+        _ = data_max - data_min
+        if _:
+          self.plt.ylim(data_min - margin * (_), data_max + margin * (_))
+
+        if lim_x != 1:
+          self.plt.xlim(-0.94 * lim_x, 0.95 * lim_x)
+
+        else:
+          ax.margins(x=0.15)
+          data_min = min(min(x) for x in x_list)
+          data_max = max(max(x) for x in x_list)
+          # Adjust for margin if necessary
+          data_min -= margin * (data_max - data_min)
+          data_max += margin * (data_max - data_min)
+          _ = data_min - margin * (data_max - data_min), data_max + margin * (data_max - data_min)
+          if _[0] != _[1]:
+            self.plt.xlim(_)
+    except:
+      pass
 
     if legend_handles:
       ax.legend(handles=legend_handles, loc='upper right', ncol=1)
       legend = ""
     if legend:
-      ax.margins(y=0.25)
+      ax.margins(y=0.45)
       ax.legend(legend, loc='upper right', ncol=2)
-    ax.tick_params(axis='y', labelcolor=ax_colour)
+    ax.tick_params(axis='y', labelcolor=ax_colour, rotation=y_tick_rotation)
+    ax.tick_params(axis='x', labelcolor=ax_colour, rotation=x_tick_rotation)
  #   ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%i'))
     ax.grid(self.plt_params.grid)
 

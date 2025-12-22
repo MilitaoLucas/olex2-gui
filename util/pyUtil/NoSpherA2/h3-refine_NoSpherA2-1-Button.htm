@@ -2,7 +2,7 @@
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT')
+<!-- #ignoreif spy.NoSpherA2.source_is_discamb()
 <!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
 <td width="10%" align='left'>
   <b>CPUs</b>
@@ -155,7 +155,7 @@ $+
 #ignoreif -->
 #ignoreif -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'discambMATT')
+<!-- #ignoreif not spy.NoSpherA2.source_is_discamb()
 <!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
 No pre-defined settings available for this Generator
 #ignoreif -->

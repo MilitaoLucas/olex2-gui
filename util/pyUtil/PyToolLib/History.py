@@ -67,7 +67,6 @@ class History(ArgumentParser):
     self.history_filepath = os.path.join(self.strdir,self.filename) + ".hist6"
     self.rename = OV.FindValue('rename')
     self.his_file = None
-    OV.registerFunction(self.make_graph,False,'History')
 
   def create_history(self, solution=False, label=None):
     self._getItems()
@@ -355,6 +354,7 @@ class History(ArgumentParser):
 
 hist = History()
 #OV.registerFunction(hist.delete_history)
+OV.registerFunction(hist.make_graph, False, 'History')
 OV.registerFunction(hist.rename_history)
 OV.registerFunction(hist.revert_history)
 OV.registerFunction(hist.create_history)
@@ -843,7 +843,7 @@ def popout_history_tree(width=800, height=500):
   height = int(height)
   font_colour = OV.GetParam('gui.html.font_colour')
   font_size = OV.GetParam('HtmlGuiFontSize')
-  html = """
+  html = r"""
 <html>
   <body>
   <font color=%s size=%s face="Arial">
@@ -859,7 +859,7 @@ def popout_history_tree(width=800, height=500):
     pop_name, htm_location, int(width*1.033), int(height*1.1))
   OV.write_to_olex(htm_location, html)
   olex.m(pop_str)
-  olx.html.SetBorders(pop_name,0)
+  OV.SetPopBorder(pop_name,0)
   olex.m(pop_str)
 OV.registerFunction(popout_history_tree)
 

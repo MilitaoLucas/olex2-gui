@@ -111,7 +111,7 @@ class BrukerSaint(ImageTools):
       
       elif self.fun == 'exec':
         self.have_gui = True
-        self.most_recent_p4p = olx.html.GetValue('p4p')
+        self.most_recent_p4p = OV.GetControlValue('p4p')
         self.write_saint_ini_file()
         self.write_cmd_file()
         #outdir = r"%s\olex" %(self.filepath)
@@ -194,7 +194,7 @@ class BrukerSaint(ImageTools):
         else:
           olx.Atreap(p4p)
           self.make_reset_structure_gui()
-        olx.html.Update()
+        OV.UpdateHtml()
           
     except Exception as ex:
       print("There was a problem in BrukerSaint")
@@ -372,7 +372,7 @@ class BrukerSaint(ImageTools):
         self.make_box_image()
       self.make_gui_content_evaluate_frames()
       #self.saint_pid.stdout.flush()
-      olx.html.Update()
+      OV.UpdateHtml()
       OV.Refresh()
       
       #global terminated
@@ -659,7 +659,7 @@ class BrukerSaint(ImageTools):
       #try:
         #checkboxes = ['NODECAY', 'NOCORFILT', 'BLEND', 'NORESIZE']
         #for box in checkboxes:
-          #s = olx.html.GetState(box)
+          #s = OV.GetControlState(box)
           #if s == 'true':
             #self.saint_key[box] = ""
           #else:
@@ -669,12 +669,12 @@ class BrukerSaint(ImageTools):
 
     #if self.have_gui:
       #try:
-        #self.saint_key['pointgroup'] = olx.html.GetValue("POINTGROUP")
-        #self.saint_key['resolution'] = olx.html.GetValue("RESOLUTION")
-        #self.saint_key['GREFLIM'] = olx.html.GetValue("GREFLIM")
-        #self.saint_key['XSIZE'] = olx.html.GetValue("XSIZE")
-        #self.saint_key['YSIZE'] = olx.html.GetValue("YSIZE")
-        #self.saint_key['ZSIZE'] = olx.html.GetValue("ZSIZE")
+        #self.saint_key['pointgroup'] = OV.GetControlValue("POINTGROUP")
+        #self.saint_key['resolution'] = OV.GetControlValue("RESOLUTION")
+        #self.saint_key['GREFLIM'] = OV.GetControlValue("GREFLIM")
+        #self.saint_key['XSIZE'] = OV.GetControlValue("XSIZE")
+        #self.saint_key['YSIZE'] = OV.GetControlValue("YSIZE")
+        #self.saint_key['ZSIZE'] = OV.GetControlValue("ZSIZE")
       #except:
         #pass
     
@@ -722,21 +722,21 @@ INTEGRATE /TITLE="%(title)s" &
     try:
       checkboxes = checkboxes_on + checkboxes_off
       for box in checkboxes:
-        s = olx.html.GetState(box)
+        s = OV.GetControlState(box)
         if s == 'true':
           self.saint_key[box] = ""
 
         else:
           self.saint_key[box] = "/%s" %box
-      self.saint_key['pointgroup'] = olx.html.GetValue("POINTGROUP")
+      self.saint_key['pointgroup'] = OV.GetControlValue("POINTGROUP")
       self.saint_key['constrain_integration'] = self.laue_class_def[self.saint_key['pointgroup']]['constraint']
       self.saint_key['constrain_globalrefine'] = self.laue_class_def[self.saint_key['pointgroup']]['constraint']
-      self.saint_key['resolution'] = olx.html.GetValue("RESOLUTION")
-      self.saint_key['GREFLIM'] = olx.html.GetValue("GREFLIM")
-      self.saint_key['XSIZE'] = olx.html.GetValue("XSIZE")
-      self.saint_key['YSIZE'] = olx.html.GetValue("YSIZE")
-      self.saint_key['ZSIZE'] = olx.html.GetValue("ZSIZE")
-      self.outdir = olx.html.GetValue("outdir")
+      self.saint_key['resolution'] = OV.GetControlValue("RESOLUTION")
+      self.saint_key['GREFLIM'] = OV.GetControlValue("GREFLIM")
+      self.saint_key['XSIZE'] = OV.GetControlValue("XSIZE")
+      self.saint_key['YSIZE'] = OV.GetControlValue("YSIZE")
+      self.saint_key['ZSIZE'] = OV.GetControlValue("ZSIZE")
+      self.outdir = OV.GetControlValue("outdir")
     except:
       pass
     

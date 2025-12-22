@@ -65,7 +65,7 @@ def get_mask_info():
     return return_note("")
 
   based_on = OV.GetParam('user.masks.based_on')
-  based_on_display = "Asymmetric Unit"
+  based_on_display = "Asym. Unit"
   if based_on == "FU":
     based_on_display = "Formula Unit"
   elif based_on == "Cell":
@@ -179,6 +179,9 @@ def get_mask_info():
   total_void_accounted_for_electrons = 0
   total_void_no = 0
   f = get_adjust_for_base_factor()
+  content_disp_all_l = []
+  content_disp_all = "No content!"
+
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
     multi_idx = []
     electrons_accounted_for = 0
@@ -241,9 +244,9 @@ def get_mask_info():
 
     _ = content.split(",")
 
-    content_disp_l = []
-
     for entry in _:
+      content_disp_l = []
+      content_disp = "No content"
       if not entry or entry == "?":
         continue
       sum_content.append((multiplicity, entry))
@@ -262,13 +265,15 @@ def get_mask_info():
       if entity and entity != "?":
         _ = "%s %s" % (format_number(multiplicity * user_number / f), entity)
         if ent:
-          content_disp_l.append(_)
+          if entry[0] != ' ':
+            content_disp_l.append(_)
         else:
           content_disp_l.append("<font color=%s><b>%s</b></font>" % (gui.red, _))
       else:
         _ = "<font color=%s><b>%s</b></font>" % (gui.red, entity)
         content_disp_l.append(_)
-    content_disp = ", ".join(content_disp_l)
+      content_disp = ", ".join(content_disp_l)
+      content_disp_all_l.extend(content_disp_l)
 
     electrons_accounted_for = electrons_accounted_for * multiplicity
     non_h_accounted_for = non_h_accounted_for * multiplicity
@@ -329,9 +334,15 @@ def get_mask_info():
     d['volume_disp'] = volume / f
     d['e_accounted_for_raw'] = electrons_accounted_for
     t += get_template('mask_output_table_row_rp', path=template_path, force=debug) % d
+
   t += get_template('mask_output_based_on', path=template_path, force=debug) % d
 
   #-- FINAL BLOCK ###############
+
+  if content_disp_all_l:
+    content_disp_all = " and ".join([", ".join(content_disp_all_l[:-1]), content_disp_l[-1]]) if len(content_disp_all_l) > 1 else content_disp_all_l[0]
+    content_disp_all = re.sub(r"<.*?>", "", content_disp_all)
+  d['content_disp_all'] = content_disp_all
 
   total_formula = get_rounded_formula()
   total_electrons_accounted_for = 0
@@ -395,15 +406,15 @@ def get_mask_info():
   # Set the background colour of the Formula + and Moiety + buttons.
   if add_to_moiety not in OV.get_cif_item('_chemical_formula_moiety'):
     if OV.IsControl("ADD_TO_MASK_MOIETY"):
-      olx.html.SetBG("ADD_TO_MASK_MOIETY", gui_red)
+      OV.SetControlBG("ADD_TO_MASK_MOIETY", gui_red)
       OV.SetVar("ADD_TO_MASK_MOIETY_BG", gui_red)
   else:
     OV.SetVar("ADD_TO_MASK_MOIETY_BG", OV.GetParam('gui.green').hexadecimal)
 
   if gui.tools.is_masked_moiety_in_formula(olx.xf.GetFormula('', 3)):
     if OV.IsControl("ADD_TO_MASK_FORMULA"):
-      olx.html.SetBG("ADD_TO_MASK_FORMULA", gui_red)
-      OV.SetVar("ADD_TO_MASK_FORMULA_BG", gui_red)
+      OV.SetControlBG("ADD_TO_MASK_FORMULA", gui_red, check=False)
+      OV.SetVar("ADD_TO_MASK_FORMULA_BG", gui_red, check=False)
   else:
     OV.SetVar("ADD_TO_MASK_FORMULA_BG", gui_green)
   ####################################################################
@@ -544,7 +555,9 @@ def split_entity(entry):
     multi = 1
   return entity, multi
 
+
 cleaned_formulae = {}
+
 
 def formula_cleaner(formula):
   formula = formula.replace(" ", "").replace(" ", "")
@@ -601,23 +614,25 @@ def update_metacif(sNum, file_name):
   CT = CifTools()
   CT.update_cif_block(olx.cif_model[sNum], force=True)
 
+
 def get_sqf_name(base=None):
   import time
   prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
   HKLSrc_base = os.path.splitext(OV.HKLSrc())[0]
   sqfs = []
   if prg == "Platon":
-    sqfs.append( f"{HKLSrc_base}_sqd.sqf")
-    sqfs.append( f"{HKLSrc_base}_sq.sqf")
+    sqfs.append(f"{HKLSrc_base}_sqd.sqf")
+    sqfs.append(f"{HKLSrc_base}_sq.sqf")
   else:
-    sqfs = [ f"{HKLSrc_base}.sqf" ]
+    sqfs = [f"{HKLSrc_base}.sqf"]
   for sqf in sqfs:
     if not os.path.exists(sqf):
       continue
-    OV.SetVar('masking_info_dte',  time.ctime(os.path.getmtime(sqf)))
+    OV.SetVar('masking_info_dte', time.ctime(os.path.getmtime(sqf)))
     OV.SetVar('masking_info_src', os.path.basename(sqf))
     return sqf
   return sqf
+
 
 def edit_mask_special_details(txt, base, sNum):
   OV.SetVar('current_mask_sqf', "")
@@ -631,10 +646,9 @@ def edit_mask_special_details(txt, base, sNum):
     OV.SetParam('snum.masks.special_detail_button_text', 'Edit')
     OV.UpdateHtml(force=True)
     ## After the special details text has been edited, switch off the mask updating.
-    if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT'):
-      olx.html.SetState('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT', False)
-    OV.SetParam('snum.refinement.recompute_mask_before_refinement','false')
-    
+    OV.SetControlState('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT', False)
+    OV.SetParam('snum.refinement.recompute_mask_before_refinement', 'false')
+
 
 OV.registerFunction(edit_mask_special_details)
 
@@ -660,9 +674,10 @@ def update_sqf_file(current_sNum, scope, scope2=None):
       print(cif_block, file=f)
     CifInfo.MergeCif()
 
+
 def _get_mask_base():
   if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG'):
-    base = olx.html.GetValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG').lower()
+    base = OV.GetControlValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG').lower()
     if "platon" in base.lower():
       base = "platon_squeeze"
     elif "olex2" in base.lower():
@@ -674,7 +689,8 @@ def _get_mask_base():
       base = "smtbx_masks"
   return base
 
-def add_mask_content(i, which): 
+
+def add_mask_content(i, which):
   global mask_info_has_updated
   global current_sNum
   current_sNum = OV.ModelSrc()
@@ -850,6 +866,7 @@ def status_bg(var, val, status='on'):
 
 OV.registerFunction(status_bg)
 
+
 def return_note(note, note_details="", col=OV.GetVar('HtmlHighlightColour')):
   if "#" not in col:
     col = OV.GetParam(col, OV.GetVar('HtmlHighlightColour')).hexadecimal
@@ -868,11 +885,13 @@ def escape_param_names(name):
     name = name.replace(item, "_")
   return name
 
+
 def get_hkl_base(path):
   base, ext = os.path.splitext(path)
   if '_sq' in base:
     base = base[::-1].replace('_qs'[::-1], '', 1)[::-1]
   return base
+
 
 def change_hklsrc_according_to_mask_prg(prg, where='internal'):
   OV.SetParam('snum.refinement.recompute_mask_before_refinement_prg', prg)
@@ -886,7 +905,8 @@ def change_hklsrc_according_to_mask_prg(prg, where='internal'):
       shutil.move(src, dst)
       tidy_l = ["_sqd.hkl", "_sq.hkl"] #,  "_sqd.ins", "_sq.ins", "_pl.spf"]
       for f in tidy_l:
-        os.remove(hkl_base + f)
+        if os.path.exists(f):
+          os.remove(hkl_base + f)
     else:
       if where == "internal":
         import olexex
@@ -895,6 +915,7 @@ def change_hklsrc_according_to_mask_prg(prg, where='internal'):
         return
   get_mask_info()
   OV.UpdateHtml(force=True)
+
 
 def change_based_on_button_states():
   l = ["BASE_ON_CELL", "BASE_ON_FU", "BASE_ON_ASU"]
@@ -912,11 +933,12 @@ def change_based_on_button_states():
       state = "false"
 
     if state == "true":
-      olx.html.SetBG(btn, 'gui_green')
+      OV.SetControlBG(btn, 'gui_green')
       l.remove(btn)
       for btn in l:
-        olx.html.SetBG(btn, 'gui_light_grey')
+        OV.SetControlBG(btn, 'gui_light_grey')
       break
+
 
 def get_masking_method():
   prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
@@ -925,12 +947,14 @@ def get_masking_method():
     method = "SQUEEZE"
   return method
 
+
 def sort_out_masking_hkl():
   prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', None)
   if prg:
     change_hklsrc_according_to_mask_prg(prg)
 
-def get_and_check_mask_origin(fab_path=None, prg=None, check_time = False):
+
+def get_and_check_mask_origin(fab_path=None, prg=None, check_time=False):
   ## Checking whether a given .fab file has actually been generated by the method that is to be used. Returns the contents of the fab file as lines if the fab file is from the correct program
   import shutil
 
@@ -938,19 +962,19 @@ def get_and_check_mask_origin(fab_path=None, prg=None, check_time = False):
     hkl_base = os.path.splitext(OV.HKLSrc())[0]
   except:
     return [], None, None
-  
+
   if not prg:
     prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
-  
+
   if not fab_path:
       fab_path = f"{hkl_base}.fab"
-      
+
   if debug:
     print(f"Getting the fab information from {fab_path}")
   if not os.path.exists(fab_path):
     print(f"-- alas, no such file exists")
     return [], None, None
-  
+
   with open(fab_path) as fab:
     lines = []
     lines = fab.readlines()
@@ -965,14 +989,15 @@ def get_and_check_mask_origin(fab_path=None, prg=None, check_time = False):
       msg = f"-- .fab was created by Platon, and we want a {prg} mask. Not Good"
     if msg:
       if debug:
-        print (msg)
+        print(msg)
       return [], fab_path, prg
 
   msg = f"-- .fab was created by {prg}, and we want a {prg} mask. Good"
   msg += f"\n-- Returning contents from {fab_path}, generated by {prg}"
   if debug:
-    print (msg)
+    print(msg)
   return lines, fab_path, prg
+
 
 OV.registerFunction(change_based_on_button_states)
 OV.registerFunction(change_hklsrc_according_to_mask_prg)

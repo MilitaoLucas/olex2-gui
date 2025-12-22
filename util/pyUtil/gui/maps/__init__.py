@@ -38,10 +38,8 @@ class MapUtil:
 
   def deal_with_controls(self):
     self.get_map_scale()
-    if OV.IsControl('SNUM_XGRID_SCALE_SLIDE'):
-      olx.html.SetValue('SNUM_XGRID_SCALE_SLIDE', self.value)
-    if OV.IsControl('SNUM_XGRID_SCALE_VALUE'):
-      olx.html.SetValue('SNUM_XGRID_SCALE_SLIDE', self.value)
+    OV.SetControlValue('SNUM_XGRID_SCALE_SLIDE', self.value)
+    OV.SetControlValue('SNUM_XGRID_SCALE_VALUE', self.value)
 
   def VoidView(self, recalculate='0', onoff=None):
     img_bases = ['small-Void']
@@ -49,9 +47,8 @@ class MapUtil:
       return
     if OV.IsControl('SNUM_MAP_BUTTON'):
       # set electron density map button to 'up' state
-      olx.html.SetState('SNUM_MAP_BUTTON','up')
-      olx.html.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
-
+      OV.SetControlState('SNUM_MAP_BUTTON','up', check=False)
+      OV.SetControlLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'), check=False)
     resolution = OV.GetParam("snum.calcvoid.resolution")
     distance = OV.GetParam("snum.calcvoid.distance")
     precise = OV.GetParam("snum.calcvoid.precise")
@@ -92,11 +89,10 @@ class MapUtil:
     if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
       self.SetXgridView(True)
       return
-    update_controls = True
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):
       # set calcvoid button to 'up' state
-      olx.html.SetState('SNUM_CALCVOID_BUTTON','up')
-      olx.html.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
+      OV.SetControlState('SNUM_CALCVOID_BUTTON','up', check=False)
+      OV.SetControlLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'), check=False)
 
     map_type =  OV.GetParam("snum.map.type")
     map_source = OV.GetParam("snum.map.source")
@@ -144,11 +140,11 @@ class MapUtil:
         else:
           olex.m(cf_cmd)
 
-    self.SetXgridView(update_controls)
+    self.SetXgridView(True)
 
 
   def SetXgridView(self, update_controls=False):
-    update_controls = bool(update_controls)
+    update_controls = OV.get_bool_from_any(update_controls)
     view = OV.GetParam("snum.xgrid.view")
     extended = OV.GetParam("snum.xgrid.extended")
     if view == "2D":
@@ -167,10 +163,10 @@ class MapUtil:
       _ = olx.GetVar('map_slider_scale')
     except:
       _ = None
-    if update_controls in (True, 'true') or not _:
+    if update_controls or not _:
 
       self.deal_with_controls()
-      olx.html.Update()
+      OV.UpdateHtml()
 
   def Round(self, value, digits):
     value = float(value)
@@ -214,7 +210,7 @@ class MapUtil:
       #OV.SetParam('snum.xgrid.slider_scale',5)
 
     olx.xgrid.Fix(map_minimum, step)
-    olx.html.Update()
+    OV.UpdateHtml()
 
   def getActionString(self, what="Map", control=""):
     control = control.strip("'")
@@ -222,20 +218,15 @@ class MapUtil:
       retVal =  "Show %s" %what
     else:
       retVal = "Hide %s" %what
-
     if control:
-      if OV.IsControl(control):
-        olx.html.SetLabel(control, retVal)
-
+      OV.SetControlLabel(control, retVal)
     return retVal
 
   def get_map_scale(self):
     SCALED_TO = 50
-
+    # this must be pre-set even if the map is not visible
     olx.SetVar('map_slider_scale', 10)
-    olx.SetVar('map_min',1)
-    olx.SetVar('map_max',0)
-    olx.SetVar('map_value',0)
+
     self.value = 0
     self.scale = 0
     map_type = None
@@ -246,8 +237,8 @@ class MapUtil:
     if olx.xgrid.Visible() == "false":
       return
 
-    val_min = float(olx.xgrid.GetMin())  #* -1
-    val_max = float(olx.xgrid.GetMax())  # * -1
+    val_min = float(olx.xgrid.GetMin())
+    val_max = float(olx.xgrid.GetMax())
 
     if abs(val_min) > abs(val_max):
       difference = val_min
@@ -256,7 +247,6 @@ class MapUtil:
       difference = val_max
 
     slider_scale = int(SCALED_TO/difference)
-    olx.SetVar('map_slider_scale', slider_scale)
     self.scale = slider_scale
 
     map_max = int(round((val_min * slider_scale * 0.1),0)) * 10
@@ -296,12 +286,12 @@ class MapUtil:
     elif 275 <= s < 325:
       slider_scale = 300
 
-    olx.SetVar('map_slider_scale', slider_scale* -1)
+    olx.SetVar('map_slider_scale', slider_scale*-1)
 
     _ = round(float(olx.xgrid.Scale()),3)
     OV.SetParam('snum.xgrid.scale', _)
     olx.SetVar('snum.xgrid.scale', _)
-    olx.SetVar('map_value', olx.xgrid.Scale())
+    olx.SetVar('map_value', map_value)
 
 if OV.HasGUI():
   mu = MapUtil()

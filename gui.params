@@ -13,6 +13,8 @@ gui
     .type = strings
   font_top_system_adjust = 0
     .type = int
+  console_offset = 6
+    .type = int
   battery_font_adjust = -1
     .type = int
   ppi_font_adjust_amount = -2
@@ -157,6 +159,10 @@ gui
     button.highlight.lightness = 120
       .type = int
     button.border.lightness = 120
+      .type = int
+    R1.border.lightness = 220
+      .type = int
+    R1.highlight.lightness = 20
       .type = int
     link_type = 'gui-link-button'
       .type = str
@@ -803,6 +809,8 @@ gui
     fitline_colour = #b40000
       .type = colour
     page_colour = #ffffff
+      .type = colour
+    graph_bg_colour = #ffffff
       .type = colour
     axislabel_colour = #888888
       .type = colour

@@ -140,7 +140,7 @@ class PlatonWrapper:
         print("Calling Platon Directly")
         a = self.run_platon([exe_name, inputfile])
         a.wait()
-        olx.html.Update()
+        OV.UpdateHtml()
         return a
       else:
         if platonflag == 'U':
@@ -157,7 +157,7 @@ class PlatonWrapper:
         try:
           a = self.run_platon(command)
           a.wait()
-          olx.html.Update()
+          OV.UpdateHtml()
           return
         except Exception as err:
           print("PLATON gave up. This is why: %s" %err)

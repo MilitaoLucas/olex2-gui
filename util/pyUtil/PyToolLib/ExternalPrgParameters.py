@@ -72,18 +72,6 @@ def defineExternalPrograms():
   texp = Method_shelx_solution(texp_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
-  sir97_dm = Method_SIR(sir_dm_phil)
-  sir97_patt = Method_SIR(sir_patt_phil)
-  sir2002_dm = Method_SIR(sir_dm_phil)
-  sir2002_patt = Method_SIR(sir_patt_phil)
-  sir2004_dm = Method_SIR(sir_dm_phil)
-  sir2004_patt = Method_SIR(sir_patt_phil)
-  sir2008_dm = Method_SIR(sir_dm_phil)
-  sir2008_patt = Method_SIR(sir_patt_phil)
-  sir2011_dm = Method_SIR(sir_dm_phil)
-  sir2011_patt = Method_SIR(sir_patt_phil)
-  sir2014_dm = Method_SIR(sir_dm_phil)
-  sir2014_patt = Method_SIR(sir_patt_phil)
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
@@ -184,46 +172,18 @@ def defineExternalPrograms():
     brief_reference="Burla et al.,  2007",
     versions = '97',
     execs=["sir97.exe", "sir97"])
-  SIR2002 = Program(
-    name='SIR2002',
-    program_type='solution',
-    author=SIR97.author,
-    reference=SIR97.reference,
-    brief_reference=SIR97.brief_reference,
-    versions = '2002',
-    execs=["sir2002.exe", "sir2002"])
-  SIR2004 = Program(
-    name='SIR2004',
-    program_type='solution',
-    author=SIR97.author,
-    reference=SIR97.reference,
-    brief_reference=SIR97.brief_reference,
-    versions = '2004',
-    execs=["sir2004.exe", "sir2004"])
-  SIR2008 = Program(
-    name='SIR2008',
-    program_type='solution',
-    author=SIR97.author,
-    reference=SIR97.reference,
-    brief_reference=SIR97.brief_reference,
-    versions = '2008',
-    execs=["sir2008.exe", "sir2008"])
-  SIR2011 = Program(
-    name='SIR2011',
-    program_type='solution',
-    author=SIR97.author,
-    reference=SIR97.reference,
-    brief_reference=SIR97.brief_reference,
-    versions = '2011',
-    execs=["sir2011.exe", "sir2011"])
-  SIR2014 = Program(
-    name='SIR2014',
-    program_type='solution',
-    author=SIR97.author,
-    reference=SIR97.reference,
-    brief_reference=SIR97.brief_reference,
-    versions = '2014',
-    execs=["sir2014.exe", "sir2014"])
+
+  SIRs = [SIR97]
+  for year in ('2002', '2004', '2008', '2011', '2014', '2019'):
+    SIR_year = Program(
+      name='SIR%s' %year,
+      program_type='solution',
+      author=SIR97.author,
+      reference=SIR97.reference,
+      brief_reference=SIR97.brief_reference,
+      versions = year,
+      execs=["sir%s.exe" %year, "sir%s" %year])
+    SIRs.append(SIR_year)
   Superflip = Program(
     name='Superflip',
     program_type='solution',
@@ -255,18 +215,11 @@ Palatinus et al., 2012""",
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
-  SIR97.addMethod(sir97_dm)
-  SIR97.addMethod(sir97_patt)
-  SIR2002.addMethod(sir2002_dm)
-  SIR2002.addMethod(sir2002_patt)
-  SIR2004.addMethod(sir2004_dm)
-  SIR2004.addMethod(sir2004_patt)
-  SIR2008.addMethod(sir2008_dm)
-  SIR2008.addMethod(sir2008_patt)
-  SIR2011.addMethod(sir2011_dm)
-  SIR2011.addMethod(sir2011_patt)
-  SIR2014.addMethod(sir2014_dm)
-  SIR2014.addMethod(sir2014_patt)
+  for sir in SIRs:
+    sir_dm = Method_SIR(sir_dm_phil)
+    sir_patt = Method_SIR(sir_patt_phil)
+    sir.addMethod(sir_dm)
+    sir.addMethod(sir_patt)
   Superflip.addMethod(superflip_cf)
 
   # define refinement programs
@@ -360,7 +313,7 @@ Palatinus et al., 2012""",
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXT, ShelXD, ShelXD97, XM,
-              smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, SIR2014, Superflip):
+              smtbx_solve, *SIRs, Superflip):
     SPD.addProgram(prg)
 
   return SPD, RPD

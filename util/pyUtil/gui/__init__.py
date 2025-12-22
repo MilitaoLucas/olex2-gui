@@ -53,7 +53,7 @@ def SwitchSettings(name="solve"):
     t = "cbtn* 1 cbtn-%s 1 *settings 0 %s-settings 0 1" %(name, name)
   else:
     t = "cbtn* 1 cbtn-%s 1 *settings 0" %name
-  olx.html.ItemState(t)
+  OV.SetItemState(t)
 
 olex.registerFunction(SwitchSettings, False, "gui")
 
@@ -61,17 +61,17 @@ olex.registerFunction(SwitchSettings, False, "gui")
 def SwitchPanel(name="home"):
   name = name.lower()
   if name == "home":
-    OV.setItemstate("* 0 tab* 2 tab-home 1 logo1 1 index-home* 1 info-title 1")
-    #olx.html.ItemState("index* 0 index-home 1 tab* 2")
+    OV.SetItemState("* 0 tab* 2 tab-home 1 logo1 1 index-home* 1 info-title 1")
+    #OV.SetItemState("index* 0 index-home 1 tab* 2")
   elif name == "work":
     if olx.IsFileLoaded() != "false":
-      OV.setItemstate("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
+      OV.SetItemState("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
   elif name == "view":
-    OV.setItemstate("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
+    OV.SetItemState("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
   elif name == "tools":
-    OV.setItemstate("* 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+    OV.SetItemState("* 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
   elif name == "info":
-    OV.setItemstate("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
+    OV.SetItemState("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
   else:
     print("Invalid argument for the panel name: " + name)
   return ""
@@ -83,7 +83,7 @@ def SwitchTool(name=None):
   #e.g h2-tools-images
   l = name.split("-")
   SwitchPanel(l[1])
-  OV.setItemstate("%s 1" %name)
+  OV.SetItemState("%s 1" %name)
 olex.registerFunction(SwitchTool, False, "gui")
 
 def PopTool(name=None):
@@ -101,7 +101,7 @@ def UpdateWeight():
     print("No suggested weighting scheme present. Please refine and try again.")
     return ""
   olex.m("UpdateWght %s %s" %(w[0], w[1]))
-  print("Weighting scheme has been updated")
+  # print("Weighting scheme has been updated")
 olex.registerFunction(UpdateWeight, False, "gui")
 
 def GetPathParam(variable, default=None):
@@ -227,9 +227,9 @@ def do_sort():
     OV.GetParam("user.sorting.cat3", ''),
     OV.GetParam("user.sorting.cat4", '')))
   try:
-    if olx.html.GetState('atom_sequence_inplace') == 'true':
+    if OV.GetControlState('atom_sequence_inplace') == 'true':
       args[0] += 'w'
-    elif olx.html.GetState('atom_sequence_first') == 'true':
+    elif OV.GetControlState('atom_sequence_first') == 'true':
       args[0] += 'f'
   except:
     pass
@@ -351,13 +351,13 @@ olex.registerFunction(copy_datadir_items, False, "gui")
 
 def focus_on_control():
   highlight = OV.GetVar('HtmlHighlightColour')
-  control = OV.GetVar('set_focus_on_control_please',None)
-  if control == "None": control = None
-  if control:
-    print("focus on %s" %control)
-    if OV.IsControl(control):
-      olx.html.SetBG(control,highlight)
-      olx.html.SetFocus(control)
+  ctrl_name = OV.GetVar('set_focus_on_control_please',None)
+  if ctrl_name == "None": ctrl_name = None
+  if ctrl_name:
+    print(f"focus on {ctrl_name}")
+    if OV.IsControl(ctrl_name):
+      OV.SetControlBG(ctrl_name,highlight, check=False)
+      OV.SetFocus(ctrl_name, check=False)
       OV.SetVar('set_focus_on_control_please','None')
       return
   olx.Focus()
@@ -432,7 +432,7 @@ def set_notification(string):
     get_default_notification()
   OV.SetVar('GuiNotification', string)
   olx.Freeze(True)
-  OV.htmlUpdate()
+  OV.UpdateHtml()
   olx.Freeze(False)
 
 def get_notification():
@@ -506,19 +506,19 @@ def NamingMode():
     print("Available from the GUI only!")
     return
   args = []
-  start = olx.html.GetValue("naming*start", "")
+  start = OV.GetControlValue("naming*start", "")
   if start:
     args.append(start)
-  suffix = olx.html.GetValue("naming*suffix", "")
-  elm = olx.html.GetValue("naming*type", "")
+  suffix = OV.GetControlValue("naming*suffix", "")
+  elm = OV.GetControlValue("naming*type", "")
   auto = 0
-  if olx.html.GetState("naming*auto*on", "false") == "true":
+  if OV.GetControlState("naming*auto*on", "false") == "true":
     auto = 1
-    if olx.html.GetState("naming*auto*stop_type", "false") == "true":
+    if OV.GetControlState("naming*auto*stop_type", "false") == "true":
       auto += 2
-    if olx.html.GetState("naming*auto*stop_part", "false") == "true":
+    if OV.GetControlState("naming*auto*stop_part", "false") == "true":
       auto += 4
-    if olx.html.GetState("naming*auto*stop_branch", "true") == "false":
+    if OV.GetControlState("naming*auto*stop_branch", "true") == "false":
       auto += 8
   olx.Mode("Name", *args, a=auto, t=elm, s=suffix)
 
@@ -580,11 +580,12 @@ def set_client_mode(v):
   else:
     return
   OV.SetParam("user.refinement.client_mode", v)
+
   if OV.IsControl("cpus_label@refine"):
-    olx.html.SetLabel("cpus_label@refine", get_thread_n_label())
-    olx.html.SetItems("cpus@refine", get_thread_n_selection())
+    OV.SetControlLabel("cpus_label@refine", get_thread_n_label(), check=False)
+    OV.SetControlItems("cpus@refine", get_thread_n_selection(), check=False)
     cpu_n = "-1%" if v else "-1"
-    olx.html.SetValue("cpus@refine", cpu_n)
+    OV.SetControlValue("cpus@refine", cpu_n, check=False)
     OV.SetParam("user.refinement.thread_n", cpu_n)
 
 olex.registerFunction(set_client_mode, False, "gui")
@@ -673,7 +674,7 @@ def create_history_branch(switch):
   hist.create_history(True, branch_name)
   if not switch:
     tree.active_node = current_node
-  OV.htmlUpdate()
+  OV.UpdateHtml()
 
 olex.registerFunction(create_history_branch, False, "gui")
 
@@ -702,7 +703,7 @@ def set_ofile(idx):
        "spy.run_skin sNumTitle",
        "spy.make_HOS(True)"])
     olex.m("run(%s)" %cmd)
-  olx.html.Update()
+  OV.UpdateHtml()
 
 def delete_ofile(idx):
   res = olx.Alert("Please confirm", "Do you really want to delete this ovelray?", "YCQ")
@@ -775,7 +776,7 @@ def run_CAP():
               x=x, y=y, w=sw, h=sh,
               t="Multiple PAR files have been detected",
               b="tscr", s=False)
-    olx.html.ShowModal("par_files")
+    OV.ShowModal("par_files")
   else:
     activate_or_run_CAP(par_files[0])
 

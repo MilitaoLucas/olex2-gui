@@ -247,8 +247,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('history_width', IT.history_width)
   OV.SetVar('button.highlight.lightness', OV.GetParam('gui.skin.button.highlight.lightness'))
   OV.SetVar('button.border.lightness', OV.GetParam('gui.skin.button.border.lightness'))
-  OV.SetVar('custom_button', 'border.lightness: %s;highlight.lightness: %s' % (
-    OV.GetParam('gui.skin.button.highlight.lightness'), OV.GetParam('gui.skin.button.border.lightness')))
+  OV.SetVar('custom_button', f"border.lightness:{OV.GetParam('gui.skin.button.border.lightness')};highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}")
+  OV.SetVar('R1_button', f"border.lightness: {OV.GetParam('gui.skin.R1.border.lightness')}; highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}")
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
   except:
@@ -375,6 +375,11 @@ class Skin():
           item.load_ressources()
         except Exception as err:
           print("Could not load ressources for '%s': %s" % (item, err))
+    except:
+      pass
+
+    try:
+      olex.m(f"console.offset {OV.GetParam('gui.console_offset', 6)}")
     except:
       pass
 
@@ -522,11 +527,9 @@ def get_user_bond_colour(colour):
     t = ""
     for item in l:
       t += "%s;" % (item.split("@@")[1])
-    try:
-      olx.html.SetItems("BOND_COLOUR_COMBO", t)
-      olx.html.SetValue("BOND_COLOUR_COMBO", colour)
-    except:
-      pass
+    if OV.IsControl("BOND_COLOUR_COMBO"):
+      OV.SetControlItems("BOND_COLOUR_COMBO", t, check=False)
+      OV.SetControlValue("BOND_COLOUR_COMBO", colour, check=False)
     OV.SetParam('user.bonds.colours', l)
   _ = "%s@@%s" % (c.replace(";", "@"), colour)
   OV.SetParam('user.bonds.colour', colour)
@@ -548,7 +551,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
 
   import shlex
   if "[" in colour:
-    olx.html.SetValue('BOND_COLOUR_COMBO%s' % scope, "")
+    OV.SetControlValue('BOND_COLOUR_COMBO%s' % scope, "")
     return
   if "@" in colour:
     print("Please do not use the '@' character in colour names")
@@ -582,7 +585,7 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
     olx.Sel("-u")
     olx.ShowH("b", True)
   if scope:
-    olx.html.SetValue("BOND_COLOUR_COMBO%s" % scope, colour)
+    OV.SetControlValue("BOND_COLOUR_COMBO%s" % scope, colour)
 
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')

@@ -95,10 +95,16 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
       olx.SetOlex2RefinementListener(False)
       OV.DeleteBitmap('refine')
       self.interrupted = cctbx.interrupted
+      self.objective_only = cctbx.objective_only
 
   def post_refinement(self, RunPrgObject):
-    OV.SetParam('snum.refinement.max_cycles',self.cycles)
-    self.writeRefinementInfoIntoRes(self.cif)
+    OV.SetParam('snum.refinement.max_cycles', self.cycles)
+    if not self.objective_only:
+      self.writeRefinementInfoIntoRes(self.cif)
+    self.cif.setdefault('_refine_ls_abs_structure_Flack', "n/a")
+    self.cif.setdefault('_refine_ls_shift/su_max', "n/a")
+    self.cif.setdefault('_refine_ls_shift/su_mean', "n/a")
+
     txt = '''
     R1_all=%(_refine_ls_R_factor_all)s;
     R1_gt = %(_refine_ls_R_factor_gt)s;
@@ -112,9 +118,10 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     Hole = %(_refine_diff_density_min)s;
     Peak = %(_refine_diff_density_max)s;
     Flack = %(_refine_ls_abs_structure_Flack)s;
-    ''' %self.cif
+    ''' % self.cif
+
     try:
-      olx.xf.RefinementInfo(txt)
+      olx.xf.RefinementInfo(txt %self.cif)
     except:
       pass
 
@@ -125,10 +132,10 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     #      cif[key] = "%.4f" %float(value)
     #    except:
     #      pass
-    f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
-    t = f.read() %cif
-    f.close()
-    OV.write_to_olex('refinedata.htm',t)
+    if "_refine_ls_shift/su_max" in cif:
+      with open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir()) as f:
+        t = f.read() %cif
+        OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
 
   def deal_with_AAFF(self, RunPrgObject):

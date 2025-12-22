@@ -407,11 +407,10 @@ class ExtractCifInfo(CifTools):
   conflict_d = {}
 
   def __init__(self, evaluate_conflicts=True, run=False):
-    self.state_file = os.path.join(OV.StrDir(), "matacif_cache.pickle")
-    ext = OV.FileExt()
-    if ext and ext.lower() == "cif":
+    if "cif" == OV.FileExt().lower():
       return
     super(ExtractCifInfo, self).__init__()
+    self.state_file = os.path.join(OV.StrDir(), "%s.matacif_cache.pickle" %OV.FileName())
     if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
       evaluate_conflicts = True
     else:
@@ -430,7 +429,14 @@ class ExtractCifInfo(CifTools):
       self.metacifFiles = pickle.load(open(self.state_file, "rb"))
       self.metacifFiles.fix_attrs()
     else:
-      self.metacifFiles = MetacifFiles()
+      old_cache_file = os.path.join(OV.StrDir(), "matacif_cache.pickle")
+      # for backwards compatibility take ownership of the old file
+      if os.path.exists(old_cache_file):
+        self.metacifFiles = pickle.load(open(old_cache_file, "rb"))
+        self.metacifFiles.fix_attrs()
+        os.remove(old_cache_file)
+      else:
+        self.metacifFiles = MetacifFiles()
 
     self.evaluate_conflicts=evaluate_conflicts
     OV.registerFunction(self.conflict_evaluation,True,'extractcifinfo')

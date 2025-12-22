@@ -21,13 +21,13 @@ while not os.path.exists(out_fn):
   if tries >= 5:
     print("Failed to locate the output file")
     exit(1)
-with open(out_fn, "rU") as stdout:
+with open(out_fn, "r") as stdout:
   while p.poll() is None:
     x = stdout.read()
     if x:
       print(x)
     time.sleep(3)
-with open(err_fn, "rU") as stderr:
+with open(err_fn, "r") as stderr:
   print(stderr.read())
 
 print("Finished")

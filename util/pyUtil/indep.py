@@ -3,6 +3,7 @@ import sys, os
 def debugInVSC():
   import olex
   cd = os.getcwd()
+  print("Attaching to MS Visual Studio Code debugger")
   try:
     basedir = olex.f("BaseDir()")
     os.chdir(os.path.join(basedir, "util", "pyUtil"))

@@ -548,11 +548,11 @@ class GetHelp(VFSDependent):
           OV.write_to_olex(webView, t)
           wFilePath = webView
 
-        if "true" in olx.html.IsPopup(pop_name).lower():
+        if not OV.IsPopup(pop_name):
           olx.Popup(pop_name, wFilePath)
         else:
           olx.Popup(pop_name, wFilePath, b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
-          olx.html.SetBorders(pop_name, 5)
+          OV.SetPopBorder(pop_name, 5)
         if box_type == 'tutorial':
           tutorial_box_initialised = pop_name
 
@@ -623,7 +623,7 @@ class AutoDemoTemp(AutoDemo):
 
     if OV.IsControl('%s' % self.pop_name):
       pass
-      #olx.html.ShowModal(self.pop_name)
+      #OV.ShowModal(self.pop_name)
     else:
       if self.interactive:
         txt = gui.tools.TemplateProvider.get_template('pop_tutorials') % d

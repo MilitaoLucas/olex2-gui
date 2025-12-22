@@ -72,17 +72,36 @@
 </td>
 <!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
 
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
+<td width='25%'>
+  <b>Weighting Scheme</b>
+</td>
+<td align="right">
+     <snippet src="gui/snippets/input-combo"
+     name="WeightingScheme"
+     items="Default<-default;Shelx<-shelx;New Shelx<-new_shelx;Unity<-unity;Sigma<-sigma;SinT_Lambda<-stl"
+     readonly="true"
+     value="spy.GetParam('snum.refinement.weighting_scheme')"
+     onchange="spy.SetParam('snum.refinement.weighting_scheme', html.GetValue('~name~'))" />
+</td>
+
+<td width='50%'>
+  <b> </b>
+</td>
+
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+
 <!-- #include second-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
 <td width='25%'>
-  <b>Inelastic form factor table</b>
+  <b>Resonant form factor table</b>
 </td>
 <td align="right">
      <snippet src="gui/snippets/input-combo"
      name="FPFDP"
      items="Henke<-henke;Sasaki<-sasaki;Brennan<-brennan"
      readonly="true"
-     value="spy.GetParam('snum.smtbx.inelastic_form_factor_table')"
-     onchange="spy.SetParam('snum.smtbx.inelastic_form_factor_table', html.GetValue('~name~'))" />
+     value="spy.GetParam('snum.smtbx.resonant_form_factor_table')"
+     onchange="spy.SetParam('snum.smtbx.resonant_form_factor_table', html.GetValue('~name~'))" />
 </td>
 
 <td width='45%'>

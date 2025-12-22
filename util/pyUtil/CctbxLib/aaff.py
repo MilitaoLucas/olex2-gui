@@ -22,8 +22,8 @@ def deal_with_AAFF(self: RunRefinementPrg):
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n"+"*" * 110 + "\n")
     HAR_log.write("{:3d}".format(run))
     energy = None
-    source = OV.GetParam('snum.NoSpherA2.source')
-    update = OV.GetParam('snum.NoSpherA2.Calculate')
+    source = str(OV.GetParam('snum.NoSpherA2.source')).lstrip()
+    update = ".tsc" not in source and ".tscb" not in source
     if "Please S" in source and update:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
@@ -48,8 +48,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     HAR_log.write("\n")
     HAR_log.flush()
     max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
-    calculate = OV.GetParam('snum.NoSpherA2.Calculate')
-    if calculate:
+    if update:
       if OV.GetParam('snum.NoSpherA2.h_aniso'):
         olx.Anis("$D", h=True)
         olx.Anis("$H", h=True)
@@ -85,8 +84,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       tsc_exists = False
       wfn_file = None
+      table_file_name = OV.GetParam('snum.NoSpherA2.file')
+      table_file_name = table_file_name.lstrip().rstrip()
       for file in os.listdir(olx.FilePath()):
-        if file == os.path.basename(OV.GetParam('snum.NoSpherA2.file')):
+        if file == os.path.basename(table_file_name):
           tsc_exists = True
         elif file.endswith(".wfn"):
           wfn_file = file
@@ -103,16 +104,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       # get energy from wfn file
       energy = None
-      if source == "fragHAR" or source == "Hybdrid" or source == "DISCAMB" or "MATTS" in source or "hakkar" in source:
+      if source == "fragHAR" or source == "Hybdrid" or "discamb" in source.lower() or "hakkar" in source:
         HAR_log.write("{:^24}".format("---"))
       else:
-        if (wfn_file is not None) and calculate:
+        if (wfn_file is not None) and update:
           if ".gbw" not in wfn_file:
             with open(wfn_file, "rb") as f:
               f.seek(-2000, os.SEEK_END)
               fread = f.readlines()[-1].decode()
               if "THE VIRIAL" in fread:
-                source = OV.GetParam('snum.NoSpherA2.source')
+                source = OV.GetParam('snum.NoSpherA2.source').lstrip()
                 if "Gaussian" in source:
                   energy = float(fread.split()[3])
                 elif "ORCA" in source:
@@ -258,7 +259,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 res = abs(new_disp - old_disp) / disp_esd
                 if res > results.max_overall:
                   results.update_overall(res, annotations[matrix_run])
-              matrix_run += 1            
+              matrix_run += 1
             elif '.u' in an:
               adp = new_atom['adp'][0]
               adp = (adp[0], adp[1], adp[2], adp[5], adp[4], adp[3])
@@ -338,7 +339,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           raise e
       r = results()
       analyze_shifts(r)
-      if not calculate:
+      if not update:
         converged = True
         break
       elif not Full_HAR:
@@ -362,7 +363,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       HAR_log.close()
     raise e
   # Done with the while !Converged
-  OV.SetParam('snum.NoSpherA2.Calculate', False)
+  #OV.SetParam('snum.NoSpherA2.Calculate', False)
+  OV.SetParam('snum.NoSpherA2.source', "  " + OV.GetParam('snum.NoSpherA2.file'))
   ext_name = "h3-NoSpherA2-extras"
   if OV.IsHtmlItem(ext_name):
     olex.m(f"html.ItemState {ext_name} 2")
@@ -397,7 +399,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   HAR_log.write("\n")
   precise = OV.GetParam('snum.NoSpherA2.precise_output')
   if precise:
-    olex.m("spy.NoSpherA2.write_precise_model_file()")
+    from NoSpherA2.utilities import write_precise_model_file
+    write_precise_model_file()
+    #olex.m("spy.NoSpherA2.write_precise_model_file()")
   HAR_log.flush()
   HAR_log.close()
   with open("%s/%s.NoSpherA2" %(OV.FilePath(),self.original_filename), 'r') as f:
@@ -407,6 +411,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 def make_fcf(self: RunRefinementPrg):
   from refinement import FullMatrixRefine
   table = str(OV.GetParam('snum.NoSpherA2.file'))
+  table = table.lstrip().rstrip()
   self.startRun()
   try:
     self.setupRefine()
@@ -433,12 +438,14 @@ def make_fcf(self: RunRefinementPrg):
   return True
 
 def get_refinement_details(cif_block, acta_stuff):
-  tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  t = OV.GetParam('snum.NoSpherA2.file')
+  t = t.lstrip().rstrip()
+  tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),t)
   if not os.path.exists(tsc_file_name):
-    t = os.path.join(OV.FilePath(), OV.GetParam('snum.NoSpherA2.file'))
+    t = os.path.join(OV.FilePath(), t)
     if os.path.exists(t):
       tsc_file_name = t
-      
+
   if os.path.exists(tsc_file_name):
     #tsc = open(tsc_file_name, 'r').readlines()
     #cif_block_found = False
@@ -468,7 +475,7 @@ This fragment can be embedded in an electrostatic crystal field by employing clu
 or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
-    software = OV.GetParam('snum.NoSpherA2.source')
+    software = OV.GetParam('snum.NoSpherA2.source').lstrip()
     details_text = details_text + "   SOFTWARE:       %s\n"%software
     if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
       method = OV.GetParam('snum.NoSpherA2.method')
@@ -513,10 +520,8 @@ The following options were used:
       for sl in ['a', 'b']:
         for sn in range(1, 5):
           key = '_atom_type_scat_Cromer_Mann_%s%s' % (sl, sn)
-          if key in cif_block:
-            cif_block.pop(key)
-      if '_atom_type_scat_Cromer_Mann_c' in cif_block:
-        cif_block.pop('_atom_type_scat_Cromer_Mann_c')
+          cif_block.pop(key, None)
+      cif_block.pop('_atom_type_scat_Cromer_Mann_c', None)
       if '_atom_type_scat_source' in cif_block:
         for i in range(cif_block['_atom_type_scat_source'].size()):
           cif_block['_atom_type_scat_source'][i] = "NoSpherA2: Chem.Sci. 2021, DOI:10.1039/D0SC05526C"

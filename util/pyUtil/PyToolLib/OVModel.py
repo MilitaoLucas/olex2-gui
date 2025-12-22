@@ -29,7 +29,7 @@ class OVModel(Model.StructureModel):
       hist.run()
       K = Analysis('lst', None)
       K.run()
-      if olx: olx.html.Update()
+      if olx: OV.UpdateHtml()
 
     if not self.noOlex:
       filefull = olx.FileFull()

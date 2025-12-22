@@ -7,6 +7,9 @@ class initpy_funcs():
     self.olx = olx
     self.basedir = basedir
     self.datadir = datadir
+    pv = sys.version_info
+    self.py_version = "%s%s" %(pv.major, pv.minor)
+    self.py_ds_version = "%s.%s" %(pv.major, pv.minor)
 
   def set_python_paths(self):
     if sys.platform[:3] == 'win':
@@ -14,25 +17,23 @@ class initpy_funcs():
       _ = os.environ.get("PYTHONHOME")
       if _:
         python_dir = _
-      else:
-        python_dir = r"%s\Python38" %self.basedir
+      else: # not sure this could ever happen as without PYTHONHOME exe cannot start
+        python_dir = r"%s\Python%s" %(self.basedir, self.py_version)
       sys.path.append(python_dir)
       sys.path.append(r"%s\DLLs" %python_dir)
       sys.path.append(r"%s\Lib" %python_dir)
       sys.path.append(r"%s\Lib\site-packages" %python_dir)
       sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
-      sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
-      sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
       os.add_dll_directory(self.basedir)
     else:
       #it looks like we do not want to set the sys PATH on Linux or Mac!
       set_sys_path = True
       try:
-        set_sys_path = os.path.exists(self.basedir + '/lib/python3.8_')
+        set_sys_path = os.path.exists(self.basedir + '/lib/python3.9_')
       except:
         pass
       if set_sys_path:
-        sys.prefix = self.basedir + '/lib/python3.8'
+        sys.prefix = self.basedir + '/lib/python%s' %self.py_ds_version
         sys.path = ['',
           sys.prefix,
           sys.prefix + '/lib-tk',
@@ -46,7 +47,11 @@ class initpy_funcs():
           sys.path.append(sys.prefix + '/plat-mac')
         elif sys.platform == 'linux2':
           sys.path.append(sys.prefix + '/plat-linux2')
-    sys.path.append(os.path.join(self.datadir, "site-packages"))
+    if sys.version_info.major >= 3 and sys.version_info.minor > 8:
+      py_version = "-%s%s" %(sys.version_info.major, sys.version_info.minor)
+    else:
+      py_version = ""
+    sys.path.append(os.path.join(self.datadir, "site-packages%s" %py_version))
 
   def onexit(self):
     sps = self.OV.GetVar("launched_server.ports", "")
@@ -158,7 +163,7 @@ class initpy_funcs():
       self.olx.stopwatch.exec("from NoSpherA2 import NoSpherA2")
     except Exception as e:
       self.olx.Echo(e, m="error")
-      print("Failed to load NoSpherA2 plugin. Please check your installation.")
+      print("Failed to load NoSpherA2. Please check your installation.")
       return
 
   def onstartup(self):
@@ -255,3 +260,8 @@ class initpy_funcs():
           "Failed make required files (%s) executable - please fix manually." %(", ".join(to_check)),
           m="error")
         return
+  def get_phil_extensions(self):
+    dev_path = os.path.join(self.basedir, "util", "pyUtil", "AC7d")
+    if os.path.exists(dev_path):
+      return [os.path.join(dev_path, "ACED.phil")]
+    return [os.path.join(self.basedir, "util", "pyUtil", "AC7", "ACED.phil")]

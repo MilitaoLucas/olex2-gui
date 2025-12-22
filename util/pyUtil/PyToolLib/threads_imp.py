@@ -143,7 +143,7 @@ class NewsImageRetrivalThread(ThreadEx):
           continue
         else:
           break
-          
+
 
     if not img_url:
       return None, None
@@ -151,7 +151,7 @@ class NewsImageRetrivalThread(ThreadEx):
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
-  
+
   def get_sample_list(self, which='samples', ext="html", urlbase="defaultURL"):
     self.get_server_content(which=which, ext=ext, urlbase=urlbase)
 
@@ -215,7 +215,13 @@ class NewsImageRetrivalThread(ThreadEx):
       for ext in ['res', 'ins', 'cif']:
         fn = "%s.%s" %(reap_base, ext)
         if os.path.exists(fn):
-          olex.m("reap '%s'" %fn)
+          olex.m(f"reap '{fn}'")
+          if ext == 'cif':
+            olex.m("export")
+            fn = reap_base + ".res"
+            if os.path.exists(fn):
+              olex.m(f"reap '{fn}'")
+
           return
 
   def get_styles_from_url(self, name, url=None):

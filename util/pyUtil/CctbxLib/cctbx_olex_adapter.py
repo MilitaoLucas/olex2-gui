@@ -162,23 +162,25 @@ class OlexCctbxAdapter(object):
         self._restraints_manager = restraints.manager(**kwds)
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
+      if self.olx_atoms.exptl.get("radiation_type", "xray") == "neutrons":
+        OV.SetParam("snum.smtbx.atomic_form_factor_table", "neutron")
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
       null_disp = table == "electron" or table == "neutron"
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
-      inelastic_table = None
+      resonant_table = None
       #  default for DISP first
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
-        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
-        if inelastic_table != "brennan":
+        resonant_table = OV.GetParam("snum.smtbx.resonant_form_factor_table")
+        if resonant_table != "brennan":
           try:
-            self._xray_structure.set_inelastic_form_factors(
-              self.wavelength, inelastic_table)
+            self._xray_structure.set_resonant_form_factors(
+              self.wavelength, resonant_table)
           except Exception as e:
             if OV.IsDebugging():
-              print("Failed to retrieve some inelastic scattering factors")
+              print("Failed to retrieve some resonant scattering factors")
               print(e)
           for sc in self._xray_structure.scatterers():
             if null_disp:
@@ -199,13 +201,13 @@ class OlexCctbxAdapter(object):
                 custom_fp_fdps.setdefault(sc.scattering_type, (fp_fdp[0], fp_fdp[1]))
           except Exception as exc:
             print("Error: Brennan & Cowan failed (%s), switching to Sasaki!" %str(exc))
-            inelastic_table = "sasaki"
+            resonant_table = "sasaki"
             try:
-              self._xray_structure.set_inelastic_form_factors(
-                        self.wavelength, inelastic_table)
+              self._xray_structure.set_resonant_form_factors(
+                        self.wavelength, resonant_table)
             except Exception as e:
               if OV.IsDebugging():
-                print("Failed to retrieve some inelastic scattering factors")
+                print("Failed to retrieve some resonant scattering factors")
                 print(e)
             for sc in self._xray_structure.scatterers():
               if null_disp:
@@ -224,9 +226,9 @@ class OlexCctbxAdapter(object):
               sfac_dict['gaussian'][2]))
           custom_fp_fdps[element] = sfac_dict['fpfdp']
       if null_disp == True:
-        inelastic_table = "custom"
+        resonant_table = "custom"
       self._xray_structure.set_custom_inelastic_form_factors(
-        custom_fp_fdps, source=inelastic_table)
+        custom_fp_fdps, source=resonant_table)
       if table == "electron" and OV.GetParam("snum.smtbx.electron_table_name") == "Peng-1996":
         if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
           custom_gaussians = {}
@@ -392,18 +394,73 @@ class OlexCctbxAdapter(object):
       params[param] = value
     return least_squares.mainstream_shelx_weighting(**params)
 
-  def compute_weights(self, fo2, fc):
+  def get_new_shelxl_weighting(self):
+    from smtbx.refinement import least_squares
+    weight = self.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0,
+                  #c=0, d=0, e=0, f=1./3,
+                  )
+    for param, value in zip(list(params.keys())[:min(2, len(weight))], weight):
+      params[param] = value
+    return least_squares.new_shelx_weighting(**params)
+
+  def get_unit_weighting(self):
+    from smtbx.refinement import least_squares
+    return least_squares.unit_weighting()
+
+  def get_sigma_weighting(self):
+    from smtbx.refinement import least_squares
+    return least_squares.sigma_weighting()
+
+  def get_sin_theta_over_lambda_weighting(self):
+    from smtbx.refinement import least_squares
+    weight = self.olx_atoms.model['weight']
+    params = dict(unit_cell = self._xray_structure._unit_cell, a=weight[0] if len(weight) > 0 else 0.1)
+    return least_squares.stl_weighting(**params)
+
+  def compute_weights(self, fo2, fc, reset_scale_factor = False):
     weight = self.olx_atoms.model['weight']
     params = [0.1, 0, 0, 0, 0, 1./3]
     for i, v in enumerate(weight):
       params[i] = v
-    weighting = xray.weighting_schemes.shelx_weighting(*params,
-      wavelength=self.wavelength)
-    #scale_factor = fo2.scale_factor(fc)
-    scale_factor = OV.GetOSF()
-    weighting.observed = fo2
-    weighting.compute(fc, scale_factor)
-    return weighting.weights
+
+    if reset_scale_factor:
+      scale_factor = fo2.scale_factor(fc)
+    else:
+      scale_factor = OV.GetOSF()
+    if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
+      scheme = OV.GetParam("snum.refinement.weighting_scheme", "shelx")
+      if scheme == "shelx":
+        weighting = self.get_shelxl_weighting()
+      elif scheme.lower() == "default":
+        weighting = self.get_shelxl_weighting()
+      elif scheme == "new_shelx":
+        weighting = self.get_new_shelxl_weighting()
+      elif scheme == "unit":
+        weighting = self.get_unit_weighting()
+      elif scheme == "sigma":
+        weighting = self.get_sigma_weighting()
+      elif scheme == "sin_theta_over_lambda":
+        weighting = self.get_sin_theta_over_lambda_weighting()
+      elif scheme == "stl":
+        weighting = self.get_sin_theta_over_lambda_weighting()
+      else:
+        print("Unknown weighting scheme %s, using shelx!" %scheme)
+        weighting = self.get_shelxl_weighting()
+      fc2 = fc.as_amplitude_array().data()
+      indices = fo2.indices()
+      fo2_d = fo2.data()
+      sigmas = fo2.sigmas()
+      weights = flex.double(fo2.size(), 1.0)
+      for i in range(fo2.size()):
+        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2[i], indices[i], scale_factor)
+      return weights
+    else:
+      weighting = xray.weighting_schemes.shelx_weighting(*params,
+        wavelength=self.wavelength)
+      weighting.observed = fo2
+      weighting.compute(fc, scale_factor)
+      return weighting.weights
 
   def load_mask(self):
     import gui
@@ -445,6 +502,7 @@ class OlexCctbxAdapter(object):
       crystal_symmetry=self.xray_structure().crystal_symmetry(),
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
+
   # complete - detwins the who index range rather than just measured refs, used in masking
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if filtered:
@@ -544,7 +602,7 @@ class hooft_analysis(absolute_structure.hooft_analysis):
     if use_fcf:
       fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
       if not os.path.exists(fcf_path):
-        print("No fcf file is present")
+        olx.Echo("No fcf file is present", m="error")
         return
       reflections = list(miller.array.from_cif(file_path=str(fcf_path)).values())[0]
       try:
@@ -555,7 +613,7 @@ class hooft_analysis(absolute_structure.hooft_analysis):
         "_refln_F_squared_calc is expected')
         return
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
-      if self.hklf_code == 5:
+      if self.olex2_adaptor.hklf_code == 5:
         fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
         fc = fc.common_set(fo2)
       scale = 1
@@ -832,6 +890,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     one_h = None
     if OV.IsNoSpherA2():
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = table_name.lstrip().rstrip()
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
@@ -1107,16 +1166,14 @@ def calcsolv(solvent_radius=None, grid_step=None):
           solvent_radius = val
         else:
           OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
-          if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
-            olx.html.SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
+          OV.SetControlValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
 
       elif item == 'grid':
         if not grid_step:
           grid_step = val
         else:
           OV.SetParam('snum.calcsolv.%s'%item,grid_step)
-          if OV.IsControl('SET_SNUM_CALCSOLV_Grid'):
-            olx.html.SetValue('SET_SNUM_CALCSOLV_GRID', grid_step)
+          OV.SetControlValue('SET_SNUM_CALCSOLV_GRID', grid_step)
     else:
       if item == 'probe':
         if not solvent_radius:
@@ -1459,7 +1516,7 @@ def generate_ED_SFAC(table_file_name=None, force = False):
   rm = olexex.OlexRefinementModel()
   sfac = rm.model.get('sfac')
   if sfac:
-    sfac_elms = set([x.lower() for x in sfac.keys()])
+    sfac_elms = set([x.lower() for x in sfac.keys() if 'gaussian' in sfac[x]])
   else:
     sfac_elms = set()
   elms = set([x.lower() for x in rm.get_unique_types(use_charges=True)])

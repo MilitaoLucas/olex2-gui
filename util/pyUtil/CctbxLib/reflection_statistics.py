@@ -140,6 +140,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fc = None
       if NoSpherA2:
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        table_name = table_name.lstrip().rstrip()
         fo2, fc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name))
       else:
@@ -275,6 +276,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     fc = None
     if NoSpherA2:
       table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = table_name.lstrip().rstrip()
       fo2, fc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
     else:
@@ -335,6 +337,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
       f_calc_filtered = None
       if NoSpherA2:
         table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        table_name = table_name.lstrip().rstrip()
         f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name),
           filtered=False)
@@ -400,8 +403,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     fc = flex.abs(f_calc_filtered.data())
     fo /= k
     fit = flex.linear_regression(fc, fo)
-    ShowFitSummary(fit)
-
+    #ShowFitSummary(fit)
     plot = empty()
     plot.indices = f_obs_filtered.indices()
     plot.f_obs = fo
@@ -422,6 +424,8 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "F calc"
     plot.yLegend = "F obs"
+    plot.omit = self.reflections._omit
+    plot.omit_shel = self.reflections._shel
     self.xy_plot = plot
 
 class I_obs_vs_I_calc(OlexCctbxAdapter):
@@ -534,8 +538,9 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     #plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "I calc"
     plot.yLegend = "I obs"
+    plot.omit = self.reflections._omit
+    plot.omit_shel = self.reflections._shel
     self.xy_plot = plot
-
 
 class f_obs_over_f_calc(OlexCctbxAdapter):
   def __init__(self,
@@ -644,7 +649,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.amplitudes_array = f_obs.as_amplitude_array()
     fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
     corr = flex.linear_correlation(self.x[5:-5], self.y[5:-5])
-    ShowFitSummary(fit)
+    #ShowFitSummary(fit)
     assert fit.is_well_defined()
     self.fit_y_intercept = fit.y_intercept()
     self.fit_slope = fit.slope()

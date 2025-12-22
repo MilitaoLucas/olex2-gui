@@ -16,7 +16,6 @@ from ImageTools import IT
 from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
-from Wfn_Job import is_orca_new
 import numpy as np
 
 def scrub(cmd):
@@ -48,7 +47,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         txt="Calculating .tsc file from Wavefunction <b>%s</b>..."%os.path.basename(wfn_file),
         txt_col='black_text')
     if OV.HasGUI():
-      olx.html.Update()
+      OV.UpdateHtml()
       olx.Refresh()
   ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
@@ -56,7 +55,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   args = []
   NoSpherA2 = OV.GetVar("NoSpherA2")
   args.append(NoSpherA2)
-  if OV.GetParam('snum.NoSpherA2.source') == "SALTED":
+  if software() == "SALTED":
     salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
     args.append("-SALTED")
     args.append(salted_model_dir)
@@ -91,23 +90,25 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append('-skpts')
   if(read_k_pts):
     args.append('-rkpts')
-  software = OV.GetParam('snum.NoSpherA2.source')
-  if "xTB" in software or "pTB" in software:
+  soft = software()
+  if "xTB" in soft or "pTB" in soft:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
-    if "xTB" in software:
+    if "xTB" in soft:
       args.append(str(2))
-    elif "pTB" in software:
+    elif "pTB" in soft:
       args.append(str(3))
   elif "ECP" in basis_name:
     args.append("-ECP")
     mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
     args.append(str(mode))
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_RI_FIT'):
+  if OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "RI-Fit":
     if is_orca_new():
       auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
       args.append("-RI_FIT")
       args.append(auxiliary_basis)
+      if auxiliary_basis == "auto" or auxiliary_basis == "auto_aux":
+        args.append(OV.GetParam('snum.NoSpherA2.auxiliary_basis_beta'))
       mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))
@@ -115,6 +116,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
       print("Performing refinement without RI fit!")
       time.sleep(10)
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "TFVC":
+    args.append("-TFVC")
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "Becke":
+    args.append("-Becke")
 
   olex_refinement_model = OV.GetRefinementModel(False)
 
@@ -193,7 +198,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         for j in range(len(groups[i])):
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
-    if software == "Hybrid":
+    if soft == "Hybrid":
       args.append("-mtc_mult")
       for i in range(1, min(6, len(groups) + 1)):
         m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
@@ -232,9 +237,9 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
           args.append(str(c))
       args.append("-mtc_ECP")
       for i in range(len(groups)):
-        if software == "xTB":
+        if soft == "xTB":
           args.append("2")
-        elif software == "pTB":
+        elif soft == "pTB":
           args.append("3")
         elif "ECP" in basis_name:
           args.append("1")
@@ -313,7 +318,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("process ended before the output file was found")
       OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
       raise NameError('NoSpherA2 ended unexpectedly!')
-  with open(out_fn, "rU") as stdout:
+  with open(out_fn, "r") as stdout:
     while p.poll() is None:
       x = stdout.read()
       if x:
@@ -438,11 +443,11 @@ def combine_tscs(match_phrase="_part_", no_check=False):
 
   try:
     OV.SetParam('snum.NoSpherA2.file', tsc_dst)
-    olx.html.SetValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
+    OV.SetControlValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
   if OV.HasGUI():
-    olx.html.Update()
+    OV.UpdateHtml()
   return True
 
 OV.registerFunction(combine_tscs, False, 'NoSpherA2')
@@ -545,7 +550,9 @@ def is_disordered():
 OV.registerFunction(is_disordered, False, 'NoSpherA2')
 
 def software():
-  return OV.GetParam('snum.NoSpherA2.source')
+  t = OV.GetParam('snum.NoSpherA2.source')
+  t = t.lstrip().rstrip()
+  return t
 
 def org_min():
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
@@ -571,7 +578,7 @@ def org_min():
 OV.registerFunction(org_min, False, "NoSpherA2")
 
 def org_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVDZ")
+  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
@@ -784,7 +791,7 @@ def make_quick_button_gui():
         name="nosphera2_quick_button_%(type)s_%(qual)s"
         value="%(value)s"
         height="GetVar(HtmlComboHeight)"
-        onclick="spy.SetParam('snum.NoSpherA2.Calculate',True)>>spy.NoSpherA2.%(type)s_%(qual)s()"
+        onclick="spy.NoSpherA2.%(type)s_%(qual)s()"
         bgcolor="%(col)s"
         fgcolor="#ffffff"
         fit="false"
@@ -815,7 +822,23 @@ def calculate_number_of_electrons():
     ne += Z
   return ne, adapter
 
-def write_precise_model_file():
+def source_is_tsc():
+  source = software()
+  if ".tsc" in source or ".tscb" in source:
+    return True
+  else:
+    return False
+OV.registerFunction(source_is_tsc, False, 'NoSpherA2')
+
+def source_is_discamb():
+  source = software()
+  if source == OV.GetParam('user.NoSpherA2.discamb_exe'):
+    return True
+  else:
+    return False
+OV.registerFunction(source_is_discamb, False, 'NoSpherA2')
+
+def write_precise_model_file(model = None, cov_matrix = None, annotations = None):
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
   table_name = ""
@@ -1102,7 +1125,7 @@ def appendDir(phil_value) -> None:
     return
   old = OV.GetParam(phil_value)
   if old is None:
-    pass
+    old = a
   else:
     old += ";"+a
   OV.SetParam(phil_value, old)
@@ -1131,8 +1154,8 @@ def toggle_full_HAR():
     OV.SetParam('snum.NoSpherA2.full_HAR', False)
   else:
     OV.SetParam('snum.NoSpherA2.full_HAR', True)
-  OV.setItemstate("h3-NoSpherA2-extras 2")
-  OV.setItemstate("h3-NoSpherA2-extras 1")
+  OV.SetItemState("h3-NoSpherA2-extras 2")
+  OV.SetItemState("h3-NoSpherA2-extras 1")
 OV.registerFunction(toggle_full_HAR, False, "NoSpherA2")
 
 def cov_mat():
@@ -1143,7 +1166,7 @@ def cov_mat():
     ann = x.readline().split()
     nf = np.load(x)
     header_string =""
-    for anno in ann: 
+    for anno in ann:
       header_string = header_string  + str(anno.decode('UTF-8'))+ ","
     sqrt_size = len(ann)
     cov_array = np.zeros((sqrt_size, sqrt_size))
@@ -1155,8 +1178,8 @@ def cov_mat():
             idx += 1
     np.savetxt("numpy.csv", cov_array, delimiter=',')
     corrMat = np.corrcoef(cov_array)
-    np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)  
-    
+    np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)
+
     # After calculating corrMat
     threshold = 0.75
     iu_nodiag = np.triu_indices(sqrt_size, k=1)
@@ -1167,3 +1190,11 @@ def cov_mat():
         print(f"{ann[i].decode('utf-8')} <-> {ann[j].decode('utf-8')}: {corr:.3f}")
 
 OV.registerFunction(cov_mat, False, "NoSpherA2")
+
+def is_orca_new(given_software = None):
+  """Check if the current wavefunction software is ORCA."""
+  if given_software is None:
+    return software() in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
+  else:
+    return given_software in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
+OV.registerFunction(is_orca_new, False, "NoSpherA2")

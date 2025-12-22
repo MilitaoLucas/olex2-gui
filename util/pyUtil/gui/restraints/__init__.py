@@ -452,9 +452,9 @@ OV.registerFunction(get_existing_fvar_dropdown_items, False, "gui.restraints")
 
 def set_mode_fit():
   cmd = "mode fit -s"
-  val_parts = olx.html.GetValue('SPLIT_PARTS', None)
-  val_fvars = olx.html.GetValue('SPLIT_FVARS', None)
-  val_restraints = olx.html.GetValue('SPLIT_RESTRAINTS', None)
+  val_parts = OV.GetControlValue('SPLIT_PARTS', None)
+  val_fvars = OV.GetControlValue('SPLIT_FVARS', None)
+  val_restraints = OV.GetControlValue('SPLIT_RESTRAINTS', None)
 
   if val_restraints != "--":
     cmd += " %s" %val_restraints
