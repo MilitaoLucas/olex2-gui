@@ -115,14 +115,6 @@ def do_init():
     olx.Echo(e, m="error")
   stopwatch.stop()
 
-  stopwatch.start("PhAI")
-  try:
-    import PhAI_adapter
-  except Exception as e:
-    if OV.IsDebugging() or OV.IsDeveloping():
-      olx.Echo(e, m="error")
-  stopwatch.stop()
-
   if OV.IsDebugging():
     olx.stopwatch.log()
   else:
