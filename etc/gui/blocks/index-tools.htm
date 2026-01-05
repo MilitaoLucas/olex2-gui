@@ -15,11 +15,11 @@
 
 <!-- #includeif and(false,IsFileType('ires')) h2-tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;2; -->
 
- <!-- #includeif or(IsFileType('ires'),IsFileType('p4p')) h2-tools-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
+ <!-- -#includeif or(IsFileType('ires'),IsFileType('p4p')) h2-tools-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
 <!-- #includeif isplugininstalled(plugin-brukersaint) h2-tools-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;2; -->
 <!-- #includeif isplugininstalled(plugin-Batch) h2-tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;2; -->
- <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) h2-tools-refinement gui\refinement.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
- <!-- #includeif or(IsFileType('ires'),IsFileType('crs')) h2-tools-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;onclick='sg>>spy GuiTools single:solve';0; -->
+ <!-- -#includeif or(IsFileType('ires'),IsFileType('cif')) h2-tools-refinement gui\refinement.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
+ <!-- -#includeif or(IsFileType('ires'),IsFileType('crs')) h2-tools-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;onclick='sg>>spy GuiTools single:solve';0; -->
 <!-- #include h2-tools-folder-view gui\tools\folder-view.htm;gui\blocks\tool-off.htm;image=Folder-View;onclick=;2; -->
 <!-- #include h2-tools-platon gui\tools\platon.htm;gui\blocks\tool-off.htm;image=Platon;onclick=;2; -->
 
@@ -27,4 +27,4 @@ $spy.make_gui_edit_link(index-tools)
 
 <!-- %tools% -->
 
- <!-- #include h2-tools-cds-search gui\cds-search.htm;gui\blocks\tool-off.htm;image=cds-search;onclick=;2; -->
+ <!-- -#include h2-tools-cds-search gui\cds-search.htm;gui\blocks\tool-off.htm;image=cds-search;onclick=;2; -->

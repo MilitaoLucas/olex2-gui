@@ -2744,8 +2744,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-    if OV.IsDebugging():
-      print("FROM SCRATCH: %s" %item)
 
     nam = item
     if outside_name:
