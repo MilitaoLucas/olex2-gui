@@ -147,7 +147,7 @@ class GuiFunctions(object):
   @gui_only()
   def IsControlEnabled(self, ctrl_name, check=True):
     if not check or self.IsControl(ctrl_name):
-      olx.html.IsEnabled(ctrl_name) == 'true'
+      return olx.html.IsEnabled(ctrl_name) == 'true'
     return False
 
   @gui_only()
