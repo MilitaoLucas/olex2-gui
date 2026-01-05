@@ -189,8 +189,6 @@ Solvent masking is currently ignored for ED Dynamical Refinement
 <ignore test="strcmp(spy.gui.IsEDRefinement(), False)">
 
 <!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
-
-<!-- #ignoreif not GetVar("HavePlaton")
   $+
     html.Snippet("gui/snippets/input-combo-td",
     "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG",
@@ -202,7 +200,6 @@ Solvent masking is currently ignored for ED Dynamical Refinement
     "td1=<td width=20%>"
     )
   $-
-#ignoreif -->
 
   $+
     html.Snippet("gui/snippets/input-checkbox-td",

@@ -104,7 +104,7 @@ class GuiFunctions(object):
   @gui_only()
   def GetControlValue(self, ctrl_name, val="", check=True):
     if not check or self.IsControl(ctrl_name):
-      olx.html.GetValue(ctrl_name, val)
+      return olx.html.GetValue(ctrl_name, val)
 
   @gui_only()
   def SetControlData(self, ctrl_name, val, check=True):
@@ -114,7 +114,7 @@ class GuiFunctions(object):
   @gui_only()
   def GetControlData(self, ctrl_name, val, check=True):
     if not check or self.IsControl(ctrl_name):
-      olx.html.GetData(ctrl_name, val)
+      return olx.html.GetData(ctrl_name, val)
 
   @gui_only()
   def SetControlLabel(self, ctrl_name, val, check=True):
@@ -147,7 +147,7 @@ class GuiFunctions(object):
   @gui_only()
   def IsControlEnabled(self, ctrl_name, check=True):
     if not check or self.IsControl(ctrl_name):
-      olx.html.IsEnabled(ctrl_name) == 'true'
+      return olx.html.IsEnabled(ctrl_name) == 'true'
     return False
 
   @gui_only()
@@ -259,7 +259,7 @@ class GuiFunctions(object):
 
   @gui_only()
   def GetItemState(self, item):
-    olx.html.GetItemState(item)
+    return olx.html.GetItemState(item)
 
   @gui_only()
   def setDisplayQuality(self, q=None):

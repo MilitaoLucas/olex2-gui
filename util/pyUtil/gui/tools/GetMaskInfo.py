@@ -244,8 +244,8 @@ def get_mask_info():
 
     _ = content.split(",")
 
+    content_disp_l = []
     for entry in _:
-      content_disp_l = []
       content_disp = "No content"
       if not entry or entry == "?":
         continue
@@ -272,8 +272,8 @@ def get_mask_info():
       else:
         _ = "<font color=%s><b>%s</b></font>" % (gui.red, entity)
         content_disp_l.append(_)
-      content_disp = ", ".join(content_disp_l)
-      content_disp_all_l.extend(content_disp_l)
+    content_disp = ", ".join(content_disp_l)
+    content_disp_all_l.extend(content_disp_l)
 
     electrons_accounted_for = electrons_accounted_for * multiplicity
     non_h_accounted_for = non_h_accounted_for * multiplicity
@@ -677,7 +677,7 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
 def _get_mask_base():
   if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG'):
-    base = OV.GetControlValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG').lower()
+    base = OV.GetControlValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG')
     if "platon" in base.lower():
       base = "platon_squeeze"
     elif "olex2" in base.lower():
