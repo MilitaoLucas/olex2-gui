@@ -398,7 +398,7 @@ t:weight_toggle{
         bgcolor="GetVar(HtmlTableFirstcolColour)"
         name="SET_SNUM_REFINEMENT_UPDATE_WEIGHT"
         checked="spy.GetParam('snum.refinement.update_weight')"
-        onclick="spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))>>>>spy.gui.tools.weightGuiDisplay()"
+        onclick="spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))>>spy.gui.tools.weightGuiDisplay()>>html.update"
         manage="false"
         disabled="false"
         custom="GetVar(custom_button);arrow_width: 20"
