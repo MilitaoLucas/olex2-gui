@@ -974,7 +974,7 @@ def user_input_weight():
   current_weight = olx.Ins("weight")
   if current_weight == "n/a":
     current_weight = 0.2
-    if OV.IsEDData:
+    if OV.IsEDData():
       current_weight = 0.05
   res = OV.GetUserInput(1,"Weight", current_weight)
   if res:
