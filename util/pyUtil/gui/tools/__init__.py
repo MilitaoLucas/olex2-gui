@@ -912,26 +912,6 @@ def weightGuiDisplay():
     for i in range(length_current - len(suggested_weight)):
       suggested_weight.append(0)
 
-  #if OV.GetParam('snum.refinement.update_weight') == False:
-    #for i in range(length_current):
-      #weight = current_weight[i]
-      #try:
-        #weight = f"{float(current_weight[i]):.2f}"
-      #except:
-        #pass
-      #name = f"Weight_{i + 1}"
-      #d['curr'] = weight
-      #d['sugg'] = "--"
-      #d['width'] = width
-      #d['name'] = name
-      #d['fg'] = '#000000'
-      #d['bg'] = gui_light_grey
-      #d['click'] = "editins"
-      #weight_display += gui.tools.TemplateProvider.get_template('weight_button', force=debug) % d
-      #if OV.IsControl(name):
-        #OV.SetControlValue(name, "%(curr)s | %(sugg)s" % d)
-        #OV.SetControlFG(name, "%(fg)s" % d)
-
   if not OV.GetParam('snum.refinement.weighting_scheme', None):
     OV.SetParam('snum.refinement.weighting_scheme', 'default')
   if 'shelx' not in OV.GetParam('snum.refinement.weighting_scheme').lower() and 'default' not in OV.GetParam('snum.refinement.weighting_scheme').lower():
@@ -965,8 +945,10 @@ def weightGuiDisplay():
       curr = (_ % curr).lstrip('0')
       sugg = (_ % sugg).lstrip('0')
       name = f"Weight_{i + 1}"
-      click = "editins"
-
+      if OV.GetParam('snum.refinement.update_weight'):
+        click = "UpdateWght>>spy.gui.tools.weightGuiDisplay()"
+      else:
+        click = "spy.gui.tools.user_input_weight()>>spy.gui.tools.weightGuiDisplay()"
       d = {'curr': curr,
            'sugg': sugg,
            'fg': colour,
@@ -987,6 +969,19 @@ def weightGuiDisplay():
   return weight_display
 
 OV.registerFunction(weightGuiDisplay, True, "gui.tools")
+
+def user_input_weight():
+  current_weight = olx.Ins("weight")
+  if current_weight == "n/a":
+    current_weight = 0.2
+    if OV.IsEDData():
+      current_weight = 0.05
+  res = OV.GetUserInput(1,"Weight", current_weight)
+  if res:
+    args = list(map(float, res.split()))
+    olx.UpdateWght(*args)
+  
+OV.registerFunction(user_input_weight, True, "gui.tools")
 
 def number_non_hydrogen_atoms():
   return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H', 'Q'))
