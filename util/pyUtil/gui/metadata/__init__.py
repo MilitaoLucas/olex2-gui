@@ -132,11 +132,10 @@ def make_no_conflicts_gui(resolved, some_remain=False):
   if len(resolved) > 1:
     txt += '''
 <a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
-  if OV.IsPopup('conflicts') == "true" and not some_remain:
+  if OV.IsPopup('conflicts') and not some_remain:
     OV.EndModal('conflicts', 0)
   wFilePath_gui = r"conflicts_html_window.htm"
   OV.write_to_olex(wFilePath_gui, "<tr><td>%s</td></tr>" %txt)
-
 
 def conflicts(popout='auto', d=None):
   if popout == 'true':
@@ -269,11 +268,11 @@ def conflicts(popout='auto', d=None):
     box_width = screen_width - box_x
     box_height = screen_height - box_y
     main_spacer = box_height - 300
-    if OV.IsPopup('conflicts') == "false":
+    if not OV.IsPopup('conflicts'):
       olx.Popup('conflicts', '%s' %wFilePath,
        b="tcr",  t="CIF Conflicts",
        w=box_width, h=box_height, x=box_x, y=box_y, s=False)
-      OV.ShowModal('conflicts', True)
+      OV.ShowModal('conflicts')
     else:
       OV.UpdateHtml('conflicts')
   else:
