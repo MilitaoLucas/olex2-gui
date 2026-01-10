@@ -128,7 +128,10 @@ class hydrogen_atom_constraints_customisation(object):
 
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
-      if j in self.src.constrained_site_indices: continue
+      if j in self.src.constrained_site_indices:
+        continue
+      if scatterers[j].scattering_type in ('H', 'D'):
+        continue
       b_part = self.olx_atoms[j]['part']
       if part != 0 and b_part != 0 and b_part != part:
         excluded_sites.append(b)
