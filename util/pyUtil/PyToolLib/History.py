@@ -221,7 +221,7 @@ class History(ArgumentParser):
   def revert_history(self, node_index):
     node = tree._full_index.get(node_index)
     assert node is not None
-    if node.is_root:
+    if node.is_root or node == tree.active_node:
       return
     tree.active_node = node
     node.set_params()

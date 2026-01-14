@@ -2606,7 +2606,7 @@ def label_rsa():
     rsa = a.get('rsa', None)
     if rsa:
       args.append("%s=%s*%s" % (a['label'], a['label'], rsa))
-  if args:
+  if OV.HasGUI() and args:
     olx.Label(*args, a=True)
 
 OV.registerFunction(label_rsa, False, "tools")

@@ -549,8 +549,9 @@ def FixFree(target):
     olx.Run("sel -u>>sel $H>>free Uiso")
   elif target == "AFIX":
     olx.Run("kill $H>>HAdd")
-  olx.Labels(f=True, h=True, a=True, r=True)
-  GetNParams()
+  if OV.HasGUI():
+    olx.Labels(f=True, h=True, a=True, r=True)
+    GetNParams()
 
 olex.registerFunction(FixFree, False, "gui")
 

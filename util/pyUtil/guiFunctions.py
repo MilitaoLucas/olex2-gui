@@ -223,6 +223,7 @@ class GuiFunctions(object):
   @gui_only()
   def SetGrad(self, f=None):
     from ImageTools import IT
+    from olexFunctions import OV
     l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
     v = []
     for i in range(4):
