@@ -91,7 +91,7 @@ class Peanut():
     self.old_arad = -1
     self.old_brad = -1
 
-    print("Init sucessfull")
+    print("Init successfull")
     
   def make_diff_cif(self, cif1, cif2, out=None):
     """
