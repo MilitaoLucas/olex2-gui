@@ -820,7 +820,7 @@ b"""
        b="t",  t="Licence agreement",
        x=sz[0] + sz[2]/2 - w/2, y=sz[1] + sz[3]/2 - h/2,
        w=w, h=h, s=False)
-    res = OV.ShowModal("module_licence", True)
+    res = OV.ShowModal("module_licence")
     olex.writeImage("module_licence_content", b"", 0)
     olex.writeImage("module_licence", b"", 0)
     if int(res) != 1:

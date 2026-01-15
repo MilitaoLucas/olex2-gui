@@ -145,7 +145,7 @@
       <cmd5 "file">
       <cmd5 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
       <cmd6 "if strcmp(%2,'-1') then None else spy.SetMaxPeaks(%2)">
-      <cmd10 "spy.RunRefinementPrg()">
+      <cmd10 "spy.refine.do_refine">
     >
   >
 >

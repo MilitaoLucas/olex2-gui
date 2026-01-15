@@ -4194,9 +4194,8 @@ class HealthOfStructure():
 
       else:
         l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','hooft_str']
-        if not OV.GetParam('snum.refinement.hooft_str'):
-          if not OV.GetHeaderParam('ED.z.value'):
-            l.remove("hooft_str")
+        if not OV.IsEDData() and not OV.GetParam('snum.refinement.hooft_str'):
+          l.remove("hooft_str")
     else:
       self.scope = "hkl"
       ## If there is no CIF information and no hkl file, we don't have stats, but still have {'IsCentrosymmetric} as a single item
@@ -4228,21 +4227,20 @@ class HealthOfStructure():
           if OV.IsEDData():
             OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), ".")
           else:
-            hooft_src = "Flack"
+            hooft_src = "Hooft"
             if item == 'hooft_str':
               try:
-                value = OV.get_cif_item('_refine_ls_abs_structure_Flack')
                 value = olx.Cif('_refine_ls_abs_structure_Flack')
                 _ = olx.Cif('_refine_ls_abs_structure_details')
-
                 if "parsons" in _.lower():
                   hooft_src = "Parsons"
                 elif "hooft" in _.lower():
                   hooft_src = "Hooft"
-                OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
               except:
                 value = OV.GetParam('snum.refinement.%s' %item)
-
+              finally:
+                OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
+ 
         if self.is_CIF:
           try:
             value = float(olx.Cif(item))

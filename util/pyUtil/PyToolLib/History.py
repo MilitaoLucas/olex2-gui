@@ -30,7 +30,7 @@ class HistoryFiles(object):
     for f in files:
       if not os.path.exists(f):
         continue
-      ext = os.path.splitext(f)[1]
+      ext = os.path.splitext(f)[1].lower()
       if ext ==".hkl":
         self.hkl = f
       elif ext == ".cif_od":
@@ -221,7 +221,7 @@ class History(ArgumentParser):
   def revert_history(self, node_index):
     node = tree._full_index.get(node_index)
     assert node is not None
-    if node.is_root:
+    if node.is_root or node == tree.active_node:
       return
     tree.active_node = node
     node.set_params()
