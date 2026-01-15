@@ -30,7 +30,7 @@ class HistoryFiles(object):
     for f in files:
       if not os.path.exists(f):
         continue
-      ext = os.path.splitext(f)[1]
+      ext = os.path.splitext(f)[1].lower()
       if ext ==".hkl":
         self.hkl = f
       elif ext == ".cif_od":
