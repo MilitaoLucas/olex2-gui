@@ -115,7 +115,6 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     else:
       print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
       print("Performing refinement without RI fit!")
-      time.sleep(10)
   elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "TFVC":
     args.append("-TFVC")
   elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "Becke":
@@ -494,16 +493,6 @@ def deal_with_parts():
     olex.m("showp")
     return result, groups
 OV.registerFunction(deal_with_parts, False, 'NoSpherA2')
-
-def check_for_matching_fcf():
-  p = OV.FilePath()
-  name = OV.ModelSrc()
-  fcf = os.path.join(p,name + '.fcf')
-  if os.path.exists(fcf):
-    return True
-  else:
-    return False
-OV.registerFunction(check_for_matching_fcf, False, 'NoSpherA2')
 
 def check_for_matching_wfn():
   p = OV.FilePath()
