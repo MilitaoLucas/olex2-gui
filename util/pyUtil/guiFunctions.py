@@ -60,11 +60,11 @@ class GuiFunctions(object):
 
   @gui_only()
   def ShowModal(self, name):
-    olx.html.ShowModal(name, True)
+    return olx.html.ShowModal(name, True)
 
   @gui_only()
-  def EndModal(self, name):
-    olx.html.ShowModal(name, False)
+  def EndModal(self, name, value):
+    return olx.html.EndModal(name, value)
 
   @gui_only()
   def IsHtmlItem(self, name):
