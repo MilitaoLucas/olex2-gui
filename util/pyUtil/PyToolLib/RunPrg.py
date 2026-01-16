@@ -883,9 +883,9 @@ OV.registerFunction(run_auto_vss, False, 'runprg')
 def do_refine():
   rpg = RunRefinementPrg()
   if rpg.refinement_has_failed:
-    print("!!! The refinement has failed")
+    #print("\n>> There is a note from the refinement program for you to consider:")
     for line in rpg.refinement_has_failed:
-      print(line)
+      print(f"-- {line}")
       return
 
   if OV.IsEDData():
