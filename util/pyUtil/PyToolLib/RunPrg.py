@@ -447,7 +447,7 @@ class RunSolutionPrg(RunPrg):
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
-  
+
 class RunRefinementPrg(RunPrg):
   running = None
 
@@ -882,11 +882,8 @@ OV.registerFunction(run_auto_vss, False, 'runprg')
 
 def do_refine():
   rpg = RunRefinementPrg()
-  if rpg.refinement_has_failed:
-    #print("\n>> There is a note from the refinement program for you to consider:")
-    for line in rpg.refinement_has_failed:
-      print(f"-- {line}")
-      return
+  if rpg.terminate:
+    return
 
   if OV.IsEDData():
     if OV.GetHeaderParamBool('ED.z.auto_after_refine', True) \
@@ -901,7 +898,7 @@ def do_refine():
       OV.SetParam('snum.refinement.flack_str', "ED")
       OV.SetHeaderParam('ED.z.value', "ED")
       return
-  
+
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(do_refine, True, 'refine')
