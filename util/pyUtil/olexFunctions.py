@@ -371,7 +371,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         OV.SetControlValue(ctrl_name,0, check=False)
 
     if max_peaks != 0 and auto_peaks != max_peaks:
-      OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks, check=False)
+      OV.SetParam('snum.refinement.manual_q_peak_override', max_peaks)
       if OV.IsControl(ctrl_name):
         OV.SetControlBG(ctrl_name,OV.GetParam('gui.red').hexadecimal, check=False)
         OV.SetControlFG(ctrl_name, '#ffffff', check=False)
