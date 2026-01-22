@@ -826,7 +826,7 @@ class ImageTools(FontInstances):
 
   def get_text_modifications(self):
     if self.translate:
-      self.txt = OV.Translate("%%%s%%" % self.txt.strip())  # #Language
+      self.txt = OV.Translate(self.txt.strip())  # #Language
     if self.titleCase:
       self.txt = self.txt.title()
     if self.lowerCase:
@@ -885,7 +885,7 @@ class ImageTools(FontInstances):
                          font_size=11,
                          font_colour="#000000",
                          align="left",
-                         max_width=1000,
+                         max_width=3000,
                          image_size=None,
                          titleCase=False,
                          lowerCase=False,
@@ -940,28 +940,30 @@ class ImageTools(FontInstances):
       txt_in = txt.split()
 
       for word in txt_in:
-        wX, wY = get_text_size(draw, word, font=font)
-        wXT += wX
         if wXT < max_width-1:
+          wX, wY = get_text_size(draw, word, font=font)
+          wXT += wX
           t += " %s" % word
         else:
           txt_l.append(t.strip())
           wXT = 0
-          t = "%s" % word
+          t = word
       txt_l.append(t.strip())
+
     else:
       txt = self._shorten_text(txt, draw, 0, max_width, font)
 
-    if "</p>" in txt:
-      self.txt = txt
-      self.print_html_to_draw()
-      return
-    elif '<br>' in txt:
-      txt = txt.split('<br>')
-      txt_l = txt
-    else:
-      if txt not in txt_l:
-        txt_l.append(txt)
+    if not txt_l:
+      if "</p>" in txt:
+        self.txt = txt
+        self.print_html_to_draw()
+        return
+      elif '<br>' in txt:
+        txt = txt.split('<br>')
+        txt_l = txt
+      else:
+        if txt not in txt_l:
+          txt_l.append(txt)
 
     if not self.abort:
       if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != str:

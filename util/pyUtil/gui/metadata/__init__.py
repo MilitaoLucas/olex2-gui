@@ -88,7 +88,6 @@ def sources():
         if os.path.exists(filePath):
           del list_l[1:]
           break
-
     else:
       del list_l[list_l.index(d)]
 
@@ -102,7 +101,7 @@ def sources():
 conflic_d = None
 
 def add_resolved_conflict_item_to_phil(item, value):
-  l = OV.GetParam('snum.metadata.resolved_conflict_items')
+  l = OV.GetParam('snum.metadata.resolved_conflict_items', [])
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
   OV.set_cif_item(item, value.replace("<br>", "\n").replace('\\"', '"'))
@@ -114,7 +113,7 @@ def resolve_all(idx):
   global conflict_d
   idx = int(idx)
   key = conflict_d['sources'][idx]
-  l = OV.GetParam('snum.metadata.resolved_conflict_items')
+  l = OV.GetParam('snum.metadata.resolved_conflict_items', [])
   for i,v in conflict_d.items():
     if not i.startswith('_'): continue
     l.append(i)
@@ -131,7 +130,7 @@ def make_no_conflicts_gui(resolved, some_remain=False):
     txt = "<font color='green'><b>All conflicts are resolved</b></font>"
   if len(resolved) > 1:
     txt += '''
-<a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
+<a href='spy.extractcifinfo.reset_conflicts()'>Reset Previously Resolved Conflicts</a>'''
   if OV.IsPopup('conflicts') and not some_remain:
     OV.EndModal('conflicts', 0)
   wFilePath_gui = r"conflicts_html_window.htm"
@@ -140,7 +139,7 @@ def make_no_conflicts_gui(resolved, some_remain=False):
 def conflicts(popout='auto', d=None):
   if popout == 'true':
     popout = True
-  resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
+  resolved = OV.GetParam('snum.metadata.resolved_conflict_items', [])
   head_colour = "#005096"
   col_even = "#cdcdcd"
   col_odd = "#dedede"

@@ -447,7 +447,7 @@ class RunSolutionPrg(RunPrg):
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
-  
+
 class RunRefinementPrg(RunPrg):
   running = None
 
@@ -882,26 +882,22 @@ OV.registerFunction(run_auto_vss, False, 'runprg')
 
 def do_refine():
   rpg = RunRefinementPrg()
-  if rpg.refinement_has_failed:
-    print("!!! The refinement has failed")
-    for line in rpg.refinement_has_failed:
-      print(line)
-      return
+  if rpg.terminate:
+    if OV.IsEDData():
+      if OV.GetHeaderParamBool('ED.z.auto_after_refine', True) \
+         and OV.GetHeaderParam('ED.refinement.method', 'Kinematic') == 'N-Beam' \
+         and OV.IsAcentric() \
+         and not OV.GetHeaderParamBool("ED.z.refine_after_inversion"):
+        OV.GetACI().EDI.gui_compute_enantiomers()
+      else:
+        if debug:
+          print("Skipping Hooft parameter evaluation for ED data")
+        OV.SetParam('snum.refinement.hooft_str', "ED")
+        OV.SetParam('snum.refinement.flack_str', "ED")
+        OV.SetHeaderParam('ED.z.value', "ED")
+        return
+    return
 
-  if OV.IsEDData():
-    if OV.GetHeaderParamBool('ED.z.auto_after_refine', True) \
-       and OV.GetHeaderParam('ED.refinement.method', 'Kinematic') == 'N-Beam' \
-       and OV.IsAcentric() \
-       and not OV.GetHeaderParamBool("ED.z.refine_after_inversion"):
-      OV.GetACI().EDI.gui_compute_enantiomers()
-    else:
-      if debug:
-        print("Skipping Hooft parameter evaluation for ED data")
-      OV.SetParam('snum.refinement.hooft_str', "ED")
-      OV.SetParam('snum.refinement.flack_str', "ED")
-      OV.SetHeaderParam('ED.z.value', "ED")
-      return
-  
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(do_refine, True, 'refine')

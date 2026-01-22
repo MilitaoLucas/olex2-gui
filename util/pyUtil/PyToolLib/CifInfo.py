@@ -411,14 +411,8 @@ class ExtractCifInfo(CifTools):
       return
     super(ExtractCifInfo, self).__init__()
     self.state_file = os.path.join(OV.StrDir(), "%s.matacif_cache.pickle" %OV.FileName())
-    if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
-      evaluate_conflicts = True
-    else:
-      evaluate_conflicts = False
-    if run or repr(run).lower() == "true":
-      run= True
-    else:
-      run = False
+    evaluate_conflicts = OV.get_bool_from_any(evaluate_conflicts)
+    run = OV.get_bool_from_any(run)
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
     self.computing_citations_d = {}
@@ -439,16 +433,23 @@ class ExtractCifInfo(CifTools):
         self.metacifFiles = MetacifFiles()
 
     self.evaluate_conflicts=evaluate_conflicts
-    OV.registerFunction(self.conflict_evaluation,True,'extractcifinfo')
+    OV.registerFunction(self.conflict_evaluation, True, 'extractcifinfo')
+    OV.registerFunction(self.reset_conflicts, True, 'extractcifinfo')
     if run:
       self.run()
     olx.cif_model = self.cif_model
+
+  def reset_conflicts(self):
+    if os.path.exists(self.state_file):
+      os.remove(self.state_file)
+    OV.SetParam("snum.metadata.resolved_conflict_items","[]")
+    olex.m("spy.ExtractCifInfo(True,True)")
+    OV.UpdateHtml()
 
   def run(self):
     import iotbx.cif
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
-    basename = self.filename
     path = self.filepath
 
     import History
@@ -706,6 +707,24 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
   def read_files(self, path, save_state):
     all_sources_d = {}
     versions = self.get_def()
+
+    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA', 'crystal_clear']
+    for manu_cif in manu_cifs:
+      p, pp, update = self.sort_out_path(path, manu_cif)
+      if p:
+        if update:
+          try:
+            with open(p, 'r') as f:
+              cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
+              self.exclude_cif_items(cif_s)
+              self.update_cif_block(cif_s, force=False)
+              all_sources_d[p] = cif_s
+          except Exception as e:
+            print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
+        if save_state:
+          pickle.dump(self.metacifFiles, open(self.state_file, "wb"))
+        return all_sources_d # the only file
+
     ##THINGS IN CIF FORMAT
     p, pp, update = self.sort_out_path(path, "smart")
     if update:
@@ -808,41 +827,6 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
       except:
         print("Error reading pcf file %s" %p)
 
-    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA']
-    for manu_cif in manu_cifs:
-      p, pp, update  = self.sort_out_path(path, manu_cif)
-      if update:
-        try:
-          with open(p, 'r') as f:
-            cif_s = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
-            self.exclude_cif_items(cif_s)
-            self.update_cif_block(cif_s, force=False)
-            all_sources_d[p] = cif_s
-        except Exception as e:
-          print("Error reading %s CIF %s. The error was %s" %(manu_cif, p, e))
-
-
-    # Rigaku data collection CIF
-    p, pp, update = self.sort_out_path(path, "crystal_clear")
-    sidefile = False
-    if update:
-      try:
-        if sidefile: # what is this supposed to be???
-          ciflist = OV.GetCifMergeFilesList()
-          if p not in ciflist and os.path.exists(p):
-            ## Add this file to list of merged files
-            import gui
-            gui.report.publication.add_cif_to_merge_list.__func__(p)
-        else:
-          with open(p, 'r') as f:
-            crystal_clear = list(iotbx.cif.reader(input_string=f.read()).model().values())[0]
-            self.exclude_cif_items(crystal_clear)
-          self.update_cif_block(crystal_clear, force=False)
-          all_sources_d[p] = crystal_clear
-
-      except:
-        print("Error reading Rigaku CIF %s" %p)
-
     if save_state:
       pickle.dump(self.metacifFiles, open(self.state_file, "wb"))
     return all_sources_d
@@ -883,10 +867,9 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
           k_l.add(k)
     self.conflict_d.setdefault('sources',l)
 
-    resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
+    resolved = OV.GetParam('snum.metadata.resolved_conflict_items', [])
     show_all_info = OV.GetParam('snum.metadata.show_all_cif_sources',False)
 
-    have_conflicts = False
     already_resolved = 0
     conflict_count = 0
     for k in k_l:
@@ -939,11 +922,9 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
       print("All %s conflicts have been resolved" %(conflict_count))
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
-# o: what is this supposed to do?
-#    elif show_all_info:
-#      print "There are no conflicts. All CIF info is shown in the pop-up window."
-#      from gui.metadata import conflicts
-#      conflicts(True, self.conflict_d)
+    elif show_all_info:
+      from gui.metadata import conflicts
+      conflicts(True, self.conflict_d)
 
     else:
       wFilePath = r"conflicts_html_window.htm"
@@ -1195,7 +1176,8 @@ If more than one file is present, the path of the most recent file is returned b
       returnvalue = info[0]
     if returnvalue:
       returnvalue = (OV.standardizePath(returnvalue[1]), returnvalue[0])
-    return returnvalue[0], pp, returnvalue[1] != curr_date
+    update = False if not returnvalue[0] else returnvalue[1] != curr_date
+    return returnvalue[0], pp, update
 
   def get_def(self):
     versions = self.versions
