@@ -255,7 +255,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
   else:
-    args.append("-wfn")
+    if wfn_file.endswith("toml"):
+      args.append("-occ")
+    else:
+      args.append("-wfn")
     args.append(wfn_file)
     args.append("-cif")
     args.append(cif)
@@ -299,6 +302,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       print("A problem with pyl is encountered, aborting.")
       return
     p = subprocess.Popen(args)
+  while p.poll() is None:
+    olx.Refresh()
 
   out_fn = "NoSpherA2.log"
 
@@ -544,7 +549,23 @@ def software():
   return t
 
 def org_min():
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.method', "r2scan")
+    OV.SetParam('snum.NoSpherA2.basis_name',"3-21g")
+    olex.m("html.Update()")
+    return
+
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
+  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
+  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
+  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
+  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
+  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.Relativistic',False)
+
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
   elif "ORCA" in software():
@@ -554,19 +575,16 @@ def org_min():
       OV.SetParam('snum.NoSpherA2.method', "PBE")
   else:
     OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
 
 def org_small():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"def2-svp")
+    OV.SetParam('snum.NoSpherA2.method', "r2scan")
+    olex.m("html.Update()")
+    return
+
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -590,6 +608,12 @@ def org_small():
 OV.registerFunction(org_small, False, "NoSpherA2")
 
 def org_final():
+  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"cc-pvtz")
+    OV.SetParam('snum.NoSpherA2.basis_name',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -608,11 +632,15 @@ def org_final():
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
   OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(org_final, False, "NoSpherA2")
 
 def light_min():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"3-21g")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -636,6 +664,12 @@ def light_min():
 OV.registerFunction(light_min, False, "NoSpherA2")
 
 def light_small():
+  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"def2-svp")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -654,11 +688,15 @@ def light_small():
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
   OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
 
 def light_final():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"def2-qzvpp")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -677,11 +715,15 @@ def light_final():
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
   OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(light_final, False, "NoSpherA2")
 
 def heavy_min():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"cc-pvtz")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-SVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -705,6 +747,11 @@ def heavy_min():
 OV.registerFunction(heavy_min, False, "NoSpherA2")
 
 def heavy_small():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"cc-pvqz")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
@@ -728,6 +775,11 @@ def heavy_small():
 OV.registerFunction(heavy_small, False, "NoSpherA2")
 
 def heavy_final():
+  if "OCC" in software():
+    OV.SetParam('snum.NoSpherA2.basis_name',"cc-pvdz-f12")
+    OV.SetParam('snum.NoSpherA2.method',"r2scan")
+    olex.m("html.Update()")
+    return
   OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
   if "Tonto" in software():
     OV.SetParam('snum.NoSpherA2.method', "B3LYP")
