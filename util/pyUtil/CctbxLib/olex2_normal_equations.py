@@ -110,7 +110,7 @@ def normal_equation_class():
       self.step_info['_refine_ls_R_factor_gt'] = R1_4sig
       self.step_info['_refine_ls_wR_factor_ref'] = self.wR2()
       self.step_info['_refine_ls_goodness_of_fit_ref'] = self.goof()
-      
+
       #if OV.IsControl('R1_GUI'):
         #OV.SetControlValue('R1_GUI', f"{R1_4sig * 100:.2f}%")
 
@@ -325,6 +325,7 @@ from scitbx.lstbx import normal_eqns_solving
 class iterations_with_shift_analysis(normal_eqns_solving.iterations):
   convergence_as_shift_over_esd = 1e-3
   max_ls_shift_over_su = None
+  iteration_listeners = []
 
   def analyse_shifts(self, limit_shift_over_su=None):
     if self.max_ls_shift_over_su is not None:
@@ -372,6 +373,10 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     self.max_ls_shift_over_su = None
     self.max_shift_for = None
 
+  def on_cycle_completion(self, iteration, n_iterations):
+    for l in iterations_with_shift_analysis.iteration_listeners:
+      l(iteration, n_iterations)
+
 class naive_iterations_with_damping_and_shift_limit(
     normal_eqns_solving.naive_iterations_with_damping,
     iterations_with_shift_analysis):
@@ -396,6 +401,7 @@ class naive_iterations_with_damping_and_shift_limit(
       if timer:
         print("-- " + "{:10.5f}".format(t2-t1) + " for reset+build_up")
         print("-- " + "{:10.5f}".format(time.time()-t2) + " for damping+ls_solve+step_forward")
+      self.on_cycle_completion(self.n_iterations, self.n_max_iterations)
       self.n_iterations += 1
     self.non_linear_ls.on_completion()
     if timer:
@@ -443,6 +449,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       h = self.non_linear_ls.step()
       expected_decrease = 0.5*h.dot(self.mu*h - g)
       self.non_linear_ls.step_forward()
+      self.on_cycle_completion(self.n_iterations, self.n_max_iterations)
       self.n_iterations += 1
       self.non_linear_ls.build_up(objective_only=True)
       objective_new = self.non_linear_ls.objective()
