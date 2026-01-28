@@ -110,6 +110,9 @@ def normal_equation_class():
       self.step_info['_refine_ls_R_factor_gt'] = R1_4sig
       self.step_info['_refine_ls_wR_factor_ref'] = self.wR2()
       self.step_info['_refine_ls_goodness_of_fit_ref'] = self.goof()
+      
+      OV.SetParam('snum.refinement.last_R1', "%.4f" %self.step_info['_refine_ls_R_factor_gt'])
+      OV.SetParam('snum.refinement.last_wR2', "%.4f" %self.step_info['_refine_ls_wR_factor_ref'])
 
       #if OV.IsControl('R1_GUI'):
         #OV.SetControlValue('R1_GUI', f"{R1_4sig * 100:.2f}%")
