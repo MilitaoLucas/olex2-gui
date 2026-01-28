@@ -123,7 +123,9 @@ class Graph(ArgumentParser):
     # added this to fix functionality where it is used!!!
     self.gui_green = self.guiParams.green.hexadecimal
 
-  def plot_function(self, function, locals=None, width=2, n_points=50, fill="#ababab"):
+  def plot_function(self, function, locals=None, width=2, n_points=80, fill=None):
+    if not fill:
+      fill = self.function_params[self.function_counter].colour.rgb
     width *= self.scale
     if locals is None:
       locals = {}
