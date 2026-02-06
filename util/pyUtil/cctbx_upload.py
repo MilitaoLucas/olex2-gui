@@ -58,8 +58,8 @@ build_def['win32-64bit'] += build_def['win32-32bit']
 build_def['win32-64bit'] += build_def['win32-64bit-next']
 
 build_def['linux-64bit'] += build_def['linux-64bit-next']
-if platform.platform() == "arm":
-  build_def['darwin-64bit'] == build_def['darwin-64bit-arm']
+if platform.processor() == "arm":
+  build_def['darwin-64bit'] = build_def['darwin-64bit-arm']
 else:
   build_def['darwin-64bit'] += build_def['darwin-64bit-next']
 
