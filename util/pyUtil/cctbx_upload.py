@@ -36,6 +36,9 @@ build_def = {
   'darwin-64bit-next':
     (('~/build/svn/cctbx/build_mac64_py313/', '~/build/svn/cctbx/modules/cctbx_project/',
     '/tmp/cctbx/', 'cctbx-mac64-next.zip', '-j3'),),
+  'darwin-64bit-arm':
+    (('~/build/repo/cctbx/build/', '~/build/repo/cctbx/modules/cctbx_project/',
+    '/tmp/cctbx/', 'cctbx-mac64-arm.zip', '-j15'),),
 
   'win32-32bit':
     [('d:/devel/cctbx/cctbx_latest/build_win32_py38/', 'd:/devel/cctbx/cctbx_latest/modules/cctbx_project/',
@@ -55,7 +58,10 @@ build_def['win32-64bit'] += build_def['win32-32bit']
 build_def['win32-64bit'] += build_def['win32-64bit-next']
 
 build_def['linux-64bit'] += build_def['linux-64bit-next']
-build_def['darwin-64bit'] += build_def['darwin-64bit-next']
+if platform.platform() == "arm":
+  build_def['darwin-64bit'] == build_def['darwin-64bit-arm']
+else:
+  build_def['darwin-64bit'] += build_def['darwin-64bit-next']
 
 def compile(_platform):
   cwd = os.getcwd()

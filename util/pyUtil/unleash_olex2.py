@@ -247,6 +247,16 @@ mac64_next_zip_files = {
   'ac-py313.zip',
 } | portable_zip_files
 
+mac64_arm_zip_files = {
+  'cctbx-mac64-arm.zip',  #cctbx/cctbx_sources,...
+  'olex2-mac64-arm.zip',  #olex2 executable
+  'unirun-mac64.zip',
+  'plgl-mac64-arm.zip',
+  'lib-mac64-arm.zip',
+  'hart-mac64-arm.zip',
+  'ac-py313.zip',
+} | portable_zip_files
+
 lin64_zip_files = {
   'cctbx-linux64.zip',  #cctbx/cctbx_sources,...
   'lib-linux64.zip',    #lib/dlls
@@ -950,6 +960,24 @@ if platforms.get("mac64-next"):
       "zip_name": mac64_next_port_zip_name,
       "port_zips": mac64_next_zip_files,
       "prefix": mac64_next_port_prefix,
+      "extra_files":
+      {
+        bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+        bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+        bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+        bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+      }
+    }
+  )
+  threads.append(t)
+
+if platforms.get("mac64-arm"):
+  t = threading.Thread(target=create_portable_distro,
+    kwargs={
+      "port_props": {mac64_arm_port_name},
+      "zip_name": mac64_arm_port_zip_name,
+      "port_zips": mac64_arm_zip_files,
+      "prefix": mac64_arm_port_prefix,
       "extra_files":
       {
         bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
