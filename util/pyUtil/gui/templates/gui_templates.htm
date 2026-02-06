@@ -364,9 +364,8 @@ $run(Focus)
 -->
 }
 
-t:gui_notification{
+t:_gui_notification{
 <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
-
   <tr>
     <td bgcolor='%(col_bg)s'>
       <font color='%(col_fg)s'><b> %(txt)s </b></font>
@@ -374,6 +373,11 @@ t:gui_notification{
   </tr>
 </table>
 }
+
+t:gui_notification{
+      <font color='%(col_fg)s'><b> %(txt)s </b></font>
+}
+
 
 
 t:weight_total{

@@ -1271,10 +1271,10 @@ def GetTwinLawAndBASF(html=False):
 
   if html:
     if curr_law:
-      txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(
+      txt = "<b><font color='%s'>TWIN LAW %s</font></b>" %(
         OV.GetParam('gui.green_text').hexadecimal, txt)
     else:
-      txt = "<tr><td><b><font color='%s'>HKLF 5 %s</font></b></td></tr>" %(
+      txt = "<b><font color='%s'>HKLF 5 %s</font></b>" %(
         OV.GetParam('gui.green_text').hexadecimal, txt)
   return txt
 OV.registerFunction(GetTwinLawAndBASF)
