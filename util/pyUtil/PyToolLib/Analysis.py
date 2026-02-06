@@ -3889,6 +3889,7 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
+    self.grey = OV.GetParam('gui.grey').hexadecimal
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
@@ -4402,9 +4403,11 @@ class HealthOfStructure():
           have_null = False
         elif raw_val is None:
           have_null = True
+        if OV.GetParam("snum.refinement.max_cycles") == 0:
+          bg_colour = self.grey
 
       if have_null:
-        bg_colour = "#555555"
+        bg_colour = self.grey
         value = "n/a"
       ##========================
 
@@ -4633,8 +4636,6 @@ class HealthOfStructure():
             value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     if item == "MinD":
-#      fill = self.get_bg_colour(item, value_raw)
-#      fill = '#555555'
       value_display_extra = "2Theta=%.1f%s" %(self.theta_max*2,self.deg)
       value_display_extra = IT.get_unicode_characters(value_display_extra)
       fill = '#ffffff'
