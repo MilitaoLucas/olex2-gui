@@ -4400,7 +4400,7 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
-        elif raw_val is None or int(raw_val) < 0:
+        elif raw_val is None:
           have_null = True
 
       if have_null:

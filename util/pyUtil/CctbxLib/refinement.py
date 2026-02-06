@@ -1829,7 +1829,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if not self.objective_only:
       OV.SetParam("snum.refinement.max_shift_over_esd", max_shift_esd)
     else:
-      OV.SetParam("snum.refinement.max_shift_over_esd", -1)
+      OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
