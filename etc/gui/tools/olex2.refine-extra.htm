@@ -98,10 +98,10 @@
 <td align="right">
      <snippet src="gui/snippets/input-combo"
      name="FPFDP"
-     items="Henke<-henke;Sasaki<-sasaki;Brennan<-brennan"
+     items="Auto<-auto;Henke<-henke;Sasaki<-sasaki;Brennan<-brennan"
      readonly="true"
      value="spy.GetParam('snum.smtbx.resonant_form_factor_table')"
-     onchange="spy.SetParam('snum.smtbx.resonant_form_factor_table', html.GetValue('~name~'))" />
+     onchange="GenDisp -force -source=html.GetValue('~name~')>>spy.SetParam('snum.smtbx.resonant_form_factor_table', html.GetValue('~name~'))" />
 </td>
 
 <td width='45%'>

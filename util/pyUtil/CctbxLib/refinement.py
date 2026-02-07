@@ -841,8 +841,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif acta != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
     if write_fcf:
-      list_code = 8 if self.twin_components is not None and\
-          not self.reparametrisation.fc_correction.grad else 4
+      #list_code = 8 if self.twin_components is not None and\
+      #     not self.reparametrisation.fc_correction.grad else 4
+      list_code = 4
       fcf_cif, fmt_str = self.create_fcf_content(list_code=list_code,
         add_weights=True, fixed_format=False)
 
