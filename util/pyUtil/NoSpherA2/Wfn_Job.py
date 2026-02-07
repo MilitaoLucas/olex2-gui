@@ -1,5 +1,7 @@
 import os
 import sys
+from typing import Optional
+
 import olex
 import olx
 import gui
@@ -13,7 +15,10 @@ import subprocess
 
 from olexFunctions import OV
 from utilities import run_with_bitmap, software, is_orca_new
-
+from pathlib import Path
+import extra_utils.tomli as tomli
+import extra_utils.tomli_w as tomli_w
+from extra_utils.utils import find_basis_file
 try:
   p_path = os.path.dirname(os.path.abspath(__file__))
 except Exception as e:
@@ -97,6 +102,8 @@ class wfn_Job(object):
     elif self.software == "xTB" or self.software == "pTB":
       if xyz:
         self.write_xyz_file()
+    elif self.software == "OCC":
+      self.write_occ_input()
     else: 
       print("ERROR: Wavefunction software not recognized.\nPlease select a valid software.\nNo Input file written.")
 
@@ -635,6 +642,82 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if not os.path.exists(os.path.join(self.full_dir,params_filename)):
         OV.SetVar('NoSpherA2-Error', "NoORCAMMFile")
         raise NameError("No MM File for ORCA file generated!")
+
+  def update_gui_occ_parameters(self) -> None:
+    """
+    Updates the parameters on the gui, doesn't write to file.
+    """
+    fdir = Path(self.full_dir)
+    input_fn = fdir / f"{self.name}.toml"
+    with open(input_fn, "rb") as f:
+      inputf_data = tomli.load(f)
+
+    if "threads" in inputf_data:
+      OV.SetParam("snum.NoSpherA2.ncpus", inputf_data["threads"])
+
+    inputf_scf = inputf_data["scf"]
+    if "method" in inputf_scf:
+      OV.SetParam("snum.NoSpherA2.method", inputf_scf["method"])
+
+    if "basis" in inputf_scf:
+        OV.SetParam("snum.NoSpherA2.basis_name", inputf_scf["basis"])
+
+    if "charge" in inputf_scf:
+      OV.SetParam('snum.NoSpherA2.charge', inputf_scf["charge"])
+
+    if "multiplicity" in inputf_scf:
+      OV.SetParam('snum.NoSpherA2.multiplicity', inputf_scf["multiplicity"])
+
+    if "solvent" in inputf_scf:
+      OV.SetParam('snum.NoSpherA2.occ.solvent', inputf_scf["solvent"])
+
+    olx.html.Update()
+
+  def write_occ_input(self, basis_name: Optional[str] = None, method: Optional[str] = None,
+                      ncpus: Optional[int] = None, charge: Optional[int] = None,
+                      mult: Optional[int] = None, solvent: Optional[str] = None) -> None:
+    old_fdir = self.full_dir
+    self.full_dir = Path(self.full_dir) / "olex2" /"Wfn_job"
+    fdir = Path(self.full_dir)
+    self.write_xyz_file()
+    if not os.path.isdir(fdir):
+      os.makedirs(fdir)
+    coordinates_fn = f"{self.name}.xyz"
+    self.input_fn = fdir / f"{self.name}.toml"
+    if os.path.isfile(self.input_fn):
+      with open(self.input_fn, "rb") as f:
+        input_dict = tomli.load(f)
+    else:
+      input_dict = dict(
+        verbosity = 2,
+        scf = dict(
+          spherical=True,
+          output = "fchk"
+        )
+      )
+
+    input_dict["scf"]["input"] = str(coordinates_fn)
+    if basis_name is None:
+      input_dict["scf"]["basis"] = OV.GetParam('snum.NoSpherA2.basis_name')
+
+    if method is None:
+      input_dict["scf"]["method"] = OV.GetParam('snum.NoSpherA2.method')
+
+    if ncpus is None:
+      input_dict["threads"] = int(OV.GetParam('snum.NoSpherA2.ncpus'))
+
+    if charge is None:
+      input_dict["scf"]["charge"] = int(OV.GetParam('snum.NoSpherA2.charge'))
+
+    if mult is None:
+      input_dict["scf"]["multiplicity"] = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+
+    if solvent is None:
+      input_dict["scf"]["solvent"] = OV.GetParam('snum.NoSpherA2.occ.solvent')
+    self.full_dir = old_fdir
+    with open(self.input_fn, "wb") as f:
+      tomli_w.dump(input_dict, f)
+    return
 
   def write_orca_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,strategy=None,convergence=None,part=None, efield=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
@@ -2073,6 +2156,10 @@ ener = cf.kernel()"""
       elif softw == "pySCF":
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
+      elif("occ" in args[0]):
+        src = os.path.join(self.full_dir, self.name + ".owf.fchk")
+      if os.path.isfile(src):
+        shutil.copy(src, self.name + ".owf.fchk")
 
       experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
 

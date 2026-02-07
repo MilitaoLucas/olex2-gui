@@ -1,0 +1,17 @@
+$control_line
+%pal
+  nprocs $ncpus
+end
+%maxcore $maxcore
+$cpcm_block
+$mp2_block
+%coords
+  CTyp xyz
+  charge $charge
+  mult $mult
+  units angs
+  coords
+$coordinates
+end
+$basis_block
+$scf_block

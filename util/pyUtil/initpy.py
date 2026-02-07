@@ -1,4 +1,16 @@
 # initpy.py
+import pydevd_pycharm
+
+print("Connecting to PyCharm debugger...")
+try:
+  pydevd_pycharm.settrace(
+    'localhost',
+    port=5678,
+    suspend=False
+  )
+except:
+  print("Failed to connect to debugger...")
+
 import os, sys, time
 import olex
 

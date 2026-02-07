@@ -40,3 +40,14 @@ util/pyUtil/wingdbstub.py
 *.manifest
 *.key
 *.dll
+/lib/
+/basis_sets/
+/cctbx/
+/_pydevd_bundle/
+/_pydevd_frame_eval/
+/bin/
+/olex2.desktop/
+/pydevd_attach_to_process/
+/sample_data/
+/tests/
+/notebook_testing/

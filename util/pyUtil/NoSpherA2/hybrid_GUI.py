@@ -1,7 +1,136 @@
-import htmlTools
+from functools import lru_cache
+from typing import List, Optional
 
+import htmlTools
+import olx
+from NoSpherA2.olx_gui.components.item_component import Ignore, LabeledGeneralComponent, Filler
+from NoSpherA2.olx_gui.dominate.tags import p, td
 from olexFunctions import OV
 from utilities import make_quick_button_gui, is_disordered
+import ast
+import textwrap
+from utilities import software
+import os
+import sys
+import inspect
+from contextlib import contextmanager
+
+@contextmanager
+def local_chdir(directory: str):
+  """
+  This changes the directory just for the context. So you don't change the global directory of the script
+  """
+  prev_cwd = os.getcwd()
+  os.chdir(directory)
+  try:
+    yield
+  finally:
+    os.chdir(prev_cwd)
+
+@lru_cache(maxsize=None) # This doesn't change, so there is no reason to run it more than once.
+def setup_software_static(exe_pre: str):
+  """The setup_software in NoSpherA2 class is kind of annoying to deal with, so this does the same thing but returns
+  the exe path instead of modifying the class
+  """
+  # Determine platform-specific executable name
+  exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
+  # Changedir to BaseDir() before
+  with local_chdir(OV.BaseDir()):
+    exe_path = olx.file.Which(exe_name)
+  return exe_path
+
+@lru_cache(maxsize=None) # This doesn't change, so there is no reason to run it more than once.
+def get_cpu_list_static():
+  soft = software()
+  import multiprocessing
+  max_cpu = multiprocessing.cpu_count()
+  cpu_list = ['1',]
+  hyperthreading = OV.GetParam('user.refinement.has_HT')
+  if hyperthreading:
+    max_cpu /= 2
+  for n in range(1, int(max_cpu)):
+    cpu_list.append(str(n + 1))
+  # ORCA and Tonto rely on MPI, so only make it available if mpiexec is found
+  if soft == "Tonto" or "ORCA" in soft or soft == "fragHAR":
+    if not os.path.exists(setup_software_static("mpiexec")):
+      return '1'
+  # otherwise allow more CPUs
+  return ';'.join(cpu_list)
+
+def patch_function_inplace(module, func_name, old_text, new_text):
+    # 1. Get the old function object
+    old_func = getattr(module, func_name)
+
+    # 2. Get source and modify it
+    source = inspect.getsource(old_func)
+    new_source = source.replace(old_text, new_text)
+
+    # 3. Compile the new function temporarily
+    # We create a temporary scope to hold the new function
+    temp_scope = module.__dict__.copy()
+    exec(new_source, temp_scope)
+    new_func = temp_scope[func_name]
+
+    # 4. SWAP THE INTERNALS (The Magic Step)
+    # We overwrite the __code__ object of the old function
+    old_func.__code__ = new_func.__code__
+
+def replace_function_in_file(file_path, func_name, new_code):
+    """
+    Replaces a function definition in a file with new code.
+
+    :param file_path: Path to the .py file
+    :param func_name: Name of the function to replace (string)
+    :param new_code: The new source code as a string
+    """
+    # 1. Read the file
+    with open(file_path, "r") as f:
+        source_lines = f.readlines()
+
+    source_text = "".join(source_lines)
+    tree = ast.parse(source_text)
+
+    # 2. Find the target function node
+    target_node = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == func_name:
+            target_node = node
+            break
+
+    if not target_node:
+        raise ValueError(f"Function '{func_name}' not found in {file_path}")
+
+    # 3. Determine Start/End Lines
+    # Handle decorators: if present, the function starts at the first decorator
+    if target_node.decorator_list:
+        start_line = target_node.decorator_list[0].lineno - 1
+    else:
+        start_line = target_node.lineno - 1
+
+    end_line = target_node.end_lineno  # Available in Python 3.8+
+
+    # 4. Handle Indentation
+    # We grab the indentation from the first line of the original function
+    original_indent = source_lines[start_line][: -len(source_lines[start_line].lstrip())]
+
+    # We strip the new code of its own common indentation, then apply the original file's indentation
+    # This ensures that if you paste a top-level function into a class, it gets indented correctly.
+    dedented_new_code = textwrap.dedent(new_code).strip()
+    indented_new_code = textwrap.indent(dedented_new_code, original_indent)
+
+    # 5. Reconstruct the file content
+    # Everything before the function + New Code + Everything after the function
+    new_file_content = (
+        "".join(source_lines[:start_line]) +
+        indented_new_code + "\n" +
+        "".join(source_lines[end_line:])
+    )
+
+    # 6. Write back to disk
+    with open(file_path, "w") as f:
+        f.write(new_file_content)
+
+    print(f"Successfully replaced '{func_name}' in {file_path}")
 
 def begin_new_line(help_label="NoSpherA2_Options_1", scope="1"):
   return f'''<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -18,6 +147,70 @@ def end_line():
     </table>
   </td>
 </tr>'''
+
+_ACTIVE_MANAGER: Optional['LineManager'] = None
+_ACTIVE_LINE: Optional['Line'] = None
+
+class LineManager:
+  def __init__(self):
+    self.lines = []
+    self.combined_strings = ""
+
+  def __enter__(self):
+    global _ACTIVE_MANAGER
+    if _ACTIVE_MANAGER is not None:
+      raise RuntimeError("Nesting LineManagers is not allowed!")
+
+    _ACTIVE_MANAGER = self
+    return self
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    global _ACTIVE_MANAGER
+    _ACTIVE_MANAGER = None
+
+    for line in self.lines:
+      self.combined_strings += line.line_str
+
+  def __str__(self):
+    return self.combined_strings
+
+  def __repr__(self):
+    return str(self)
+
+class Line:
+  def __init__(self, help_label="NoSpherA2_Options_1", scope="1"):
+    self.help_label = help_label
+    self.scope = scope
+    self.line_str = ""
+    self.components = []
+
+    if _ACTIVE_MANAGER is None:
+      raise RuntimeError("Called Line() outside of a LineManager!")
+
+    _ACTIVE_MANAGER.lines.append(self)
+
+  def __enter__(self):
+    global _ACTIVE_LINE
+    if _ACTIVE_LINE is not None:
+      raise RuntimeError("Nesting Lines is not allowed!")
+
+    self.line_str = begin_new_line(self.help_label, self.scope)
+    _ACTIVE_LINE = self
+    return self
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    global _ACTIVE_LINE
+    _ACTIVE_LINE = None
+
+    for comp in self.components:
+      self.line_str += comp
+    self.line_str += end_line()
+
+def lw(component_str: str):
+  if _ACTIVE_LINE is None:
+    raise RuntimeError("Called lw() outside of a Line!")
+  _ACTIVE_LINE.components.append(component_str)
+
 
 def input_combo(name,items,value,onchange):
   return f'''<font size="$GetVar('HtmlFontSizeControls')">
@@ -139,6 +332,7 @@ def labeled_spin(name,label,value,onchange,width_label=20, width_spinbox=30, min
       onchange="{onchange}"
     >
   </td>'''
+
 
 def button(name,label,onclick,width=20,hint=""):
   return f'''
@@ -698,6 +892,141 @@ def make_ORCA_GUI(new_ORCA = True):
     t += end_line()
   t += partitioning_scheme_line()
   return t
+
+def make_OCC_GUI():
+  import json
+  from olx_gui.components.table import RowConfig, Row, RowManager
+  from olx_gui.components.item_component import raw, ComboBox, InputSpinner, InputCheckbox, InputLinkButton, Cycle
+  from pathlib import Path
+  rows = RowManager()
+  occ_data_path = Path(OV.BaseDir()) / "occ_data"
+  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  with open(occ_data_path / "basis_list.json", "r") as f:
+    basis: list = json.load(f)
+
+  with open(occ_data_path / "method_list.json", "r") as f:
+    methods: list = json.load(f)
+
+  with open(occ_data_path / "solvent_list.json", "r") as f:
+    solvents: list = json.load(f)
+
+  with rows:
+    config = RowConfig()
+    config.tr3_parameters.pop("bgcolor")
+    with Row("AutoSelect", config=config, help_ext="NoSpherA2_Quick_Buttons"):
+      raw(make_quick_button_gui())
+
+    config.table2_parameters.pop("width")
+    with Row("second", config=config, help_ext="NoSpherA2_Options_1"):
+      ComboBox("NoSpherA2_basis@refine",
+               txt_label="Basis Set",
+               items=f"\"{';'.join(basis)}\"", # Olex2 kind of breaks for some reason with occ basis without double quotes
+               value="spy.GetParam('snum.NoSpherA2.basis_name')",
+               onchange="spy.NoSpherA2.change_basisset(html.GetValue('~name~'))",
+      )
+
+      ComboBox("NoSpherA2_method@refine",
+               txt_label="Method",
+               items=";".join(methods),
+               value="spy.GetParam('snum.NoSpherA2.method')",
+               onchange="spy.SetParam('snum.NoSpherA2.method', html.GetValue('~name~'))",
+               tdwidth="25%"
+      )
+
+      ComboBox("NoSpherA2_cpus@refine",
+               txt_label="CPUs",
+               items=get_cpu_list_static(),
+               value="spy.GetParam('snum.NoSpherA2.ncpus')",
+               onchange="spy.SetParam('snum.NoSpherA2.ncpus', html.GetValue('~name~'))",
+               tdwidth="30%"
+      )
+
+    config.table2_parameters["width"] = "100%"
+    max_cycles = InputSpinner(bgcolor="spy.GetParam(gui.html.input_bg_colour)",
+                          min='1',
+                          txt_label="Max Cycles",
+                          name='SET_SNUM_MULTIPLICITY',
+                          value='$spy.GetParam(snum.NoSpherA2.multiplicity)',
+                          onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))",
+                          width="100%",
+                          hidden=True
+                          )
+    link_button = InputLinkButton(name="link_button",
+                                  value="Update .tsc & .wfn",
+                                  onclick="spy.NoSpherA2.launch() >> html.Update()",
+                                  )
+    with  Row("third", config=config, help_ext="NoSpherA2_Options_2"):
+      InputSpinner("SET_CHARGE",
+                           txt_label="Charge",
+                           value='$spy.GetParam(snum.NoSpherA2.charge)',
+                           onchange='spy.SetParam(snum.NoSpherA2.charge,html.GetValue(~name~))',
+                           width="100%"
+                           )
+      InputSpinner(bgcolor="spy.GetParam(gui.html.input_bg_colour)",
+                                 min='1',
+                                 txt_label="Multiplicity",
+                                 name='SET_SNUM_MULTIPLICITY',
+                                 value='$spy.GetParam(snum.NoSpherA2.multiplicity)',
+                                 onchange="spy.SetParam(snum.NoSpherA2.multiplicity,html.GetValue(~name~))",
+                                 width="100%"
+                   )
+      InputCheckbox(name="Iterative",
+                              txt_label="Iterative",
+                              checked="spy.GetParam('snum.NoSpherA2.full_HAR')",
+                              oncheck="spy.NoSpherA2.toggle_full_HAR()",
+                              bgcolor="GetVar(HtmlTableFirstcolColour)",
+                              onuncheck="spy.NoSpherA2.toggle_full_HAR()",
+                              tdwidth="20%",
+                              label_left=False
+                              )
+      Cycle(max_cycles, link_button, "spy.GetParam('snum.NoSpherA2.full_HAR')")
+    solvationCombo = ComboBox(
+      "NoSpherA2_solv",
+        txt_label="Solvent",
+        items=f"\"{';'.join(solvents)}\"",
+        value="spy.GetParam('snum.NoSpherA2.occ.solvent')",
+        onchange="spy.SetParam('snum.NoSpherA2.occ.solvent', html.GetValue('~name~'))",
+        tdwidth="25%"
+    )
+    fill =  Filler()
+    with Row("line4", config=config, help_ext="NoSpherA2_Options_3"):
+      InputCheckbox(
+        name="H_Aniso",
+        txt_label="H Aniso",
+        checked="spy.GetParam('snum.NoSpherA2.h_aniso')",
+        oncheck="spy.SetParam('snum.NoSpherA2.h_aniso','True')",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.h_aniso','False')",
+      )
+
+      InputCheckbox(
+        name="H_Afix 0",
+        txt_label="No Afix",
+        checked="spy.GetParam('snum.NoSpherA2.h_afix')",
+        oncheck="spy.SetParam('snum.NoSpherA2.h_afix','True')",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.h_afix','False')",
+      )
+
+      InputCheckbox(
+        name="occ_solvation",
+        txt_label="Solvation",
+        checked="spy.GetParam('snum.NoSpherA2.occ.solvation')",
+        oncheck="spy.SetParam('snum.NoSpherA2.occ.solvation','True')>>html.Update",
+        bgcolor="GetVar(HtmlTableFirstcolColour)",
+        onuncheck="spy.SetParam('snum.NoSpherA2.occ.solvation','False')>>html.Update",
+      )
+      Cycle(solvationCombo, fill, "spy.GetParam('snum.NoSpherA2.occ.solvation')")
+
+    with Row("line5", config=config, help_ext="NoSpherA2_Options_3"):
+      InputLinkButton(
+        name="edit_input",
+        value="Edit_OCC_input_file",
+        align="center",
+        bgcolor="#C8C8C9",
+        onclick="spy.NoSpherA2.edit_occ_input()",
+      )
+  return str(rows)
 
 def make_tonto_GUI():
   # Basis Set, Method, CPUs, Memory

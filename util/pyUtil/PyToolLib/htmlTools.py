@@ -342,15 +342,16 @@ def EditGuiItem(OXD,language="English"):
   if not os.path.exists(gui_file):
     return
 
-  rFile = open(gui_file,'r')
-  text = rFile.read()
+  # Python doesn't necessarily close files when they go out of scope
+  with open(gui_file,'r') as rFile:
+    text = rFile.read()
   if not text:
     return
 
   inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
   if inputText and inputText != text:
-    wFile = open(gui_file,'w')
-    wFile.write(inputText)
+    with open(gui_file,'w') as wFile:
+      wFile.write(inputText)
     OV.UpdateHtml()
   else:
     inputText = text
