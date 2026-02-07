@@ -250,7 +250,7 @@ mac64_next_zip_files = {
 mac64_arm_zip_files = {
   'cctbx-mac64-arm.zip',  #cctbx/cctbx_sources,...
   'olex2-mac64-arm.zip',  #olex2 executable
-  'unirun-mac64.zip',
+  'unirun-mac64-arm.zip',
   'plgl-mac64-arm.zip',
   'lib-mac64-arm.zip',
   'hart-mac64-arm.zip',
