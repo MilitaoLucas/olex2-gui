@@ -185,8 +185,8 @@ class GuiFunctions(object):
     return retStr
 
   @gui_only()
-  def UpdateHtml(self, html_name='', force=False):
-    olx.html.Update(html_name)
+  def UpdateHtml(self, html_name='', q=False, force=False):
+    olx.html.Update(html_name, q=q)
 
   @gui_only()
   def HtmlLoad(self, path):
