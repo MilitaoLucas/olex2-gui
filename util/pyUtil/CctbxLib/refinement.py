@@ -841,8 +841,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif acta != "n/a" and "NOHKL" not in acta.upper():
         write_fcf = True
     if write_fcf:
-      list_code = 8 if self.twin_components is not None and\
-          not self.reparametrisation.fc_correction.grad else 4
+      #list_code = 8 if self.twin_components is not None and\
+      #     not self.reparametrisation.fc_correction.grad else 4
+      list_code = 4
       fcf_cif, fmt_str = self.create_fcf_content(list_code=list_code,
         add_weights=True, fixed_format=False)
 
@@ -1829,7 +1830,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if not self.objective_only:
       OV.SetParam("snum.refinement.max_shift_over_esd", max_shift_esd)
     else:
-      OV.SetParam("snum.refinement.max_shift_over_esd", -1)
+      OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())

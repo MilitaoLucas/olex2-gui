@@ -123,7 +123,9 @@ class Graph(ArgumentParser):
     # added this to fix functionality where it is used!!!
     self.gui_green = self.guiParams.green.hexadecimal
 
-  def plot_function(self, function, locals=None, width=2, n_points=50, fill="#ababab"):
+  def plot_function(self, function, locals=None, width=2, n_points=80, fill=None):
+    if not fill:
+      fill = self.function_params[self.function_counter].colour.rgb
     width *= self.scale
     if locals is None:
       locals = {}
@@ -3150,7 +3152,7 @@ class Xobs_Xcalc_plot(Analysis):
 
     if x_obs_omitted and x_obs_omitted.size():
       have_omitted = True
-      self.omit_hkl = xy_plot.omit.get('hkl', None)
+      self.omit_hkl = xy_plot.indices_omitted #.omit.get('hkl', None)
       hkl_omit_n = 0
       if self.omit_hkl:
         self.omit_hkl_str = f"{len(self.omit_hkl)} reflections"
@@ -3177,7 +3179,8 @@ class Xobs_Xcalc_plot(Analysis):
         metadata["idx"] = 2
         data_omitted = True
         data_common = self.get_common_data(xy_plot, metadata)
-        self.data.setdefault('dataset3', data_common)
+        if len(data_common.x) > 0:
+          self.data.setdefault('dataset3', data_common)
     self.draw_fit_line(1, 0, colour="#ababab")
     self.draw_pairs()
     if have_omitted:
@@ -3485,7 +3488,7 @@ class item_vs_resolution_plot(Analysis):
         self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
           hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
-        
+
         write_text = IT.get_unicode_characters("3 sigma line (noise below, data above)")
         self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text=write_text, reverse_x=reverse_x)
         self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
@@ -3886,6 +3889,7 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
+    self.grey = OV.GetParam('gui.grey').hexadecimal
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
@@ -4240,7 +4244,7 @@ class HealthOfStructure():
                 value = OV.GetParam('snum.refinement.%s' %item)
               finally:
                 OV.SetParam('user.diagnostics.%s.%s.display' %(self.scope,item), hooft_src)
- 
+
         if self.is_CIF:
           try:
             value = float(olx.Cif(item))
@@ -4397,11 +4401,13 @@ class HealthOfStructure():
       if item == 'max_shift_over_esd':
         if raw_val == '0' or raw_val == 0:
           have_null = False
-        elif raw_val is None or int(raw_val) < 0:
+        elif raw_val is None:
           have_null = True
+        if OV.GetParam("snum.refinement.max_cycles") == 0:
+          bg_colour = self.grey
 
       if have_null:
-        bg_colour = "#555555"
+        bg_colour = self.grey
         value = "n/a"
       ##========================
 
@@ -4630,8 +4636,6 @@ class HealthOfStructure():
             value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     if item == "MinD":
-#      fill = self.get_bg_colour(item, value_raw)
-#      fill = '#555555'
       value_display_extra = "2Theta=%.1f%s" %(self.theta_max*2,self.deg)
       value_display_extra = IT.get_unicode_characters(value_display_extra)
       fill = '#ffffff'

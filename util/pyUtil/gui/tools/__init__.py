@@ -2077,27 +2077,54 @@ def load_res_from_cif():
 
 OV.registerFunction(load_res_from_cif, False, 'gui.tools')
 
-def set_style_and_scene(style=None, scene=None, src_dir=None, ):
-  if not src_dir or "etc/styles" in src_dir:
+def set_style_and_scene(style=None, scene=None, src_dir=None):
+  ETC_STYLES = os.path.join("etc", "styles")
+
+  # --- resolve source directory ---
+  if not src_dir or ETC_STYLES in src_dir:
     src_dir = OV.GetParam('user.def_style_scene_src_dir')
-    if "etc/styles" in src_dir:
+
+    if ETC_STYLES in src_dir:
       dst_dir = os.path.join(OV.DataDir(), 'styles')
       copy_directory(src_dir, dst_dir)
       src_dir = dst_dir
 
-  if not style:
-    style = OV.GetParam('user.def_style')
-  if not scene:
-    scene = OV.GetParam('user.def_scene')
+  os.makedirs(src_dir, exist_ok=True)
+
+  # --- resolve defaults ---
+  style = style or OV.GetParam('user.def_style')
+  scene = scene or OV.GetParam('user.def_scene')
+
+  # --- persist parameters ---
   OV.SetParam('user.def_style', style)
   OV.SetParam('user.def_scene', scene)
   OV.SetParam('user.def_style_scene_src_dir', src_dir)
-  olex.m('grad false')
-  style_p = os.path.join(src_dir, style + ".glds")
-  scene_p = os.path.join(src_dir, scene + ".glsp")
 
-  olex.m("load style %s" % style_p)
-  olex.m("load scene %s" % scene_p)
+  olex.m('grad false')
+
+  # --- paths ---
+  style_p = os.path.join(src_dir, f"{style}.glds")
+  scene_p = os.path.join(src_dir, f"{scene}.glsp")
+
+  etc_dir = os.path.join(OV.BaseDir(), ETC_STYLES)
+
+  # --- ensure files exist ---
+  if not os.path.exists(style_p):
+    shutil.copyfile(
+          os.path.join(etc_dir, f"{style}.glds"),
+            style_p
+        )
+
+  if not os.path.exists(scene_p):
+    shutil.copyfile(
+          os.path.join(etc_dir, f"{scene}.glsp"),
+            scene_p
+        )
+
+  # --- load ---
+  olex.m(f"load style {style_p}")
+  olex.m(f"load scene {scene_p}")
+
 
 OV.registerFunction(set_style_and_scene, False, 'gui.tools')
 
