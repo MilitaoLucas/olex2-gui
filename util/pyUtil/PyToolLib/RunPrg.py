@@ -478,16 +478,15 @@ class RunRefinementPrg(RunPrg):
       fg = white
       warning_counter = 0
       for i, note in enumerate(self.refinement_has_failed):
-        for note in self.refinement_has_failed:
-          if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
-            bg = green
-            fg = white
-            note += "-Mask INFO exists"
-          if "warning" in note.lower():
-            warning_counter += 1
-          if i > 0 and warning_counter > 1:
-            note = note.strip("Warning:").strip("warning:").strip()
-          notes.append(note)
+        if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
+          bg = green
+          fg = white
+          note += "-Mask INFO exists"
+        if "warning" in note.lower():
+          warning_counter += 1
+        if i > 0 and warning_counter > 1:
+          note = note.strip("Warning:").strip("warning:").strip()
+        notes.append(note)
       msg = " | ".join(notes)
       if warning_counter == len(self.refinement_has_failed):
         bg = orange
