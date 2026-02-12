@@ -375,8 +375,13 @@ class OlexCctbxAdapter(object):
           data.append(one_h_function.f_calc)
         fc = miller_set_.array(data=flex.complex_double(data), sigmas=None)
       else:
+        xs = self.xray_structure()
+        if miller_set_.space_group_number() == 1 and\
+           self.xray_structure() != miller_set_.space_group():
+           #xs = xs.deep_copy()
+           xs = xs.expand_to_p1()
         fc = miller_set_.structure_factors_from_scatterers(
-          self.xray_structure(), algorithm=algorithm).f_calc()
+          xs, algorithm=algorithm).f_calc()
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
