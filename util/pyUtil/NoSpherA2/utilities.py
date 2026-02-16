@@ -119,6 +119,10 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-TFVC")
   elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "Becke":
     args.append("-Becke")
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "MBIS":
+    args.append("-MBIS")
+  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "EMBIS":
+    args.append("-EMBIS")
 
   olex_refinement_model = OV.GetRefinementModel(False)
 

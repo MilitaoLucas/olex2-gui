@@ -292,7 +292,7 @@ def partitioning_scheme_line():
   temp = begin_new_line("NoSpherA2_Options_RIFit") + \
           labeled_combo("NoSpherA2_partitioning_scheme@refine",
                         "Partitioning Scheme",
-                        "'Hirshfeld;RI-Fit;TFVC;Becke'",
+                        "'Hirshfeld;RI-Fit;TFVC;Becke;MBIS;EMBIS'",
                         "spy.GetParam('snum.NoSpherA2.NoSpherA2_Partition')",
                         "spy.SetParam('snum.NoSpherA2.NoSpherA2_Partition', html.GetValue('~name~')) >> html.Update()",
                         width_label=24, width_combo=16)
