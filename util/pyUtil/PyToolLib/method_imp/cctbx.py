@@ -22,8 +22,10 @@ class Method_cctbx_refinement(Method_refinement):
     use_aspherical = False
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
-      html = "Using <font color=$GetVar(gui.blue)><b>spherical </b></font>form factors"
+      html = f"olex2.refine using __spherical__ form factors "
       OV.SetVar('gui_notification', html)
+      import gui
+      gui.set_notification()
       use_aspherical = OV.IsNoSpherA2()
     else:
       self.table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')
@@ -32,7 +34,7 @@ class Method_cctbx_refinement(Method_refinement):
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
       self.table_file_name = OV.GetParam('snum.NoSpherA2.file')
-      html = "smtbx.refine using <font color=$GetVar(gui.green_text)><b>tabulated </b></font>Form Factors from <b>%s</b>" %os.path.basename(self.table_file_name)
+      html = f"olex2.refine using __non-spherical__ form factors from __{os.path.basename(self.table_file_name)}__ "
       OV.SetVar('gui_notification', html)
       if not os.path.exists(self.table_file_name):
         self.table_file_name = None

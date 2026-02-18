@@ -95,14 +95,14 @@ class RefinementChecks(object):
           unreasonable_fdp.append(sc.label)
       if len(unreasonable_fdp) != 0:
         if len(unreasonable_fdp) == 1:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s has strongly deviating f''</a>" % unreasonable_fdp[0])
+          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: %s'>%s has strongly deviating f''</a>" % (OV.GetParam('gui.red'), unreasonable_fdp[0]))
         else:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s have strongly deviating f''</a>" % ",".join(unreasonable_fdp))
+          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: %s'>%s have strongly deviating f''</a>" % (OV.GetParam('gui.red'), unreasonable_fdp[0]))
       if len(unreasonable_fp) != 0:
         if len(unreasonable_fp) == 1:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s has strongly deviating f'</a>" % unreasonable_fp[0])
+          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: %s'>%s has strongly deviating f'</a>" % (OV.GetParam('gui.red'), unreasonable_fdp[0]))
         else:
-          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: white'>%s have strongly deviating f'</a>" % ",".join(unreasonable_fp))
+          self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: %s'>%s have strongly deviating f'</a>" % (OV.GetParam('gui.red'), ",".join(unreasonable_fp)))
 
   def check_mu(self):
     try:

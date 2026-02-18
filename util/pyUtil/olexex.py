@@ -1230,6 +1230,12 @@ def GetOptionalHyphenString(txt):
 OV.registerFunction(GetOptionalHyphenString)
 
 def GetTwinLawAndBASF(html=False):
+  
+  def fmt_law(x, tol=1e-9):
+    if abs(x - round(x)) < tol:
+      return str(int(round(x)))
+    return f"{x:.3f}"  
+  
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
   basf_list = olex_refinement_model['hklf'].get('basf', [])
@@ -1246,7 +1252,7 @@ def GetTwinLawAndBASF(html=False):
 
   txt = ""
   if curr_law:
-    txt = repr(curr_law)
+    txt = "[" + ", ".join(fmt_law(x) for x in curr_law) + "]"
   basf = []
   if olx.IsFileType("ires") != "false":
     try:
@@ -1271,7 +1277,7 @@ def GetTwinLawAndBASF(html=False):
 
   if html:
     if curr_law:
-      txt = "<b><font color='%s'>TWIN LAW %s</font></b>" %(
+      txt = "<b><font color='%s'>TWIN%s</font></b>" %(
         OV.GetParam('gui.green_text').hexadecimal, txt)
     else:
       txt = "<b><font color='%s'>HKLF 5 %s</font></b>" %(
