@@ -506,7 +506,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             # groups[i-groups_counter].append(0)
             # groups[i-groups_counter].append(parts[i])
             endings = [".gbw", ".ffn", ".molden", ".fchk", ".xtb", ".xyz", ".wfn", ".wfx"]
-            for file in os.listdir(os.getcwd()):
+            for file in os.listdir(os.path.join(OV.FilePath(), wfn_job_dir)):
               if "_part" in file:
                 continue
               temp = None

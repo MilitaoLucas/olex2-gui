@@ -77,6 +77,10 @@ gui
     .type = colour
   image_highlight = None
     .type = str
+  notification_base_colour = #307125
+    .type = colour
+  notification_highlight_colour = #ff8f00
+    .type = colour
   GuiImages {
     action = None
     .type=str

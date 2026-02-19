@@ -64,7 +64,7 @@
       <cmd14 "spy.setAllMainToolbarTabButtons()">
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
       <cmd16 "html.Update">
-	  <cmd17 "spy.gui.get_default_notification('Structure **$FileName()** loaded')">
+      <cmd17 "spy.gui.get_default_notification('Structure __$FileName()__ loaded')">
       <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
     >
     <onabort

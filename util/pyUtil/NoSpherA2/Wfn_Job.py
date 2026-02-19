@@ -1725,8 +1725,7 @@ ener = cf.kernel()"""
       softw = str(OV.GetParam('snum.NoSpherA2.source'))
     softw = softw.lstrip()
     gui.get_default_notification(
-          txt="Calculating Wavefunction for <font color=$GetVar(gui.green_text)><b>%s</b></font> using <font color=#000000><b>%s</b></font>..."%(self.name,softw),
-          txt_col='black_text')
+          txt = f"Calculating Wavefunction for __{self.name}__ using __{softw}__")
     if OV.HasGUI():
       OV.UpdateHtml()
       olx.xf.EndUpdate()

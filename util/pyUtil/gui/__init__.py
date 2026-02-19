@@ -7,10 +7,13 @@ from olexFunctions import OV
 from ImageTools import IT
 import htmlTools
 from . import restraints
+import re
 
 table_col = OV.GetVar('HtmlTableFirstcolColour')
 green_text = OV.GetParam('gui.green_text')
 green = OV.GetParam('gui.green')
+notification_base_colour = OV.GetParam('gui.notification_base_colour')
+notification_highlight_colour = OV.GetParam('gui.notification_highlight_colour')
 red = OV.GetParam('gui.red')
 orange = OV.GetParam('gui.orange')
 white = "#ffffff"
@@ -399,8 +402,8 @@ def get_default_notification(txt="", txt_col='green_text'):
   poly = ""
   _ = olx.xf.latt.IsPolymeric()
   if _ == 'true':
-    poly = " | Polymeric structure"
-  set_notification("<font color='%s'>%s</font>%s;%s;%s" %(txt_col, txt, poly, table_col,'#888888'))
+    poly = " | polymeric"
+  set_notification("%s%s;%s;%s" %(txt, poly, table_col,'#888888'))
 
 #https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
 def strip_html_tags(html):
@@ -422,14 +425,23 @@ def strip_html_tags(html):
   s.feed(html)
   return s.get_data()
 
-def set_notification(string):
+def set_notification(string=None, fg = None):
+  if not string:
+    string = OV.GetVar('gui_notification')
   if not OV.HasGUI():
     olx.Echo(strip_html_tags(string.split(';')[0]), m="error")
     with open(os.path.join(OV.StrDir(), "refinement.check"), "w") as out:
       out.write(string)
     return
   if string is None:
-    get_default_notification()
+    string = get_default_notification()
+  if not fg:
+    fg = notification_base_colour
+  def repl_col(m):
+    return f'<font color={notification_highlight_colour}>{m.group(1)}</font>'
+  string = re.sub(r'__(.*?)__', repl_col, string)
+  string = f"<font color={fg}>{string} </font>"
+  
   OV.SetVar('GuiNotification', string)
   olx.Freeze(True)
   OV.UpdateHtml()

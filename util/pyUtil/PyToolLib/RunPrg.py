@@ -112,6 +112,13 @@ class RunPrg(ArgumentParser):
     caught_exception = None
     try:
       evt = stopwatch.start_scope("Running %s" %self.program.name)
+
+      html = f"<font color=$GetVar(gui.dark_green)>Running <font color=$GetVar(gui.orange)><b>{self.program.name}</b></font></font> "
+      OV.SetVar('gui_notification', html)
+      
+      if "XL" in self.program.name:
+        gui.set_notification(OV.GetVar('gui_notification'))
+      
       res = self.method.run(self)
       evt.stop()
       if not res:
@@ -475,33 +482,33 @@ class RunRefinementPrg(RunPrg):
     if self.refinement_has_failed:
       notes = []
       bg = red
-      fg = white
+      fg = red
       warning_counter = 0
       for i, note in enumerate(self.refinement_has_failed):
-        for note in self.refinement_has_failed:
-          if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
-            bg = green
-            fg = white
-            note += "-Mask INFO exists"
-          if "warning" in note.lower():
-            warning_counter += 1
-          if i > 0 and warning_counter > 1:
-            note = note.strip("Warning:").strip("warning:").strip()
-          notes.append(note)
+        if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
+          bg = white
+          fg = green
+          note += "-Mask INFO exists"
+        if "warning" in note.lower():
+          warning_counter += 1
+        if i > 0 and warning_counter > 1:
+          note = note.strip("Warning:").strip("warning:").strip()
+        notes.append(note)
       msg = " | ".join(notes)
       if warning_counter == len(self.refinement_has_failed):
-        bg = orange
-      gui.set_notification("%s;%s;%s" % (msg, bg, fg))
+        fg = orange
+      string =  "%s;%s;%s" % (msg, bg, fg)
+      gui.set_notification(string, fg=fg)
     elif self.IsClientMode():
       rc_fn = os.path.join(OV.StrDir(), "refinement.check")
       if os.path.exists(rc_fn):
         gui.set_notification(open(rc_fn, "r").read())
     elif not OV.IsNoSpherA2():
-      gui.get_default_notification(txt="Refinement Finished",
+      gui.get_default_notification(txt="Refinement finished",
         txt_col='green_text')
     else:
       gui.get_default_notification(
-        txt="Refinement Finished    Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
+        txt="Refinement finished    Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
           txt_col='green_text')
 
   def reset_params(self):
