@@ -172,11 +172,10 @@ class OlexCctbxAdapter(object):
       resonant_table = None
       #  default for DISP first
       if self.reflections._merge < 4:
-        from cctbx.eltbx import wavelengths
         resonant_table = OV.GetParam("snum.smtbx.resonant_form_factor_table")
         if resonant_table != "brennan":
           try:
-            self._xray_structure.set_resonant_form_factors(
+            self._xray_structure.set_inelastic_form_factors(
               self.wavelength, resonant_table)
           except Exception as e:
             if OV.IsDebugging():
@@ -203,7 +202,7 @@ class OlexCctbxAdapter(object):
             print("Error: Brennan & Cowan failed (%s), switching to Sasaki!" %str(exc))
             resonant_table = "sasaki"
             try:
-              self._xray_structure.set_resonant_form_factors(
+              self._xray_structure.set_inelastic_form_factors(
                         self.wavelength, resonant_table)
             except Exception as e:
               if OV.IsDebugging():
