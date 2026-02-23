@@ -532,8 +532,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def calc_flack(self):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
-      if (self.twin_components is not None and len(self.twin_components)
-          and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
+      if self.is_inversion_twin():
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
@@ -901,7 +900,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
-    if self.hooft is not None:
+    flack_str = OV.GetParam("snum.refinement.flack_str")
+    if self.is_inversion_twin() and flack_str:
+        cif_block['_refine_ls_abs_structure_details'] = \
+                 'Refined as an inversion twin.'
+        cif_block['_refine_ls_abs_structure_Flack'] = flack_str
+    elif self.hooft is not None:
         cif_block['_refine_ls_abs_structure_details'] = \
                  'Hooft, R.W.W., Straver, L.H., Spek, A.L. (2010). J. Appl. Cryst., 43, 665-668.'
         cif_block['_refine_ls_abs_structure_Flack'] = self.hooft_str
@@ -1016,17 +1020,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block.sort(key=sort_key)
     return cif_block
 
-  #moves EXTI from Fc_sq to Fo_sq
-  def  transfer_exti(self, exti, wavelength, fo_sq, fc_sq):
+  #moves EXTI from Fc_sq to Fo_sq and scales Fo_sq if requested
+  def  transfer_exti(self, exti, wavelength, fo_sq, fc_sq, do_scale=True):
     #return fo_sq, fc_sq
     sin_2_theta = fc_sq.unit_cell().sin_two_theta(fc_sq.indices(), wavelength)
     correction = 0.001 * exti * fc_sq.data() * math.pow(wavelength, 3) / sin_2_theta
     # recover original Fc_sq
     fc_sq_original = fc_sq.data()*(correction + flex.pow(flex.pow(correction, 2) + 4, 0.5))/2
-    #compute original correction toapply to Fo_sq
+    #compute original correction to apply to Fo_sq
     correction = 0.001 * exti * fc_sq_original * math.pow(wavelength, 3) / sin_2_theta
     correction += 1
     correction = flex.pow(correction, 0.5)
+    if do_scale:
+      correction /= self.scale_factor
     # #test fc_sq = fc_sq_original/correction
     # test_v = fc_sq_original / correction
     # for i, fc_sq_v in enumerate(fc_sq.data()):
@@ -1063,8 +1069,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   # complete_detwin also DISABLES MASK
   def get_fcf_data(self, anomalous_flag, use_fc_sq=False, complete_detwin=False):
     if self.hklf_code == 5 or\
-      (self.twin_components is not None
-        and self.twin_components[0].twin_law.as_double() != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
+      (self.twin_components and (not self.is_inversion_twin() or complete_detwin)):
       merge = self.hklf_code < 5
       if self.use_tsc:
         fo_sq, fc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation,
@@ -1105,23 +1110,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if (self.exti is not None or self.swat is not None) and\
           type(self.fc_correction) is not xray.dummy_fc_correction:
         if self.exti is not None:
-          fo_sq, fc_sq = self.transfer_exti(self.fc_correction.value, self.wavelength, fo_sq, fc_sq)
-        elif self.swat is not None: # swat should not be transferred...
-          #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
-          pass
+          fo_sq, fc_sq = self.transfer_exti(
+            self.fc_correction.value, self.wavelength, fo_sq, fc_sq,
+            do_scale=True)
+        # elif self.swat is not None: # swat should not be transferred...
+        #   #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
+        #   pass
+        # weights = self.compute_weights(fo_sq, fc=fc_sq.as_amplitude_array(), reset_scale_factor=True)
+        # scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+        #     / flex.sum(weights * flex.pow2(fc_sq.data()))
 
-      #   scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
-      #       / flex.sum(weights * flex.pow2(fc_sq.data()))
-
-      #   fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
-      #     data=fo_sq.data()*(1/scale),
-      #     sigmas=fo_sq.sigmas()*(1/scale),
-      #     anomalous_flag=anomalous_flag)
-      # else:
-      fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
-        data=fo_sq.data()*(1/self.scale_factor),
-        sigmas=fo_sq.sigmas()*(1/self.scale_factor),
-        anomalous_flag=anomalous_flag)
+        # fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+        #   data=fo_sq.data()*(1/scale),
+        #   sigmas=fo_sq.sigmas()*(1/scale),
+        #   anomalous_flag=anomalous_flag)
+      else:
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=fo_sq.data()*(1/self.scale_factor),
+          sigmas=fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=anomalous_flag)
 
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc', format="coreCIF")
@@ -1683,7 +1690,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_obs = f_obs.customized_copy(data=flex.double(new_data))
       fo2 = f_obs.as_intensity_array()
 
-      weights = self.compute_weights(fo2, f_calc, reset_scale_factor=True)
+      weights = self.compute_weights(fo2, f_calc, fc2_data=f_calc_sq.data(), reset_scale_factor=True)
       scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
               / flex.sum(weights * flex.pow2(f_calc_sq.data()))
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)

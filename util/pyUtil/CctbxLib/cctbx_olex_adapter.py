@@ -330,12 +330,9 @@ class OlexCctbxAdapter(object):
         miller_set_ = self.observations.unique_mapped_miller_set
     else:
       miller_set_ = miller_set
-    if (ignore_inversion_twin
-        and self.twin_components is not None
-        and self.twin_components[0].twin_law.as_double() == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double()):
+    if ignore_inversion_twin and self.is_inversion_twin():
       apply_twin_law = False
-    if (apply_twin_law
-        and self.twin_components is not None):
+    if apply_twin_law and self.twin_components:
       twin_sets = []
       #twin_component = self.twin_components[0]
       for twin_component in self.twin_components:
@@ -422,14 +419,21 @@ class OlexCctbxAdapter(object):
     params = dict(unit_cell = self._xray_structure._unit_cell, a=weight[0] if len(weight) > 0 else 0.1)
     return least_squares.stl_weighting(**params)
 
-  def compute_weights(self, fo2, fc, reset_scale_factor = False):
+  def compute_weights(self, fo2, fc, fc2_data=None, reset_scale_factor = False):
     weight = self.olx_atoms.model['weight']
     params = [0.1, 0, 0, 0, 0, 1./3]
     for i, v in enumerate(weight):
       params[i] = v
 
     if reset_scale_factor:
-      scale_factor = fo2.scale_factor(fc)
+      # this requires complex numbers
+      #scale_factor = fo2.scale_factor(fc)
+      if fc2_data is None:
+        if fc.is_complex_array():
+          fc2_data = flex.norm(fc.data())
+        else:
+          fc2_data = flex.pow2(fc.data())
+      scale_factor = flex.sum(fo2.data()*fc2_data) / flex.sum(flex.pow2(fc2_data))
     else:
       scale_factor = OV.GetOSF()
     if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
@@ -451,13 +455,14 @@ class OlexCctbxAdapter(object):
       else:
         print("Unknown weighting scheme %s, using shelx!" %scheme)
         weighting = self.get_shelxl_weighting()
-      fc2 = fc.as_amplitude_array().data()
+      if fc2_data is None:
+        fc2_data = fc.as_intensity_array().data()
       indices = fo2.indices()
       fo2_d = fo2.data()
       sigmas = fo2.sigmas()
       weights = flex.double(fo2.size(), 1.0)
       for i in range(fo2.size()):
-        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2[i], indices[i], scale_factor)
+        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2_data[i], indices[i], scale_factor)
       return weights
     else:
       weighting = xray.weighting_schemes.shelx_weighting(*params,
@@ -507,7 +512,7 @@ class OlexCctbxAdapter(object):
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
 
-  # complete - detwins the who index range rather than just measured refs, used in masking
+  # complete - detwins the whole index range rather than just measured refs, used in masking
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
     if filtered:
       fo2 = self.reflections.f_sq_obs_filtered
@@ -522,8 +527,10 @@ class OlexCctbxAdapter(object):
         print("Error during calculation of F_calcs: %s"%(str(e)))
         return None, None
     else:
-      fc = self.f_calc(miller_set, self.exti is not None, True,
+      fc = self.f_calc(miller_set,
+       apply_extinction_correction=self.exti is not None,
        ignore_inversion_twin=False,
+       apply_twin_law=False,
        twin_data=False)
     dtw = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
@@ -576,6 +583,23 @@ class OlexCctbxAdapter(object):
     elif tw_c is not None:
       return False
     return True
+
+  def is_inversion_twin_ex(self):
+    """
+    Returns  a tuple if the first twin component is an inversion and if it is
+    being refined
+    """
+    if not self.twin_components:
+      return (False, False)
+    return (self.twin_components[0].twin_law.as_double() ==\
+        sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)).as_double(),
+        self.twin_components[0].grad)
+
+  def is_inversion_twin(self):
+    """
+    Checks if the first twin component is an inversion
+    """
+    return self.is_inversion_twin_ex()[0]
 
 def write_fab(f_mask, fab_path=None):
   import shutil

@@ -834,7 +834,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     #re-compute the scale
     fo2 = f_obs.as_intensity_array()
     f_calc_sq = f_calc.as_intensity_array()
-    weights = cctbx_adapter.compute_weights(fo2, f_calc, reset_scale_factor=True)
+    weights = cctbx_adapter.compute_weights(fo2, f_calc, fc2_data=f_calc_sq.data(), reset_scale_factor=True)
     scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
             / flex.sum(weights * flex.pow2(f_calc_sq.data()))
     #
