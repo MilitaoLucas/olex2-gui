@@ -1112,18 +1112,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if self.exti is not None:
           fo_sq, fc_sq = self.transfer_exti(
             self.fc_correction.value, self.wavelength, fo_sq, fc_sq,
-            do_scale=True)
+            do_scale=False)
         # elif self.swat is not None: # swat should not be transferred...
         #   #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
         #   pass
-        # weights = self.compute_weights(fo_sq, fc=fc_sq.as_amplitude_array(), reset_scale_factor=True)
-        # scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
-        #     / flex.sum(weights * flex.pow2(fc_sq.data()))
+        weights = self.compute_weights(fo_sq, fc=fc_sq.as_amplitude_array(), reset_scale_factor=True)
+        scale = flex.sum(weights * fo_sq.data() *fc_sq.data()) \
+            / flex.sum(weights * flex.pow2(fc_sq.data()))
 
-        # fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
-        #   data=fo_sq.data()*(1/scale),
-        #   sigmas=fo_sq.sigmas()*(1/scale),
-        #   anomalous_flag=anomalous_flag)
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=fo_sq.data()*(1/scale),
+          sigmas=fo_sq.sigmas()*(1/scale),
+          anomalous_flag=anomalous_flag)
       else:
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
           data=fo_sq.data()*(1/self.scale_factor),

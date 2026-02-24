@@ -175,6 +175,8 @@ class OlexCctbxAdapter(object):
         resonant_table = OV.GetParam("snum.smtbx.resonant_form_factor_table")
         if resonant_table != "brennan":
           try:
+            if str(resonant_table) == 'Auto':
+              resonant_table = 'Custom'
             self._xray_structure.set_inelastic_form_factors(
               self.wavelength, resonant_table)
           except Exception as e:
