@@ -68,6 +68,7 @@ class Method_cctbx_refinement(Method_refinement):
       olx.SetOlex2RefinementListener(True)
       olx.stopwatch.run(cctbx.run, table_file_name=self.table_file_name,
         ed_refinement=OV.IsEDRefinement())
+      self.hooft = cctbx.hooft
     except InvalidConstraint as e:
       print(e)
     except NotImplementedError as e:
