@@ -698,21 +698,3 @@ def refinement_acta_bg_colour():
   return retVal
 
 OV.registerFunction(refinement_acta_bg_colour)
-
-
-def refineDataMaker():
-  txt = """
-<tr><td>R1(Fo > 4sig(Fo))</td><td>0.0511</td><td>R1(all data)</td><td>0.0690</td></tr>
-<tr><td>wR2</td><td>0.1138</td><td>GooF</td><td>1.16</td></tr>
-<tr><td>GooF(Restr)</td><td>1.16</td><td>Highest peak</td><td>0.32</td></tr>
-<tr><td>Deepest hole</td><td>-0.32</td><td>Params</td><td>216</td></tr>
-<tr><td>Refs(total)</td><td>6417</td><td>Refs(uni)</td><td>2803</td></tr>
-<tr><td>Refs(Fo > 4sig(Fo))</td><td>2366</td><td>R(int)</td><td>0.061</td></tr>
-<tr><td>R(sigma)</td><td>0.055</td><td>F000</td><td>364</td></tr>
-<tr><td>&rho;/g*cm<sup>-3</sup></td><td>1.574</td><td>&mu;/mm<sup>-1</sup></td><td>0.140</td></tr>
-"""
-  OV.write_to_olex("refinedata.htm", txt)
-  OV.UpdateHtml()
-
-
-OV.registerFunction(refineDataMaker)
