@@ -532,7 +532,7 @@ class OlexCctbxAdapter(object):
       fc = self.f_calc(miller_set,
        apply_extinction_correction=self.exti is not None,
        ignore_inversion_twin=False,
-       apply_twin_law=False,
+       apply_twin_law=True,
        twin_data=False)
     dtw = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
