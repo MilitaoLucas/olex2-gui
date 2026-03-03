@@ -230,6 +230,9 @@ diagnostics {
         .type = str
       display = "Min Peak"
         .type = str
+      # clicking the min-peak square will open the fractal-dimension graph
+      href = "spy.make_reflection_graph('fractal_dimension')"
+        .type = str
       value_format= "1f"
         .type = str
       grade1  = -0.51

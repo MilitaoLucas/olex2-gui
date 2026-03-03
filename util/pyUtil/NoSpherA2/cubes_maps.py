@@ -17,6 +17,8 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from cctbx_olex_adapter import OlexCctbxMasks
 from cctbx.eltbx import tiny_pse
+from iotbx.cif import miller_indices_as_cif_loop
+from libtbx.containers import OrderedDict
 if OV.HasGUI():
   import olex_xgrid
 
@@ -886,6 +888,306 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   write_map_to_cube(diff_map, "diff")
 
 OV.registerFunction(residual_map, False, "NoSpherA2")
+
+#This is a copy of the original class from cctbx to allow custom formatting
+class NSA2_miller_arrays_as_cif_block():
+
+  def __init__(self, array, array_type=None,
+               column_name=None, column_names=None,
+               miller_index_prefix='_refln',
+               format="mmcif",
+               string_format="%d"):
+    wformat = format.lower()
+    assert wformat in ("corecif", "mmcif")
+    if wformat == "mmcif":
+      separator = '.'
+    else:
+      separator = '_'
+    self.cif_block = array.crystal_symmetry().as_cif_block(format=format)
+    self.prefix = miller_index_prefix + separator
+    self.indices = array.indices().deep_copy()
+    self.refln_loop = None
+    self.add_miller_array(array, array_type, column_name, column_names, string_format=string_format)
+    self.cif_block.add_loop(self.refln_loop)
+
+  def add_miller_array(self, array, array_type=None,
+                       column_name=None, column_names=None,
+                       string_format="%d"):
+    """
+    Accepts a miller array, and one of array_type, column_name or column_names.
+    """
+
+    assert [array_type, column_name, column_names].count(None) == 2
+    if array_type is not None:
+      assert array_type in ('calc', 'meas')
+    elif column_name is not None:
+      column_names = [column_name]
+    if array.is_complex_array():
+      if column_names is None:
+        column_names = [self.prefix+'F_'+array_type,
+                        self.prefix+'phase_'+array_type]
+      else: assert len(column_names) == 2
+      if (('_A_' in column_names[0] and '_B_' in column_names[1]) or
+          ('.A_' in column_names[0] and '.B_' in column_names[1])):
+        data = [flex.real(array.data()).as_string(string_format),
+                 flex.imag(array.data()).as_string(string_format)]
+      elif (('_F_squared_calc' in column_names[0] and 'phase_calc' in column_names[1]) or
+            ('_F_squared_calc' in column_names[1] and 'phase_calc' in column_names[0])):
+        data = [flex.norm(array.data()).as_string(string_format),
+                 array.phases(deg=True).data().as_string(string_format)]
+      else:
+        data = [flex.abs(array.data()).as_string(string_format),
+                 array.phases(deg=True).data().as_string(string_format)]
+    else:
+      if array_type is not None:
+        if array.is_xray_intensity_array():
+          obs_ext = 'squared_'
+        else: obs_ext = ''
+        column_names = [self.prefix+'F_'+obs_ext+array_type]
+        if array.sigmas() is not None:
+          column_names.append(self.prefix+'F_'+obs_ext+'sigma')
+      if isinstance(array.data(), flex.std_string):
+        data = [array.data()]
+      else:
+        data = [array.data().as_string(string_format)]
+      if array.anomalous_flag():
+        if ((array.sigmas() is not None and len(column_names) == 4) or
+            (array.sigmas() is None and len(column_names) == 2)):
+          data = []
+          asu, matches = array.match_bijvoet_mates()
+          for anomalous_sign in ("+", "-"):
+            sel = matches.pairs_hemisphere_selection(anomalous_sign)
+            sel.extend(matches.singles_hemisphere_selection(anomalous_sign))
+            if (anomalous_sign == "+"):
+              indices = asu.indices().select(sel)
+              hemisphere_column_names = column_names[:len(column_names)//2]
+            else:
+              indices = -asu.indices().select(sel)
+              hemisphere_column_names = column_names[len(column_names)//2:]
+            hemisphere_data = asu.data().select(sel)
+            hemisphere_array = miller.array(miller.set(
+              array.crystal_symmetry(), indices), hemisphere_data)
+            if array.sigmas() is not None:
+              hemisphere_array.set_sigmas(asu.sigmas().select(sel))
+            if self.refln_loop is None:
+              # then this is the first array to be added to the loop,
+              # hack so we don't have both hemispheres of indices
+              self.indices = indices
+            self.add_miller_array(
+              hemisphere_array, column_names=hemisphere_column_names)
+          return
+      if array.sigmas() is not None and len(column_names) == 2:
+        data.append(array.sigmas().as_string(string_format))
+    if not (self.indices.size() == array.indices().size() and
+            self.indices.all_eq(array.indices())):
+      from cctbx.miller import match_indices
+      other_indices = array.indices().deep_copy()
+      match = match_indices(self.indices, other_indices)
+      if match.singles(0).size():
+        # array is missing some reflections indices that already appear in the loop
+        # therefore pad the data with '?' values
+        other_indices.extend(self.indices.select(match.single_selection(0)))
+        for d in data:
+          d.extend(flex.std_string(['?']*(other_indices.size() - d.size())))
+        for d in data:
+          assert d.size() == other_indices.size()
+        match = match_indices(self.indices, other_indices)
+      if match.singles(1).size():
+        # this array contains some reflections that are not already present in the
+        # cif loop, therefore need to add rows of '?' values
+        single_indices = other_indices.select(match.single_selection(1))
+        self.indices.extend(single_indices)
+        n_data_columns = len(self.refln_loop) - 3
+        for hkl in single_indices:
+          row = list(hkl) + ['?'] * n_data_columns
+          self.refln_loop.add_row(row)
+        match = match_indices(self.indices, other_indices)
+
+      match = match_indices(self.indices, other_indices)
+      perm = match.permutation()
+      data = [d.select(perm) for d in data]
+    if self.refln_loop is None:
+      self.refln_loop = miller_indices_as_cif_loop(self.indices, prefix=self.prefix)
+    columns = OrderedDict(zip(column_names, data))
+    for key in columns:
+      assert key not in self.refln_loop
+    self.refln_loop.add_columns(columns)
+
+def residual_fcf(expand = False):
+  cctbx_adapter = OlexCctbxAdapter()
+  xray_structure = cctbx_adapter.xray_structure()
+  use_tsc = OV.IsNoSpherA2()
+  one_h = None
+  f_diff = None
+  f_mask = None
+  if use_tsc:
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    print("Calculating Structure Factors from files...")
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return
+    one_h = direct.f_calc_modulus_squared(xray_structure, table_file_name=table_name)
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+  else:
+    print("Non NoSpherA2 map...")
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    f_mask = cctbx_adapter.load_mask()
+    if not f_mask:
+      OlexCctbxMasks()
+      if olx.current_mask.flood_fill.n_voids() > 0:
+        f_mask = olx.current_mask.f_mask()
+    if f_mask:
+      if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+        f_mask = f_mask.generate_bijvoet_mates()
+      f_mask = f_mask.common_set(f_sq_obs)
+      f_obs = f_sq_obs.f_sq_as_f()
+      f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+      k = math.sqrt(OV.GetOSF())
+      f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
+  else:
+    f_obs = f_sq_obs.f_sq_as_f()
+    k = math.sqrt(OV.GetOSF())
+    f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
+
+  if OV.IsEDRefinement():
+    I_obs, I_calc = OV.GetACI().EDI.compute_Io_Ic(merge=True)
+    f_calc = cctbx_adapter.f_calc(I_obs, None, True, False,
+                       one_h_function=one_h, twin_data=False)
+    Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+    new_data = []
+    for i in range(I_obs.size()):
+      mfc = math.sqrt(I_calc.data()[i])
+      if mfc == 0:
+        s = 1
+      else:
+        s = abs(f_calc.data()[i])/mfc
+      Io = I_obs.data()[i]
+      new_data.append(0 if Io < 0 else math.sqrt(Io)*s)
+    I_obs = I_obs.customized_copy(data=flex.double(new_data))
+    f_diff = I_obs.f_obs_minus_f_calc(1. , f_calc)
+    f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
+    f_diff = f_diff.expand_to_p1()
+  else:
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)    
+    #f_diff = f_diff.expand_to_p1()
+
+  with open(f"{OV.ModelSrc()}_residual.fcf", 'w') as fcf_file:
+    if expand:
+      f_diff = f_diff.expand_to_p1()
+      f_calc = f_calc.expand_to_p1()
+      f_sq_obs = f_sq_obs.expand_to_p1()
+      
+    refln_loop = NSA2_miller_arrays_as_cif_block(f_calc.as_intensity_array(), array_type='calc', format="coreCIF", string_format="%14.8e")
+    refln_loop.add_miller_array(f_sq_obs, array_type='meas', string_format="%14.8e")
+    refln_loop.add_miller_array(f_sq_obs.f_sq_as_f(), array_type="meas", string_format="%14.8e")
+    refln_loop.add_miller_array(f_calc, column_names=['_refln_A_calc','_refln_B_calc'], string_format="%14.8e")
+    refln_loop.add_miller_array(f_calc, array_type='calc', string_format="%14.8e")
+    refln_loop.add_miller_array(f_diff, column_names=['_refln_A_residual','_refln_B_residual'], string_format="%14.8e")
+    refln_loop.add_miller_array(f_diff.as_intensity_array(), column_names=['_refln_I_residual'], string_format="%14.8e")
+    refln_loop.add_miller_array(f_calc.d_spacings(), column_name="_refln_d_spacing", string_format="%14.8e")
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      if expand:
+        f_mask = f_mask.expand_to_p1()
+      refln_loop.add_miller_array(f_mask, column_names=['_refln_A_mask','_refln_B_mask'], string_format="%14.8e")
+    
+    fcf_file.write(str(refln_loop.cif_block))
+  print(f"Saved residual structure factors as {os.path.realpath(fcf_file.name)}")
+
+OV.registerFunction(residual_fcf, False, "NoSpherA2")
+
+def residual_E(expand = False):
+  from smtbx.refinement import least_squares
+  def get_shelxl_weighting(cca=None):
+    weight = cca.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0,
+                  #c=0, d=0, e=0, f=1./3,
+                  )
+    for param, value in zip(list(params.keys())[:min(2, len(weight))], weight):
+      params[param] = value
+    return least_squares.mainstream_shelx_weighting(**params)
+  cctbx_adapter = OlexCctbxAdapter()
+  xray_structure = cctbx_adapter.xray_structure()
+  use_tsc = OV.IsNoSpherA2()
+  one_h = None
+  f_diff = None
+  f_mask = None
+  if use_tsc:
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    print("Calculating Structure Factors from files...")
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return
+    one_h = direct.f_calc_modulus_squared(xray_structure, table_file_name=table_name)
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+  else:
+    print("Non NoSpherA2 map...")
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if OV.GetParam("snum.refinement.use_solvent_mask"):
+    f_mask = cctbx_adapter.load_mask()
+    if not f_mask:
+      OlexCctbxMasks()
+      if olx.current_mask.flood_fill.n_voids() > 0:
+        f_mask = olx.current_mask.f_mask()
+    if f_mask:
+      if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+        f_mask = f_mask.generate_bijvoet_mates()
+      f_mask = f_mask.common_set(f_sq_obs)
+      f_obs = f_sq_obs.f_sq_as_f()
+      f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+      k = math.sqrt(OV.GetOSF())
+      f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
+      
+  else:
+    f_obs = f_sq_obs.f_sq_as_f()
+    k = math.sqrt(OV.GetOSF())
+    f_diff = f_obs.f_obs_minus_f_calc(1.0/k, f_calc)
+
+  if OV.IsEDRefinement():
+    I_obs, I_calc = OV.GetACI().EDI.compute_Io_Ic(merge=True)
+    f_calc = cctbx_adapter.f_calc(I_obs, None, True, False,
+                       one_h_function=one_h, twin_data=False)
+    Fc2Ug = OV.GetACI().EDI.get_Fc2Ug()
+    new_data = []
+    for i in range(I_obs.size()):
+      mfc = math.sqrt(I_calc.data()[i])
+      if mfc == 0:
+        s = 1
+      else:
+        s = abs(f_calc.data()[i])/mfc
+      Io = I_obs.data()[i]
+      new_data.append(0 if Io < 0 else math.sqrt(Io)*s)
+    I_obs = I_obs.customized_copy(data=flex.double(new_data))
+    f_diff = I_obs.f_obs_minus_f_calc(1. , f_calc)
+    f_diff = f_diff.apply_scaling(factor=3.324943664/Fc2Ug)
+    f_diff = f_diff.expand_to_p1()
+  else:
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)    
+
+  if expand:
+    f_diff = f_diff.expand_to_p1()
+    
+  shelx_weight = get_shelxl_weighting(cctbx_adapter)
+  sigmas = f_sq_obs.sigmas()
+  s_weights = flex.double(f_sq_obs.size(), 1.0)
+  u_weights = 1/(sigmas*sigmas)
+  fo_d = f_sq_obs.data()
+  fc_d = f_calc.as_intensity_array().data()
+  ind = f_sq_obs.indices()
+  for i in range(f_sq_obs.size()):
+    s_weights[i] = shelx_weight.compute(fo_d[i], sigmas[i], fc_d[i], ind[i], OV.GetOSF())
+  
+  I_diff = f_diff.as_intensity_array()
+  stl_sq = f_diff.sin_theta_over_lambda_sq()
+  ratio = I_diff.data() / stl_sq.data()
+  E_coul = 1.0/(2.0*np.pi*f_diff.unit_cell().volume()) * sum(ratio)
+  E_coul_u = 1.0/(2.0*np.pi*f_diff.unit_cell().volume()) * sum(ratio * u_weights)
+  E_coul_s = 1.0/(2.0*np.pi*f_diff.unit_cell().volume()) * sum(ratio * s_weights)
+  print(f"{E_coul:.5e} e/A, sigma_weight: {E_coul_u:.5e} e/A, shelx_weight: {E_coul_s:.5e}")
+
+OV.registerFunction(residual_E, False, "NoSpherA2")
 
 def adp_list_to_array(a: Sequence) -> np.ndarray:
   return np.array([(a[0], a[3], a[4]), (a[3], a[1], a[5]), (a[4], a[5], a[2])])

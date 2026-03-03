@@ -1196,7 +1196,7 @@ class Graph(ArgumentParser):
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     legend_top = self.graph_top + 20
     #legend_bottom = legend_top + 1.2*wY
-    x = width - 0.9 *wX - self.bSides
+    x = width - 0.4 * wX - self.bSides
     top_left = (x, legend_top)
     #box = (x-0.8*wX,legend_top,x+wX,legend_bottom)
     ## Wipe the legend area
@@ -4462,7 +4462,9 @@ class HealthOfStructure():
 
 
     href = OV.get_diag('%s.%s.href' %(self.scope,item))
-    if item == "Completeness":
+    if item == 'max_hole' and not href:
+      href = "spy.make_reflection_graph('fractal_dimension')"
+    elif item == "Completeness":
       target = OV.GetParam('snum.refinement.%s.target' %item.lower())
     elif item == "Rint":
       target = ["Internal R factors. Click to see the graph", " Multiplicity = %.2f" %self.hkl_stats.get('multiplicity', 0.0)]
@@ -4477,9 +4479,8 @@ class HealthOfStructure():
     if href:
       if href == "atom":
         href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
-      if item != 'max_hole':
-        ref_open = '<a target="%s" href="%s">' %(target, href)
-        ref_close = "</a>"
+      ref_open = '<a target="%s" href="%s">' %(target, href)
+      ref_close = "</a>"
     txt += '''
 <td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
 

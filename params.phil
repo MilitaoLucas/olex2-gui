@@ -1819,7 +1819,7 @@ user
           .type = float
         top = -5
           .type = float
-        href = echo "Please add PLAN -n to your ins file first"
+        href = "spy.make_reflection_graph('fractal_dimension')"
           .type = str
       }
       _refine_diff_density_min{
