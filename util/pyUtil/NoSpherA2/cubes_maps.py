@@ -889,6 +889,116 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
 
 OV.registerFunction(residual_map, False, "NoSpherA2")
 
+def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
+  cctbx_adapter = OlexCctbxAdapter()
+  xray_structure = cctbx_adapter.xray_structure()
+  use_tsc = OV.IsNoSpherA2()
+  one_h = None
+  if use_tsc:
+    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    print("Calculating Structure Factors from files...")
+    if not os.path.exists(table_name):
+      print("Error! Form factor file does not exist!")
+      return
+    one_h = direct.f_calc_modulus_squared(
+        xray_structure, table_file_name=table_name)
+    if not OV.IsEDRefinement():
+      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+  else:
+    print("Non NoSpherA2 map...")
+    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+
+  if not OV.IsEDRefinement():
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      f_mask = cctbx_adapter.load_mask()
+      if not f_mask:
+        OlexCctbxMasks()
+        if olx.current_mask.flood_fill.n_voids() > 0:
+          f_mask = olx.current_mask.f_mask()
+      if f_mask:
+        if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
+          f_mask = f_mask.generate_bijvoet_mates()
+        f_mask = f_mask.common_set(f_sq_obs)
+        f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+    f_obs = f_sq_obs.f_sq_as_f()
+    scale = OV.GetOSF() ** 0.5
+    f_diff = f_obs.f_obs_minus_f_calc(1.0/ scale, f_calc)
+    f_diff = f_diff.array(data=f_diff.data() * (2*flex.abs(f_obs.data())/f_sq_obs.sigmas()))
+    if OV.IsEDData():
+      f_diff = f_diff.apply_scaling(factor=3.324943664)
+    f_diff = f_diff.expand_to_p1()
+  else:
+    I_obs, I_calc = OV.GetACI().EDI.compute_Io_Ic(merge=True)
+    f_calc = cctbx_adapter.f_calc(I_obs, None, True, False,
+                       one_h_function=one_h, twin_data=False)
+    f_obs = I_obs.f_sq_as_f()
+    new_data = []
+    for i in range(I_obs.size()):
+      mfc = math.sqrt(I_calc.data()[i])
+      if mfc == 0:
+        s = 1
+      else:
+        s = abs(f_calc.data()[i])/mfc
+      fo = f_obs.data()[i] * s
+      new_data.append(fo)
+    f_obs = f_obs.customized_copy(data=flex.double(new_data))
+    #re-compute the scale
+    fo2 = f_obs.as_intensity_array()
+    f_calc_sq = f_calc.as_intensity_array()
+    weights = cctbx_adapter.compute_weights(fo2, f_calc, fc2_data=f_calc_sq.data(), reset_scale_factor=True)
+    scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
+            / flex.sum(weights * flex.pow2(f_calc_sq.data()))
+    #
+    f_diff = f_obs.f_obs_minus_f_calc(1. / scale**0.5 , f_calc)
+    f_diff = f_diff.array(data=f_diff.data() * (2*flex.abs(f_obs.data())/f_sq_obs.sigmas()))
+    f_diff = f_diff.apply_scaling(factor=3.324943664)
+    f_diff = f_diff.expand_to_p1()
+
+  print("Using %d reflections for Fourier synthesis"%f_diff.size())
+  diff_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                            resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
+  if print_peaks == True or print_peaks == "True":
+    from cctbx import maptbx
+    max_peaks=10
+    peaks = diff_map.peak_search(
+      parameters=maptbx.peak_search_parameters(
+        peak_search_level=2,
+        interpolate=False,
+        min_distance_sym_equiv=1.0,
+        max_clusters=max_peaks+len(xray_structure.scatterers())),
+      verify_symmetry=True
+      ).all()
+    i = 0
+    olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
+    for xyz, height in zip(peaks.sites(), peaks.heights()):
+      if i < max_peaks:
+        a = olx.xf.uc.Closest(*xyz).split(',')
+        if OV.IsEDData():
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
+        else:
+          pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A^3, %.3f A away from %s" % (
+            i + 1, xyz[0], xyz[1], xyz[2], height, float(a[1]), a[0])
+        print(pi)
+      id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
+      if id != '-1':
+        olx.xf.au.SetAtomU(id, "0.06")
+        i = i+1
+      if i == 100 or i >= max_peaks:
+        break
+    if OV.HasGUI():
+      basis = olx.gl.Basis()
+      frozen = olx.Freeze(True)
+    olx.xf.EndUpdate(True) #clear LST
+    olx.Compaq(q=True)
+    if OV.HasGUI():
+      olx.gl.Basis(basis)
+      olx.Freeze(frozen)
+  if return_map == True:
+    return diff_map
+  write_map_to_cube(diff_map, "diff")
+
+OV.registerFunction(diff_sig_map, False, "NoSpherA2")
+
 #This is a copy of the original class from cctbx to allow custom formatting
 class NSA2_miller_arrays_as_cif_block():
 
@@ -1495,6 +1605,37 @@ def deformation_map(resolution=0.1, return_map=False):
 
 OV.registerFunction(deformation_map, False, "NoSpherA2")
 
+def def_sig_map(resolution=0.1, return_map=False):
+  use_tsc = OV.IsNoSpherA2()
+  if use_tsc == False:
+    print("ERROR! Deformation is only available when using a .tsc file!")
+    return
+  cctbx_adapter = OlexCctbxAdapter()
+  table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  print("Calculating Structure Factors from files...")
+  xray_structure = cctbx_adapter.xray_structure()
+  if not os.path.exists(table_name):
+    print("Error! Form factor file does not exist!")
+    return
+  one_h = direct.f_calc_modulus_squared(
+        xray_structure, table_file_name=table_name)
+  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+  f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
+  print("Fspher_Fcalc R1:")
+  print(f_calc_spher.r1_factor(f_calc, scale_factor=1))
+  f_diff = f_calc.f_obs_minus_f_calc(1, f_calc_spher)
+  f_diff = f_diff.array(data=f_diff.data() * (2*flex.abs(f_sq_obs.f_sq_as_f().data())/f_sq_obs.sigmas()))
+  f_diff = f_diff.expand_to_p1()
+  if OV.IsEDData():
+    f_diff = f_diff.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
+  def_map = f_diff.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+                           resolution_factor=1,grid_step=float(resolution)).apply_volume_scaling()
+  if return_map==True:
+    return def_map
+  write_map_to_cube(def_map, "deform")
+
+OV.registerFunction(def_sig_map, False, "NoSpherA2")
+
 def obs_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
@@ -1606,5 +1747,9 @@ def show_fft_map(resolution=0.1,map_type="diff",use_f000=False,print_peaks=False
     plot_fft_map(tomc_map(resolution, return_map=True, use_f000=use_f000))
   elif map_type == "mask":
     plot_fft_map(mask_map(resolution, return_map=True, use_f000=use_f000))
+  elif map_type == "diff_sig":
+    plot_fft_map(diff_sig_map(resolution, return_map=True, print_peaks=print_peaks))
+  elif map_type == "def_sig":
+    plot_fft_map(def_sig_map(resolution, return_map=True))
 
 OV.registerFunction(show_fft_map, False, "NoSpherA2")
