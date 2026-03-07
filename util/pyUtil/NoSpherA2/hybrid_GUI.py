@@ -340,7 +340,7 @@ def make_hybrid_GUI(softwares_list_string):
   else:
     t += update_tsc_button()
 
-  t += end_line() + begin_new_line("NoSpherA2_Options_3") + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + begin_new_line("NoSpherA2_Options_3") + partitioning_scheme_line() + end_line()
+  t += end_line() + begin_new_line("NoSpherA2_Options_3") + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + partitioning_scheme_line()
   for i in parts:
     if i == 0:
       continue
