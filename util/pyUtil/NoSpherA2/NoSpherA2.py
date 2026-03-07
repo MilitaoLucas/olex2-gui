@@ -513,7 +513,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               if any(file.endswith(x) for x in endings):
                 temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + os.path.splitext(file)[1]
               if temp is not None:
-                shutil.move(file, temp)
+                shutil.copy(os.path.join(OV.FilePath(), wfn_job_dir, file),  temp)
                 wfn_files.append(temp)
                 break
         else:
@@ -778,18 +778,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       elif wfn_object.software == "Psi4":
         print("Psi4 not yet fully implemented for Hybrid!!! Sorry!!")
         return False
+      elif wfn_object.software == "Thakkar IAM":
+        print("Thakkar IAM does not require wavefunction calculation, skipping to tsc generation!")
+        return True
+      elif wfn_object.software == "SALTED":
+        print("SALTED does not require wavefunction calculation, skipping to tsc generation!")
+        return True
       wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
     else:
       wfn_object.write_input(xyz)
-    if soft == "Hybrid":
-      if software_part != "Thakkar IAM" and software_part != "SALTED":
-        try:
-          wfn_object.run(part, software_part, basis_part)
-        except NameError as error:
-          print("The following error occured during QM Calculation: ",error)
-          OV.SetVar('NoSpherA2-Error',error)
-          raise NameError('Unsuccesfull Wavefunction Calculation!')
-    elif soft != "Thakkar IAM" and soft != "SALTED":
+    if soft != "Thakkar IAM" and soft != "SALTED":
       try:
         wfn_object.run(part)
       except NameError as error:
@@ -1316,6 +1314,7 @@ def get_functional_list(wfn_code=None):
   if wfn_code is None:
     wfn_code = software()
   list = None
+  wfn_code = wfn_code.strip()
   if wfn_code == "Tonto" or wfn_code == "'Please Select'":
     list = "HF;B3LYP;"
   elif wfn_code == "pySCF":
@@ -1335,10 +1334,13 @@ OV.registerFunction(get_functional_list,False,'NoSpherA2')
 
 def change_tsc_generator(input):
   if input == "  Get ORCA":
+    print("Opening ORCA Forum in your browser...\nPlease register and download ORCA from there, then set the path to the executable in the settings of Olex2.")
     olx.Shell("https://orcaforum.kofo.mpg.de/index.php")
   elif input == "  Get discambMATTS":
+    print("Opening DISCAMB website in your browser...\nPlease download DISCAMB from there, then set the path to the executable in the settings of Olex2.")
     olx.Shell("http://4xeden.uw.edu.pl/software/discamb/")
   elif input == "  Get xTB":
+    print("Opening xTB website in your browser...\nPlease download xTB from there, then set the path to the executable in the settings of Olex2.")
     olx.Shell("https://github.com/grimme-lab/xtb")
   elif input == "  Get pySCF":
     wsl_adapter = NoSpherA2_instance.WSLAdapter

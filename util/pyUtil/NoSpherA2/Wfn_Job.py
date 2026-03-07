@@ -1722,7 +1722,10 @@ ener = cf.kernel()"""
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
     if softw is None:
-      softw = str(OV.GetParam('snum.NoSpherA2.source'))
+      if self.software is None:
+        softw = str(OV.GetParam('snum.NoSpherA2.source'))
+      else:
+        softw = self.software
     softw = softw.lstrip()
     gui.get_default_notification(
           txt = f"Calculating Wavefunction for __{self.name}__ using __{softw}__")
