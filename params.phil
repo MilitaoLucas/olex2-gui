@@ -2429,6 +2429,9 @@ user
       .type = str
     show_partitioning = False
       .type = bool
+    show_broken_sym = False
+      .type = bool
+      .expert_level = 2
   }
   Server{
     host=localhost

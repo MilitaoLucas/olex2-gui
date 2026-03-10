@@ -230,6 +230,12 @@ snum{
       .type = int
     ORCA_DAMP = False
       .type = bool
+    ORCA_Broken_sym_atoms = ""
+      .type = str
+    ORCA_Broken_sym_spin = ""
+      .type = str
+    ORCA_use_broken_sym = False
+      .type = bool
     ORCA_FORCE_ROKS = False
       .type = bool
     ORCA_Relativistic = "ZORA"

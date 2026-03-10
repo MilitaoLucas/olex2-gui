@@ -7,6 +7,7 @@ import shutil
 import time
 import textwrap
 import basis_set_api
+import olexex
 BSE = basis_set_api.GetBSEThread()                    
 
 import subprocess
@@ -667,16 +668,21 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       control += basis_name.replace("ECP-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    brok_sym = OV.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')
     mp2_block = ""
     if method == "HF":
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
         control += " ROHF "
+      elif brok_sym:
+        control += " UKS "
       else:
         control += " rhf "
       grids = ""
     else:
       if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
         control += " ROKS "
+      if brok_sym:
+        control += " UKS "
       if soft == "Hybrid":
         soft = str(OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part))
         soft = soft.lstrip()
@@ -929,6 +935,29 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
       if convergence == "NoSpherA2SCF":
         scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+    if brok_sym:
+        atom_flip_list_in = OV.GetParam("snum.NoSpherA2.ORCA_Broken_sym_atoms")
+        atom_flip_list_out = ""
+        #from cctbx import uctbx, adptbx
+        for atom in atom_flip_list_in.split(","):
+            ref_mod = olexex.OlexRefinementModel(False)
+            olx_atoms = ref_mod.atoms()
+            #uc = uctbx.unit_cell(ref_mod.getCell())
+            #Lets hope olex keeps internal atom numbers according to how xyz files are generated...
+            index = -1
+            for i,a in enumerate(olx_atoms):
+              label = a['label']
+              if atom in label:
+                  index = i
+                  break
+            if index == -1:
+              print("Could not find atom %s in the structure! Check the atom labels and the list of atoms to flip in the ORCA settings!"%atom)
+              continue
+            if atom_flip_list_out != "":
+              atom_flip_list_out += ","
+            atom_flip_list_out += "%d"%index
+        atom_spin_list = OV.GetParam("snum.NoSpherA2.ORCA_Broken_sym_spin")
+        scf_block += f"\nFlipSpin {atom_flip_list_out}\nFinalMs {atom_spin_list}"
     if scf_block != "":
       inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()

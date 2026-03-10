@@ -664,7 +664,16 @@ def make_ORCA_GUI(new_ORCA = True):
                           "spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM', True) >> html.Update()",
                           "spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM', False) >> html.Update()",
                           width=10)
+    show_bs = OV.GetParam('user.NoSpherA2.show_broken_sym')
+    if show_bs:
+        t += labeled_checkbox("NoSpherA2_ORCA_use_brok_sym@refine",
+                          "Broken Symmetry",
+                          "spy.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')",
+                          "spy.SetParam('snum.NoSpherA2.ORCA_use_broken_sym', True) >> html.Update()",
+                          "spy.SetParam('snum.NoSpherA2.ORCA_use_broken_sym', False) >> html.Update()",
+                          width=15)
     embed = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+    brok_sym = OV.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')
     if embed:
       t += standalone_combo("NoSpherA2_ORCA_embedding_type@refine",
                             "Mol;Ion",
@@ -693,6 +702,17 @@ def make_ORCA_GUI(new_ORCA = True):
                           "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')",
                           "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS', html.GetValue('~name~'))",
                           width_label=11, width_spinbox=8, min_value=0, max_value=100)
+    if brok_sym:
+      t += end_line() + begin_new_line() + labeled_text("NoSpherA2_ORCA_brok_sym_atoms@refine",
+                            "Broken Sym. Atoms",
+                            "spy.GetParam('snum.NoSpherA2.ORCA_Broken_sym_atoms')",
+                            "spy.SetParam('snum.NoSpherA2.ORCA_Broken_sym_atoms', html.GetValue('~name~'))",
+                            width_label=20, width_textbox=10) + \
+           labeled_text("NoSpherA2_ORCA_brok_sym_spins@refine",
+                            "Broken Sym. Spin",
+                            "spy.GetParam('snum.NoSpherA2.ORCA_Broken_sym_spin')",
+                            "spy.SetParam('snum.NoSpherA2.ORCA_Broken_sym_spin', html.GetValue('~name~'))",
+                            width_label=20, width_textbox=10)
     t += end_line()
   t += partitioning_scheme_line()
   return t
