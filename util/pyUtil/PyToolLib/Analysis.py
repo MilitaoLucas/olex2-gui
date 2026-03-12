@@ -1342,6 +1342,7 @@ class Graph(ArgumentParser):
 
       else:
         href = ""
+        href_str = "OMIT"
         if scale == None:
           scale = 1
         if indices is None:
@@ -1353,12 +1354,12 @@ class Graph(ArgumentParser):
           xl = self.metadata.get("x_label", "F calc")
           if xl == "I calc":
             graph_type = "Iobs_Icalc"
-            href_str = "spy.ED.get_profile_plot"
             options = ""
+            if OV.IsEDRefinement():
+              href_str = "spy.ED.get_profile_plot"
           else:
             graph_type = "fobs_fcalc"
             options = ""
-            href_str = "OMIT"
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           target = '%s %s' %(href_str, idx)
           href = target
