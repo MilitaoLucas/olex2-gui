@@ -1353,17 +1353,19 @@ class Graph(ArgumentParser):
           xl = self.metadata.get("x_label", "F calc")
           if xl == "I calc":
             graph_type = "Iobs_Icalc"
+            href_str = "spy.ED.get_profile_plot"
             options = ""
           else:
             graph_type = "fobs_fcalc"
-            options = "-a"
+            options = ""
+            href_str = "OMIT"
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
-          href = "OMIT %s>>spy.make_reflection_graph(%s)" %(idx, graph_type)
-          target = 'OMIT %s' %(idx)
+          target = '%s %s' %(href_str, idx)
+          href = target
           if 'hkl' in self.model['omit']:
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
-              href = "OMIT -u %s %s>>spy.make_reflection_graph(%s)" %(options, idx, graph_type)
+              href = "%s -u %s %s>>spy.make_reflection_graph(%s)" %(href_str, options, idx, graph_type)
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (tuple(v / self.scale for v in box) + (href, target)))
 
