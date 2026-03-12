@@ -366,17 +366,29 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
     # Now check whether and do some history file handlings
     tsc_exists = False
+    has_backup_candidates = False
     f_time = None
     if not OV.GetParam('snum.NoSpherA2.no_backup'):
-      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".tscb", ".tsc", ".wfnlog"]
+      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".ffn", ".xtb", ".tscb", ".tsc", ".wfnlog"]
       for file in os.listdir(olx.FilePath()):
+        full_file = os.path.join(olx.FilePath(), file)
+        if any(file.endswith(x) for x in backup_endings):
+          has_backup_candidates = True
+          m_time = os.path.getmtime(full_file)
+          if f_time is None or m_time > f_time:
+            f_time = m_time
         if file.endswith(".tsc"):
           tsc_exists = True
-          f_time = os.path.getmtime(file)
+          f_time = os.path.getmtime(full_file)
         if file.endswith(".tscb"):
           tsc_exists = True
-          f_time = os.path.getmtime(file)
-      if tsc_exists and not any(x in wfn_code for x in [".wfn", ".wfx", ".molden", ".gbw", ".fchk"]):
+          f_time = os.path.getmtime(full_file)
+
+      source_is_wavefunction_file = any(x in wfn_code for x in [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".ffn", ".xtb"])
+      archive_for_tonto = wfn_code == "Tonto" and has_backup_candidates
+      archive_for_others = tsc_exists and not source_is_wavefunction_file
+
+      if (archive_for_tonto or archive_for_others) and f_time is not None:
         import datetime
         timestamp_dir = os.path.join(self.history_dir,olx.FileName() + "_" + datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S'))
         if not os.path.exists(timestamp_dir):
@@ -407,7 +419,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_files = []
       need_to_combine = False
       need_to_partition = False
-      if ".wfn" in wfn_code or ".wfx" in wfn_code or ".gbw" in wfn_code or ".fchk" in wfn_code or ".molden" in wfn_code:
+      if ".wfn" in wfn_code or ".wfx" in wfn_code or ".gbw" in wfn_code or ".fchk" in wfn_code or ".molden" in wfn_code or ".ffn" in wfn_code or ".xtb" in wfn_code:
         print("Calculation from wavefunction file with disorder not possible, sorry!\n")
         return False
       groups_counter = 0
@@ -629,7 +641,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
       else:
         if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
-           wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
+           wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw") or \
+           wfn_code.lower().endswith(".ffn") or wfn_code.lower().endswith(".xtb"):
           pass
         elif wfn_code == "Tonto":
           job = Job(self, self.name)
@@ -639,21 +652,25 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           except NameError as error:
             print("Aborted due to: ", error)
             success = False
-          if 'Error in' in open(job.error_fn).read():
-            success = False
-            with open(job.error_fn) as file:
-              for i in file.readlines():
-                if 'Error in' in i:
-                  print(i)
-            OV.SetVar('NoSpherA2-Error',"StructureFactor")
-            return False
-          if success:
+          if not success:
             OV.SetVar('NoSpherA2-Error',"Tonto")
             return False
+
+          ffn_in_job = os.path.join(job.full_dir, job.name + ".ffn")
+          if not os.path.exists(ffn_in_job):
+            OV.SetVar('NoSpherA2-Error',"Tonto")
+            raise NameError("Tonto finished but no .ffn file found in job folder")
+          ffn_in_main = os.path.join(OV.FilePath(), job.name + ".ffn")
+          shutil.copy(ffn_in_job, ffn_in_main)
+
           if OV.HasGUI():
             OV.UpdateHtml()
           if not experimental_SF:
-            shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
+            tsc_in_job = os.path.join(job.full_dir, job.name + ".tsc")
+            if not os.path.exists(tsc_in_job):
+              OV.SetVar('NoSpherA2-Error',"StructureFactor")
+              raise NameError("Tonto finished but no .tsc file found in job folder")
+            shutil.copy(tsc_in_job, job.name+".tsc")
             OV.SetParam('snum.NoSpherA2.file', job.name+".tsc")
         else:
           if wfn_code == "ELMOdb":
@@ -676,7 +693,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if wfn_code != "fragHAR" and wfn_code != "SALTED":
             path_base = os.path.join(self.jobs_dir, self.name)
             if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
-               wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw"):
+               wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw") or \
+               wfn_code.lower().endswith(".ffn") or wfn_code.lower().endswith(".xtb"):
               wfn_fn = wfn_code
             else:
               endings = [".fchk", ".wfn", ".ffn", ".wfx", ".molden", ".xtb"]
@@ -1022,8 +1040,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
 @run_with_bitmap('Running DISCAMB')
 def discamb(folder, name, discamb_exe):
-  move_args = []
-  move_args.append(discamb_exe)
+  move_args = [discamb_exe]
   hkl_file = os.path.join(folder,name+".hkl")
 #  cif = os.path.join(folder,name+".cif")
 #  move_args.append(cif)
@@ -1039,21 +1056,34 @@ def discamb(folder, name, discamb_exe):
 
   wavelength = float(olx.xf.exptl.Radiation())
   if wavelength < 0.1:
-    #args.append("-ED")
-    os.environ['discamb_cmd'] = '+&-'.join([discamb_exe, "-e"])
-  else:
-    os.environ['discamb_cmd'] = discamb_exe
-  os.environ['discamb_file'] = folder
-  pyl = OV.getPYLPath()
-  if not pyl:
-    print("A problem with pyl is encountered, aborting.")
-    return
-  import subprocess
-  p = subprocess.Popen([pyl,
-                        os.path.join(p_path, "discamb-launch.py")])
-  while p.poll() is None:
-    time.sleep(5)
-    OV.UpdateHtml()
+    move_args.append("-e")
+
+  startinfo = None
+  if sys.platform[:3] == 'win':
+    startinfo = subprocess.STARTUPINFO()
+    startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = 7
+
+  p = subprocess.Popen(move_args, cwd=folder, startupinfo=startinfo)
+  tries = 0
+  log_fn = os.path.join(folder, 'discambMATTS2tsc.log')
+  while not os.path.exists(log_fn):
+    if p.poll() is not None:
+      raise NameError(f"DISCAMB terminated early with code {p.returncode}")
+    time.sleep(1)
+    tries += 1
+    if tries >= 20:
+      raise NameError("Failed to locate DISCAMB output file")
+
+  with open(log_fn, "r") as stdout:
+    while p.poll() is None:
+      x = stdout.read()
+      if x:
+        print(x, end='')
+      time.sleep(1)
+
+  if p.returncode not in (0, None):
+    raise NameError(f"DISCAMB failed with return code {p.returncode}")
 
 class Job(object):
   out_fn = None
@@ -1158,20 +1188,27 @@ class Job(object):
     self.error_fn = os.path.join(self.full_dir, self.name) + "_tonto.err"
     self.out_fn = os.path.join(self.full_dir, self.name) + "_tonto.out"
     self.wfn_name = os.path.join(self.full_dir, self.name) + "_tonto.ffn"
-    os.environ['hart_cmd'] = '+&-'.join(args)
-    os.environ['hart_file'] = self.name
-    os.environ['hart_dir'] = os.path.join(OV.FilePath(),self.full_dir)
+    for stale_fn in (
+      self.error_fn,
+      self.out_fn,
+      self.wfn_name,
+      os.path.join(self.full_dir, self.name + ".ffn")
+    ):
+      if os.path.exists(stale_fn):
+        try:
+          os.remove(stale_fn)
+        except Exception:
+          pass
     OV.SetParam('snum.NoSpherA2.name',self.name)
     OV.SetParam('snum.NoSpherA2.dir',self.full_dir)
     OV.SetParam('snum.NoSpherA2.cmd',args)
 
-    pyl = OV.getPYLPath()
-    if not pyl:
-      print("A problem with pyl is encountered, aborting.")
-      return
-    import subprocess
-    p = subprocess.Popen([pyl,
-                          os.path.join(p_path, "HARt-launch.py")])
+    startinfo = None
+    if sys.platform[:3] == 'win':
+      startinfo = subprocess.STARTUPINFO()
+      startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      startinfo.wShowWindow = 7
+    p = subprocess.Popen(args, cwd=self.full_dir, startupinfo=startinfo)
     tries = 0
     while tries < 20:
       if os.path.exists(self.out_fn):
@@ -1621,7 +1658,7 @@ def make_NSA2_GUI(method):
   method = method.lstrip().rstrip()
   if source_is_tsc():
     return "No GUI for .tsc source."
-  elif ".gbw" in method or ".fchk" in method or ".wfn" in method or ".molden" in method or ".wfx" in method:
+  elif ".gbw" in method or ".fchk" in method or ".wfn" in method or ".molden" in method or ".wfx" in method or ".ffn" in method or ".xtb" in method:
     return make_wfn_GUI()
   elif method == "Hybrid":
     return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
@@ -1663,7 +1700,7 @@ def get_sources_string():
     calculator_header = " -- Wavefunction Calculators -- "
     calculators = NoSpherA2_instance.getwfn_softwares()
     wavefunction_files_header = " -- From Wavefunction File -- "
-    existing_wfns_raw = gui.GetFileListAsDropdownItems(OV.FilePath(),'wfn;wfx;gbw;molden;xtb')
+    existing_wfns_raw = gui.GetFileListAsDropdownItems(OV.FilePath(),'wfn;wfx;gbw;molden;xtb;ffn')
     existing_wfns = ""
     for f in existing_wfns_raw.split(';'):
         existing_wfns += f"  {f};"

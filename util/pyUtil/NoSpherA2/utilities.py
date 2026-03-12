@@ -292,16 +292,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     startinfo = subprocess.STARTUPINFO()
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     startinfo.wShowWindow = 7
-    pyl = OV.getPYLPath()
-    if not pyl:
-      print("A problem with pyl is encountered, aborting.")
-      return
     p = subprocess.Popen(args, startupinfo=startinfo)
   else:
-    pyl = OV.getPYLPath()
-    if not pyl:
-      print("A problem with pyl is encountered, aborting.")
-      return
     p = subprocess.Popen(args)
 
   out_fn = "NoSpherA2.log"
@@ -309,7 +301,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   tries = 0
   while not os.path.exists(out_fn):
     if p.poll() is None:
-      time.sleep(1)
+      time.sleep(0.2)
       tries += 1
       if tries >= 10:
         if "python" in args[2] and tries <=10:
@@ -504,11 +496,17 @@ def check_for_matching_wfn():
   wfn = os.path.join(p, name + '.wfn')
   wfx = os.path.join(p, name + '.wfx')
   gbw = os.path.join(p, name + '.gbw')
+  ffn = os.path.join(p, name + '.ffn')
+  xtb = os.path.join(p, name + '.xtb')
   if os.path.exists(wfn):
     return True
   elif os.path.exists(wfx):
     return True
   elif os.path.exists(gbw):
+    return True
+  elif os.path.exists(ffn):
+    return True
+  elif os.path.exists(xtb):
     return True
   else:
     return False

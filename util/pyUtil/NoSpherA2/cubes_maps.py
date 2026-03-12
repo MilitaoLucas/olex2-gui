@@ -1,4 +1,5 @@
 import os
+import time
 import olex
 import olx
 import olex_core
@@ -116,6 +117,12 @@ def calculate_cubes():
     return
 
   NoSpherA2 = OV.GetVar("NoSpherA2")
+  if not NoSpherA2:
+    print("NoSpherA2 executable is not configured.")
+    return
+  if os.path.isabs(NoSpherA2) and not os.path.exists(NoSpherA2):
+    print(f"NoSpherA2 executable not found: {NoSpherA2}")
+    return
   args = []
 
   args.append(NoSpherA2)
@@ -123,12 +130,23 @@ def calculate_cubes():
   args.append("-cpus")
   args.append(cpus)
   args.append("-wfn")
-  if os.path.exists(OV.ModelSrc() + ".gbw"):
-    args.append(OV.ModelSrc() + ".gbw")
-  elif os.path.exists(OV.ModelSrc() + ".wfx"):
-    args.append(OV.ModelSrc() + ".wfx")
-  else:
-    args.append(OV.ModelSrc() + ".wfn")
+  wfn_path = None
+  candidates = [
+    OV.ModelSrc() + ".gbw",
+    OV.ModelSrc() + ".wfx",
+    OV.ModelSrc() + ".ffn",
+    OV.ModelSrc() + ".wfn",
+    OV.ModelSrc() + ".molden",
+    OV.ModelSrc() + ".xtb",
+  ]
+  for candidate in candidates:
+    if os.path.exists(candidate):
+      wfn_path = candidate
+      break
+  if wfn_path is None:
+    print(f"Wavefunction file not found for cube calculation. Looked for: {', '.join(candidates)}")
+    return
+  args.append(wfn_path)
   Lap = OV.GetParam('snum.NoSpherA2.Property_Lap')
   Eli = OV.GetParam('snum.NoSpherA2.Property_Eli')
   Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
@@ -170,16 +188,46 @@ def calculate_cubes():
   args.append("-cif")
   args.append(OV.ModelSrc() + ".cif")
 
-  os.environ['cube_cmd'] = '+&-'.join(args)
-  os.environ['cube_file'] = OV.ModelSrc()
-  os.environ['cube_dir'] = OV.FilePath()
+  cube_dir = OV.FilePath()
+  cube_log = os.path.join(cube_dir, "NoSpherA2_cube.log")
+  if os.path.exists(cube_log):
+    import shutil
+    shutil.move(cube_log, cube_log + "_org")
 
   import subprocess
-  pyl = OV.getPYLPath()
-  if not pyl:
-    print("A problem with pyl is encountered, aborting.")
-    return
-  subprocess.Popen([pyl, os.path.join(p_path, "cube-launch.py")])
+  startinfo = None
+  if os.name == 'nt':
+    startinfo = subprocess.STARTUPINFO()
+    startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startinfo.wShowWindow = 7
+
+  log_handle = open(cube_log, "w", encoding="utf-8", errors="replace")
+  try:
+    p = subprocess.Popen(
+      args,
+      cwd=cube_dir,
+      stdout=log_handle,
+      stderr=subprocess.STDOUT,
+      stdin=subprocess.DEVNULL,
+      startupinfo=startinfo,
+    )
+    time.sleep(0.2)
+    rc = p.poll()
+    if rc is not None and rc != 0:
+      print(f"Cube calculation process exited immediately with code {rc}.")
+      try:
+        with open(cube_log, "r", encoding="utf-8", errors="replace") as lf:
+          content = lf.read().strip()
+          if content:
+            print(content)
+      except Exception:
+        pass
+    else:
+      print("Cube calculation started in background.")
+  except Exception as e:
+    print(f"Failed to start cube calculation: {e}")
+  finally:
+    log_handle.close()
 OV.registerFunction(calculate_cubes,False,'NoSpherA2')
 
 def get_map_types():

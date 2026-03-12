@@ -1762,7 +1762,6 @@ ener = cf.kernel()"""
       OV.UpdateHtml()
       olx.xf.EndUpdate()
       olex.m('refresh')
-    python_script = "fchk-launch.py"
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
 
     if softw != "pySCF":
@@ -1800,7 +1799,6 @@ ener = cf.kernel()"""
         args.append(charge)
         args.append(mem)
         args.append(method)
-        python_script = "psi4-launch.py"
       elif softw == "ELMOdb":
         if self.parent.ubuntu_exe is not None and os.path.exists(self.parent.ubuntu_exe):
           args.append(self.parent.ubuntu_exe)
@@ -1881,6 +1879,7 @@ ener = cf.kernel()"""
       out_fn = None
       path = self.full_dir
       nr = 0
+      fchk_dir_abs = os.path.abspath(os.path.join(OV.FilePath(), self.full_dir))
       if sys.platform[:3] == 'win' and "ubuntu" in args[0]:
         nr = 2
       # if part != 0:
@@ -1907,54 +1906,106 @@ ener = cf.kernel()"""
             out_fn = os.path.join(path, self.name + "_pyscf.log")
           else:
             out_fn = os.path.join(path, self.name + ".log")
+
+      out_fn_abs = out_fn
+      if not os.path.isabs(out_fn_abs):
+        out_fn_abs = os.path.abspath(os.path.join(OV.FilePath(), out_fn_abs))
   
-      os.environ['fchk_cmd'] = '+&-'.join(args)
-      os.environ['fchk_file'] = self.name
-      os.environ['fchk_dir'] = os.path.join(OV.FilePath(), self.full_dir)
-      os.environ['fchk_out_fn'] = out_fn
-      pidfile = os.path.join(path, "NoSpherA2.pidfile")
+      pidfile = os.path.join(fchk_dir_abs, "NoSpherA2.pidfile")
   
-      if os.path.exists(out_fn):
+      if os.path.exists(out_fn_abs):
         print("Moving file to old!")
-        shutil.move(out_fn, out_fn + '_old')
+        shutil.move(out_fn_abs, out_fn_abs + '_old')
       if os.path.exists(pidfile):
         os.remove(pidfile)
   
       import subprocess
       p = None
+      run_args = list(args)
+      stdin_handle = None
+      stdout_handle = open(out_fn_abs, "w", encoding="utf-8", errors="replace")
+
+      if softw == "ELMOdb":
+        filtered_args = []
+        i = 0
+        while i < len(run_args):
+          token = run_args[i]
+          if token == "<" and i + 1 < len(run_args):
+            inp_name = run_args[i + 1]
+            inp_path = inp_name if os.path.isabs(inp_name) else os.path.join(fchk_dir_abs, inp_name)
+            if os.path.exists(inp_path):
+              stdin_handle = open(inp_path, "r")
+            i += 2
+            continue
+          if token == ">" and i + 1 < len(run_args):
+            i += 2
+            continue
+          filtered_args.append(token)
+          i += 1
+        run_args = filtered_args
+
+      print("Launching QM command directly:", run_args)
       if sys.platform[:3] == 'win':
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startinfo.wShowWindow = 7
-        pyl = OV.getPYLPath()
-        if not pyl:
-          print("A problem with pyl is encountered, aborting.")
-          return
-        p = subprocess.Popen([pyl,
-                              os.path.join(p_path, python_script)],
-                              startupinfo=startinfo
-                             )
+        try:
+          p = subprocess.Popen(
+            run_args,
+            startupinfo=startinfo,
+            cwd=fchk_dir_abs,
+            stdout=stdout_handle,
+            stderr=subprocess.STDOUT,
+            stdin=stdin_handle
+          )
+        except Exception as exc:
+          stdout_handle.close()
+          if stdin_handle is not None:
+            stdin_handle.close()
+          OV.SetVar('NoSpherA2-Error', "Launcher Popen failed")
+          raise NameError(f"Failed to launch QM process: {exc}")
       else:
-        pyl = OV.getPYLPath()
-        if not pyl:
-          print("A problem with pyl is encountered, aborting.")
-          return
-        p = subprocess.Popen([pyl,
-                              os.path.join(p_path, python_script)])
+        try:
+          p = subprocess.Popen(
+            run_args,
+            cwd=fchk_dir_abs,
+            stdout=stdout_handle,
+            stderr=subprocess.STDOUT,
+            stdin=stdin_handle
+          )
+        except Exception as exc:
+          stdout_handle.close()
+          if stdin_handle is not None:
+            stdin_handle.close()
+          OV.SetVar('NoSpherA2-Error', "Launcher Popen failed")
+          raise NameError(f"Failed to launch QM process: {exc}")
+      print(f"QM process PID: {p.pid}")
+      stdout_handle.close()
   
       tries = 0
       time.sleep(0.5)
-      while not os.path.exists(out_fn):
+      while not os.path.exists(out_fn_abs):
+        if p.poll() is not None:
+          print(f"QM process exited before log creation with return code {p.returncode}")
+          OV.SetVar('NoSpherA2-Error',"Wfn-Process failed")
+          if stdin_handle is not None:
+            stdin_handle.close()
+          raise NameError('Wfn-Process failed before output log creation!')
         time.sleep(1)
         tries += 1
-        if tries >= 5:
+        if tries >= 30:
           if "python" in args[nr] and tries <=10:
             continue
-          print("Failed to locate the output file at "+str(out_fn))
+          print("Failed to locate the output file at "+str(out_fn_abs))
           OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
+          if stdin_handle is not None:
+            stdin_handle.close()
           raise NameError('Wfn-Output not found!')
+
+      if stdin_handle is not None:
+        stdin_handle.close()
   
-      with open(out_fn, "r") as stdout:
+      with open(out_fn_abs, "r") as stdout:
         while p.poll() is None:
           x = None
           try:
@@ -1981,7 +2032,7 @@ ener = cf.kernel()"""
           else:
             time.sleep(0.5)
       print("\nWavefunction calculation ended!")
-      shutil.copy(out_fn, wfnlog, follow_symlinks=False)
+      shutil.copy(out_fn_abs, wfnlog, follow_symlinks=False)
     else:
       self.parent.pyscf_adapter.run(os.path.join(self.full_dir, self.name + ".py"))
       shutil.copy(self.name + ".wfn", os.path.join(self.full_dir, self.name + ".wfn"))
@@ -2109,6 +2160,7 @@ ener = cf.kernel()"""
 
       if (not experimental_SF) and ("g" not in args[0]):
         self.convert_to_fchk()
+        
   @run_with_bitmap("Converting to .fchk")
   def convert_to_fchk(self):
     move_args = []
