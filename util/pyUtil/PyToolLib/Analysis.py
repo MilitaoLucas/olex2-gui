@@ -1357,12 +1357,14 @@ class Graph(ArgumentParser):
             options = ""
             if OV.IsEDRefinement():
               href_str = "spy.ED.get_profile_plot"
+              reload_graph = ""
           else:
             graph_type = "fobs_fcalc"
+            reload_graph = ">>spy.make_reflection_graph(%s)" % graph_type
             options = ""
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           target = '%s %s' %(href_str, idx)
-          href = target
+          href = target + reload_graph
           if 'hkl' in self.model['omit']:
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
