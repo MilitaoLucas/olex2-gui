@@ -2432,6 +2432,9 @@ user
     show_broken_sym = False
       .type = bool
       .expert_level = 2
+    show_OCC = False
+      .type = bool
+      .expert_level = 2
   }
   Server{
     host=localhost

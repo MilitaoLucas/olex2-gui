@@ -259,8 +259,12 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
   else:
-    args.append("-wfn")
-    args.append(wfn_file)
+    if soft == "OCC":
+      args.append("-occ")
+      args.append(wfn_file)
+    else:
+      args.append("-wfn")
+      args.append(wfn_file)
     args.append("-cif")
     args.append(cif)
     args.append("-mult")
@@ -287,16 +291,24 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
 
+  env = None
+  if soft == "OCC":
+    env = dict(os.environ)
+    env["OCC_DATA_PATH"] = os.path.join(os.path.dirname(NoSpherA2), "occ", "share")
+
   p = None
   if sys.platform[:3] == 'win':
     startinfo = subprocess.STARTUPINFO()
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    startinfo.wShowWindow = 7
-    p = subprocess.Popen(args, startupinfo=startinfo)
+    startinfo.wShowWindow = 0
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    p = subprocess.Popen(args, startupinfo=startinfo, creationflags=creationflags, env=env)
   else:
-    p = subprocess.Popen(args)
+    p = subprocess.Popen(args, env=env)
 
   out_fn = "NoSpherA2.log"
+  occ_log_fn = "NoSpherA2_OCC.log"
+  wfn_log_fn = name + ".wfnlog"
 
   tries = 0
   while not os.path.exists(out_fn):
@@ -314,25 +326,59 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
       raise NameError('NoSpherA2 ended unexpectedly!')
   with open(out_fn, "r") as stdout:
-    while p.poll() is None:
-      x = stdout.read()
-      if x:
-        print(x, end='')
-      # if OV.GetVar("stop_current_process"):
-      #  p.terminate()
-      #  print("Calculation aborted by INTERRUPT!")
-      #  OV.SetVar("stop_current_process", False)
-      # else:
-      #  time.sleep(0.1)
+    occ_stdout = None
+    if os.path.exists(occ_log_fn):
+      occ_stdout = open(occ_log_fn, "r")
+    try:
+      while p.poll() is None:
+        x = stdout.read()
+        if x:
+          print(x, end='')
+        if occ_stdout:
+          y = occ_stdout.read()
+          if y:
+            print(y, end='')
+        # if OV.GetVar("stop_current_process"):
+        #  p.terminate()
+        #  print("Calculation aborted by INTERRUPT!")
+        #  OV.SetVar("stop_current_process", False)
+        # else:
+        #  time.sleep(0.1)
+    finally:
+      if occ_stdout:
+        occ_stdout.close()
 
   sucess = False
   shutil.move(out_fn, final_log_name)
+  if os.path.exists(occ_log_fn):
+    shutil.move(occ_log_fn, wfn_log_fn)
   with open(final_log_name, "r") as f:
     lines = f.readlines()
     if "Writing tsc file...  ... done!\n" in lines or "Writing tsc file...\n" in lines:
       sucess = True
 
   if sucess:
+    if soft == "OCC":
+      wfn_job_dir = os.path.join(folder, "olex2", "Wfn_job")
+      fchk_candidates = [
+        os.path.join(wfn_job_dir, name + ".owf.fchk"),
+        os.path.join(wfn_job_dir, "experimental.owf.fchk"),
+      ]
+      has_fchk = any(os.path.exists(f) for f in fchk_candidates)
+      if not has_fchk:
+        OV.SetVar('NoSpherA2-Error', "NoFchk")
+        raise NameError('OCC run did not generate an fchk file during cuQCT call!')
+
+      tsc_candidates = [
+        os.path.join(folder, name + ".tsc"),
+        os.path.join(folder, name + ".tscb"),
+        os.path.join(folder, "experimental.tsc"),
+        os.path.join(folder, "experimental.tscb"),
+      ]
+      has_tsc = any(os.path.exists(f) for f in tsc_candidates)
+      if not has_tsc:
+        OV.SetVar('NoSpherA2-Error', "NoTsc")
+        raise NameError('OCC run did not generate a .tsc/.tscb file during cuQCT call!')
     print("\n.tsc calculation ended!")
   else:
     print ("\nERROR during tsc calculation!")
@@ -412,6 +458,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     startinfo = subprocess.STARTUPINFO()
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     startinfo.wShowWindow = subprocess.SW_HIDE
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
   if startinfo is None:
     with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
@@ -420,7 +467,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
         sys.stdout.write(string)
         sys.stdout.flush()
   else:
-    with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
+    with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo, creationflags=creationflags) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
         sys.stdout.write(string)
@@ -1062,6 +1109,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
     startinfo = STARTUPINFO()
     startinfo.dwFlags |= STARTF_USESHOWWINDOW
     startinfo.wShowWindow = SW_HIDE
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
   if startinfo is None:
     with Popen(args, stdout=PIPE) as p:
@@ -1070,7 +1118,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
         stdout.write(string)
         stdout.flush()
   else:
-    with Popen(args, stdout=PIPE, startupinfo=startinfo) as p:
+    with Popen(args, stdout=PIPE, startupinfo=startinfo, creationflags=creationflags) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
         string = c.decode()
         stdout.write(string)

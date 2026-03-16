@@ -196,10 +196,12 @@ def calculate_cubes():
 
   import subprocess
   startinfo = None
+  creationflags = 0
   if os.name == 'nt':
     startinfo = subprocess.STARTUPINFO()
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    startinfo.wShowWindow = 7
+    startinfo.wShowWindow = 0
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
   log_handle = open(cube_log, "w", encoding="utf-8", errors="replace")
   try:
@@ -210,6 +212,7 @@ def calculate_cubes():
       stderr=subprocess.STDOUT,
       stdin=subprocess.DEVNULL,
       startupinfo=startinfo,
+      creationflags=creationflags,
     )
     time.sleep(0.2)
     rc = p.poll()

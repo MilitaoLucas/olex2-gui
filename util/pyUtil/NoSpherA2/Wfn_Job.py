@@ -71,10 +71,91 @@ class wfn_Job(object):
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
 
-  def write_xyz_file(self):
+  def write_xyz_file(self, normalize_h_isotopes=False):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     olx.Kill("$Q")
     olx.File(coordinates_fn,p=10)
+    if normalize_h_isotopes:
+      self._normalize_xyz_h_isotopes(coordinates_fn)
+
+  def _normalize_xyz_h_isotopes(self, coordinates_fn):
+    with open(coordinates_fn, "r", encoding="utf-8", errors="replace") as xyz_file:
+      xyz_lines = xyz_file.readlines()
+
+    normalized_lines = xyz_lines[:2]
+    for line in xyz_lines[2:]:
+      atom = line.split()
+      if atom and atom[0] in ("D", "T"):
+        atom[0] = "H"
+        line = "  ".join(atom) + "\n"
+      normalized_lines.append(line)
+
+    with open(coordinates_fn, "w", encoding="utf-8", errors="replace") as xyz_file:
+      xyz_file.writelines(normalized_lines)
+
+  def _normalize_occ_keyword(self, value):
+    return str(value).strip().replace("_", "-").lower()
+
+  def _get_occ_df_basis(self, basis_name):
+    allowed_df_basis = {
+      "def2-universal-jkfit",
+      "cc-pvtz-jkfit",
+      "cc-pvqz-jkfit",
+    }
+
+    selected_df_basis = self._normalize_occ_keyword(OV.GetParam('snum.NoSpherA2.OCC_df_basis'))
+    if selected_df_basis in allowed_df_basis:
+      return selected_df_basis
+
+    basis_key = self._normalize_occ_keyword(basis_name)
+    if basis_key.startswith("cc-pvqz"):
+      return "cc-pvqz-jkfit"
+    if basis_key.startswith("cc-pvtz"):
+      return "cc-pvtz-jkfit"
+    return "def2-universal-jkfit"
+
+  def _get_occ_grid_settings(self):
+    grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    grid_map = {
+      "Low": (86, 110, "1e-4"),
+      "Normal": (194, 230, "1e-6"),
+      "High": (266, 302, "1e-10"),
+      "Max": (590, 974, "1e-15"),
+    }
+    return grid_map.get(grid_accuracy, grid_map["Normal"])
+
+  def write_occ_input(self, xyz, basis_name=None, method=None, charge=None, mult=None):
+    if xyz:
+      self.write_xyz_file(normalize_h_isotopes=True)
+
+    self.input_fn = os.path.join(self.full_dir, self.name) + ".toml"
+    if basis_name is None:
+      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    if method is None:
+      method = OV.GetParam('snum.NoSpherA2.method')
+    if charge is None:
+      charge = OV.GetParam('snum.NoSpherA2.charge')
+    if mult is None:
+      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+
+    max_angular, min_angular, radial_precision = self._get_occ_grid_settings()
+    df_basis = self._get_occ_df_basis(basis_name)
+    input_xyz = os.path.join(self.full_dir, self.name) + ".xyz"
+
+    with open(self.input_fn, "w", encoding="utf-8", errors="replace") as inp:
+      inp.write(f"threads = {OV.GetParam('snum.NoSpherA2.ncpus')}\n\n")
+      inp.write("[scf]\n")
+      inp.write(f'input = "{input_xyz.replace(chr(92), chr(92)+chr(92))}"\n')
+      inp.write(f'method = "{self._normalize_occ_keyword(method)}"\n')
+      inp.write(f'basis = "{self._normalize_occ_keyword(basis_name)}"\n')
+      inp.write(f'charge = {int(charge)}\n')
+      inp.write(f'multiplicity = {int(mult)}\n')
+      inp.write("spherical = true\n")
+      inp.write('output = "fchk"\n')
+      inp.write(f'df-basis = "{df_basis}"\n')
+      inp.write(f'dft_grid_max_angular = {max_angular}\n')
+      inp.write(f'dft_grid_min_angular = {min_angular}\n')
+      inp.write(f'dft_grid_radial_precision = {radial_precision}\n')
     
   def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None):
     if self.software == "ORCA":
@@ -93,11 +174,13 @@ class wfn_Job(object):
       self.write_elmodb_input(xyz)
     elif self.software == "Psi4":
       self.write_psi4_input(xyz)
+    elif self.software == "OCC":
+      self.write_occ_input(xyz, basis, method, charge, mult)
     elif self.software == "Thakkar IAM" or self.software == "SALTED":
       self.write_xyz_file()
     elif self.software == "xTB" or self.software == "pTB":
       if xyz:
-        self.write_xyz_file()
+        self.write_xyz_file(normalize_h_isotopes=True)
     else: 
       print("ERROR: Wavefunction software not recognized.\nPlease select a valid software.\nNo Input file written.")
 
@@ -226,7 +309,7 @@ class wfn_Job(object):
   def write_gX_input(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,part=None):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
     if xyz:
-      self.write_xyz_file()
+      self.write_xyz_file(True)
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
     com = open(self.input_fn,"w")
@@ -283,12 +366,6 @@ class wfn_Job(object):
       i = i+1
       if i > 2:
         atom = line.split()
-        if atom[0] == "D":
-          atom[0] = "H"
-          line = line.replace("D", "H")
-        if atom[0] == "T":
-          atom[0] = "H"
-          line = line.replace("T", "H")
         com.write(line)
         if atom[0] not in atom_list:
           atom_list.append(atom[0])
@@ -618,12 +695,14 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if sys.platform[:3] == 'win':
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        startinfo.wShowWindow = 7
+        startinfo.wShowWindow = 0
+        creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         m = subprocess.Popen(mm_prep_args, cwd=self.full_dir,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT,
                              stdin=subprocess.PIPE,
-                             startupinfo=startinfo)
+                             startupinfo=startinfo,
+                             creationflags=creationflags)
       else:
         m = subprocess.Popen(mm_prep_args,
                              cwd=self.full_dir,
@@ -646,7 +725,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if "ECP" in basis_name:
       ECP = True
     if xyz:
-      self.write_xyz_file()
+      self.write_xyz_file(True)
     xyz = open(coordinates_fn,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
@@ -790,12 +869,6 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       i = i+1
       if i > 2:
         atom = line.split()
-        if atom[0] == "D":
-          atom[0] = "H"
-          line = line.replace("D", "H")
-        if atom[0] == "T":
-          atom[0] = "H"
-          line = line.replace("T", "H")
         inp.write(line)
         if atom[0] not in atom_list:
           atom_list.append(atom[0])
@@ -1764,6 +1837,9 @@ ener = cf.kernel()"""
       olex.m('refresh')
     wfnlog = os.path.join(OV.FilePath(), self.name + ".wfnlog")
 
+    if softw == "OCC":
+      return
+
     if softw != "pySCF":
       if softw == "ORCA":
         args.append(self.parent.orca_exe)
@@ -1902,7 +1978,9 @@ ener = cf.kernel()"""
         if "ubuntu" in args[0]:
           print("Starting Ubuntu for wavefunction calculation, please be patient for start")
         if out_fn is None:
-          if "ubuntu" in args[0]:
+          if softw == "OCC":
+            out_fn = os.path.join(path, self.name + ".log")
+          elif "ubuntu" in args[0]:
             out_fn = os.path.join(path, self.name + "_pyscf.log")
           else:
             out_fn = os.path.join(path, self.name + ".log")
@@ -1948,11 +2026,13 @@ ener = cf.kernel()"""
       if sys.platform[:3] == 'win':
         startinfo = subprocess.STARTUPINFO()
         startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        startinfo.wShowWindow = 7
+        startinfo.wShowWindow = 0
+        creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         try:
           p = subprocess.Popen(
             run_args,
             startupinfo=startinfo,
+            creationflags=creationflags,
             cwd=fchk_dir_abs,
             stdout=stdout_handle,
             stderr=subprocess.STDOUT,
@@ -2075,6 +2155,12 @@ ener = cf.kernel()"""
           if "Error" in line:
             print(line)
         raise NameError('pTB did not terminate normally!')
+    elif softw == "OCC":
+      if os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk")):
+        pass
+      else:
+        OV.SetVar('NoSpherA2-Error',"OCC")
+        raise NameError('OCC did not generate an fchk file!')
     #embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
     #if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding):
     #  molden_args = []
@@ -2146,6 +2232,9 @@ ener = cf.kernel()"""
         if (os.path.isfile(os.path.join(self.full_dir, "wfn.xtb"))):
           shutil.copy(os.path.join(self.full_dir, "wfn.xtb"), self.name + ".xtb")
           shutil.move(os.path.join(self.full_dir, "wfn.xtb"), os.path.join(self.full_dir, self.name + ".xtb"))
+      elif softw == "OCC":
+        if (os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk"))):
+          shutil.copy(os.path.join(self.full_dir, self.name + ".fchk"), self.name + ".fchk")
       elif("elmodb" in args[0]):
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfx"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfx"), self.name + ".wfx")
@@ -2158,13 +2247,15 @@ ener = cf.kernel()"""
 
       experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
 
-      if (not experimental_SF) and ("g" not in args[0]):
+      if (not experimental_SF) and ("g" not in args[0]) and softw != "OCC":
         self.convert_to_fchk()
         
   @run_with_bitmap("Converting to .fchk")
-  def convert_to_fchk(self):
+  def convert_to_fchk(self, softw=None):
     move_args = []
     basis_dir = self.parent.basis_dir
+    run_cwd = None
+    log_fn = "NoSpherA2.log"
     move_args.append(self.parent.NoSpherA2)
     move_args.append("-wfn")
     move_args.append(self.name + ".wfn")
@@ -2183,10 +2274,10 @@ ener = cf.kernel()"""
       move_args.append("rhf")
     else:
       move_args.append("rks")
-    m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+    m = subprocess.Popen(move_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, cwd=run_cwd)
     while m.poll() is None:
       time.sleep(1)
-    with open("NoSpherA2.log", "r") as log:
+    with open(log_fn, "r") as log:
       x = log.read()
       if x:
         print(x)
@@ -2195,4 +2286,4 @@ ener = cf.kernel()"""
     else:
       OV.SetVar('NoSpherA2-Error', "NoFchk")
       raise NameError("No fchk generated!")
-    shutil.move("NoSpherA2.log", os.path.join(self.full_dir, self.name + "_fchk.log"))
+    shutil.move(log_fn, os.path.join(self.full_dir, self.name + "_fchk.log"))

@@ -230,6 +230,8 @@ snum{
       .type = int
     ORCA_DAMP = False
       .type = bool
+    OCC_df_basis = "def2_universal_jkfit"
+      .type = str
     ORCA_Broken_sym_atoms = ""
       .type = str
     ORCA_Broken_sym_spin = ""

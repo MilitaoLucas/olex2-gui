@@ -14,7 +14,7 @@ from PluginTools import PluginTools as PT
 # Local imports for NoSpherA2 functions
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
@@ -109,6 +109,7 @@ class NoSpherA2(PT):
         'discamb_exe': self.setup_discamb,
         'elmodb_exe': self.setup_elmodb,
         'orca_exe': self.setup_orca_executables,
+        'occ_exe': self.setup_occ_executables,
         'xtb_exe': self.setup_xtb_executables,
         'ptb_exe': self.setup_ptb_executables,
     }
@@ -131,15 +132,30 @@ class NoSpherA2(PT):
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
+      self.occ_basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], os.path.join("occ", "share", "basis")).replace("\\", "/")
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
         basis_list.sort()
         self.basis_list_str = ';'.join(basis_list)
+        OCC_basis_list = []
+        if os.path.exists(self.occ_basis_dir):
+          for basis_name in os.listdir(self.occ_basis_dir):
+            basis_name_l = basis_name.lower()
+            if "jkfit" in basis_name_l or "jfit" in basis_name_l or "rij" in basis_name_l or "rifit" in basis_name_l or "thakkar" in basis_name_l:
+              continue
+            if basis_name_l.endswith(".json"):
+              basis_name = basis_name[:-5]
+            OCC_basis_list.append(basis_name)
+        OCC_basis_list.sort()
+        self.OCC_basis_list_str = ";".join(OCC_basis_list)
       else:
         self.basis_list_str = None
+        self.OCC_basis_list_str = None
     else:
       self.basis_list_str = None
       self.basis_dir = None
+      self.OCC_basis_list_str = None
+      self.occ_basis_dir = None
       print("-- No NoSpherA2 executable found!")
     print(" ")
 
@@ -702,8 +718,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 endings.append(".gbw")
               if wfn_code == "Thakkar IAM":
                 wfn_fn = path_base + ".xyz"
+              elif wfn_code == "OCC":
+                wfn_fn = path_base + ".toml"
               elif not any(os.path.exists(path_base + x) for x in endings):
-                print("No usefull wavefunction found!")
+                print("No useful wavefunction found!")
                 return False
               else:
                 for e in endings:
@@ -805,7 +823,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       wfn_object.write_input(xyz, basis_part, method_part, relativistc, charge, mult, strategy, conv, part, damping)
     else:
       wfn_object.write_input(xyz)
-    if soft != "Thakkar IAM" and soft != "SALTED":
+    if soft != "Thakkar IAM" and soft != "SALTED" and soft != "OCC":
       try:
         wfn_object.run(part)
       except NameError as error:
@@ -905,6 +923,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
+  def setup_occ_executables(self):
+    if OV.GetParam('user.NoSpherA2.show_OCC') == False:
+      return
+    self.softwares = f"{self.softwares};  OCC" if self.softwares else "  OCC"
+
   def setup_ptb_executables(self):
     if not OV.IsDebugging():
       return
@@ -940,6 +963,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     source = software()
     if self.basis_list_str is None:
       return "No Basis Sets found!"
+    if "OCC" in source:
+      return self.OCC_basis_list_str
     BL = self.basis_list_str.split(";")
     from cctbx_olex_adapter import OlexCctbxAdapter
     XRS = OlexCctbxAdapter().xray_structure()
@@ -1059,12 +1084,14 @@ def discamb(folder, name, discamb_exe):
     move_args.append("-e")
 
   startinfo = None
+  creationflags = 0
   if sys.platform[:3] == 'win':
     startinfo = subprocess.STARTUPINFO()
     startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    startinfo.wShowWindow = 7
+    startinfo.wShowWindow = 0
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
-  p = subprocess.Popen(move_args, cwd=folder, startupinfo=startinfo)
+  p = subprocess.Popen(move_args, cwd=folder, startupinfo=startinfo, creationflags=creationflags)
   tries = 0
   log_fn = os.path.join(folder, 'discambMATTS2tsc.log')
   while not os.path.exists(log_fn):
@@ -1204,11 +1231,13 @@ class Job(object):
     OV.SetParam('snum.NoSpherA2.cmd',args)
 
     startinfo = None
+    creationflags = 0
     if sys.platform[:3] == 'win':
       startinfo = subprocess.STARTUPINFO()
       startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      startinfo.wShowWindow = 7
-    p = subprocess.Popen(args, cwd=self.full_dir, startupinfo=startinfo)
+      startinfo.wShowWindow = 0
+      creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    p = subprocess.Popen(args, cwd=self.full_dir, startupinfo=startinfo, creationflags=creationflags)
     tries = 0
     while tries < 20:
       if os.path.exists(self.out_fn):
@@ -1362,6 +1391,8 @@ def get_functional_list(wfn_code=None):
     list = "HF;BP;BP86;PWLDA;r2SCAN;B3PW91;PBE;PBE0;M062X;B3LYP;BLYP;wr2SCAN;wB97X-V;DSD-BLYP;TPSSh;r2SCAN0"
   elif wfn_code == "xTB":
     list = "GFN1;GFN2"
+  elif wfn_code == "OCC":
+    list = "HF;BP86;PBE;PBE0;B3LYP;BLYP;r2SCAN;TPSS;M062X;wB97;wB97X;"
   elif wfn_code == "XHARPy":
     list = "PBE;SCAN;LDA;revPBE"
   else:
@@ -1379,6 +1410,8 @@ def change_tsc_generator(input):
   elif input == "  Get xTB":
     print("Opening xTB website in your browser...\nPlease download xTB from there, then set the path to the executable in the settings of Olex2.")
     olx.Shell("https://github.com/grimme-lab/xtb")
+  elif input == "  Get OCC":
+    print("Please install OCC and make sure the 'occ' executable is available on PATH, then reopen the NoSpherA2 source selection.")
   elif input == "  Get pySCF":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
@@ -1664,6 +1697,8 @@ def make_NSA2_GUI(method):
     return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   elif method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
     return make_ORCA_GUI(is_orca_new())
+  elif method == "OCC":
+    return make_OCC_GUI()
   elif method == "pySCF":
     return make_pySCF_GUI()
   elif method == "xTB":

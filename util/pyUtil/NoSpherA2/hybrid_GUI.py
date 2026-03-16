@@ -566,6 +566,43 @@ def make_wfn_GUI():
       end_line() + \
       partitioning_scheme_line()
 
+def occ_df_basis_combo():
+  return labeled_combo("NoSpherA2_OCC_DF_Basis@refine",
+                      "DF Basis",
+                      "'def2_universal_jkfit;cc-pvtz-jkfit;cc-pvqz-jkfit'",
+                      "spy.GetParam('snum.NoSpherA2.OCC_df_basis')",
+                      "spy.SetParam('snum.NoSpherA2.OCC_df_basis', html.GetValue('~name~'))",
+                      width_label=13, width_combo=27)
+
+def make_OCC_GUI():
+  t = begin_new_line() + make_quick_button_gui() + end_line()
+  t += begin_new_line() + \
+        basis_combo() + \
+        method_combo() + \
+        cpu_combo() + \
+        memory_text() + \
+        end_line()
+  t += begin_new_line("NoSpherA2_Options_2") + \
+        charge_spin() + \
+        multiplicity_spin() + \
+        iterative_checkbox()
+  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  if full_har == False:
+    t += update_tsc_button()
+  else:
+    t += cycles_spin()
+  t += end_line()
+  t += begin_new_line("NoSpherA2_Options_3") + \
+        integration_accuracy_combo() + \
+        occ_df_basis_combo() + \
+        h_aniso_checkbox() + \
+        no_afix_checkbox() + \
+        end_line()
+  if is_disordered():
+    t += disorder_groups_text()
+  t += partitioning_scheme_line()
+  return t
+
 def make_ORCA_GUI(new_ORCA = True):
   # Quick buttons
   t = begin_new_line() + make_quick_button_gui() + end_line()
