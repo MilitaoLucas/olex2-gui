@@ -20,6 +20,102 @@ try:
 except Exception as e:
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
+
+def _find_basis_file(basis_dir, basis_name):
+  """Return the path to a basis set file, matching case-insensitively."""
+  direct = os.path.join(basis_dir, basis_name)
+  if os.path.exists(direct):
+    return direct
+  lower = basis_name.lower()
+  for fn in os.listdir(basis_dir):
+    if fn.lower() == lower:
+      return os.path.join(basis_dir, fn)
+  return direct  # not found; let the caller raise a natural error
+
+
+def _read_atom_basis(basis_fh, element, basis_name):
+  """Locate one element in an open basis-set file and return its shells.
+
+  Returns a list of (shell_type, [(exp_str, coeff_str), ...]).
+  Raises RecursionError if the element is not found.
+  """
+  temp_atom = element + ":" + basis_name
+  fmt = ""
+  basis_fh.seek(0, 0)
+  while True:
+    line = basis_fh.readline()
+    if not line:
+      raise RecursionError(f"Atom {element!r} not found in basis set!")
+    if not line.strip() or line[0] == "!":
+      continue
+    if "keys=" in line:
+      kl = line.split(" ")
+      fmt = kl[kl.index("keys=") + 2]
+    if temp_atom.lower() in line.lower():
+      break
+  line_run = basis_fh.readline()
+  if "{" in line_run:
+    line_run = basis_fh.readline()
+  shells = []
+  while "}" not in line_run:
+    parts = line_run.split()
+    if not parts:
+      line_run = basis_fh.readline()
+      continue
+    if fmt == "turbomole=":
+      n_prim, shell_type = int(parts[0]), parts[1].upper()
+    elif fmt == "gamess-us=":
+      n_prim, shell_type = int(parts[1]), parts[0].upper()
+    else:
+      line_run = basis_fh.readline()
+      continue
+    primitives = []
+    for _ in range(n_prim):
+      cols = basis_fh.readline().replace("D", "E").split()
+      if fmt == "turbomole=":
+        primitives.append((cols[0], cols[1]))
+      else:  # gamess-us: cols[0] is seq-index
+        primitives.append((cols[1], cols[2]))
+    shells.append((shell_type, primitives))
+    line_run = basis_fh.readline()
+  return shells
+
+
+_PYSCF_MOMENTUM = {"S": "0", "P": "1", "D": "2", "F": "3"}
+
+
+def _write_atom_basis_orca(fh, element, shells):
+  """Write one element's basis in ORCA %basis newgto format."""
+  fh.write("newgto " + element + "\n")
+  for shell_type, primitives in shells:
+    fh.write("    " + shell_type + "   " + str(len(primitives)) + "\n")
+    for n, (exp, coeff) in enumerate(primitives):
+      fh.write("  " + str(n + 1) + "   " + exp + "  " + coeff + "\n")
+  fh.write("end\n")
+
+
+def _write_atom_basis_gaussian(fh, element, shells):
+  """Write one element's basis in Gaussian gen format."""
+  fh.write(element + " 0\n")
+  for shell_type, primitives in shells:
+    fh.write("   " + shell_type + " " + str(len(primitives)) + " 1.0\n")
+    for exp, coeff in primitives:
+      fh.write(exp + " " + coeff + "\n")
+  fh.write("****\n")
+
+
+def _write_atom_basis_pyscf(fh, element, shells):
+  """Write one element's basis in pySCF dict-literal format."""
+  fh.write("'" + element + "': [")
+  for shell_type, primitives in shells:
+    momentum = _PYSCF_MOMENTUM.get(shell_type, "0")
+    fh.write("[" + momentum + ",")
+    for exp, coeff in primitives:
+      fh.write("\n                (" + exp + ", " + coeff + "),")
+    fh.write("],\n")
+  fh.write("],\n")
+
+
 class wfn_Job(object):
   """This class is used to create a job for a specific wavefunction software."""
   def __init__(self, parent, name, _dir, soft=None):
@@ -131,6 +227,7 @@ class wfn_Job(object):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".toml"
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis_name = basis_name.lower()
     if method is None:
       method = OV.GetParam('snum.NoSpherA2.method')
     if charge is None:
@@ -189,7 +286,7 @@ class wfn_Job(object):
       self.write_xyz_file()
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
     elmodb_libs = None
     if sys.platform[:3] == "win":
       temp = self.parent.elmodb_lib
@@ -315,7 +412,8 @@ class wfn_Job(object):
     com = open(self.input_fn,"w")
     if basis_name is None:
       basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
-    basis_set_fn = os.path.join(self.parent.basis_dir,OV.GetParam("snum.NoSpherA2.basis_name"))
+    basis_name = basis_name.lower()
+    basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
     basis = open(basis_set_fn,"r")
     chk_destination = "%chk=./" + self.name + ".chk"
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
@@ -371,44 +469,9 @@ class wfn_Job(object):
           atom_list.append(atom[0])
     xyz.close()
     com.write(" \n")
-    for i in range(0, len(atom_list)):
-      atom_type = atom_list[i] + " 0\n"
-      com.write(atom_type)
-      temp_atom = atom_list[i] + ":" + basis_name
-      basis.seek(0,0)
-      while True:
-        line = basis.readline()
-        if not line:
-          raise RecursionError("Atom not found in the basis set!")
-        if line[0] == "!":
-          continue
-        if "keys=" in line:
-          key_line = line.split(" ")
-          type = key_line[key_line.index("keys=")+2]
-        if temp_atom in line:
-          break
-      line_run = basis.readline()
-      if "{"  in line_run:
-        line_run = basis.readline()
-      while ("}" not in line_run):
-        shell_line = line_run.split()
-        if type == "turbomole=":
-          n_primitives = shell_line[0]
-          shell_type = shell_line[1]
-        elif type == "gamess-us=":
-          n_primitives = shell_line[1]
-          shell_type = shell_line[0]
-        shell_gaussian = "   " + shell_type.upper() + " " + n_primitives + " 1.0\n"
-        com.write(shell_gaussian)
-        for n in range(0,int(n_primitives)):
-          if type == "turbomole=":
-            com.write(basis.readline())
-          else:
-            temp_line = basis.readline()
-            temp = temp_line.split()
-            com.write(temp[1] + " " + temp[2] + '\n')
-        line_run = basis.readline()
-      com.write("****\n")
+    for element in atom_list:
+      shells = _read_atom_basis(basis, element, basis_name)
+      _write_atom_basis_gaussian(com, element, shells)
     basis.close()
     com.write(" \n./%s.wfx\n\n" %self.name)
     com.close()
@@ -503,7 +566,7 @@ class wfn_Job(object):
     xyz2 = open(coordinates_fn2,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
       cpu = "nprocs " + ncpus
@@ -515,12 +578,12 @@ class wfn_Job(object):
     qmmmtype = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE")
     control = "! NoPop MiniPrint 3-21G "
     ECP = False
-    if "ECP" in basis_name:
+    if "ecp" in basis_name:
       ECP = True
     if not ECP:
       control += " 3-21G "
     else:
-      control += basis_name.replace("ECP-", "") + ' '
+      control += basis_name.replace("ecp-", "") + ' '
 
     if qmmmtype == "Mol":
       control += "MOL-CRYSTAL-QMMM "
@@ -587,47 +650,12 @@ class wfn_Job(object):
       inp.write(mp2_block+"\n")
     el_list = atom_list
     if not ECP:
-      basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+      basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
-      for i in range(0,len(atom_list)):
-        atom_type = "newgto " +atom_list[i] + '\n'
-        inp.write(atom_type)
-        temp_atom = atom_list[i] + ":" + basis_name
-        basis.seek(0,0)
-        while True:
-          line = basis.readline()
-          if not line:
-            raise RecursionError("Atom not found in the basis set!")
-          if line == '':
-            continue
-          if line[0] == "!":
-            continue
-          if "keys=" in line:
-            key_line = line.split(" ")
-            type = key_line[key_line.index("keys=")+2]
-          if temp_atom in line:
-            break
-        line_run = basis.readline()
-        if "{"  in line_run:
-          line_run = basis.readline()
-        while ("}" not in line_run):
-          shell_line = line_run.split()
-          if type == "turbomole=":
-            n_primitives = shell_line[0]
-            shell_type = shell_line[1]
-          elif type == "gamess-us=":
-            n_primitives = shell_line[1]
-            shell_type = shell_line[0]
-          shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
-          inp.write(shell_gaussian)
-          for n in range(0,int(n_primitives)):
-            if type == "turbomole=":
-              inp.write("  " + str(n+1) + "   " + basis.readline().replace("D","E"))
-            else:
-              inp.write(basis.readline().replace("D","E"))
-          line_run = basis.readline()
-        inp.write("end\n")
+      for element in atom_list:
+        shells = _read_atom_basis(basis, element, basis_name)
+        _write_atom_basis_orca(inp, element, shells)
       basis.close()
       inp.write("end\n")
     conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
@@ -722,7 +750,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     ECP = False
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    if "ECP" in basis_name:
+    basis_name = basis_name.lower()
+    if "ecp" in basis_name:
       ECP = True
     if xyz:
       self.write_xyz_file(True)
@@ -744,7 +773,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if not ECP:
       control += "3-21G "
     else:
-      control += basis_name.replace("ECP-", "") + ' '
+      control += basis_name.replace("ecp-", "") + ' '
 
     grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     brok_sym = OV.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')
@@ -877,7 +906,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if mp2_block != "":
       inp.write(mp2_block+'\n')
     if not ECP:
-      basis_set_fn = os.path.join(self.parent.basis_dir, basis_name)
+      basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
       if OV.GetParam("snum.NoSpherA2.basis_adv"):
@@ -922,47 +951,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
         except Exception as error:
             print("Error parsing basis string:", error)                   
-      for i in range(0, len(atom_list)):
-        atom_type = "newgto " + atom_list[i] + '\n'
-        inp.write(atom_type)
-        temp_atom = atom_list[i] + ":" + basis_name
-        basis.seek(0, 0)
-        typ = ""
-        while True:
-          line = basis.readline()
-          if not line:
-            raise RecursionError(f"Atom {atom_type} not found in the basis set!")
-          if line == '':
-            continue
-          if line[0] == "!":
-            continue
-          if "keys=" in line:
-            key_line = line.split(" ")
-            typ = key_line[key_line.index("keys=") + 2]
-          if temp_atom in line:
-            break
-        line_run = basis.readline()
-        if "{" in line_run:
-          line_run = basis.readline()
-        while ("}" not in line_run):
-          shell_line = line_run.split()
-          n_primitives = ""
-          shell_type = ""
-          if typ == "turbomole=":
-            n_primitives = shell_line[0]
-            shell_type = shell_line[1]
-          elif typ == "gamess-us=":
-            n_primitives = shell_line[1]
-            shell_type = shell_line[0]
-          shell_gaussian = "    " + shell_type.upper() + "   " + n_primitives + "\n"
-          inp.write(shell_gaussian)
-          for n in range(0, int(n_primitives)):
-            if typ == "turbomole=":
-              inp.write("  " + str(n + 1) + "   " + basis.readline().replace("D", "E"))
-            else:
-              inp.write(basis.readline().replace("D", "E"))
-          line_run = basis.readline()
-        inp.write("end\n")
+      for element in atom_list:
+        shells = _read_atom_basis(basis, element, basis_name)
+        _write_atom_basis_orca(inp, element, shells)
       basis.close()
       inp.write("end\n")
     Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
@@ -1049,7 +1040,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       inp = open(self.input_fn,"w")
       if basis_name is None:
         basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-      basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+      basis_name = basis_name.lower()
+      basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
       if charge is None:
@@ -1072,52 +1064,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         inp.write("''',\n  verbose = 4,\n  charge = %d,\n  spin = %d\n)\nmol.output = '%s_pyscf.log'\n"%(int(charge),int(mult-1),self.name))
         inp.write("mol.max_memory = %s\n"%str(mem_value))
         inp.write("mol.basis = {")
-        for i in range(0,len(atom_list)):
-          atom_type = "'" +atom_list[i] + "': ["
-          inp.write(atom_type)
-          temp_atom = atom_list[i] + ":" + basis_name
-          basis.seek(0,0)
-          while True:
-            line = basis.readline()
-            if not line:
-              raise RecursionError("Atom not found in the basis set!")
-            if line[0] == "!":
-              continue
-            if "keys=" in line:
-              key_line = line.split(" ")
-              type = key_line[key_line.index("keys=")+2]
-            if temp_atom in line:
-              break
-          line_run = basis.readline()
-          if "{"  in line_run:
-            line_run = basis.readline()
-          while ("}" not in line_run):
-            shell_line = line_run.split()
-            if type == "turbomole=":
-              n_primitives = shell_line[0]
-              shell_type = shell_line[1]
-            elif type == "gamess-us=":
-              n_primitives = shell_line[1]
-              shell_type = shell_line[0]
-            if shell_type.upper() == "S":
-              momentum = '0'
-            elif shell_type.upper() == "P":
-              momentum = '1'
-            elif shell_type.upper() == "D":
-              momentum = '2'
-            elif shell_type.upper() == "F":
-              momentum = '3'
-            inp.write("[%s,"%momentum)
-            for n in range(0,int(n_primitives)):
-              if type == "turbomole=":
-                number1, number2 = basis.readline().replace("D","E").split()
-                inp.write("\n                (" + number1 + ', ' + number2 + "),")
-              else:
-                number1, number2, number3 = basis.readline().replace("D","E").split()
-                inp.write("\n                (" + number2 + ', ' + number3 + "),")
-            inp.write("],\n")
-            line_run = basis.readline()
-          inp.write("],\n")
+        for element in atom_list:
+          shells = _read_atom_basis(basis, element, basis_name)
+          _write_atom_basis_pyscf(inp, element, shells)
         basis.close()
         inp.write("\n}\nmol.build()\n")
 
@@ -1533,7 +1482,8 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
     inp = open(self.input_fn,"w")
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    basis_set_fn = os.path.join(self.parent.basis_dir,basis_name)
+    basis_name = basis_name.lower()
+    basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
     basis = open(basis_set_fn,"r")
     ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
     if charge is None:
@@ -1556,52 +1506,9 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
       inp.write("''',\n  verbose = 4,\n  charge = %d,\n  spin = %d\n)\nmol.output = '%s_pyscf.log'\n"%(int(charge),int(mult-1),self.name))
       inp.write("mol.max_memory = %s\n"%str(mem_value))
       inp.write("mol.basis = {")
-      for i in range(0,len(atom_list)):
-        atom_type = "'" +atom_list[i] + "': ["
-        inp.write(atom_type)
-        temp_atom = atom_list[i] + ":" + basis_name
-        basis.seek(0,0)
-        while True:
-          line = basis.readline()
-          if not line:
-            raise RecursionError("Atom not found in the basis set!")
-          if line[0] == "!":
-            continue
-          if "keys=" in line:
-            key_line = line.split(" ")
-            type = key_line[key_line.index("keys=")+2]
-          if temp_atom in line:
-            break
-        line_run = basis.readline()
-        if "{" in line_run:
-          line_run = basis.readline()
-        while "}" not in line_run:
-          shell_line = line_run.split()
-          if type == "turbomole=":
-            n_primitives = shell_line[0]
-            shell_type = shell_line[1]
-          elif type == "gamess-us=":
-            n_primitives = shell_line[1]
-            shell_type = shell_line[0]
-          if shell_type.upper() == "S":
-            momentum = '0'
-          elif shell_type.upper() == "P":
-            momentum = '1'
-          elif shell_type.upper() == "D":
-            momentum = '2'
-          elif shell_type.upper() == "F":
-            momentum = '3'
-          inp.write("[%s,"%momentum)
-          for n in range(0,int(n_primitives)):
-            if type == "turbomole=":
-              number1, number2 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number1 + ', ' + number2 + "),")
-            else:
-              number1, number2, number3 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number2 + ', ' + number3 + "),")
-          inp.write("],\n")
-          line_run = basis.readline()
-        inp.write("],\n")
+      for element in atom_list:
+        shells = _read_atom_basis(basis, element, basis_name)
+        _write_atom_basis_pyscf(inp, element, shells)
       basis.close()
       inp.write("\n}\nmol.build()\n")
 
@@ -1711,50 +1618,9 @@ mf.kernel()"""
       inp.write("cell.max_memory = %s\n"%str(mem_value))
       inp.write("cell.precision = 1.0e-06\ncell.exp_to_discard = 0.1\n")
       inp.write("cell.basis = {")
-      for i in range(0,len(atom_list)):
-        atom_type = "'" +atom_list[i] + "': ["
-        inp.write(atom_type)
-        temp_atom = atom_list[i] + ":" + basis_name
-        basis.seek(0,0)
-        while True:
-          line = basis.readline()
-          if line[0] == "!":
-            continue
-          if "keys=" in line:
-            key_line = line.split(" ")
-            type = key_line[key_line.index("keys=")+2]
-          if temp_atom in line:
-            break
-        line_run = basis.readline()
-        if "{"  in line_run:
-          line_run = basis.readline()
-        while ("}" not in line_run):
-          shell_line = line_run.split()
-          if type == "turbomole=":
-            n_primitives = shell_line[0]
-            shell_type = shell_line[1]
-          elif type == "gamess-us=":
-            n_primitives = shell_line[1]
-            shell_type = shell_line[0]
-          if shell_type.upper() == "S":
-            momentum = '0'
-          elif shell_type.upper() == "P":
-            momentum = '1'
-          elif shell_type.upper() == "D":
-            momentum = '2'
-          elif shell_type.upper() == "F":
-            momentum = '3'
-          inp.write("[%s,"%momentum)
-          for n in range(0,int(n_primitives)):
-            if type == "turbomole=":
-              number1, number2 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number1 + ', ' + number2 + "),")
-            else:
-              number1, number2, number3 = basis.readline().replace("D","E").split()
-              inp.write("\n                (" + number2 + ', ' + number3 + "),")
-          inp.write("],\n")
-          line_run = basis.readline()
-        inp.write("],\n")
+      for element in atom_list:
+        shells = _read_atom_basis(basis, element, basis_name)
+        _write_atom_basis_pyscf(inp, element, shells)
       basis.close()
       inp.write("\n}\ncell.build()\nnk=[1,1,1]\nkpts = cell.make_kpts(nk)\n")
 
@@ -1823,6 +1689,7 @@ ener = cf.kernel()"""
     args = []
     if basis_name is None:
       basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis_name = basis_name.lower()
     if softw is None:
       if self.software is None:
         softw = str(OV.GetParam('snum.NoSpherA2.source'))
@@ -1862,7 +1729,7 @@ ener = cf.kernel()"""
         input_fn = self.name + ".com"
         args.append(input_fn)
       elif softw == "Psi4":
-        basis_set_fn = os.path.join(OV.BaseDir(),"basis_sets",basis_name)
+        basis_set_fn = _find_basis_file(os.path.join(OV.BaseDir(), "basis_sets"), basis_name)
         ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
         mult = OV.GetParam('snum.NoSpherA2.multiplicity')
         charge = OV.GetParam('snum.NoSpherA2.charge')

@@ -91,6 +91,52 @@ def terminate_process_tree(process):
     except Exception:
       pass
 
+def _get_occ_fchk_candidates_from_toml(toml_path):
+  base_dir = os.path.dirname(toml_path)
+  base_name = os.path.splitext(os.path.basename(toml_path))[0]
+  return [
+    os.path.join(base_dir, base_name + ".owf.fchk"),
+    os.path.join(base_dir, "experimental.owf.fchk"),
+  ]
+
+def _collect_occ_fchk_outputs(wfn_file, folder, name):
+  if isinstance(wfn_file, list):
+    found = []
+    for toml_path in wfn_file:
+      if not str(toml_path).lower().endswith(".toml"):
+        continue
+      candidates = _get_occ_fchk_candidates_from_toml(toml_path)
+      for candidate in candidates:
+        if os.path.exists(candidate):
+          found.append(candidate)
+          break
+    return found
+
+  wfn_job_dir = os.path.join(folder, "olex2", "Wfn_job")
+  fallback_candidates = [
+    os.path.join(wfn_job_dir, name + ".owf.fchk"),
+    os.path.join(wfn_job_dir, "experimental.owf.fchk"),
+  ]
+  if str(wfn_file).lower().endswith(".toml"):
+    fallback_candidates = _get_occ_fchk_candidates_from_toml(wfn_file) + fallback_candidates
+
+  for candidate in fallback_candidates:
+    if os.path.exists(candidate):
+      return [candidate]
+  return []
+
+def _copy_occ_fchk_outputs_to_workspace(fchk_files, folder, name):
+  for index, source in enumerate(fchk_files, start=1):
+    source_dir = os.path.basename(os.path.dirname(source))
+    if source_dir.startswith("Part_"):
+      suffix = "_part_" + source_dir.split("Part_", 1)[1]
+    elif len(fchk_files) > 1:
+      suffix = "_part_%d" % index
+    else:
+      suffix = ""
+    destination = os.path.join(folder, name + suffix + ".owf.fchk")
+    shutil.copy(source, destination)
+
 def scrub(cmd):
   log = gui.tools.LogListen()
   olex.m(cmd)
@@ -446,15 +492,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
 
   if sucess:
     if soft == "OCC":
-      wfn_job_dir = os.path.join(folder, "olex2", "Wfn_job")
-      fchk_candidates = [
-        os.path.join(wfn_job_dir, name + ".owf.fchk"),
-        os.path.join(wfn_job_dir, "experimental.owf.fchk"),
-      ]
-      has_fchk = any(os.path.exists(f) for f in fchk_candidates)
-      if not has_fchk:
+      occ_fchk_files = _collect_occ_fchk_outputs(wfn_file, folder, name)
+      if not occ_fchk_files:
         OV.SetVar('NoSpherA2-Error', "NoFchk")
         raise NameError('OCC run did not generate an fchk file during cuQCT call!')
+      _copy_occ_fchk_outputs_to_workspace(occ_fchk_files, folder, name)
 
       tsc_candidates = [
         os.path.join(folder, name + ".tsc"),
@@ -696,7 +738,7 @@ def org_min():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -719,7 +761,7 @@ def org_small():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -742,7 +784,7 @@ def org_final():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
@@ -765,7 +807,7 @@ def light_min():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -788,7 +830,7 @@ def light_small():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -811,7 +853,7 @@ def light_final():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',False)
   OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")
@@ -834,7 +876,7 @@ def heavy_min():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',True)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -857,7 +899,7 @@ def heavy_small():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',True)
   OV.SetParam('snum.NoSpherA2.full_HAR',False)
   olex.m("html.Update()")
@@ -880,7 +922,7 @@ def heavy_final():
   OV.SetParam('snum.NoSpherA2.cluster_radius',0)
   OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
   OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Vacuum")
+  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
   OV.SetParam('snum.NoSpherA2.Relativistic',True)
   OV.SetParam('snum.NoSpherA2.full_HAR',True)
   olex.m("html.Update()")

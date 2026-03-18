@@ -47,6 +47,9 @@ p_img = eval(d['p_img'])
 p_scope = d['p_scope']
 
 class NoSpherA2(PT):
+  _PART_JOB_ENDINGS = [".gbw", ".ffn", ".molden", ".fchk", ".xtb", ".xyz", ".wfn", ".wfx", ".toml"]
+  _PART_CWD_ENDINGS = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog", ".xtb", ".xyz", ".toml"]
+
   def __init__(self):
     olx.stopwatch.start("NoSpherA2.__init__()")
     super(NoSpherA2, self).__init__()
@@ -158,6 +161,45 @@ class NoSpherA2(PT):
       self.occ_basis_dir = None
       print("-- No NoSpherA2 executable found!")
     print(" ")
+
+  def _select_partition_input_file(self, path_base, wfn_code):
+    if wfn_code == "OCC":
+      candidate = path_base + ".toml"
+      return candidate if os.path.exists(candidate) else None
+    if os.path.exists(path_base + ".wfx"):
+      return path_base + ".wfx"
+    if os.path.exists(path_base + ".fchk"):
+      return path_base + ".fchk"
+    if os.path.exists(path_base + ".wfn"):
+      return path_base + ".wfn"
+    if os.path.exists(path_base + ".gbw"):
+      return path_base + ".gbw"
+    if os.path.exists(path_base + ".molden"):
+      return path_base + ".molden"
+    if os.path.exists(path_base + ".xtb"):
+      return path_base + ".xtb"
+    if os.path.exists(path_base + ".xyz"):
+      return path_base + ".xyz"
+    return None
+
+  def _copy_first_part_output_from_job_dir(self, job_dir, part):
+    for file in os.listdir(job_dir):
+      if "_part" in file:
+        continue
+      if any(file.endswith(x) for x in self._PART_JOB_ENDINGS):
+        src = os.path.join(job_dir, file)
+        dst = os.path.splitext(file)[0] + "_part%d" % part + os.path.splitext(file)[1]
+        shutil.copy(src, dst)
+        return dst
+    return None
+
+  def _suffix_part_outputs_in_cwd(self, part):
+    for file in os.listdir(os.getcwd()):
+      if "_part" in file:
+        continue
+      if any(file.endswith(x) for x in self._PART_CWD_ENDINGS):
+        temp = os.path.splitext(file)[0] + "_part%d" % part + os.path.splitext(file)[1]
+        shutil.move(file, temp)
 
   def setup_WSL_softwares(self):
     use = OV.GetParam('olex2.wsl_conda')
@@ -334,7 +376,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     wfn_code = software()
     self.wfn_code = wfn_code
     self.name = olx.FileName()
-    basis = OV.GetParam('snum.NoSpherA2.basis_name')
+    basis = OV.GetParam('snum.NoSpherA2.basis_name').lower()
     update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
     experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
     if "Please S" in wfn_code and update:
@@ -361,8 +403,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       for sc in adapter.xray_structure().scatterers():
         if sc.electron_count() > 36:
           heavy = True
-      if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ECP" not in basis) \
-        and ("STO" not in basis) and ("3-21" not in basis):
+      if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ecp" not in basis) \
+        and ("sto" not in basis) and ("3-21" not in basis):
         print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
         OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
         return False
@@ -385,7 +427,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     has_backup_candidates = False
     f_time = None
     if not OV.GetParam('snum.NoSpherA2.no_backup'):
-      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".ffn", ".xtb", ".tscb", ".tsc", ".wfnlog"]
+      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn", ".xtb", ".tscb", ".tsc", ".wfnlog"]
       for file in os.listdir(olx.FilePath()):
         full_file = os.path.join(olx.FilePath(), file)
         if any(file.endswith(x) for x in backup_endings):
@@ -400,7 +442,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           tsc_exists = True
           f_time = os.path.getmtime(full_file)
 
-      source_is_wavefunction_file = any(x in wfn_code for x in [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".ffn", ".xtb"])
+      source_is_wavefunction_file = any(x in wfn_code for x in [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn", ".xtb"])
       archive_for_tonto = wfn_code == "Tonto" and has_backup_candidates
       archive_for_others = tsc_exists and not source_is_wavefunction_file
 
@@ -530,20 +572,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               except Exception as error:
                 print ("Aborted due to: ",error)
                 pass
-            wfn_fn = None
-            # groups[i-groups_counter].append(0)
-            # groups[i-groups_counter].append(parts[i])
-            endings = [".gbw", ".ffn", ".molden", ".fchk", ".xtb", ".xyz", ".wfn", ".wfx"]
-            for file in os.listdir(os.path.join(OV.FilePath(), wfn_job_dir)):
-              if "_part" in file:
-                continue
-              temp = None
-              if any(file.endswith(x) for x in endings):
-                temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + os.path.splitext(file)[1]
-              if temp is not None:
-                shutil.copy(os.path.join(OV.FilePath(), wfn_job_dir, file),  temp)
-                wfn_files.append(temp)
-                break
+            elif hybrid_part_wfn_code == "OCC":
+              wfn_fn = path_base + ".toml"
+              if not os.path.exists(wfn_fn):
+                print("No OCC .toml found for part %d" % parts[i])
+                return False
+              wfn_files.append(wfn_fn)
+              continue
+            wfn_fn = self._copy_first_part_output_from_job_dir(os.path.join(OV.FilePath(), wfn_job_dir), parts[i])
+            if wfn_fn is None:
+              return False
+            wfn_files.append(wfn_fn)
         else:
           # Neither Hybrid nor DISCAMB are used, so ORCA; g16; pySCF etc
           need_to_partition = True
@@ -586,37 +625,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           elif wfn_code == "Thakkar IAM" or wfn_code == "SALTED":
             wfn_fn = os.path.join(OV.FilePath(), wfn_job_dir, self.name + ".xyz")
           else:
-            wfn_fn = None
             path_base = os.path.join(OV.FilePath(), wfn_job_dir, self.name)
-            if os.path.exists(path_base + ".wfx"):
-              if (wfn_fn is None or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk")):
-                wfn_fn = path_base + ".wfx"
-            elif os.path.exists(path_base + ".fchk"):
-              if (wfn_fn is None):
-                wfn_fn = path_base + ".fchk"
-            elif os.path.exists(path_base + ".wfn"):
-              wfn_fn = path_base + ".wfn"
-            elif os.path.exists(path_base + ".gbw"):
-              if (wfn_fn is None or wfn_fn.endswith(".wfx") or wfn_fn.endswith(".wfn") or wfn_fn.endswith(".fchk") and is_orca_new()):
-                wfn_fn = path_base + ".gbw"
-            elif os.path.exists(path_base + ".molden"):
-              wfn_fn = path_base + ".molden"
-            elif os.path.exists(path_base + ".xtb"):
-              wfn_fn = path_base + ".xtb"
-            elif os.path.exists(path_base + ".xyz"):
-              wfn_fn = path_base + ".xyz"
-            else:
+            wfn_fn = self._select_partition_input_file(path_base, wfn_code)
+            if wfn_fn is None:
+              if wfn_code == "OCC":
+                print("No OCC .toml found for part %d" % parts[i])
               return False
           wfn_files.append(wfn_fn)
-          endings = [".wfn", ".wfx", ".gbw", ".ffn", ".molden", ".fchk", ".wfnlog", ".xtb", ".xyz"]
-          for file in os.listdir(os.getcwd()):
-            if "_part" in file:
-              continue
-            temp = None
-            if any(file.endswith(x) for x in endings):
-              temp = os.path.splitext(file)[0] + "_part%d" % parts[i] + os.path.splitext(file)[1]
-            if temp is not None:
-              shutil.move(file,temp)
+          self._suffix_part_outputs_in_cwd(parts[i])
 
       # End of loop over parts
       if need_to_partition:
@@ -986,8 +1002,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     return final_string
 
   def disable_relativistics(self):
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
-    if "DKH" in basis_name:
+    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
+    if "dkh" in basis_name:
       return False
     if "x2c" in basis_name:
       return False
