@@ -970,6 +970,8 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       v = int(v)
       if v <= 0:
         v = max(1, int(os.cpu_count() *3/4))
+        if v > 20:
+          v = 20
         return (v, False) if ext else v
       return (v, True) if ext else v
 

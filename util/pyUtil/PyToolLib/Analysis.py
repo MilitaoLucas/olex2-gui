@@ -1342,6 +1342,7 @@ class Graph(ArgumentParser):
 
       else:
         href = ""
+        href_str = "OMIT"
         if scale == None:
           scale = 1
         if indices is None:
@@ -1354,16 +1355,20 @@ class Graph(ArgumentParser):
           if xl == "I calc":
             graph_type = "Iobs_Icalc"
             options = ""
+            if OV.IsEDRefinement():
+              href_str = "spy.ED.get_profile_plot"
+              reload_graph = ""
           else:
             graph_type = "fobs_fcalc"
-            options = "-a"
+            reload_graph = ">>spy.make_reflection_graph(%s)" % graph_type
+            options = ""
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
-          href = "OMIT %s>>spy.make_reflection_graph(%s)" %(idx, graph_type)
-          target = 'OMIT %s' %(idx)
+          target = '%s %s' %(href_str, idx)
+          href = target + reload_graph
           if 'hkl' in self.model['omit']:
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
-              href = "OMIT -u %s %s>>spy.make_reflection_graph(%s)" %(options, idx, graph_type)
+              href = "%s -u %s %s>>spy.make_reflection_graph(%s)" %(href_str, options, idx, graph_type)
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (tuple(v / self.scale for v in box) + (href, target)))
 
