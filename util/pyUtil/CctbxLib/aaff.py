@@ -213,52 +213,51 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         try:
           uc = self.cctbx.normal_eqns.xray_structure.unit_cell()
           atoms_lookup = {}
-          for i, atom in enumerate(new_model._atoms):
+          _new_atoms = new_model._atoms
+          _old_atoms = old_model._atoms
+          for i, atom in enumerate(_new_atoms):
             atoms_lookup[atom['label']] = i
+          _annotations = annotations
+          _esds = esds
+          n_annotations = len(_annotations)
           matrix_run = 0
-          while matrix_run < len(annotations):
-            an = annotations[matrix_run]
-            atom_idx = atoms_lookup[an.split('.')[0]]
-            new_atom = new_model._atoms[atom_idx]
-            old_atom = old_model._atoms[atom_idx]
+          while matrix_run < n_annotations:
+            an = _annotations[matrix_run]
+            atom_idx = atoms_lookup[an.partition('.')[0]]
+            new_atom = _new_atoms[atom_idx]
+            old_atom = _old_atoms[atom_idx]
             if '.occ' in an:
               matrix_run += 1
             elif '.x' in an:
               xyz = new_atom['crd'][0]
               xyz2 = old_atom['crd'][0]
-              for x in range(3):
-                # if parameter is fixed and therefore has 0 esd
-                if esds[matrix_run] > 0:
-                  res = abs(xyz[x] - xyz2[x]) / esds[matrix_run]
+              esd = _esds[matrix_run]
+              if esd > 0:
+                for x in range(3):
+                  res = abs(xyz[x] - xyz2[x]) / esd
                   if res > results.max_dxyz:
-                    results.update_xyz(res, annotations[matrix_run])
+                    results.update_xyz(res, an)
               matrix_run += 3
             elif '.uiso' in an:
-              adp = new_atom['uiso'][0]
-              adp2 = old_atom['uiso'][0]
-              adp_esd = esds[matrix_run]
-              if esds[matrix_run] > 0:
-                res = abs(adp - adp2) / adp_esd
+              esd = _esds[matrix_run]
+              if esd > 0:
+                res = abs(new_atom['uiso'][0] - old_atom['uiso'][0]) / esd
                 if res > results.max_duij:
-                  results.update_uij(res, annotations[matrix_run])
+                  results.update_uij(res, an)
               matrix_run += 1
             elif 'fp' in an:
-              new_disp = new_atom['disp'][0]
-              old_disp = old_atom['disp'][0]
-              disp_esd = esds[matrix_run]
+              disp_esd = _esds[matrix_run]
               if disp_esd > 0:
-                res = abs(new_disp - old_disp) / disp_esd
+                res = abs(new_atom['disp'][0] - old_atom['disp'][0]) / disp_esd
                 if res > results.max_overall:
-                  results.update_overall(res, annotations[matrix_run])
+                  results.update_overall(res, an)
               matrix_run += 1
             elif 'fdp' in an:
-              new_disp = new_atom['disp'][0]
-              old_disp = old_atom['disp'][0]
-              disp_esd = esds[matrix_run]
+              disp_esd = _esds[matrix_run]
               if disp_esd > 0:
-                res = abs(new_disp - old_disp) / disp_esd
+                res = abs(new_atom['disp'][0] - old_atom['disp'][0]) / disp_esd
                 if res > results.max_overall:
-                  results.update_overall(res, annotations[matrix_run])
+                  results.update_overall(res, an)
               matrix_run += 1
             elif '.u' in an:
               adp = new_atom['adp'][0]
@@ -267,48 +266,41 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               adp2 = (adp2[0], adp2[1], adp2[2], adp2[5], adp2[4], adp2[3])
               adp = adptbx.u_cart_as_u_cif(uc, adp)
               adp2 = adptbx.u_cart_as_u_cif(uc, adp2)
-              adp_esds = (esds[matrix_run],
-                          esds[matrix_run + 1],
-                          esds[matrix_run + 2],
-                          esds[matrix_run + 3],
-                          esds[matrix_run + 4],
-                          esds[matrix_run + 5])
+              adp_esds = (_esds[matrix_run], _esds[matrix_run + 1], _esds[matrix_run + 2],
+                          _esds[matrix_run + 3], _esds[matrix_run + 4], _esds[matrix_run + 5])
               adp_esds = adptbx.u_star_as_u_cif(uc, adp_esds)
               for u in range(6):
-                # if parameter is fixed and therefore has 0 esd
                 if adp_esds[u] > 0:
                   res = abs(adp[u] - adp2[u]) / adp_esds[u]
                   if res > results.max_duij:
-                    results.update_uij(res, annotations[matrix_run + u])
+                    results.update_uij(res, _annotations[matrix_run + u])
               matrix_run += 6
             elif '.C' in an or '.D' in an:
               order = new_atom['anharmonic_adp']['order']
               if order == 3:
-                  size = 10
+                size = 10
               elif order == 4:
-                  size = 25
+                size = 25
               else:
-                  size = 0
+                size = 0
               if order >= 3:
                 adp_C = new_atom['anharmonic_adp']['C']
                 adp2_C = old_atom['anharmonic_adp']['C']
-                adp_esds_C = (esds[matrix_run:matrix_run + 10])
                 for u in range(10):
-                  # if parameter is fixed and therefore has 0 esd
-                  if adp_esds_C[u] > 0:
-                    res = abs(adp_C[u] - adp2_C[u]) / adp_esds_C[u]
+                  esd_u = _esds[matrix_run + u]
+                  if esd_u > 0:
+                    res = abs(adp_C[u] - adp2_C[u]) / esd_u
                     if res > results.max_overall:
-                      results.update_overall(res, annotations[matrix_run + u])
+                      results.update_overall(res, _annotations[matrix_run + u])
               if order >= 4:
                 adp_D = new_atom['anharmonic_adp']['D']
                 adp2_D = old_atom['anharmonic_adp']['D']
-                adp_esds_D = (esds[matrix_run + 10:matrix_run + 25])
                 for u in range(14):
-                  # if parameter is fixed and therefore has 0 esd
-                  if adp_esds_D[u] > 0:
-                    res = abs(adp_D[u] - adp2_D[u]) / adp_esds_D[u]
+                  esd_u = _esds[matrix_run + 10 + u]
+                  if esd_u > 0:
+                    res = abs(adp_D[u] - adp2_D[u]) / esd_u
                     if res > results.max_overall:
-                      results.update_overall(res, annotations[matrix_run + u + 10])
+                      results.update_overall(res, _annotations[matrix_run + 10 + u])
               matrix_run += size
 
           HAR_log.write("{:>16.4f}".format(results.max_dxyz))
