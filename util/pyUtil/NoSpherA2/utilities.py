@@ -8,6 +8,8 @@ import olex
 import olex_core
 import sys
 import subprocess
+import signal
+import time
 from olexFunctions import OV
 #import OlexVFS
 #from PIL import ImageDraw, Image
@@ -17,6 +19,77 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
 import numpy as np
+
+_interrupt_requested = False
+_interrupt_handlers_installed = False
+_interrupt_ignore_until = 0.0
+
+def _signal_interrupt_handler(signum, frame):
+  global _interrupt_requested
+  _interrupt_requested = True
+
+def _install_interrupt_handlers_once():
+  global _interrupt_handlers_installed
+  if _interrupt_handlers_installed:
+    return
+  for sig_name in ("SIGINT", "SIGTERM"):
+    sig = getattr(signal, sig_name, None)
+    if sig is None:
+      continue
+    try:
+      signal.signal(sig, _signal_interrupt_handler)
+    except Exception:
+      pass
+  _interrupt_handlers_installed = True
+
+def reset_interrupt_request():
+  global _interrupt_requested
+  _interrupt_requested = False
+
+def consume_interrupt_request(cooldown_s=0.6):
+  global _interrupt_ignore_until
+  reset_interrupt_request()
+  _interrupt_ignore_until = time.time() + max(0.0, float(cooldown_s))
+  if sys.platform[:3] == 'win':
+    try:
+      import ctypes
+      ctypes.windll.user32.GetAsyncKeyState(0x13)
+    except Exception:
+      pass
+
+def is_pause_break_pressed():
+  _install_interrupt_handlers_once()
+  if time.time() < _interrupt_ignore_until:
+    return False
+  if sys.platform[:3] != 'win':
+    return _interrupt_requested
+  try:
+    import ctypes
+    return bool(ctypes.windll.user32.GetAsyncKeyState(0x13) & 0x1)
+  except Exception:
+    return False
+
+def terminate_process_tree(process):
+  if process is None or process.poll() is not None:
+    return
+  try:
+    if sys.platform[:3] == 'win':
+      subprocess.run(
+        ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+      )
+    else:
+      try:
+        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+      except Exception:
+        process.terminate()
+  except Exception:
+    try:
+      process.kill()
+    except Exception:
+      pass
 
 def scrub(cmd):
   log = gui.tools.LogListen()
@@ -312,6 +385,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
 
   tries = 0
   while not os.path.exists(out_fn):
+    if OV.GetVar("stop_current_process") or is_pause_break_pressed():
+      print("Partitioning aborted by INTERRUPT before log creation!")
+      terminate_process_tree(p)
+      OV.SetVar("stop_current_process", False)
+      consume_interrupt_request()
+      OV.SetVar('NoSpherA2-Error', "Wfn-Interrupted")
+      raise NameError('NoSpherA2/partitioning aborted by user.')
     if p.poll() is None:
       time.sleep(0.2)
       tries += 1
@@ -330,6 +410,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if os.path.exists(occ_log_fn):
       occ_stdout = open(occ_log_fn, "r")
     try:
+      aborted_by_user = False
       while p.poll() is None:
         x = stdout.read()
         if x:
@@ -338,15 +419,21 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
           y = occ_stdout.read()
           if y:
             print(y, end='')
-        # if OV.GetVar("stop_current_process"):
-        #  p.terminate()
-        #  print("Calculation aborted by INTERRUPT!")
-        #  OV.SetVar("stop_current_process", False)
-        # else:
-        #  time.sleep(0.1)
+        if OV.GetVar("stop_current_process") or is_pause_break_pressed():
+          print("Calculation aborted by INTERRUPT!")
+          terminate_process_tree(p)
+          OV.SetVar("stop_current_process", False)
+          consume_interrupt_request()
+          aborted_by_user = True
+          break
+        else:
+          time.sleep(0.1)
     finally:
       if occ_stdout:
         occ_stdout.close()
+  if aborted_by_user:
+    OV.SetVar('NoSpherA2-Error', "Wfn-Interrupted")
+    raise NameError('NoSpherA2/partitioning aborted by user.')
 
   sucess = False
   shutil.move(out_fn, final_log_name)

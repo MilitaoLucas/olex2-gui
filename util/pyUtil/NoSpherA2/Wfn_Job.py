@@ -13,7 +13,7 @@ BSE = basis_set_api.GetBSEThread()
 import subprocess
 
 from olexFunctions import OV
-from utilities import run_with_bitmap, software, is_orca_new
+from utilities import run_with_bitmap, software, is_orca_new, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request
 
 try:
   p_path = os.path.dirname(os.path.abspath(__file__))
@@ -2065,6 +2065,15 @@ ener = cf.kernel()"""
       tries = 0
       time.sleep(0.5)
       while not os.path.exists(out_fn_abs):
+        if OV.GetVar("stop_current_process") or is_pause_break_pressed():
+          print("Calculation aborted by INTERRUPT before log creation!")
+          terminate_process_tree(p)
+          OV.SetVar("stop_current_process", False)
+          consume_interrupt_request()
+          OV.SetVar('NoSpherA2-Error', "Wfn-Interrupted")
+          if stdin_handle is not None:
+            stdin_handle.close()
+          raise NameError('Wavefunction calculation aborted by user.')
         if p.poll() is not None:
           print(f"QM process exited before log creation with return code {p.returncode}")
           OV.SetVar('NoSpherA2-Error',"Wfn-Process failed")
@@ -2085,6 +2094,7 @@ ener = cf.kernel()"""
       if stdin_handle is not None:
         stdin_handle.close()
   
+      aborted_by_user = False
       with open(out_fn_abs, "r") as stdout:
         while p.poll() is None:
           x = None
@@ -2095,24 +2105,24 @@ ener = cf.kernel()"""
             pass
           if x:
             print(x, end='')
-          if OV.GetVar("stop_current_process"):
+          if OV.GetVar("stop_current_process") or is_pause_break_pressed():
             try:
-              #import signal
-              #pid = None
-              # with open(pidfile, "r") as pf:
-              #  line = pf.read()
-              #  pid = int(line)
-              #os.kill(pid, signal.SIGABRT)
-              #os.kill(pid, signal.SIGTERM)
               print("Calculation aborted by INTERRUPT!")
+              terminate_process_tree(p)
+              aborted_by_user = True
             except Exception as e:
               print(e)
               pass
             OV.SetVar("stop_current_process", False)
+            consume_interrupt_request()
+            break
           else:
             time.sleep(0.5)
       print("\nWavefunction calculation ended!")
       shutil.copy(out_fn_abs, wfnlog, follow_symlinks=False)
+      if aborted_by_user:
+        OV.SetVar('NoSpherA2-Error', "Wfn-Interrupted")
+        raise NameError('Wavefunction calculation aborted by user.')
     else:
       self.parent.pyscf_adapter.run(os.path.join(self.full_dir, self.name + ".py"))
       shutil.copy(self.name + ".wfn", os.path.join(self.full_dir, self.name + ".wfn"))
