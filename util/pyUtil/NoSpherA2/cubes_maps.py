@@ -864,7 +864,11 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
         f_mask = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
     f_obs = f_sq_obs.f_sq_as_f()
-    scale = OV.GetOSF() ** 0.5
+    k = OV.GetOSF()
+    if k is None:
+      print("Error! Overall scale factor is not set! Using 1.0 as default.")
+      k = 1.0
+    scale = k ** 0.5
     f_diff = f_obs.f_obs_minus_f_calc(1.0/ scale, f_calc)
     if OV.IsEDData():
       f_diff = f_diff.apply_scaling(factor=3.324943664)
@@ -972,7 +976,11 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
         f_mask = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
     f_obs = f_sq_obs.f_sq_as_f()
-    scale = OV.GetOSF() ** 0.5
+    k = OV.GetOSF()
+    if k is None:
+      print("Error! Overall scale factor is not set! Using 1.0 as default.")
+      k = 1.0
+    scale = k ** 0.5
     f_diff = f_obs.f_obs_minus_f_calc(1.0/ scale, f_calc)
     f_diff = f_diff.array(data=f_diff.data() * (2*flex.abs(f_obs.data())/f_sq_obs.sigmas()))
     if OV.IsEDData():
