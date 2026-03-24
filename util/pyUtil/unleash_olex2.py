@@ -79,12 +79,12 @@ distro_zips = (
 
 external_files = {
   #mac64 shared
-  'unirun-mac64.zip': ('olex-port', mac64_port_name, mac64_next_port_name,
+  'unirun-mac64.zip': ('olex-port', mac64_port_name, mac64_legacy_port_name, mac64_next_port_name,
     'action:extract', 'action:delete'),
   'hart-mac64.zip': ('olex-port', mac64_port_name, mac64_next_port_name,
     'action:extract', 'action:delete'),
   #mac64
-  'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'olex2-mac64.zip': ('olex-port', mac64_port_name, mac64_legacy_port_name, 'action:extract', 'action:delete'),
   'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac64.zip': ('olex-port', mac64_port_name,
     'action:rmdir cctbx', 'action:extract', 'action:delete'),
