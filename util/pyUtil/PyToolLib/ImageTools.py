@@ -1,7 +1,6 @@
 # -*- coding:utf8 -*-
 # import PngImagePlugin
-from PIL import Image
-from PIL import ImageDraw, ImageChops, ImageColor
+from PIL import Image, ImageDraw, ImageChops, ImageColor, ImageFont
 
 from io import StringIO
 
@@ -59,6 +58,8 @@ def get_text_size_old(draw, text, font):
 def get_text_size(draw, text, font):
   if hasattr(draw, 'textbbox'):
     bbox = text_bbox(text=text, font=font)
+    if bbox is None: # fall back to the _old
+      bbox = draw.textbbox((0, 0), text, font=font)
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
   else:
     return draw.textsize(text, font=font)
@@ -200,7 +201,7 @@ class ImageTools(FontInstances):
     return retVal
 
   def decimalColorToHTMLcolor(self, dec_colour):
-    
+
     r = hex(dec_colour&255)[2:]
     g = hex((dec_colour>>8)&255)[2:]
     b = hex((dec_colour>>16)&255)[2:]
@@ -211,18 +212,18 @@ class ImageTools(FontInstances):
       g = "00"
     if b == "0":
       b = "00"
-      
+
     retVal = "#%s%s%s" %(r, g, b)
     return retVal
-  
+
   def decimalColorToRGB(self, dec_colour):
-    
+
     r = dec_colour & 255
     g = (dec_colour >> 8) & 255
     b = (dec_colour >> 16) & 255
 
     retVal = (r, g, b)
-    return retVal  
+    return retVal
 
   def getOlexVariables(self):
     # self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
@@ -234,7 +235,7 @@ class ImageTools(FontInstances):
     self.gui_green = OV.GetParam('gui.green').rgb
     self.gui_blue = OV.GetParam('gui.blue').rgb
     self.gui_grey = OV.GetParam('gui.grey').rgb
-    
+
   def dec2hex(self, n):
     """return the hexadecimal string representation of integer n"""
     return "%X" % n
@@ -651,7 +652,7 @@ class ImageTools(FontInstances):
       if value <= 0:
         value = 0
       l.append(value)
-      
+
     if as_format.lower() == "rgb":
       nc = tuple(l)
     elif as_format.lower() == "hex" or as_format.lower() == "html":
@@ -664,10 +665,10 @@ class ImageTools(FontInstances):
     """Check if a given hex color is lighter than medium gray (#808080)."""
     hex_color = hex_color.lstrip("#")  # Remove '#' if present
     r, g, b = [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]  # Convert to RGB
-  
+
     # Compute luminance (brightness)
     luminance = 0.299 * r + 0.587 * g + 0.114 * b
-  
+
     return luminance > 128  # True if lighter, False if darker
 
   def gradient_bgr(self, draw, width, height, colour=(237, 237, 235), fraction=0.85, increment=10, step=1):
@@ -1638,9 +1639,9 @@ class ImageTools(FontInstances):
       im.save(p)
     else:
       return im
-    
-    
-    
+
+
+
   from PIL import ImageFont
   def text_bbox(self, font: ImageFont.FreeTypeFont, text: str):
     """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
@@ -1654,19 +1655,19 @@ class ImageTools(FontInstances):
     except Exception:
       # some versions may raise for certain inputs; ignore and try fallback
       pass
-  
+
     # 2) Pillow's getlength + font metrics to build bbox if available
     try:
       # getlength gives advance width for the string (Pillow >= 8+)
       if hasattr(font, "getlength"):
         width = font.getlength(text)
         ascent, descent = font.getmetrics()
-        # bounding box left, top, right, bottom in pixels relative to baseline: 
+        # bounding box left, top, right, bottom in pixels relative to baseline:
         # we approximate top as -ascent and bottom as descent
         return (0, -ascent, int(width), descent)
     except Exception:
       pass
-  
+
     # 3) getmask fallback (works broadly, returns pixel bbox)
     try:
       mask = font.getmask(text)
@@ -1675,7 +1676,7 @@ class ImageTools(FontInstances):
         return bbox
     except Exception:
       pass
-  
+
     # 4) conservative fallback using getsize (older API)
     try:
       w, h = font.getsize(text)
@@ -1684,9 +1685,9 @@ class ImageTools(FontInstances):
       return (0, 0, w, h)
     except Exception:
       pass
-  
+
     return None
-  
+
   def text_advance(font: ImageFont.FreeTypeFont, text: str):
     """Return the horizontal advance width (float or int)."""
     try:
@@ -1704,7 +1705,7 @@ class ImageTools(FontInstances):
       return font.getsize(text)[0]
     except Exception:
       return 0
-  
+
   def line_height(font: ImageFont.FreeTypeFont):
     """Return a reliable line height to use for multiline layout."""
     try:
@@ -1717,9 +1718,9 @@ class ImageTools(FontInstances):
         return font.getsize("A")[1]
       except Exception:
         return 0
-    
-    
-    
+
+
+
   def make_pie_map(self, map_l, size):
 
     width = size[0]
@@ -1786,8 +1787,6 @@ if olx.HasGUI() == 'true':
 OV.registerFunction(IT.trim_image, False, 'it')
 
 
-from PIL import ImageFont
-
 def text_bbox(font: ImageFont.FreeTypeFont, text: str):
   """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
   # 1) Pillow's getbbox (newer versions)
@@ -1807,7 +1806,7 @@ def text_bbox(font: ImageFont.FreeTypeFont, text: str):
     if hasattr(font, "getlength"):
       width = font.getlength(text)
       ascent, descent = font.getmetrics()
-      # bounding box left, top, right, bottom in pixels relative to baseline: 
+      # bounding box left, top, right, bottom in pixels relative to baseline:
       # we approximate top as -ascent and bottom as descent
       return (0, -ascent, int(width), descent)
   except Exception:

@@ -141,12 +141,9 @@ class Graph(ArgumentParser):
       x += spacing
     data = Dataset(x_values,y_values,metadata=None)
 
-    min_x = self.min_x
     max_x = self.max_x
-    scale_x = self.scale_x
     delta_x = self.delta_x
     max_y = self.max_y
-    min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
     xy_pairs = data.xy_pairs()
@@ -755,7 +752,8 @@ class Graph(ArgumentParser):
         self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx)
+        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs,
+        targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx)
       i += 1
 
     self.draw_x_axis()
@@ -1205,7 +1203,8 @@ class Graph(ArgumentParser):
 
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None,
                        hrefs=None, targets=None, lt=None, gt=None, no_negatives=False,
-                       scale=None, colour=None, force_draw=False, counter=0):
+                       scale=None, colour=None, force_draw=False, counter=0,
+                       populate_map_txt_list=True):
 
     shape = self.params.marker_shape
     log = self.use_log
@@ -1226,7 +1225,7 @@ class Graph(ArgumentParser):
     else:
       marker = self.marker_params[1]
       fill = colour
-
+    href_map = []
     outline = marker.border.rgb
     marker_width = int(self.im.size[0])*marker.size_factor
     if marker_size_factor is not None:
@@ -1253,7 +1252,6 @@ class Graph(ArgumentParser):
              + ((delta_y - max_y) * scale_y))
       scale_y = -self.scale_y
 
-    map_txt_list = self.map_txt_list
     if sigmas is not None:
       for i, (xr, yr) in enumerate(xy_pairs):
         if log:
@@ -1332,14 +1330,12 @@ class Graph(ArgumentParser):
         self.draw.ellipse(box, fill=fill, outline=outline, width=self.scale)
 
       if self.item == "AutoChem":
-        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
-                            % (tuple(v / self.scale for v in box) + (xr, yr)))
-
+        href_map.append(('<zrect coords="%i,%i,%i,%i" href="reap \'%s\'"  target="%s">',
+                        box, (xr, yr)))
       if hrefs:
         box = (x - r, y - r, x + r, y + r)
-        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (tuple(v / self.scale for v in box) + (hrefs[i], targets[i])))
-
+        href_map.append(('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">',
+                        box, (hrefs[i], targets[i])))
       else:
         href = ""
         href_str = "OMIT"
@@ -1369,18 +1365,26 @@ class Graph(ArgumentParser):
             if indices[i] in self.model['omit']['hkl']:
               target = "Remove OMIT %s" %idx
               href = "%s -u %s %s>>spy.make_reflection_graph(%s)" %(href_str, options, idx, graph_type)
-        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-                            % (tuple(v / self.scale for v in box) + (href, target)))
+        href_map.append(('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">',
+                        box, (href, target)))
+    if populate_map_txt_list:
+      self.href_map2href_txt(href_map)
+      return None
+    return href_map
+
+  def href_map2href_txt(self, href_map, scales=None):
+    if not scales:
+      scales = (1, 1)
+    for html, box, href in href_map:
+      box = (box[0]*scales[0]/self.scale, box[1]*scales[1]/self.scale,
+             box[2]*scales[0]/self.scale, box[3]*scales[1]/self.scale)
+      self.map_txt_list.append(html %(box + href))
 
   def plot_data_points(self, xy_pairs, no_negatives=False, scale=None, width = 1, colour=None):
     width = width * self.scale
-    log = self.use_log
-    min_x = self.min_x
     max_x = self.max_x
-    scale_x = self.scale_x
     delta_x = self.delta_x
     max_y = self.max_y
-    min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
     if colour == None:
@@ -1515,6 +1519,35 @@ class Graph(ArgumentParser):
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2 + (3 * self.scale)), int(self.graph_top +wY/2)))
 
+  def calc_extra_width(self, y_min,y_max, label):
+    delta_y = y_max - y_min
+    dv_y = self.get_divisions(delta_y)
+    y_axis = []
+
+    modulo = dv_y % 1
+    if modulo == 0.0:
+      precision = 0
+    else:
+      precision = len(str(modulo).split('.')[-1])
+
+    if y_min < 0 and y_max > 0: # axis are in range to be drawn
+      div_val = 0.0
+      while div_val > y_min:
+        div_val -= dv_y
+    else:
+      div_val = round(y_min-dv_y, precision)
+    if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
+    y_axis.append(div_val)
+    while div_val < y_max:
+      div_val = div_val + float(dv_y)
+      y_axis.append(div_val)
+
+    format_string = "%5d"
+    temp_txt = format_string %y_axis[-1]
+    temp_wX, temp_wY = get_text_size(self.draw, temp_txt, font=self.font_small)
+    extra_width = temp_wX + 4*self.scale
+    return extra_width
+
   def draw_y_axis_2(self,y_min,y_max, label):
     delta_y = y_max - y_min
     scale = ((self.graph_bottom - self.graph_top)/delta_y)
@@ -1542,7 +1575,8 @@ class Graph(ArgumentParser):
     format_string = "%5d"
     temp_txt = format_string %y_axis[-1]
     temp_wX, temp_wY = get_text_size(self.draw, temp_txt, font=self.font_small)
-    self.im = IT.add_whitespace(self.im,side='right',weight=temp_wX + 4*self.scale ,colour=self.pageColour)
+    extra_width = temp_wX + 4*self.scale
+    self.im = IT.add_whitespace(self.im,side='right', weight=extra_width ,colour=self.pageColour)
     for item in y_axis:
       val = float(item)
       if val ==0:
@@ -1588,6 +1622,7 @@ class Graph(ArgumentParser):
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.graph_right - 1.5 * wY), int((self.graph_bottom-self.graph_top)/3)))
+    return extra_width
 
   def draw_x_axis(self, add_precision=None):
     min_x = self.min_x
@@ -2803,10 +2838,13 @@ class Fractal_Dimension(Analysis):
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
     for dataset in list(self.data.values()):
-      self.draw_data_points(dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices, hrefs=dataset.hrefs, targets=dataset.targets)
+      self.draw_data_points(dataset.xy_pairs(),
+                            sigmas=dataset.sigmas, indices=dataset.indices,
+                            hrefs=dataset.hrefs, targets=dataset.targets)
     self.draw_x_axis()
     self.draw_y_axis()
-    self.draw_info("e gross: %8.2f e-\ne net:  %10.2f e-" % (xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
+    self.draw_info("e gross: %8.2f e-\ne net:  %10.2f e-" %(
+      xy_plot.e_gross, xy_plot.e_net), font_size=self.font_size_small)
 
 class MuPlot(Analysis):
   def __init__(self):
@@ -3458,6 +3496,7 @@ class item_vs_resolution_plot(Analysis):
     plot_reflection_count = False
     scale = None
     max_y = None
+    href_list = []
     if self.item == "i_over_sigma_vs_resolution" or self.item == "rmerge_vs_resolution":
       plot_reflection_count = True
       item_save = self.item
@@ -3474,7 +3513,6 @@ class item_vs_resolution_plot(Analysis):
       self.item = item_save #BECAUSE THIS IS SOMEHOW BEYOND ME!
       metadata2 = dict(metadata)
       max_y1 = max(xy_plot.y)
-      min_y1 = min(xy_plot.y)
       max_y = max(xy_plot2.y)
       scale = (max_y1)/max(xy_plot2.y)
       metadata2["y_label"] = xy_plot2.yLegend
@@ -3490,48 +3528,68 @@ class item_vs_resolution_plot(Analysis):
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
         self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
       if dataset.metadata().get('y_label') == "I/sigma":
-        self.draw_data_points(
-          dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-          hrefs=dataset.hrefs, targets=dataset.targets, lt=3)
+        href_list += self.draw_data_points(dataset.xy_pairs(),
+          sigmas=dataset.sigmas, indices=dataset.indices,
+          hrefs=dataset.hrefs, targets=dataset.targets, lt=3,
+          populate_map_txt_list=False)
 
         write_text = IT.get_unicode_characters("3 sigma line (noise below, data above)")
-        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text=write_text, reverse_x=reverse_x)
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=3, write_equation=False,
+          write_text=write_text, reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr,
+          write_equation=False,
+          write_text="Min IUCr resolution for %s" %rad_name,
+          rotate_text="top_lineleft", reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "R_merge /%":
-        self.draw_data_points(
+        href_list += self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-          hrefs=dataset.hrefs, targets=dataset.targets, gt=0.15)
-        self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="15 %% line (troublesome data above, good data below)", reverse_x=reverse_x)
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
+          hrefs=dataset.hrefs, targets=dataset.targets, gt=0.15,
+          populate_map_txt_list=False)
+        self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False,
+          write_text="15 %% line (troublesome data above, good data below)",
+          reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr,
+          write_equation=False,
+          write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft",
+          reverse_x=reverse_x)
       elif dataset.metadata().get('y_label') == "CC 1/2":
-        self.draw_data_points(
+        href_list += self.draw_data_points(
           dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-          hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95)
+          hrefs=dataset.hrefs, targets=dataset.targets, lt=0.95,
+          populate_map_txt_list=False)
 
-        self.draw_fit_line(slope=0, y_intercept=0.75, write_equation=False, write_text="Recommendation line (noise below, data above)", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0.75, write_equation=False,
+          write_text="Recommendation line (noise below, data above)",
+          reverse_x=reverse_x)
 
-        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="Min IUCr resolution for %s" %rad_name, rotate_text="top_lineleft", reverse_x=reverse_x)
+        self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr,
+          write_equation=False,
+          write_text="Min IUCr resolution for %s" %rad_name,
+          rotate_text="top_lineleft", reverse_x=reverse_x)
       else:
         if plot_reflection_count:
-          self.draw_data_points(
+          href_list += self.draw_data_points(
             dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-            hrefs=dataset.hrefs, targets=dataset.targets, scale=1/scale)
+            hrefs=dataset.hrefs, targets=dataset.targets, scale=1/scale,
+            populate_map_txt_list=False)
         else:
-          self.draw_data_points(
+          href_list += self.draw_data_points(
             dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-            hrefs=dataset.hrefs, targets=dataset.targets)
+            hrefs=dataset.hrefs, targets=dataset.targets,
+            populate_map_txt_list=False)
 
     self.draw_x_axis()
     if list(self.data.values())[0].metadata().get('y_label') == "R_merge /%":
       self.draw_y_axis(percent=True)
     else:
       self.draw_y_axis()
+    href_scales = [1, 1]
+    # need rescale the html map as the image size changes
     if plot_reflection_count:
-      self.draw_y_axis_2(0,max_y,"Number of unique Reflections")
-    #self.draw_legend("test")
-
-    #self.draw_pairs(reverse_x=reverse_x, lt=3)
-
+      w = self.im.width
+      extra_w = self.draw_y_axis_2(0, max_y, "Number of unique Reflections")
+      href_scales[0] -= (extra_w/(w))
+    self.href_map2href_txt(href_list, scales=href_scales)
 
     return True
 
