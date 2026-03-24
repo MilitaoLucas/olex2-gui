@@ -980,7 +980,7 @@ def user_input_weight():
   if res:
     args = list(map(float, res.split()))
     olx.UpdateWght(*args)
-  
+
 OV.registerFunction(user_input_weight, True, "gui.tools")
 
 def number_non_hydrogen_atoms():
@@ -2801,9 +2801,9 @@ class PlotIt():
     if byline:
       self.plt.rcParams['font.family'] = 'Arial'
       self.plt.rcParams['font.stretch'] = 'condensed'
-      
+
       axes = self.fig.get_axes()      # all axes in the figure
-      bottom = min(ax.get_position().y0 for ax in axes)      
+      bottom = min(ax.get_position().y0 for ax in axes)
       self.fig.text(0.96, bottom, byline, rotation=90, verticalalignment='bottom', horizontalalignment='center', fontname="Arial", fontsize=self.plt_params.subtitle_fontsize - 2, color="#bebebe")
 
     self.fig.align_ylabels()
@@ -2844,8 +2844,8 @@ class PlotIt():
              line_width=None,
              ylabel="",
              xlabel="",
-             y_tick_rotation=0, 
-             x_tick_rotation=0, 
+             y_tick_rotation=0,
+             x_tick_rotation=0,
              series={},
              labels=[],
              colours=[],
@@ -2928,12 +2928,12 @@ class PlotIt():
         ss_res = np.sum((y - y_pred)**2)
         ss_tot = np.sum((y - np.mean(y))**2)
         r2 = 1 - ss_res/ss_tot
-        
+
         x = np.asarray(x)
         y = np.asarray(y)
         ss_res_id = np.sum((y - x) ** 2)
         r2_identity = 1.0 - ss_res_id / ss_tot if ss_tot != 0 else (1.0 if ss_res_id == 0 else 0.0)
-        label = f"{legend[i]} (R²={r2:.3f} R²(identity)={r2_identity:.3f}" 
+        label = f"{legend[i]} (R²={r2:.3f} R²(identity)={r2_identity:.3f}"
         ax.scatter(x, y, s=markersize, label=label)
       ax.axline((0, 0), slope=1, color="gray", linestyle="--", label="_nolegend_")
 
@@ -2941,7 +2941,7 @@ class PlotIt():
         ax.set_xlim(0, xlim)
       if ylim:
         ax.set_ylim(0, ylim)
-      
+
       ax.tick_params(
           axis="both",
           which="both",
@@ -2950,8 +2950,8 @@ class PlotIt():
           labelbottom=False,
           labelleft=False
       )
-      
-      #self.plt.tight_layout()      
+
+      #self.plt.tight_layout()
       self.plt.xlabel(labels[0], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       self.plt.ylabel(labels[1], fontname=self.fontname_proc, fontsize=self.plt_params.axis_fontsize)
       self.plt.legend()
@@ -3000,9 +3000,9 @@ class PlotIt():
         if j and lenx - i <= j:
           legend_handles.append(_)
         i += 1
-        
-        
-        
+
+
+
       try:
         ## LAbel datapiont?
         ax.plot.xticks(range(len(x)), y, rotation=x_tick_rotation) # Redefining x-axis labels
