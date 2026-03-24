@@ -59,7 +59,10 @@ def get_text_size(draw, text, font):
   if hasattr(draw, 'textbbox'):
     bbox = text_bbox(text=text, font=font)
     if bbox is None: # fall back to the _old
-      bbox = draw.textbbox((0, 0), text, font=font)
+      try:
+        bbox = draw.textbbox((0, 0), text, font=font)
+      except:
+        return draw.textsize(text, font=font)
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
   else:
     return draw.textsize(text, font=font)
