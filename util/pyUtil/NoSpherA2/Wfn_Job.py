@@ -1829,7 +1829,7 @@ ener = cf.kernel()"""
       #  path = os.path.join(path,"Part_"+str(part))
       if softw == "Psi4":
         out_fn = os.path.join(path, self.name + "_psi4.log")
-      if len(args) < 1:
+      if len(args) < 1 or args[0] is None:
         OV.SetVar('NoSpherA2-Error',"Wfn-Software-Args")
         raise NameError("Wavefunction software arguments not set!\nLikely an internal error.")
       elif nr >= len(args):

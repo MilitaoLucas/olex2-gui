@@ -337,7 +337,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       args.append("-mtc_ECP")
       for i in range(1, min(6, len(groups) + 1)):
         ECP_m_C = 0
-        sftw = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d' % i)
+        sftw = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d' % i).lstrip()
         if sftw == "xTB":
           ECP_m_C = 2
         elif sftw == "pTB":
