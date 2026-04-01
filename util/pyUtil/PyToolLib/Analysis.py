@@ -4037,7 +4037,8 @@ class HealthOfStructure():
       return
     try:
       self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma'] if self.hkl_stats['Rsigma'] else 0
-      self.theta_max = math.asin(self.radiation/(2*self.hkl_stats['MinD']))*180/math.pi
+      min_d = self.hkl_stats['MinD']
+      self.theta_max = math.asin(self.radiation/(2*min_d))*180/math.pi if min_d else 180
       if olx.IsFileType("ires") == 'true':
         try:
           od_theta = OV.get_cif_item('_reflns_odcompleteness_theta')

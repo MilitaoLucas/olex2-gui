@@ -98,7 +98,7 @@ class OlexCctbxAdapter(object):
         grad_twin_fractions = [False] * (n-1)
       else:
         grad_twin_fractions = [True] * len(twin_fractions)
-      if self.hklf_code == 5:
+      if self.hklf_code == 2 or self.hklf_code >= 5:
         batch_cnt = len(twin_fractions)-len(twin_laws)
         assert batch_cnt > 0
         self.twin_fractions = tuple(
@@ -117,7 +117,7 @@ class OlexCctbxAdapter(object):
              twin_laws, twin_fractions, grad_twin_fractions)])
     else:
       olx_tw_f = self.olx_atoms.model['hklf'].get('basf',None)
-      if self.hklf_code == 5 and olx_tw_f is not None:
+      if (self.hklf_code == 2 or self.hklf_code >= 5) and olx_tw_f is not None:
         twin_fractions = flex.double(olx_tw_f)
         self.twin_fractions = tuple(
           [ xray.twin_fraction(fraction,True)

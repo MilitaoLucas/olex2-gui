@@ -167,13 +167,13 @@ class reflections(object):
       raise RuntimeError("HKLF5 file format requires batch numbers")
     if hklf_code == 2 and len(miller_arrays) <= 2:
       raise RuntimeError("HKLF2 file format requires batch numbers and wavelengths")
+    self.wavelengths = None
     if len(miller_arrays) > 1:
       self.batch_numbers_array = miller_arrays[1]
       if hklf_code == 2 and len(miller_arrays) > 2:
-        self.wavelenghts = miller_arrays[2]
+        self.wavelengths = miller_arrays[2]
     else:
       self.batch_numbers_array = None
-      self.wavelenghts = None
     self._omit = None
     self._shel = None
     self._merge = None
@@ -260,6 +260,8 @@ class reflections(object):
       batch_numbers,
       filter)
     f_sq_obs_filtered = f_sq_obs_filtered.select(filter_res.selection)
+    if self.wavelengths:
+      f_sq_obs_filtered.wavelengths = self.wavelengths.select(filter_res.selection)
     if self.hklf_code in (2,5):
       self.batch_numbers = self.batch_numbers_array.select(
         filter_res.selection).data()
@@ -300,6 +302,11 @@ class reflections(object):
         twin_components=twin_components)
       self.f_sq_obs_filtered = rv.fo_sq
       self.batch_numbers = rv.measured_scale_indices
+    elif self.wavelengths:
+      rv = self.f_sq_obs_filtered.as_xray_observations(
+        scale_indices=self.batch_numbers,
+        twin_fractions=twin_fractions,
+        wavelengths=self.f_sq_obs_filtered.wavelengths)
     else:
       rv = self.f_sq_obs_filtered.as_xray_observations(
         twin_components=twin_components)
