@@ -844,10 +844,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     # Determine platform-specific executable name
     exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
     # search PATH
-    cwd = os.getcwd()
-    os.chdir(olx.BaseDir())
-    exe_path = olx.file.Which(exe_name)
-    os.chdir(cwd)
+    exe_path = olx.file.Which(exe_name, current_dir=False)
     # Update software list if requested and executable exists
     if name and exe_path:
         if name not in self.softwares:
