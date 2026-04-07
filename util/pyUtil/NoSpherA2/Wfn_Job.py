@@ -169,6 +169,8 @@ class wfn_Job(object):
 
   def write_xyz_file(self, normalize_h_isotopes=False):
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    if os.path.exists(coordinates_fn): #This could be the case e.g. if disorder already prepared files
+      return
     olx.Kill("$Q")
     olx.File(coordinates_fn,p=10)
     if normalize_h_isotopes:
