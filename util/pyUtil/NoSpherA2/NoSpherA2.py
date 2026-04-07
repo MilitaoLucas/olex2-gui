@@ -929,7 +929,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     # Determine platform-specific executable name
     exe_name = exe_pre + (".exe" if sys.platform.startswith("win") else "")
     # search PATH
-    exe_path = olx.file.Which(exe_name)
+    exe_path = olx.file.Which(exe_name, current_dir=False)
     # Update software list if requested and executable exists
     if name and exe_path:
         if name not in self.softwares:
@@ -1788,7 +1788,7 @@ def make_NSA2_GUI(method):
     return make_discambMATT_GUI()
   elif method == "ELMOdb":
     return make_ELMOdb_GUI()
-  
+
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
 

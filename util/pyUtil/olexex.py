@@ -1230,12 +1230,12 @@ def GetOptionalHyphenString(txt):
 OV.registerFunction(GetOptionalHyphenString)
 
 def GetTwinLawAndBASF(html=False):
-  
+
   def fmt_law(x, tol=1e-9):
     if abs(x - round(x)) < tol:
       return str(int(round(x)))
-    return f"{x:.3f}"  
-  
+    return f"{x:.3f}"
+
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
   basf_list = olex_refinement_model['hklf'].get('basf', [])
@@ -1273,15 +1273,33 @@ def GetTwinLawAndBASF(html=False):
     return ""
   if basf:
     if txt: txt += ", "
-    txt += "BASF [%s]" % ";".join(basf)
+    txt += "BASF ["
+    sz = len(basf)
+    if sz < 36:
+      i, ln = 0, 12
+      while i < sz:
+        txt += "%s" %(';'.join(basf[i:min(i+ln, len(basf))]))
+        i += ln
+        if i >= sz:
+          break
+        else:
+          txt += ';'
+          if html:
+            txt += "<br/>"
+    else:
+      if html:
+        txt += "<a href='EditIns'>...</a>"
+      else:
+        txt += "..."
+    txt += "]"
 
   if html:
     if curr_law:
       txt = "<b><font color='%s'>TWIN%s</font></b>" %(
         OV.GetParam('gui.green_text').hexadecimal, txt)
     else:
-      txt = "<b><font color='%s'>HKLF 5 %s</font></b>" %(
-        OV.GetParam('gui.green_text').hexadecimal, txt)
+      txt = "<b><font color='%s'>HKLF %s %s</font></b>" %(
+        OV.GetParam('gui.green_text').hexadecimal, olx.HKLF(), txt)
   return txt
 OV.registerFunction(GetTwinLawAndBASF)
 
