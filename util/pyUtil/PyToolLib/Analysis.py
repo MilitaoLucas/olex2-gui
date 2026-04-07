@@ -992,7 +992,6 @@ class Graph(ArgumentParser):
       if n_bars <= max_bars:
         bar_width = int(width/max_bars)
       max_bars = n_bars
-
     else:
       bar_width = int(width/max_bars)
 
@@ -1003,13 +1002,15 @@ class Graph(ArgumentParser):
       top_left = (x,y)
       IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
 
-    j = 0
-    img_no = 0
-    for i, xy in enumerate(dataset.xy_pairs()):
+    i, j = 0, 0
+    pairs, img_no = dataset.xy_pairs(), 0
+    bar_cnt = len(pairs)
+    fill_last_page = OV.GetParam("user.graphs.program_analysis.fill_last_page")
+    while i < bar_cnt:
+      xy = pairs[i]
       if j == 0:
         barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=self.pageColour)
         barDraw = ImageDraw.Draw(barImage)
-      last = len(dataset.x)
       x_value, y_value = xy
       if y_value is None:
         y_value = 1
@@ -1032,7 +1033,7 @@ class Graph(ArgumentParser):
       else:
         fill = (0,0,0)
 
-      if i == last - 1 and n_bars > max_bars and all_in_one_history:
+      if i == bar_cnt - 1 and n_bars > max_bars and all_in_one_history:
         bar_right = width - self.bSides - 1
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
@@ -1086,9 +1087,14 @@ class Graph(ArgumentParser):
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
 
       j += 1
-      if j == max_bars or i == last - 1:
+      i += 1
+      if j == max_bars or i == bar_cnt - 1:
         img_no += 1
         j = 0
+        # make full last image
+        if fill_last_page:
+          if i != bar_cnt-1 and i + max_bars > bar_cnt:
+            i = bar_cnt - max_bars - 1
         self.image_location = "history_%s.png" %img_no
 
         historyText = """\
@@ -1096,7 +1102,6 @@ class Graph(ArgumentParser):
         %s
         </zimg></td></tr>
         """ %(self.image_location, self.map_txt)
-
 
         previous_img = img_no -1
         next_img = img_no + 1
@@ -1118,12 +1123,17 @@ class Graph(ArgumentParser):
 >
 </font>'''
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy.make_history_bars()>>html.Update'>Split Display</a>"
+          all_in_oneText = "<div><a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy.make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
 <a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy.make_history_bars()>>html.Update">Show All Bars</a>
+
+<snippet src="gui/snippets/input-checkbox" value="%Fill last page%" name="histiry_fill_lp"
+  checked="spy.GetParam('user.graphs.program_analysis.fill_last_page')"
+  onclick="spy.SetParam('user.graphs.program_analysis.fill_last_page',html.GetState('~name~'))>>
+    spy.make_history_bars()>>html.Update"/></div>
 '''
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
@@ -1142,12 +1152,12 @@ class Graph(ArgumentParser):
         historyTextNext =  _%("", scaleTxt, all_in_oneText, next_img)
         historyTextPrevious = _ %(previous_img, scaleTxt, all_in_oneText, "")
         historyTextBoth = _%(previous_img, scaleTxt, all_in_oneText, next_img)
-        if img_no == 1 and i != last - 1:
+        if img_no == 1 and i != bar_cnt - 1:
           historyText += historyTextNext
-        elif img_no == 1 and i == last - 1 and not all_in_one_history:
+        elif img_no == 1 and i == bar_cnt - 1 and not all_in_one_history:
           historyText += "<tr><td>%s</td></tr>" %scaleTxt
           pass
-        elif i == last - 1:
+        elif i == bar_cnt - 1:
           historyText += historyTextPrevious
         else:
           historyText += historyTextBoth

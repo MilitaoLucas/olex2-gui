@@ -88,6 +88,27 @@ class publication:
       OV.SetParam("snum.metacif.publ_author_names", newValue)
     return changed
 
+  def AddAllDefaultAuthors(self):
+    oldValue = OV.GetParam("snum.metacif.publ_author_names")
+    from userDictionaries import DBConnection
+    cursor = DBConnection().conn.cursor()
+    cursor.execute("SELECT * FROM person where add_author!=0")
+    all_persons = cursor.fetchall()
+    if not all_persons:
+      return False
+    new_values = []
+    for p in all_persons:
+      n = userDictionaries.person(p).get_display_name()
+      if not oldValue or (oldValue and n not in oldValue):
+        new_values.append(n)
+    if not new_values:
+      return False
+    newValue = ";".join(new_values)
+    if oldValue:
+      newValue = "%s;%s" %(oldValue, ";".join(new_values))
+    OV.SetParam("snum.metacif.publ_author_names", newValue)
+    return True
+
   def OnAddNameToAuthorList(self, box_name,person_id=None):
     value = self.OnPersonChange(box_name, person_id=person_id)
     if self.AddNameToAuthorList(value):
@@ -175,6 +196,7 @@ olex.registerFunction(pub.OnAddNameToAuthorList, False, "gui.report.publication"
 olex.registerFunction(pub.OnPublicationTemplateChange, False, "gui.report.publication")
 olex.registerFunction(pub.AddTemplateToMergeList, False, "gui.report.publication")
 olex.registerFunction(pub.DisplayMergeList, False, "gui.report.publication")
+olex.registerFunction(pub.AddAllDefaultAuthors, False, "gui.report.publication")
 
 def ResolvePrograms():
   if not OV.HasGUI():

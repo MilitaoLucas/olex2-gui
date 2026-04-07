@@ -49,7 +49,7 @@ def get_sql(table_name, d):
 
 class person:
   def __init__(self, affiliationid, id=None, firstname="", middlename="",
-               lastname="", email="", phone="", orchid_id=""):
+               lastname="", email="", phone="", orchid_id="", add_author=False):
     if type(affiliationid) == tuple:
       sql_res = affiliationid
       self.id = sql_res[0]
@@ -60,6 +60,7 @@ class person:
       self.email = sql_res[5]
       self.phone = sql_res[6]
       self.orchid_id = sql_res[7]
+      self.add_author = sql_res[8]
     else:
       self.affiliationid = affiliationid
       self.id = id
@@ -69,6 +70,7 @@ class person:
       self.orchid_id = orchid_id
       self.email = email
       self.phone = phone
+      self.add_author = add_author
 
   def update(self):
     cursor = DBConnection().conn.cursor()
@@ -612,7 +614,7 @@ CREATE TABLE affiliation (
 CREATE TABLE person (
   id INTEGER NOT NULL, affiliationid INTEGER NOT NULL,
   firstname TEXT, middlename TEXT, lastname TEXT,
-  email TEXT, phone TEXT, orchid_id TEXT,
+  email TEXT, phone TEXT, orchid_id TEXT, add_author integer,
   PRIMARY KEY(id),
   FOREIGN KEY(affiliationid)
     REFERENCES affiliation(id)
@@ -629,4 +631,9 @@ CREATE INDEX affiliationfk ON person (affiliationid);
       except Exception as e:
         cursor.execute("Alter table person add column orchid_id TEXT default ''")
         print("Added orchid_id to person")
+      try:
+        cursor.execute("SELECT add_author FROM person limit 1")
+      except Exception as e:
+        cursor.execute("Alter table person add column add_author integer default 0")
+        print("Added add_author to person")
 

@@ -216,7 +216,7 @@ def GetImageFilename(image_type):
       filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
     if not filename:
       return None, None, None
-  if_exists = OV.GetParam('snum.image.if_file_exists')
+  if_exists = OV.GetParam('user.image.if_file_exists')
   if os.path.exists("%s.%s" %(filename, fileext)):
     if if_exists == 'increment':
       fp = olx.FilePath()

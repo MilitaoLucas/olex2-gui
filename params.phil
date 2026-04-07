@@ -420,8 +420,6 @@ routines requiring structure refinement
   image
     .short_caption = Structure Images
     {
-    if_file_exists = *ask increment replace
-      .type = choice
     name = None
       .type = str
     trim_border_colour = #dedede
@@ -1238,6 +1236,8 @@ user
       max_bars = 12
         .type = int
       all_in_one_history = False
+        .type = bool
+      fill_last_page = False
         .type = bool
       y_scale_factor = 3
         .type = int
@@ -2303,6 +2303,8 @@ user
     }
   }
   image{
+    if_file_exists = *ask increment replace
+      .type = choice
     img_type = 'bitmap'
       .type= str
     label_symm = 'none'
