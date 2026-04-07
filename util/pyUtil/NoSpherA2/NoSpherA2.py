@@ -7,6 +7,7 @@ import gui
 import shutil
 import time
 import subprocess
+import hashlib
 
 from olexFunctions import OV
 from PluginTools import PluginTools as PT
@@ -371,6 +372,40 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       shutil.rmtree(self.jobs_dir)
     print(" ... done!")
 
+  def set_tsc_file_with_metadata(self, filename, origin=None):
+    """
+    Set the NoSpherA2 file parameter and store metadata (hash and origin).
+    
+    Args:
+      filename: The name of the TSC/TSCB file to set
+      origin: The software/method that generated this file. If None, auto-detect from wfn_code.
+              If hash is empty (file not found), origin will be set to "externally provided".
+    """
+    # Set the file parameter
+    OV.SetParam('snum.NoSpherA2.file', filename)
+    
+    # Compute file hash if the file exists
+    file_path = os.path.join(OV.FilePath(), filename)
+    file_hash = ""
+    if os.path.exists(file_path):
+      try:
+        with open(file_path, 'rb') as f:
+          file_hash = hashlib.sha256(f.read()).hexdigest()
+      except Exception as e:
+        print(f"Warning: Could not compute hash for {filename}: {e}")
+    
+    # Determine origin if not provided
+    if origin is None:
+      # If hash is unknown/empty and origin not explicitly provided, mark as externally provided
+      if file_hash == "":
+        origin = "externally provided"
+      else:
+        origin = self.wfn_code if hasattr(self, 'wfn_code') else software()
+    
+    # Store metadata
+    OV.SetParam('snum.NoSpherA2.file_hash', file_hash)
+    OV.SetParam('snum.NoSpherA2.file_origin', origin)
+
   def launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = software()
@@ -397,7 +432,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return False
 
     # This checks ne multiplicity and Number of electrons
-    if (wfn_code != OV.GetParam('user.NoSpherA2.discamb_exe')) and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and not is_disordered():
+    if (wfn_code != OV.GetParam('user.NoSpherA2.discamb_exe')) and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and not is_disordered() and (wfn_code != "SALTED"):
       ne, adapter = calculate_number_of_electrons()
       heavy = False
       for sc in adapter.xray_structure().scatterers():
@@ -643,9 +678,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):
           shutil.move("experimental.tscb", self.name + ".tscb")
-          OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
+          self.set_tsc_file_with_metadata(self.name + ".tscb")
         else:
-          OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+          self.set_tsc_file_with_metadata(self.name + ".tsc")
       if need_to_combine:
         #Too lazy to properly do it...
         if os.path.exists(self.name + ".tsc"):
@@ -667,10 +702,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         olx.File(cif)
         discamb(os.path.join(OV.FilePath(), self.jobs_dir), self.name, self.discamb_exe)
         shutil.copy(os.path.join(OV.FilePath(), self.jobs_dir, self.name + ".tsc"), self.name + ".tsc")
-        OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+        self.set_tsc_file_with_metadata(self.name + ".tsc", "DISCAMB")
       elif wfn_code == "XHARPy":
           self.xharpy_adapter.calculate_tsc_cli(f"{os.path.join(self.jobs_dir, self.name)}.cif")
-          OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+          self.set_tsc_file_with_metadata(self.name + ".tsc", "XHARPy")
       else:
         if wfn_code.lower().endswith(".wfn") or wfn_code.lower().endswith(".wfx") or \
            wfn_code.lower().endswith(".molden") or wfn_code.lower().endswith(".gbw") or \
@@ -703,7 +738,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               OV.SetVar('NoSpherA2-Error',"StructureFactor")
               raise NameError("Tonto finished but no .tsc file found in job folder")
             shutil.copy(tsc_in_job, job.name+".tsc")
-            OV.SetParam('snum.NoSpherA2.file', job.name+".tsc")
+            self.set_tsc_file_with_metadata(job.name+".tsc", "Tonto")
         else:
           if wfn_code == "ELMOdb":
             # copy the pdb
@@ -750,9 +785,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):
               shutil.move("experimental.tscb", self.name + ".tscb")
-              OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
+              self.set_tsc_file_with_metadata(self.name + ".tscb")
             else:
-              OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+              self.set_tsc_file_with_metadata(self.name + ".tsc")
 
           elif wfn_code == "SALTED":
             path_base = os.path.join(self.jobs_dir, self.name)
@@ -763,9 +798,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):
               shutil.move("experimental.tscb", self.name + ".tscb")
-              OV.SetParam('snum.NoSpherA2.file', self.name + ".tscb")
+              self.set_tsc_file_with_metadata(self.name + ".tscb")
             else:
-              OV.SetParam('snum.NoSpherA2.file', self.name + ".tsc")
+              self.set_tsc_file_with_metadata(self.name + ".tsc")
 
         elif wfn_code != "Tonto":
           job = Job(self, self.name)
@@ -789,7 +824,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if OV.HasGUI():
             OV.UpdateHtml()
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
-          OV.SetParam('snum.NoSpherA2.file',job.name+".tsc")
+          self.set_tsc_file_with_metadata(job.name+".tsc", "Tonto")
     # add_info_to_tsc()
     if not OV.GetParam('snum.NoSpherA2.full_HAR'):
       fn = str(OV.GetParam('snum.NoSpherA2.file'))
@@ -1313,13 +1348,14 @@ This fregment can be embedded in an electrostatic crystal field by employing clu
 The following options were used:
 """
   soft = software()
-  details_text = details_text + "   SOFTWARE:       %s\n"%soft
+  # Use the stored origin (set at calculation time) if available; fall back to software() result
+  origin = OV.GetParam('snum.NoSpherA2.file_origin')
+  if not origin:
+    origin = soft
+  details_text = details_text + "   SOFTWARE:       %s\n"%origin
   if soft != OV.GetParam('user.NoSpherA2.discamb_exe'):
-    method = OV.GetParam('snum.NoSpherA2.method')
-    basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
     charge = OV.GetParam('snum.NoSpherA2.charge')
     mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
     accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
     if partitioning:
@@ -1327,10 +1363,27 @@ The following options were used:
       details_text += "   INT ACCURACY:   %s\n"%accuracy
     else:
       details_text += "   PARTITIONING:   Tonto\n"
-    details_text += "   METHOD:         %s\n"%method
-    details_text += "   BASIS SET:      %s\n"%basis_set
+    if soft == "SALTED":
+      salted_model = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+      details_text += "   MODEL:          %s\n"%os.path.basename(str(salted_model))
+    elif soft == "Thakkar IAM":
+      cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+      anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      if cations:
+        details_text += "   CATIONS:        %s\n"%cations
+      if anions:
+        details_text += "   ANIONS:         %s\n"%anions
+    elif soft == "pTB":
+      pass  # pTB does not use method or basis set
+    else:
+      method = OV.GetParam('snum.NoSpherA2.method')
+      details_text += "   METHOD:         %s\n"%method
+      if soft != "xTB":
+        basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+        details_text += "   BASIS SET:      %s\n"%basis_set
     details_text += "   CHARGE:         %s\n"%charge
     details_text += "   MULTIPLICITY:   %s\n"%mult
+    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
     if relativistic:
       details_text += "   RELATIVISTIC:   DKH2\n"
     if software == "Tonto":
@@ -1523,7 +1576,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
     OV.SetParam('snum.NoSpherA2.source', input)
     _input = input.lstrip().rstrip()
     if ".tsc" in _input:
-      OV.SetParam('snum.NoSpherA2.file', _input)
+      self.set_tsc_file_with_metadata(_input)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != OV.GetParam('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, adapter = calculate_number_of_electrons()

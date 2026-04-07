@@ -468,10 +468,12 @@ or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
     software = OV.GetParam('snum.NoSpherA2.source').lstrip()
-    details_text = details_text + "   SOFTWARE:       %s\n"%software
+    # Use the stored origin (set at calculation time) if available; fall back to source param
+    origin = OV.GetParam('snum.NoSpherA2.file_origin')
+    if not origin:
+      origin = software
+    details_text = details_text + "   SOFTWARE:       %s\n"%origin
     if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
-      method = OV.GetParam('snum.NoSpherA2.method')
-      basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
       charge = OV.GetParam('snum.NoSpherA2.charge')
       mult = OV.GetParam('snum.NoSpherA2.multiplicity')
       relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
@@ -482,8 +484,24 @@ The following options were used:
         details_text += f"   INT ACCURACY:   {accuracy}\n"
       else:
         details_text += "   PARTITIONING:   Tonto\n"
-      details_text += f"   METHOD:         {method}\n"
-      details_text += f"   BASIS SET:      {basis_set}\n"
+      if software == "SALTED":
+        salted_model = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+        details_text += f"   MODEL:          {os.path.basename(str(salted_model))}\n"
+      elif software == "Thakkar IAM":
+        cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+        anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+        if cations:
+          details_text += f"   CATIONS:        {cations}\n"
+        if anions:
+          details_text += f"   ANIONS:         {anions}\n"
+      elif software == "pTB":
+        pass  # pTB does not use method or basis set
+      else:
+        method = OV.GetParam('snum.NoSpherA2.method')
+        details_text += f"   METHOD:         {method}\n"
+        if software != "xTB":
+          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+          details_text += f"   BASIS SET:      {basis_set}\n"
       details_text += f"   CHARGE:         {charge}\n"
       details_text += f"   MULTIPLICITY:   {mult}\n"
       solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
