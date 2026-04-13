@@ -102,10 +102,11 @@ class hemihedral_twinning(object):
 class reflections(object):
   """ reflections is the filename holding the reflections """
   def __init__(self,  cell, spacegroup, reflection_file, hklf_code, hklf_matrix=None, merge_code=2):
-    if merge_code != 0 or hklf_code == 5:
+    if merge_code != 0:
       cs = crystal.symmetry(cell, spacegroup)
     else:
       cs = crystal.symmetry(cell, "P1")
+    self.space_group = spacegroup
     #do we read amplitudes or intensisty?
     f_hklf_code = hklf_code
     if f_hklf_code != 3:
@@ -228,7 +229,7 @@ class reflections(object):
     f_sq_obs_filtered = self.f_sq_obs_merged.treat_negative_amplitudes_shelx(omit['s'])
     if hkl is None: hkl = ()
     if self._shel is None:
-      self._shel = {'high' : self.d_min, 'low': -1}
+      self._shel = {'high' : -1, 'low': -1}
     else:
       if self._shel['high'] > self._shel['low']:
         self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
@@ -240,11 +241,12 @@ class reflections(object):
     else:
       anomalous_flag = f_sq_obs_filtered.anomalous_flag()
 
+    omit_map = miller.lookup_tensor(flex.miller_index(hkl),
+      f_sq_obs_filtered.crystal_symmetry().space_group(), anomalous_flag)
     filter = observations.filter(
       f_sq_obs_filtered.unit_cell(),
-      f_sq_obs_filtered.crystal_symmetry().space_group(),
-      anomalous_flag,
-      flex.miller_index(hkl),
+      sgtbx.space_group(self.space_group[6:]),
+      omit_map,
       float(self._shel['high']),
       float(self._shel['low']),
       omit['s']*0.5

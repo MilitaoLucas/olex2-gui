@@ -1276,7 +1276,7 @@ def GetTwinLawAndBASF(html=False):
     txt += "BASF ["
     sz = len(basf)
     if sz < 36:
-      i, ln = 0, 12
+      i, ln = 0, 10
       while i < sz:
         txt += "%s" %(';'.join(basf[i:min(i+ln, len(basf))]))
         i += ln
