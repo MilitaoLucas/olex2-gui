@@ -657,8 +657,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       two_theta_full = float(two_theta_full)
     except ValueError:
       two_theta_full = math.asin(self.wavelength*0.6)*360/math.pi
-    two_theta_full_set = uctbx.d_star_sq_as_two_theta(
-      uctbx.d_as_d_star_sq(completeness_refs.d_max_min()[1]), self.wavelength, deg=True)
+    try: #TOF
+      two_theta_full_set = uctbx.d_star_sq_as_two_theta(
+        uctbx.d_as_d_star_sq(completeness_refs.d_max_min()[1]), self.wavelength, deg=True)
+    except Exception as e:
+      two_theta_full_set = 180
     if two_theta_full_set < two_theta_full:
       two_theta_full = two_theta_full_set
     ref_subset = completeness_refs.resolution_filter(
@@ -892,8 +895,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_diffrn_reflns_limit_l_max'] = l_max
     cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
       0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
-    cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
-      0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
+    try:
+      cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
+        0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
+    except:
+      cif_block['_diffrn_reflns_theta_max'] = 90
     cif_block['_diffrn_reflns_theta_full'] = fmt % (two_theta_full/2)
     #
     cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
@@ -1038,7 +1044,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # for i, fc_sq_v in enumerate(fc_sq.data()):
     #   if abs(fc_sq_v - test_v[i]) > 1e-8:
     #     raise Exception("Assert!")
-    #   fc_m = fc_sq_original[i]*self.fc_correction.compute(fc_sq.indices()[i], fc_sq_original[i], False)
+    #   fc_m = fc_sq_original[i]*self.fc_correction.compute(
+    #     wavelength, fc_sq.indices()[i], fc_sq_original[i], False)
     #   if abs(fc_sq_v - fc_m) > 1e-8:
     #     raise Exception("Assert!")
     # #end test
@@ -1046,6 +1053,40 @@ class FullMatrixRefine(OlexCctbxAdapter):
     fo_sq_ = fo_sq.customized_copy(
         data=fo_sq.data()*correction,
         sigmas=fo_sq.sigmas()*correction)
+    return fo_sq_, fc_sq_
+
+  #moves EXTI and scales from Fc_sq to Fo_sq
+  def  transfer_exti_hklf2(self, exti, wavelengths, fo_sq, fc_sq):
+    uc = fc_sq.unit_cell()
+    sin_t_sq = uc.d_star_sq(fc_sq.indices()) * flex.pow(wavelengths, 2) * 0.25
+    sin_2t = 2*flex.pow(flex.abs(sin_t_sq*(1-sin_t_sq)), 0.5)
+    correction = 0.001 * exti * fc_sq.data() * flex.pow(wavelengths, 3) / sin_2t
+    # recover original Fc_sq
+    fc_sq_original = fc_sq.data()*(correction + flex.pow(flex.pow(correction, 2) + 4, 0.5))/2
+    #compute original correction to apply to Fo_sq
+    correction = 0.001 * exti * fc_sq_original * flex.pow(wavelengths, 3) / sin_2t
+    correction += 1
+    correction = flex.pow(correction, 0.5)
+    # #test fc_sq = fc_sq_original/correction
+    # test_v = fc_sq_original / correction
+    # for i, fc_sq_v in enumerate(fc_sq.data()):
+    #   if abs(fc_sq_v - test_v[i]) > 1e-8:
+    #     raise Exception("Assert!")
+    #   fc_m = fc_sq_original[i]*self.fc_correction.compute(wavelengths[i],
+    #     fc_sq.indices()[i], fc_sq_original[i], False)
+    #   if abs(fc_sq_v - fc_m) > 1e-8:
+    #     raise Exception("Assert!")
+    # #end test
+    fc_sq_ = fc_sq.customized_copy(data=fc_sq_original)
+    data=fo_sq.data()*correction
+    sigmas=fo_sq.sigmas()*correction
+    if len(self.observations.measured_scale_indices) > 0:
+      data = flex.double([I / self.observations.scale(i) for i, I in enumerate(data)])
+      sigmas = flex.double([s / self.observations.scale(i) for i, s in enumerate(sigmas)])
+
+    fo_sq_ = fo_sq.customized_copy(
+        data=data,
+        sigmas=sigmas)
     return fo_sq_, fc_sq_
 
   #moves SWAT from Fc_sq to Fo_sq
@@ -1110,9 +1151,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if (self.exti is not None or self.swat is not None) and\
           type(self.fc_correction) is not xray.dummy_fc_correction:
         if self.exti is not None:
-          fo_sq, fc_sq = self.transfer_exti(
-            self.fc_correction.value, self.wavelength, fo_sq, fc_sq,
-            do_scale=False)
+          if self.hklf_code == 2:
+            fo_sq, fc_sq = self.transfer_exti_hklf2(
+              self.fc_correction.value, self.normal_eqns.observations.wavelengths,
+                fo_sq, fc_sq)
+          else:
+            fo_sq, fc_sq = self.transfer_exti(
+              self.fc_correction.value, self.wavelength, fo_sq, fc_sq,
+              do_scale=False)
         # elif self.swat is not None: # swat should not be transferred...
         #   #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
         #   pass
@@ -1232,7 +1278,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f = io.StringIO()
       fcf_cif, fmt_str = self.create_fcf_content(list_code, fixed_format=False)
       if not fcf_cif:
-        print("Unsupported list (fcf) format")
+        print("Unsupported list (FCF) format")
         return
       fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
       fcf_content = f.getvalue()
@@ -1656,16 +1702,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if self.f_mask:
         f_mask = self.f_mask.common_set(f_calc)
         f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
+    elif self.hklf_code ==2:
+      fo2, fc_sq = self.transfer_exti_hklf2(self.fc_correction.value,
+        self.normal_eqns.observations.wavelengths,
+        self.normal_eqns.observations.fo_sq,
+        self.normal_eqns.f_calc.as_intensity_array())
+      #' need also to apply scale (BASF) before merging
+      fo2 = fo2.customized_copy(space_group_info=sgtbx.space_group_info(self.space_group))
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_calc = self.f_calc(fo2, apply_extinction_correction=False, twin_data=False)
+      fc_sq = f_calc.as_intensity_array()
+      weights = self.compute_weights(fo2, f_calc, fc2_data=fc_sq.data(), reset_scale_factor=True)
+      scale = flex.sum(weights * fo2.data() * fc_sq.data()) \
+              / flex.sum(weights * flex.pow2(fc_sq.data()))
+      f_obs = fo2.f_sq_as_f()
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
+    elif OV.IsEDRefinement():
+      pass
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       f_calc = self.normal_eqns.f_calc
-    f_obs = fo2.f_sq_as_f()
-    if scale_factor is None:
-      k = OV.GetOSF()
-    else:
-      k = math.sqrt(scale_factor)
-    #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
-    scaling_factor = 3.324943664 # scales from A-2 to eA-1
+      f_obs = fo2.f_sq_as_f()
+      k = OV.GetOSF() if scale_factor is None else math.sqrt(scale_factor)
+      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
     #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
@@ -1694,10 +1753,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       scale = flex.sum(weights * fo2.data() * f_calc_sq.data()) \
               / flex.sum(weights * flex.pow2(f_calc_sq.data()))
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
-    else:
-      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
 
     if OV.IsEDData():
+      #https://journals.iucr.org/a/issues/2020/01/00/ae5072/index.html
+      scaling_factor = 3.324943664 # scales from A-2 to eA-1
       f_obs_minus_f_calc = f_obs_minus_f_calc.apply_scaling(factor=scaling_factor)
     if debug:
       print("%d Reflections for Fourier Analysis" % f_obs_minus_f_calc.size())

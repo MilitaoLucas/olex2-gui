@@ -375,7 +375,7 @@ class OlexCctbxAdapter(object):
       else:
         xs = self.xray_structure()
         if miller_set_.space_group_number() == 1 and\
-           self.xray_structure() != miller_set_.space_group():
+           self.xray_structure().space_group() != miller_set_.space_group():
            #xs = xs.deep_copy()
            xs = xs.expand_to_p1()
         fc = miller_set_.structure_factors_from_scatterers(
