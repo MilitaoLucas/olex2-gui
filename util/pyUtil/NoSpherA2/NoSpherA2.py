@@ -432,7 +432,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       return False
 
     # This checks ne multiplicity and Number of electrons
-    if (wfn_code != OV.GetParam('user.NoSpherA2.discamb_exe')) and (wfn_code != "Thakkar IAM") and (olx.xf.latt.IsGrown() != 'true') and not is_disordered() and (wfn_code != "SALTED"):
+    if (wfn_code != OV.GetParam('user.NoSpherA2.discamb_exe')) \
+        and (wfn_code != "Thakkar IAM") \
+        and (olx.xf.latt.IsGrown() != 'true') \
+        and not is_disordered() \
+        and (wfn_code != "SALTED")\
+        and (wfn_code != "pTB")\
+        and (wfn_code != "xTB"):
       ne, adapter = calculate_number_of_electrons()
       heavy = False
       for sc in adapter.xray_structure().scatterers():
