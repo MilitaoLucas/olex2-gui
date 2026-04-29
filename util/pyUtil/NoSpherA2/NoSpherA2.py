@@ -1,6 +1,7 @@
 import os
 import sys
 import olex
+import olexex
 import olx
 #import olex_core
 import gui
@@ -13,7 +14,7 @@ from olexFunctions import OV
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
-from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software
+from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, ELEMENTS, ELEMENTS_BY_SYMBOL
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
@@ -439,10 +440,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         and (wfn_code != "SALTED")\
         and (wfn_code != "pTB")\
         and (wfn_code != "xTB"):
-      ne, adapter = calculate_number_of_electrons()
+      ne, model = calculate_number_of_electrons()
       heavy = False
-      for sc in adapter.xray_structure().scatterers():
-        if sc.electron_count() > 36:
+      for sc in model._atoms:
+        if sc['type'] == 'Q':
+          continue
+        Z = ELEMENTS_BY_SYMBOL.get(sc['type'], 0)
+        if Z > 36:
           heavy = True
       if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ecp" not in basis) \
         and ("sto" not in basis) and ("3-21" not in basis):
@@ -1023,19 +1027,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if "OCC" in source:
       return self.OCC_basis_list_str
     BL = self.basis_list_str.split(";")
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    XRS = OlexCctbxAdapter().xray_structure()
+    model = olexex.OlexRefinementModel()
     max_Z = 1
-    from cctbx import eltbx
-    elements = eltbx.tiny_pse
-    for sc in XRS.scatterers():
-      if sc.electron_count() > max_Z:
-        max_Z = sc.electron_count()
+    for sc in model._atoms:
+      ec = ELEMENTS_BY_SYMBOL.get(sc['type'], 0)
+      if ec > max_Z:
+        max_Z = ec
     final_string = ""
     for basis in BL:
       if OV.GetParam("snum.NoSpherA2.basis_adv"):
         final_string += basis + ";"
-      elif self.check_for_atom_in_basis_set(basis, XRS, elements):
+      elif self.check_for_atom_in_basis_set(basis, model._atoms):
         final_string += basis + ";"
     if source == "ORCA" or source == "ORCA 5.0" or source == "fragHAR" or source == "Hybrid" or source == "ORCA 6.0" or source == "ORCA 6.1":
       if max_Z <= 86 and max_Z > 36:
@@ -1091,16 +1093,16 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def available(self):
     return os.path.exists(self.NoSpherA2)
 
-  def check_for_atom_in_basis_set(self, name, x_ray_struct, elements):
+  def check_for_atom_in_basis_set(self, name, model_atoms):
     BD = self.basis_dir
     basis_file = os.path.join(BD, name)
     if not os.path.exists(basis_file):
       return False
     basis = open(basis_file, "r")
     atoms = []
-    for sc in x_ray_struct.scatterers():
-      Z = sc.electron_count()
-      t = elements.table(Z).symbol() + ":" + name
+    for sc in model_atoms:
+      t = sc['type']
+      t = t + ":" + name
       if not any(t == atom for atom in atoms):
         atoms.append(t)
     basis.seek(0, 0)
@@ -1585,7 +1587,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       self.set_tsc_file_with_metadata(_input)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != OV.GetParam('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
-      ne, adapter = calculate_number_of_electrons()
+      ne, model = calculate_number_of_electrons()
       mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
       if mult == 0:
         if (ne % 2 == 0):
