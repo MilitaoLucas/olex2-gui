@@ -759,9 +759,9 @@ class Graph(ArgumentParser):
     self.draw_x_axis()
     self.draw_y_axis()
 
+  @property
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
-  map_txt = property(map_txt)
 
   def get_division_spacings_and_scale(self):
     log = self.use_log
@@ -1011,6 +1011,7 @@ class Graph(ArgumentParser):
       if j == 0:
         barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=self.pageColour)
         barDraw = ImageDraw.Draw(barImage)
+        map_list = []
       x_value, y_value = xy
       if y_value is None:
         y_value = 1
@@ -1055,9 +1056,8 @@ class Graph(ArgumentParser):
         target = dataset.targets[i]
       else:
         target = "%.3f" %y_value
-      self.map_txt_list.append(
-        """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-        % (bar_left, top, bar_right, bar_bottom, href, target))
+      map_list.append('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">' %(
+        *box, href, target))
       if draw_bar_labels:
         if bar_label:
           txt = bar_label
@@ -1101,7 +1101,7 @@ class Graph(ArgumentParser):
         <tr><td><zimg name="HISTORY_IMAGE" border="0" src="%s">
         %s
         </zimg></td></tr>
-        """ %(self.image_location, self.map_txt)
+        """ %(self.image_location, '\n'.join(map_list))
 
         previous_img = img_no -1
         next_img = img_no + 1
