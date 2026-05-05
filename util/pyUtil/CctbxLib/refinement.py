@@ -1717,8 +1717,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
               / flex.sum(weights * flex.pow2(fc_sq.data()))
       f_obs = fo2.f_sq_as_f()
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
-    elif OV.IsEDRefinement():
-      pass
     else:
       fo2 = self.normal_eqns.observations.fo_sq
       f_calc = self.normal_eqns.f_calc
