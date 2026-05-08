@@ -70,6 +70,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.refine_secondary_xh2_angle = False
     self.idealise_secondary_xh2_angle = False
     self.use_tsc = False
+    self.table_file_name = None
+    self.flack_reflections_used = None
     sec_ch2_treatment = OV.GetParam('snum.smtbx.secondary_ch2_angle')
     if sec_ch2_treatment == 'idealise':
       self.idealise_secondary_xh2_angle = True
@@ -105,6 +107,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
      If reparametrisation_only is True - only constructs and returns the reparametrisation object
     """
     self.ed_refinement = ed_refinement
+    self.table_file_name = table_file_name
     stopwatch = olx.stopwatch
     open_blas_tn = 1
     try:
@@ -131,8 +134,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
     self.fo_sq_fc = None
-    self.fo_sq_fc_merge = None
-    self.fo_sq_fc_complete = None
+    self.fo_sq_fc_key = None
     if OV.GetParam("snum.refinement.use_solvent_mask") and not reparametrisation_only:
       #OV.SetVar('current_mask_sqf', "")
       ### If the original filename already ends in _sq (i.e. the files come from outside Olex2, things get very confusing. Maybe one way of dealing with it is to leave the original files all untouched, and rename sNum to the filename without the _sq bit, alongside with the HKLSrc(). But will metadata get lost? Should all files get copied/renamed?
@@ -549,35 +551,95 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return rv
 
   def calc_flack(self):
+    self.flack_reflections_used = None
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if self.is_inversion_twin():
         if self.twin_components[0].grad:
           flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
+          self.flack_reflections_used = self.normal_eqns.observations.fo_sq.size()
           return utils.format_float_with_standard_uncertainty(flack, su)
+      flack_str = self._calc_flack_one_parameter_fixed_model()
+      if flack_str is not None:
+        return flack_str
+      return "N/A"
+
+  def _calc_flack_one_parameter_fixed_model(self):
+    """
+    Fixed-model one-parameter Flack solve with refinement OSF:
+      I_model(h) = k * ((1-x) * I_calc(h) + x * I_calc(-h)),
+    where k is the scale/OSF from the refinement. All model parameters stay
+    fixed and only x is solved.
+    """
+    try:
+      if self.xray_structure().space_group().is_centric():
+        return None
+      obs = self.normal_eqns.observations.fo_sq
+      if not obs.anomalous_flag():
+        return None
+
+      fc_sq = self.normal_eqns.fc_sq.common_set(obs)
+      obs = obs.common_set(fc_sq)
+      weights = None
+      try:
+        weights = self.normal_eqns.weights.common_set(obs)
+      except Exception:
+        pass
+
+      lt = miller.lookup_tensor(
+        obs.indices(), obs.space_group(), obs.anomalous_flag())
+
+      # Use the refinement scale (OSF) as fixed k in the one-parameter model.
+      k = self.scale_factor
+      if k is None:
+        try:
+          k = self.normal_eqns.scale_factor()
+        except Exception:
+          k = OV.GetOSF()
+      if k is None or abs(k) < 1e-12:
+        return None
+
+      num = 0.0
+      den = 0.0
+      n_used = 0
+
+      obs_data = obs.data()
+      fc_data = fc_sq.data()
+      if weights is not None:
+        w_data = weights.data()
       else:
-        if self.observations.merohedral_components or self.observations.twin_fractions:
-          if self.use_tsc:
-            obs_ = self.get_fo_sq_fc(one_h_function=\
-              self.normal_eqns.one_h_linearisation)[0].as_xray_observations()
-          else:
-            obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
+        sigmas = obs.sigmas()
+        w_data = None if sigmas is None else flex.double([1.0/(s*s) if s > 0 else 0.0 for s in sigmas])
+
+      for i, h in enumerate(obs.indices()):
+        mate_i = lt.find_hkl((-h[0], -h[1], -h[2]))
+        if mate_i < 0:
+          continue
+        a = float(fc_data[i])
+        b = float(fc_data[mate_i])
+        d = k * (b - a)
+        if abs(d) < 1e-12:
+          continue
+        y = float(obs_data[i])
+        if w_data is not None:
+          w = float(w_data[i])
+          if w <= 0:
+            continue
         else:
-          obs_ = self.observations
-        from smtbx import absolute_structure
-        fc_cr = None
-        if self.fc_correction.grad:
-          fc_cr = self.fc_correction.fork()
-          fc_cr.grad = False
-        flack = absolute_structure.flack_analysis(
-          self.normal_eqns.xray_structure,
-          obs_,
-          fc_cr,
-          connectivity_table=self.connectivity_table
-        )
-        return utils.format_float_with_standard_uncertainty(
-          flack.flack_x, flack.sigma_x)
+          w = 1.0
+        num += w * (y - k * a) * d
+        den += w * d * d
+        n_used += 1
+
+      if den <= 0 or n_used < 10:
+        return None
+
+      x = num / den
+      su = math.sqrt(1.0 / den)
+      self.flack_reflections_used = n_used
+      return utils.format_float_with_standard_uncertainty(x, su)
+    except Exception:
       return None
 
   def check_hooft(self):
@@ -597,6 +659,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           sys.stderr.formatExceptionInfo()
       # people still would want to see this...
       flack = self.calc_flack()
+      if self.flack_reflections_used is not None:
+        print("Flack reflections used: %s" % self.flack_reflections_used)
       OV.SetParam('snum.refinement.flack_str', flack)
 
   def get_radiation_type(self):
@@ -894,7 +958,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
 
     merging = self.reflections.merging
-    if merging is not None:
+    if self.hklf_code == 2:
+      merging = self.get_hklf2_merging_stats()
+      cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+      cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
+    elif merging is not None:
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
     elif self.hklf_code == 5:
@@ -1723,22 +1791,31 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
       f_calc = f_calc.customized_copy(crystal_symmetry=fo2.crystal_symmetry())
       f_calc = f_calc.common_set(fo2)
+      if f_calc.size() != fo2.size():
+        fo2 = fo2.common_set(f_calc)
       if self.f_mask:
         f_mask = self.f_mask.common_set(f_calc)
         f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
     elif self.hklf_code == 2:
-      fo2, fc_sq = self.transfer_exti_hklf2(self.fc_correction.value,
-        self.normal_eqns.observations.wavelengths,
-        self.normal_eqns.observations.fo_sq,
-        self.normal_eqns.f_calc.as_intensity_array())
-      #' need also to apply scale (BASF) before merging
+      one_h_function = None
+      if self.use_tsc:
+        one_h_function = self.normal_eqns.one_h_linearisation
+      # Keep HKLF2 maps on the cctbx detwin/BASF-adjusted path.
+      fo2, f_calc = self.get_fo_sq_fc(one_h_function=one_h_function,
+        merge=False, complete=True)
       fo2 = fo2.customized_copy(space_group_info=sgtbx.space_group_info(self.space_group))
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
-      f_calc = self.f_calc(fo2, apply_extinction_correction=False, twin_data=False)
-      fc_sq = f_calc.as_intensity_array()
-      weights = self.compute_weights(fo2, f_calc, fc2_data=fc_sq.data(), reset_scale_factor=True)
-      scale = flex.sum(weights * fo2.data() * fc_sq.data()) \
-              / flex.sum(weights * flex.pow2(fc_sq.data()))
+      f_calc = f_calc.customized_copy(crystal_symmetry=fo2.crystal_symmetry())
+      f_calc = f_calc.common_set(fo2)
+      if f_calc.size() != fo2.size():
+        fo2 = fo2.common_set(f_calc)
+      if self.f_mask:
+        f_mask = self.f_mask.common_set(f_calc)
+        f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
+      fc2_data = flex.norm(f_calc.data())
+      weights = self.compute_weights(fo2, f_calc, fc2_data=fc2_data, reset_scale_factor=True)
+      scale = flex.sum(weights * fo2.data() * fc2_data) \
+        / flex.sum(weights * flex.pow2(fc2_data))
       f_obs = fo2.f_sq_as_f()
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
 
@@ -1962,12 +2039,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print("Disagreeable reflections:", file=log)
     self.get_disagreeable_reflections()
 
+  def get_hklf2_merging_stats(self):
+    if self.hklf_code != 2:
+      return None
+    one_h_function = None
+    if self.use_tsc:
+      one_h_function = self.normal_eqns.one_h_linearisation
+    fo2, f_calc = self.get_fo_sq_fc(one_h_function=one_h_function,
+      filtered=False, merge=False)
+    return fo2.merge_equivalents(algorithm="shelx")
+
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
-    if self.fo_sq_fc is None or self.fo_sq_fc_merge != merge or self.fo_sq_fc_complete != complete:
+    if one_h_function is not None:
+      return super().get_fo_sq_fc(one_h_function=one_h_function,
+        filtered=filtered, merge=merge, complete=complete)
+    cache_key = (filtered, merge, complete)
+    if self.fo_sq_fc is None or self.fo_sq_fc_key != cache_key:
       self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function,
         filtered=filtered, merge=merge, complete=complete)
-      self.fo_sq_fc_merge = merge
-      self.fo_sq_fc_complete = complete
+      self.fo_sq_fc_key = cache_key
     return self.fo_sq_fc
 
   def get_refinement_wrapper(self, iterations_class):

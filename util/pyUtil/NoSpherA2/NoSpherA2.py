@@ -838,8 +838,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     # add_info_to_tsc()
     if not OV.GetParam('snum.NoSpherA2.full_HAR'):
       fn = str(OV.GetParam('snum.NoSpherA2.file'))
-      fol = OV.FilePath()
-      OV.SetParam('snum.NoSpherA2.source', os.path.join(fol, fn))
+      # Keep source in the same display format as dropdown entries.
+      OV.SetParam('snum.NoSpherA2.source', "  " + fn)
 
     return True
 
@@ -1584,7 +1584,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
     OV.SetParam('snum.NoSpherA2.source', input)
     _input = input.lstrip().rstrip()
     if ".tsc" in _input:
-      self.set_tsc_file_with_metadata(_input)
+      NoSpherA2_instance.set_tsc_file_with_metadata(_input)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != OV.GetParam('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, model = calculate_number_of_electrons()

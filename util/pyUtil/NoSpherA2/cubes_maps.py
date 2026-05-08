@@ -835,6 +835,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
 def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
+  hklf_code = cctbx_adapter.hklf_code
   use_tsc = OV.IsNoSpherA2()
   one_h = None
   if use_tsc:
@@ -846,10 +847,30 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     one_h = direct.f_calc_modulus_squared(
         xray_structure, table_file_name=table_name)
     if not OV.IsEDRefinement():
-      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
+      if hklf_code == 2:
+        f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h, merge=False)
+        f_sq_obs = f_sq_obs.customized_copy(
+          space_group_info=sgtbx.space_group_info(cctbx_adapter.space_group))
+        f_sq_obs = f_sq_obs.merge_equivalents(algorithm="shelx").array().map_to_asu()
+        f_calc = f_calc.customized_copy(crystal_symmetry=f_sq_obs.crystal_symmetry())
+        f_calc = f_calc.common_set(f_sq_obs)
+        if f_calc.size() != f_sq_obs.size():
+          f_sq_obs = f_sq_obs.common_set(f_calc)
+      else:
+        f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
-    f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+    if hklf_code == 2:
+      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(merge=False)
+      f_sq_obs = f_sq_obs.customized_copy(
+        space_group_info=sgtbx.space_group_info(cctbx_adapter.space_group))
+      f_sq_obs = f_sq_obs.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_calc = f_calc.customized_copy(crystal_symmetry=f_sq_obs.crystal_symmetry())
+      f_calc = f_calc.common_set(f_sq_obs)
+      if f_calc.size() != f_sq_obs.size():
+        f_sq_obs = f_sq_obs.common_set(f_calc)
+    else:
+      f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
 
   if not OV.IsEDRefinement():
     if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -864,11 +885,19 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
         f_mask = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
     f_obs = f_sq_obs.f_sq_as_f()
-    k = OV.GetOSF()
-    if k is None:
-      print("Error! Overall scale factor is not set! Using 1.0 as default.")
-      k = 1.0
-    scale = k ** 0.5
+    if hklf_code == 2:
+      fc2_data = flex.norm(f_calc.data())
+      weights = cctbx_adapter.compute_weights(
+        f_sq_obs, f_calc, fc2_data=fc2_data, reset_scale_factor=True)
+      scale = flex.sum(weights * f_sq_obs.data() * fc2_data) / \
+              flex.sum(weights * flex.pow2(fc2_data))
+      scale = scale ** 0.5
+    else:
+      k = OV.GetOSF()
+      if k is None:
+        print("Error! Overall scale factor is not set! Using 1.0 as default.")
+        k = 1.0
+      scale = k ** 0.5
     f_diff = f_obs.f_obs_minus_f_calc(1.0/ scale, f_calc)
     if OV.IsEDData():
       f_diff = f_diff.apply_scaling(factor=3.324943664)

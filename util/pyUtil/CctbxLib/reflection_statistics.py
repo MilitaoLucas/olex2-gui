@@ -99,7 +99,10 @@ class item_vs_resolution(OlexCctbxAdapter):
       self.binned_data = fo2.mean(use_binning=True)
 
     elif self.item == "rmerge_vs_resolution":
-      fo2 = self.reflections.f_sq_obs
+      if self.hklf_code == 2:
+        fo2, junk = self.get_fo_sq_fc(filtered=False, merge=False)
+      else:
+        fo2 = self.reflections.f_sq_obs
       self.info = fo2.info()
       try:
         stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
@@ -117,7 +120,10 @@ class item_vs_resolution(OlexCctbxAdapter):
         #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
 
     elif self.item == "i_over_sigma_vs_resolution":
-      fo2 = self.reflections.f_sq_obs_merged
+      if self.hklf_code == 2:
+        fo2, junk = self.get_fo_sq_fc(filtered=False, merge=True)
+      else:
+        fo2 = self.reflections.f_sq_obs_merged
       fo2.setup_binner(n_bins=n_bins)
       self.info = fo2.info()
       a = fo2.data()/fo2.sigmas()
@@ -332,15 +338,42 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
     NoSpherA2 = OV.IsNoSpherA2()
-    if self.hklf_code == 5:
+    batch_numbers = None
+    one_h_function = None
+    if NoSpherA2:
+      table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+      one_h_function = self.get_one_h_function(table_name)
+
+    if self.hklf_code == 2:
+      if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
+        fo2, f_calc, batch_numbers = self.get_fo_sq_fc(
+          one_h_function=one_h_function,
+          filtered=True,
+          merge=False,
+          return_scale_indices=True)
+        assert batch_number <= flex.max(batch_numbers), "batch_number <= max(batch_numbers)"
+        selection = (batch_numbers == batch_number)
+        f_sq_obs_filtered = fo2.select(selection)
+        f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+        f_calc_filtered = f_calc.select(selection)
+        f_obs_omitted = None
+        f_calc_omitted = None
+        batch_numbers = flex.int(f_obs_filtered.size(), int(batch_number))
+      else:
+        f_sq_obs_filtered, f_calc_filtered, batch_numbers = self.get_fo_sq_fc(
+          one_h_function=one_h_function,
+          filtered=True,
+          merge=False,
+          return_scale_indices=True)
+        f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+        f_obs_omitted = None
+        f_calc_omitted = None
+    elif self.hklf_code == 5:
       f_sq_obs_filtered = None
       f_calc_filtered = None
-      if NoSpherA2:
-        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        table_name = table_name.lstrip().rstrip()
+      if one_h_function is not None:
         f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(
-          one_h_function=self.get_one_h_function(table_name),
-          filtered=False)
+          one_h_function=one_h_function, filtered=False)
       else:
         f_sq_obs, f_calc = OlexCctbxAdapter(do_filter=False).get_fo_sq_fc(filtered=False)
       f_sq_obs_filtered = f_sq_obs.common_set(self.reflections.f_sq_obs_filtered)
@@ -361,9 +394,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         f_obs_filtered = f_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
       f_calc_merged = None
       f_calc_filtered = None
-      if NoSpherA2:
-        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-        one_h_function = self.get_one_h_function(table_name)
+      if one_h_function is not None:
         try:
           f_calc_merged = self.f_calc(miller_set=f_obs_merged, one_h_function=one_h_function)
           f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
@@ -426,6 +457,8 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.yLegend = "F obs"
     plot.omit = self.reflections._omit
     plot.omit_shel = self.reflections._shel
+    plot.batch_numbers = batch_numbers
+    plot.hklf_code = self.hklf_code
     self.xy_plot = plot
 
 class I_obs_vs_I_calc(OlexCctbxAdapter):
@@ -435,13 +468,42 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     from cctbx import maptbx, miller, sgtbx, uctbx, xray
     OlexCctbxAdapter.__init__(self)
     NoSpherA2 = OV.IsNoSpherA2()
-    if self.hklf_code == 5:
+    batch_numbers = None
+    do_scale = True
+    one_h_function = None
+    if NoSpherA2:
+      table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+      one_h_function = self.get_one_h_function(table_name)
+
+    if self.hklf_code == 2:
+      if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
+        I_obs, f_calc, batch_numbers = self.get_fo_sq_fc(
+          one_h_function=one_h_function,
+          filtered=True,
+          merge=False,
+          return_scale_indices=True)
+        assert batch_number <= flex.max(batch_numbers), "batch_number <= max(batch_numbers)"
+        selection = (batch_numbers == batch_number)
+        I_obs_filtered = I_obs.select(selection)
+        I_calc_filtered = f_calc.select(selection).as_amplitude_array().f_as_f_sq()
+        I_obs_omitted = None
+        I_calc_omitted = None
+        batch_numbers = flex.int(I_obs_filtered.size(), int(batch_number))
+      else:
+        I_obs_filtered, f_calc_filtered, batch_numbers = self.get_fo_sq_fc(
+          one_h_function=one_h_function,
+          filtered=True,
+          merge=False,
+          return_scale_indices=True)
+        I_calc_filtered = f_calc_filtered.as_amplitude_array().f_as_f_sq()
+        I_obs_omitted = None
+        I_calc_omitted = None
+    elif self.hklf_code == 5:
       I_obs_filtered = None
       I_calc_filtered = None
-      if NoSpherA2:
-        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      if one_h_function is not None:
         I_obs, f_calc = self.get_fo_sq_fc(
-          one_h_function=self.get_one_h_function(table_name),
+          one_h_function=one_h_function,
           filtered=False)
       else:
         I_obs, f_calc = self.get_fo_sq_fc(filtered=False)
@@ -463,7 +525,6 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       I_calc_merged = None
       I_calc_filtered = None
       I_calc_omitted = None
-      do_scale = True
       if OV.IsEDRefinement():
         I_obs_all, I_calc_all = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=False)
         I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=True)
@@ -471,9 +532,7 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
         I_calc_omitted = I_calc_all.lone_set(I_calc_filtered)
         do_scale = False
       else:
-        if NoSpherA2:
-          table_name = str(OV.GetParam("snum.NoSpherA2.file"))
-          one_h_function = self.get_one_h_function(table_name)
+        if one_h_function is not None:
           try:
             I_calc_merged = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function).as_amplitude_array().f_as_f_sq()
             I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
@@ -540,6 +599,8 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     plot.yLegend = "I obs"
     plot.omit = self.reflections._omit
     plot.omit_shel = self.reflections._shel
+    plot.batch_numbers = batch_numbers
+    plot.hklf_code = self.hklf_code
     self.xy_plot = plot
 
 class f_obs_over_f_calc(OlexCctbxAdapter):

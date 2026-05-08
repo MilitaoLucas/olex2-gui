@@ -515,11 +515,17 @@ class OlexCctbxAdapter(object):
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
 
   # complete - detwins the whole index range rather than just measured refs, used in masking
-  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
+  def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False,
+                   return_scale_indices=False):
+    scale_indices = None
     if filtered:
       fo2 = self.reflections.f_sq_obs_filtered
+      if self.hklf_code in (2, 5):
+        scale_indices = self.reflections.batch_numbers
     else:
       fo2 = self.reflections.f_sq_obs_merged
+      if self.hklf_code in (2, 5) and self.reflections.batch_numbers_array is not None:
+        scale_indices = self.reflections.batch_numbers_array.data()
     miller_set = None
     if one_h_function:
       try:
@@ -546,11 +552,12 @@ class OlexCctbxAdapter(object):
           anomalous_flag=fo2.anomalous_flag()),
         data=dtw.data,
         sigmas=dtw.sigmas).set_observation_type(fo2)
-    if self.hklf_code < 5 or merge:
+    if merge:
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
       fc = fc.common_set(fo2)
       if fc.size() != fo2.size():
         fo2 = fo2.common_set(fc)
+      scale_indices = None
     else:
       lt = miller.lookup_tensor(fc.indices(), fc.space_group(), fc.anomalous_flag())
       fc_data_ = fc.data()
@@ -564,6 +571,10 @@ class OlexCctbxAdapter(object):
             anomalous_flag=fc.anomalous_flag()),
           data=flex.complex_double(fc_data))\
             .set_observation_type(fo2)
+      if scale_indices is not None and scale_indices.size() != fo2.size():
+        scale_indices = None
+    if return_scale_indices:
+      return (fo2, fc, scale_indices)
     return (fo2, fc)
 
   def update_twinning(self, tw_f, tw_c):

@@ -746,6 +746,7 @@ class Graph(ArgumentParser):
     i = 0
     for dataset in list(self.data.values()):
       idx = dataset.metadata().get("idx", i)
+      colour = dataset.metadata().get("colour", None)
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
@@ -753,7 +754,8 @@ class Graph(ArgumentParser):
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
         marker_size_factor=marker_size_factor, hrefs=dataset.hrefs,
-        targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx)
+        targets=dataset.targets, lt=lt, no_negatives=no_negatives, counter=idx,
+        colour=colour)
       i += 1
 
     self.draw_x_axis()
@@ -3171,6 +3173,55 @@ class Xobs_Xcalc_plot(Analysis):
 
     self.metadata["shapes"].append(equal_line)
 
+    use_hklf2_batch_colours = (
+      self.F_or_I == "F"
+      and getattr(xy_plot, "hklf_code", None) == 2
+      and self.batch_number is None
+      and getattr(xy_plot, "batch_numbers", None) is not None
+      and xy_plot.batch_numbers.size() > 0)
+
+    if use_hklf2_batch_colours:
+      self.omit_str = ""
+      self.omit_hkl_str = ""
+      self.shel_str = ""
+      self.shel_hkl_str = ""
+      keys = []
+      palette = [
+        "#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd",
+        "#17becf", "#8c564b", "#e377c2", "#bcbd22", "#7f7f7f"
+      ]
+      unique_batches = sorted(set(int(v) for v in xy_plot.batch_numbers))
+      for i, batch in enumerate(unique_batches):
+        colour = palette[i % len(palette)]
+        selection = (xy_plot.batch_numbers == batch)
+        metadata = {
+          "name": f"Batch {batch}",
+          "idx": i,
+          "colour": colour
+        }
+        data = Dataset(
+          xy_plot.f_calc.select(selection),
+          xy_plot.f_obs.select(selection),
+          indices=xy_plot.indices.select(selection),
+          metadata=metadata)
+        self.data.setdefault(f"dataset{i+1}", data)
+        keys.append({
+          'type': 'marker',
+          'number': i + 1,
+          'label': f"Batch {batch}",
+          'colour': colour
+        })
+
+      self.make_empty_graph(axis_x = True, square=False)
+      self.draw_fit_line(1, 0, colour="#ababab")
+      self.draw_pairs(marker_size_factor=0.55)
+      if keys:
+        key = self.draw_key(tuple(keys))
+        self.im.paste(key,
+                      (int(self.graph_right - (key.size[0] + 5 * self.scale)),
+                       int(self.graph_top + 8 * self.scale)))
+      return
+
     ## Included Data
     metadata["name"] = "Included Data"
     metadata["idx"] = 0
@@ -4047,6 +4098,32 @@ class HealthOfStructure():
     try:
       self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma'] if self.hkl_stats['Rsigma'] else 0
       min_d = self.hkl_stats['MinD']
+      # Respect explicit SHEL/OMIT limits from INS so HOS d_min matches refinement limits.
+      try:
+        shel = olx.Ins('SHEL')
+      except Exception:
+        shel = "n/a"
+      if shel and shel != "n/a":
+        try:
+          shel_d = float(str(shel).split()[-1])
+          if shel_d > 0:
+            min_d = max(min_d, shel_d)
+        except Exception:
+          pass
+      try:
+        omit = olx.Ins('OMIT')
+      except Exception:
+        omit = "n/a"
+      if omit and omit != "n/a":
+        try:
+          omit_theta = float(str(omit).split()[-1])
+          from cctbx import uctbx
+          omit_d = uctbx.two_theta_as_d(omit_theta, self.radiation, deg=True)
+          if omit_d > 0:
+            min_d = max(min_d, omit_d)
+        except Exception:
+          pass
+      self.hkl_stats['MinD'] = min_d
       self.theta_max = math.asin(min(1, self.radiation/(2*min_d)))*180/math.pi if min_d else 180
       if olx.IsFileType("ires") == 'true':
         try:
@@ -4065,6 +4142,28 @@ class HealthOfStructure():
       for x in (('full', self.theta_full), ('max', self.theta_max)):
         self.hkl_stats['Completeness_laue_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,True))
         self.hkl_stats['Completeness_point_%s' %x[0]] = float(olx.xf.rm.Completeness(x[1]*2,False))
+
+      # HKLF2 requires BASF-aware detwinning/scaling before merging statistics.
+      # HOS defaults to olex_core stats, so override here with adapter-based values.
+      try:
+        from cctbx_olex_adapter import OlexCctbxAdapter
+        adapter = OlexCctbxAdapter()
+        if adapter.hklf_code == 2:
+          one_h_function = None
+          if OV.IsNoSpherA2():
+            table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+            one_h_function = adapter.get_one_h_function(table_name)
+          fo2, junk = adapter.get_fo_sq_fc(
+            one_h_function=one_h_function,
+            filtered=False,
+            merge=False)
+          merging = fo2.merge_equivalents(algorithm="shelx")
+          self.hkl_stats['Rint'] = float(merging.r_int())
+          self.hkl_stats['Rsigma'] = float(merging.r_sigma())
+          self.hkl_stats['MeanIOverSigma'] = (
+            1.0 / self.hkl_stats['Rsigma'] if self.hkl_stats['Rsigma'] else 0)
+      except Exception as err:
+        print("Could not override HKLF2 HOS stats from BASF-aware data: %s" %err)
     except Exception as err:
       print("Could not get info from hkl_stats: %s" %err)
 
