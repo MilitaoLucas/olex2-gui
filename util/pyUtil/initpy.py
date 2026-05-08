@@ -107,6 +107,7 @@ def do_init():
   stopwatch.exec("from RunPrg import RunPrg")
 
   stopwatch.run(initpy.NoSpherA2)
+  stopwatch.run(initpy.NoMoRe)
 
   stopwatch.start("Peanut")
   try:

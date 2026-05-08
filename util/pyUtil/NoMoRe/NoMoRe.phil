@@ -1,0 +1,34 @@
+snum {
+  NoMoRe {
+    enabled = False
+      .type = bool
+    filename = ""
+      .type = str
+    strategy = "thermal"
+      .type = str
+    scales = ""
+      .type = str
+    scales_hash = ""
+      .type = str
+    thermal {
+      medium_factor = 1.5
+        .type = float
+      high_factor = 2.0
+        .type = float
+    }
+    fixed {
+      medium_limit = None
+        .type = float(allow_none=True)
+      high_limit = 1000.0
+        .type = float
+      n_refined = None
+        .type = int(allow_none=True)
+    }
+    sensitivity {
+      low_threshold = 0.90
+        .type = float
+      high_threshold = 0.99
+        .type = float
+    }
+  }
+}

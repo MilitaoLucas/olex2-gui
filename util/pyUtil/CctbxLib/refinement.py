@@ -196,6 +196,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
+
+    # NoMoRe constraint — built from snum params, same as any other constraint
+    self._nomore_constraint = None
+    if OV.GetParam('snum.NoMoRe.enabled', False):
+      try:
+        from NoMoRe.nomore import build_constraint
+        nomore_c = build_constraint()
+        if nomore_c is not None:
+          self.constraints.append(nomore_c)
+          self._nomore_constraint = nomore_c
+      except Exception as e:
+        print(f'NoMoRe constraint skipped: {e}')
+
     self.n_constraints = len(self.constraints)
 
     self.temp = self.olx_atoms.exptl['temperature']
@@ -419,6 +432,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
         pass
+      if self._nomore_constraint is not None:
+        try:
+          from NoMoRe.nomore import save_scales
+          save_scales(self._nomore_constraint)
+        except Exception as e:
+          print(f'NoMoRe: could not save scales: {e}')
     except RuntimeError as e:
       e_string = str(e)
       if e_string.startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):

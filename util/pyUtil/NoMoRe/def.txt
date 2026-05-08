@@ -1,0 +1,5 @@
+
+  p_name = NoMoRe
+  p_htm = NoMoRe
+  p_img = [("NoMoRe",'h1')]
+  p_scope = NoMoRe
