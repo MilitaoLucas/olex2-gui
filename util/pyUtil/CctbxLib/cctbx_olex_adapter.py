@@ -947,13 +947,14 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         fc.as_intensity_array().data(), True)
       fo2 = miller.array(
           miller_set=miller.set(
-            crystal_symmetry=fo2.crystal_symmetry(),
+            crystal_symmetry=mask.xray_structure.crystal_symmetry(),
             indices=dtw.indices,
             anomalous_flag=fo2.anomalous_flag()),
           data=dtw.data,
           sigmas=dtw.sigmas).set_observation_type(fo2)
       fo2 = fo2.merge_equivalents(algorithm="shelx").array()\
         .average_bijvoet_mates().map_to_asu()
+      fc = fc.customized_copy(crystal_symmetry=fo2.crystal_symmetry())
       fc = fc.common_set(fo2)
       if fc.size() != fo2.size():
         fo2 = fo2.common_set(fc)
