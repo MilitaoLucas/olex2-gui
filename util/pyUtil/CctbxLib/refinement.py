@@ -1721,7 +1721,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if self.f_mask:
         f_mask = self.f_mask.common_set(f_calc)
         f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
-    elif self.hklf_code ==2:
+    elif self.hklf_code == 2:
       fo2, fc_sq = self.transfer_exti_hklf2(self.fc_correction.value,
         self.normal_eqns.observations.wavelengths,
         self.normal_eqns.observations.fo_sq,
@@ -1736,12 +1736,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
               / flex.sum(weights * flex.pow2(fc_sq.data()))
       f_obs = fo2.f_sq_as_f()
       f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / scale**0.5, f_calc)
-    else:
+
+    if self.hklf_code != 2:
       fo2 = self.normal_eqns.observations.fo_sq
       f_calc = self.normal_eqns.f_calc
-      f_obs = fo2.f_sq_as_f()
-      k = OV.GetOSF() if scale_factor is None else math.sqrt(scale_factor)
-      f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
+      if not OV.IsEDRefinement():
+        f_obs = fo2.f_sq_as_f()
+        k = OV.GetOSF() if scale_factor is None else math.sqrt(scale_factor)
+        f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1. / k, f_calc)
     #https://www.science.org/doi/suppl/10.1126/science.aak9652/suppl_file/aak9652-palatinus-sm.pdf, p7
     if OV.IsEDRefinement():
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
