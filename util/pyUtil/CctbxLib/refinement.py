@@ -1137,7 +1137,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       else:
         fo_sq, fc = self.get_fo_sq_fc(merge=merge, complete=complete_detwin)
       if self.f_mask and not complete_detwin:
-        f_mask = self.f_mask.common_set(fc)
+        f_mask = self.f_mask.expand_to_p1()
+        f_mask = f_mask.common_set(fc)
         fc = fc.array(data=fc.data()+f_mask.data())
       fo_sq = fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
@@ -1715,9 +1716,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
     if detwin or self.hklf_code == 5:
       if self.use_tsc:
-        fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation)
+        fo2, f_calc = self.get_fo_sq_fc(one_h_function=self.normal_eqns.one_h_linearisation, complete=True)
       else:
-        fo2, f_calc = self.get_fo_sq_fc()
+        fo2, f_calc = self.get_fo_sq_fc(complete=True)
+      fo2 = fo2.customized_copy(space_group_info=sgtbx.space_group_info(self.space_group))
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+      f_calc = f_calc.customized_copy(crystal_symmetry=fo2.crystal_symmetry())
+      f_calc = f_calc.common_set(fo2)
       if self.f_mask:
         f_mask = self.f_mask.common_set(f_calc)
         f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
