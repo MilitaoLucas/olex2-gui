@@ -232,8 +232,8 @@ class Graph(ArgumentParser):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
-    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 18 * self.scale
-    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 10 * self.scale
+    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 22 * self.scale
+    boxHeight = int((self.font_size_tiny + 10 * self.scale) * (len(keys_to_draw))) + 10 * self.scale
     colour = self.pageColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
@@ -1701,8 +1701,8 @@ class Graph(ArgumentParser):
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
-    x = self.graph_right - wX - self.bSides
-    y = self.boxY  - self.imY * 0.002
+    x = self.graph_right - wX - self.bSides + 6 * self.scale
+    y = self.boxY - self.imY * -0.002 * self.scale
 
     box = (x, y, x+wX, y+wY)
     fill = (256, 256, 256)
@@ -2998,7 +2998,6 @@ class AnomDispPlot(Analysis):
     self.extend_x = False
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
     self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
-
     self.draw_origin = True
     self.make_anom_plot()
     self.popout()
@@ -3107,8 +3106,8 @@ class AnomDispPlot(Analysis):
                          colour=colour)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
-                  (int(self.graph_right - (key.size[0] + 10)),
-                   int(self.graph_top + 10 * self.scale))
+                  (int(self.graph_right - (key.size[0] + 10 * self.scale)),
+                   int(self.graph_top + 12 * self.scale))
                   )
     for i, data in enumerate(self.data.values()):
       self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])
