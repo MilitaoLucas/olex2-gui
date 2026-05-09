@@ -299,51 +299,62 @@ class EditCifInfo(CifTools):
     print(self.cif_model, file=s)
     text = s.getvalue()
     text += "\n%s" %append
-    inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
-    if inputText and inputText != text:
-      reader = iotbx.cif.reader(input_string=inputText)
-      if reader.error_count():
+    # handle errors more gracefylly
+    inputText, syntax_err = text, True
+    while syntax_err:
+      inputText = OV.GetUserInput(0,'Items to be entered into cif file', inputText)
+      if inputText and inputText != text:
+        try:
+          reader = iotbx.cif.reader(input_string=inputText)
+          if reader.error_count():
+            return
+          syntax_err = False
+        except iotbx.cif.CifParserError as e:
+          olx.Alert("Syntax error(s) detected, please fix", str(e), "OE")
+          syntax_err = True
+      else:
         return
-      updated_cif_model = reader.model()
-      updated_values = list(updated_cif_model.values())
-      current_values = list(self.cif_model.values())
-      if '_diffrn_ambient_temperature' in updated_values[0]:
-        OV.set_cif_item('_diffrn_ambient_temperature',
-          updated_values[0]['_diffrn_ambient_temperature'])
-      diff_1 = current_values[0].difference(updated_values[0])
-      modified_items = diff_1._set
-      removed_items = current_values[0]._set - updated_values[0]._set
-      added_items = updated_values[0]._set - current_values[0]._set
-      user_modified = OV.GetParam('snum.metacif.user_modified')
-      user_removed = OV.GetParam('snum.metacif.user_removed')
-      user_added = OV.GetParam('snum.metacif.user_added')
-      for tem in added_items:
-        if user_added is None:
-          user_added = [tem]
-        elif tem not in user_added:
-          user_added.append(tem)
-      for tem in removed_items:
-        if user_removed is None:
-          user_removed = [tem]
-        elif tem not in user_removed:
-          user_removed.append(tem)
-      for tem in modified_items:
-        if user_modified is None:
-          user_modified = [tem]
-        elif tem not in user_modified:
-          user_modified.append(tem)
-      olx.cif_model = updated_cif_model
-      self.cif_model = olx.cif_model
-      self.cif_block = olx.cif_model[self.data_name]
-      self.update_specials()
-      self.write_metacif_file()
-      if user_modified is not None:
-        OV.SetParam('snum.metacif.user_modified', user_modified)
-      if user_removed is not None:
-        OV.SetParam('snum.metacif.user_removed', user_removed)
-      if user_added is not None:
-        OV.SetParam('snum.metacif.user_added', user_added)
-      OV.update_crystal_size()
+
+    updated_cif_model = reader.model()
+    updated_values = list(updated_cif_model.values())
+    current_values = list(self.cif_model.values())
+    if '_diffrn_ambient_temperature' in updated_values[0]:
+      OV.set_cif_item('_diffrn_ambient_temperature',
+        updated_values[0]['_diffrn_ambient_temperature'])
+    diff_1 = current_values[0].difference(updated_values[0])
+    modified_items = diff_1._set
+    removed_items = current_values[0]._set - updated_values[0]._set
+    added_items = updated_values[0]._set - current_values[0]._set
+    user_modified = OV.GetParam('snum.metacif.user_modified')
+    user_removed = OV.GetParam('snum.metacif.user_removed')
+    user_added = OV.GetParam('snum.metacif.user_added')
+    for tem in added_items:
+      if user_added is None:
+        user_added = [tem]
+      elif tem not in user_added:
+        user_added.append(tem)
+    for tem in removed_items:
+      if user_removed is None:
+        user_removed = [tem]
+      elif tem not in user_removed:
+        user_removed.append(tem)
+    for tem in modified_items:
+      if user_modified is None:
+        user_modified = [tem]
+      elif tem not in user_modified:
+        user_modified.append(tem)
+    olx.cif_model = updated_cif_model
+    self.cif_model = olx.cif_model
+    self.cif_block = olx.cif_model[self.data_name]
+    self.update_specials()
+    self.write_metacif_file()
+    if user_modified is not None:
+      OV.SetParam('snum.metacif.user_modified', user_modified)
+    if user_removed is not None:
+      OV.SetParam('snum.metacif.user_removed', user_removed)
+    if user_added is not None:
+      OV.SetParam('snum.metacif.user_added', user_added)
+    OV.update_crystal_size()
 
 OV.registerFunction(EditCifInfo)
 
