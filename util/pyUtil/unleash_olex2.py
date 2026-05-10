@@ -41,7 +41,7 @@ lin64_port_name = 'lin64-py38'
 lin64_port_zip_name = 'olex2-linux64.zip'
 lin64_port_prefix = 'olex2/'
 
-lin64_next_port_name = 'linux64-py313'
+lin64_next_port_name = 'lin64-py313'
 lin64_next_port_zip_name = 'olex2-linux64-next.zip'
 lin64_next_port_prefix = 'olex2/'
 
