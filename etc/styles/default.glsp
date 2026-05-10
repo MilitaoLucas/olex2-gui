@@ -14,9 +14,9 @@
  <Notes id="#olex2.fnt:frb_12" >
  <Labels id="#olex2.fnt:frb_12" >
  <AtomLabels id="#olex2.fnt:frb_18" >
- <BondLabels id="0;-13;0;0;0;400;0;0;0;1;0;0;2;48;Courier New" >
+ <BondLabels id="#olex2.fnt:frb_18" >
+ <AngleLabels id="#olex2.fnt:frb_18" >
  <Tooltip id="#olex2.fnt:frb_12" >
- <Picture_labels id="#olex2.fnt:frb_20" >
 >
 <Materials 
  <Help_txt "1;0.000,1.000,1.000,0.000" >
