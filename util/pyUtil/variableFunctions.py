@@ -419,6 +419,11 @@ def SaveOlex2Params():
     file_name=olex2_phil_file, scope_name='olex2', diff_only=True)
 OV.registerFunction(SaveOlex2Params)
 
+def SaveScopeParams(scope: str, file_name: str):
+  olx.phil_handler.save_param_file(
+    file_name=file_name, scope_name=scope, diff_only=True)
+OV.registerFunction(SaveScopeParams)
+
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
   expert_level = int(expert_level)
   if scope_name.startswith("gui"):

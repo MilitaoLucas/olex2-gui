@@ -6,7 +6,8 @@ from olexFunctions import OV
 
 class UsersDB:
   site_items = ('name', 'department', 'address', 'city', 'country', 'postcode')
-  person_items = ('firstname', 'middlename', 'lastname', 'email', 'phone', 'orchid_id')
+  person_items = ('firstname', 'middlename', 'lastname', 'email', 'phone', 'orchid_id', 'add_author')
+  bool_items = {'add_author': True}
   def __init__(self):
     self.site = None
     self.person = None
@@ -19,7 +20,7 @@ class UsersDB:
     OV.SetControlLabel(self.ctrl("message"), txt)
 
   def Manage(self):
-    w, h = 650, 700
+    w, h = 650, 650
     x, y = gui.GetBoxPosition(w, h)
     path = "%s/etc/gui/tools/users-db.htm" % (olx.BaseDir())
     path = os.path.join(olx.BaseDir(), "etc", "gui", "tools", "users-db.htm")
@@ -92,7 +93,7 @@ class UsersDB:
     affiliations.deleteSiteById(self.site.id)
     OV.SetControlItems(self.ctrl("Sites"), self.getSiteList())
     self.setSite(None)
-    
+
   def getPeopleList(self, t):
     from userDictionaries import persons
     return persons.getListPeople(site_id=t, edit=False)
@@ -104,7 +105,10 @@ class UsersDB:
   def setPerson(self, t):
     if not t:
       for i in self.person_items:
-        OV.SetControlValue(self.ctrl(i), '')
+        if self.bool_items.get(i, False):
+          OV.SetControlState(self.ctrl(i), False)
+        else:
+          OV.SetControlValue(self.ctrl(i), '')
       OV.SetControlEnabled(self.ctrl("UpdatePerson"), False)
       OV.SetControlEnabled(self.ctrl("DeletePerson"), False)
       self.person = None
@@ -112,7 +116,10 @@ class UsersDB:
     from userDictionaries import persons
     self.person = persons.get_person(t)
     for i in self.person_items:
-      OV.SetControlValue(self.ctrl(i), self.person.__dict__[i])
+      if self.bool_items.get(i, False):
+        OV.SetControlState(self.ctrl(i), False if not self.person.__dict__[i] else True)
+      else:
+        OV.SetControlValue(self.ctrl(i), self.person.__dict__[i])
     OV.SetControlEnabled(self.ctrl("UpdatePerson"), True)
     OV.SetControlEnabled(self.ctrl("DeletePerson"), True)
     self.setMessage()
@@ -127,7 +134,10 @@ class UsersDB:
     else:
       self.person.id = id
     for i in self.person_items:
-      self.person.__dict__[i] = OV.GetControlValue(self.ctrl(i))
+      if self.bool_items.get(i, False):
+        self.person.__dict__[i] = OV.GetControlState(self.ctrl(i))
+      else:
+        self.person.__dict__[i] = OV.GetControlValue(self.ctrl(i))
     lastname = self.person.lastname.strip()
     if not lastname:
       self.setMessage("Non-empty last name is expected")

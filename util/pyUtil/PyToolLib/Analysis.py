@@ -232,8 +232,8 @@ class Graph(ArgumentParser):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
-    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 18 * self.scale
-    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 10 * self.scale
+    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 22 * self.scale
+    boxHeight = int((self.font_size_tiny + 10 * self.scale) * (len(keys_to_draw))) + 10 * self.scale
     colour = self.pageColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
@@ -759,9 +759,9 @@ class Graph(ArgumentParser):
     self.draw_x_axis()
     self.draw_y_axis()
 
+  @property
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
-  map_txt = property(map_txt)
 
   def get_division_spacings_and_scale(self):
     log = self.use_log
@@ -992,7 +992,6 @@ class Graph(ArgumentParser):
       if n_bars <= max_bars:
         bar_width = int(width/max_bars)
       max_bars = n_bars
-
     else:
       bar_width = int(width/max_bars)
 
@@ -1003,13 +1002,16 @@ class Graph(ArgumentParser):
       top_left = (x,y)
       IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
 
-    j = 0
-    img_no = 0
-    for i, xy in enumerate(dataset.xy_pairs()):
+    i, j = 0, 0
+    pairs, img_no = dataset.xy_pairs(), 0
+    bar_cnt = len(pairs)
+    fill_last_page = OV.GetParam("user.graphs.program_analysis.fill_last_page")
+    while i < bar_cnt:
+      xy = pairs[i]
       if j == 0:
         barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=self.pageColour)
         barDraw = ImageDraw.Draw(barImage)
-      last = len(dataset.x)
+        map_list = []
       x_value, y_value = xy
       if y_value is None:
         y_value = 1
@@ -1032,7 +1034,7 @@ class Graph(ArgumentParser):
       else:
         fill = (0,0,0)
 
-      if i == last - 1 and n_bars > max_bars and all_in_one_history:
+      if i == bar_cnt - 1 and n_bars > max_bars and all_in_one_history:
         bar_right = width - self.bSides - 1
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
@@ -1054,9 +1056,8 @@ class Graph(ArgumentParser):
         target = dataset.targets[i]
       else:
         target = "%.3f" %y_value
-      self.map_txt_list.append(
-        """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
-        % (bar_left, top, bar_right, bar_bottom, href, target))
+      map_list.append('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">' %(
+        *box, href, target))
       if draw_bar_labels:
         if bar_label:
           txt = bar_label
@@ -1086,17 +1087,21 @@ class Graph(ArgumentParser):
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
 
       j += 1
-      if j == max_bars or i == last - 1:
+      i += 1
+      if j == max_bars or i == bar_cnt - 1:
         img_no += 1
         j = 0
+        # make full last image
+        if fill_last_page:
+          if i != bar_cnt-1 and i + max_bars > bar_cnt:
+            i = bar_cnt - max_bars - 1
         self.image_location = "history_%s.png" %img_no
 
         historyText = """\
         <tr><td><zimg name="HISTORY_IMAGE" border="0" src="%s">
         %s
         </zimg></td></tr>
-        """ %(self.image_location, self.map_txt)
-
+        """ %(self.image_location, '\n'.join(map_list))
 
         previous_img = img_no -1
         next_img = img_no + 1
@@ -1118,12 +1123,17 @@ class Graph(ArgumentParser):
 >
 </font>'''
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy.make_history_bars()>>html.Update'>Split Display</a>"
+          all_in_oneText = "<div><a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy.make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
 <a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy.make_history_bars()>>html.Update">Show All Bars</a>
+
+<snippet src="gui/snippets/input-checkbox" value="%Fill last page%" name="histiry_fill_lp"
+  checked="spy.GetParam('user.graphs.program_analysis.fill_last_page')"
+  onclick="spy.SetParam('user.graphs.program_analysis.fill_last_page',html.GetState('~name~'))>>
+    spy.make_history_bars()>>html.Update"/></div>
 '''
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
@@ -1142,12 +1152,12 @@ class Graph(ArgumentParser):
         historyTextNext =  _%("", scaleTxt, all_in_oneText, next_img)
         historyTextPrevious = _ %(previous_img, scaleTxt, all_in_oneText, "")
         historyTextBoth = _%(previous_img, scaleTxt, all_in_oneText, next_img)
-        if img_no == 1 and i != last - 1:
+        if img_no == 1 and i != bar_cnt - 1:
           historyText += historyTextNext
-        elif img_no == 1 and i == last - 1 and not all_in_one_history:
+        elif img_no == 1 and i == bar_cnt - 1 and not all_in_one_history:
           historyText += "<tr><td>%s</td></tr>" %scaleTxt
           pass
-        elif i == last - 1:
+        elif i == bar_cnt - 1:
           historyText += historyTextPrevious
         else:
           historyText += historyTextBoth
@@ -1691,8 +1701,8 @@ class Graph(ArgumentParser):
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = OV.correct_rendered_text(IT.get_unicode_characters(txt))
     wX, wY = get_text_size(self.draw, txt, font=self.font_small)
-    x = self.graph_right - wX - self.bSides
-    y = self.boxY  - self.imY * 0.002
+    x = self.graph_right - wX - self.bSides + 6 * self.scale
+    y = self.boxY - self.imY * -0.002 * self.scale
 
     box = (x, y, x+wX, y+wY)
     fill = (256, 256, 256)
@@ -2988,7 +2998,6 @@ class AnomDispPlot(Analysis):
     self.extend_x = False
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
     self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
-
     self.draw_origin = True
     self.make_anom_plot()
     self.popout()
@@ -3097,8 +3106,8 @@ class AnomDispPlot(Analysis):
                          colour=colour)
     key = self.draw_key(tuple(keys))
     self.im.paste(key,
-                  (int(self.graph_right - (key.size[0] + 10)),
-                   int(self.graph_top + 10 * self.scale))
+                  (int(self.graph_right - (key.size[0] + 10 * self.scale)),
+                   int(self.graph_top + 12 * self.scale))
                   )
     for i, data in enumerate(self.data.values()):
       self.plot_data_points(data.xy_pairs(), width=2, colour=colours[i])

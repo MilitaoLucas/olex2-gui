@@ -394,8 +394,11 @@ class GeneratedGuiMaker(object):
 
     retstr += """
   <tr VALIGN="center" ALIGN="left">
-    <td colspan='2'>
+    <td>
       <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
+    </td>
+    <td>
+      <a href="spy.gui.report.publication.AddAllDefaultAuthors()>>html.Update" target="Add all default authors"><b>Add all default authors</b></a>
     </td>
   </tr>
   """

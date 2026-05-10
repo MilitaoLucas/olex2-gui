@@ -134,6 +134,7 @@
     <cmd "spy.SaveUserParams()">
     <cmd "spy.SaveGuiParams()">
     <cmd "spy.SaveOlex2Params()">
+    <cmd "spy.SaveScopeParams(aced, DataDir()/aced.phil)">
     <cmd "storeparam startup file.relativePath(filefull())">
     <cmd "storeparam last_version GetVar(last_version, '')">
     <cmd "spy.threading.joinAll()">
