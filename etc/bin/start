@@ -1,0 +1,71 @@
+#!/bin/bash
+
+#http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+bin_dir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+#modify the line below to point to a valid cctbx installtion to be used with olex2
+export OLEX2_CCTBX_DIR=$bin_dir/cctbx
+#this is necessary here as the cctbx sets signalf for FPE and does not handle them...
+export BOOST_ADAPTBX_FPE_DEFAULT=1
+export BOOST_ADAPTBX_SIGNALS_DEFAULT=1
+
+#uncomment this on k/ubuntu to fix graphics...
+#export OLEX2_GL_DEFAULT=True
+#change if have/need stereo support in opengl (use gl.stereo(hardware) to turn on)
+export OLEX2_GL_STEREO=FALSE
+export OLEX2_GL_MULTISAMPLE=FALSE
+# change appropriatly - if needed
+export OLEX2_GL_DEPTH_BITS=16
+
+#uncomment the line below to specify alternative location of olex2 GUI
+#by default it is the $bin_dir
+#export OLEX2_DIR=$bin_dir
+
+
+# we need to set the correct update path, if the gui is not at the default location
+#update_path="$bin_dir"
+
+if [ $OLEX2_DIR ]
+then
+  update_path="$OLEX2_DIR"
+  echo Setting the update path to: $update_path
+fi
+
+#set the dynamic library paths
+export LD_LIBRARY_PATH=$bin_dir/lib:$bin_dir/ilib:$OLEX2_CCTBX_DIR/cctbx_build/lib:$LD_LIBRARY_PATH
+export PYTHONHOME=$bin_dir
+export PATH=$bin_dir/bin:$PATH
+
+# this may be needed for SSL in Python
+#export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+cd "$bin_dir"
+if [ ! -x unirun ]
+then
+  chmod +x unirun
+fi
+
+if [ -n "$update_path" ]
+then
+  ./unirun -run
+else
+  $bin_dir/unirun "$update_path" -run
+fi
+
+if [ ! -x olex2 ]
+then
+  chmod +x olex2
+fi
+
+if [ ! -x olex2c ]
+then
+  chmod +x olex2c
+fi
+
+./olex2 "$@" &
