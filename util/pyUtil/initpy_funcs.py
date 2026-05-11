@@ -226,7 +226,7 @@ class initpy_funcs():
       if self.OV.IsDeveloping():
         self.olx.stopwatch.exec("from gui import dimas")
 
-  def import_caustom_and_user_sripts(self):
+  def import_custom_and_user_sripts(self):
     try:
       import customScripts
     except ImportError as err:
@@ -265,3 +265,19 @@ class initpy_funcs():
     if os.path.exists(dev_path):
       return [os.path.join(dev_path, "aced.phil")]
     return [os.path.join(self.basedir, "util", "pyUtil", "AC7", "aced.phil")]
+
+  def final_checks(self):
+    if sys.platform.startswith('linux'):
+      import pathlib
+      old_dd = os.path.join(pathlib.Path.home(), ".olex2")
+      if os.path.exists(old_dd):
+        self.olx.Echo(
+          "Olex2 settings have been migrated from '~/.olex2' to '%s'" %os.path.split(self.datadir)[0],
+          m="warning")
+      lib_path = 'LD_LIBRARY_PATH'
+      paths = self.olx.GetEnv(lib_path)
+      internal_lib_path = os.path.join(self.basedir, "ilib")
+      if internal_lib_path not in paths:
+        self.olx.Echo(
+          f"'{internal_lib_path}' Folder must be on {lib_path}. Please update your 'start' script",
+          m="warning")

@@ -102,7 +102,7 @@ def do_init():
     #olx.SetVar('defeditor','gedit')
     #olx.SetVar('defexplorer','nautilus')
 
-  stopwatch.run(initpy.import_caustom_and_user_sripts)
+  stopwatch.run(initpy.import_custom_and_user_sripts)
   ## These imports will register macros and functions for spy.
   stopwatch.exec("from RunPrg import RunPrg")
 
@@ -128,5 +128,6 @@ def do_init():
         "\nOLEX2: A complete structure solution, refinement and analysis program (2009)."+\
         "\nJ. Appl. Cryst., 42, 339-341.\n")
 
-########################### THE INITIALISATIOn ENTRY POINT ####################
+  initpy.final_checks()
+########################### THE INITIALISATION ENTRY POINT ####################
 do_init()
