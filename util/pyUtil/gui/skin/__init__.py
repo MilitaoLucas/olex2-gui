@@ -183,27 +183,25 @@ def export_parameters(load_phil=True):
     OV.SetParam('HtmlTableWidth', table_width)
     OV.SetVar('HtmlTableWidth', table_width)
 
-    OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
-    OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
-    OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
-    OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
-    OV.SetVar('HtmlFontSizeExtraLarge', OV.GetParam('gui.html.font_size_extra_large'))
-
     # Stepwise ajust relative font size according to cut-off
     font_size_steps = OV.GetParam('gui.font_size_steps')
     font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
     _ = int(olx.html.ClientWidth('self'))
+    var_map = {
+      'HtmlGuiFontSize': 'font_size',
+      'HtmlFontSizeControls': 'font_size_controls',
+      'HtmlFontSizeLarge': 'font_size_large',
+      'HtmlFontSizeMedium': 'font_size_medium',
+      'HtmlFontSizeExtraLarge': 'font_size_extra_large',
+    }
     for step, s in zip(font_size_steps, font_size_rel_size):
       step = int(step)
       s = int(s)
       if _ >= step:
         #if ppi > 96:
           #s += OV.GetParam('gui.ppi_font_adjust_amount')
-        OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size') + s)
-        OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls') + s)
-        OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large') + s)
-        OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium') + s)
-        OV.SetVar('HtmlFontSizeExtraLarge', OV.GetParam('gui.html.font_size_extra_large') + s)
+        for v,p in var_map.items():
+          OV.SetVar(v, max(1, OV.GetParam('gui.html.%s'%(p)) + s))
         break
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
@@ -213,10 +211,11 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlTableGroupHeaderColour', OV.GetParam('gui.html.table_group_header_colour').hexadecimal)
   OV.SetVar('HtmlTableRowBgColour', OV.GetParam('gui.html.table_row_bg_colour').hexadecimal)
   OV.SetVar('HtmlInputBgColour', OV.GetParam('gui.html.input_bg_colour').hexadecimal)
-  OV.SetVar('HtmlComboHeight', OV.GetParam('gui.html.combo_height'))
-  OV.SetVar('HtmlComboWidth2', OV.GetParam('gui.html.combo_width_2'))
-  OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
+  OV.SetVar('HtmlLinkColour', OV.GetParam('gui.html.link_colour').hexadecimal)
+  OV.SetVar('HtmlBgColour', OV.GetParam('gui.html.bg_colour').hexadecimal)
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
+  OV.SetVar('TimageColour', OV.GetParam('gui.timage.grad_colour').hexadecimal)
+
   OV.SetVar('gui.watermark', OV.GetParam('gui.watermark').hexadecimal)
   OV.SetVar('gui.action_colour', OV.GetParam('gui.action_colour').hexadecimal)
   OV.SetVar('gui.grey', OV.GetParam('gui.grey').hexadecimal)
@@ -229,26 +228,35 @@ def export_parameters(load_phil=True):
   OV.SetVar('gui.red', OV.GetParam('gui.red').hexadecimal)
   OV.SetVar('ed_bg', OV.GetParam('gui.ed_bg').hexadecimal)
   OV.SetVar('ed_fg', OV.GetParam('gui.ed_fg').hexadecimal)
+
+  OV.SetVar('HtmlComboHeight', OV.GetParam('gui.html.combo_height'))
+  OV.SetVar('HtmlComboWidth2', OV.GetParam('gui.html.combo_width_2'))
+  OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
+  OV.SetVar('HtmlSpinHeight', OV.GetParam('gui.html.spin_height'))
+
+  OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlCheckboxWidth', OV.GetParam('gui.html.checkbox_width'))
   OV.SetVar('HtmlCheckboxWidth2', OV.GetParam('gui.html.checkbox_width_2'))
-  OV.SetVar('TimageColour', OV.GetParam('gui.timage.grad_colour').hexadecimal)
-  OV.SetVar('HtmlSpinHeight', OV.GetParam('gui.html.spin_height'))
-  OV.SetVar('HtmlLinkColour', OV.GetParam('gui.html.link_colour').hexadecimal)
-  OV.SetVar('HtmlBgColour', OV.GetParam('gui.html.bg_colour').hexadecimal)
+  OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+  OV.SetVar('history_width', IT.history_width)
+
   OV.SetVar('HtmlFontName', OV.GetParam('gui.html.font_name'))
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
-  OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
-  OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+
+  OV.SetVar('custom_button',
+    f"""border.lightness:{OV.GetParam('gui.skin.button.border.lightness')};
+    highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}""")
+  OV.SetVar('R1_button',
+    f"""border.lightness: {OV.GetParam('gui.skin.R1.border.lightness')};
+    highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}""")
+  OV.SetVar('button.highlight.lightness', OV.GetParam('gui.skin.button.highlight.lightness'))
+  OV.SetVar('button.border.lightness', OV.GetParam('gui.skin.button.border.lightness'))
+
   OV.SetVar('link_type', OV.GetParam('gui.skin.link_type'))
   OV.SetVar('default_link', OV.GetParam('gui.skin.default_link'))
   OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
   OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
-  OV.SetVar('history_width', IT.history_width)
-  OV.SetVar('button.highlight.lightness', OV.GetParam('gui.skin.button.highlight.lightness'))
-  OV.SetVar('button.border.lightness', OV.GetParam('gui.skin.button.border.lightness'))
-  OV.SetVar('custom_button', f"border.lightness:{OV.GetParam('gui.skin.button.border.lightness')};highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}")
-  OV.SetVar('R1_button', f"border.lightness: {OV.GetParam('gui.skin.R1.border.lightness')}; highlight.lightness: {OV.GetParam('gui.skin.button.highlight.lightness')}")
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
   except:
@@ -256,10 +264,6 @@ def export_parameters(load_phil=True):
 
   if timing:
     print("export_parameters took %.4fs" % (time.time() - t))
-
-
-OV.registerFunction(export_parameters, False, 'skin')
-
 
 class Skin():
   def __init__(self):
@@ -481,12 +485,6 @@ class Skin():
       OV.SetVar('gui_html_font_size', html_font_size + 2)
 
 
-Skin_instance = Skin()
-OV.registerMacro(Skin_instance.run_skin, '')
-
-OV.registerFunction(load_user_gui_phil)
-
-
 def get_colour_choice(scope, what):
   import shlex
   if what == "value":
@@ -498,13 +496,8 @@ def get_colour_choice(scope, what):
       t += "%s;" % (item.split("@@")[1])
     return t + "[new colour]"
 
-
-OV.registerFunction(get_colour_choice, False, 'gui.skin')
-
-
 def define_new_bond_colour(name):
   pass
-
 
 def get_user_bond_colour(colour):
   c = ""
@@ -587,10 +580,6 @@ def change_bond_colour(scope="", colour="", display_style="", bypass_collections
   if scope:
     OV.SetControlValue("BOND_COLOUR_COMBO%s" % scope, colour)
 
-
-OV.registerFunction(change_bond_colour, True, 'gui.skin')
-
-
 def _select_bonds(bypass_collections=False):
   if bypass_collections:
     olex.m("sel %s" % bypass_collections)
@@ -601,10 +590,6 @@ def _select_bonds(bypass_collections=False):
     olex.m("sel bonds where xbond.type==3")
     olex.m("sel -i")
   olex.m("sel atoms -u")
-
-
-OV.registerFunction(_select_bonds, True, 'gui.skin')
-
 
 def _get_available_html_width(margin_adjust=True, first_col_width_adjust=True, ppi_aware=True):
   width = int(olx.html.ClientWidth('self'))
@@ -626,4 +611,12 @@ def _get_available_html_width(margin_adjust=True, first_col_width_adjust=True, p
 
   return width, max_width
 
+Skin_instance = Skin()
+OV.registerMacro(Skin_instance.run_skin, '')
 
+OV.registerFunction(load_user_gui_phil)
+OV.registerFunction(export_parameters, False, 'skin')
+OV.registerFunction(get_colour_choice, False, 'gui.skin')
+
+OV.registerFunction(change_bond_colour, True, 'gui.skin')
+OV.registerFunction(_select_bonds, True, 'gui.skin')

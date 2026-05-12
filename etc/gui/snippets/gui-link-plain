@@ -1,7 +1,7 @@
 #value=
 #hint=
 #width=100%
-#height=GetVar(HtmlComboHeight)
+#height=GetVar(HtmlInputHeight)
 #name=#value
 #onclick=#onclick
 #fit=false
