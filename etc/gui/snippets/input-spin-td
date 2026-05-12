@@ -3,6 +3,7 @@
 #min=
 #max=
 #width=100%
+#height=GetVar('HtmlInputHeight')
 #readonly=true
 #manage=false
 #onchangealways=false
@@ -19,7 +20,7 @@
   <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="spin"
-      height="GetVar('HtmlComboHeight')"
+      height="#height"
       bgcolor="#bgcolor"
       fgcolor="#fgcolor"
       valign="center"

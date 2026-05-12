@@ -1,11 +1,4 @@
-#value=
-#width=100%
-#height=$GetVar('HtmlComboHeight')
-#name=#value
 #onclick=#onclick
-#fit=true
-#flat=$GetVar('linkButton.flat')
-#disabled=false
 #bgcolor=$GetVar('linkButton.bgcolor')
 #fgcolor=$GetVar('linkButton.fgcolor')
 #td1=<td align="left" bgcolor="#bgcolor">
