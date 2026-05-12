@@ -1076,6 +1076,8 @@ user
       .type = bool
     select = True
       .type = bool
+    colour = True
+      .type = bool
   }
 
   solution{
@@ -1576,6 +1578,8 @@ user
           .type = str
         target = "Data/Parameter Ratio"
           .type = str
+        show_if_lower_than = 12
+          .type = int
       }
 
       hooft_str{

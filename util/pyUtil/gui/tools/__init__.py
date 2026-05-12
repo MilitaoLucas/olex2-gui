@@ -14,6 +14,8 @@ import glob
 global have_found_python_error
 have_found_python_error = False
 
+from ImageTools import IT
+
 global last_formula
 last_formula = ""
 
@@ -25,6 +27,9 @@ current_sNum = ""
 
 global custom_scripts_d
 custom_scripts_d = {}
+
+global known_materials
+known_materials = {}
 
 haveGUI = OV.HasGUI()
 
@@ -1463,11 +1468,12 @@ def GetDPRInfo():
   dpr = None
   if data and parameters:
     dpr = data / parameters
-
   else:
     dpr = data
     parameters = 0
   if dpr:
+    if dpr > OV.GetParam('user.diagnostics.refinement.dpr.show_if_lower_than', 8):
+      return gui.tools.TemplateProvider.get_template('no_battery_gui', force=debug)
     if dpr in cache:
       return cache[dpr]
 
@@ -1561,6 +1567,7 @@ def has_digit(s):
 def parse_atominfo(atominfo):
   atom = atominfo.split(":")[0].strip()
   if not has_digit(atom):
+    import random
     atom += str(random.randint(100, 999))
   rs = atominfo.split(":")[1].split("(")[0].strip()
   try:
@@ -1647,7 +1654,6 @@ def FormatRInfo(R1, wR2, d_format):
       if R1 == "n/a":
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', 100)
       else:
-
         R1 = float(R1)
         col_R1 = gui.tools.get_diagnostics_colour('refinement', 'R1', R1)
         R1 = "%.2f" % (R1 * 100)
@@ -1675,11 +1681,15 @@ def FormatRInfo(R1, wR2, d_format):
         t = gett('R_factor_display') % d
     except:
       disp = R1
+      t = "ERROR!"
       if not R1:
-        disp = "No R factors!"
-      t = "<td colspan='2' align='center' rowspan='2' align='right'><font size='%s' color='%s'><b>%s</b></font></td>" % (font_size_wR2, gui_grey, disp)
+        disp = "ERROR!"
+      if R1 == "Solution":
+        disp = R1
+      d = {'font_size': font_size_wR2, 'colour': gui_grey, 'disp': disp} 
+      t =  gett('R_factor_display_no_R') % d
     finally:
-      retVal = t
+      return t
 
   elif d_format == 'float':
     try:
@@ -1882,11 +1892,30 @@ class DisorderDisplayTools(object):
       d['parts'] = item
       d['scope'] = scope
       d['show_options'] = show_options
+      
+      bg_colour = None
+      if OV.GetParam('user.parts.colour'):
+        try:
+          mat = OV.GetParam(f'gui.materials.p{item}')
+          bg_colour = get_html_colour_from_material(mat)
+        except:
+          pass
+      if not bg_colour:
+        bg_colour = OV.GetVar('linkButton.bgcolor')
+      d['bg_colour'] =  bg_colour
+
       if select:
         sel = ">>sel part %s" % item
       parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug) % d
-
-    dd = {'parts_display': parts_display, 'scope': scope, 'show_options': show_options}
+      
+    cmds = 'spy.gui.clear_all_parts()'
+    clear_parts = gui.tools.TemplateProvider.get_template('reset_all_parts', force=debug) % cmds
+ 
+    dd = {'parts_display': parts_display,
+          'scope': scope,
+          'show_options': show_options,
+          'clear_parts': clear_parts
+          }
     return self.load_disorder_tool_template(dd)
 
   def load_disorder_tool_template(self, d):
@@ -1896,19 +1925,20 @@ class DisorderDisplayTools(object):
       retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug) % d
     return retVal
 
-  # def clear_higlights(self):
-    # if self.haveHighlights:
-      #olex.m("sel %s"%self.haveHighlights)
-      #olex.m("mask 48")
-      # olex.m("Individualise")
-      #self.haveHighlights = False
-
   def set_part_display(self, parts, part):
     self.show_unique_only()
     olex.m("ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)" % parts)
+
+    if OV.GetParam('user.parts.colour'):
+      olex.m(f'spy.gui.disorder.set_part_colour({part})')
+    else:
+      olex.m(f'cp0')
+
     if OV.GetParam('user.parts.select'):
       olex.m('sel part %s' % parts)
       olex.m('sel atom bonds -a')
+  OV.registerFunction(set_part_display, False, 'gui.tools')
+
 
 DisorderDisplayTools_instance = DisorderDisplayTools()
 
@@ -3088,3 +3118,42 @@ def on_sg_change(args):
   olx.html.Refresh("SNUMTITLE")
 
 OV.registerCallback("sgchange", on_sg_change)
+
+
+def get_html_colour_from_material(mat):
+  global known_materials
+#  print mat
+  if ";" not in mat:
+    scheme = OV.GetParam('drawplus.group_colour_scheme')
+    mat = OV.GetParam('drawplus.colour_schemes.%s.%s' % (scheme, mat))
+    if mat in known_materials:
+      return known_materials[mat]
+    else:
+      return
+
+  import struct
+  _ = struct.unpack("4B", struct.pack(">I", int(mat.split(";")[1])))
+  c = (_[3], _[2], _[1])
+  c = IT.RGBToHTMLColor(c)
+  known_materials[mat] = c
+  return c
+
+OV.registerFunction(get_html_colour_from_material, True, 'gui')
+
+def get_clear_all_parts_cmds():
+  parts = set(olexex.OlexRefinementModel().disorder_parts())
+  cmds = gui.tools.TemplateProvider.get_template('reset_all_parts_cmds') % ' '.join(str(part) for part in parts if part != 0 and part % 2 == 0)
+  return cmds
+
+def clear_all_parts():
+  sel = olx.Alert(f"Run",
+                  """PARTS will be removed and your structure will be reset. Continue?""",
+                  "NY",
+                  )
+  if sel == "N":
+    return
+  
+  cmds =  get_clear_all_parts_cmds()
+  OV.runCommands(cmds=cmds.split("\n"))
+ 
+OV.registerFunction(clear_all_parts, True, 'gui')

@@ -53,29 +53,22 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 #ignoreif -->
 
 <tr align='left'>
-<td>
-  <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
-  <tr>
-    <td width='57%' bgcolor=$GetVar(HtmlTableBgColour)>
-      <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+  <table border="0" cellpadding="1" cellspacing="1" align='center' bgcolor=$GetVar(HtmlTableBgColour) width='100%%' >
+    <tr bgcolor=$GetVar(HtmlTableBgColour)>
+      <td width='60%'>
 $spy.gui.tools.make_cell_dimensions_display()
-      </table>
-    </td>
-      
-    <td align='center' width='12%'>
-      $spy.GetDPRInfo()
-    </td>
-
-    <td width='35%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
-      <table border="0"  width="100%" height="100%" cellpadding="1" cellspacing="1" >
-        <tr>
-          <td align='right'>
-            $spy.GetRInfo()
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
+      </td>
+          
+      <td align='center' width='12%'>
+          $spy.GetDPRInfo()
+      </td>
+    
+      <td width='35%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
+          $spy.GetRInfo()
+      </td>
+    </tr>
+  </table>
+</tr>  
 </table>
 </td></tr>
 
@@ -90,7 +83,7 @@ $spy.gui.tools.make_cell_dimensions_display()
 </table>
 </td></tr></table>
 
-<table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
+<table border="0"  width="100%" cellpadding="0" cellspacing="2" bgcolor=$GetVar(HtmlTableBgColour)>
 <tr><td>
 $spy.gui.get_notification()
 </td>

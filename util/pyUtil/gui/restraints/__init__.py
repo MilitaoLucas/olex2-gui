@@ -19,7 +19,6 @@ global filtered_off
 filtered_off = 0
 olx.SetVar('restraint_filter', 2.0)
 
-
 def append_row(rows, observed, target, delta, sigma, restraint, atoms):
   global filtered_off
   filter_val = float(olx.GetVar('restraint_filter'))
@@ -196,6 +195,55 @@ def mangle_fdb_data(tabledata):
     new_l.append(l[0:-1] + [_[0]] + [" ".join(_[1:])])
   return new_l
 
+def sanitise_FVARs():
+  ## These templates are in util/pyUtil/gui/templates/gui_templates.txt
+  import gui
+  get_template = gui.tools.TemplateProvider.get_template
+  fvars = []
+  try:
+    for i in range(1, 20):
+      fvars.append((i, olx.xf.rm.FVar(i)))
+  except:
+    pass
+  if fvars:
+    print(fvars)
+
+    from itertools import combinations
+
+  #data = [
+      #(1, '0.40938'),
+      #(2, '0.99331'),
+      #(3, '0.39198'),
+      #(4, '0.85966'),
+      #(5, '0.19862'),
+      #(6, '0.19863'),
+      #(7, '0.12247'),
+      #(8, '0.07617')
+  #]
+
+  data = fvars
+  tol = 0.03
+  
+  pairs = []
+  
+  for (id1, v1), (id2, v2) in combinations(data, 2):
+    v1 = float(v1)
+    v2 = float(v2)
+  
+    if abs(v1 - v2) <= tol:
+      pairs.append((id1, id2, "same"))
+      d = {"id1":id1 + 1, "id2":id2 + 1}
+      cmds = get_template('sanitise_FVARs', force=debug) % d
+      OV.runCommands(cmds=cmds.split("\n"))
+
+    elif abs(v1 - (1 - v2)) <= tol:
+      pairs.append((id1, id2, "complement"))
+  
+  for p in pairs:
+    print(p)
+
+OV.registerFunction(sanitise_FVARs, False, "gui")
+
 def make_fvar_table(*kwds):
   fvar_table: str = ""
   header = """
@@ -212,8 +260,8 @@ def make_fvar_table(*kwds):
   except:
     pass
   for i, var in enumerate(fvars):
-    filling += """<b>""" + "%d1:</b> %s </b>| " % (i + 2, round(float(var), 3))
-  filling += "</td>"
+    filling += """<b>""" + "%d:</b> %s </b>| " % (i + 2, round(float(var), 3))
+  #filling += "<a href=spy.gui.sanitise_fvars()>Sanitise</a></td>"
   fvar_table = header + filling + footer
   return fvar_table
 
@@ -296,13 +344,13 @@ class html_Table(object):
       # more than two colors here are too crystmas treelike:
       self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1')
       #self.grade_1_colour = self.rgb2hex(IT.adjust_colour(grade_1_colour, luminosity=1.8))
-      
+
       self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2')
       #self.grade_2_colour = self.rgb2hex(IT.adjust_colour(grade_2_colour, luminosity=1.8))
-      
+
       self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3')
       #self.grade_3_colour = self.rgb2hex(IT.adjust_colour(grade_3_colour, luminosity=1.8))
-      
+
       self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4')
       #self.grade_4_colour = self.rgb2hex(IT.adjust_colour(grade_4_colour, luminosity=1.8))
     except(ImportError, NameError):
@@ -330,19 +378,19 @@ class html_Table(object):
     <b>There may be no restraints, they have been filtered or can not be evaluated.</b>
     """
     html = r"""
-    <table width="100%" border="0" cellpadding="0" cellspacing="3">
+      <table width="100%" border="0" cellpadding="0" cellspacing="3">
       <tr>
-         <td width='12%' align='left'><b>Observed </b></td>
-         <td width='12%'align='left'><b>Target   </b></td>
-         <td width='10%'align='center'><b>Dev    </b></td>
-         <td width='10%'align='center'><b>Sig    </b></td>
-         <td width='10%'align='center'><b>D/S    </b></td>
-         <td width='10%'align='left'><b>Restr. </b></td>
-         <td align='left'><b>Atoms </b></td>
+      <td width='12%' align='left'><b>Observed </b></td>
+      <td width='12%'align='left'><b>Target   </b></td>
+      <td width='10%'align='center'><b>Dev    </b></td>
+      <td width='10%'align='center'><b>Sig    </b></td>
+      <td width='10%'align='center'><b>D/S    </b></td>
+      <td width='10%'align='left'><b>Restr. </b></td>
+      <td align='left'><b>Atoms </b></td>
       </tr>
 
       {0}
-    </table>
+      </table>
       {1}
       """.format('\n'.join(table), footer)
     if not table:
@@ -408,12 +456,12 @@ class html_Table(object):
           # align left for words:
           if not error:
             td.append(r"""
-              <td align='left'>
-                <a href='sel {}'>{} </a>
-              </td>
-              <td align='right'>
-                <a href="spy.gui.edit_restraints({})">Edit </a>
-              </td>""".format(item, item, item))
+                      <td align='left'>
+                      <a href='sel {}'>{} </a>
+                      </td>
+                      <td align='right'>
+                      <a href="spy.gui.edit_restraints({})">Edit </a>
+                      </td>""".format(item, item, item))
     if not td:
       row = "<tr> No (disagreeable) restraints found in .lst file. </tr>"
     else:
@@ -438,37 +486,6 @@ class html_Table(object):
         # atoms.append(remove_partsymbol(i))  # Have to remove this, because new names needed for 'edit'
         atoms.append(i)
     OV.cmd('editatom {}'.format(' '.join(atoms)))
-
-def get_existing_fvar_dropdown_items():
-  FvarNum=0
-  while OV.GetFVar(FvarNum) is not None:
-    FvarNum+=1
-  items = ""
-  for i in range(FvarNum):
-    i += 1
-    items += "%s;" %(i+1)
-  return items
-OV.registerFunction(get_existing_fvar_dropdown_items, False, "gui.restraints")
-
-def set_mode_fit():
-  cmd = "mode fit -s"
-  val_parts = OV.GetControlValue('SPLIT_PARTS', None)
-  val_fvars = OV.GetControlValue('SPLIT_FVARS', None)
-  val_restraints = OV.GetControlValue('SPLIT_RESTRAINTS', None)
-
-  if val_restraints != "--":
-    cmd += " %s" %val_restraints
-  
-  if val_parts != "auto":
-    cmd += " -p=%s" % val_parts.split("/")[0].strip()
-
-  if val_fvars != "auto":
-    cmd += " -v=%s" % val_fvars
-
-  olex.m(cmd)
-
-OV.registerFunction(set_mode_fit, False, "gui.restraints")
-
 
 h_t = html_Table()
 OV.registerFunction(h_t.edit_restraints, False, "gui")

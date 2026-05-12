@@ -297,6 +297,15 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     elif key.startswith('_exptl_crystal_size'):
       self.update_crystal_size()
 
+  def get_sNum_and_path(self):
+    """Return a stable, globally unique identifier for the current structure."""
+    if olx.IsFileType("ires") == 'true':
+      sNum = OV.ModelSrc()
+    else:
+      sNum = olx.xf.DataName(int(olx.xf.CurrentData()))
+    # Combine with the directory to make it globally unique
+    directory = os.path.normpath(OV.FilePath())
+    return sNum, directory  
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
@@ -885,6 +894,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def HasGUI(self):
     return HasGUI
+
+  def HasParts(self):
+    try:
+      olx.xf.rm.FVar(1)
+      return True
+    except:
+      return False
 
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
@@ -1491,3 +1507,4 @@ OV.registerFunction(OV.IsDeveloping)
 OV.registerFunction(OV.GetHeaderParam)
 OV.registerFunction(OV.GetHeaderParamBool)
 OV.registerFunction(OV.SetHeaderParam)
+OV.registerFunction(OV.get_sNum_and_path)

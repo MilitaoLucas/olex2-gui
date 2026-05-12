@@ -372,6 +372,7 @@ def OnStructureLoaded(previous):
     OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
     call_listener('structure')
   elif olx.IsFileType('cif'):
+    call_listener('structure')
     if olx.GetVar("cif_uses_masks", 'false') == 'true':
       OV.SetParam("snum.refinement.use_solvent_mask", True)
 

@@ -1,5 +1,6 @@
 <shortcuts
   <shortcut key="Ctrl+G" macro="mode grow">
+  <shortcut key="Ctrl+D" macro="dis">
   <shortcut key="Ctrl+H" macro="showH">
   <shortcut key="Ctrl+Q" macro="showQ">
   <shortcut key="Ctrl+R" macro="refine">

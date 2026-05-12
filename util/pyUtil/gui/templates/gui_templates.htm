@@ -15,33 +15,128 @@ t:cif_export_gui{
 t:cif_no_embedded_files{
 <font color=$GetVar(gui.orange)>You need a res/ins and hkl file to refine this structure</font>}
 
+t:sanitise_FVARs{
+"sel fvar %(id1)s"
+"sel fvar %(id2)s"
+"fvar %(id1)s"
+"sel fvar %(id1)s"
+}
+
+t:set_pA_or_pB{
+  sel atom bonds
+  group -u
+  sel bonds -u
+  part %(part)s %(fvar)s1
+  selback
+  sel atom bonds -a
+  sel bond atoms -u
+  group -n=p%(part)s
+  labels -p
+  sel -u
+}
+
+t:set_pC{
+  sel atom bonds
+  group -u
+  sel bonds -u
+  part -c
+  part -1 10.5
+  selback
+  sel atom bonds -a
+  sel bond atoms -u
+  group -n=pC
+  labels -p
+  sel -u
+}
+
+
+
+t:p1{
+  part 1 21
+  selback
+  sel atom bonds -a
+  sel bond atoms -u
+  group -n=p1
+  labels -p
+}
+
+t:p2{
+  part 2 -21
+  selback
+  sel atom bonds -a
+  sel bond atoms -u
+  group -n=p2
+  labels -p
+}
+
+
+
+spy.set_refinement_program('olex2.refine')
+html.update
+html.ItemState ed_gui 1 
+spy.ED.set_method('N-Beam')
+}
 
 t:part_0_and_n{
 <td align='left'>
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="0 | %(part)s@%(scope)s"
-  value="0 | %(part)s"
+  name="%(part)s@%(scope)s"
+  value="%(part)s"
   width="100%%"
   height="GetVar('HtmlInputHeight')"
   onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
-  bgcolor="GetVar('linkButton.bgcolor')"
+  bgcolor="%(bg_colour)s"
   fgcolor="GetVar('linkButton.fgcolor')"
   custom="#custom"
 ></b>
 </font>
 </td>
-
 }
+
+t:set_part_colour_cmds{
+sel part %(part)s
+sel atom bonds -a
+sel bond atoms -u
+group -u
+sel atom bonds -a
+sel bond atoms -u
+group -n=p%(part)s
+labels -p
+}
+
+t:reset_all_parts_cmds{
+sel part %s
+kill
+sel -a
+group -u
+part 0 11
+sel -u
+}
+
+t:reset_all_parts{
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="RESET_ALL"
+  value="Clear"
+  height="GetVar('HtmlInputHeight')"
+  width="100%%"
+  onclick="%s"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  custom="#custom"
+></b>
+</font>
+}
+
 
 t:disorder_quicktool_no_options{
 
   %(parts_display)s
 
   <td>
-
-
 
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
@@ -56,7 +151,6 @@ t:disorder_quicktool_no_options{
   custom="#custom"
 ></b>
 </font>
-
 </td>
 }
 
@@ -80,12 +174,12 @@ t:disorder_quicktool{
   custom="#custom"
 ></b>
 </font>
-
   </td>
 
-  <td width='4%%' align='right'>
-  Sel
-  </td>
+<td>
+  %(clear_parts)s
+</td>
+
 
   <td width='4%%' align='right'>
     <font size=$GetVar(HtmlFontSizeControls)>
@@ -102,9 +196,28 @@ t:disorder_quicktool{
     >
     </font>
   </td>
+  <td width='4%%' align='right'>
+  Sel
+  </td>
 
-  <td width='5%%' align='right'>
-  Unique
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='COLOUR_PARTS@%(scope)s'
+      checked="spy.GetParam('user.parts.colour')"
+      oncheck="spy.SetParam('user.parts.colour','true')"
+      onuncheck="spy.SetParam('user.parts.colour','false')>>sel -a>>group -u>>sel -u"
+      target="Colour PARTS"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+
+  <td width='4%%' align='right'>
+    Col
   </td>
 
   <td width='4%%' align='right'>
@@ -122,6 +235,11 @@ t:disorder_quicktool{
     >
     </font>
   </td>
+
+  <td width='5%%' align='right'>
+  Unique
+  </td>
+
 
   <td width='20%%' align='right'>
   <font size="$GetVar('HtmlFontSizeControls')">
@@ -160,6 +278,21 @@ t:minimal_gui_link_button{
   </font>
 }
 
+t:R_factor_display_no_R{
+  <table border="0" cellpadding="1" cellspacing="1" align='center' width='100%%'>
+  <tr>
+    <td>
+      <font size='%(font_size)s' color='%(colour)s'>
+      <b>
+        %(disp)s
+      </b>
+      </font>
+    </td>
+  </tr>
+</table>
+}
+
+
 t:R_factor_display_report{
 <table>
 <tr>
@@ -176,15 +309,14 @@ t:R_factor_display_report{
 }
 
 t:R_factor_display{
-<table width='100%%' border='0' cellspacing='0' cellpadding='0'>
+  <table border="0" cellpadding="1" cellspacing="1" align='left' width='100%%'>
   <tr>
-    <td align='center'>
+    <td align='left' width="30%%">
       <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'>
         <b><i>R</i><sub>1&nbsp;</sub></b>
       </font>
     </td>
-
-    <td align='right'>
+    <td align='left' width="70%%">
       <font size='%(font_size_R1)s' color='%(font_colour_R1)s'>
         <b>
         <input
@@ -193,7 +325,8 @@ t:R_factor_display{
           bgcolor="GetVar('HtmlTableBgColour')"
           name='R1_GUI'
           weight='bold'
-          height='38'
+          height='26'
+          width='100%%'
           flat="#flat"
           value='%(R1)s&thinsp;%%'
           onclick='spy.make_reflection_graph(gui_fobs_fcalc)'
@@ -201,28 +334,38 @@ t:R_factor_display{
           custom="GetVar(R1_button)"
         >
         </b>
-        <!--<b>%(R1)s</b>-->
       </font>
-        <!--$spy.MakeHoverButton('tiny-%%','spy.make_reflection_graph(gui_fobs_fcalc)')-->
     </td>
   </tr>
 
   <tr>
-    <td align='center'>
-            <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>wR</i><sub>2&nbsp;</sub></b>&nbsp;</font>
+    <td align='left'  width="35%%">
+      <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'>
+        <b><i>wR</i><sub>2&nbsp;</sub></b>
+      </font>
     </td>
-
-    <td align='right'>
-      <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'>
-        <b>%(wR2)s</b>&nbsp;
+    <td align='left' width="65%%">
+      <font size='%(font_size_wR2)s' color='%(font_colour_R1)s'>
+        <b>
+        <input
+          type='button'
+          align='right'
+          bgcolor="GetVar('HtmlTableBgColour')"
+          name='wR2_GUI'
+          weight='bold'
+          height='26'
+          width='100%%'
+          flat="#flat"
+          value='%(wR2)s'
+          onclick='spy.make_reflection_graph(gui_fobs_fcalc)'
+          border='#ffffff
+          custom="GetVar(R1_button)"
+        >
+        </b>
       </font>
-
-      <font size='%(font_size_wR2)s' color='%(grey)s'>
-        <b>%%</b>
-      </font>
-  </td>
-
+    </td>
   </tr>
+ 
 </table>
 }
 
@@ -381,7 +524,7 @@ t:_gui_notification{
 }
 
 t:gui_notification{
-      <font color='%(col_fg)s'><b> %(txt)s </b></font>
+    <font color='%(col_fg)s'><b> %(txt)s </b></font>
 }
 
 
@@ -647,50 +790,53 @@ t:edt_gui{
 }
 
 t:snum_cell_display{
-  <tr bgcolor=$GetVar(HtmlTableGroupBgColour)>
-    <td width='33%%'>
-       <b>a </b>= %(a)s
-    </td>
+  <table border="0" cellpadding="2" cellspacing="2" align='left' width='100%%' >
+    <tr bgcolor=$GetVar(HtmlTableGroupBgColour)>
+      <td width='33%%'>
+         <b>a </b>= %(a)s
+      </td>
+      <td width='33%%'>
+         <b>&alpha; </b>=%(alpha)s&deg;
+      </td>
+      <td width='33%%'>
+         <b>Z </b>= %(Z)s
+      </td>
+    </tr>
+    <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
+      <td width='33%%'>
+         <b>b </b>= %(b)s
+      </td>
+      <td width='33%%'>
+         <b>&beta; </b>= %(beta)s&deg;
+      </td>
+      <td width='33%%'>
+         <b>Z' </b>= %(Zprime)s
+      </td>
+    </tr>
+    <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
+      <td>
+         <b>c </b>= %(c)s
+      </td>
+      <td>
+         <b>&gamma; </b>= %(gamma)s&deg;
+      </td>
+      <td>
+         <b>V </b>= %(volume)s
+      </td>
+    </tr>
+ </table> 
+}
 
-    <td width='33%%'>
-       <b>&alpha; </b>=%(alpha)s&deg;
-    </td>
-
-    <td width='33%%'>
-       <b>Z </b>= %(Z)s
-    </td>
-  </tr>
-
-  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
-
-    <td width='33%%'>
-       <b>b </b>= %(b)s
-    </td>
-
-    <td width='33%%'>
-       <b>&beta; </b>= %(beta)s&deg;
-    </td>
-
-    <td width='33%%'>
-       <b>Z' </b>= %(Zprime)s
-    </td>
-  </tr>
-
-  <tr align='left' bgcolor=$GetVar(HtmlTableGroupBgColour)>
-    <td>
-       <b>c </b>= %(c)s
-    </td>
-    <td>
-       <b>&gamma; </b>= %(gamma)s&deg;
-    </td>
-    <td>
-       <b>V </b>= %(volume)s
-    </td>
-  </tr>
+t:no_battery_gui{
+  <table border="0" cellpadding="2" cellspacing="2" align='left' width='100%%' >
+    <tr>
+     <td></td>
+    </tr>
+  </table>
 }
 
 t:battery_gui{
-  <table border="0" cellpadding="0" cellspacing="0" align='center' width='100%%' >
+  <table border="0" cellpadding="2" cellspacing="2" align='left' width='100%%' >
     <tr align='center' width="100%%">
       <td align='center'>
         <a target="%(hint)s" href="echo '%(hint)s'"><zimg src="%(img_name)s"></a>

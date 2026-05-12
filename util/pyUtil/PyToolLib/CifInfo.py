@@ -276,7 +276,7 @@ class CifTools(ArgumentParser):
       self.cif_block['_publ_contact_author_address'] \
         = userDictionaries.people.getPersonInfo(ID,'address')
       self.cif_block['_publ_contact_author_id_orcid'] \
-        = userDictionaries.people.getPersonInfo(ID,'orchid_id')
+        = userDictionaries.people.getPersonInfo(ID,'orcid_id')
 
 class SaveCifInfo(CifTools):
   def __init__(self):

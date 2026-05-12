@@ -4,7 +4,7 @@
     "value=Fit",
     "hint=Mode Fit. Select atom(s) and then rotate/move to fit.",
     "onclick=if strcmp(sel(),'') then 'mode split -s' else 'mode fit -s=false'",
-    "td1=<td width='15%'>"
+    "td1=<td width='8%'>"
     )
   $-
 
@@ -14,10 +14,40 @@
     html.Snippet(GetVar(default_link),
     "value=Split",
     "hint=Restrained Split. The selected group will be split and but restraints will be applied to the resulting PARTs",
-    "onclick=if spy.check_for_selection() then 'spy.gui.restraints.set_mode_fit()'",
-    "td1=<td width='15%' align='left'>"
+    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_mode_fit()'",
+    "td1=<td width='8%' align='left'>"
     )
   $-
+
+<td align='center'>|</td>
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=A",
+    "hint=Assign to part A",
+    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(A)'",
+    "td1=<td width='8%' align='left'>"
+    )
+  $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=B",
+    "hint=Assign to part B",
+    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(B)'",
+    "td1=<td width='8%' align='left'>"
+    )
+  $-
+
+  <!--$+-->
+    <!--html.Snippet(GetVar(default_link),-->
+    <!--"value=C",-->
+    <!--"hint=Assign part C",-->
+    <!--"onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pC()'",-->
+    <!--"td1=<td width='8%' align='left'>"-->
+    <!--)-->
+  <!--$--->
+
 
 <td width='4%' align='center'>
 with
@@ -62,7 +92,7 @@ with
   $+
     html.Snippet("gui/snippets/input-combo",
     "name=SPLIT_FVARS",
-    "items=auto;spy.gui.restraints.get_existing_fvar_dropdown_items()",
+    "items=auto;spy.gui.disorder.get_existing_fvar_dropdown_items()",
     "value=auto",
     "readonly=false",
     "onchange=",

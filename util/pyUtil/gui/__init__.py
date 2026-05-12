@@ -7,6 +7,7 @@ from olexFunctions import OV
 from ImageTools import IT
 import htmlTools
 from . import restraints
+from . import disorder
 import re
 
 table_col = OV.GetVar('HtmlTableFirstcolColour')
