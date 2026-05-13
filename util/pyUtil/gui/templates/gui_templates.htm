@@ -30,7 +30,7 @@ t:set_pA_or_pB{
   selback
   sel atom bonds -a
   sel bond atoms -u
-  group -n=p%(part)s
+  group -n=_p%(part)s
   labels -p
   sel -u
 }
@@ -44,7 +44,7 @@ t:set_pC{
   selback
   sel atom bonds -a
   sel bond atoms -u
-  group -n=pC
+  group -n=_pC
   labels -p
   sel -u
 }
@@ -56,7 +56,7 @@ t:p1{
   selback
   sel atom bonds -a
   sel bond atoms -u
-  group -n=p1
+  group -n=_p1
   labels -p
 }
 
@@ -65,7 +65,7 @@ t:p2{
   selback
   sel atom bonds -a
   sel bond atoms -u
-  group -n=p2
+  group -n=_p2
   labels -p
 }
 
@@ -83,7 +83,7 @@ t:part_0_and_n{
 <input
   type="button"
   name="%(part)s@%(scope)s"
-  value="%(part)s"
+  value="0|%(part)s"
   width="100%%"
   height="GetVar('HtmlInputHeight')"
   onclick="freeze true>>spy.gui.tools.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
@@ -102,17 +102,22 @@ sel bond atoms -u
 group -u
 sel atom bonds -a
 sel bond atoms -u
-group -n=p%(part)s
+group -n=_p%(part)s
 labels -p
 }
 
 t:reset_all_parts_cmds{
+sp
 sel part %s
 kill
-sel -a
+sel collection _p*
 group -u
+sel collection _p*
+group -u
+sel -a
 part 0 11
 sel -u
+echo "All disorder has been reset"
 }
 
 t:reset_all_parts{
@@ -208,7 +213,7 @@ t:disorder_quicktool{
       name='COLOUR_PARTS@%(scope)s'
       checked="spy.GetParam('user.parts.colour')"
       oncheck="spy.SetParam('user.parts.colour','true')"
-      onuncheck="spy.SetParam('user.parts.colour','false')>>sel -a>>group -u>>sel -u"
+      onuncheck="spy.SetParam('user.parts.colour','false')>>sel collection _p*"
       target="Colour PARTS"
       onclick=""
       value=''

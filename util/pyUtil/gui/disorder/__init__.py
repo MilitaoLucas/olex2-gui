@@ -21,6 +21,7 @@ OV.registerFunction(get_existing_fvar_dropdown_items, False, "gui.disorder")
 def set_part_colour(part = None):
   if not part:
     part = set(olexex.OlexRefinementModel().disorder_parts()) - {0}
+    part = OV.ListParts()
     part =  " ".join(map(str, part))
   d = {'part': part}
   cmds = gui.tools.TemplateProvider.get_template('set_part_colour_cmds') %d

@@ -1896,7 +1896,7 @@ class DisorderDisplayTools(object):
       bg_colour = None
       if OV.GetParam('user.parts.colour'):
         try:
-          mat = OV.GetParam(f'gui.materials.p{item}')
+          mat = OV.GetParam(f'gui.materials._p{item}')
           bg_colour = get_html_colour_from_material(mat)
         except:
           pass

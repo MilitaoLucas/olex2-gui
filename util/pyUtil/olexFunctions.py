@@ -997,8 +997,8 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def ListParts(self):
     import olexex
-    parts = set(olexex.OlexRefinementModel().disorder_parts())
-    if len(parts) == 1:
+    parts = set(olexex.OlexRefinementModel().disorder_parts()) - {0}
+    if len(parts) == 0:
       return None
     else:
       return parts
@@ -1508,3 +1508,4 @@ OV.registerFunction(OV.GetHeaderParam)
 OV.registerFunction(OV.GetHeaderParamBool)
 OV.registerFunction(OV.SetHeaderParam)
 OV.registerFunction(OV.get_sNum_and_path)
+OV.registerFunction(OV.ListParts)

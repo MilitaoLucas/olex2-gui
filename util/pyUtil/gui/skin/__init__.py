@@ -89,8 +89,8 @@ def SetMaterials():
   olx.SetMaterial("Console.Text", OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("XGrid.+Surface", OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface", OV.GetParam('gui.xgrid.negative_surface_material'))
-  
-  materials = ['p1', 'p2', 'p3', 'p4', 'dp1']
+ 
+  materials = ['_p1', '_p2', '_p3', '_p4', '_p5', '_p5', '_pC', 'dp1']
   for material in materials:
     olx.SetMaterial(material, OV.GetParam(f'gui.materials.{material}'))
 
@@ -101,6 +101,7 @@ def SetMaterials():
   olex.m("lines %s" % OV.GetParam('gui.lines_of_cmd_text'))
 
   OV.SetParam('gui.skin.materials_have_been_set', True)
+  print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
 
 
 def load_user_gui_phil():
