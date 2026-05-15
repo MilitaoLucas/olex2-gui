@@ -2983,7 +2983,6 @@ class AnomDispPlot(Analysis):
   def __init__(self):
     Analysis.__init__(self, scale=4)
     self.item = "AnomDispPlot"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Anomalous Dispersion Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
@@ -2999,7 +2998,7 @@ class AnomDispPlot(Analysis):
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
     self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
     self.draw_origin = True
-    self.make_anom_plot()
+    plot_src = self.make_anom_plot()
     self.popout()
 
   def make_anom_plot(self):
@@ -3007,6 +3006,7 @@ class AnomDispPlot(Analysis):
     from brennan import brennan
     from cctbx.array_family import flex
     br = brennan()
+    plot_src = "Brennan and Cowan"
     steps = 250
     self.x = flex.double(steps)
     for i, v in enumerate(np.linspace(self.min_x, self.max_x, steps)):
@@ -3024,8 +3024,6 @@ class AnomDispPlot(Analysis):
         fp, fdp = a['disp']
         refined_disp.append((a['label'], fp, fdp, a['type']))
     keys = []
-    self.make_empty_graph(axis_x = True, square=False)
-    self.ax_marker_length = int(self.imX * 0.006)
     wavelength = float(olx.xf.exptl.Radiation())
     refined_data = {}
     data2 = {}
@@ -3046,6 +3044,7 @@ class AnomDispPlot(Analysis):
           print(f"Error getting Value for {e}; Switching to Sasaki; Carefull with interpreting the Plot for {e}!")
           from cctbx.eltbx import sasaki
           tables = sasaki
+          plot_src = "Sasaki"
           t = tables.table(e)
           r = t.at_angstrom(v)
           y[i] = r.fp()
@@ -3087,6 +3086,11 @@ class AnomDispPlot(Analysis):
                    'number': n + 1,
                    'label': ref[0],
                    'colour': col})
+
+    self.graphInfo["Title"] = OV.TranslatePhrase("Anomalous Dispersion Plot") +\
+      f" [{plot_src}]"
+    self.make_empty_graph(axis_x = True, square=False)
+    self.ax_marker_length = int(self.imX * 0.006)
 
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
