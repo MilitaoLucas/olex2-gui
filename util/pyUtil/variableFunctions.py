@@ -177,9 +177,10 @@ def LoadParams(scopes=None, extensions=None):
     if extensions:
       for phf in extensions:
         fp  = os.path.join(OV.BaseDir(), phf)
-        if not os.path.exists(fp):  continue
+        if not os.path.exists(fp):
+          continue
         phil_handler.adopt_phil(phil_file=fp)
-        phil_handler.rebuild_index()
+      phil_handler.rebuild_index()
 
   for scope in scopes:
     phil_p = get_phil_file_path(scope)

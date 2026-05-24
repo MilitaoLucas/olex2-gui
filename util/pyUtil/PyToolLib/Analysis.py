@@ -2998,7 +2998,7 @@ class AnomDispPlot(Analysis):
     self.common_wl = [2.2911, 1.5419, 1.3923, 1.3414, 0.71073, 0.5609, 0.5136]
     self.common_wl_name = ["Cr", "Cu Ka", "Cu Kb", "Ga", "Mo", "Ag", "In"]
     self.draw_origin = True
-    plot_src = self.make_anom_plot()
+    self.make_anom_plot()
     self.popout()
 
   def make_anom_plot(self):

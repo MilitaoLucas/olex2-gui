@@ -261,10 +261,10 @@ class initpy_funcs():
           m="error")
         return
   def get_phil_extensions(self):
-    dev_path = os.path.join(self.basedir, "util", "pyUtil", "AC7d")
+    dev_path = os.path.join(self.basedir, "util", "pyUtil", "ACED7d")
     if os.path.exists(dev_path):
       return [os.path.join(dev_path, "aced.phil")]
-    return [os.path.join(self.basedir, "util", "pyUtil", "AC7", "aced.phil")]
+    return [os.path.join(self.basedir, "util", "pyUtil", "ACED", "aced.phil")]
 
   def final_checks(self):
     if sys.platform.startswith('linux'):
