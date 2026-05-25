@@ -2,6 +2,7 @@
 import gui
 import os
 import shutil
+import hashlib
 import time
 import olx
 import olex
@@ -12,6 +13,7 @@ import subprocess
 import signal
 import time
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param, nsa2_set_param
 #import OlexVFS
 #from PIL import ImageDraw, Image
 from ImageTools import IT
@@ -44,6 +46,7 @@ ELEMENTS_BY_SYMBOL = {symbol: z for z, symbol in ELEMENTS.items()}
 _interrupt_requested = False
 _interrupt_handlers_installed = False
 _interrupt_ignore_until = 0.0
+_nsa2_hash_mismatch_ignored = set()
 
 def _signal_interrupt_handler(signum, frame):
   global _interrupt_requested
@@ -178,7 +181,7 @@ OV.registerFunction(write_merged_hkl, False, "NoSpherA2")
 
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
-  basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+  basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
   final_log_name = name + ".partitionlog"
@@ -189,14 +192,14 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if OV.HasGUI():
       OV.UpdateHtml()
       olx.Refresh()
-  ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+  ncpus = nsa2_get_param('ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
   args = []
   NoSpherA2 = OV.GetVar("NoSpherA2")
   args.append(NoSpherA2)
   if software() == "SALTED":
-    salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+    salted_model_dir = nsa2_get_param('selected_salted_model')
     args.append("-SALTED")
     args.append(salted_model_dir)
   if hkl_file is not None:
@@ -210,21 +213,21 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   if (int(ncpus) >= 1):
     args.append('-cpus')
     args.append(ncpus)
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug'):
+  if nsa2_get_param('NoSpherA2_debug'):
     args.append('-v')
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_ED'):
+  if nsa2_get_param('NoSpherA2_ED'):
     args.append('-ED')
   else:
     wavelength = float(olx.xf.exptl.Radiation())
     if wavelength < 0.1:
       args.append("-ED")
-  if (OV.GetParam('snum.NoSpherA2.becke_accuracy') != "Normal"):
+  if (nsa2_get_param('becke_accuracy') != "Normal"):
     args.append('-acc')
-    if (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Low"):
+    if (nsa2_get_param('becke_accuracy') == "Low"):
       args.append('1')
-    elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "High"):
+    elif (nsa2_get_param('becke_accuracy') == "High"):
       args.append('3')
-    elif (OV.GetParam('snum.NoSpherA2.becke_accuracy') == "Max"):
+    elif (nsa2_get_param('becke_accuracy') == "Max"):
       args.append('4')
   if(save_k_pts):
     args.append('-skpts')
@@ -233,35 +236,35 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   soft = software()
   if "xTB" in soft or "pTB" in soft:
     args.append("-ECP")
-    mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
+    mode = nsa2_get_param('NoSpherA2_ECP')
     if "xTB" in soft:
       args.append(str(2))
     elif "pTB" in soft:
       args.append(str(3))
   elif "ECP" in basis_name:
     args.append("-ECP")
-    mode = OV.GetParam('snum.NoSpherA2.NoSpherA2_ECP')
+    mode = nsa2_get_param('NoSpherA2_ECP')
     args.append(str(mode))
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "RI-Fit":
+  if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
     if is_orca_new():
-      auxiliary_basis = OV.GetParam('snum.NoSpherA2.auxiliary_basis')
+      auxiliary_basis = nsa2_get_param('auxiliary_basis')
       args.append("-RI_FIT")
       args.append(auxiliary_basis)
       if auxiliary_basis == "auto" or auxiliary_basis == "auto_aux":
-        args.append(OV.GetParam('snum.NoSpherA2.auxiliary_basis_beta'))
-      mem = float(OV.GetParam('snum.NoSpherA2.mem')) * 1000 #Mem in MB
+        args.append(nsa2_get_param('auxiliary_basis_beta'))
+      mem = float(nsa2_get_param('mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))
     else:
       print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
       print("Performing refinement without RI fit!")
-  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "TFVC":
+  elif nsa2_get_param('NoSpherA2_Partition') == "TFVC":
     args.append("-TFVC")
-  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "Becke":
+  elif nsa2_get_param('NoSpherA2_Partition') == "Becke":
     args.append("-Becke")
-  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "MBIS":
+  elif nsa2_get_param('NoSpherA2_Partition') == "MBIS":
     args.append("-MBIS")
-  elif OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "EMBIS":
+  elif nsa2_get_param('NoSpherA2_Partition') == "EMBIS":
     args.append("-EMBIS")
 
   olex_refinement_model = OV.GetRefinementModel(False)
@@ -344,13 +347,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if soft == "Hybrid":
       args.append("-mtc_mult")
       for i in range(1, min(6, len(groups) + 1)):
-        m =  OV.GetParam('snum.NoSpherA2.Hybrid.multiplicity_Part%d' % i)
+        m =  nsa2_get_param('Hybrid.multiplicity_Part%d' % i)
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")
       for i in range(1, min(6, len(groups) + 1)):
-        c = int(OV.GetParam('snum.NoSpherA2.Hybrid.charge_Part%d' % i))
+        c = int(nsa2_get_param('Hybrid.charge_Part%d' % i))
         if c < 0:
           args.append("n"+str(c))
         else:
@@ -358,7 +361,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       args.append("-mtc_ECP")
       for i in range(1, min(6, len(groups) + 1)):
         ECP_m_C = 0
-        sftw = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d' % i).lstrip()
+        sftw = nsa2_get_param('Hybrid.software_Part%d' % i).lstrip()
         if sftw == "xTB":
           ECP_m_C = 2
         elif sftw == "pTB":
@@ -367,13 +370,13 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     else:
       args.append("-mtc_mult")
       for i in range(len(groups)):
-        m =  OV.GetParam('snum.NoSpherA2.muliplicity')
+        m =  nsa2_get_param('muliplicity')
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")
       for i in range(len(groups)):
-        c = int(OV.GetParam('snum.NoSpherA2.charge'))
+        c = int(nsa2_get_param('charge'))
         if c < 0:
           args.append("n"+str(c))
         else:
@@ -390,11 +393,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
           args.append("0")
 
     if any(".xyz" in f for f in wfn_file):
-      Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+      Cations = nsa2_get_param('Thakkar_Cations')
       if Cations != "" and Cations is not None:
         args.append("-Cations")
         args.append(Cations)
-      Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      Anions = nsa2_get_param('Thakkar_Anions')
       if Anions != "" and Anions is not None:
         args.append("-Anions")
         args.append(Anions)
@@ -408,25 +411,25 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     args.append("-cif")
     args.append(cif)
     args.append("-mult")
-    m = OV.GetParam('snum.NoSpherA2.multiplicity')
+    m = nsa2_get_param('multiplicity')
     if m == 0:
       m = 1
     if m is None:
       m = 1
     args.append(str(m))
     args.append("-charge")
-    c = OV.GetParam('snum.NoSpherA2.charge')
+    c = nsa2_get_param('charge')
     args.append(str(c))
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
         args.append(groups[i])
     if ".xyz" in wfn_file:
-      Cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
+      Cations = nsa2_get_param('Thakkar_Cations')
       if Cations != "" and Cations is not None:
         args.append("-Cations")
         args.append(Cations)
-      Anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      Anions = nsa2_get_param('Thakkar_Anions')
       if Anions != "" and Anions is not None:
         args.append("-Anions")
         args.append(Anions)
@@ -634,7 +637,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     shutil.move("experimental.tscb", tsc_dst)
 
   try:
-    OV.SetParam('snum.NoSpherA2.file', tsc_dst)
+    nsa2_set_param('file', tsc_dst)
     OV.SetControlValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
@@ -710,7 +713,7 @@ def check_for_matching_wfn():
 OV.registerFunction(check_for_matching_wfn, False, 'NoSpherA2')
 
 def read_disorder_groups():
-  inp = OV.GetParam('snum.NoSpherA2.Disorder_Groups')
+  inp = nsa2_get_param('Disorder_Groups')
   if inp is None or inp == "":
     return []
   groups = inp.split(';')
@@ -738,214 +741,267 @@ def is_disordered():
 OV.registerFunction(is_disordered, False, 'NoSpherA2')
 
 def software():
-  t = OV.GetParam('snum.NoSpherA2.source')
+  t = nsa2_get_param('source')
   t = t.lstrip().rstrip()
   return t
 
+
+def reset_unused_generator_flags(selected_source=None):
+  """Clear stale generator-specific flags after switching density source.
+
+  This keeps source-specific tuning parameters from leaking into unrelated
+  generators and confusing the run output.
+  """
+  source = selected_source if selected_source is not None else software()
+  source = str(source or '').strip().lower()
+
+  is_tonto = 'tonto' in source
+  is_pyscf = 'pyscf' in source
+  is_orca = 'orca' in source
+  is_gaussian = 'gaussian' in source
+
+  # Tonto-only DIIS threshold.
+  if is_tonto:
+    if str(nsa2_get_param('DIIS', '') or '').strip() == '':
+      nsa2_set_param('DIIS', '0.01')
+    if str(nsa2_get_param('cluster_radius', '') or '').strip() == '':
+      nsa2_set_param('cluster_radius', '0')
+  else:
+    nsa2_set_param('DIIS', '')
+    nsa2_set_param('cluster_radius', '')
+
+  # pySCF-only damping parameter.
+  if is_pyscf:
+    if str(nsa2_get_param('pySCF_Damping', '') or '').strip() == '':
+      nsa2_set_param('pySCF_Damping', '0.6')
+  else:
+    nsa2_set_param('pySCF_Damping', '')
+  
+  if is_orca:
+    if str(nsa2_get_param('ORCA_SCF_Conv', '') or '').strip() == '':
+      nsa2_set_param('ORCA_SCF_Conv', 'SloppySCF')
+    if str(nsa2_get_param('ORCA_SCF_Strategy', '') or '').strip() == '':
+      nsa2_set_param('ORCA_SCF_Strategy', 'EasyConv')
+    if str(nsa2_get_param('ORCA_Solvation', '') or '').strip() == '':
+      nsa2_set_param('ORCA_Solvation', 'Water')
+    if str(nsa2_get_param('ORCA_CRYSTAL_QMMM', '') or '').strip() == '':
+      nsa2_set_param('ORCA_CRYSTAL_QMMM', 'False')
+    if str(nsa2_get_param('ORCA_use_broken_sym', '') or '').strip() == '':
+      nsa2_set_param('ORCA_use_broken_sym', 'False')
+  else:
+    nsa2_set_param('ORCA_SCF_Conv', '')
+    nsa2_set_param('ORCA_SCF_Strategy', '')
+    nsa2_set_param('ORCA_Solvation', '')
+    nsa2_set_param('ORCA_CRYSTAL_QMMM', '')
+    nsa2_set_param('ORCA_use_broken_sym', '')
+
+
+OV.registerFunction(reset_unused_generator_flags, False, 'NoSpherA2')
+
 def org_min():
-  OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
+  nsa2_set_param('basis_name',"3-21G")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"SloppySCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"EasyConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.01")
+  nsa2_set_param('pySCF_Damping',"0.6")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
 
 def org_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
+  nsa2_set_param('basis_name',"def2-SVP")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"NoSpherA2SCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"EasyConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.001")
+  nsa2_set_param('pySCF_Damping',"0.6")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(org_small, False, "NoSpherA2")
 
 def org_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"cc-pVTZ")
+  nsa2_set_param('basis_name',"cc-pVTZ")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"EasyConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.6")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Normal")
+  nsa2_set_param('ORCA_SCF_Conv',"StrongSCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"EasyConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.0001")
+  nsa2_set_param('pySCF_Damping',"0.6")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(org_final, False, "NoSpherA2")
 
 def light_min():
-  OV.SetParam('snum.NoSpherA2.basis_name',"3-21G")
+  nsa2_set_param('basis_name',"3-21G")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"SloppySCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.01")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_min, False, "NoSpherA2")
 
 def light_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"def2-SVP")
+  nsa2_set_param('basis_name',"def2-SVP")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"NoSpherA2SCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.001")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
 
 def light_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"def2-TZVP")
+  nsa2_set_param('basis_name',"def2-TZVP")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',False)
-  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Normal")
+  nsa2_set_param('ORCA_SCF_Conv',"StrongSCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.0001")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',False)
+  nsa2_set_param('full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(light_final, False, "NoSpherA2")
 
 def heavy_min():
-  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-SVP")
+  nsa2_set_param('basis_name',"x2c-SVP")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"SloppySCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.01")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',True)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"SloppySCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.01")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',True)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_min, False, "NoSpherA2")
 
 def heavy_small():
-  OV.SetParam('snum.NoSpherA2.basis_name',"jorge-DZP-DKH")
+  nsa2_set_param('basis_name',"jorge-DZP-DKH")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Low")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"NoSpherA2SCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',True)
-  OV.SetParam('snum.NoSpherA2.full_HAR',False)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Low")
+  nsa2_set_param('ORCA_SCF_Conv',"NoSpherA2SCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.001")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',True)
+  nsa2_set_param('full_HAR',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_small, False, "NoSpherA2")
 
 def heavy_final():
-  OV.SetParam('snum.NoSpherA2.basis_name',"x2c-TZVP")
+  nsa2_set_param('basis_name',"x2c-TZVP")
   if "Tonto" in software():
-    OV.SetParam('snum.NoSpherA2.method', "B3LYP")
+    nsa2_set_param('method', "B3LYP")
   elif "ORCA" in software():
     if is_orca_new():
-      OV.SetParam('snum.NoSpherA2.method', "r2SCAN")
+      nsa2_set_param('method', "r2SCAN")
     else:
-      OV.SetParam('snum.NoSpherA2.method', "PBE")
+      nsa2_set_param('method', "PBE")
   else:
-    OV.SetParam('snum.NoSpherA2.method', "PBE")
-  OV.SetParam('snum.NoSpherA2.becke_accuracy',"Normal")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Conv',"StrongSCF")
-  OV.SetParam('snum.NoSpherA2.ORCA_SCF_Strategy',"SlowConv")
-  OV.SetParam('snum.NoSpherA2.cluster_radius',0)
-  OV.SetParam('snum.NoSpherA2.DIIS',"0.0001")
-  OV.SetParam('snum.NoSpherA2.pySCF_Damping',"0.85")
-  OV.SetParam('snum.NoSpherA2.ORCA_Solvation',"Water")
-  OV.SetParam('snum.NoSpherA2.Relativistic',True)
-  OV.SetParam('snum.NoSpherA2.full_HAR',True)
+    nsa2_set_param('method', "PBE")
+  nsa2_set_param('becke_accuracy',"Normal")
+  nsa2_set_param('ORCA_SCF_Conv',"StrongSCF")
+  nsa2_set_param('ORCA_SCF_Strategy',"SlowConv")
+  nsa2_set_param('cluster_radius',0)
+  nsa2_set_param('DIIS',"0.0001")
+  nsa2_set_param('pySCF_Damping',"0.85")
+  nsa2_set_param('ORCA_Solvation',"Water")
+  nsa2_set_param('Relativistic',True)
+  nsa2_set_param('full_HAR',True)
   olex.m("html.Update()")
 OV.registerFunction(heavy_final, False, "NoSpherA2")
 
@@ -965,7 +1021,11 @@ def make_quick_button_gui():
     d.setdefault('description', 'Heavy metal (Z  &gt; 35) ')
 
   buttons = ""
-  base_col = OV.GetParam("gui.action_colour")
+  base_col = OV.GetVar('gui.action_colour')
+  if not base_col:
+    base_col = OV.GetVar('HtmlTableFirstcolColour')
+  if not base_col:
+    base_col = '#4a6a89'
   for item in [("min", IT.adjust_colour(base_col, luminosity=1.0, as_format='hex'), "Test"),
                ("small", IT.adjust_colour(base_col, luminosity=0.9, as_format='hex'), "Work"),
                ("final", IT.adjust_colour(base_col, luminosity=0.8, as_format='hex'), "Final")]:
@@ -1002,7 +1062,7 @@ def make_quick_button_gui():
 OV.registerFunction(make_quick_button_gui, False, "NoSpherA2")
 
 def calculate_number_of_electrons():
-  ne = -int(OV.GetParam('snum.NoSpherA2.charge'))
+  ne = -int(nsa2_get_param('charge'))
   model = olexex.OlexRefinementModel()
   for sc in model._atoms:
     t = sc['type']
@@ -1022,18 +1082,96 @@ OV.registerFunction(source_is_tsc, False, 'NoSpherA2')
 
 def source_is_discamb():
   source = software()
-  if source == OV.GetParam('user.NoSpherA2.discamb_exe'):
+  if source == nsa2_get_param('user.NoSpherA2.discamb_exe'):
     return True
   else:
     return False
 OV.registerFunction(source_is_discamb, False, 'NoSpherA2')
+
+
+def _nsa2_resolve_existing_path(path):
+  if not path:
+    return None
+  p = str(path).strip()
+  if not p:
+    return None
+  if os.path.exists(p):
+    return p
+  p2 = os.path.join(OV.FilePath(), p)
+  if os.path.exists(p2):
+    return p2
+  return None
+
+
+def _nsa2_sha256(path):
+  try:
+    with open(path, 'rb') as f:
+      return hashlib.sha256(f.read()).hexdigest()
+  except Exception:
+    return ''
+
+
+def nsa2_validate_tsc_file_integrity():
+  """Validate current NoSpherA2 TSC/TSCB file against stored metadata.
+
+  Returns:
+    (is_valid, stored_hash, current_hash, reason)
+    reason in {'ok', 'mismatch', 'file_not_found', 'no_salted_model',
+               'salted_model_not_found'}
+  """
+  table_file_name = nsa2_get_param('file')
+  tsc_path = _nsa2_resolve_existing_path(table_file_name)
+  if not tsc_path:
+    return False, '', '', 'file_not_found'
+
+  source = str(nsa2_get_param('source', '') or '').strip().lower()
+  if source == 'salted':
+    salted_model = nsa2_get_param('selected_salted_model')
+    if not salted_model:
+      return False, '', '', 'no_salted_model'
+    salted_model_path = _nsa2_resolve_existing_path(salted_model)
+    if not salted_model_path:
+      return False, '', '', 'salted_model_not_found'
+
+  current_hash = _nsa2_sha256(tsc_path)
+  stored_hash = str(nsa2_get_param('file_hash', '') or '').strip()
+
+  if not stored_hash:
+    nsa2_set_param('file_hash', current_hash)
+    return True, stored_hash, current_hash, 'ok'
+
+  if stored_hash == current_hash:
+    return True, stored_hash, current_hash, 'ok'
+
+  mismatch_key = (os.path.abspath(tsc_path), stored_hash, current_hash)
+  if mismatch_key in _nsa2_hash_mismatch_ignored:
+    nsa2_set_param('file_hash', current_hash)
+    return True, stored_hash, current_hash, 'ok'
+
+  _nsa2_hash_mismatch_ignored.add(mismatch_key)
+  return False, stored_hash, current_hash, 'mismatch'
+
+
+def nsa2_check_tsc_origin_known():
+  """Return whether the current TSC origin metadata is known and meaningful."""
+  origin = nsa2_get_param('file_origin', '')
+  origin_text = str(origin or '').strip()
+  if not origin_text:
+    return False, origin_text
+  if origin_text.lower() in ('unknown', 'externally provided'):
+    return False, origin_text
+  return True, origin_text
+
+
+OV.registerFunction(nsa2_validate_tsc_file_integrity, False, 'NoSpherA2')
+OV.registerFunction(nsa2_check_tsc_origin_known, False, 'NoSpherA2')
 
 def write_precise_model_file(model = None, cov_matrix = None, annotations = None):
   from refinement import FullMatrixRefine
   from olexex import OlexRefinementModel
   table_name = ""
   if OV.IsNoSpherA2():
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
   try:
     fmr = FullMatrixRefine()
     if table_name != "":
@@ -1185,7 +1323,7 @@ def get_tsc_file_dropdown_items():
     res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
     t = res.split(";")
     if len(t[0]) == 0:
-        OV.SetParam('snum.NoSpherA2.file', 'No .tsc/.tscb files found')
+        nsa2_set_param('file', 'No .tsc/.tscb files found')
         return "No .tsc/.tscb files found"
     else:
         return res
@@ -1250,7 +1388,7 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
   args.append("-radius")
   args.append(str(radius))
   args.append("-cpus")
-  args.append(OV.GetParam("snum.NoSpherA2.ncpus"))
+  args.append(nsa2_get_param("ncpus"))
 
   startinfo = None
 
@@ -1341,10 +1479,10 @@ def removeDir(phil_value, item_to_remove) -> None:
 OV.registerFunction(removeDir, False, "NoSpherA2")
 
 def toggle_full_HAR():
-  if OV.GetParam('snum.NoSpherA2.full_HAR'):
-    OV.SetParam('snum.NoSpherA2.full_HAR', False)
+  if nsa2_get_param('full_HAR'):
+    nsa2_set_param('full_HAR', False)
   else:
-    OV.SetParam('snum.NoSpherA2.full_HAR', True)
+    nsa2_set_param('full_HAR', True)
   OV.SetItemState("h3-NoSpherA2-extras 2")
   OV.SetItemState("h3-NoSpherA2-extras 1")
 OV.registerFunction(toggle_full_HAR, False, "NoSpherA2")

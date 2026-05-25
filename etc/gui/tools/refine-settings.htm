@@ -290,7 +290,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=USE_ASPHERICAL@refine",
-        "checked=spy.GetParam('snum.NoSpherA2.use_aspherical')",
+        "checked=spy.nsa2_get_param('use_aspherical')",
         "label=NoSpherA2 ",
         "height=0",
         "td1=<td align='left' width="22%">",
@@ -298,7 +298,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
         "onclick=spy.NoSpherA2.toggle_GUI()")
       $-
 
-<!-- #ignoreif spy.GetParam('snum.NoSpherA2.use_aspherical')
+<!-- #ignoreif spy.nsa2_get_param('use_aspherical')
 <td>
 Use non-spherical atomic scattering factors
 </td>
@@ -308,7 +308,7 @@ Use non-spherical atomic scattering factors
 
 
 
-<!-- #ignoreif not spy.GetParam('snum.NoSpherA2.use_aspherical')
+<!-- #ignoreif not spy.nsa2_get_param('use_aspherical')
 
 <td width='20%' align='right'>
 <b>Source of .tsc:</b> 
@@ -325,7 +325,7 @@ Use non-spherical atomic scattering factors
     valign="center"
     name="SNUM_REFINEMENT_NSFF_SOURCE"
     width="100%"
-    value="spy.GetParam('snum.NoSpherA2.source')"
+    value="spy.nsa2_get_param('source')"
     label=""
     setdefault="false"
     items="$spy.NoSpherA2.get_sources_string()"

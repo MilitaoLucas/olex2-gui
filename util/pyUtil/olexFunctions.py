@@ -119,6 +119,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
 
   def SetHeaderParam(self, param, value):
     olx.xf.rm.StoreParam(param, value)
+  
+  def ClearHeaderParam(self, param):
+    olx.xf.rm.ClearParams(param)
 
   def GetHeaderParam(self, param, default=None, src=None):
     if src == None:
@@ -909,8 +912,13 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return self.GetParam("olex2.developing", False)
 
   def IsNoSpherA2(self):
-    return self.GetParam("snum.NoSpherA2.use_aspherical") and\
-      self.GetParam("snum.refinement.program") == "olex2.refine"
+    from variableFunctions import nsa2_get_param
+    use_aspherical = nsa2_get_param("use_aspherical", False)
+    if isinstance(use_aspherical, str):
+      use_aspherical = use_aspherical.strip().lower() in ('1', 'true', 'yes', 'on', 'y')
+    else:
+      use_aspherical = bool(use_aspherical)
+    return use_aspherical and self.GetParam("snum.refinement.program") == "olex2.refine"
 
   def get_diag(self, param):
     v = None

@@ -1,6 +1,7 @@
 import htmlTools
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param
 from utilities import make_quick_button_gui, is_disordered
 
 def begin_new_line(help_label="NoSpherA2_Options_1", scope="1"):
@@ -168,60 +169,60 @@ def method_combo():
   return labeled_combo("NoSpherA2_method@refine",                                          
                       "Method",
                       "spy.NoSpherA2.get_functional_list()",
-                      "spy.GetParam(\'snum.NoSpherA2.method\')",
-                      "spy.SetParam(\'snum.NoSpherA2.method\',html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'method\')",
+                      "spy.nsa2_set_param(\'method\',html.GetValue(\'~name~\'))",
                       width_label=11, width_combo=17)
 
 def basis_combo():
   return labeled_combo("NoSpherA2_basis@refine",
                       "Basis Set",
                       "spy.NoSpherA2.getBasisListStr()",
-                      "spy.GetParam(\'snum.NoSpherA2.basis_name\')",
-                      "spy.SetParam(\'snum.NoSpherA2.basis_name\',html.GetValue(\'~name~\')) >> html.Update()",
+                      "spy.nsa2_get_param(\'basis_name\')",
+                      "spy.nsa2_set_param(\'basis_name\',html.GetValue(\'~name~\')) >> html.Update()",
                       width_label=12, width_combo=19)
 
 def cpu_combo():
   return labeled_combo("NoSpherA2_cpus@refine",
                       "CPUs",
                       "spy.NoSpherA2.getCPUListStr()",
-                      "spy.GetParam(\'snum.NoSpherA2.ncpus\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ncpus\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ncpus\')",
+                      "spy.nsa2_set_param(\'ncpus\', html.GetValue(\'~name~\'))",
                       width_label=8, width_combo=10)
 
 def memory_text():
   return labeled_text("NosPherA2_Memory",
                       "Mem(Gb)",
-                      "spy.GetParam('snum.NoSpherA2.mem')",
-                      "spy.SetParam('snum.NoSpherA2.mem', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('mem')",
+                      "spy.nsa2_set_param('mem', html.GetValue('~name~'))",
                       width_label=10, width_textbox=20)
   
 def charge_spin():
   return labeled_spin("NoSpherA2_Charge@refine",
                       "Charge",
-                      "spy.GetParam(\'snum.NoSpherA2.charge\')",
-                      "spy.SetParam(\'snum.NoSpherA2.charge\',html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'charge\')",
+                      "spy.nsa2_set_param(\'charge\',html.GetValue(\'~name~\'))",
                       width_label=11, width_spinbox=9, min_value=-1000, max_value=1000)
   
 def multiplicity_spin():
   return labeled_spin("NoSpherA2_Multiplicity@refine",
                       "Multiplicity",
-                      "spy.GetParam(\'snum.NoSpherA2.multiplicity\')",
-                      "spy.SetParam(\'snum.NoSpherA2.multiplicity\',html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'multiplicity\')",
+                      "spy.nsa2_set_param(\'multiplicity\',html.GetValue(\'~name~\'))",
                       width_label=14, width_spinbox=9, min_value=1, max_value=200)
   
 def iterative_checkbox():
   return labeled_checkbox("NoSpherA2_Iterative@refine",
                          "Iterative",
-                         "spy.GetParam(\'snum.NoSpherA2.full_HAR\')",
-                         "spy.SetParam(\'snum.NoSpherA2.full_HAR\',\'True\')>>html.Update()",
-                         "spy.SetParam(\'snum.NoSpherA2.full_HAR\',\'False\')>>html.Update()",
+                         "spy.nsa2_get_param(\'full_HAR\')",
+                         "spy.nsa2_set_param(\'full_HAR\',\'True\')>>html.Update()",
+                         "spy.nsa2_set_param(\'full_HAR\',\'False\')>>html.Update()",
                          width=15)
 
 def cycles_spin():
   return labeled_spin("NoSpherA2_Max_HAR_Cycles@refine",
                       "Max Cycles",
-                      "spy.GetParam(\'snum.NoSpherA2.Max_HAR_Cycles\')",
-                      "spy.SetParam(\'snum.NoSpherA2.Max_HAR_Cycles\',html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'Max_HAR_Cycles\')",
+                      "spy.nsa2_set_param(\'Max_HAR_Cycles\',html.GetValue(\'~name~\'))",
                       width_label=17, width_spinbox=8, min_value=1, max_value=100)
   
 def update_tsc_button():
@@ -235,55 +236,55 @@ def integration_accuracy_combo():
   return labeled_combo("NoSpherA2_becke_accuracy@refine",
                         "Integr. Accuracy",
                         "'Low;Normal;High;Max'",
-                        "spy.GetParam(\'snum.NoSpherA2.becke_accuracy\')",
-                        "spy.SetParam(\'snum.NoSpherA2.becke_accuracy\', html.GetValue(\'~name~\'))",
+                        "spy.nsa2_get_param(\'becke_accuracy\')",
+                        "spy.nsa2_set_param(\'becke_accuracy\', html.GetValue(\'~name~\'))",
                         width_label=19, width_combo=15)
   
 def relativistics_checkbox():
   return labeled_checkbox("NoSpherA2_Relativistics@refine",
                          "Relativitics",
-                         "spy.GetParam(\'snum.NoSpherA2.Relativistic\')",
-                         "spy.SetParam(\'snum.NoSpherA2.Relativistic\',\'True\')",
-                         "spy.SetParam(\'snum.NoSpherA2.Relativistic\',\'False\')",
+                         "spy.nsa2_get_param(\'Relativistic\')",
+                         "spy.nsa2_set_param(\'Relativistic\',\'True\')",
+                         "spy.nsa2_set_param(\'Relativistic\',\'False\')",
                          width=18)
 
 def h_aniso_checkbox():
   return labeled_checkbox("NoSpherA2_H_Aniso@refine",
                          "H Aniso",
-                         "spy.GetParam(\'snum.NoSpherA2.h_aniso\')",
-                         "spy.SetParam(\'snum.NoSpherA2.h_aniso\',\'True\')",
-                         "spy.SetParam(\'snum.NoSpherA2.h_aniso\',\'False\')",
+                         "spy.nsa2_get_param(\'h_aniso\')",
+                         "spy.nsa2_set_param(\'h_aniso\',\'True\')",
+                         "spy.nsa2_set_param(\'h_aniso\',\'False\')",
                          width=18)
   
 def no_afix_checkbox():
   return labeled_checkbox("NoSpherA2_Afix_remove@refine",
                          "No Afix",
-                         "spy.GetParam(\'snum.NoSpherA2.h_afix\')",
-                         "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'True\')",
-                         "spy.SetParam(\'snum.NoSpherA2.h_afix\',\'False\')",
+                         "spy.nsa2_get_param(\'h_afix\')",
+                         "spy.nsa2_set_param(\'h_afix\',\'True\')",
+                         "spy.nsa2_set_param(\'h_afix\',\'False\')",
                          width=20)
 
 def disorder_groups_text():
   return begin_new_line("NoSpherA2_Options_Grouped_Parts") + labeled_text("NoSpherA2_grouped_parts@refine",
                       "Grouped Parts",
-                      "spy.GetParam('snum.NoSpherA2.Disorder_Groups')",
-                      "spy.SetParam('snum.NoSpherA2.Disorder_Groups', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('Disorder_Groups')",
+                      "spy.nsa2_set_param('Disorder_Groups', html.GetValue('~name~'))",
                       width_label=20, width_textbox=20) + end_line()
 
 def pyscf_damping():
   return labeled_combo("NoSpherA2_Hybrid_pySCF_Damping@refine",
                       "Damping",
                       "'0.6;0.7;0.85;0.93'",
-                      "spy.GetParam('snum.NoSpherA2.Hybrid.pySCF_Damping')",
-                      "spy.SetParam('snum.NoSpherA2.Hybrid.pySCF_Damping', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('Hybrid.pySCF_Damping')",
+                      "spy.nsa2_set_param('Hybrid.pySCF_Damping', html.GetValue('~name~'))",
                       width_label=15, width_combo=20)
 
 def pyscf_solvation():
   return labeled_combo("NoSpherA2_ORCA_Solvation@refine",
                       "Solvation",
                       "'Vacuum;Water;Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene'",
-                      "spy.GetParam('snum.NoSpherA2.ORCA_Solvation')",
-                      "spy.SetParam('snum.NoSpherA2.ORCA_Solvation', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('ORCA_Solvation')",
+                      "spy.nsa2_set_param('ORCA_Solvation', html.GetValue('~name~'))",
                       width_label=13, width_combo=30)
   
 def partitioning_scheme_line():
@@ -293,21 +294,21 @@ def partitioning_scheme_line():
           labeled_combo("NoSpherA2_partitioning_scheme@refine",
                         "Partitioning Scheme",
                         "'Hirshfeld;RI-Fit;TFVC;Becke;MBIS;EMBIS'",
-                        "spy.GetParam('snum.NoSpherA2.NoSpherA2_Partition')",
-                        "spy.SetParam('snum.NoSpherA2.NoSpherA2_Partition', html.GetValue('~name~')) >> html.Update()",
+                        "spy.nsa2_get_param('NoSpherA2_Partition')",
+                        "spy.nsa2_set_param('NoSpherA2_Partition', html.GetValue('~name~')) >> html.Update()",
                         width_label=24, width_combo=16)
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_Partition') == "RI-Fit":
+  if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
       temp += labeled_combo("NoSpherA2_Aux_basis@refine",
                           "Auxiliary Basis",
                           "auto;combo_basis_fit;def2_universal_jkfit;def2_universal_jfit;def2_svp_rifit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit",
-                          "spy.GetParam('snum.NoSpherA2.auxiliary_basis')",
-                          "spy.SetParam('snum.NoSpherA2.auxiliary_basis', html.GetValue('~name~')) >> html.Update()",
+                          "spy.nsa2_get_param('auxiliary_basis')",
+                          "spy.nsa2_set_param('auxiliary_basis', html.GetValue('~name~')) >> html.Update()",
                           width_label=18, width_combo=25)
-      if OV.GetParam('snum.NoSpherA2.auxiliary_basis') == "auto":
+      if nsa2_get_param('auxiliary_basis') == "auto":
           temp += labeled_text("NoSpherA2_custom_aux_basis@refine",
                               "Beta",
-                              "spy.GetParam('snum.NoSpherA2.auxiliary_basis_beta')",
-                              "spy.SetParam('snum.NoSpherA2.auxiliary_basis_beta', html.GetValue('~name~'))",
+                              "spy.nsa2_get_param('auxiliary_basis_beta')",
+                              "spy.nsa2_set_param('auxiliary_basis_beta', html.GetValue('~name~'))",
                               width_label=8, width_textbox=10)
       else:
         temp += "<td width='18%'></td>"
@@ -320,8 +321,8 @@ def WSL_distro():
   return labeled_combo("NoSpherA2_WSL_distro@refine",
                       "WSL Distro",
                       "spy.NoSpherA2.get_distro_list()",
-                      "spy.GetParam('snum.NoSpherA2.distro')",
-                      "spy.SetParam('snum.NoSpherA2.distro', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('distro')",
+                      "spy.nsa2_set_param('distro', html.GetValue('~name~'))",
                       width_label=15, width_combo=30)
 
 def make_hybrid_GUI(softwares_list_string):
@@ -334,7 +335,7 @@ def make_hybrid_GUI(softwares_list_string):
       cpu_combo() + \
       memory_text() + \
       iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == True:
     t += cycles_spin()
   else:
@@ -350,9 +351,9 @@ def make_hybrid_GUI(softwares_list_string):
       "NoSpherA2_software_Part%d@refine"%(i+1),
       "Software",
       softwares_list,
-      "spy.GetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\')"%i, 
-      "spy.SetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\',html.GetValue(\'~name~\'))>>html.Update()"%i)
-    selected_software = OV.GetParam('snum.NoSpherA2.Hybrid.software_Part%d'%i)
+      "spy.nsa2_get_param(\'Hybrid.software_Part%d\')"%i, 
+      "spy.nsa2_set_param(\'Hybrid.software_Part%d\',html.GetValue(\'~name~\'))>>html.Update()"%i)
+    selected_software = nsa2_get_param('Hybrid.software_Part%d'%i)
     t += end_line() + begin_new_line("NoSpherA2_Options_2")
     if selected_software != "  " + str(OV.GetParam('user.NoSpherA2.discamb_exe')):
       if selected_software != "ELMOdb":
@@ -360,66 +361,66 @@ def make_hybrid_GUI(softwares_list_string):
           "NoSpherA2_basis_Part%d@refine"%i,
           "Basis Set",
           "spy.NoSpherA2.getBasisListStr()", 
-          "spy.GetParam(\'snum.NoSpherA2.Hybrid.basis_name_Part%d\')"%i,
-          "spy.SetParam(\'snum.NoSpherA2.Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
+          "spy.nsa2_get_param(\'Hybrid.basis_name_Part%d\')"%i,
+          "spy.nsa2_set_param(\'Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
           13, 20)
         t += labeled_combo(
           "NoSpherA2_method_Part%d@refine"%i, 
           "Method",
-          "spy.NoSpherA2.get_functional_list(spy.GetParam(\'snum.NoSpherA2.Hybrid.software_Part%d\'))"%i, 
-          "spy.GetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\')"%i,
-          "spy.SetParam(\'snum.NoSpherA2.Hybrid.method_Part%d\',html.GetValue(\'~name~\'))"%i,
+          "spy.NoSpherA2.get_functional_list(spy.nsa2_get_param(\'Hybrid.software_Part%d\'))"%i, 
+          "spy.nsa2_get_param(\'Hybrid.method_Part%d\')"%i,
+          "spy.nsa2_set_param(\'Hybrid.method_Part%d\',html.GetValue(\'~name~\'))"%i,
           11, 20)
         t += labeled_checkbox("NoSpherA2_ORCA_Relativistics_PART%d@refine"%i, 
                       "Relativitics", 
-                      "spy.GetParam(\'snum.NoSpherA2.Hybrid.Relativistic_Part%d\')"%i, 
-                      "spy.SetParam(\'snum.NoSpherA2.Hybrid.Relativistic_Part%d\',\'True\')"%i, 
-                      "spy.SetParam(\'snum.NoSpherA2.Hybrid.Relativistic_Part%d\',\'False\')"%i)        
+                      "spy.nsa2_get_param(\'Hybrid.Relativistic_Part%d\')"%i, 
+                      "spy.nsa2_set_param(\'Hybrid.Relativistic_Part%d\',\'True\')"%i, 
+                      "spy.nsa2_set_param(\'Hybrid.Relativistic_Part%d\',\'False\')"%i)        
         t += end_line() + \
              begin_new_line() + \
              labeled_spin("SET_CHARGE_PART%d@refine"%i,
                                                           "Charge",
-                      "spy.GetParam(\'snum.NoSpherA2.Hybrid.charge_Part%d\')"%i,
-                      "spy.SetParam(\'snum.NoSpherA2.Hybrid.charge_Part%d\',html.GetValue(\'~name~\'))"%i,
+                      "spy.nsa2_get_param(\'Hybrid.charge_Part%d\')"%i,
+                      "spy.nsa2_set_param(\'Hybrid.charge_Part%d\',html.GetValue(\'~name~\'))"%i,
                       width_label=13, width_spinbox=8, min_value=-1000, max_value=1000) + \
              labeled_spin("SET_MULTIPLICITY_PART%d@refine"%i,
                       "Multiplicity",
-                      "spy.GetParam(\'snum.NoSpherA2.Hybrid.multiplicity_Part%d\')"%i,
-                      "spy.SetParam(\'snum.NoSpherA2.Hybrid.multiplicity_Part%d\',html.GetValue(\'~name~\'))"%i,
+                      "spy.nsa2_get_param(\'Hybrid.multiplicity_Part%d\')"%i,
+                      "spy.nsa2_set_param(\'Hybrid.multiplicity_Part%d\',html.GetValue(\'~name~\'))"%i,
                       width_label=16, width_spinbox=8, min_value=1, max_value=200)
         if "ORCA" in selected_software:
           t += end_line() + begin_new_line() + \
                labeled_combo("NoSpherA2_ORCA_SCF_Conv_Part%d@refine"%i,
                              "SCF Thresh.",
                            "\'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF\'",
-                           "spy.GetParam(\'snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d\')"%i,
-                           "spy.SetParam(\'snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d', html.GetValue(\'~name~\'))"%i,
+                           "spy.nsa2_get_param(\'Hybrid.ORCA_SCF_Conv_Part%d\')"%i,
+                           "spy.nsa2_set_param(\'Hybrid.ORCA_SCF_Conv_Part%d', html.GetValue(\'~name~\'))"%i,
                            17, 20)
           t += labeled_combo("NoSpherA2_ORCA_SCF_Strategy_Part%d@refine"%i,
                              "SCF Strategy",
                            "\'EasyConv;NormalConv;SlowConv;VerySlowConv\'",
-                           "spy.GetParam(\'snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d\')"%i,
-                           "spy.SetParam(\'snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d\', html.GetValue(\'~name~\'))"%i,
+                           "spy.nsa2_get_param(\'Hybrid.ORCA_SCF_Strategy_Part%d\')"%i,
+                           "spy.nsa2_set_param(\'Hybrid.ORCA_SCF_Strategy_Part%d\', html.GetValue(\'~name~\'))"%i,
                            17, 20)
           t += labeled_combo("NoSpherA2_ORCA_Solvation@refine",
                              "Solvation",
                            "\'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene\'",
-                           "spy.GetParam(\'snum.NoSpherA2.ORCA_Solvation\')",
-                           "spy.SetParam(\'snum.NoSpherA2.ORCA_Solvation\', html.GetValue(\'~name~\'))",
+                           "spy.nsa2_get_param(\'ORCA_Solvation\')",
+                           "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
                            13, 20)
         elif "pySCF" in selected_software:
           t += end_line() + begin_new_line() + \
                labeled_combo("NoSpherA2_Hybrid_pySCF_Damping_Part%d@refine"%i,
                              "Damping",
                            "\'0.6;0.7;0.85;0.93\'",
-                           "spy.GetParam(\'snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d\')"%i,
-                           "spy.SetParam(\'snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d\', html.GetValue(\'~name~\'))"%i,
+                           "spy.nsa2_get_param(\'Hybrid.pySCF_Damping_Part%d\')"%i,
+                           "spy.nsa2_set_param(\'Hybrid.pySCF_Damping_Part%d\', html.GetValue(\'~name~\'))"%i,
                            10, 10) + \
                labeled_combo("NoSpherA2_pyscf_Solvation@refine",
-                           "Solvation"
-                           "\'Vacuum;Water; Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene\'",
-                           "spy.GetParam(\'snum.NoSpherA2.ORCA_Solvation\')",
-                           "spy.SetParam(\'snum.NoSpherA2.ORCA_Solvation\', html.GetValue(\'~name~\'))",
+                           "Solvation",
+                           "'Vacuum;Water; Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;",
+                           "spy.nsa2_get_param(\'ORCA_Solvation\')",
+                           "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
                            13, 30)
       else:
         #HAVE TO FINISCH ELMO LATER
@@ -427,8 +428,8 @@ def make_hybrid_GUI(softwares_list_string):
           "NoSpherA2_basis_Part%d@refine"%i,
           "Basis Set",
           "'6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'", 
-          "spy.GetParam(\'snum.NoSpherA2.Hybrid.basis_name_Part%d\')"%i,
-          "spy.SetParam(\'snum.NoSpherA2.Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
+          "spy.nsa2_get_param(\'Hybrid.basis_name_Part%d\')"%i,
+          "spy.nsa2_set_param(\'Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
           13, 20)
       
       t += end_line()
@@ -445,7 +446,7 @@ def make_xtb_GUI():
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -456,8 +457,8 @@ def make_xtb_GUI():
         integration_accuracy_combo() + \
         labeled_text("NoSpherA2_xtb_temp@refine",
                       "Temp. (K)",
-                      "spy.GetParam('snum.NoSpherA2.temperature')",
-                      "spy.SetParam('snum.NoSpherA2.temperature', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('temperature')",
+                      "spy.nsa2_set_param('temperature', html.GetValue('~name~'))",
                       width_label=15, width_textbox=9) + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
@@ -470,14 +471,14 @@ def make_ptb_GUI():
   t = begin_new_line() + cpu_combo() + memory_text() + \
     labeled_checkbox("NoSpherA2_purification@refine",
                      "Purify",
-                     "spy.GetParam('snum.NoSpherA2.PTB_use_purify')",
-                     "spy.SetParam('snum.NoSpherA2.PTB_use_purify', True) >> html.Update()",
-                     "spy.SetParam('snum.NoSpherA2.PTB_use_purify', False) >> html.Update()",
+                     "spy.nsa2_get_param('PTB_use_purify')",
+                     "spy.nsa2_set_param('PTB_use_purify', True) >> html.Update()",
+                     "spy.nsa2_set_param('PTB_use_purify', False) >> html.Update()",
                      width=2) +\
     end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
-  iterative = OV.GetParam('snum.NoSpherA2.full_HAR')
+  iterative = nsa2_get_param('full_HAR')
   if iterative == False:
     t += update_tsc_button()
   else:
@@ -500,8 +501,8 @@ def make_SALTED_GUI():
     labeled_combo("NoSpherA2_SALTED_model@refine",
                   "Model",
                   "spy.NoSpherA2.get_SALTED_model_locations()",
-                  "spy.GetParam('snum.NoSpherA2.selected_salted_model')",
-                  "spy.SetParam('snum.NoSpherA2.selected_salted_model', html.GetValue('~name~'))",
+                  "spy.nsa2_get_param('selected_salted_model')",
+                  "spy.nsa2_set_param('selected_salted_model', html.GetValue('~name~'))",
                   width_label=10, width_combo=50) + \
     f"<td width='5%' align='left'>{htmlTools.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >> html.Update()', 'on')}</td>" + \
     f"<td width='5%' align='left'>{htmlTools.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.Update()', 'on')}</td>" + \
@@ -514,13 +515,13 @@ def make_Thakkar_GUI():
   return begin_new_line() + \
     labeled_text("NoSpherA2_Thakkar_cations@refine",
                   "Cations",
-                  "spy.GetParam('snum.NoSpherA2.Thakkar_Cations')",
-                  "spy.SetParam('snum.NoSpherA2.Thakkar_Cations', html.GetValue('~name~'))",
+                  "spy.nsa2_get_param('Thakkar_Cations')",
+                  "spy.nsa2_set_param('Thakkar_Cations', html.GetValue('~name~'))",
                   width_label=15, width_textbox=25) + \
     labeled_text("NoSpherA2_Thakkar_anions@refine",
                   "Anions",
-                  "spy.GetParam('snum.NoSpherA2.Thakkar_Anions')",
-                  "spy.SetParam('snum.NoSpherA2.Thakkar_Anions', html.GetValue('~name~'))",
+                  "spy.nsa2_get_param('Thakkar_Anions')",
+                  "spy.nsa2_set_param('Thakkar_Anions', html.GetValue('~name~'))",
                   width_label=15, width_textbox=25) + \
     button("Update_Thakkar_Model",
             "Update Model",
@@ -534,13 +535,13 @@ def make_ELMOdb_GUI():
     labeled_combo("NoSpherA2_basis@refine",
                   "Basis Set",
                   "'6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'",
-                  "spy.GetParam('snum.NoSpherA2.basis_name')",
-                  "spy.SetParam('snum.NoSpherA2.basis_name', html.GetValue('~name~'))",
+                  "spy.nsa2_get_param('basis_name')",
+                  "spy.nsa2_set_param('basis_name', html.GetValue('~name~'))",
                   width_label=15, width_combo=50) + \
       cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
-  iterative = OV.GetParam('snum.NoSpherA2.full_HAR')
+  iterative = nsa2_get_param('full_HAR')
   if iterative == False:
     t += update_tsc_button()
   else:
@@ -570,8 +571,8 @@ def occ_df_basis_combo():
   return labeled_combo("NoSpherA2_OCC_DF_Basis@refine",
                       "DF Basis",
                       "'def2_universal_jkfit;cc-pvtz-jkfit;cc-pvqz-jkfit'",
-                      "spy.GetParam('snum.NoSpherA2.OCC_df_basis')",
-                      "spy.SetParam('snum.NoSpherA2.OCC_df_basis', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('OCC_df_basis')",
+                      "spy.nsa2_set_param('OCC_df_basis', html.GetValue('~name~'))",
                       width_label=13, width_combo=27)
 
 def make_OCC_GUI():
@@ -586,7 +587,7 @@ def make_OCC_GUI():
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -613,26 +614,26 @@ def make_ORCA_GUI(new_ORCA = True):
         cpu_combo() + \
         memory_text() + \
         end_line()
-  adv = OV.GetParam('snum.NoSpherA2.basis_adv')
+  adv = nsa2_get_param('basis_adv')
   if adv == True:
     t += begin_new_line() + \
           labeled_text("NoSpherA2_Basis_Set_Extra@refine",
                        "Adv. Basis Set",
-                       "spy.GetParam('snum.NoSpherA2.basis_adv_string')",
-                       "spy.SetParam('snum.NoSpherA2.basis_adv_string', html.GetValue('~name~')) >> html.Update()",
+                       "spy.nsa2_get_param('basis_adv_string')",
+                       "spy.nsa2_set_param('basis_adv_string', html.GetValue('~name~')) >> html.Update()",
                        width_label=15, width_textbox=50) + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line("NoSpherA2_Options_2") + \
         labeled_checkbox("NoSpherA2_baseset_adv@refine",
                          "Adv.",
-                         "spy.GetParam('snum.NoSpherA2.basis_adv')",
-                         "spy.SetParam('snum.NoSpherA2.basis_adv', True) >> html.Update()",
-                         "spy.SetParam('snum.NoSpherA2.basis_adv', False) >> html.Update()",
+                         "spy.nsa2_get_param('basis_adv')",
+                         "spy.nsa2_set_param('basis_adv', True) >> html.Update()",
+                         "spy.nsa2_set_param('basis_adv', False) >> html.Update()",
                          width=2) + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -650,39 +651,39 @@ def make_ORCA_GUI(new_ORCA = True):
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",
                       "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_SCF_Conv\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ORCA_SCF_Conv\')",
+                      "spy.nsa2_set_param(\'ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
                       width_label=17, width_combo=20) + \
         labeled_combo("NoSpherA2_ORCA_SCF_Strategy@refine",
                       "SCF Strategy",
                       "'EasyConv;NormalConv;SlowConv;VerySlowConv'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_SCF_Strategy\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ORCA_SCF_Strategy\')",
+                      "spy.nsa2_set_param(\'ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
                       width_label=17, width_combo=20) + \
         labeled_combo("NoSpherA2_ORCA_Solvation@refine",
                       "Solvation",
                       "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_Solvation\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_Solvation\', html.GetValue(\'~name~\')) >> html.Update()",
+                      "spy.nsa2_get_param(\'ORCA_Solvation\')",
+                      "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\')) >> html.Update()",
                       width_label=13, width_combo=30) + \
         end_line()
-  custom_solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+  custom_solvation = nsa2_get_param('ORCA_Solvation')
   if custom_solvation == "Custom":
     t += begin_new_line() + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine",
                        "Epsilon",
-                       "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')",
-                       "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
+                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_epsilon')",
+                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
                        width_label=15, width_textbox=20) + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_refractive@refine",
                        "Refractive Index",
-                       "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')",
-                       "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
+                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_refrac')",
+                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
                        width_label=15, width_textbox=20) + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_probe@refine",
                       "Probe Radius (A)",
-                      "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')",
-                      "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('ORCA_Solvation_CPCM_rsolv')",
+                      "spy.nsa2_set_param('ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
                       width_label=15, width_textbox=20) + \
           end_line()
   if is_disordered():
@@ -691,64 +692,64 @@ def make_ORCA_GUI(new_ORCA = True):
     t += begin_new_line() + \
          labeled_checkbox("NoSpherA2_ORCA_damp@refine",
                           "Damp.",
-                          "spy.GetParam('snum.NoSpherA2.ORCA_DAMP')",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_DAMP', True)",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_DAMP', False)",
+                          "spy.nsa2_get_param('ORCA_DAMP')",
+                          "spy.nsa2_set_param('ORCA_DAMP', True)",
+                          "spy.nsa2_set_param('ORCA_DAMP', False)",
                           width=8) + \
          labeled_checkbox("NoSpherA2_ORCA_embedding@refine",
                           "Embed.",
-                          "spy.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM', True) >> html.Update()",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM', False) >> html.Update()",
+                          "spy.nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')",
+                          "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', True) >> html.Update()",
+                          "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False) >> html.Update()",
                           width=10)
-    show_bs = OV.GetParam('user.NoSpherA2.show_broken_sym')
+    show_bs = nsa2_get_param('user.NoSpherA2.show_broken_sym')
     if show_bs:
         t += labeled_checkbox("NoSpherA2_ORCA_use_brok_sym@refine",
                           "Broken Symmetry",
-                          "spy.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_use_broken_sym', True) >> html.Update()",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_use_broken_sym', False) >> html.Update()",
+                          "spy.nsa2_get_param('ORCA_use_broken_sym')",
+                          "spy.nsa2_set_param('ORCA_use_broken_sym', True) >> html.Update()",
+                          "spy.nsa2_set_param('ORCA_use_broken_sym', False) >> html.Update()",
                           width=15)
-    embed = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
-    brok_sym = OV.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')
+    embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
+    brok_sym = nsa2_get_param('ORCA_use_broken_sym')
     if embed:
       t += standalone_combo("NoSpherA2_ORCA_embedding_type@refine",
                             "Mol;Ion",
-                            "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE')",
-                            "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()",
+                            "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')",
+                            "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()",
                             width=11) + \
            labeled_text("NoSpherA2_ORCA_embedding_radius@refine",
                         "Embed. rad.",
-                        "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS')",
-                        "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS', html.GetValue('~name~'))",
+                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_RADIUS')",
+                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_RADIUS', html.GetValue('~name~'))",
                         width_label=11, width_textbox=8) + \
            labeled_text("NoSpherA2_ORCA_convergence@refine",
                         "Charge Conv.",
-                        "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')",
-                        "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV', html.GetValue('~name~'))",
+                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_CONV')",
+                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_CONV', html.GetValue('~name~'))",
                         width_label=11, width_textbox=8) + \
            labeled_spin("NoSpherA2_ORCA_HF_Layers@refine",
                         "HF Layers",
-                        "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')",
-                        "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS', html.GetValue('~name~'))",
+                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_HF_LAYERS')",
+                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_HF_LAYERS', html.GetValue('~name~'))",
                         width_label=11, width_spinbox=8, min_value=0, max_value=100)
-      ion = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE')
+      ion = nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')
       if ion == "Ion":
         t += labeled_spin("NoSpherA2_ORCA_ECP_Layers@refine",
                           "ECP Layers",
-                          "spy.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')",
-                          "spy.SetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS', html.GetValue('~name~'))",
+                          "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS')",
+                          "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS', html.GetValue('~name~'))",
                           width_label=11, width_spinbox=8, min_value=0, max_value=100)
     if brok_sym:
       t += end_line() + begin_new_line() + labeled_text("NoSpherA2_ORCA_brok_sym_atoms@refine",
                             "Broken Sym. Atoms",
-                            "spy.GetParam('snum.NoSpherA2.ORCA_Broken_sym_atoms')",
-                            "spy.SetParam('snum.NoSpherA2.ORCA_Broken_sym_atoms', html.GetValue('~name~'))",
+                            "spy.nsa2_get_param('ORCA_Broken_sym_atoms')",
+                            "spy.nsa2_set_param('ORCA_Broken_sym_atoms', html.GetValue('~name~'))",
                             width_label=20, width_textbox=10) + \
            labeled_text("NoSpherA2_ORCA_brok_sym_spins@refine",
                             "Broken Sym. Spin",
-                            "spy.GetParam('snum.NoSpherA2.ORCA_Broken_sym_spin')",
-                            "spy.SetParam('snum.NoSpherA2.ORCA_Broken_sym_spin', html.GetValue('~name~'))",
+                            "spy.nsa2_get_param('ORCA_Broken_sym_spin')",
+                            "spy.nsa2_set_param('ORCA_Broken_sym_spin', html.GetValue('~name~'))",
                             width_label=20, width_textbox=10)
     t += end_line()
   t += partitioning_scheme_line()
@@ -767,7 +768,7 @@ def make_tonto_GUI():
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -783,20 +784,20 @@ def make_tonto_GUI():
   t += begin_new_line("NoSpherA2 Extras") + \
         labeled_text("NoSpherA2_tonto_cluster_radius@refine",
                       "Cluster r",
-                      "spy.GetParam('snum.NoSpherA2.cluster_radius')",
-                      "spy.SetParam('snum.NoSpherA2.cluster_radius', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('cluster_radius')",
+                      "spy.nsa2_set_param('cluster_radius', html.GetValue('~name~'))",
                       width_label=13, width_textbox=6) + \
         labeled_combo("NoSpherA2_tonto_DIIS@refine",
                       "DIIS Conv.",
                       "'0.1;0.01;0.001;0.0001;0.00001'",
-                      "spy.GetParam('snum.NoSpherA2.DIIS')",
-                      "spy.SetParam('snum.NoSpherA2.DIIS', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('DIIS')",
+                      "spy.nsa2_set_param('DIIS', html.GetValue('~name~'))",
                       width_label=16, width_combo=20) + \
         labeled_checkbox("NoSpherA2_tonto_cluster_grow@refine",
                          "Complete Cluster",
-                         "spy.GetParam('snum.NoSpherA2.cluster_grow')",
-                         "spy.SetParam('snum.NoSpherA2.cluster_grow', True)",
-                         "spy.SetParam('snum.NoSpherA2.cluster_grow', False)",
+                         "spy.nsa2_get_param('cluster_grow')",
+                         "spy.nsa2_set_param('cluster_grow', True)",
+                         "spy.nsa2_set_param('cluster_grow', False)",
                          width=5) + end_line()
   t += partitioning_scheme_line()
   return t
@@ -807,9 +808,9 @@ def make_frag_HAR_GUI():
         basis_combo() + \
         labeled_checkbox("NoSpherA2_baseset_adv@refine",
                          "Adv.",
-                         "spy.GetParam('snum.NoSpherA2.basis_adv')",
-                         "spy.SetParam('snum.NoSpherA2.basis_adv', True) >> html.Update()",
-                         "spy.SetParam('snum.NoSpherA2.basis_adv', False) >> html.Update()",
+                         "spy.nsa2_get_param('basis_adv')",
+                         "spy.nsa2_set_param('basis_adv', True) >> html.Update()",
+                         "spy.nsa2_set_param('basis_adv', False) >> html.Update()",
                          width=2) + \
         method_combo() + \
         cpu_combo() + \
@@ -820,15 +821,15 @@ def make_frag_HAR_GUI():
     t += begin_new_line() + \
           labeled_text("NoSpherA2_Basis_Set_Extra@refine",
                        "Adv. Basis Set",
-                       "spy.GetParam('snum.NoSpherA2.basis_adv_string')",
-                       "spy.SetParam('snum.NoSpherA2.basis_adv_string', html.GetValue('~name~'))",
+                       "spy.nsa2_get_param('basis_adv_string')",
+                       "spy.nsa2_set_param('basis_adv_string', html.GetValue('~name~'))",
                        width_label=15, width_textbox=50) + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line("NoSpherA2_Options_2") + \
         charge_spin() + \
         multiplicity_spin() + \
         iterative_checkbox()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -846,64 +847,64 @@ def make_frag_HAR_GUI():
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",
                       "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_SCF_Conv\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ORCA_SCF_Conv\')",
+                      "spy.nsa2_set_param(\'ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
                       width_label=17, width_combo=20) + \
         labeled_combo("NoSpherA2_ORCA_SCF_Strategy@refine",
                       "SCF Strategy",
                       "'EasyConv;NormalConv;SlowConv;VerySlowConv'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_SCF_Strategy\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ORCA_SCF_Strategy\')",
+                      "spy.nsa2_set_param(\'ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
                       width_label=17, width_combo=20) + \
         labeled_combo("NoSpherA2_ORCA_Solvation@refine",
                       "Solvation",
                       "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
-                      "spy.GetParam(\'snum.NoSpherA2.ORCA_Solvation\')",
-                      "spy.SetParam(\'snum.NoSpherA2.ORCA_Solvation\', html.GetValue(\'~name~\'))",
+                      "spy.nsa2_get_param(\'ORCA_Solvation\')",
+                      "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
                       width_label=13, width_combo=30) + \
         end_line()
-  custom_solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+  custom_solvation = nsa2_get_param('ORCA_Solvation')
   if custom_solvation == "Custom":
     t += begin_new_line() + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine",
                        "Epsilon",
-                       "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')",
-                       "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
+                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_epsilon')",
+                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
                        width_label=15, width_textbox=20) + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_refractive@refine",
                        "Refractive Index",
-                       "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')",
-                       "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
+                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_refrac')",
+                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
                        width_label=15, width_textbox=20) + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_probe@refine",
                       "Probe Radius (A)",
-                      "spy.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')",
-                      "spy.SetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('ORCA_Solvation_CPCM_rsolv')",
+                      "spy.nsa2_set_param('ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
                       width_label=15, width_textbox=20) + \
           end_line()
   t += begin_new_line() + \
         labeled_text("NoSpherA2_frag_HAR_radius_tol@refine",
                       "Radius Tol.",
-                      "spy.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance')",
-                      "spy.SetParam('snum.NoSpherA2.frag_HAR.radius_tolerance', html.GetValue('~name~'))",
+                      "spy.nsa2_get_param('frag_HAR.radius_tolerance')",
+                      "spy.nsa2_set_param('frag_HAR.radius_tolerance', html.GetValue('~name~'))",
                       width_label=8, width_textbox=9) + \
         labeled_checkbox("NoSpherA2_frag_HAR_test@refine",
                           "Test Fragments",
-                          "spy.GetParam('snum.NoSpherA2.frag_HAR.H_test')",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.H_test', True)",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.H_test', False)",
+                          "spy.nsa2_get_param('frag_HAR.H_test')",
+                          "spy.nsa2_set_param('frag_HAR.H_test', True)",
+                          "spy.nsa2_set_param('frag_HAR.H_test', False)",
                           width=1) + \
         labeled_checkbox("NoSpherA2_frag_HAR_H_Box_Ex@refine",
                           "H-bond",
-                          "spy.GetParam('snum.NoSpherA2.frag_HAR.H_box_ex')",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.H_box_ex', True)",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.H_box_ex', False)",
+                          "spy.nsa2_get_param('frag_HAR.H_box_ex')",
+                          "spy.nsa2_set_param('frag_HAR.H_box_ex', True)",
+                          "spy.nsa2_set_param('frag_HAR.H_box_ex', False)",
                           width=1) + \
         labeled_checkbox("NoSpherA2_frag_HAR_min_H_bond@refine",
                           "Min. H-bond",
-                          "spy.GetParam('snum.NoSpherA2.frag_HAR.min_H_bond')",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.min_H_bond', True)",
-                          "spy.SetParam('snum.NoSpherA2.frag_HAR.min_H_bond', False)",
+                          "spy.nsa2_get_param('frag_HAR.min_H_bond')",
+                          "spy.nsa2_set_param('frag_HAR.min_H_bond', True)",
+                          "spy.nsa2_set_param('frag_HAR.min_H_bond', False)",
                           width=1) + \
         end_line()
   t += partitioning_scheme_line()
@@ -918,7 +919,7 @@ def make_pySCF_GUI():
         multiplicity_spin() + \
         iterative_checkbox() + \
         end_line()
-  full_har = OV.GetParam('snum.NoSpherA2.full_HAR')
+  full_har = nsa2_get_param('full_HAR')
   if full_har == False:
     t += update_tsc_button()
   else:
@@ -941,7 +942,7 @@ def make_pySCF_GUI():
 def make_discambMATT_GUI():
   t = begin_new_line() + \
     iterative_checkbox()
-  iterative = OV.GetParam('snum.NoSpherA2.full_HAR')
+  iterative = nsa2_get_param('full_HAR')
   if iterative == False:
     t += update_tsc_button()
   else:
@@ -956,27 +957,27 @@ def make_xHARPY_GUI():
   t = begin_new_line() + method_combo() + \
     labeled_text("NoSpherA2_xHARPY_grid_spacing",
                  "Grid spacing (Ang)",
-                 "spy.GetParam('snum.NoSpherA2.xharpy.grid_spacing')",
-                 "spy.SetParam('snum.NoSpherA2.xharpy.grid_spacing', html.GetValue('~name~'))",
+                 "spy.nsa2_get_param('xharpy.grid_spacing')",
+                 "spy.nsa2_set_param('xharpy.grid_spacing', html.GetValue('~name~'))",
                  width_label=15, width_textbox=12) + \
     cpu_combo() + memory_text() + end_line()
   # Charge, Multiplicity, iterative and Update/Max cycles
   t += begin_new_line() + labeled_text("NoSpherA2_xHARPY_k_points1",
                                        "K-point grid",
-                                        "spy.GetParam('snum.NoSpherA2.xharpy.k_points1')",
-                                        "spy.SetParam('snum.NoSpherA2.xharpy.k_points1', html.GetValue('~name~'))",
+                                        "spy.nsa2_get_param('xharpy.k_points1')",
+                                        "spy.nsa2_set_param('xharpy.k_points1', html.GetValue('~name~'))",
                                         width_label=15, width_textbox=12) + \
     standalone_text("NoSpherA2_xHARPY_k_points2",
-             "spy.GetParam('snum.NoSpherA2.xharpy.k_points2')",
-             "spy.SetParam('snum.NoSpherA2.xharpy.k_points2', html.GetValue('~name~'))", 12) + \
+             "spy.nsa2_get_param('xharpy.k_points2')",
+             "spy.nsa2_set_param('xharpy.k_points2', html.GetValue('~name~'))", 12) + \
     standalone_text("NoSpherA2_xHARPY_k_points3",
-             "spy.GetParam('snum.NoSpherA2.xharpy.k_points3')",
-             "spy.SetParam('snum.NoSpherA2.xharpy.k_points3', html.GetValue('~name~'))", 12) + \
+             "spy.nsa2_get_param('xharpy.k_points3')",
+             "spy.nsa2_set_param('xharpy.k_points3', html.GetValue('~name~'))", 12) + \
     labeled_checkbox("NoSpherA2_xHARPY_center_gamma",
                      "Center Gamma",
-                     "spy.GetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma')",
-                     "spy.SetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma', True)",
-                     "spy.SetParam('snum.NoSpherA2.xharpy.k_points_centre_gamma', False)",
+                     "spy.nsa2_get_param('xharpy.k_points_centre_gamma')",
+                     "spy.nsa2_set_param('xharpy.k_points_centre_gamma', True)",
+                     "spy.nsa2_set_param('xharpy.k_points_centre_gamma', False)",
                       width=10) + \
     end_line()
   t += begin_new_line() + WSL_distro() + update_tsc_button() + end_line()

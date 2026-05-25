@@ -1,6 +1,6 @@
 <!-- ======= ELMO SPECIFIC START ===================== -->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.source'),'ELMOdb')
+<!-- #ignoreif not strcmp(spy.nsa2_get_param('source'),'ELMOdb')
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Extras;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -10,17 +10,17 @@
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=tail",
     "label=Tailor made residues",
-    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.tail')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.tail','True') >> html.Update()",
+    "checked=spy.nsa2_get_param('ELMOdb.tail')",
+    "oncheck=spy.nsa2_set_param('ELMOdb.tail','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.tail','False') >> html.Update()"
+    "onuncheck=spy.nsa2_set_param('ELMOdb.tail','False') >> html.Update()"
     )
   $-
 </td>
 
 <!-- ============ START TAILOR MADE RESIDUES====================-->
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.tail'),'True')
+<!-- #ignoreif not strcmp(spy.nsa2_get_param('ELMOdb.tail'),'True')
 <td width="50%" align='right'>
     <b># of tailor made residues </b>
 </td>
@@ -32,8 +32,8 @@
     bgcolor="spy.GetParam(gui.html.input_bg_colour)"
     min='1'
     name='SET_SNUM_ELMODB_MAXTAIL',
-    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.maxtail)', 
-    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.maxtail,html.GetValue(~name~)) >> html.Update()"
+    value='$spy.nsa2_get_param('ELMOdb.maxtail')', 
+    onchange="spy.nsa2_set_param('ELMOdb.maxtail',html.GetValue(~name~)) >> html.Update()"
   > 
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -47,8 +47,8 @@
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_ELMODB_NTAIL",
       "items=spy.NoSpherA2.get_ntail_list()",
-      "value=spy.GetParam('snum.NoSpherA2.ELMOdb.ntail')",
-      "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.ntail', html.GetValue('~name~'))>>html.Update()")
+      "value=spy.nsa2_get_param('ELMOdb.ntail')",
+      "onchange=spy.nsa2_set_param('ELMOdb.ntail', html.GetValue('~name~'))>>html.Update()")
     $-
   </td>
 </td>
@@ -168,15 +168,15 @@ $-
   html.Snippet("gui/snippets/input-checkbox-td",
   "name=spect",
   "label=Special triad",
-  "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.spect')",
-  "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.spect','True') >> html.Update()",
+  "checked=spy.nsa2_get_param('ELMOdb.spect')",
+  "oncheck=spy.nsa2_set_param('ELMOdb.spect','True') >> html.Update()",
   "bgcolor=GetVar(HtmlTableRowBgColour)",
-  "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.spect','False') >> html.Update()")
+  "onuncheck=spy.nsa2_set_param('ELMOdb.spect','False') >> html.Update()")
   $-
 </td>
 
 <!-- ============ START SPECIAL TRIAD====================-->
-<!-- #ignoreif strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.spect'),'False')
+<!-- #ignoreif strcmp(spy.nsa2_get_param('ELMOdb.spect'),'False')
 <td width="30%" align='right'>
     <b> # of special triads  </b>
 </td>
@@ -188,8 +188,8 @@ $-
     bgcolor="spy.GetParam(gui.html.input_bg_colour)"
     min='1'
     name='SET_SNUM_ELMODB_NSPECT',
-    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.nspect)', 
-    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.nspect,html.GetValue(~name~))"
+    value='$spy.nsa2_get_param('ELMOdb.nspect')', 
+    onchange="spy.nsa2_set_param('ELMOdb.nspect',html.GetValue(~name~))"
   > 
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -206,8 +206,8 @@ $-
   "multiline=true",
   "height=40",
   "name=ELMOdb_NT1_SPECINP",
-  "value=spy.GetParam('snum.NoSpherA2.ELMOdb.specinp')",
-  "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.specinp', html.GetValue('~name~'))")
+  "value=spy.nsa2_get_param('ELMOdb.specinp')",
+  "onchange=spy.nsa2_set_param('ELMOdb.specinp', html.GetValue('~name~'))")
   $-
 </td>
 #ignoreif -->
@@ -225,16 +225,16 @@ $-
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=tail",
     "label=Disulfide bonds",
-    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.ssbond')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbond','True') >> html.Update()",
+    "checked=spy.nsa2_get_param('ELMOdb.ssbond')",
+    "oncheck=spy.nsa2_set_param('ELMOdb.ssbond','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbond','False') >> html.Update()"
+    "onuncheck=spy.nsa2_set_param('ELMOdb.ssbond','False') >> html.Update()"
     )
   $-
 </td>
 
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.ssbond'),'True')
+<!-- #ignoreif not strcmp(spy.nsa2_get_param('ELMOdb.ssbond'),'True')
 <td width="40%" align='right'>
     <b> # of disulfide bonds </b>
 </td>
@@ -246,8 +246,8 @@ $-
     bgcolor="spy.GetParam(gui.html.input_bg_colour)"
     min='1'
     name='SET_SNUM_ELMODB_NSSBOND',
-    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.nssbond)', 
-    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.nssbond,html.GetValue(~name~))"
+    value='$spy.nsa2_get_param('ELMOdb.nssbond')', 
+    onchange="spy.nsa2_set_param('ELMOdb.nssbond',html.GetValue(~name~))"
   > 
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -264,8 +264,8 @@ $-
     "multiline=true",
     "height=40",
     "name=ELMOdb_SSBONDINP",
-    "value=spy.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.ssbondinp', html.GetValue('~name~'))")
+    "value=spy.nsa2_get_param('ELMOdb.ssbondinp')",
+    "onchange=spy.nsa2_set_param('ELMOdb.ssbondinp', html.GetValue('~name~'))")
   $-
 </td>
 #ignoreif -->
@@ -281,16 +281,16 @@ $-
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=tail",
     "label=Cyclic polypeptide",
-    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.cycl')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.cycl','True') >> html.Update()",
+    "checked=spy.nsa2_get_param('ELMOdb.cycl')",
+    "oncheck=spy.nsa2_set_param('ELMOdb.cycl','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.cycl','False') >> html.Update()"
+    "onuncheck=spy.nsa2_set_param('ELMOdb.cycl','False') >> html.Update()"
     )
   $-
 </td>
 
 
-<!-- #ignoreif not strcmp(spy.GetParam('snum.NoSpherA2.ELMOdb.cycl'),'True')
+<!-- #ignoreif not strcmp(spy.nsa2_get_param('ELMOdb.cycl'),'True')
 <td width="40%" align='right'>
     <b> # of cyclic polypeptides </b>
 </td>
@@ -302,8 +302,8 @@ $-
     bgcolor="spy.GetParam(gui.html.input_bg_colour)"
     min='1'
     name='SET_SNUM_ELMODB_NCYPEP',
-    value='$spy.GetParam(snum.NoSpherA2.ELMOdb.ncycl)', 
-    onchange="spy.SetParam(snum.NoSpherA2.ELMOdb.ncycl,html.GetValue(~name~))"
+    value='$spy.nsa2_get_param('ELMOdb.ncycl')', 
+    onchange="spy.nsa2_set_param('ELMOdb.ncycl',html.GetValue(~name~))"
   > 
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -320,8 +320,8 @@ $-
     "multiline=true",
     "height=40",
     "name=ELMOdb_CYPEPINP",
-    "value=spy.GetParam('snum.NoSpherA2.ELMOdb.cyclinp')",
-    "onchange=spy.SetParam('snum.NoSpherA2.ELMOdb.cyclinp', html.GetValue('~name~'))")
+    "value=spy.nsa2_get_param('ELMOdb.cyclinp')",
+    "onchange=spy.nsa2_set_param('ELMOdb.cyclinp', html.GetValue('~name~'))")
   $-
 </td>
 #ignoreif -->
@@ -337,10 +337,10 @@ $-
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=mutation",
     "label=Mutations",
-    "checked=spy.GetParam('snum.NoSpherA2.ELMOdb.mutation')",
-    "oncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','True') >> html.Update()",
+    "checked=spy.nsa2_get_param('ELMOdb.mutation')",
+    "oncheck=spy.nsa2_set_param('ELMOdb.mutation','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableRowBgColour)",
-    "onuncheck=spy.SetParam('snum.NoSpherA2.ELMOdb.mutation','False') >> html.Update()"
+    "onuncheck=spy.nsa2_set_param('ELMOdb.mutation','False') >> html.Update()"
     )
   $-
 </td>
@@ -348,3 +348,4 @@ $-
 <!-- ============ END MUTATIONS ====================-->                                                         
 #ignoreif -->
 <!-- ============ ELMO SPECIFIC END ====================-->
+

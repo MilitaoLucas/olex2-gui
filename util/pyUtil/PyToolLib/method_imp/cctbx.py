@@ -33,8 +33,12 @@ class Method_cctbx_refinement(Method_refinement):
         self.table_file_name = None
     if use_aspherical == True:
       self.method = OV.GetParam('snum.refinement.method')
-      self.table_file_name = OV.GetParam('snum.NoSpherA2.file')
-      html = f"olex2.refine using __non-spherical__ form factors from __{os.path.basename(self.table_file_name)}__ "
+      from variableFunctions import nsa2_get_param
+      self.table_file_name = nsa2_get_param('file')
+      if self.table_file_name:
+        html = f"olex2.refine using __non-spherical__ form factors from __{os.path.basename(self.table_file_name)}__ "
+      else:
+        html = f"olex2.refine using __non-spherical__ form factors (file not found)"
       OV.SetVar('gui_notification', html)
       if not os.path.exists(self.table_file_name):
         self.table_file_name = None

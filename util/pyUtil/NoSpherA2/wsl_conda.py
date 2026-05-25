@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 from olexFunctions import OlexFunctions
+from NoSpherA2.utilities import nsa2_get_param
 import time
 OV = OlexFunctions()
 
@@ -112,7 +113,7 @@ class WSLAdapter(object):
       return result.stdout.strip()
     try:
       wsl_cmd = ["wsl"]
-      selected_distro = OV.GetParam("snum.NoSpherA2.distro", None)
+      selected_distro = nsa2_get_param("distro", None)
       if selected_distro not in self.disto_list:
         print("Selected WSL distribution is not available. Using default: Ubuntu.")
         selected_distro = None
@@ -170,7 +171,7 @@ class WSLAdapter(object):
       return result.stdout.strip()
     try:
       wsl_cmd = ["wsl"]
-      selected_distro = OV.GetParam("snum.NoSpherA2.distro", None)
+      selected_distro = nsa2_get_param("distro", None)
       if selected_distro is not None and selected_distro != "None":
         wsl_cmd.extend(["-d", selected_distro])
       result = subprocess.run(

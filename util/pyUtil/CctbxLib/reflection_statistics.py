@@ -2,6 +2,7 @@ from __future__ import division
 from cctbx_olex_adapter import OlexCctbxAdapter
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param
 import olx
 
 from cctbx import statistics
@@ -145,7 +146,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2 = None
       fc = None
       if NoSpherA2:
-        table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+        table_name = str(nsa2_get_param("file"))
         table_name = table_name.lstrip().rstrip()
         fo2, fc = self.get_fo_sq_fc(
           one_h_function=self.get_one_h_function(table_name))
@@ -237,7 +238,7 @@ class item_vs_resolution(OlexCctbxAdapter):
 #    if NoSpherA2:
 #      from refinement import FullMatrixRefine
 #      fmr = FullMatrixRefine()
-#      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+#      table_name = str(nsa2_get_param("file"))
 #      nrml_eqns = fmr.run(build_only=True, table_file_name = table_name)
 #      fo2, fc = self.get_fo_sq_fc(one_h_function=nrml_eqns.one_h_linearisation)
 #    else:
@@ -281,7 +282,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     fo2 = None
     fc = None
     if NoSpherA2:
-      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = str(nsa2_get_param("file"))
       table_name = table_name.lstrip().rstrip()
       fo2, fc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
@@ -341,7 +342,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     batch_numbers = None
     one_h_function = None
     if NoSpherA2:
-      table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+      table_name = str(nsa2_get_param("file")).lstrip().rstrip()
       one_h_function = self.get_one_h_function(table_name)
 
     if self.hklf_code == 2:
@@ -472,7 +473,7 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     do_scale = True
     one_h_function = None
     if NoSpherA2:
-      table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+      table_name = str(nsa2_get_param("file")).lstrip().rstrip()
       one_h_function = self.get_one_h_function(table_name)
 
     if self.hklf_code == 2:
@@ -614,7 +615,7 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
     f_sq_obs_filtered = None
     f_calc_filtered = None
     if NoSpherA2:
-      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = str(nsa2_get_param("file"))
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
     else:
@@ -678,7 +679,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     f_sq_obs = None
     f_calc = None
     if NoSpherA2:
-      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      table_name = str(nsa2_get_param("file"))
       f_sq_obs, f_calc = self.get_fo_sq_fc(
         one_h_function=self.get_one_h_function(table_name))
     else:

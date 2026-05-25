@@ -1,5 +1,7 @@
 import os
 import sys
+
+from sympy import re
 import olex
 import olexex
 import olx
@@ -11,10 +13,11 @@ import subprocess
 import hashlib
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param, nsa2_set_param
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
-from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, ELEMENTS, ELEMENTS_BY_SYMBOL
+from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, ELEMENTS, ELEMENTS_BY_SYMBOL
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
@@ -271,7 +274,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   #  self.f_calc = f_calc
   #  self.f_obs_sq = f_obs_sq
   #  self.one_h_linearisation = one_h_linarization
-  #  file_name = OV.GetParam("snum.NoSpherA2.file")
+  #  file_name = nsa2_get_param("file")
   #  time = os.path.getmtime(file_name)
   #  self.reflection_date = time
 
@@ -319,7 +322,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         _l += 1
       backup += f"_{_l}"
 
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    Full_HAR = nsa2_get_param('full_HAR')
     run = None
     if Full_HAR:
       run = OV.GetVar('Run_number')
@@ -383,7 +386,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
               If hash is empty (file not found), origin will be set to "externally provided".
     """
     # Set the file parameter
-    OV.SetParam('snum.NoSpherA2.file', filename)
+    nsa2_set_param('file', filename)
     
     # Compute file hash if the file exists
     file_path = os.path.join(OV.FilePath(), filename)
@@ -404,17 +407,17 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         origin = self.wfn_code if hasattr(self, 'wfn_code') else software()
     
     # Store metadata
-    OV.SetParam('snum.NoSpherA2.file_hash', file_hash)
-    OV.SetParam('snum.NoSpherA2.file_origin', origin)
+    nsa2_set_param('file_hash', file_hash)
+    nsa2_set_param('file_origin', origin)
 
   def launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = software()
     self.wfn_code = wfn_code
     self.name = olx.FileName()
-    basis = OV.GetParam('snum.NoSpherA2.basis_name').lower()
+    basis = nsa2_get_param('basis_name').lower()
     update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
-    experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
+    experimental_SF = nsa2_get_param('NoSpherA2_SF')
     if "Please S" in wfn_code and update:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
@@ -453,7 +456,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
         OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
         return False
-      mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      mult = int(nsa2_get_param('multiplicity'))
       if (ne % 2 == 0) and (mult % 2 == 0):
         print ("Error! Multiplicity and number of electrons is even. This is impossible!\n")
         OV.SetVar('NoSpherA2-Error',"Multiplicity")
@@ -471,7 +474,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     tsc_exists = False
     has_backup_candidates = False
     f_time = None
-    if not OV.GetParam('snum.NoSpherA2.no_backup'):
+    if not nsa2_get_param('no_backup'):
       backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn", ".xtb", ".tscb", ".tsc", ".wfnlog"]
       for file in os.listdir(olx.FilePath()):
         full_file = os.path.join(olx.FilePath(), file)
@@ -592,7 +595,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           need_to_combine = True
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
-          hybrid_part_wfn_code = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%(parts[i]))
+          hybrid_part_wfn_code = nsa2_get_param("Hybrid.software_Part%d"%(parts[i]))
           if hybrid_part_wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
             groups.pop(i-groups_counter)
             groups_counter+=1
@@ -634,7 +637,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if wfn_code != "Tonto":
             shutil.move("%s_part_%s.xyz" % (self.name, parts[i]), os.path.join(wfn_job_dir, "%s.xyz" % (self.name)))
             if wfn_code == "ELMOdb":
-              mutation = OV.GetParam('snum.NoSpherA2.ELMOdb.mutation')
+              mutation = nsa2_get_param('ELMOdb.mutation')
               pdb_name = job.name + ".pdb"
               if mutation:
                 pdb_name += "_mut" + str(parts[i])
@@ -646,7 +649,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                   raise NameError('No pdb_name file available for mutation!')
                 else:
                   raise NameError('No pdb file available! Make sure the name of the pdb file is the same as the name of your ins file!')
-            OV.SetParam('snum.NoSpherA2.fchk_file', self.name + ".fchk")
+            nsa2_set_param('fchk_file', self.name + ".fchk")
             try:
               self.wfn(folder=wfn_job_dir, xyz=False, part=parts[i])  # Produces Fchk file in all cases that are not fchk or tonto directly
             except NameError as error:
@@ -836,10 +839,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           shutil.copy(os.path.join(job.full_dir, job.name+".tsc"),job.name+".tsc")
           self.set_tsc_file_with_metadata(job.name+".tsc", "Tonto")
     # add_info_to_tsc()
-    if not OV.GetParam('snum.NoSpherA2.full_HAR'):
-      fn = str(OV.GetParam('snum.NoSpherA2.file'))
+    if not nsa2_get_param('full_HAR'):
+      fn = str(nsa2_get_param('file'))
       # Keep source in the same display format as dropdown entries.
-      OV.SetParam('snum.NoSpherA2.source', "  " + fn)
+      nsa2_set_param('source', "  " + fn)
 
     return True
 
@@ -859,15 +862,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       run_frag_HAR_wfn(res_file, cif_file, qS_file, wfn_object, part)
       return
     elif soft == "Hybrid":
-      software_part = OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d" % part)
-      basis_part = OV.GetParam("snum.NoSpherA2.Hybrid.basis_name_Part%d" % part)
-      method_part = OV.GetParam("snum.NoSpherA2.Hybrid.method_Part%d" % part)
-      relativistc = OV.GetParam("snum.NoSpherA2.Hybrid.Relativistic_Part%d" % part)
-      charge = OV.GetParam("snum.NoSpherA2.Hybrid.charge_Part%d" % part)
-      mult = OV.GetParam("snum.NoSpherA2.Hybrid.multiplicity_Part%d" % part)
-      conv = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Conv_Part%d" % part)
-      strategy = OV.GetParam("snum.NoSpherA2.Hybrid.ORCA_SCF_Strategy_Part%d" % part)
-      damping = OV.GetParam("snum.NoSpherA2.Hybrid.pySCF_Damping_Part%d" % part)
+      software_part = nsa2_get_param("Hybrid.software_Part%d" % part)
+      basis_part = nsa2_get_param("Hybrid.basis_name_Part%d" % part)
+      method_part = nsa2_get_param("Hybrid.method_Part%d" % part)
+      relativistc = nsa2_get_param("Hybrid.Relativistic_Part%d" % part)
+      charge = nsa2_get_param("Hybrid.charge_Part%d" % part)
+      mult = nsa2_get_param("Hybrid.multiplicity_Part%d" % part)
+      conv = nsa2_get_param("Hybrid.ORCA_SCF_Conv_Part%d" % part)
+      strategy = nsa2_get_param("Hybrid.ORCA_SCF_Strategy_Part%d" % part)
+      damping = nsa2_get_param("Hybrid.pySCF_Damping_Part%d" % part)
       wfn_object.software = software_part.lstrip()
       if wfn_object.software == "ELMOdb":
         print("ELMO not yet fully implemented for Hybrid!!! Sorry!!")
@@ -958,12 +961,17 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       try:
         import subprocess
         creationflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
-        p = subprocess.run(['orca', '-v'], capture_output=True, text=True, creationflags=creationflags)
-        idx = p.stdout.index("Version")
-        result = p.stdout[idx:idx + 50].split('\n')[0].split()[1]
-        print("-- ORCA VERSION: ", result)  # print the version
-        OV.SetParam('NoSpherA2.ORCA_Version', result.split(".")[0])
-        OV.SetParam('NoSpherA2.ORCA_Version_Minor', result.split(".")[1])
+        p = subprocess.run(['orca', '-v'], capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=creationflags)
+        if "Version" not in p.stdout:
+          print("-- Could not detect ORCA version from output")
+        else:
+          idx = p.stdout.index("Version")
+          result = p.stdout[idx:idx + 50].split("\n")[0].split()[1]
+          parts = result.split(".")
+          major = parts[0]
+          minor = parts[1] if len(parts) > 1 else "0"
+          OV.SetParam("NoSpherA2.ORCA_Version", major)
+          OV.SetParam("NoSpherA2.ORCA_Version_Minor", minor)
       except Exception as e:
         print("-- Failed to evaluate ORCA version", e)
       Orca_Vers = OV.GetParam('NoSpherA2.ORCA_Version')
@@ -1035,7 +1043,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         max_Z = ec
     final_string = ""
     for basis in BL:
-      if OV.GetParam("snum.NoSpherA2.basis_adv"):
+      if nsa2_get_param("basis_adv"):
         final_string += basis + ";"
       elif self.check_for_atom_in_basis_set(basis, model._atoms):
         final_string += basis + ";"
@@ -1045,7 +1053,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     return final_string
 
   def disable_relativistics(self):
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
+    basis_name = nsa2_get_param('basis_name').lower()
     if "dkh" in basis_name:
       return False
     if "x2c" in basis_name:
@@ -1221,52 +1229,52 @@ class Job(object):
       args = [self.name+"_tonto.cif",
               "-basis-dir", self.parent.basis_dir,
               "-shelx-f2", self.name+".hkl"
-              ,"-basis", OV.GetParam('snum.NoSpherA2.basis_name')
-              ,"-cluster-radius", str(OV.GetParam('snum.NoSpherA2.cluster_radius'))
-              ,"-dtol", OV.GetParam('snum.NoSpherA2.DIIS')
-              ]
-      method = OV.GetParam('snum.NoSpherA2.method')
+          ,"-basis", nsa2_get_param('basis_name')
+          ,"-cluster-radius", str(nsa2_get_param('cluster_radius'))
+          ,"-dtol", nsa2_get_param('DIIS')
+          ]
+      method = nsa2_get_param('method')
       args.append("-scf")
       if method == "HF":
         args.append("rhf")
       else:
         args.append("rks")
-      if not OV.GetParam('snum.NoSpherA2.cluster_grow'):
+      if not nsa2_get_param('cluster_grow'):
         args.append("-complete-mol")
         args.append("f")
 
-      if OV.GetParam('snum.NoSpherA2.Relativistic'):
+      if nsa2_get_param('Relativistic'):
         args.append("-dkh")
         args.append("t")
     elif fchk_source == "SALTED":
-      salted_model_dir = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+      salted_model_dir = nsa2_get_param('selected_salted_model')
       args = ["-SALTED",salted_model_dir, "-cif" ,data_file_name+".cif", "-xyz", data_file_name+".xyz", "-dmin", ]
     else:
       # We want these from supplied fchk file """
-      fchk_file = OV.GetParam('snum.NoSpherA2.fchk_file')
+      fchk_file = nsa2_get_param('fchk_file')
       args = [self.name+"_tonto.cif",
               "-shelx-f2", self.name+".hkl ",
               "-fchk", fchk_file]
 
-    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
-      args = [self.parent.mpiexec, "-np", OV.GetParam('snum.NoSpherA2.ncpus'), self.parent.mpi_har] + args
+    if nsa2_get_param('ncpus') != '1':
+      args = [self.parent.mpiexec, "-np", nsa2_get_param('ncpus'), self.parent.mpi_har] + args
     else:
       args = [self.parent.exe] + args
 
-    if OV.GetParam('snum.NoSpherA2.charge') != '0':
+    if nsa2_get_param('charge') != '0':
       args.append("-charge")
-      args.append(OV.GetParam('snum.NoSpherA2.charge'))
-    if OV.GetParam('snum.NoSpherA2.multiplicity') != '1':
-      multiplicity = OV.GetParam('snum.NoSpherA2.multiplicity')
+      args.append(nsa2_get_param('charge'))
+    if nsa2_get_param('multiplicity') != '1':
+      multiplicity = nsa2_get_param('multiplicity')
       if multiplicity == '0':
         OV.SetVar('NoSpherA2-Error',"Multiplicity0")
         raise NameError('Multiplicity of 0 is meaningless!')
       args.append("-mult")
       args.append(multiplicity)
-    if not OV.GetParam('snum.NoSpherA2.keep_wfn'):
+    if not nsa2_get_param('keep_wfn'):
       args.append("-wfn")
       args.append("f")
-    if OV.GetParam('snum.NoSpherA2.NoSpherA2_SF'):
+    if nsa2_get_param('NoSpherA2_SF'):
       args.append("-scf-only")
       args.append("t")
 
@@ -1285,9 +1293,9 @@ class Job(object):
           os.remove(stale_fn)
         except Exception:
           pass
-    OV.SetParam('snum.NoSpherA2.name',self.name)
-    OV.SetParam('snum.NoSpherA2.dir',self.full_dir)
-    OV.SetParam('snum.NoSpherA2.cmd',args)
+    nsa2_set_param('name',self.name)
+    nsa2_set_param('dir',self.full_dir)
+    nsa2_set_param('cmd',args)
 
     startinfo = None
     creationflags = 0
@@ -1329,7 +1337,7 @@ class Job(object):
     shutil.move(self.wfn_name, os.path.join(self.full_dir, self.name) + ".ffn")
 
 def add_info_to_tsc():
-  tsc_fn = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  tsc_fn = os.path.join(nsa2_get_param('dir'), nsa2_get_param('file'))
   if not os.path.isfile(tsc_fn):
     print("Error finding tsc File!\n")
     return False
@@ -1357,26 +1365,26 @@ The following options were used:
 """
   soft = software()
   # Use the stored origin (set at calculation time) if available; fall back to software() result
-  origin = OV.GetParam('snum.NoSpherA2.file_origin')
+  origin = nsa2_get_param('file_origin')
   if not origin:
     origin = soft
   details_text = details_text + "   SOFTWARE:       %s\n"%origin
   if soft != OV.GetParam('user.NoSpherA2.discamb_exe'):
-    charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-    partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
-    accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    charge = nsa2_get_param('charge')
+    mult = nsa2_get_param('multiplicity')
+    partitioning = nsa2_get_param('NoSpherA2_SF')
+    accuracy = nsa2_get_param('becke_accuracy')
     if partitioning:
       details_text += "   PARTITIONING:   NoSpherA2\n"
       details_text += "   INT ACCURACY:   %s\n"%accuracy
     else:
       details_text += "   PARTITIONING:   Tonto\n"
     if soft == "SALTED":
-      salted_model = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+      salted_model = nsa2_get_param('selected_salted_model')
       details_text += "   MODEL:          %s\n"%os.path.basename(str(salted_model))
     elif soft == "Thakkar IAM":
-      cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
-      anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+      cations = nsa2_get_param('Thakkar_Cations')
+      anions = nsa2_get_param('Thakkar_Anions')
       if cations:
         details_text += "   CATIONS:        %s\n"%cations
       if anions:
@@ -1384,20 +1392,20 @@ The following options were used:
     elif soft == "pTB":
       pass  # pTB does not use method or basis set
     else:
-      method = OV.GetParam('snum.NoSpherA2.method')
+      method = nsa2_get_param('method')
       details_text += "   METHOD:         %s\n"%method
       if soft != "xTB":
-        basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+        basis_set = nsa2_get_param('basis_name')
         details_text += "   BASIS SET:      %s\n"%basis_set
     details_text += "   CHARGE:         %s\n"%charge
     details_text += "   MULTIPLICITY:   %s\n"%mult
-    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+    relativistic = nsa2_get_param('Relativistic')
     if relativistic:
       details_text += "   RELATIVISTIC:   DKH2\n"
     if software == "Tonto":
-      radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+      radius = nsa2_get_param('cluster_radius')
       details_text += "   CLUSTER RADIUS: %s\n"%radius
-  tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),OV.GetParam('snum.NoSpherA2.file'))
+  tsc_file_name = os.path.join(nsa2_get_param('dir'), nsa2_get_param('file'))
   if os.path.exists(tsc_file_name):
     f_time = os.path.getctime(tsc_file_name)
   else:
@@ -1435,19 +1443,19 @@ The following options were used:
 OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
 def change_basisset(input):
-  OV.SetParam('snum.NoSpherA2.basis_name',input)
+  nsa2_set_param('basis_name',input)
   if "x2c" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    nsa2_set_param('Relativistic', True)
     if OV.HasGUI():
       OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'True')
       OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   elif "DKH" in input:
-    OV.SetParam('snum.NoSpherA2.Relativistic', True)
+    nsa2_set_param('Relativistic', True)
     if OV.HasGUI():
       OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'True')
       OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'True')
   else:
-    OV.SetParam('snum.NoSpherA2.Relativistic', False)
+    nsa2_set_param('Relativistic', False)
     if OV.HasGUI():
       OV.SetControlState('NoSpherA2_ORCA_Relativistics@refine', 'False')
       OV.SetControlEnabled('NoSpherA2_ORCA_Relativistics@refine', 'False')
@@ -1504,18 +1512,19 @@ OlexSys and the Olex2-Team do not take any responsibility for damage done to you
         olx.Alert("No WSL Distros found", """Please install a WSL Distro first!
 For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         return
-      distro = OV.GetParam('snum.NoSpherA2.distro', "Ubuntu")
+      distro = nsa2_get_param('distro', "Ubuntu")
       if distro == "Select Distro to use<-None" and wsl_adapter.is_windows:
         print("No WSL Distro selected.")
         print("Available Distros: ", distros)
-        print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
+        print("Please select a WSL Distro using spy.SetParam(distro, <distro_name>).")
         return
       elif wsl_adapter.is_windows:
         print("Installing pySCF in WSL Distro: ", distro)
       print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c 'micromamba create -y -n pyscf pyscf python=3.12 -c conda-forge'")
       NoSpherA2_instance.softwares.replace("Get pySCF", "pySCF")
-      OV.SetParam('snum.NoSpherA2.source', "  pySCF")
+      nsa2_set_param('source', "  pySCF")
+      reset_unused_generator_flags("pySCF")
       olex.m("html.Update()")
   elif input == "Get XHARPy":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
@@ -1535,18 +1544,19 @@ OlexSys and the Olex2-Team do not take any responsibility for damage done to you
         olx.Alert("No WSL Distros found", """Please install a WSL Distro first!
 For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         return
-      distro = OV.GetParam('snum.NoSpherA2.distro')
+      distro = nsa2_get_param('distro')
       if distro == "Select Distro to use<-None" and wsl_adapter.is_windows:
         print("No WSL Distro selected.")
         print("Available Distros: ", distros)
-        print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
+        print("Please select a WSL Distro using spy.SetParam(distro, <distro_name>).")
         return
       wsl_adapter.copy_from_possible_wsl(script, "~/XHARPy.sh")
       print("Installing XHARPy in WSL Distro: ", distro)
       print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c '~/XHARPy.sh -y'")
       NoSpherA2_instance.softwares.replace("Get XHARPy", "XHARPy")
-      OV.SetParam('snum.NoSpherA2.source', "  XHARPy")
+      nsa2_set_param('source', "  XHARPy")
+      reset_unused_generator_flags("XHARPy")
       olex.m("html.Update()")
 
   elif input == "Get Psi4":
@@ -1564,36 +1574,38 @@ OlexSys and the Olex2-Team do not take any responsibility for damage done to you
         olx.Alert("No WSL Distros found", """Please install a WSL Distro first!
 For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
         return
-      distro = OV.GetParam('snum.NoSpherA2.distro', "Ubuntu")
+      distro = nsa2_get_param('distro', "Ubuntu")
       if distro == "Select Distro to use<-None" and wsl_adapter.is_windows:
         print("No WSL Distro selected.")
         print("Available Distros: ", distros)
-        print("Please select a WSL Distro using spy.SetParam(snum.NoSpherA2.distro, <distro_name>).")
+        print("Please select a WSL Distro using spy.SetParam(distro, <distro_name>).")
         return
       elif wsl_adapter.is_windows:
         print("Installing Psi4 in WSL Distro: ", distro)
       print("This will take a while, please be patient.")
       wsl_adapter.call_command("bash -i -c 'micromamba create -y -n psi4 psi4 python=3.12 -c conda-forge/label/libint_dev -c conda-forge'")
       NoSpherA2_instance.softwares.replace("Get Psi4", "Psi4")
-      OV.SetParam('snum.NoSpherA2.source', "  Psi4")
+      nsa2_set_param('source', "  Psi4")
+      reset_unused_generator_flags("Psi4")
       olex.m("html.Update()")
   elif " -- " in input or "Please Select" in input:
     print("ERROR: Invalid tsc generator selected.\nYou cannot select a header.\n Please select a valid option.")
     return
   else:
-    OV.SetParam('snum.NoSpherA2.source', input)
+    nsa2_set_param('source', input)
     _input = input.lstrip().rstrip()
+    reset_unused_generator_flags(_input)
     if ".tsc" in _input:
       NoSpherA2_instance.set_tsc_file_with_metadata(_input)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
-    if _input != OV.GetParam('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
+    if _input != nsa2_get_param('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, model = calculate_number_of_electrons()
-      mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      mult = int(nsa2_get_param('multiplicity'))
       if mult == 0:
         if (ne % 2 == 0):
-          OV.SetParam('snum.NoSpherA2.multiplicity',1)
+          nsa2_set_param('multiplicity',1)
         elif (ne % 2 != 0):
-          OV.SetParam('snum.NoSpherA2.multiplicity',2)
+          nsa2_set_param('multiplicity',2)
 OV.registerFunction(change_tsc_generator,False,'NoSpherA2')
 
 def set_default_cpu_and_mem():
@@ -1601,16 +1613,16 @@ def set_default_cpu_and_mem():
   import multiprocessing
   parallel = OV.GetVar("Parallel")
   max_cpu = multiprocessing.cpu_count()
-  hyperthreading = OV.GetParam('user.refinement.has_HT')
+  hyperthreading = nsa2_get_param('user.refinement.has_HT')
   if not hyperthreading:
     max_cpu /= 2
-  current_cpus = OV.GetParam('snum.NoSpherA2.ncpus')
+  current_cpus = nsa2_get_param('ncpus')
   update = False
   if not parallel:
-    OV.SetParam('snum.NoSpherA2.ncpus',1)
+    nsa2_set_param('ncpus',1)
     return
   if (max_cpu == 1):
-    OV.SetParam('snum.NoSpherA2.ncpus',1)
+    nsa2_set_param('ncpus',1)
     return
   elif (current_cpus != "1"):
     update = True
@@ -1646,15 +1658,15 @@ def set_default_cpu_and_mem():
   tf_mem = math.floor(mem_gib/4*30)/10
   tf_cpu = math.floor(max_cpu/4*3)
   if not update:
-    OV.SetParam('snum.NoSpherA2.ncpus',str(int(tf_cpu)))
-  OV.SetParam('snum.NoSpherA2.mem', str(tf_mem))
+    nsa2_set_param('ncpus',str(int(tf_cpu)))
+  nsa2_set_param('mem', str(tf_mem))
 OV.registerFunction(set_default_cpu_and_mem,False,'NoSpherA2')
 
 def toggle_GUI():
   if OV.IsNoSpherA2():
-    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
+    nsa2_set_param('use_aspherical', False)
   else:
-    OV.SetParam('snum.NoSpherA2.use_aspherical', True)
+    nsa2_set_param('use_aspherical', True)
     set_default_cpu_and_mem()
   if OV.HasGUI():
     OV.UpdateHtml()

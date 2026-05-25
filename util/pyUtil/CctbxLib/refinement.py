@@ -6,6 +6,7 @@ ext = python.import_ext("smtbx_refinement_least_squares_ext")
 constraints_ext = python.import_ext("smtbx_refinement_constraints_ext")
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param
 
 import olx
 import olex
@@ -127,7 +128,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         ext.build_normal_equations.available_threads,
         open_blas_tn,
         OV.GetParam("user.refinement.use_openmp")))
-    fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+    fcf_only = nsa2_get_param('make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
     self.normal_equations_class = normal_equations_class_builder()
     self.use_tsc = table_file_name is not None

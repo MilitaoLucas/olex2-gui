@@ -930,7 +930,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_calc_set = mask.fo2.set()
     one_h = None
     if OV.IsNoSpherA2():
-      table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+      from variableFunctions import nsa2_get_param
+      table_name = str(nsa2_get_param("file"))
       table_name = table_name.lstrip().rstrip()
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(

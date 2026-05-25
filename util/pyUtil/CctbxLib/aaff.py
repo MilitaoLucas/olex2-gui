@@ -3,14 +3,16 @@ import olex, olx
 from olexex import OlexRefinementModel
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param, nsa2_set_param
 from RunPrg import RunPrg, RunRefinementPrg
+from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity, nsa2_check_tsc_origin_known, write_precise_model_file
 
 
 def deal_with_AAFF(self: RunRefinementPrg):
   HAR_log = None
   try:
     from cctbx import adptbx
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    Full_HAR = nsa2_get_param('full_HAR')
     old_model = OlexRefinementModel()
     converged = False
     run = 0
@@ -22,7 +24,7 @@ def deal_with_AAFF(self: RunRefinementPrg):
     HAR_log.write("Cycle     SCF Energy    Max shift:  xyz/ESD     Label   Uij/ESD       Label   Max/ESD       Label    R1    wR2\n"+"*" * 110 + "\n")
     HAR_log.write("{:3d}".format(run))
     energy = None
-    source = str(OV.GetParam('snum.NoSpherA2.source')).lstrip()
+    source = str(nsa2_get_param('source')).lstrip()
     update = ".tsc" not in source and ".tscb" not in source
     if "Please S" in source and update:
       olx.Alert("No tsc generator selected",\
@@ -47,12 +49,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       HAR_log.write("{:>7}".format("N/A"))
     HAR_log.write("\n")
     HAR_log.flush()
-    max_cycles = int(OV.GetParam('snum.NoSpherA2.Max_HAR_Cycles'))
+    max_cycles = int(nsa2_get_param('Max_HAR_Cycles'))
     if update:
-      if OV.GetParam('snum.NoSpherA2.h_aniso'):
+      if nsa2_get_param('h_aniso'):
         olx.Anis("$D", h=True)
         olx.Anis("$H", h=True)
-      if OV.GetParam('snum.NoSpherA2.h_afix'):
+      if nsa2_get_param('h_afix'):
         olex.m("Afix 0 $H")
       else:
         print("Setting all AFIX H Atoms to Neutron distances")
@@ -84,7 +86,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       tsc_exists = False
       wfn_file = None
-      table_file_name = OV.GetParam('snum.NoSpherA2.file')
+      table_file_name = nsa2_get_param('file')
       table_file_name = table_file_name.lstrip().rstrip()
       for file in os.listdir(olx.FilePath()):
         if file == os.path.basename(table_file_name):
@@ -113,7 +115,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               f.seek(-2000, os.SEEK_END)
               fread = f.readlines()[-1].decode()
               if "THE VIRIAL" in fread:
-                source = OV.GetParam('snum.NoSpherA2.source').lstrip()
+                source = nsa2_get_param('source').lstrip()
                 if "Gaussian" in source:
                   energy = float(fread.split()[3])
                 elif "ORCA" in source:
@@ -133,7 +135,59 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           fread = None
         else:
           HAR_log.write("{:^24}".format("---"))
-      if OV.GetParam('snum.NoSpherA2.run_refine'):
+      if nsa2_get_param('run_refine'):
+        # Validate TSC file integrity before running refinement
+
+        is_valid, stored_hash, current_hash, reason = nsa2_validate_tsc_file_integrity()
+        if not is_valid:
+          if reason == 'mismatch':
+            # TSC file hash mismatch - warn user and stop
+            msg = f"""TSC/TSCB file hash mismatch!
+
+The TSC/TSCB file on disk does not match the hash stored in the .ins header.
+This may indicate the file was modified or replaced.
+
+Stored hash: {stored_hash[:16]}...
+Current hash: {current_hash[:16]}...
+
+To proceed with refinement using the current file anyway, run refinement again
+with the same file - the warning will be ignored for this session and the hash
+will be updated in the .ins header.
+
+Refinement aborted."""
+            olx.Echo(msg, m="warning")
+            return False
+          elif reason == 'file_not_found':
+            msg = "TSC/TSCB file not found on disk. Please recalculate or select a valid file."
+            olx.Echo(msg, m="warning")
+            return False
+          elif reason == 'no_salted_model':
+            msg = "No SALTED model is selected. Please select a SALTED model file and recalculate."
+            olx.Echo(msg, m="warning")
+            return False
+          elif reason == 'salted_model_not_found':
+            msg = "Selected SALTED model file was not found on disk. Please fix the path or select a valid model."
+            olx.Echo(msg, m="warning")
+            return False
+          else:
+            msg = f"TSC file validation error: {reason}"
+            olx.Echo(msg, m="warning")
+            return False
+        
+        # Check if TSC origin is known
+        origin_known, origin = nsa2_check_tsc_origin_known()
+        if not origin_known:
+          msg = f"""TSC/TSCB file origin could not be determined.
+
+The source of the wavefunction that generated this TSC/TSCB file is unknown.
+This may indicate the file was externally provided or the metadata was lost.
+
+Current origin: {origin if origin else '(empty)'}
+
+Refinement will proceed, but consider recalculating the TSC to ensure
+all calculation parameters are properly recorded."""
+          olx.Echo(msg, m="warning")
+        
         # Run Least-Squares
         self.startRun()
         try:
@@ -355,8 +409,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       HAR_log.close()
     raise e
   # Done with the while !Converged
-  #OV.SetParam('snum.NoSpherA2.Calculate', False)
-  OV.SetParam('snum.NoSpherA2.source', "  " + OV.GetParam('snum.NoSpherA2.file'))
+  #nsa2_set_param('Calculate', False)
+  nsa2_set_param('source', "  " + nsa2_get_param('file'))
   ext_name = "h3-NoSpherA2-extras"
   if OV.IsHtmlItem(ext_name):
     olex.m(f"html.ItemState {ext_name} 2")
@@ -389,9 +443,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   HAR_log.write("Refinement finished at: ")
   HAR_log.write(str(datetime.datetime.now()))
   HAR_log.write("\n")
-  precise = OV.GetParam('snum.NoSpherA2.precise_output')
+  precise = nsa2_get_param('precise_output')
   if precise:
-    from NoSpherA2.utilities import write_precise_model_file
     write_precise_model_file()
     #olex.m("spy.NoSpherA2.write_precise_model_file()")
   HAR_log.flush()
@@ -402,7 +455,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
 def make_fcf(self: RunRefinementPrg):
   from refinement import FullMatrixRefine
-  table = str(OV.GetParam('snum.NoSpherA2.file'))
+  table = str(nsa2_get_param('file'))
   table = table.lstrip().rstrip()
   self.startRun()
   try:
@@ -430,9 +483,9 @@ def make_fcf(self: RunRefinementPrg):
   return True
 
 def get_refinement_details(cif_block, acta_stuff):
-  t = OV.GetParam('snum.NoSpherA2.file')
+  t = nsa2_get_param('file')
   t = t.lstrip().rstrip()
-  tsc_file_name = os.path.join(OV.GetParam('snum.NoSpherA2.dir'),t)
+  tsc_file_name = os.path.join(nsa2_get_param('dir'),t)
   if not os.path.exists(tsc_file_name):
     t = os.path.join(OV.FilePath(), t)
     if os.path.exists(t):
@@ -467,29 +520,29 @@ This fragment can be embedded in an electrostatic crystal field by employing clu
 or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
-    software = OV.GetParam('snum.NoSpherA2.source').lstrip()
+    software = nsa2_get_param('source').lstrip()
     # Use the stored origin (set at calculation time) if available; fall back to source param
-    origin = OV.GetParam('snum.NoSpherA2.file_origin')
+    origin = nsa2_get_param('file_origin')
     if not origin:
       origin = software
     details_text = details_text + "   SOFTWARE:       %s\n"%origin
     if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
-      charge = OV.GetParam('snum.NoSpherA2.charge')
-      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-      relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
-      partitioning = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
-      accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+      charge = nsa2_get_param('charge')
+      mult = nsa2_get_param('multiplicity')
+      relativistic = nsa2_get_param('Relativistic')
+      partitioning = nsa2_get_param('NoSpherA2_SF')
+      accuracy = nsa2_get_param('becke_accuracy')
       if partitioning == True:
         details_text += "   PARTITIONING:   NoSpherA2\n"
         details_text += f"   INT ACCURACY:   {accuracy}\n"
       else:
         details_text += "   PARTITIONING:   Tonto\n"
       if software == "SALTED":
-        salted_model = OV.GetParam('snum.NoSpherA2.selected_salted_model')
+        salted_model = nsa2_get_param('selected_salted_model')
         details_text += f"   MODEL:          {os.path.basename(str(salted_model))}\n"
       elif software == "Thakkar IAM":
-        cations = OV.GetParam('snum.NoSpherA2.Thakkar_Cations')
-        anions = OV.GetParam('snum.NoSpherA2.Thakkar_Anions')
+        cations = nsa2_get_param('Thakkar_Cations')
+        anions = nsa2_get_param('Thakkar_Anions')
         if cations:
           details_text += f"   CATIONS:        {cations}\n"
         if anions:
@@ -497,26 +550,26 @@ The following options were used:
       elif software == "pTB":
         pass  # pTB does not use method or basis set
       else:
-        method = OV.GetParam('snum.NoSpherA2.method')
+        method = nsa2_get_param('method')
         details_text += f"   METHOD:         {method}\n"
         if software != "xTB":
-          basis_set = OV.GetParam('snum.NoSpherA2.basis_name')
+          basis_set = nsa2_get_param('basis_name')
           details_text += f"   BASIS SET:      {basis_set}\n"
       details_text += f"   CHARGE:         {charge}\n"
       details_text += f"   MULTIPLICITY:   {mult}\n"
-      solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+      solv = nsa2_get_param('ORCA_Solvation')
       if solv != "Vacuum":
         details_text += f"   SOLVATION:      {solv}\n"
       if relativistic == True:
         if "ORCA" in software:
-          ORCA_Relativistic = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
+          ORCA_Relativistic = nsa2_get_param('ORCA_Relativistic')
           details_text += f"   RELATIVISTIC:   {ORCA_Relativistic}\n"
         else:
           details_text += "   RELATIVISTIC:   DKH2\n"
       if software == "Tonto":
-        radius = OV.GetParam('snum.NoSpherA2.cluster_radius')
+        radius = nsa2_get_param('cluster_radius')
         details_text += f"   CLUSTER RADIUS: {radius}\n"
-        complete = OV.GetParam('snum.NoSpherA2.cluster_grow')
+        complete = nsa2_get_param('cluster_grow')
         details_text += f"   CLUSTER GROW:   {complete}\n"
     if os.path.exists(tsc_file_name):
       f_time = os.path.getctime(tsc_file_name)

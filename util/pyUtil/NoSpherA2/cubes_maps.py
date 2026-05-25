@@ -11,6 +11,7 @@ import textwrap
 from typing import List, Sequence, Union
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param, nsa2_set_param
 from cctbx_olex_adapter import OlexCctbxAdapter
 from smtbx.structure_factors import direct
 from cctbx import sgtbx
@@ -126,7 +127,7 @@ def calculate_cubes():
   args = []
 
   args.append(NoSpherA2)
-  cpus = OV.GetParam('snum.NoSpherA2.ncpus')
+  cpus = nsa2_get_param('ncpus')
   args.append("-cpus")
   args.append(cpus)
   args.append("-wfn")
@@ -147,15 +148,15 @@ def calculate_cubes():
     print(f"Wavefunction file not found for cube calculation. Looked for: {', '.join(candidates)}")
     return
   args.append(wfn_path)
-  Lap = OV.GetParam('snum.NoSpherA2.Property_Lap')
-  Eli = OV.GetParam('snum.NoSpherA2.Property_Eli')
-  Elf = OV.GetParam('snum.NoSpherA2.Property_Elf')
-  RDG = OV.GetParam('snum.NoSpherA2.Property_RDG')
-  ESP = OV.GetParam('snum.NoSpherA2.Property_ESP')
-  MO = OV.GetParam('snum.NoSpherA2.Property_MO')
-  ATOM = OV.GetParam('snum.NoSpherA2.Property_ATOM')
-  DEF = OV.GetParam('snum.NoSpherA2.Property_DEF')
-  all_MOs = OV.GetParam('snum.NoSpherA2.Property_all_MOs')
+  Lap = nsa2_get_param('Property_Lap')
+  Eli = nsa2_get_param('Property_Eli')
+  Elf = nsa2_get_param('Property_Elf')
+  RDG = nsa2_get_param('Property_RDG')
+  ESP = nsa2_get_param('Property_ESP')
+  MO = nsa2_get_param('Property_MO')
+  ATOM = nsa2_get_param('Property_ATOM')
+  DEF = nsa2_get_param('Property_DEF')
+  all_MOs = nsa2_get_param('Property_all_MOs')
   if Lap:
     args.append("-lap")
   if Eli:
@@ -175,12 +176,12 @@ def calculate_cubes():
     if all_MOs:
       args.append("all")
     else:
-      args.append(str(int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) - 1))
-  if OV.GetParam('snum.NoSpherA2.NoSpherA2_debug'):
+      args.append(str(int(nsa2_get_param('Property_MO_number')) - 1))
+  if nsa2_get_param('NoSpherA2_debug'):
     args.append("-v")
 
-  radius = OV.GetParam('snum.NoSpherA2.map.radius')
-  res = OV.GetParam('snum.NoSpherA2.map.resolution')
+  radius = nsa2_get_param('map.radius')
+  res = nsa2_get_param('map.resolution')
   args.append("-resolution")
   args.append(res)
   args.append("-radius")
@@ -276,7 +277,7 @@ def get_map_types():
 OV.registerFunction(get_map_types,False,'NoSpherA2')
 
 def change_map():
-  Type = OV.GetParam('snum.NoSpherA2.map.type')
+  Type = nsa2_get_param('map.type')
   if Type == "None" or Type == "":
     return
   name = OV.ModelSrc()
@@ -291,17 +292,17 @@ def change_map():
   elif Type == "Stat. Def.":
     plot_cube(name+"_def.cube",None)
   elif Type == "NCI":
-    OV.SetParam('snum.NoSpherA2.map.scale_name', "RGB")
+    nsa2_set_param('map.scale_name', "RGB")
     plot_cube(name+"_rdg.cube",name+"_signed_rho.cube")
   elif Type == "RDG":
     plot_cube(name+"_rdg.cube",None)
   elif Type == "Rho + ESP":
-    OV.SetParam('snum.NoSpherA2.map.scale_name', "BWR")
+    nsa2_set_param('map.scale_name', "BWR")
     plot_cube(name+"_rho.cube",name+"_esp.cube")
   elif Type == "fcfmc" or Type == "diff" or Type == "tomc" or Type == "fobs" or Type == "fcalc":
     OV.SetVar('map_slider_scale',-50)
-    OV.SetParam('snum.map.type',Type)
-    show_fft_map(float(OV.GetParam('snum.NoSpherA2.map.resolution')), map_type=Type)
+    nsa2_set_param('snum.map.type',Type)
+    show_fft_map(float(nsa2_get_param('map.resolution')), map_type=Type)
     minimal = float(olx.xgrid.GetMin())
     maximal = float(olx.xgrid.GetMax())
     if -minimal > maximal:
@@ -310,10 +311,10 @@ def change_map():
     OV.SetVar('map_max',maximal*50)
     olex.m("html.Update()")
   elif Type == "MO":
-    number = int(OV.GetParam('snum.NoSpherA2.Property_MO_number')) -1
+    number = int(nsa2_get_param('Property_MO_number')) -1
     plot_cube(name+"_MO_"+str(number)+".cube",None)
   elif Type == "HDEF":
-    number = int(OV.GetParam('snum.NoSpherA2.Property_ATOM_number')) -1
+    number = int(nsa2_get_param('Property_ATOM_number')) -1
     plot_cube(name+"_HDEF_"+str(number)+".cube",None)
   else:
     print("Sorry, no map type available or selected map type not correct!")
@@ -321,7 +322,7 @@ def change_map():
 OV.registerFunction(change_map,False,'NoSpherA2')
 
 def change_pointsize():
-  PS = OV.GetParam('snum.NoSpherA2.gl_pointsize')
+  PS = nsa2_get_param('gl_pointsize')
   olex.m('gl.PointSize ' + PS)
 OV.registerFunction(change_pointsize,False,'NoSpherA2')
 
@@ -451,7 +452,7 @@ def plot_cube(name, color_cube):
     type = isinstance(data, flex.int)
     olex_xgrid.Import(
       gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
-  Type = OV.GetParam('snum.NoSpherA2.map.type')
+  Type = nsa2_get_param('map.type')
   if Type == "Laplacian":
     OV.SetVar('map_min', 0)
     OV.SetVar('map_max', 40)
@@ -496,12 +497,12 @@ def plot_cube(name, color_cube):
   mi = mmm.min
   ma = mmm.max
   iso = float((abs(mi)+abs(ma))*2/3)
-  OV.SetParam('snum.xgrid.scale',"{:.3f}".format(iso))
+  nsa2_set_param('snum.xgrid.scale',"{:.3f}".format(iso))
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mmm.min, mmm.max)
     olex_xgrid.SetSurfaceScale(iso)
     olex_xgrid.SetVisible(True)
-    mask = OV.GetParam('snum.map.mask')
+    mask = nsa2_get_param('snum.map.mask')
     if mask:
       olex_xgrid.InitSurface(True, 1.1)
     else:
@@ -574,13 +575,13 @@ def plot_cube_single(name):
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mmm.min, mmm.max)
     olex_xgrid.SetVisible(True)
-    if OV.GetParam('snum.map.mask'):
+    if nsa2_get_param('snum.map.mask'):
       olex_xgrid.InitSurface(True, 1.1)
     else:
       olex_xgrid.InitSurface(True, -100)
     iso = float(rms * 2.)
     olex_xgrid.SetSurfaceScale(iso)
-    OV.SetParam('snum.xgrid.scale', "{:.3f}".format(iso))
+    nsa2_set_param('snum.xgrid.scale', "{:.3f}".format(iso))
     olex.m("html.Update()")
 
 OV.registerFunction(plot_cube_single,False,'NoSpherA2')
@@ -655,9 +656,9 @@ def get_color(value):
   b = 0
   g = 0
   r = 0
-  scale_min = OV.GetParam('snum.NoSpherA2.map.scale_min')
-  scale_max = OV.GetParam('snum.NoSpherA2.map.scale_max')
-  scale = OV.GetParam('snum.NoSpherA2.map.scale_name')  # BWR = Blue White Red; RGB = Red Green Blue
+  scale_min = nsa2_get_param('map.scale_min')
+  scale_max = nsa2_get_param('map.scale_max')
+  scale = nsa2_get_param('map.scale_name')  # BWR = Blue White Red; RGB = Red Green Blue
   x = 0
   if value <= float(scale_min):
     x = 0
@@ -699,7 +700,7 @@ def get_color(value):
 OV.registerFunction(get_color,False,'NoSpherA2')
 
 def is_colored():
-  Type = OV.GetParam('snum.NoSpherA2.map.type')
+  Type = nsa2_get_param('map.type')
   if Type == "NCI":
     return True
   elif Type == "Rho + ESP":
@@ -725,7 +726,7 @@ def plot_fft_map(fft_map):
   if OV.HasGUI():
     olex_xgrid.SetMinMax(min_v, max_v)
     olex_xgrid.SetVisible(True)
-    mask = OV.GetParam('snum.map.mask')
+    mask = nsa2_get_param('snum.map.mask')
     if mask:
       olex_xgrid.InitSurface(True, 1.1)
     else:
@@ -756,7 +757,7 @@ def plot_map(data, iso, dist=1.0, min_v=0, max_v=20):
   olex_xgrid.Import(
     gridding.all(), gridding.focus(), data.copy_to_byte_str(), type)
   olex_xgrid.SetMinMax(min_v, max_v)
-  mask = OV.GetParam('snum.map.mask')
+  mask = nsa2_get_param('snum.map.mask')
   if mask == True:
     olex_xgrid.InitSurface(True, dist)
   else:
@@ -839,7 +840,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
   use_tsc = OV.IsNoSpherA2()
   one_h = None
   if use_tsc:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
@@ -979,7 +980,7 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
   use_tsc = OV.IsNoSpherA2()
   one_h = None
   if use_tsc:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
@@ -1219,7 +1220,7 @@ def residual_fcf(expand = False):
   f_diff = None
   f_mask = None
   if use_tsc:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
@@ -1312,7 +1313,7 @@ def residual_E(expand = False):
   f_diff = None
   f_mask = None
   if use_tsc:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
@@ -1615,7 +1616,7 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     xray_structure = cctbx_adapter.xray_structure()
     if not os.path.exists(table_name):
@@ -1669,7 +1670,7 @@ def deformation_map(resolution=0.1, return_map=False):
     print("ERROR! Deformation is only available when using a .tsc file!")
     return
   cctbx_adapter = OlexCctbxAdapter()
-  table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  table_name = str(nsa2_get_param("file"))
   print("Calculating Structure Factors from files...")
   xray_structure = cctbx_adapter.xray_structure()
   if not os.path.exists(table_name):
@@ -1699,7 +1700,7 @@ def def_sig_map(resolution=0.1, return_map=False):
     print("ERROR! Deformation is only available when using a .tsc file!")
     return
   cctbx_adapter = OlexCctbxAdapter()
-  table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+  table_name = str(nsa2_get_param("file"))
   print("Calculating Structure Factors from files...")
   xray_structure = cctbx_adapter.xray_structure()
   if not os.path.exists(table_name):
@@ -1728,7 +1729,7 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     xray_structure = cctbx_adapter.xray_structure()
     if not os.path.exists(table_name):
@@ -1765,7 +1766,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
   if use_tsc == True:
-    table_name = str(OV.GetParam("snum.NoSpherA2.file"))
+    table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
     xray_structure = cctbx_adapter.xray_structure()
     if not os.path.exists(table_name):

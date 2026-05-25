@@ -21,6 +21,208 @@ def getOlex2VersionInfo():
   txt = 'Olex2, OlexSys Ltd (compiled %s)' %OV.GetCompilationInfo()
   return txt
 
+def _build_nsa2_phil_type_map():
+  """Parse NoSpherA2.phil and return {snum_key: type_str} for all defined params."""
+  import re
+  phil_file = os.path.join(os.path.dirname(__file__), 'NoSpherA2', 'NoSpherA2.phil')
+  type_map = {}
+  try:
+    with open(phil_file, 'r') as f:
+      lines = f.readlines()
+  except IOError:
+    return type_map
+  scope_stack = []
+  current_key = None
+  for line in lines:
+    stripped = line.strip()
+    m = re.match(r'^(\w+)\s*\{', stripped)
+    if m:
+      scope_stack.append(m.group(1))
+      current_key = None
+      continue
+    if stripped == '}':
+      if scope_stack:
+        scope_stack.pop()
+      current_key = None
+      continue
+    if stripped.startswith('.'):
+      m = re.match(r'^\.type\s*=\s*(\w+)', stripped)
+      if m and current_key is not None:
+        type_name = m.group(1)
+        if type_name == 'choice':
+          type_name = 'str'
+        full_key = '.'.join(scope_stack + [current_key])
+        type_map[full_key] = type_name
+        current_key = None
+      continue
+    m = re.match(r'^(\w+)\s*=', stripped)
+    if m:
+      current_key = m.group(1)
+  return type_map
+
+_NSA2_PHIL_TYPE_MAP = None
+
+def _nsa2_get_type(snum_key):
+  """Return the phil type string ('bool','int','float','str') for a snum.* key."""
+  global _NSA2_PHIL_TYPE_MAP
+  if _NSA2_PHIL_TYPE_MAP is None:
+    _NSA2_PHIL_TYPE_MAP = _build_nsa2_phil_type_map()
+  return _NSA2_PHIL_TYPE_MAP.get(snum_key, 'str')
+
+def _nsa2_cast_value(snum_key, value):
+  """Cast *value* to the Python type declared in the phil definition for *snum_key*."""
+  if value is None or not isinstance(value, str):
+    return value  # Already typed or missing — leave as-is.
+  type_name = _nsa2_get_type(snum_key)
+  if type_name == 'bool':
+    return value.strip().lower() in ('true', '1', 'yes')
+  if type_name == 'int':
+    try:
+      return int(value)
+    except (ValueError, TypeError):
+      return value
+  if type_name == 'float':
+    try:
+      return float(value)
+    except (ValueError, TypeError):
+      return value
+  return value  # str (default)
+
+def _nsa2_header_key_from_param(key):
+  """Map snum.NoSpherA2.* params to canonical NoSpherA2 Header paths."""
+  suffix = key[len('snum.NoSpherA2.'):]
+  explicit_map = {
+    'file': 'NoSpherA2.table_of_form_factors.file',
+    'file_origin': 'NoSpherA2.table_of_form_factors.origin',
+    'file_hash': 'NoSpherA2.electron_density_generator.file_hash',
+    'selected_salted_model': 'NoSpherA2.electron_density_generator.salted.model',
+  }
+  partitioning_keys = {
+    'NoSpherA2_SF',
+    'NoSpherA2_Partition',
+    'becke_accuracy',
+    'auxiliary_basis',
+    'auxiliary_basis_beta',
+    'NoSpherA2_ECP',
+    'NoSpherA2_debug',
+    'NoSpherA2_ED',
+  }
+  generator_keys = {
+    'method',
+    'basis_name',
+    'charge',
+    'multiplicity',
+    'Relativistic',
+    'ncpus',
+    'mem',
+    'source',
+    'Thakkar_Cations',
+    'Thakkar_Anions',
+    'cluster_radius',
+    'cluster_grow',
+    'DIIS',
+    'full_HAR',
+    'temperature',
+    'basis_adv',
+    'basis_adv_string',
+    'fchk_file',
+    'distro',
+    'OCC_df_basis',
+    'PTB_use_purify',
+    'muliplicity',
+  }
+
+  if suffix in explicit_map:
+    return explicit_map[suffix]
+  if suffix in partitioning_keys:
+    return 'NoSpherA2.partitioning.%s' % suffix
+  if suffix in generator_keys:
+    return 'NoSpherA2.electron_density_generator.%s' % suffix
+  if suffix.startswith(('ORCA_', 'pySCF_', 'ELMOdb.', 'xharpy.', 'frag_HAR.')):
+    return 'NoSpherA2.electron_density_generator.%s' % suffix
+  return 'NoSpherA2.%s' % suffix
+
+
+def _nsa2_normalize_param_key(key):
+  """Normalize NoSpherA2 keys to snum.NoSpherA2.* form.
+
+  Accepted shorthand examples:
+  - method -> snum.NoSpherA2.method
+  - NoSpherA2.method -> snum.NoSpherA2.method
+  - snum.NoSpherA2.method -> unchanged
+  """
+  key = str(key)
+  if key.startswith('snum.NoSpherA2.'):
+    return key
+  if key.startswith('NoSpherA2.'):
+    return 'snum.%s' % key
+  if '.' not in key:
+    return 'snum.NoSpherA2.%s' % key
+  if key.startswith(('user.', 'olex2.', 'snum.')):
+    return key
+  return 'snum.NoSpherA2.%s' % key
+
+
+def _nsa2_should_persist_to_header(key):
+  """Return False for NoSpherA2 UI/runtime-only keys that should not go to .ins."""
+  if not key.startswith('snum.NoSpherA2.'):
+    return False
+  suffix = key[len('snum.NoSpherA2.'):]
+  if suffix.startswith('map.'):
+    return False
+  if suffix.startswith('Property'):
+    return False
+  return True
+
+def nsa2_get_param(key, default=None):
+  """Global accessor exposed as spy.nsa2_get_param for HTML/UI conditions.
+
+  Returns values cast to the Python type declared in the phil definition
+  (bool, int, float, or str).  Values retrieved from the structure Header are
+  always strings, so they are cast here; values from the phil handler are
+  already typed and are returned unchanged.
+  """
+  key = _nsa2_normalize_param_key(key)
+  if key.startswith('snum.NoSpherA2.'):
+    header_key = _nsa2_header_key_from_param(key)
+    if not _nsa2_should_persist_to_header(key):
+      # Clean up legacy persisted values for phil-only/runtime keys.
+      OV.ClearHeaderParam(header_key)
+      return OV.GetParam(key, default)
+    v = OV.GetHeaderParam(header_key, None)
+    # Treat empty header strings as missing so we can still resolve live params.
+    if v not in (None, ''):
+      return _nsa2_cast_value(key, v)
+    v = OV.GetParam(key, default)
+    # Persist any actually used NoSpherA2 value into Header for this structure,
+    # including defaults that were consumed through this accessor.
+    if v not in (None, ''):
+      OV.SetHeaderParam(header_key, v)
+    else:
+      OV.ClearHeaderParam(header_key)
+    return _nsa2_cast_value(key, v)
+  return OV.GetParam(key, default)
+
+def nsa2_set_param(key, value):
+  """Global setter exposed as spy.nsa2_set_param for HTML/UI controls."""
+  key = _nsa2_normalize_param_key(key)
+  if key.startswith('snum.NoSpherA2.'):
+    header_key = _nsa2_header_key_from_param(key)
+    if _nsa2_should_persist_to_header(key):
+      if value in (None, ''):
+        OV.ClearHeaderParam(header_key)
+      else:
+        OV.SetHeaderParam(header_key, value)
+    else:
+      # Ensure old persisted values are removed for phil-only/runtime keys.
+      OV.ClearHeaderParam(header_key)
+  OV.SetParam(key, value)
+
+OV.registerFunction(nsa2_get_param)
+OV.registerFunction(nsa2_set_param)
+OV.registerFunction(nsa2_get_param, False, 'NoSpherA2')
+OV.registerFunction(nsa2_set_param, False, 'NoSpherA2')
+
 def getDefaultPrgMethod(prgType):
   import olexex
 #  defaultPrg = '?'

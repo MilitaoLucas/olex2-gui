@@ -5,6 +5,7 @@ import numpy as np
 import copy
 import os
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param, nsa2_set_param
 
 cov_rad=[
   #THESE ARE THE VALUES FROM THE ORIGINAL SCRIPT
@@ -688,7 +689,7 @@ def find_first_shell(mol,res,anum,part,l_frag,cap1):
 #    finds first bonded atoms from neighbouring residues
   anums = []
   count = 0
-  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
+  radius_tolerance = float(nsa2_get_param('frag_HAR.radius_tolerance'))
 #   A1=[mol[res][anum].x,mol[res][i].y,mol[res][i].z]
   for i in range(len(mol)):
     if i != res:
@@ -730,7 +731,7 @@ def find_second_shell(mol, cap1, res, part, cap2, hbond_ex, minHbond):
 #   print("cap1cap1cap1",cap1)
 #   A1=[mol[res][anum].x,mol[res][i].y,mol[res][i].z]
   count=0
-  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
+  radius_tolerance = float(nsa2_get_param('frag_HAR.radius_tolerance'))
   for j in range(len(cap1)):
     for i in range(len(mol)):
       l_res = None
@@ -793,7 +794,7 @@ def find_second_shell(mol, cap1, res, part, cap2, hbond_ex, minHbond):
 #
 #  plan=False
 #  n_atom=[]
-#  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
+#  radius_tolerance = float(nsa2_get_param('frag_HAR.radius_tolerance'))
 #  for i in range(len(res)):
 #    dist=atom_dist(atom,res[i])
 #    if 0.5 <  dist <= (atom.cov + res[i].cov+radius_tolerance):
@@ -827,7 +828,7 @@ def find_junction(mol,cap2,cap1,cell,res,part):
   j_num = 1
   elongate = []
   atom_j = []
-  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
+  radius_tolerance = float(nsa2_get_param('frag_HAR.radius_tolerance'))
   for j in range(len(cap2)):
     if cap2[j].ele != "H":  # NEW
       for i in range(len(mol)):
@@ -937,8 +938,8 @@ def build_cap(mol, res, cell, part):
   cap1 = []
   cap2 = []
   frag_core = []
-  hbond_ex = OV.GetParam('snum.NoSpherA2.frag_HAR.H_box_ex')
-  minHbond = OV.GetParam('snum.NoSpherA2.frag_HAR.min_H_bond')
+  hbond_ex = nsa2_get_param('frag_HAR.H_box_ex')
+  minHbond = nsa2_get_param('frag_HAR.min_H_bond')
   l_frag = []
   part_name = "atoms_" + str(abs(part))
   l_frag = getattr(mol[res], part_name)
@@ -999,7 +1000,7 @@ def build_cap(mol, res, cell, part):
 
 def find_hbond(mol,res,anum,part,l_frag):##NEW
 #    finds first bondet atoms from naibouring residues
-  radius_tolerance = float(OV.GetParam('snum.NoSpherA2.frag_HAR.radius_tolerance'))
+  radius_tolerance = float(nsa2_get_param('frag_HAR.radius_tolerance'))
   anums = []
   count = 0
   if l_frag[anum].ele == "H":
@@ -1154,7 +1155,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
   import shutil
   from utilities import cuqct_tsc
   from decors import run_with_bitmap
-  test_frag = OV.GetParam('snum.NoSpherA2.frag_HAR.H_test')
+  test_frag = nsa2_get_param('frag_HAR.H_test')
 
   import time
   t1 = time.time()
@@ -1240,9 +1241,9 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
     print("Error trying to move the tsc file! Make sure the calculation worked!")
     return
   if os.path.exists(wfn_object.name + ".tscb"):
-    OV.SetParam('snum.NoSpherA2.file', wfn_object.name + ".tscb")
+    nsa2_set_param('file', wfn_object.name + ".tscb")
   else:
-    OV.SetParam('snum.NoSpherA2.file', wfn_object.name + ".tsc")
+    nsa2_set_param('file', wfn_object.name + ".tsc")
   t4 = time.time()
   print("Timing of fragHAR:")
   print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")

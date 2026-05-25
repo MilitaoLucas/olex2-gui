@@ -3,6 +3,7 @@ import olex
 import olx
 import time
 from olexFunctions import OlexFunctions
+from NoSpherA2.utilities import nsa2_get_param
 # Custom Imports
 import subprocess
 from pathlib import Path, PurePosixPath
@@ -86,13 +87,13 @@ class xharpy:
 
   def produce_gpaw_script(self):
     """Generates a template for GPAW calculations."""
-    functional = OV.GetParam("snum.NoSpherA2.method")
-    grid_spacing = OV.GetParam("snum.NoSpherA2.xharpy.grid_spacing")
-    kpoint1 = OV.GetParam("snum.NoSpherA2.xharpy.k_points1")
-    kpoint2 = OV.GetParam("snum.NoSpherA2.xharpy.k_points2")
-    kpoint3 = OV.GetParam("snum.NoSpherA2.xharpy.k_points3")
-    gamma = str(OV.GetParam("snum.NoSpherA2.xharpy.k_points_centre_gamma"))
-    reload = str(OV.GetParam("snum.NoSpherA2.xharpy.reload"))
+    functional = nsa2_get_param("method")
+    grid_spacing = nsa2_get_param("xharpy.grid_spacing")
+    kpoint1 = nsa2_get_param("xharpy.k_points1")
+    kpoint2 = nsa2_get_param("xharpy.k_points2")
+    kpoint3 = nsa2_get_param("xharpy.k_points3")
+    gamma = str(nsa2_get_param("xharpy.k_points_centre_gamma"))
+    reload = str(nsa2_get_param("xharpy.reload"))
     template = textwrap.dedent(f"""
       from xharpy import cif2tsc
       from pathlib import Path                     

@@ -13,6 +13,7 @@ BSE = basis_set_api.GetBSEThread()
 import subprocess
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param
 from utilities import run_with_bitmap, software, is_orca_new, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request, ELEMENTS, ELEMENTS_BY_SYMBOL
 
 try:
@@ -182,7 +183,7 @@ class wfn_Job(object):
       "cc-pvqz-jkfit",
     }
 
-    selected_df_basis = self._normalize_occ_keyword(OV.GetParam('snum.NoSpherA2.OCC_df_basis'))
+    selected_df_basis = self._normalize_occ_keyword(nsa2_get_param('OCC_df_basis'))
     if selected_df_basis in allowed_df_basis:
       return selected_df_basis
 
@@ -194,7 +195,7 @@ class wfn_Job(object):
     return "def2-universal-jkfit"
 
   def _get_occ_grid_settings(self):
-    grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    grid_accuracy = nsa2_get_param('becke_accuracy')
     grid_map = {
       "Low": (86, 110, "1e-4"),
       "Normal": (194, 230, "1e-6"),
@@ -209,21 +210,21 @@ class wfn_Job(object):
 
     self.input_fn = os.path.join(self.full_dir, self.name) + ".toml"
     if basis_name is None:
-      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+      basis_name = nsa2_get_param('basis_name')
     basis_name = basis_name.lower()
     if method is None:
-      method = OV.GetParam('snum.NoSpherA2.method')
+      method = nsa2_get_param('method')
     if charge is None:
-      charge = OV.GetParam('snum.NoSpherA2.charge')
+      charge = nsa2_get_param('charge')
     if mult is None:
-      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+      mult = nsa2_get_param('multiplicity')
 
     max_angular, min_angular, radial_precision = self._get_occ_grid_settings()
     df_basis = self._get_occ_df_basis(basis_name)
     input_xyz = os.path.join(self.full_dir, self.name) + ".xyz"
 
     with open(self.input_fn, "w", encoding="utf-8", errors="replace") as inp:
-      inp.write(f"threads = {OV.GetParam('snum.NoSpherA2.ncpus')}\n\n")
+      inp.write(f"threads = {nsa2_get_param('ncpus')}\n\n")
       inp.write("[scf]\n")
       inp.write(f'input = "{input_xyz.replace(chr(92), chr(92)+chr(92))}"\n')
       inp.write(f'method = "{self._normalize_occ_keyword(method)}"\n')
@@ -241,7 +242,7 @@ class wfn_Job(object):
     if self.software == "ORCA":
       self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0" or self.software == "ORCA 6.1":
-      embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+      embedding = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
       if embedding:
         self.write_orca_crystal_input(xyz)
       else:
@@ -269,7 +270,7 @@ class wfn_Job(object):
       self.write_xyz_file()
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
+    basis_name = nsa2_get_param('basis_name').lower()
     elmodb_libs = None
     if sys.platform[:3] == "win":
       temp = self.parent.elmodb_lib
@@ -285,41 +286,41 @@ class wfn_Job(object):
     inp.write(" $END" + '\n')
     inp.write(" " + '\n')
     inp.write(" $INPUT_STRUCTURE" +  '\n' + "   pdb_file='"  + self.name + ".pdb'" '\n' + "   xyz_file='"  + self.name + ".xyz'" + '\n')
-    charge = OV.GetParam('snum.NoSpherA2.charge')
+    charge = nsa2_get_param('charge')
     if charge != '0':
       inp.write("   icharge=" + charge + '\n')
-    ssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.ssbond')
+    ssbond = nsa2_get_param('ELMOdb.ssbond')
     if ssbond:
-      nssbond = OV.GetParam('snum.NoSpherA2.ELMOdb.nssbond')
+      nssbond = nsa2_get_param('ELMOdb.nssbond')
       inp.write("   nssbond=" + nssbond + '\n')
-    cycl = OV.GetParam('snum.NoSpherA2.ELMOdb.cycl')
+    cycl = nsa2_get_param('ELMOdb.cycl')
     if cycl:
-      ncycl = OV.GetParam('snum.NoSpherA2.ELMOdb.ncycl')
+      ncycl = nsa2_get_param('ELMOdb.ncycl')
       inp.write("   ncycl=" + ncycl + '\n')
-    tail = OV.GetParam('snum.NoSpherA2.ELMOdb.tail')
+    tail = nsa2_get_param('ELMOdb.tail')
     if tail:
-      maxtail = OV.GetParam('snum.NoSpherA2.ELMOdb.maxtail')
+      maxtail = nsa2_get_param('ELMOdb.maxtail')
       inp.write("   ntail=" + str(maxtail) + '\n')
-      resnames = OV.GetParam('snum.NoSpherA2.ELMOdb.str_resname')
+      resnames = nsa2_get_param('ELMOdb.str_resname')
       resnames = resnames.split(';')
-      nat = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nat')
+      nat = nsa2_get_param('ELMOdb.str_nat')
       nat = nat.split(';')
-      nfrag = OV.GetParam('snum.NoSpherA2.ELMOdb.str_nfrag')
+      nfrag = nsa2_get_param('ELMOdb.str_nfrag')
       nfrag = nfrag.split(';')
-      ncltd = OV.GetParam('snum.NoSpherA2.ELMOdb.str_ncltd')
+      ncltd = nsa2_get_param('ELMOdb.str_ncltd')
       ncltd = ncltd.split(';')
-      specac = OV.GetParam('snum.NoSpherA2.ELMOdb.str_specac')
+      specac = nsa2_get_param('ELMOdb.str_specac')
       specac = specac.split(';')
-      exbsinp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_exbsinp')
+      exbsinp = nsa2_get_param('ELMOdb.str_exbsinp')
       exbsinp = exbsinp.split(';')
-      fraginp = OV.GetParam('snum.NoSpherA2.ELMOdb.str_fraginp')
+      fraginp = nsa2_get_param('ELMOdb.str_fraginp')
       fraginp = fraginp.split(';')
       if int(max(nfrag)) > 50:
         inp.write("   max_frtail=" + str(max(nfrag)) + '\n')
       if int(max(nat)) > 50:
         inp.write("   max_atail=" + str(max(nat)) + '\n')
-    spect = OV.GetParam('snum.NoSpherA2.ELMOdb.spect')
-    nspect = OV.GetParam('snum.NoSpherA2.ELMOdb.nspect')
+    spect = nsa2_get_param('ELMOdb.spect')
+    nspect = nsa2_get_param('ELMOdb.nspect')
     if spect:
       inp.write("   nspec=" + str(nspect) + '\n')
     inp.write(" $END" + '\n')
@@ -372,7 +373,7 @@ class wfn_Job(object):
           inp.write( str(exbsinp[i]) + ' ' + '\n')
         inp.write(" " + '\n' + str(fraginp[i])+ '\n' + ' ' + '\n')
       if spect:
-        inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.specinp') + '\n' + ' ' + '\n')
+        inp.write(" " + '\n' + nsa2_get_param('ELMOdb.specinp') + '\n' + ' ' + '\n')
       if basis_name == "extrabasis":
         if os.path.exists(os.path.join(self.origin_folder,"extrabasis")):
           shutil.copy(os.path.join(self.origin_folder,"extrabasis"),os.path.join(self.full_dir,"extrabasis"))
@@ -380,9 +381,9 @@ class wfn_Job(object):
           OV.SetVar('NoSpherA2-Error',"ELMOdb")
           raise NameError('No extrabasis file available!')
     if ssbond:
-      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.ssbondinp') + '\n' + ' ' + '\n')
+      inp.write(" " + '\n' + nsa2_get_param('ELMOdb.ssbondinp') + '\n' + ' ' + '\n')
     if cycl:
-      inp.write(" " + '\n' + OV.GetParam('snum.NoSpherA2.ELMOdb.cyclinp') + '\n' + ' ' + '\n')
+      inp.write(" " + '\n' + nsa2_get_param('ELMOdb.cyclinp') + '\n' + ' ' + '\n')
     inp.close()
 
 
@@ -394,19 +395,19 @@ class wfn_Job(object):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".com"
     com = open(self.input_fn,"w")
     if basis_name is None:
-      basis_name = OV.GetParam("snum.NoSpherA2.basis_name")
+      basis_name = nsa2_get_param("basis_name")
     basis_name = basis_name.lower()
     basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
     basis = open(basis_set_fn,"r")
     chk_destination = "%chk=./" + self.name + ".chk"
-    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
-      cpu = "%nproc=" + OV.GetParam('snum.NoSpherA2.ncpus')
+    if nsa2_get_param('ncpus') != '1':
+      cpu = "%nproc=" + nsa2_get_param('ncpus')
     else:
       cpu = "%nproc=1"
-    mem = "%mem=" + OV.GetParam('snum.NoSpherA2.mem') + "GB"
+    mem = "%mem=" + nsa2_get_param('mem') + "GB"
     control = "# "
     if method is None:
-      method = OV.GetParam('snum.NoSpherA2.method')
+      method = nsa2_get_param('method')
     if method == "HF":
       control += "rhf"
       method = "RHF"
@@ -419,10 +420,10 @@ class wfn_Job(object):
     if method == "BP86" or method == "PBE":
       control += " DensityFit "
     if relativistic is None:
-      relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+      relativistic = nsa2_get_param('Relativistic')
     if relativistic:
       control = control + " Integral=DKH2"
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    Full_HAR = nsa2_get_param('full_HAR')
     run = None
     if Full_HAR:
       run = OV.GetVar('Run_number')
@@ -437,9 +438,9 @@ class wfn_Job(object):
     com.write(title + '\n')
     com.write(" " + '\n')
     if charge is None:
-      charge = OV.GetParam('snum.NoSpherA2.charge')
+      charge = nsa2_get_param('charge')
     if mult is None:
-      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+      mult = nsa2_get_param('multiplicity')
     com.write(charge + " " + mult + '\n')
     atom_list = []
     i = 0
@@ -536,29 +537,29 @@ class wfn_Job(object):
       "I": -1.0,
     }
     coordinates_fn1 = os.path.join(self.full_dir, "asu") + ".xyz"
-    charge = OV.GetParam('snum.NoSpherA2.charge')
-    mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+    charge = nsa2_get_param('charge')
+    mult = nsa2_get_param('multiplicity')
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1, p=10)
     xyz1 = open(coordinates_fn1, "r")
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
-    radius = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_RADIUS")
+    radius = nsa2_get_param("ORCA_CRYSTAL_QMMM_RADIUS")
     olex.m("XYZCluster_4NoSpherA2 %s"%radius)
     shutil.move(self.name + ".xyz", os.path.join(self.full_dir, self.name) + ".xyz")
     xyz2 = open(coordinates_fn2,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
-    basis_name = OV.GetParam('snum.NoSpherA2.basis_name').lower()
-    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
+    basis_name = nsa2_get_param('basis_name').lower()
+    ncpus = nsa2_get_param('ncpus')
+    if nsa2_get_param('ncpus') != '1':
       cpu = "nprocs " + ncpus
     else:
       cpu = "nprocs 1"
-    mem = OV.GetParam('snum.NoSpherA2.mem')
+    mem = nsa2_get_param('mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
-    qmmmtype = OV.GetParam("snum.NoSpherA2.ORCA_CRYSTAL_QMMM_TYPE")
+    qmmmtype = nsa2_get_param("ORCA_CRYSTAL_QMMM_TYPE")
     control = "! NoPop MiniPrint 3-21G "
     ECP = False
     if "ecp" in basis_name:
@@ -572,16 +573,16 @@ class wfn_Job(object):
       control += "MOL-CRYSTAL-QMMM "
     else:
       control += "IONIC-CRYSTAL-QMMM "
-    method = OV.GetParam('snum.NoSpherA2.method')
-    grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+    method = nsa2_get_param('method')
+    grid = nsa2_get_param('becke_accuracy')
     mp2_block = ""
     if method == "HF":
       control += "rhf "
       grids = ""
     else:
-      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
+      if mult != 1 and nsa2_get_param("ORCA_FORCE_ROKS"):
         control += " ROKS "
-      SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
+      SCNL = nsa2_get_param('ORCA_SCNL')
       if SCNL:
         if method != "wB97X":
           control += method + ' SCNL '
@@ -598,18 +599,18 @@ class wfn_Job(object):
         grids = self.write_grids_5(method, grid)
       else:
         print("MOL-CRYSTAL-QMMM only works from ORCA 5.0 upwards")
-    convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
+    convergence = nsa2_get_param('ORCA_SCF_Conv')
     if convergence == "NoSpherA2SCF":
       conv = " LooseSCF"
     else:
       conv = convergence
-    control += grids + ' ' + conv + ' ' + OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
-    relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+    control += grids + ' ' + conv + ' ' + nsa2_get_param('ORCA_SCF_Strategy')
+    relativistic = nsa2_get_param('Relativistic')
     if relativistic:
       control += " DKH2 SARC/J RIJCOSX"
     else:
       control += " def2/J RIJCOSX"
-    Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+    Solvation = nsa2_get_param('ORCA_Solvation')
     if Solvation != "Vacuum" and Solvation is not None:
       control += " CPCM("+Solvation+") "
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
@@ -641,9 +642,9 @@ class wfn_Job(object):
         _write_atom_basis_orca(inp, element, shells)
       basis.close()
       inp.write("end\n")
-    conv = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_CONV')
-    hflayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_HF_LAYERS')
-    ecplayer = OV.GetParam('snum.NoSpherA2.ORCA_CRYSTAL_QMMM_ECP_LAYERS')
+    conv = nsa2_get_param('ORCA_CRYSTAL_QMMM_CONV')
+    hflayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_HF_LAYERS')
+    ecplayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS')
     inp.write("%qmmm\n")
     asu_lines = xyz1.readlines()
     natoms = int(asu_lines[0])
@@ -732,7 +733,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     soft = software()
     ECP = False
     if basis_name is None:
-      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+      basis_name = nsa2_get_param('basis_name')
     basis_name = basis_name.lower()
     if "ecp" in basis_name:
       ECP = True
@@ -742,13 +743,13 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
     if method is None:
-      method = OV.GetParam('snum.NoSpherA2.method')
-    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-    if OV.GetParam('snum.NoSpherA2.ncpus') != '1':
+      method = nsa2_get_param('method')
+    ncpus = nsa2_get_param('ncpus')
+    if nsa2_get_param('ncpus') != '1':
       cpu = "nprocs " + ncpus
     else:
       cpu = "nprocs 1"
-    mem = OV.GetParam('snum.NoSpherA2.mem')
+    mem = nsa2_get_param('mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
     control = "! NoPop MiniPrint "
@@ -758,11 +759,11 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     else:
       control += basis_name.replace("ecp-", "") + ' '
 
-    grid = OV.GetParam('snum.NoSpherA2.becke_accuracy')
-    brok_sym = OV.GetParam('snum.NoSpherA2.ORCA_use_broken_sym')
+    grid = nsa2_get_param('becke_accuracy')
+    brok_sym = nsa2_get_param('ORCA_use_broken_sym')
     mp2_block = ""
     if method == "HF":
-      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
+      if mult != 1 and nsa2_get_param("ORCA_FORCE_ROKS"):
         control += " ROHF "
       elif brok_sym:
         control += " UKS "
@@ -770,17 +771,17 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         control += " rhf "
       grids = ""
     else:
-      if mult != 1 and OV.GetParam("snum.NoSpherA2.ORCA_FORCE_ROKS"):
+      if mult != 1 and nsa2_get_param("ORCA_FORCE_ROKS"):
         control += " ROKS "
       if brok_sym:
         control += " UKS "
       if soft == "Hybrid":
-        soft = str(OV.GetParam("snum.NoSpherA2.Hybrid.software_Part%d"%part))
+        soft = str(nsa2_get_param("Hybrid.software_Part%d"%part))
         soft = soft.lstrip()
       elif soft == "fragHAR":
         soft = "ORCA 5.0"
       if is_orca_new(soft):
-        SCNL = OV.GetParam('snum.NoSpherA2.ORCA_SCNL')
+        SCNL = nsa2_get_param('ORCA_SCNL')
         if SCNL:
           if method != "wB97X":
             control += method + ' SCNL '
@@ -797,19 +798,19 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         control += method + ' '
         grids = self.write_grids_4(method, grid)
     if convergence is None:
-      convergence = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Conv')
+      convergence = nsa2_get_param('ORCA_SCF_Conv')
     if convergence == "NoSpherA2SCF":
       conv = "LooseSCF"
     else:
       conv = convergence
     if strategy is None:
-      strategy = OV.GetParam('snum.NoSpherA2.ORCA_SCF_Strategy')
+      strategy = nsa2_get_param('ORCA_SCF_Strategy')
     control += grids + conv + ' ' + strategy
     if relativistic is None:
-      relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+      relativistic = nsa2_get_param('Relativistic')
     if method == "BP86" or method == "PBE" or method == "PWLDA":
       if relativistic:
-        t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
+        t = nsa2_get_param('ORCA_Relativistic')
         if t == "DKH2":
           control += " DKH2 SARC/J RI"
         elif t == "ZORA":
@@ -824,7 +825,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         control += " def2/J RI"
     else:
       if relativistic:
-        t = OV.GetParam('snum.NoSpherA2.ORCA_Relativistic')
+        t = nsa2_get_param('ORCA_Relativistic')
         if t == "DKH2":
           control += " DKH2 SARC/J RIJCOSX"
         elif t == "ZORA":
@@ -840,26 +841,26 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           control += " ZORA SARC/J RIJCOSX"
       else:
         control += " def2/J RIJCOSX"
-    Solvation = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+    Solvation = nsa2_get_param('ORCA_Solvation')
     cpcm_block = ""
     if Solvation == "Custom":
       cpcm_block = f"""
       %cpcm
-        epsilon {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_epsilon')}
-        refrac  {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_refrac')}
-        rsolv   {OV.GetParam('snum.NoSpherA2.ORCA_Solvation_CPCM_rsolv')}
+        epsilon {nsa2_get_param('ORCA_Solvation_CPCM_epsilon')}
+        refrac  {nsa2_get_param('ORCA_Solvation_CPCM_refrac')}
+        rsolv   {nsa2_get_param('ORCA_Solvation_CPCM_rsolv')}
       end"""
     elif Solvation != "Vacuum" and Solvation is not None:
       control += f" CPCM({Solvation}) "
-    GBW_file = OV.GetParam("snum.NoSpherA2.ORCA_USE_GBW")
+    GBW_file = nsa2_get_param("ORCA_USE_GBW")
     if not is_orca_new():
       GBW_file = False
     if not GBW_file:
       control += " AIM "
     if charge is None:
-      charge = OV.GetParam('snum.NoSpherA2.charge')
+      charge = nsa2_get_param('charge')
     if mult is None:
-      mult = OV.GetParam('snum.NoSpherA2.multiplicity')
+      mult = nsa2_get_param('multiplicity')
     if mult == 0:
       mult = 1
     inp.write(textwrap.dedent(f"""\
@@ -892,10 +893,10 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
-      if OV.GetParam("snum.NoSpherA2.basis_adv"):
+      if nsa2_get_param("basis_adv"):
         import re
         try:
-            gto = OV.GetParam("snum.NoSpherA2.basis_adv_string")
+            gto = nsa2_get_param("basis_adv_string")
 
             # Split input string on any of these separators: , ; : . or whitespace
             tokens = re.split(r"[,\.;:\s]+", gto.strip())
@@ -939,9 +940,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         _write_atom_basis_orca(inp, element, shells)
       basis.close()
       inp.write("end\n")
-    Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+    Full_HAR = nsa2_get_param('full_HAR')
     run = None
-    damping = OV.GetParam('snum.NoSpherA2.ORCA_DAMP')
+    damping = nsa2_get_param('ORCA_DAMP')
     scf_block = ""
     if damping:
       scf_block += "   CNVZerner true\n"
@@ -983,7 +984,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       if convergence == "NoSpherA2SCF":
         scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     if brok_sym:
-        atom_flip_list_in = OV.GetParam("snum.NoSpherA2.ORCA_Broken_sym_atoms")
+        atom_flip_list_in = nsa2_get_param("ORCA_Broken_sym_atoms")
         atom_flip_list_out = ""
         #from cctbx import uctbx, adptbx
         for atom in atom_flip_list_in.split(","):
@@ -1003,17 +1004,17 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             if atom_flip_list_out != "":
               atom_flip_list_out += ","
             atom_flip_list_out += "%d"%index
-        atom_spin_list = OV.GetParam("snum.NoSpherA2.ORCA_Broken_sym_spin")
+        atom_spin_list = nsa2_get_param("ORCA_Broken_sym_spin")
         scf_block += f"\nFlipSpin {atom_flip_list_out}\nFinalMs {atom_spin_list}"
     if scf_block != "":
       inp.write(f"%scf\n{scf_block}\nend\n")
     inp.close()
 
-  def write_psi4_input(self,xyz, basis_name=None, cahrge = None):
+  def write_psi4_input(self,xyz, basis_name=None, charge = None):
     if xyz:
       self.write_xyz_file()
       coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
-      pbc = OV.GetParam('snum.NoSpherA2.pySCF_PBC')
+      pbc = nsa2_get_param('pySCF_PBC')
       if pbc:
         olex.m("pack cell")
       if xyz:
@@ -1022,14 +1023,14 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       self.input_fn = os.path.join(self.full_dir, self.name) + ".py"
       inp = open(self.input_fn,"w")
       if basis_name is None:
-        basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+        basis_name = nsa2_get_param('basis_name')
       basis_name = basis_name.lower()
       basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
-      ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+      ncpus = nsa2_get_param('ncpus')
       if charge is None:
-        charge = int(OV.GetParam('snum.NoSpherA2.charge'))
-      mem = OV.GetParam('snum.NoSpherA2.mem')
+        charge = int(nsa2_get_param('charge'))
+      mem = nsa2_get_param('mem')
       mem_value = float(mem) * 1024
       if not pbc:
         inp.write("#!/usr/bin/env python\n%s\n\nfrom pyscf import gto, scf, dft, lib\n"%fixed_wfn_function)
@@ -1055,7 +1056,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
 
         model_line = None
         if method is None:
-          method = OV.GetParam('snum.NoSpherA2.method')
+          method = nsa2_get_param('method')
         if method == "HF":
           if mult == 1:
             model_line = "scf.RHF(mol)"
@@ -1068,7 +1069,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             model_line = "dft.UKS(mol)"
 
         if relativistic is None:
-          relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+          relativistic = nsa2_get_param('Relativistic')
         if relativistic:
           model_line += ".x2c()"
         #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
@@ -1086,7 +1087,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
           inp.write("mf.xc = 'PBE0'\n")
         elif method == "R2SCAN":
           inp.write("mf.xc = 'R2SCAN'\n")
-        grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+        grid_accuracy = nsa2_get_param('becke_accuracy')
         grid = None
         if grid_accuracy == "Low":
           grid = 0
@@ -1106,16 +1107,16 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
   mf.conv_tol_grad = 1e-2
   mf.level_shift = 0.25"""
         if damp is None:
-          damp = float(OV.GetParam('snum.NoSpherA2.pySCF_Damping'))
+          damp = float(nsa2_get_param('pySCF_Damping'))
         rest += "\nmf.damp = %f\n"%damp
         rest += "mf.chkfile = '%s.chk'\n"%self.name
-        Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+        Full_HAR = nsa2_get_param('full_HAR')
         run = None
         if Full_HAR:
           run = OV.GetVar('Run_number')
           if run > 1:
             rest += "mf.init_guess = 'chk'\n"
-        solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+        solv = nsa2_get_param('ORCA_Solvation')
         if solv != "Vacuum":
           rest += "from pyscf import solvent\nmf = mf.ddCOSMO()\nmf.with_solvent.lebedev_order = 11\nmf.with_solvent.lmax = 5\nmf.with_solvent.grids.radi_method = dft.gauss_chebyshev\nmf.with_solvent.grids.level = %d\nmf.with_solvent.eps = %f\n"%(int(grid),float(solv_epsilon[solv]))
         rest +="""mf.kernel()
@@ -1320,7 +1321,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     }
 
     if mult is None:
-      mult = int(OV.GetParam('snum.NoSpherA2.multiplicity'))
+      mult = int(nsa2_get_param('multiplicity'))
     fixed_wfn_function = """
 import numpy
 
@@ -1455,7 +1456,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
   fout.write('END DATA\\n')
   fout.write(' THE SCF ENERGY =%20.12f THE VIRIAL(-V/T)=   0.00000000\\n'%tot_ener)"""
     coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
-    pbc = OV.GetParam('snum.NoSpherA2.pySCF_PBC')
+    pbc = nsa2_get_param('pySCF_PBC')
     if pbc:
       olex.m("pack cell")
     if xyz:
@@ -1464,14 +1465,14 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
     self.input_fn = os.path.join(self.full_dir, self.name) + ".py"
     inp = open(self.input_fn,"w")
     if basis_name is None:
-      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+      basis_name = nsa2_get_param('basis_name')
     basis_name = basis_name.lower()
     basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
     basis = open(basis_set_fn,"r")
-    ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
+    ncpus = nsa2_get_param('ncpus')
     if charge is None:
-      charge = int(OV.GetParam('snum.NoSpherA2.charge'))
-    mem = OV.GetParam('snum.NoSpherA2.mem')
+      charge = int(nsa2_get_param('charge'))
+    mem = nsa2_get_param('mem')
     mem_value = float(mem) * 1024
     if not pbc:
       inp.write("#!/usr/bin/env python\n%s\n\nfrom pyscf import gto, scf, dft, lib, df\n"%fixed_wfn_function)
@@ -1497,7 +1498,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
 
       model_line = None
       if method is None:
-        method = OV.GetParam('snum.NoSpherA2.method')
+        method = nsa2_get_param('method')
       if method == "HF":
         if mult == 1:
           model_line = "scf.RHF(mol)"
@@ -1510,7 +1511,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
           model_line = "dft.UKS(mol)"
 
       if relativistic is None:
-        relativistic = OV.GetParam('snum.NoSpherA2.Relativistic')
+        relativistic = nsa2_get_param('Relativistic')
       if relativistic:
         model_line += ".x2c()"
       #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
@@ -1528,7 +1529,7 @@ def write_wfn(fout, mol, mo_coeff, mo_energy, mo_occ, tot_ener):
         inp.write("mf.xc = 'PBE0'\n")
       elif method == "R2SCAN":
         inp.write("mf.xc = 'R2SCAN'\n")
-      grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+      grid_accuracy = nsa2_get_param('becke_accuracy')
       grid = None
       if grid_accuracy == "Low":
         grid = 0
@@ -1549,16 +1550,16 @@ mf.conv_tol = 0.0033
 mf.conv_tol_grad = 1e-2
 mf.level_shift = 0.25"""
       if damp is None:
-        damp = float(OV.GetParam('snum.NoSpherA2.pySCF_Damping'))
+        damp = float(nsa2_get_param('pySCF_Damping'))
       rest += "\nmf.damp = %f\n"%damp
       rest += "mf.chkfile = '%s.chk'\n"%self.name
-      Full_HAR = OV.GetParam('snum.NoSpherA2.full_HAR')
+      Full_HAR = nsa2_get_param('full_HAR')
       run = None
       if Full_HAR:
         run = OV.GetVar('Run_number')
         if run > 1:
           rest += "mf.init_guess = 'chk'\n"
-      solv = OV.GetParam('snum.NoSpherA2.ORCA_Solvation')
+      solv = nsa2_get_param('ORCA_Solvation')
       if solv != "Vacuum":
         rest += "from pyscf import solvent\nmf = mf.ddCOSMO()\nmf.with_solvent.lebedev_order = 11\nmf.with_solvent.lmax = 5\nmf.with_solvent.grids.radi_method = dft.gauss_chebyshev\nmf.with_solvent.grids.level = %d\nmf.with_solvent.eps = %f\n"%(int(grid),float(solv_epsilon[solv]))
       rest +="""mf.kernel()
@@ -1609,7 +1610,7 @@ mf.kernel()"""
 
       model_line = None
       if method is None:
-        method = OV.GetParam('snum.NoSpherA2.method')
+        method = nsa2_get_param('method')
       if method == "HF":
         if mult == 1:
           model_line = "scf.KRHF(cell,kpts)"
@@ -1633,7 +1634,7 @@ mf.kernel()"""
         inp.write("cf.xc = 'M06X2X,M06X2C'\n")
       elif method == "PBE0":
         inp.write("cf.xc = 'PBE0'\n")
-      grid_accuracy = OV.GetParam('snum.NoSpherA2.becke_accuracy')
+      grid_accuracy = nsa2_get_param('becke_accuracy')
       grid = None
       if grid_accuracy == "Low":
         grid = 0
@@ -1671,11 +1672,11 @@ ener = cf.kernel()"""
   def run(self,part=0,softw=None,basis_name=None, copy = True):
     args = []
     if basis_name is None:
-      basis_name = OV.GetParam('snum.NoSpherA2.basis_name')
+      basis_name = nsa2_get_param('basis_name')
     basis_name = basis_name.lower()
     if softw is None:
       if self.software is None:
-        softw = str(OV.GetParam('snum.NoSpherA2.source'))
+        softw = str(nsa2_get_param('source'))
       else:
         softw = self.software
     softw = softw.lstrip()
@@ -1713,11 +1714,11 @@ ener = cf.kernel()"""
         args.append(input_fn)
       elif softw == "Psi4":
         basis_set_fn = _find_basis_file(os.path.join(OV.BaseDir(), "basis_sets"), basis_name)
-        ncpus = OV.GetParam('snum.NoSpherA2.ncpus')
-        mult = OV.GetParam('snum.NoSpherA2.multiplicity')
-        charge = OV.GetParam('snum.NoSpherA2.charge')
-        mem = OV.GetParam('snum.NoSpherA2.mem')
-        method = OV.GetParam('snum.NoSpherA2.method')
+        ncpus = nsa2_get_param('ncpus')
+        mult = nsa2_get_param('multiplicity')
+        charge = nsa2_get_param('charge')
+        mem = nsa2_get_param('mem')
+        method = nsa2_get_param('method')
         args.append(basis_name)
         args.append(basis_set_fn)
         args.append(ncpus)
@@ -1741,7 +1742,7 @@ ener = cf.kernel()"""
         args.append(">")
         args.append(self.name + ".out")
       elif softw == "xTB":
-        method = OV.GetParam('snum.NoSpherA2.method')
+        method = nsa2_get_param('method')
         args.append(self.parent.xtb_exe)
         if method == "GFN0":
           args.append("--gfn")
@@ -1754,7 +1755,7 @@ ener = cf.kernel()"""
           args.append("2")
         elif method == "GFNFF":
           args.append("--gfnff")
-        acc = OV.GetParam("snum.NoSpherA2.becke_accuracy")
+        acc = nsa2_get_param("becke_accuracy")
         if acc == "Low":
           args.append("--acc")
           args.append("30")
@@ -1767,22 +1768,22 @@ ener = cf.kernel()"""
         elif acc == "Max":
           args.append("--acc")
           args.append("0.1")
-        temperature = OV.GetParam("snum.NoSpherA2.temperature")
+        temperature = nsa2_get_param("temperature")
         args.append("--etemp")
         args.append(str(temperature))
         args.append("--molden")
         args.append(self.name+".xyz")
-        charge = OV.GetParam("snum.NoSpherA2.charge")
+        charge = nsa2_get_param("charge")
         args.append("--chrg")
         args.append(str(charge))
-        mult = OV.GetParam("snum.NoSpherA2.multiplicity")
+        mult = nsa2_get_param("multiplicity")
         if mult != 1:
           args.append("--uhf")
           args.append(str(int(mult)-1))
       elif softw == "pTB":
-        method = OV.GetParam('snum.NoSpherA2.method')
-        charge = OV.GetParam("snum.NoSpherA2.charge")
-        mult = OV.GetParam("snum.NoSpherA2.multiplicity")
+        method = nsa2_get_param('method')
+        charge = nsa2_get_param("charge")
+        mult = nsa2_get_param("multiplicity")
         base = os.path.dirname(self.parent.ptb_exe)
         args.append(self.parent.ptb_exe)
         args.append(self.name+".xyz")
@@ -1793,7 +1794,7 @@ ener = cf.kernel()"""
         args.append(os.path.join(base, ".basis_vDZP"))
         args.append("-chrg")
         args.append(str(charge))
-        if OV.GetParam("snum.NoSpherA2.PTB_use_purify"):
+        if nsa2_get_param("PTB_use_purify"):
           args.append("-purify")
         if mult != 1:
           args.append("-uhf")
@@ -2021,7 +2022,7 @@ ener = cf.kernel()"""
       else:
         OV.SetVar('NoSpherA2-Error',"OCC")
         raise NameError('OCC did not generate an fchk file!')
-    #embedding = OV.GetParam('snum.NoSpherA2.ORCA_USE_CRYSTAL_QMMM')
+    #embedding = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
     #if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding):
     #  molden_args = []
     #  molden_args.append(os.path.join(os.path.dirname(self.parent.orca_exe), "orca_2mkl"))
@@ -2105,7 +2106,7 @@ ener = cf.kernel()"""
         if (os.path.isfile(os.path.join(self.full_dir, self.name + ".wfn"))):
           shutil.copy(os.path.join(self.full_dir, self.name + ".wfn"), self.name + ".wfn")
 
-      experimental_SF = OV.GetParam('snum.NoSpherA2.NoSpherA2_SF')
+      experimental_SF = nsa2_get_param('NoSpherA2_SF')
 
       if (not experimental_SF) and ("g" not in args[0]) and softw != "OCC":
         self.convert_to_fchk()
@@ -2120,16 +2121,16 @@ ener = cf.kernel()"""
     move_args.append("-wfn")
     move_args.append(self.name + ".wfn")
     move_args.append("-mult")
-    move_args.append(OV.GetParam('snum.NoSpherA2.multiplicity'))
+    move_args.append(nsa2_get_param('multiplicity'))
     move_args.append("-b")
-    move_args.append(OV.GetParam('snum.NoSpherA2.basis_name'))
+    move_args.append(nsa2_get_param('basis_name'))
     move_args.append("-d")
     if sys.platform[:3] == 'win':
       move_args.append(basis_dir.replace("/", "\\"))
     else:
       move_args.append(basis_dir + '/')
     move_args.append("-method")
-    method = OV.GetParam('snum.NoSpherA2.method')
+    method = nsa2_get_param('method')
     if method == "HF":
       move_args.append("rhf")
     else:

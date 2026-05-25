@@ -32,6 +32,7 @@ import time
 from ImageTools import IT
 
 from olexFunctions import OV
+from variableFunctions import nsa2_get_param
 #debug = OV.IsDebugging()
 debug = False
 
@@ -4155,7 +4156,7 @@ class HealthOfStructure():
         if adapter.hklf_code == 2:
           one_h_function = None
           if OV.IsNoSpherA2():
-            table_name = str(OV.GetParam("snum.NoSpherA2.file")).lstrip().rstrip()
+            table_name = str(nsa2_get_param("file")).lstrip().rstrip()
             one_h_function = adapter.get_one_h_function(table_name)
           fo2, junk = adapter.get_fo_sq_fc(
             one_h_function=one_h_function,

@@ -12,6 +12,7 @@ from ArgumentParser import ArgumentParser
 from History import hist
 from olexex import OlexRefinementModel
 from olexFunctions import OV, SilentException
+from variableFunctions import nsa2_get_param, nsa2_set_param
 debug = OV.IsDebugging()
 green = OV.GetParam('gui.green')
 red = OV.GetParam('gui.red')
@@ -395,7 +396,7 @@ class RunSolutionPrg(RunPrg):
             self.terminate = True
             return
     OV.SetParam('snum.refinement.data_parameter_ratio', 0)
-    OV.SetParam('snum.NoSpherA2.use_aspherical', False)
+    nsa2_set_param('use_aspherical', False)
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
@@ -541,7 +542,7 @@ class RunRefinementPrg(RunPrg):
     result = False
     try:
       if use_aspherical:
-        make_fcf_only = OV.GetParam('snum.NoSpherA2.make_fcf_only')
+        make_fcf_only = nsa2_get_param('make_fcf_only')
         if make_fcf_only:
           from aaff import make_fcf
           result = make_fcf(self)
