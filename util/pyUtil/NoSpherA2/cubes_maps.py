@@ -740,7 +740,7 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = ()) -> None:
     if olx.xf.au.GetAtomType(a) == 'Q':
       n_atoms -= 1
       continue
-    position = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(',')
+    position = olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(a)).split(' ')
     positions[a] = [float(position[i]) / a2b for i in range(3)]
 
   vecs = [(cm[0] / (size[0]), cm[1] / (size[1]), cm[2] / (size[2])),
