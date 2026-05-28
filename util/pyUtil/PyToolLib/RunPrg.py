@@ -115,10 +115,10 @@ class RunPrg(ArgumentParser):
 
       html = f"<font color=$GetVar(gui.dark_green)>Running <font color=$GetVar(gui.orange)><b>{self.program.name}</b></font></font> "
       OV.SetVar('gui_notification', html)
-      
+
       if "XL" in self.program.name:
         gui.set_notification(OV.GetVar('gui_notification'))
-      
+
       res = self.method.run(self)
       evt.stop()
       if not res:
@@ -891,11 +891,8 @@ def do_refine():
   rpg = RunRefinementPrg()
   if rpg.terminate:
     if OV.IsEDData():
-      if OV.GetHeaderParamBool('ED.z.auto_after_refine', True) \
-         and OV.GetHeaderParam('ED.refinement.method', 'Kinematic') == 'N-Beam' \
-         and OV.IsAcentric() \
-         and not OV.GetHeaderParamBool("ED.z.refine_after_inversion"):
-        OV.GetACI().EDI.gui_compute_enantiomers()
+      if OV.GetACI().EDI.gui_compute_enantiomers_internal():
+        pass
       else:
         if debug:
           print("Skipping Hooft parameter evaluation for ED data")
