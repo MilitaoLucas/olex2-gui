@@ -3,7 +3,15 @@ import olex_core
 from decors import return_str
 import olx
 from olexFunctions import OV
+"""
+typical content of defaults:
+  param_defaults = {
+    'refinement.beam_n': (10, 'aced.user.defaults.starting.n_beams'),
+    'thickness.value': (400, 'aced.user.defaults.starting.thickness'),
+    'thickness.grad': True,
+  }
 
+"""
 class OlxInsHeader:
   param_defaults = {
   }
