@@ -603,7 +603,7 @@ def save_map_cube(map_type, resolution):
   cm = tuple(cm)
   for a in range(n_atoms):
     coord = olx.xf.au.GetAtomCrd(a)
-    pos = olx.xf.au.Orthogonalise(coord).split(',')
+    pos = olx.xf.au.Orthogonalise(coord).split(' ')
     positions[a] = [float(pos[0]) / a2b, float(pos[1]) / a2b, float(pos[2]) / a2b]
 
   vecs = [(cm[0] / (size[0] - 1), cm[1] / (size[1] - 1), cm[2] / (size[2] - 1)),
@@ -947,7 +947,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < max_peaks:
-        a = olx.xf.uc.Closest(*xyz).split(',')
+        a = olx.xf.uc.Closest(*xyz).split(' ')
         if OV.IsEDData():
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
         else:
@@ -1061,7 +1061,7 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
     olx.Kill('$Q', au=True) #HP-JUL18 -- Why kill the peaks? -- cause otherwise they accumulate! #HP4/9/18
     for xyz, height in zip(peaks.sites(), peaks.heights()):
       if i < max_peaks:
-        a = olx.xf.uc.Closest(*xyz).split(',')
+        a = olx.xf.uc.Closest(*xyz).split(' ')
         if OV.IsEDData():
           pi = "Peak %s = (%.3f, %.3f, %.3f), Height = %.3f e/A, %.3f A away from %s"
         else:

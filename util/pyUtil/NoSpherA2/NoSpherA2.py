@@ -1,7 +1,7 @@
 import os
 import sys
 
-from sympy import re
+#from sympy import re
 import olex
 import olexex
 import olx
@@ -28,6 +28,7 @@ import cubes_maps # noqa: F401
 import xharpy
 import pyscf
 import psi4
+from tscb_rename import read_tscb_scatterer_labels, read_tscb_scatterer_text, rewrite_tscb_scatterers
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -80,12 +81,10 @@ class NoSpherA2(PT):
     self.softwares = ""
     self.NoSpherA2 = ""
     self.WSLAdapter = None
-    #self.f_calc = None
-    #self.f_obs_sq = None
-    #self.one_h_linearisation = None
-    #self.reflection_date = None
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
+    self._labels_before_naming_mode = None
+    self._suspend_name_log_sync = False
     self.xharpy_adapter = None
     self.pyscf_adapter = None
     import platform
@@ -264,26 +263,6 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       self.WSLAdapter = None
       self.conda_adapter = None
 
-  #def set_f_obs_sq(self, f_obs_sq):
-  #  self.f_obs_sq = f_obs_sq
-
-  #def set_one_h_linearization(self, one_h_linarization):
-  #  self.one_h_linearisation = one_h_linarization
-
-  #def set_f_calc_obs_sq_one_h_linearisation(self,f_calc,f_obs_sq,one_h_linarization):
-  #  self.f_calc = f_calc
-  #  self.f_obs_sq = f_obs_sq
-  #  self.one_h_linearisation = one_h_linarization
-  #  file_name = nsa2_get_param("file")
-  #  time = os.path.getmtime(file_name)
-  #  self.reflection_date = time
-
-  #def delete_f_calc_f_obs_one_h(self):
-  #  self.f_calc = None
-  #  self.f_obs_sq = None
-  #  self.one_h_linearisation = None
-  #  self.reflection_date = None
-
   def setup_har_executables(self):
     self.mpiexec = self.setup_software(None, "mpiexec")
     self.mpi_har = self.setup_software(None, "hart_mpi")
@@ -335,7 +314,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         f_work = os.path.join(wfn_job_dir, f)
         f_dest = os.path.join(backup, f)
         if Full_HAR:
-          if run > 0:
+          if run is not None and run > 0:
             if self.wfn_code == "Tonto":
               if "restricted" not in f:
                 shutil.move(f_work, f_dest)
@@ -410,6 +389,247 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     nsa2_set_param('file_hash', file_hash)
     nsa2_set_param('file_origin', origin)
 
+  def _resolve_active_tscb_path(self):
+    tsc_name = str(OV.GetParam('snum.NoSpherA2.file') or '').strip()
+    if not tsc_name.lower().endswith('.tscb'):
+      return None
+
+    if os.path.isabs(tsc_name):
+      if os.path.exists(tsc_name):
+        return tsc_name
+      return None
+
+    candidate = os.path.join(OV.FilePath(), tsc_name)
+    if os.path.exists(candidate):
+      return candidate
+    return None
+
+  def _get_scatterer_labels(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    adapter = OlexCctbxAdapter()
+    return [str(sc.label) for sc in adapter.xray_structure().scatterers()]
+
+  def _update_active_tscb_hash(self, tscb_path, file_hash=None):
+    try:
+      if file_hash is None:
+        with open(tscb_path, 'rb') as handle:
+          file_hash = hashlib.sha256(handle.read()).hexdigest()
+      nsa2_set_param('file_hash', file_hash)
+    except Exception as error:
+      print(f"Warning: could not update NoSpherA2 file hash for {os.path.basename(tscb_path)}: {error}")
+
+  def _notify_tscb_sync(self, tscb_path, replacements):
+    message = f"Updated {os.path.basename(tscb_path)}: renamed {replacements} atom label(s) in active TSCB"
+    print(message)
+    if OV.HasGUI():
+      try:
+        gui.get_default_notification(txt=message, txt_col='black_text')
+      except Exception as error:
+        print(f"Warning: could not set GUI notification for TSCB sync: {error}")
+
+  def _ensure_active_tscb_matches_model(self):
+    tscb_path = self._resolve_active_tscb_path()
+    if tscb_path is None:
+      return True
+
+    try:
+      model_labels = self._get_scatterer_labels()
+    except Exception as error:
+      print(f"Error: could not read current model labels before using active TSCB: {error}")
+      OV.SetVar('NoSpherA2-Error', 'Active TSCB label read failed')
+      return False
+
+    try:
+      tscb_labels = read_tscb_scatterer_labels(tscb_path)
+    except Exception as error:
+      print(f"Error: could not read scatterer labels from active TSCB {os.path.basename(tscb_path)}: {error}")
+      OV.SetVar('NoSpherA2-Error', 'Active TSCB label read failed')
+      return False
+
+    if tscb_labels == model_labels:
+      return True
+
+    if len(tscb_labels) == len(model_labels):
+      self.sync_active_tscb_labels()
+      try:
+        tscb_labels = read_tscb_scatterer_labels(tscb_path)
+      except Exception as error:
+        print(f"Error: could not re-read scatterer labels from active TSCB {os.path.basename(tscb_path)} after sync: {error}")
+        OV.SetVar('NoSpherA2-Error', 'Active TSCB verification failed')
+        return False
+      if tscb_labels == model_labels:
+        return True
+
+    print("Error!: Active .tscb scatterers do not match the current model.")
+    print("Automatic label synchronisation could not make the active .tscb safe for refinement.")
+    print("Please recalculate the tsc/tscb file or select the matching table file before refining.")
+    print(f"Model scatterer count: {len(model_labels)}")
+    print(f"Active TSCB scatterer count: {len(tscb_labels)}")
+    OV.SetVar('NoSpherA2-Error', 'Active TSCB mismatch')
+    if OV.HasGUI():
+      try:
+        olx.Alert(
+          "Active TSCB mismatch",
+          "The active .tscb file does not match the current model and automatic label synchronisation could not repair it.\n\nPlease recalculate the tsc/tscb file or select the matching table file before refining.",
+          "O",
+          False,
+        )
+      except Exception as error:
+        print(f"Warning: could not show active TSCB mismatch alert: {error}")
+    return False
+
+  def _sync_active_tscb_for_renamed_labels(self, labels_before):
+    tscb_path = self._resolve_active_tscb_path()
+    if tscb_path is None:
+      return 0
+
+    try:
+      labels_after = self._get_scatterer_labels()
+    except Exception as error:
+      print(f"Warning: could not read scatterer labels after renaming: {error}")
+      return 0
+
+    if not labels_before or len(labels_before) != len(labels_after):
+      try:
+        labels_before = read_tscb_scatterer_labels(tscb_path)
+      except Exception as error:
+        print(f"Warning: could not read scatterer labels from active TSCB: {error}")
+        return 0
+
+    if not labels_before or len(labels_before) != len(labels_after):
+      print(f"Warning: active TSCB scatterer count does not match current model; skipping label sync ({len(labels_before)} vs {len(labels_after)})")
+      return 0
+
+    rename_map = {}
+    for old_label, new_label in zip(labels_before, labels_after):
+      if old_label and new_label and old_label != new_label:
+        rename_map[old_label] = new_label
+
+    if not rename_map:
+      return 0
+
+    try:
+      replacements, file_hash = rewrite_tscb_scatterers(tscb_path, rename_map)
+    except Exception as error:
+      print(f"Warning: failed to rename atoms inside {os.path.basename(tscb_path)}: {error}")
+      return 0
+
+    if replacements > 0:
+      self._update_active_tscb_hash(tscb_path, file_hash)
+      self._notify_tscb_sync(tscb_path, replacements)
+    return replacements
+
+  def sync_active_tscb_labels(self):
+    self._suspend_name_log_sync = True
+    try:
+      return self._sync_active_tscb_for_renamed_labels(None)
+    finally:
+      self._suspend_name_log_sync = False
+
+  def _should_sync_after_log_line(self, txt):
+    line = str(txt or '').strip().lower()
+    if not line:
+      return False
+    if line.startswith('spy.nosphera2.'):
+      return False
+    if line.startswith('name '):
+      return True
+    if line.startswith('match sel'):
+      return True
+    if line.startswith('label '):
+      return True
+    return False
+
+  def notify_log_for_tscb_sync(self, txt):
+    if self._suspend_name_log_sync:
+      return
+    if self._resolve_active_tscb_path() is None:
+      return
+    if not self._should_sync_after_log_line(txt):
+      return
+    self.sync_active_tscb_labels()
+
+  def diagnose_active_tscb_labels(self):
+    tscb_path = self._resolve_active_tscb_path()
+    if tscb_path is None:
+      print("No active .tscb file selected")
+      return 0
+
+    try:
+      model_labels = self._get_scatterer_labels()
+    except Exception as error:
+      print(f"Failed to read current model labels: {error}")
+      return 0
+
+    try:
+      tscb_text = read_tscb_scatterer_text(tscb_path)
+      tscb_labels = read_tscb_scatterer_labels(tscb_path)
+    except Exception as error:
+      print(f"Failed to read active TSCB labels: {error}")
+      return 0
+
+    print(f"Active TSCB: {tscb_path}")
+    print(f"Model scatterer count: {len(model_labels)}")
+    print(f"TSCB scatterer count: {len(tscb_labels)}")
+    print("Model labels preview:", " ".join(model_labels[:12]))
+    print("TSCB labels preview:", " ".join(tscb_labels[:12]))
+    print("TSCB scatterer block preview:")
+    print(tscb_text[:500])
+
+    mismatch_index = None
+    for index, (tscb_label, model_label) in enumerate(zip(tscb_labels, model_labels)):
+      if tscb_label != model_label:
+        mismatch_index = index
+        break
+
+    if mismatch_index is None and len(tscb_labels) == len(model_labels):
+      print("No mismatch found in overlapping scatterer labels")
+    elif mismatch_index is not None:
+      print(f"First mismatch at index {mismatch_index}: TSCB={tscb_labels[mismatch_index]} model={model_labels[mismatch_index]}")
+
+    return len(tscb_labels)
+
+  def notify_modechange_for_tscb_sync(self, mode_change_args):
+    mode = str(mode_change_args or '').strip().lower()
+    primary_mode = mode.split()[0] if mode else ''
+
+    if self._labels_before_naming_mode is not None and primary_mode != 'name':
+      labels_before = self._labels_before_naming_mode
+      self._labels_before_naming_mode = None
+      self._sync_active_tscb_for_renamed_labels(labels_before)
+      return
+
+    if primary_mode != 'name' or self._labels_before_naming_mode is not None:
+      return
+
+    if self._resolve_active_tscb_path() is None:
+      return
+
+    try:
+      self._labels_before_naming_mode = self._get_scatterer_labels()
+    except Exception as error:
+      print(f"Warning: could not capture labels before naming mode: {error}")
+      self._labels_before_naming_mode = None
+
+  def match_sel_with_tscb_sync(self, suffix='', invert=False):
+    labels_before = None
+    if self._resolve_active_tscb_path() is not None:
+      try:
+        labels_before = self._get_scatterer_labels()
+      except Exception as error:
+        print(f"Warning: could not capture labels before match naming: {error}")
+
+    cmd = 'match sel'
+    suffix = str(suffix or '').strip()
+    if suffix:
+      cmd += f' -n={suffix}'
+    cmd += f' -i={str(invert).lower()}'
+
+    olex.m(cmd)
+
+    if labels_before is not None:
+      self._sync_active_tscb_for_renamed_labels(labels_before)
+
   def launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = software()
@@ -418,6 +638,10 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     basis = nsa2_get_param('basis_name').lower()
     update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
     experimental_SF = nsa2_get_param('NoSpherA2_SF')
+    
+    if not self._ensure_active_tscb_matches_model():
+      return False
+    
     if "Please S" in wfn_code and update:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
@@ -1066,7 +1290,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     import multiprocessing
     max_cpu = multiprocessing.cpu_count()
     cpu_list = ['1',]
-    hyperthreading = OV.GetParam('user.refinement.has_HT')
+    hyperthreading = nsa2_get_param('user.refinement.has_HT')
     if not hyperthreading:
       max_cpu /= 2
     for n in range(1, int(max_cpu)):
@@ -1439,7 +1663,6 @@ The following options were used:
         print("CIF BLOCK is there")
         write_file.write(line)
   write_file.close()
-
 OV.registerFunction(add_info_to_tsc,False,'NoSpherA2')
 
 def change_basisset(input):
@@ -1688,81 +1911,28 @@ def sample_folder(input_name):
   olex.m(load_input_cif)
 OV.registerFunction(sample_folder, False, "NoSpherA2")
 
-#def run_psi4():
-#  import psi4
-#  geom = """
-#nocom
-#noreorient
-#O  2.7063023580 5.1528084960 8.7720795339
-#O  3.3917574233 4.6987620000 6.5946475188
-#O  3.3951198906 7.3446337920 8.3358309397
-#O  3.5584508738 5.4011996640 11.3644823059
-#H  3.9006607840 4.8830494080 11.1073486405
-#O  0.0777075174 4.3750162080 8.1552339725
-#H  -0.8348749233 5.0153560800 7.5389177106
-#O  0.5790341980 6.1209060960 10.2647039402
-#H  0.5199558750 5.2261571520 9.6673365980
-#O  5.9710316304 7.3284116160 10.8122112756
-#H  7.0596333792 6.6514410240 10.7672208236
-#O  5.8122422037 6.1015441440 7.1287106485
-#H  4.6869574832 6.3973808160 6.7212559436
-#O  4.5348713625 3.4297692000 4.4283307918
-#H  4.4649589816 4.3055922720 4.3947732076
-#O  0.6221059176 1.6562318400 7.3208463434
-#H  0.0542246615 1.4387151360 8.4539705735
-#O  3.4196014307 1.0813039680 6.8952895978
-#H  2.6365932773 0.2366170080 7.1116672067
-#C  2.2907529119 5.0602723200 7.4142147637
-#H  1.9724426610 6.0465980640 7.0040077017
-#C  3.6799020526 6.5094533760 10.5130512350
-#H  3.4079286655 7.4494674240 11.1040669840
-#C  2.7674469766 6.5041332000 9.2667627857
-#C  5.0653480467 6.7215626880 9.9006517889
-#H  5.4745713694 5.7394233120 9.5440098297
-#C  2.8085932626 2.3223876480 6.6235472679
-#H  2.4041473554 2.3378248800 5.5971298038
-#C  1.1531809098 4.0439442720 7.2764910508
-#H  0.7962560402 4.0444675680 6.2010604590
-#C  1.6368850964 2.6190964800 7.5673940202
-#H  2.0163570849 2.5153966560 8.6195354368
-#C  4.7613582222 7.6483199040 8.7213726480
-#H  4.7945236343 8.7079943040 9.0026423677
-#C  1.3504633130 7.0304817600 9.5008189958
-#H  0.8884059681 7.2729422400 8.4842465012
-#H  1.4228497713 8.0140165920 9.9861865776
-#C  3.9116136622 3.3699390240 6.7894297108
-#H  4.3812157993 3.2453073600 7.8100248811
-#C  5.0179353755 3.1993445280 5.7475567032
-#H  5.3801952506 2.1660093600 5.8059913608
-#H  5.8953563191 3.9488788320 5.9985504952
-#C  5.6803463582 7.4588867520 7.5271672631
-#H  6.6956267802 7.8106288800 7.8564973715
-#H  5.3388863094 8.1423113280 6.6742541538
-#"""
-#  sfc_name = OV.ModelSrc()
-#  out = os.path.join(OV.FilePath(), sfc_name + "_psi4.log")
-#  psi4.core.set_output_file(out)
-#  psi4.geometry(geom)
-#  psi4.set_num_threads(6)
-#  psi4.set_memory('15000 MB')
-#  psi4.set_options({'scf_type': 'DF',
-#  'dft_pruning_scheme': 'treutler',
-#  'dft_radial_points': 20,
-#  'dft_spherical_points': 110,
-#  'dft_basis_tolerance': 1E-10,
-#  'dft_density_tolerance': 1.0E-8,
-#  'ints_tolerance': 1.0E-8,
-#  'df_basis_scf': 'def2-universal-jkfit',
-#  })
-#  E, wfn = psi4.energy('pbe/cc-pVDZ', return_wfn=True)
-#  psi4.fchk(wfn, os.path.join(OV.FilePath(), sfc_name + ".fchk"))
-#  return None
-#OV.registerFunction(psi4, False, "NoSpherA2")
-
 NoSpherA2_instance = NoSpherA2()
+
+def _on_mode_change_nos2_tscb_sync(*args):
+  arg_str = ''
+  if args:
+    arg_str = args[0]
+  try:
+    NoSpherA2_instance.notify_modechange_for_tscb_sync(arg_str)
+  except Exception as e:
+    print(f"Error occurred while notifying mode change: {e}")
+
+def _on_log_nos2_tscb_sync(*args):
+  txt = ''
+  if args:
+    txt = args[0]
+  try:
+    NoSpherA2_instance.notify_log_for_tscb_sync(txt)
+  except Exception as e:
+    print(f"Error occurred while notifying log: {e}")
+
 OV.registerFunction(NoSpherA2_instance.available, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.launch, False, "NoSpherA2")
-#OV.registerFunction(NoSpherA2_instance.delete_f_calc_f_obs_one_h, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getBasisListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.getCPUListStr, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_SALTED_model_locations, False, "NoSpherA2")
@@ -1770,6 +1940,9 @@ OV.registerFunction(NoSpherA2_instance.getwfn_softwares, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.disable_relativistics, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.wipe_wfn_jobs_folder, False, "NoSpherA2")
 OV.registerFunction(NoSpherA2_instance.get_distro_list, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.match_sel_with_tscb_sync, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.sync_active_tscb_labels, False, "NoSpherA2")
+OV.registerFunction(NoSpherA2_instance.diagnose_active_tscb_labels, False, "NoSpherA2")
 
 def hybrid_GUI():
   t = make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
