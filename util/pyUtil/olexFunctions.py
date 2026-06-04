@@ -8,7 +8,7 @@ import OlexVFS
 import cProfile
 from subprocess import *
 import guiFunctions
-
+from ins_header import ins_header
 from decors import gui_only
 
 import time
@@ -110,38 +110,16 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
 
   def GetHeaderParamBool(self, param, default=None) -> bool:
-    rv = self.GetHeaderParam(param, default)
-    if type(rv) == bool:
-      return rv
-    if rv and rv.lower() == 'true':
-      return True
-    return False
+    return ins_header.get_bool(param, default)
 
   def SetHeaderParam(self, param, value):
-    olx.xf.rm.StoreParam(param, value)
-  
+    ins_header.set(param, value)
+
   def ClearHeaderParam(self, param):
     olx.xf.rm.ClearParams(param)
 
-  def GetHeaderParam(self, param, default=None, src=None):
-    if src == None:
-      src = olex_core.GetStoredParams()
-    if src is None:
-      return default
-    toks = param.split(".")
-    for i, t in enumerate(toks):
-      if (i+1) == len(toks):
-        if t == 'value':
-          return src.get('value', default)
-        if t == 'fields':
-          return src.get('fields', default)
-        else:
-          return src['fields'].get(t, default)
-      src = src.get(t)
-      if src is None:
-        return default
-    return default
-
+  def GetHeaderParam(self, param, default=None):
+    return ins_header.get(param, default)
 
   def GetParam(self, variable, default=None, get_list=False):
     retVal = default
@@ -308,7 +286,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       sNum = olx.xf.DataName(int(olx.xf.CurrentData()))
     # Combine with the directory to make it globally unique
     directory = os.path.normpath(OV.FilePath())
-    return sNum, directory  
+    return sNum, directory
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):

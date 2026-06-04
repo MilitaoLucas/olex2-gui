@@ -1,8 +1,5 @@
-
-import olex_core
+import olex, olex_core
 from decors import return_str
-import olx
-from olexFunctions import OV
 """
 typical content of defaults:
   param_defaults = {
@@ -37,6 +34,7 @@ class OlxInsHeader:
     olex_core.SetStoredParam(param, str(value))
 
   def _get_default(self, param, default):
+    from olexFunctions import OV
     rv = self.defaults.get(param, default)
     if isinstance(rv, tuple):
       return OV.GetParam(rv[1], rv[0])
@@ -97,10 +95,10 @@ class OlxInsHeaderScope():
     ins_header.print(self.scope)
 
 #mainly for testing
-OV.registerFunction(ins_header.register, False, "ins_header")
-OV.registerFunction(ins_header.exists, False, "ins_header")
-OV.registerFunction(ins_header.get, False, "ins_header")
-OV.registerFunction(ins_header.get_bool, False, "ins_header")
-OV.registerFunction(ins_header.set_, False, "ins_header")
-OV.registerFunction(ins_header.delete, False, "ins_header")
-OV.registerFunction(ins_header.print, False, "ins_header")
+olex.registerFunction(ins_header.register, False, "ins_header")
+olex.registerFunction(ins_header.exists, False, "ins_header")
+olex.registerFunction(ins_header.get, False, "ins_header")
+olex.registerFunction(ins_header.get_bool, False, "ins_header")
+olex.registerFunction(ins_header.set_, False, "ins_header")
+olex.registerFunction(ins_header.delete, False, "ins_header")
+olex.registerFunction(ins_header.print, False, "ins_header")
