@@ -66,7 +66,7 @@ class OlxInsHeader:
   def print(self, scope=None):
     prefix = f"{scope}." if scope else None
     for k, v in self.defaults.items():
-      if prefix and not k.startwith(prefix):
+      if prefix and not k.startswith(prefix):
         continue
       print(f"{k}: {v}")
 
