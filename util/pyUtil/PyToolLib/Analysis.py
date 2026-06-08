@@ -1091,13 +1091,13 @@ class Graph(ArgumentParser):
 
       j += 1
       i += 1
-      if j == max_bars or i == bar_cnt - 1:
+      if j == max_bars or i == bar_cnt:
         img_no += 1
         j = 0
         # make full last image
         if fill_last_page:
-          if i != bar_cnt-1 and i + max_bars > bar_cnt:
-            i = bar_cnt - max_bars - 1
+          if i != bar_cnt and i + max_bars > bar_cnt:
+            i = bar_cnt - max_bars
         self.image_location = "history_%s.png" %img_no
 
         historyText = """\
