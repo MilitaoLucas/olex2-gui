@@ -1578,7 +1578,7 @@ user
           .type = str
         target = "Data/Parameter Ratio"
           .type = str
-        show_if_lower_than = 12
+        show_if_lower_than = 999
           .type = int
       }
 

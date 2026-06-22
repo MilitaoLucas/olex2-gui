@@ -498,7 +498,7 @@ class Graph(ArgumentParser):
       y2 = self.graph_bottom - float(y2)
 
     adj_x = 0 * self.scale
-    adj_y = 1 * self.scale
+    adj_y = 0 * self.scale
     if x_intercept:
       adj_x = 0 * self.scale
       adj_y = 0 * self.scale
@@ -751,7 +751,7 @@ class Graph(ArgumentParser):
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
-        self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None))
+        self.draw_fit_line(slope, y_intercept, R=dataset.metadata().get("R", None), colour="#ff4400")
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
         marker_size_factor=marker_size_factor, hrefs=dataset.hrefs,
@@ -1676,7 +1676,7 @@ class Graph(ArgumentParser):
       txt = format_string %_
 
       wX, wY = get_text_size(self.draw, txt, font=self.font_small)
-      y = self.graph_bottom + self.imX * 0.01
+      y = self.graph_bottom + self.imX * 0.0025
 
       if self.reverse_x:
         x = self.bX \
@@ -1693,7 +1693,7 @@ class Graph(ArgumentParser):
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         x = int(x + wX/2)
         y = y - self.imY * 0.005
-        y = self.graph_bottom
+        y = self.graph_bottom -1
         self.draw.line(((x, y),(x, y-self.ax_marker_length)), width=self.line_width, fill=self.outlineColour)
 
     if self.draw_origin:
@@ -1868,8 +1868,13 @@ class Analysis(Graph):
         var = li.split("=")[0].strip("#")
         var = var.strip()
         val = li.split("=")[1].strip()
+        # Fudge labels -- this is where the axis 
         if "x_label" in var:
-           val = "ln(<mFo^2>m)/(Fexp^2)"
+          if val == 'ln(<Fo^2>)/(Fexp^2)':
+            val = "ln(<mI>m/<mE>m)"
+        if "y_label" in var:
+          if val == 'sin^2(theta)/lambda^2':
+            val = "(sintheta/lambda)^2"
         metadata.setdefault(var, val)
       else:
         xy = li.split(",")
@@ -2221,14 +2226,14 @@ class WilsonPlot(Analysis):
       self.get_simple_x_y_pair_data_from_file(filepath)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_y = True, no_negatives=False)
-    grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
-    #size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
+    grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.06))))
     size = ((self.im.size[0]), self.im.size[1])
     colour = self.pageColour
     new = Image.new('RGB', size, colour)
     new.paste(self.im, (0,0))
-#    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
-    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1] - grad.size[1])))
+    x =  int(self.xSpace+self.bSides)
+    y =  int(self.im.size[1] - grad.size[1] - 15)
+    new.paste(grad, (x,y))
     draw = ImageDraw.Draw(new)
 
     imX, imY = new.size
@@ -2245,7 +2250,7 @@ class WilsonPlot(Analysis):
 #    left = grad.size[0] + self.xSpace + imX * 0.04
 #    top = self.im.size[1] - imY * 0.02
     left = grad.size[0] + self.xSpace + imX * 0.04
-    top = self.im.size[1] - grad.size[1] + 22
+    top = self.im.size[1] - grad.size[1] - 2 * self.scale
     top_original = top
     i = 0
     for txt in text:
@@ -2277,8 +2282,8 @@ class WilsonPlot(Analysis):
     metadata = {}
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
     metadata.setdefault("B", wp.wilson_b)
-    metadata.setdefault("y_label", "sin^2(theta)/lambda^2")
-    metadata.setdefault("x_label", "ln(<mFo2>m).Fexp2)")
+    metadata.setdefault("y_label", "(sin(theta)/lambda)^2")
+    metadata.setdefault("x_label", "ln(<mFo2>m.Fexp2))")
     # convert axes in formula
     metadata.setdefault("fit_slope", 1/wp.fit_slope)
     metadata.setdefault("fit_y_intercept", -wp.fit_y_intercept/wp.fit_slope)
@@ -2287,15 +2292,13 @@ class WilsonPlot(Analysis):
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(wp.y,wp.x,metadata=metadata))
 
-  def make_gradient_box(self, size = (320, 35)):
+  def make_gradient_box(self, size = (320, 25)):
     boxWidth = size[0]
     boxHeight = size[1]*0.4
     boxTopOffset = self.imY * 0.035
     colour = self.pageColour
     im = Image.new('RGB', size, colour)
     draw = ImageDraw.Draw(im)
-    #target_left = (0,0,255)
-    #target_right = (0,255,0)
     middle = boxWidth/2
     box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
     draw.rectangle(box, fill=self.pageColour, outline=self.outlineColour)
@@ -2313,24 +2316,24 @@ class WilsonPlot(Analysis):
 
     if value < (0.736 - 0.736*0.2):
       max1 = 128.0
-      c1 = (255.0, 0 , 0)
+      c1 = (139, 34 , 34)
       max2 = 128.0
       c2 = (0, 0, 0)
     elif (0.736 - 0.736*0.1) < value < (0.736 + 0.736*0.1):
       max1 = 128.0
-      c1 = (0, 255.0 , 0)
+      c1 = (34, 139, 34)
       max2 = 128.0
       c2 = (0, 0, 0)
     elif (0.736 + 0.736*0.1) <= value <= (0.968 - 0.968*0.1):
       max1 = 128.0
-      c1 = (255.0, 0, 0)
+      c1 = (139, 34, 34)
       max2 = 128.0
       c2 = (255.0, 0, 0)
     elif (0.968 - 0.968*0.1) < value < (0.968 + 0.968*0.1):
       max1 = 128.0
       c1 = (0, 0, 0)
       max2 = 128.0
-      c2 = (0, 255.0, 0)
+      c2 = (34, 139, 34)
     elif value > (0.968 + 0.968*0.1):
       max1 = 128.0
       c1 = (0, 0, 0)
@@ -2347,21 +2350,23 @@ class WilsonPlot(Analysis):
       if i == margin_left:
         txt = "acentric"
         txt = OV.TranslatePhrase(txt)
+        txt = f"{txt} (0.736)"
         wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
-        top_left = (i - int(wX / 2), 0)
-        IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
-        txt = "0.736"
-        wX, wY = get_text_size(draw, txt, font=self.font_tiny)
-        draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
+        top_left = (i - int(wX / 2), -5)
+        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
+        #txt = "0.736"
+        #wX, wY = get_text_size(draw, txt, font=self.font_tiny)
+        #draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       if i == (margin_right):
         txt = "centric"
         txt = OV.TranslatePhrase(txt)
+        txt = f"{txt} (0.968)"
         wX, wY = get_text_size(draw, txt, font=self.font_tiny)
-        top_left = (i-int(wX/2), 0)
-        IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
-        txt = "0.968"
-        wX, wY = get_text_size(draw, txt, font=self.font_small)
-        draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
+        top_left = (i-int(wX/2), -5)
+        IT.write_text_to_draw(draw, txt=txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.grey)
+        #txt = "0.968"
+        #wX, wY = get_text_size(draw, txt, font=self.font_small)
+        #draw.text((i - int(wX / 2), boxTopOffset + boxHeight), "%s" % txt, font=self.font_tiny, fill=self.titleColour)
       top =  int(boxTopOffset+1)
       bottom = int(boxTopOffset+boxHeight-2)
       if i < margin_left:
@@ -2396,23 +2401,37 @@ class WilsonPlot(Analysis):
         draw.line(((i, top),(i, bottom)), fill=fill)
     val = int((value - begin) / scale)
     txt = chr(8226)
-    wX, wY = get_text_size(draw, txt, font=self.font_bold_normal)
-    draw.ellipse(((val-int(wX/2), boxTopOffset+3*self.scale),(val+int(wX/2), boxTopOffset+boxHeight-3*self.scale)), fill=(255,235,10))
-    draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
+    wX, wY = get_text_size(draw, txt, font=self.font_bold_large)
+    top =  boxTopOffset-self.imY*0.012
+    draw.line(((val, top),(val, top + 90)), fill="#ffffff", width=20)
+    draw.line(((val, top + 20),(val, top + 80)), fill=gui.red.hexadecimal, width=8)
     image_location = "%s.png" %("grad")
     OlexVFS.save_image_to_olex(im, image_location,  1)
     return im
 
-  def grad_fill(self, max, c1, col):
-    fill = []
-    for c in c1:
-      if not c:
-        c = col
-        fill.append(int(col))
-      else:
-        fill.append(int(c))
-    fill = tuple(fill)
+  def grad_fill(self, maxval, colour, col):
+    # col goes from ~255 (white) down to ~128 (peak colour)
+    t = (255.0 - col) / (255.0 - maxval)
+  
+    t = max(0.0, min(1.0, t))
+  
+    fill = tuple(
+        int(255 - (255 - c) * t)
+          for c in colour
+      )
+  
     return fill
+  
+  #def grad_fill(self, max, c1, col):
+    #fill = []
+    #for c in c1:
+      #if not c:
+        #c = col
+        #fill.append(int(col))
+      #else:
+        #fill.append(int(c))
+    #fill = tuple(fill)
+    #return fill
 
 class ChargeFlippingPlot(PrgAnalysis):
   def __init__(self):
@@ -3099,7 +3118,7 @@ class AnomDispPlot(Analysis):
     self.draw_x_axis()
     self.draw_y_axis()
     for i, wl in enumerate(self.common_wl):
-      if wl == wavelength:
+      if abs(wavelength - wl) / wl <= 2 / 100:
         colour = self.red
       else:
         colour = self.fitlineColour
@@ -3232,11 +3251,15 @@ class Xobs_Xcalc_plot(Analysis):
     metadata["idx"] = 0
 
     if self.F_or_I == "F":
+      metadata.setdefault("fit_slope", xy_plot.fit_slope)
+      metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
       data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
     elif self.F_or_I == "I":
       data = Dataset(
       xy_plot.I_calc, xy_plot.I_obs, indices=xy_plot.indices, metadata=metadata)
+
+
 
     self.data.setdefault('dataset1', data)
 
@@ -3289,11 +3312,10 @@ class Xobs_Xcalc_plot(Analysis):
         data_common = self.get_common_data(xy_plot, metadata)
         if len(data_common.x) > 0:
           self.data.setdefault('dataset3', data_common)
-    self.draw_fit_line(1, 0, colour="#ababab")
+    self.draw_fit_line(1, 0, colour="#bbbbbb", write_equation=False, width=1)
     self.draw_pairs()
     if have_omitted:
       make_data_key(self)
-
 
   def get_common_data(self, xy_plot, metadata):
     from cctbx.array_family import flex
@@ -3908,7 +3930,7 @@ def makeReflectionGraphGui():
          'valign':'top',
         }
     #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
-    gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
+    gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-Go@MakeGraphs','%s')" %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -3933,6 +3955,7 @@ def makeReflectionGraphGui():
      'height': guiParams.html.combo_height,
      'bgcolor': guiParams.html.input_bg_colour,
      'value': value,
+     'onchangealways': True,
      'onchange': "spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
      'manage': 'manage',
      'readonly': 'readonly',
