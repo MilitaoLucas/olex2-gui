@@ -222,7 +222,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       msg = "ED refinement"
       msg_l = len(msg)
       #if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
-      if self.exti is not None and not OV.GetHeaderParam('ED.refinement.refine.exti'):
+      if self.exti is not None and not OV.GetHeaderParamBool('ED.refinement.refine.exti'):
         self.exti = None
         msg +=", ignoring EXTI"
       if self.swat is not None:

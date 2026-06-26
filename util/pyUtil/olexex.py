@@ -1275,7 +1275,7 @@ def GetTwinLawAndBASF(html=False):
     if txt: txt += ", "
     txt += "BASF ["
     sz = len(basf)
-    if sz < 36:
+    if sz < 3:
       i, ln = 0, 10
       while i < sz:
         txt += "%s" %(';'.join(basf[i:min(i+ln, len(basf))]))
@@ -1287,6 +1287,7 @@ def GetTwinLawAndBASF(html=False):
           if html:
             txt += "<br/>"
     else:
+      txt += "%s" %(';'.join(basf[0:3]))
       if html:
         txt += "<a href='EditIns'>...</a>"
       else:
