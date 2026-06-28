@@ -22,7 +22,8 @@ def get_latest_job_id():
 def get_artifacts(job_id, out_fn):
   #https://gitlab.com/olexsys/hugo-website-hextra/-/jobs/15065586043/artifacts/download?file_type=archive
   #url = f"https://gitlab.com/olexsys/hugo-website-hextra/-/jobs/{job_id}"
-  url = f"https://gitlab.com/olexsys/hugo-website-hextra/-/jobs/{job_id}/artifacts/download?file_type=archive"
+  #public URL alternative - no need for the token
+  #url = f"https://gitlab.com/olexsys/hugo-website-hextra/-/jobs/{job_id}/artifacts/download?file_type=archive"
   url = f"{base_url}/projects/83460962/jobs/{job_id}/artifacts"
   with requests.get(url, headers=headers, stream=True) as response:
     response.raise_for_status()
@@ -75,8 +76,9 @@ if __name__ == "__main__":
     f.write(str(job_id))
 
   try:
-    arts = filter(os.path.isfile, os.listdir(atrtifacts_dir))
-    arts = [os.path.join(atrtifacts_dir, f) for f in arts] # add path to each file
+    arts = os.listdir(atrtifacts_dir)
+    arts = [os.path.join(atrtifacts_dir, f) for f in arts]
+    arts = filter(os.path.isfile, arts)
     arts.sort(key=lambda x: os.path.getctime(x), reverse=True)
     if len(arts) > 3:
       for f in arts[3:]:
