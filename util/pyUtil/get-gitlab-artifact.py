@@ -3,7 +3,7 @@ import requests
 from pathlib import Path
 
 headers = {
-  "PRIVATE-TOKEN": "glpat-657swJEfC0VRDX-gvlBR02M6MQpvOjEKdTpub3EyOA8.01.170u2pp00",
+  "PRIVATE-TOKEN": "...",
 }
 # get user_id: f"{base_url}/user" ["id"]
 # get user projects: f"base_url/v4/users/{user_id}/projects"
