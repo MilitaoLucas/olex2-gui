@@ -78,7 +78,7 @@ if __name__ == "__main__":
   try:
     arts = os.listdir(atrtifacts_dir)
     arts = [os.path.join(atrtifacts_dir, f) for f in arts]
-    arts = filter(os.path.isfile, arts)
+    arts = list(filter(os.path.isfile, arts))
     arts.sort(key=lambda x: os.path.getctime(x), reverse=True)
     if len(arts) > 3:
       for f in arts[3:]:
