@@ -3,7 +3,7 @@ import requests
 from pathlib import Path
 
 headers = {
-  "PRIVATE-TOKEN": "...",
+  "PRIVATE-TOKEN": os.environ["GITLAB_TOKEN"],
 }
 # get user_id: f"{base_url}/user" ["id"]
 # get user projects: f"base_url/v4/users/{user_id}/projects"
@@ -13,7 +13,7 @@ base_url = "https://gitlab.com/api/v4"
 www_dir = "/var/www/rsx/website-new/www"
 
 def get_latest_job_id():
-  url = f"{base_url}/projects/83460962/jobs?order_by=id&per_page=1"
+  url = f"{base_url}/projects/83460962/jobs?scope=success&order_by=id&per_page=1"
   with requests.get(url, headers=headers) as response:
     response.raise_for_status()
     job_id = response.json()[0]['id']
@@ -56,11 +56,31 @@ if __name__ == "__main__":
     except Exception as e:
       print("Failed to get the artifacts archive: %s" %str(e))
       exit(1)
-  if os.path.exists(www_dir):
-    shutil.rmtree(www_dir)
-  os.mkdir(www_dir)
+  # extract to a spare dir
+  new_dir = www_dir + "_new"
+  if os.path.exists(new_dir):
+    shutil.rmtree(new_dir)
   with zipfile.ZipFile(out_fn, "r") as zf:
-    zf.extractall(www_dir)
+    zf.extractall(new_dir)
+
+  #rename existing dir if exists
+  if os.path.exists(www_dir):
+    os.rename(www_dir, www_dir + "_old")
+  #do the swapping
+  os.rename(new_dir, www_dir)
+  if os.path.exists(www_dir + "_old"):
+    shutil.rmtree(www_dir + "_old")
+
   with open(last_job_fn, "w+") as f:
     f.write(str(job_id))
+
+  try:
+    arts = filter(os.path.isfile, os.listdir(atrtifacts_dir))
+    arts = [os.path.join(atrtifacts_dir, f) for f in arts] # add path to each file
+    arts.sort(key=lambda x: os.path.getctime(x), reverse=True)
+    if len(arts) > 3:
+      for f in arts[3:]:
+        os.unlink(f)
+  except Exception as e:
+    pass
   print("Done")
