@@ -735,6 +735,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     groups = None
     if not parts:
       nr_parts = 1
+      groups = [-1000]
     elif len(parts) > 1:
       olx.Kill("$Q")
       cif = False
@@ -744,6 +745,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         cif = True
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
+    elif len(parts) == 1:
+      #Special case where all atoms are part of a single disorder group.
+      nr_parts = 1
+      groups = parts
+    else:
+      #WTF?!
+      raise NameError("Could not determine the number of disorder parts!\nThis is an undefined case, please rech out to the Olex2 team to explain this model.")
+      
 
     if nr_parts > 1:
       wfn_files = []
@@ -1017,7 +1026,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                     wfn_fn = path_base + e
             #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
-            cuqct_tsc(wfn_fn, cif_fn, [-1000])
+            cuqct_tsc(wfn_fn, cif_fn, groups)
             if os.path.exists("experimental.tsc"):
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):
@@ -1030,7 +1039,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             path_base = os.path.join(self.jobs_dir, self.name)
             cif_fn = path_base + ".cif"
             wfn_fn = path_base + ".xyz"
-            cuqct_tsc(wfn_fn, cif_fn, [-1000])
+            cuqct_tsc(wfn_fn, cif_fn, groups)
             if os.path.exists("experimental.tsc"):
               shutil.move("experimental.tsc", self.name + ".tsc")
             if os.path.exists("experimental.tscb"):

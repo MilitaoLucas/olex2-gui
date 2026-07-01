@@ -3921,7 +3921,7 @@ def makeReflectionGraphGui():
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
-    onclick = 'spy.make_reflection_graph\(%s)' %name
+    onclick = 'spy.make_reflection_graph(%s)' %name
     d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
          'bgcolor':guiParams.html.input_bg_colour,
          'onclick': onclick,

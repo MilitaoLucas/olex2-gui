@@ -423,7 +423,11 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     if(groups[0] != -1000):
       args.append('-group')
       for i in range(len(groups)):
-        args.append(groups[i])
+        g = groups[i]
+        if g < 0:
+            args.append("+"+str(abs(g)))
+        else:
+            args.append(str(groups[i]))
     if ".xyz" in wfn_file:
       Cations = nsa2_get_param('Thakkar_Cations')
       if Cations != "" and Cations is not None:
