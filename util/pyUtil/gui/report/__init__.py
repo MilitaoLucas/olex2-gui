@@ -452,6 +452,9 @@ def get_reflections_stats_dictionary():
 def create_report():
   try:
     aci = OV.GetACI()
+    if aci is None:
+      print("ACI is not available. aborting")
+      return
     if aci.HasAC():
       try:
         olex.m('spy.ac.create_report()')

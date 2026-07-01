@@ -978,8 +978,11 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       return (v, True) if ext else v
 
   def GetACI(self):
-    import AC7 as ac
-    return ac.get_aci()
+    try:
+        import AC7 as ac
+        return ac.get_aci()
+    except:
+        return None
 
   def ListParts(self):
     import olexex

@@ -535,7 +535,7 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     print("\n.tsc calculation ended!")
   else:
     print ("\nERROR during tsc calculation!")
-    raise NameError('NoSpherA2-Output not complete!')
+    raise NameError('NoSpherA2-Output not complete!\nPlease check the NoSpherA2.log/<name>.partitionlog file for details!')
 
 def get_nmo():
   line = ""
@@ -1527,3 +1527,62 @@ def is_orca_new(given_software = None):
   else:
     return given_software in ["ORCA 5.0", "ORCA 6.0", "ORCA 6.1"]
 OV.registerFunction(is_orca_new, False, "NoSpherA2")
+
+def bartusel_helper(hkl):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    from cctbx import adptbx
+    import cmath
+    import math
+
+    # Normalize input to the cctbx-expected Miller index tuple (int, int, int)
+    if isinstance(hkl, str):
+      parts = hkl.replace(" ", "").split(",")
+    elif isinstance(hkl, (list, tuple)) and len(hkl) == 3:
+      parts = hkl
+    else:
+      raise ValueError("hkl must be a string like '1,2,3' or a 3-element list/tuple")
+    h, k, l = map(int, parts)
+    hkl_idx = (h, k, l)
+
+    adapter = OlexCctbxAdapter()
+    xs = adapter.xray_structure()
+    uc = xs.unit_cell()
+
+    rows = []
+    for sc in xs.scatterers():
+        # Get an isotropic U for every atom:
+        # - if atom is refined isotropically, use u_iso
+        # - if anisotropic, convert U* -> Ueq (isotropic equivalent)
+        if sc.flags.use_u_iso():
+            u = sc.u_iso
+            dw = adptbx.debye_waller_factor_u_iso(uc, hkl_idx, u)
+        elif sc.flags.use_u_aniso():
+            u = sc.u_star
+            dw = adptbx.debye_waller_factor_u_star(hkl_idx, u)
+            u = adptbx.u_star_as_u_cart(uc, u)
+        else:
+            # fallback (rare)
+            u = 0.0
+            dw = 0.0
+            ac = sc.anharmonic_adp
+
+        # phase factor exp(2*pi*i*(h*x + k*y + l*z))
+        x, y, z = sc.site
+        arg = h*x + k*y + l*z
+        phase_complex = cmath.exp(2j * math.pi * arg)
+
+        rows.append({
+            "label": sc.label,
+            "xyz_frac": (x, y, z),
+            "u_iso_used": u,
+            "dw_iso": dw,
+            "phase_complex": phase_complex,
+            # useful combined prefactor (without atomic form factor):
+            "occ_dw_phase": sc.occupancy * dw * phase_complex
+        })
+    print(f"Results for hkl={hkl_idx}:")
+    for row in rows:
+      c = row['occ_dw_phase']
+      print(f"{row['label']}: x={row['xyz_frac']} u_iso={row['u_iso_used']} DW={row['dw_iso']} "
+          f"Phase={row['phase_complex']:.4f} Occ*DW*Phase=({c.real:.3e}{c.imag:+.3e}i)")
+OV.registerFunction(bartusel_helper, False, "NoSpherA2")

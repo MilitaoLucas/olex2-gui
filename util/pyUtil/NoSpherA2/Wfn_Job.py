@@ -782,6 +782,8 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         soft = "ORCA 5.0"
       if is_orca_new(soft):
         SCNL = nsa2_get_param('ORCA_SCNL')
+        if OV.GetParam('snum.NoSpherA2.ORCA_screen_libxc'):
+          control += "LibXC(B97M-V) "
         if SCNL:
           if method != "wB97X":
             control += method + ' SCNL '
@@ -974,30 +976,22 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         if os.path.exists(os.path.join(self.full_dir, self.name + "2.gbw")):
           scf_block += f"   Guess MORead\n   MOInp \"{self.name}2.gbw\""
           if convergence == "NoSpherA2SCF":
-            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n    Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+            scf_block += "\n   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n   TolMAXP 1E-5\n    Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
         elif convergence == "NoSpherA2SCF":
-          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n   TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
       else:
         if convergence == "NoSpherA2SCF":
-          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+          scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n   TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     else:
       if convergence == "NoSpherA2SCF":
-        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n    TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
+        scf_block += "   TolE 3E-5\n   TolErr 1E-4\n   TolRMSP 1E-6\n   TolMAXP 1E-5\n   Thresh 1E-9\n   TolG 3E-4\n   TolX 3E-4"
     if brok_sym:
         atom_flip_list_in = nsa2_get_param("ORCA_Broken_sym_atoms")
         atom_flip_list_out = ""
         #from cctbx import uctbx, adptbx
         for atom in atom_flip_list_in.split(","):
-            ref_mod = olexex.OlexRefinementModel(False)
-            olx_atoms = ref_mod.atoms()
-            #uc = uctbx.unit_cell(ref_mod.getCell())
-            #Lets hope olex keeps internal atom numbers according to how xyz files are generated...
-            index = -1
-            for i,a in enumerate(olx_atoms):
-              label = a['label']
-              if atom in label:
-                  index = i
-                  break
+            # Use the improved helper function to find atom index
+            index = self._find_atom_index_by_label(atom)
             if index == -1:
               print("Could not find atom %s in the structure! Check the atom labels and the list of atoms to flip in the ORCA settings!"%atom)
               continue
@@ -1008,9 +1002,20 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         scf_block += f"\nFlipSpin {atom_flip_list_out}\nFinalMs {atom_spin_list}"
     if scf_block != "":
       inp.write(f"%scf\n{scf_block}\nend\n")
+    if OV.GetParam("snum.NoSpherA2.ORCA_screen_libxc"):
+      inp.write(f'''%method
+  ExtParamXC "_cx01" {OV.GetVar("ORCA_B97_Parameter_1")}
+  ExtParamXC "_cx02" {OV.GetVar("ORCA_B97_Parameter_2")}
+  ExtParamXC "_cx10" {OV.GetVar("ORCA_B97_Parameter_3")}
+end\n''')
     inp.close()
 
   def write_psi4_input(self,xyz, basis_name=None, charge = None):
+    """Write a Psi4 input file.
+    
+    This function handles the writing of input files for Psi4 calculations.
+    It takes into account the basis set, charge, multiplicity, and other parameters.
+    """
     if xyz:
       self.write_xyz_file()
       coordinates_fn = os.path.join(self.full_dir, self.name) + ".xyz"
@@ -1045,279 +1050,203 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             if atom[0] not in atom_list:
               atom_list.append(atom[0])
         xyz.close()
-        inp.write("''',\n  verbose = 4,\n  charge = %d,\n  spin = %d\n)\nmol.output = '%s_pyscf.log'\n"%(int(charge),int(mult-1),self.name))
-        inp.write("mol.max_memory = %s\n"%str(mem_value))
-        inp.write("mol.basis = {")
+        inp.write("'''\n  basis = '''")
         for element in atom_list:
           shells = _read_atom_basis(basis, element, basis_name)
           _write_atom_basis_pyscf(inp, element, shells)
         basis.close()
-        inp.write("\n}\nmol.build()\n")
-
-        model_line = None
-        if method is None:
-          method = nsa2_get_param('method')
-        if method == "HF":
-          if mult == 1:
-            model_line = "scf.RHF(mol)"
-          else:
-            model_line = "scf.UHF(mol)"
-        else:
-          if mult == 1:
-            model_line = "dft.RKS(mol)"
-          else:
-            model_line = "dft.UKS(mol)"
-
-        if relativistic is None:
-          relativistic = nsa2_get_param('Relativistic')
-        if relativistic:
-          model_line += ".x2c()"
-        #inp.write("mf = sgx.sgx_fit(%s)\n"%model_line)
-        inp.write("mf = %s\n"%model_line)
-        if method == "B3LYP":
-          #inp.write("mf.xc = 'b3lyp'\nmf.with_df.dfj = True\n")
-          inp.write("mf.xc = 'b3lyp'\n")
-        elif method == "PBE":
-          inp.write("mf.xc = 'pbe,pbe'\n")
-        elif method == "BLYP":
-          inp.write("mf.xc = 'b88,lyp'\n")
-        elif method == "M062X":
-          inp.write("mf.xc = 'M062X'\n")
-        elif method == "PBE0":
-          inp.write("mf.xc = 'PBE0'\n")
-        elif method == "R2SCAN":
-          inp.write("mf.xc = 'R2SCAN'\n")
-        grid_accuracy = nsa2_get_param('becke_accuracy')
-        grid = None
-        if grid_accuracy == "Low":
-          grid = 0
-        elif grid_accuracy == "Normal":
-          grid = 0
-        elif grid_accuracy == "High":
-          grid = 3
-        else:
-          grid = 9
-        rest = "mf = mf.density_fit()\n"
-        if method != "HF":
-          rest += "mf.grids.radi_method = dft.gauss_chebyshev\n"
-        rest += "mf.grids.level = "+str(grid)+"\n"
-        rest += """mf.with_df.auxbasis = 'def2-tzvp-jkfit'
-  mf.diis_space = 19
-  mf.conv_tol = 0.0033
-  mf.conv_tol_grad = 1e-2
-  mf.level_shift = 0.25"""
-        if damp is None:
-          damp = float(nsa2_get_param('pySCF_Damping'))
-        rest += "\nmf.damp = %f\n"%damp
-        rest += "mf.chkfile = '%s.chk'\n"%self.name
-        Full_HAR = nsa2_get_param('full_HAR')
-        run = None
-        if Full_HAR:
-          run = OV.GetVar('Run_number')
-          if run > 1:
-            rest += "mf.init_guess = 'chk'\n"
-        solv = nsa2_get_param('ORCA_Solvation')
-        if solv != "Vacuum":
-          rest += "from pyscf import solvent\nmf = mf.ddCOSMO()\nmf.with_solvent.lebedev_order = 11\nmf.with_solvent.lmax = 5\nmf.with_solvent.grids.radi_method = dft.gauss_chebyshev\nmf.with_solvent.grids.level = %d\nmf.with_solvent.eps = %f\n"%(int(grid),float(solv_epsilon[solv]))
-        rest +="""mf.kernel()
-  print("Switching to SOSCF and shutting down damping & levelshift")
-  mf.conv_tol = 1e-9
-  mf.conv_tol_grad = 1e-5
-  mf.level_shift = 0.0
-  mf.damp = 0.0
-  mf = scf.newton(mf)
-  mf.kernel()"""
-        rest += "\nwith open('%s.wfn', 'w') as f1:\n  write_wfn(f1,mol,mf.mo_coeff,mf.mo_energy,mf.mo_occ,mf.e_tot)"%self.name
-        inp.write(rest)
+        inp.write("'''\n  charge = %d\n  spin = %d\n  unit = 'Ang'\n)\n\n"% (charge, mult))
+        inp.write("mf = dft.RKS(mol, xc='%s')\n"%method)
+        inp.write("mf.kernel()\n")
         inp.close()
 
 
   def write_pyscf_script(self,xyz,basis_name=None,method=None,relativistic=None,charge=None,mult=None,damp=None,part=None):
     solv_epsilon = {
-      "Water"                                  :78.3553,
-      "Acetonitrile"                           :35.688 ,
-      "Methanol"                               :32.613 ,
-      "Ethanol"                                :24.852 ,
-      "IsoQuinoline"                           :11.00  ,
-      "Quinoline"                              :9.16   ,
-      "Chloroform"                             :4.7113 ,
-      "DiethylEther"                           :4.2400 ,
-      "Dichloromethane"                        :8.93   ,
-      "DiChloroEthane"                         :10.125 ,
-      "CarbonTetraChloride"                    :2.2280 ,
-      "Benzene"                                :2.2706 ,
-      "Toluene"                                :2.3741 ,
-      "ChloroBenzene"                          :5.6968 ,
-      "NitroMethane"                           :36.562 ,
-      "Heptane"                                :1.9113 ,
-      "CycloHexane"                            :2.0165 ,
-      "Aniline"                                :6.8882 ,
-      "Acetone"                                :20.493 ,
-      "TetraHydroFuran"                        :7.4257 ,
-      "DiMethylSulfoxide"                      :46.826 ,
-      "Argon"                                  :1.430  ,
-      "Krypton"                                :1.519  ,
-      "Xenon"                                  :1.706  ,
-      "n-Octanol"                              :9.8629 ,
-      "1,1,1-TriChloroEthane"                  :7.0826 ,
-      "1,1,2-TriChloroEthane"                  :7.1937 ,
-      "1,2,4-TriMethylBenzene"                 :2.3653 ,
-      "1,2-DiBromoEthane"                      :4.9313 ,
-      "1,2-EthaneDiol"                         :40.245 ,
-      "1,4-Dioxane"                            :2.2099 ,
-      "1-Bromo-2-MethylPropane"                :7.7792 ,
-      "1-BromoOctane"                          :5.0244 ,
-      "1-BromoPentane"                         :6.269  ,
-      "1-BromoPropane"                         :8.0496 ,
-      "1-Butanol"                              :17.332 ,
-      "1-ChloroHexane"                         :5.9491 ,
-      "1-ChloroPentane"                        :6.5022 ,
-      "1-ChloroPropane"                        :8.3548 ,
-      "1-Decanol"                              :7.5305 ,
-      "1-FluoroOctane"                         :3.89   ,
-      "1-Heptanol"                             :11.321 ,
-      "1-Hexanol"                              :12.51  ,
-      "1-Hexene"                               :2.0717 ,
-      "1-Hexyne"                               :2.615  ,
-      "1-IodoButane"                           :6.173  ,
-      "1-IodoHexaDecane"                       :3.5338 ,
-      "1-IodoPentane"                          :5.6973 ,
-      "1-IodoPropane"                          :6.9626 ,
-      "1-NitroPropane"                         :23.73  ,
-      "1-Nonanol"                              :8.5991 ,
-      "1-Pentanol"                             :15.13  ,
-      "1-Pentene"                              :1.9905 ,
-      "1-Propanol"                             :20.524 ,
-      "2,2,2-TriFluoroEthanol"                 :26.726 ,
-      "2,2,4-TriMethylPentane"                 :1.9358 ,
-      "2,4-DiMethylPentane"                    :1.8939 ,
-      "2,4-DiMethylPyridine"                   :9.4176 ,
-      "2,6-DiMethylPyridine"                   :7.1735 ,
-      "2-BromoPropane"                         :9.3610 ,
-      "2-Butanol"                              :15.944 ,
-      "2-ChloroButane"                         :8.3930 ,
-      "2-Heptanone"                            :11.658 ,
-      "2-Hexanone"                             :14.136 ,
-      "2-MethoxyEthanol"                       :17.2   ,
-      "2-Methyl-1-Propanol"                    :16.777 ,
-      "2-Methyl-2-Propanol"                    :12.47  ,
-      "2-MethylPentane"                        :1.89   ,
-      "2-MethylPyridine"                       :9.9533 ,
-      "2-NitroPropane"                         :25.654 ,
-      "2-Octanone"                             :9.4678 ,
-      "2-Pentanone"                            :15.200 ,
-      "2-Propanol"                             :19.264 ,
-      "2-Propen-1-ol"                          :19.011 ,
-      "3-MethylPyridine"                       :11.645 ,
-      "3-Pentanone"                            :16.78  ,
-      "4-Heptanone"                            :12.257 ,
-      "4-Methyl-2-Pentanone"                   :12.887 ,
-      "4-MethylPyridine"                       :11.957 ,
-      "5-Nonanone"                             :10.6   ,
-      "AceticAcid"                             :6.2528 ,
-      "AcetoPhenone"                           :17.44  ,
-      "a-ChloroToluene"                        :6.7175 ,
-      "Anisole"                                :4.2247 ,
-      "Benzaldehyde"                           :18.220 ,
-      "BenzoNitrile"                           :25.592 ,
-      "BenzylAlcohol"                          :12.457 ,
-      "BromoBenzene"                           :5.3954 ,
-      "BromoEthane"                            :9.01   ,
-      "Bromoform"                              :4.2488 ,
-      "Butanal"                                :13.45  ,
-      "ButanoicAcid"                           :2.9931 ,
-      "Butanone"                               :18.246 ,
-      "ButanoNitrile"                          :24.291 ,
-      "ButylAmine"                             :4.6178 ,
-      "ButylEthanoate"                         :4.9941 ,
-      "CarbonDiSulfide"                        :2.6105 ,
-      "Cis-1,2-DiMethylCycloHexane"            :2.06   ,
-      "Cis-Decalin"                            :2.2139 ,
-      "CycloHexanone"                          :15.619 ,
-      "CycloPentane"                           :1.9608 ,
-      "CycloPentanol"                          :16.989 ,
-      "CycloPentanone"                         :13.58  ,
-      "Decalin-mixture"                        :2.196  ,
-      "DiBromomEthane"                         :7.2273 ,
-      "DiButylEther"                           :3.0473 ,
-      "DiEthylAmine"                           :3.5766 ,
-      "DiEthylSulfide"                         :5.723  ,
-      "DiIodoMethane"                          :5.32   ,
-      "DiIsoPropylEther"                       :3.38   ,
-      "DiMethylDiSulfide"                      :9.6    ,
-      "DiPhenylEther"                          :3.73   ,
-      "DiPropylAmine"                          :2.9112 ,
-      "e-1,2-DiChloroEthene"                   :2.14   ,
-      "e-2-Pentene"                            :2.051  ,
-      "EthaneThiol"                            :6.667  ,
-      "EthylBenzene"                           :2.4339 ,
-      "EthylEthanoate"                         :5.9867 ,
-      "EthylMethanoate"                        :8.3310 ,
-      "EthylPhenylEther"                       :4.1797 ,
-      "FluoroBenzene"                          :5.42   ,
-      "Formamide"                              :108.94 ,
-      "FormicAcid"                             :51.1   ,
-      "HexanoicAcid"                           :2.6    ,
-      "IodoBenzene"                            :4.5470 ,
-      "IodoEthane"                             :7.6177 ,
-      "IodoMethane"                            :6.8650 ,
-      "IsoPropylBenzene"                       :2.3712 ,
-      "m-Cresol"                               :12.44  ,
-      "Mesitylene"                             :2.2650 ,
-      "MethylBenzoate"                         :6.7367 ,
-      "MethylButanoate"                        :5.5607 ,
-      "MethylCycloHexane"                      :2.024  ,
-      "MethylEthanoate"                        :6.8615 ,
-      "MethylMethanoate"                       :8.8377 ,
-      "MethylPropanoate"                       :6.0777 ,
-      "m-Xylene"                               :2.3478 ,
-      "n-ButylBenzene"                         :2.36   ,
-      "n-Decane"                               :1.9846 ,
-      "n-Dodecane"                             :2.0060 ,
-      "n-Hexadecane"                           :2.0402 ,
-      "n-Hexane"                               :1.8819 ,
-      "NitroBenzene"                           :34.809 ,
-      "NitroEthane"                            :28.29  ,
-      "n-MethylAniline"                        :5.9600 ,
-      "n-MethylFormamide-mixture"              :181.56 ,
-      "n,n-DiMethylAcetamide"                  :37.781 ,
-      "n,n-DiMethylFormamide"                  :37.219 ,
-      "n-Nonane"                               :1.9605 ,
-      "n-Octane"                               :1.9406 ,
-      "n-Pentadecane"                          :2.0333 ,
-      "n-Pentane"                              :1.8371 ,
-      "n-Undecane"                             :1.9910 ,
-      "o-ChloroToluene"                        :4.6331 ,
-      "o-Cresol"                               :6.76   ,
-      "o-DiChloroBenzene"                      :9.9949 ,
-      "o-NitroToluene"                         :25.669 ,
-      "o-Xylene"                               :2.5454 ,
-      "Pentanal"                               :10.0   ,
-      "PentanoicAcid"                          :2.6924 ,
-      "PentylAmine"                            :4.2010 ,
-      "PentylEthanoate"                        :4.7297 ,
-      "PerFluoroBenzene"                       :2.029  ,
-      "p-IsoPropylToluene"                     :2.2322 ,
-      "Propanal"                               :18.5   ,
-      "PropanoicAcid"                          :3.44   ,
-      "PropanoNitrile"                         :29.324 ,
-      "PropylAmine"                            :4.9912 ,
-      "PropylEthanoate"                        :5.5205 ,
-      "p-Xylene"                               :2.2705 ,
-      "Pyridine"                               :12.978 ,
-      "sec-ButylBenzene"                       :2.3446 ,
-      "tert-ButylBenzene"                      :2.3447 ,
-      "TetraChloroEthene"                      :2.268  ,
-      "TetraHydroThiophene-s,s-dioxide"        :43.962 ,
-      "Tetralin"                               :2.771  ,
-      "Thiophene"                              :2.7270 ,
-      "Thiophenol"                             :4.2728 ,
-      "trans-Decalin"                          :2.1781 ,
-      "TriButylPhosphate"                      :8.1781 ,
-      "TriChloroEthene"                        :3.422  ,
-      "TriEthylAmine"                          :2.3832 ,
-      "Xylene-mixture"                         :2.3879 ,
-      "z-1,2-DiChloroEthene"                   :9.2
+      "Water"                          :78.3553,
+      "Acetonitrile"                   :35.688 ,
+      "Methanol"                       :32.613 ,
+      "Ethanol"                        :24.852 ,
+      "IsoQuinoline"                   :11.00  ,
+      "Quinoline"                      :9.16   ,
+      "Chloroform"                     :4.7113 ,
+      "DiethylEther"                   :4.2400 ,
+      "Dichloromethane"                :8.93   ,
+      "DiChloroEthane"                 :10.125 ,
+      "CarbonTetraChloride"            :2.2280 ,
+      "Benzene"                        :2.2706 ,
+      "Toluene"                        :2.3741 ,
+      "ChloroBenzene"                  :5.6968 ,
+      "NitroMethane"                   :36.562 ,
+      "Heptane"                        :1.9113 ,
+      "CycloHexane"                    :2.0165 ,
+      "Aniline"                        :6.8882 ,
+      "Acetone"                        :20.493 ,
+      "TetraHydroFuran"                :7.4257 ,
+      "DiMethylSulfoxide"              :46.826 ,
+      "Argon"                          :1.430  ,
+      "Krypton"                        :1.519  ,
+      "Xenon"                          :1.706  ,
+      "n-Octanol"                      :9.8629 ,
+      "1,1,1-TriChloroEthane"          :7.0826 ,
+      "1,1,2-TriChloroEthane"          :7.1937 ,
+      "1,2,4-TriMethylBenzene"         :2.3653 ,
+      "1,2-DiBromoEthane"              :4.9313 ,
+      "1,2-EthaneDiol"                 :40.245 ,
+      "1,4-Dioxane"                    :2.2099 ,
+      "1-Bromo-2-MethylPropane"        :7.7792 ,
+      "1-BromoOctane"                  :5.0244 ,
+      "1-BromoPentane"                 :6.269  ,
+      "1-BromoPropane"                 :8.0496 ,
+      "1-Butanol"                      :17.332 ,
+      "1-ChloroHexane"                 :5.9491 ,
+      "1-ChloroPentane"                :6.5022 ,
+      "1-ChloroPropane"                :8.3548 ,
+      "1-Decanol"                      :7.5305 ,
+      "1-FluoroOctane"                 :3.89   ,
+      "1-Heptanol"                     :11.321 ,
+      "1-Hexanol"                      :12.51  ,
+      "1-Hexene"                       :2.0717 ,
+      "1-Hexyne"                       :2.615  ,
+      "1-IodoButane"                   :6.173  ,
+      "1-IodoHexaDecane"               :3.5338 ,
+      "1-IodoPentane"                  :5.6973 ,
+      "1-IodoPropane"                  :6.9626 ,
+      "1-NitroPropane"                 :23.73  ,
+      "1-Nonanol"                      :8.5991 ,
+      "1-Pentanol"                     :15.13  ,
+      "1-Pentene"                      :1.9905 ,
+      "1-Propanol"                     :20.524 ,
+      "2,2,2-TriFluoroEthanol"         :26.726 ,
+      "2,2,4-TriMethylPentane"         :1.9358 ,
+      "2,4-DiMethylPentane"            :1.8939 ,
+      "2,4-DiMethylPyridine"           :9.4176 ,
+      "2,6-DiMethylPyridine"           :7.1735 ,
+      "2-BromoPropane"                 :9.3610 ,
+      "2-Butanol"                      :15.944 ,
+      "2-ChloroButane"                 :8.3930 ,
+      "2-Heptanone"                    :11.658 ,
+      "2-Hexanone"                     :14.136 ,
+      "2-MethoxyEthanol"               :17.2   ,
+      "2-Methyl-1-Propanol"            :16.777 ,
+      "2-Methyl-2-Propanol"            :12.47  ,
+      "2-MethylPentane"                :1.89   ,
+      "2-MethylPyridine"               :9.9533 ,
+      "2-NitroPropane"                 :25.654 ,
+      "2-Octanone"                     :9.4678 ,
+      "2-Pentanone"                    :15.200 ,
+      "2-Propanol"                     :19.264 ,
+      "2-Propen-1-ol"                  :19.011 ,
+      "3-MethylPyridine"               :11.645 ,
+      "3-Pentanone"                    :16.78  ,
+      "4-Heptanone"                    :12.257 ,
+      "4-Methyl-2-Pentanone"           :12.887 ,
+      "4-MethylPyridine"               :11.957 ,
+      "5-Nonanone"                     :10.6   ,
+      "AceticAcid"                     :6.2528 ,
+      "AcetoPhenone"                   :17.44  ,
+      "a-ChloroToluene"                :6.7175 ,
+      "Anisole"                        :4.2247 ,
+      "Benzaldehyde"                   :18.220 ,
+      "BenzoNitrile"                   :25.592 ,
+      "BenzylAlcohol"                  :12.457 ,
+      "BromoBenzene"                   :5.3954 ,
+      "BromoEthane"                    :9.01   ,
+      "Bromoform"                      :4.2488 ,
+      "Butanal"                        :13.45  ,
+      "ButanoicAcid"                   :2.9931 ,
+      "Butanone"                       :18.246 ,
+      "ButanoNitrile"                  :24.291 ,
+      "ButylAmine"                     :4.6178 ,
+      "ButylEthanoate"                 :4.9941 ,
+      "CarbonDiSulfide"                :2.6105 ,
+      "Cis-1,2-DiMethylCycloHexane"    :2.06   ,
+      "Cis-Decalin"                    :2.2139 ,
+      "CycloHexanone"                  :15.619 ,
+      "CycloPentane"                   :1.9608 ,
+      "CycloPentanol"                  :16.989 ,
+      "CycloPentanone"                 :13.58  ,
+      "Decalin-mixture"                :2.196  ,
+      "DiBromomEthane"                 :7.2273 ,
+      "DiButylEther"                   :3.0473 ,
+      "DiEthylAmine"                   :3.5766 ,
+      "DiEthylSulfide"                 :5.723  ,
+      "DiIodoMethane"                  :5.32   ,
+      "DiIsoPropylEther"               :3.38   ,
+      "DiMethylDiSulfide"              :9.6    ,
+      "DiPhenylEther"                  :3.73   ,
+      "DiPropylAmine"                  :2.9112 ,
+      "e-1,2-DiChloroEthene"           :2.14   ,
+      "e-2-Pentene"                    :2.051  ,
+      "EthaneThiol"                    :6.667  ,
+      "EthylBenzene"                   :2.4339 ,
+      "EthylEthanoate"                 :5.9867 ,
+      "EthylMethanoate"                :8.3310 ,
+      "EthylPhenylEther"               :4.1797 ,
+      "FluoroBenzene"                  :5.42   ,
+      "Formamide"                      :108.94 ,
+      "FormicAcid"                     :51.1   ,
+      "HexanoicAcid"                   :2.6    ,
+      "IodoBenzene"                    :4.5470 ,
+      "IodoEthane"                     :7.6177 ,
+      "IodoMethane"                    :6.8650 ,
+      "IsoPropylBenzene"               :2.3712 ,
+      "m-Cresol"                       :12.44  ,
+      "Mesitylene"                     :2.2650 ,
+      "MethylBenzoate"                 :6.7367 ,
+      "MethylButanoate"                :5.5607 ,
+      "MethylCycloHexane"              :2.024  ,
+      "MethylEthanoate"                :6.8615 ,
+      "MethylMethanoate"               :8.8377 ,
+      "MethylPropanoate"               :6.0777 ,
+      "m-Xylene"                       :2.3478 ,
+      "n-ButylBenzene"                 :2.36   ,
+      "n-Decane"                       :1.9846 ,
+      "n-Dodecane"                     :2.0060 ,
+      "n-Hexadecane"                   :2.0402 ,
+      "n-Hexane"                       :1.8819 ,
+      "NitroBenzene"                   :34.809 ,
+      "NitroEthane"                    :28.29  ,
+      "n-MethylAniline"                :5.9600 ,
+      "n-MethylFormamide-mixture"      :181.56 ,
+      "n,n-DiMethylAcetamide"          :37.781 ,
+      "n,n-DiMethylFormamide"          :37.219 ,
+      "n-Nonane"                       :1.9605 ,
+      "n-Octane"                       :1.9406 ,
+      "n-Pentadecane"                  :2.0333 ,
+      "n-Pentane"                      :1.8371 ,
+      "n-Undecane"                     :1.9910 ,
+      "o-ChloroToluene"                :4.6331 ,
+      "o-Cresol"                       :6.76   ,
+      "o-DiChloroBenzene"              :9.9949 ,
+      "o-NitroToluene"                 :25.669 ,
+      "o-Xylene"                       :2.5454 ,
+      "Pentanal"                       :10.0   ,
+      "PentanoicAcid"                  :2.6924 ,
+      "PentylAmine"                    :4.2010 ,
+      "PentylEthanoate"                :4.7297 ,
+      "PerFluoroBenzene"               :2.029  ,
+      "p-IsoPropylToluene"             :2.2322 ,
+      "Propanal"                       :18.5   ,
+      "PropanoicAcid"                  :3.44   ,
+      "PropanoNitrile"                 :29.324 ,
+      "PropylAmine"                    :4.9912 ,
+      "PropylEthanoate"                :5.5205 ,
+      "p-Xylene"                       :2.2705 ,
+      "Pyridine"                       :12.978 ,
+      "sec-ButylBenzene"               :2.3446 ,
+      "tert-ButylBenzene"              :2.3447 ,
+      "TetraChloroEthene"              :2.268  ,
+      "TetraHydroThiophene-s,s-dioxide":43.962 ,
+      "Tetralin"                       :2.771  ,
+      "Thiophene"                      :2.7270 ,
+      "Thiophenol"                     :4.2728 ,
+      "trans-Decalin"                  :2.1781 ,
+      "TriButylPhosphate"              :8.1781 ,
+      "TriChloroEthene"                :3.422  ,
+      "TriEthylAmine"                  :2.3832 ,
+      "Xylene-mixture"                 :2.3879 ,
+      "z-1,2-DiChloroEthene"           :9.2
     }
 
     if mult is None:
