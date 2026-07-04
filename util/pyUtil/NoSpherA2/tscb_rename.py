@@ -60,6 +60,23 @@ def _find_scatterers_segment(scatterer_text):
   return segment_start, segment_end
 
 
+def _read_tscb_header(tscb_bytes):
+  if len(tscb_bytes) < 4:
+    raise ValueError("TSCB file is too short")
+  header_len = struct.unpack_from("<i", tscb_bytes, 0)[0]
+  if header_len < 0 or 4 + header_len > len(tscb_bytes):
+    raise ValueError("Invalid TSCB header length")
+  return tscb_bytes[4:4 + header_len]
+
+
+def tscb_uses_scatterer_ids(tscb_path):
+  # SCATTERER_IDS-headed files store the scatterer block as fixed-width binary
+  # ids, not as text labels; callers must not tokenize that block as label text.
+  with open(tscb_path, "rb") as file_handle:
+    tscb_bytes = file_handle.read()
+  return _read_tscb_header(tscb_bytes) == b"SCATTERER_IDS"
+
+
 def _locate_scatterers_block(tscb_bytes):
   if len(tscb_bytes) > _MAX_TSCB_BYTES:
     raise ValueError("TSCB file is too large")
@@ -134,6 +151,11 @@ def remap_scatterer_text(scatterer_text, rename_map):
 
 
 def rewrite_tscb_scatterers(tscb_path, rename_map):
+  if tscb_uses_scatterer_ids(tscb_path):
+    # Scatterer identity in an id-based TSCB is keyed by a stable id, independent
+    # of the atom label text, so a label rename never needs to touch this block.
+    return 0, None
+
   with open(tscb_path, "rb") as file_handle:
     tscb_bytes = file_handle.read()
 
@@ -149,7 +171,7 @@ def rewrite_tscb_scatterers(tscb_path, rename_map):
 
   updated_text, replacement_count = remap_scatterer_text(scatterer_text, rename_map)
   if replacement_count == 0:
-    return 0
+    return 0, None
 
   updated_scatterer_bytes = updated_text.encode(encoding)
   rebuilt = bytearray()
@@ -172,6 +194,8 @@ def rewrite_tscb_scatterers(tscb_path, rename_map):
 
 
 def read_tscb_scatterer_labels(tscb_path):
+  if tscb_uses_scatterer_ids(tscb_path):
+    raise ValueError("TSCB scatterer block stores ids, not labels")
   scatterer_text = read_tscb_scatterer_text(tscb_path)
   return extract_scatterer_labels(scatterer_text)
 

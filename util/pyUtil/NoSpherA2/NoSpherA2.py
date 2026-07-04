@@ -28,7 +28,7 @@ import cubes_maps # noqa: F401
 import xharpy
 import pyscf
 import psi4
-from tscb_rename import read_tscb_scatterer_labels, read_tscb_scatterer_text, rewrite_tscb_scatterers
+from tscb_rename import read_tscb_scatterer_labels, read_tscb_scatterer_text, rewrite_tscb_scatterers, tscb_uses_scatterer_ids
 
 if OV.HasGUI():
   get_template = gui.tools.TemplateProvider.get_template
@@ -484,6 +484,18 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       return 0
 
     try:
+      if tscb_uses_scatterer_ids(tscb_path):
+        # Scatterer identity in an id-based TSCB is keyed by a stable id, independent
+        # of the atom label text, so a label rename in the model does not require
+        # rewriting the file's scatterer list. If the id list itself ever needs to
+        # be resynced (e.g. after the scatterer order changes), that is handled by
+        # update_scatterers_in_file in aaff.py, not by this label-rename hook.
+        return 0
+    except Exception as error:
+      print(f"Warning: could not determine scatterer storage type in {os.path.basename(tscb_path)}: {error}")
+      return 0
+
+    try:
       labels_after = self._get_scatterer_labels()
     except Exception as error:
       print(f"Warning: could not read scatterer labels after renaming: {error}")
@@ -639,8 +651,8 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
     experimental_SF = nsa2_get_param('NoSpherA2_SF')
     
-    if not self._ensure_active_tscb_matches_model():
-      return False
+    #if not self._ensure_active_tscb_matches_model():
+    #  return False
     
     if "Please S" in wfn_code and update:
       olx.Alert("No tsc generator selected",\

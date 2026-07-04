@@ -1115,6 +1115,17 @@ def _nsa2_sha256(path):
     return ''
 
 
+def nsa2_refresh_file_hash(path, file_hash=None):
+  """Recompute (unless already known) and persist the nsa2 file_hash for `path`, so that
+  nsa2_validate_tsc_file_integrity does not flag our own intentional scatterer-block rewrites
+  as external tampering. Call this immediately after any code rewrites a tsc/tscb file's
+  scatterer block."""
+  if file_hash is None:
+    file_hash = _nsa2_sha256(path)
+  nsa2_set_param('file_hash', file_hash)
+  return file_hash
+
+
 def nsa2_validate_tsc_file_integrity():
   """Validate current NoSpherA2 TSC/TSCB file against stored metadata.
 
