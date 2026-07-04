@@ -179,6 +179,31 @@ def write_merged_hkl():
   print("Done!")
 OV.registerFunction(write_merged_hkl, False, "NoSpherA2")
 
+def _mask_completion_hkl_bounds():
+  """When solvent-mask set completion is enabled, the mask's F_calc step (structure_factors()
+  in cctbx_olex_adapter.py, via smtbx.masks.mask.complete_set = fo2.complete_set()) evaluates
+  NoSpherA2's table at every index of the complete theoretical sphere out to fo2's resolution
+  limit, not just the measured reflections. For a low-symmetry cell this complete sphere can
+  need much larger individual h/k/l bounds than any actual dataset shows (e.g. large |k| in a
+  very oblique triclinic cell), so the tsc/tscb table must be generated wide enough to cover
+  it or the mask calculation fails with "index not found in table" (table_based.h assertion).
+
+  Returns ((h_min, h_max), (k_min, k_max), (l_min, l_max)) or None if no mask/set-completion
+  is in play (in which case the caller should just use the measured-file bounds as before).
+  """
+  if not (OV.GetParam('snum.refinement.use_solvent_mask') and OV.GetParam('snum.masks.use_set_completion')):
+    return None
+  try:
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx_adaptor = OlexCctbxAdapter()
+    fo2 = cctbx_adaptor.reflections.f_sq_obs_merged.average_bijvoet_mates()
+    complete_set = fo2.complete_set()
+    (h_min, k_min, l_min), (h_max, k_max, l_max) = complete_set.min_max_indices()
+    return (h_min, h_max), (k_min, k_max), (l_min, l_max)
+  except Exception as e:
+    print(f"Warning: could not compute mask set-completion index bounds for NoSpherA2 table: {e}")
+    return None
+
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
   basis_name = nsa2_get_param('basis_name')
@@ -290,14 +315,37 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
     for row in c:
       for el in row:
         args.append(str(float(el)))
-  d2 = olex_core.GetHklStat()
+  original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
+  if original_hklsrc and OV.HKLSrc() != original_hklsrc:
+    # A solvent mask is active: OV.HKLSrc() currently points at the temporary
+    # "<name>-mask.hkl" file used to feed mask-corrected intensities into refinement
+    # (see make-masked-hkl.py), which is built from the SHEL/OMIT-restricted "current
+    # range" reflections (get_fo_sq_fc(filtered=True)) and can therefore cover a
+    # narrower h,k,l range than the true original measured hkl file. NoSpherA2's
+    # tsc/tscb must still cover the full original range, so read the file stats from
+    # the original hkl file instead, restoring the active source immediately after.
+    current_hklsrc = OV.HKLSrc()
+    OV.HKLSrc(original_hklsrc)
+    try:
+      d2 = olex_core.GetHklStat()
+    finally:
+      OV.HKLSrc(current_hklsrc)
+  else:
+    d2 = olex_core.GetHklStat()
+  hkl_min = list(d2['FileMinIndices'])
+  hkl_max = list(d2['FileMaxIndices'])
+  mask_bounds = _mask_completion_hkl_bounds()
+  if mask_bounds is not None:
+    for i in range(3):
+      hkl_min[i] = min(hkl_min[i], mask_bounds[i][0])
+      hkl_max[i] = max(hkl_max[i], mask_bounds[i][1])
   args.append("-hkl_min_max")
-  args.append(str(d2['FileMinIndices'][0]))
-  args.append(str(d2['FileMaxIndices'][0]))
-  args.append(str(d2['FileMinIndices'][1]))
-  args.append(str(d2['FileMaxIndices'][1]))
-  args.append(str(d2['FileMinIndices'][2]))
-  args.append(str(d2['FileMaxIndices'][2]))
+  args.append(str(hkl_min[0]))
+  args.append(str(hkl_max[0]))
+  args.append(str(hkl_min[1]))
+  args.append(str(hkl_max[1]))
+  args.append(str(hkl_min[2]))
+  args.append(str(hkl_max[2]))
   #shel = olx.Ins('SHEL')
   #omit = olx.Ins('OMIT')
   #d_min = d2['MinD']
