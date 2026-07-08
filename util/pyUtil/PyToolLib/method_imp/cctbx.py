@@ -112,7 +112,9 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     self.cif.setdefault('_refine_ls_shift/su_max', "n/a")
     self.cif.setdefault('_refine_ls_shift/su_mean', "n/a")
 
-    txt = '''
+    map_type = "potential" if OV.IsEDData() else "density"
+
+    txt = f'''
     R1_all=%(_refine_ls_R_factor_all)s;
     R1_gt = %(_refine_ls_R_factor_gt)s;
     wR_ref = %(_refine_ls_wR_factor_ref)s;
@@ -122,8 +124,8 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     Reflections_all = %(_reflns_number_total)s;
     Reflections_gt = %(_reflns_number_gt)s;
     Parameters = %(_refine_ls_number_parameters)s;
-    Hole = %(_refine_diff_density_min)s;
-    Peak = %(_refine_diff_density_max)s;
+    Hole = %(_refine_diff_{map_type}_min)s;
+    Peak = %(_refine_diff_{map_type}_max)s;
     Flack = %(_refine_ls_abs_structure_Flack)s;
     ''' % self.cif
 
@@ -141,7 +143,10 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
     #      pass
     if "_refine_ls_shift/su_max" in cif:
       with open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir()) as f:
-        t = f.read() %cif
+        t = f.read()
+        if OV.IsEDData():
+          t = t.replace("_diff_density_", "_diff_potential_")
+        t = t % cif
         OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
 

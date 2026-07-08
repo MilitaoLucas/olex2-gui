@@ -304,11 +304,12 @@ class OlexCctbxAdapter(object):
 
     omit = self.olx_atoms.model['omit']
     shel = self.olx_atoms.model.get('shel', None)
+    _shel = self.reflections._get_shel(omit, shel, self.wavelength)
     update = False
     if merge_code is None or merge_code != self.reflections._merge:
       self.reflections.merge(merge=merge_code)
       update = True
-    if force or omit is None or omit != self.reflections._omit or shel != self.reflections._shel:
+    if force or omit is None or omit != self.reflections._omit or _shel != self.reflections._shel:
       update = True
 
     if update or self.observations is None:

@@ -335,12 +335,13 @@ class Method_refinement(Method):
   def writeRefinementInfoIntoRes(self, d, file_name=None):
     ''' Expects a dictionary containing the relevant items with cif identifiers as keys '''
     d.setdefault('_refine_ls_abs_structure_Flack', "n/a")
-    txt = '''
+    map_type = "potential" if OV.IsEDData() else "density"
+    txt = f'''
   REM The information below was added by Olex2.
   REM
   REM R1 = %(_refine_ls_R_factor_gt)s for %(_reflns_number_gt)s Fo > 4sig(Fo) and %(_refine_ls_R_factor_all)s for all %(_reflns_number_total)s data
   REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
-  REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
+  REM Highest difference peak %(_refine_diff_{map_type}_max)s, deepest hole %(_refine_diff_{map_type}_min)s
   REM Mean Shift %(_refine_ls_shift/su_mean)s, Max Shift %(_refine_ls_shift/su_max)s.
 
   REM +++ Tabular Listing of Refinement Information +++
@@ -353,8 +354,8 @@ class Method_refinement(Method):
   REM Reflections_all = %(_reflns_number_total)s
   REM Reflections_gt = %(_reflns_number_gt)s
   REM Parameters = %(_refine_ls_number_parameters)s
-  REM Hole = %(_refine_diff_density_min)s
-  REM Peak = %(_refine_diff_density_max)s
+  REM Hole = %(_refine_diff_{map_type}_min)s
+  REM Peak = %(_refine_diff_{map_type}_max)s
   REM Flack = %(_refine_ls_abs_structure_Flack)s
 
   ''' %d
