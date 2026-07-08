@@ -1060,7 +1060,7 @@ class Graph(ArgumentParser):
       else:
         target = "%.3f" %y_value
       map_list.append('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">' %(
-        *box, href, target))
+        box[0], 0, box[2], box[3], href, target))
       if draw_bar_labels:
         if bar_label:
           txt = bar_label
@@ -1868,7 +1868,7 @@ class Analysis(Graph):
         var = li.split("=")[0].strip("#")
         var = var.strip()
         val = li.split("=")[1].strip()
-        # Fudge labels -- this is where the axis 
+        # Fudge labels -- this is where the axis
         if "x_label" in var:
           if val == 'ln(<Fo^2>)/(Fexp^2)':
             val = "ln(<mI>m/<mE>m)"
@@ -2412,16 +2412,16 @@ class WilsonPlot(Analysis):
   def grad_fill(self, maxval, colour, col):
     # col goes from ~255 (white) down to ~128 (peak colour)
     t = (255.0 - col) / (255.0 - maxval)
-  
+
     t = max(0.0, min(1.0, t))
-  
+
     fill = tuple(
         int(255 - (255 - c) * t)
           for c in colour
       )
-  
+
     return fill
-  
+
   #def grad_fill(self, max, c1, col):
     #fill = []
     #for c in c1:
