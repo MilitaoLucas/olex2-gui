@@ -896,9 +896,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
     cif_block['_diffrn_reflns_theta_full'] = fmt % (two_theta_full/2)
     #
-    cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
-    cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
-    cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
+    map_type = "potential" if OV.IsEDData() else "density"
+    cif_block[f'_refine_diff_{map_type}_max'] = fmt % self.diff_stats.max()
+    cif_block[f'_refine_diff_{map_type}_min'] = fmt % self.diff_stats.min()
+    cif_block[f'_refine_diff_{map_type}_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
     flack_str = OV.GetParam("snum.refinement.flack_str")
     if self.is_inversion_twin() and flack_str:

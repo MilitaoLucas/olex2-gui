@@ -210,6 +210,21 @@ class reflections(object):
     else:
       return merging
 
+  def _get_shel(self, omit, shel, wavelength):
+    _shel = shel
+    two_theta = omit['2theta']
+    d_min = uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
+    if _shel is None:
+      _shel = {'high' : -1, 'low': -1}
+      if two_theta != 180:
+        _shel['high'] = d_min
+    else:
+      if _shel['high'] > _shel['low']:
+        _shel = {'high' : _shel['low'], 'low': _shel['high']}
+      if two_theta != 180:
+        _shel['high'] = d_min
+    return _shel
+
   def filter(self, omit, shel, wavelength, doFilter=True):
     if not doFilter:
       self.f_sq_obs_filtered = self.f_sq_obs_merged
@@ -217,13 +232,13 @@ class reflections(object):
         self.batch_numbers = self.batch_numbers_array.data()
       return
     self._omit = omit
-    self._shel = shel
     two_theta = omit['2theta']
     if shel and two_theta != 180:
       import olx
       olx.Echo("Warning - mixing SHEL and OMIT. Using low resolution limit from SHEL and high resolution from OMIT",
                m="warning")
-    self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
+    self.d_min = uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
+    self._shel = self._get_shel(omit, shel, wavelength)
     hkl = omit.get('hkl')
     f_sq_obs_filtered = self.f_sq_obs_merged.treat_negative_amplitudes_shelx(omit['s'])
     if hkl is None: hkl = ()

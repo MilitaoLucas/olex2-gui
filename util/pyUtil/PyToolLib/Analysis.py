@@ -1057,7 +1057,7 @@ class Graph(ArgumentParser):
       else:
         target = "%.3f" %y_value
       map_list.append('<zrect coords="%i,%i,%i,%i" href="%s" target="%s">' %(
-        *box, href, target))
+        box[0], 0, box[2], box[3], href, target))
       if draw_bar_labels:
         if bar_label:
           txt = bar_label
