@@ -281,6 +281,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     use_openmp = OV.GetParam("user.refinement.use_openmp")
     max_mem = int(OV.GetParam("user.refinement.openmp_mem"))
+    if table_file_name is not None:
+      for i,atom in enumerate(self.olx_atoms._atoms):
+        self.xray_structure().scatterers()[i].set_part(atom['part'])
     stopwatch.start("Initialising normal equations")
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():

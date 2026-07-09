@@ -19,7 +19,7 @@ def get_current_scatter_ids(model):
       constraints_iter=None, #self.olx_atoms.constraints_iterator()
       same_iter=None
     ).structure()
-    ids = [scatterer.get_id_5_16() for scatterer in xray_structure.scatterers()]
+    ids = [scatterer.get_id_5_16(model._atoms[i]['part'] + 16) for i, scatterer in enumerate(xray_structure.scatterers())] #Add 16 to avoid negative parts
     return ids
 
 
@@ -127,7 +127,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return False
       
       try:# This will map the internal scatterer indices to the indices in the TSC/TSCB file
-        old_model = OlexRefinementModel()
         internal_scatterer_ids = get_current_scatter_ids(old_model)
         model_labels = [atom["label"] for atom in old_model._atoms]
         file_entries = read_scatterers(table_file_name)

@@ -52,19 +52,22 @@ def read_scatterers(tsc_file):
 def update_tsc_file(tsc_file, scatterers):
     new_data = ""
     with open(tsc_file, 'r') as f:
-      for line in f:
-        if line.startswith('SCATTERER_IDS:'):
-          new_data += "SCATTERER_IDS: "
-          new_data += " ".join([f"{sid:016x}" for sid in scatterers]) + "\n"
-          break
-        elif line.startswith('SCATTERERS'):
-          new_data += "SCATTERERS: "
-          new_data += " ".join([f"{label}" for label in scatterers]) + "\n"
-          break
-        else:
-          new_data += line
+        for line in f:
+            if not (line.startswith('SCATTERER_IDS:') or line.startswith('SCATTERERS')):
+                new_data += line
+                continue
+            
+            if isinstance(scatterers[0], int):
+                new_data += "SCATTERER_IDS: "
+                new_data += " ".join([f"{sid:016x}" for sid in scatterers]) + "\n"
+                break
+            elif isinstance(scatterers[0], str):
+                new_data += "SCATTERERS: "
+                new_data += " ".join([f"{label}" for label in scatterers]) + "\n"
+                break
 
-      new_data += f.read()  # Append the rest of the file
+
+        new_data += f.read()  # Append the rest of the file
 
     temp_fd, temp_path = tempfile.mkstemp(prefix="tsc_rewrite_", suffix=".tmp", dir=os.path.dirname(tsc_file) or None)
     try:
@@ -76,27 +79,39 @@ def update_tsc_file(tsc_file, scatterers):
         os.remove(temp_path)
 
 def update_tscb_file(tscb_file, scatterers):
-  with open(tscb_file, "r+b") as f:
-      header_length = int.from_bytes(f.read(4), byteorder='little')
-      header = f.read(header_length)
-      n_scatterers_field_pos = f.tell()
-      n_scatterers = int.from_bytes(f.read(4), byteorder='little')
+    with open(tscb_file, "r+b") as f:
+        header_length = int.from_bytes(f.read(4), byteorder='little')
+        header = f.read(header_length)
+        n_scatterers = int.from_bytes(f.read(4), byteorder='little')
 
-      if (header == b"SCATTERER_IDS"):#As the number of scatterers did not change, the lenght of the representation does not change, so we can just overwrite the scatterer IDs in place.
-          if n_scatterers != len(scatterers):
-              raise ValueError(f"Number of scatterers in TSCB file ({n_scatterers}) does not match the provided list ({len(scatterers)}).")
-          for scat in scatterers:
-              f.write(scat.to_bytes(8, byteorder='little'))
-      else: #If the scatterers are stored as labels, we need to read the rest of the data after the payload, overwrite the payload (and its size), and then write back the rest of the data.
-        payload_size = n_scatterers #For the case of stored labels, this field is the byte size of the space-separated label payload, not a scatterer count.
-        scatterer_start = f.tell()
-        f.seek(scatterer_start + payload_size)
-        data = f.read() #Save data that comes after the label payload
-        new_payload = " ".join(str(scat) for scat in scatterers).encode('utf-8')
-        f.seek(n_scatterers_field_pos)
-        f.write(len(new_payload).to_bytes(4, byteorder='little'))
-        f.write(new_payload)
-        f.truncate()
+        if (header == b"SCATTERER_IDS"  and isinstance(scatterers[0], int)):
+            #As the number of scatterers did not change, the lenght of the representation does not change, so we can just overwrite the scatterer IDs in place.
+            if n_scatterers != len(scatterers):
+                raise ValueError(f"Number of scatterers in TSCB file ({n_scatterers}) does not match the provided list ({len(scatterers)}).")
+            for scat in scatterers:
+                f.write(scat.to_bytes(8, byteorder='little'))
+            return
+            
+        #We have to change the size of the file, thus we need to first save the data written at the end
+        if (header == b"SCATTERER_IDS"): 
+            f.seek(8 * n_scatterers, 1)
+        else: 
+            f.seek(n_scatterers, 1) 
+        data = f.read() #Save data that comes after the scatterer IDs or labels
+        f.seek(0)
+        
+        if isinstance(scatterers[0], int):
+            f.write(len(b"SCATTERER_IDS").to_bytes(4, byteorder='little'))
+            f.write(b"SCATTERER_IDS")
+            f.write(len(scatterers).to_bytes(4, byteorder='little'))
+            for scat in scatterers:
+                f.write(scat.to_bytes(8, byteorder='little'))
+        else:
+            f.write(int(0).to_bytes(4, byteorder='little')) #Label scatteres do not get a header, so we write a 0 length header
+            new_payload = " ".join(str(scat) for scat in scatterers).encode('utf-8')
+            f.write(len(new_payload).to_bytes(4, byteorder='little'))
+            f.write(new_payload)
+            
         f.write(data) #Write the rest of the data back to the file
 
 def update_scatterers_in_file(tsc_file, scatterers):
