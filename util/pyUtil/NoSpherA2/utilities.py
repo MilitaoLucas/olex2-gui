@@ -486,9 +486,8 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
         args.append("-Anions")
         args.append(Anions)
 
-  env = None
+  env = dict(os.environ)
   if soft == "OCC":
-    env = dict(os.environ)
     env["OCC_DATA_PATH"] = os.path.join(os.path.dirname(NoSpherA2), "occ", "share")
 
   p = None

@@ -139,7 +139,9 @@ class NoSpherA2(PT):
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
-      self.occ_basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], os.path.join("occ", "share", "basis")).replace("\\", "/")
+      self.occ_basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], os.path.join("occ", "basis")).replace("\\", "/")
+      if os.path.exists(self.occ_basis_dir):
+        os.environ["OCC_DATA_PATH"] = os.path.join(os.path.split(self.NoSpherA2)[0], "occ", "share").replace("\\", "/")
       if os.path.exists(self.basis_dir):
         basis_list = os.listdir(self.basis_dir)
         basis_list.sort()
@@ -1233,18 +1235,12 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       self.softwares = f"{self.softwares};  Get ORCA"
 
   def setup_xtb_executables(self):
-    if not OV.IsDebugging():
-      return
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
   def setup_occ_executables(self):
-    if OV.GetParam('user.NoSpherA2.show_OCC') == False:
-      return
     self.softwares = f"{self.softwares};  OCC" if self.softwares else "  OCC"
 
   def setup_ptb_executables(self):
-    if not OV.IsDebugging():
-      return
     self.ptb_exe = self.setup_software("pTB", "ptb")
 
   def setup_discamb(self):

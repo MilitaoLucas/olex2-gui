@@ -169,11 +169,6 @@ def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_sca
   # using the two id-derived fields that ARE stable across a move: the element (Z) and, via a
   # distance bound, plausibility of the coordinate shift for "the same atom moved" rather than
   # "two atoms got swapped/reordered".
-  #
-  # Known limitation: this cannot distinguish two same-element atoms that were swapped in array
-  # position if they happen to sit within max_shift_angstrom of each other - closing that gap would
-  # need full assignment/Hungarian-style matching, which is more than the available data (label,
-  # Z, count, position) can soundly support, so it is left as a documented residual risk.
   from cctbx.xray import ext
 
   if len(read_scatterer_ids) != len(internal_scatterer_ids):
@@ -223,6 +218,13 @@ def resolve_scatterer_mapping(file_entries, model_labels, internal_scatterer_ids
       internal_to_tsc = [file_entries.index(x) for x in internal_scatterer_ids]
       return internal_to_tsc, None
     except ValueError:
-      internal_to_tsc = resolve_id_mapping_with_positional_fallback(
-        file_entries, internal_scatterer_ids, unit_cell)
-      return internal_to_tsc, internal_scatterer_ids
+      try:
+        internal_to_tsc = resolve_id_mapping_with_positional_fallback(
+          file_entries, internal_scatterer_ids, unit_cell)
+        return internal_to_tsc, internal_scatterer_ids
+      except ScattererResolutionError:
+        print("ScattererResolutionError: Failed to resolve scatterer mapping by ID. Attempting to recover using label matching.")
+        if not allow_rename_recovery:
+          raise
+        internal_to_tsc, _renamed = resolve_labels_by_position(file_entries, model_labels)
+        return internal_to_tsc, internal_scatterer_ids

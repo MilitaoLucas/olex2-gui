@@ -134,24 +134,24 @@ class ImageTools(FontInstances):
     if debug:
       print("====== dpi_scaling set to %s ======" %self.dpi_scale)
 
-  def show_image(self, IM):
-    import sys
-    sys.path.append("C:\\Users\Horst\Documents\olex-trunk\Python26\Lib\site-packages\wx-2.8-msw-unicode")
-    import wx
-    a = wx.PySimpleApp()
-    wximg = wx.Image('%s/splash.jpg' % OV.BaseDir(), wx.BITMAP_TYPE_JPEG)
-    wxbmp = wx.BitmapFromImage(wximg)
-    f = wx.Frame(None, -1, "Show JPEG demo")
-    f.SetSize(wxbmp.GetSize())
-    wx.StaticBitmap(f, -1, wxbmp, (0, 0))
-    f.Show(True)
-
-    def callback(evt, a=a, f=f):
-      # Closes the window upon any keypress
-      f.Close()
-      a.ExitMainLoop()
-      wx.EVT_CHAR(f, callback)
-      a.MainLoop()
+  #def show_image(self, IM):
+  #  import sys
+  #  #sys.path.append("C:\\Users\Horst\Documents\olex-trunk\Python26\Lib\site-packages\wx-2.8-msw-unicode")
+  #  import wx
+  #  a = wx.PySimpleApp()
+  #  wximg = wx.Image('%s/splash.jpg' % OV.BaseDir(), wx.BITMAP_TYPE_JPEG)
+  #  wxbmp = wx.BitmapFromImage(wximg)
+  #  f = wx.Frame(None, -1, "Show JPEG demo")
+  #  f.SetSize(wxbmp.GetSize())
+  #  wx.StaticBitmap(f, -1, wxbmp, (0, 0))
+  #  f.Show(True)
+#
+  #  def callback(evt, a=a, f=f):
+  #    # Closes the window upon any keypress
+  #    f.Close()
+  #    a.ExitMainLoop()
+  #    wx.EVT_CHAR(f, callback)
+  #    a.MainLoop()
 
 
   def get_unicode_characters(self, txt):
