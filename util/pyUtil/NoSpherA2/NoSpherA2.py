@@ -1247,6 +1247,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
       self.discamb_exe = self.setup_software("discambMATTS", "discambMATTS2tsc", True)
+    if not os.path.exists(self.discamb_exe):
+      self.softwares += ";  Get discambMATTS"
 
   def setup_xharpy(self):
     try:
