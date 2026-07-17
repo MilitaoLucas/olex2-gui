@@ -1338,8 +1338,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         return self.softwares + ";  fragHAR;  SALTED;"
     else:
       if parts and len(parts) > 1:
-        return self.softwares + ";  Hybrid;"
-    return self.softwares + ";"
+        return self.softwares + ";  fragHAR  Hybrid;"
+    return self.softwares + ";  fragHAR"
 
   def available(self):
     return os.path.exists(self.NoSpherA2)

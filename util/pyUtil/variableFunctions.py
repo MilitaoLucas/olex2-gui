@@ -174,6 +174,11 @@ def _nsa2_should_persist_to_header(key):
     return False
   return True
 
+def _nsa2_clear_header_param_if_present(header_key):
+  """Clear a legacy NoSpherA2 Header value only if it actually exists."""
+  if OV.GetHeaderParam(header_key, None) not in (None, ''):
+    OV.ClearHeaderParam(header_key)
+
 def nsa2_get_param(key, default=None):
   """Global accessor exposed as spy.nsa2_get_param for HTML/UI conditions.
 
@@ -187,7 +192,7 @@ def nsa2_get_param(key, default=None):
     header_key = _nsa2_header_key_from_param(key)
     if not _nsa2_should_persist_to_header(key):
       # Clean up legacy persisted values for phil-only/runtime keys.
-      OV.ClearHeaderParam(header_key)
+      _nsa2_clear_header_param_if_present(header_key)
       return OV.GetParam(key, default)
     v = OV.GetHeaderParam(header_key, None)
     # Treat empty header strings as missing so we can still resolve live params.
@@ -199,7 +204,7 @@ def nsa2_get_param(key, default=None):
     if v not in (None, ''):
       OV.SetHeaderParam(header_key, v)
     else:
-      OV.ClearHeaderParam(header_key)
+      _nsa2_clear_header_param_if_present(header_key)
     return _nsa2_cast_value(key, v)
   return OV.GetParam(key, default)
 
@@ -210,12 +215,12 @@ def nsa2_set_param(key, value):
     header_key = _nsa2_header_key_from_param(key)
     if _nsa2_should_persist_to_header(key):
       if value in (None, ''):
-        OV.ClearHeaderParam(header_key)
+        _nsa2_clear_header_param_if_present(header_key)
       else:
         OV.SetHeaderParam(header_key, value)
     else:
       # Ensure old persisted values are removed for phil-only/runtime keys.
-      OV.ClearHeaderParam(header_key)
+      _nsa2_clear_header_param_if_present(header_key)
   OV.SetParam(key, value)
 
 OV.registerFunction(nsa2_get_param)

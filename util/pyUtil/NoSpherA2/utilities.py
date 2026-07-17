@@ -205,7 +205,7 @@ def _mask_completion_hkl_bounds():
     return None
 
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts=False):
+def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False):
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()

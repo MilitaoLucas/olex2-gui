@@ -328,6 +328,18 @@ class OlexCctbxAdapter(object):
              one_h_function=None,
              algorithm="direct",
              twin_data=True):
+    def evaluate_one_h_many(one_h_function, indices):
+      evaluate_many = getattr(one_h_function, "evaluate_many", None)
+      if evaluate_many is not None:
+        return evaluate_many(indices)
+      data = []
+      data_append = data.append
+      evaluate = one_h_function.evaluate
+      for mi in indices:
+        evaluate(mi)
+        data_append(one_h_function.f_calc)
+      return flex.complex_double(data)
+
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if not miller_set:
         miller_set_ = self.observations.unique_mapped_miller_set
@@ -347,11 +359,8 @@ class OlexCctbxAdapter(object):
       else:
         twin_set = twin_sets[0]
       if one_h_function:
-        data = []
-        for mi in twin_set.indices():
-          one_h_function.evaluate(mi)
-          data.append(one_h_function.f_calc)
-        fc = twin_set.array(data=flex.complex_double(data))
+        fc = twin_set.array(
+          data=evaluate_one_h_many(one_h_function, twin_set.indices()))
       else:
         fc = twin_set.structure_factors_from_scatterers(
           self.xray_structure(), algorithm=algorithm).f_calc()
@@ -368,11 +377,9 @@ class OlexCctbxAdapter(object):
           fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
     else:
       if one_h_function:
-        data = []
-        for mi in miller_set_.indices():
-          one_h_function.evaluate(mi)
-          data.append(one_h_function.f_calc)
-        fc = miller_set_.array(data=flex.complex_double(data), sigmas=None)
+        fc = miller_set_.array(
+          data=evaluate_one_h_many(one_h_function, miller_set_.indices()),
+          sigmas=None)
       else:
         xs = self.xray_structure()
         if miller_set_.space_group_number() == 1 and\
