@@ -92,7 +92,8 @@ def compile(_platform):
         shutil.rmtree(bundle_dir)
       os.makedirs(bundle_dir)
       os.chdir(bundle_dir)
-      if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
+      if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx' +
+                   " --skip_src=langchain;maptbx/bcr") != 0:
         print('Failed to create a distribution...')
         return False
 
