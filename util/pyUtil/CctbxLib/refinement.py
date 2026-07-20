@@ -2060,11 +2060,34 @@ class FullMatrixRefine(OlexCctbxAdapter):
       filtered=False, merge=False)
     return fo2.merge_equivalents(algorithm="shelx")
 
+  def _fo_sq_fc_cache_table_signature(self, table_file_name):
+    if not table_file_name:
+      return None
+    table_file_name = os.path.normcase(os.path.abspath(table_file_name))
+    try:
+      stat = os.stat(table_file_name)
+      return (table_file_name, stat.st_mtime_ns, stat.st_size)
+    except OSError:
+      return (table_file_name, None, None)
+
+  def _fo_sq_fc_cache_key(self, one_h_function, filtered, merge, complete):
+    current_table_file_name = None
+    try:
+      current_table_file_name = str(nsa2_get_param("file")).lstrip().rstrip()
+    except Exception:
+      pass
+    return (
+      id(one_h_function) if one_h_function is not None else None,
+      bool(self.use_tsc),
+      bool(OV.IsNoSpherA2()),
+      self._fo_sq_fc_cache_table_signature(self.table_file_name),
+      self._fo_sq_fc_cache_table_signature(current_table_file_name),
+      filtered,
+      merge,
+      complete)
+
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False):
-    if one_h_function is not None:
-      return super().get_fo_sq_fc(one_h_function=one_h_function,
-        filtered=filtered, merge=merge, complete=complete)
-    cache_key = (filtered, merge, complete)
+    cache_key = self._fo_sq_fc_cache_key(one_h_function, filtered, merge, complete)
     if self.fo_sq_fc is None or self.fo_sq_fc_key != cache_key:
       self.fo_sq_fc = super().get_fo_sq_fc(one_h_function=one_h_function,
         filtered=filtered, merge=merge, complete=complete)
