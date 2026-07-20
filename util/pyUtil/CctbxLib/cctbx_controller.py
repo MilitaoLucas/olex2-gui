@@ -242,14 +242,6 @@ class reflections(object):
     hkl = omit.get('hkl')
     f_sq_obs_filtered = self.f_sq_obs_merged.treat_negative_amplitudes_shelx(omit['s'])
     if hkl is None: hkl = ()
-    if self._shel is None:
-      self._shel = {'high' : self.d_min, 'low': -1}
-    else:
-      if self._shel['high'] > self._shel['low']:
-        self._shel = {'high' : self._shel['low'], 'low': self._shel['high']}
-      if two_theta != 180:
-        self._shel['high'] = self.d_min
-
     if self.hklf_code >= 5 or self.merge_code == 0:
       anomalous_flag = True
     else:
