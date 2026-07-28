@@ -37,8 +37,11 @@ def normal_equation_class():
         **kwds)
       if table_file_name:
         try:
+          from cctbx_olex_adapter import get_table_contribution
           one_h_linearisation = direct.f_calc_modulus_squared(
-            self.xray_structure, table_file_name=table_file_name)
+            self.xray_structure,
+            scatterer_contribution=get_table_contribution(
+              self.xray_structure, table_file_name))
         except Exception as e:
           e_str = str(e)
           if "stoks.size() == scatterer" in e_str:
@@ -47,6 +50,11 @@ def normal_equation_class():
             print("OpenMP Error during Normal Equation build-up, likely missing reflection in .tsc file")
           raise e
       else:
+        try:
+          from cctbx_olex_adapter import note_table_not_used
+          note_table_not_used()
+        except ImportError:
+          pass
         one_h_linearisation = direct.f_calc_modulus_squared(
           self.xray_structure, reflections=self.observations)
       self.refinement = refinement
@@ -63,16 +71,29 @@ def normal_equation_class():
       self.olx_atoms = olx_atoms
       self.n_current_cycle = 0
 
-    def step_forward(self):
+    def begin_cycle(self):
+      """ Note where the structure stands, so shifts can be reported against it.
+      """
       self.n_current_cycle += 1
       self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
-      super(normal_eqns, self).step_forward()
+
+    def end_cycle(self):
+      """ Report the cycle and hand the structure back to Olex2. """
       self.show_cycle_summary(log=self.log)
       self.show_sorted_shifts(max_items=10, log=self.log)
       self.restraints_manager.show_sorted(
         self.xray_structure, f=self.log)
       self.show_cycle_summary()
       self.feed_olex()
+
+    def step_forward(self):
+      # Gauss-Newton and Levenberg-Marquardt move once per cycle, so the whole
+      # of a cycle happens here. The scipy minimisers move many times per cycle
+      # and call begin_cycle and end_cycle themselves, so that Olex2 is fed once
+      # per iteration rather than once per evaluation of the objective.
+      self.begin_cycle()
+      super(normal_eqns, self).step_forward()
+      self.end_cycle()
       return self
 
     def step_backward(self):
@@ -133,6 +154,17 @@ def normal_equation_class():
         if hasattr(self.iterations_object,'mu'):
           header += "  % 8.2e"
           params += (self.iterations_object.mu,)
+        # a scipy minimiser evaluates the objective many times per cycle, and
+        # how many is the thing to watch: each costs about one Gauss-Newton
+        # cycle, so it is what its speed comes down to
+        if hasattr(self.iterations_object, 'n_evaluations'):
+          header += "  % 8i"
+          params += (self.iterations_object.n_evaluations,)
+        # conjugate gradient least squares reports the conjugate gradient
+        # iterations it has spent, which are what its cost comes down to
+        if hasattr(self.iterations_object, 'n_cg_iterations'):
+          header += "  % 8i"
+          params += (self.iterations_object.n_cg_iterations,)
         print(header %params, file=log)
 
       else:
@@ -334,12 +366,31 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
   max_ls_shift_over_su = None
   iteration_listeners = []
 
+  def shifts_to_analyse(self):
+    """ The shifts whose size is to be reported.
+
+    For the solvers here that is the step about to be taken, which is what the
+    normal equations were just solved for. A solver which does not move along
+    that step reports the shifts it actually applied instead.
+    """
+    return self.non_linear_ls.step()
+
+  def standard_uncertainties(self):
+    """ The s.u. of the independent parameters.
+
+    This is the expensive half of the shift analysis: it solves the normal
+    equations, which costs a Cholesky decomposition and, since solving consumes
+    the normal matrix, obliges anything still needing the normal equations to
+    build them again.
+    """
+    return flex.sqrt(
+      self.non_linear_ls.covariance_matrix().matrix_packed_u_diagonal())
+
   def analyse_shifts(self, limit_shift_over_su=None):
     if self.max_ls_shift_over_su is not None:
       return
-    x = self.non_linear_ls.step()
-    esd = self.non_linear_ls.covariance_matrix().matrix_packed_u_diagonal()
-    ls_shifts_over_su = x/flex.sqrt(esd)
+    x = self.shifts_to_analyse()
+    ls_shifts_over_su = x/self.standard_uncertainties()
     max_shift_i = 0
     s_sum = 0
     for i,s in enumerate(ls_shifts_over_su):
@@ -417,6 +468,189 @@ class naive_iterations_with_damping_and_shift_limit(
 
   def __str__(self):
     return "Gauss-Newton with damping and shift scaling"
+
+
+from smtbx.refinement import cgls, minimisers
+
+
+class cgls_iterations(iterations_with_shift_analysis, cgls.cgls_iterations):
+  """ Refine by conjugate gradient least squares.
+
+  A cycle is one linearisation followed by conjugate gradients on it, so it
+  counts as a refinement cycle in the same sense a Gauss-Newton cycle does, and
+  the two are directly comparable. The normal matrix is never formed; the
+  design matrix is, which is what limits this to structures of up to a thousand
+  parameters or so, beyond which Gauss-Newton is faster again.
+  """
+
+  def begin_cycle(self):
+    self.non_linear_ls.actual.begin_cycle()
+
+  def end_cycle(self):
+    self.reset_shifts()
+    self.non_linear_ls.actual.end_cycle()
+    self.on_cycle_completion(self.n_iterations, self.n_max_iterations)
+
+  def had_small_enough_shifts(self, step, ls):
+    """ Converged on the same criterion Gauss-Newton uses here.
+
+    The base class compares the step against the size of the parameter vector,
+    having no s.u. to hand. Olex2 does have an estimate of them by this point,
+    end_cycle having just worked the shift/su out for the table, so the same
+    threshold as every other solver in this file can be applied and the methods
+    stay comparable. It is an estimate from the block diagonal and so errs
+    towards saying not-yet-converged, which is the right way to err.
+    """
+    if self.max_ls_shift_over_su is None:
+      return cgls.cgls_iterations.had_small_enough_shifts(self, step, ls)
+    return abs(self.max_ls_shift_over_su) < self.convergence_as_shift_over_esd
+
+  # SHELXL's DAMP, second argument, and the same default the Gauss-Newton path
+  # here uses. Olex2 reads both from the .ins file and hands them over.
+  max_shift_over_esd = 15
+
+  def scale_shifts(self, step, problem, ls):
+    """ Hold the largest shift/su to max_shift_over_esd, as DAMP asks.
+
+    The s.u. are the block diagonal estimate the shift/su column of the table
+    already rests on. They understate the true ones, correlations between atoms
+    being ignored, so this errs towards limiting a step which did not need it,
+    which is the safe direction for a damping instruction.
+    """
+    if not self.max_shift_over_esd:
+      return step
+    su = self.standard_uncertainties()
+    if su is None or su.size() != step.size():
+      return step
+    shifts_over_su = step/su
+    largest = flex.max(flex.abs(shifts_over_su))
+    if largest > self.max_shift_over_esd:
+      step = step*(self.max_shift_over_esd/largest)
+    return step
+
+  def shifts_to_analyse(self):
+    """ The shifts this cycle applied, which conjugate gradients produced
+    rather than the normal equations.
+    """
+    if getattr(self, 'latest_step', None) is None:
+      return flex.double(self.non_linear_ls.actual.n_parameters, 0)
+    return self.latest_step
+
+  def standard_uncertainties(self):
+    """ Estimated from the block diagonal of the normal matrix.
+
+    There is no covariance matrix to be had here, that being the whole point,
+    so the shift/su column of a CGLS cycle rests on the preconditioner's
+    blocks: each atom's own parameters against each other, and the correlations
+    between atoms ignored. That understates the s.u. and so overstates
+    shift/su, which is the safe direction for something being read as a
+    convergence indicator. The values which reach the CIF are not these: the
+    run ends with an ordinary build and solve, and refinement.py takes them
+    from that.
+    """
+    problem = getattr(self, 'latest_problem', None)
+    if problem is None:
+      return iterations_with_shift_analysis.standard_uncertainties(self)
+    variances = flex.double(problem.n_parameters, 0)
+    for indices, inverse in self.latest_preconditioner:
+      for j, i in enumerate(indices):
+        variances[int(i)] = inverse[j, j]
+    variances /= problem.sum_w_yo_sq
+    variances *= self.non_linear_ls.actual.restrained_goof()**2
+    variances.set_selected(variances <= 0, 1e-30)
+    return flex.sqrt(variances)
+
+  def __str__(self):
+    # which of the three ways the system was held is not a detail: it decides
+    # how much memory the run wanted and how it spent its time, and auto may
+    # have chosen differently from one structure to the next
+    described = {'stored': 'stored design matrix',
+                 'normal_matrix': 'normal matrix',
+                 'matrix_free': 'recomputed design matrix'}
+    mode = getattr(self, 'chosen_mode', None)
+    if mode is None:
+      return "conjugate gradient least squares"
+    return ("conjugate gradient least squares, %s"
+            % described.get(mode, mode))
+
+
+class scipy_iterations(iterations_with_shift_analysis,
+                       minimisers.crystallographic_scipy_iterations):
+  """ Refine with one of the minimisers of scipy.optimize.
+
+  Unlike Gauss-Newton and Levenberg-Marquardt, these move the structure several
+  times per iteration -- a line search or a trust region tries points and
+  discards most of them -- so a cycle here is one iteration of the minimiser
+  and not one move of the structure. Olex2 is fed, and a row printed, once per
+  cycle; the number of objective evaluations that took is reported alongside,
+  each of them costing about what one Gauss-Newton cycle costs.
+  """
+
+  # Working out shift/su every cycle would about double what a cycle costs: it
+  # solves the normal equations, and because solving consumes the normal matrix
+  # the next evaluation has to build them again, which is as much again as the
+  # evaluation itself. The s.u. barely move from one cycle to the next, so they
+  # are recomputed only every so often and reused in between. The shifts
+  # themselves stay exact; only the scale they are measured against is allowed
+  # to age, and the value which reaches the CIF is the one from the cycle where
+  # the refinement has settled anyway.
+  su_refresh_interval = 5
+
+  def do(self):
+    self.p_cycle_start = None
+    self.cached_su = None
+    self.cached_su_cycle = 0
+    self.non_linear_ls.actual.begin_cycle()
+    minimisers.crystallographic_scipy_iterations.do(self)
+
+  def standard_uncertainties(self):
+    if (self.cached_su is None
+        or self.n_iterations - self.cached_su_cycle
+           >= self.su_refresh_interval):
+      self.cached_su = \
+        iterations_with_shift_analysis.standard_uncertainties(self)
+      self.cached_su_cycle = self.n_iterations
+      # solving for them has taken the normal matrix away
+      self.invalidate_evaluation()
+    return self.cached_su
+
+  def shifts_to_analyse(self):
+    """ The shifts applied since the cycle began, in units of the parameters.
+
+    There is no step from the normal equations to report here, the minimiser
+    having chosen where to go by itself.
+    """
+    if getattr(self, 'p_cycle_start', None) is None:
+      # No cycle has completed. Either this is an L.S. 0, where the refinement
+      # wrapper has built and solved the normal equations without ever calling
+      # do(), and the step they give is what would be reported for
+      # Gauss-Newton too; or the run stopped before its first cycle was over,
+      # and nothing was applied at all.
+      if self.non_linear_ls.step_equations().solved:
+        return iterations_with_shift_analysis.shifts_to_analyse(self)
+      return flex.double(self.non_linear_ls.opposite_of_gradient().size(), 0)
+    shifts = self.p_model - self.p_cycle_start
+    if self.parameter_scale is not None:
+      shifts /= self.parameter_scale
+    return shifts
+
+  def on_iteration_completion(self):
+    # What gets reported and handed back to Olex2 must be the point the
+    # minimiser accepted, not whichever trial point it last happened to try.
+    # This usually costs nothing, the two being the same point.
+    self.build_at(self.p_accepted)
+    normal_eqns = self.non_linear_ls.actual
+    # end_cycle reports the cycle, which may or may not solve the normal
+    # equations for fresh s.u.; standard_uncertainties invalidates the
+    # evaluation itself on the cycles where it does
+    normal_eqns.end_cycle()
+    self.reset_shifts()
+    self.p_cycle_start = self.p_model.deep_copy()
+    normal_eqns.begin_cycle()
+    self.on_cycle_completion(self.n_iterations, self.n_max_iterations)
+
+  def __str__(self):
+    return "%s via scipy.optimize.minimize" % self.method
 
 
 class levenberg_marquardt_iterations(iterations_with_shift_analysis):

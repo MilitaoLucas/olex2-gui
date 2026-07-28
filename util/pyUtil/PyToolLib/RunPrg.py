@@ -676,6 +676,10 @@ class RunRefinementPrg(RunPrg):
       rc.check_disp()
       rc.check_occu()
       rc.check_mu() #This is the L-M mu!
+      try:
+        rc.check_table_coverage()
+      except Exception as e:
+        print("Could not check .tsc coverage: %s" % e)
       evt.stop()
       self.refinement_has_failed = rc.refinement_has_failed
     OV.SetParam('snum.init.skip_routine', False)

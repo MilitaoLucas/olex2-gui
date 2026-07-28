@@ -281,8 +281,96 @@ routines requiring structure refinement
       Unknown 
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' Unknown
+      'Full Matrix' FullCG 'L-BFGS-B' 'Newton-CG' SLSQP CGLS-J Unknown
       .type = choice
+    cgls
+      .help = Settings for CGLS-J, conjugate gradient least squares. One cycle \
+        is one linearisation followed by conjugate gradients on it, so cycles \
+        and DAMP mean what they do for Gauss-Newton.
+    {
+      tolerance = 1e-3
+        .type = float(value_min=0)
+        .help = Stop the conjugate gradients when the residual falls to this \
+          fraction of the right hand side. Loose by default, as SHELXL's CGLS \
+          is, because the linearised system is only a local model of the \
+          objective and solving it tighter than the model is worth wastes \
+          work. Tighten it only if a refinement will not settle.
+        .expert_level = 1
+      max_cg_iterations = None
+        .type = int(value_min=1)
+        .help = Cap on conjugate gradient iterations per cycle. Unset means the \
+          number of parameters. A low cap deliberately under-solves, damping \
+          the directions the data determine worst, as SHELXL relies on.
+        .expert_level = 2
+      mode = *auto stored normal_matrix matrix_free
+        .type = choice
+        .help = How the linearised system is held. stored keeps the design \
+          matrix, the quickest but also the largest. normal_matrix keeps the \
+          normal matrix instead. matrix_free keeps neither and recomputes each \
+          iteration, a way to run at all rather than to run fast. auto takes \
+          the first that fits.
+        .expert_level = 2
+      standard_uncertainties = True
+        .type = bool
+        .help = End the run with a full-matrix build so standard uncertainties \
+          can be had, since the conjugate gradients never form the matrix they \
+          come from. Off skips that build and is faster, as SHELXL's CGLS is. \
+          Turn it off for intermediate work and on for a published structure. \
+          Nothing else the run reports changes.
+        .expert_level = 1
+      single_precision_design_matrix = False
+        .type = bool
+        .help = Hold the stored design matrix in single precision. The matrix \
+          is then half the size and the bandwidth-bound solve is faster. The \
+          products are still accumulated in double precision, so the effect on \
+          the result is negligible. Useful for large structures, and it halves \
+          what the matrix must fit within the memory limit.
+        .expert_level = 1
+      npd_s_target = 0.001
+        .type = float(value_min=-1, value_max=1)
+        .help = For the SHELXL XNPD restraint, applied when the .ins carries an \
+          XNPD instruction: how far above the non-positive-definite boundary \
+          the restraint holds anisotropic ADPs. Larger values push them to be \
+          rounder.
+        .expert_level = 2
+      npd_sigma = 0.01
+        .type = float(value_min=1e-6)
+        .help = How strongly the restraint bites. The weight is 1/sigma^2, so \
+          smaller is stronger.
+        .expert_level = 2
+    }
+    scipy
+      .help = Settings for the refinement methods driven by \
+        scipy.optimize.minimize: NL-CG, L-BFGS, Newt-CG and SLSQP. These do \
+        not solve the normal equations for a step but evaluate the objective \
+        and its gradient at points of their own choosing, several times per \
+        cycle. A method with no option for a given tolerance ignores it.
+    {
+      max_evaluations = 2000
+        .type = int(value_min=1)
+        .help = Give up after this many evaluations of the objective. Each \
+          costs about what one Gauss-Newton cycle costs, so this bounds the \
+          run time however badly the minimiser behaves.
+        .expert_level = 1
+      g_tolerance = 1e-8
+        .type = float(value_min=0)
+        .help = Stop once the gradient is this small. The objective is \
+          normalised to lie between 0 and 1 and sits near wR2^2/2, so asking \
+          for much less than this is asking for more than the data support.
+        .expert_level = 1
+      f_tolerance = 1e-12
+        .type = float(value_min=0)
+        .help = Stop once a cycle improves the objective by less than this.
+        .expert_level = 1
+      preconditioning = *diagonal none
+        .type = choice
+        .help = Scale the parameters by the square root of the diagonal of \
+          the normal matrix before minimising. Gauss-Newton does not care how \
+          the parameters are scaled but these minimisers do, a fractional \
+          coordinate and a U_iso differing by orders of magnitude in \
+          curvature. Turning this off is for diagnosis only.
+        .expert_level = 2
+    }
     sg_list = None
       .type = str
       .expert_level = 1

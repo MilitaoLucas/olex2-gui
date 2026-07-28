@@ -845,8 +845,10 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
+    from cctbx_olex_adapter import get_table_contribution
     one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
     if not OV.IsEDRefinement():
       if hklf_code == 2:
         f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h, merge=False)
@@ -985,8 +987,10 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
+    from cctbx_olex_adapter import get_table_contribution
     one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
     if not OV.IsEDRefinement():
       f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
@@ -1225,7 +1229,10 @@ def residual_fcf(expand = False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
-    one_h = direct.f_calc_modulus_squared(xray_structure, table_file_name=table_name)
+    from cctbx_olex_adapter import get_table_contribution
+    one_h = direct.f_calc_modulus_squared(
+      xray_structure, scatterer_contribution=get_table_contribution(
+        xray_structure, table_name))
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
@@ -1318,7 +1325,10 @@ def residual_E(expand = False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
-    one_h = direct.f_calc_modulus_squared(xray_structure, table_file_name=table_name)
+    from cctbx_olex_adapter import get_table_contribution
+    one_h = direct.f_calc_modulus_squared(
+      xray_structure, scatterer_contribution=get_table_contribution(
+        xray_structure, table_name))
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
@@ -1622,8 +1632,10 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
+    from cctbx_olex_adapter import get_table_contribution
     one_h = direct.f_calc_modulus_squared(
-                       xray_structure, table_file_name=table_name)
+                       xray_structure, scatterer_contribution=
+                       get_table_contribution(xray_structure, table_name))
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
@@ -1676,8 +1688,10 @@ def deformation_map(resolution=0.1, return_map=False):
   if not os.path.exists(table_name):
     print("Error! Form factor file does not exist!")
     return
+  from cctbx_olex_adapter import get_table_contribution
   one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
   f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
   print("Fspher_Fcalc R1:")
@@ -1706,8 +1720,10 @@ def def_sig_map(resolution=0.1, return_map=False):
   if not os.path.exists(table_name):
     print("Error! Form factor file does not exist!")
     return
+  from cctbx_olex_adapter import get_table_contribution
   one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
   f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   f_sq_obs, f_calc_spher = cctbx_adapter.get_fo_sq_fc()
   print("Fspher_Fcalc R1:")
@@ -1735,8 +1751,10 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
+    from cctbx_olex_adapter import get_table_contribution
     one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")
@@ -1772,8 +1790,10 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
     if not os.path.exists(table_name):
       print("Error! Form factor file does not exist!")
       return
+    from cctbx_olex_adapter import get_table_contribution
     one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc(one_h_function=one_h)
   else:
     print("Non NoSpherA2 map...")

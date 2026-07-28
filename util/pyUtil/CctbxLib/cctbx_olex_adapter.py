@@ -162,6 +162,20 @@ class OlexCctbxAdapter(object):
         self._restraints_manager = restraints.manager(**kwds)
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
+      # The part tells two disorder components apart, and a tabulated
+      # scattering table is keyed on it: an entry written for PART 2 is never
+      # matched to a scatterer claiming to be in PART 0. Set it here, on the
+      # structure every consumer shares, rather than in the refinement alone --
+      # a map calculated straight after a refinement failed on exactly that.
+      atoms = self.olx_atoms._atoms
+      scatterers = self._xray_structure.scatterers()
+      if len(atoms) == scatterers.size():
+        for i, atom in enumerate(atoms):
+          scatterers[i].set_part(atom['part'])
+      else:
+        print("Warning: %d atoms against %d scatterers, so disorder parts were "
+              "left unset; a tabulated scattering table will not match."
+              % (len(atoms), scatterers.size()))
       if self.olx_atoms.exptl.get("radiation_type", "xray") == "neutrons":
         OV.SetParam("snum.smtbx.atomic_form_factor_table", "neutron")
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
@@ -943,7 +957,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       table_name = table_name.lstrip().rstrip()
       xray_structure = mask.xray_structure
       one_h = direct.f_calc_modulus_squared(
-        xray_structure, table_file_name=table_name)
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_name))
     #if self.hklf_code >= 5 or self.twin_components:
     if self.hklf_code >= 5:
       mask.use_set_completion = False
@@ -1673,12 +1688,144 @@ def set_ED_tables(tables_name):
   OV.set_cif_item('_diffrn_oxdiff_scatteringfactors_ed', ref)
 OV.registerFunction(set_ED_tables, False, "sfac")
 
+# The last table read, as (key, contribution, uncovered). A refinement, the map
+# that follows it and every reflection statistic each ask for the same file, and
+# reading one costs time and memory proportional to its size. Only one is kept:
+# tables are large, and it is the file just used that gets asked for again.
+_cached_table = [None, None, []]
+
+
+def _table_cache_key(xray_structure, table_file_name):
+  """ What has to match for a table already read to be usable again.
+
+  Everything the table is built from has to be in here, because a stale table
+  is not a slow answer but a wrong one: the columns would be put on the wrong
+  atoms and every number downstream would look perfectly plausible. So the key
+  covers the file, and each thing build() consumes --
+
+    - the element and the part of every scatterer, in order, which is what the
+      entries are matched on;
+    - the labels too, which nothing matches on but which catch an edit the
+      rest would miss;
+    - the cell, which the matching measures distances in;
+    - the space group and with it the anomalous flag, which the reflection
+      lookup is built from.
+
+  Coordinates are left out on purpose: they move every cycle, and a structure
+  that has refined still wants the same table. That is the one thing here
+  allowed to change.
+  """
+  stat = os.stat(table_file_name)
+  scatterers = xray_structure.scatterers()
+  space_group = xray_structure.space_group()
+  return (os.path.normcase(os.path.abspath(table_file_name)),
+          stat.st_mtime_ns, stat.st_size,
+          tuple((sc.label, sc.scattering_type, sc.get_part())
+                for sc in scatterers),
+          tuple(xray_structure.unit_cell().parameters()),
+          str(space_group.type().hall_symbol()),
+          bool(space_group.is_origin_centric()))
+
+
+def get_table_contribution(xray_structure, table_file_name):
+  """ The tabulated table for this structure, read afresh only if it has to be.
+  """
+  from smtbx.structure_factors import direct
+  try:
+    key = _table_cache_key(xray_structure, table_file_name)
+  except OSError:
+    key = None
+  if key is not None and _cached_table[0] == key:
+    return _cached_table[1]
+  # a table need not name every atom in the model. Rather than refuse it, the
+  # atoms it misses get ordinary spherical form factors -- which is a weaker
+  # model for those atoms, so it is reported rather than done quietly.
+  contribution = direct.ext.table_based_scatterer_contribution.\
+    build_with_fallback(
+      xray_structure.unit_cell(),
+      xray_structure.scatterers(),
+      table_file_name,
+      xray_structure.space_group(),
+      not xray_structure.space_group().is_origin_centric(),
+      xray_structure.scattering_type_registry())
+  scatterers = xray_structure.scatterers()
+  fallback = [scatterers[i].label
+              for i in contribution.scatterers_not_in_table()]
+  if fallback:
+    _report_table_fallback(table_file_name, fallback, scatterers.size())
+    # Not cached. The spherical half of a partially tabulated contribution
+    # reads the scatterers as it goes, so that fp, fdp and the rest follow the
+    # refinement -- which means it is tied to the scatterer array it was built
+    # from. A later refinement builds a new one, and reusing this would quietly
+    # serve values from the previous structure. Re-reading the file each time
+    # is the cost of that, and a table which does not cover the model is the
+    # exceptional case.
+    key = None
+  # replace rather than accumulate: holding two tables at once is costly
+  _cached_table[0], _cached_table[1], _cached_table[2] = \
+    key, contribution, fallback
+  return contribution
+
+
+def _report_table_fallback(table_file_name, fallback, n_scatterers):
+  """ Say, in the log, which atoms the table did not cover. """
+  print("")
+  print("WARNING: %s covers %d of %d atoms." % (
+    os.path.basename(table_file_name), n_scatterers - len(fallback),
+    n_scatterers))
+  print("  These atoms are refined with spherical scattering factors"
+        " instead:")
+  for i in range(0, len(fallback), 10):
+    print("    " + " ".join(fallback[i:i + 10]))
+  print("  Re-run NoSpherA2 over the whole model to tabulate them all.")
+  print("")
+
+
+def note_table_not_used():
+  """ This refinement used no table: drop the one held.
+
+  The cache is meant to survive a refinement, because the map and the
+  statistics that follow one ask for the same file again. A refinement that
+  consults no table at all is the other thing entirely -- the model has been
+  switched back to spherical scattering factors, and nothing after it is going
+  to want that table either, so holding it costs memory for nothing.
+
+  This also clears the coverage report, which is what stops the atoms a
+  previous table failed to cover from being named again after a refinement
+  that never looked at one.
+  """
+  forget_cached_table()
+
+
+def get_table_fallback_atoms():
+  """ The atoms the table last read did not cover, by label.
+
+  Empty when the table covered the whole model, which is the normal case, and
+  empty when no table is held at all.
+  """
+  return list(_cached_table[2])
+
+
+def forget_cached_table():
+  """ Drop the cached table, freeing it.
+
+  Nothing needs to call this for correctness -- a table that no longer suits
+  the structure is not reused, it is replaced. It is here for memory: the one
+  table held stays until another is read.
+  """
+  had = _cached_table[0] is not None
+  _cached_table[0], _cached_table[1], _cached_table[2] = None, None, []
+  return had
+OV.registerFunction(forget_cached_table, False, "sfac")
+
+
 def get_one_h_function(xray_structure, table_file_name):
   from smtbx.structure_factors import direct
   from smtbx_refinement_least_squares_ext import f_calc_function_default
   try:
     return f_calc_function_default(direct.f_calc_modulus_squared(
-      xray_structure, table_file_name=table_file_name))
+      xray_structure, scatterer_contribution=get_table_contribution(
+        xray_structure, table_file_name)))
   except Exception as e:
     e_str = str(e)
     if "stoks.size() == scatterer" in e_str:

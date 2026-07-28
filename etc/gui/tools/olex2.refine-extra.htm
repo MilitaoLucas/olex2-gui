@@ -46,6 +46,29 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #ignoreif not(strcmp(spy.GetParam('snum.refinement.method'),'CGLS-J'))
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=CGLS_Options;1 -->
+<td width='25%'>
+  <b>CGLS - ESD</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-checkbox-plain"
+     name="cgls_esd"
+     checked="spy.GetParam('snum.refinement.cgls.standard_uncertainties')"
+     onclick="spy.SetParam('snum.refinement.cgls.standard_uncertainties', html.GetState('~name~'))" />
+</td>
+<td width='25%'>
+  <b>CGLS - single</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-checkbox-plain"
+     name="cgls_single"
+     checked="spy.GetParam('snum.refinement.cgls.single_precision_design_matrix')"
+     onclick="spy.SetParam('snum.refinement.cgls.single_precision_design_matrix', html.GetState('~name~'))" />
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+#ignoreif -->
+
 <!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
 <td width='25%'>
   <b>CH<sub>2</sub></b>

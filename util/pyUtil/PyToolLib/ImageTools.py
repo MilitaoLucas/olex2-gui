@@ -56,16 +56,31 @@ def get_text_size_old(draw, text, font):
 
 # Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
 def get_text_size(draw, text, font):
-  if hasattr(draw, 'textbbox'):
+  text = str(text)  # Pillow requires str; callers sometimes pass int/float
+  # Try font-level bbox first (no draw object needed, works in all Pillow versions)
+  if font is not None:
     bbox = text_bbox(text=text, font=font)
-    if bbox is None: # fall back to the _old
-      try:
-        bbox = draw.textbbox((0, 0), text, font=font)
-      except:
-        return draw.textsize(text, font=font)
-    return bbox[2] - bbox[0], bbox[3] - bbox[1]
-  else:
-    return draw.textsize(text, font=font)
+    if bbox is not None:
+      return bbox[2] - bbox[0], bbox[3] - bbox[1]
+  # draw.textbbox — available in Pillow >= 8.0.0 (replaces textsize)
+  if hasattr(draw, 'textbbox'):
+    try:
+      bbox = draw.textbbox((0, 0), text, font=font)
+      return bbox[2] - bbox[0], bbox[3] - bbox[1]
+    except Exception:
+      pass
+  # draw.textsize — removed in Pillow 10.0.0; keep as last resort for older installs
+  if hasattr(draw, 'textsize'):
+    try:
+      return draw.textsize(text, font=font)
+    except Exception:
+      pass
+  # Hard fallback: approximate using font metrics or fixed character width
+  try:
+    w, h = font.getsize(text)
+    return w, h
+  except Exception:
+    return len(text) * 8, 12
 
 class ImageTools(FontInstances):
   def __init__(self):
@@ -234,10 +249,15 @@ class ImageTools(FontInstances):
     # if olx.IsCurrentLanguage('Chinese') == "true":
     #  self.language = 'Chinese'
     self.fonts = self.defineFonts()
-    self.gui_red = OV.GetParam('gui.red').rgb
-    self.gui_green = OV.GetParam('gui.green').rgb
-    self.gui_blue = OV.GetParam('gui.blue').rgb
-    self.gui_grey = OV.GetParam('gui.grey').rgb
+    # Defensive: parameters may not be available during early module import
+    gui_red_param = OV.GetParam('gui.red')
+    self.gui_red = gui_red_param.rgb if gui_red_param else (255, 0, 0)
+    gui_green_param = OV.GetParam('gui.green')
+    self.gui_green = gui_green_param.rgb if gui_green_param else (0, 255, 0)
+    gui_blue_param = OV.GetParam('gui.blue')
+    self.gui_blue = gui_blue_param.rgb if gui_blue_param else (0, 0, 255)
+    gui_grey_param = OV.GetParam('gui.grey')
+    self.gui_grey = gui_grey_param.rgb if gui_grey_param else (128, 128, 128)
 
   def dec2hex(self, n):
     """return the hexadecimal string representation of integer n"""

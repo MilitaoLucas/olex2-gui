@@ -10,6 +10,24 @@ from tsc_scatterer_resync import ScattererResolutionError, read_scatterers, upda
 import cctbx_controller as cctbx_controller
 
 
+def _table_identifies_by_id(table_file_name):
+  """Does this table name its columns by scatterer id, or by label?"""
+  import struct
+  try:
+    with open(table_file_name, 'rb') as f:
+      if table_file_name.endswith('.tscb'):
+        head_len = struct.unpack('<i', f.read(4))[0]
+        return b'SCATTERER_IDS' in f.read(head_len)
+      for line in f:
+        if line.lower().startswith(b'scatterer_ids:'):
+          return True
+        if line.lower().startswith(b'scatterers:'):
+          return False
+  except (OSError, struct.error):
+    pass
+  return False
+
+
 def get_current_scatter_ids(model):
     xray_structure = cctbx_controller.create_cctbx_xray_structure(
       [model._cell["a"][0], model._cell["b"][0], model._cell["c"][0], model._cell["alpha"][0], model._cell["beta"][0], model._cell["gamma"][0]],
@@ -19,7 +37,7 @@ def get_current_scatter_ids(model):
       constraints_iter=None, #self.olx_atoms.constraints_iterator()
       same_iter=None
     ).structure()
-    ids = [scatterer.get_id_5_16(model._atoms[i]['part'] + 16) for i, scatterer in enumerate(xray_structure.scatterers())] #Add 16 to avoid negative parts
+    ids = [scatterer.get_id_big(model._atoms[i]['part']) for i, scatterer in enumerate(xray_structure.scatterers())]
     return ids
 
 
@@ -126,17 +144,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         HAR_log.close()
         return False
       
-      try:# This will map the internal scatterer indices to the indices in the TSC/TSCB file
+      # Which column of the table describes each atom. Nothing is written here:
+      # the table is brought up to date once, after the refinement, so that
+      # there is a single place that can put a column on the wrong atom.
+      try:
         internal_scatterer_ids = get_current_scatter_ids(old_model)
         model_labels = [atom["label"] for atom in old_model._atoms]
         file_entries = read_scatterers(table_file_name)
-        internal_to_tsc, ids_to_persist = resolve_scatterer_mapping(
-          file_entries, model_labels, internal_scatterer_ids, get_unit_cell(old_model),
-          allow_rename_recovery=bool(nsa2_get_param('auto_resolve_renamed_labels')))
-        if ids_to_persist is not None:
-          update_scatterers_in_file(table_file_name, ids_to_persist)
-          nsa2_refresh_file_hash(table_file_name)
-          print(f"NoSpherA2: resynced scatterer ids in {os.path.basename(table_file_name)}")
+        internal_to_tsc = resolve_scatterer_mapping(
+          file_entries, model_labels, internal_scatterer_ids, get_unit_cell(old_model))
       except (ValueError, ScattererResolutionError) as e:
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")
@@ -261,11 +277,40 @@ all calculation parameters are properly recorded."""
         break
       new_model=OlexRefinementModel()
       
-      try:# Now write the new scatterer IDs to the TSC/TSCB file, in case the order of scatterers has changed due to refinement
+      try:# Now write the new scatterer IDs to the TSC/TSCB file, so they describe where the refinement left the atoms
         internal_scatterer_ids = get_current_scatter_ids(new_model)
-        scatterers_id_file_order = [internal_scatterer_ids[idx] for idx in internal_to_tsc]
-        update_scatterers_in_file(table_file_name, scatterers_id_file_order)
-        nsa2_refresh_file_hash(table_file_name)
+        # internal_to_tsc maps a model atom to the column describing it, so the
+        # file-ordered list is built by scattering into it, not by indexing the
+        # model's ids with a column number. Those two agree only when the file
+        # and the model happen to be in the same order, which is not the usual
+        # case: a table is written in whatever order produced it, and a
+        # generator that treats some atoms separately emits them last.
+        # Composing this the wrong way round writes each atom's id onto some
+        # other atom's column, and since it is then saved, every later run
+        # reads a table whose columns describe the wrong atoms.
+        scatterers_id_file_order = [None] * len(internal_to_tsc)
+        for model_index, column in enumerate(internal_to_tsc):
+          if column is None or not (0 <= column < len(scatterers_id_file_order)):
+            raise ValueError(
+              "scatterer %d maps to column %r, which is not a column of this "
+              "table" % (model_index, column))
+          if scatterers_id_file_order[column] is not None:
+            raise ValueError(
+              "two scatterers both map to column %d; refusing to write a table "
+              "whose columns would describe the wrong atoms" % column)
+          scatterers_id_file_order[column] = internal_scatterer_ids[model_index]
+        if any(entry is None for entry in scatterers_id_file_order):
+          raise ValueError(
+            "no scatterer maps to column(s) %s; refusing to write a partly "
+            "described table"
+            % [i for i, e in enumerate(scatterers_id_file_order) if e is None])
+        # Only refresh a table that already identifies its columns by id. A
+        # label table needs no refreshing -- a label does not go stale when the
+        # atom moves -- and converting one to ids would throw away the only
+        # thing that still matches after a rename.
+        if _table_identifies_by_id(table_file_name):
+          update_scatterers_in_file(table_file_name, scatterers_id_file_order)
+          nsa2_refresh_file_hash(table_file_name)
       except ValueError as e:
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")

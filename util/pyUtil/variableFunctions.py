@@ -88,6 +88,22 @@ def _nsa2_cast_value(snum_key, value):
       return value
   return value  # str (default)
 
+def _nsa2_cast_bool_like(value, default=False):
+  """Coerce common bool-like persisted values to Python bool."""
+  if isinstance(value, bool):
+    return value
+  if value is None:
+    return default
+  if isinstance(value, (int, float)):
+    return bool(value)
+  if isinstance(value, str):
+    lowered = value.strip().lower()
+    if lowered in ('true', '1', 'yes', 'y', 'on', 't'):
+      return True
+    if lowered in ('false', '0', 'no', 'n', 'off', 'f', ''):
+      return False
+  return default
+
 def _nsa2_header_key_from_param(key):
   """Map snum.NoSpherA2.* params to canonical NoSpherA2 Header paths."""
   suffix = key[len('snum.NoSpherA2.'):]
@@ -206,7 +222,11 @@ def nsa2_get_param(key, default=None):
     else:
       _nsa2_clear_header_param_if_present(header_key)
     return _nsa2_cast_value(key, v)
-  return OV.GetParam(key, default)
+
+  v = OV.GetParam(key, default)
+  if key in ('user.refinement.has_HT', 'user.NoSpherA2.show_broken_sym'):
+    return _nsa2_cast_bool_like(v, False)
+  return v
 
 def nsa2_set_param(key, value):
   """Global setter exposed as spy.nsa2_set_param for HTML/UI controls."""

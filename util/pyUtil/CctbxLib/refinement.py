@@ -47,9 +47,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
     'Gauss-Newton': olex2_normal_equations.naive_iterations_with_damping_and_shift_limit,
     #'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
     'Levenberg-Marquardt': olex2_normal_equations.levenberg_marquardt_iterations,
-    'NSFF': normal_eqns_solving.levenberg_marquardt_iterations
+    'NSFF': normal_eqns_solving.levenberg_marquardt_iterations,
+    'FullCG': olex2_normal_equations.scipy_iterations,
+    'L-BFGS-B': olex2_normal_equations.scipy_iterations,
+    'Newton-CG': olex2_normal_equations.scipy_iterations,
+    'SLSQP': olex2_normal_equations.scipy_iterations,
+    'CGLS-J': olex2_normal_equations.cgls_iterations,
   }
   solvers_default_method = 'Gauss-Newton'
+  # Methods solved by scipy.optimize.minimize, mapping the Olex2 name onto the
+  # scipy one. FullCG is scipy's 'CG', nonlinear conjugate gradient, which is a
+  # different thing from ShelXL's CGLS (conjugate gradients on the linearised
+  # problem, method 'CGLS-J' above).
+  scipy_methods = {
+    'FullCG': 'CG',
+    'L-BFGS-B': 'L-BFGS-B',
+    'Newton-CG': 'Newton-CG',
+    'SLSQP': 'SLSQP',
+  }
 
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None, weighting=None):
     olx.stopwatch.run(OlexCctbxAdapter.__init__ , self)
@@ -61,6 +76,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.verbose = verbose
     sys.stdout.refresh = False
     self.scale_factor = None
+    # None unless a full-matrix step produced them; CGLS without ESD leaves
+    # them None, and the CIF and reports fall back to no uncertainties
+    self.covariance_matrix_and_annotations = None
+    self.twin_covariance_matrix = None
     self.failure = False
     self.objective_only = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
@@ -124,7 +143,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
       pass
     if not (reparametrisation_only or build_only):
-      print("Using %s refinement and %s OpenBlas threads. Using OpenMP: %s." %(
+      optimiser = OV.GetParam('snum.refinement.method')
+      if optimiser in FullMatrixRefine.scipy_methods:
+        optimiser += " via scipy.optimize.minimize"
+      print("Optimiser: %s. Using %s refinement and %s OpenBlas threads. "
+        "Using OpenMP: %s." %(
+        optimiser,
         ext.build_normal_equations.available_threads,
         open_blas_tn,
         OV.GetParam("user.refinement.use_openmp")))
@@ -189,6 +213,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print(msg)
     restraints_manager = self.restraints_manager()
     restraints_manager.sump_proxies = sump_proxies
+    self._add_npd_restraint(restraints_manager)
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     stopwatch.start("Setting up constraints")
@@ -347,6 +372,54 @@ class FullMatrixRefine(OlexCctbxAdapter):
               tau = 1e-6,
               convergence_as_shift_over_esd=convergence_as_shift_over_esd,
               )
+        elif method == 'CGLS-J':
+          # 'auto' is how a phil choice spells "pick on what fits"
+          mode = OV.GetParam('snum.refinement.cgls.mode')
+          if mode == 'auto':
+            mode = None
+          self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
+              n_max_iterations=self.max_cycles,
+              cg_tolerance=OV.GetParam('snum.refinement.cgls.tolerance'),
+              max_cg_iterations=OV.GetParam(
+                'snum.refinement.cgls.max_cg_iterations'),
+              mode=mode,
+              # The "Max. Memory (MB)" box: the budget the design matrix must
+              # fit within to be stored, which is the fast mode.
+              max_design_matrix_memory=max_mem,
+              # The keyword is compute_standard_uncertainties, not
+              # standard_uncertainties: the class mixes in a method of the
+              # latter name (scale_shifts calls it), which a bool would shadow.
+              # The phil name is unchanged.
+              compute_standard_uncertainties=OV.GetParam(
+                'snum.refinement.cgls.standard_uncertainties'),
+              single_precision_design_matrix=OV.GetParam(
+                'snum.refinement.cgls.single_precision_design_matrix'),
+              # DAMP means here what it means for Gauss-Newton
+              damping_value=damping[0],
+              max_shift_over_esd=damping[1],
+              convergence_as_shift_over_esd=convergence_as_shift_over_esd,
+              gradient_threshold=None,
+              step_threshold=None)
+        elif method in FullMatrixRefine.scipy_methods:
+          # 'none' is how a phil choice spells no preconditioning
+          preconditioning = OV.GetParam(
+            'snum.refinement.scipy.preconditioning')
+          if preconditioning == 'none':
+            preconditioning = None
+          # track_all is deliberately not passed: it journals the gradient and
+          # the step at every build of the normal equations, of which there are
+          # many per cycle here rather than one.
+          self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
+              method=FullMatrixRefine.scipy_methods[method],
+              n_max_iterations=self.max_cycles,
+              max_evaluations=OV.GetParam(
+                'snum.refinement.scipy.max_evaluations'),
+              g_tolerance=OV.GetParam('snum.refinement.scipy.g_tolerance'),
+              f_tolerance=OV.GetParam('snum.refinement.scipy.f_tolerance'),
+              preconditioning=preconditioning,
+              convergence_as_shift_over_esd=convergence_as_shift_over_esd,
+              gradient_threshold=None,
+              step_threshold=None)
         else:
           self.get_refinement_wrapper(iterations_class)(self, self.normal_eqns,
               n_max_iterations=self.max_cycles,
@@ -399,51 +472,58 @@ class FullMatrixRefine(OlexCctbxAdapter):
         return
       # get the final shifts
       stopwatch.run(self.normal_eqns.analyse_shifts)
-      self.scale_factor = self.cycles.scale_factor_history[-1]
-      self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
-      self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
-        jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
-          self.reparametrisation.mapping_to_grad_fc_independent_scalars))
-      fcf_stuff = '-' in olx.Ins('MORE')
-      if fcf_stuff:
-        self.export_var_covar(self.covariance_matrix_and_annotations)
-      try:
-        stopwatch.run(self.check_hooft)
-      except Exception as e:
-        print("Failed to evaluate Hooft parameter")
-        if OV.IsDebugging():
-          sys.stderr.formatExceptionInfo()
-      if not OV.IsEDData():
-        OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
-      #extract SU on BASF and extinction
-      stopwatch.start("Extracting scalars")
-      diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
-      dlen = len(diag)
-      if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
-        dlen -= 1
-      if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
-        if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
-          su = math.sqrt(diag[dlen-1])
-          OV.SetExtinction(self.reparametrisation.fc_correction.value, su)
-          dlen -= 1
-        elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
-          e_g = math.sqrt(diag[dlen-2])
-          e_U = math.sqrt(diag[dlen-1])
-          OV.SetSWAT(self.reparametrisation.fc_correction.g,
-            self.reparametrisation.fc_correction.U,
-          e_g, e_U)
-          dlen -= 2
-      try:
-        for i in range(dlen):
-          olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
-      except:
-        pass
-      if self._nomore_constraint is not None:
+      if getattr(self.cycles, 'compute_standard_uncertainties', True):
+        self.scale_factor = self.cycles.scale_factor_history[-1]
+        self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
+        self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
+          jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
+            self.reparametrisation.mapping_to_grad_fc_independent_scalars))
+        fcf_stuff = '-' in olx.Ins('MORE')
+        if fcf_stuff:
+          self.export_var_covar(self.covariance_matrix_and_annotations)
         try:
-          from NoMoRe.nomore import save_scales
-          save_scales(self._nomore_constraint)
+          stopwatch.run(self.check_hooft)
         except Exception as e:
-          print(f'NoMoRe: could not save scales: {e}')
+          print("Failed to evaluate Hooft parameter")
+          if OV.IsDebugging():
+            sys.stderr.formatExceptionInfo()
+        if not OV.IsEDData():
+          OV.SetParam('snum.refinement.hooft_str', self.hooft_str)
+        #extract SU on BASF and extinction
+        stopwatch.start("Extracting scalars")
+        diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+        dlen = len(diag)
+        if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
+          dlen -= 1
+        if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
+          if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+            su = math.sqrt(diag[dlen-1])
+            OV.SetExtinction(self.reparametrisation.fc_correction.value, su)
+            dlen -= 1
+          elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
+            e_g = math.sqrt(diag[dlen-2])
+            e_U = math.sqrt(diag[dlen-1])
+            OV.SetSWAT(self.reparametrisation.fc_correction.g,
+              self.reparametrisation.fc_correction.U,
+            e_g, e_U)
+            dlen -= 2
+        try:
+          for i in range(dlen):
+            olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
+        except:
+          pass
+        if self._nomore_constraint is not None:
+          try:
+            from NoMoRe.nomore import save_scales
+            save_scales(self._nomore_constraint)
+          except Exception as e:
+            print(f'NoMoRe: could not save scales: {e}')
+      else:
+        # CGLS asked not to compute standard uncertainties: no normal matrix
+        # stands, so there is no covariance, as SHELXL's CGLS leaves it. The
+        # refined model, R factors and difference map are unaffected, and the
+        # CIF is written without uncertainties.
+        self.scale_factor = self.normal_eqns.scale_factor()
     except RuntimeError as e:
       e_string = str(e)
       if e_string.startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
@@ -453,14 +533,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
         i = str(e).rfind(' ')
         index = int(str(e)[i:])
         if index >= 0:
-          param_name = ""
-          n_components = len(self.reparametrisation.component_annotations)
-          if index >= n_components:
+          # the index is a row of the normal matrix, i.e. an independent
+          # parameter; translate it to the crystallographic parameter it stands
+          # for. component_annotations lists grad_Fc components instead, of which
+          # there are more once constraints reduce the model, so indexing it
+          # with a normal-matrix row names the wrong parameter.
+          try:
+            annotations = self._independent_parameter_annotations()
+          except Exception:
+            annotations = list(self.reparametrisation.component_annotations)
+          if index >= len(annotations):
             param_name = "Scalar Parameter"
           else:
-            param_name = self.reparametrisation.component_annotations[index]
+            param_name = annotations[index]
           print("the leading minor of order %i for %s is not positive definite"\
            %(index, param_name))
+          print("This parameter is not determined by the data. Look for a "
+                "restraint or constraint involving it, or an atom that should "
+                "not be refined freely.")
+        if OV.IsDebugging():
+          try:
+            self._dump_refinement_diagnostics(e_string, offending_index=index)
+          except Exception as de:
+            print("could not dump diagnostics: %s" % de)
       elif "SMTBX_ASSERT(l != mi_lookup.end()) failure" in e_string:
         lines = e_string.split("\n")
         indices = lines[1].split("(")[2].split(")")[0].split(',')
@@ -470,6 +565,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print("Refinement failed")
         import traceback
         traceback.print_exc()
+        # any parameter index the error carries, named. cctbx reports these as
+        # bare numbers, which say nothing about which atom is at fault.
+        try:
+          for described in self._annotate_parameter_indices(e_string):
+            print("  %s" % described)
+        except Exception:
+          pass
+        if OV.IsDebugging():
+          try:
+            self._dump_refinement_diagnostics(e_string)
+          except Exception as de:
+            print("could not dump diagnostics: %s" % de)
       self.failure = True
     else:
       stopwatch.start("FFT")
@@ -512,6 +619,277 @@ class FullMatrixRefine(OlexCctbxAdapter):
       sys.stdout.refresh = True
       self.log.close()
 
+  def _add_npd_restraint(self, restraints_manager):
+    """ SHELXL's XNPD as a restraint: keep anisotropic ADPs positive-definite.
+
+    Applied when the .ins carries an XNPD instruction, like any other ShelX
+    instruction. Adds the smtbx npd_adp restraint to every anisotropic atom
+    being refined; it works for any refinement method.
+    """
+    if olx.Ins("XNPD").strip() == "n/a":
+      return
+    from cctbx import adp_restraints
+    s_target = OV.GetParam('snum.refinement.cgls.npd_s_target')
+    sigma = OV.GetParam('snum.refinement.cgls.npd_sigma')
+    weight = 1.0/(sigma*sigma)
+    proxies = adp_restraints.shared_npd_adp_proxy()
+    for i_seq, sc in enumerate(self.xray_structure().scatterers()):
+      if sc.flags.use_u_aniso() and sc.flags.grad_u_aniso():
+        proxies.append(adp_restraints.npd_adp_proxy(
+          i_seqs=(i_seq,), weight=weight, s_target=s_target))
+    if proxies.size():
+      restraints_manager.npd_adp_proxies = proxies
+      print("XNPD: restraining %d anisotropic atoms positive-definite"
+            % proxies.size())
+
+  def _dump_refinement_diagnostics(self, error_string, offending_index=None):
+    """ Dump everything needed to work on a refinement failure offline.
+
+    Called only in debug mode (OV.IsDebugging()). A singular normal matrix -- a
+    Cholesky failure -- is almost always a restraint or constraint that leaves a
+    parameter or a direction undetermined. These files let that be found without
+    an attached debugger:
+
+      <name>.refine_debug.json                 error, the offending parameter,
+                                               every restraint, constraint and
+                                               scatterer, and the annotations
+      <name>.refine_debug.normal_matrix_u.npy  the packed upper triangle of the
+                                               normal matrix that failed Cholesky
+      <name>.refine_debug.gradient.npy         the right hand side
+
+    Load the matrix with numpy and unpack the upper triangle: a zero or negative
+    pivot, or the eigenvector of the near-zero eigenvalue, is the undetermined
+    direction, and the restraints and constraints in the JSON are where an
+    over-determination usually hides. parameter_annotations names each row -- so
+    the eigenvector's largest components read straight off as parameter names.
+
+    parameter_annotations is aligned with the matrix (row i is
+    parameter_annotations[i]), translated from the grad_Fc components through the
+    reparametrisation by _independent_parameter_annotations. The raw grad_Fc list
+    is kept alongside as grad_fc_component_annotations for reference.
+
+    Everything is best-effort: a failure to serialise one part must not stop the
+    rest, since the point is to salvage what can be salvaged from a broken run.
+    """
+    import json
+    try:
+      base = OV.file_ChangeExt(OV.FileFull(), '') + ".refine_debug"
+    except Exception:
+      base = "refine_debug"
+    try:
+      labels = list(self.xray_structure().scatterers().extract_labels())
+    except Exception:
+      labels = []
+    try:
+      grad_fc_annotations = list(self.reparametrisation.component_annotations)
+    except Exception:
+      grad_fc_annotations = []
+    # aligned with the normal matrix and gradient: row i is matrix_annotations[i]
+    try:
+      matrix_annotations = self._independent_parameter_annotations()
+    except Exception as e:
+      matrix_annotations = []
+      print("could not map Cholesky rows to parameters: %s" % e)
+
+    diag = {'error': error_string,
+            'n_matrix_parameters': len(matrix_annotations) or None,
+            'n_grad_fc_components': len(grad_fc_annotations)}
+    if offending_index is not None:
+      diag['offending_index'] = int(offending_index)
+      diag['offending_parameter'] = (
+        matrix_annotations[offending_index]
+        if 0 <= offending_index < len(matrix_annotations)
+        else "out of range")
+    # row i of the normal matrix and gradient is this parameter
+    diag['parameter_annotations'] = matrix_annotations
+    # the raw grad_Fc component list, for reference
+    diag['grad_fc_component_annotations'] = grad_fc_annotations
+    for key, fn in (('restraints', lambda: self._serialise_restraints(labels)),
+                    ('constraints', self._serialise_constraints),
+                    ('scatterers', self._serialise_scatterers)):
+      try:
+        diag[key] = fn()
+      except Exception as e:
+        diag[key] = "could not serialise: %s" % e
+    try:
+      with open(base + ".json", 'w') as f:
+        json.dump(diag, f, indent=2, default=str)
+      print("Refinement diagnostics: wrote %s.json" % base)
+    except Exception as e:
+      print("Refinement diagnostics: could not write %s.json: %s" % (base, e))
+
+    try:
+      import numpy
+    except Exception:
+      numpy = None
+    if numpy is not None:
+      # the accessor may live on the normal equations object or on an ls it
+      # wraps, depending on the refinement method, so try each
+      candidates = [self.normal_eqns,
+                    getattr(self.normal_eqns, 'non_linear_ls', None),
+                    getattr(self.normal_eqns, 'actual', None)]
+      def first(method):
+        for obj in candidates:
+          fn = getattr(obj, method, None)
+          if fn is not None:
+            return fn()
+        raise AttributeError(method)
+      for suffix, method in (("normal_matrix_u", "normal_matrix_packed_u"),
+                             ("gradient", "opposite_of_gradient")):
+        try:
+          numpy.save(base + "." + suffix + ".npy", first(method).as_numpy_array())
+          print("Refinement diagnostics: wrote %s.%s.npy" % (base, suffix))
+        except Exception as e:
+          print("Refinement diagnostics: could not write %s (%s)" % (suffix, e))
+
+  def _serialise_restraints(self, labels):
+    """ Every restraint proxy on the manager, as atom labels, weight and any
+    target it carries. """
+    out = {}
+    rm = self.restraints_manager
+    if rm is None:
+      return out
+    for name in dir(rm):
+      if not name.endswith('_proxies'):
+        continue
+      proxies = getattr(rm, name, None)
+      if proxies is None:
+        continue
+      try:
+        out[name] = [self._proxy_to_dict(p, labels) for p in proxies]
+      except Exception as e:
+        out[name] = "could not serialise: %s" % e
+    return out
+
+  def _proxy_to_dict(self, proxy, labels):
+    d = {}
+    i_seqs = getattr(proxy, 'i_seqs', None)
+    if i_seqs is None:
+      i_seqs = getattr(proxy, 'i_seq', None)
+    if i_seqs is not None:
+      try:
+        d['atoms'] = [labels[int(i)] if 0 <= int(i) < len(labels) else int(i)
+                      for i in i_seqs]
+      except TypeError:
+        d['atoms'] = labels[int(i_seqs)] if 0 <= int(i_seqs) < len(labels) \
+          else int(i_seqs)
+    for attr in ('weight', 'distance_ideal', 'angle_ideal', 'u_eq_ideal',
+                 's_target', 'delta', 'sigma'):
+      v = getattr(proxy, attr, None)
+      if v is not None:
+        try:
+          d[attr] = float(v)
+        except (TypeError, ValueError):
+          pass
+    return d
+
+  def _serialise_constraints(self):
+    """ The constraints, by type and description. component_annotations above
+    already show how each parameter is reparametrised; this lists the objects
+    that did it. """
+    out = []
+    for c in (self.constraints or []):
+      out.append({'type': type(c).__name__, 'description': str(c)})
+    return out
+
+  def _serialise_scatterers(self):
+    out = []
+    xs = self.xray_structure()
+    for sc in xs.scatterers():
+      f = sc.flags
+      out.append({
+        'label': sc.label,
+        'type': sc.scattering_type,
+        'site': tuple(sc.site),
+        'occupancy': sc.occupancy,
+        'u_iso': sc.u_iso if f.use_u_iso() else None,
+        'u_star': tuple(sc.u_star) if f.use_u_aniso() else None,
+        'grad': {'site': f.grad_site(), 'u_iso': f.grad_u_iso(),
+                 'u_aniso': f.grad_u_aniso(), 'occupancy': f.grad_occupancy()},
+      })
+    return out
+
+  def _annotate_parameter_indices(self, message):
+    """ Name the parameters any indices in a cctbx error message refer to.
+
+    cctbx reports a failing parameter as a bare number -- a row of the normal
+    matrix, e.g. "failure in index: 417" from a Cholesky decomposition -- which
+    on its own says nothing about which atom is at fault. This finds those
+    indices and names them through _independent_parameter_annotations.
+
+    Returns a list of description strings, empty when the message carries no
+    index or none of them is in range. Conservative on purpose: only indices
+    written as "index: N" or "index N" are taken, since an arbitrary number in
+    an error message is not a parameter and a confidently wrong atom name is
+    worse than none.
+    """
+    import re
+    try:
+      annotations = self._independent_parameter_annotations()
+    except Exception:
+      return []
+    out = []
+    for match in re.finditer(r'index[:\s]+(\d+)', message, re.I):
+      index = int(match.group(1))
+      if 0 <= index < len(annotations):
+        out.append("index %d is %s" % (index, annotations[index]))
+      else:
+        out.append("index %d is out of range (%d parameters), most likely a "
+                   "scalar parameter such as the scale factor, an extinction "
+                   "or a twin fraction" % (index, len(annotations)))
+    return out
+
+  def _independent_parameter_annotations(self):
+    """ A name for each independent parameter -- each row of the normal matrix
+    and the Cholesky decomposition -- as the crystallographic parameter it
+    stands for.
+
+    reparametrisation.component_annotations names the grad_Fc components (the
+    scatterer parameters), of which there are more than there are independent
+    parameters once constraints reduce the model. The mapping between the two is
+    jacobian_transpose_matching_grad_fc, which here is a selection: each
+    independent parameter picks out the one grad_Fc component it equals (weight
+    1), and a handful of scalar parameters (scale, extinction, twin fractions,
+    at the end) pick out none. A shared parameter picks out more than one, and
+    those are joined. This is what turns a bare Cholesky index into 'HD1a_52.uiso'
+    rather than a number.
+    """
+    # cached: the walk below is over every column of the jacobian, and both the
+    # error message and the diagnostic dump ask for it
+    cached = getattr(self, '_independent_annotations_cache', None)
+    if cached is not None:
+      return cached
+    rp = self.reparametrisation
+    component = list(rp.component_annotations)
+    jt = rp.jacobian_transpose_matching_grad_fc()
+    drives = [[] for _ in range(jt.n_rows)]
+    for j in range(jt.n_cols):
+      if j >= len(component):
+        continue
+      for i, v in jt.col(j):
+        drives[i].append((v, component[j]))
+    out = []
+    for lst in drives:
+      if not lst:
+        out.append("scalar parameter")
+        continue
+      # The parameter the row equals has weight 1 (its identity in grad_Fc); the
+      # rest are what it drives through a constraint. Weight, not magnitude,
+      # tells them apart: a riding-U derivative carries a large metric factor, so
+      # sorting by size would bury the identity behind it.
+      identity = [n for w, n in lst if abs(abs(w) - 1.0) < 1e-4]
+      driven = [n for w, n in lst if abs(abs(w) - 1.0) >= 1e-4]
+      if identity:
+        head, tail = identity[0], identity[1:] + driven
+        out.append(head if not tail else "%s (with %s)" % (head, ", ".join(tail)))
+      else:
+        # no identity: a constraint parameter (e.g. a rotation) with no grad_Fc
+        # component of its own, named by what it moves
+        moved = [n for _, n in sorted(lst, key=lambda t: -abs(t[0]))]
+        out.append("constraint parameter for %s" % ", ".join(moved))
+    self._independent_annotations_cache = out
+    return out
+
   def data_to_parameter_watch(self):
     parameters = self.reparametrisation.n_independents
     try:
@@ -539,6 +917,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if ref_method == "Levenberg-Marquardt":
       header += "     Mu of LM      "
       hr +=   "  --------------"
+    elif ref_method in FullMatrixRefine.scipy_methods:
+      header += "  Evaluations "
+      hr +=   "  ------------"
+    elif ref_method == 'CGLS-J':
+      header += "   CG iters   "
+      hr +=   "  ------------"
+    # Name the optimiser right above its own table, so that a log holding
+    # several runs cannot leave it in doubt which one produced which. The
+    # console has had this already, from the line naming the thread counts, so
+    # only the log file needs it here.
+    if log is not sys.stdout:
+      if ref_method in FullMatrixRefine.scipy_methods:
+        print("Optimiser: %s via scipy.optimize.minimize" % ref_method,
+              file=log)
+      elif ref_method == 'CGLS-J':
+        print("Optimiser: conjugate gradient least squares. Shift/esd is "
+              "approximated from the block diagonal during the run; the "
+              "values reported at the end are from the full matrix.", file=log)
+      else:
+        print("Optimiser: %s" % ref_method, file=log)
     print(hr, file=log)
     print(header, file=log)
     print(hr, file=log)
@@ -774,7 +1172,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     acta_stuff = olx.Ins('ACTA') != "n/a"
     xs = self.xray_structure()
     site_labels = xs.scatterers().extract_labels()
-    if not acta_stuff or self.objective_only:
+    if (not acta_stuff or self.objective_only
+        or self.covariance_matrix_and_annotations is None):
       from iotbx.cif import model
       cif_block = model.block()
     else:
@@ -1969,6 +2368,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.goof()
     ))
 
+    # The solvers describe themselves; for the scipy ones that includes which
+    # minimiser was used, how many evaluations of the objective it took and,
+    # if it did not simply converge, what stopped it.
+    optimiser = str(self.cycles)
+    n_evaluations = getattr(self.cycles, 'n_evaluations', None)
+    if n_evaluations is not None:
+      optimiser += ", %i evaluations" % n_evaluations
+    stop_reason = getattr(self.cycles, 'stop_reason', None)
+    if stop_reason:
+      optimiser += ", stopped because %s" % stop_reason
+    # "Method:   " keeps the value in the same column as the rows around it
+    print_l.append("  +  Method:   %s" % optimiser)
+
     print_l.append("  +  Diff:     max=%.2f, min=%.2f, RMS=%.2f" % (
       self.diff_stats.max(),
       self.diff_stats.min(),
@@ -2037,8 +2449,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if log is None: log = sys.stdout
     self.show_summary(log)
     if not self.objective_only:
-      standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
-      if self.twin_components is not None and len(self.twin_components):
+      # twin_covariance_matrix is None when no uncertainties were computed
+      # (CGLS without ESD), in which case there is no twin summary to print
+      if (self.twin_components is not None and len(self.twin_components)
+          and self.twin_covariance_matrix is not None):
+        standard_uncertainties = \
+          self.twin_covariance_matrix.matrix_packed_u_diagonal()
         print(file=log)
         print("Twin summary:", file=log)
         print("twin_law  fraction  standard_uncertainty", file=log)

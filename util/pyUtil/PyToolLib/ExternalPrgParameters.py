@@ -79,6 +79,11 @@ def defineExternalPrograms():
   cgls = Method_shelx_refinement(get_CGLS_phil())
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
+  conjugate_gradient = Method_cctbx_refinement(conjugate_gradient_phil)
+  lbfgsb = Method_cctbx_refinement(lbfgsb_phil)
+  newton_cg = Method_cctbx_refinement(newton_cg_phil)
+  slsqp = Method_cctbx_refinement(slsqp_phil)
+  cgls_j = Method_cctbx_refinement(cgls_j_phil)
 
   # define solution programs
 
@@ -304,6 +309,11 @@ Palatinus et al., 2012""",
 
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
+  smtbx_refine.addMethod(conjugate_gradient)
+  smtbx_refine.addMethod(lbfgsb)
+  smtbx_refine.addMethod(newton_cg)
+  smtbx_refine.addMethod(slsqp)
+  smtbx_refine.addMethod(cgls_j)
   RPD.addProgram(smtbx_refine)
 
   #tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))

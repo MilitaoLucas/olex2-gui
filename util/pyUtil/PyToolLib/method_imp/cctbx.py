@@ -256,6 +256,59 @@ display = 'NSFF'
   .type=str
 """)
 
+# Driven by scipy.optimize.minimize rather than by solving the normal
+# equations for a step. Adding another is one more of these plus the name in
+# params.phil, in FullMatrixRefine.solvers and in FullMatrixRefine.
+# scipy_methods; which arguments and tolerances the method takes is settled in
+# scitbx.lstbx.scipy_iterations.supported_methods.
+
+# scipy's 'CG': nonlinear conjugate gradient, a first-order method working on
+# the full problem and relinearising it at every step. Distinct from CGLS-J,
+# which iterates conjugate gradients on the linearised least-squares system
+# (one linearisation per cycle), and from Newton-CG, which uses second
+# derivatives. The internal name stays FullCG so saved settings still resolve;
+# only the label shown to the user says which CG this is.
+conjugate_gradient_phil = phil_interface.parse("""
+name = 'FullCG'
+  .type=str
+display = 'NL-CG'
+  .type=str
+""")
+
+lbfgsb_phil = phil_interface.parse("""
+name = 'L-BFGS-B'
+  .type=str
+display = 'L-BFGS'
+  .type=str
+""")
+
+newton_cg_phil = phil_interface.parse("""
+name = 'Newton-CG'
+  .type=str
+display = 'Newt-CG'
+  .type=str
+""")
+
+# Sequential least squares programming: builds a quadratic model of the
+# objective and solves it subject to linearised constraints. First order, so it
+# costs what L-BFGS costs per evaluation rather than what Newton-CG does.
+slsqp_phil = phil_interface.parse("""
+name = 'SLSQP'
+  .type=str
+display = 'SLSQP'
+  .type=str
+""")
+
+# Not a scipy method: conjugate gradients on the linearised problem, one
+# linearisation per cycle, the normal matrix never formed. The J marks it as
+# the variant which stores the design matrix, as against a matrix-free one.
+cgls_j_phil = phil_interface.parse("""
+name = 'CGLS-J'
+  .type=str
+display = 'CGLS-J'
+  .type=str
+""")
+
 ##########################################################################
 # this is how a refinement thread could look like
 

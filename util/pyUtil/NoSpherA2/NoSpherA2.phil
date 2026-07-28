@@ -78,8 +78,6 @@ snum{
       .type = str
     file = ""
       .type = str
-    auto_resolve_renamed_labels = True
-      .type = bool
     full_HAR = False
       .type = bool
     frag_HAR{

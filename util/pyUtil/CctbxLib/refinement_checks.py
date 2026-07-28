@@ -104,6 +104,25 @@ class RefinementChecks(object):
         else:
           self.refinement_has_failed.append("<a href='spy.gui.SwitchTool(h2-info-anomalous-dispersion)>>spy.gui.tools.flash_gui_control(h2-Anomalous-Dispersion)' style='color: %s'>%s have strongly deviating f'</a>" % (OV.GetParam('gui.red'), ",".join(unreasonable_fp)))
 
+  def check_table_coverage(self):
+    """ Warn if the tabulated table did not cover the whole model.
+
+    The atoms it missed were refined with spherical scattering factors, so part
+    of the structure is modelled more crudely than the rest. The refinement
+    itself succeeds, which is exactly why this has to be said out loud.
+    """
+    from cctbx_olex_adapter import get_table_fallback_atoms
+    fallback = get_table_fallback_atoms()
+    if not fallback:
+      return
+    if len(fallback) <= 6:
+      which = ", ".join(fallback)
+    else:
+      which = "%s and %d more" % (", ".join(fallback[:6]), len(fallback) - 6)
+    self.refinement_has_failed.append(
+      "<font color='%s'><b>Not in .tsc, refined spherically: %s</b></font>"
+      % (OV.GetParam('gui.red'), which))
+
   def check_mu(self):
     try:
       mu = self.cctbx.normal_eqns.iterations_object.mu

@@ -113,3 +113,10 @@ Once the void contents have been entered, Olex2 will calculate the number of ele
 
 # Refinement Settings Extra
 Some refinement programs may have extra settings that are not accessible through the Olex2 GUI; these extra settings may be specified here.
+
+# CGLS Options
+Two options for conjugate gradient least squares (CGLS-J).
+
+**ESD**: when on, the refinement ends with a full-matrix build to obtain standard uncertainties, as a Least Squares refinement does. Off skips that build and is faster, which is how SHELXL's CGLS behaves; nothing else the refinement reports changes. Leave it on for a final model, off for intermediate work.
+
+**single**: holds the design matrix in single precision. The matrix is then half the size and the conjugate gradient solve, which is limited by memory bandwidth, is faster. The products are still accumulated in double precision, so the effect on the result is negligible. Useful for large structures.
