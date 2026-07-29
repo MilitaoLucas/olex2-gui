@@ -248,11 +248,7 @@ class OlexRefinementModel(object):
         return False
       if ra_l: break
     if not ra: ra = atom_set
-    fixed_cnt = 0
-    for a in atom_set:
-      if a in fixed_xyz:
-        fixed_cnt += 1
-    return fixed_cnt < atom_cnt
+    return len(atom_set & fixed_xyz) < atom_cnt
 
   adp_constraints = {'eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'}
 
@@ -357,7 +353,7 @@ class OlexRefinementModel(object):
     from smtbx.refinement.constraints import adp, site
     redundant_adp, redundant_xyz = {}, []
     fixed_adp = [] # fixed or constrained
-    fixed_xyz = []
+    fixed_xyz = set()
     adp_atoms = set()
     for i, a in enumerate(self._atoms):
       behaviour_of_variable = [True]*12
@@ -366,7 +362,7 @@ class OlexRefinementModel(object):
         for var in fixed_vars:
           behaviour_of_variable[var['index']] = False
       if not all(behaviour_of_variable[:3]):
-        fixed_xyz.append(i)
+        fixed_xyz.add(i)
       if not all(behaviour_of_variable[-6:]):
         fixed_adp.append(i)
       if a.get('adp') != None:
@@ -444,11 +440,13 @@ class OlexRefinementModel(object):
           restrain_def = self.geom_restraints.get(restraint_type)
           ac = len(restraint['atoms'])
           st = 0
-          filtered_atoms = []
+          filtered_atoms, distilled_atoms = [], []
           while ac > 0:
             ga = restraint['atoms'][st:st+restrain_def[0]]
             if self.is_valid_geom(ga, redundant_xyz, fixed_xyz):
               filtered_atoms += ga
+            else:
+              distilled_atoms += ga
             st += restrain_def[0]
             ac -= restrain_def[0]
           if len(filtered_atoms) < restrain_def[0] * restrain_def[1]:
@@ -456,6 +454,12 @@ class OlexRefinementModel(object):
               print("Skipping geometrical restraint (all atoms have fixed coordinates): %s %s" %(
                 restraint_type, " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
             continue
+          elif distilled_atoms:
+            if OV.IsDebugging():
+              print("Skipping %s in: %s %s" %(
+                " ".join([self._atoms[i[0]]['label'] for i in distilled_atoms]),
+                restraint_type,
+                 " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in filtered_atoms]
