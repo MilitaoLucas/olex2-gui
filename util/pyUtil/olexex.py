@@ -227,7 +227,28 @@ class OlexRefinementModel(object):
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
           'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp')
 
-  adp_constraints = set(('eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'))
+  # restraint -> group of, min groups
+  geom_restraints = {
+    'bond': (2, 1),
+    'bond_similarity': (2, 2),
+    'angle': (3, 1),
+    'dihedral': (4, 1),
+    'planarity': (4, 1),
+    'chirality': (4, 1),
+   }
+
+  def is_valid_geom(self, atoms, redundant_xyz, fixed_xyz):
+    atom_set = {a[0] for a in atoms}
+    atom_cnt = len(atoms)
+    for r in redundant_xyz:
+      ra = atom_set & r
+      if ra:
+        if len(ra) == atom_cnt: # all represent the same atom
+          return False
+        break
+    return len(atom_set & fixed_xyz) < atom_cnt
+
+  adp_constraints = {'eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'}
 
   def __init__(self, need_connectivity=True):
     olex_refinement_model = OV.GetRefinementModel(need_connectivity)
@@ -328,9 +349,9 @@ class OlexRefinementModel(object):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     from smtbx.refinement.constraints import adp, site
-    redundant_adp = {}
+    redundant_adp, redundant_xyz = {}, []
     fixed_adp = [] # fixed or constrained
-    fixed_xyz = []
+    fixed_xyz = set()
     adp_atoms = set()
     for i, a in enumerate(self._atoms):
       behaviour_of_variable = [True]*12
@@ -339,7 +360,7 @@ class OlexRefinementModel(object):
         for var in fixed_vars:
           behaviour_of_variable[var['index']] = False
       if not all(behaviour_of_variable[:3]):
-        fixed_xyz.append(i)
+        fixed_xyz.add(i)
       if not all(behaviour_of_variable[-6:]):
         fixed_adp.append(i)
       if a.get('adp') != None:
@@ -359,6 +380,19 @@ class OlexRefinementModel(object):
         if isinstance(sp, adp.shared_u):
           for i in sp.indices[1:]:
             redundant_adp[i] = sp.indices[0]
+        elif isinstance(sp, site.shared_site):
+          al = None
+          for i in sp.indices:
+            for v in redundant_xyz:
+              if i in v:
+                al = v
+                break
+            if al: break
+          if al:
+            al += sp.indices
+          else:
+            redundant_xyz.append(set(sp.indices))
+
     # for k,v in redundant_adp.items():
     #   if v in redundant_adp:
     #     raise Exception("Cyclic constraint located for: %s and %s" \
@@ -400,19 +434,33 @@ class OlexRefinementModel(object):
         if restraint_type is None: continue
         i_seqs = [i[0] for i in restraint['atoms']]
         kwds = dict(i_seqs=i_seqs)
-        if not self.is_adp_restraint(restraint_type):
-          fixed_count = 0
-          for i in restraint['atoms']:
-            if i[0] in fixed_xyz:
-              fixed_count += 1
-          if fixed_count == len(restraint['atoms']):
+        if not self.is_adp_restraint(restraint_type) and restraint_type not in self.adp_constraints:
+          restrain_def = self.geom_restraints.get(restraint_type)
+          ac = len(restraint['atoms'])
+          st = 0
+          filtered_atoms, distilled_atoms = [], []
+          while ac > 0:
+            ga = restraint['atoms'][st:st+restrain_def[0]]
+            if self.is_valid_geom(ga, redundant_xyz, fixed_xyz):
+              filtered_atoms += ga
+            else:
+              distilled_atoms += ga
+            st += restrain_def[0]
+            ac -= restrain_def[0]
+          if len(filtered_atoms) < restrain_def[0] * restrain_def[1]:
             if OV.IsDebugging():
               print("Skipping geometrical restraint (all atoms have fixed coordinates): %s %s" %(
                 restraint_type, " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
             continue
+          elif distilled_atoms:
+            if OV.IsDebugging():
+              print("Skipping %s in: %s %s" %(
+                " ".join([self._atoms[i[0]]['label'] for i in distilled_atoms]),
+                restraint_type,
+                 " ".join([self._atoms[i[0]]['label'] for i in restraint['atoms']])))
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
-            for i in restraint['atoms']]
+            for i in filtered_atoms]
           if restraint_type in ('angle', 'dihedral'):
             esd_val = restraint['esd1']*180/math.pi
           else:
