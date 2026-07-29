@@ -289,6 +289,8 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(f[0], f[1])
 
   def runAfterProcess(self):
+    #olx.ShowWindow('info', True)
+    #olx.Schedule(3, 'ShowWindow info False' )
     if self.IsClientMode():
       self.method.runAfterProcess(self)
       return
@@ -376,10 +378,13 @@ class RunPrg(ArgumentParser):
     f_name = OV.FileName() + "_%s_output.html" %self.prgType
     OlexVFS.write_to_olex(f_name, t)
 #    OV.UpdateHtml()
+
 class RunSolutionPrg(RunPrg):
 
   def __init__(self):
     RunPrg.__init__(self)
+    self.solution_observer_timer = 0
+    self.solution_has_failed = []
     self.bitmap = 'solve'
     self.program, self.method = self.getProgramMethod('solve')
     self.run()
@@ -410,7 +415,31 @@ class RunSolutionPrg(RunPrg):
       return
     if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
+
+    OV.registerCallback("procout", self.solution_observer)
     RunPrg.run(self)
+    OV.unregisterCallback("procout", self.solution_observer)
+
+    if self.solution_has_failed:
+      notes = []
+      bg = red
+      fg = red
+      warning_counter = 0
+      for i, note in enumerate(self.solution_has_failed):
+        if note ==  "Cell contents from UNIT instruction and atom list do not agree" and not OV.GetVar("mask_but_same", True):
+          bg = white
+          fg = green
+          note += "-Mask INFO exists"
+        if "warning" in note.lower():
+          warning_counter += 1
+        if i > 0 and warning_counter > 1:
+          note = note.strip("Warning:").strip("warning:").strip()
+        notes.append(note)
+      msg = " | ".join(notes)
+      if warning_counter == len(self.solution_has_failed):
+        fg = orange
+      string =  "%s;%s;%s" % (msg, bg, fg)
+      gui.set_notification(string, fg=fg)
 
   def runAfterProcess(self):
     olx.UpdateWght(0.1)
@@ -455,6 +484,16 @@ class RunSolutionPrg(RunPrg):
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
+  
+  def solution_observer(self, msg):
+    if self.solution_observer_timer == 0:
+      self.solution_observer_timer = time.time()
+    if "** " in msg:
+      import re
+      regex = re.compile(r"\*\*(.*?)\*\*")
+      m = regex.findall(msg)
+      if m:
+        self.solution_has_failed.append(m[0].strip())
 
 class RunRefinementPrg(RunPrg):
   running = None

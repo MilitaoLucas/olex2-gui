@@ -912,7 +912,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
      # %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
     ref_method = OV.GetParam("snum.refinement.method")
-    header = "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      "
+    header = "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyz               Shift U      "
     hr = "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
     if ref_method == "Levenberg-Marquardt":
       header += "     Mu of LM      "
