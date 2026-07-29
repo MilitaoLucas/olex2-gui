@@ -240,14 +240,12 @@ class OlexRefinementModel(object):
   def is_valid_geom(self, atoms, redundant_xyz, fixed_xyz):
     atom_set = {a[0] for a in atoms}
     atom_cnt = len(atoms)
-    ra = None
     for r in redundant_xyz:
       ra = atom_set & r
-      ra_l = len(ra)
-      if ra_l == atom_cnt: # all represent the same atom
-        return False
-      if ra_l: break
-    if not ra: ra = atom_set
+      if ra:
+        if len(ra) == atom_cnt: # all represent the same atom
+          return False
+        break
     return len(atom_set & fixed_xyz) < atom_cnt
 
   adp_constraints = {'eadp', 'olex2.constraint.rotating_adp', 'olex2.constraint.rotated_adp'}
