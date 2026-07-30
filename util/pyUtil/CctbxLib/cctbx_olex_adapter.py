@@ -102,12 +102,24 @@ class OlexCctbxAdapter(object):
         # With a batch-scaled format the BASF list holds the batch scale
         # factors first and the twin component fractions after them, so what is
         # left over once each twin law has taken its fraction is the batch
-        # count. Zero is a model in its own right -- one TWIN law, one BASF, and
-        # no batch scaling at all -- and is left with no twin fractions, exactly
-        # as a refinement without a batch-scaled format would be. Fewer BASF
-        # than laws is not a model, so that is still refused, now with a message
-        # saying which two numbers disagree.
+        # count.
         batch_cnt = len(twin_fractions)-len(twin_laws)
+        # HKLF 5 already names the twin component of every reflection in the
+        # file, and miller.array.as_xray_observations refuses twin components
+        # alongside those batch numbers outright -- the two are competing
+        # descriptions of the same thing. So a TWIN matrix cannot be combined
+        # with it, whatever the BASF count, and saying so here is worth more
+        # than the assertion deeper in cctbx that would say it otherwise.
+        assert self.hklf_code < 5, \
+          "a TWIN matrix cannot be used with HKLF %d: the file already " \
+          "identifies each reflection's twin component. Either drop the TWIN " \
+          "card and keep BASF, which is how HKLF %d expresses twinning, or " \
+          "keep TWIN and use HKLF 4 data." %(self.hklf_code, self.hklf_code)
+        # Zero batches is a model in its own right -- one TWIN law, one BASF,
+        # and no batch scaling at all -- and is left with no twin fractions,
+        # exactly as a refinement without a batch-scaled format would be. Fewer
+        # BASF than laws is not a model, so that is refused with a message
+        # saying which two numbers disagree.
         assert batch_cnt >= 0, \
           "%d BASF given for %d twin law(s): each law needs a fraction, and " \
           "any BASF beyond that are batch scale factors" \
