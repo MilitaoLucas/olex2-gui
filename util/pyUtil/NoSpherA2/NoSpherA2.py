@@ -759,9 +759,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       parts, groups = deal_with_parts()
       nr_parts = len(parts)
     elif len(parts) == 1:
-      #Special case where all atoms are part of a single disorder group.
+      # PART 0 is implicit in a SHELX/Olex structure.  Keep it alongside the
+      # one explicit PART (for example PART -1) so a single-part disorder is
+      # passed to NoSpherA2 as both groups.
       nr_parts = 1
-      groups = parts
+      groups = [0] + list(parts)
     else:
       #WTF?!
       raise NameError("Could not determine the number of disorder parts!\nThis is an undefined case, please rech out to the Olex2 team to explain this model.")
