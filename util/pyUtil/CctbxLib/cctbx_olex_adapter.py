@@ -99,11 +99,23 @@ class OlexCctbxAdapter(object):
       else:
         grad_twin_fractions = [True] * len(twin_fractions)
       if self.hklf_code == 2 or self.hklf_code >= 5:
+        # With a batch-scaled format the BASF list holds the batch scale
+        # factors first and the twin component fractions after them, so what is
+        # left over once each twin law has taken its fraction is the batch
+        # count. Zero is a model in its own right -- one TWIN law, one BASF, and
+        # no batch scaling at all -- and is left with no twin fractions, exactly
+        # as a refinement without a batch-scaled format would be. Fewer BASF
+        # than laws is not a model, so that is still refused, now with a message
+        # saying which two numbers disagree.
         batch_cnt = len(twin_fractions)-len(twin_laws)
-        assert batch_cnt > 0
-        self.twin_fractions = tuple(
-          [ xray.twin_fraction(twin_fractions[i],True)
-            for i in range(batch_cnt)])
+        assert batch_cnt >= 0, \
+          "%d BASF given for %d twin law(s): each law needs a fraction, and " \
+          "any BASF beyond that are batch scale factors" \
+          %(len(twin_fractions), len(twin_laws))
+        if batch_cnt > 0:
+          self.twin_fractions = tuple(
+            [ xray.twin_fraction(twin_fractions[i],True)
+              for i in range(batch_cnt)])
         self.twin_components = tuple(
           [xray.twin_component(law, fraction, grad)
            for law, fraction, grad in zip(
