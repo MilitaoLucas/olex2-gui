@@ -1,0 +1,44 @@
+snum {
+  DispRadial {
+    enabled = False
+      .type = bool
+      .help = "Refine a radial falloff shared by f' and f''."
+    mode = *element atom
+      .type = choice
+      .help = "One set of coefficients per element, or one per atom."
+    selection = ""
+      .type = str
+      .help = "Comma or space separated element symbols (mode=element) or \
+atom labels (mode=atom). Empty means every atom which has f' or f''."
+    basis = *cos_2theta stol
+      .type = choice
+      .help = "The variable the polynomial is in: 1 - cos(2theta), which is \
+what the physics asks for, or sin(theta)/lambda. Since \
+cos(2theta) = 1 - 2 lambda^2 s^2, a polynomial in the first is exactly a \
+polynomial of the same degree in s^2, i.e. it spans the even powers of s and \
+only those; powers of s span the odd ones too, which are not polynomials in \
+cos(2theta) at all. The choice is a restriction of the model, not a change of \
+units."
+    n_terms = 2
+      .type = int
+      .help = "How many powers of the variable. R = 1 + c1 u + c2 u^2 + ... \
+There is no constant term: it would be degenerate with f' and f'' themselves."
+    refine = True
+      .type = bool
+      .help = "Refine the coefficients, or hold them at their current values. \
+Held, the correction still multiplies f' and f''; it just contributes no \
+parameters to the least squares. Set values with disprad.set."
+    coefficients = ""
+      .type = str
+      .help = "The coefficients, JSON, group-major. Written by the refinement \
+and settable by hand with disprad.set."
+    coefficients_hash = ""
+      .type = str
+      .help = "What the stored coefficients were refined for. Consulted only \
+when refining, to decide whether they are a fair place to start from: values \
+put there by hand are an assertion and stand until they are changed."
+    esds = ""
+      .type = str
+      .help = "Standard uncertainties of the coefficients, JSON."
+  }
+}

@@ -1,0 +1,78 @@
+<!-- #include tool-h;gui/blocks/tool-h.htm;image=#image;onclick=;1; -->
+<font size='$GetVar(HtmlFontSizeControls)'>
+<p>
+A radial falloff shared by f' and f''.
+</p>
+<p>
+f' and f'' are stored as constants and enter Fc unchanged at every scattering
+angle, while f0 decays. This gives them a decay of their own, the same one for
+both, refined with the structure:
+</p>
+<p>
+&nbsp;&nbsp;f'(u) = f' R(u), &nbsp; f''(u) = f'' R(u), &nbsp;
+R(u) = 1 + c<sub>1</sub>u + c<sub>2</sub>u<sup>2</sup> + ...
+</p>
+<p>
+u is 1 &minus; cos 2&theta; by default, which is what the physics asks for, or
+sin(&theta;)/&lambda; with <b>basis=stol</b>. These are not just different
+units. Since cos 2&theta; = 1 &minus; 2&lambda;<sup>2</sup>s<sup>2</sup>, a
+polynomial in the first is exactly a polynomial of the same degree in
+s<sup>2</sup> &mdash; the <i>even</i> powers of s and only those &mdash;
+whereas powers of s span the odd ones too, and those are not polynomials in
+cos 2&theta; at all. Choosing cos 2&theta; restricts the model to the physical
+family rather than rewriting it, and it makes the correction turn on
+quadratically from forward scattering instead of linearly.
+</p>
+<p>
+There is no constant term: scaling f' by a constant is the same as changing f',
+so it would be exactly degenerate. Both choices of u vanish at &theta; = 0, so
+R(0) = 1 and the tabulated values stand untouched at forward scattering, where
+they are by definition right.
+</p>
+<p>
+There are no GUI controls yet. It is driven from the command line:
+</p>
+<pre>
+  disprad.setup elements=Pd n=2
+  disprad.setup atoms=Pd1 n=1 basis=stol
+  disprad.print_current
+  disprad.plot
+  disprad.remove
+</pre>
+<p>
+Values of your own can be asserted rather than fitted. Held fixed the
+correction still multiplies f' and f'' &mdash; it shapes the model the R
+factors describe &mdash; it simply contributes no parameter to the least
+squares, and gets no uncertainty:
+</p>
+<pre>
+  disprad.set group=Pd c=-1.8,2.0 fix=True
+  disprad.set c=-1.8,2.0,-0.3,0.1        every coefficient, group-major
+  disprad.fix                            hold whatever is there now
+  disprad.refine                         let them go again
+</pre>
+<p>
+Values put there by hand stand until you change them; refined values are
+reused as a starting point only while they still match the model they came
+from. Note that fixing is all or nothing &mdash; there is no way yet to hold
+one group and refine another.
+</p>
+<p>
+The coefficients start at zero, where R is 1 and nothing has changed. They
+correlate strongly with U of the same atoms, and with f' and f'' themselves
+where those are refined too, so treat a large correction with suspicion: it is
+at least as likely to be absorbing model error as measuring dispersion. R is
+held above 0.1 over the measured resolution range, since f' and f'' changing
+sign is not something the model should be allowed to do quietly.
+</p>
+<p>
+<b>disprad.plot</b> draws f' and f'' against sin(&theta;)/&lambda; over the
+measured resolution range: a flat line for each tabulated value and a curve for
+what the refinement made of it. How far a curve departs from its line is the
+size of the correction, and the further it goes the more likely it is to be
+absorbing model error rather than measuring dispersion.
+</p>
+<p>
+Twinned data is refused.
+</p>
+</font>

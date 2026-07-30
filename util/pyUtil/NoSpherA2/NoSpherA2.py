@@ -17,7 +17,7 @@ from variableFunctions import nsa2_get_param, nsa2_set_param
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
-from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, ELEMENTS, ELEMENTS_BY_SYMBOL
+from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
@@ -412,11 +412,10 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     return [str(sc.label) for sc in adapter.xray_structure().scatterers()]
 
   def _update_active_tscb_hash(self, tscb_path, file_hash=None):
+    # Flushes to disk: we have just replaced the .tscb on disk, so the hash that
+    # describes it has to be saved with it rather than waiting for the next save.
     try:
-      if file_hash is None:
-        with open(tscb_path, 'rb') as handle:
-          file_hash = hashlib.sha256(handle.read()).hexdigest()
-      nsa2_set_param('file_hash', file_hash)
+      nsa2_refresh_file_hash(tscb_path, file_hash)
     except Exception as error:
       print(f"Warning: could not update NoSpherA2 file hash for {os.path.basename(tscb_path)}: {error}")
 

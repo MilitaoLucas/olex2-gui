@@ -5,7 +5,7 @@ from olexex import OlexRefinementModel
 from olexFunctions import OV
 from variableFunctions import nsa2_get_param, nsa2_set_param
 from RunPrg import RunPrg, RunRefinementPrg
-from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity, nsa2_check_tsc_origin_known, write_precise_model_file, nsa2_refresh_file_hash
+from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity, nsa2_check_tsc_origin_known, write_precise_model_file, nsa2_refresh_file_hash, nsa2_flush_ins_header
 from tsc_scatterer_resync import ScattererResolutionError, read_scatterers, update_scatterers_in_file, resolve_scatterer_mapping
 import cctbx_controller as cctbx_controller
 
@@ -310,7 +310,11 @@ all calculation parameters are properly recorded."""
         # thing that still matches after a rename.
         if _table_identifies_by_id(table_file_name):
           update_scatterers_in_file(table_file_name, scatterers_id_file_order)
-          nsa2_refresh_file_hash(table_file_name)
+          # Record the new hash but do not save here: the shift analysis below
+          # still needs self.cctbx, and a save can reload the model underneath
+          # it. Cycles after this one are covered by the .ins written during
+          # setup; the last one is flushed once the loop is done.
+          nsa2_refresh_file_hash(table_file_name, flush=False)
       except ValueError as e:
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")
@@ -503,6 +507,10 @@ all calculation parameters are properly recorded."""
       HAR_log.close()
     raise e
   # Done with the while !Converged
+  # The last cycle rewrote the scatterer ids in the table and stored the matching
+  # hash, but nothing saves the structure after that point, so get it onto disk
+  # here. Otherwise the next session reads the new table against the old hash.
+  nsa2_flush_ins_header()
   #nsa2_set_param('Calculate', False)
   nsa2_set_param('source', "  " + nsa2_get_param('file'))
   ext_name = "h3-NoSpherA2-extras"

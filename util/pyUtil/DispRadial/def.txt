@@ -1,0 +1,5 @@
+
+  p_name = DispRadial
+  p_htm = DispRadial
+  p_img = [("DispRadial",'h1')]
+  p_scope = DispRadial

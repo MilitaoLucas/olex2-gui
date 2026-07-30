@@ -118,6 +118,7 @@ class initpy_funcs():
     sys.path.append(os.path.join(up, "HAR"))
     sys.path.append(os.path.join(up, "NoSpherA2"))
     sys.path.append(os.path.join(up, "NoMoRe"))
+    sys.path.append(os.path.join(up, "DispRadial"))
     sys.path.append(os.path.join(up, "PluginLib"))
     self.olx.VFSDependent = set()
 
@@ -173,6 +174,14 @@ class initpy_funcs():
     except Exception as e:
       self.olx.Echo(e, m="error")
       print("Failed to load NoMoRe. Please check your installation.")
+      return
+
+  def DispRadial(self):
+    try:
+      self.olx.stopwatch.exec("import disp_radial")
+    except Exception as e:
+      self.olx.Echo(e, m="error")
+      print("Failed to load DispRadial. Please check your installation.")
       return
 
   def onstartup(self):

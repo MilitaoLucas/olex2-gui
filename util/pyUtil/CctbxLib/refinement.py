@@ -273,6 +273,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.fc_correction = xray.dummy_fc_correction()
       self.fc_correction.expression = ''
 
+    # A radial falloff shared by f' and f''. Not a constraint: it is a
+    # correction the structure factors themselves apply, so it goes to the
+    # reparametrisation as a parameter and to f_calc_modulus_squared as an
+    # argument, and both have to get it or it silently does nothing.
+    self.dispersion_radial = None
+    if OV.GetParam('snum.DispRadial.enabled', False):
+      try:
+        from DispRadial.disp_radial import build_correction
+        self.dispersion_radial = build_correction(self.xray_structure())
+      except Exception as e:
+        print('DispRadial: skipped, %s' % e)
+
     stopwatch.start("Building reparametrisation")
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
@@ -281,6 +293,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       twin_fractions=self.get_twin_fractions(),
       temperature=self.temp,
       fc_correction=self.fc_correction,
+      dispersion_radial=self.dispersion_radial,
       directions=self.directions
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
@@ -334,7 +347,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=self.weighting,
       log=self.log,
-      may_parallelise=ext.build_normal_equations.available_threads > 1,
+      may_parallelise=self.worth_parallelising(),
       use_openmp=use_openmp,
       max_memory=max_mem,
       std_observations=self.std_obserations
@@ -493,6 +506,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         stopwatch.start("Extracting scalars")
         diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
         dlen = len(diag)
+        # peeled from the end, so in the reverse of the order finalise()
+        # assigned them: BASF..., fc_correction, thickness, dispersion. A block
+        # taken out of turn shifts every BASF su below it without any error.
+        disp_esds = None
+        dr = self.reparametrisation.dispersion_radial
+        if dr is not None and dr.grad:
+          disp_esds = [math.sqrt(diag[dlen - dr.n_param + i])
+                       for i in range(dr.n_param)]
+          dlen -= dr.n_param
         if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
           dlen -= 1
         if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
@@ -512,6 +534,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
         except:
           pass
+        self._save_dispersion_radial(disp_esds)
         if self._nomore_constraint is not None:
           try:
             from NoMoRe.nomore import save_scales
@@ -524,6 +547,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         # refined model, R factors and difference map are unaffected, and the
         # CIF is written without uncertainties.
         self.scale_factor = self.normal_eqns.scale_factor()
+        # the coefficients themselves are refined either way, and losing them
+        # here would also leave the next run with nothing to warm start from
+        self._save_dispersion_radial(None)
     except RuntimeError as e:
       e_string = str(e)
       if e_string.startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
@@ -1043,6 +1069,61 @@ class FullMatrixRefine(OlexCctbxAdapter):
       return utils.format_float_with_standard_uncertainty(x, su)
     except Exception:
       return None
+
+  # Below this many reflections x parameters, sharing the reflection pass out
+  # over threads costs more than it saves. Measured: the crossover sits between
+  # 1.7e7 and 5.0e7, and the penalty either side of it is lopsided -- wrongly
+  # serial costs at most about 2.4x, wrongly parallel up to 8.6x -- so the
+  # threshold sits nearer the serial end of the bracket than the middle.
+  parallel_work_threshold = 3e7
+
+  def worth_parallelising(self):
+    """Whether the reflection pass is big enough to be shared out.
+
+    Threading a build costs a fixed amount -- threads to start, and one fork of
+    the structure factor functor apiece, which clones the scatterer contribution
+    and with it any tabulated table. Measured, that fixed cost is about a sixth
+    of a second whatever the structure, while the work itself scales. A typical
+    small-molecule refinement does not come close to covering it: this used to
+    be on for every structure on any machine with more than one thread, which on
+    a few-hundred-parameter model made the build several times slower.
+    """
+    if ext.build_normal_equations.available_threads <= 1:
+      return False
+    try:
+      n_refl = self.observations.fo_sq.size()
+      n_par = self.reparametrisation.n_independents
+    except Exception:
+      return True             # cannot tell: leave it as it was
+    work = float(n_refl)*n_par
+    parallel = work >= self.parallel_work_threshold
+    if OV.IsDebugging():
+      print('-- %d reflections x %d parameters = %.3g: %s reflection pass'
+            % (n_refl, n_par, work, 'threaded' if parallel else 'serial'))
+    return parallel
+
+  def _save_dispersion_radial(self, esds):
+    """Keep and report the refined f'/f'' radial coefficients.
+
+    Called from both branches of the standard-uncertainty test: the values are
+    refined whether or not a covariance matrix was worked out, and only the
+    uncertainties depend on there being one. Losing them when CGLS is asked to
+    skip the s.u. would also leave the next run with nothing to warm start
+    from, since the stored hash would never match.
+    """
+    dr = getattr(self.reparametrisation, 'dispersion_radial', None)
+    if dr is None:
+      return
+    try:
+      from DispRadial.disp_radial import save_coefficients, report
+      xs = self.reparametrisation.structure
+      # held fixed there is nothing new to keep, but what it did to f' and f''
+      # is still worth saying: it shaped the model the R factors describe
+      if dr.grad:
+        save_coefficients(xs, dr, esds)
+      report(xs, dr, esds)
+    except Exception as e:
+      print('DispRadial: could not save the coefficients: %s' % e)
 
   def check_hooft(self):
     if OV.IsEDData():

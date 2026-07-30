@@ -16,13 +16,16 @@ import olex_core
 
 # need this pattern to use 'dynamic' base
 def normal_equation_class():
-  #Overwrite to force BLAS Normal Equations from cctbx, since OpenMP builds them itself
   def get_base_class():
-    OpenMP = OV.GetParam('user.refinement.use_openmp')
-    if OpenMP == True:
-      from scitbx.lstbx import normal_eqns
-      return least_squares.crystallographic_ls_class(
-        normal_eqns.non_linear_ls_with_separable_scale_factor_BLAS_2)
+    """ Whichever accumulator cctbx picks, OpenMP or not.
+
+    This used to force the BLAS 2 accumulator whenever OpenMP was on, because
+    the OpenMP accumulation was only implemented for that one and asking for
+    BLAS 3 threw. It is implemented for both now, and forcing BLAS 2 is an
+    expensive thing to do: on a structure of a few thousand parameters the
+    difference between the two accumulators is the best part of an order of
+    magnitude, far more than OpenMP itself is worth.
+    """
     return least_squares.crystallographic_ls_class()
 
   class normal_eqns(get_base_class()):
@@ -35,13 +38,17 @@ def normal_equation_class():
       super(normal_eqns, self).__init__(
         observations, refinement.reparametrisation, initial_scale_factor=OV.GetOSF(),
         **kwds)
+      # both branches, or the radial f'/f'' correction would quietly do nothing
+      # for exactly the refinements it is most likely to be used on
+      disp_correction = getattr(refinement, 'dispersion_radial', None)
       if table_file_name:
         try:
           from cctbx_olex_adapter import get_table_contribution
           one_h_linearisation = direct.f_calc_modulus_squared(
             self.xray_structure,
             scatterer_contribution=get_table_contribution(
-              self.xray_structure, table_file_name))
+              self.xray_structure, table_file_name),
+            disp_correction=disp_correction)
         except Exception as e:
           e_str = str(e)
           if "stoks.size() == scatterer" in e_str:
@@ -56,7 +63,8 @@ def normal_equation_class():
         except ImportError:
           pass
         one_h_linearisation = direct.f_calc_modulus_squared(
-          self.xray_structure, reflections=self.observations)
+          self.xray_structure, reflections=self.observations,
+          disp_correction=disp_correction)
       self.refinement = refinement
       self.one_h_linearisation = f_calc_function_default(one_h_linearisation)
       self.f_mask_data = None

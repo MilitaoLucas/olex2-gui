@@ -108,6 +108,7 @@ def do_init():
 
   stopwatch.run(initpy.NoSpherA2)
   stopwatch.run(initpy.NoMoRe)
+  stopwatch.run(initpy.DispRadial)
 
   stopwatch.start("Peanut")
   try:

@@ -1162,14 +1162,53 @@ def _nsa2_sha256(path):
     return ''
 
 
-def nsa2_refresh_file_hash(path, file_hash=None):
+def nsa2_flush_ins_header():
+  """Write the structure out, so a hash we just stored reaches the file on disk.
+
+  nsa2_set_param -> OV.SetHeaderParam -> olex_core.SetStoredParam only updates the
+  refinement model in memory; the REM <olex2.extras> block it lands in is written
+  when the structure is saved. A tsc/tscb, by contrast, is replaced on disk the
+  moment we rewrite it. Without this flush the two commit at different times, and
+  the next Olex2 session validates new file bytes against the previous hash.
+  """
+  try:
+    if olx.IsFileLoaded() == 'false':
+      return False
+    OV.File()
+    return True
+  except Exception as error:
+    print("Warning: could not save the structure after updating the NoSpherA2 file hash: %s" % error)
+    return False
+OV.registerFunction(nsa2_flush_ins_header, False, 'NoSpherA2')
+
+
+def nsa2_refresh_file_hash(path, file_hash=None, flush=True):
   """Recompute (unless already known) and persist the nsa2 file_hash for `path`, so that
   nsa2_validate_tsc_file_integrity does not flag our own intentional scatterer-block rewrites
   as external tampering. Call this immediately after any code rewrites a tsc/tscb file's
-  scatterer block."""
+  scatterer block.
+
+  `path` is resolved the same way the validator resolves it, so a bare file name
+  means the same file to both. Pass flush=False where saving the structure would
+  disturb live state, and call nsa2_flush_ins_header() at a safer point instead.
+  """
   if file_hash is None:
-    file_hash = _nsa2_sha256(path)
+    resolved = _nsa2_resolve_existing_path(path)
+    if resolved is None:
+      print("Warning: could not locate '%s' to refresh its NoSpherA2 hash; "
+            "the stored hash is left as it was" % path)
+      return None
+    file_hash = _nsa2_sha256(resolved)
+  # An empty hash means the file could not be read. Storing it would clear the
+  # stored value (nsa2_set_param treats '' as "remove"), and validation reads a
+  # missing hash as "nothing to check against" -- so a transient read failure
+  # would quietly switch the integrity check off. Leave the old value in place.
+  if not file_hash:
+    print("Warning: could not hash '%s'; the stored NoSpherA2 hash is left as it was" % path)
+    return None
   nsa2_set_param('file_hash', file_hash)
+  if flush:
+    nsa2_flush_ins_header()
   return file_hash
 
 
