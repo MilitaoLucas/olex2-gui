@@ -213,7 +213,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print(msg)
     restraints_manager = self.restraints_manager()
     restraints_manager.sump_proxies = sump_proxies
-    self._add_npd_restraint(restraints_manager)
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
     stopwatch.start("Setting up constraints")
@@ -298,6 +297,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
+    # After the reparametrisation and not before: constructing it is what sets
+    # grad_u_aniso on the scatterers, and the restraint is added to exactly the
+    # atoms whose ADPs are being refined. Asked any earlier, every flag is still
+    # false and XNPD silently restrains nothing.
+    self._add_npd_restraint(restraints_manager)
 
     self.std_obserations = None
     if ed_refinement:
@@ -667,6 +671,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager.npd_adp_proxies = proxies
       print("XNPD: restraining %d anisotropic atoms positive-definite"
             % proxies.size())
+    else:
+      # XNPD was asked for and nothing qualified, which is worth saying: a
+      # restraint that quietly does nothing looks exactly like one that works.
+      print("XNPD: no anisotropic atoms are being refined, nothing restrained")
 
   def _dump_refinement_diagnostics(self, error_string, offending_index=None):
     """ Dump everything needed to work on a refinement failure offline.
