@@ -1083,6 +1083,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
   # 1.7e7 and 5.0e7, and the penalty either side of it is lopsided -- wrongly
   # serial costs at most about 2.4x, wrongly parallel up to 8.6x -- so the
   # threshold sits nearer the serial end of the bracket than the middle.
+  #
+  # Reflections x parameters stands in for the work only where the cost of a
+  # reflection is roughly the same for all of them, which is what was measured:
+  # spherical and tabulated X-ray structure factors. It is not a stand-in for
+  # anything else, and must not be applied to a build whose per-reflection cost
+  # is of a different order -- see worth_parallelising.
   parallel_work_threshold = 3e7
 
   def worth_parallelising(self):
@@ -1095,9 +1101,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     small-molecule refinement does not come close to covering it: this used to
     be on for every structure on any machine with more than one thread, which on
     a few-hundred-parameter model made the build several times slower.
+
+    Dynamical electron diffraction is exempt, and the exemption is the point of
+    this note. A reflection there is not a structure factor but a beam-group
+    calculation, orders of magnitude dearer, so reflections x parameters
+    understates the work by about as much and a dataset of a couple of thousand
+    reflections lands far below a threshold it should clear easily. Gating it on
+    that number turned every ED refinement serial. There is no fixed cost worth
+    saving against a build of that size, so it is simply always shared out.
     """
     if ext.build_normal_equations.available_threads <= 1:
       return False
+    if getattr(self, 'ed_refinement', False):
+      return True
     try:
       n_refl = self.observations.fo_sq.size()
       n_par = self.reparametrisation.n_independents
