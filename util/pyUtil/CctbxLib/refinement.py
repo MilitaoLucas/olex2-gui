@@ -1095,12 +1095,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       n_par = self.reparametrisation.n_independents
     except Exception:
       return True             # cannot tell: leave it as it was
-    work = float(n_refl)*n_par
-    parallel = work >= self.parallel_work_threshold
-    if OV.IsDebugging():
-      print('-- %d reflections x %d parameters = %.3g: %s reflection pass'
-            % (n_refl, n_par, work, 'threaded' if parallel else 'serial'))
-    return parallel
+    return float(n_refl)*n_par >= self.parallel_work_threshold
 
   def _save_dispersion_radial(self, esds):
     """Keep and report the refined f'/f'' radial coefficients.
