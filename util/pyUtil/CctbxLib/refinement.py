@@ -154,6 +154,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         OV.GetParam("user.refinement.use_openmp")))
     fcf_only = nsa2_get_param('make_fcf_only')
     OV.SetVar('stop_current_process', False) #reset any interrupt before starting.
+    # Kept as well as called: the class is rebuilt once the reparametrisation
+    # exists, because the accumulator depends on the size of the problem.
+    self.normal_equations_class_builder = normal_equations_class_builder
     self.normal_equations_class = normal_equations_class_builder()
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
@@ -342,6 +345,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
+    # Which accumulator is quicker depends on how many parameters there are and
+    # on whether the build is threaded, and neither was known where the class
+    # was first built -- the reparametrisation did not exist yet. Rebuilt here,
+    # where both do.
+    self.normal_equations_class = self.normal_equations_class_builder(
+      n_parameters=self.reparametrisation.n_independents,
+      may_parallelise=self.worth_parallelising())
     self.normal_eqns = self.normal_equations_class(
       self.observations,
       self,
@@ -1078,29 +1088,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except Exception:
       return None
 
-  # Below this many reflections x parameters, sharing the reflection pass out
-  # over threads costs more than it saves. Measured: the crossover sits between
-  # 1.7e7 and 5.0e7, and the penalty either side of it is lopsided -- wrongly
-  # serial costs at most about 2.4x, wrongly parallel up to 8.6x -- so the
-  # threshold sits nearer the serial end of the bracket than the middle.
-  #
-  # Reflections x parameters stands in for the work only where the cost of a
-  # reflection is roughly the same for all of them, which is what was measured:
-  # spherical and tabulated X-ray structure factors. It is not a stand-in for
-  # anything else, and must not be applied to a build whose per-reflection cost
-  # is of a different order -- see worth_parallelising.
-  parallel_work_threshold = 3e7
+  # An override only. Zero, and the decision is cctbx's -- see
+  # smtbx.refinement.least_squares.worth_parallelising, which sets it together
+  # with the accumulator because the two are one decision: the work threshold
+  # that applies depends on which accumulator the parameter count implies, and
+  # there are two of those an order of magnitude apart. Set a number here to
+  # force a single threshold regardless, which is what this used to be (3e7,
+  # from when threading a build cost a flat ~0.15 s whatever the structure --
+  # nearly all of it the main thread sleeping between looks at the workers,
+  # which it no longer does).
+  parallel_work_threshold = 0
 
   def worth_parallelising(self):
     """Whether the reflection pass is big enough to be shared out.
 
-    Threading a build costs a fixed amount -- threads to start, and one fork of
-    the structure factor functor apiece, which clones the scatterer contribution
-    and with it any tabulated table. Measured, that fixed cost is about a sixth
-    of a second whatever the structure, while the work itself scales. A typical
-    small-molecule refinement does not come close to covering it: this used to
-    be on for every structure on any machine with more than one thread, which on
-    a few-hundred-parameter model made the build several times slower.
+    Threading a build costs threads to start and one fork of the structure
+    factor functor apiece, which clones the scatterer contribution and with it
+    any tabulated table. That used to be swamped by a fixed ~0.15 s of the main
+    thread sleeping between looks at the workers, which no longer happens, so
+    what is left really does scale with the structure and the crossover is far
+    lower than it was.
 
     Dynamical electron diffraction is exempt, and the exemption is the point of
     this note. A reflection there is not a structure factor but a beam-group
@@ -1119,7 +1126,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       n_par = self.reparametrisation.n_independents
     except Exception:
       return True             # cannot tell: leave it as it was
-    return float(n_refl)*n_par >= self.parallel_work_threshold
+    if self.parallel_work_threshold:
+      return float(n_refl)*n_par >= self.parallel_work_threshold
+    # Asked of cctbx, which decides this together with the accumulator: which
+    # threshold applies depends on which accumulator the size implies, and
+    # answering the two separately gets the structures between them wrong.
+    return least_squares.worth_parallelising(
+      n_par, n_refl, ext.build_normal_equations.available_threads)
 
   def _save_dispersion_radial(self, esds):
     """Keep and report the refined f'/f'' radial coefficients.

@@ -15,7 +15,7 @@ import olex
 import olex_core
 
 # need this pattern to use 'dynamic' base
-def normal_equation_class():
+def normal_equation_class(n_parameters=None, may_parallelise=None):
   def get_base_class():
     """ Whichever accumulator cctbx picks, OpenMP or not.
 
@@ -25,8 +25,14 @@ def normal_equation_class():
     expensive thing to do: on a structure of a few thousand parameters the
     difference between the two accumulators is the best part of an order of
     magnitude, far more than OpenMP itself is worth.
+
+    The size of the problem and whether the build will be threaded are passed
+    on where the caller knows them, because which accumulator is quicker
+    depends on both -- see smtbx.refinement.least_squares. Given neither, the
+    choice is what it has always been.
     """
-    return least_squares.crystallographic_ls_class()
+    return least_squares.crystallographic_ls_class(
+      n_parameters=n_parameters, may_parallelise=may_parallelise)
 
   class normal_eqns(get_base_class()):
     log = None

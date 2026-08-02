@@ -468,14 +468,28 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     args.append("-charge")
     c = nsa2_get_param('charge')
     args.append(str(c))
-    if(groups[0] != -1000):
-      args.append('-group')
-      for i in range(len(groups)):
-        g = groups[i]
-        if g < 0:
-            args.append("+"+str(abs(g)))
-        else:
-            args.append(str(groups[i]))
+    # Only emit -group together with a valid value.  Olex2 can represent the
+    # default, non-disordered part as an empty entry; passing that resulted in
+    # a bare -group command-line flag and an empty argv value for NoSpherA2.
+    valid_groups = []
+    for group in groups or []:
+      if group is None or str(group).strip() == "":
+        continue
+      try:
+        group = int(group)
+      except (TypeError, ValueError):
+        continue
+      if group != -1000:
+        valid_groups.append(group)
+    # Group 0 is implicit in SHELX/Olex and must accompany any explicit PART.
+    if 0 not in valid_groups:
+      valid_groups.insert(0, 0)
+    args.append('-group')
+    for group in valid_groups:
+      if group < 0:
+        args.append("+" + str(abs(group)))
+      else:
+        args.append(str(group))
     if ".xyz" in wfn_file:
       Cations = nsa2_get_param('Thakkar_Cations')
       if Cations != "" and Cations is not None:
