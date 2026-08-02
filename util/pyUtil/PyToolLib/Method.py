@@ -335,7 +335,10 @@ class Method_refinement(Method):
   def writeRefinementInfoIntoRes(self, d, file_name=None):
     ''' Expects a dictionary containing the relevant items with cif identifiers as keys '''
     d.setdefault('_refine_ls_abs_structure_Flack', "n/a")
-    map_type = "potential" if OV.IsEDData() else "density"
+    map_type = "density"
+    if OV.IsEDData() and '_refine_diff_potential_min' in d:
+      map_type = "potential"
+
     txt = f'''
   REM The information below was added by Olex2.
   REM
