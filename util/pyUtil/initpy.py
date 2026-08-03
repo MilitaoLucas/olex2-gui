@@ -71,8 +71,24 @@ def do_init():
                 extensions=initpy.get_phil_extensions())
 ###############################################################################
 
-  stopwatch.start("import olexex")
-  import olexex
+  defer_olexex = os.environ.get("OLEX2_DEFER_OLEXEX_IMPORTS")
+  if defer_olexex:
+    olexex_loaded = [False]
+    def import_olexex_deferred():
+      try:
+        if olexex_loaded[0]:
+          return
+        olexex_loaded[0] = True
+        stopwatch.start("import olexex")
+        import olexex
+      except Exception as e:
+        print("Deferred olexex import failed: %s" %str(e))
+
+    olex.registerFunction(import_olexex_deferred, False, "initpy")
+    olx.Schedule(1, "spy.initpy.import_olexex_deferred()", g=True)
+  else:
+    stopwatch.start("import olexex")
+    import olexex
 
   stopwatch.start("import CifInfo")
   import CifInfo # import needed to register functions to olex
@@ -87,14 +103,28 @@ def do_init():
   stopwatch.run(initpy.onstartup)
   stopwatch.run(initpy.set_plugins_paths)
 
-  stopwatch.start("import Loader")
-  import Loader
+  if os.environ.get("OLEX2_DEFER_LOADER_IMPORTS"):
+    def import_loader_deferred():
+      try:
+        import Loader
+      except Exception as e:
+        print("Deferred Loader import failed: %s" %str(e))
+
+    olex.registerFunction(import_loader_deferred, False, "initpy")
+    olx.Schedule(1, "spy.initpy.import_loader_deferred()", g=True)
+  else:
+    stopwatch.start("import Loader")
+    import Loader
 
   # timed inside
   initpy.setup_MySQL()
 
   if OV.HasGUI():
-    olexex.check_for_recent_update()
+    if defer_olexex:
+      olx.Schedule(2, "spy.initpy.import_olexex_deferred()", g=True)
+      olx.Schedule(3, "spy.check_for_recent_update()", g=True)
+    else:
+      olexex.check_for_recent_update()
 
   if sys.platform[:3] == 'win':
     OV.SetVar('defeditor','notepad')
@@ -108,19 +138,50 @@ def do_init():
   stopwatch.exec("from RunPrg import RunPrg")
 
   if fast_startup:
-    def get_sources_string():
+    def _call_nsa2(name, *args):
       # Preserve NoSpherA2 GUI calls in fast mode by lazy-loading on first use.
       try:
-        import NoSpherA2
-        if hasattr(NoSpherA2, "get_sources_string"):
-          return NoSpherA2.get_sources_string()
-        from NoSpherA2.NoSpherA2 import get_sources_string as _get_sources_string
-        return _get_sources_string()
+        import importlib
+        nsa2_mod = importlib.import_module("NoSpherA2.NoSpherA2")
+        target = getattr(nsa2_mod, name, None)
+        if target is None:
+          nsa2_pkg = importlib.import_module("NoSpherA2")
+          getter = getattr(nsa2_pkg, "get_NoSpherA2_instance", None)
+          if getter is not None:
+            target = getattr(getter(), name, None)
+        if target is None:
+          print("NoSpherA2 lazy load failed: method '%s' is unavailable" % name)
+          return "Please Select;" if name == "get_sources_string" else None
+        return target(*args)
       except Exception as e:
-        print("NoSpherA2 lazy load failed: %s" %str(e))
-        return "Please Select;"
+        print("NoSpherA2 lazy load failed: %s" % str(e))
+        return "Please Select;" if name == "get_sources_string" else None
 
-    OV.registerFunction(get_sources_string, False, "NoSpherA2")
+    def _register_nsa2_proxy(name):
+      def _proxy(*args):
+        return _call_nsa2(name, *args)
+      _proxy.__name__ = name
+      OV.registerFunction(_proxy, False, "NoSpherA2")
+
+    for nsa2_function in (
+      "get_sources_string",
+      "toggle_GUI",
+      "make_NSA2_GUI",
+      "hybrid_GUI",
+      "get_functional_list",
+      "change_tsc_generator",
+      "change_basisset",
+      "set_default_cpu_and_mem",
+      "available",
+      "launch",
+      "getBasisListStr",
+      "getCPUListStr",
+      "getwfn_softwares",
+      "get_distro_list",
+      "disable_relativistics",
+    ):
+      _register_nsa2_proxy(nsa2_function)
+
     print("Fast startup mode: skipping NoSpherA2/NoMoRe/DispRadial preload")
   else:
     stopwatch.run(initpy.NoSpherA2)

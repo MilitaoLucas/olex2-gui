@@ -107,40 +107,94 @@ class initpy_funcs():
     return retval
 
   def set_olex_paths(self):
-    sys.path.append("%s" %self.basedir)
-    sys.path.append(os.path.join(self.basedir, "etc", "scripts"))
+    def _append_unique(path):
+      if path not in sys.path:
+        sys.path.append(path)
+
+    _append_unique("%s" %self.basedir)
+    _append_unique(os.path.join(self.basedir, "etc", "scripts"))
     up = os.path.join(self.basedir, "util", "pyUtil")
-    sys.path.append(up)
-    sys.path.append(os.path.join(up, "misc"))
-    sys.path.append(os.path.join(up, "PyToolLib"))
-    sys.path.append(os.path.join(up, "PyToolLib", "FileReaders"))
-    sys.path.append(os.path.join(up, "CctbxLib"))
-    sys.path.append(os.path.join(up, "HAR"))
-    sys.path.append(os.path.join(up, "NoSpherA2"))
-    sys.path.append(os.path.join(up, "NoMoRe"))
-    sys.path.append(os.path.join(up, "DispRadial"))
-    sys.path.append(os.path.join(up, "PluginLib"))
+    _append_unique(up)
+    _append_unique(os.path.join(up, "misc"))
+    _append_unique(os.path.join(up, "PyToolLib"))
+    _append_unique(os.path.join(up, "PyToolLib", "FileReaders"))
+    _append_unique(os.path.join(up, "CctbxLib"))
+    _append_unique(os.path.join(up, "HAR"))
+    _append_unique(os.path.join(up, "NoSpherA2"))
+    _append_unique(os.path.join(up, "NoMoRe"))
+    _append_unique(os.path.join(up, "DispRadial"))
+    _append_unique(os.path.join(up, "PluginLib"))
     self.olx.VFSDependent = set()
 
   def set_plugins_paths(self):
-    import olexex
-    plugins = olexex.InstalledPlugins()
+    import olex_core
+    plugins = olex_core.GetPluginList() or []
+    plugins = list(dict.fromkeys(plugins))
     self.olx.InstalledPlugins = set()
 
-    self.olx.stopwatch.start("import AC7", False)
-    import AC7
-    self.olx.stopwatch.stop()
+    def _append_unique(path):
+      if path not in sys.path:
+        sys.path.append(path)
+
+    def _timed_import(module_name):
+      self.olx.stopwatch.start("import " + module_name, False)
+      __import__(module_name)
+      self.olx.stopwatch.stop()
 
     if not self.OV.HasGUI() and not os.environ.get("LOAD_HEADLESS_PLUGINS"):
       return
 
-    self.olx.stopwatch.exec("import PluginTools")
-    self.olx.stopwatch.exec("import FragmentDB")
     for plugin in plugins:
-      sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(self.basedir,plugin))
+      _append_unique("%s/util/pyUtil/PluginLib/plugin-%s" %(self.basedir,plugin))
+
+    self._startup_plugins = plugins
+    if os.environ.get("OLEX2_DEFER_PLUGIN_IMPORTS"):
+      import olex
+      olex.registerFunction(self.import_startup_plugins_deferred, False, "initpy")
+      self.olx.Schedule(1, "spy.initpy.import_startup_plugins_deferred()", g=True)
+      return
+
+    self.import_startup_plugins_deferred()
+
+  def import_startup_plugins_deferred(self):
+    if getattr(self, "_startup_plugins_loaded", False):
+      return
+    self._startup_plugins_loaded = True
+
+    plugins = getattr(self, "_startup_plugins", [])
+
+    def _append_unique(path):
+      if path not in sys.path:
+        sys.path.append(path)
+
+    def _timed_import(module_name):
+      self.olx.stopwatch.start("import " + module_name, False)
+      __import__(module_name)
+      self.olx.stopwatch.stop()
+
+    if os.environ.get("OLEX2_DEFER_AC7_IMPORTS"):
+      import olex
+      olex.registerFunction(self.import_ac7_deferred, False, "initpy")
+      self.olx.Schedule(1, "spy.initpy.import_ac7_deferred()", g=True)
+    else:
+      self.import_ac7_deferred()
+
+    _timed_import("PluginTools")
+    if os.environ.get("OLEX2_LAZY_FRAGMENTDB"):
+      # Hybrid lazy mode: keep GUI/tool registration intact, but rely on
+      # FragmentDB's own runtime guards to defer heavy DB setup until first use.
+      if os.environ.get("OLEX2_LAZY_FRAGMENTDB_KEEP_GUI", "True").lower() in ("1", "true", "yes"):
+        _timed_import("FragmentDB")
+      else:
+        self._register_lazy_fragmentdb_proxies()
+    else:
+      _timed_import("FragmentDB")
+
     for plugin in plugins:
+      if plugin in sys.modules:
+        continue
       try:
-        self.olx.stopwatch.exec("import " + plugin)
+        _timed_import(plugin)
       except Exception as err:
         if self.OV.IsDebugging():
           sys.stdout.formatExceptionInfo()
@@ -148,7 +202,62 @@ class initpy_funcs():
           print("Failed to load plugin '%s': %s" %(plugin, err))
       ##Dependencies
       if plugin == "plugin-SQLAlchemy":
-        sys.path.append("%s/util/pyUtil/PythonLib/sqlalchemy" %self.basedir)
+        _append_unique("%s/util/pyUtil/PythonLib/sqlalchemy" %self.basedir)
+
+  def import_ac7_deferred(self):
+    if getattr(self, "_ac7_loaded", False):
+      return
+    self._ac7_loaded = True
+    self.olx.stopwatch.start("import AC7", False)
+    import AC7
+    self.olx.stopwatch.stop()
+
+  def _register_lazy_fragmentdb_proxies(self):
+    if getattr(self, "_lazy_fragmentdb_registered", False):
+      return
+    self._lazy_fragmentdb_registered = True
+
+    import olex
+
+    def _call_fragmentdb(method_name, *args):
+      try:
+        import FragmentDB
+        if method_name == "results":
+          target_obj = getattr(FragmentDB, "ref", None)
+        else:
+          target_obj = getattr(FragmentDB, "fdb", None)
+        if target_obj is None:
+          print("FragmentDB lazy load failed: plugin instance is unavailable")
+          return None
+        target = getattr(target_obj, method_name, None)
+        if target is None:
+          print("FragmentDB lazy load failed: method '%s' is unavailable" % method_name)
+          return None
+        return target(*args)
+      except Exception as e:
+        print("FragmentDB lazy load failed: %s" % str(e))
+        return None
+
+    methods = [
+      "det_refmodel", "set_id", "imagedisp", "prepare_selected_atoms", "exportfrag",
+      "init_plugin", "get_fvar_occ", "search_fragments", "show_reference", "make_selctions_picture",
+      "set_frag_atoms", "open_edit_fragment_window", "list_all_fragments", "get_fragments", "fit_db_fragment",
+      "get_resi_class", "find_free_residue_num", "get_frag_for_gui", "set_occu", "set_resiclass",
+      "store_new_fragment", "set_fragment_picture", "get_chemdrawstyle", "add_new_frag", "update_fragment",
+      "delete_fragment", "display_large_image", "save_picture", "store_picture", "display_image",
+      "revert_last", "make_history", "clear_mainvalues"
+    ]
+    def _register_proxy(method_name):
+      def _proxy(*args):
+        return _call_fragmentdb(method_name, *args)
+      _proxy.__name__ = method_name
+      olex.registerFunction(_proxy, False, "FragmentDB")
+      olex.registerFunction(_proxy, False, "fragmentdb")
+
+    for method_name in methods:
+      _register_proxy(method_name)
+
+    _register_proxy("results")
 
   def setup_cctbx(self):
     import path_utils
@@ -239,13 +348,38 @@ class initpy_funcs():
       self.olx.stopwatch.exec("from gui.maps import *")
       self.olx.stopwatch.exec("from gui.images import *")
       self.olx.stopwatch.exec("from gui.db import *")
-      self.olx.stopwatch.exec("from  gui.help import *")
+      if os.environ.get("OLEX2_DEFER_HEAVY_GUI_IMPORTS"):
+        self._register_heavy_gui_proxies()
+        import olex
+        olex.registerFunction(self.import_gui_heavy_deferred, False, "initpy")
+        self.olx.Schedule(1, "spy.initpy.import_gui_heavy_deferred()", g=True)
+      else:
+        self.olx.stopwatch.exec("from  gui.help import *")
+        self.olx.stopwatch.exec("import Analysis")
       #import Tutorials
       #load_user_gui_phil()
       #export_parameters()
-      self.olx.stopwatch.exec("import Analysis")
       if self.OV.IsDeveloping():
         self.olx.stopwatch.exec("from gui import dimas")
+
+  def _register_heavy_gui_proxies(self):
+    if getattr(self, "_heavy_gui_proxies_registered", False):
+      return
+    self._heavy_gui_proxies_registered = True
+
+    def _make_hos_proxy(*args):
+      import Analysis
+      return Analysis.HOS_instance.make_HOS(*args)
+
+    _make_hos_proxy.__name__ = "make_HOS"
+    self.OV.registerFunction(_make_hos_proxy)
+
+  def import_gui_heavy_deferred(self):
+    if getattr(self, "_gui_heavy_imports_loaded", False):
+      return
+    self._gui_heavy_imports_loaded = True
+    self.olx.stopwatch.exec("from  gui.help import *")
+    self.olx.stopwatch.exec("import Analysis")
 
   def import_custom_and_user_sripts(self):
     try:
