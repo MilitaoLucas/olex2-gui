@@ -24,6 +24,7 @@ def do_init():
   stopwatch.stop()
 
   initpy = initpy_funcs.initpy_funcs(basedir=basedir, datadir=datadir)
+  fast_startup = os.environ.get("OLEX2_FAST_STARTUP", "").lower() in ("1", "true", "yes")
 
   olex.registerFunction(initpy.onexit, False)
   sys.on_sys_exit_raise = None
@@ -106,9 +107,25 @@ def do_init():
   ## These imports will register macros and functions for spy.
   stopwatch.exec("from RunPrg import RunPrg")
 
-  stopwatch.run(initpy.NoSpherA2)
-  stopwatch.run(initpy.NoMoRe)
-  stopwatch.run(initpy.DispRadial)
+  if fast_startup:
+    def get_sources_string():
+      # Preserve NoSpherA2 GUI calls in fast mode by lazy-loading on first use.
+      try:
+        import NoSpherA2
+        if hasattr(NoSpherA2, "get_sources_string"):
+          return NoSpherA2.get_sources_string()
+        from NoSpherA2.NoSpherA2 import get_sources_string as _get_sources_string
+        return _get_sources_string()
+      except Exception as e:
+        print("NoSpherA2 lazy load failed: %s" %str(e))
+        return "Please Select;"
+
+    OV.registerFunction(get_sources_string, False, "NoSpherA2")
+    print("Fast startup mode: skipping NoSpherA2/NoMoRe/DispRadial preload")
+  else:
+    stopwatch.run(initpy.NoSpherA2)
+    stopwatch.run(initpy.NoMoRe)
+    stopwatch.run(initpy.DispRadial)
 
   stopwatch.start("Peanut")
   try:

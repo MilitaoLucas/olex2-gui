@@ -1896,6 +1896,9 @@ class Analysis(Graph):
     self.metadata = metadata
 
   def popout(self, htm_location = None):
+    have_gui = olx.HasGUI() == 'true'
+    if not have_gui:
+      return
     use_plotly = False
     #if use_plotly:
       #url = htm_location

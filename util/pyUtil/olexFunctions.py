@@ -527,7 +527,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
         if not os.path.exists(fab_path):
           try:
             import cctbx_olex_adapter as COA
-            from cctbx_olex_adapter import OlexCctbxAdapter
+            #from cctbx_olex_adapter import OlexCctbxAdapter
             mask = COA.OlexCctbxAdapter().load_mask()
             if mask:
               COA.write_fab(mask, fab_path)

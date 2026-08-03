@@ -154,6 +154,9 @@ class initpy_funcs():
     import path_utils
     path_utils.setup_cctbx()
 
+    if os.environ.get("OLEX2_SKIP_CCTBX_WARM_IMPORTS"):
+      return
+
     # Import these files now to reduce time taken on running cctbx for the first time
     import my_refine_util
     import cctbx_olex_adapter
