@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, threading
 import olex
 
 class FileId(object):
@@ -61,7 +61,7 @@ class StreamRedirection:
     from olexFunctions import OV
     traceback.print_exc()
     tb = sys.exc_info()[2]
-    if OV.HasGUI():
+    if OV.HasGUI() and threading.current_thread() is threading.main_thread():
       olex.m("Cursor")
     if tb is not None:
       while tb.tb_next is not None: tb = tb.tb_next
