@@ -1252,7 +1252,7 @@ def nsa2_validate_tsc_file_integrity():
   stored_hash = str(nsa2_get_param('file_hash', '') or '').strip()
 
   if not stored_hash:
-    nsa2_set_param('file_hash', current_hash)
+    nsa2_refresh_file_hash(table_file_name, current_hash)
     return True, stored_hash, current_hash, 'ok'
 
   if stored_hash == current_hash:
@@ -1260,7 +1260,7 @@ def nsa2_validate_tsc_file_integrity():
 
   mismatch_key = (os.path.abspath(tsc_path), stored_hash, current_hash)
   if mismatch_key in _nsa2_hash_mismatch_ignored:
-    nsa2_set_param('file_hash', current_hash)
+    nsa2_refresh_file_hash(table_file_name, current_hash)
     return True, stored_hash, current_hash, 'ok'
 
   _nsa2_hash_mismatch_ignored.add(mismatch_key)

@@ -209,8 +209,26 @@ class initpy_funcs():
       return
     self._ac7_loaded = True
     self.olx.stopwatch.start("import AC7", False)
-    import AC7
-    self.olx.stopwatch.stop()
+    try:
+      import AC7
+    except ImportError as err:
+      # AC7 is distributed as version-specific bytecode.  Let a development
+      # runtime with a different Python minor version start without it, but do
+      # not mask unrelated AC7 import errors.
+      if "bad magic number" not in str(err):
+        raise
+      self._ac7_unavailable_reason = str(err)
+      # The refinement HTML always evaluates this AC7 predicate.  Register a
+      # false fallback so its ``ignoreif`` conditions remain valid when AC7 is
+      # intentionally unavailable in a different Python minor version.
+      def isMEDEnabled():
+        return False
+      import olex
+      olex.registerFunction(isMEDEnabled, False, "ac")
+      print("AC7 is disabled: its bytecode is incompatible with Python %s.%s (%s)"
+        %(sys.version_info.major, sys.version_info.minor, err))
+    finally:
+      self.olx.stopwatch.stop()
 
   def _register_lazy_fragmentdb_proxies(self):
     if getattr(self, "_lazy_fragmentdb_registered", False):
