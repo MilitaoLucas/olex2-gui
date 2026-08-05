@@ -12,6 +12,7 @@ from ins_header import ins_header
 from decors import gui_only
 
 import time
+import threading
 
 try:
   olx.olex2_tag
@@ -882,6 +883,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       return True
     except:
       return False
+
+  def IsMainThread(self):
+    return threading.current_thread() is threading.main_thread()
 
   def IsDebugging(self):
     return self.GetParam("olex2.debug", False)
