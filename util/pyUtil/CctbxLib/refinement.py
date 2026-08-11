@@ -157,7 +157,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # Kept as well as called: the class is rebuilt once the reparametrisation
     # exists, because the accumulator depends on the size of the problem.
     self.normal_equations_class_builder = normal_equations_class_builder
-    self.normal_equations_class = normal_equations_class_builder()
     self.use_tsc = table_file_name is not None
     self.reflections.show_summary(log=self.log)
     self.f_mask = None
@@ -316,11 +315,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         olx.Echo(str(e), m="error")
         self.failure = True
         return
-    elif len(self.reparametrisation.mapping_to_grad_fc_all) == 0 and self.max_cycles != 0:
-      if not (reparametrisation_only or build_only):
-        olx.Echo("Nothing to refine!", m="error")
-      self.failure = True
-      return
+    else:
+      if len(self.reparametrisation.mapping_to_grad_fc_all) == 0 and self.max_cycles != 0:
+        if not (reparametrisation_only or build_only):
+          olx.Echo("Nothing to refine!", m="error")
+        self.failure = True
+        return
+      self.normal_equations_class = normal_equations_class_builder(
+        n_parameters=self.reparametrisation.n_independents,
+        may_parallelise=self.worth_parallelising())
+
     if reparametrisation_only:
       return self.reparametrisation
 
@@ -349,9 +353,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # on whether the build is threaded, and neither was known where the class
     # was first built -- the reparametrisation did not exist yet. Rebuilt here,
     # where both do.
-    self.normal_equations_class = self.normal_equations_class_builder(
-      n_parameters=self.reparametrisation.n_independents,
-      may_parallelise=self.worth_parallelising())
     self.normal_eqns = self.normal_equations_class(
       self.observations,
       self,
