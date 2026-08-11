@@ -22,6 +22,47 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from decors import run_with_bitmap
 import numpy as np
+import io
+import locale
+
+def open(file, mode="r", *args, **kwargs):
+  """open() that does not depend on the machine's code page.
+
+  Without an explicit encoding Python decodes with the ANSI code page, so an
+  ORCA, pTB or NoSpherA2 output file containing a single non-ASCII byte either
+  raises UnicodeDecodeError or is silently mangled on a machine with a
+  non-western locale. Everything we parse is ASCII, so UTF-8 reads those files
+  byte for byte, and errors="replace" keeps a stray byte from aborting a
+  refinement. Binary modes are passed through untouched.
+  """
+  if "b" not in mode:
+    kwargs.setdefault("encoding", "utf-8")
+    kwargs.setdefault("errors", "replace")
+  return io.open(file, mode, *args, **kwargs)
+
+class stream_decoder(object):
+  """Decodes a byte stream that is consumed one byte at a time.
+
+  NoSpherA2 draws its progress bar without newlines, so its output has to be
+  read byte-wise. Decoding every single byte on its own raises for any
+  non-ASCII character, so incomplete UTF-8 sequences are buffered here until
+  they are complete. Anything that is not valid UTF-8 at all - a path in the
+  ANSI code page on a machine with a non-western locale, for example - falls
+  back to that locale instead of aborting the run.
+  """
+  def __init__(self):
+    self.buffer = b""
+
+  def decode(self, byte):
+    self.buffer += byte
+    try:
+      text = self.buffer.decode("utf-8")
+    except UnicodeDecodeError as error:
+      if "end of data" in error.reason and len(self.buffer) < 4:
+        return ""  # start of a multi-byte character, wait for the rest
+      text = self.buffer.decode(locale.getpreferredencoding(False), errors="replace")
+    self.buffer = b""
+    return text
 
 ELEMENTS = {
   1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O", 9: "F", 10: "Ne",
@@ -223,6 +264,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   args = []
   NoSpherA2 = OV.GetVar("NoSpherA2")
   args.append(NoSpherA2)
+  args.append("-tsc_labels")
   if software() == "SALTED":
     salted_model_dir = nsa2_get_param('selected_salted_model')
     args.append("-SALTED")
@@ -678,16 +720,17 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     startinfo.wShowWindow = subprocess.SW_HIDE
     creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
+  decoder = stream_decoder()
   if startinfo is None:
     with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
-        string = c.decode()
+        string = decoder.decode(c)
         sys.stdout.write(string)
         sys.stdout.flush()
   else:
     with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo, creationflags=creationflags) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
-        string = c.decode()
+        string = decoder.decode(c)
         sys.stdout.write(string)
         sys.stdout.flush()
 
@@ -1516,16 +1559,17 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
     startinfo.wShowWindow = SW_HIDE
     creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
+  decoder = stream_decoder()
   if startinfo is None:
     with Popen(args, stdout=PIPE) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
-        string = c.decode()
+        string = decoder.decode(c)
         stdout.write(string)
         stdout.flush()
   else:
     with Popen(args, stdout=PIPE, startupinfo=startinfo, creationflags=creationflags) as p:
       for c in iter(lambda: p.stdout.read(1), b''):
-        string = c.decode()
+        string = decoder.decode(c)
         stdout.write(string)
         stdout.flush()
 

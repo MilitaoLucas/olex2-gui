@@ -15,6 +15,7 @@ import subprocess
 from olexFunctions import OV
 from variableFunctions import nsa2_get_param
 from utilities import run_with_bitmap, software, is_orca_new, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request, ELEMENTS, ELEMENTS_BY_SYMBOL
+from utilities import open  # code page independent, see utilities.open
 
 try:
   p_path = os.path.dirname(os.path.abspath(__file__))

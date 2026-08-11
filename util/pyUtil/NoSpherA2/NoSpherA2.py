@@ -18,6 +18,7 @@ from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
+from utilities import open  # code page independent, see utilities.open
 from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
 from wsl_conda import WSLAdapter, CondaAdapter

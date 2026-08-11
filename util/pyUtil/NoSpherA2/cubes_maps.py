@@ -26,6 +26,7 @@ if OV.HasGUI():
 
 #import NoSpherA2
 from utilities import is_disordered
+from utilities import open  # code page independent, see utilities.open
 #import Wfn_Job
 from decors import run_with_bitmap
 

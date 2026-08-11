@@ -28,7 +28,7 @@ out_fn = os.path.join(fchk_dir, sfc_name + "_psi4.log")
 if os.path.exists(out_fn):
   shutil.move(out_fn,out_fn+"_OLD")
 coordinates_fn = os.path.join(fchk_dir, fchk_file) + ".xyz"
-xyz = open(coordinates_fn,"r")
+xyz = open(coordinates_fn,"r", encoding="utf-8", errors="replace")
 #basis = open(basis_set_fn,"r")
 mem_value = float(mem) * 1024
 

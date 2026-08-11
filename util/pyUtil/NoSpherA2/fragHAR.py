@@ -398,7 +398,7 @@ def read_cif(cif_name):
   cif_aniso = []
   cif_sym = []
   # res_int=[]
-  read_cif = open(cif_name, "r")
+  read_cif = open(cif_name, "r", encoding="utf-8", errors="replace")
   count = -1
   loop = False
   coord = False
@@ -583,7 +583,7 @@ def write_cif(res, cif_head, cif_sym, path="", name=""):
     output=str(name)+".cif"
   else:
     output = os.path.join(path,str(name)+".cif")
-  file = open(output, "w")
+  file = open(output, "w", encoding="utf-8", errors="replace")
   for i in range(len(cif_head)):
     string=cif_head[i]
     file.write(string)
@@ -1098,7 +1098,7 @@ def write_xyz(res,path="",part=0,name=""):
     output=str(name)+".xyz"
   else:
     output=os.path.join(path,str(name+".xyz"))
-  file = open(output, "w")
+  file = open(output, "w", encoding="utf-8", errors="replace")
   file.write(str(len(res.atoms))+"\nXYZ file written during fragHAR handling of fragments! q:"+str(res.q)+" S:"+str(res.s)+" \n")
   for i in range(len(res.atoms)):
     string = str(res.atoms[i].ele)+" "+str(res.atoms[i].x)+" "+str(res.atoms[i].y)+" "+str(res.atoms[i].z)+"\n"
@@ -1119,7 +1119,7 @@ def read_qS(file,mol):
 
   # read charges and multiplisity from file
   if os.path.exists(file):
-    for line in open(file, "r"):
+    for line in open(file, "r", encoding="utf-8", errors="replace"):
       l_split = line.split()
       if l_split == []:
         pass

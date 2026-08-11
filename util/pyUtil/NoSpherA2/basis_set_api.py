@@ -69,9 +69,9 @@ class GetBSEThread(ThreadEx):
         #        data = response.read().decode('utf-8')
         #except Exception as e:
         #    raise RuntimeError(f"Error fetching data: {e}")
-        with open("result.dat", "w") as out:
+        with open("result.dat", "w", encoding="utf-8", errors="replace") as out:
             out.write(data)
-        with open("result.dat", "r") as gto:
+        with open("result.dat", "r", encoding="utf-8", errors="replace") as gto:
             switch = False
             for line in gto:
                 if switch and line.startswith("\n"):

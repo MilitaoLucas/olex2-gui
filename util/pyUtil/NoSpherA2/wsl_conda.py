@@ -53,12 +53,12 @@ class WSLAdapter(object):
     if len(self.disto_list) > 0:
       return self.disto_list
     try:
-      result = subprocess.run(["wsl", "--status"], capture_output=True, text=True, check=True)
+      result = subprocess.run(["wsl", "--status"], capture_output=True, text=True, errors="replace", check=True)
       if "not installed" in result.stdout:
         print("No WSL distributions are installed.")
         return []
       # in the headless this will hand for a minute - same as when you run it from cmd
-      result = subprocess.run(["wsl", "--list", "--verbose"], capture_output=True, text=True, check=True)
+      result = subprocess.run(["wsl", "--list", "--verbose"], capture_output=True, text=True, errors="replace", check=True)
       if "no installed distributions" in result.stdout:
         print("No WSL distributions are installed.")
         return []
@@ -107,7 +107,7 @@ class WSLAdapter(object):
   def call_command(self, command, tail_output = False, output_file=Path(".xharpy_olex2") / "sucrose" / "gpaw.txt"):
     """Calls a command in WSL and returns the output."""
     if not self.is_wsl:
-      result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True)
+      result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True, errors="replace")
       if result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, command, result.stdout, result.stderr)
       return result.stdout.strip()
@@ -125,6 +125,7 @@ class WSLAdapter(object):
           shell=True,
           capture_output=True,
           text=True,
+          errors="replace",
           check=True,
           creationflags=self.creationflags
         )
@@ -146,7 +147,7 @@ class WSLAdapter(object):
             print("Failed to locate the output file at "+str(wsl_path))
             OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
             raise NameError('Wfn-Output not found!')
-        with open(wsl_path, "r") as f:
+        with open(wsl_path, "r", encoding="utf-8", errors="replace") as f:
           while result.poll() is None:
             x = None
             try:
@@ -165,7 +166,7 @@ class WSLAdapter(object):
   def call_command_return(self, command):
     """Calls a command in WSL and returns the output."""
     if not self.is_wsl:
-      result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True)
+      result = subprocess.run(" ".join(command), shell=True, capture_output=True, text=True, errors="replace")
       if result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, command, result.stdout, result.stderr)
       return result.stdout.strip()
@@ -179,6 +180,7 @@ class WSLAdapter(object):
           shell=True,
           capture_output=True,
           text=True,
+          errors="replace",
           check=True,
           creationflags=self.creationflags
       )
