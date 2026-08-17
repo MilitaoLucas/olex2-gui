@@ -121,7 +121,7 @@ class initpy_funcs():
     _append_unique(os.path.join(up, "CctbxLib"))
     _append_unique(os.path.join(up, "HAR"))
     _append_unique(os.path.join(up, "NoSpherA2"))
-    _append_unique(os.path.join(up, "NoMoRe"))
+    #_append_unique(os.path.join(up, "NoMoRe"))
     _append_unique(os.path.join(up, "DispRadial"))
     _append_unique(os.path.join(up, "PluginLib"))
     self.olx.VFSDependent = set()
@@ -299,6 +299,17 @@ class initpy_funcs():
       return
 
   def NoMoRe(self):
+    # NoMoRe is unfinished, and its directory is deliberately left off
+    # sys.path in set_olex_paths. Importing it regardless printed "Failed to
+    # load NoMoRe. Please check your installation." on every single startup -
+    # about an installation that is fine. Skip while it is off the path, so
+    # putting that _append_unique back is all that is needed to re-enable it.
+    try:
+      import importlib.util
+      if importlib.util.find_spec("nomore") is None:
+        return
+    except Exception:
+      return
     try:
       self.olx.stopwatch.exec("import nomore")
     except Exception as e:
