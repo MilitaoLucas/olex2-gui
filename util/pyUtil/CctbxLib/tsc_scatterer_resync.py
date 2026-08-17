@@ -39,18 +39,27 @@ def read_scatterers_from_tscb(tscb_file):
     return scatterer_ids
 
 def read_scatterers_from_tsc(tsc_file):
+    # The header is keyed, not positional: discamb2tsc writes a SYMM: line, so
+    # the third line was 'SYMM: expanded' and 'expanded' was resolved as a
+    # scatterer label. The lookup then failed and the refinement carried on
+    # spherically, which is what update_tsc_file already does correctly. DATA:
+    # ends the header, so a file without the key is not read past it.
     scatterer_ids = []
     with open(tsc_file, 'r') as f:
-        f.readline()
-        f.readline()
-        line = f.readline().split()
-        header, scatterers = line[0], line[1:]
-        is_id = header == 'SCATTERER_IDS:'
-        for scat in scatterers:
-            if is_id:
-                scatterer_ids.append(xray_.scatterer_id_big(scat))
-            else:
-                scatterer_ids.append(scat)
+        for line in f:
+            if line.startswith('DATA:'):
+                break
+            if not line.startswith(('SCATTERERS:', 'SCATTERER_IDS:')):
+                continue
+            line = line.split()
+            header, scatterers = line[0], line[1:]
+            is_id = header == 'SCATTERER_IDS:'
+            for scat in scatterers:
+                if is_id:
+                    scatterer_ids.append(xray_.scatterer_id_big(scat))
+                else:
+                    scatterer_ids.append(scat)
+            break
     return scatterer_ids
 
 
@@ -182,11 +191,64 @@ def convert_labels_to_ids(labels, model_labels, model_ids):
 
     missing = [label for label in labels if label.upper() not in label_to_id]
     if missing:
+      resolved = _match_by_residue_triple(labels, model_labels, model_ids)
+      if resolved is not None:
+        return resolved
       raise ScattererResolutionError(
         f"{len(missing)} label(s) from the table file were not found in the current model "
         f"(renamed?): {missing[:5]}{'...' if len(missing) > 5 else ''}")
 
     return [label_to_id[label.upper()] for label in labels]
+
+
+def _residue_triple(name):
+  """(atom, chain, residue) from either naming order, or None.
+
+  A protein atom is written two ways. Olex2 names it chain first, 'A:H1_1',
+  while the CIF handed to the table generator names it atom first, 'N_A:1', so
+  a table made for a protein matches none of the model's labels even though
+  both sides mean the same atom. Anything without both a chain and a residue -
+  every small molecule - returns None and is left to the exact match.
+  """
+  if ':' not in name:
+    return None
+  head, _, tail = name.partition(':')
+  if '_' in head:                          # atom first: LABEL_CHAIN:RESI
+    atom, _, chain = head.rpartition('_')
+    residue = tail
+  else:                                    # chain first: CHAIN:LABEL_RESI
+    chain = head
+    atom, _, residue = tail.rpartition('_')
+  if not atom or not chain or not residue:
+    return None
+  return (atom.upper(), chain.upper(), residue.upper())
+
+
+def _match_by_residue_triple(labels, model_labels, model_ids):
+  """Ids for labels written in the other naming order, or None to give up.
+
+  Deliberately all or nothing. Rewriting a form factor table against the wrong
+  atoms leaves a file of the right shape holding plausible numbers, and the
+  refinement then describes the wrong model with nothing to say so, which is
+  why a partial or ambiguous match is refused rather than patched up.
+  """
+  index = {}
+  for label, atom_id in zip(model_labels, model_ids):
+    triple = _residue_triple(label)
+    if triple is None:
+      return None
+    if triple in index:
+      return None
+    index[triple] = atom_id
+  out = []
+  for label in labels:
+    triple = _residue_triple(label)
+    if triple is None or triple not in index:
+      return None
+    out.append(index[triple])
+  print("Table labels are in the other residue naming order; matched all %d "
+        "on chain, residue and atom" % len(out))
+  return out
 
 
 _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM = 2.0
