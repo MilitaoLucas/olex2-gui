@@ -13,12 +13,16 @@ import pcf_reader
 
 
 class FileReaderTestCase(unittest.TestCase):
+  maxDiff = None
+
   def exercise_FileReader(self, reader, filename, expected):
     FileReader = reader(filename)
     if hasattr(FileReader, 'cifItems'):
       self.assertEqual(FileReader.cifItems(), expected)
     else:
-      self.assertEqual(list(FileReader.values()), expected)
+      # values() gives a dict; list() of it gives the keys, so the comparison
+      # against the expected dict could never pass
+      self.assertEqual(FileReader.values(), expected)
     return FileReader
 
   def test_bruker_frames(self):
