@@ -1212,13 +1212,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     return exe_path or ""
 
   def setup_orca_executables(self):
-    # search PATH
-    self.orca_exe = shutil.which("orca" + (".exe" if sys.platform.startswith("win") else ""))
+    # One resolver, and then the binary it found. shutil.which and
+    # olx.file.Which search in different orders, and 'orca' handed to
+    # subprocess is resolved a third time by the OS - with two installations
+    # on PATH that is three answers, so the version reported could belong to a
+    # different executable from the one the job runs.
+    self.orca_exe = olx.file.Which(
+      "orca" + (".exe" if sys.platform.startswith("win") else ""),
+      current_dir=False)
     if self.orca_exe and os.path.exists(self.orca_exe):
       try:
         import subprocess
         creationflags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
-        p = subprocess.run(['orca', '-v'], capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=creationflags)
+        p = subprocess.run([self.orca_exe, '-v'], capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=creationflags)
         if "Version" not in p.stdout:
           print("-- Could not detect ORCA version from output")
         else:
