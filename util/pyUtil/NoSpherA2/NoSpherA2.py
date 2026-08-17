@@ -662,6 +662,14 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
 Please select one of the generators from the drop-down menu.""", "O", False)
       OV.SetVar('NoSpherA2-Error',"TSC Generator unselected")
       return False
+    if wfn_code == "SALTED" and not str(nsa2_get_param('selected_salted_model') or '').strip():
+      message = ("No SALTED model is selected.\n\n"
+                 "Select a SALTED model in the SALTED settings before calculating "
+                 "the TSC file.")
+      print("Error: " + message.replace("\n", " "))
+      olx.Alert("SALTED model required", message, "O", False)
+      OV.SetVar('NoSpherA2-Error', "No SALTED model selected")
+      return False
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
     if not os.path.exists(self.history_dir):
