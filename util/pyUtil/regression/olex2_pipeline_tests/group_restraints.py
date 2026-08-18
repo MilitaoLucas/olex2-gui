@@ -45,6 +45,95 @@ def register(suite):
               t_restraint, suite, name, template, n, kind)
   suite.run("restraints", "a restrained model still refines",
             t_refines_with_restraints, suite)
+  for name, build in DEGENERATE:
+    suite.run("restraints", "degenerate %s is survivable" % name,
+              t_degenerate, name, build)
+
+
+def _degenerate_structure(sites):
+  """A P1 box with the given Cartesian sites, all coordinates refinable."""
+  from cctbx import crystal, xray
+  cs = crystal.symmetry(unit_cell=(50, 50, 50, 90, 90, 90),
+                        space_group_symbol="P1")
+  xs = xray.structure(crystal_symmetry=cs)
+  for i, s in enumerate(sites):
+    sc = xray.scatterer(label="C%d" % i, scattering_type="C",
+                        site=[c / 50.0 for c in s])
+    sc.flags.set_grad_site(True)
+    xs.add_scatterer(sc)
+  return xs
+
+
+def _row(xs, **proxies):
+  from cctbx import geometry_restraints as geom
+  from smtbx.refinement import restraints as smtbx_restraints
+  mgr = smtbx_restraints.manager(**proxies)
+  eqns = mgr.build_linearised_eqns(xs, xs.parameter_map())
+  return list(eqns.design_matrix.as_dense_matrix())
+
+
+def _coplanar_chirality():
+  from cctbx import geometry_restraints as geom
+  xs = _degenerate_structure([(0, 0, 0), (1., 0, 0), (0, 1., 0), (0, 0, 0)])
+  p = geom.chirality_proxy((0, 1, 2, 3), volume_ideal=0., both_signs=False,
+                           weight=100)
+  return _row(xs, chirality_proxies=geom.shared_chirality_proxy([p]))
+
+
+def _collinear_dihedral():
+  from cctbx import geometry_restraints as geom
+  xs = _degenerate_structure([(0, 1e-8, 0), (0, 0, 0), (1., 0, 0),
+                              (1., 1e-8, 0.5)])
+  p = geom.dihedral_proxy((0, 1, 2, 3), angle_ideal=0., weight=100)
+  return _row(xs, dihedral_proxies=geom.shared_dihedral_proxy([p]))
+
+
+def _coincident_sadi():
+  from cctbx import geometry_restraints as geom
+  xs = _degenerate_structure([(0, 0, 0), (1.5, 0, 0), (5., 0, 0), (5., 0, 0)])
+  p = geom.bond_similarity_proxy(i_seqs=[(0, 1), (2, 3)], weights=(1., 1.))
+  return _row(xs, bond_similarity_proxies=
+              geom.shared_bond_similarity_proxy([p]))
+
+
+# Geometries that used to poison the normal matrix, with the ceiling a healthy
+# row is allowed to reach. A chirality restraint on coplanar sites divided 0
+# by 0; a SADI pair on one point divided by a zero length; a dihedral about an
+# axis its terminal atom sits on returned a row 1e8 times everything else.
+DEGENERATE = [
+  ("coplanar chirality (FLAT)", _coplanar_chirality),
+  ("collinear dihedral", _collinear_dihedral),
+  ("coincident SADI pair", _coincident_sadi),
+]
+MAX_HEALTHY_ROW = 1e6
+
+
+def t_degenerate(name, build):
+  """A degenerate restraint must give a usable row or none, never a poisoned one.
+
+  This asks the cctbx that Olex2 actually loads, not the one in the source
+  tree - the fixes live in compiled extensions, and the bundle under
+  rundir-py3/cctbx is not version controlled, so a rebuild from an older
+  source silently takes them away again. That is the regression worth
+  catching, and it is why this builds the row directly instead of refining:
+  the check costs milliseconds and still fails if the deployed binary is old.
+  """
+  try:
+    row = build()
+  except ImportError as e:
+    raise SkipTest("cctbx is not importable here: %s" % e)
+  nan = [v for v in row if v != v]
+  inf = [v for v in row if v == v and abs(v) == float("inf")]
+  if nan:
+    raise AssertionError("%d NaN in the design matrix - this cctbx predates "
+                         "the fix" % len(nan))
+  if inf:
+    raise AssertionError("%d inf in the design matrix" % len(inf))
+  biggest = max((abs(v) for v in row), default=0.0)
+  if biggest > MAX_HEALTHY_ROW:
+    raise AssertionError(
+      "largest entry %.3g, which the normal matrix cannot carry" % biggest)
+  return "no NaN, largest entry %.3g" % biggest
 
 
 def _atoms(kind, n):
