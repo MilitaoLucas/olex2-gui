@@ -93,6 +93,18 @@ def do_init():
   stopwatch.start("import CifInfo")
   import CifInfo # import needed to register functions to olex
 
+  stopwatch.start("import PdbFetch")
+  import PdbFetch # import needed to register functions to olex
+
+  stopwatch.start("import CartoonGui")
+  import CartoonGui # import needed to register functions to olex
+
+  # registers spy.protein.*. Imported here rather than left to olexex, which
+  # only does it from the renderer's polymer detection - so without a window
+  # the restraints could not be applied at all
+  stopwatch.start("import ProteinRestraints")
+  import ProteinRestraints # import needed to register functions to olex
+
   stopwatch.start("from olexFunctions import OV")
   from olexFunctions import OV
   initpy.OV = OV

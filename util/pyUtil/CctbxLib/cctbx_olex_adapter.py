@@ -204,6 +204,21 @@ class OlexCctbxAdapter(object):
         OV.SetParam("snum.smtbx.atomic_form_factor_table", "neutron")
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
       null_disp = table == "electron" or table == "neutron"
+      # Deuterium is the same electron cloud as hydrogen, so it scatters X-rays
+      # and electrons identically and neither table carries an entry for it --
+      # scattering_type_registry asserts instead. Only the neutron table tells
+      # them apart, the scattering lengths there being genuinely different.
+      # A joint X-ray/neutron deposition brings this in: 5MON has 593 D.
+      # The dispersion lookup below already does the same mapping.
+      if table != "neutron":
+        n_d = 0
+        for sc in scatterers:
+          if sc.scattering_type == 'D':
+            sc.scattering_type = 'H'
+            n_d += 1
+        if n_d:
+          print("%d deuterium atom(s) scattering as hydrogen for the %s table"
+                % (n_d, table))
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       custom_fp_fdps = {}
@@ -889,6 +904,21 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
       use_set_completion = OV.GetParam('snum.masks.use_set_completion')
       mask = masks.mask(xs, fo_sq, use_set_completion=use_set_completion)
+      # set before compute() so structure_factors sees it; getattr because the
+      # cctbx bundle here is refreshed separately from this working copy
+      if hasattr(mask, 'boundary_smearing'):
+        mask.boundary_smearing = getattr(
+          self.params, 'boundary_smearing', 0) or 0
+        if mask.boundary_smearing:
+          print("Mask boundary smeared over %.2f x the %.2f A solvent radius"
+                % (mask.boundary_smearing, self.params.solvent_radius))
+      else:
+        print("This cctbx has no mask boundary smearing; refresh the bundle")
+      if hasattr(mask, 'bias_correction'):
+        mask.bias_correction = bool(
+          getattr(self.params, 'bias_correction', False))
+        if mask.bias_correction:
+          print("Difference map weighted by sigma_A: m*Fo - D*Fc")
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
@@ -907,6 +937,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       fo2.show_comprehensive_summary(f=out)
       print(file=out)
       mask.show_summary(log=out)
+      self.check_mask_is_solvent(mask, log=out)
       from iotbx.cif import model
       cif_block = model.block()
       #merging = self.reflections.merging
@@ -962,6 +993,52 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if OV.HasGUI() and show:
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
+
+  def check_mask_is_solvent(self, mask, log):
+    """Two sanity checks on the mask that need no known answer.
+
+    Both catch the same failure - a mask that is fitting something other than
+    solvent - and both work on real data, where the solvent content is exactly
+    what nobody knows.
+
+    Liquid water is 0.334 e/A^3, and disordered solvent in a channel is that at
+    most, usually well under it. Above it the region is not holding solvent.
+
+    Disordered solvent also scatters at low angle alone, so f_mask surviving in
+    the outer half of the data means the region is holding something that is
+    not disordered solvent. That is either ordered solvent, which is real and
+    should be kept, or the model's own error coming through the region cut,
+    which should not. The two look the same here and only a refinement tells
+    them apart - on crambin at 0.48 A band limiting the map at 3 A cost the
+    whole benefit of the mask, so the content there was doing real work.
+    Reported rather than acted on for that reason; solvent_d_min is the
+    control, and it has to be chosen per structure.
+    """
+    water = 0.334
+    if mask.n_voids() == 0 or not mask.solvent_accessible_volume: return
+    rho = sum(mask.electron_counts_per_void())/mask.solvent_accessible_volume
+    print("Mean density in the solvent region = %.3f e/A^3 (%.2f x liquid "
+          "water)" % (rho, rho/water), file=log)
+    if rho > water:
+      print("  ** denser than liquid water, so this is not solvent alone",
+            file=log)
+    f_mask = mask.f_mask()
+    if f_mask is None: return
+    f_calc = mask.f_calc.common_set(f_mask)
+    f_mask = f_mask.common_set(f_calc)
+    if f_mask.size() == 0: return
+    d = f_calc.d_spacings().data()
+    cut = flex.sorted(d)[int(0.5*(d.size() - 1))]
+    sel = d < cut
+    denominator = flex.mean(flex.abs(f_calc.select(sel).data()))
+    if denominator <= 0: return
+    hi = 100*flex.mean(flex.abs(f_mask.select(sel).data()))/denominator
+    print("f_mask beyond %.2f A = %.1f%% of f_calc there" % (cut, hi), file=log)
+    if hi > 5:
+      print("  ** disordered solvent cannot scatter there, so the region holds "
+            "ordered solvent or the model's error. snum.masks.solvent_d_min "
+            "limits it - check wR2 and GooF, not R1, before keeping the limit",
+            file=log)
 
   def structure_factors(self, mask, max_cycles=100):
     """P. van der Sluis and A. L. Spek, Acta Cryst. (1990). A46, 194-201."""
@@ -1027,63 +1104,76 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if mask.scale_factor is None:
       mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
         flex.abs(mask.f_calc.data()))
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(
-      1/mask.scale_factor, mask.f_calc)
+    # through the mask, so that bias_correction reaches both sites. getattr
+    # because the cctbx bundle here is refreshed separately from this copy.
+    coeffs = getattr(mask, '_difference_coefficients', None)
+    if coeffs is None:
+      coeffs = lambda fo, fc: fo.f_obs_minus_f_calc(1/mask.scale_factor, fc)
+    f_obs_minus_f_calc = coeffs(f_obs, mask.f_calc)
     mask.fft_scale = mask.xray_structure.unit_cell().volume()\
         / mask.crystal_gridding.n_grid_points()
     epsilon_for_min_residual = 2
-    grid_points_per_void = mask.flood_fill.grid_points_per_void()
-    n_solvent_grid_points = mask.n_solvent_grid_points()
-    prev_x = mask.n_voids() * [0]
     mask._electron_counts_per_void = mask.n_voids() * [0]
-    grid_scale = mask.crystal_gridding.n_grid_points() /\
-      (mask.crystal_gridding.n_grid_points() - n_solvent_grid_points)
+    # once, the mask being fixed through the iteration. getattr so an older
+    # cctbx bundle still runs, with the hard edge it has always had.
+    if hasattr(mask, 'solvent_weight_map'):
+      solvent_weight = mask.solvent_weight_map()
+    else:
+      solvent_weight = mask.mask.data.as_double()
+      solvent_weight.set_selected(solvent_weight > 0, 1.)
+    # F(000) is not measured, so the difference map has zero mean over the
+    # cell and the region integrates to Q(1 - <w>) instead of Q. The bundled
+    # cctbx solves for that level, and for the clamp when it is on, in one
+    # step; without it, fall back to dividing the factor out afterwards, which
+    # is the same thing whenever nothing is clamped.
+    level_and_clamp = getattr(mask, '_level_and_clamp', None)
+    n_grid = mask.crystal_gridding.n_grid_points()
+    grid_scale = n_grid/(n_grid - mask.n_solvent_grid_points())
+    solvent_d_min = getattr(self.params, 'solvent_d_min', None) or None
+    if solvent_d_min is not None:
+      print("Solvent sought in data beyond %.1f A only" % solvent_d_min)
     for i in range(max_cycles):
-      mask.diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
+      coefficients = f_obs_minus_f_calc
+      if solvent_d_min is not None:
+        coefficients = coefficients.resolution_filter(d_min=solvent_d_min)
+      mask.diff_map = miller.fft_map(mask.crystal_gridding, coefficients)
       mask.diff_map.apply_volume_scaling()
-      #stats = mask.diff_map.statistics()
-      masked_diff_map = mask.diff_map.real_map_unpadded().set_selected(
-        mask.mask.data.as_double() == 0, 0)
-      mask.f_000 = 0
+      # multiplied by the weight, not cut by a selection, so boundary_smearing
+      # rounds the edge. This method is a second copy of van der Sluis and
+      # Spek, kept here because the mask needs Olex2's f_calc (NoSpherA2
+      # tables), so the same change in smtbx.masks does nothing for Olex2 and
+      # both have to carry it.
+      masked_diff_map = mask.diff_map.real_map_unpadded()*solvent_weight
+      if level_and_clamp is not None:
+        masked_diff_map, f_000_s = level_and_clamp(
+          masked_diff_map, solvent_weight, mask.diff_map.statistics().sigma())
+      else:
+        f_000_s = flex.sum(masked_diff_map)*mask.fft_scale*grid_scale
+        masked_diff_map.add_selected(
+          mask.mask.data.as_double() > 0,
+          f_000_s/mask.xray_structure.unit_cell().volume())
       for j in range(mask.n_voids()):
-        # exclude voids with negative electron counts from the masked map
-        # set the electron density in those areas to be zero
+        # read off the levelled map: before the level is restored every void
+        # still carries its share of the missing F(000), and a void would then
+        # be discarded for holding less than that share rather than nothing
         selection = mask.mask.data == j+2
         if mask.exclude_void_flags[j]:
           masked_diff_map.set_selected(selection, 0)
           continue
         diff_map_ = masked_diff_map.deep_copy().set_selected(~selection, 0)
-        f_000 = flex.sum(diff_map_) * mask.fft_scale
-        f_000_s = f_000 * grid_scale
-        if i > 0:
-          if f_000_s - prev_x[j] < 0.1:
-            if f_000_s < 0:
-              masked_diff_map.set_selected(selection, 0)
-              mask.exclude_void_flags[j] = True
-              mask._electron_counts_per_void[j] = 0
-              n_solvent_grid_points -= grid_points_per_void[j]
-              grid_scale = mask.crystal_gridding.n_grid_points() /\
-                (mask.crystal_gridding.n_grid_points() - n_solvent_grid_points)
-            prev_x[j] = f_000_s
-            continue
-        mask.f_000 += f_000
-        prev_x[j] = f_000_s
+        electrons = flex.sum(diff_map_) * mask.fft_scale
+        if electrons < 0:
+          masked_diff_map.set_selected(selection, 0)
+          mask.exclude_void_flags[j] = True
+          f_000_s -= electrons
+          electrons = 0
         if OV.IsEDData():
-          mask._electron_counts_per_void[j] = f_000_s * 3.324943664
-        else:
-          mask._electron_counts_per_void[j] = f_000_s
-
-      #mask.f_000 = flex.sum(masked_diff_map) * mask.fft_scale
-      f_000_s = mask.f_000 * grid_scale
-      if (mask.f_000_s is not None and
-          approx_equal_relatively(mask.f_000_s, f_000_s, 0.001)):
-        mask.f_000_s = f_000_s
-        break # we have reached convergence
-      else:
-        mask.f_000_s = f_000_s
-      masked_diff_map.add_selected(
-        mask.mask.data.as_double() > 0,
-        mask.f_000_s/mask.xray_structure.unit_cell().volume())
+          electrons *= 3.324943664
+        mask._electron_counts_per_void[j] = electrons
+      mask.f_000 = flex.sum(masked_diff_map) * mask.fft_scale
+      previous_f_000_s = mask.f_000_s
+      mask.f_000_s = f_000_s
+      mask._masked_diff_map = masked_diff_map
       mask._f_mask = f_obs.structure_factors_from_map(map=masked_diff_map)
       mask._f_mask *= mask.fft_scale
       scales = []
@@ -1103,10 +1193,14 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           scale_for_min_residual = scale
           epsilon_for_min_residual = epsilon
       mask.scale_factor = scale_for_min_residual
+      # tested last, so that the map, f_mask and the count the object reports
+      # all come from one and the same cycle
+      if (previous_f_000_s is not None and
+          approx_equal_relatively(previous_f_000_s, f_000_s, 0.001)):
+        break
       f_model = mask.f_model(epsilon=epsilon_for_min_residual)
       f_obs = mask.f_obs()
-      f_obs_minus_f_calc = f_obs.phase_transfer(f_model).f_obs_minus_f_calc(
-        1/mask.scale_factor, mask.f_calc)
+      f_obs_minus_f_calc = coeffs(f_obs.phase_transfer(f_model), mask.f_calc)
     #make sure sum matches the summary
     mask.f_000_s = 0
     for j in range(mask.n_voids()):

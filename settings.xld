@@ -1,6 +1,7 @@
 <shortcuts
   <shortcut key="Ctrl+G" macro="mode grow">
   <shortcut key="Ctrl+D" macro="dis">
+  <shortcut key="Ctrl+F" macro="isolate">
   <shortcut key="Ctrl+H" macro="showH">
   <shortcut key="Ctrl+Q" macro="showQ">
   <shortcut key="Ctrl+R" macro="refine">
@@ -143,6 +144,7 @@
     <item title="Edit;Undo" macro="undo">
 
     <item title="File;Open \tCtrl+O" macro="reap" before="#">
+    <item title="File;Load PDB entry..." macro="spy.pdb.fetch_entry()" before="#">
     <check title="File;#" macro="">
     <item title="File;Save \tCtrl+S" macro="file">
     <item title="File;Save With Sorting" macro="file -s">

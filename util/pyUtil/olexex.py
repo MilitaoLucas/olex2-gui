@@ -1981,3 +1981,99 @@ def pip(package:str):
     os.get_terminal_size = os_get_terminal_size
     locale.setlocale(locale.LC_CTYPE, saved_locale)
 OV.registerFunction(pip, False)
+
+#-----------------------------------------------------------------------------
+# Polymers
+#-----------------------------------------------------------------------------
+def IsPolymer():
+  """Whether the renderer traced a backbone through the loaded structure.
+
+  Set by on_polymer_loaded below and cleared by on_polymer_absent, so the
+  answer rests on a backbone actually having been traced rather than on a
+  residue count: a structure carrying RESI instructions but no peptide chain
+  does not qualify. Held in a snum parameter, so it belongs to the structure.
+
+  Compared as text rather than passed to bool(). GetParam returns whatever is
+  in olx.structure_params when the value has been set this session, and that
+  can be the string it was written as - at which point bool('False') is True,
+  which is the wrong answer with no way to notice it.
+  """
+  try:
+    return str(OV.GetParam('snum.is_polymer')).lower() in ('true', '1')
+  except Exception:
+    return False
+OV.registerFunction(IsPolymer)
+
+
+def on_polymer_absent():
+  """No backbone was traced. Called from the renderer on every model change.
+
+  The flag is stored with the structure, so leaving it alone here is not
+  neutral: a small molecule that was once mistaken for a polymer keeps saying
+  it is one, in its own settings file, across sessions. Only written when it
+  is actually set, since this runs on every model change and a write means
+  touching the structure's phil.
+  """
+  try:
+    if IsPolymer():
+      OV.SetParam('snum.is_polymer', False)
+  except Exception as e:
+    print("on_polymer_absent: %s" % str(e))
+OV.registerFunction(on_polymer_absent)
+
+
+def on_polymer_loaded():
+  """Pick refinement settings suited to a polymer. Called from the renderer.
+
+  Idempotent, and it never overrides a choice: each setting is moved only
+  while it still holds the value it is given by default, so a user who picks
+  something else keeps it, and the repeated calls that come with every model
+  change do nothing after the first.
+
+  These are snum parameters, so they are saved with the structure and reach
+  no other one.
+  """
+  try:
+    OV.SetParam('snum.is_polymer', True)
+    if OV.GetParam('snum.refinement.method') == 'Gauss-Newton':
+      OV.SetParam('snum.refinement.method', 'CGLS-J')
+      olx.Echo("Polymer: refining with CGLS-J, which does not form the "
+               "normal matrix. 'Gauss-Newton' in the refinement settings "
+               "restores the usual method.")
+      # The final full-matrix build that standard uncertainties need is the
+      # one step whose memory scales with the square of the parameter count,
+      # which is exactly what CGLS-J was chosen to avoid. Off while the model
+      # is being worked on; turn it back on for a structure to be published.
+      if OV.GetParam('snum.refinement.cgls.standard_uncertainties'):
+        OV.SetParam('snum.refinement.cgls.standard_uncertainties', False)
+        olx.Echo("  standard uncertainties are off: switch them on in the "
+                 "refinement settings for a final run.")
+      # Half of a protein crystal is disordered solvent, and a model without
+      # it is wrong at low angle in a way the refinement cannot fix by moving
+      # atoms - so it absorbs the residual into the ADPs instead. Measured on
+      # lysozyme: with the solvent unmodelled the ADPs go negative in the
+      # second cycle, and dropping the 0.7% of reflections beyond 5 A - the
+      # ones the solvent dominates - is enough on its own to keep them
+      # positive and let R1 fall. The mask is the proper fix and Olex2
+      # already has it.
+      if not OV.GetParam('snum.refinement.use_solvent_mask'):
+        OV.SetParam('snum.refinement.use_solvent_mask', True)
+        olx.Echo("  solvent mask on: without a bulk-solvent model the "
+                 "low-angle residual ends up in the ADPs.")
+    # Once per structure. Without restraints an anisotropic protein diverges
+    # in the first cycle, and the entry it came from carries none.
+    if (OV.GetParam('snum.auto_protein_restraints') and
+        not OV.GetParam('snum.protein_restraints_done')):
+      OV.SetParam('snum.protein_restraints_done', True)
+      import ProteinRestraints
+      ProteinRestraints.restrain()
+    # The renderer draws a cartoon by itself above a residue count, but knows
+    # nothing of the representation and colour this user settled on. Scheduled
+    # rather than called: this runs from inside CreateObjects, which is in the
+    # middle of building the very objects a representation change would
+    # rebuild. Every default in user.cartoon is the value the renderer already
+    # holds, so a user who has changed nothing pays for no rebuild.
+    olx.Schedule(0, "spy.cartoon.apply_stored()", g=True)
+  except Exception as e:
+    print("on_polymer_loaded: %s" % str(e))
+OV.registerFunction(on_polymer_loaded)

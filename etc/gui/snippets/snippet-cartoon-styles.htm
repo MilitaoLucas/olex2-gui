@@ -1,0 +1,56 @@
+<!-- The polymer row of Quick Drawing Styles.
+
+Only for a structure whose backbone was actually traced: spy.IsPolymer() is
+set by the renderer when a cartoon is built, not by counting RESI records, so
+a small molecule carrying residues does not get a row of controls that would
+do nothing.
+
+The row above this one changes how atoms are drawn. With a cartoon up the
+atoms it draws are hidden, so those controls then apply to what is left - the
+ligands, sugars, metals and waters - and this row is what says how the protein
+itself is drawn.
+-->
+<!-- #ignoreif not(spy.IsPolymer())
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CARTOON_STYLES';help_ext=Cartoon;helpTxt=How the polymer backbone is drawn. Ribbon is a plain tube along the chain, cartoon adds helix ribbons and strand arrows, and the third button also draws the ligands, sugars and metals as atoms. The row above applies to those, because the atoms the cartoon draws are hidden while it is up. Sidechains puts a residue back as sticks with its backbone left to the ribbon.;1 -->
+  <td name=IMG_CARTOON_TRACE width=8%>
+$spy.cartoon.button('trace')
+  </td>
+  <td name=IMG_CARTOON_CARTOON width=8%>
+$spy.cartoon.button('cartoon')
+  </td>
+  <td name=IMG_CARTOON_LIGANDS width=8%>
+$spy.cartoon.button('ligands')
+  </td>
+  <td name=IMG_CARTOON_OFF width=8%>
+$spy.cartoon.button('off')
+  </td>
+  <td width='8%' align='right'>
+    <b>%Colour%</b>:
+  </td>
+  <td width='28%'>
+    $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SET_CARTOON_COLOUR",
+    "items=Chain<-chain;Rainbow<-rainbow;Secondary structure<-ss;Polarity<-polarity;Charge<-charge;Residue<-residue;Ueq<-ueq",
+    "value=spy.GetParam('user.cartoon.colour')",
+    "onchange=spy.cartoon.set_colour(html.GetValue('~name~'))",
+    "disabled=spy.cartoon.cartoon_is_off()",
+    )
+    $-
+  </td>
+  <td width='12%' align='right'>
+    <b>%Sidechains%</b>:
+  </td>
+  <td width='20%'>
+    $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=SET_CARTOON_SIDECHAINS",
+    "items=None<-off;Isolated<-focus;All<-all",
+    "value=spy.GetParam('user.cartoon.sidechains')",
+    "onchange=spy.cartoon.set_sidechains(html.GetValue('~name~'))",
+    "disabled=spy.cartoon.cartoon_is_off()",
+    )
+    $-
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
