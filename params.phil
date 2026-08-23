@@ -923,6 +923,17 @@ routines requiring structure refinement
       .type = float
     resolution_factor = 1/4
       .type = float
+    occupancy_weighting = True
+      .type = bool
+      .help = Give back the bulk solvent that partially occupied atoms \
+              wrongly exclude. around_atoms knows sites and radii and no \
+              occupancies, so a side chain at quarter occupancy excludes \
+              solvent from all of the volume it touches rather than a \
+              quarter of it. Afonine et al. 2024 name this as one of the \
+              three failings of the flat model. Judged on held-out \
+              reflections over five structures. Best where the \
+              correction is large and never worse. A structure with \
+              no partial atoms is untouched.
     boundary_smearing = 0
       .type = float
       .help = Rounds the solvent region edge over a Gaussian of this many \

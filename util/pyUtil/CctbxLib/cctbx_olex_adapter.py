@@ -919,6 +919,13 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           getattr(self.params, 'bias_correction', False))
         if mask.bias_correction:
           print("Difference map weighted by sigma_A: m*Fo - D*Fc")
+      # the occupancy correction lives in smtbx.masks, so an older bundle
+      # simply will not have it and the flag is skipped rather than set
+      if hasattr(mask, 'occupancy_weighting'):
+        mask.occupancy_weighting = bool(
+          getattr(self.params, 'occupancy_weighting', True))
+        if mask.occupancy_weighting:
+          print("Mask gives back solvent excluded by partial occupancy")
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,

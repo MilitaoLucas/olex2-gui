@@ -215,6 +215,18 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     )
   $-
 
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=SNUM_MASKS_OCCUPANCY_WEIGHTING",
+    "label=Occupancies",
+    "checked=spy.GetParam('snum.masks.occupancy_weighting')",
+    "oncheck=spy.SetParam('snum.masks.occupancy_weighting','true')",
+    "onuncheck=spy.SetParam('snum.masks.occupancy_weighting','false')",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "disabled=spy.gui.IsEDRefinement()",
+    )
+  $-
+
 <!-- #ignoreif strcmp(spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg'), 'Olex2')
   <td width="11%"> </td>
   <td width="10%">
