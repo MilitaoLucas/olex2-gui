@@ -71,7 +71,7 @@ def test_parse_atom_table_mismatched_row_ignored():
   lines = [
         "Atom Type    x    y    z    Ueq",
         "C1   C    0.1   0.2   0.3   0.04",
-        "C2   C    0.1   0.2",          # too short — skipped
+        "C2   C    0.1   0.2",          # too short -- skipped
         "Mean Uiso  0.04",
     ]
   result = _parse_atom_table(lines)

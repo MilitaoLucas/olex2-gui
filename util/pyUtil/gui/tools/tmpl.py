@@ -44,7 +44,7 @@ def make_template_getter(package_file: str):
     Returns
     -------
     Callable[[str], str]
-        get_template(name) — fetches the named template, forcing a reload
+        get_template(name) -- fetches the named template, forcing a reload
         when olex2.dev_mode is True. Returns '' on any failure.
     """
   template_file = os.path.join(os.path.dirname(package_file), 'templates.htm')

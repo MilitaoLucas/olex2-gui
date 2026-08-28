@@ -1,7 +1,7 @@
 """
 gui/disorder/_core.py
 
-Pure-Python core for the disorder package — no Olex2 dependencies.
+Pure-Python core for the disorder package -- no Olex2 dependencies.
 Everything here is fully testable without a running Olex2 instance.
 """
 
