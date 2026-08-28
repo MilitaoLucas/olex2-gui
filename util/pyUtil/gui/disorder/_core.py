@@ -9,7 +9,7 @@ from __future__ import annotations
 
 
 def _parse_atom_table(lines: list[str]) -> dict[str, dict[str, str]]:
-    """
+  """
     Parse the tabular output of the Olex2 'info' command into a dict.
 
     Input  : list of strings (lines from the info command output).
@@ -28,24 +28,24 @@ def _parse_atom_table(lines: list[str]) -> dict[str, dict[str, str]]:
     ... ])
     {'C1': {'Type': 'C', 'x': '0.123', 'y': '0.234', 'z': '0.345', 'Ueq': '0.032'}}
     """
-    atoms: dict[str, dict[str, str]] = {}
-    headers: list[str] = []
-    in_table = False
+  atoms: dict[str, dict[str, str]] = {}
+  headers: list[str] = []
+  in_table = False
 
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        if line.startswith('Atom Type'):
-            headers = line.split()
-            in_table = True
-            continue
-        if line.startswith('Mean Uiso'):
-            break
-        if in_table and headers:
-            parts = line.split()
-            if len(parts) == len(headers):
-                atom_name = parts[0]
-                atoms[atom_name] = dict(zip(headers[1:], parts[1:]))
+  for line in lines:
+    line = line.strip()
+    if not line:
+      continue
+    if line.startswith('Atom Type'):
+      headers = line.split()
+      in_table = True
+      continue
+    if line.startswith('Mean Uiso'):
+      break
+    if in_table and headers:
+      parts = line.split()
+      if len(parts) == len(headers):
+        atom_name = parts[0]
+        atoms[atom_name] = dict(zip(headers[1:], parts[1:]))
 
-    return atoms
+  return atoms

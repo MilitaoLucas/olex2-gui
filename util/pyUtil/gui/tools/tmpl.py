@@ -31,7 +31,7 @@ import os
 
 
 def make_template_getter(package_file: str):
-    """
+  """
     Return a get_template(name) -> str function bound to the templates.htm
     in the same directory as package_file.
 
@@ -47,21 +47,21 @@ def make_template_getter(package_file: str):
         get_template(name) — fetches the named template, forcing a reload
         when olex2.dev_mode is True. Returns '' on any failure.
     """
-    template_file = os.path.join(os.path.dirname(package_file), 'templates.htm')
-    package_name  = os.path.basename(os.path.dirname(package_file))
+  template_file = os.path.join(os.path.dirname(package_file), 'templates.htm')
+  package_name  = os.path.basename(os.path.dirname(package_file))
 
-    def get_template(name: str) -> str:
-        try:
-            from olexFunctions import OV
-            import gui.tools
-            dev_mode = bool(OV.GetParam('olex2.dev_mode', False))
-            return gui.tools.TemplateProvider.get_template(
-                name,
-                template_file=template_file,
-                force=dev_mode,
-            )
-        except Exception as e:
-            print(f"[{package_name}] template '{name}' failed: {e}")
-            return ''
+  def get_template(name: str) -> str:
+    try:
+      from olexFunctions import OV
+      import gui.tools
+      dev_mode = bool(OV.GetParam('olex2.dev_mode', False))
+      return gui.tools.TemplateProvider.get_template(
+        name,
+        template_file=template_file,
+        force=dev_mode,
+      )
+    except Exception as e:
+      print(f"[{package_name}] template '{name}' failed: {e}")
+      return ''
 
-    return get_template
+  return get_template
