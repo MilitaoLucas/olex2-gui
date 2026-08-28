@@ -1548,8 +1548,6 @@
 
 <hch help="hide carbon hydrogen atoms"
   <body
-    <args
-	>
     <cmd
       <cmd1 "sel bonds where bond.b.bai.z==1 && bond.a.bai.z==6">
       <cmd2 "sel bond atoms">
@@ -1557,22 +1555,12 @@
       <cmd4 "detach">
 >>>
 
-
-<dis_old help="disorder settings for GUI"
-  <body
-    <cmd
-      <cmd1 "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
-      <cmd2 "html.ItemState cbtn* 1 cbtn-refine 1 *settings 0 refine-settings 0">
-      <cmd2 "html.ItemState h3-disorder-tools 1">
->>>
-
- 
-<dis help="disorder settings for GUI"
-  <body
-    <cmd
-      <cmd1 "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
-      <cmd "html.ItemState h2-work-toolbox 1">
-      <cmd2 "html.ItemState h3-disorder-tools 1">
+<dis help="Show the Modelling & Disorder Tools panel"
+   <body
+     <cmd
+       <cmd1 "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
+       <cmd3 "html.ItemState h2-work-toolbox 1">
+       <cmd5 "html.ItemState h3-disorder-tools 1">
 >>>
 
 <dpp help="Disorder Picture"
