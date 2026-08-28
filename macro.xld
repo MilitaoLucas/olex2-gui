@@ -1558,11 +1558,20 @@
 >>>
 
 
-<dis help="disorder settings for GUI"
+<dis_old help="disorder settings for GUI"
   <body
     <cmd
       <cmd1 "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
       <cmd2 "html.ItemState cbtn* 1 cbtn-refine 1 *settings 0 refine-settings 0">
+      <cmd2 "html.ItemState h3-disorder-tools 1">
+>>>
+
+ 
+<dis help="disorder settings for GUI"
+  <body
+    <cmd
+      <cmd1 "html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
+      <cmd "html.ItemState h2-work-toolbox 1">
       <cmd2 "html.ItemState h3-disorder-tools 1">
 >>>
 
@@ -1588,34 +1597,9 @@
       <cmd1 "CalcFourier -diff -r=0.0%1 -m=%2">
 >>>
 
-
-<p0 help="Set everything to PART 0 11, keep even parts, delete odd ones."
-  <body
-    <cmd
-      <cmd1 "spy.gui.clear_all_parts()">
->>>
-
-
-<pA help="Set part A"
-  <body
-    <cmd
-      <cmd1 "spy.gui.disorder.set_pA_or_pB(A)">
->>>
-
-<pB help="Set part A"
-  <body
-    <cmd
-      <cmd1 "spy.gui.disorder.set_pA_or_pB(B)">
->>>
-
-
-
-
-
 <user_onstartup help="dummy definition" <body > >
 <user_onexit help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
-
 
 <#include "custom.xld">
 <#include "app.ConfigDir()/custom.xld">

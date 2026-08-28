@@ -25,7 +25,7 @@
     html.Snippet(GetVar(default_link),
     "value=A",
     "hint=Assign to part A",
-    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(A)'",
+    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(A)>>sel -u'",
     "td1=<td width='8%' align='left'>"
     )
   $-
@@ -34,7 +34,7 @@
     html.Snippet(GetVar(default_link),
     "value=B",
     "hint=Assign to part B",
-    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(B)'",
+    "onclick=if spy.check_for_selection() then 'spy.gui.disorder.set_pA_or_pB(B)>>sel -u'",
     "td1=<td width='8%' align='left'>"
     )
   $-

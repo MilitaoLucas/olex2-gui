@@ -1,0 +1,210 @@
+t:set_pC{
+  sel atom bonds
+  group -u
+  sel bonds -u
+  part -c
+  part -1 10.5
+  selback
+  sel atom bonds -a
+  sel bond atoms -u
+  group -n=_pC
+  labels -p
+  sel -u
+}
+
+t:set_pA_or_pB{
+  part %(part)s %(fvar)s1
+  selback
+  sel atom bonds -a
+  sel atoms -u
+  name collection _p%(part)s
+  sel collection _p%(part)s
+  SetMaterial Sel.* %(mat)s
+  sel -a
+  sel -u
+  labels -p
+}
+
+t:set_part_colour_cmds{
+sel part %(part)s
+sel atom bonds -a
+sel atoms -u
+name collection _p%(part)s
+sel collection _p%(part)s
+SetMaterial Sel.* %(mat)s
+labels -p
+sel -u
+}
+
+t:reset_all_parts_cmds{
+sp
+sel part %s
+kill
+sel atoms -u
+sel collection _p*
+clear collections
+sel -a
+part 0 11
+sel -u
+echo "All disorder has been reset"
+}
+
+t:reset_all_parts{
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="RESET_ALL"
+  value="Clear"
+  height="GetVar('HtmlInputHeight')"
+  width="100%%"
+  onclick="%s"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  bgcolor="#ff8888"
+  custom="#custom"
+></b>
+</font>
+}
+
+t:part_0_and_n{
+<td align='left'>
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="%(part)s@%(scope)s"
+  value="0|%(part)s"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="freeze true>>spy.gui.disorder.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
+  bgcolor="%(bg_colour)s"
+  fgcolor="GetVar('linkButton.fgcolor')"
+  custom="#custom"
+></b>
+</font>
+</td>
+}
+
+t:disorder_quicktool_no_options{
+
+  %(parts_display)s
+
+  <td>
+
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="ALL@%(scope)s"
+  value="All"
+  height="GetVar('HtmlInputHeight')"
+  width="100%%"
+  onclick="showP>>focus"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  custom="#custom"
+></b>
+</font>
+</td>
+}
+
+t:disorder_quicktool{
+
+  %(parts_display)s
+
+  <td>
+
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="ALL@%(scope)s"
+  value="All"
+  width="100%%"
+  height="GetVar('HtmlInputHeight')"
+  onclick="spy.gui.disorder.set_part_display(all,%(scope)s)"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  custom="#custom"
+></b>
+</font>
+  </td>
+
+<td>
+  %(clear_parts)s
+</td>
+
+
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SELECT_PARTS@%(scope)s'
+      checked="spy.GetParam('user.parts.select')"
+      oncheck="spy.SetParam('user.parts.select','true')"
+      onuncheck="spy.SetParam('user.parts.select','false')"
+      target="Auto-Select PARTS"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+  <td width='4%%' align='right'>
+  Sel
+  </td>
+
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='COLOUR_PARTS@%(scope)s'
+      checked="spy.GetParam('user.parts.colour')"
+      oncheck="spy.SetParam('user.parts.colour','true')>>spy.gui.disorder.set_part_colour"
+      onuncheck="spy.SetParam('user.parts.colour','false')>>sel collection _p*>>clear collections"
+      target="Colour PARTS"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+
+  <td width='4%%' align='right'>
+    Col
+  </td>
+
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='KEEP_UNIQUE@%(scope)s'
+      checked="spy.GetParam('user.parts.keep_unique')"
+      oncheck="spy.SetParam('user.parts.keep_unique','true')>>spy.gui.disorder.make_unique()"
+      onuncheck="spy.SetParam('user.parts.keep_unique','false')"
+      target="Keep showing single fragments when switching the PART view"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+
+  <td width='5%%' align='right'>
+  Unique
+  </td>
+
+
+  <td width='20%%' align='right'>
+  <font size="$GetVar('HtmlFontSizeControls')">
+  <input
+    type='combo'
+    width='100%%'
+    height="$GetVar('HtmlInputHeight')"
+    name='set_label_content_disorder@%(scope)s'
+    value='Labels'
+    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
+    bgcolor="$GetVar('HtmlInputBgColour')"
+    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
+    readonly="True"
+    custom="GetVar(custom_button);arrow_width: 20"
+  >
+  </font>
+  </td>
+}
