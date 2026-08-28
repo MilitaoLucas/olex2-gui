@@ -139,7 +139,13 @@ def update(base_dir, pythons_exe, modules_path, olex2_tag, module):
 
   for python_def in pythons_exe:
     try:
+      print(f"modules_path: {modules_path}")
+      print(f"olex2_tag: {olex2_tag}")
+      print(f"python_def[1]: {python_def[1]}")
+      print(f"module: {module}")
+
       dp = os.path.join(os.path.join(modules_path, olex2_tag) + python_def[1], module)
+      #dp = os.path.join(os.path.join(modules_path, olex2_tag), module)
       print(dp)
       if not os.path.exists(dp):
         print("This module does not exist %s" %dp)
@@ -151,9 +157,9 @@ def update(base_dir, pythons_exe, modules_path, olex2_tag, module):
       print("GIT status printed above.\n")
       if not query_yes_no("Continue? Next step will perform a hard reset!"):
         return False
-      # git("reset", "--hard")
-      # git("pull")
-      # git("status")
+      git("reset", "--hard")
+      git("pull")
+      git("status")
 
       if subprocess.call([python_def[0], os.path.join(base_dir, "compile.py"), dp]) != 0:
         raise RuntimeError("Failed to compile the sources")
@@ -181,8 +187,6 @@ def update(base_dir, pythons_exe, modules_path, olex2_tag, module):
 if __name__ == '__main__':
   from optparse import OptionParser
 
-  os.environ['GIT_SSH'] = "C:/Program Files/PuTTY/plink.exe"
-
   parser = OptionParser(usage='update.py module [1.5-dev]')
   parser.add_option('--plugins-path',
       dest='plugins_path',
@@ -206,9 +210,10 @@ if __name__ == '__main__':
     module = "plugin-" + module
   if sys.platform[:3] == "win":
     py_def = [("d:/python38x64/python.exe", ""), ("d:/python313x64/python.exe", "-py313")]
+    os.environ['GIT_SSH'] = "C:/Program Files/PuTTY/plink.exe"
     git_cmd = "C:/Program Files/Git/bin/git.exe"
   else:
     py_def = [("python3.8", ""), ("python3.13", "-py313")]
-  if not update(os.path.split(__file__)[0], py_def, options.plugins_path, olex2_version, module):
+  if not update(os.path.dirname(os.path.abspath(__file__)), py_def, options.plugins_path, olex2_version, module): #Claude Fix
     exit(1)
   exit(0)
