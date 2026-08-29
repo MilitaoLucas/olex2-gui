@@ -110,7 +110,7 @@ def normal_equation_class():
       self.step_info['_refine_ls_R_factor_gt'] = R1_4sig
       self.step_info['_refine_ls_wR_factor_ref'] = self.wR2()
       self.step_info['_refine_ls_goodness_of_fit_ref'] = self.goof()
-      
+
       OV.SetParam('snum.refinement.last_R1', "%.4f" %self.step_info['_refine_ls_R_factor_gt'])
       OV.SetParam('snum.refinement.last_wR2', "%.4f" %self.step_info['_refine_ls_wR_factor_ref'])
 
@@ -289,12 +289,7 @@ def normal_equation_class():
         else:
           OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
       #update BASF
-      if self.twin_fractions is not None:
-        idx = 0
-        for fraction in self.twin_fractions:
-          if fraction.grad:
-            olx.xf.rm.BASF(idx, fraction.value)
-            idx += 1
+      self.update_BASF()
       #update EXTI
       if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
         if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
@@ -321,6 +316,15 @@ def normal_equation_class():
       pass
     def on_completion(self):
       pass
+    def update_BASF(self):
+      if not self.twin_fractions:
+        return
+      idx = 0
+      for fraction in self.twin_fractions:
+        if fraction.grad:
+          olx.xf.rm.BASF(idx, fraction.value)
+          idx += 1
+
   return normal_eqns
 
 from scitbx.lstbx import normal_eqns_solving

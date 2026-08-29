@@ -111,13 +111,13 @@ class RefinementChecks(object):
         self.refinement_has_failed.append("Mu of LM is very large!")
     except AttributeError:
       return
-  
+
   def check_corr(self):
-    try:      
+    try:
       m_and_a = self.cctbx.normal_eqns.covariance_matrix_and_annotations()
       annotations = m_and_a.annotations
       n = len(annotations)
-      
+
       nf = m_and_a.matrix.as_numpy_array()
 
       counter = 0
@@ -142,11 +142,11 @@ class RefinementChecks(object):
       for i,j,corr in zip(iu_nodiag[0][strong_mask], iu_nodiag[1][strong_mask], corrMat[iu_nodiag][strong_mask]):
           print(f" {annotations[i]:<10} v {annotations[j]:<10}: {corr:>6.3f}")
       print("==================================")
-      
+
     except Exception as e:
       import traceback
       traceback.print_exc()
       print(f"Error reading vcv matrix for calculation of correlations {e}")
       return
 
-      
+
