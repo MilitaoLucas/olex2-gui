@@ -24,10 +24,55 @@ import argparse
 import fnmatch
 import os
 import sys
+import tarfile
 import zipfile
 from io import BytesIO
 
 import requests
+
+TAR_MODES = {
+    ".tar": "r:",
+    ".tar.gz": "r:gz",
+    ".tgz": "r:gz",
+    ".tar.bz2": "r:bz2",
+    ".tar.xz": "r:xz",
+}
+
+
+def _tar_mode_for(filename: str) -> str | None:
+    lower = filename.lower()
+    for ext, mode in TAR_MODES.items():
+        if lower.endswith(ext):
+            return mode
+    return None
+
+
+def extract_nested_archives(directory: str):
+    """Find zip/tar archives inside an extracted artifact and extract those too."""
+    for entry in os.listdir(directory):
+        path = os.path.join(directory, entry)
+        if not os.path.isfile(path):
+            continue
+
+        tar_mode = _tar_mode_for(entry)
+        if tar_mode:
+            dest = os.path.join(directory, entry.split(".tar")[0] + "_tar")
+            os.makedirs(dest, exist_ok=True)
+            try:
+                with tarfile.open(path, tar_mode) as tf:
+                    tf.extractall(dest)
+                print(f"    Extracted nested tarball '{entry}' -> {dest}")
+            except tarfile.TarError as e:
+                print(f"    Warning: failed to extract '{entry}': {e}")
+        elif entry.lower().endswith(".zip"):
+            dest = os.path.join(directory, entry[:-4] + "_zip")
+            os.makedirs(dest, exist_ok=True)
+            try:
+                with zipfile.ZipFile(path) as zf:
+                    zf.extractall(dest)
+                print(f"    Extracted nested zip '{entry}' -> {dest}")
+            except zipfile.BadZipFile as e:
+                print(f"    Warning: failed to extract '{entry}': {e}")
 
 API = "https://api.github.com"
 
@@ -134,6 +179,7 @@ def download_artifacts(
             with zipfile.ZipFile(zip_path) as zf:
                 zf.extractall(extract_dir)
             print(f"  Extracted to {extract_dir}")
+            extract_nested_archives(extract_dir)
         except zipfile.BadZipFile:
             print(f"  Warning: '{zip_path}' is not a valid zip, left as-is")
 
