@@ -498,6 +498,19 @@ def make_disorder_quicktools(scope: str = 'main',
 
 
 # ===========================================================================
+# Back-compat shims
+# ===========================================================================
+# Before the refactor these lived on gui/tools and were called as
+# spy.gui.tools.hasDisorder / spy.gui.tools.make_disorder_quicktools.
+# Several plugin .htm files (DrawPlus, ContextPlus, CifPlus/StructureChecking)
+# still use those names, so keep them registered under the old scope.
+
+def hasDisorder(num_return: bool = False):
+  """Back-compat alias for has_disorder (old spy.gui.tools name)."""
+  return has_disorder(num_return)
+
+
+# ===========================================================================
 # Olex2 registration
 # ===========================================================================
 
@@ -521,5 +534,8 @@ try:
     # Back-compat: these were originally registered under 'gui' scope
   OV.registerFunction(get_html_colour_from_material,    True,  'gui')
   OV.registerFunction(clear_all_parts,                  True,  'gui')
+    # Back-compat: old names still used by some plugin .htm files
+  OV.registerFunction(hasDisorder,                      False, 'gui.tools')
+  OV.registerFunction(make_disorder_quicktools,         False, 'gui.tools')
 except ImportError:
   pass
