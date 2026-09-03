@@ -404,6 +404,13 @@ def get_default_notification(txt="", txt_col='green_text'):
   _ = olx.xf.latt.IsPolymeric()
   if _ == 'true':
     poly = " | polymeric"
+  if txt == "__structure___loaded_":
+    txt = "%s is loaded" %olx.FileName()
+    prg = OV.GetParam("snum.solution.program")
+    if prg:
+      cl = OV.GetParam("snum.solution.%s.command_line" %prg)
+    if cl:
+      txt += ", <font color='red'>Warning: %s</font>" %cl
   set_notification("%s%s;%s;%s" %(txt, poly, table_col,'#888888'))
 
 #https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
@@ -442,7 +449,7 @@ def set_notification(string=None, fg = None):
     return f'<font color={notification_highlight_colour}>{m.group(1)}</font>'
   string = re.sub(r'__(.*?)__', repl_col, string)
   string = f"<font color={fg}>{string} </font>"
-  
+
   OV.SetVar('GuiNotification', string)
   olx.Freeze(True)
   OV.UpdateHtml()

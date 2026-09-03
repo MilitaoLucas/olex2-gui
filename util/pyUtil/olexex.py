@@ -1026,6 +1026,10 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     OV.SetParam("%s.solution.program" %scope, prg_name)
     OV.SetParam("%s.solution.method" %scope, method)
     OV.SetParam('user.solution.default_program', prg_name)
+    cl = OV.GetParam("snum.solution.%s.command_line" %prg_name)
+    if cl:
+      cl = "<font color='red'>Warning: %s</font>" %cl
+    gui.get_default_notification(cl, txt_col="red_text")
     onSolutionMethodChange(prg_name, method)
 
 def onSolutionMethodChange(prg_name, method):
