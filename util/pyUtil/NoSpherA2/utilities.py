@@ -760,6 +760,11 @@ def deal_with_parts():
   if not parts:
     return
   grouped_parts = read_disorder_groups()
+  if grouped_parts is None:
+    # read_disorder_groups has already explained the invalid configuration.
+    # Do not let an incomplete user grouping silently omit atoms from all
+    # generated wavefunction calculations.
+    return None, None
   if grouped_parts == []:
     groups = []
     for part in parts:
@@ -837,6 +842,28 @@ def read_disorder_groups():
           result[i].append(int(part))
       else:
         result[i].append(int(part))
+
+  # A custom grouping replaces the default PART handling completely.  Thus an
+  # omitted PART would otherwise vanish from every generated model and produce
+  # a chemically meaningless, but apparently successful, refinement.
+  model_parts = OV.ListParts()
+  if model_parts:
+    model_parts = set(model_parts)
+    assigned_parts = set(part for group in result for part in group)
+    missing_parts = sorted(model_parts - assigned_parts)
+    if missing_parts:
+      missing_text = ', '.join(str(part) for part in missing_parts)
+      message = (
+        "WARNING: Disorder_Groups does not assign model PART(s) %s. "
+        "NoSpherA2 has stopped before generating incomplete disorder models. "
+        "Assign every PART listed in the model exactly once in Disorder_Groups "
+        "(or clear Disorder_Groups to use the default handling)." % missing_text)
+      print(message)
+      try:
+        olx.Alert(message)
+      except Exception:
+        pass
+      return None
   return result
 OV.registerFunction(read_disorder_groups, False, 'NoSpherA2')
 

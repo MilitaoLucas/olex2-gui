@@ -649,7 +649,8 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     wfn_code = software()
     self.wfn_code = wfn_code
     self.name = olx.FileName()
-    basis = nsa2_get_param('basis_name').lower()
+    basis_name = nsa2_get_param('basis_name')
+    basis = basis_name.lower() if isinstance(basis_name, str) else ''
     update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
     experimental_SF = nsa2_get_param('NoSpherA2_SF')
     
@@ -697,6 +698,23 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         Z = ELEMENTS_BY_SYMBOL.get(sc['type'], 0)
         if Z > 36:
           heavy = True
+      # During an HTML refresh the basis combo can briefly provide an empty
+      # value.  For a heavy-atom structure recover the first compatible Jorge
+      # basis instead of treating that transient state as an invalid choice.
+      # Do not replace a non-empty user selection: that still receives the
+      # normal validation error below.
+      if heavy and not basis:
+        recovered_basis = self.get_heavy_atom_basis(model._atoms)
+        if recovered_basis:
+          nsa2_set_param('basis_name', recovered_basis)
+          basis = recovered_basis.lower()
+          print("Recovered empty basis-set selection as %s for heavy atoms." % recovered_basis)
+          if OV.HasGUI():
+            OV.UpdateHtml()
+        else:
+          print("Atoms with Z > 36 require a Jorge, ECP or x2c basis set; no compatible installed basis was found.")
+          OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
+          return False
       if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ecp" not in basis) \
         and ("sto" not in basis) and ("3-21" not in basis):
         print("Atoms with Z > 36 require jorge, ECP or x2c basis sets!")
@@ -766,6 +784,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       elif wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
         cif = True
       parts, groups = deal_with_parts()
+      if parts is None:
+        OV.SetVar('NoSpherA2-Error', 'Invalid Disorder_Groups')
+        return False
       nr_parts = len(parts)
     elif len(parts) == 1:
       # PART 0 is implicit in a SHELX/Olex structure.  Keep it alongside the
@@ -1312,7 +1333,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     return final_string
 
   def disable_relativistics(self):
-    basis_name = nsa2_get_param('basis_name').lower()
+    basis_name = nsa2_get_param('basis_name') or ''
+    basis_name = basis_name.lower()
     if "dkh" in basis_name:
       return False
     if "x2c" in basis_name:
@@ -1388,6 +1410,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if found != len(atoms):
       return False  # If any atoms are missing this basis set is not OK
     return True  # Only true if all atom searches were succesfull
+
+  def get_heavy_atom_basis(self, model_atoms):
+    """Return a compatible installed Jorge basis for an empty UI selection."""
+    if not self.basis_list_str:
+      return None
+    basis_names = self.basis_list_str.split(';')
+    preferred = ["jorge-DZP"]
+    candidates = preferred + [name for name in basis_names
+                              if name.lower().startswith("jorge") and name not in preferred]
+    for name in candidates:
+      if self.check_for_atom_in_basis_set(name, model_atoms):
+        return name
+    return None
 
 @run_with_bitmap('Running DISCAMB')
 def discamb(folder, name, discamb_exe):
@@ -1784,7 +1819,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       nsa2_set_param('source', "  pySCF")
       reset_unused_generator_flags("pySCF")
       olex.m("html.Update()")
-  elif input == "Get XHARPy":
+  elif input == "  Get XHARPy":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
     if wsl_adapter.is_wsl:
@@ -1817,7 +1852,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       reset_unused_generator_flags("XHARPy")
       olex.m("html.Update()")
 
-  elif input == "Get Psi4":
+  elif input == "  Get Psi4":
     wsl_adapter = NoSpherA2_instance.WSLAdapter
     olex2_folder = OV.BaseDir()
     if wsl_adapter.is_wsl:
