@@ -4495,12 +4495,18 @@ class HealthOfStructure():
         if OV.IsEDData():
           #value = OV.GetParam('snum.refinement.hooft_str', "ED")
           value = OV.GetHeaderParam('ED.z.value', 'ED')
-          if not value:
+          # The Z-Score is "unknown" until a dynamical (N-beam) run has
+          # determined it: no value, the "ED" marker, or a plain 0.
+          try:
+            z = float(value)
+          except (TypeError, ValueError):
+            z = None
+          if not value or "(" in value or z == 0:
             value = "ED"
-          if value == "ED" or "(" in value:
+          if value == "ED":
             bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
           else:
-            _ = float(value)
+            _ = z
             if _ < 1:
               bg_colour = OV.GetParam('gui.red').hexadecimal
             elif _ < 3:
@@ -4737,21 +4743,25 @@ class HealthOfStructure():
         value_display = value_display.replace("0.",".")
 
     if item == "Completeness":
-      laue_name = 'Completeness_laue_full'
-      point_name = 'Completeness_point_full'
-      if round(self.theta_full*100) != round(self.theta_max*100):
-        if self.resolution_type == 'full':
-          if round(self.hkl_stats['Completeness_laue_max']*100) !=\
-             round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.0f%% to %.1f%s" %(
-              self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
-        else:
-          laue_name = 'Completeness_laue_max'
-          point_name = 'Completeness_point_max'
-          if round(self.hkl_stats['Completeness_laue_full']*100) !=\
-             round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.0f%% to %.1f%s" %(
-              self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
+      try:
+        laue_name = 'Completeness_laue_full'
+        point_name = 'Completeness_point_full'
+        if round(self.theta_full*100) != round(self.theta_max*100):
+          if self.resolution_type == 'full':
+            if round(self.hkl_stats['Completeness_laue_max']*100) !=\
+               round(self.hkl_stats[laue_name]*100):
+              value_display_extra = "%.0f%% to %.1f%s" %(
+                self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
+          else:
+            laue_name = 'Completeness_laue_max'
+            point_name = 'Completeness_point_max'
+            if round(self.hkl_stats['Completeness_laue_full']*100) !=\
+               round(self.hkl_stats[laue_name]*100):
+              value_display_extra = "%.0f%% to %.1f%s" %(
+                self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
+      except: #HP 26-06-03 -- why would this ever happen? Hazel had found an example.
+        self.hkl_stats[laue_name] = 0
+        self.hkl_stats[point_name] = 0
 
       value_display = "%.1f" %(self.hkl_stats[laue_name]*100)
       value_display = value_display.replace("100.0", "100")
@@ -4832,7 +4842,11 @@ class HealthOfStructure():
 
     if item == "hooft_str":
       if OV.IsEDData():
-        if value_raw != "ED" and value_raw != 0:
+        try:
+          z_known = float(value_display) != 0
+        except (TypeError, ValueError):
+          z_known = False
+        if z_known:
           _ = OV.GetHeaderParam('ED.z.deltaR1', '')
           if _:
             _ = _.replace("-", "")
@@ -4911,3 +4925,368 @@ def make_data_key(self):
                   (int(self.graph_right - (key.size[0] + 5 * self.scale)),
                    int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
                   )
+
+
+class SNumInfoBitmap(object):
+  """Compose a clean, poster/talk-ready bitmap of the top-right structure-info
+  panel.
+
+  It reproduces the on-screen panel but:
+    - omits the tool-button row, and
+    - never renders the structure's file path (an optional caption can take
+      its place).
+
+  The Health-of-Structure cells and the data/parameter 'battery' are reused
+  verbatim from the PNGs the GUI already writes into the VFS; the title, the
+  optional caption, the formula, the cell and the R factors are drawn here so
+  the result is independent of the current skin and of debug overlays.
+
+  Config: user.diagnostics.snum_info_bitmap.{background,manual_colour,scale}
+  Entry point: spy.make_snum_info_bitmap([caption])
+  """
+
+  phil_base = 'user.diagnostics.snum_info_bitmap'
+  vfs_name = 'snum_info.png'
+  hos_hkl = ('MinD', 'MeanIOverSigma', 'Rint', 'Completeness')
+  hos_ref = ('max_shift_over_esd', 'max_peak', 'max_hole', 'goof', 'hooft_str')
+
+  def __init__(self):
+    self.s = max(1, int(OV.GetParam('%s.scale' % self.phil_base) or 3))
+    self.bg_mode = (OV.GetParam('%s.background' % self.phil_base) or 'theme').lower()
+    self.bg_manual = OV.GetParam('%s.manual_colour' % self.phil_base) or '#ffffff'
+    self.font = 'DefaultFont'
+    self.font_b = 'DefaultFont Bold'
+    self.col_text = self._hex(OV.GetParam('gui.html.font_colour'), '#f0f0f0')
+    self.col_grey = self._hex(OV.GetParam('gui.grey'), '#8a9a9a')
+    self.col_title = self._hex(OV.GetParam('gui.html.formula_colour'), self.col_text)
+    self.pad = 8 * self.s
+    self.gap = 6 * self.s
+    self.width = int(round((OV.GetParam('gui.htmlpanelwidth') or 360) * self.s))
+
+  # -- helpers ----------------------------------------------------------------
+
+
+  @staticmethod
+  def _hex(param, fallback):
+    try:
+      return param.hexadecimal
+    except Exception:
+      return param if isinstance(param, str) and param else fallback
+
+  def _rgb(self, colour):
+    from PIL import ImageColor
+    if isinstance(colour, (tuple, list)):
+      return tuple(int(x) for x in colour[:3])
+    try:
+      return ImageColor.getrgb(colour)
+    except Exception:
+      try:
+        return ImageColor.getrgb('#' + str(colour).lstrip('#'))
+      except Exception:
+        return (32, 75, 87)
+
+  def _font(self, size, bold=False):
+    return IT.registerFontInstance(self.font_b if bold else self.font,
+                                   max(1, int(round(size * self.s))))
+
+  def _vfs_image(self, name):
+    """Read a VFS image into a PIL RGBA image, or None.  Deliberately does not
+    use IT.get_PIL_image_from_olex_VFS(), which rebuilds the whole button set
+    as a side effect when a name is missing."""
+    try:
+      if olx.fs.Exists(name) != "true":
+        return None
+      import io
+      data = OlexVFS.read_from_olex(name)
+      if not data:
+        return None
+      return Image.open(io.BytesIO(data)).convert('RGBA')
+    except Exception:
+      return None
+
+  def _new_band(self, h):
+    return Image.new('RGBA', (self.width, max(1, int(h))), (0, 0, 0, 0))
+
+  # -- tiny sub/superscript text renderer -----------------------------------
+
+  def _parse_rich(self, s):
+    """(text, kind) list from a tiny HTML string; kind in '', 'sub', 'sup'."""
+    out, buf, kind, i = [], '', '', 0
+    s = (s or '').replace('&thinsp;', ' ').replace('&nbsp;', ' ').replace('&#8201;', ' ')
+    while i < len(s):
+      for tag, k in (('<sub>', 'sub'), ('<sup>', 'sup')):
+        if s.startswith(tag, i):
+          if buf:
+            out.append((buf, kind)); buf = ''
+          kind = k; i += len(tag); break
+      else:
+        if s.startswith('</sub>', i) or s.startswith('</sup>', i):
+          if buf:
+            out.append((buf, kind)); buf = ''
+          kind = ''; i += 6
+        elif s[i] == '<':
+          j = s.find('>', i)
+          if j == -1:
+            break
+          i = j + 1
+        else:
+          buf += s[i]; i += 1
+    if buf:
+      out.append((buf, kind))
+    return out
+
+  def _seg_font(self, size, kind, bold):
+    return self._font(size * (0.68 if kind else 1.0), bold)
+
+  def _rich_width(self, draw, segs, size, bold=False):
+    return int(sum(get_text_size(draw, t, self._seg_font(size, k, bold))[0]
+                   for t, k in segs))
+
+  def _draw_rich(self, draw, xy, segs, size, colour, bold=False):
+    x, y = xy
+    base_h = get_text_size(draw, 'Xg', self._font(size, bold))[1] or int(size * self.s)
+    for txt, kind in segs:
+      fnt = self._seg_font(size, kind, bold)
+      dy = base_h * 0.30 if kind == 'sub' else (-base_h * 0.25 if kind == 'sup' else 0)
+      draw.text((x, y + dy), txt, font=fnt, fill=colour)
+      x += get_text_size(draw, txt, fnt)[0]
+    return x
+
+  # -- data -----------------------------------------------------------------
+
+  def _cell_grid(self):
+    g = lambda k: olx.xf.uc.CellEx(k)
+    try:
+      vol = olx.xf.uc.VolumeEx()
+    except Exception:
+      vol = '?'
+    try:
+      Z, Zp = olx.xf.au.GetZ(), olx.xf.au.GetZprime()
+    except Exception:
+      Z = Zp = '?'
+    d = u'°'
+    return [
+      [u'a = %s' % g('a'), u'α = %s%s' % (g('alpha'), d), u'Z = %s' % Z],
+      [u'b = %s' % g('b'), u'β = %s%s' % (g('beta'), d),  u"Z' = %s" % Zp],
+      [u'c = %s' % g('c'), u'γ = %s%s' % (g('gamma'), d), u'V = %s' % vol],
+    ]
+
+  def _battery(self):
+    try:
+      data = int(round(float(gui.tools.get_data_number())))
+      params = int(round(float(gui.tools.get_parameter_number())))
+    except Exception:
+      return None, None, None, None
+    dpr = (data / params) if (data and params) else (data or 0)
+    img = None
+    try:
+      n = int(gui.tools.get_diagnostics_colour('refinement', 'dpr', dpr, number_only=True))
+      colour = ['green', 'yellow', 'orange', 'red'][max(0, min(3, 4 - n))]
+      img = self._vfs_image('battery_%s.png' % colour)
+      if img is None:
+        p = os.path.join(OV.BaseDir(), 'etc', 'gui', 'images', 'src',
+                         'battery_%s.png' % colour)
+        if os.path.exists(p):
+          img = Image.open(p).convert('RGBA')
+    except Exception:
+      pass
+    if not dpr:
+      disp = 'n/a'
+    elif dpr <= 10:
+      disp = '%.2f' % dpr
+    else:
+      disp = '%.1f' % dpr
+    return img, disp, str(data), str(params)
+
+  def _r_factors(self):
+    R1 = wR2 = 'n/a'
+    try:
+      R1, wR2 = gui.tools._get_R_values()
+    except Exception:
+      pass
+    col = self.col_text
+    try:
+      r = float(R1)
+      col = gui.tools.get_diagnostics_colour('refinement', 'R1', r)
+      R1 = '%.2f' % (r * 100)
+    except Exception:
+      pass
+    try:
+      wR2 = '%.2f' % (float(wR2) * 100)
+    except Exception:
+      pass
+    return R1, wR2, col
+
+  # -- bands --------------------------------------------------------------
+
+  def _band_title(self, caption):
+    size = 17
+    im = self._new_band(size * self.s * (2.3 if caption else 1.7))
+    d = ImageDraw.Draw(im)
+    d.text((self.pad, 0), olx.FileName() or 'structure',
+           font=self._font(size, True), fill=self.col_title)
+    try:
+      sg = olex.f("SG('%h')")
+    except Exception:
+      sg = ''
+    if sg and sg != 'n/a':
+      segs = self._parse_rich(sg)
+      w = self._rich_width(d, segs, 13, bold=True)
+      self._draw_rich(d, (self.width - self.pad - w, size * self.s * 0.12),
+                      segs, 13, self.col_text, bold=True)
+    if caption:
+      d.text((self.pad, size * self.s * 1.2), caption,
+             font=self._font(8.5), fill=self.col_grey)
+    return im
+
+  def _band_formula(self):
+    size = 13
+    im = self._new_band(size * self.s * 1.8)
+    d = ImageDraw.Draw(im)
+    try:
+      html = olx.xf.GetFormula('html', 1)
+    except Exception:
+      html = ''
+    self._draw_rich(d, (self.pad, 0), self._parse_rich(html), size,
+                    self.col_title, bold=True)
+    return im
+
+  def _band_middle(self):
+    s = self.s
+    h = 64 * s
+    im = self._new_band(h)
+    d = ImageDraw.Draw(im)
+    x_cell, w_cell = self.pad, int(self.width * 0.56)
+    x_bat, w_bat = x_cell + w_cell, int(self.width * 0.16)
+    x_r = x_bat + w_bat
+
+    f = self._font(8.5)
+    col_w, line_h = w_cell / 3.0, h / 3.5
+    for ri, row in enumerate(self._cell_grid()):
+      for ci, val in enumerate(row):
+        d.text((x_cell + ci * col_w, 2 * s + ri * line_h), val, font=f,
+               fill=self.col_text)
+
+    img, dpr, data, params = self._battery()
+    tx = x_bat
+    if img is not None:
+      bh = int(h * 0.72)
+      bw = max(1, int(img.width * bh / img.height))
+      im.alpha_composite(img.resize((bw, bh)), (int(x_bat), int((h - bh) / 2)))
+      tx = x_bat + bw + 3 * s
+    if dpr:
+      d.text((tx, 2 * s), dpr, font=self._font(8, True), fill=self.col_text)
+      d.text((tx, 2 * s + 13 * s), data, font=self._font(7), fill=self.col_grey)
+      d.text((tx, 2 * s + 23 * s), params, font=self._font(7), fill=self.col_grey)
+
+    R1, wR2, col_R1 = self._r_factors()
+    d.text((x_r, 0), 'R', font=self._font(9, True), fill=self.col_grey)
+    d.text((x_r + 9 * s, 6 * s), '1', font=self._font(6, True), fill=self.col_grey)
+    d.text((x_r + 16 * s, -2 * s), '%s %%' % R1, font=self._font(17, True),
+           fill=col_R1)
+    d.text((x_r, 32 * s), 'wR', font=self._font(8, True), fill=self.col_grey)
+    d.text((x_r + 18 * s, 37 * s), '2', font=self._font(6, True), fill=self.col_grey)
+    d.text((x_r + 26 * s, 30 * s), wR2, font=self._font(11, True), fill=self.col_text)
+    return im
+
+  def _band_hos(self, items):
+    imgs = [i for i in (self._vfs_image('%s_large' % it) or self._vfs_image(it)
+                        for it in items) if i is not None]
+    if not imgs:
+      return None
+    cell_w = self.width / float(len(imgs))
+    band_h = int(max(i.height * (cell_w / i.width) for i in imgs))
+    band = self._new_band(band_h)
+    x = 0.0
+    for i in imgs:
+      w = int(cell_w)
+      ih = max(1, int(i.height * (w / i.width)))
+      band.alpha_composite(i.resize((w, ih)), (int(x), 0))
+      x += cell_w
+    return band
+
+  # -- assembly ---------------------------------------------------------------
+
+  def _background(self, size):
+    m = self.bg_mode
+    if m == 'transparent':
+      return Image.new('RGBA', size, (0, 0, 0, 0))
+    if m == 'white':
+      return Image.new('RGBA', size, (255, 255, 255, 255))
+    if m == 'manual':
+      return Image.new('RGBA', size, self._rgb(self.bg_manual) + (255,))
+    col = OV.GetParam('gui.html.table_bg_colour')
+    try:
+      rgb = tuple(int(x) for x in col.rgb)
+    except Exception:
+      rgb = self._rgb(self._hex(col, '#204b57'))
+    return Image.new('RGBA', size, rgb + (255,))
+
+  def _refresh_sources(self):
+    """(Re)render the Health-of-Structure cell PNGs for both scopes so the
+    strips are current.  Fully guarded; the current scope is restored."""
+    try:
+      keep = OV.GetParam('snum.current_process_diagnostics')
+    except Exception:
+      keep = None
+    for scope in ('hkl', 'refinement', keep):
+      if not scope:
+        continue
+      try:
+        OV.SetParam('snum.current_process_diagnostics', scope)
+        HOS_instance.make_HOS(force=True)
+      except Exception as e:
+        print("snum_info: HOS refresh (%s) failed: %s" % (scope, e))
+
+  def run(self, caption=None, refresh=True):
+    if caption in (None, '', 'None'):
+      caption = None
+    try:
+      refresh = OV.get_bool_from_any(refresh)
+    except Exception:
+      refresh = bool(refresh)
+    if refresh:
+      self._refresh_sources()
+
+    bands = [b for b in (self._band_title(caption),
+                         self._band_formula(),
+                         self._band_middle(),
+                         self._band_hos(self.hos_hkl),
+                         self._band_hos(self.hos_ref)) if b is not None]
+    total_h = self.pad * 2 + sum(b.height for b in bands) \
+        + self.gap * max(0, len(bands) - 1)
+    canvas = self._background((self.width, int(total_h)))
+    y = float(self.pad)
+    for b in bands:
+      canvas.alpha_composite(b, (0, int(y)))
+      y += b.height + self.gap
+
+    out = canvas if self.bg_mode == 'transparent' else canvas.convert('RGB')
+    OlexVFS.save_image_to_olex(out, self.vfs_name, 1)
+    disk = None
+    try:
+      disk = OV.ModelSrc() + '_snum_info.png'
+      out.save(disk)
+    except Exception as e:
+      print("snum_info: could not write '%s': %s" % (disk, e))
+      disk = None
+    print("Structure-info bitmap: VFS '%s'%s"
+          % (self.vfs_name, (", disk '%s'" % disk) if disk else ""))
+    return self.vfs_name
+
+
+def make_snum_info_bitmap(caption=None, refresh=True):
+  """spy.make_snum_info_bitmap([caption]) -- write a clean, path-free and
+  button-free bitmap of the structure-info panel to the VFS ('snum_info.png')
+  and alongside the model ('<model>_snum_info.png')."""
+  try:
+    return SNumInfoBitmap().run(caption=caption, refresh=refresh)
+  except Exception as e:
+    import traceback
+    print("make_snum_info_bitmap failed: %s" % e)
+    traceback.print_exc()
+    if hasattr(sys, '_wing_debugger'):
+      raise
+    return None
+
+OV.registerFunction(make_snum_info_bitmap)

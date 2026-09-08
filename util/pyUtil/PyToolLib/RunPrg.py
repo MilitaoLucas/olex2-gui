@@ -942,7 +942,15 @@ def do_refine():
           print("Skipping Hooft parameter evaluation for ED data")
         OV.SetParam('snum.refinement.hooft_str', "ED")
         OV.SetParam('snum.refinement.flack_str', "ED")
-        OV.SetHeaderParam('ED.z.value', "ED")
+        # Only mark the panel as 'ED' while the Z-Score is still unknown.
+        # Once a dynamical (N-beam) run has determined it, keep showing it
+        # -- a later kinematic/plain refine must not wipe it back to "ED".
+        try:
+          z_known = float(OV.GetHeaderParam('ED.z.value', 0)) != 0
+        except (TypeError, ValueError):
+          z_known = False
+        if not z_known:
+          OV.SetHeaderParam('ED.z.value', "ED")
         return
     return
 
