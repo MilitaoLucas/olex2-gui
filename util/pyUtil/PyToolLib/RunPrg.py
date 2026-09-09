@@ -627,6 +627,7 @@ class RunRefinementPrg(RunPrg):
       programSettings.onMaxPeaksChange(_)
     if olx.LSM().upper() == "CGLS" and olx.Ins("ACTA") != "n/a":
       olx.DelIns("ACTA")
+    OV.ClearHeaderParam('ED.z')
 
   def doAutoTidyBefore(self):
     olx.Clean('-npd -aq=0.1 -at')
