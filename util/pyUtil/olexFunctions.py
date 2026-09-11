@@ -116,7 +116,8 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     ins_header.set(param, value)
 
   def ClearHeaderParam(self, param):
-    olx.xf.rm.ClearParams(param)
+    ins_header.delete(param)
+    #olx.xf.rm.ClearParams(param)
 
   def GetHeaderParam(self, param, default=None):
     return ins_header.get(param, default)
