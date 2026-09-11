@@ -322,6 +322,9 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       retVal = True
     return retVal
 
+  def GetMaxCycles(self, default=4):
+    return self.GetParam('snum.refinement.max_cycles', default)
+
   def SetMaxCycles(self, max_cycles):
     try:
       import programSettings

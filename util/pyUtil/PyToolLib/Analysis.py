@@ -4368,12 +4368,18 @@ class HealthOfStructure():
         if OV.IsEDData():
           #value = OV.GetParam('snum.refinement.hooft_str', "ED")
           value = OV.GetHeaderParam('ED.z.value', 'ED')
-          if not value:
+          # The Z-Score is "unknown" until a dynamical (N-beam) run has
+          # determined it: no value, the "ED" marker, or a plain 0.
+          try:
+            z = float(value)
+          except (TypeError, ValueError):
+            z = None
+          if not value or "(" in value or z == 0:
             value = "ED"
-          if value == "ED" or "(" in value:
+          if value == "ED":
             bg_colour = OV.GetParam('gui.ed_fg').hexadecimal
           else:
-            _ = float(value)
+            _ = z
             if _ < 1:
               bg_colour = OV.GetParam('gui.red').hexadecimal
             elif _ < 3:
@@ -4609,21 +4615,25 @@ class HealthOfStructure():
         value_display = value_display.replace("0.",".")
 
     if item == "Completeness":
-      laue_name = 'Completeness_laue_full'
-      point_name = 'Completeness_point_full'
-      if round(self.theta_full*100) != round(self.theta_max*100):
-        if self.resolution_type == 'full':
-          if round(self.hkl_stats['Completeness_laue_max']*100) !=\
-             round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.0f%% to %.1f%s" %(
-              self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
-        else:
-          laue_name = 'Completeness_laue_max'
-          point_name = 'Completeness_point_max'
-          if round(self.hkl_stats['Completeness_laue_full']*100) !=\
-             round(self.hkl_stats[laue_name]*100):
-            value_display_extra = "%.0f%% to %.1f%s" %(
-              self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
+      try:
+        laue_name = 'Completeness_laue_full'
+        point_name = 'Completeness_point_full'
+        if round(self.theta_full*100) != round(self.theta_max*100):
+          if self.resolution_type == 'full':
+            if round(self.hkl_stats['Completeness_laue_max']*100) !=\
+               round(self.hkl_stats[laue_name]*100):
+              value_display_extra = "%.0f%% to %.1f%s" %(
+                self.hkl_stats['Completeness_laue_max']*100, self.theta_max*2, self.deg)
+          else:
+            laue_name = 'Completeness_laue_max'
+            point_name = 'Completeness_point_max'
+            if round(self.hkl_stats['Completeness_laue_full']*100) !=\
+               round(self.hkl_stats[laue_name]*100):
+              value_display_extra = "%.0f%% to %.1f%s" %(
+                self.hkl_stats['Completeness_laue_full']*100, self.theta_full*2, self.deg)
+      except: #HP 26-06-03 -- why would this ever happen? Hazel had found an example.
+        self.hkl_stats[laue_name] = 0
+        self.hkl_stats[point_name] = 0
 
       value_display = "%.1f" %(self.hkl_stats[laue_name]*100)
       value_display = value_display.replace("100.0", "100")
@@ -4704,7 +4714,11 @@ class HealthOfStructure():
 
     if item == "hooft_str":
       if OV.IsEDData():
-        if value_raw != "ED" and value_raw != 0:
+        try:
+          z_known = float(value_display) != 0
+        except (TypeError, ValueError):
+          z_known = False
+        if z_known:
           _ = OV.GetHeaderParam('ED.z.deltaR1', '')
           if _:
             _ = _.replace("-", "")
@@ -4783,3 +4797,4 @@ def make_data_key(self):
                   (int(self.graph_right - (key.size[0] + 5 * self.scale)),
                    int(self.graph_bottom - (key.size[1] + 45 * self.scale)))
                   )
+
