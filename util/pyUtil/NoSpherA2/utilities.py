@@ -245,6 +245,21 @@ def _mask_completion_hkl_bounds():
     print(f"Warning: could not compute mask set-completion index bounds for NoSpherA2 table: {e}")
     return None
 
+def _file_d_min():
+  """d_min over every reflection of the current hkl file (HKLF-matrix transformed, no SHEL/OMIT
+  or sigma filter, so unlike GetHklStat()['MinD'] it covers the whole file). Sent to NoSpherA2 as
+  -dmin next to -hkl_min_max: with both, NoSpherA2 keeps from the resolution sphere only the
+  symmetry images of the index box, the smallest table from which cctbx's tsc reader resolves
+  every measured index (generate_hkl in Src/core/scattering_factors.cpp). The box alone expands
+  its corners beyond the measured resolution, the sphere alone can reach far outside a partial
+  dataset's box. Returns None when the file cannot be read, and the caller falls back to the box."""
+  try:
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    return OlexCctbxAdapter().reflections.f_sq_obs.d_min()
+  except Exception as e:
+    print(f"Warning: could not read the hkl file's d_min for the NoSpherA2 table: {e}")
+    return None
+
 @run_with_bitmap('Partitioning')
 def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False):
   basis_name = nsa2_get_param('basis_name')
@@ -370,10 +385,12 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     OV.HKLSrc(original_hklsrc)
     try:
       d2 = olex_core.GetHklStat()
+      file_d_min = _file_d_min()
     finally:
       OV.HKLSrc(current_hklsrc)
   else:
     d2 = olex_core.GetHklStat()
+    file_d_min = _file_d_min()
   hkl_min = list(d2['FileMinIndices'])
   hkl_max = list(d2['FileMaxIndices'])
   mask_bounds = _mask_completion_hkl_bounds()
@@ -388,28 +405,20 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   args.append(str(hkl_max[1]))
   args.append(str(hkl_min[2]))
   args.append(str(hkl_max[2]))
-  #shel = olx.Ins('SHEL')
-  #omit = olx.Ins('OMIT')
-  #d_min = d2['MinD']
-  #if shel != "n/a":
-  #  d = float(shel.split()[-1])
-  #  if d > d_min:
-  #    d_min = d
-  #if omit != "n/a":
-  #  from cctbx import uctbx
-  #  d = uctbx.two_theta_as_d(float(omit.split()[-1]),float(olx.xf.exptl.Radiation()),deg=True)
-  #  if d > d_min:
-  #    d_min = d
-  #args.append("-dmin")
-  #args.append(str(d_min * 0.95))
+  # -dmin next to the box (see _file_d_min). NoSpherA2 keeps a 1e-3 margin inside dmin itself,
+  # so the file's own d_min is sent unscaled. For ED the dynamical calculation needs every beam
+  # to min(top_up_d, measured d_min)/2 (smtbx/ED/n_beam.h); NoSpherA2 generates that sphere
+  # from -dmin and ignores the box under -ED.
+  d_min = file_d_min
   if OV.IsEDRefinement():
     try:
       top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d"))
-      if top_up_d < d2['MinD']:
-        args.append("-dmin")
-        args.append(str(top_up_d))
+      d_min = top_up_d if d_min is None else min(d_min, top_up_d)
     except:
-      print("Failed to set dmin for TSC")
+      print("Failed to read top_up_d for the TSC resolution")
+  if d_min is not None:
+    args.append("-dmin")
+    args.append(str(d_min))
   if isinstance(wfn_file, list):
     if isinstance(cif, list):
       args.append("-cmtc")
