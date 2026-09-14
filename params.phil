@@ -299,8 +299,15 @@ routines requiring structure refinement
       Unknown 
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' FullCG 'L-BFGS-B' 'Newton-CG' SLSQP CGLS-J Unknown
+      'Full Matrix' FullCG 'L-BFGS-B' 'Newton-CG' SLSQP CGLS-J MLF MLI \
+      Unknown
       .type = choice
+      .help = MLF and MLI are not steps but targets: both take the CGLS-J \
+        step and replace weighted least squares on F squared with a \
+        likelihood, on amplitudes and on intensities respectively. They pay \
+        only below about one reflection per parameter, and the statistics \
+        they report are least-squares ones, so treat GooF, wR2 and the \
+        standard uncertainties from an ML run with care.
     cgls
       .help = Settings for CGLS-J, conjugate gradient least squares. One cycle \
         is one linearisation followed by conjugate gradients on it, so cycles \
@@ -355,6 +362,46 @@ routines requiring structure refinement
         .type = float(value_min=1e-6)
         .help = How strongly the restraint bites. The weight is 1/sigma^2, so \
           smaller is stronger.
+        .expert_level = 2
+    }
+    ml
+      .help = Maximum-likelihood refinement, which replaces the least-squares \
+        target with the Rice likelihood. Experimental, and off by default. It \
+        is worth having only where the data barely determine the model: on a \
+        test structure it beat least squares below about one reflection per \
+        refined parameter and lost above it, so an ordinary small-molecule \
+        refinement should leave it alone. It applies to whichever solver is \
+        selected above, changing the target rather than the step.
+    {
+      enabled = False
+        .type = bool
+        .help = Refine against the likelihood instead of weighted least \
+          squares. The weighting scheme is then ignored: the weights come from \
+          alpha and beta, which are re-estimated every cycle.
+        .expert_level = 2
+      target = *mlf mli
+        .type = choice
+        .help = mlf is the amplitude (Rice) target, what Refmac and Phenix use \
+          by default. mli convolves it with the experimental error, so a \
+          negative measured intensity is used rather than rejected and no \
+          French-Wilson conversion is needed. mli costs about twice mlf per \
+          cycle, for a 20-node quadrature per reflection.
+        .expert_level = 2
+      free_fraction = 0.1
+        .type = float(value_min=0.01, value_max=0.5)
+        .help = Fraction of reflections held out to estimate alpha and beta. \
+          The set is derived from the Miller indices, the cell and the space \
+          group, so it is the same on every run and nothing is written into \
+          the file. It is also excluded from the target sum, since estimating \
+          alpha and beta on reflections being refined against is circular. \
+          A free set is required: estimated on the working set, beta falls to \
+          zero as the model overfits and whole shells then contribute nothing.
+        .expert_level = 2
+      free_reflections_per_bin = 140
+        .type = int(value_min=20)
+        .help = Resolution bin width for the alpha/beta estimate, counted in \
+          free reflections. Fewer per bin follows resolution more closely and \
+          is noisier.
         .expert_level = 2
     }
     scipy
@@ -430,8 +477,19 @@ routines requiring structure refinement
       .type = bool
     recompute_mask_before_refinement = False
       .type = bool
-    recompute_mask_before_refinement_prg = *Olex2 Platon
+    recompute_mask_before_refinement_prg = *Olex2 Platon Flat Flip
       .type = choice
+      .help = Which program computes the solvent contribution. Olex2 is \
+              smtbx.masks, which reads the solvent density out of the \
+              difference map. Platon is SQUEEZE. Flat is the two \
+              parameter k_sol/B_sol model macromolecular programs use, \
+              where the region comes from the atoms and only its height \
+              and fall-off are fitted. On ten proteins, scored on \
+              reflections held out of the fit, Flat improved R_free by \
+              13.3 per cent in the lowest resolution shell and left the \
+              outer shells untouched, where Olex2 gained 1.2 per cent \
+              and lost 14.8 per cent in the outer shells. Prefer Flat \
+              for proteins.
     auto_add_masked_moieties = True
       .type = bool
     check_absolute_structure_after_refinement = True
@@ -461,6 +519,38 @@ routines requiring structure refinement
       command_line = ''
         .type = str
     }
+
+    use_free_set = False
+      .type = bool
+      .short_caption = Hold reflections out for R_free
+      .help = Refine against part of the data only and report R_free on the \
+        rest. A deposited set is used where one exists - PdbFetch writes it \
+        beside the hkl - since an R_free the model has already seen cannot be \
+        compared with a published value. Off by default: at small-molecule \
+        data to parameter ratios the reflections cost more than the check is \
+        worth.
+    free_fraction = 0.05
+      .type = float(value_min=0.01, value_max=0.5)
+      .short_caption = Fraction held out
+      .help = How much of the data to hold out when there is no deposited \
+        set. Drawn from the Miller indices, the cell and the space group, so \
+        it is the same on every run and nothing is written into the file. \
+        Ignored when a deposited set is found.
+    free_shell_report = True
+      .type = bool
+      .short_caption = Report the shell composition
+      .help = Print how the test set is spread over resolution when it is \
+        built. A set that is the right size overall can still be badly \
+        composed, and that is not visible from R_free alone.
+    free_shells = 20
+      .type = int(value_min=1, value_max=200)
+      .short_caption = Resolution shells
+      .help = The fraction is taken from each of this many shells of equal \
+        reflection count, rather than from the data as a whole. Drawn \
+        uniformly the test set is not uniform in resolution - the sparse \
+        inner shells can lose a disproportionate share - and R_free is then \
+        noisiest where the model is least constrained. 1 restores an \
+        unstratified draw.
 
     auto
       .short_caption = Autotidy
@@ -934,11 +1024,54 @@ routines requiring structure refinement
               reflections over five structures. Best where the \
               correction is large and never worse. A structure with \
               no partial atoms is untouched.
+    flip_cycles = 12
+      .type = int
+      .help = Iterations of the solvent-region charge flipping. The \
+              atomic model is the fixed channel and only the region is \
+              free, which is the two channel arrangement Roversi 1998 \
+              showed avoids the artefacts of maximum entropy on sharp \
+              atomic cores.
+    flip_threshold_sigma = 0.4
+      .type = float
+      .help = Density below this many sigma of the region is flipped \
+              rather than kept. Flipping enforces positivity without \
+              ever fitting the residual directly, which is a weaker \
+              way to absorb model error than levelling a difference \
+              map is.
+    flat_solvent_radius = 1.1
+      .type = float
+      .help = Probe radius for the flat model's region, in Angstrom. \
+              Defaults to the macromolecular value from mmtbx.masks \
+              rather than the small molecule one used for the \
+              difference-map mask, because the flat model is the \
+              macromolecular one and should be built its way.
+    flat_shrink_radius = 0.9
+      .type = float
+      .help = Shrink truncation radius for the flat model's region, in \
+              Angstrom. Also the mmtbx value. The difference-map mask \
+              uses 1.2, which removes noticeably more of the region. \
+              which removes noticeably more of the region.
+    flat_ignore_hydrogens = True
+      .type = bool
+      .help = Leave hydrogens out of the flat model's region, as \
+              mmtbx.masks does. Including several thousand of them \
+              shrinks the solvent region and roughens its boundary.
+    flat_k_sol_range = 0.05 0.90 35
+      .type = floats(size=3)
+      .help = Lowest, highest and number of trial values for k_sol, the \
+              solvent electron density of the flat model, in e/Angstrom \
+              cubed. Liquid water is 0.334 and fits on ten proteins \
+              landed between 0.30 and 0.50.
+    flat_b_sol_range = 0.0 300.0 61
+      .type = floats(size=3)
+      .help = Lowest, highest and number of trial values for B_sol, how \
+              quickly the flat solvent contribution falls off with \
+              resolution, in Angstrom squared.
     boundary_smearing = 0
       .type = float
       .help = Rounds the solvent region edge over a Gaussian of this many \
               solvent radii. Zero is the hard edge Olex2 has always used. On \
-              crambin 0.5 is a small improvement judged the right way - wR2 \
+              one protein 0.5 is a small improvement judged the right way - wR2 \
               0.3283 and GooF 2.161 against 0.3294 and 2.169 for the hard edge, \
               with a more believable density, 0.88 times liquid water against \
               1.03. R1 moves the other way, which is why it is not the measure \
@@ -955,7 +1088,7 @@ routines requiring structure refinement
               keeps the mask off the atoms, at the cost of about a fifth of \
               the region volume and the electrons in it, and it cannot be \
               exact where the boundary is concave. Measured worse than the \
-              default on both crambin and 1IEE once solvent_d_min is set.
+              default on two proteins once solvent_d_min is set.
     bias_correction = False
       .type = bool
       .help = Weight the difference map by how far the model can be trusted, \
@@ -973,7 +1106,7 @@ routines requiring structure refinement
               angle reflections carry no information about it, and cutting a \
               region out of a map built from them can put the model's own error \
               into f_mask. Whether that is what is happening depends on the \
-              structure and cannot be assumed: on crambin at 0.48 A the mask \
+              structure and cannot be assumed: on one protein at 0.48 A the mask \
               held 33 per cent of Fc in every shell, a limit of 3 A removed it \
               and kept 98 per cent of the electrons, and the refinement then \
               lost the whole benefit of the mask - wR2 0.546 against 0.330. At \
@@ -1308,6 +1441,20 @@ user
     hide_nsff = False
       .type = bool
       .expert_level = 2
+    show_experimental = False
+      .type = bool
+      .short_caption = Show experimental refinement options
+      .help = Offer the experimental refinement work in the GUI - the \
+              maximum-likelihood targets ML - F and ML - I in the method \
+              list, and the R_free settings beside them. Off by default \
+              because none of it helps an ordinary small-molecule \
+              refinement and the likelihood in particular reports \
+              least-squares statistics that must not be published. Set it \
+              the way user.NoSpherA2.show_partitioning is set, per user \
+              rather than per structure. Turning it off again does not \
+              change a structure already refining against a likelihood - \
+              the method stays selected and stays visible, so nothing \
+              silently switches target underneath it.
     refln_loop = False
       .type = bool
     use_openmp = False

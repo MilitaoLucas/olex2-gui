@@ -309,6 +309,27 @@ display = 'CGLS-J'
   .type=str
 """)
 
+# The two maximum-likelihood targets. They are not steps of their own: both
+# take the CGLS-J step and change what is being minimised, from weighted least
+# squares on F^2 to the Rice likelihood on amplitudes (MLF) or its convolution
+# with the measurement error on intensities (MLI). They appear here rather
+# than as a switch because the target is the thing a user is choosing between,
+# and because the likelihood is worth having only below about one reflection
+# per parameter - which is why they are offered on polymers.
+mlf_phil = phil_interface.parse("""
+name = 'MLF'
+  .type=str
+display = 'ML - F'
+  .type=str
+""")
+
+mli_phil = phil_interface.parse("""
+name = 'MLI'
+  .type=str
+display = 'ML - I'
+  .type=str
+""")
+
 ##########################################################################
 # this is how a refinement thread could look like
 

@@ -69,6 +69,73 @@
 <!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
 #ignoreif -->
 
+<!-- The maximum-likelihood targets are ML - F and ML - I in the refinement
+method list; what is left here is the free set they are estimated from,
+which has no meaning under any other method. -->
+<!-- Applies to every method rather than to one, so what guards it is the
+experimental switch and not the method. -->
+<!-- #ignoreif not spy.GetParam('user.refinement.show_experimental')
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=R_Free;1 -->
+<td width='25%'>
+  <b>R<sub>free</sub> set</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-checkbox"
+     name="use_free_set"
+     checked="spy.GetParam('snum.refinement.use_free_set')"
+     onclick="spy.SetParam('snum.refinement.use_free_set', html.GetState('~name~'))" />
+</td>
+<td width='25%'>
+  <b>Fraction</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-text"
+     name="free_fraction"
+     value="spy.GetParam('snum.refinement.free_fraction')"
+     onchange="spy.SetParam('snum.refinement.free_fraction', html.GetValue('~name~'))" />
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=R_Free;1 -->
+<td width='25%'>
+  <b>R<sub>free</sub> shells</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-text"
+     name="free_shells"
+     value="spy.GetParam('snum.refinement.free_shells')"
+     onchange="spy.SetParam('snum.refinement.free_shells', html.GetValue('~name~'))" />
+</td>
+<td width='25%'>
+</td>
+<td width='5%' align="right">
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+#ignoreif -->
+
+<!-- #ignoreif not(or(strcmp(spy.GetParam('snum.refinement.method'),'MLF'),strcmp(spy.GetParam('snum.refinement.method'),'MLI')))
+<!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=ML_Options;1 -->
+<td width='25%'>
+  <b>ML - free set</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-text"
+     name="ml_free_fraction"
+     value="spy.GetParam('snum.refinement.ml.free_fraction')"
+     onchange="spy.SetParam('snum.refinement.ml.free_fraction', html.GetValue('~name~'))" />
+</td>
+<td width='25%'>
+  <b>ML - refl/bin</b>
+</td>
+<td width='5%' align="right">
+     <snippet src="gui/snippets/input-text"
+     name="ml_refl_per_bin"
+     value="spy.GetParam('snum.refinement.ml.free_reflections_per_bin')"
+     onchange="spy.SetParam('snum.refinement.ml.free_reflections_per_bin', html.GetValue('~name~'))" />
+</td>
+<!-- #include first-row-table-off gui\balanced\row-table-off.htm;1; -->
+#ignoreif -->
+
 <!-- #include first-row-on gui\balanced\row-table-on.htm;help_ext=Terminate_ED;1 -->
 <td width='25%'>
   <b>CH<sub>2</sub></b>

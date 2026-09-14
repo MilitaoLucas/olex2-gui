@@ -1134,6 +1134,13 @@ def get_refinement_programs(scope='snum'):
   return retval
 OV.registerFunction(get_refinement_programs)
 
+# Refinement methods that are not offered unless
+# user.refinement.show_experimental is set. They are registered as ordinary
+# methods, so the filter is here rather than in ExternalPrgParameters: a method
+# that is not in RPD at all cannot be selected by a script or reloaded from a
+# structure that was refined with it.
+experimental_refinement_methods = ('MLF', 'MLI')
+
 def get_refinement_methods(prg, scope='snum'):
   retval = ""
   if prg == '?' or prg == 'Unknown': return retval
@@ -1142,7 +1149,16 @@ def get_refinement_methods(prg, scope='snum'):
     return 'Auto'
   p = [x.name for x in RPD.programs[prg]]
   p.sort()
+  # The one already selected is always listed, whatever the switch says.
+  # Dropping it would leave the combo showing a value that is not among its
+  # items, and the next thing to touch the control would quietly refine with
+  # something else.
+  show_experimental = bool(OV.GetParam('user.refinement.show_experimental'))
+  current = OV.GetParam("%s.refinement.method" %scope)
   for item in p:
+    if (item in experimental_refinement_methods
+        and not show_experimental and item != current):
+      continue
     display = RPD.programs[prg].methods[item].display
     retval += "%s<-%s;" %(display,item)
   OV.SetControlItems(f'SET_{scope}_refinement_METHOD', retval)

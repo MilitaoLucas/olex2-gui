@@ -178,6 +178,37 @@ def normal_equation_class(*args, **kwds):
         if hasattr(self.iterations_object, 'n_cg_iterations'):
           header += "  % 8i"
           params += (self.iterations_object.n_cg_iterations,)
+        # Under a likelihood target, the two statistics that judge it: the
+        # free log-likelihood per reflection - the functional being
+        # minimised, evaluated where the refinement cannot see - and the
+        # free R factor beside it. Tickle (2007) argues the first is what a
+        # weighting parameter should be chosen against, the second knowing
+        # nothing about the error model that the weights are.
+        #
+        # Guarded on the attribute rather than on the method: an older
+        # cctbx bundle in this run directory has no log_likelihood, and a
+        # missing column is better than a refinement that stops.
+        # free_only: the columns show LL_free alone, and the working sum
+        # is the expensive nine tenths - 12-21% of an MLI cycle measured
+        ll = None
+        if hasattr(self, 'log_likelihood'):
+          try:
+            ll = self.log_likelihood(free_only=True)
+          except TypeError:
+            # a bundle older than free_only still has the method, so
+            # hasattr says yes and the call then dies on the keyword.
+            # That killed every refinement, not only the likelihood
+            # ones, because this runs for all of them.
+            ll = self.log_likelihood()
+        if ll is not None and ll.n_free:
+          header += "  % 10.4f"
+          params += (ll.free_per_reflection(),)
+          r_free, n_free = self.r_free()
+          if r_free is not None:
+            header += "  % 8.4f"
+            params += (r_free*100,)
+            self.step_info['_refine_ls_R_factor_R_free'] = r_free
+            self.step_info['_refine_ls_number_reflns_R_free'] = n_free
         print(header %params, file=log)
 
       else:
@@ -569,6 +600,15 @@ class cgls_iterations(iterations_with_shift_analysis, cgls.cgls_iterations):
       for j, i in enumerate(indices):
         variances[int(i)] = inverse[j, j]
     variances /= problem.sum_w_yo_sq
+    # deliberately the goodness of fit even under a likelihood, where the
+    # covariance itself does not want it (see
+    # crystallographic_ls.variance_goof_factor). These s.u. are not reported;
+    # DAMP divides the shifts by them, and its limit is a number users choose
+    # against least-squares behaviour. Dropping the factor here raises the ML
+    # s.u. about twelvefold on a restrained protein, DAMP then admits a step
+    # about twelve times longer, and one protein ends a three cycle run at R1
+    # 0.158 instead of 0.133. Keeping it holds the limiter to one scale across
+    # targets, which is what makes a DAMP value mean the same thing in each.
     variances *= self.non_linear_ls.actual.restrained_goof()**2
     variances.set_selected(variances <= 0, 1e-30)
     return flex.sqrt(variances)

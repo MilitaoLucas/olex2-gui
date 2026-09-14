@@ -1,5 +1,6 @@
 import math, os, sys
-from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
+from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, \
+  OlexCctbxFlatSolvent, OlexCctbxFlipSolvent, rt_mx_from_olx
 import cctbx_olex_adapter as COA
 from boost_adaptbx.boost import python
 ext = python.import_ext("smtbx_refinement_least_squares_ext")
@@ -53,6 +54,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     'Newton-CG': olex2_normal_equations.scipy_iterations,
     'SLSQP': olex2_normal_equations.scipy_iterations,
     'CGLS-J': olex2_normal_equations.cgls_iterations,
+    # Targets, not steps: both take the CGLS-J step and only change
+    # what is minimised. See get_ml_target.
+    'MLF': olex2_normal_equations.cgls_iterations,
+    'MLI': olex2_normal_equations.cgls_iterations,
   }
   solvers_default_method = 'Gauss-Newton'
   # Methods solved by scipy.optimize.minimize, mapping the Olex2 name onto the
@@ -114,6 +119,77 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print("WARNING: unsupported weighting scheme: '%s' is replaced by 'shelx'"\
             %weighting_choice)
         self.weighting = self.get_shelxl_weighting()
+
+  def get_ml_target(self):
+    """ 'mlf', 'mli', or None for ordinary least squares.
+
+    Read on its own because the accumulator family has to be chosen before the
+    normal equations object is built, which is well before the observations are
+    wanted.
+
+    The method chosen in the dropdown decides it; the ml scope only supplies
+    the settings. snum.refinement.ml.enabled is still honoured so that saved
+    structures and scripts that set it keep working, but picking MLF or MLI is
+    the ordinary way in.
+    """
+    method = OV.GetParam('snum.refinement.method')
+    if method == 'MLF':
+      target = 'mlf'
+    elif method == 'MLI':
+      target = 'mli'
+    elif OV.GetParam('snum.refinement.ml.enabled'):
+      target = str(OV.GetParam('snum.refinement.ml.target'))
+    else:
+      return None
+    # The bundled cctbx is a separate copy and may predate this. Checked here
+    # so the failure names the cause, rather than surfacing as a TypeError
+    # about an unexpected keyword from somewhere inside the class builder.
+    import inspect
+    from smtbx.refinement import least_squares as smtbx_least_squares
+    if 'ml_target' not in inspect.signature(
+        smtbx_least_squares.crystallographic_ls_class).parameters:
+      raise RuntimeError(
+        "maximum-likelihood refinement is not available in this Olex2's "
+        "cctbx: smtbx.refinement.least_squares.crystallographic_ls_class has "
+        "no ml_target. Choose another refinement method, or update the "
+        "bundled cctbx.")
+    return target
+
+  def get_ml_kwds(self):
+    """ The maximum-likelihood settings, or nothing at all.
+
+    The free set is derived from the Miller indices, the cell and the space
+    group rather than stored, so it is the same on every run and no flag column
+    is written into anyone's file. It is held out of the target sum as well as
+    used for the estimate: alpha and beta estimated on reflections that are
+    being refined against would be circular.
+    """
+    target = self.get_ml_target()
+    if target is None:
+      return {}
+    from smtbx.refinement import sigma_a
+    if not sigma_a.is_available():
+      raise RuntimeError(
+        "maximum-likelihood refinement needs the alpha/beta estimator from "
+        "mmtbx.max_lik, which this installation does not have. Switch "
+        "snum.refinement.ml.enabled off to refine by least squares.")
+    # Said once per refinement, because the numbers Olex2 goes on to report are
+    # least-squares statements and stay least-squares statements. The weight in
+    # the normal matrix is the positive part of the curvature only, so
+    # covariance_matrix - and every standard uncertainty taken from it - comes
+    # out systematically too small; goof and wR2 are defined against the
+    # least-squares target and are not the likelihood's.
+    olx.Echo("Maximum likelihood is experimental. Standard uncertainties, GooF"
+      " and wR2 reported from this refinement are least-squares quantities and"
+      " are not valid under the likelihood; the s.u.s in particular are too"
+      " small. Do not publish them.", m="warning")
+    fraction = float(OV.GetParam('snum.refinement.ml.free_fraction'))
+    return dict(
+      ml_target=target,
+      ml_free_flags=sigma_a.deterministic_free_flags(
+        self.observations.fo_sq, fraction),
+      ml_free_reflections_per_bin=int(
+        OV.GetParam('snum.refinement.ml.free_reflections_per_bin')))
 
   def run(self,
           build_only=False, #return normal normal equations object
@@ -190,6 +266,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if not self.f_mask:
             self.failure = True
             return
+        elif _ == "Flip":
+          # solvent recovered by charge flipping in the region, with the
+          # atomic model held fixed as the known channel
+          stopwatch.run(OlexCctbxFlipSolvent)
+          if olx.current_mask.n_voids() > 0:
+            self.f_mask = olx.current_mask.f_mask()
+        elif _ == "Flat":
+          # the two parameter k_sol/B_sol model; the region is geometry
+          # only, so there is no difference map to read and nothing to
+          # write back into the hkl - hence no sort_out_masking_hkl here
+          stopwatch.run(OlexCctbxFlatSolvent)
+          if olx.current_mask.n_voids() > 0:
+            self.f_mask = olx.current_mask.f_mask()
         else:
           stopwatch.run(OlexCctbxMasks)
           gui.tools.GetMaskInfo.sort_out_masking_hkl()
@@ -321,9 +410,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.Echo("Nothing to refine!", m="error")
         self.failure = True
         return
+      # ml_target picks the accumulator family as well as the target: maximum
+      # likelihood needs the fixed-scale one, the separable accumulator solving
+      # for a scale that alpha and beta already contain. The BLAS level is
+      # chosen inside, from whether fast_linalg came up.
+      #
+      # Passed only when it is wanted, so that a cctbx without the parameter
+      # goes on refining by least squares as before rather than raising on
+      # every structure.
+      kwds = {}
+      ml_target = self.get_ml_target()
+      if ml_target is not None:
+        kwds['ml_target'] = ml_target
       self.normal_equations_class = normal_equations_class_builder(
         n_parameters=self.reparametrisation.n_independents,
-        may_parallelise=self.worth_parallelising())
+        may_parallelise=self.worth_parallelising(),
+        **kwds)
 
     if reparametrisation_only:
       return self.reparametrisation
@@ -365,7 +467,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       may_parallelise=self.worth_parallelising(),
       use_openmp=use_openmp,
       max_memory=max_mem,
-      std_observations=self.std_obserations
+      std_observations=self.std_obserations,
+      **self.get_ml_kwds()
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -400,7 +503,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
               tau = 1e-6,
               convergence_as_shift_over_esd=convergence_as_shift_over_esd,
               )
-        elif method == 'CGLS-J':
+        elif method in ('CGLS-J', 'MLF', 'MLI'):
           # 'auto' is how a phil choice spells "pick on what fits"
           mode = OV.GetParam('snum.refinement.cgls.mode')
           if mode == 'auto':
@@ -478,6 +581,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       stopwatch.start("Analysis")
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
+      self.r_free = self.compute_r_free()
       if len(self.reparametrisation.mapping_to_grad_fc_all) == 0:
         self.objective_only = True
         stopwatch.start("FFT")
@@ -572,7 +676,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif "SCITBX_ASSERT(!cholesky.failure) failure" in e_string:
         print("Cholesky failure")
         i = str(e).rfind(' ')
-        index = int(str(e)[i:])
+        # scitbx reports the ORDER of the leading minor that failed, which is
+        # one-based because zero has to mean "no failure". The matrix row is
+        # therefore one less, and using the reported number as a row index
+        # names the parameter after the guilty one: on a THPP refinement it
+        # blamed H10b.x, an atom that was perfectly well determined, while the
+        # actual zero row was the scalar parameter at index 0.
+        index = int(str(e)[i:]) - 1
         if index >= 0:
           # the index is a row of the normal matrix, i.e. an independent
           # parameter; translate it to the crystallographic parameter it stands
@@ -587,8 +697,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
             param_name = "Scalar Parameter"
           else:
             param_name = annotations[index]
-          print("the leading minor of order %i for %s is not positive definite"\
-           %(index, param_name))
+          print("the leading minor of order %i for %s (matrix row %i) is not "
+                "positive definite" % (index + 1, param_name, index))
           print("This parameter is not determined by the data. Look for a "
                 "restraint or constraint involving it, or an atom that should "
                 "not be refined freely.")
@@ -965,9 +1075,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     elif ref_method in FullMatrixRefine.scipy_methods:
       header += "  Evaluations "
       hr +=   "  ------------"
-    elif ref_method == 'CGLS-J':
+    elif ref_method in ('CGLS-J', 'MLF', 'MLI'):
       header += "   CG iters   "
       hr +=   "  ------------"
+      if ref_method in ('MLF', 'MLI'):
+        header += "  -LL_free/n      R_free"
+        hr +=     "  ----------  --------"
     # Name the optimiser right above its own table, so that a log holding
     # several runs cannot leave it in doubt which one produced which. The
     # console has had this already, from the line naming the thread counts, so
@@ -976,10 +1089,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if ref_method in FullMatrixRefine.scipy_methods:
         print("Optimiser: %s via scipy.optimize.minimize" % ref_method,
               file=log)
-      elif ref_method == 'CGLS-J':
+      elif ref_method in ('CGLS-J', 'MLF', 'MLI'):
         print("Optimiser: conjugate gradient least squares. Shift/esd is "
               "approximated from the block diagonal during the run; the "
               "values reported at the end are from the full matrix.", file=log)
+        if ref_method != 'CGLS-J':
+          # R1 is a least-squares quantity throughout and comparable with a
+          # CGLS-J run. wR2 and GooF are not: they are formed from the
+          # likelihood's own effective observations and weights, which are a
+          # curvature rather than an inverse variance, so the goodness of fit
+          # has no reason to approach one.
+          print("Target: maximum likelihood on %s. The columns below are "
+                "least-squares statistics of the model it reaches, so they "
+                "compare directly with a CGLS-J run." %
+                ("amplitudes" if ref_method == 'MLF' else "intensities"),
+                file=log)
       else:
         print("Optimiser: %s" % ref_method, file=log)
     print(hr, file=log)
@@ -1553,9 +1677,38 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_refine_ls_shift/su_max'] = "%.4f" % self.normal_eqns.max_shift_esd
       cif_block['_refine_ls_shift/su_mean'] = "%.4f" % self.normal_eqns.mean_shift_esd
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
-    cif_block['_refine_ls_weighting_details'] = str(
-      self.normal_eqns.weighting_scheme)
+    # Under a likelihood target the weighting scheme is not used at all: the
+    # weights come from alpha and beta, re-estimated every cycle against a
+    # free set. Printing the scheme regardless would put a weighting into a
+    # publishable CIF that the refinement never applied.
+    ml_target = getattr(self.normal_eqns, 'ml_target', None)
+    if ml_target:
+      cif_block['_refine_ls_weighting_details'] = (
+        'maximum likelihood, %s target. The weights are computed from alpha '
+        'and beta, re-estimated each cycle from a free set of reflections; '
+        'no least-squares weighting scheme was applied.' % str(ml_target))
+    else:
+      cif_block['_refine_ls_weighting_details'] = str(
+        self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
+    if ml_target:
+      # The refinement already warns on screen that the goodness of fit, wR2
+      # and the standard uncertainties are least-squares quantities and must
+      # not be published. They are still written above, because checkCIF wants
+      # them and omitting them would fail validation - so the file has to carry
+      # the caveat rather than leave a reader to assume otherwise.
+      caveat = (
+        'Refined against a maximum likelihood target (%s). The goodness of '
+        'fit, wR2 and the standard uncertainties reported here are '
+        'least-squares quantities taken from the final normal equations; they '
+        'are not valid under the likelihood and the uncertainties in '
+        'particular are underestimated.' % str(ml_target))
+      try:
+        previous = cif_block['_refine_special_details']
+      except (KeyError, TypeError):
+        previous = None
+      cif_block['_refine_special_details'] = (
+        caveat if not previous else "%s\n%s" % (previous, caveat))
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
     cif_block['_refine_ls_wR_factor_gt'] = fmt % self.wR2_factor(2)
     (h_min, k_min, l_min), (h_max, k_max, l_max) = refinement_refs.min_max_indices()
@@ -2459,6 +2612,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
       olx.Freeze(frozen)
       OV.Refresh()
 
+  def compute_r_free(self):
+    """R1 on the reflections the refinement never saw, or None.
+
+    Recomputed from the refined model rather than read off the last cycle:
+    the test set is not in the normal equations at all, which is the point of
+    it, so nothing in there knows these reflections exist.
+    """
+    fo_sq = getattr(self, 'f_sq_obs_free', None)
+    if fo_sq is None or fo_sq.size() == 0:
+      return None
+    try:
+      import free_set
+      fc = self.f_calc(fo_sq, ignore_inversion_twin=True)
+      return free_set.r1(fo_sq, fc)
+    except Exception as e:
+      print("R_free could not be computed: %s" %e)
+      return None
+
   def show_summary(self, log=None):
     _ = self.cycles.n_iterations
     plural = "S"
@@ -2477,6 +2648,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print_l.append(f"  ++++++++++++++++++++++++++++++++++++++++++++++++{pad*'+'}++++++ After {self.cycles.n_iterations} CYCLE{plural} +++")
     print_l.append(f"  +  R1:       {self.r1[0]:.4f} for {self.r1[1]} reflections I >= 2u(I). Last R1: {last}")
     print_l.append("  +  R1 (all): %.4f for %i reflections" %self.r1_all_data)
+    if getattr(self, 'r_free', None) is not None:
+      print_l.append("  +  R_free:   %.4f for %i reflections held out" % (
+        self.r_free, self.f_sq_obs_free.size()))
     print_l.append("  +  wR2:      %.4f, GooF:  %.4f" % (
       self.normal_eqns.wR2(),
       self.normal_eqns.goof()

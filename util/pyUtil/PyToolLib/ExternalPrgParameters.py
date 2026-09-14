@@ -84,6 +84,8 @@ def defineExternalPrograms():
   newton_cg = Method_cctbx_refinement(newton_cg_phil)
   slsqp = Method_cctbx_refinement(slsqp_phil)
   cgls_j = Method_cctbx_refinement(cgls_j_phil)
+  mlf = Method_cctbx_refinement(mlf_phil)
+  mli = Method_cctbx_refinement(mli_phil)
 
   # define solution programs
 
@@ -314,6 +316,8 @@ Palatinus et al., 2012""",
   smtbx_refine.addMethod(newton_cg)
   smtbx_refine.addMethod(slsqp)
   smtbx_refine.addMethod(cgls_j)
+  smtbx_refine.addMethod(mlf)
+  smtbx_refine.addMethod(mli)
   RPD.addProgram(smtbx_refine)
 
   #tonto_refine.addMethod(Method_tonto_HAR(tonto_HAR_phil))
