@@ -69,6 +69,15 @@ When all settings are finalized, a final NoSpherA2 job is run by clicking this b
 # NoSpherA2 Options
 All the settings required for the calculation of the .tsc file are found under this tool tab.
 
+## Experimental features
+Some parts of the NoSpherA2 interface are hidden by default and switched on per user. Each has its own flag in the **user.NoSpherA2** scope, set from the console with **spy.SetParam('user.NoSpherA2.&lt;flag&gt;', True)** followed by **html.Update()**, or in your user phil file:
+
+- **show\_OCC** - offers **OCC**, the wavefunction code compiled into NoSpherA2, in the source list.
+- **show\_CE** - shows the **Energies** row (SALTED interaction energies) in NoSpherA2 Properties.
+- **show\_XCW** - shows the **NoSpherA2 XCW** block for X-ray constrained wavefunction fitting (see below).
+
+The SALTED source is a development feature and appears only in debug mode (**olex2.debug**).
+
 
 # NoSpherA2 Options 1
 
@@ -245,3 +254,27 @@ Select three or more atoms and click the **Depth** button to display a map that 
 
 ## Size
 This slider controls the size of the plotted 2D map. Larger values decrease the size of the map on the screen, but increase the resolution of the map. Again, specific values of the map size can be manually entered in the text box next to the slider.
+
+# NoSpherA2 XCW
+Experimental. X-ray constrained wavefunction (XCW) fitting: the wavefunction of the model is refined against the measured structure factors with a Lagrange multiplier &lambda; that weights the agreement with the data against the energy. NoSpherA2 scans &lambda; from *start* to *end* in steps and writes one form-factor table **NA2\_&lambda;.tscb** per step, so any of them can then be used for a HAR-type refinement. The block is shown only with **user.NoSpherA2.show\_XCW** and all settings live in **snum.NoSpherA2.XCW**.
+
+## Basis Set
+The orbital basis of the SCF (the **basis\_set** keyword of the settings file), *DF Basis* an optional density-fitting auxiliary basis. *Target* chooses whether F or F<sup>2</sup> is fitted, *weighted* applies the &sigma; weights of the data, *Ref.* selects a restricted (rhf) or unrestricted (uhf) reference.
+
+## Lambda scan
+*&lambda; start*, *step* and *end* define the scan; &lambda; = 0 is the unconstrained wavefunction. *Params* is the number of refined parameters of the crystallographic model, needed for the goodness of fit; 0 takes the count of the last refinement. *Charge* is the total charge of the molecule.
+
+## SCF
+*SCF* is the convergence preset (sloppy, normal, tight, very\_tight), *Conv.* the damping preset (slow\_conv, normal\_conv, fast\_conv), *Max iter* the SCF iteration limit. *CPUs* and *Mem(Gb)* are passed to NoSpherA2 like every other run.
+
+## Run options
+*Gaussian halt* stops the scan at the Gaussian halting criterion instead of running to *end*; *strong cutoff* is the I/&sigma; threshold for the strong reflections used by that criterion. *incremental* starts every &lambda; step from the previous wavefunction, *int. precision* is the integral screening threshold, *extrapolate* extrapolates the starting density between steps, *GPU* uses the device for the integrals when NoSpherA2 was built with GPU support.
+
+## I tensor MB
+Memory cap for the stored I tensor in MB (0 = automatic). *Anom. disp. file* is an optional file with anomalous dispersion corrections (**-anom\_disp**), a path relative to the structure. *Multiplicity* is the spin multiplicity.
+
+## Extra settings
+Anything typed here is appended verbatim to the end of the settings file, one line per entry, so keywords the GUI has no control for (**conv 1e-7**, **gradient 1e-5**, **damp 0.5**, **shift 0.3**, **diis\_damping**, **diis\_shift**, **read**, **load\_wfn &lt;file&gt;**, **nbo**, **save**, **i\_float**, ...) can still reach **NoSpherA2 -do\_XCW**. Separate several entries with a semicolon. A value keyword repeated here overrides the one the GUI wrote above it, because NoSpherA2 keeps the last value it reads.
+
+## Run XCW
+Writes the cif, the hkl file and the settings file into **olex2/XCW** next to the structure and starts **NoSpherA2 -do\_XCW** in the background; *Stop* kills it. The status cell shows the last &lambda; row of the log while running and the recommended halting &lambda; afterwards. Once tables exist, *Table* lists the **NA2\_&lambda;.tscb** files of the last run and *Use* copies the chosen one next to the structure and makes it the NoSpherA2 source.

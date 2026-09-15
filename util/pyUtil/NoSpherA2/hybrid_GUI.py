@@ -982,3 +982,96 @@ def make_xHARPY_GUI():
     end_line()
   t += begin_new_line() + WSL_distro() + update_tsc_button() + end_line()
   return t
+
+
+def _xcw_text(name, label, key, width_label, width_textbox):
+  return labeled_text(f"NoSpherA2_XCW_{name}@refine", label,
+                      f"spy.nsa2_get_param('XCW.{key}')",
+                      f"spy.nsa2_set_param('XCW.{key}', html.GetValue('~name~'))",
+                      width_label=width_label, width_textbox=width_textbox)
+
+def _xcw_checkbox(name, label, key, width):
+  return labeled_checkbox(f"NoSpherA2_XCW_{name}@refine", label,
+                          f"spy.nsa2_get_param('XCW.{key}')",
+                          f"spy.nsa2_set_param('XCW.{key}', True)",
+                          f"spy.nsa2_set_param('XCW.{key}', False)",
+                          width=width)
+
+def _xcw_combo(name, label, key, items, width_label, width_combo, update=False):
+  onchange = f"spy.nsa2_set_param('XCW.{key}', html.GetValue('~name~'))"
+  if update:
+    onchange += " >> html.Update()"
+  return labeled_combo(f"NoSpherA2_XCW_{name}@refine", label, items,
+                       f"spy.nsa2_get_param('XCW.{key}')", onchange,
+                       width_label=width_label, width_combo=width_combo)
+
+def make_XCW_GUI():
+  """The X-ray constrained wavefunction block. Experimental: shown only with
+  user.NoSpherA2.show_XCW, see xcw.py for what the buttons run."""
+  if OV.GetParam('user.NoSpherA2.show_XCW') != True:
+    return ""
+  from xcw import xcw_status, xcw_tscb_list
+  # basis and fit target: the settings-file keywords basis_set, df_basis, f/f2, weighted, rhf/uhf
+  t = begin_new_line("NoSpherA2_XCW", "1") + \
+      _xcw_combo("basis", "Basis Set", "basis_name", "spy.NoSpherA2.getBasisListStr()", 12, 18) + \
+      _xcw_text("df_basis", "DF Basis", "df_basis", 10, 12) + \
+      _xcw_combo("target", "Target", "target", "F;F2", 7, 7) + \
+      _xcw_checkbox("weighted", "weighted", "weighted", 8) + \
+      _xcw_combo("reference", "Ref.", "reference", "rhf;uhf", 6, 9) + \
+      end_line()
+  # the lambda scan: start, step_size, end and the parameter count of the chi-square
+  t += begin_new_line("NoSpherA2_XCW", "2") + \
+       _xcw_text("start", "&lambda; start", "start", 9, 11) + \
+       _xcw_text("step", "step", "step_size", 6, 11) + \
+       _xcw_text("end", "end", "end", 5, 11) + \
+       _xcw_text("params", "Params", "params", 9, 11) + \
+       charge_spin() + \
+       end_line()
+  # SCF presets and resources
+  t += begin_new_line("NoSpherA2_XCW", "3") + \
+       _xcw_combo("scf", "SCF", "scf_preset", "sloppy;normal;tight;very_tight", 5, 14) + \
+       _xcw_combo("conv", "Conv.", "conv_preset", "slow_conv;normal_conv;fast_conv", 7, 15) + \
+       _xcw_text("max_iter", "Max iter", "max_iter", 8, 8) + \
+       labeled_combo("NoSpherA2_XCW_cpus@refine", "CPUs", "spy.NoSpherA2.getCPUListStr()",
+                     "spy.nsa2_get_param('ncpus')",
+                     "spy.nsa2_set_param('ncpus', html.GetValue('~name~'))",
+                     width_label=7, width_combo=9) + \
+       labeled_text("NoSpherA2_XCW_mem@refine", "Mem(Gb)",
+                    "spy.nsa2_get_param('mem')",
+                    "spy.nsa2_set_param('mem', html.GetValue('~name~'))",
+                    width_label=9, width_textbox=12) + \
+       end_line()
+  # run options: the -xcw_* command line flags
+  t += begin_new_line("NoSpherA2_XCW", "4") + \
+       _xcw_checkbox("gaussian_halt", "Gaussian halt", "gaussian_halt", 12) + \
+       _xcw_text("strong_cutoff", "strong cutoff", "strong_cutoff", 12, 8) + \
+       _xcw_checkbox("incremental", "incremental", "incremental", 11) + \
+       _xcw_text("int_precision", "int. precision", "int_precision", 12, 10) + \
+       _xcw_checkbox("extrapolate", "extrapolate", "extrapolate", 11) + \
+       _xcw_checkbox("use_gpu", "GPU", "use_gpu", 6) + \
+       end_line()
+  t += begin_new_line("NoSpherA2_XCW", "5") + \
+       _xcw_text("i_tensor_mb", "I tensor MB", "i_tensor_mb", 12, 10) + \
+       _xcw_text("anom_disp", "Anom. disp. file", "anom_disp_file", 16, 36) + \
+       multiplicity_spin() + \
+       end_line()
+  # free text appended to the settings file, for keywords the GUI has no control for
+  t += begin_new_line("NoSpherA2_XCW", "6") + \
+       _xcw_text("extra", "Extra settings", "extra_settings", 14, 82) + \
+       end_line()
+  # action row: run, stop, status and the table picker of the last run
+  t += begin_new_line("NoSpherA2_XCW", "7") + \
+       button("NoSpherA2_XCW_run", "Run XCW", "spy.NoSpherA2.xcw_run() >> html.Update()", width=12,
+              hint="Write the settings file and start NoSpherA2 -do_XCW in the background") + \
+       button("NoSpherA2_XCW_stop", "Stop", "spy.NoSpherA2.xcw_stop() >> html.Update()", width=8,
+              hint="Kill the running XCW job") + \
+       f"<td width='34%' align='left'><i>{xcw_status()}</i></td>"
+  tscbs = xcw_tscb_list()
+  if tscbs:
+    t += _xcw_combo("tscb", "Table", "selected_tscb", tscbs, 8, 24) + \
+         button("NoSpherA2_XCW_use", "Use", "spy.NoSpherA2.xcw_use_tscb() >> html.Update()", width=8,
+                hint="Copy the chosen NA2_<lambda>.tscb next to the structure and make it the tsc source")
+  else:
+    t += "<td width='40%'></td>"
+  t += end_line()
+  return t

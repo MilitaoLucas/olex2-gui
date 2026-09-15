@@ -90,14 +90,20 @@ The implementation of solvent masking in Olex2 is based on the **BYPASS** paper 
 ## Use solvent mask
 Ticking this box includes in the refinement a solvent contribution to the structure factors as the discrete Fourier transform of the electron density in the solvent area. The solvent mask is a region occupied by disordered solvent. It can be calculated and displayed under **Tools** > **Maps** > **Masks** (select **wire** in the drop-down menu under **View** in the **Maps** tool tab). With olex2.refine, the solvent contribution is added internally to that calculated from the ordered part, whereas with ShelXL the solvent contribution is subtracted from the observed data and a modified hkl file is passed to the external refinement program.
 
+## Program
+**Olex2** computes the mask from a difference map (smtbx.masks) and refines the solvent contribution with the model. **Platon** runs SQUEEZE and refines against the modified reflection file it writes. **Flat** uses the flat bulk-solvent model: a constant density in the solvent region, scaled together with the model; it has its own *solvent r* / *shrink r* pair, with defaults 1.1 and 0.9 &Aring; (the macromolecular values), shown in place of *trunc.* when Flat is chosen.
+
 ## Update mask
 When ticked, the solvent mask will be recomputed before the start of the refinement. This can lead to an improved solvent mask, particularly if the ordered part of the structure was poorly converged before the initial mask search.
+
+## Occ.
+Occupancy weighting. When ticked, partially occupied atoms exclude only their share of the solvent volume. Without it a site at quarter occupancy keeps solvent out of all of the volume it touches, which under-estimates the solvent contribution. A structure without partial atoms is unaffected.
 
 ## Solvent *r*
 Only grid points within cavities *larger* than a certain solvent radius (*r*) are taken into account in the calculation. The default value is **1.2 &Aring;**, which prevents displaying voids in which no atom could fit.
 
-## Truncation
-This value is used to define a more close-fitting solvent mask than would be possible with the solvent radius *r* alone. It is usually very close, if not equal, to the solvent radius *r*.
+## Trunc.
+The truncation radius. This value is used to define a more close-fitting solvent mask than would be possible with the solvent radius *r* alone. It is usually very close, if not equal, to the solvent radius *r*.
 
 
 # Masking Info

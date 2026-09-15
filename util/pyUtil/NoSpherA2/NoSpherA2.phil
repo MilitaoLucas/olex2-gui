@@ -378,6 +378,69 @@ snum{
       reload = False
         .type = bool
     }
+    XCW{
+      basis_name = "def2-SVP"
+        .type = str
+        .help = "Orbital basis of the constrained wavefunction (settings keyword basis_set)"
+      df_basis = ""
+        .type = str
+        .help = "Density-fitting auxiliary basis; empty leaves the NoSpherA2 default"
+      target = *F F2
+        .type = choice
+        .help = "Fit to structure factor amplitudes or intensities"
+      weighted = False
+        .type = bool
+        .help = "Use the sigma-weighted chi-square (settings keyword weighted)"
+      reference = *rhf uhf
+        .type = choice
+      start = 0.0
+        .type = float
+        .help = "First lambda of the scan"
+      step_size = 0.01
+        .type = float
+      end = 1.0
+        .type = float
+        .help = "Last lambda of the scan"
+      params = 0
+        .type = int
+        .help = "Number of refined parameters for the chi-square; 0 takes it from the last refinement"
+      scf_preset = sloppy *normal tight very_tight
+        .type = choice
+      conv_preset = slow_conv *normal_conv fast_conv
+        .type = choice
+      max_iter = 100
+        .type = int
+      gaussian_halt = False
+        .type = bool
+        .help = "Stop the scan at the Gaussian-fit halting lambda (-xcw_gaussian_halt)"
+      strong_cutoff = 3.0
+        .type = float
+        .help = "-xcw_strong_cutoff"
+      incremental = False
+        .type = bool
+        .help = "Incremental Fock build (-xcw_incremental)"
+      int_precision = 1e-10
+        .type = float
+        .help = "Integral screening threshold (-xcw_int_precision)"
+      extrapolate = True
+        .type = bool
+        .help = "Extrapolate the orbitals between lambda steps (-no_xcw_extrapolate when off)"
+      use_gpu = False
+        .type = bool
+        .help = "Let NoSpherA2 use a GPU when the build has one; off passes -no_gpu"
+      i_tensor_mb = 0
+        .type = int
+        .help = "Memory for the I tensor in MB (settings keyword i_tensor_mb); 0 leaves the default"
+      anom_disp_file = ""
+        .type = str
+        .help = "Anomalous dispersion table passed with -anom_disp; empty for none"
+      selected_tscb = ""
+        .type = str
+        .help = "The NA2_<lambda>.tscb of the last run chosen in the Use combo"
+      extra_settings = ""
+        .type = str
+        .help = "Further lines appended verbatim to the XCW settings file; separate several with ;"
+    }
   }
 }
 

@@ -155,6 +155,11 @@ $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
+<!-- One row: Use Mask | program | Update Mask | Occ. | solvent r | trunc. (shrink r for Flat).
+     Every cell has an explicit width and the labels are kept short, the sum stays
+     below 100%: unsized cells once pushed the truncation input off the panel.
+     Each <ignore> holds complete cells only and the row is closed exactly once,
+     by the row_table_off after the last </ignore>. -->
 <tr ALIGN='left' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Masks;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -166,7 +171,7 @@ $-
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",
         "disabled=spy.gui.IsEDRefinement()",
-        "td1=<td width=16%>"
+        "td1=<td width=11%>"
         )
       $-
 
@@ -194,10 +199,10 @@ Solvent masking is currently ignored for ED Dynamical Refinement
     "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG",
     "value=spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg')",
     "items=Olex2;Platon;Flat",
-    "onchange=spy.change_hklsrc_according_to_mask_prg(html.GetValue('~name~'), gui)",
+    "onchange=spy.change_hklsrc_according_to_mask_prg(html.GetValue('~name~'), gui)>>html.Update()",
     "bgcolor=GetVar(HtmlTableGroupBgColour)",
     "disabled=spy.gui.IsEDRefinement()",
-    "td1=<td width=20%>"
+    "td1=<td width=17%>"
     )
   $-
 
@@ -212,39 +217,35 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     "onuncheck=spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
     "disabled=spy.gui.IsEDRefinement()",
+    "td1=<td width=13%>"
     )
   $-
 
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=SNUM_MASKS_OCCUPANCY_WEIGHTING",
-    "label=Occupancies",
+    "label=Occ.",
     "checked=spy.GetParam('snum.masks.occupancy_weighting')",
     "oncheck=spy.SetParam('snum.masks.occupancy_weighting','true')",
     "onuncheck=spy.SetParam('snum.masks.occupancy_weighting','false')",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
     "disabled=spy.gui.IsEDRefinement()",
+    "td1=<td width=9%>"
     )
   $-
 
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg'), 'Olex2')
-  <td width="11%"> </td>
-  <td width="10%">
-  </td>
-  <td width="11%"> </td>
-  <td width="10%">
-  </td>
-#ignoreif -->
-
-
-<!-- #ignoreif strcmp(spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg'), 'Platon')
-  <td width="11%"> solvent r</td>
-  <td width="10%">
+<!-- the radii of the mask program: Olex2 (smtbx.mask) and Flat each have their
+     own pair, Platon (SQUEEZE) has none. Positive strcmp tests, so a fourth
+     program value cannot render two pairs. -->
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg'), 'Olex2')
+  <td width="13%">solvent r</td>
+  <td width="9%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
       width="100%"
+      height="GetVar('HtmlInputHeight')"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -253,8 +254,8 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     >
     </font>
   </td>
-  <td width="11%">truncation</td>
-  <td width="10%">
+  <td width="11%">trunc.</td>
+  <td width="9%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
@@ -270,27 +271,58 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
     </font>
   </td>
 #ignoreif -->
-</ignore>
 
+<!-- #ignoreif not strcmp(spy.GetParam('snum.refinement.recompute_mask_before_refinement_prg'), 'Flat')
+  <td width="13%">solvent r</td>
+  <td width="9%">
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="text"
+      name = "SET_SNUM_MASKS_FLAT_SOLVENT_RADIUS"
+      width="100%"
+      height="GetVar('HtmlInputHeight')"
+      valign="center"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.flat_solvent_radius')"
+      onchange="spy.SetParam('snum.masks.flat_solvent_radius',html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+  <td width="11%">shrink r</td>
+  <td width="9%">
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="text"
+      name = "SET_SNUM_MASKS_FLAT_SHRINK_RADIUS"
+      width="100%"
+      height="GetVar('HtmlInputHeight')"
+      valign="center"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.flat_shrink_radius')"
+      onchange="spy.SetParam('snum.masks.flat_shrink_radius',html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+#ignoreif -->
+#ignoreif -->
+</ignore>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
+<!-- the Masking Info row, shown whenever the mask is on -->
+<!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
 <ignore test="strcmp(spy.gui.IsEDRefinement(), False)">
-
 <tr ALIGN='left' width='100%%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Masking-Info;1 -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <td>
 <!-- #include mask_info spy.gui.tools.get_mask_info();1; -->
 </td>
-<!-- TABLE CLOSES AT THE END OF THE SECTION -->
-#ignoreif -->
-
-<!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
-#ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 </ignore>
+#ignoreif -->
+<!-- ==================================== SOLVENT MASKING INTERFACE END ==== -->
 
 
 <!-- ========================================== NOSPHERA2 INTERFACE BEGIN == -->

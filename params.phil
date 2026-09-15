@@ -2799,6 +2799,15 @@ user
     show_OCC = False
       .type = bool
       .expert_level = 2
+      .help = Offer OCC as a wavefunction calculator in the NoSpherA2 source list
+    show_CE = False
+      .type = bool
+      .expert_level = 2
+      .help = Show the SALTED interaction-energy row in NoSpherA2 Properties
+    show_XCW = False
+      .type = bool
+      .expert_level = 2
+      .help = Show the experimental X-ray constrained wavefunction block
   }
   Server{
     host=localhost

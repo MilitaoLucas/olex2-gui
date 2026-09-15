@@ -20,12 +20,13 @@ from PluginTools import PluginTools as PT
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
 from utilities import open  # code page independent, see utilities.open
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_XCW_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
 import ELMO # noqa: F401
 import cubes_maps # noqa: F401
+import xcw # noqa: F401
 import xharpy
 import pyscf
 import psi4
@@ -140,7 +141,7 @@ class NoSpherA2(PT):
     olx.stopwatch.start("basis sets")
     if os.path.exists(self.NoSpherA2):
       self.basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "basis_sets").replace("\\", "/")
-      self.occ_basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], os.path.join("occ", "basis")).replace("\\", "/")
+      self.occ_basis_dir = os.path.join(os.path.split(self.NoSpherA2)[0], "occ", "share", "basis").replace("\\", "/")
       if os.path.exists(self.occ_basis_dir):
         os.environ["OCC_DATA_PATH"] = os.path.join(os.path.split(self.NoSpherA2)[0], "occ", "share").replace("\\", "/")
       if os.path.exists(self.basis_dir):
@@ -1275,6 +1276,11 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
   def setup_occ_executables(self):
+    # OCC is compiled into NoSpherA2; it is offered only to users who ask for it
+    if OV.GetParam('user.NoSpherA2.show_OCC') != True:
+      return
+    if "OCC" in [x.strip() for x in self.softwares.split(";")]:   # called again from the GUI, keep one entry
+      return
     self.softwares = f"{self.softwares};  OCC" if self.softwares else "  OCC"
 
   def setup_ptb_executables(self):
@@ -2029,7 +2035,7 @@ def make_NSA2_GUI(method):
     return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   elif method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
     return make_ORCA_GUI(is_orca_new())
-  elif method == "OCC":
+  elif method == "OCC" and OV.GetParam('user.NoSpherA2.show_OCC') == True:
     return make_OCC_GUI()
   elif method == "pySCF":
     return make_pySCF_GUI()
@@ -2039,7 +2045,7 @@ def make_NSA2_GUI(method):
     return make_xHARPY_GUI()
   elif method == "pTB":
     return make_ptb_GUI()
-  elif method == "SALTED":
+  elif method == "SALTED" and OV.IsDebugging():
     return make_SALTED_GUI()
   elif method == "Tonto":
     return make_tonto_GUI()
@@ -2054,6 +2060,7 @@ def make_NSA2_GUI(method):
 
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
+OV.registerFunction(make_XCW_GUI, False, "NoSpherA2")
 
 def get_sources_string():
     PS = 'Please Select'
