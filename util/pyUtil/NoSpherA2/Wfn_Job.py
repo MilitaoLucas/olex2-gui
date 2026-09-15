@@ -264,7 +264,7 @@ class wfn_Job(object):
       if xyz:
         self.write_xyz_file(normalize_h_isotopes=True)
     else: 
-      print("ERROR: Wavefunction software not recognized.\nPlease select a valid software.\nNo Input file written.")
+      olx.Echo("Wavefunction software not recognized. Please select a valid software. No input file written.", m="error")
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -937,7 +937,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
                     print(f"Removed {elem_symbol} from list, remaining: {atom_list}")
 
         except Exception as error:
-            print("Error parsing basis string:", error)                   
+            olx.Echo("Error parsing basis string: %s" % error, m="error")                   
       for element in atom_list:
         shells = _read_atom_basis(basis, element, basis_name)
         _write_atom_basis_orca(inp, element, shells)
@@ -994,7 +994,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
             # Use the improved helper function to find atom index
             index = self._find_atom_index_by_label(atom)
             if index == -1:
-              print("Could not find atom %s in the structure! Check the atom labels and the list of atoms to flip in the ORCA settings!"%atom)
+              olx.Echo("Could not find atom %s in the structure! Check the atom labels and the list of atoms to flip in the ORCA settings!" % atom, m="error")
               continue
             if atom_flip_list_out != "":
               atom_flip_list_out += ","
@@ -1847,7 +1847,7 @@ ener = cf.kernel()"""
       time.sleep(0.5)
       while not os.path.exists(out_fn_abs):
         if OV.GetVar("stop_current_process") or is_pause_break_pressed():
-          print("Calculation aborted by INTERRUPT before log creation!")
+          olx.Echo("Calculation aborted by INTERRUPT before log creation!", m="warning")
           terminate_process_tree(p)
           OV.SetVar("stop_current_process", False)
           consume_interrupt_request()
@@ -1866,7 +1866,7 @@ ener = cf.kernel()"""
         if tries >= 30:
           if "python" in args[nr] and tries <=10:
             continue
-          print("Failed to locate the output file at "+str(out_fn_abs))
+          olx.Echo("Failed to locate the output file at " + str(out_fn_abs), m="error")
           OV.SetVar('NoSpherA2-Error',"Wfn-Output not found!")
           if stdin_handle is not None:
             stdin_handle.close()
@@ -1882,13 +1882,13 @@ ener = cf.kernel()"""
           try:
             x = stdout.read()
           except Exception as e:
-            print("Error reading output file: ", e)
+            olx.Echo("Error reading output file: %s" % e, m="error")
             pass
           if x:
             print(x, end='')
           if OV.GetVar("stop_current_process") or is_pause_break_pressed():
             try:
-              print("Calculation aborted by INTERRUPT!")
+              olx.Echo("Calculation aborted by INTERRUPT!", m="warning")
               terminate_process_tree(p)
               aborted_by_user = True
             except Exception as e:

@@ -418,7 +418,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     try:
       nsa2_refresh_file_hash(tscb_path, file_hash)
     except Exception as error:
-      print(f"Warning: could not update NoSpherA2 file hash for {os.path.basename(tscb_path)}: {error}")
+      olx.Echo(f"Could not update NoSpherA2 file hash for {os.path.basename(tscb_path)}: {error}", m="warning")
 
   def _notify_tscb_sync(self, tscb_path, replacements):
     message = f"Updated {os.path.basename(tscb_path)}: renamed {replacements} atom label(s) in active TSCB"
@@ -427,7 +427,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       try:
         gui.get_default_notification(txt=message, txt_col='black_text')
       except Exception as error:
-        print(f"Warning: could not set GUI notification for TSCB sync: {error}")
+        olx.Echo(f"Could not set GUI notification for TSCB sync: {error}", m="warning")
 
   def _ensure_active_tscb_matches_model(self):
     tscb_path = self._resolve_active_tscb_path()
@@ -437,14 +437,14 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     try:
       model_labels = self._get_scatterer_labels()
     except Exception as error:
-      print(f"Error: could not read current model labels before using active TSCB: {error}")
+      olx.Echo(f"Could not read current model labels before using active TSCB: {error}", m="error")
       OV.SetVar('NoSpherA2-Error', 'Active TSCB label read failed')
       return False
 
     try:
       tscb_labels = read_tscb_scatterer_labels(tscb_path)
     except Exception as error:
-      print(f"Error: could not read scatterer labels from active TSCB {os.path.basename(tscb_path)}: {error}")
+      olx.Echo(f"Could not read scatterer labels from active TSCB {os.path.basename(tscb_path)}: {error}", m="error")
       OV.SetVar('NoSpherA2-Error', 'Active TSCB label read failed')
       return False
 
@@ -456,15 +456,15 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       try:
         tscb_labels = read_tscb_scatterer_labels(tscb_path)
       except Exception as error:
-        print(f"Error: could not re-read scatterer labels from active TSCB {os.path.basename(tscb_path)} after sync: {error}")
+        olx.Echo(f"Could not re-read scatterer labels from active TSCB {os.path.basename(tscb_path)} after sync: {error}", m="error")
         OV.SetVar('NoSpherA2-Error', 'Active TSCB verification failed')
         return False
       if tscb_labels == model_labels:
         return True
 
-    print("Error!: Active .tscb scatterers do not match the current model.")
-    print("Automatic label synchronisation could not make the active .tscb safe for refinement.")
-    print("Please recalculate the tsc/tscb file or select the matching table file before refining.")
+    olx.Echo("Active .tscb scatterers do not match the current model. "
+             "Automatic label synchronisation could not make the active .tscb safe for refinement. "
+             "Please recalculate the tsc/tscb file or select the matching table file before refining.", m="error")
     print(f"Model scatterer count: {len(model_labels)}")
     print(f"Active TSCB scatterer count: {len(tscb_labels)}")
     OV.SetVar('NoSpherA2-Error', 'Active TSCB mismatch')
@@ -477,7 +477,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
           False,
         )
       except Exception as error:
-        print(f"Warning: could not show active TSCB mismatch alert: {error}")
+        olx.Echo(f"Could not show active TSCB mismatch alert: {error}", m="warning")
     return False
 
   def _sync_active_tscb_for_renamed_labels(self, labels_before):
@@ -494,24 +494,24 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
         # update_scatterers_in_file in aaff.py, not by this label-rename hook.
         return 0
     except Exception as error:
-      print(f"Warning: could not determine scatterer storage type in {os.path.basename(tscb_path)}: {error}")
+      olx.Echo(f"Could not determine scatterer storage type in {os.path.basename(tscb_path)}: {error}", m="warning")
       return 0
 
     try:
       labels_after = self._get_scatterer_labels()
     except Exception as error:
-      print(f"Warning: could not read scatterer labels after renaming: {error}")
+      olx.Echo(f"Could not read scatterer labels after renaming: {error}", m="warning")
       return 0
 
     if not labels_before or len(labels_before) != len(labels_after):
       try:
         labels_before = read_tscb_scatterer_labels(tscb_path)
       except Exception as error:
-        print(f"Warning: could not read scatterer labels from active TSCB: {error}")
+        olx.Echo(f"Could not read scatterer labels from active TSCB: {error}", m="warning")
         return 0
 
     if not labels_before or len(labels_before) != len(labels_after):
-      print(f"Warning: active TSCB scatterer count does not match current model; skipping label sync ({len(labels_before)} vs {len(labels_after)})")
+      olx.Echo(f"Active TSCB scatterer count does not match current model; skipping label sync ({len(labels_before)} vs {len(labels_after)})", m="warning")
       return 0
 
     rename_map = {}
@@ -525,7 +525,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     try:
       replacements, file_hash = rewrite_tscb_scatterers(tscb_path, rename_map)
     except Exception as error:
-      print(f"Warning: failed to rename atoms inside {os.path.basename(tscb_path)}: {error}")
+      olx.Echo(f"Failed to rename atoms inside {os.path.basename(tscb_path)}: {error}", m="warning")
       return 0
 
     if replacements > 0:
@@ -566,20 +566,20 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   def diagnose_active_tscb_labels(self):
     tscb_path = self._resolve_active_tscb_path()
     if tscb_path is None:
-      print("No active .tscb file selected")
+      olx.Echo("No active .tscb file selected", m="warning")
       return 0
 
     try:
       model_labels = self._get_scatterer_labels()
     except Exception as error:
-      print(f"Failed to read current model labels: {error}")
+      olx.Echo(f"Failed to read current model labels: {error}", m="error")
       return 0
 
     try:
       tscb_text = read_tscb_scatterer_text(tscb_path)
       tscb_labels = read_tscb_scatterer_labels(tscb_path)
     except Exception as error:
-      print(f"Failed to read active TSCB labels: {error}")
+      olx.Echo(f"Failed to read active TSCB labels: {error}", m="error")
       return 0
 
     print(f"Active TSCB: {tscb_path}")
@@ -622,7 +622,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     try:
       self._labels_before_naming_mode = self._get_scatterer_labels()
     except Exception as error:
-      print(f"Warning: could not capture labels before naming mode: {error}")
+      olx.Echo(f"Could not capture labels before naming mode: {error}", m="warning")
       self._labels_before_naming_mode = None
 
   def match_sel_with_tscb_sync(self, suffix='', invert=False):
@@ -631,7 +631,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       try:
         labels_before = self._get_scatterer_labels()
       except Exception as error:
-        print(f"Warning: could not capture labels before match naming: {error}")
+        olx.Echo(f"Could not capture labels before match naming: {error}", m="warning")
 
     cmd = 'match sel'
     suffix = str(suffix or '').strip()
@@ -667,7 +667,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       message = ("No SALTED model is selected.\n\n"
                  "Select a SALTED model in the SALTED settings before calculating "
                  "the TSC file.")
-      print("Error: " + message.replace("\n", " "))
+      olx.Echo(message.replace("\n", " "), m="error")
       olx.Alert("SALTED model required", message, "O", False)
       OV.SetVar('NoSpherA2-Error', "No SALTED model selected")
       return False
@@ -679,7 +679,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if not update:
       return True
     if self.NoSpherA2 == "":
-      print("Could not locate usable NoSpherA2 executable")
+      olx.Echo("Could not locate usable NoSpherA2 executable", m="error")
       return False
 
     # This checks ne multiplicity and Number of electrons
@@ -712,7 +712,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           if OV.HasGUI():
             OV.UpdateHtml()
         else:
-          print("Atoms with Z > 36 require a Jorge, ECP or x2c basis set; no compatible installed basis was found.")
+          olx.Echo("Atoms with Z > 36 require a Jorge, ECP or x2c basis set; no compatible installed basis was found.", m="error")
           OV.SetVar('NoSpherA2-Error', "Heavy Atom but no heavy atom basis set!")
           return False
       if heavy and ("x2c" not in basis) and ("jorge" not in basis) and ("ecp" not in basis) \
@@ -901,7 +901,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             elif hybrid_part_wfn_code == "OCC":
               wfn_fn = path_base + ".toml"
               if not os.path.exists(wfn_fn):
-                print("No OCC .toml found for part %d" % parts[i])
+                olx.Echo("No OCC .toml found for part %d" % parts[i], m="error")
                 return False
               wfn_files.append(wfn_fn)
               continue
@@ -955,7 +955,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             wfn_fn = self._select_partition_input_file(path_base, wfn_code)
             if wfn_fn is None:
               if wfn_code == "OCC":
-                print("No OCC .toml found for part %d" % parts[i])
+                olx.Echo("No OCC .toml found for part %d" % parts[i], m="error")
               return False
           wfn_files.append(wfn_fn)
           self._suffix_part_outputs_in_cwd(parts[i])
@@ -1008,7 +1008,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             job.launch()
           except NameError as error:
-            print("Aborted due to: ", error)
+            olx.Echo("Aborted due to: %s" % error, m="error")
             success = False
           if not success:
             OV.SetVar('NoSpherA2-Error',"Tonto")
@@ -1041,7 +1041,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             self.wfn(folder=self.jobs_dir) # Produces Fchk file in all cases that are not fchk or tonto directly
           except NameError as error:
-            print("Aborted due to: ",error)
+            olx.Echo("Aborted due to: %s" % error, m="error")
             OV.SetVar('NoSpherA2-Error',error)
             return False
 
@@ -1063,7 +1063,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
               elif wfn_code == "OCC":
                 wfn_fn = path_base + ".toml"
               elif not any(os.path.exists(path_base + x) for x in endings):
-                print("No useful wavefunction found!")
+                olx.Echo("No useful wavefunction found!", m="error")
                 return False
               else:
                 for e in endings:
@@ -1099,7 +1099,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           try:
             job.launch()
           except NameError as error:
-            print("Aborted due to: ", error)
+            olx.Echo("Aborted due to: %s" % error, m="error")
             success = False
           if 'Error in' in open(os.path.join(job.full_dir, job.name+".err")).read():
             success = False
@@ -1126,7 +1126,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
   def wfn(self, folder='', xyz=True, part=0):
     if not self.basis_list_str:
-      print("Could not locate usable HARt executable")
+      olx.Echo("Could not locate usable HARt executable", m="error")
       return
     soft = software()
     wfn_object = Wfn_Job.wfn_Job(self, olx.FileName(), folder, soft)
@@ -1169,7 +1169,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       try:
         wfn_object.run(part)
       except NameError as error:
-        print("The following error occured during QM Calculation: ",error)
+        olx.Echo("The following error occurred during the QM calculation: %s" % error, m="error")
         OV.SetVar('NoSpherA2-Error',error)
         raise NameError('Unsuccesfull Wavefunction Calculation!')
 
@@ -1633,7 +1633,7 @@ class Job(object):
 def add_info_to_tsc():
   tsc_fn = os.path.join(nsa2_get_param('dir'), nsa2_get_param('file'))
   if not os.path.isfile(tsc_fn):
-    print("Error finding tsc File!\n")
+    olx.Echo("Error finding tsc file!", m="error")
     return False
   with open(tsc_fn) as f:
     tsc = f.readlines()
@@ -1882,7 +1882,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       reset_unused_generator_flags("Psi4")
       olex.m("html.Update()")
   elif " -- " in input or "Please Select" in input:
-    print("ERROR: Invalid tsc generator selected.\nYou cannot select a header.\n Please select a valid option.")
+    olx.Echo("Invalid tsc generator selected. You cannot select a header. Please select a valid option.", m="error")
     return
   else:
     nsa2_set_param('source', input)

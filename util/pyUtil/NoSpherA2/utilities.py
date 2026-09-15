@@ -242,7 +242,7 @@ def _mask_completion_hkl_bounds():
     (h_min, k_min, l_min), (h_max, k_max, l_max) = complete_set.min_max_indices()
     return (h_min, h_max), (k_min, k_max), (l_min, l_max)
   except Exception as e:
-    print(f"Warning: could not compute mask set-completion index bounds for NoSpherA2 table: {e}")
+    olx.Echo(f"Could not compute mask set-completion index bounds for the NoSpherA2 table: {e}", m="warning")
     return None
 
 def _file_d_min():
@@ -257,7 +257,7 @@ def _file_d_min():
     from cctbx_olex_adapter import OlexCctbxAdapter
     return OlexCctbxAdapter().reflections.f_sq_obs.d_min()
   except Exception as e:
-    print(f"Warning: could not read the hkl file's d_min for the NoSpherA2 table: {e}")
+    olx.Echo(f"Could not read the hkl file's d_min for the NoSpherA2 table: {e}", m="warning")
     return None
 
 @run_with_bitmap('Partitioning')
@@ -338,7 +338,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       args.append("-mem")
       args.append(str(mem))
     else:
-      print("WARNING! RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!")
+      olx.Echo("RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!", m="warning")
       print("Performing refinement without RI fit!")
   elif nsa2_get_param('NoSpherA2_Partition') == "TFVC":
     args.append("-TFVC")
@@ -415,7 +415,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d"))
       d_min = top_up_d if d_min is None else min(d_min, top_up_d)
     except:
-      print("Failed to read top_up_d for the TSC resolution")
+      olx.Echo("Failed to read top_up_d for the TSC resolution", m="error")
   if d_min is not None:
     args.append("-dmin")
     args.append(str(d_min))
@@ -423,7 +423,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     if isinstance(cif, list):
       args.append("-cmtc")
       if len(wfn_file) != len(groups) or len(wfn_file) != len(groups):
-        print("Inconsistant size of parameters! ERROR!")
+        olx.Echo("Inconsistent size of parameters!", m="error")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])
@@ -436,7 +436,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       args.append(cif)
       args.append("-mtc")
       if len(wfn_file) != len(groups):
-        print("Inconsistant size of parameters! ERROR!")
+        olx.Echo("Inconsistent size of parameters!", m="error")
         return
       for i in range(len(wfn_file)):
         args.append(wfn_file[i])
@@ -584,7 +584,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       if tries >= 10:
         if "python" in args[2] and tries <=10:
           continue
-        print("Failed to locate the output file")
+        olx.Echo("Failed to locate the output file", m="error")
         OV.SetVar('NoSpherA2-Error',"NoSpherA2-Output not found!")
         raise NameError('NoSpherA2-Output not found!')
     else:
@@ -719,7 +719,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
       if match_phrase in f and (".tsc" in f or ".tscb" in f) :
         args.append(os.path.join(OV.FilePath(), f))
   else:
-    print("ERROR! Please make sure threre is a match phrase to look for tscs!")
+    olx.Echo("Please make sure there is a match phrase to look for tscs!", m="error")
     return False
   startinfo = None
 
@@ -1270,7 +1270,7 @@ def nsa2_flush_ins_header():
     OV.File()
     return True
   except Exception as error:
-    print("Warning: could not save the structure after updating the NoSpherA2 file hash: %s" % error)
+    olx.Echo("Could not save the structure after updating the NoSpherA2 file hash: %s" % error, m="warning")
     return False
 OV.registerFunction(nsa2_flush_ins_header, False, 'NoSpherA2')
 
@@ -1288,8 +1288,8 @@ def nsa2_refresh_file_hash(path, file_hash=None, flush=True):
   if file_hash is None:
     resolved = _nsa2_resolve_existing_path(path)
     if resolved is None:
-      print("Warning: could not locate '%s' to refresh its NoSpherA2 hash; "
-            "the stored hash is left as it was" % path)
+      olx.Echo("Could not locate '%s' to refresh its NoSpherA2 hash; "
+               "the stored hash is left as it was" % path, m="warning")
       return None
     file_hash = _nsa2_sha256(resolved)
   # An empty hash means the file could not be read. Storing it would clear the
@@ -1297,7 +1297,7 @@ def nsa2_refresh_file_hash(path, file_hash=None, flush=True):
   # missing hash as "nothing to check against" -- so a transient read failure
   # would quietly switch the integrity check off. Leave the old value in place.
   if not file_hash:
-    print("Warning: could not hash '%s'; the stored NoSpherA2 hash is left as it was" % path)
+    olx.Echo("Could not hash '%s'; the stored NoSpherA2 hash is left as it was" % path, m="warning")
     return None
   nsa2_set_param('file_hash', file_hash)
   if flush:
@@ -1381,7 +1381,7 @@ def write_precise_model_file(model = None, cov_matrix = None, annotations = None
     jac_tr = None
     annotations = reparam.component_annotations
   except:
-    print("Could not obtain cctbx object and calculate ESDs!\n")
+    olx.Echo("Could not obtain cctbx object and calculate ESDs!", m="error")
     return False
   f = open(OV.ModelSrc() + ".precise_model", "w")
   matrix_run = 0
@@ -1628,7 +1628,7 @@ def setDir(phil_value) -> None:
   try:
     a = olex.f('choosedir("Choose your data folder")')
   except:
-    print("No selection made, Aborting!")
+    olx.Echo("No selection made, aborting!", m="warning")
     return
   OV.SetParam(phil_value, a)
 OV.registerFunction(setDir, False, "NoSpherA2")
@@ -1645,7 +1645,7 @@ def appendDir(phil_value) -> None:
   try:
     a = olex.f('choosedir("Choose your data folder")')
   except:
-    print("No selection made, Aborting")
+    olx.Echo("No selection made, aborting!", m="warning")
     return
   old = OV.GetParam(phil_value)
   if old is None:
