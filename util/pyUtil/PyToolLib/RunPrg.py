@@ -578,7 +578,7 @@ class RunRefinementPrg(RunPrg):
     RunRefinementPrg.running = self
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
-    result = False
+    result = True
     try:
       if use_aspherical:
         make_fcf_only = nsa2_get_param('make_fcf_only')
@@ -934,7 +934,7 @@ OV.registerFunction(run_auto_vss, False, 'runprg')
 
 def do_refine():
   rpg = RunRefinementPrg()
-  if rpg.terminate:
+  if not rpg.terminate:
     if OV.IsEDData():
       if OV.GetACI().EDI.gui_compute_enantiomers_internal():
         pass
