@@ -353,6 +353,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           olx.Echo("Please restart Olex2 to fully enable OpenMP!", m="warning")
           self.failure = True
           return
+        elif "table_based.h" in str_e:
+          print(str_e)
+          olx.Echo("Please try updating the TSC/B file!", m="error")
+          self.failure = True
+          return
         else:
           raise e
       stopwatch.start("Analysis")
