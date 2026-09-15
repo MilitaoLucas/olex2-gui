@@ -32,7 +32,7 @@ mac64_next_port_name = 'mac64-py313'
 mac64_next_port_zip_name = 'olex2-mac64-intel-next.zip'
 mac64_next_port_prefix = 'olex2.app/Contents/MacOS/'
 
-mac64_arm_port_name = 'mac64-arm'
+mac64_arm_port_name = 'mac64-arm-py313'
 mac64_arm_port_zip_name = 'olex2-mac64-arm.zip'
 mac64_arm_port_prefix = 'olex2.app/Contents/MacOS/'
 
