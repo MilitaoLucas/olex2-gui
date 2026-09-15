@@ -148,13 +148,23 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
       for el in row:
         args.append(str(float(el)))
   d2 = olex_core.GetHklStat()
+  min_idx = list(d2['FileMinIndices'])
+  max_idx = list(d2['FileMaxIndices'])
+  if OV.IsEDRefinement():
+    from cctbx.uctbx import unit_cell
+    uc = unit_cell(olx.xf.au.GetCell())
+    try:
+      top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d", d2['MinD']))
+      maxi = uc.max_miller_indices(min(d2['MinD'], top_up_d)/2)
+      for hi in range(3):
+        min_idx[hi] = min(-maxi[hi], min_idx[hi])
+        max_idx[hi] = max(maxi[hi], max_idx[hi])
+    except:
+      olx.Echo("Failed to set dmin for TSC", m="error")
   args.append("-hkl_min_max")
-  args.append(str(d2['FileMinIndices'][0]))
-  args.append(str(d2['FileMaxIndices'][0]))
-  args.append(str(d2['FileMinIndices'][1]))
-  args.append(str(d2['FileMaxIndices'][1]))
-  args.append(str(d2['FileMinIndices'][2]))
-  args.append(str(d2['FileMaxIndices'][2]))
+  for hi in range(3):
+    args.append(str(min_idx[hi]))
+    args.append(str(max_idx[hi]))
   #shel = olx.Ins('SHEL')
   #omit = olx.Ins('OMIT')
   #d_min = d2['MinD']
@@ -169,14 +179,6 @@ def cuqct_tsc(wfn_file, cif, groups, hkl_file=None, save_k_pts=False, read_k_pts
   #    d_min = d
   #args.append("-dmin")
   #args.append(str(d_min * 0.95))
-  if OV.IsEDRefinement():
-    try:
-      top_up_d = float(OV.GetACI().EDI.get_stored_param("refinement.top_up_d"))
-      if top_up_d < d2['MinD']:
-        args.append("-dmin")
-        args.append(str(top_up_d))
-    except:
-      print("Failed to set dmin for TSC")
   if isinstance(wfn_file, list):
     if isinstance(cif, list):
       args.append("-cmtc")
