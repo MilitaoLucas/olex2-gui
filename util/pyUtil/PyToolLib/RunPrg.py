@@ -70,6 +70,9 @@ class RunPrg(ArgumentParser):
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
     self.please_run_auto_vss = False
+    # Set by a solution method to a zero-argument callable; invoked once the
+    # run has finished and `RunPrg.running` is clear, so it may start programs.
+    self.please_tidy_solution = None
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
     if self.demo_mode:
@@ -146,6 +149,25 @@ class RunPrg(ArgumentParser):
       if self.please_run_auto_vss:
         self.run_auto_vss()
       stopwatch.log()
+      # Deferred work that starts *another program* runs here, last of all.
+      #
+      # It has to be after `RunPrg.running = False`, because anything invoking
+      # `refine` earlier is refused with "Already running. Please wait..." --
+      # and refused without raising, so the caller carries on and acts on
+      # results that were never produced.
+      #
+      # It also has to be after `stopwatch.log()`. A nested run is itself a
+      # RunPrg and resets the shared stopwatch, so logging afterwards found
+      # `self.root` cleared and died with `AttributeError: 'NoneType' object
+      # has no attribute 'log'` -- after the tidy-up had already succeeded,
+      # which makes it look like the tidy-up failed when it did not.
+      if getattr(self, "please_tidy_solution", None):
+        tidy = self.please_tidy_solution
+        self.please_tidy_solution = None
+        try:
+          tidy()
+        except Exception as err:
+          print("Solution tidy-up failed: %s" % err)
       if caught_exception:
         raise SilentException(caught_exception)
 
@@ -576,6 +598,10 @@ class RunRefinementPrg(RunPrg):
       print("Already running. Please wait...")
       return False
     RunRefinementPrg.running = self
+    for m in (sys.modules.get("crystal_energies"), sys.modules.get("NoSpherA2.crystal_energies")):
+      if m is not None:
+        m.crystal_energies_invalidate()
+        break
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = True

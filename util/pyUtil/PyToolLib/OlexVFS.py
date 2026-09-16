@@ -3,7 +3,7 @@ import olex_fs
 import io
 
 class ImageWriter:
-  def init(self):
+  def __init__(self):
     self.position = 0
     self.data = b""
     self.name = ""
@@ -32,14 +32,19 @@ def copy_image(name_from, name_to):
   olex.writeImage(name_to, f)
 
 def save_image_to_olex(image, name, isPersistent=0):
-  ImageToOlexWriter.setName(name)
-  image.save(ImageToOlexWriter, "PNG")
-  ImageToOlexWriter.endWrite(isPersistent)
+  buf = io.BytesIO()
+  image.save(buf, format="PNG")
+  data = buf.getvalue()
+  olex.writeImage(str(name), data, int(isPersistent))
 
 def write_to_olex(filename, data, isPersistent=0):
   if isinstance(data, str):
     data = data.encode("utf-8")
-  olex.writeImage(filename, data, isPersistent)
+  elif isinstance(data, (bytearray, memoryview)):
+    data = bytes(data)
+  elif not isinstance(data, bytes):
+    raise TypeError("Data must be bytes, bytearray, memoryview, or str")
+  olex.writeImage(str(filename), data, int(isPersistent))
 
 def read_from_olex(filename):
   try:

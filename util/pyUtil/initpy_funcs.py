@@ -426,7 +426,7 @@ class initpy_funcs():
       return
     import stat
     # leave olex2c as the last one!
-    to_check = ["pyl", "NoSpherA2", "hart", "hart_mpi",
+    to_check = ["pyl", "NoSpherA2", "ptb", "hart", "hart_mpi",
                 "etc/bin/restart.sh",
                 "etc/bin/restart-mac.sh",
                 "olex2c"]

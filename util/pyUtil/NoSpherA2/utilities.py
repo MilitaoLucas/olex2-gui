@@ -261,7 +261,9 @@ def _file_d_min():
     return None
 
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False):
+def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False, parts=None):
+  """parts: the PART number of each wavefunction in wfn_file (Hybrid mode reads
+  the per-part settings by that number; without it they are taken as 1..n)."""
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -444,21 +446,29 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
           groups[i][j] = str(groups[i][j])
         args.append(','.join(groups[i]))
     if soft == "Hybrid":
+      # one entry per wavefunction handed over, read from that wavefunction's
+      # own PART: a discambMATTS part has no wavefunction and is not in the
+      # list, so position and PART number differ as soon as one precedes a
+      # wavefunction part (pTB in PART 2 behind discamb in PART 1 used to be
+      # given PART 1's ECP flag, 0, and lost its core electrons)
+      if parts is None:
+        parts = list(range(1, len(groups) + 1))
+      parts = [int(p) for p in parts][:len(groups)]
       args.append("-mtc_mult")
-      for i in range(1, min(6, len(groups) + 1)):
+      for i in parts:
         m =  nsa2_get_param('Hybrid.multiplicity_Part%d' % i)
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
       args.append("-mtc_charge")
-      for i in range(1, min(6, len(groups) + 1)):
+      for i in parts:
         c = int(nsa2_get_param('Hybrid.charge_Part%d' % i))
         if c < 0:
           args.append("n"+str(c))
         else:
           args.append(str(c))
       args.append("-mtc_ECP")
-      for i in range(1, min(6, len(groups) + 1)):
+      for i in parts:
         ECP_m_C = 0
         sftw = nsa2_get_param('Hybrid.software_Part%d' % i).lstrip()
         if sftw == "xTB":
@@ -469,7 +479,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     else:
       args.append("-mtc_mult")
       for i in range(len(groups)):
-        m =  nsa2_get_param('muliplicity')
+        m =  nsa2_get_param('multiplicity')
         if m is None or m == 'None':
           m = 1
         args.append(str(m))
@@ -901,7 +911,7 @@ def reset_unused_generator_flags(selected_source=None):
 
   is_tonto = 'tonto' in source
   is_pyscf = 'pyscf' in source
-  is_orca = 'orca' in source
+  is_orca = 'orca' in source or 'fraghar' in source  # fragHAR runs ORCA
   is_gaussian = 'gaussian' in source
 
   # Tonto-only DIIS threshold.

@@ -20,12 +20,13 @@ from PluginTools import PluginTools as PT
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
 from utilities import open  # code page independent, see utilities.open
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_XCW_GUI
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
 import ELMO # noqa: F401
 import cubes_maps # noqa: F401
+import crystal_energies # noqa: F401
 import xcw # noqa: F401
 import xharpy
 import pyscf
@@ -802,6 +803,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
 
     if nr_parts > 1:
       wfn_files = []
+      wfn_parts = []  # the PART number each wavefunction in wfn_files belongs to
       need_to_combine = False
       need_to_partition = False
       if ".wfn" in wfn_code or ".wfx" in wfn_code or ".gbw" in wfn_code or ".fchk" in wfn_code or ".molden" in wfn_code or ".ffn" in wfn_code or ".xtb" in wfn_code:
@@ -875,7 +877,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         elif wfn_code == "Hybrid":
           # We are in Hybrid mode
           hybrid_part_wfn_code = nsa2_get_param("Hybrid.software_Part%d"%(parts[i]))
-          if hybrid_part_wfn_code == OV.GetParam('user.NoSpherA2.discamb_exe'):
+          # the part combos are built from the source list, whose entries carry
+          # two leading spaces (hybrid_GUI compares against "  " + exe)
+          if hybrid_part_wfn_code.strip() == OV.GetParam('user.NoSpherA2.discamb_exe'):
             groups.pop(i-groups_counter)
             groups_counter+=1
             discamb(os.path.join(OV.FilePath(), wfn_job_dir), self.name, self.discamb_exe)
@@ -905,11 +909,13 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 olx.Echo("No OCC .toml found for part %d" % parts[i], m="error")
                 return False
               wfn_files.append(wfn_fn)
+              wfn_parts.append(parts[i])
               continue
             wfn_fn = self._copy_first_part_output_from_job_dir(os.path.join(OV.FilePath(), wfn_job_dir), parts[i])
             if wfn_fn is None:
               return False
             wfn_files.append(wfn_fn)
+            wfn_parts.append(parts[i])
         else:
           # Neither Hybrid nor DISCAMB are used, so ORCA; g16; pySCF etc
           need_to_partition = True
@@ -959,20 +965,27 @@ Please select one of the generators from the drop-down menu.""", "O", False)
                 olx.Echo("No OCC .toml found for part %d" % parts[i], m="error")
               return False
           wfn_files.append(wfn_fn)
+          wfn_parts.append(parts[i])
           self._suffix_part_outputs_in_cwd(parts[i])
 
       # End of loop over parts
       if need_to_partition:
         cif_fn = os.path.join(self.jobs_dir, self.name + ".cif")
         #hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
-        cuqct_tsc(wfn_files, cif_fn, groups)
+        cuqct_tsc(wfn_files, cif_fn, groups, parts=wfn_parts)
         if os.path.exists("experimental.tsc"):
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):
           shutil.move("experimental.tscb", self.name + ".tscb")
-          self.set_tsc_file_with_metadata(self.name + ".tscb")
-        else:
-          self.set_tsc_file_with_metadata(self.name + ".tsc")
+        # With a discambMATTS part still to be merged in, this table is an
+        # intermediate: adopting it now would rewrite its label columns as
+        # scatterer ids, and -merge then refuses it next to discamb's label
+        # table ("mixed labels and IDs"). combine_tscs adopts the merged one.
+        if not need_to_combine:
+          if os.path.exists(self.name + ".tscb"):
+            self.set_tsc_file_with_metadata(self.name + ".tscb")
+          else:
+            self.set_tsc_file_with_metadata(self.name + ".tsc")
       if need_to_combine:
         #Too lazy to properly do it...
         if os.path.exists(self.name + ".tsc"):
@@ -1289,9 +1302,8 @@ Please select one of the generators from the drop-down menu.""", "O", False)
   def setup_discamb(self):
     self.discamb_exe = self.setup_software(OV.GetParam('user.NoSpherA2.discamb_exe'), OV.GetParam('user.NoSpherA2.discamb_exe'))
     if not os.path.exists(self.discamb_exe):
+      # get=True appends "  Get discambMATTS" when the exe is not found
       self.discamb_exe = self.setup_software("discambMATTS", "discambMATTS2tsc", True)
-    if not os.path.exists(self.discamb_exe):
-      self.softwares += ";  Get discambMATTS"
 
   def setup_xharpy(self):
     try:
@@ -1784,6 +1796,20 @@ def get_functional_list(wfn_code=None):
   return list
 OV.registerFunction(get_functional_list,False,'NoSpherA2')
 
+def keep_valid_choice(param, choices, default=None):
+  """Keep `param` if the new source offers it (matched case-insensitively,
+  taking the list's spelling), else fall back to `default` or the first entry."""
+  choices = [c.strip() for c in str(choices or "").split(";") if c.strip() and " -- " not in c]
+  if not choices:
+    return
+  cur = str(nsa2_get_param(param) or "").strip()
+  by_lower = dict((c.lower(), c) for c in choices)
+  new = by_lower.get(cur.lower()) or by_lower.get(str(default or "").lower()) or choices[0]
+  if new != cur:
+    print("NoSpherA2: %s '%s' is not available for %s, using '%s'" % (param, cur, software().strip(), new))
+    nsa2_set_param(param, new)
+
+
 def change_tsc_generator(input):
   if input == "  Get ORCA":
     print("Opening ORCA Forum in your browser...\nPlease register and download ORCA from there, then set the path to the executable in the settings of Olex2.")
@@ -1894,6 +1920,9 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
     nsa2_set_param('source', input)
     _input = input.lstrip().rstrip()
     reset_unused_generator_flags(_input)
+    if not source_is_tsc() and _input != "Thakkar IAM":
+      keep_valid_choice('method', get_functional_list(_input), "GFN2" if _input == "xTB" else "PBE")
+      keep_valid_choice('basis_name', NoSpherA2_instance.getBasisListStr(), "def2-SVP")
     if ".tsc" in _input:
       NoSpherA2_instance.set_tsc_file_with_metadata(_input)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
@@ -2060,6 +2089,7 @@ def make_NSA2_GUI(method):
 
   return "Unknown .tsc source selected."
 OV.registerFunction(make_NSA2_GUI, False, "NoSpherA2")
+OV.registerFunction(make_CE_GUI, False, "NoSpherA2")
 OV.registerFunction(make_XCW_GUI, False, "NoSpherA2")
 
 def get_sources_string():

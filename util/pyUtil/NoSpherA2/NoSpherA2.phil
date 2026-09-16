@@ -312,6 +312,8 @@ snum{
       .type = bool
     selected_salted_model = ""
       .type = str
+    CE_cutoff = 3.8
+      .type = float
     source = "'Please Select'"
       .type = str
     temperature = 100

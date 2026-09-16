@@ -220,7 +220,7 @@ class wfn_Job(object):
     if mult is None:
       mult = nsa2_get_param('multiplicity')
 
-    max_angular, min_angular, radial_precision = self._get_occ_grid_settings()
+    min_angular, max_angular, radial_precision = self._get_occ_grid_settings()
     df_basis = self._get_occ_df_basis(basis_name)
     input_xyz = os.path.join(self.full_dir, self.name) + ".xyz"
 
@@ -233,7 +233,9 @@ class wfn_Job(object):
       inp.write(f'charge = {int(charge)}\n')
       inp.write(f'multiplicity = {int(mult)}\n')
       inp.write("spherical = true\n")
-      inp.write('output = "fchk"\n')
+      # a list: occ's toml reader only honours the scalar form inside the
+      # array branch, so a bare "fchk" falls through to the json default
+      inp.write('output = ["fchk"]\n')
       inp.write(f'df-basis = "{df_basis}"\n')
       inp.write(f'dft_grid_max_angular = {max_angular}\n')
       inp.write(f'dft_grid_min_angular = {min_angular}\n')
@@ -853,7 +855,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
         refrac  {nsa2_get_param('ORCA_Solvation_CPCM_refrac')}
         rsolv   {nsa2_get_param('ORCA_Solvation_CPCM_rsolv')}
       end"""
-    elif Solvation != "Vacuum" and Solvation is not None:
+    elif Solvation and Solvation != "Vacuum":
+      # blank after reset_unused_generator_flags (Hybrid, a tsc source): no
+      # solvation rather than an empty CPCM()
       control += f" CPCM({Solvation}) "
     GBW_file = nsa2_get_param("ORCA_USE_GBW")
     if not is_orca_new():

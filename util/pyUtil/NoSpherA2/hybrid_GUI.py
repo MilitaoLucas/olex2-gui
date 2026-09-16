@@ -983,6 +983,33 @@ def make_xHARPY_GUI():
   t += begin_new_line() + WSL_distro() + update_tsc_button() + end_line()
   return t
 
+def make_CE_GUI():
+  if OV.GetParam('user.NoSpherA2.show_CE') != True:
+    return ""
+  from crystal_energies import crystal_energies_status
+  t = begin_new_line("CrystalEnergies") + \
+    "<td width='10%' align='left'><b>Energies</b></td>" + \
+    labeled_text("NoSpherA2_CE_cutoff@refine",
+                 "Cutoff/&Aring;",
+                 "spy.nsa2_get_param('CE_cutoff')",
+                 "spy.nsa2_set_param('CE_cutoff', html.GetValue('~name~'))",
+                 width_label=9, width_textbox=7) + \
+    labeled_combo("NoSpherA2_CE_model@refine",
+                  "Model",
+                  "spy.NoSpherA2.get_SALTED_model_locations()",
+                  "spy.nsa2_get_param('selected_salted_model')",
+                  "spy.nsa2_set_param('selected_salted_model', html.GetValue('~name~'))",
+                  width_label=7, width_combo=27) + \
+    button("NoSpherA2_CE_calc", "Calculate", "spy.NoSpherA2.crystal_energies_calculate()", width=11,
+           hint="Predict every molecule with the SALTED model in the background and draw the pair energies as rods; cached until an atom moves") + \
+    button("NoSpherA2_CE_recalc", "Redo", "spy.NoSpherA2.crystal_energies_recalculate()", width=7,
+           hint="Discard the cached energies of this geometry and calculate again") + \
+    button("NoSpherA2_CE_clear", "Clear", "spy.NoSpherA2.crystal_energies_clear() >> html.Update()", width=7,
+           hint="Remove the rods") + \
+    f"<td width='15%' align='center'><i>{crystal_energies_status()}</i></td>" + \
+  end_line()
+  return t
+
 
 def _xcw_text(name, label, key, width_label, width_textbox):
   return labeled_text(f"NoSpherA2_XCW_{name}@refine", label,
