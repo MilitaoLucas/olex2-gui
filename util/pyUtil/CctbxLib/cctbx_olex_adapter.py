@@ -3023,10 +3023,106 @@ def _table_cache_key(xray_structure, table_file_name):
           bool(space_group.is_origin_centric()))
 
 
+# The file state (path, mtime, size) whose provenance was last reported on.
+# Hashing a table is proportional to its size and tables reach gigabytes, so the
+# question is asked once per version of a file rather than once per use.
+_table_provenance_checked = [None]
+
+
+def _table_name_for_log(table_file_name):
+  """ The table's file name as it can be printed wherever the log is going.
+
+  Inside Olex2 a print is handed to olex.post as str and nothing here encodes
+  it, but a headless run writes to a real stream, and one in a single-byte
+  code page raises on a name it cannot spell -- a folder named in Chinese on a
+  Western Windows. A warning about a table must not be what stops a refinement,
+  so the name is made spellable and the unspellable characters escaped.
+  """
+  import sys
+  name = os.path.basename(table_file_name)
+  encoding = getattr(sys.stdout, 'encoding', None)
+  if encoding:
+    try:
+      name.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+      name = name.encode(encoding, 'backslashreplace').decode(encoding)
+  return name
+
+
+def check_table_readable(table_file_name):
+  """ Read the table's scatterer block, and nothing else, to find out whether
+  the table can be framed at all.
+
+  The reader downstream cannot report this. An id block read at the wrong record
+  width -- the marker named an 8-byte record before 29 July 2026 and a 16-byte
+  one after -- is not rejected, it is misframed, and what comes back is a table
+  matching no atom rather than an error. That reads as a modelling problem,
+  which is how it was reported to us. One row per atom is affordable in front of
+  every use, so it is checked here, where every use passes.
+  """
+  from tsc_scatterer_resync import read_scatterers, ScattererResolutionError
+  try:
+    return read_scatterers(table_file_name)
+  except ScattererResolutionError:
+    raise
+  except (OSError, ValueError, IndexError, UnicodeDecodeError) as error:
+    raise ScattererResolutionError(
+      "%s cannot be read as a scattering table: %s" % (
+        _table_name_for_log(table_file_name), error))
+
+
+def _report_table_provenance(table_file_name):
+  """ Say, in the log, when the table about to be read is not the one the model
+  recorded, or came from somewhere the model does not know.
+
+  A refinement asks this itself and stops on the answer. Everything else that
+  reads a table asked nothing, and a map is where that matters most: a table
+  belonging to another model draws residual density which somebody then models
+  as an atom. Here it warns rather than refuses - a map is a diagnostic, and it
+  is the refinement that must not proceed.
+  """
+  try:
+    from variableFunctions import nsa2_get_param
+    from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity,       nsa2_check_tsc_origin_known
+    current = str(nsa2_get_param('file') or '').strip()
+    if not current or os.path.basename(current) != os.path.basename(table_file_name):
+      return
+    stat = os.stat(table_file_name)
+    state = (os.path.normcase(os.path.abspath(table_file_name)),
+             stat.st_mtime_ns, stat.st_size)
+    if _table_provenance_checked[0] == state:
+      return
+    _table_provenance_checked[0] = state
+    # acknowledge=False: a mismatch is forgiven by being seen once, and that one
+    # warning belongs to the refinement, which is what offers to proceed on it
+    is_valid, stored_hash, current_hash, reason =       nsa2_validate_tsc_file_integrity(acknowledge=False)
+    if not is_valid:
+      if reason == 'mismatch':
+        print("WARNING: %s does not match the hash stored with this structure"
+              " (%s... on disk, %s... recorded)." % (
+                _table_name_for_log(table_file_name), current_hash[:16],
+                stored_hash[:16]))
+        print("  It was replaced, restored or written for another model, so what"
+              " is drawn from it may not belong to this structure.")
+      else:
+        print("WARNING: the scattering table could not be validated: %s" % reason)
+    origin_known, origin = nsa2_check_tsc_origin_known()
+    if not origin_known:
+      print("WARNING: the origin of %s is %s - nothing records how it was"
+            " calculated." % (_table_name_for_log(table_file_name),
+                              origin if origin else '(empty)'))
+  except Exception as error:
+    # provenance is a report, not a gate: a structure carrying no NoSpherA2
+    # metadata must still be able to draw a map
+    print("Note: could not check the provenance of the scattering table: %s" % error)
+
+
 def get_table_contribution(xray_structure, table_file_name):
   """ The tabulated table for this structure, read afresh only if it has to be.
   """
   from smtbx.structure_factors import direct
+  check_table_readable(table_file_name)
+  _report_table_provenance(table_file_name)
   try:
     key = _table_cache_key(xray_structure, table_file_name)
   except OSError:
@@ -3067,7 +3163,7 @@ def _report_table_fallback(table_file_name, fallback, n_scatterers):
   """ Say, in the log, which atoms the table did not cover. """
   print("")
   print("WARNING: %s covers %d of %d atoms." % (
-    os.path.basename(table_file_name), n_scatterers - len(fallback),
+    _table_name_for_log(table_file_name), n_scatterers - len(fallback),
     n_scatterers))
   print("  These atoms are refined with spherical scattering factors"
         " instead:")

@@ -5,14 +5,99 @@ import cctbx.xray as xray_
 class ScattererResolutionError(Exception):
   pass
 
+_ID_RECORD_BYTES = 16          # scatterer_id_big / atomID
+_LEGACY_ID_RECORD_BYTES = 8    # scatterer_id_5, written by NoSpherA2 12-29 July 2026
+_ID_MARKER = b'SCATTERER_IDS'
+SOURCE_LABELS_KEY = b'SOURCE_LABELS'
+
+
+def _tscb_header_says_ids(header):
+    # Substring, not equality: the header is a block of KEY: VALUE lines and the
+    # marker is only the first of them, so a table carrying a second line -- 'AD:
+    # FALSE', or an ID_BYTES: line -- is still an id table. The other three
+    # readers of this format all match by substring; matching by equality here
+    # sent such a table down the label branch, where the id bytes were decoded as
+    # utf-8.
+    return b'SCATTERER_IDS' in header
+
+
+def _declared_id_bytes(header):
+    # The record width the file declares, or None if it declares none. Files
+    # written before the key existed fall through to the probe below.
+    for line in header.split(b'\n'):
+        key, sep, value = line.partition(b':')
+        if sep and key.strip().upper() == b'ID_BYTES':
+            try:
+                return int(value.strip())
+            except ValueError:
+                return None
+    return None
+
+
+def _probe_id_record_bytes(path, header_length, n_scatterers):
+    # The id block is not length-prefixed, but everything after it is: the int32
+    # that follows it is the reflection count, and the rest of the file is that
+    # many rows of three int32 Miller indices plus one complex<double> per
+    # scatterer. Only the true record width makes that come out even, so the file
+    # states its own format arithmetically even when it does not state it in the
+    # header.
+    total = os.path.getsize(path)
+    id_block_start = 4 + header_length + 4
+    row_bytes = 12 + n_scatterers * 16
+    with open(path, 'rb') as f:
+        for width in (_ID_RECORD_BYTES, _LEGACY_ID_RECORD_BYTES):
+            end = id_block_start + n_scatterers * width
+            if end + 4 > total:
+                continue
+            f.seek(end)
+            n_refl = int.from_bytes(f.read(4), byteorder='little', signed=True)
+            if n_refl <= 0:
+                continue
+            if total - (end + 4) == n_refl * row_bytes:
+                return width
+    return None
+
+
+def _tscb_id_record_bytes(path, header, header_length, n_scatterers):
+    # Reading ids at the wrong width is not detected where the mistake is made:
+    # every record after the first is framed from the wrong offset and the
+    # failure surfaces much later as a model that does not match its own table.
+    # So refuse rather than guess.
+    name = os.path.basename(path)
+    width = _declared_id_bytes(header)
+    if width is None:
+        width = _probe_id_record_bytes(path, header_length, n_scatterers)
+    if width == _ID_RECORD_BYTES:
+        return width
+    if width == _LEGACY_ID_RECORD_BYTES:
+        raise ScattererResolutionError(
+            f"{name} holds 8-byte scatterer ids -- the format NoSpherA2 wrote between "
+            "12 and 29 July 2026 -- but this Olex2 reads the 16-byte format. The marker "
+            "is the same in both, so nothing else can tell them apart. Recalculate the "
+            "table with the current NoSpherA2.")
+    if width is None:
+        raise ScattererResolutionError(
+            f"cannot determine the scatterer id width of {name}: it declares none and "
+            "its size fits neither known width, so it is truncated, damaged or written "
+            "by a version this Olex2 does not know.")
+    raise ScattererResolutionError(
+        f"{name} declares ID_BYTES: {width}, which this Olex2 cannot read.")
+
+
 def read_binary_scatterers(filestream):
     decode_scale = 16 / (0xFFFFFFFF/2)
-    frac_x = int.from_bytes(filestream.read(4), byteorder='little', signed=True) * decode_scale
-    frac_y = int.from_bytes(filestream.read(4), byteorder='little', signed=True) * decode_scale
-    frac_z = int.from_bytes(filestream.read(4), byteorder='little', signed=True) * decode_scale
-    data = int.from_bytes(filestream.read(2), byteorder='little', signed=True)
-    Z = int.from_bytes(filestream.read(1), byteorder='little')
-    reserved = int.from_bytes(filestream.read(1), byteorder='little')
+    raw = filestream.read(_ID_RECORD_BYTES)
+    # int.from_bytes(b'', ...) is 0, so a short read would otherwise turn a
+    # truncated file into a block of Z=0 atoms rather than into an error.
+    if len(raw) != _ID_RECORD_BYTES:
+        raise ScattererResolutionError(
+            "TSCB file ends in the middle of the scatterer id block; the table is truncated")
+    frac_x = int.from_bytes(raw[0:4], byteorder='little', signed=True) * decode_scale
+    frac_y = int.from_bytes(raw[4:8], byteorder='little', signed=True) * decode_scale
+    frac_z = int.from_bytes(raw[8:12], byteorder='little', signed=True) * decode_scale
+    data = int.from_bytes(raw[12:14], byteorder='little', signed=True)
+    Z = raw[14]
+    reserved = raw[15]
     return xray_.scatterer_id_big(frac_x, frac_y, frac_z, data, Z, reserved)
 
 
@@ -23,7 +108,8 @@ def read_scatterers_from_tscb(tscb_file):
         header = f.read(header_length)
         n_scatterers = int.from_bytes(f.read(4), byteorder='little')
 
-        if header == b"SCATTERER_IDS":
+        if _tscb_header_says_ids(header):
+            _tscb_id_record_bytes(tscb_file, header, header_length, n_scatterers)
             for _ in range(n_scatterers):
                 scatterer_ids.append(read_binary_scatterers(f))
         else:
@@ -37,6 +123,29 @@ def read_scatterers_from_tscb(tscb_file):
             
             
     return scatterer_ids
+
+def _text_scatterer_id(token, tsc_file):
+    # the text format carries the same two vintages as the binary one: the
+    # 8-byte id of July 2026 prints as 16 hex characters, the current one as 32.
+    # Without this the constructor's own message names neither the file nor the
+    # format, and a table that cannot be read looks like a table that does not
+    # match.
+    name = os.path.basename(tsc_file)
+    try:
+        return xray_.scatterer_id_big(token)
+    except ValueError:
+        if len(token) == 2 * _LEGACY_ID_RECORD_BYTES:
+            raise ScattererResolutionError(
+                f"{name} holds 8-byte scatterer ids -- the format NoSpherA2 wrote between "
+                "12 and 29 July 2026 -- but this Olex2 reads the 16-byte format. "
+                "Recalculate the table with the current NoSpherA2.")
+        raise ScattererResolutionError(
+            f"{name} carries a scatterer id of {len(token)} characters, which is neither "
+            "known format, so the table is damaged or was written by a version this Olex2 "
+            "does not know.")
+    except RuntimeError as error:
+        raise ScattererResolutionError(f"{name} carries an unusable scatterer id: {error}")
+
 
 def read_scatterers_from_tsc(tsc_file):
     # The header is keyed, not positional: discamb2tsc writes a SYMM: line, so
@@ -56,7 +165,7 @@ def read_scatterers_from_tsc(tsc_file):
             is_id = header == 'SCATTERER_IDS:'
             for scat in scatterers:
                 if is_id:
-                    scatterer_ids.append(xray_.scatterer_id_big(scat))
+                    scatterer_ids.append(_text_scatterer_id(scat, tsc_file))
                 else:
                     scatterer_ids.append(scat)
             break
@@ -64,19 +173,61 @@ def read_scatterers_from_tsc(tsc_file):
 
 
 def read_scatterers(tsc_file):
+    # a caller may still hold the path as bytes, the way the refinement once
+    # passed it to the C++ builder; the readers and the error messages want str
+    if isinstance(tsc_file, bytes):
+        tsc_file = os.fsdecode(tsc_file)
     if tsc_file.endswith('.tscb'):
         return read_scatterers_from_tscb(tsc_file)
     else:
         return read_scatterers_from_tsc(tsc_file)
 
-def update_tsc_file(tsc_file, scatterers):
+def _header_key(line):
+    return line.split(b':', 1)[0].strip().upper()
+
+
+def compose_header(header, want_ids, extra_lines=None):
+    """The header to write back: the lines the file already carried, with the
+    marker made to agree with the kind of block now in it, and any line the
+    caller supplies replacing an older line of the same key.
+
+    The marker is a bare word rather than a KEY: VALUE line, and every reader
+    looks for it as a substring anywhere in the header, so it is filtered out
+    and put back rather than edited in place.
+    """
+    # the binary header is bytes and the text one is str, and callers pass
+    # whichever they are holding, so a line is taken in either form
+    extra_lines = [l.encode('utf-8') if isinstance(l, str) else l
+                   for l in (extra_lines or []) if l.strip()]
+    if not extra_lines and _tscb_header_says_ids(header) == bool(want_ids):
+        # nothing to decide, so keep the bytes exactly as they were found rather
+        # than normalising whitespace nobody asked about
+        return header
+    replaced = set(_header_key(l) for l in extra_lines)
+    kept = [l for l in header.split(b'\n')
+            if l.strip() and l.strip() != _ID_MARKER
+            and _header_key(l) not in replaced]
+    lines = ([_ID_MARKER] if want_ids else []) + extra_lines + kept
+    return b'\n'.join(lines)
+
+
+def update_tsc_file(tsc_file, scatterers, extra_header_lines=None):
+    extra = [l.decode('utf-8') if isinstance(l, bytes) else l
+             for l in (extra_header_lines or []) if str(l).strip()]
+    replaced = set(l.split(':', 1)[0].strip().upper() for l in extra)
     new_data = ""
     with open(tsc_file, 'r') as f:
         for line in f:
             if not (line.startswith('SCATTERER_IDS:') or line.startswith('SCATTERERS:')):
-                new_data += line
+                # a line the caller is about to write is dropped here rather
+                # than left to appear twice, since nothing downstream says
+                # which of two lines with one key wins
+                if line.split(':', 1)[0].strip().upper() not in replaced:
+                    new_data += line
                 continue
-            
+
+            for extra_line in extra:
+                new_data += extra_line.rstrip('\n') + '\n'
             if isinstance(scatterers[0], str):
                 new_data += "SCATTERERS: "
                 new_data += " ".join([f"{label}" for label in scatterers]) + "\n"
@@ -93,7 +244,7 @@ def update_tsc_file(tsc_file, scatterers):
     with open(tsc_file, 'w') as f:
         f.write(new_data)
 
-def update_tscb_file(tscb_file, scatterers):
+def update_tscb_file(tscb_file, scatterers, extra_header_lines=None):
     with open(tscb_file, "r+b") as f:
         header_length = int.from_bytes(f.read(4), byteorder='little')
         header = f.read(header_length)
@@ -108,7 +259,11 @@ def update_tscb_file(tscb_file, scatterers):
         id_block_start = 4 + header_length + 4
         payload_start = 4 + header_length
 
-        if (header == b"SCATTERER_IDS"  and not isinstance(scatterers[0], str)):
+        # The two in-place paths below return before the header is composed, so
+        # they are only available when the caller has nothing to put in it.
+        if (_tscb_header_says_ids(header) and not isinstance(scatterers[0], str)
+                and not extra_header_lines):
+            _tscb_id_record_bytes(tscb_file, header, header_length, n_scatterers)
             #As the number of scatterers did not change, the lenght of the representation does not change, so we can just overwrite the scatterer IDs in place.
             if n_scatterers != len(scatterers):
                 raise ValueError(f"Number of scatterers in TSCB file ({n_scatterers}) does not match the provided list ({len(scatterers)}).")
@@ -121,43 +276,53 @@ def update_tscb_file(tscb_file, scatterers):
                         "refusing to write a table whose ids would not line up")
                 f.write(payload)
             return
-        elif (header == b"" and isinstance(scatterers[0], str)):
-            #As the number of scatterers did not change, the lenght of the representation does not change, so we can just overwrite the scatterer labels in place.
-            if n_scatterers != len(scatterers):
-                raise ValueError(f"Number of scatterers in TSCB file ({n_scatterers}) does not match the provided list ({len(scatterers)}).")
+        elif (not _tscb_header_says_ids(header) and isinstance(scatterers[0], str)):
+            # In the label case the int just read is the byte size of the payload,
+            # not a count of scatterers, so it is the size that decides whether the
+            # block can be overwritten where it lies. A payload of any other size
+            # falls through to the resize path below; comparing it against the
+            # number of labels instead would reject renames that fit perfectly.
             new_payload = " ".join(str(scat) for scat in scatterers).encode('utf-8')
-            if len(new_payload) != n_scatterers:
-                raise ValueError(
-                    f"label payload changed size ({n_scatterers} -> {len(new_payload)}); "
-                    "cannot be overwritten in place")
-            f.seek(payload_start)
-            f.write(len(new_payload).to_bytes(4, byteorder='little'))
-            f.write(new_payload)
-            return
+            if len(new_payload) == n_scatterers and not extra_header_lines:
+                f.seek(payload_start)
+                f.write(len(new_payload).to_bytes(4, byteorder='little'))
+                f.write(new_payload)
+                return
             
         #We have to change the size of the file, thus we need to first save the data written at the end
-        if (header == b"SCATTERER_IDS"): 
-            f.seek(16 * n_scatterers, 1)
+        if _tscb_header_says_ids(header):
+            f.seek(_tscb_id_record_bytes(tscb_file, header, header_length, n_scatterers)
+                   * n_scatterers, 1)
         else: 
             f.seek(n_scatterers, 1) 
         data = f.read() #Save data that comes after the scatterer IDs or labels
         f.seek(0)
         
-        if isinstance(scatterers[0], str):
-            f.write(int(0).to_bytes(4, byteorder='little')) #Label scatteres do not get a header, so we write a 0 length header
+        # The header keeps every line it came with; only the marker follows the
+        # kind of block. Rewriting it as a bare marker dropped everything else
+        # the writer had put there -- 'AD: FALSE' among them -- so a resync
+        # quietly changed what the table claimed about itself.
+        is_labels = isinstance(scatterers[0], str)
+        new_header = compose_header(header, not is_labels, extra_header_lines)
+        f.write(len(new_header).to_bytes(4, byteorder='little'))
+        f.write(new_header)
+        if is_labels:
             new_payload = " ".join(str(scat) for scat in scatterers).encode('utf-8')
             f.write(len(new_payload).to_bytes(4, byteorder='little'))
             f.write(new_payload)
         else: #AtomID case
-            f.write(len(b"SCATTERER_IDS").to_bytes(4, byteorder='little'))
-            f.write(b"SCATTERER_IDS")
             f.write(len(scatterers).to_bytes(4, byteorder='little'))
             for scat in scatterers:
                 f.write(scat.to_bytes())
-                
-        f.write(data) #Write the rest of the data back to the file
 
-def update_scatterers_in_file(tsc_file, scatterers):
+        f.write(data) #Write the rest of the data back to the file
+        # a block that shrank would otherwise leave the tail of the old file
+        # beyond it. Readers count their way through and would not notice, but
+        # the id width is worked out from the file size, and stray bytes make
+        # that arithmetic come out to no known width at all.
+        f.truncate()
+
+def update_scatterers_in_file(tsc_file, scatterers, extra_header_lines=None):
     # Rewriting the table is the one action here that can damage it, and when
     # it goes wrong nothing else says so: the file stays the right shape, the
     # numbers stay plausible, and the refinement simply describes the wrong
@@ -166,9 +331,9 @@ def update_scatterers_in_file(tsc_file, scatterers):
     print("Updating the %d scatterer %s in %s"
           % (len(scatterers), kind, os.path.basename(tsc_file)))
     if tsc_file.endswith('.tscb'):
-        update_tscb_file(tsc_file, scatterers)
+        update_tscb_file(tsc_file, scatterers, extra_header_lines)
     else:
-        update_tsc_file(tsc_file, scatterers)
+        update_tsc_file(tsc_file, scatterers, extra_header_lines)
 
 
 def convert_labels_to_ids(labels, model_labels, model_ids):

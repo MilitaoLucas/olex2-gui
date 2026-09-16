@@ -72,9 +72,12 @@ def _read_tscb_header(tscb_bytes):
 def tscb_uses_scatterer_ids(tscb_path):
   # SCATTERER_IDS-headed files store the scatterer block as fixed-width binary
   # ids, not as text labels; callers must not tokenize that block as label text.
+  # Matched as a substring because the header is a block of lines and the marker
+  # is only the first: an id table carrying an AD: or ID_BYTES: line would
+  # otherwise be taken for a label table and its id block rewritten as text.
   with open(tscb_path, "rb") as file_handle:
     tscb_bytes = file_handle.read()
-  return _read_tscb_header(tscb_bytes) == b"SCATTERER_IDS"
+  return b"SCATTERER_IDS" in _read_tscb_header(tscb_bytes)
 
 
 def _locate_scatterers_block(tscb_bytes):

@@ -43,7 +43,8 @@ class Method_cctbx_refinement(Method_refinement):
       if not os.path.exists(self.table_file_name):
         self.table_file_name = None
     if self.table_file_name:
-      self.table_file_name = self.table_file_name.encode("utf-8")
+      # kept as str: the table readers and the cache signatures compare it
+      # against the str nsa2 'file' parameter, and the C++ builder takes str
       OV.SetParam('snum.auto_hydrogen_naming', False)
       print("Using tabulated atomic form factors")
 

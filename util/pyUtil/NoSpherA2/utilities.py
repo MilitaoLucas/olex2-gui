@@ -764,7 +764,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     shutil.move("experimental.tscb", tsc_dst)
 
   try:
-    nsa2_set_param('file', tsc_dst)
+    nsa2_adopt_tsc_file(tsc_dst, "NoSpherA2 -merge")
     OV.SetControlValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
@@ -1315,8 +1315,13 @@ def nsa2_refresh_file_hash(path, file_hash=None, flush=True):
   return file_hash
 
 
-def nsa2_validate_tsc_file_integrity():
+def nsa2_validate_tsc_file_integrity(acknowledge=True):
   """Validate current NoSpherA2 TSC/TSCB file against stored metadata.
+
+  A mismatch is reported once and then forgiven, so that running the same thing
+  again is how the user accepts the file. acknowledge=False asks the question
+  without spending that: a map or a statistic reads the same file, and must not
+  answer the warning the refinement is going to raise.
 
   Returns:
     (is_valid, stored_hash, current_hash, reason)
@@ -1352,7 +1357,8 @@ def nsa2_validate_tsc_file_integrity():
     nsa2_refresh_file_hash(table_file_name, current_hash)
     return True, stored_hash, current_hash, 'ok'
 
-  _nsa2_hash_mismatch_ignored.add(mismatch_key)
+  if acknowledge:
+    _nsa2_hash_mismatch_ignored.add(mismatch_key)
   return False, stored_hash, current_hash, 'mismatch'
 
 
@@ -1369,6 +1375,109 @@ def nsa2_check_tsc_origin_known():
 
 OV.registerFunction(nsa2_validate_tsc_file_integrity, False, 'NoSpherA2')
 OV.registerFunction(nsa2_check_tsc_origin_known, False, 'NoSpherA2')
+
+
+def _nsa2_report_table_readable(path):
+  """Say now if the table cannot be framed at all, rather than at the next refinement.
+
+  read_scatterers costs one row per atom, which is nothing against the size of
+  these files, and it is the step that tells an unreadable table from an
+  unmatched one: an id block read at the wrong record width is not rejected, it
+  is misframed, and what comes back is a table matching no atom in the model.
+  Reported, not refused -- selecting a table that cannot be read is how a user
+  finds out that it cannot be read.
+  """
+  try:
+    from tsc_scatterer_resync import read_scatterers, ScattererResolutionError
+  except ImportError:
+    return True
+  try:
+    read_scatterers(path)
+    return True
+  except ScattererResolutionError as error:
+    print("WARNING: %s cannot be used as it stands: %s" % (os.path.basename(path), error))
+  except Exception as error:
+    print("WARNING: %s could not be read as a scattering table: %s"
+          % (os.path.basename(path), error))
+  return False
+
+
+def _nsa2_normalise_table_labels(path):
+  """Rewrite a label-keyed table as an id-keyed one, once, on the way in.
+
+  DISCAMB and others name their columns by atom label, and a label is only as
+  stable as the model holding it: rename an atom and the table matches nothing,
+  with no way back, because a label table carries nothing else to identify its
+  columns by. Scatterer ids do not have that failure mode, and the labels are
+  the only thing that can produce them -- so the conversion is made while they
+  are still known to be right, against the model the file arrived with.
+
+  All or nothing, and fail-soft. A table where one label of hundreds does not
+  resolve is left exactly as it was: half-converted is worse than unconverted.
+  The original labels go into the header as SOURCE_LABELS, so what the
+  generator called each column survives the conversion.
+  """
+  try:
+    if olx.IsFileLoaded() == 'false':
+      return False
+  except Exception:
+    return False
+  try:
+    if os.path.normcase(os.path.dirname(os.path.abspath(path))) != \
+       os.path.normcase(os.path.abspath(OV.FilePath())):
+      # a table sitting somewhere else is somebody else's file to rewrite
+      return False
+    from tsc_scatterer_resync import read_scatterers, convert_labels_to_ids, \
+      update_scatterers_in_file, SOURCE_LABELS_KEY
+    from aaff import get_current_scatter_ids
+    labels = read_scatterers(path)
+    if not labels or not isinstance(labels[0], str):
+      return False
+    model = olexex.OlexRefinementModel()
+    ids = convert_labels_to_ids(labels, [atom["label"] for atom in model._atoms],
+                                get_current_scatter_ids(model))
+    source_line = SOURCE_LABELS_KEY.decode('ascii') + ": " + " ".join(labels)
+    update_scatterers_in_file(path, ids, extra_header_lines=[source_line])
+    print("%s named its columns by atom label; all %d resolved, so it now carries "
+          "scatterer ids and the labels are kept in its header."
+          % (os.path.basename(path), len(labels)))
+    return True
+  except Exception as error:
+    print("Note: %s stays keyed by atom label (%s)." % (os.path.basename(path), error))
+    return False
+
+
+def nsa2_adopt_tsc_file(filename, origin=None, normalise=True):
+  """Take a tsc/tscb file into this structure: check it, normalise it, record it.
+
+  Every route that hands Olex2 a table -- a generator finishing, a parts merge,
+  the file picker -- comes through here, so that what gets stored about a file
+  is decided once rather than in each of them.
+
+  The order is the point. The file is rewritten before it is hashed: a hash
+  taken first describes bytes that are then replaced, and the next session
+  validates the new file against it and reports tampering that never happened.
+
+  Returns the resolved path, or None when the file could not be found -- in
+  which case the stored hash and origin are cleared rather than left describing
+  the file that was selected before.
+  """
+  nsa2_set_param('file', filename)
+  resolved = _nsa2_resolve_existing_path(filename)
+  if resolved is None:
+    nsa2_set_param('file_hash', '')
+    nsa2_set_param('file_origin', 'externally provided')
+    return None
+
+  _nsa2_report_table_readable(resolved)
+  if normalise:
+    _nsa2_normalise_table_labels(resolved)
+
+  nsa2_set_param('file_hash', _nsa2_sha256(resolved))
+  nsa2_set_param('file_origin', origin or 'externally provided')
+  return resolved
+OV.registerFunction(nsa2_adopt_tsc_file, False, 'NoSpherA2')
+
 
 def write_precise_model_file(model = None, cov_matrix = None, annotations = None):
   from refinement import FullMatrixRefine
@@ -1527,7 +1636,9 @@ def get_tsc_file_dropdown_items():
     res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
     t = res.split(";")
     if len(t[0]) == 0:
-        nsa2_set_param('file', 'No .tsc/.tscb files found')
+        # adopting the sentinel clears the hash and origin the previous
+        # file left behind, which is the point of routing even this through
+        nsa2_adopt_tsc_file('No .tsc/.tscb files found')
         return "No .tsc/.tscb files found"
     else:
         return res

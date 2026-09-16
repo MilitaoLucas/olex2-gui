@@ -363,37 +363,21 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
   def set_tsc_file_with_metadata(self, filename, origin=None):
     """
     Set the NoSpherA2 file parameter and store metadata (hash and origin).
-    
+
     Args:
       filename: The name of the TSC/TSCB file to set
-      origin: The software/method that generated this file. If None, auto-detect from wfn_code.
-              If hash is empty (file not found), origin will be set to "externally provided".
-    """
-    # Set the file parameter
-    nsa2_set_param('file', filename)
-    
-    # Compute file hash if the file exists
-    file_path = os.path.join(OV.FilePath(), filename)
-    file_hash = ""
-    if os.path.exists(file_path):
-      try:
-        with open(file_path, 'rb') as f:
-          file_hash = hashlib.sha256(f.read()).hexdigest()
-      except Exception as e:
-        print(f"Warning: Could not compute hash for {filename}: {e}")
-    
-    # Determine origin if not provided
-    if origin is None:
-      # If hash is unknown/empty and origin not explicitly provided, mark as externally provided
-      if file_hash == "":
-        origin = "externally provided"
-      else:
-        origin = self.wfn_code if hasattr(self, 'wfn_code') else software()
-    
-    # Store metadata
-    nsa2_set_param('file_hash', file_hash)
-    nsa2_set_param('file_origin', origin)
+      origin: The software/method that generated this file. If None, taken from
+              wfn_code; if the file cannot be found, "externally provided".
 
+    The work itself is nsa2_adopt_tsc_file's. It is the one place a table is
+    checked, normalised and only then hashed, and the other routes in -- a
+    parts merge, fragHAR, the file picker -- reach it too, so a file means the
+    same thing however it arrived.
+    """
+    from utilities import nsa2_adopt_tsc_file
+    if origin is None:
+      origin = self.wfn_code if hasattr(self, 'wfn_code') else software()
+    nsa2_adopt_tsc_file(filename, origin)
   def _resolve_active_tscb_path(self):
     tsc_name = str(OV.GetParam('snum.NoSpherA2.file') or '').strip()
     if not tsc_name.lower().endswith('.tscb'):

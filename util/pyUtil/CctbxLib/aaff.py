@@ -143,7 +143,41 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         RunRefinementPrg.running = None
         HAR_log.close()
         return False
-      
+
+      # Ask whether this is still the same file before asking what its columns
+      # mean. The column matching below can only say that the ids differ, which
+      # is equally true of a table that was replaced, restored from a backup or
+      # written for another model -- the hash is the only thing that tells those
+      # apart, so it is checked first.
+      if nsa2_get_param('run_refine'):
+        is_valid, stored_hash, current_hash, reason = nsa2_validate_tsc_file_integrity()
+        if not is_valid:
+          if reason == 'mismatch':
+            msg = f"""TSC/TSCB file hash mismatch!
+
+The TSC/TSCB file on disk does not match the hash stored in the .ins header.
+This may indicate the file was modified or replaced.
+
+Stored hash: {stored_hash[:16]}...
+Current hash: {current_hash[:16]}...
+
+To proceed with refinement using the current file anyway, run refinement again
+with the same file - the warning will be ignored for this session and the hash
+will be updated in the .ins header.
+
+Refinement aborted."""
+          elif reason == 'file_not_found':
+            msg = "TSC/TSCB file not found on disk. Please recalculate or select a valid file."
+          elif reason == 'no_salted_model':
+            msg = "No SALTED model is selected. Please select a SALTED model file and recalculate."
+          elif reason == 'salted_model_not_found':
+            msg = "Selected SALTED model file was not found on disk. Please fix the path or select a valid model."
+          else:
+            msg = f"TSC file validation error: {reason}"
+          olx.Echo(msg, m="warning")
+          HAR_log.close()
+          return False
+
       # Which column of the table describes each atom. Nothing is written here:
       # the table is brought up to date once, after the refinement, so that
       # there is a single place that can put a column on the wrong atom.
@@ -190,44 +224,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         else:
           HAR_log.write("{:^24}".format("---"))
       if nsa2_get_param('run_refine'):
-        # Validate TSC file integrity before running refinement
-
-        is_valid, stored_hash, current_hash, reason = nsa2_validate_tsc_file_integrity()
-        if not is_valid:
-          if reason == 'mismatch':
-            # TSC file hash mismatch - warn user and stop
-            msg = f"""TSC/TSCB file hash mismatch!
-
-The TSC/TSCB file on disk does not match the hash stored in the .ins header.
-This may indicate the file was modified or replaced.
-
-Stored hash: {stored_hash[:16]}...
-Current hash: {current_hash[:16]}...
-
-To proceed with refinement using the current file anyway, run refinement again
-with the same file - the warning will be ignored for this session and the hash
-will be updated in the .ins header.
-
-Refinement aborted."""
-            olx.Echo(msg, m="warning")
-            return False
-          elif reason == 'file_not_found':
-            msg = "TSC/TSCB file not found on disk. Please recalculate or select a valid file."
-            olx.Echo(msg, m="warning")
-            return False
-          elif reason == 'no_salted_model':
-            msg = "No SALTED model is selected. Please select a SALTED model file and recalculate."
-            olx.Echo(msg, m="warning")
-            return False
-          elif reason == 'salted_model_not_found':
-            msg = "Selected SALTED model file was not found on disk. Please fix the path or select a valid model."
-            olx.Echo(msg, m="warning")
-            return False
-          else:
-            msg = f"TSC file validation error: {reason}"
-            olx.Echo(msg, m="warning")
-            return False
-        
+        # The file itself was validated before the columns were matched, above.
         # Check if TSC origin is known
         origin_known, origin = nsa2_check_tsc_origin_known()
         if not origin_known:
