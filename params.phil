@@ -175,8 +175,40 @@ routines requiring structure refinement
       .type = float
     program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 SIR2014 SIR2019 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
+    method = 'Dual Space' '*Charge Flipping' 'Auto-Solve' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice
+    tidy_cycles = 4
+      .type = int
+      .short_caption = Tidy-up refinement cycles
+      .help = "Auto-Solve only. Cycles of refinement run after solving, to "
+              "find which peaks are real. The peak search deliberately picks "
+              "more maxima than there are atoms, and a peak with no density "
+              "under it cannot hold a sensible displacement parameter, so a "
+              "few cycles separate atoms from noise far better than peak "
+              "height does. 0 turns the tidy-up off."
+    tidy_uiso_factor = 3.0
+      .type = float
+      .short_caption = Tidy-up U factor
+      .help = "Auto-Solve only. After the tidy-up cycles, a peak is removed "
+              "when its U exceeds this multiple of the value expected for its "
+              "element. A ratio rather than a fixed number, because a fixed "
+              "one is confounded by element: palladium belongs near 0.02 and "
+              "carbon near 0.06, so any single cutoff is at once too tight "
+              "for the light atoms and far too loose for the heavy ones. A "
+              "peak that is not an atom has no density holding it and its U "
+              "runs away from its element's expectation whatever that was."
+    retype_after_tidy = True
+      .type = bool
+      .short_caption = Re-assign element types after the tidy-up
+      .help = "Auto-Solve only. Assign the element types a second time once "
+              "the spurious peaks have been removed. The peak search "
+              "over-picks by design -- 30% of its maxima are not atoms, "
+              "measured -- and those extras sit in the real atoms' descriptor "
+              "neighbourhoods and in the density scale fit, so they corrupt "
+              "the typing of everything near them. Re-typing on the cleaned "
+              "model measured +0.05 and +0.03 correct on two independent "
+              "samples, as an oracle bound. Costs about one second, and is "
+              "skipped automatically when the tidy-up removed nothing."
     graphical_output = False
       .type = bool
     current_atomic_volume = None
@@ -1263,6 +1295,38 @@ programs
           .type = int
         max_solving_iterations = 500
           .type = int
+        n_trials = 8
+          .type = int
+          .short_caption = Trials
+          .help = "How many random starts to try. Each is scored and the best "
+                  "kept, instead of using whichever start happened to work. "
+                  "1 restores the old single-run behaviour."
+        suggest_space_groups = True
+          .type = bool
+          .short_caption = Suggest space groups
+          .help = "After solving, offer the most likely space groups as a "
+                  "clickable list, the way ShelXT does, instead of assuming "
+                  "the one currently set. Costs a second or two."
+        assign_elements = True
+          .type = bool
+          .short_caption = Assign element types
+          .help = "After solving, propose an element for each peak instead of "
+                  "leaving them all as Q peaks to be retyped by hand. Uses "
+                  "integrated density combined with a local-geometry "
+                  "classifier: measured 0.717 correct over 1,162,153 atoms, "
+                  "against 0.635 for density alone, with the right element "
+                  "among the top three suggestions 0.924 of the time. C, N "
+                  "and O differ by one electron and will still be confused, "
+                  "and B, I, P and Si are poor; the labels are a starting "
+                  "point, not an answer. Falls back to the density call alone "
+                  "when the geometry step is unavailable. Adds a second or two."
+        weak_reflection_fraction = 0.2
+          .type = float
+          .short_caption = Weak reflection fraction
+          .help = "Fraction of the weakest reflections given the "
+                  "Oszlanyi-Suto weak-reflection treatment. 0.2 is a measured "
+                  "optimum over the Crystallography Open Database; 0 turns the "
+                  "treatment off and costs about 9 percentage points."
         }
       }
     Sir2002
@@ -1364,6 +1428,18 @@ user
               "The backbone always stays with the ribbon, so what this adds "
               "is the sidechain. focus means whatever isolate leaves on "
               "screen. Named residues are set with 'cartoon -sc=A:45-60'."
+    }
+
+  solution
+    .short_caption = Structure solution
+    {
+    auto_solve = False
+      .type = bool
+      .short_caption = Offer Auto-Solve
+      .help = "Register the Auto-Solve method (multi-trial charge flipping "
+              "with space-group suggestions and element assignment). Needs a "
+              "cctbx with smtbx.ab_initio; without it the method is silently "
+              "left out. Takes effect at the next start."
     }
 
   use_fader = 0

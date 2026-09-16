@@ -72,6 +72,18 @@ def defineExternalPrograms():
   texp = Method_shelx_solution(texp_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
+  # The multi-attempt pipeline is its own method rather than a mode of
+  # `Charge Flipping`, so that method keeps behaving exactly as it always has
+  # for existing users, scripts and the other developers' workflows. Opt-in
+  # (user.solution.auto_solve) until the smtbx.ab_initio modules it runs on
+  # are in every shipped cctbx.
+  auto_solve = None
+  if OV.GetParam('user.solution.auto_solve', False):
+    try:
+      import smtbx.ab_initio  # noqa: F401
+      auto_solve = Method_cctbx_AutoSolve(auto_solve_phil)
+    except ImportError:
+      print("user.solution.auto_solve is set but this cctbx has no smtbx.ab_initio")
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
@@ -221,7 +233,12 @@ Palatinus et al., 2012""",
   ShelXD.addMethod(dual_space)
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
+  # Order decides what the GUI lists first, and `charge_flipping` stays first
+  # so the default is unchanged. Swap these two lines to make Auto-Solve the
+  # default once it has been exercised on real work.
   smtbx_solve.addMethod(charge_flipping)
+  if auto_solve is not None:
+    smtbx_solve.addMethod(auto_solve)
   for sir in SIRs:
     sir_dm = Method_SIR(sir_dm_phil)
     sir_patt = Method_SIR(sir_patt_phil)

@@ -786,12 +786,85 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
 OV.registerFunction(students_t_hooft_analysis)
 
 
+# **What the solution knew, kept for the tidy-up to reuse.**
+#
+# `tidy_solution` runs from `RunPrg` after the solving run has finished, on a
+# *new* `OlexCctbxSolve`, so anything stored on the instance is gone by then.
+# The alternative -- recomputing the density from a map after the refinement --
+# is the decision that stalled this feature: the solution map no longer matches
+# the moved atoms, and an Fo/2Fo-Fc map from the tidy-up refinement has its Fc
+# contaminated by the very assignment being corrected.
+#
+# Recording the *integrated densities* sidesteps it. They are a property of the
+# solution map at a point, so they are as valid after the refinement as before,
+# while `element_assignment.assign` refits its carbon scale over whatever sites
+# survive -- which is precisely the part cleanup improves.
+#
+# Keyed by atom name because that is what survives the `.res` round trip,
+# `compaq`, `refine` and `kill`. Positions do not: the atoms move 0.1-0.24 A in
+# the refinement and `compaq` moves whole fragments between symmetry images.
+_SOLUTION_EVIDENCE = {}
+
+
+_GEOMETRY_MODEL = {}
+
+
+def _geometry_model(path):
+  """ The geometry-aid model, loaded once per Olex2 session.
+
+  `geometry_aid.Model(path)` decompresses a 4.4 MB npz holding a 100 x 42,042
+  float64 PCA matrix -- 33.6 MB once expanded -- and it measured **0.139 s**,
+  against 0.030 s for the projection it exists to perform and 0.008 s for the
+  three dense layers after it. Rebuilding it per call was affordable while
+  there was one call per solve. Auto-Solve now makes two, before and after the
+  tidy-up, so it is worth keeping.
+
+  Keyed on the file's modification time as well as its path: a developer
+  dropping in a retrained model mid-session must get the new one, and a stale
+  classifier would be invisible in every number it produced.
+  """
+  from smtbx.ab_initio import geometry_aid
+  try:
+    key = (path, os.path.getmtime(path))
+  except OSError:
+    key = (path, None)
+  if key not in _GEOMETRY_MODEL:
+    _GEOMETRY_MODEL.clear()
+    _GEOMETRY_MODEL[key] = geometry_aid.Model(path)
+  return _GEOMETRY_MODEL[key]
+
+
+def _remember_density_evidence(densities, sites, allowed):
+  """ Hold the densities until the peaks have names; see `_SOLUTION_EVIDENCE`. """
+  _SOLUTION_EVIDENCE.clear()
+  _SOLUTION_EVIDENCE["densities"] = list(densities)
+  _SOLUTION_EVIDENCE["allowed"] = set(allowed or ())
+  _SOLUTION_EVIDENCE["names"] = {}
+
+
+def _name_density_evidence(index, name):
+  """ Attach the Olex2 name a posted peak was given to its density. """
+  if name and "names" in _SOLUTION_EVIDENCE:
+    _SOLUTION_EVIDENCE["names"][str(name)] = index
+
+
 class OlexCctbxSolve(OlexCctbxAdapter):
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
     self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks
 
-  def runChargeFlippingSolution(self, verbose="highly", solving_interval=60):
+  def runChargeFlippingSolution(self, verbose="highly", solving_interval=60,
+                                mode="classic"):
+    """ Solve. `mode` selects which of the two solution methods is running.
+
+    `classic` is the original single charge-flipping run, unchanged, and is
+    what the `Charge Flipping` method calls. `auto` is the multi-attempt
+    pipeline -- ranked trials, a space-group shortlist and element types --
+    and is what `Auto-Solve` calls.
+
+    Defaulting to `classic` is deliberate: anything already calling this
+    without the argument gets the behaviour it has always had.
+    """
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
@@ -805,12 +878,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     data = self.reflections.f_sq_obs
 
     # merge them (essential!!)
+    #
+    # **Drop the anomalous flag before merging.** Olex2 hands over an array
+    # with `Anomalous flag: True`, so merging keeps Friedel opposites apart.
+    # Every number this pipeline was tuned and measured against was produced
+    # from non-anomalous arrays (`cod_data.read_f_sq` builds them with
+    # `anomalous_flag=False`), and charge flipping works from |F| assuming
+    # Friedel's law in any case. Leaving it set means the GUI runs a different
+    # input convention from the one all the measurements describe -- a
+    # divergence no harness could ever have shown, because the harness is what
+    # defined the convention.
+    if f_obs.anomalous_flag():
+      f_obs = f_obs.as_non_anomalous_array()
     merging = f_obs.merge_equivalents()
     f_obs = merging.array()
     f_obs.show_summary()
-
-    # charge flipping iterations
-    flipping = charge_flipping.weak_reflection_improved_iterator(delta=None)
 
     params = OV.Params().programs.solution.smtbx.cf
     extra = group_args(
@@ -828,20 +910,53 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     elif params.amplitude_type == 'quasi-E':
       extra.normalisations_for = charge_flipping.amplitude_quasi_normalisations
 
-    solving = charge_flipping.solving_iterator(
-      flipping,
-      f_obs,
-      yield_during_delta_guessing=True,
-      yield_solving_interval=solving_interval,
-      **extra.__dict__
-    )
-    charge_flipping_loop(solving, verbose=verbose)
+    # Set on every run so a previous run's table can never be shown beside a
+    # new solution.
+    self.solution_suggestions = None
+    self.solution_f_obs = f_obs
+
+    # **The method decides the mode, not the parameters.** The two solution
+    # methods share this adapter and one phil namespace, so resolving "am I the
+    # classic one?" from a parameter value would make the answer depend on
+    # whichever settings page was touched last. `Charge Flipping` must behave
+    # exactly as it always has for existing users and scripts, whatever the
+    # pipeline's knobs happen to say.
+    if mode == "classic":
+      n_trials, want_groups, want_elements = 1, False, False
+    else:
+      n_trials = max(1, int(getattr(params, 'n_trials', 8)))
+      want_groups = bool(getattr(params, 'suggest_space_groups', True))
+      want_elements = bool(getattr(params, 'assign_elements', True))
+    self.assign_elements_wanted = want_elements
+
+    if n_trials > 1:
+      f_calc = self.multiTrialSolution(f_obs, params, extra, n_trials, verbose)
+      if want_groups:
+        self.solution_suggestions = self.suggestSpaceGroups(f_obs)
+    else:
+      # The original single run, kept reachable so that the previous behaviour
+      # is still available and comparable: it is not the same as one trial of
+      # the multi-trial driver, because the solving iterator restarts itself up
+      # to max_attempts_* times here and exactly once there.
+      flipping = charge_flipping.weak_reflection_improved_iterator(
+        delta=None,
+        weak_reflection_fraction=getattr(params, 'weak_reflection_fraction',
+                                         0.2))
+      solving = charge_flipping.solving_iterator(
+        flipping,
+        f_obs,
+        yield_during_delta_guessing=True,
+        yield_solving_interval=solving_interval,
+        **extra.__dict__
+      )
+      charge_flipping_loop(solving, verbose=verbose)
+      f_calc = (solving.f_calc_solutions[0][0]
+                if solving.f_calc_solutions else None)
+
     # play with the solutions
     expected_peaks = f_obs.unit_cell().volume()/18.6/len(f_obs.space_group())
     expected_peaks *= 1.3
-    if solving.f_calc_solutions:
-      # actually only the supposedly best one
-      f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
+    if f_calc is not None:
       fft_map = f_calc.fft_map(
         symmetry_flags=maptbx.use_space_group_symmetry)
       fft_map.apply_volume_scaling()
@@ -852,24 +967,844 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           max_clusters=expected_peaks,),
         verify_symmetry=False
         ).all()
-      for xyz, height in zip(peaks.sites(), peaks.heights()):
+      # Propose an element for each peak, if asked. Falls back to the old
+      # unnamed-peak behaviour on any failure -- a solution the user can refine
+      # by hand beats no solution because the labelling stage broke.
+      elements = None
+      if getattr(self, 'assign_elements_wanted', False):
+        elements = self.assignElementTypes(f_calc, fft_map, peaks.sites())
+
+      for i, (xyz, height) in enumerate(zip(peaks.sites(), peaks.heights())):
         if not xyz:
           have_solution = False
           break
         else:
-          self.post_single_peak(xyz, height)
+          element = None
+          if elements is not None and i < len(elements):
+            element = elements[i]
+          name = self.post_single_peak(xyz, height, element=element)
+          _name_density_evidence(i, name)
       have_solution = True
     else: have_solution = False
     return have_solution
 
-  def post_single_peak(self, xyz, height, cutoff=1.0):
+  def startingUiso(self, element, u_carbon=0.06):
+    """ A starting displacement parameter appropriate to the element.
+
+    Every peak used to be seeded at 0.06 regardless of what it was. That is
+    right for carbon and badly wrong for a heavy atom: mean-square displacement
+    goes as 1/(m omega^2), so a heavier atom genuinely vibrates less, and
+    palladium belongs near 0.02. Starting it at 0.06 leaves the refinement to
+    walk it all the way down -- which is exactly what was seen on the first
+    real structure, where `Pd.uiso` was the worst-behaved parameter in the
+    model at -35 sigma on cycle 1 and still -18 by cycle 4.
+
+    `u_carbon * sqrt(M_C / M)` reproduces the usual spread closely enough to
+    start from: C 0.060, O 0.052, Cl 0.035, Fe 0.028, Pd 0.020, Pt 0.015.
+
+    Capped, because the same formula sends hydrogen to 0.21. Hydrogen is not
+    placed from peaks here, but a formula that can return nonsense for an
+    element someone might later pass is a trap worth closing now.
+    """
+    import math
+    try:
+      from cctbx.eltbx import tiny_pse
+      mass = tiny_pse.table(str(element)).weight()
+    except Exception:
+      return u_carbon
+    if not mass or mass <= 0:
+      return u_carbon
+    return max(0.005, min(0.08, u_carbon*math.sqrt(12.011/mass)))
+
+  def expectedElements(self):
+    """ The element symbols the user has declared for this crystal, as a set.
+
+    Only the identities are taken. The **counts are deliberately ignored**: a
+    user typing one atom of each element is normal practice -- it is all
+    SHELXT needs -- and every attempt to lean on the numbers has measured
+    worse than not asking, so this must work when the formula is qualitative.
+
+    Empty set when there is no formula, which the caller treats as "any
+    element is possible" rather than as an error.
+    """
+    try:
+      raw = str(olx.xf.GetFormula('list'))
+    except Exception:
+      return set()
+    out = set()
+    for part in raw.split(','):
+      symbol = part.split(':')[0].strip()
+      if symbol:
+        out.add(symbol.capitalize())
+    return out
+
+  def geometryProposals(self, unit_cell, space_group, sites):
+    """ The classifier's ranked elements per site, from local geometry alone.
+
+    Split out of `assignElementTypes` because the re-typing that happens after
+    the tidy-up needs exactly this and nothing else: **SOAP is computed from
+    coordinates, so the geometry half needs no map.** That is what makes
+    re-typing after cleanup cheap enough to do at all -- the density half can
+    be replayed from the integrated densities recorded at solve time, and only
+    this has to be recomputed.
+
+    Returns `(proposals, model)` or `None`. Raises nothing the caller has to
+    handle beyond a None: a labelling failure must not cost a solution.
+
+    Cost, measured on node1 6 August: **0.90 s**, of which the NoSpherA2
+    process is 0.88 and everything else -- the 40 MB descriptor round trip, the
+    PCA projection, the network -- is 0.02. The cost is *fixed*: one atom and
+    120 atoms both take 0.9 s, because it is process startup rather than work.
+    Anything that wants this faster has to stop launching a process, not make
+    the arithmetic cheaper.
+    """
+    import os
+    import subprocess
+    import tempfile
+    from smtbx.ab_initio import assemble, geometry_aid
+
+    # shipped by the NoSpherA2 distribution zip (etc/ merges into Olex2's), not SVN
+    model_path = os.path.join(OV.BaseDir(), "etc", "geometry_aid_model.npz")
+    exe = os.path.join(OV.BaseDir(), "NoSpherA2.exe")
+    if not (os.path.exists(model_path) and os.path.exists(exe)):
+      print("Geometry model or NoSpherA2 not found; using density only")
+      return None
+
+    built = assemble.assemble(unit_cell, space_group, sites)
+    work = tempfile.mkdtemp(prefix="olex_elements_")
+    xyz_path = os.path.join(work, "peaks.xyz")
+    with open(xyz_path, "w") as f:
+      f.write(assemble.as_xyz(unit_cell, built.sites,
+                              ["C"]*built.sites.size(), title="peaks"))
+    # **No console window, and capture what it says.** This runs from the GUI,
+    # and `check_call` pops a black console box on Windows for as long as
+    # NoSpherA2 takes. Same idiom as `gui/help.convert_md_to_html_pandoc`.
+    #
+    # Capturing rather than inheriting stdout also keeps NoSpherA2's chatter out
+    # of the Olex2 log, and means a failure can say *why* instead of raising a
+    # bare CalledProcessError with the reason on a console that has already
+    # closed.
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+    proc = subprocess.run(
+      [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"],
+      cwd=work, capture_output=True, text=True, creationflags=flags)
+    if proc.returncode != 0:
+      tail = [x for x in ((proc.stderr or "") + "\n"
+                          + (proc.stdout or "")).splitlines() if x.strip()]
+      raise RuntimeError("NoSpherA2 exited %d: %s"
+                         % (proc.returncode, " | ".join(tail[-4:])
+                            or "no output"))
+    import numpy
+    values = numpy.load(os.path.join(work, "descriptor.npy"))
+    model = _geometry_model(model_path)
+    n = min(sites.size(), values.shape[0])
+    return model.top_k(values[:n], k=len(model.classes)), model
+
+  def assignElementTypes(self, f_calc, fft_map, sites):
+    """ An element per peak: integrated density, then local geometry.
+
+    Charge flipping returns unlabelled maxima and Olex2 has always called them
+    all carbon, which is the difference between "a structure appeared" and "a
+    structure I can refine". Two independent signals are combined:
+
+      density   how many electrons sit at the peak. Good at heavy-versus-light,
+                poor exactly where chemistry matters -- C, N and O differ by one
+                electron and overlap at ordinary resolution.
+      geometry  a SOAP description of the atom's surroundings, put through the
+                geometry-aid classifier. A carbonyl oxygen and a ring carbon
+                have nearly the same density and completely different
+                neighbourhoods.
+
+    Measured over **1,162,153 atoms of 44,568 structures**: density alone
+    0.635, geometry alone 0.692, the two combined 0.717, with the right element
+    among the classifier's top three 0.924. Nothing moved by more than 0.006
+    from the earlier 11,692-atom figures across a hundredfold more atoms, which
+    says more than the third decimal does. Weak per element and worth knowing
+    before trusting a label: B 0.09, I 0.11, P 0.16, Si 0.23 -- C, N and O
+    carry the average.
+
+    **Two preconditions, both learned the hard way.** The molecule is assembled
+    first (`assemble.py`), because an atom whose bonded neighbours sit in a
+    different symmetry image has an almost empty environment inside the 3.5 A
+    cutoff and its descriptor is meaningless rather than merely noisy. And the
+    .xyz handed to the descriptor is **all carbon**, because the shipped model
+    was trained that way; feeding it the density assignment scored oxygen at
+    0.05 against 0.44.
+
+    Returns a list of element symbols aligned with `sites`, or None -- in which
+    case the caller keeps the old unnamed peaks. Never raises: a labelling
+    failure must not cost the user their solution.
+    """
+    import os
+    import subprocess
+    import tempfile
+
+    try:
+      from smtbx.ab_initio import assemble, element_assignment, geometry_aid
+    except ImportError as e:
+      print("Element assignment unavailable: %s" % e)
+      return None
+
+    # **Restrict the candidates to what the user says is in the crystal.**
+    # Without this the table is the whole of COMMON_ELEMENTS and the density
+    # call is free to answer Ru or Si in a Pd/Fe/Cl/P/S/C structure -- which is
+    # exactly what it did on the first real run, and a wrong Z wrecks the
+    # residual map far more visibly than a wrong position would. Knowing that
+    # only C, N, O and S are possible removes most of the ambiguity for free,
+    # and the composition is something the user has already typed.
+    allowed = self.expectedElements()
+    if allowed:
+      print("Element assignment restricted to: %s" % ", ".join(sorted(allowed)))
+    else:
+      print("No composition given, so any element may be proposed")
+
+    try:
+      densities = element_assignment.integrated_densities(fft_map, sites)
+      assigned = element_assignment.assign(f_calc.unit_cell(), sites,
+                                           densities,
+                                           elements=sorted(allowed) or None)
+      calls = assigned.assignments
+      by_density = [a.element for a in calls]
+
+      # **Keep the integrated densities, not the conclusions.** The tidy-up is
+      # about to delete peaks, and `element_assignment.assign` fits its carbon
+      # scale over whichever sites it is given -- so once the spurious peaks are
+      # gone the same densities give a *better* scale and different calls. The
+      # densities themselves do not change, which is what lets the whole density
+      # half be replayed after cleanup without ever touching a map again.
+      _remember_density_evidence(densities, sites, allowed)
+
+      got = self.geometryProposals(f_calc.unit_cell(), f_calc.space_group(),
+                                   sites)
+      if got is None:
+        return by_density
+      proposals, model = got
+      n = min(len(calls), len(proposals))
+      merged = geometry_aid.combine(calls[:n], proposals[:n])
+      out = [m.element for m in merged]
+      # The classifier ranks over *its own* trained classes, which have nothing
+      # to do with this crystal's composition, so the merge can reintroduce an
+      # element the user never declared even when the density call was
+      # restricted. Anything outside the declared set falls back to the density
+      # answer, which is already constrained.
+      if allowed:
+        overruled = 0
+        for i, sym in enumerate(out):
+          if sym not in allowed:
+            out[i] = by_density[i]
+            overruled += 1
+        if overruled:
+          print("  %d geometry proposal(s) outside the given composition, "
+                "reverted to the density call" % overruled)
+      # Peaks beyond what assembly covered keep their density call.
+      out.extend(by_density[n:])
+
+      changed = sum(1 for a, b in zip(by_density, out) if a != b)
+      print("Element assignment: %d peaks, %d where geometry changed the "
+            "density call" % (len(out), changed))
+      return out
+    except Exception as e:
+      # **Fall back to the density call, not to nothing.** `by_density` was
+      # computed above and is a complete answer on its own -- measured 0.635
+      # correct over 1,162,153 atoms, against 0.717 for density plus geometry.
+      # Losing it because the geometry half failed throws away two thirds of
+      # the value and leaves the user retyping every label by hand, which is
+      # exactly the state this feature exists to fix.
+      #
+      # The geometry half fails for mundane reasons: the shipped NoSpherA2.exe
+      # hard-codes older SOAP hyperparameters and emits 16,500 features where
+      # every trained model expects 42,042, so it refuses -- correctly, since a
+      # descriptor of the wrong length would give confident nonsense.
+      names = locals().get("by_density")
+      if names:
+        print("Geometry step unavailable (%s: %s); using the density call only"
+              % (type(e).__name__, e))
+        return names
+      print("Element assignment failed (%s: %s); leaving peaks unnamed"
+            % (type(e).__name__, e))
+      return None
+
+  def reassignAfterCleanup(self):
+    """ Re-type the atoms that survived the tidy-up, on the cleaned model.
+
+    Florian's observation, and it measures: the peak search deliberately
+    over-picks, so a fresh solution carries maxima that are not atoms. **30% of
+    them, measured** -- 1,447 of 4,823 peaks over 137 structures on 6 August.
+    Those extras do not merely waste a classification each. They sit in the
+    descriptor neighbourhoods of the real atoms and in the carbon-scale fit, so
+    they corrupt the typing of everything around them.
+
+    Measured gain from typing after the peaks are gone, on the same atoms:
+
+      first sample   n=137, 3,273 atoms   0.8185 -> 0.8698   +0.0513
+      independent    n=126, 3,109 atoms   0.7948 -> 0.8273   +0.0325
+
+    Both are **oracle** figures: there the cleanup was done by knowing which
+    peaks were real, so no run-time criterion can beat them. What the ADP prune
+    in `tidy_solution` actually captures of that is the open question, and this
+    is the code that makes it answerable.
+
+    Costs one NoSpherA2 call, 0.9 s, and **skips itself when the tidy-up
+    removed nothing** -- with the same atoms in the same neighbourhoods the
+    proposals cannot change, so the second call would be 0.9 s spent to
+    reproduce the first answer.
+
+    **One approximation, stated.** The densities were integrated at the peak
+    positions; the sites used here are the refined ones, 0.1-0.24 A away. Per
+    site that does not matter -- `integrated_densities` is a sphere sum about a
+    point and each is independent, so taking a subset of them is exact -- but
+    `carbon_scale` decides which pairs count as bonded by distance, and a
+    quarter of an Angstrom can move a pair across that window. The refined
+    positions are the better ones, so this is expected to help rather than
+    hurt, but it has not been measured separately from the rest.
+
+    Never raises. The structure is already saved and loaded by this point, and
+    a labelling refinement must not cost the user their solution.
+    """
+    from smtbx.ab_initio import element_assignment, geometry_aid
+
+    index_of = _SOLUTION_EVIDENCE.get("names") or {}
+    densities = _SOLUTION_EVIDENCE.get("densities")
+    if not index_of or not densities:
+      return 0                      # nothing solved in this session to reuse
+
+    # The model as it stands after `compaq -a`, the refinement, the ADP prune
+    # and `compaq -q`. Read through the adapter rather than atom by atom so the
+    # unit cell, the space group and the sites all come from one description.
+    from cctbx.array_family import flex
+    xs = OlexCctbxAdapter().xray_structure()
+    names, sites, keep = [], flex.vec3_double(), []
+    for scatterer in xs.scatterers():
+      label = str(scatterer.label)
+      i = index_of.get(label)
+      if i is None or i >= len(densities):
+        # An atom the solution did not post: a difference peak the refinement
+        # added, or one the user typed. It has no recorded density, so it takes
+        # no part in the scale fit and keeps whatever it is.
+        continue
+      names.append(label)
+      sites.append(scatterer.site)
+      keep.append(i)
+
+    removed = len(densities) - len(keep)
+    if not keep:
+      return 0
+    if removed <= 0:
+      print("Re-typing skipped: the tidy-up removed nothing, so the "
+            "neighbourhoods are unchanged")
+      return 0
+
+    allowed = _SOLUTION_EVIDENCE.get("allowed") or set()
+    try:
+      # **Refit the carbon scale over the survivors.** This is the half of the
+      # gain that costs nothing: same densities, better population.
+      kept_densities = flex.double([densities[i] for i in keep])
+      assigned = element_assignment.assign(xs.unit_cell(), sites,
+                                           kept_densities,
+                                           elements=sorted(allowed) or None)
+      # **No scale means every atom comes back as carbon.** `assign` needs two
+      # peaks a C-C distance apart to calibrate density per electron, and says
+      # so honestly by returning element="C", marginal=True for everything when
+      # it cannot find them. On the full peak list that is rare; on a pruned one
+      # it is not -- a test that dropped a third of the peaks lost the scale on
+      # one structure in three. Applying that answer would overwrite a good set
+      # of labels with carbon, so this is the one case where the second pass
+      # must decline rather than improve.
+      if not assigned.scale or assigned.scale <= 0:
+        print("Re-typing skipped: too few bonded pairs survived the tidy-up "
+              "to calibrate the density, so the solution's labels stand")
+        return 0
+      calls = assigned.assignments
+      by_density = [a.element for a in calls]
+
+      got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
+      if got is None:
+        proposed = by_density
+      else:
+        proposals, model = got
+        n = min(len(calls), len(proposals))
+        merged = geometry_aid.combine(calls[:n], proposals[:n])
+        proposed = [m.element for m in merged] + by_density[n:]
+        # Same guard as the first pass: the classifier ranks over its own
+        # eleven trained classes, which know nothing of this crystal, so a
+        # proposal outside the declared composition falls back to the density
+        # call rather than being applied.
+        if allowed:
+          for j, symbol in enumerate(proposed):
+            if symbol not in allowed:
+              proposed[j] = by_density[j]
+
+      # Compare against what each atom currently *is*, not against the density
+      # call: the point is which labels this changes in the file.
+      changed = {}
+      current = dict((str(s.label),
+                      s.scattering_type.strip().capitalize())
+                     for s in xs.scatterers())
+      for name, now in zip(names, proposed):
+        if now and current.get(name) != now:
+          changed.setdefault(now, []).append(name)
+
+      if not changed:
+        print("Re-typed %d atoms after cleanup (%d peak(s) had been removed); "
+              "no label changed" % (len(names), removed))
+        return 0
+
+      # Olex2's own idiom for changing an element, as the element buttons use:
+      # select, then `name sel <symbol>`, which renumbers within the element.
+      total = 0
+      for symbol, group in sorted(changed.items()):
+        olex.m("sel %s" % " ".join(group))
+        olex.m("name sel %s" % symbol)
+        olex.m("sel -u")
+        total += len(group)
+      print("Re-typed %d atoms after cleanup (%d peak(s) had been removed); "
+            "%d label(s) changed: %s"
+            % (len(names), removed, total,
+               ", ".join("%d -> %s" % (len(g), s)
+                         for s, g in sorted(changed.items()))))
+      return total
+    except Exception as e:
+      import traceback
+      print("Re-typing after cleanup did not run (%s: %s); the labels from "
+            "the solution are unchanged" % (type(e).__name__, e))
+      if OV.IsDebugging():
+        traceback.print_exc()
+      return 0
+
+  def multiTrialSolution(self, f_obs, params, extra, n_trials, verbose):
+    """ Charge flipping from several random starts, keeping the best.
+
+    The solving iterator already restarts itself when an attempt fails, but
+    discards every restart and reports only the attempt that finally worked --
+    so which random start it happened to get decides the answer. Here each
+    attempt gets its own seed and is kept, and the one with the highest
+    correlation peak height wins. Measured on real data this roughly doubles
+    how often a structure solves, for a few seconds more.
+    """
+    from smtbx.ab_initio import multi_trial
+
+    def olex_loop(solving, verbose=True, out=None):
+      # Olex2's own loop, so that the progress plot and the stop button behave
+      # exactly as they do for a single run.
+      charge_flipping_loop(solving, verbose=verbose)
+      return not OV.FindValue('stop_current_process', False)
+
+    def progress(i_trial, n_trials, result):
+      if result.error is not None:
+        print("Trial %i/%i failed: %s" % (i_trial + 1, n_trials, result.error))
+      elif result.cc_peak_height is not None:
+        print("Trial %i/%i: correlation %.3f"
+              % (i_trial + 1, n_trials, result.cc_peak_height))
+      else:
+        print("Trial %i/%i: no solution" % (i_trial + 1, n_trials))
+      return not OV.FindValue('stop_current_process', False)
+
+    result = multi_trial.solve(
+      f_obs,
+      n_trials=n_trials,
+      weak_reflection_fraction=getattr(params, 'weak_reflection_fraction', 0.3),
+      normalisations_for=getattr(extra, 'normalisations_for', None),
+      max_solving_iterations=extra.max_solving_iterations,
+      loop=olex_loop,
+      callback=progress,
+      verbose=verbose)
+    multi_trial.show(result)
+    # Kept for the space-group suggestions: every entry in f_calc_solutions has
+    # had the currently assumed space group imposed on it, so the unsymmetrised
+    # P1 structure factors are the only form that still carries what the data
+    # alone said -- which is what a symmetry search has to be given.
+    self.multi_trial_result = result
+    return result.f_calc
+
+  def suggestSpaceGroups(self, f_obs, n_suggestions=3):
+    """ A short ranked list of candidate space groups for the P1 solution.
+
+    Offering the best few *solutions* would be close to worthless -- measured,
+    it is worth under one percentage point, because the solution is not what
+    fails. Offering the best few *space groups* is worth several, because a
+    structure that solves correctly and is then placed in the wrong group is
+    the single commonest way this pipeline loses: on a uniform sample of the
+    Crystallography Open Database, 149 structures did that for every 16 that
+    failed the other way round.
+    """
+    from smtbx.ab_initio import space_group_suggest
+
+    result = getattr(self, 'multi_trial_result', None)
+    if result is None or result.f_calc_in_p1 is None:
+      return None
+
+    # Use the Laue class of whatever space group is currently set. That is not
+    # a guess: the Laue class comes out of data reduction, from R_int over
+    # unmerged symmetry equivalents, long before anyone tries to solve -- so by
+    # the time this runs the user already knows it even if the full space group
+    # is still open. Measured over 1395 structures it is worth 16 points of
+    # top-3 space-group recovery (0.871 with it against 0.711 without), and it
+    # is free.
+    #
+    # Skipped when the current group is P1, which usually means "nothing
+    # determined yet" rather than "triclinic": deriving a Laue class of -1 from
+    # it would restrict the shortlist to P1 and P-1 and throw away the answer.
+    # In that case the candidates come from the solution map instead.
+    laue = None
+    try:
+      current = f_obs.space_group()
+      if current.order_z() > 1:
+        from cctbx import sgtbx
+        laue = sgtbx.space_group_info(
+          group=current.build_derived_laue_group())
+    except Exception:
+      laue = None
+
+    try:
+      suggestion = space_group_suggest.suggest(
+        f_obs, result.f_calc_in_p1, laue_group_info=laue,
+        n_suggestions=n_suggestions)
+    except Exception as e:
+      print("Space-group suggestions unavailable: %s" % e)
+      return None
+    suggestion.cc_peak_height = result.cc_peak_height
+    self._rerankByRefinedR1(f_obs, suggestion, result)
+    space_group_suggest.show(suggestion)
+    return suggestion
+
+  def _rerankByRefinedR1(self, f_obs, suggestion, result):
+    """ Re-order the shortlist by actually solving in each candidate.
+
+    Everything `suggest` ranks on reads the **P1** solution, which is the same
+    for every candidate, so none of it can separate the shortlist. The three
+    solutions are the only evidence that differs, and refined free-R1 over them
+    is worth +0.0097 GOAL on the completed COD screen (CI [+0.0076, +0.0120])
+    once R1 is allowed to argue by magnitude and not only by rank -- see
+    `composite.SG_R1_MARGIN`.
+
+    **This is the expensive block**: it solves once per shortlisted group
+    instead of not at all, so it is linear in `composite.N_SHORTLIST` (3). Set
+    `SMTBX_SG_R1_RANK=0` to skip it and get exactly the previous ordering.
+
+    Degrades to a no-op on any failure. The shortlist as `suggest` left it is a
+    usable answer, and a re-ranking that raises must never be worse than not
+    having tried.
+    """
+    import os
+
+    if os.environ.get("SMTBX_SG_R1_RANK", "1") in ("", "0", "false", "False"):
+      return
+    entries = getattr(suggestion, "suggestions", None)
+    if not entries or len(entries) < 2:
+      return
+    try:
+      from smtbx.ab_initio import composite
+
+      # The same cell-only estimate the peak search uses below. It reads the
+      # unit cell and nothing else -- an atom count taken from the deposited
+      # model is exactly the number a user does not have.
+      n_heavy = max(1, int(f_obs.unit_cell().volume()
+                           / 18.6/len(f_obs.space_group())))
+      ranked = composite.choose_space_group(
+        f_obs, entries, result.f_calc_in_p1, n_heavy)
+      if not ranked:
+        return
+
+      # Map back to the caller's own objects. Matched by identity, because
+      # `choose_space_group` carries `s.space_group_info` straight through --
+      # matching on the symbol instead would merge two settings of one group.
+      by_info = {}
+      for e in entries:
+        by_info.setdefault(id(e.space_group_info), []).append(e)
+      order, seen = [], set()
+      for r in ranked:
+        for e in by_info.get(id(r["space_group_info"]), []):
+          if id(e) not in seen:
+            seen.add(id(e))
+            e.r1 = r.get("r1")
+            order.append(e)
+            break
+      # Candidates past N_SHORTLIST were never solved; they keep their order
+      # behind the ones that were.
+      for e in entries:
+        if id(e) not in seen:
+          order.append(e)
+      if len(order) == len(entries):
+        suggestion.suggestions = order
+    except Exception as e:
+      print("R1 re-ranking skipped: %s" % e)
+
+  def settingNote(self, space_group_info):
+    """ Say so when a suggested group is not in its reference setting.
+
+    SHELXT reports this in its own `Orientation` column and reorients the cell
+    when it helps; we generate the alternative settings as candidates already --
+    `_settings_compatible_with` iterates settings rather than the 230 group
+    numbers, because they differ in exactly which reflections are absent -- but
+    we never told the user which one they ended up in.
+
+    It is not a rare corner. Measured 6 August 2026 over Florian's 92 real
+    structures, **26 (28%) are in a non-reference setting**:
+
+        17  P 1 21/n 1  ->  P 1 21/c 1
+         3  P c a b     ->  P b c a
+         2  P 2 21 21   ->  P 21 21 2
+         1  I 1 2/a 1   ->  C 1 2/c 1,  P n a b -> P b c n,
+            P 1 2/n 1   ->  P 1 2/c 1,  P n a a -> P c c n
+
+    **This reports and does not change anything**, which is the whole point.
+    Those 17 monoclinic cases are not errors: P2(1)/n is chosen deliberately
+    over P2(1)/c because it gives a beta angle nearer 90 degrees, it is what
+    the community publishes, and silently "correcting" it would be wrong. The
+    orthorhombic ones are axis-order differences, where the conventional
+    setting usually is wanted -- but that is the user's call, not ours, and
+    applying it means transforming the cell, the atoms and the reflections
+    together rather than relabelling the group.
+
+    Returns a short string, or None when the setting is already conventional.
+    """
+    try:
+      if space_group_info.is_reference_setting():
+        return None
+      reference = space_group_info.reference_setting()
+      cb_op = space_group_info.change_of_basis_op_to_reference_setting()
+    except Exception:
+      return None
+    system = space_group_info.group().crystal_system()
+    if system == "Monoclinic":
+      advice = ("this is the usual choice for such a cell and is normally "
+                "kept; the conventional equivalent would be")
+    else:
+      advice = "the conventional setting of the same group is"
+    return ("%s is a non-standard setting -- %s %s, reached by %s"
+            % (space_group_info, advice, reference, cb_op.as_hkl()))
+
+  def writeSuggestions(self, f_obs, result, max_files=3):
+    """ One .res per suggested space group, written out for the user to pick.
+
+    Deliberately the same mechanism the other solution route in Olex2 uses: files are
+    written into temp/ and the table below links to them, so nothing in the
+    user's model changes until they click a suggestion. Driving the model
+    directly for each candidate would mean changing the space group and
+    replacing the atoms three times before the user has chosen anything, and
+    leaving it on whichever candidate happened to be last.
+
+    Returns a list of (suggestion, res_path, n_peaks), best first.
+    """
+    import os
+    from cctbx import maptbx, xray
+    from cctbx.array_family import flex
+    from iotbx.shelx import writer
+    from smtbx.ab_initio import charge_flipping
+    from smtbx.ab_initio import solve as ab_initio_solve  # noqa: F401
+
+    out = []
+    temp_dir = os.path.join(OV.StrDir(), "temp")
+    if not os.path.exists(temp_dir):
+      os.makedirs(temp_dir)
+
+    # `result` is the suggestion object from space_group_suggest.suggest, which
+    # carries candidates and evidence but no structure factors -- the solution
+    # lives on the multi-trial result. Reading result.f_calc here was simply
+    # wrong and raised AttributeError on the first real structure that produced
+    # a shortlist.
+    # Say which setting each candidate is in before the user picks one. The
+    # `.res` files below are written in whatever setting the candidate came
+    # from, so a user who chooses the second suggestion can end up in a
+    # different setting from the first without anything having said so.
+    for suggestion in getattr(result, 'suggestions', [])[:max_files]:
+      note = self.settingNote(suggestion.space_group_info)
+      if note:
+        print("  " + note)
+
+    solving = getattr(self, 'multi_trial_result', None)
+    f_calc_in_p1 = getattr(solving, 'f_calc_in_p1', None) if solving else None
+    if f_calc_in_p1 is None:
+      return out
+
+    for i, suggestion in enumerate(result.suggestions[:max_files]):
+      sgi = suggestion.space_group_info
+      # **Place the P1 solution; do not re-solve.** Re-solving in the group is
+      # worth 37 points *for the answer the user keeps*, and the main solve
+      # above already did it for the group actually chosen. These files are
+      # previews of the alternatives, and `place_in` is a translation search
+      # rather than a fresh solve -- which is what makes switching suggestions
+      # feel instant instead of costing another eight trials per candidate.
+      #
+      # Measured on the first real GUI run: re-solving here took **148 s** of a
+      # 167 s total, and then failed on all three candidates with "Maximum
+      # number of attempts exceeded", so the user waited two and a half minutes
+      # to be shown nothing. The shortlist is worthless if producing it costs
+      # more than the solve.
+      #
+      # Wrapped per candidate: one candidate that cannot be placed must not
+      # take the other two down with it.
+      #
+      # **Take the first symmetrisation, do not enumerate them all.**
+      # `solve.place_in` calls `list()` on `f_calc_symmetrisations`, which on
+      # this structure produced **403** candidates in 23.7 s per group. The
+      # generator already yields best-first -- the first has cc_peak 0.9746,
+      # which is the maximum over all 403 -- so `next()` returns the identical
+      # answer in **0.06 s**. Three candidates: 71 s becomes 0.2 s.
+      #
+      # Done here rather than in `smtbx.ab_initio.solve` on purpose: that
+      # module is watched by `code_stamp`, and editing it mid-run would change
+      # the stamp of a benchmark that is measuring right now.
+      try:
+        f_obs_g = f_obs.customized_copy(
+          space_group_info=sgi).merge_equivalents().array()
+        best = next(iter(charge_flipping.f_calc_symmetrisations(
+          f_obs_g, f_calc_in_p1, min_cc_peak_height=0.0)), None)
+        f_calc = best[0] if best is not None else None
+      except Exception as e:
+        print("  cannot place the solution in %s (%s)" % (sgi, e))
+        continue
+      if f_calc is None:
+        continue
+      fft_map = f_calc.fft_map(symmetry_flags=maptbx.use_space_group_symmetry)
+      fft_map.apply_volume_scaling()
+      expected = 1.3*f_obs.unit_cell().volume()/18.6/len(f_calc.space_group())
+      peaks = fft_map.peak_search(
+        parameters=maptbx.peak_search_parameters(
+          min_distance_sym_equiv=1.0, max_clusters=int(expected)),
+        verify_symmetry=False).all()
+      if peaks.sites().size() == 0:
+        continue
+
+      # Peaks are unlabelled, so every one becomes a carbon. Naming them and
+      # guessing elements is a separate problem, and putting a wrong element in
+      # the file would be a claim this pipeline has not earned.
+      structure = xray.structure(
+        crystal_symmetry=f_calc.crystal_symmetry().customized_copy(
+          space_group_info=sgi))
+      for j, site in enumerate(peaks.sites()):
+        structure.add_scatterer(
+          xray.scatterer(label="C%i" % (j + 1), site=site, u=0.06))
+
+      path = os.path.join(temp_dir, "%s_sg%i.res" % (OV.FileName(), i + 1))
+      try:
+        with open(path, "w") as f:
+          # **`full_matrix_least_squares_cycles` is not optional.**
+          # `iotbx.shelx.writer.generator` asserts that at most one of the two
+          # cycle arguments is None, so passing *neither* fails -- and it fails
+          # as a bare `AssertionError` carrying no message, which printed as
+          # "Could not write suggestion P 21 21 21: " with nothing after the
+          # colon and cost an hour to trace. 4 matches the `L.S. 4` these files
+          # are written with.
+          #
+          # **`sort_scatterers=False`.** The default sort raises
+          # `TypeError: '<' not supported between instances of 'scatterer' and
+          # 'scatterer'` -- `scatterer` never gained an ordering under Python 3,
+          # so the writer's tidy-up cannot run at all here. The ordering is
+          # cosmetic for a preview file the user is going to load and refine
+          # anyway, and these peaks are already in descending height order,
+          # which is more useful than by element.
+          # The writer emits `TITL <title> in <space group>` itself, so a
+          # title that already names the group comes out doubled:
+          # "TITL 2016333 in P 21 21 21 in P 21 21 21".
+          for line in writer.generator(
+              structure,
+              title=OV.FileName(),
+              full_matrix_least_squares_cycles=4,
+              sort_scatterers=False):
+            f.write(line)
+      except Exception as e:
+        # A centric group in a non-origin-centric setting trips the *other*
+        # assertion in the writer. Skip that candidate rather than lose the
+        # whole table. Report the type as well as the text: this one is
+        # message-less, so "%s" alone renders as nothing at all.
+        print("Could not write suggestion %s: %s: %s"
+              % (sgi, type(e).__name__, e or "(no message)"))
+        continue
+      out.append((suggestion, path, peaks.sites().size()))
+    return out
+
+  def suggestionsTableHtml(self, written, result):
+    """ The solution chooser: one row per candidate, space group clickable.
+
+    Same template and the same click action as the existing chooser
+    (`method_imp/shelx.py::Method_shelxt.post_solution`), so the two solution
+    routes present themselves identically and a user does not have to learn a
+    second idiom.
+
+    The columns differ because the evidence differs. There is deliberately
+    **no R1 column here**, because it was measured to be
+    actively misleading for choosing a space group: the solution is a P1
+    solution, so imposing symmetry can only worsen the fit and R1 always
+    favours the lowest-symmetry candidate whatever the truth. Showing it would
+    invite exactly the wrong choice.
+
+    **And no "Evidence" column.** `suggestion.reason` is a sentence, not a
+    cell -- "25 predicted absences, 99% of them missing from the data (merged
+    file, so they cannot be measured); centrosymmetry agrees with <|E^2-1|>" --
+    and putting it in a table stretched every other column into uselessness.
+    The evidence is already there in numeric form: `Absences` is the violation
+    count and `Centro` is the agreement, both colour-coded. The prose still
+    goes to the log, where there is room for it.
+
+    Uses its own five-column template rather than ShelXT's `xt_output_table`,
+    which is fixed at six cells and shared -- narrowing that one would have
+    silently reshaped the ShelXT chooser too.
+    """
+    import gui.tools
+
+    s_blank = gui.tools.TemplateProvider.get_template(
+      'sg_output_table', force=OV.IsDebugging())
+    header = {
+      'td1': "<b>Correlation</b>", 'td2': "<b>Absences</b>",
+      'td3': "<b>Centro</b>", 'td4': "<b>Peaks</b>",
+      'td5': "<b>Space group</b>"}
+    s = s_blank % header
+
+    hkl_src = olx.file.ChangeExt(OV.FileFull(), 'hkl')
+    for suggestion, path, n_peaks in written:
+      sgi = suggestion.space_group_info
+      link = ('<a href="file.copy(\'%s\',\'%s.res\')>>reap \'%s\'">%s</a>'
+              % (path, OV.FileName(), OV.FileFull(), str(sgi)))
+      if suggestion.n_predicted_absent:
+        absences = "%d/%d" % (suggestion.n_violations,
+                              suggestion.n_predicted_absent)
+        if suggestion.n_violations:
+          absences = "<font color='red'>%s</font>" % absences
+        else:
+          absences = "<font color='green'>%s</font>" % absences
+      else:
+        absences = "---"
+      if suggestion.centric_agrees is None:
+        centro = "---"
+      elif suggestion.centric_agrees:
+        centro = "<font color='green'>yes</font>"
+      else:
+        centro = "<font color='red'>no</font>"
+      s += s_blank % {
+        'td1': "%.3f" % (result.cc_peak_height or float('nan')),
+        'td2': absences,
+        'td3': centro,
+        'td4': "%d" % n_peaks,
+        'td5': "<b>%s</b>" % link}
+      # The prose reason is not dropped, only moved: it is a sentence and
+      # belongs in the log, where `space_group_suggest.show` already prints it.
+    # No .hkl is copied alongside: the reflection file is the
+    # user's own and is unchanged by which space group they pick. Only the
+    # model file differs between candidates.
+    return s
+
+  def post_single_peak(self, xyz, height, cutoff=1.0, element=None):
 #    if height/self.peak_normaliser < cutoff:
 #      return
 #    sp = (height/self.peak_normaliser)
     sp = height #hp
-    id = olx.xf.au.NewAtom("%.2f" %(sp), *xyz)
+    # A named peak becomes a typed atom; an unnamed one stays a Q peak with its
+    # height as the label, which is the behaviour this has always had.
+    label = element if element else "%.2f" % sp
+    id = olx.xf.au.NewAtom(label, *xyz)
     if id != '-1':
-      olx.xf.au.SetAtomU(id, "0.06")
+      # Seeded per element rather than at a flat 0.06: see `startingUiso`.
+      # An unnamed Q peak has no element to scale by and keeps the old value.
+      u = self.startingUiso(element) if element else 0.06
+      olx.xf.au.SetAtomU(id, "%.4f" % u)
+      # Olex2 numbers the atom itself, so the name only exists once it has been
+      # created. It is the key the tidy-up uses to find this peak again.
+      try:
+        return str(olx.xf.au.GetAtomName(id))
+      except Exception:
+        return None
+    return None
 
 class OlexCctbxFlipSolvent(OlexCctbxAdapter):
   """Recover the solvent density by charge flipping inside the region.

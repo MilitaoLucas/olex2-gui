@@ -160,6 +160,24 @@ The original model is in the INS file.""" %cctbx.cycles.n_iterations, m="warning
 
 
 class Method_cctbx_ChargeFlip(Method_solution):
+  """ The original single charge-flipping run.
+
+  **Behaviour here is frozen on purpose.** Existing users, scripts and the
+  other developers' workflows all reach structure solution through this
+  method, so it keeps doing exactly one run and keeping the first result. The
+  multi-attempt pipeline is a separate method (`Method_cctbx_AutoSolve`) with
+  its own name in the GUI, rather than a mode of this one -- a method that
+  quietly does something different depending on a setting is the harder thing
+  to review, to script against and to explain.
+  """
+
+  # Which branch of the shared adapter to take. Subclass and change this.
+  solve_mode = "classic"
+
+  # Tidy-up applied to the loaded model after solving. **Empty here on
+  # purpose**: `Charge Flipping` must leave the structure exactly as it always
+  # has, so nothing is assembled, refined or pruned behind the user's back.
+  tidy_after_solve = False
 
   def do_run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
@@ -167,6 +185,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
     print('+++ STARTING olex2.solve ++++++++++++++++++++++++++++++++++++')
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
+    # Kept so post_solution can reach the space-group suggestions this run
+    # produced; they are computed during solving and would otherwise be lost
+    # when this method returns.
+    self.cctbx_solver = cctbx
 
     #solving_interval = int(float(self.getArgs().split()[1]))
     solving_interval = self.phil_index.params.flipping_interval
@@ -178,7 +200,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
       item = item.split(":")
       formula_d.setdefault(item[0], {'count':float(item[1])})
     try:
-      have_solution = cctbx.runChargeFlippingSolution(solving_interval=solving_interval)
+      have_solution = cctbx.runChargeFlippingSolution(
+        solving_interval=solving_interval, mode=self.solve_mode)
       if not have_solution:
         print("*** No solution found ***")
     except Exception as err:
@@ -202,6 +225,147 @@ class Method_cctbx_ChargeFlip(Method_solution):
   def post_solution(self, RunPrgObject):
     if OV.GetParam('user.solution.run_auto_vss'):
       RunPrgObject.please_run_auto_vss = True
+    # Harmless for the classic method: it never sets `solution_suggestions`,
+    # so this returns immediately.
+    self.show_space_group_suggestions(RunPrgObject)
+    if self.tidy_after_solve:
+      # **Deferred, not called here.** `post_solution` runs while
+      # `RunPrg.running` is still True, so `refine` is refused with "Already
+      # running. Please wait..." -- and refused without raising, so the prune
+      # then read every U as the 0.06 it was seeded with and removed nothing.
+      # RunPrg invokes this once the run is finished.
+      RunPrgObject.please_tidy_solution = self.tidy_solution
+
+  def tidy_solution(self):
+    """ Make the solution look like chemistry, then drop what will not refine.
+
+    Two steps, in this order, because the second depends on the first.
+
+    **Assemble.** Charge flipping places peaks anywhere in the cell, so the
+    fragments come out scattered across symmetry images and the model looks
+    shattered even when the phasing is right. `compaq -a` gathers them into
+    connected molecules -- the same thing a crystallographer does by hand
+    immediately after solving.
+
+    **Refine briefly, then prune by ADP.** The peak search deliberately
+    over-picks (`1.3 x V/18.6/order`, so ~42 peaks where the deposited model
+    has 31 atoms), and the surplus is noise. A real atom settles to a sensible
+    displacement parameter in a few cycles; a noise peak has no density to hold
+    it and its U runs away. So a short refinement separates them far better
+    than peak height does, which is Florian's observation and the reason this
+    is worth the seconds it costs.
+
+    Reuses Olex2's own idiom rather than inventing one --
+    `RunPrg.doAutoTidyBefore/After` prunes with exactly this pair of calls.
+    """
+    factor = OV.GetParam('snum.solution.tidy_uiso_factor') or 3.0
+    cycles = OV.GetParam('snum.solution.tidy_cycles')
+    cycles = 4 if cycles is None else int(cycles)
+    try:
+      olex.m("compaq -a")
+    except Exception as err:
+      print("Could not assemble the fragments: %s" % err)
+    if cycles <= 0:
+      return
+    try:
+      olex.m("refine %d" % cycles)
+      # **Count after the refinement, not before it.** olex2.refine runs a
+      # Fourier analysis and adds the difference peaks it finds to the model,
+      # so an atom count taken before the refinement is compared against a
+      # larger, different thing afterwards -- which reported "Pruned -22
+      # peak(s)" on the first real run, having actually removed several.
+      before = int(olx.xf.au.GetAtomCount())
+
+      # **Judge U against what that element should have, not against one
+      # number.** A flat threshold is confounded by element: palladium belongs
+      # near 0.02 and carbon near 0.06, so any single cutoff is simultaneously
+      # too tight for the light atoms and far too loose for the heavy ones. The
+      # ratio is the signal -- a peak that is not an atom has no density to
+      # hold it and its U runs away from the element's expectation whatever
+      # that expectation was.
+      from cctbx_olex_adapter import OlexCctbxSolve
+      expected_for = OlexCctbxSolve().startingUiso
+      doomed = []
+      for i in range(int(olx.xf.au.GetAtomCount())):
+        if olx.xf.au.IsAtomDeleted(i) == 'true':
+          continue
+        symbol = str(olx.xf.au.GetAtomType(i))
+        if symbol == 'Q':
+          continue                      # unassigned peaks are not ours to judge
+        try:
+          u = float(olx.xf.au.GetAtomUiso(i))
+        except (TypeError, ValueError):
+          continue
+        if u > factor*expected_for(symbol):
+          doomed.append(str(olx.xf.au.GetAtomName(i)))
+      if doomed:
+        olex.m("kill %s" % " ".join(doomed))
+      after = int(olx.xf.au.GetAtomCount())
+      if doomed:
+        print("Pruned %d peak(s) whose U exceeded %.1fx the value expected "
+              "for their element after %d cycles (%d left): %s"
+              % (len(doomed), factor, cycles, after,
+                 " ".join(doomed[:12]) + (" ..." if len(doomed) > 12 else "")))
+      else:
+        print("Every atom refined to within %.1fx its expected U; "
+              "nothing pruned" % factor)
+
+      # **Gather the difference peaks last, once the model is settled.**
+      # The refinement's Fourier analysis adds its peaks wherever symmetry puts
+      # them, so they arrive scattered across images exactly as the solved
+      # fragments did -- and pruning has just changed which atoms they should
+      # sit near. `-q` moves the Q peaks to the structure, so what is left to
+      # interpret is next to the molecule rather than a cell away from it.
+      #
+      # After the kill, not before: moving peaks toward atoms that are about to
+      # be deleted would place them against the wrong neighbours.
+      olex.m("compaq -q")
+
+      # **Re-type last, on the cleaned model.** Florian's point: the peaks that
+      # are not atoms sit in the real atoms' descriptor neighbourhoods and in
+      # the carbon-scale fit, so they corrupt the typing of what is around them.
+      # Doing it here rather than at solve time is worth +0.05 (n=137) and
+      # +0.03 (n=126, independent) as an oracle bound.
+      #
+      # After `compaq -q`, not before: the descriptor is a description of an
+      # atom's surroundings, so it has to be computed once the fragments are
+      # where they belong and the doomed peaks are gone.
+      retype = OV.GetParam('snum.solution.retype_after_tidy')
+      if retype is None or retype:
+        OlexCctbxSolve().reassignAfterCleanup()
+    except Exception as err:
+      # Never let the tidy-up cost the user their solution: the structure is
+      # already saved and loaded by this point.
+      import traceback
+      print("Post-solution tidy-up failed: %s" % err)
+      if OV.IsDebugging():
+        traceback.print_exc()
+
+  def show_space_group_suggestions(self, RunPrgObject):
+    """ The solution chooser, when the solver produced candidates.
+
+    Presented exactly as the existing solution table is
+    (`method_imp/shelx.py`) -- same template, same click-to-load action -- so
+    the two solution routes look and behave alike.
+    Silent when there is nothing to choose between: a one-row chooser is noise.
+    """
+    if not OV.HasGUI():
+      return
+    cctbx = getattr(self, 'cctbx_solver', None)
+    suggestions = getattr(cctbx, 'solution_suggestions', None) if cctbx else None
+    if not suggestions or len(suggestions.suggestions) < 2:
+      return
+    try:
+      written = cctbx.writeSuggestions(cctbx.solution_f_obs, suggestions)
+      if len(written) < 2:
+        return
+      RunPrgObject.post_prg_output_html_message = \
+        cctbx.suggestionsTableHtml(written, suggestions)
+    except Exception as err:
+      import traceback
+      print("Could not show space-group suggestions: %s" % err)
+      if OV.IsDebugging():
+        traceback.print_exc()
 
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
@@ -227,6 +391,83 @@ instructions {
       max_solving_iterations = 500
         .type = int
         .caption = MASI
+      weak_reflection_fraction = 0.2
+        .type = float
+        .caption = WRFR
+        }
+    default=True
+      .type=bool
+    }
+  }
+""")
+
+
+class Method_cctbx_AutoSolve(Method_cctbx_ChargeFlip):
+  """ Charge flipping run several times, ranked, with the space group and the
+  element types worked out rather than assumed.
+
+  Everything the classic method does, plus the three things a user has to do
+  by hand today:
+
+    * **several attempts instead of one.** Charge flipping starts from random
+      phases, so a single run is one draw. Eight ranked attempts take solution
+      success from 0.739 to 0.863 on 10,099 development structures.
+    * **the space group is decided, and three are offered.** Given the Laue
+      class, the best suggestion is right 0.878 of the time against 0.725 for
+      the old route, and the right group is among the three offered 0.954 of
+      the time. Offering three is the honest presentation: of 17 crystals in
+      our archive refined twice, every disagreement between crystallographers
+      was centrosymmetry, mirror-versus-glide or an axis convention -- the
+      same places this fails.
+    * **peaks come back with proposed elements** instead of all as carbon.
+
+  Separate from `Charge Flipping` rather than a switch inside it, so that
+  method keeps behaving exactly as it always has.
+  """
+
+  solve_mode = "auto"
+
+  # Assemble the fragments and drop the peaks that will not refine. On here
+  # and off for `Charge Flipping`, which is the whole point of the split.
+  tidy_after_solve = True
+
+
+auto_solve_phil = phil_interface.parse("""
+name = 'Auto-Solve'
+  .type=str
+display = 'Auto-Solve'
+  .type=str
+atom_sites_solution=iterative
+  .type=str
+flipping_interval=60
+  .type=int
+instructions {
+  cf {
+    values {
+      amplitude_type = F E *quasi-E
+        .type = choice
+        .caption = AMPT
+      max_attempts_to_get_phase_transition = 5
+        .type = int
+        .caption = MAPT
+      max_attempts_to_get_sharp_correlation_map = 5
+        .type = int
+        .caption = MACM
+      max_solving_iterations = 500
+        .type = int
+        .caption = MASI
+      weak_reflection_fraction = 0.2
+        .type = float
+        .caption = WRFR
+      n_trials = 8
+        .type = int
+        .caption = NTRI
+      suggest_space_groups = True
+        .type = bool
+        .caption = SGSG
+      assign_elements = True
+        .type = bool
+        .caption = ASEL
         }
     default=True
       .type=bool
