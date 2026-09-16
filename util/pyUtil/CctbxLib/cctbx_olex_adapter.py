@@ -15,6 +15,7 @@ except:
   olx.current_reflections = None
   olx.current_mask = None
   olx.current_space_group = None
+  olx.current_cell = None
   olx.current_observations = None
 
 import olex
@@ -327,10 +328,15 @@ class OlexCctbxAdapter(object):
         (olx.current_reflections is not None and merge_code != olx.current_reflections._merge) or
         (olx.current_reflections is not None and
           (hklf_matrix != olx.current_reflections.hklf_matrix
-            or self.space_group != olx.current_space_group))):
+            or self.space_group != olx.current_space_group
+            # the GUI silently takes the cell from the hkl file's trailing ins
+            # block (tasks.cpp, use_hkl_cell); a reflection set built on the
+            # old cell keeps stale d-spacings
+            or self.cell != getattr(olx, 'current_cell', None)))):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
       olx.current_space_group = self.space_group
+      olx.current_cell = self.cell
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
