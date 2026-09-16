@@ -53,12 +53,17 @@ class Result(object):
     return "%-5s %-10s %-34s %6.1fs  %s" % (
       self.state, self.group, self.name, self.seconds, self.detail)
 
+  def log_line(self):
+    """The golden form: no group, no timing, single-spaced detail."""
+    return "%s %s  %s" % (self.state, self.name, " ".join(str(self.detail).split()))
+
 
 class Suite(object):
   def __init__(self):
     self.results = []
     self._copy_n = 0
-    self.scratch = os.path.join(tempfile.gettempdir(), "olex2_pipeline_tests")
+    self.scratch = os.environ.get("OLEX2_TEST_SCRATCH") or os.path.join(
+      tempfile.gettempdir(), "olex2_pipeline_tests")
     # rmtree is best-effort: a QM job that is still finishing, or a file left
     # open by a previous run, keeps its directory. Tolerate what survives
     # rather than failing the whole suite before the first case - sample()
@@ -79,6 +84,11 @@ class Suite(object):
     except Exception as e:
       state = Result.FAIL
       detail = "%s: %s" % (type(e).__name__, e)
+      # the innermost frame: a FAIL line is never a golden, so it may say
+      # where the exception came from
+      tb = traceback.extract_tb(sys.exc_info()[2])
+      if tb:
+        detail += " [%s:%d]" % (os.path.basename(tb[-1][0]), tb[-1][1])
       if OV.GetParam('user.debug', False):
         traceback.print_exc()
     r = Result(group, name, state, detail, time.time() - t0)
@@ -216,11 +226,13 @@ def has_hkl(folder):
 
 
 def _r1_raw():
-  v = olx.Ins("R1")
-  try:
-    return float(v)
-  except (TypeError, ValueError):
-    pass
+  # The parameter first: olex2.refine stores it after every cycle and never
+  # reloads the file, so olx.Ins("R1") - the REM R1 line of the res that was
+  # *loaded* - still says what the sample shipped with. sucrose ships with
+  # 0.0280, which is also what three cycles of Gauss-Newton produce, so the
+  # stale value looked right until an aspherical run reached 0.0266 and the
+  # test still read 0.0280. SHELXL reloads its res, so Ins is right for it,
+  # and doHistoryCreation stores the parameter for it too.
   for key in ("snum.refinement.last_R1", "snum.refinement.R1"):
     v = OV.GetParam(key, None)
     if v not in (None, "", "n/a"):
@@ -228,7 +240,14 @@ def _r1_raw():
         return float(v)
       except (TypeError, ValueError):
         continue
-  return None
+  if str(OV.GetParam('snum.refinement.program', '')).lower() == "olex2.refine":
+    # nothing stored means it did not run; the file's line would be a lie
+    return None
+  v = olx.Ins("R1")
+  try:
+    return float(v)
+  except (TypeError, ValueError):
+    return None
 
 
 def clear_r1():

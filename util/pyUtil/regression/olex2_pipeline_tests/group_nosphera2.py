@@ -63,7 +63,6 @@ BACKENDS = [
   ("xTB",     False),   # semi-empirical, so seconds rather than minutes
   ("pTB",     False),
   ("ORCA",    True),
-  ("Tonto",   True),
   ("OCC",     True),
 ]
 
@@ -390,7 +389,9 @@ def _wavefunctions(folder):
   found = set()
   for root, dirs, files in os.walk(folder):
     for f in files:
-      if f.lower().endswith((".molden", ".gbw", ".wfn", ".wfx", ".fchk")):
+      # .xtb is what pTB writes (thpp.xtb per part), .molden what xTB writes
+      if f.lower().endswith((".molden", ".gbw", ".wfn", ".wfx", ".fchk",
+                             ".xtb")):
         found.add(os.path.join(root, f))
   return found
 

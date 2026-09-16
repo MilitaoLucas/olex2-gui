@@ -44,9 +44,35 @@ GROUPS = {
   "solve":     "group_solve",
   "refine":    "group_refine",
   "nosphera2": "group_nosphera2",
+  "nsa2_matrix": "group_nsa2_matrix",
+  "release":   "group_release",
 }
 DEFAULT = ("api,macros,model,instructions,restraints,geometry,symmetry,"
            "formats,hkl,cif,solve,refine")
+
+
+def _write_release_log(suite, path, complete):
+  """One line per case sorted by name, then END pass fail skip; and next
+  to it <stem>_timings.txt with the seconds that the golden must not hold."""
+  if not path:
+    return
+  lines = sorted(r.log_line() for r in suite.results)
+  if complete:
+    n = {Result.PASS: 0, Result.FAIL: 0, Result.SKIP: 0}
+    for r in suite.results:
+      n[r.state] = n.get(r.state, 0) + 1
+    lines.append("END %d %d %d" % (n[Result.PASS], n[Result.FAIL], n[Result.SKIP]))
+  try:
+    with open(path, "w") as f:
+      f.write("\n".join(lines) + "\n")
+    stem, ext = os.path.splitext(path)
+    with open(stem + "_timings.txt", "w") as f:
+      for r in sorted(suite.results, key=lambda r: r.name):
+        f.write("%s %.1f\n" % (r.name, r.seconds))
+    if complete:
+      print("release log written to %s" % path)
+  except Exception as e:
+    print("could not write %s: %s" % (path, e))
 
 
 def main():
@@ -63,22 +89,29 @@ def main():
 
   suite = Suite()
   t0 = time.time()
-  for name in wanted:
-    mod_name = GROUPS.get(name)
-    if mod_name is None:
-      print("no such group: %s (have %s)" % (name, ", ".join(sorted(GROUPS))))
-      continue
-    try:
-      mod = __import__(mod_name)
-    except Exception as e:
-      # a group that will not even import is a failure of that group, not of
-      # the run - the others still have something to say
-      suite.results.append(Result(name, "import", Result.FAIL, str(e)))
-      print("FAIL  %-10s import  %s" % (name, e))
-      continue
-    mod.register(suite)
+  try:
+    for name in wanted:
+      mod_name = GROUPS.get(name)
+      if mod_name is None:
+        print("no such group: %s (have %s)" % (name, ", ".join(sorted(GROUPS))))
+        continue
+      try:
+        mod = __import__(mod_name)
+      except Exception as e:
+        # a group that will not even import is a failure of that group, not of
+        # the run - the others still have something to say
+        suite.results.append(Result(name, "import", Result.FAIL, str(e)))
+        print("FAIL  %-10s import  %s" % (name, e))
+        continue
+      mod.register(suite)
+  finally:
+    # the release gate reads this file; a crash half-way must still leave
+    # one, without the END line that says the run completed
+    _write_release_log(suite, os.environ.get("OLEX2_TEST_RELEASE_LOG"),
+                       complete=False)
 
   n = suite.summary()
+  _write_release_log(suite, os.environ.get("OLEX2_TEST_RELEASE_LOG"), complete=True)
   elapsed = time.time() - t0
   lines = [str(r) for r in suite.results]
   lines.append("")
