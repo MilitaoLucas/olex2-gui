@@ -980,6 +980,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       if getattr(self, 'assign_elements_wanted', False):
         elements = self.assignElementTypes(f_calc, fft_map, peaks.sites())
 
+      numbered = {}
       for i, (xyz, height) in enumerate(zip(peaks.sites(), peaks.heights())):
         if not xyz:
           have_solution = False
@@ -988,7 +989,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           element = None
           if elements is not None and i < len(elements):
             element = elements[i]
-          name = self.post_single_peak(xyz, height, element=element)
+            numbered[element] = numbered.get(element, 0) + 1
+          name = self.post_single_peak(xyz, height, element=element,
+                                       number=numbered.get(element))
           _name_density_evidence(i, name)
       have_solution = True
     else: have_solution = False
@@ -1168,7 +1171,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       densities = element_assignment.integrated_densities(fft_map, sites)
       assigned = element_assignment.assign(f_calc.unit_cell(), sites,
                                            densities,
-                                           elements=sorted(allowed) or None)
+                                           elements=sorted(allowed) or None,
+                                           space_group=f_calc.space_group())
       calls = assigned.assignments
       by_density = [a.element for a in calls]
 
@@ -1307,7 +1311,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       kept_densities = flex.double([densities[i] for i in keep])
       assigned = element_assignment.assign(xs.unit_cell(), sites,
                                            kept_densities,
-                                           elements=sorted(allowed) or None)
+                                           elements=sorted(allowed) or None,
+                                           space_group=xs.space_group())
       # **No scale means every atom comes back as carbon.** `assign` needs two
       # peaks a C-C distance apart to calibrate density per electron, and says
       # so honestly by returning element="C", marginal=True for everything when
@@ -1739,8 +1744,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     cell -- "25 predicted absences, 99% of them missing from the data (merged
     file, so they cannot be measured); centrosymmetry agrees with <|E^2-1|>" --
     and putting it in a table stretched every other column into uselessness.
-    The evidence is already there in numeric form: `Absences` is the violation
-    count and `Centro` is the agreement, both colour-coded. The prose still
+    The evidence is already there in numeric form: `Absences` is the count
+    with the judging test's percentage and `Centro` is the agreement. The prose still
     goes to the log, where there is room for it.
 
     Uses its own five-column template rather than ShelXT's `xt_output_table`,
@@ -1762,13 +1767,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       sgi = suggestion.space_group_info
       link = ('<a href="file.copy(\'%s\',\'%s.res\')>>reap \'%s\'">%s</a>'
               % (path, OV.FileName(), OV.FileFull(), str(sgi)))
-      if suggestion.n_predicted_absent:
-        absences = "%d/%d" % (suggestion.n_violations,
-                              suggestion.n_predicted_absent)
-        if suggestion.n_violations:
-          absences = "<font color='red'>%s</font>" % absences
-        else:
-          absences = "<font color='green'>%s</font>" % absences
+      # The same evidence the log prose gives: how many absences the group
+      # predicts and what the test that judged it found.
+      if suggestion.judged_by == "intensity":
+        absences = "%d at %.0f%% I" % (suggestion.n_predicted_absent,
+                                       100*suggestion.absence_ratio)
+      elif suggestion.judged_by == "coverage":
+        absences = "%d, %.0f%% missing" % (suggestion.n_coverage_absent,
+                                           100*suggestion.coverage_margin)
       else:
         absences = "---"
       if suggestion.centric_agrees is None:
@@ -1790,22 +1796,26 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # model file differs between candidates.
     return s
 
-  def post_single_peak(self, xyz, height, cutoff=1.0, element=None):
+  def post_single_peak(self, xyz, height, cutoff=1.0, element=None,
+                       number=None):
 #    if height/self.peak_normaliser < cutoff:
 #      return
 #    sp = (height/self.peak_normaliser)
     sp = height #hp
     # A named peak becomes a typed atom; an unnamed one stays a Q peak with its
-    # height as the label, which is the behaviour this has always had.
-    label = element if element else "%.2f" % sp
+    # height as the label, which is the behaviour this has always had. The
+    # number makes the label unique now: NewAtom("O") for every oxygen leaves
+    # ten atoms called O until the file is written, and a name recorded then
+    # finds one of them afterwards.
+    label = "%.2f" % sp if not element else (
+      "%s%d" % (element, number) if number else element)
     id = olx.xf.au.NewAtom(label, *xyz)
     if id != '-1':
       # Seeded per element rather than at a flat 0.06: see `startingUiso`.
       # An unnamed Q peak has no element to scale by and keeps the old value.
       u = self.startingUiso(element) if element else 0.06
       olx.xf.au.SetAtomU(id, "%.4f" % u)
-      # Olex2 numbers the atom itself, so the name only exists once it has been
-      # created. It is the key the tidy-up uses to find this peak again.
+      # The name is the key the tidy-up uses to find this peak again.
       try:
         return str(olx.xf.au.GetAtomName(id))
       except Exception:
