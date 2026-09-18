@@ -1175,6 +1175,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       print("Element assignment restricted to: %s" % ", ".join(sorted(allowed)))
     else:
       print("No composition given, so any element may be proposed")
+    # A charge-flipping peak is never a hydrogen. Typed H it escapes the ADP
+    # prune (which skips H) and rides along to the end as an atom called "H".
+    allowed -= set(("H", "D"))
 
     try:
       densities = element_assignment.integrated_densities(fft_map, sites)
