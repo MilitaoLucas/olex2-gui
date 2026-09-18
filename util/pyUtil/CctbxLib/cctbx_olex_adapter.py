@@ -1587,6 +1587,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       weak_reflection_fraction=getattr(params, 'weak_reflection_fraction', 0.3),
       normalisations_for=getattr(extra, 'normalisations_for', None),
       max_solving_iterations=extra.max_solving_iterations,
+      max_seconds=getattr(params, 'max_seconds', None),
       loop=olex_loop,
       callback=progress,
       verbose=verbose)

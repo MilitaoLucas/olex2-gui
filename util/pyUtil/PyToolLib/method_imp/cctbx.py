@@ -483,6 +483,9 @@ instructions {
       n_trials = 8
         .type = int
         .caption = NTRI
+      max_seconds = 120
+        .type = float
+        .caption = MAXS
       suggest_space_groups = True
         .type = bool
         .caption = SGSG
