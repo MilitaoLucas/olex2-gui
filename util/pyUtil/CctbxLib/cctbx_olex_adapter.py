@@ -1380,6 +1380,42 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       print("  %s: %s" % (name, " | ".join("%s (%.0f %%)" % (e, 100*p)
                                             for e, p in alt)))
 
+  def checkMissedSymmetry(self, suggestions=None, cutoff=0.10):
+    """ ADDSYM in spirit: the refined model, expanded to P1, is searched for
+    symmetry beyond the group it was solved in. A supergroup found is printed
+    and appended to the shortlist, which decides nothing -- 15 % of correct
+    COD models show one at this cutoff (pseudo-symmetry), so it is a hint
+    the user checks by re-solving in it. Never raises. """
+    try:
+      from cctbx import symmetry_search
+      from libtbx import group_args
+      xs = self.xray_structure()
+      xs = xs.select(~(xs.scattering_types() == "H"))
+      if xs.scatterers().size() < 3:
+        return None
+      p1 = xs.expand_to_p1()
+      fc = p1.structure_factors(d_min=1.0).f_calc()
+      ss = symmetry_search.structure_factor_symmetry(
+        fc, phi_sym_acceptance_cutoff=cutoff)
+      found = ss.space_group_info
+      if found.group().order_z() <= xs.space_group().order_z():
+        return None
+      print("Possible missed symmetry: the refined model has %s, solved in %s;"
+            " re-solve in it to check" % (found, xs.space_group_info()))
+      entries = list(getattr(suggestions, "suggestions", None) or [])
+      if suggestions is not None and found.type().number() not in [
+          e.space_group_info.type().number() for e in entries]:
+        entries.append(group_args(
+          space_group_info=found, absence_ratio=None, n_predicted_absent=0,
+          centric_agrees=None, judged_by=None, alpha=None,
+          reason="the refined model carries this symmetry"))
+        suggestions.suggestions = entries
+      return found
+    except Exception as e:
+      print("Missed-symmetry check did not run (%s: %s)"
+            % (type(e).__name__, e))
+      return None
+
   def reassignAfterCleanup(self):
     """ Re-type the refined model from what the data say sits at each site.
 
@@ -1643,7 +1679,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       n_heavy = max(1, int(f_obs.unit_cell().volume()
                            / 18.6/len(f_obs.space_group())))
       ranked = composite.choose_space_group(
-        f_obs, entries, result.f_calc_in_p1, n_heavy)
+        f_obs, entries, result.f_calc_in_p1, n_heavy,
+        f_calc_in_start=result.f_calc)
       if not ranked:
         return
 

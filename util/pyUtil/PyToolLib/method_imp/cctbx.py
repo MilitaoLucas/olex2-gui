@@ -282,7 +282,26 @@ class Method_cctbx_ChargeFlip(Method_solution):
       # ponytail: prune-only rounds do not count, the budget is for re-typing;
       # the first round never re-types, the noise is always still there
       for p in range(3*passes):
-        olex.m("refine %d" % cycles)
+        # ponytail: the refine macro spends 1.2 s a round on GUI, html and
+        # files around 0.3 s of least squares; the engine is called directly
+        try:
+          from refinement import FullMatrixRefine
+          fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          OV.SetParam('snum.refinement.flack_str', "")
+          fmr.run()
+          fmr.log.close()
+          if fmr.failure:
+            raise RuntimeError("refinement failed")
+          # the macro's absolute-structure check, which a polar group needs
+          flack = OV.GetParam('snum.refinement.flack_str') or ""
+          hooft = getattr(fmr, 'hooft', None)
+          if (flack and float(flack.split('(')[0]) > 0.8) or (hooft is not None
+              and round(getattr(hooft, 'p2_false', 0) or 0, 3) == 1):
+            olex.m('inv -f')
+            print("The structure has been inverted (Flack %s)" % flack)
+        except Exception as err:
+          print("Direct refinement failed (%s), using the macro" % err)
+          olex.m("refine %d" % cycles)
         us = []
         for i in range(int(olx.xf.au.GetAtomCount())):
           if olx.xf.au.IsAtomDeleted(i) == 'true' or \
@@ -332,6 +351,11 @@ class Method_cctbx_ChargeFlip(Method_solution):
           olex.m("refine %d" % cycles)
           OlexCctbxSolve().printDoubt()
           break
+      OV.File('%s.res' % OV.FileName())
+      addsym = OV.GetParam('snum.solution.missed_symmetry_check')
+      if addsym is None or addsym:
+        OlexCctbxSolve().checkMissedSymmetry(getattr(
+          getattr(self, 'cctbx_solver', None), 'solution_suggestions', None))
     except Exception as err:
       import traceback
       print("Post-solution tidy-up failed: %s" % err)

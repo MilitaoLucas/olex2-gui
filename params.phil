@@ -209,6 +209,14 @@ routines requiring structure refinement
               "model measured +0.05 and +0.03 correct on two independent "
               "samples, as an oracle bound. Costs about one second, and is "
               "skipped automatically when the tidy-up removed nothing."
+    missed_symmetry_check = True
+      .type = bool
+      .short_caption = Look for missed symmetry after the tidy-up
+      .help = "Auto-Solve only. The refined model, expanded to P1, is "
+              "searched for symmetry beyond the group it was solved in; "
+              "a supergroup is printed and added to the shortlist as a "
+              "hint. Pseudo-symmetry triggers it on about 1 in 80 correct "
+              "models, so it decides nothing by itself."
     graphical_output = False
       .type = bool
     current_atomic_volume = None
