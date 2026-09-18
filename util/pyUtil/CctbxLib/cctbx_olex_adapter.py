@@ -1434,6 +1434,16 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         return {}
       got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
       proposals = got[0] if got else []
+      # ponytail: a site with one neighbour within 2.1 A is terminal, which a
+      # halogen is and an S or O bridge is not, so halogens weigh 2x there;
+      # no penalty with more, a bridging F or Cl has two like an O or S
+      try:
+        table = xs.pair_asu_table(distance_cutoff=2.1).table()
+        n_nb = dict((str(s.label), sum(len(g) for gs in table[i].values()
+                                       for g in gs))
+                    for i, s in enumerate(xs.scatterers()))
+      except Exception:
+        n_nb = {}
       current = dict((str(s.label), s.scattering_type.strip().capitalize())
                      for s in xs.scatterers())
       changed, doubt = {}, []
@@ -1445,6 +1455,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         sigma = max(0.35, 0.04*z)
         score = dict((e, math.exp(-0.5*((z - ez)/sigma)**2)
                       * max(top.get(e, 0.0), 0.05)**0.5) for e, ez in z_of)
+        for e in ("F", "Cl", "Br", "I"):
+          if e in score and n_nb.get(name, 2) <= 1:
+            score[e] *= 2.0
         tot = sum(score.values()) or 1.0
         # ponytail: a missing heavy atom reads far under its Z (Mo typed O read
         # 18) or its collapsed U absorbs the surplus and it reads its own Z (Ru
