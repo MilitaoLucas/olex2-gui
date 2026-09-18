@@ -13,6 +13,10 @@ def sources():
      'itemName':'CIF_OD',
      'chooseFile':{'filter':'.cif_od files|*.cif_od'}
      },
+    {'varName':'snum.metacif.cfx_LANA_file',
+     'itemName':'STOE LANA CIF',
+     'chooseFile':{'filter':'.cfx_LANA files|*.cfx_LANA;*.cfx_LANA.cif'}
+     },
     {'varName':'snum.metacif.crystal_clear_file',
      'itemName':'Rigaku CrystalClear CIF',
      'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
@@ -84,9 +88,9 @@ def sources():
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
 
-      if "cif_od" in listFiles.lower() or "crystal_clear" in listFiles.lower():
+      if "cif_od" in listFiles.lower() or "cfx" in listFiles.lower() or "crystal_clear" in listFiles.lower():
         if os.path.exists(filePath):
-          del list_l[1:]
+          del list_l[x:]
           break
     else:
       del list_l[list_l.index(d)]

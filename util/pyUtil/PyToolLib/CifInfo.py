@@ -719,7 +719,7 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
     all_sources_d = {}
     versions = self.get_def()
 
-    manu_cifs = ['cif_od', 'cfx', 'cfx_LANA', 'crystal_clear']
+    manu_cifs = ['cif_od', 'cfx_LANA', 'cfx', 'crystal_clear'] # LANA supersedes X-Red
     for manu_cif in manu_cifs:
       p, pp, update = self.sort_out_path(path, manu_cif)
       if p:
@@ -951,7 +951,7 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length',
-                    '_audit', '_reflns', # These is only here because of STOE files
+                    '_audit', '_refln', # These is only here because of STOE files
                     '_cell_angle',
                     '_cell_volume',
                     '_cell_formula',
@@ -1096,11 +1096,12 @@ If more than one file is present, the path of the most recent file is returned b
       name = os.path.splitext(os.path.basename(OV.HKLSrc()))[0]
       extension = ".cif_od"
     elif tool == "cfx":
-      name = OV.FileName()
+      name = os.path.splitext(os.path.basename(OV.HKLSrc()))[0]
       extension = ".cfx"
     elif tool == "cfx_LANA":
-      name = OV.FileName()
-      extension = ".cfx_LANA"
+      # STOE writes <hkl>.cfx_LANA or <hkl>.cfx_LANA.cif
+      name = os.path.splitext(os.path.basename(OV.HKLSrc()))[0]
+      extension = ".cfx_LANA*"
     elif tool == "crystal_clear":
       name = "CrystalClear"
       extension = ".cif"

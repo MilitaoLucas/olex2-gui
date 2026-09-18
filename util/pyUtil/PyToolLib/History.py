@@ -20,12 +20,16 @@ tree = None
 
 timing = False #bool(OV.GetParam('gui.timing'))
 
+# manufacturer CIFs stored in the cif_od slot, the extension travels with the node
+manu_cif_exts = (".cif_od", ".cfx_LANA", ".cfx_LANA.cif")
+
 class HistoryFiles(object):
   def from_list(self, files):
     self.hkl = None
     self.dyn = None
     self.res = None
     self.cif_od = None
+    self.cif_od_ext = ".cif_od"
     self.files = []
     for f in files:
       if not os.path.exists(f):
@@ -33,8 +37,9 @@ class HistoryFiles(object):
       ext = os.path.splitext(f)[1].lower()
       if ext ==".hkl":
         self.hkl = f
-      elif ext == ".cif_od":
+      elif f.lower().endswith(tuple(e.lower() for e in manu_cif_exts)):
         self.cif_od = f
+        self.cif_od_ext = [e for e in manu_cif_exts if f.lower().endswith(e.lower())][0]
       elif ext == ".cif_cap":
         self.dyn = f
       elif ext == ".res" or ext == ".ins":
@@ -45,9 +50,8 @@ class HistoryFiles(object):
 
   def __init__(self, hkl_name, res_name):
     data_base = os.path.splitext(hkl_name)[0]
-    self.from_list([hkl_name, res_name,
-                   data_base + "_dyn.cif_cap",
-                   data_base + ".cif_od"])
+    self.from_list([hkl_name, res_name, data_base + "_dyn.cif_cap"] +
+                   [data_base + e for e in manu_cif_exts])
 
 class History(ArgumentParser):
   def __init__(self):
@@ -178,7 +182,7 @@ class History(ArgumentParser):
           pass
         try:
           if node.cif_od is not None:
-            zout.writestr(filename+".cif_od", decompressFile(tree.getCifODData(node)), zipfile.ZIP_DEFLATED)
+            zout.writestr(filename+getattr(node, "cif_od_ext", ".cif_od"), decompressFile(tree.getCifODData(node)), zipfile.ZIP_DEFLATED)
         except AttributeError:
           pass
         try:
@@ -189,7 +193,7 @@ class History(ArgumentParser):
         if node.lst is not None:
           zout.writestr(filename+".lst", decompressFile(node.lst), zipfile.ZIP_DEFLATED)
     else:
-      file_exts = [".cif", ".fcf", ".cif_od", "_dyn_.cif_cap", ".lst", ".log", ".tsc", ".tscb"]
+      file_exts = [".cif", ".fcf", "_dyn_.cif_cap", ".lst", ".log", ".tsc", ".tscb"] + list(manu_cif_exts)
       filename = OV.FileName()
       filepath = OV.FilePath()
       ffilename = os.path.join(filepath, filename)
@@ -272,7 +276,7 @@ class History(ArgumentParser):
 
     try:
       if node.cif_od is not None:
-        cif_odFile = os.path.splitext(hklSrc)[0] + ".cif_od"
+        cif_odFile = os.path.splitext(hklSrc)[0] + getattr(node, "cif_od_ext", ".cif_od")
         if not os.path.exists(cif_odFile) and not tree.isTheSameCifODDigest(node, cif_odFile):
           cif_odFileData = decompressFile(tree.getCifODData(node))
           with open(cif_odFile, 'wb') as wFile:
@@ -395,11 +399,12 @@ class Node(object):
     self.hkl = None
     self.dyn = None
     self.cif_od = None
+    self.cif_od_ext = ".cif_od"
 
     if files:
       if files.hkl:     self.hkl = digestPath(files.hkl)
       if files.dyn:     self.dyn = digestPath(files.dyn)
-      if files.cif_od:  self.cif_od = digestPath(files.cif_od)
+      if files.cif_od:  self.cif_od, self.cif_od_ext = digestPath(files.cif_od), files.cif_od_ext
 
     if history_leaf is None:
       if files.res:
