@@ -1575,7 +1575,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     try:
       suggestion = space_group_suggest.suggest(
         f_obs, result.f_calc_in_p1, laue_group_info=laue,
-        n_suggestions=n_suggestions)
+        n_suggestions=n_suggestions,
+        ensure_centric=max(self.expectedZs() or [0]) >= 19)
     except Exception as e:
       print("Space-group suggestions unavailable: %s" % e)
       return None
