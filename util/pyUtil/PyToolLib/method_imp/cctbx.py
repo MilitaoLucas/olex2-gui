@@ -240,28 +240,37 @@ class Method_cctbx_ChargeFlip(Method_solution):
   def tidy_solution(self):
     """ Make the solution look like chemistry, then drop what will not refine.
 
-    Two steps, in this order, because the second depends on the first.
-
-    **Assemble.** Charge flipping places peaks anywhere in the cell, so the
-    fragments come out scattered across symmetry images and the model looks
-    shattered even when the phasing is right. `compaq -a` gathers them into
-    connected molecules -- the same thing a crystallographer does by hand
-    immediately after solving.
-
-    **Refine briefly, then prune by ADP.** The peak search deliberately
-    over-picks (`1.3 x V/18.6/order`, so ~42 peaks where the deposited model
-    has 31 atoms), and the surplus is noise. A real atom settles to a sensible
-    displacement parameter in a few cycles; a noise peak has no density to hold
-    it and its U runs away. So a short refinement separates them far better
-    than peak height does, which is Florian's observation and the reason this
-    is worth the seconds it costs.
-
-    Reuses Olex2's own idiom rather than inventing one --
-    `RunPrg.doAutoTidyBefore/After` prunes with exactly this pair of calls.
+    `compaq -a` gathers the fragments, then rounds of: refine `tidy_cycles`,
+    prune every atom whose U exceeds `tidy_uiso_factor` times the median U
+    of the model (a noise peak has no density to hold it and its U runs
+    away; the median follows the temperature and the data where a fixed
+    expectation per element did not), gather the difference peaks, make the
+    atoms over `tidy_anis_z` anisotropic. Once a
+    round (not the first) prunes nothing the survivors are re-typed from the
+    refined model and the fragments gathered again (noise peaks typed carbon steal scale from every real atom
+    and read them all a Z too heavy), at most `tidy_passes` times. Stops once
+    a round changes nothing. Never lets the tidy-up cost the user the
+    solution. With `complete_after_tidy` the difference map is asked once for
+    what is missing (`completeModel`) once the types are settled.
     """
     factor = OV.GetParam('snum.solution.tidy_uiso_factor') or 3.0
     cycles = OV.GetParam('snum.solution.tidy_cycles')
     cycles = 4 if cycles is None else int(cycles)
+    passes = OV.GetParam('snum.solution.tidy_passes')
+    passes = 4 if passes is None else int(passes)
+    retype = OV.GetParam('snum.solution.retype_after_tidy')
+    retype = retype is None or retype
+    # ponytail: off by default; on 45 COD entries the additions were all
+    # pruned again, the misses were wrong-SG or noise-displaced, not absent
+    complete = bool(OV.GetParam('snum.solution.complete_after_tidy'))
+    anis_z = OV.GetParam('snum.solution.tidy_anis_z')
+    anis_z = 10 if anis_z is None else int(anis_z)
+    from cctbx.eltbx import tiny_pse
+    def heavy_z(t):
+      try:
+        return tiny_pse.table(t.capitalize()).atomic_number()
+      except (RuntimeError, ValueError):
+        return 0
     try:
       olex.m("compaq -a")
     except Exception as err:
@@ -269,74 +278,61 @@ class Method_cctbx_ChargeFlip(Method_solution):
     if cycles <= 0:
       return
     try:
-      olex.m("refine %d" % cycles)
-      # **Count after the refinement, not before it.** olex2.refine runs a
-      # Fourier analysis and adds the difference peaks it finds to the model,
-      # so an atom count taken before the refinement is compared against a
-      # larger, different thing afterwards -- which reported "Pruned -22
-      # peak(s)" on the first real run, having actually removed several.
-      before = int(olx.xf.au.GetAtomCount())
-
-      # **Judge U against what that element should have, not against one
-      # number.** A flat threshold is confounded by element: palladium belongs
-      # near 0.02 and carbon near 0.06, so any single cutoff is simultaneously
-      # too tight for the light atoms and far too loose for the heavy ones. The
-      # ratio is the signal -- a peak that is not an atom has no density to
-      # hold it and its U runs away from the element's expectation whatever
-      # that expectation was.
       from cctbx_olex_adapter import OlexCctbxSolve
-      expected_for = OlexCctbxSolve().startingUiso
-      doomed = []
-      for i in range(int(olx.xf.au.GetAtomCount())):
-        if olx.xf.au.IsAtomDeleted(i) == 'true':
+      # ponytail: prune-only rounds do not count, the budget is for re-typing;
+      # the first round never re-types, the noise is always still there
+      for p in range(3*passes):
+        olex.m("refine %d" % cycles)
+        us = []
+        for i in range(int(olx.xf.au.GetAtomCount())):
+          if olx.xf.au.IsAtomDeleted(i) == 'true' or \
+             str(olx.xf.au.GetAtomType(i)) in ('Q', 'H'):
+            continue
+          try:
+            us.append((float(olx.xf.au.GetAtomUiso(i)), i,
+                       str(olx.xf.au.GetAtomName(i)),
+                       str(olx.xf.au.GetAtomType(i))))
+          except (TypeError, ValueError):
+            pass
+        us.sort()
+        median = us[len(us)//2][0] if us else 0.0
+        doomed = [n for u, i, n, t in us if u > factor*max(median, 0.005)]
+        # ponytail: the heavy atoms go anisotropic once the noise is gone;
+        # an isotropic Pd leaves a residual the light atoms then read
+        heavy = sorted(set("$" + t for u, i, n, t in us if anis_z
+                           and heavy_z(t) > anis_z))
+        if doomed:
+          olex.m("kill %s" % " ".join(doomed))
+          print("Pruned %d peak(s) whose U exceeded %.1fx the median U %.3f "
+                "after %d cycles (%d left): %s"
+                % (len(doomed), factor, median, cycles, len(us) - len(doomed),
+                   " ".join(doomed[:12]) + (" ..." if len(doomed) > 12 else "")))
+        else:
+          print("Every atom refined to within %.1fx the median U %.3f; "
+                "nothing pruned" % (factor, median))
+        olex.m("compaq -q")
+        if heavy:
+          olex.m("anis %s" % " ".join(heavy))
+        if doomed or p == 0:
           continue
-        symbol = str(olx.xf.au.GetAtomType(i))
-        if symbol == 'Q':
-          continue                      # unassigned peaks are not ours to judge
-        try:
-          u = float(olx.xf.au.GetAtomUiso(i))
-        except (TypeError, ValueError):
+        # re-typed only once nothing was pruned: noise peaks typed carbon steal
+        # scale from every real atom and read them all a Z too heavy
+        if not retype or not OlexCctbxSolve().reassignAfterCleanup():
+          # ponytail: one completion once the types are settled; what it adds
+          # goes through the same refine, prune and re-typing as the rest
+          if not complete or not OlexCctbxSolve().completeModel():
+            break
+          complete = False
           continue
-        if u > factor*expected_for(symbol):
-          doomed.append(str(olx.xf.au.GetAtomName(i)))
-      if doomed:
-        olex.m("kill %s" % " ".join(doomed))
-      after = int(olx.xf.au.GetAtomCount())
-      if doomed:
-        print("Pruned %d peak(s) whose U exceeded %.1fx the value expected "
-              "for their element after %d cycles (%d left): %s"
-              % (len(doomed), factor, cycles, after,
-                 " ".join(doomed[:12]) + (" ..." if len(doomed) > 12 else "")))
-      else:
-        print("Every atom refined to within %.1fx its expected U; "
-              "nothing pruned" % factor)
-
-      # **Gather the difference peaks last, once the model is settled.**
-      # The refinement's Fourier analysis adds its peaks wherever symmetry puts
-      # them, so they arrive scattered across images exactly as the solved
-      # fragments did -- and pruning has just changed which atoms they should
-      # sit near. `-q` moves the Q peaks to the structure, so what is left to
-      # interpret is next to the molecule rather than a cell away from it.
-      #
-      # After the kill, not before: moving peaks toward atoms that are about to
-      # be deleted would place them against the wrong neighbours.
-      olex.m("compaq -q")
-
-      # **Re-type last, on the cleaned model.** Florian's point: the peaks that
-      # are not atoms sit in the real atoms' descriptor neighbourhoods and in
-      # the carbon-scale fit, so they corrupt the typing of what is around them.
-      # Doing it here rather than at solve time is worth +0.05 (n=137) and
-      # +0.03 (n=126, independent) as an oracle bound.
-      #
-      # After `compaq -q`, not before: the descriptor is a description of an
-      # atom's surroundings, so it has to be computed once the fragments are
-      # where they belong and the doomed peaks are gone.
-      retype = OV.GetParam('snum.solution.retype_after_tidy')
-      if retype is None or retype:
-        OlexCctbxSolve().reassignAfterCleanup()
+        passes -= 1
+        # ponytail: the prunes leave fragments scattered again; a second
+        # assembly after the re-typing joins what the first round could not
+        olex.m("compaq -a")
+        if passes <= 0:
+          olex.m("refine %d" % cycles)
+          OlexCctbxSolve().printDoubt()
+          break
     except Exception as err:
-      # Never let the tidy-up cost the user their solution: the structure is
-      # already saved and loaded by this point.
       import traceback
       print("Post-solution tidy-up failed: %s" % err)
       if OV.IsDebugging():
