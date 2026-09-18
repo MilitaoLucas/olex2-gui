@@ -646,7 +646,8 @@ def make_ORCA_GUI(new_ORCA = True):
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
-  # ORCA specific options: SCF Thresh., SCF Strategy, Solvation
+  # ORCA specific options: SCF Thresh., SCF Strategy, Solvation (not with embedding)
+  embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
   t += begin_new_line("NoSpherA2 Extras") + \
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",
@@ -659,16 +660,17 @@ def make_ORCA_GUI(new_ORCA = True):
                       "'EasyConv;NormalConv;SlowConv;VerySlowConv'",
                       "spy.nsa2_get_param(\'ORCA_SCF_Strategy\')",
                       "spy.nsa2_set_param(\'ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
-                      width_label=17, width_combo=20) + \
-        labeled_combo("NoSpherA2_ORCA_Solvation@refine",
+                      width_label=17, width_combo=20)
+  if not embed:
+    t += labeled_combo("NoSpherA2_ORCA_Solvation@refine",
                       "Solvation",
                       "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
                       "spy.nsa2_get_param(\'ORCA_Solvation\')",
                       "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\')) >> html.Update()",
-                      width_label=13, width_combo=30) + \
-        end_line()
+                      width_label=13, width_combo=30)
+  t += end_line()
   custom_solvation = nsa2_get_param('ORCA_Solvation')
-  if custom_solvation == "Custom":
+  if custom_solvation == "Custom" and not embed:
     t += begin_new_line() + \
           labeled_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine",
                        "Epsilon",
@@ -710,7 +712,6 @@ def make_ORCA_GUI(new_ORCA = True):
                           "spy.nsa2_set_param('ORCA_use_broken_sym', True) >> html.Update()",
                           "spy.nsa2_set_param('ORCA_use_broken_sym', False) >> html.Update()",
                           width=15)
-    embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
     brok_sym = nsa2_get_param('ORCA_use_broken_sym')
     if embed:
       t += standalone_combo("NoSpherA2_ORCA_embedding_type@refine",

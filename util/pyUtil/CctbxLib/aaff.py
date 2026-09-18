@@ -656,9 +656,13 @@ The following options were used:
           details_text += f"   BASIS SET:      {basis_set}\n"
       details_text += f"   CHARGE:         {charge}\n"
       details_text += f"   MULTIPLICITY:   {mult}\n"
-      solv = nsa2_get_param('ORCA_Solvation')
-      if solv != "Vacuum":
-        details_text += f"   SOLVATION:      {solv}\n"
+      embedded = "ORCA" in software and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
+      if embedded:
+        details_text += f"   EMBEDDING:      {nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')}-Crystal-QMMM, {nsa2_get_param('ORCA_CRYSTAL_QMMM_RADIUS')} A\n"
+      else:
+        solv = nsa2_get_param('ORCA_Solvation')
+        if solv != "Vacuum":
+          details_text += f"   SOLVATION:      {solv}\n"
       if relativistic == True:
         if "ORCA" in software:
           ORCA_Relativistic = nsa2_get_param('ORCA_Relativistic')

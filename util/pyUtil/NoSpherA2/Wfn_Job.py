@@ -23,6 +23,70 @@ except Exception as e:
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 
+def _crystal_cluster(subunit_fn, cluster_fn, radius):
+  # cluster of identical, identically ordered copies of the displayed molecule (ORCA CRYSTAL-QMMM subunits), displayed copy first
+  import numpy as np
+  import olex_core
+  from crystal_energies import _cell_matrix, _floats
+  lines = open(subunit_fn).read().splitlines()
+  n0 = int(lines[0])
+  el = [("H" if l.split()[0] in ("D", "T") else l.split()[0]) for l in lines[2:2 + n0]]
+  X = np.array([[float(v) for v in l.split()[1:4]] for l in lines[2:2 + n0]])
+  M = _cell_matrix(_floats(olx.xf.au.GetCell()))
+  Minv = np.linalg.inv(M)
+  spacing = 1.0 / np.linalg.norm(Minv, axis=1)
+  ops = [np.array(m, dtype=float) for m in olex_core.SGInfo()["MatricesAll"]]
+  radius = float(radius)
+
+  def overlap(P, Q):
+    return np.min(np.linalg.norm(P[:, None, :] - Q[None, :, :], axis=2), axis=1) < 0.1
+
+  def images(X):
+    # symmetry images of X with an atom within radius of X's centroid
+    F = X @ Minv.T
+    cent, fcent = X.mean(axis=0), F.mean(axis=0)
+    reach = radius + np.max(np.linalg.norm(X - cent, axis=1))
+    for op in ops:
+      G = F @ op[:, :3].T + op[:, 3]
+      shift = fcent - G.mean(axis=0)
+      lo = np.floor(shift - reach / spacing).astype(int)
+      hi = np.ceil(shift + reach / spacing).astype(int)
+      for t in np.ndindex(*(hi - lo + 1)):
+        P = (G + lo + np.array(t)) @ M.T
+        if np.min(np.linalg.norm(P - cent, axis=1)) <= radius:
+          yield P
+
+  # an image sharing some but not all atoms with X means X sits on a special position: its mates complete the subunit
+  while True:
+    for P in images(X):
+      hit = overlap(P, X)
+      if hit.any() and not hit.all():
+        X = np.vstack([X, P[~hit]])
+        el += [e for e, h in zip(el, hit) if not h]
+        break
+    else:
+      break
+    if len(el) > 48 * n0:
+      raise RuntimeError("Embedding: the displayed atoms do not complete to a finite molecule - not a molecular crystal, use the Ion type")
+  n = len(el)
+  if n > n0:
+    print("Embedding: %d symmetry-generated atoms added to complete the QM subunit (%d atoms)" % (n - n0, n))
+  placed, blocks = X, [X]
+  for P in images(X):
+    hit = overlap(P, placed)
+    if hit.all():
+      continue
+    if hit.any():
+      raise RuntimeError("Embedding: symmetry images of the QM subunit overlap partially (%d of %d atoms)" % (hit.sum(), n))
+    placed = np.vstack([placed, P])
+    blocks.append(P)
+  with open(cluster_fn, "w") as f:
+    f.write("%d\nCluster of %d subunits with %d atoms written by NoSpherA2\n" % (n * len(blocks), len(blocks), n))
+    for P in blocks:
+      for e, x in zip(el, P):
+        f.write("%-2s %14.8f %14.8f %14.8f\n" % (e, x[0], x[1], x[2]))
+  return n, len(blocks), el
+
 def _find_basis_file(basis_dir, basis_name):
   """Return the path to a basis set file, matching case-insensitively."""
   direct = os.path.join(basis_dir, basis_name)
@@ -545,11 +609,10 @@ class wfn_Job(object):
     olx.Kill("$Q")
     if xyz:
       olx.File(coordinates_fn1, p=10)
-    xyz1 = open(coordinates_fn1, "r")
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
     radius = nsa2_get_param("ORCA_CRYSTAL_QMMM_RADIUS")
-    olex.m("XYZCluster_4NoSpherA2 %s"%radius)
-    shutil.move(self.name + ".xyz", os.path.join(self.full_dir, self.name) + ".xyz")
+    natoms, nsub, el_list = _crystal_cluster(coordinates_fn1, coordinates_fn2, radius)
+    print("Embedding: %d subunits of %d atoms within %s A" % (nsub, natoms, radius))
     xyz2 = open(coordinates_fn2,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
@@ -613,34 +676,18 @@ class wfn_Job(object):
       control += " DKH2 SARC/J RIJCOSX"
     else:
       control += " def2/J RIJCOSX"
-    Solvation = nsa2_get_param('ORCA_Solvation')
-    if Solvation != "Vacuum" and Solvation is not None:
-      control += " CPCM("+Solvation+") "
     inp.write(control + '\n' + "%pal\n" + cpu + '\n' + "end\n" + mem + '\n' + "%coords\n        CTyp xyz\n        charge " + charge + "\n        mult " + mult + "\n        units angs\n        coords\n")
-    atom_list = []
-    i = 0
-    for line in xyz2:
-      i = i+1
-      if i > 2:
-        atom = line.split()
-        if atom[0] == "D":
-          atom[0] = "H"
-          line = line.replace("D", "H")
-        if atom[0] == "T":
-          atom[0] = "H"
-          line = line.replace("T", "H")
-        inp.write(line)
-        if atom[0] not in atom_list:
-          atom_list.append(atom[0])
+    inp.writelines(xyz2.readlines()[2:])
+    xyz2.close()
     inp.write("   end\nend\n")
     if mp2_block != "":
       inp.write(mp2_block+"\n")
-    el_list = atom_list
+    el_list = sorted(set(el_list))
     if not ECP:
       basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
-      for element in atom_list:
+      for element in el_list:
         shells = _read_atom_basis(basis, element, basis_name)
         _write_atom_basis_orca(inp, element, shells)
       basis.close()
@@ -649,32 +696,8 @@ class wfn_Job(object):
     hflayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_HF_LAYERS')
     ecplayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS')
     inp.write("%qmmm\n")
-    asu_lines = xyz1.readlines()
-    natoms = int(asu_lines[0])
-    xyz2.seek(0)
-    all_lines = xyz2.readlines()
-    atom_list = []
-    i = 0
-    for line in asu_lines:
-      i += 1
-      if i < 3:
-        continue
-      j = 0
-      for line2 in all_lines:
-        j += 1
-        if j < 3:
-          continue
-        if line == line2:
-          atom_list.append(j-3)
-          break
-    if len(atom_list) != natoms:
-      print("Did not find all atoms in the big XYZ-file! Make sure the ASU is in included when running 'pack %f -c'"%radius)
-      return
     inp.write("  NUnitCellAtoms %d\n"%natoms)
-    qm_atoms = ""
-    for atom in atom_list:
-      qm_atoms += " %d"%atom
-    inp.write("  QMAtoms {%s } end"%qm_atoms)
+    inp.write("  QMAtoms {0:%d} end\n"%(natoms - 1))
     params_filename = self.name + ".ORCAFF.prms"
     if qmmmtype == "Ion":
       inp.write("""
