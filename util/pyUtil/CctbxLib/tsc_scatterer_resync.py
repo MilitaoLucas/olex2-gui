@@ -182,6 +182,73 @@ def read_scatterers(tsc_file):
     else:
         return read_scatterers_from_tsc(tsc_file)
 
+def read_header_lines(tsc_file):
+    """The KEY: VALUE lines of a tsc/tscb header as a dict, keys upper-cased.
+
+    Lines without a colon (the id marker) are skipped; a repeated key keeps
+    the first occurrence, which is the order compose_header writes replacements
+    in.
+    """
+    if isinstance(tsc_file, bytes):
+        tsc_file = os.fsdecode(tsc_file)
+    if tsc_file.endswith('.tscb'):
+        with open(tsc_file, 'rb') as f:
+            header_length = int.from_bytes(f.read(4), byteorder='little')
+            raw = f.read(header_length).decode('utf-8', 'replace').split('\n')
+    else:
+        raw = []
+        with open(tsc_file, 'r') as f:
+            for line in f:
+                if line.startswith('DATA:'):
+                    break
+                raw.append(line)
+    header = {}
+    for line in raw:
+        key, sep, value = line.partition(':')
+        if sep:
+            header.setdefault(key.strip().upper(), value.strip())
+    return header
+
+
+def write_header_lines(tsc_file, lines):
+    """Add KEY: VALUE lines to the header, replacing older lines of the same
+    key; the scatterer block and the data are copied through untouched.
+
+    A value is flattened to one line: cctbx's reader stops at the first empty
+    header line and takes a line without a colon for the id marker, so a
+    newline inside a value would end or corrupt the header for it.
+    """
+    if isinstance(tsc_file, bytes):
+        tsc_file = os.fsdecode(tsc_file)
+    lines = [' '.join((l.decode('utf-8') if isinstance(l, bytes) else str(l)).split())
+             for l in lines if str(l).strip()]
+    if not lines:
+        return
+    import shutil
+    tmp = tsc_file + '.header.tmp'
+    if tsc_file.endswith('.tscb'):
+        with open(tsc_file, 'rb') as f, open(tmp, 'wb') as g:
+            header_length = int.from_bytes(f.read(4), byteorder='little')
+            header = f.read(header_length)
+            header = compose_header(header, _tscb_header_says_ids(header), lines)
+            g.write(len(header).to_bytes(4, byteorder='little'))
+            g.write(header)
+            shutil.copyfileobj(f, g)
+    else:
+        replaced = set(l.split(':', 1)[0].strip().upper() for l in lines)
+        with open(tsc_file, 'r') as f, open(tmp, 'w') as g:
+            for line in f:
+                if line.startswith('DATA:'):
+                    for l in lines:
+                        g.write(l + '\n')
+                    g.write(line)
+                    break
+                if line.split(':', 1)[0].strip().upper() not in replaced:
+                    g.write(line)
+            shutil.copyfileobj(f, g)
+    os.replace(tmp, tsc_file)
+
+
 def _header_key(line):
     return line.split(b':', 1)[0].strip().upper()
 

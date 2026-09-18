@@ -188,6 +188,12 @@ Refinement aborted."""
         internal_to_tsc = resolve_scatterer_mapping(
           file_entries, model_labels, internal_scatterer_ids, get_unit_cell(old_model))
       except (ValueError, ScattererResolutionError) as e:
+        # the header says which cell, space group and hkl the table was made for: the likely reason
+        try:
+          from cctbx_olex_adapter import _report_table_fingerprint
+          _report_table_fingerprint(table_file_name)
+        except Exception as fp_error:
+          print("Note: could not compare the table header with the model: %s" % fp_error)
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")
         raise e
@@ -619,66 +625,84 @@ This fragment can be embedded in an electrostatic crystal field by employing clu
 or modelled using implicit solvation models, depending on the software used.
 The following options were used:
 """
-    software = nsa2_get_param('source').lstrip()
-    # Use the stored origin (set at calculation time) if available; fall back to source param
-    origin = nsa2_get_param('file_origin')
+    from NoSpherA2.utilities import nsa2_read_settings_header, nsa2_generator_citation
+    # the settings that made the table when its header records them; the live GUI values only for an older table
+    recorded = nsa2_read_settings_header(tsc_file_name)
+    def param(key):
+      if recorded is not None:
+        return recorded.get(key.upper(), '')
+      return nsa2_get_param(key)
+    def flag(key):
+      return str(param(key)).strip().lower() in ('true', '1', 'yes')
+    software = str(param('source')).strip()
+    origin = param('origin') if recorded is not None else nsa2_get_param('file_origin')
     if not origin:
       origin = software
+    citation = nsa2_generator_citation(recorded or {})
+    if citation and citation[0].split()[0].upper() == str(origin).split()[0].upper():
+      origin = citation[0]
     details_text = details_text + "   SOFTWARE:       %s\n"%origin
     if software != OV.GetParam('user.NoSpherA2.discamb_exe'):
-      charge = nsa2_get_param('charge')
-      mult = nsa2_get_param('multiplicity')
-      relativistic = nsa2_get_param('Relativistic')
-      partitioning = nsa2_get_param('NoSpherA2_SF')
-      accuracy = nsa2_get_param('becke_accuracy')
-      if partitioning == True:
+      if flag('NoSpherA2_SF'):
         details_text += "   PARTITIONING:   NoSpherA2\n"
-        details_text += f"   INT ACCURACY:   {accuracy}\n"
+        details_text += f"   INT ACCURACY:   {param('becke_accuracy')}\n"
       else:
         details_text += "   PARTITIONING:   Tonto\n"
       if software == "SALTED":
-        salted_model = nsa2_get_param('selected_salted_model')
-        details_text += f"   MODEL:          {os.path.basename(str(salted_model))}\n"
+        details_text += f"   MODEL:          {os.path.basename(str(param('selected_salted_model')))}\n"
       elif software == "Thakkar IAM":
-        cations = nsa2_get_param('Thakkar_Cations')
-        anions = nsa2_get_param('Thakkar_Anions')
+        cations = param('Thakkar_Cations')
+        anions = param('Thakkar_Anions')
         if cations:
           details_text += f"   CATIONS:        {cations}\n"
         if anions:
           details_text += f"   ANIONS:         {anions}\n"
       elif software == "pTB":
         pass  # pTB does not use method or basis set
+      elif software == "Hybrid":
+        # one line per disorder part; the global method/basis say nothing about what each part got
+        parts = sorted(set(int(k.split('_PART')[1]) for k in (recorded or {}) if k.startswith('HYBRID.') and '_PART' in k)) \
+                if recorded is not None else (OV.ListParts() or [])
+        for part in parts:
+          pp = lambda key: param("Hybrid.%s_Part%d" % (key, part))
+          rel = ", relativistic" if str(pp('Relativistic')).strip().lower() in ('true', '1', 'yes') else ""
+          details_text += f"   PART {part}:         {str(pp('software')).strip()} {pp('method')}/{pp('basis_name')}, charge {pp('charge')}, multiplicity {pp('multiplicity')}{rel}\n"
       else:
-        method = nsa2_get_param('method')
-        details_text += f"   METHOD:         {method}\n"
+        details_text += f"   METHOD:         {param('method')}\n"
         if software != "xTB":
-          basis_set = nsa2_get_param('basis_name')
-          details_text += f"   BASIS SET:      {basis_set}\n"
-      details_text += f"   CHARGE:         {charge}\n"
-      details_text += f"   MULTIPLICITY:   {mult}\n"
-      embedded = "ORCA" in software and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
-      if embedded:
-        details_text += f"   EMBEDDING:      {nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')}-Crystal-QMMM, {nsa2_get_param('ORCA_CRYSTAL_QMMM_RADIUS')} A\n"
-      else:
-        solv = nsa2_get_param('ORCA_Solvation')
-        if solv != "Vacuum":
+          details_text += f"   BASIS SET:      {param('basis_name')}\n"
+      if software != "Hybrid":
+        details_text += f"   CHARGE:         {param('charge')}\n"
+        details_text += f"   MULTIPLICITY:   {param('multiplicity')}\n"
+      is_orca = "ORCA" in software or "ORCA" in str(origin)
+      if is_orca and flag('ORCA_USE_CRYSTAL_QMMM'):
+        details_text += f"   EMBEDDING:      {param('ORCA_CRYSTAL_QMMM_TYPE')}-Crystal-QMMM, {param('ORCA_CRYSTAL_QMMM_RADIUS')} A\n"
+      elif is_orca:
+        # only ORCA honours the solvation setting; the others ignore it and must not claim it
+        solv = param('ORCA_Solvation')
+        if solv and solv != "Vacuum":
           details_text += f"   SOLVATION:      {solv}\n"
-      if relativistic == True:
-        if "ORCA" in software:
-          ORCA_Relativistic = nsa2_get_param('ORCA_Relativistic')
-          details_text += f"   RELATIVISTIC:   {ORCA_Relativistic}\n"
-        else:
-          details_text += "   RELATIVISTIC:   DKH2\n"
+      if flag('Relativistic') and software != "Hybrid":
+        details_text += f"   RELATIVISTIC:   {param('ORCA_Relativistic') if is_orca else 'DKH2'}\n"
       if software == "Tonto":
-        radius = nsa2_get_param('cluster_radius')
-        details_text += f"   CLUSTER RADIUS: {radius}\n"
-        complete = nsa2_get_param('cluster_grow')
-        details_text += f"   CLUSTER GROW:   {complete}\n"
-    if os.path.exists(tsc_file_name):
-      f_time = os.path.getctime(tsc_file_name)
-    import datetime
-    f_date = datetime.datetime.fromtimestamp(f_time).strftime('%Y-%m-%d_%H-%M-%S')
+        details_text += f"   CLUSTER RADIUS: {param('cluster_radius')}\n"
+        details_text += f"   CLUSTER GROW:   {param('cluster_grow')}\n"
+    # the date the table was made, not the date its file was last copied
+    f_date = param('date') if recorded is not None else ''
+    if not f_date:
+      import datetime
+      f_date = datetime.datetime.fromtimestamp(os.path.getmtime(tsc_file_name)).strftime('%Y-%m-%d_%H-%M-%S')
     details_text = details_text + "   DATE:           %s\n"%f_date
+    if recorded is None:
+      details_text += "   (settings taken from the current GUI state; the table does not record its own)\n"
+    # a compact copy in the item checkCIF and readers actually show, appended after any caveat already there
+    special = "Aspherical atomic form factors from NoSpherA2 (Kleemiss et al., Chem. Sci. 2021, 12, 1675), " \
+              + ' '.join(details_text.split("The following options were used:\n", 1)[1].replace("\n", "; ").split()).strip("; ")
+    try:
+      previous = cif_block['_refine_special_details']
+    except (KeyError, TypeError):
+      previous = None
+    cif_block['_refine_special_details'] = special if not previous else "%s\n%s" % (previous, special)
     tsc_info = tsc_info + details_text + ";\n"
     cif_block['_olex2_refine_details'] = tsc_info
     if acta_stuff:

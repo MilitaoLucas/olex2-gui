@@ -360,7 +360,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       shutil.rmtree(self.jobs_dir)
     print(" ... done!")
 
-  def set_tsc_file_with_metadata(self, filename, origin=None):
+  def set_tsc_file_with_metadata(self, filename, origin=None, record=True):
     """
     Set the NoSpherA2 file parameter and store metadata (hash and origin).
 
@@ -368,16 +368,20 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       filename: The name of the TSC/TSCB file to set
       origin: The software/method that generated this file. If None, taken from
               wfn_code; if the file cannot be found, "externally provided".
+      record: write the generator settings and the model fingerprint into the
+              file's header (NSA2_ lines). True for a file this run just made;
+              the file picker passes False, a user's table is not rewritten.
 
     The work itself is nsa2_adopt_tsc_file's. It is the one place a table is
     checked, normalised and only then hashed, and the other routes in -- a
     parts merge, fragHAR, the file picker -- reach it too, so a file means the
     same thing however it arrived.
     """
-    from utilities import nsa2_adopt_tsc_file
+    from utilities import nsa2_adopt_tsc_file, nsa2_settings_header
     if origin is None:
       origin = self.wfn_code if hasattr(self, 'wfn_code') else software()
-    nsa2_adopt_tsc_file(filename, origin)
+    settings = nsa2_settings_header(origin) if record else None
+    nsa2_adopt_tsc_file(filename, origin, settings=settings)
   def _resolve_active_tscb_path(self):
     tsc_name = str(OV.GetParam('snum.NoSpherA2.file') or '').strip()
     if not tsc_name.lower().endswith('.tscb'):
@@ -1908,7 +1912,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       keep_valid_choice('method', get_functional_list(_input), "GFN2" if _input == "xTB" else "PBE")
       keep_valid_choice('basis_name', NoSpherA2_instance.getBasisListStr(), "def2-SVP")
     if ".tsc" in _input:
-      NoSpherA2_instance.set_tsc_file_with_metadata(_input)
+      NoSpherA2_instance.set_tsc_file_with_metadata(_input, record=False)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != nsa2_get_param('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, model = calculate_number_of_electrons()

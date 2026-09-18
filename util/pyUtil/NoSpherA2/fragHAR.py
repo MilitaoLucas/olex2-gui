@@ -1240,11 +1240,9 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
   except:
     print("Error trying to move the tsc file! Make sure the calculation worked!")
     return
-  from utilities import nsa2_adopt_tsc_file
-  if os.path.exists(wfn_object.name + ".tscb"):
-    nsa2_adopt_tsc_file(wfn_object.name + ".tscb", "fragHAR")
-  else:
-    nsa2_adopt_tsc_file(wfn_object.name + ".tsc", "fragHAR")
+  from utilities import nsa2_adopt_tsc_file, nsa2_settings_header
+  ext = ".tscb" if os.path.exists(wfn_object.name + ".tscb") else ".tsc"
+  nsa2_adopt_tsc_file(wfn_object.name + ext, "fragHAR", settings=nsa2_settings_header("fragHAR"))
   t4 = time.time()
   print("Timing of fragHAR:")
   print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")

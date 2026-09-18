@@ -668,6 +668,19 @@ Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
 White, F., Grundkoetter-Stock, B., Steinhauer, S., Lentz, D., Puschmann, H.,
 Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
       full_references.append(NoSpherA2_ref)
+      # the program that made the wavefunction is part of the refinement method, so it is cited with it
+      try:
+        from NoSpherA2.utilities import nsa2_generator_citation
+        citation = nsa2_generator_citation()
+      except Exception:
+        citation = None
+      if citation:
+        name, ref = citation
+        computing = str(self.cif_block.get('_computing_structure_refinement', '') or '').strip()
+        if name.split()[0] not in computing:
+          self.update_cif_block({
+            '_computing_structure_refinement': "%s; %s" % (computing, name) if computing else name}, force=True)
+        full_references.append(ref)
     if 'current_cif' in locals():
       disp_refine = "_atom_site_dispersion_real" in current_cif
       if disp_refine:

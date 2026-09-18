@@ -3296,10 +3296,37 @@ def _report_table_provenance(table_file_name):
       print("WARNING: the origin of %s is %s - nothing records how it was"
             " calculated." % (_table_name_for_log(table_file_name),
                               origin if origin else '(empty)'))
+    _report_table_fingerprint(table_file_name)
   except Exception as error:
     # provenance is a report, not a gate: a structure carrying no NoSpherA2
     # metadata must still be able to draw a map
     print("Note: could not check the provenance of the scattering table: %s" % error)
+
+
+def _report_table_fingerprint(table_file_name):
+  """ Say when the table was computed for another cell, space group or hkl
+  file than the ones now loaded. The header records them at calculation
+  time; a table written before that carries nothing and passes in silence.
+  Warn, never refuse -- a transformed cell that still resolves every index
+  runs without any other sign.
+  """
+  from NoSpherA2.utilities import nsa2_read_settings_header, nsa2_model_fingerprint
+  recorded = nsa2_read_settings_header(table_file_name) or {}
+  now = nsa2_model_fingerprint()
+  name = _table_name_for_log(table_file_name)
+  cell = recorded.get('CELL')
+  if cell and any(abs(float(a) - float(b)) > 1e-3 for a, b in zip(cell.split(), now.get('cell', '').split())):
+    print("WARNING: %s was computed for cell %s, the loaded cell is %s."
+          % (name, cell, now.get('cell')))
+  hall = recorded.get('HALL')
+  if hall and now.get('hall') and hall.split() != str(now['hall']).split():
+    print("WARNING: %s was computed in space group %s, the loaded one is %s."
+          % (name, hall, now['hall']))
+  hkl_hash = recorded.get('HKL_SHA256')
+  if hkl_hash and now.get('hkl_sha256') and hkl_hash != now['hkl_sha256']:
+    print("WARNING: %s was computed for reflection file %s, which has changed"
+          " since (now %s); recalculate the table."
+          % (name, recorded.get('HKL'), now.get('hkl')))
 
 
 def get_table_contribution(xray_structure, table_file_name):

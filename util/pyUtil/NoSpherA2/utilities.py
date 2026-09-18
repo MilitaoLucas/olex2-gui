@@ -3,6 +3,7 @@ import gui
 import os
 import shutil
 import hashlib
+import re
 import time
 import olx
 import olex
@@ -764,7 +765,7 @@ def combine_tscs(match_phrase="_part_", no_check=False):
     shutil.move("experimental.tscb", tsc_dst)
 
   try:
-    nsa2_adopt_tsc_file(tsc_dst, "NoSpherA2 -merge")
+    nsa2_adopt_tsc_file(tsc_dst, "NoSpherA2 -merge", settings=nsa2_settings_header("NoSpherA2 -merge"))
     OV.SetControlValue('SNUM_REFINEMENT_NSFF_TSC_FILE', os.path.basename(tsc_dst))
   except:
     pass
@@ -1277,7 +1278,12 @@ def nsa2_flush_ins_header():
   try:
     if olx.IsFileLoaded() == 'false':
       return False
+    # the refinement wrote the .res before the table was resynced, so the .res, which is what gets
+    # loaded next, still carries the old hash: write it again from the same model
+    loaded = olx.FileFull()
     OV.File()
+    if loaded.lower().endswith('.res'):
+      OV.File(loaded)
     return True
   except Exception as error:
     olx.Echo("Could not save the structure after updating the NoSpherA2 file hash: %s" % error, m="warning")
@@ -1447,7 +1453,115 @@ def _nsa2_normalise_table_labels(path):
     return False
 
 
-def nsa2_adopt_tsc_file(filename, origin=None, normalise=True):
+# what the CIF reports about a table; recorded in its header at calculation time as NSA2_<param>: lines
+_NSA2_RECORDED = (
+  'source', 'method', 'basis_name', 'charge', 'multiplicity', 'Relativistic',
+  'ORCA_Relativistic', 'NoSpherA2_SF', 'becke_accuracy', 'ORCA_Solvation',
+  'ORCA_USE_CRYSTAL_QMMM', 'ORCA_CRYSTAL_QMMM_TYPE', 'ORCA_CRYSTAL_QMMM_RADIUS',
+  'ORCA_SCF_Conv', 'ORCA_SCF_Strategy', 'pySCF_Damping', 'DIIS',
+  'cluster_radius', 'cluster_grow', 'selected_salted_model',
+  'Thakkar_Cations', 'Thakkar_Anions')
+_NSA2_HYBRID_PART = ('software', 'method', 'basis_name', 'Relativistic', 'charge', 'multiplicity')
+_NSA2_PREFIX = 'NSA2_'
+
+
+def nsa2_model_fingerprint():
+  """cell, space group and hkl file a table was computed for; a table is only right for these"""
+  fp = {}
+  try:
+    fp['cell'] = ' '.join(str(olx.xf.au.GetCell()).replace(',', ' ').split())
+    fp['hall'] = olx.xf.au.GetCellSymm("hall")
+    hkl = OV.HKLSrc()
+    fp['hkl'] = os.path.basename(hkl)
+    fp['hkl_sha256'] = _nsa2_sha256(hkl)
+  except Exception:
+    pass
+  return fp
+
+
+def nsa2_settings_header(origin):
+  """the NSA2_<key>: value header lines describing what made a table: settings, versions, model fingerprint"""
+  vals = {'origin': origin, 'date': time.strftime('%Y-%m-%d_%H-%M-%S')}
+  for key in _NSA2_RECORDED:
+    vals[key] = nsa2_get_param(key)
+  if str(vals['source']).strip() == "Hybrid":
+    for part in OV.ListParts() or []:
+      for key in _NSA2_HYBRID_PART:
+        name = "Hybrid.%s_Part%d" % (key, part)
+        vals[name] = nsa2_get_param(name)
+  if "ORCA" in str(origin):
+    # the offered name carries the version ("ORCA 6.1"); ORCA_Version_Minor is not a declared param
+    m = re.search(r'ORCA\s+(\d+(?:\.\d+)?)', "%s %s" % (origin, vals['source']))
+    vals['ORCA_Version'] = m.group(1) if m else str(OV.GetParam('NoSpherA2.ORCA_Version') or '')
+  vals.update(nsa2_model_fingerprint())
+  return ["%s%s: %s" % (_NSA2_PREFIX, k, v) for k, v in vals.items()
+          if v is not None and str(v).strip()]
+
+
+def nsa2_read_settings_header(path):
+  """the NSA2_ entries of a table header as {PARAM: value}, keys upper-cased, or None for a table that carries none"""
+  from tsc_scatterer_resync import read_header_lines
+  found = dict((k[len(_NSA2_PREFIX):], v) for k, v in read_header_lines(path).items()
+               if k.startswith(_NSA2_PREFIX))
+  return found or None
+
+
+# (short name for _computing_structure_refinement, reference for _publ_section_references) per generator
+_NSA2_CITATIONS = {
+  'ORCA': ("ORCA", "F. Neese, WIREs Comput. Mol. Sci. 2022, 12, e1606."),
+  'ORCA6': ("ORCA", "F. Neese, WIREs Comput. Mol. Sci. 2025, 15, e70019."),
+  'PYSCF': ("pySCF", "Q. Sun et al., J. Chem. Phys. 2020, 153, 024109."),
+  'XTB': ("xTB", "C. Bannwarth, S. Ehlert, S. Grimme, J. Chem. Theory Comput. 2019, 15, 1652-1671."),
+  'TONTO': ("Tonto", "D. Jayatilaka, D. J. Grimwood, Lect. Notes Comput. Sci. 2003, 2660, 142-151."),
+  'DISCAMB': ("DiSCaMB", "M. L. Chodkiewicz et al., J. Appl. Cryst. 2018, 51, 193-199."),
+  'SALTED': ("SALTED", "A. M. Lewis, A. Grisafi, M. Ceriotti, M. Rossi, J. Chem. Theory Comput. 2021, 17, 7203-7214."),
+  'ELMODB': ("ELMOdb", "B. Meyer, A. Genoni, J. Phys. Chem. A 2018, 122, 8965-8981."),
+  'PTB': ("pTB", "S. Grimme, M. Mueller, A. Hansen, J. Chem. Phys. 2023, 158, 124111."),
+  'XHARPY': ("XHARPy", "P. N. Ruth, R. Herbst-Irmer, D. Stalke, IUCrJ 2022, 9, 286-297."),
+  'OCC': ("occ", "P. R. Spackman, https://github.com/peterspackman/occ"),
+}
+
+
+def nsa2_generator_citation(settings=None):
+  """(name with version, reference) for the generator that made the active table, or None
+
+  Taken from the settings recorded in the table; the live source parameter
+  stands in for a table that carries none."""
+  settings = settings if settings is not None else (nsa2_table_settings() or {})
+  source = str(settings.get('ORIGIN') or settings.get('SOURCE') or nsa2_get_param('source') or '').strip()
+  if not source or source == "Hybrid":
+    source = str(settings.get('SOURCE') or '').strip()
+  key = source.replace(' ', '').upper()
+  # the origin is a program name, but a user-picked table records the file name and Tonto's the job name
+  for known in _NSA2_CITATIONS:
+    if known in key:
+      key = known
+      break
+  else:
+    return None
+  version = str(settings.get('ORCA_VERSION') or '').strip()
+  try:
+    major = int(version.split('.')[0])
+  except ValueError:
+    major = 0
+  if key == 'ORCA' and major >= 6:
+    key = 'ORCA6'
+  name, ref = _NSA2_CITATIONS[key]
+  if version and version != 'None.None':
+    name = "%s %s" % (name, version)
+  return name, ref
+
+
+def nsa2_table_settings():
+  """settings recorded in the active table, or None -- the CIF prints these, not the live GUI values"""
+  try:
+    resolved = _nsa2_resolve_existing_path(nsa2_get_param('file'))
+    return nsa2_read_settings_header(resolved) if resolved else None
+  except Exception:
+    return None
+
+
+def nsa2_adopt_tsc_file(filename, origin=None, normalise=True, settings=None):
   """Take a tsc/tscb file into this structure: check it, normalise it, record it.
 
   Every route that hands Olex2 a table -- a generator finishing, a parts merge,
@@ -1461,6 +1575,10 @@ def nsa2_adopt_tsc_file(filename, origin=None, normalise=True):
   Returns the resolved path, or None when the file could not be found -- in
   which case the stored hash and origin are cleared rather than left describing
   the file that was selected before.
+
+  `settings` are header lines (nsa2_settings_header) written into the file
+  before it is hashed; only a route that just made the file passes them, the
+  file picker never does -- a user's table is not rewritten on selection.
   """
   nsa2_set_param('file', filename)
   resolved = _nsa2_resolve_existing_path(filename)
@@ -1472,6 +1590,12 @@ def nsa2_adopt_tsc_file(filename, origin=None, normalise=True):
   _nsa2_report_table_readable(resolved)
   if normalise:
     _nsa2_normalise_table_labels(resolved)
+  if settings:
+    try:
+      from tsc_scatterer_resync import write_header_lines
+      write_header_lines(resolved, settings)
+    except Exception as error:
+      print("Note: could not record the settings in %s (%s)." % (os.path.basename(resolved), error))
 
   nsa2_set_param('file_hash', _nsa2_sha256(resolved))
   nsa2_set_param('file_origin', origin or 'externally provided')
