@@ -1383,9 +1383,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
   def checkMissedSymmetry(self, suggestions=None, cutoff=0.10):
     """ ADDSYM in spirit: the refined model, expanded to P1, is searched for
     symmetry beyond the group it was solved in. A supergroup found is printed
-    and appended to the shortlist, which decides nothing -- 15 % of correct
-    COD models show one at this cutoff (pseudo-symmetry), so it is a hint
-    the user checks by re-solving in it. Never raises. """
+    and appended to the shortlist, which decides nothing -- a few percent of
+    correct COD models show one (pseudo-symmetry), so it is a hint the user
+    checks by re-solving in it. Never raises. """
     try:
       from cctbx import symmetry_search
       from libtbx import group_args
