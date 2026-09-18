@@ -1484,13 +1484,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         print("Re-typed %d atoms after cleanup; no label changed" % len(names))
         self.printDoubt()
         return changed
+      # ponytail: olex2c's "name sel N" writes the bare symbol as the label
+      # and the GUI's cannot take a number an atom of a later group still
+      # holds, so each atom gets symbol + a number above every one in use
+      import re
+      labels = [str(s.label) for s in xs.scatterers()]
       groups = {}
       for name, (old, new) in changed.items():
         groups.setdefault(new, []).append(name)
       for symbol, group in sorted(groups.items()):
-        olex.m("sel %s" % " ".join(group))
-        olex.m("name sel %s" % symbol)
-        olex.m("sel -u")
+        n = max([int(m.group(1)) for m in
+                 (re.match(re.escape(symbol) + r"(\d+)", l, re.I)
+                  for l in labels) if m] + [0])
+        for name in sorted(group):
+          n += 1
+          olex.m("name %s %s%d" % (name, symbol, n))
       print("Re-typed %d atoms after cleanup; %d label(s) changed: %s"
             % (len(names), len(changed),
                ", ".join("%s %s->%s" % (n, o, w)
