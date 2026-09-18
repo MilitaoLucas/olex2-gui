@@ -1393,12 +1393,17 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       xs = xs.select(~(xs.scattering_types() == "H"))
       if xs.scatterers().size() < 3:
         return None
-      p1 = xs.expand_to_p1()
-      fc = p1.structure_factors(d_min=1.0).f_calc()
-      ss = symmetry_search.structure_factor_symmetry(
-        fc, phi_sym_acceptance_cutoff=cutoff)
-      found = ss.space_group_info
-      if found.group().order_z() <= xs.space_group().order_z():
+      fc = xs.expand_to_p1().structure_factors(d_min=1.0).f_calc()
+      # a P1 refinement blurs a pseudo-centring's Patterson peak to ~0.5 of
+      # the origin, so retry below the 0.75 cutoff when nothing is found
+      for cc in (0.75, 0.4):
+        ss = symmetry_search.structure_factor_symmetry(
+          fc, phi_sym_acceptance_cutoff=cutoff,
+          cross_correlation_cutoff_for_centring=cc)
+        found = ss.space_group_info
+        if found.group().order_z() > xs.space_group().order_z():
+          break
+      else:
         return None
       print("Possible missed symmetry: the refined model has %s, solved in %s;"
             " re-solve in it to check" % (found, xs.space_group_info()))
