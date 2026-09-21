@@ -50,6 +50,25 @@ def rt_mx_from_olx(olx_input):
   from libtbx.utils import flat_list
   return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
 
+def twin_laws_from_model(twinning):
+  """Every law of a TWIN card as sgtbx.rot_mx in the cctbx orientation (h*R, the
+  transpose of the card): the powers for n>2 and the inversion partners for n<0"""
+  twin_law = sgtbx.rot_mx([int(float(twinning['matrix'][j][i])*1000)
+              for i in range(3) for j in range(3)], 1000)
+  twin_multiplicity = twinning.get('n', 2)
+  twin_laws = [twin_law]
+  if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
+    n = abs(twin_multiplicity)
+    if twin_multiplicity < 0: n //= 2  # TWIN -6: R, R^2, then the inversion partners
+    for i in range(n-2):
+      twin_laws.append(twin_laws[-1].multiply(twin_law))
+  if twin_multiplicity < 0:
+    inv = sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
+    twin_laws.append(inv)
+    for law in twin_laws[:-1]:
+      twin_laws.append(law.multiply(inv))
+  return twin_laws
+
 class twin_domains:
   def __init__(self, twin_axis, space, twin_law, twin_fraction, angle, fom, hklf5):
     self.space = space
@@ -77,20 +96,8 @@ class OlexCctbxAdapter(object):
     self.hklf_code = self.olx_atoms.model['hklf']['value']
     if twinning is not None:
       twin_fractions = flex.double(twinning['basf'])
-      twin_law = sgtbx.rot_mx([int(float(twinning['matrix'][j][i])*1000)
-                  for i in range(3) for j in range(3)], 1000)
       twin_multiplicity = twinning.get('n', 2)
-      twin_laws = [twin_law]
-      if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
-        n = twin_multiplicity
-        if twin_multiplicity < 0: n /= 2
-        for i in range(n-2):
-          twin_laws.append(twin_laws[-1].multiply(twin_law))
-      if twin_multiplicity < 0:
-        inv = sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
-        twin_laws.append(inv)
-        for law in twin_laws[:-1]:
-          twin_laws.append(law.multiply(inv))
+      twin_laws = twin_laws_from_model(twinning)
       if len(twin_fractions) == 0:
         # perfect twinning
         # SHELX manual pages 7-6/7
@@ -969,28 +976,20 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                 if solving.f_calc_solutions else None)
 
     # play with the solutions
-    expected_peaks = f_obs.unit_cell().volume()/18.6/len(f_obs.space_group())
-    expected_peaks *= 1.3
     if f_calc is not None:
       fft_map = f_calc.fft_map(
         symmetry_flags=maptbx.use_space_group_symmetry)
       fft_map.apply_volume_scaling()
-      # search and print Fourier peaks
-      peaks = fft_map.peak_search(
-        parameters=maptbx.peak_search_parameters(
-          min_distance_sym_equiv=1.0,
-          max_clusters=expected_peaks,),
-        verify_symmetry=False
-        ).all()
+      sites, heights = self.solutionPeaks(fft_map)
       # Propose an element for each peak, if asked. Falls back to the old
       # unnamed-peak behaviour on any failure -- a solution the user can refine
       # by hand beats no solution because the labelling stage broke.
       elements = None
       if getattr(self, 'assign_elements_wanted', False):
-        elements = self.assignElementTypes(f_calc, fft_map, peaks.sites())
+        elements = self.assignElementTypes(f_calc, fft_map, sites)
 
       numbered = {}
-      for i, (xyz, height) in enumerate(zip(peaks.sites(), peaks.heights())):
+      for i, (xyz, height) in enumerate(zip(sites, heights)):
         if not xyz:
           have_solution = False
           break
@@ -1056,7 +1055,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         out.add(symbol.capitalize())
     return out
 
-  def geometryProposals(self, unit_cell, space_group, sites):
+  def geometryProposals(self, unit_cell, space_group, sites, labels=None,
+                        family=None):
     """ The classifier's ranked elements per site, from local geometry alone.
 
     Split out of `assignElementTypes` because the re-typing that happens after
@@ -1068,6 +1068,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
     Returns `(proposals, model)` or `None`. Raises nothing the caller has to
     handle beyond a None: a labelling failure must not cost a solution.
+
+    With `labels` (one per site: C for row 2, the heavy atoms as typed, Zn
+    for any other element) the row-2 specialist runs instead: it sees the
+    heavy atoms and metals and decides B C N O F only.
 
     Cost, measured on node1 6 August: **0.90 s**, of which the NoSpherA2
     process is 0.88 and everything else -- the 40 MB descriptor round trip, the
@@ -1082,18 +1086,34 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     from smtbx.ab_initio import assemble, geometry_aid
 
     # shipped by the NoSpherA2 distribution zip (etc/ merges into Olex2's), not SVN
-    model_path = os.path.join(OV.BaseDir(), "etc", "geometry_aid_model.npz")
+    model_path = os.path.join(OV.BaseDir(), "etc", "geometry_aid_%s.npz"
+                              % (family or ("row2" if labels else "model")))
     exe = os.path.join(OV.BaseDir(), "NoSpherA2.exe")
     if not (os.path.exists(model_path) and os.path.exists(exe)):
-      print("Geometry model or NoSpherA2 not found; using density only")
+      # the release harness reads the density-only line as a failure; a
+      # missing specialist model is the all-carbon pass, not a fallback
+      if not labels:
+        print("Geometry model or NoSpherA2 not found; using density only")
       return None
 
     built = assemble.assemble(unit_cell, space_group, sites)
     work = tempfile.mkdtemp(prefix="olex_elements_")
+    try:
+      return self._geometryTopK(work, exe, model_path, unit_cell, built, sites,
+                                labels, family == "full")
+    finally:
+      import shutil
+      shutil.rmtree(work, ignore_errors=True)
+
+  def _geometryTopK(self, work, exe, model_path, unit_cell, built, sites,
+                    labels=None, metals=False):
+    import subprocess
+    from smtbx.ab_initio import assemble
     xyz_path = os.path.join(work, "peaks.xyz")
+    n = built.sites.size()
+    labels = (list(labels) + ["C"]*n)[:n] if labels else ["C"]*n
     with open(xyz_path, "w") as f:
-      f.write(assemble.as_xyz(unit_cell, built.sites,
-                              ["C"]*built.sites.size(), title="peaks"))
+      f.write(assemble.as_xyz(unit_cell, built.sites, labels, title="peaks"))
     # **No console window, and capture what it says.** This runs from the GUI,
     # and `check_call` pops a black console box on Windows for as long as
     # NoSpherA2 takes. Same idiom as `gui/help.convert_md_to_html_pandoc`.
@@ -1103,8 +1123,17 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # bare CalledProcessError with the reason on a console that has already
     # closed.
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+    # the cutoff and the centre weight travel with the model (meta); a label-aware
+    # model masks the centre so it cannot copy the label it is asked to judge
+    import json, numpy
+    meta = json.loads(str(numpy.load(model_path)["meta"]))
+    extra = ["-geometry_aid_cutoff", str(meta.get("soap_cutoff", 3.5))]
+    if meta.get("center_weight", 1.0) != 1.0:
+      extra += ["-geometry_aid_center_weight", str(meta["center_weight"])]
     proc = subprocess.run(
-      [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"],
+      [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"] + extra
+      + (["-geometry_aid_metals"]
+         if metals or any(l != "C" for l in labels) else []),
       cwd=work, capture_output=True, text=True, creationflags=flags)
     if proc.returncode != 0:
       tail = [x for x in ((proc.stderr or "") + "\n"
@@ -1271,24 +1300,31 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       unit_cell=xs.unit_cell(), space_group_info=xs.space_group_info(),
       d_min=f_obs.d_min(), resolution_factor=1/3.,
       symmetry_flags=maptbx.use_space_group_symmetry)
+    radii = element_assignment.site_radii(xs)
     def integrate(data):
       m = miller.fft_map(gridding, miller.array(miller_set=f_calc, data=data))
       m.apply_volume_scaling()
-      return element_assignment.integrated_densities(m, xs.sites_frac())
+      return element_assignment.integrated_densities(m, xs.sites_frac(), radii)
     eo = integrate(flex.polar(f_obs.data()/k, flex.arg(f_calc.data())))
     ec = integrate(f_calc.data())
     ratio = [o/c if c > 0 else None for o, c in zip(eo, ec)]
     # ponytail: the median over the low-U half only; noise peaks (high U, no
     # density) sit low and would drag the median under the real atoms
-    u = list(xs.extract_u_iso_or_u_equiv())
+    hvy = [s.scattering_type.strip().capitalize() not in ("H", "D")
+           for s in xs.scatterers()]
+    ratio = [r if h else None for r, h in zip(ratio, hvy)]
+    u = [ui for ui, h in zip(xs.extract_u_iso_or_u_equiv(), hvy) if h]
     u_mid = sorted(u)[len(u)//2] if u else 0.0
-    good = sorted(r for r, ui in zip(ratio, u) if r is not None and ui <= u_mid)
+    good = sorted(r for r, ui in zip(ratio, xs.extract_u_iso_or_u_equiv())
+                  if r is not None and ui <= u_mid)
     norm = good[len(good)//2] if good else 1.0
     # ponytail: a model typed a Z too light everywhere is self-consistent
     # under the median (11 O read as C, 2211782); the formula counts, where
     # the user gave real ones, pin the middle half of the Z distribution
     have, want = [], self.expectedZs()
-    for s in xs.scatterers():
+    for s, h in zip(xs.scatterers(), hvy):
+      if not h:
+        continue
       try:
         have.append(tiny_pse.table(s.scattering_type.strip().capitalize()).atomic_number())
       except (RuntimeError, ValueError):
@@ -1300,7 +1336,15 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # ponytail: rank-based, so it only holds when the model and the formula
     # count about the same atoms (2223999: 9 modelled against 21 declared
     # read Mo and K as O); the window is the knob
-    if want and 0.75 <= len(want)/float(len(have) or 1) <= 1.33 and mid(have) > 0:
+    n_asu = len(want)/float(xs.space_group().order_z())
+    # ponytail: charge flipping finds the heavy atoms first, so a model short
+    # of the formula lacks its lightest atoms (2207152: 5 Se/Ge peaks of a
+    # Se10 Ge4 Mn N2 C6 formula, read against its whole mid-Z, came out Mn);
+    # counted per cell by weight, two of those five sit on special positions
+    n_cell = int(round(sum(s.weight() for s, h in zip(xs.scatterers(), hvy)
+                           if h) * xs.space_group().order_z()))
+    want = sorted(want)[max(0, len(want) - n_cell):]
+    if want and 0.75 <= n_asu/float(len(have) or 1) <= 1.33 and mid(have) > 0:
       print("Formula anchor: model mid-Z %.1f, formula %.1f, scale x%.2f"
             % (mid(have), mid(want), mid(have)/mid(want)))
       norm *= mid(have)/mid(want)
@@ -1313,18 +1357,46 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       out.append(z*r/norm if r is not None and z > 0 else None)
     return out
 
+  def solutionPeaks(self, fft_map):
+    """ Sites and heights of a solution map's peaks, up to 1.3 times the
+    atoms expected per asymmetric unit: the cell's at 18.6 A^3 each, or the
+    declared formula's where that is more (Li2 Mn O12 P4 in 883 A^3: 8 peaks
+    by volume for 13 sites, and rank-typed the 8 came out P, O, Li). Counted
+    by site weight, so an atom on a mirror plane takes half a place. """
+    from cctbx import maptbx, sgtbx
+    from cctbx.array_family import flex
+    cell, sg = fft_map.unit_cell(), fft_map.space_group()
+    want = 1.3*max(cell.volume()/18.6/sg.order_z(),
+                   len(self.expectedZs())/float(sg.order_z()))
+    peaks = fft_map.peak_search(
+      parameters=maptbx.peak_search_parameters(
+        min_distance_sym_equiv=1.0, max_clusters=int(2*want) + 1),
+      verify_symmetry=False).all()
+    sites, heights, total = flex.vec3_double(), [], 0.0
+    for site, h in zip(peaks.sites(), peaks.heights()):
+      total += 1.0/sgtbx.site_symmetry(
+        cell, sg, site, 0.5, False).n_matrices()
+      if total > want:
+        break
+      sites.append(site)
+      heights.append(h)
+    return sites, heights
+
   def expectedZs(self):
-    """ One Z per non-H atom of the declared formula; empty when the counts
-    look qualitative (one of each), which SHELXT users type. """
+    """ One Z per non-H atom of the declared formula, per cell (the per-Z
+    counts are fractional for atoms on special positions and drop them when
+    rounded); empty when the counts look qualitative (one of each), which
+    SHELXT users type. """
     from cctbx.eltbx import tiny_pse
     out, ns = [], []
     try:
+      z_cell = float(olx.xf.au.GetZ())
       for part in str(olx.xf.GetFormula('list')).split(','):
         e, n = part.split(':')
         e = e.strip().capitalize()
         if e not in ("H", "D"):
           ns.append(int(round(float(n))))
-          out += [tiny_pse.table(e).atomic_number()]*ns[-1]
+          out += [tiny_pse.table(e).atomic_number()]*int(round(float(n)*z_cell))
     except Exception:
       return []
     return out if len(ns) > 1 and max(ns) > 1 or len(ns) == 1 else []
@@ -1437,12 +1509,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     import math
     from cctbx.array_family import flex
     from cctbx.eltbx import tiny_pse
+    from smtbx.ab_initio import geometry_aid
 
     allowed = set(_SOLUTION_EVIDENCE.get("allowed") or self.expectedElements())
     # a hydrogen is never what a peak with too little density is
     allowed -= set(("H", "D"))
     try:
+      # ponytail: the missing hydrogens sit inside the 0.7 A read of their
+      # parent (a CH3 carbon reads 0.5 over, an O 0.4 under once the median
+      # is a CH); riding H on the current types take that out of the ratio
+      olex.m("HAdd $C $N")
+      import olexex
+      self.olx_atoms, self._xray_structure = olexex.OlexRefinementModel(), None
       xs = self.xray_structure()
+      if xs.scatterers().size() == 0:
+        return {}
       z_of = [(e, tiny_pse.table(e).atomic_number()) for e in sorted(allowed)]
       # ponytail: a mistyped atom mis-reads its correction (1.6x over a Z away,
       # under once its U has collapsed), so it is re-typed to the nearest Z and
@@ -1459,6 +1540,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         if not moved:
           break
         work.discard_scattering_type_registry()
+      olex.m("kill $H")
+      hvy = ~(xs.scattering_types() == "H")
+      xs = xs.select(hvy)
+      reads = [[r for r, h in zip(rd, hvy) if h] for rd in reads]
       names, sites, z_est, us = [], flex.vec3_double(), [], []
       u_all = xs.extract_u_iso_or_u_equiv()
       u_med = sorted(u_all)[len(u_all)//2] if len(u_all) else 0.0
@@ -1475,62 +1560,151 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         return {}
       got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
       proposals = got[0] if got else []
-      # ponytail: a site with one neighbour within 2.1 A is terminal, which a
-      # halogen is and an S or O bridge is not, so halogens weigh 2x there;
-      # no penalty with more, a bridging F or Cl has two like an O or S
+      # ponytail: second pass for the row-2 atoms with the heavy atoms and
+      # metals labelled as the density read them (nearest Z after the read
+      # loop): a donor N next to a Cu and an O next to a Mo look alike with
+      # everything blanked to carbon; every other element becomes the Zn
+      # stand-in, and heavy centres keep the all-carbon proposals
+      dens = dict((str(s.label), s.scattering_type.strip().capitalize())
+                  for s in work.scatterers())
+      labels = [geometry_aid.specialist_label(dens.get(n, "C")) for n in names]
+      if any(l != "C" for l in labels):
+        got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites,
+                                     labels)
+        if got:
+          for j, l in enumerate(labels):
+            if l == "C" and j < len(got[0]) and j < len(proposals):
+              proposals[j] = got[0][j]
+      # ponytail: the heavy neighbours carry the chemistry the read cannot
+      # see (a lone atom on Cl is O, a donor on Na is not S), as a likelihood
+      # measured on COD; a floor keeps it from vetoing a clear density read
       try:
-        table = xs.pair_asu_table(distance_cutoff=2.1).table()
-        n_nb = dict((str(s.label), sum(len(g) for gs in table[i].values()
-                                       for g in gs))
-                    for i, s in enumerate(xs.scatterers()))
+        nbs = geometry_aid.heavy_neighbours(xs)
       except Exception:
-        n_nb = {}
+        nbs = {}
       current = dict((str(s.label), s.scattering_type.strip().capitalize())
                      for s in xs.scatterers())
-      changed, doubt = {}, []
-      for j, (name, z, u) in enumerate(zip(names, z_est, us)):
-        now = current[name]
-        z_now = tiny_pse.table(now).atomic_number()
-        heavier = [ez for ez in z_of if ez[1] > z_now]
-        top = dict(proposals[j]) if j < len(proposals) else {}
-        sigma = max(0.35, 0.04*z)
-        score = dict((e, math.exp(-0.5*((z - ez)/sigma)**2)
-                      * max(top.get(e, 0.0), 0.05)**0.5) for e, ez in z_of)
-        for e in ("F", "Cl", "Br", "I"):
-          if e in score and n_nb.get(name, 2) <= 1:
-            score[e] *= 2.0
-        tot = sum(score.values()) or 1.0
-        # ponytail: a missing heavy atom reads far under its Z (Mo typed O read
-        # 18) or its collapsed U absorbs the surplus and it reads its own Z (Ru
-        # typed Cl at a fifth of the median U): either steps to the next
-        # heavier element, the next round refines it and reads again
-        # ponytail: a model whose median U sits under 0.01 is degenerate (the
-        # wrong space group doubles every atom) and every U reads collapsed
-        if heavier and (z > 1.5*z_now or 0.01 < u_med and u < 0.3*u_med):
-          changed[name] = (now, min(heavier, key=lambda ez: ez[1])[0])
-        # ponytail: a read within 0.3 of the own Z is left alone; a true N
-        # typed C reads 6.4-6.9 and so do some carbons, so in that band the
-        # Gaussian is flat over a Z and the geometry posterior decides
-        elif abs(z - z_now) >= max(0.3, 0.03*z):
+      dump = os.environ.get("OLEX2_TYPING_DUMP")
+      def decide(proposals):
+        changed, doubt, rows, fin = {}, [], [], []
+        for j, (name, z, u) in enumerate(zip(names, z_est, us)):
+          now = current[name]
+          z_now = tiny_pse.table(now).atomic_number()
+          heavier = [ez for ez in z_of if ez[1] > z_now]
+          top = dict(proposals[j]) if j < len(proposals) else {}
+          # ponytail: knobs from tune_typing.py replayed over the per-atom dumps
+          # of the csdw runs (holdout 581 -> 517, 2000 ids 1190 -> 1057 mistyped):
+          # a wider Z window, the geometry posterior to the power 1.5, N pushed
+          # up and C/O down against the C>N / O>N / N>O confusions
+          sigma = max(0.7, 0.04*z)
+          prior = dict((e, geometry_aid.neighbour_prior(e, nbs.get(name, [])))
+                       for e, ez in z_of)
+          cls = {"C": 0.7, "N": 2.0, "O": 0.7, "F": 2.0, "S": 0.85}
+          score = dict((e, math.exp(-0.5*((z - ez)/sigma)**2)
+                        * max(top.get(e, 0.0), 0.01)**1.5 * prior[e] * cls.get(e, 1.0))
+                       for e, ez in z_of)
+          tot = sum(score.values()) or 1.0
           best = max(score, key=score.get)
-          if best != now:
+          # ponytail: a missing heavy atom reads far under its Z (Mo typed O read
+          # 18) or its collapsed U absorbs the surplus and it reads its own Z (Ru
+          # typed Cl at a fifth of the median U): either steps to the next
+          # heavier element, the next round refines it and reads again
+          # ponytail: a model whose median U sits under 0.01 is degenerate (the
+          # wrong space group doubles every atom) and every U reads collapsed
+          if heavier and (z > 1.5*z_now or 0.01 < u_med and u < 0.3*u_med):
+            changed[name] = (now, min(heavier, key=lambda ez: ez[1])[0])
+          # ponytail: a read within 0.3 of the own Z is left alone; a true N
+          # typed C reads 6.4-6.9 and so do some carbons, so in that band the
+          # Gaussian is flat over a Z and the geometry posterior decides
+          elif best != now and abs(z - z_now) >= 0.3:
             changed[name] = (now, best)
-        final = changed.get(name, (now, now))[1]
-        alt = [(e, p/tot) for e, p in sorted(score.items(), key=lambda ep: -ep[1])
-               if e != final and p/tot >= 0.1]
-        if alt:
-          doubt.append((name, alt))
+          final = changed.get(name, (now, now))[1]
+          fin.append((top, final))
+          if dump:
+            rows.append(dict(name=name, now=now, final=final, z=z, u=u,
+                             u_med=u_med, nbs=nbs.get(name, []), top=top,
+                             site=list(sites[j])))
+          alt = [(e, p/tot) for e, p in sorted(score.items(), key=lambda ep: -ep[1])
+                 if e != final and p/tot >= 0.1]
+          if alt:
+            doubt.append((name, alt))
+        return changed, doubt, rows, fin
+      changed, doubt, rows, fin = decide(proposals)
+      # ponytail: the label-aware model (etc/geometry_aid_full.npz, trained
+      # with the pipeline's own mistypes) sees the labels just decided, and
+      # the decision is repeated on its posterior until nothing moves; three
+      # rounds at most, 0.9 s each
+      full_path = os.path.join(OV.BaseDir(), "etc", "geometry_aid_full.npz")
+      n_iter, cons = 0, None
+      # ponytail: as an energy the label-aware model has the wrong minimum
+      # (search_replay: truth above the found minimum 95/100), so it is a veto
+      # only: one call on the final labels, and where its posterior for the
+      # decided type is under 0.1 its argmax wins (replay: holdout +67, alpha-era
+      # 2000 ids +728 right atoms); the iterative loop stays behind OLEX2_TYPING_ITER
+      veto = float(os.environ.get("OLEX2_TYPING_VETO", 0.1))
+      if os.path.exists(full_path) and not os.environ.get("OLEX2_TYPING_ITER"):
+        typed = dict((n, changed.get(n, (0, current[n]))[1]) for n in names)
+        got = self.geometryProposals(
+          xs.unit_cell(), xs.space_group(), sites,
+          [geometry_aid.full_label(typed[n]) for n in names], family="full")
+        nv = 0
+        for j, name in enumerate(names):
+          top = dict(got[0][j]) if got and j < len(got[0]) else {}
+          ok = [e for e in top if e in allowed]
+          if not ok or typed[name] not in top or top[typed[name]] >= veto:
+            continue
+          best = max(ok, key=top.get)
+          if best == typed[name]:
+            continue
+          nv += 1
+          if best == current[name]:
+            changed.pop(name, None)
+          else:
+            changed[name] = (current[name], best)
+          if dump:
+            rows[j]["veto"], rows[j]["final"] = top, best
+        if nv:
+          print("Label-aware veto changed %d type(s)" % nv)
+      elif os.path.exists(full_path):
+        for n_iter in range(1, 4):
+          typed = dict((n, changed.get(n, (0, current[n]))[1]) for n in names)
+          got = self.geometryProposals(
+            xs.unit_cell(), xs.space_group(), sites,
+            [geometry_aid.full_label(typed[n]) for n in names], family="full")
+          if not got:
+            break
+          prev, (changed, doubt, rows, fin) = changed, decide(got[0])
+          for k, r in enumerate(rows):
+            r["iter"] = n_iter
+            r["top_c"] = dict(proposals[k]) if k < len(proposals) else {}
+          if changed == prev:
+            break
+        if fin:
+          cons = sum(math.log(max(t.get(f, 0.0), 1e-3)) for t, f in fin)/len(fin)
+          print("Typing consistency %.2f after %d label-aware round(s)"
+                % (cons, n_iter))
       type(self).doubt = doubt
+      def write_dump(new_labels):
+        if not dump:
+          return
+        import json
+        for r in rows:
+          r["label"] = new_labels.get(r["name"], r["name"])
+        with open(os.path.join(OV.FilePath(), OV.FileName() + ".typing.log"),
+                  "a") as f:
+          f.write(json.dumps(dict(allowed=sorted(allowed), atoms=rows,
+                                  iters=n_iter, consistency=cons)) + "\n")
       if not changed:
         print("Re-typed %d atoms after cleanup; no label changed" % len(names))
         self.printDoubt()
+        write_dump({})
         return changed
       # ponytail: olex2c's "name sel N" writes the bare symbol as the label
       # and the GUI's cannot take a number an atom of a later group still
       # holds, so each atom gets symbol + a number above every one in use
       import re
       labels = [str(s.label) for s in xs.scatterers()]
-      groups = {}
+      groups, new_labels = {}, {}
       for name, (old, new) in changed.items():
         groups.setdefault(new, []).append(name)
       for symbol, group in sorted(groups.items()):
@@ -1539,7 +1713,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                   for l in labels) if m] + [0])
         for name in sorted(group):
           n += 1
+          new_labels[name] = "%s%d" % (symbol, n)
           olex.m("name %s %s%d" % (name, symbol, n))
+      write_dump(new_labels)
       print("Re-typed %d atoms after cleanup; %d label(s) changed: %s"
             % (len(names), len(changed),
                ", ".join("%s %s->%s" % (n, o, w)
@@ -1581,6 +1757,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         print("Trial %i/%i: no solution" % (i_trial + 1, n_trials))
       return not OV.FindValue('stop_current_process', False)
 
+    # threads: the FFT releases the GIL, so trials run concurrently; the
+    # per-cycle plot and stop button then work per trial only with threads=1
+    n = int(getattr(params, 'threads', 0) or 0)
+    if n <= 0:
+      n = int(os.environ.get('SMTBX_SOLVE_THREADS', 0) or 0) or \
+        max(1, (os.cpu_count() or 2) - 1)
+    self.solution_threads = n
+    OV.SetVar('stop_current_process', False)
     result = multi_trial.solve(
       f_obs,
       n_trials=n_trials,
@@ -1588,8 +1772,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       normalisations_for=getattr(extra, 'normalisations_for', None),
       max_solving_iterations=extra.max_solving_iterations,
       max_seconds=getattr(params, 'max_seconds', None),
-      loop=olex_loop,
+      loop=(olex_loop if n == 1 else None),
       callback=progress,
+      stop=lambda: OV.FindValue('stop_current_process', False),
+      n_threads=n,
       verbose=verbose)
     multi_trial.show(result)
     # Kept for the space-group suggestions: every entry in f_calc_solutions has
@@ -1686,7 +1872,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                            / 18.6/len(f_obs.space_group())))
       ranked = composite.choose_space_group(
         f_obs, entries, result.f_calc_in_p1, n_heavy,
-        f_calc_in_start=result.f_calc)
+        f_calc_in_start=result.f_calc,
+        n_threads=getattr(self, 'solution_threads', 1))
       if not ranked:
         return
 
@@ -1844,12 +2031,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         continue
       fft_map = f_calc.fft_map(symmetry_flags=maptbx.use_space_group_symmetry)
       fft_map.apply_volume_scaling()
-      expected = 1.3*f_obs.unit_cell().volume()/18.6/len(f_calc.space_group())
-      peaks = fft_map.peak_search(
-        parameters=maptbx.peak_search_parameters(
-          min_distance_sym_equiv=1.0, max_clusters=int(expected)),
-        verify_symmetry=False).all()
-      if peaks.sites().size() == 0:
+      sites, heights = self.solutionPeaks(fft_map)
+      if sites.size() == 0:
         continue
 
       # Peaks are unlabelled, so every one becomes a carbon. Naming them and
@@ -1858,7 +2041,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       structure = xray.structure(
         crystal_symmetry=f_calc.crystal_symmetry().customized_copy(
           space_group_info=sgi))
-      for j, site in enumerate(peaks.sites()):
+      for j, site in enumerate(sites):
         structure.add_scatterer(
           xray.scatterer(label="C%i" % (j + 1), site=site, u=0.06))
 
@@ -1897,7 +2080,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         print("Could not write suggestion %s: %s: %s"
               % (sgi, type(e).__name__, e or "(no message)"))
         continue
-      out.append((suggestion, path, peaks.sites().size()))
+      out.append((suggestion, path, sites.size()))
     return out
 
   def suggestionsTableHtml(self, written, result):
@@ -3322,6 +3505,11 @@ def _report_table_fingerprint(table_file_name):
   if hall and now.get('hall') and hall.split() != str(now['hall']).split():
     print("WARNING: %s was computed in space group %s, the loaded one is %s."
           % (name, hall, now['hall']))
+  wl = recorded.get('WAVELENGTH')
+  if wl and now.get('wavelength') and abs(float(wl) - float(now['wavelength'])) > 1e-4:
+    # the table itself is wavelength-free unless it was made for electrons (Mott-Bethe); still worth a word
+    print("WARNING: %s was computed for wavelength %s, the loaded one is %s"
+          " (an electron table is not an X-ray one)." % (name, wl, now['wavelength']))
   hkl_hash = recorded.get('HKL_SHA256')
   if hkl_hash and now.get('hkl_sha256') and hkl_hash != now['hkl_sha256']:
     print("WARNING: %s was computed for reflection file %s, which has changed"
