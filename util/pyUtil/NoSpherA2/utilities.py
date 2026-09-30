@@ -1946,7 +1946,10 @@ def cov_mat():
             cov_array[j, i] = nf[idx]
             idx += 1
     np.savetxt("numpy.csv", cov_array, delimiter=',')
-    corrMat = np.corrcoef(cov_array)
+    # r_ij = cov_ij/sqrt(cov_ii cov_jj); np.corrcoef would correlate the rows
+    sd = np.sqrt(np.diag(cov_array))
+    sd[sd == 0] = np.inf
+    corrMat = cov_array / np.outer(sd, sd)
     np.savetxt("./correlationMat.csv", corrMat, delimiter=",", header = header_string)
 
     # After calculating corrMat

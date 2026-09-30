@@ -137,21 +137,11 @@ class RefinementChecks(object):
       annotations = m_and_a.annotations
       n = len(annotations)
 
-      nf = m_and_a.matrix.as_numpy_array()
-
-      counter = 0
-      cov_array = []
-      arr_counter = 0
-      for i in range(n):
-        for j in range(n-counter):
-          cov_array.append(nf[arr_counter])
-          arr_counter += 1
-        counter +=1
-        for k in range(counter):
-          cov_array.append(0)
-      cov_Array2 = np.array(cov_array[:-n])
-      cov_array = cov_Array2.reshape((n,n))
-      corrMat = np.corrcoef(cov_array)
+      # r_ij = cov_ij/sqrt(cov_ii cov_jj); np.corrcoef would correlate the rows
+      cov = m_and_a.matrix.matrix_packed_u_as_symmetric().as_numpy_array()
+      sd = np.sqrt(np.diag(cov))
+      sd[sd == 0] = np.inf
+      corrMat = cov / np.outer(sd, sd)
       iu_nodiag = np.triu_indices(n, k=1)
       strong_mask = np.abs(corrMat[iu_nodiag]) > 0.75
       strong_corr_count = np.sum(strong_mask)
