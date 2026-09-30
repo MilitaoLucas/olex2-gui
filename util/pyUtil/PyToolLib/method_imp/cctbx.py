@@ -166,7 +166,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
   **Behaviour here is frozen on purpose.** Existing users, scripts and the
   other developers' workflows all reach structure solution through this
   method, so it keeps doing exactly one run and keeping the first result. The
-  multi-attempt pipeline is a separate method (`Method_cctbx_AutoSolve`) with
+  multi-attempt pipeline is a separate method (`Method_cctbx_Flint`) with
   its own name in the GUI, rather than a mode of this one -- a method that
   quietly does something different depending on a setting is the harder thing
   to review, to script against and to explain.
@@ -315,7 +315,11 @@ class Method_cctbx_ChargeFlip(Method_solution):
             pass
         us.sort()
         median = us[len(us)//2][0] if us else 0.0
-        doomed = [n for u, i, n, t in us if u > factor*max(median, 0.005)]
+        # carbon-free only: the threshold never drops under 0.06 there, since the
+        # median collapses when a heavy atom is typed light; on organics the same
+        # floor kept noise and cost 7 % more mistyped atoms (21 Sep 2026)
+        floor = 0.0 if 'C' in [e.split(':')[0] for e in olx.xf.GetFormula('list').split(',')] else 0.02
+        doomed = [n for u, i, n, t in us if u > factor*max(median, floor)]
         # ponytail: the heavy atoms go anisotropic once the noise is gone;
         # an isotropic Pd leaves a residual the light atoms then read
         heavy = sorted(set("$" + t for u, i, n, t in us if anis_z
@@ -423,8 +427,10 @@ instructions {
 """)
 
 
-class Method_cctbx_AutoSolve(Method_cctbx_ChargeFlip):
-  """ Charge flipping run several times, ranked, with the space group and the
+class Method_cctbx_Flint(Method_cctbx_ChargeFlip):
+  """ FLINT - FLipping, INterpretation, Typing.
+
+  Charge flipping run several times, ranked, with the space group and the
   element types worked out rather than assumed.
 
   Everything the classic method does, plus the three things a user has to do
@@ -453,10 +459,10 @@ class Method_cctbx_AutoSolve(Method_cctbx_ChargeFlip):
   tidy_after_solve = True
 
 
-auto_solve_phil = phil_interface.parse("""
-name = 'Auto-Solve'
+flint_phil = phil_interface.parse("""
+name = 'FLINT'
   .type=str
-display = 'Auto-Solve'
+display = 'FLINT'
   .type=str
 atom_sites_solution=iterative
   .type=str
@@ -486,6 +492,9 @@ instructions {
       max_seconds = 120
         .type = float
         .caption = MAXS
+      threads = 0
+        .type = int
+        .caption = THRD
       suggest_space_groups = True
         .type = bool
         .caption = SGSG

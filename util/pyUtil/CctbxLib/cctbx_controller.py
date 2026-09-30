@@ -2,6 +2,7 @@
 
 from my_refine_util import *
 import math
+import os
 import sys
 
 from iotbx import builders, reflection_file_reader, reflection_file_utils
@@ -99,6 +100,85 @@ class hemihedral_twinning(object):
     return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
 
 
+def read_hkl_arrays(cs, f_hklf_code, reflection_file):
+  """ The hklf reader raises on the first line it cannot parse. 21 whole-COD hkl
+  files carry a res or cif block after the data with no 0 0 0 line in front of
+  it (1547410, 1555711), so on a read error the reflections up to the first
+  non-reflection line are re-read from a terminated temporary copy (24 Sep 2026). """
+  def read(path):
+    server = reflection_file_utils.reflection_file_server(
+      crystal_symmetry=cs,
+      reflection_files=[reflection_file_reader.any_reflection_file(
+        'hklf%s=%s' % (f_hklf_code, path), strict=False)])
+    return server.get_miller_arrays(None)
+  arrays = None
+  try:
+    arrays = read(reflection_file)
+    # a blank line ends the read: a bare CR between the lines (1518723: CR CR
+    # LF endings) after the first reflection, an empty line inside the data
+    # (1543653: 639 of 24089 read)
+    e = RuntimeError("%d reflection(s) read" % arrays[0].size())
+  except Exception as ex:   # Sorry from any_reflection_file, RuntimeError from the parser
+    e = ex
+  import tempfile
+  kept = []
+  with open(reflection_file, errors="replace") as f:
+    for line in f:
+      line = line.rstrip("\r\n")
+      if not line.strip():
+        continue
+      # 3I4 columns first: a negative intensity in F8.3 glues itself to l
+      # (4348671: "  52-209.106"), so a whitespace split misreads it
+      try:
+        h = [int(line[4 * i:4 * i + 4]) for i in range(3)]
+        t = line[12:].split()
+        rest = [float(t[0]), float(t[1])] + [int(x) for x in t[2:3]]
+      except (ValueError, IndexError):
+        try:
+          t = line.split()
+          h = [int(x) for x in t[:3]]
+          rest = [float(t[3]), float(t[4])] + [int(x) for x in t[5:6]]
+        except (ValueError, IndexError):
+          break
+      if h == [0, 0, 0]:
+        break
+      f8 = lambda x: ("%8.2f" % x) if len("%8.2f" % x) <= 8 else ("%8.0f" % x)[:8]
+      kept.append("%4d%4d%4d" % tuple(h) + f8(rest[0]) + f8(rest[1])
+                  + ("%4d" % rest[2] if len(rest) > 2 else ""))
+  if arrays is not None and arrays[0].size() + 1 >= len(kept):
+    return arrays
+  if len(kept) < 2:
+    raise e
+  print("%s: %s; using the %d reflections before the first non-reflection line"
+        % (os.path.basename(reflection_file), str(e).strip().splitlines()[-1], len(kept)))
+  fd, tmp = tempfile.mkstemp(suffix=".hkl")
+  with os.fdopen(fd, "w") as f:
+    f.write("\n".join(kept) + "\n   0   0   0    0.00    0.00\n")
+  try:
+    return read(tmp)
+  finally:
+    os.remove(tmp)
+
+def apply_hklf_matrix(array, hklf_matrix, cs):
+  """ h' = M h, as THklFile applies the HKLF matrix. A reflection whose
+  transformed index is not integral (a superstructure reflection under a 0.5
+  entry) is dropped, as SHELXL drops it. The symmetry stays the ins's:
+  change_basis also re-based the space group and threw on 0.5 entries and on a
+  det-3 rhombohedral matrix, 28 whole-COD cases (1546007, 4345975; 24 Sep 2026). """
+  m = hklf_matrix.as_double()
+  keep = flex.bool()
+  new = flex.miller_index()
+  for h in array.indices():
+    t = [m[3 * i] * h[0] + m[3 * i + 1] * h[1] + m[3 * i + 2] * h[2] for i in range(3)]
+    r = [int(round(x)) for x in t]
+    ok = max(abs(x - y) for x, y in zip(t, r)) < 1e-3
+    keep.append(ok)
+    if ok:
+      new.append(tuple(r))
+  info = array.info()
+  array = array.select(keep).customized_copy(indices=new, crystal_symmetry=cs)
+  return array.set_info(info)
+
 class reflections(object):
   """ reflections is the filename holding the reflections """
   def __init__(self,  cell, spacegroup, reflection_file, hklf_code, hklf_matrix=None, merge_code=2):
@@ -112,14 +192,9 @@ class reflections(object):
     if f_hklf_code != 3:
       f_hklf_code = 4
     if reflection_file:
-      reflections_server = reflection_file_utils.reflection_file_server(
-        crystal_symmetry = cs,
-        reflection_files = [
-          reflection_file_reader.any_reflection_file(
-            'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
-        ]
-      )
-      miller_arrays = reflections_server.get_miller_arrays(None)
+      miller_arrays = read_hkl_arrays(cs, f_hklf_code, reflection_file)
+      if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
+        miller_arrays = [apply_hklf_matrix(a, hklf_matrix, cs) for a in miller_arrays]
     else:
       import olex_core
       from cctbx.xray import observation_types as obs_t
@@ -150,19 +225,9 @@ class reflections(object):
 
     if hklf_code == 3:
       self.f_obs = miller_arrays[0]
-      if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
-        r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
-        cb_op = sgtbx.change_of_basis_op(r).inverse()
-        self.f_obs = self.f_obs.change_basis(cb_op).customized_copy(
-          crystal_symmetry=cs)
       self.f_sq_obs = self.f_obs.f_as_f_sq()
     else:
       self.f_sq_obs = miller_arrays[0]
-      if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
-        r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
-        cb_op = sgtbx.change_of_basis_op(r).inverse()
-        self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
-          crystal_symmetry=cs)
       self.f_obs = self.f_sq_obs.f_sq_as_f()
     if hklf_code == 5 and len(miller_arrays) <= 1:
       raise RuntimeError("HKLF5 file format requires batch numbers")
@@ -175,6 +240,27 @@ class reflections(object):
         self.wavelengths = miller_arrays[2]
     else:
       self.batch_numbers_array = None
+    if hklf_code == 4 and self.batch_numbers_array is not None:
+      # An HKLF 5 file read as HKLF 4 (no BASF, see OlexCctbxAdapter.__init__):
+      # a negative batch number marks a component that overlaps the next row,
+      # and that row is the last component of the same overlapped reflection.
+      # Neither is a single-reflection intensity, so both are dropped, as is
+      # every other domain (batch 2, 3, ...): its scale is the missing BASF
+      # (2023214, 4085534: batch-2 rows at an unknown scale gave R1 0.49).
+      b = self.batch_numbers_array.data()
+      if (b < 0).count(True):
+        # A group's last row carries the summed intensity under that domain's
+        # index, which is what a twinned crystal hands a solution anyway, so
+        # overlapped groups are kept whichever domain closes them: 4341100 had
+        # 23910 -1/2 pairs and no single row, 4346533 kept 405 of 17573 when
+        # the -2/1 groups' batch-1 rows were dropped (24 Sep 2026).
+        keep = b == 1
+        for i in range(b.size()):
+          if b[i] < 0 and i + 1 < b.size():
+            keep[i + 1] = b[i + 1] > 0
+        self.f_sq_obs = self.f_sq_obs.select(keep)
+        self.f_obs = self.f_sq_obs.f_sq_as_f()
+        self.batch_numbers_array = self.batch_numbers_array.select(keep)
     self._omit = None
     self._shel = None
     self._merge = None
@@ -291,7 +377,10 @@ class reflections(object):
     if self.merging is not None:
       print("Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents(), file=log)
       print("R(int): %f" %self.merging.r_int(), file=log)
-      print("R(sigma): %f" %self.merging.r_sigma(), file=log)
+      try:
+        print("R(sigma): %f" %self.merging.r_sigma(), file=log)
+      except ZeroDivisionError:  # intensities summing to zero (4348671, 4349736)
+        print("R(sigma): n/a", file=log)
       self.merging.show_summary(out=log)
     if self.f_sq_obs_filtered is not None:
       print("d min: %f" %self.d_min, file=log)

@@ -155,6 +155,20 @@ class OlexCctbxAdapter(object):
           [ xray.twin_fraction(fraction,True)
             for fraction in twin_fractions])
       self.twin_components = None
+      # **HKLF 5 without a BASF is HKLF 4 on the non-overlapped reflections.**
+      # The solve ins is written by TIns::SaveForSolution, which keeps the HKLF
+      # card but drops BASF, so every HKLF 5 sample reached the solver with an
+      # empty twin-fraction list and as_xray_observations asserted on it: 283
+      # of the 476 "no solution" cases of the whole-COD sweep (23 Sep 2026).
+      # Nothing can be scaled without BASF, so the file is read as HKLF 4 and
+      # cctbx_controller.reflections keeps only the reflections with no
+      # overlapping component (what SHELXT does with HKLF 5 data). The MERG 0
+      # that HKLF 5 requires goes with it: it would build the reflections in
+      # P1 and leave the space-group suggestions without a Laue class
+      # (2023214: "No space group could be suggested").
+      if self.hklf_code == 5 and not self.twin_fractions:
+        self.hklf_code = 4
+        self.hklf5_as_hklf4 = True
 
     self.exti = self.olx_atoms.model.get('exti', None)
     self.swat = self.olx_atoms.model.get('swat', None)
@@ -328,6 +342,8 @@ class OlexCctbxAdapter(object):
     else:
       mtime = time.time()
     merge_code = self.olx_atoms.model.get('merge')
+    if getattr(self, 'hklf5_as_hklf4', False):
+      merge_code = 2
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
@@ -829,7 +845,7 @@ def _geometry_model(path):
   float64 PCA matrix -- 33.6 MB once expanded -- and it measured **0.139 s**,
   against 0.030 s for the projection it exists to perform and 0.008 s for the
   three dense layers after it. Rebuilding it per call was affordable while
-  there was one call per solve. Auto-Solve now makes two, before and after the
+  there was one call per solve. FLINT now makes two, before and after the
   tidy-up, so it is worth keeping.
 
   Keyed on the file's modification time as well as its path: a developer
@@ -873,7 +889,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     `classic` is the original single charge-flipping run, unchanged, and is
     what the `Charge Flipping` method calls. `auto` is the multi-attempt
     pipeline -- ranked trials, a space-group shortlist and element types --
-    and is what `Auto-Solve` calls.
+    and is what `FLINT` calls.
 
     Defaulting to `classic` is deliberate: anything already calling this
     without the argument gets the behaviour it has always had.
@@ -1134,7 +1150,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"] + extra
       + (["-geometry_aid_metals"]
          if metals or any(l != "C" for l in labels) else []),
-      cwd=work, capture_output=True, text=True, creationflags=flags)
+      cwd=work, capture_output=True, text=True, creationflags=flags,
+      # ponytail: featomic spawns one rayon thread per core per call; on 48 cores
+      # that is 0.35 s of a 0.64 s call, identical numbers with four
+      env=dict(os.environ, RAYON_NUM_THREADS=os.environ.get("RAYON_NUM_THREADS", "4")))
     if proc.returncode != 0:
       tail = [x for x in ((proc.stderr or "") + "\n"
                           + (proc.stdout or "")).splitlines() if x.strip()]
@@ -1344,10 +1363,13 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     n_cell = int(round(sum(s.weight() for s, h in zip(xs.scatterers(), hvy)
                            if h) * xs.space_group().order_z()))
     want = sorted(want)[max(0, len(want) - n_cell):]
-    if want and 0.75 <= n_asu/float(len(have) or 1) <= 1.33 and mid(have) > 0:
+    # per cell on both sides: the quartile trim of 3 atoms against 12 read
+    # C2 H4 O as 6.7 vs 6.3 and typed the O as C (epoxide, 21 Sep 2026)
+    hc = have*xs.space_group().order_z()
+    if want and 0.75 <= n_asu/float(len(have) or 1) <= 1.33 and mid(hc) > 0:
       print("Formula anchor: model mid-Z %.1f, formula %.1f, scale x%.2f"
-            % (mid(have), mid(want), mid(have)/mid(want)))
-      norm *= mid(have)/mid(want)
+            % (mid(hc), mid(want), mid(hc)/mid(want)))
+      norm *= mid(hc)/mid(want)
     out = []
     for s, r in zip(xs.scatterers(), ratio):
       try:
@@ -1585,6 +1607,46 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       current = dict((str(s.label), s.scattering_type.strip().capitalize())
                      for s in xs.scatterers())
       dump = os.environ.get("OLEX2_TYPING_DUMP")
+      # ponytail: the bonded neighbours' U is the reference the read cannot
+      # give: a true N typed C refines collapsed against its neighbours (67 of
+      # 81 C>N under e^-0.1), a true C typed O inflated (25 of 43 over e^0.3);
+      # the median U cannot tell (a terminal O is above the median anyway).
+      # Same walk as geometry_aid.heavy_neighbours, labels instead of elements
+      def neighbour_labels(xs, slack=0.45):
+        from cctbx.eltbx import covalent_radii
+        def radius(e):
+          try:
+            return covalent_radii.table(e).radius()
+          except Exception:
+            return 1.5
+        sc = list(xs.scatterers())
+        el = [s.scattering_type.strip().capitalize() for s in sc]
+        pat = xs.pair_asu_table(distance_cutoff=3.2)
+        table, maps = pat.table(), pat.asu_mappings().mappings()
+        out = {}
+        for i, s in enumerate(sc):
+          if el[i] in ("H", "D", "Q"):
+            continue
+          ci, found = maps[i][0].mapped_site(), []
+          for j, groups in table[i].items():
+            if el[j] in ("H", "D", "Q"):
+              continue
+            for group in groups:
+              for j_sym in group:
+                cj = maps[j][j_sym].mapped_site()
+                d = sum((a - b)**2 for a, b in zip(ci, cj))**0.5
+                if 0.5 < d < radius(el[i]) + radius(el[j]) + slack:
+                  found.append(str(sc[j].label))
+          out[str(s.label)] = found
+        return out
+      try:
+        nbl = neighbour_labels(xs)
+      except Exception:
+        nbl = {}
+      u_of = dict(zip(names, us))
+      # mean ln(u/u_nb) of a right atom by heavy CN (cs03S tune half, 9700 atoms)
+      u_cn = {0: 0.0, 1: 0.35, 2: 0.07, 3: -0.10, 4: -0.15, 5: -0.18, 6: -0.23}
+      scores, locked = {}, {}
       def decide(proposals):
         changed, doubt, rows, fin = {}, [], [], []
         for j, (name, z, u) in enumerate(zip(names, z_est, us)):
@@ -1603,6 +1665,23 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           score = dict((e, math.exp(-0.5*((z - ez)/sigma)**2)
                         * max(top.get(e, 0.0), 0.01)**1.5 * prior[e] * cls.get(e, 1.0))
                        for e, ez in z_of)
+          # ponytail: U against the geometric mean of the bonded neighbours' U
+          # (the median U when the atom has none), offset by CN, shifted by
+          # 2 ln(Z_e/Z_now) since a wrong type moves ln U by about twice the
+          # log Z step (slope 2.1 measured on the mistypes); replay on 1631
+          # cs03S structures (held-out half): 462 -> 422 alone, 389 with the counts
+          ref = [u_of[n] for n in nbl.get(name, []) if u_of.get(n, 0.0) > 0]
+          if u > 0 and ref:
+            lu = math.log(u) - sum(math.log(v) for v in ref)/len(ref) \
+                 - u_cn[min(len(ref), 6)]
+          elif u > 0 and u_med > 0.001:
+            lu = math.log(u/u_med)
+          else:
+            lu = None
+          if lu is not None and u_med > 0.006:
+            for e, ez in z_of:
+              d = lu + 2.0*math.log(ez/float(z_now))
+              score[e] *= math.exp(-0.5*(d/0.2)**2)
           tot = sum(score.values()) or 1.0
           best = max(score, key=score.get)
           # ponytail: a missing heavy atom reads far under its Z (Mo typed O read
@@ -1611,13 +1690,18 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           # heavier element, the next round refines it and reads again
           # ponytail: a model whose median U sits under 0.01 is degenerate (the
           # wrong space group doubles every atom) and every U reads collapsed
+          forced = None
           if heavier and (z > 1.5*z_now or 0.01 < u_med and u < 0.3*u_med):
-            changed[name] = (now, min(heavier, key=lambda ez: ez[1])[0])
+            forced = min(heavier, key=lambda ez: ez[1])[0]
+            changed[name] = (now, forced)
           # ponytail: a read within 0.3 of the own Z is left alone; a true N
           # typed C reads 6.4-6.9 and so do some carbons, so in that band the
           # Gaussian is flat over a Z and the geometry posterior decides
-          elif best != now and abs(z - z_now) >= 0.3:
+          elif abs(z - z_now) < 0.3:
+            forced = now
+          elif best != now:
             changed[name] = (now, best)
+          scores[name], locked[name] = score, forced is not None
           final = changed.get(name, (now, now))[1]
           fin.append((top, final))
           if dump:
@@ -1630,6 +1714,74 @@ class OlexCctbxSolve(OlexCctbxAdapter):
             doubt.append((name, alt))
         return changed, doubt, rows, fin
       changed, doubt, rows, fin = decide(proposals)
+      # ponytail: the formula the user typed counts the atoms per element; the
+      # per-atom decision does not know it, and where a structure has a mistype
+      # the deposited typing is closer to the formula counts than ours in 174
+      # of 183 cases. Sequential single flips maximising
+      #   sum_i log score_i(e_i) - lam * sum_e |count_e - formula_e * n_model/n_formula|
+      # inside the anchor's own 0.75-1.33 count gate; atoms the heavier-step
+      # rule or the 0.3 band fixed stay fixed. Replay on 1631 cs03S structures
+      # (<= 5 mistyped, held-out half): 462 -> 415 alone, 389 with the U term
+      def balance(changed, lam=2.0):
+        want = self.expectedZs()
+        order_z = float(xs.space_group().order_z())
+        sym = dict((ez, e) for e, ez in z_of)
+        n_asu, n_model = len(want)/order_z, len(names)
+        if not want or not n_model or not 0.75 <= n_asu/n_model <= 1.33:
+          return 0
+        ratio = n_model/n_asu
+        x = {}
+        for zz in want:
+          if zz in sym:
+            x[sym[zz]] = x.get(sym[zz], 0.0) + ratio/order_z
+        dec = dict((n, changed.get(n, (0, current[n]))[1]) for n in names)
+        S = dict((n, dict((e, math.log(max(s, 1e-300))) for e, s in sc.items()))
+                 for n, sc in scores.items())
+        c = {}
+        for e in dec.values():
+          c[e] = c.get(e, 0) + 1
+        def pen(c):
+          return sum(abs(c.get(e, 0) - x.get(e, 0.0)) for e in set(c) | set(x))
+        moved = 0
+        for step in range(len(names)):
+          cur, best = pen(c), (1e-9, None, None)
+          for n in names:
+            if locked.get(n, True) or n not in S:
+              continue
+            e0 = dec[n]
+            for e in S[n]:
+              if e == e0:
+                continue
+              c[e0] -= 1
+              c[e] = c.get(e, 0) + 1
+              gain = S[n][e] - S[n][e0] - lam*(pen(c) - cur)
+              c[e0] += 1
+              c[e] -= 1
+              if gain > best[0]:
+                best = (gain, n, e)
+          if best[1] is None:
+            break
+          g, n, e = best
+          c[dec[n]] -= 1
+          c[e] = c.get(e, 0) + 1
+          dec[n] = e
+          moved += 1
+          if e == current[n]:
+            changed.pop(n, None)
+          else:
+            changed[n] = (current[n], e)
+          if dump:
+            for r in rows:
+              if r["name"] == n:
+                r["final"], r["count"] = e, True
+        return moved
+      try:
+        nb = balance(changed)
+      except Exception as ex:
+        nb = 0
+        print("Formula-count pass skipped: %s" % ex)
+      if nb:
+        print("Formula counts moved %d type(s)" % nb)
       # ponytail: the label-aware model (etc/geometry_aid_full.npz, trained
       # with the pipeline's own mistypes) sees the labels just decided, and
       # the decision is repeated on its posterior until nothing moves; three
@@ -1654,13 +1806,15 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           if not ok or typed[name] not in top or top[typed[name]] >= veto:
             continue
           best = max(ok, key=top.get)
-          if best == typed[name]:
+          # light elements only and never a revert of decide: on hr/hs every
+          # blown-up refinement followed a heavy-atom swap by the veto, and its
+          # reverts fixed 22 atoms for 239 broken; its light changes 327 for 14
+          if best == typed[name] or best == current[name]:
+            continue
+          if typed[name] not in ("B", "C", "N", "O", "F") or best not in ("B", "C", "N", "O", "F"):
             continue
           nv += 1
-          if best == current[name]:
-            changed.pop(name, None)
-          else:
-            changed[name] = (current[name], best)
+          changed[name] = (current[name], best)
           if dump:
             rows[j]["veto"], rows[j]["final"] = top, best
         if nv:
@@ -1741,9 +1895,23 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     """
     from smtbx.ab_initio import multi_trial
 
+    from smtbx.ab_initio import charge_flipping
+    from io import StringIO
+    # Every trial's cycle-by-cycle log goes to <name>.solve, one section per
+    # trial, and the screen keeps one line per trial plus the verdict: the
+    # tables of eight attempts hid each other, and a trial that gave up ended
+    # in cctbx's "it won't solve!" although seven others were still to come.
+    log = StringIO()
+    marker = "\n#### trial ####\n"
+
+    def sectioned_loop(solving, verbose=True, out=None):
+      out.write(marker)
+      return charge_flipping.loop(solving, verbose=verbose, out=out)
+
     def olex_loop(solving, verbose=True, out=None):
       # Olex2's own loop, so that the progress plot and the stop button behave
       # exactly as they do for a single run.
+      out.write(marker)
       charge_flipping_loop(solving, verbose=verbose)
       return not OV.FindValue('stop_current_process', False)
 
@@ -1751,10 +1919,12 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       if result.error is not None:
         print("Trial %i/%i failed: %s" % (i_trial + 1, n_trials, result.error))
       elif result.cc_peak_height is not None:
-        print("Trial %i/%i: correlation %.3f"
-              % (i_trial + 1, n_trials, result.cc_peak_height))
+        print("Trial %i/%i: correlation %.3f, R %.3f (%.1f s)"
+              % (i_trial + 1, n_trials, result.cc_peak_height, result.r1,
+                 result.seconds))
       else:
-        print("Trial %i/%i: no solution" % (i_trial + 1, n_trials))
+        print("Trial %i/%i: no solution (%.1f s)"
+              % (i_trial + 1, n_trials, result.seconds))
       return not OV.FindValue('stop_current_process', False)
 
     # threads: the FFT releases the GIL, so trials run concurrently; the
@@ -1772,12 +1942,33 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       normalisations_for=getattr(extra, 'normalisations_for', None),
       max_solving_iterations=extra.max_solving_iterations,
       max_seconds=getattr(params, 'max_seconds', None),
-      loop=(olex_loop if n == 1 else None),
+      loop=(olex_loop if n == 1 else sectioned_loop),
       callback=progress,
       stop=lambda: OV.FindValue('stop_current_process', False),
       n_threads=n,
-      verbose=verbose)
-    multi_trial.show(result)
+      verbose=verbose,
+      out=log)
+    summary = StringIO()
+    multi_trial.show(result, out=summary)
+    verdict = summary.getvalue().strip().splitlines()[-1]
+    path = os.path.join(OV.FilePath(), OV.FileName() + ".solve")
+    try:
+      import time
+      with open(path, "w") as f:
+        f.write("FLINT %s: %d trial(s) on %d thread(s), %s, %s\n"
+                % (OV.FileName(), n_trials, n, olx.xf.au.GetCell(),
+                   time.strftime("%Y-%m-%d %H:%M")))
+        f.write("space group %s, %d reflections, max %d solving iterations\n"
+                % (olx.xf.au.GetCellSymm("hall"), f_obs.size(),
+                   extra.max_solving_iterations))
+        f.write("one attempt per trial, so a trial's 'it won't solve!' is "
+                "that trial only; the ranking is by R, then correlation\n")
+        f.write(marker.strip() + " summary\n" + summary.getvalue())
+        for i, block in enumerate(log.getvalue().split(marker)[1:]):
+          f.write("\n#### trial %d ####\n%s" % (i + 1, block))
+    except Exception as e:
+      print("Could not write %s: %s" % (path, e))
+    print("%s; the trials are in %s" % (verdict, os.path.basename(path)))
     # Kept for the space-group suggestions: every entry in f_calc_solutions has
     # had the currently assumed space group imposed on it, so the unsymmetrised
     # P1 structure factors are the only form that still carries what the data
@@ -1947,7 +2138,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     return ("%s is a non-standard setting -- %s %s, reached by %s"
             % (space_group_info, advice, reference, by))
 
-  def writeSuggestions(self, f_obs, result, max_files=3):
+  def writeSuggestions(self, f_obs, result, max_files=4):
     """ One .res per suggested space group, written out for the user to pick.
 
     Deliberately the same mechanism the other solution route in Olex2 uses: files are
@@ -1957,7 +2148,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     replacing the atoms three times before the user has chosen anything, and
     leaving it on whichever candidate happened to be last.
 
-    Returns a list of (suggestion, res_path, n_peaks), best first.
+    Returns a list of (suggestion, res_path, r1), best first: r1 is that of
+    the P1 solution placed in the candidate group.
     """
     import os
     from cctbx import maptbx, xray
@@ -2029,6 +2221,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         continue
       if f_calc is None:
         continue
+      fo, fc = f_obs_g.common_sets(f_calc)
+      r1 = fo.r1_factor(fc, scale_factor=fo.scale_factor(fc))
       fft_map = f_calc.fft_map(symmetry_flags=maptbx.use_space_group_symmetry)
       fft_map.apply_volume_scaling()
       sites, heights = self.solutionPeaks(fft_map)
@@ -2080,7 +2274,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         print("Could not write suggestion %s: %s: %s"
               % (sgi, type(e).__name__, e or "(no message)"))
         continue
-      out.append((suggestion, path, sites.size()))
+      out.append((suggestion, path, r1))
     return out
 
   def suggestionsTableHtml(self, written, result):
@@ -2091,12 +2285,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     routes present themselves identically and a user does not have to learn a
     second idiom.
 
-    The columns differ because the evidence differs. There is deliberately
-    **no R1 column here**, because it was measured to be
-    actively misleading for choosing a space group: the solution is a P1
-    solution, so imposing symmetry can only worsen the fit and R1 always
-    favours the lowest-symmetry candidate whatever the truth. Showing it would
-    invite exactly the wrong choice.
+    The columns differ because the evidence differs. R1 is that of the P1
+    solution placed in each candidate group (21 Sep 2026, Florian's request,
+    in place of the peak count). Read it with care: imposing symmetry can only
+    worsen the fit, so R1 leans towards the lowest-symmetry candidate whatever
+    the truth; the absences and centro columns are the evidence that ranks.
 
     **And no "Evidence" column.** `suggestion.reason` is a sentence, not a
     cell -- "25 predicted absences, 99% of them missing from the data (merged
@@ -2116,12 +2309,12 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       'sg_output_table', force=OV.IsDebugging())
     header = {
       'td1': "<b>Correlation</b>", 'td2': "<b>Absences</b>",
-      'td3': "<b>Centro</b>", 'td4': "<b>Peaks</b>",
+      'td3': "<b>Centro</b>", 'td4': "<b>R1</b>",
       'td5': "<b>Space group</b>"}
     s = s_blank % header
 
     hkl_src = olx.file.ChangeExt(OV.FileFull(), 'hkl')
-    for suggestion, path, n_peaks in written:
+    for suggestion, path, r1 in written:
       sgi = suggestion.space_group_info
       link = ('<a href="file.copy(\'%s\',\'%s.res\')>>reap \'%s\'">%s</a>'
               % (path, OV.FileName(), OV.FileFull(), str(sgi)))
@@ -2145,7 +2338,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         'td1': "%.3f" % (result.cc_peak_height or float('nan')),
         'td2': absences,
         'td3': centro,
-        'td4': "%d" % n_peaks,
+        'td4': "%.3f" % r1,
         'td5': "<b>%s</b>" % link}
       # The prose reason is not dropped, only moved: it is a sentence and
       # belongs in the log, where `space_group_suggest.show` already prints it.

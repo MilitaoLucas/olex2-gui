@@ -175,12 +175,12 @@ routines requiring structure refinement
       .type = float
     program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 SIR2014 SIR2019 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Auto-Solve' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
+    method = 'Dual Space' '*Charge Flipping' 'FLINT' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice
     tidy_cycles = 4
       .type = int
       .short_caption = Tidy-up refinement cycles
-      .help = "Auto-Solve only. Cycles of refinement run after solving, to "
+      .help = "FLINT only. Cycles of refinement run after solving, to "
               "find which peaks are real. The peak search deliberately picks "
               "more maxima than there are atoms, and a peak with no density "
               "under it cannot hold a sensible displacement parameter, so a "
@@ -189,7 +189,7 @@ routines requiring structure refinement
     tidy_uiso_factor = 3.0
       .type = float
       .short_caption = Tidy-up U factor
-      .help = "Auto-Solve only. After the tidy-up cycles, a peak is removed "
+      .help = "FLINT only. After the tidy-up cycles, a peak is removed "
               "when its U exceeds this multiple of the value expected for its "
               "element. A ratio rather than a fixed number, because a fixed "
               "one is confounded by element: palladium belongs near 0.02 and "
@@ -200,7 +200,7 @@ routines requiring structure refinement
     retype_after_tidy = True
       .type = bool
       .short_caption = Re-assign element types after the tidy-up
-      .help = "Auto-Solve only. Assign the element types a second time once "
+      .help = "FLINT only. Assign the element types a second time once "
               "the spurious peaks have been removed. The peak search "
               "over-picks by design -- 30% of its maxima are not atoms, "
               "measured -- and those extras sit in the real atoms' descriptor "
@@ -212,7 +212,7 @@ routines requiring structure refinement
     missed_symmetry_check = True
       .type = bool
       .short_caption = Look for missed symmetry after the tidy-up
-      .help = "Auto-Solve only. The refined model, expanded to P1, is "
+      .help = "FLINT only. The refined model, expanded to P1, is "
               "searched for symmetry beyond the group it was solved in; "
               "a supergroup is printed and added to the shortlist as a "
               "hint. Pseudo-symmetry triggers it on about 1 in 80 correct "
@@ -1445,10 +1445,10 @@ user
   solution
     .short_caption = Structure solution
     {
-    auto_solve = False
+    flint = False
       .type = bool
-      .short_caption = Offer Auto-Solve
-      .help = "Register the Auto-Solve method (multi-trial charge flipping "
+      .short_caption = Offer FLINT
+      .help = "Register FLINT (FLipping, INterpretation, Typing: multi-trial charge flipping "
               "with space-group suggestions and element assignment). Needs a "
               "cctbx with smtbx.ab_initio; without it the method is silently "
               "left out. Takes effect at the next start."

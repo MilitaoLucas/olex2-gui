@@ -1,8 +1,8 @@
-"""Auto-Solve on the sample structures: the multi-trial charge-flipping
+"""FLINT on the sample structures: the multi-trial charge-flipping
 pipeline with its space-group shortlist and element assignment.
 
 Each case loads the deposited model as the reference, runs
-`olex2.solve` / `Auto-Solve` through spy.RunSolutionPrg() exactly as the GUI
+`olex2.solve` / `FLINT` through spy.RunSolutionPrg() exactly as the GUI
 does, lets the deferred tidy-up (compaq, four cycles, ADP prune, re-typing)
 run, and then compares what came back with what was deposited:
 
@@ -16,12 +16,12 @@ run, and then compares what came back with what was deposited:
   types/typed  element histogram of the final model, and the fraction of the
                deposited non-H atoms it accounts for
 
-Auto-Solve is opt-in (user.solution.auto_solve) and needs a cctbx with
+FLINT is opt-in (user.solution.flint) and needs a cctbx with
 smtbx.ab_initio; without that the group skips. The geometry classifier needs
 etc/geometry_aid_model.npz beside NoSpherA2.exe, and a run that falls back to
 density only is a failure, not a variant.
 
-OLEX2_TEST_AUTOSOLVE_SAMPLES  comma-separated sample names, default SAMPLES
+OLEX2_TEST_FLINT_SAMPLES  comma-separated sample names, default SAMPLES
 """
 from __future__ import absolute_import, division, print_function
 
@@ -35,31 +35,31 @@ from pipeline_tests import (macro, SkipTest, atom_count, space_group, has_hkl)
 from group_nsa2_matrix import sample_copy, _model_file, _load_model
 from group_nosphera2 import _refine_capturing
 
-GROUP = "autosolve"
+GROUP = "flint"
 SAMPLES = ("sucrose", "epoxide", "water", "malbac")
 NPZ = os.path.join("etc", "geometry_aid_model.npz")
 
 
 def register(suite):
-  wanted = os.environ.get("OLEX2_TEST_AUTOSOLVE_SAMPLES", "").strip()
+  wanted = os.environ.get("OLEX2_TEST_FLINT_SAMPLES", "").strip()
   samples = [s.strip() for s in wanted.split(",") if s.strip()] or SAMPLES
   for s in samples:
-    suite.run(GROUP, "autosolve %s" % s, t_autosolve, suite, s)
+    suite.run(GROUP, "flint %s" % s, t_flint, suite, s)
 
 
 def _method():
-  """The Auto-Solve method, registered for this session."""
+  """The FLINT method, registered for this session."""
   try:
     import smtbx.ab_initio  # noqa: F401
   except ImportError:
     raise SkipTest("this cctbx has no smtbx.ab_initio")
   import ExternalPrgParameters as EPP
-  OV.SetParam('user.solution.auto_solve', True)
+  OV.SetParam('user.solution.flint', True)
   EPP.SPD, EPP.RPD = EPP.defineExternalPrograms()
   prg = EPP.SPD.programs.get('olex2.solve')
-  method = prg.methods.get('Auto-Solve') if prg else None
+  method = prg.methods.get('FLINT') if prg else None
   if method is None:
-    raise AssertionError("Auto-Solve is not registered with olex2.solve")
+    raise AssertionError("FLINT is not registered with olex2.solve")
   return method
 
 
@@ -83,7 +83,7 @@ def _grab(pattern, text, default=None, cast=int):
   return cast(m.group(1)) if m else default
 
 
-def t_autosolve(suite, sample):
+def t_flint(suite, sample):
   method = _method()
   if not os.path.isfile(os.path.join(OV.BaseDir(), NPZ)):
     raise AssertionError("%s is not in the run directory" % NPZ)
@@ -95,7 +95,7 @@ def t_autosolve(suite, sample):
   n_ref = sum(ref_types.values())
 
   OV.SetParam('snum.solution.program', 'olex2.solve')
-  OV.SetParam('snum.solution.method', 'Auto-Solve')
+  OV.SetParam('snum.solution.method', 'FLINT')
   OV.SetParam('snum.solution.retype_after_tidy', True)
   # The GUI asks "solve this again?" once a model is loaded; that would block
   # a headless run in the message box.
@@ -107,7 +107,7 @@ def t_autosolve(suite, sample):
     OV.SetParam('user.alert_solve_anyway', ask)
 
   if "No solution found" in text or atom_count() == 0:
-    raise AssertionError("Auto-Solve found no solution for %s" % sample)
+    raise AssertionError("FLINT found no solution for %s" % sample)
   trials = _grab(r"Best of (\d+) trial", text)
   if not trials or trials < 2:
     raise AssertionError("expected several trials, log says %r" % trials)
