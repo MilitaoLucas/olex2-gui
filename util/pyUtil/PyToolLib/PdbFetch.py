@@ -330,6 +330,18 @@ def fetch_entry(code=None, dest=None, load=True):
 
   if load:
     olex.m("reap '%s'" % model)
+    # A build without the mmCIF reader (master before load-speed is merged)
+    # fails inside reap; say why, and do not attach the reflections to
+    # whatever structure was open before.
+    # A CIF reader that does not know the mmCIF names can also "load" the file
+    # with no atoms, so the atom count is checked as well as the file name.
+    loaded = olx.IsFileLoaded() == 'true' and os.path.normcase(
+      os.path.abspath(olx.FileFull())) == os.path.normcase(os.path.abspath(model)) \
+      and int(olx.xf.au.GetAtomCount()) > 0
+    if not loaded:
+      olx.Echo("This Olex2 build cannot open macromolecular mmCIF files yet. "
+               "%s is downloaded to %s." % (code, folder), m="error")
+      return folder
     # after the model, not before: HKLSrc applies to whatever is loaded, and
     # setting it first would attach the reflections to the previous structure
     if os.path.exists(hkl):
