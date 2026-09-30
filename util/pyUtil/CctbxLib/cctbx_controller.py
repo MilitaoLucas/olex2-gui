@@ -308,8 +308,9 @@ class reflections(object):
     else:
       if _shel['high'] > _shel['low']:
         _shel = {'high' : _shel['low'], 'low': _shel['high']}
+      # SHELXL applies both, so the stricter high-resolution limit wins
       if two_theta != 180:
-        _shel['high'] = d_min
+        _shel['high'] = max(_shel['high'], d_min)
     return _shel
 
   def filter(self, omit, shel, wavelength, doFilter=True):
@@ -322,7 +323,7 @@ class reflections(object):
     two_theta = omit['2theta']
     if shel and two_theta != 180:
       import olx
-      olx.Echo("Warning - mixing SHEL and OMIT. Using low resolution limit from SHEL and high resolution from OMIT",
+      olx.Echo("Warning - mixing SHEL and OMIT. Using low resolution limit from SHEL and the stricter high resolution limit of the two",
                m="warning")
     self.d_min = uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     self._shel = self._get_shel(omit, shel, wavelength)

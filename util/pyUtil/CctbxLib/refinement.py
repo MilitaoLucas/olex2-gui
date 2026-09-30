@@ -596,7 +596,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if not fcf_only:
           self.show_summary()
           self.show_comprehensive_summary(log=self.log)
-          self.write_oxl()
+          stopwatch.run(self.write_oxl)
         else:
           return
         stopwatch.start("CIF")
@@ -759,8 +759,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not OV.IsEDRefinement():
         OV.SetParam(
           'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
-      stopwatch.start("Listing")
-      self.write_oxl(cif[block_name])
+      stopwatch.run(self.write_oxl, cif[block_name])
+      stopwatch.start("Writing CIF")
       acta = olx.Ins("ACTA").strip()
       if acta != "n/a":
         with open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w') as f:
@@ -2789,6 +2789,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # and the 20 disagreeable reflections, which the listing gives 50 of
     log_text = re.sub(r"^Disagreeable reflections:\n +h +k +l .*\n(?: *-?\d+ +-?\d+ +-?\d+ .*\n)*",
       "", log_text, flags=re.M)
+    # and the per-cycle restraint tables, the final one is its own section
+    log_text = re.sub(r"^.+ restraints: \d+\nSorted by residual:\n(?:.*\S.*\n)*\n?", "", log_text, flags=re.M)
     xs = self.xray_structure()
     uc = xs.unit_cell()
     labels = [sc.label for sc in xs.scatterers()]
@@ -2899,6 +2901,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
             goof*math.sqrt(wd2[g].mean()/wd2.mean()),
             fo2[g].mean()/fc2[g].mean() if fc2[g].mean() else 0,
             abs(fo[g] - fc[g]).sum()/fo[g].sum() if fo[g].sum() else 0))
+      return '\n'.join(out)
+    def omit_shel():
+      r = self.reflections
+      omit, shel = r._omit, r._shel
+      hkl = list(omit.get('hkl') or ()) if omit else []
+      if not omit or (shel['high'] <= 0 and shel['low'] <= 0 and not hkl and omit['s'] == -2):
+        return "none"
+      out = ["WARNING: reflections were rejected by OMIT/SHEL during this refinement"]
+      if shel['high'] > 0 or shel['low'] > 0:
+        out.append("resolution limits  %s > d > %s A (SHEL and OMIT s 2theta, the stricter wins)" % (
+          "%.4f" % shel['low'] if shel['low'] > 0 else "inf",
+          "%.4f" % shel['high'] if shel['high'] > 0 else "0"))
+      if omit['s'] != -2:
+        out.append("OMIT s = %g" % omit['s'])
+      out += ["OMIT %4i%4i%4i" % tuple(h) for h in hkl]
+      m = r.f_sq_obs_merged
+      m = m.select(~m.sys_absent_flags().data())
+      inside = m.resolution_filter(d_max=max(shel['low'], 0), d_min=max(shel['high'], 0)).size()
+      out.append("%i of %i unique reflections rejected after merging: %i outside the limits, %i by OMIT h k l" % (
+        m.size() - r.f_sq_obs_filtered.size(), m.size(), m.size() - inside, inside - r.f_sq_obs_filtered.size()))
       return '\n'.join(out)
     def reflection_stats():
       fo = ne.observations.fo_sq
@@ -3033,6 +3055,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except Exception as e:
       block, block_error = None, "not available: %s" % e
     sections = [("Crystal data and refinement summary", lambda: block_error or summary()),
+      ("OMIT and SHEL", omit_shel),
       ("Reflection statistics", reflection_stats),
       ("Refinement log", lambda: log_text.rstrip())]
     it = getattr(ne, 'iterations_object', None)
