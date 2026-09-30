@@ -362,8 +362,14 @@ class reflections(object):
     if self.hklf_code in (2,5):
       self.batch_numbers = self.batch_numbers_array.select(
         filter_res.selection).data()
-    self.n_filtered_by_resolution = filter_res.omitted_count
-    self.n_sys_absent = filter_res.sys_abs_count
+      self.n_filtered_by_resolution = filter_res.omitted_count
+      self.n_sys_absent = filter_res.sys_abs_count
+    else:
+      # filter_data only counts for HKLF 5; merge() already counted the absences
+      d = self.f_sq_obs_merged.d_spacings().data()
+      hi, lo = float(self._shel['high']), float(self._shel['low'])
+      self.n_filtered_by_resolution = 0 if hi <= 0 and lo <= 0 else \
+        ((d <= hi) | ((d >= lo) if lo >= 0 else flex.bool(d.size()))).count(True)
     self.f_sq_obs_filtered = f_sq_obs_filtered
 
   def show_summary(self, log=None):
