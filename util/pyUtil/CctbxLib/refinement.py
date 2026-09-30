@@ -3001,19 +3001,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if flack:
         out.append("Flack x  = %s, %s" % (flack, "refined inversion twin" if self.is_inversion_twin()
           else "fixed model, %s reflections" % self.flack_reflections_used))
-      # Parsons, Flack & Wagner (2013): Q = (I+ - I-)/(I+ + I-), Q_obs = (1 - 2x) Q_calc
+      # Parsons, Flack & Wagner (2013): Q = (I+ - I-)/(I+ + I-), Q_obs = (1 - 2x) Q_calc;
+      # like SHELXL, only pairs with both I > 3u(I) - weak pairs have a large Q and no leverage
       (op, om), (cp, cm) = fo.hemispheres_acentrics(), ne.fc_sq.hemispheres_acentrics()
       a, b = op.data().as_numpy_array(), om.data().as_numpy_array()
       sa, sb = op.sigmas().as_numpy_array(), om.sigmas().as_numpy_array()
       c, e = cp.data().as_numpy_array(), cm.data().as_numpy_array()
       var = (b*sa)**2 + (a*sb)**2
-      ok = (a + b > 0) & (c + e > 0) & (var > 0)
+      ok = (a > 3*sa) & (b > 3*sb) & (c + e > 0) & (var > 0)
+      if ok.sum() < 2:
+        out.append("Parsons x: fewer than 2 Friedel pairs with both I > 3u(I)")
+        return '\n'.join(out)
       a, b, var, c, e = (v[ok] for v in (a, b, var, c, e))
       qo, qc = (a - b)/(a + b), (c - e)/(c + e)
       w = (a + b)**4/(4*var)
       s = (w*qo*qc).sum()/(w*qc*qc).sum()
       chi2 = (w*(qo - s*qc)**2).sum()/(len(qo) - 1)
-      out.append("Parsons x = %s from %i quotients (all Friedel pairs), su scaled by sqrt(chi^2/(n-1)) = %.3f" % (
+      out.append("Parsons x = %s from %i selected quotients (both I > 3u(I)), su scaled by sqrt(chi^2/(n-1)) = %.3f" % (
         utils.format_float_with_standard_uncertainty((1 - s)/2,
           0.5*math.sqrt(max(chi2, 1)/(w*qc*qc).sum())), len(qo), math.sqrt(chi2)))
       return '\n'.join(out)
