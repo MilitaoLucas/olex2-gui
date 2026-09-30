@@ -1140,10 +1140,70 @@ class FullMatrixRefine(OlexCctbxAdapter):
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
           self.flack_reflections_used = self.normal_eqns.observations.fo_sq.size()
           return utils.format_float_with_standard_uncertainty(flack, su)
+      try:
+        self.flack_method = "classical fit, full matrix"
+        return self._calc_flack_classical()
+      except Exception:
+        if OV.IsDebugging():
+          sys.stderr.formatExceptionInfo()
+      self.flack_method = "fixed model"
       flack_str = self._calc_flack_one_parameter_fixed_model()
       if flack_str is not None:
         return flack_str
       return "N/A"
+
+  def _calc_flack_classical(self):
+    """ SHELXL's "classical fit to all intensities": one full-matrix step in
+    an inversion twin fraction x from x = 0, every other parameter free:
+      x = (g.W.r - c.N^-1.b) / d,  u(x)^2 = GoF^2 / d,  d = g.W.g - c.N^-1.c,
+    where r = Fo^2 - k Ic, g = k (Ic(-h) - Ic(h)) is the derivative in x with
+    the scale projected out, c = J^T W g, b = J^T W r (zero at convergence)
+    and N the refinement's own normal matrix. This equals one Gauss-Newton
+    cycle of TWIN/BASF started at x = 0.
+    Three passes over the reflections, as ne.fc_sq predates the last shift:
+    Ic(h) and the weights for the model as it stands, Ic(-h) as an inversion
+    twin at x = 1, and c from pseudo-observations Fo^2 + lam g.
+    """
+    ne = self.normal_eqns
+    if self.twin_fractions or self.twin_components or getattr(ne, 'ml_target', None) is not None:
+      raise RuntimeError("only for untwinned least squares")
+    fo = ne.observations.fo_sq
+    n = self.reparametrisation.n_independents
+    acc_t = next(c for c in type(ne).__mro__
+      if c.__name__.startswith('non_linear_ls_with_separable_scale_factor'))
+    def build(obs, weighting, objective_only):
+      acc = acc_t(n, True, type(ne).accumulator_buffer_bytes(n, ne.max_memory))
+      b = least_squares.build_normal_equations(acc, obs, ne.mask_data(),
+        weighting, ne.scale_factor(), ne.one_h_linearisation,
+        self.reparametrisation.jacobian_transpose_matching_grad_fc(),
+        self.reparametrisation.fc_correction or xray.dummy_fc_correction(),
+        objective_only, ne.may_parallelise, ne.use_openmp, ne.max_memory)
+      return acc, b
+    acc, b = build(ne.observations, ne.weighting_scheme, False)
+    ic, w, k = flex.double(b.observables()), b.weights(), acc.optimal_scale_factor()
+    br = (acc.reduced_problem().step_equations().right_hand_side()*acc.sum_w_yo_sq()).as_numpy_array()
+    inv = xray.twin_component(sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)), 1.0, False)
+    g = k*(flex.double(build(fo.as_xray_observations(twin_components=(inv,)),
+      least_squares.sigma_weighting(), True)[1].observables()) - ic)
+    wic = w*ic
+    g -= ic*(flex.sum(wic*g)/flex.sum(wic*ic))
+    sigmas = flex.double([1/math.sqrt(x) if x > 0 else 1e30 for x in w])
+    # residual r + lam*g: lam drowns the J^T W r left by an unconverged refinement
+    lam = 1e6
+    acc = build(fo.customized_copy(data=fo.data() + lam*g, sigmas=sigmas)
+      .as_xray_observations(), least_squares.sigma_weighting(), False)[0]
+    # finalise() leaves the reduced gradient k* J^T W r / sum(w yo^2)
+    c = (acc.reduced_problem().step_equations().right_hand_side()
+      * (acc.sum_w_yo_sq()*k/(lam*acc.optimal_scale_factor()))).as_numpy_array()
+    cov = ne.covariance_matrix(normalised_by_goof=False)\
+      .matrix_packed_u_as_symmetric().as_numpy_array()
+    d = flex.sum(w*g*g) - c.dot(cov.dot(c))
+    if d <= 0:
+      raise RuntimeError("singular")
+    self.flack_reflections_used = fo.size()
+    return utils.format_float_with_standard_uncertainty(
+      (flex.sum(w*g*(fo.data() - k*ic)) - c.dot(cov.dot(br)))/d,
+      math.sqrt(ne.variance_goof_factor()/d))
 
   def _calc_flack_one_parameter_fixed_model(self):
     """
@@ -3000,7 +3060,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       flack = OV.GetParam('snum.refinement.flack_str')
       if flack:
         out.append("Flack x  = %s, %s" % (flack, "refined inversion twin" if self.is_inversion_twin()
-          else "fixed model, %s reflections" % self.flack_reflections_used))
+          else "%s, %s reflections" % (getattr(self, 'flack_method', "fixed model"), self.flack_reflections_used)))
       # Parsons, Flack & Wagner (2013): Q = (I+ - I-)/(I+ + I-), Q_obs = (1 - 2x) Q_calc;
       # like SHELXL, only pairs with both I > 3u(I) - weak pairs have a large Q and no leverage
       (op, om), (cp, cm) = fo.hemispheres_acentrics(), ne.fc_sq.hemispheres_acentrics()
@@ -3017,9 +3077,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       w = (a + b)**4/(4*var)
       s = (w*qo*qc).sum()/(w*qc*qc).sum()
       chi2 = (w*(qo - s*qc)**2).sum()/(len(qo) - 1)
+      # a refined inversion twin is already in fc_sq: Q_calc = (1 - 2x_tw) Q_calc(untwinned)
+      t = 1 - 2*self.twin_components[0].value if self.is_inversion_twin() else 1
       out.append("Parsons x = %s from %i selected quotients (both I > 3u(I)), su scaled by sqrt(chi^2/(n-1)) = %.3f" % (
-        utils.format_float_with_standard_uncertainty((1 - s)/2,
-          0.5*math.sqrt(max(chi2, 1)/(w*qc*qc).sum())), len(qo), math.sqrt(chi2)))
+        utils.format_float_with_standard_uncertainty((1 - s*t)/2,
+          0.5*abs(t)*math.sqrt(max(chi2, 1)/(w*qc*qc).sum())), len(qo), math.sqrt(chi2)))
       return '\n'.join(out)
     def disagreeable(n=50):
       fo2 = ne.observations.fo_sq.customized_copy(sigmas=flex.sqrt(1/ne.weights))\
