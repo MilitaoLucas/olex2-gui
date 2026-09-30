@@ -434,7 +434,9 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
     if self.max_ls_shift_over_su is not None:
       return
     x = self.shifts_to_analyse()
-    ls_shifts_over_su = x/self.standard_uncertainties()
+    # kept for the parameter table of the .oxl
+    self.ls_shifts, self.ls_su = x, self.standard_uncertainties()
+    ls_shifts_over_su = x/self.ls_su
     max_shift_i = 0
     s_sum = 0
     for i,s in enumerate(ls_shifts_over_su):

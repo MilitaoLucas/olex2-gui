@@ -1,4 +1,4 @@
-import math, os, sys
+import io, math, os, sys
 from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, \
   OlexCctbxFlatSolvent, OlexCctbxFlipSolvent, rt_mx_from_olx
 import cctbx_olex_adapter as COA
@@ -219,6 +219,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except:
       pass
     if not (reparametrisation_only or build_only):
+      # a failed run must not leave the previous run's listing looking current
+      oxl = OV.file_ChangeExt(OV.FileFull(), 'oxl')
+      if os.path.exists(oxl):
+        os.remove(oxl)
       optimiser = OV.GetParam('snum.refinement.method')
       if optimiser in FullMatrixRefine.scipy_methods:
         optimiser += " via scipy.optimize.minimize"
@@ -592,6 +596,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if not fcf_only:
           self.show_summary()
           self.show_comprehensive_summary(log=self.log)
+          self.write_oxl()
         else:
           return
         stopwatch.start("CIF")
@@ -744,15 +749,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()
-      acta = olx.Ins("ACTA").strip()
-      if acta != "n/a":
-        with open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w') as f:
-          print(cif, file=f)
-        inc_hkl = acta and "NOHKL" != acta.split()[-1].upper()
-        if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
-          olx.CifMerge(f=inc_hkl, u=True)
-      stopwatch.start("FCF & weights")
-      self.output_fcf(cif[block_name].get('_iucr_refine_fcf_details', None))
+      stopwatch.start("Weights")
+      # before the listing, which reports the recommended scheme
       new_weighting = self.weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
@@ -761,6 +759,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if not OV.IsEDRefinement():
         OV.SetParam(
           'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      stopwatch.start("Listing")
+      self.write_oxl(cif[block_name])
+      acta = olx.Ins("ACTA").strip()
+      if acta != "n/a":
+        with open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w') as f:
+          print(cif, file=f)
+        inc_hkl = acta and "NOHKL" != acta.split()[-1].upper()
+        if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
+          olx.CifMerge(f=inc_hkl, u=True)
+      stopwatch.start("FCF")
+      self.output_fcf(cif[block_name].get('_iucr_refine_fcf_details', None))
       if self.on_completion:
         stopwatch.start("on_completion")
         self.on_completion(cif[block_name])
@@ -1354,7 +1363,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
 #      print d_idx[i], d
     return wR2
 
-  def as_cif_block(self):
+  def as_cif_block(self, full=False):
+    """ full: the atom and geometry loops even without ACTA (for the .oxl) """
     def format_type_count(type, count):
       if round(count, 1) == round(count):
         return "%s%.0f" %(type, count)
@@ -1410,7 +1420,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     acta_stuff = olx.Ins('ACTA') != "n/a"
     xs = self.xray_structure()
     site_labels = xs.scatterers().extract_labels()
-    if (not acta_stuff or self.objective_only
+    if (not (acta_stuff or full) or self.objective_only
         or self.covariance_matrix_and_annotations is None):
       from iotbx.cif import model
       cif_block = model.block()
@@ -1659,7 +1669,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.g +\
            '' + fmt % self.reparametrisation.fc_correction.U
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
-    #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
     cif_block['_refine_ls_number_constraints'] = self.n_constraints
     # add the OSF!
@@ -2569,6 +2578,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       min_distance_sym_equiv=1.0,
       max_clusters=max_peaks+len(self.xray_structure().scatterers()))
     peaks = fft_map.peak_search(parameters=parameters,verify_symmetry=False).all()
+    # the deepest hole and the peak list, for the .oxl
+    m = fft_map.real_map_unpadded()
+    k, n = flex.min_index(m.as_1d()), m.all()
+    self.oxl_hole = (m.as_1d()[k], (k//(n[1]*n[2])/n[0], k//n[2] % n[1]/n[1], k % n[2]/n[2]))
+    self.oxl_peaks = []
     fmap = olx.Ins("FMAP")
     if fmap.startswith('-'):
       peaks.p_sites = [s for s in peaks.sites()]
@@ -2599,6 +2613,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf.au.SetAtomU(id, "0.06")
+        self.oxl_peaks.append((tuple(xyz), height))
         i = i+1
       if i == 100 or i >= max_peaks:
         break
@@ -2714,13 +2729,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetParam('snum.refinement.res_rms', self.diff_stats.sigma())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
 
-  def get_disagreeable_reflections(self, show_in_console=False):
+  def get_disagreeable_reflections(self, show_in_console=False, out=None):
     fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
       .apply_scaling(factor=1/self.normal_eqns.scale_factor())
 
     if show_in_console:
-      result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=sys.stdout)
+      out = sys.stdout
+    if out is not None:
+      result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=out)
     else:
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
 
@@ -2752,7 +2769,313 @@ class FullMatrixRefine(OlexCctbxAdapter):
               twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i])), file=log)
     print(file=log)
     print("Disagreeable reflections:", file=log)
-    self.get_disagreeable_reflections()
+    # the table goes to a file log only; the console has never had it
+    self.get_disagreeable_reflections(out=log if log is not sys.stdout else None)
+
+  def write_oxl(self, cif_block=None):
+    """ <name>.oxl, the olex2.refine listing: what a SHELXL .lst reports, in
+    plain tables. The .log first, then the final shifts, atoms, geometry,
+    restraint deviations, correlations and the analysis of variance. Each
+    section is on its own, so a report failure never fails the refinement.
+    """
+    import re
+    ne = self.normal_eqns
+    self.log.flush()
+    with open(self.log.name) as f:
+      log_text = f.read()
+    # the per-cycle top-10 atom lists stay in the .log; the cycle table has the maxima
+    log_text = re.sub(r"^Sorted (?:site shifts in Angstrom|adp shift norms):\n(?:shift|dU) scatterer\n"
+      r"(?:\d+\.\d+ \S+\n)*(?:\.\.\. \(remaining \d+ not shown\)\n)?", "", log_text, flags=re.M)
+    # and the 20 disagreeable reflections, which the listing gives 50 of
+    log_text = re.sub(r"^Disagreeable reflections:\n +h +k +l .*\n(?: *-?\d+ +-?\d+ +-?\d+ .*\n)*",
+      "", log_text, flags=re.M)
+    xs = self.xray_structure()
+    uc = xs.unit_cell()
+    labels = [sc.label for sc in xs.scatterers()]
+    def nearest(xyz, sites, names, n=4):
+      # ponytail: minimum image per symmetry operator, so one copy of each site;
+      # a site's second image among the n nearest is missed
+      f, O, dist = numpy.array(sites), numpy.array(uc.orthogonalization_matrix()).reshape(3, 3), None
+      for op in xs.space_group().all_ops():
+        d = numpy.array(xyz) - (f @ numpy.array(op.r().as_double()).reshape(3, 3).T + op.t().as_double())
+        d = numpy.sqrt((((d - numpy.round(d)) @ O.T)**2).sum(1))
+        dist = d if dist is None else numpy.minimum(dist, d)
+      return [(dist[i], names[i]) for i in numpy.argsort(dist)[:n]]
+    def table(loop, keys=None):
+      prefix = loop.name() + '_'
+      keys = [k for k in (keys or loop.keys()) if k in loop.keys()]
+      rows = [[k[len(prefix):] or 'value' for k in keys]] + [list(r) for r in zip(*[loop[k] for k in keys])]
+      widths = [max(len(r[i]) for r in rows) for i in range(len(keys))]
+      return '\n'.join('  '.join(c.rjust(w) for c, w in zip(r, widths)) for r in rows)
+    def shifts(n_show=10):
+      names = self._independent_parameter_annotations()
+      name = lambda i: names[i] if i < len(names) else "scalar parameter"
+      s, e = numpy.array(it.ls_shifts), numpy.array(it.ls_su)
+      r = numpy.divide(s, e, out=numpy.zeros_like(s), where=e != 0)
+      order = numpy.argsort(-abs(r))
+      lines = ["Mean |shift/su| = %.3f, maximum = %.3f for %s, %i parameters" % (
+        abs(r).mean(), r[order[0]], name(order[0]), len(r)),
+        "", "     N        shift           su  shift/su  parameter"]
+      for i in order[:n_show]:
+        lines.append("%6i %12.6f %12.6f %9.3f  %s" % (i + 1, s[i], e[i], r[i], name(i)))
+      return '\n'.join(lines)
+    def summary():
+      # the scalar items of the CIF block: crystal data, data and refinement statistics
+      prefixes = ('_space_group_', '_symmetry_', '_cell_', '_chemical_formula_',
+        '_exptl_', '_diffrn_', '_reflns_', '_refine_')
+      items = [(k, str(block._items[k])) for k in block._set
+        if k in block._items and k.startswith(prefixes)]
+      items = [(k, v) for k, v in items if '\n' not in v.strip()]
+      w = max(len(k) for k, v in items)
+      out = ["%-*s  %s" % (w, k, v.strip()) for k, v in items]
+      # set just before the listing on the full path only; stale on the objective-only one
+      weight = OV.GetParam('snum.refinement.suggested_weight')
+      if cif_block is not None and weight and not OV.IsEDRefinement():
+        weight = weight.split() if isinstance(weight, str) else weight
+        out.append("%-*s  WGHT %s" % (w, "recommended weighting scheme",
+          " ".join("%.4f" % float(x) for x in weight)))
+      return '\n'.join(out)
+    def chirality():
+      lines = [l.strip() for l in olex.f("rsa()").split('\n') if ':' in l]
+      return '\n'.join(lines) or "no chiral atoms"
+    def principal_u():
+      from cctbx import adptbx
+      xs = self.xray_structure()
+      uc = xs.unit_cell()
+      lines, n_npd = ["      U1        U2        U3   U3/U1  atom"], 0
+      for sc in xs.scatterers():
+        if not sc.flags.use_u_aniso():
+          continue
+        u = sorted(adptbx.eigenvalues(adptbx.u_star_as_u_cart(uc, sc.u_star)), reverse=True)
+        npd = u[2] <= 0
+        n_npd += npd
+        lines.append("%8.4f  %8.4f  %8.4f  %6.3f  %s%s" % (u[0], u[1], u[2],
+          u[2]/u[0] if u[0] > 0 else 0, sc.label, "  NPD" if npd else ""))
+      lines.append("\n%i atoms NPD" % n_npd)
+      return '\n'.join(lines)
+    def restraints():
+      out = io.StringIO()
+      self.restraints_manager().show_sorted(self.xray_structure(), f=out)
+      return out.getvalue().rstrip() or "none"
+    def correlations(threshold=0.5, max_items=500):
+      n = self.reparametrisation.n_independents
+      # ponytail: dense n x n, skipped above 2000 parameters
+      if n > 2000:
+        return "not computed for %i parameters" % n
+      c = ne.covariance_matrix().matrix_packed_u_as_symmetric().as_numpy_array().reshape(n, n)
+      d = numpy.sqrt(numpy.clip(numpy.diag(c), 0, None))
+      with numpy.errstate(divide='ignore', invalid='ignore'):
+        r = c / numpy.outer(d, d)
+      i, j = numpy.triu_indices(n, 1)
+      v = r[i, j]
+      sel = numpy.nonzero(numpy.isfinite(v) & (abs(v) >= threshold))[0]
+      sel = sel[numpy.argsort(-abs(v[sel]))]
+      names = self._independent_parameter_annotations()
+      lines = ["|r| >= %.2f, %i pairs (largest |r| %.3f)%s" % (threshold, len(sel),
+        numpy.nanmax(abs(v)) if len(v) else 0,
+        ", the largest %i shown" % max_items if len(sel) > max_items else "")]
+      for k in sel[:max_items]:
+        lines.append("%8.3f  %s  /  %s" % (v[k], names[i[k]], names[j[k]]))
+      return '\n'.join(lines)
+    def variance(n_bins=10):
+      k = ne.scale_factor()
+      fo2 = ne.observations.fo_sq.data().as_numpy_array() / k
+      fc2 = ne.fc_sq.data().as_numpy_array()
+      wd2 = ne.weights.as_numpy_array() * k * k * (fo2 - fc2)**2
+      fo = numpy.sqrt(numpy.clip(fo2, 0, None))
+      fc = numpy.sqrt(numpy.clip(fc2, 0, None))
+      goof = ne.goof()
+      out = ["Fo^2 on the scale of Fc^2. GooF of a group is the overall GooF "
+             "times sqrt(mean w*D^2 of the group / mean w*D^2), "
+             "K = mean(Fo^2)/mean(Fc^2)"]
+      for title, key in (("Fc/Fc(max)", numpy.sqrt(fc2/fc2.max())),
+          ("Resolution (A)", ne.observations.fo_sq.d_spacings().data().as_numpy_array())):
+        out.append("\n%-16s %6s %8s %8s %8s" % (title, "N", "GooF", "K", "R1"))
+        for g in numpy.array_split(numpy.argsort(key), n_bins):
+          if not len(g):
+            continue
+          out.append("%7.3f - %6.3f %6i %8.3f %8.3f %8.4f" % (
+            key[g].min(), key[g].max(), len(g),
+            goof*math.sqrt(wd2[g].mean()/wd2.mean()),
+            fo2[g].mean()/fc2[g].mean() if fc2[g].mean() else 0,
+            abs(fo[g] - fc[g]).sum()/fo[g].sum() if fo[g].sum() else 0))
+      return '\n'.join(out)
+    def reflection_stats():
+      fo = ne.observations.fo_sq
+      ranges = [(fo.d_min(), fo)]
+      theta = block.get('_diffrn_reflns_theta_full') if block is not None else None
+      if theta and self.hklf_code != 5:
+        d = uctbx.two_theta_as_d(2*float(theta), self.wavelength, deg=True)
+        ranges.append((d, fo.resolution_filter(d_min=d)))
+      laue = lambda a: a.as_non_anomalous_array().merge_equivalents().array()
+      rows = [("", lambda a, d: "d > %.4f A" % d)]
+      if fo.anomalous_flag():
+        rows += [("Unique reflections found/possible (point group)",
+          lambda a, d: "%i/%i" % (a.size(), a.complete_set(d_min=d).size())),
+          ("Unique Friedel pairs found/possible",
+          lambda a, d: "%i/%i" % (a.n_bijvoet_pairs(), a.complete_set(d_min=d).n_bijvoet_pairs()))]
+      rows.insert(1, ("Unique reflections found/possible (Laue group)",
+        lambda a, d: "%i/%i" % (laue(a).size(), laue(a).complete_set(d_min=d).size())))
+      out = ["Reflections used in the refinement, after OMIT/SHEL and merging"]
+      out += ["%-48s%s" % (t, "".join("%18s" % f(a, d) for d, a in ranges)) for t, f in rows]
+      # SHELXL's R1 after merging Friedel pairs for the Fourier synthesis
+      k = ne.scale_factor()
+      fo2, fc2 = laue(fo.apply_scaling(factor=1/k)), laue(ne.fc_sq)
+      fc2 = fc2.common_set(fo2)
+      fo2 = fo2.common_set(fc2)
+      a = numpy.sqrt(numpy.clip(fo2.data().as_numpy_array(), 0, None))
+      b = numpy.sqrt(numpy.clip(fc2.data().as_numpy_array(), 0, None))
+      out.append("\nR1 = %.4f for %i unique reflections after merging Friedel pairs" % (
+        abs(a - b).sum()/a.sum(), a.size))
+      raw = self.reflections.f_sq_obs
+      sa = raw.select(raw.sys_absent_flags().data())
+      bad = sa.select(sa.data() > 3*sa.sigmas())
+      out.append("%i systematically absent reflections read, %i of them > 3 sig(I)" % (sa.size(), bad.size()))
+      if bad.size():
+        out.append("   h   k   l      Fo^2     sigma")
+        out += ["%4i%4i%4i %9.2f %9.2f" % (h + (i, s)) for h, i, s in zip(bad.indices(), bad.data(), bad.sigmas())]
+      return '\n'.join(out)
+    def hydrogens():
+      atoms = self.olx_atoms._atoms
+      site = dict(zip(labels, xs.sites_frac()))
+      out = ["Name          x        y        z   AFIX  d(X-H)  bonded to  conformation determined by"]
+      for m, n, pivot, dependent, neighbours, d in self.olx_atoms.afix_iterator():
+        p = str(atoms[pivot]['label'])
+        for i in dependent:
+          h = str(atoms[i]['label'])
+          if str(atoms[i]['type']) not in ('H', 'D') or h not in site or p not in site:
+            continue
+          out.append("%-8s %8.4f %8.4f %8.4f %6i %7.3f  %-9s  %s" % ((h,) + tuple(site[h]) + (
+            10*m + n, uc.distance(site[p], site[h]), p,
+            " ".join(str(atoms[j]['label']) for j in neighbours))))
+      return '\n'.join(out) if len(out) > 1 else "no idealised hydrogen atoms"
+    def connectivity():
+      pst = self.reparametrisation.connectivity_table.pair_asu_table.extract_pair_sym_table(
+        skip_j_seq_less_than_i_seq=False, all_interactions_from_inside_asu=True)
+      ops, out = [], []
+      for i, js in enumerate(pst):
+        nb = []
+        for j, rts in js.items():
+          for rt in rts:
+            if not rt.is_unit_mx() and str(rt) not in ops:
+              ops.append(str(rt))
+            nb.append(labels[j] + ("" if rt.is_unit_mx() else "_$%i" % (ops.index(str(rt)) + 1)))
+        out.append("%-8s - %s" % (labels[i], " ".join(nb)))
+      out += ["$%i  %s" % (i + 1, o) for i, o in enumerate(ops)]
+      return '\n'.join(out)
+    def occupancy():
+      is_h = lambda sc: sc.scattering_type in ('H', 'D')
+      return "%.2f for non-hydrogen and %.2f for H and D atoms" % (
+        sum(sc.weight() for sc in xs.scatterers() if not is_h(sc)),
+        sum(sc.weight() for sc in xs.scatterers() if is_h(sc)))
+    def absolute_structure():
+      fo = ne.observations.fo_sq
+      if xs.space_group().is_centric() or not fo.anomalous_flag():
+        return "centrosymmetric, or Friedel pairs merged"
+      out = []
+      if self.hooft is not None:
+        out.append("Hooft y  = %s" % self.hooft_str)
+      flack = OV.GetParam('snum.refinement.flack_str')
+      if flack:
+        out.append("Flack x  = %s, %s" % (flack, "refined inversion twin" if self.is_inversion_twin()
+          else "fixed model, %s reflections" % self.flack_reflections_used))
+      # Parsons, Flack & Wagner (2013): Q = (I+ - I-)/(I+ + I-), Q_obs = (1 - 2x) Q_calc
+      (op, om), (cp, cm) = fo.hemispheres_acentrics(), ne.fc_sq.hemispheres_acentrics()
+      a, b = op.data().as_numpy_array(), om.data().as_numpy_array()
+      sa, sb = op.sigmas().as_numpy_array(), om.sigmas().as_numpy_array()
+      c, e = cp.data().as_numpy_array(), cm.data().as_numpy_array()
+      var = (b*sa)**2 + (a*sb)**2
+      ok = (a + b > 0) & (c + e > 0) & (var > 0)
+      a, b, var, c, e = (v[ok] for v in (a, b, var, c, e))
+      qo, qc = (a - b)/(a + b), (c - e)/(c + e)
+      w = (a + b)**4/(4*var)
+      s = (w*qo*qc).sum()/(w*qc*qc).sum()
+      chi2 = (w*(qo - s*qc)**2).sum()/(len(qo) - 1)
+      out.append("Parsons x = %s from %i quotients (all Friedel pairs), su scaled by sqrt(chi^2/(n-1)) = %.3f" % (
+        utils.format_float_with_standard_uncertainty((1 - s)/2,
+          0.5*math.sqrt(max(chi2, 1)/(w*qc*qc).sum())), len(qo), math.sqrt(chi2)))
+      return '\n'.join(out)
+    def disagreeable(n=50):
+      fo2 = ne.observations.fo_sq.customized_copy(sigmas=flex.sqrt(1/ne.weights))\
+        .apply_scaling(factor=1/ne.scale_factor())
+      out = io.StringIO()
+      fo2.show_disagreeable_reflections(ne.fc_sq, n_reflections=n, out=out)
+      return out.getvalue().rstrip()
+    def peaks():
+      pk, (hole, hxyz) = getattr(self, 'oxl_peaks', []), self.oxl_hole
+      sites = list(xs.sites_frac())
+      near = lambda xyz: "  ".join("%.2f %s" % p for p in nearest(xyz, sites, labels))
+      out = []
+      if pk:
+        xyz, h = max(pk, key=lambda p: p[1])
+        out.append("Highest peak %6.2f at %7.4f %7.4f %7.4f  [%s]" % ((h,) + xyz + (near(xyz).split("  ")[0],)))
+      out.append("Deepest hole %6.2f at %7.4f %7.4f %7.4f  [%s]" % ((hole,) + hxyz + (near(hxyz).split("  ")[0],)))
+      out.append("\n         x        y        z    peak  distances to the nearest atoms, symmetry equivalents included")
+      out += ["Q%-3i %8.4f %8.4f %8.4f %7.2f  %s" % ((i + 1,) + xyz + (h, near(xyz)))
+        for i, (xyz, h) in enumerate(pk)]
+      pairs = [(i + 1, j + 1, d) for i, (xyz, _) in enumerate(pk)
+        for d, j in nearest(xyz, [p[0] for p in pk], list(range(len(pk))), n=len(pk)) if j > i and d < 3]
+      out.append("\nShortest distances between peaks, below 3 A, symmetry equivalents included")
+      out += ["Q%-3i Q%-3i %6.2f" % p for p in sorted(pairs, key=lambda p: p[2])] or ["none"]
+      return '\n'.join(out)
+    def with_atoms():
+      block = cif_block
+      if ((block is None or block.get_loop('_atom_site') is None)
+          and self.covariance_matrix_and_annotations is not None
+          and not self.objective_only):
+        block = self.as_cif_block(full=True)
+      if block is None or block.get_loop('_atom_site') is None:
+        return self.xray_structure().as_cif_block(format="coreCIF")
+      return block
+    try:
+      block = with_atoms()
+      block_error = None
+    except Exception as e:
+      block, block_error = None, "not available: %s" % e
+    sections = [("Crystal data and refinement summary", lambda: block_error or summary()),
+      ("Reflection statistics", reflection_stats),
+      ("Refinement log", lambda: log_text.rstrip())]
+    it = getattr(ne, 'iterations_object', None)
+    if getattr(it, 'ls_shifts', None) is not None:
+      sections.append(("Final shifts of the independent parameters, the largest shift/su", shifts))
+    if block_error:
+      sections.append(("Atoms", lambda: block_error))
+    for name, title, keys in (
+        ('_atom_site', "Atoms, fractional coordinates and U(eq)/U(iso) in A^2",
+         ['_atom_site_label', '_atom_site_type_symbol', '_atom_site_fract_x',
+          '_atom_site_fract_y', '_atom_site_fract_z', '_atom_site_U_iso_or_equiv',
+          '_atom_site_adp_type', '_atom_site_occupancy']),
+        ('_atom_site_aniso', "Anisotropic displacement parameters in A^2", None),
+        ('_geom_bond', "Bond lengths in A", None),
+        ('_geom_angle', "Bond angles in degrees", None),
+        ('_geom_torsion', "Torsion angles in degrees", None),
+        ('_geom_hbond', "Hydrogen bonds", None)):
+      loop = block.get_loop(name) if block is not None else None
+      if name == '_geom_bond':
+        sections += [("Idealised hydrogen atoms", hydrogens),
+          ("Occupancy sum of the asymmetric unit", occupancy),
+          ("Connectivity", connectivity)]
+      if loop is not None:
+        sections.append((title, lambda loop=loop, keys=keys: table(loop, keys)))
+        if name == '_atom_site_aniso':
+          sections.append(("Principal mean square atomic displacements U in A^2", principal_u))
+    sections.append(("Chirality, R/S by CIP rules", chirality))
+    sections.append(("Absolute structure", absolute_structure))
+    sections.append(("Restraint deviations, sorted by residual", restraints))
+    if self.covariance_matrix_and_annotations is not None:
+      sections.append(("Correlations of the independent parameters", correlations))
+    sections.append(("Analysis of variance", variance))
+    sections.append(("Most disagreeable reflections", disagreeable))
+    if hasattr(self, 'oxl_hole'):
+      sections.append(("Difference electron density, peaks and holes", peaks))
+    with open(OV.file_ChangeExt(OV.FileFull(), 'oxl'), 'w') as f:
+      print("olex2.refine listing for %s" % OV.FileName(), file=f)
+      for title, make in sections:
+        print("\n%s\n%s" % (title, '-'*len(title)), file=f)
+        try:
+          print(make(), file=f)
+        except Exception as e:
+          print("not available: %s" % e, file=f)
 
   def get_hklf2_merging_stats(self):
     if self.hklf_code != 2:
