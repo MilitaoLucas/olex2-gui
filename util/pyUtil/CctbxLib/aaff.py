@@ -613,6 +613,22 @@ def make_fcf(self: RunRefinementPrg):
     fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
   return True
 
+def _mixed_h_sentence():
+  # a CIF that says "mixed" leaves the reader to guess which H were held; name them
+  RM = OlexRefinementModel()
+  held, riding = {}, set()
+  for m, n, pivot, dependent, pivot_neighbours, d in RM.afix_iterator():
+    hs = [RM._atoms[i]['label'] for i in dependent if RM._atoms[i]['type'] in ('H', 'D')]
+    if hs:
+      held.setdefault(m*10 + n, []).extend(hs)
+      riding.update(hs)
+  free = [a['label'] for a in RM._atoms if a['type'] in ('H', 'D') and a['label'] not in riding]
+  if not free or not held:
+    return ""
+  return "; H atoms %s refined freely, %s." % (", ".join(free), ", ".join(
+    "%s riding (AFIX %s)" % (", ".join(v), k) for k, v in sorted(held.items())))
+
+
 def get_refinement_details(cif_block, acta_stuff):
   t = nsa2_get_param('file')
   t = t.lstrip().rstrip()
@@ -724,6 +740,10 @@ The following options were used:
     # a compact copy in the item checkCIF and readers actually show, appended after any caveat already there
     special = "Aspherical atomic form factors from NoSpherA2 (Kleemiss et al., Chem. Sci. 2021, 12, 1675), " \
               + ' '.join(details_text.split("The following options were used:\n", 1)[1].replace("\n", "; ").split()).strip("; ")
+    try:
+      special += _mixed_h_sentence()
+    except Exception as e:  # a sentence is not worth losing the CIF over
+      print("Could not name the riding H atoms: %s" % e)
     try:
       previous = cif_block['_refine_special_details']
     except (KeyError, TypeError):
