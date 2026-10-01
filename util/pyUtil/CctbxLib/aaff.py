@@ -102,6 +102,15 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       run += 1
       HAR_log.write("{:3d}".format(run))
       old_model = OlexRefinementModel()
+      # the f'/f'' radial coefficients are refined parameters as well, but they
+      # belong to no atom, so the shift analysis below cannot find them in the
+      # model snapshots. Taken from the phil here, where the last refinement
+      # left them, and compared after this cycle's.
+      try:
+        from DispRadial.disp_radial import refined_coefficients
+        old_disp = refined_coefficients()[1]
+      except Exception:
+        old_disp = []
       OV.SetVar('Run_number', run)
       self.refinement_has_failed = []
       #Calculate Wavefunction
@@ -457,6 +466,23 @@ all calculation parameters are properly recorded."""
                     if res > results.max_overall:
                       results.update_overall(res, _annotations[matrix_run + 10 + u])
               matrix_run += size
+
+          # and the independent scalars the annotations do not cover: the
+          # dispersion coefficients. They shape f' and f'' for every reflection,
+          # so a cycle that still moves them by more than its s.u. has not
+          # converged, whatever the atoms did.
+          try:
+            from DispRadial.disp_radial import refined_coefficients
+            dc = getattr(self.cctbx.normal_eqns.reparametrisation,
+                         'dispersion_radial', None)
+            disp_labels, new_disp, disp_esds = refined_coefficients(dc)
+            for i in range(min(len(new_disp), len(old_disp), len(disp_esds))):
+              if disp_esds[i] > 0:
+                results.update_overall(
+                  abs(new_disp[i] - old_disp[i])/disp_esds[i], disp_labels[i])
+          except Exception as e:
+            print('DispRadial: coefficients left out of the shift analysis'
+                  ' (%s)' % e)
 
           HAR_log.write("{:>16.4f}".format(results.max_dxyz))
           if results.label_xyz is not None:

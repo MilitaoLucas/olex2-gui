@@ -30,12 +30,13 @@ a paper: f' and f'' are dominated by core electrons and are genuinely close to
 constant in s. One empirical function shared by both is a phenomenological
 correction, not a physical model of dispersion.
 
-Macros, all under the disprad namespace:
+Macros, all under the disprad namespace, which python plugins reach through
+spy:
 
-    disprad.setup elements=Br,I n=2
-    disprad.setup atoms=Pd1 n=3
-    disprad.print_current
-    disprad.remove
+    spy.disprad.setup elements=Br,I n=2
+    spy.disprad.setup atoms=Pd1 n=3
+    spy.disprad.print_current
+    spy.disprad.remove
 
 C.f. cctbx/xray/dispersion_radial.h for the refinement machinery.
 """
@@ -74,6 +75,42 @@ def _split(text):
   if not text:
     return []
   return [t for t in text.replace(',', ' ').split() if t]
+
+
+_ALIASES = {'element': 'elements', 'atom': 'atoms', 'groups': 'group'}
+
+
+def _bare_is_atom(token):
+  """Where a bare token belongs: "Sn" is an element, "Sn1" is an atom label."""
+  return 'atoms' if any(c.isdigit() for c in token) else 'elements'
+
+
+def _named(args, given, bare=None):
+  """Fold dash-less "name=value" parameters into the keyword arguments.
+
+  Olex2 only turns a token into a macro option if it starts with a dash, so
+  "disprad.setup elements=Pd n=2" reaches the macro as two positional
+  parameters and silently lands in the first two slots of the signature -- the
+  Pd goes to elements and the n=2 to atoms, and the macro then complains about
+  being given both. Everyone types it without the dash, so take it that way.
+
+  `bare` decides which option a token carrying no '=' at all belongs to, so
+  that "disprad.setup Sn" and "disprad.setup Sn Pd" work; without it such a
+  token is an error. Singular option names are accepted as well as plural.
+  """
+  named = dict(given)
+  for a in args:
+    a = a.decode() if isinstance(a, bytes) else str(a)
+    name, sep, value = a.partition('=')
+    if not sep:
+      if bare is None:
+        raise ValueError("DispRadial: '%s' is not name=value" % a)
+      name, value = bare(a.strip()), a.strip()
+      if named.get(name):  # "disprad.setup Sn Pd" is one list, not two options
+        value = '%s,%s' % (named[name], value)
+    name = name.strip().lower()  # every option here is lower case
+    named[_ALIASES.get(name, name)] = value.strip()
+  return named
 
 
 def _has_anomalous_scattering(sc):
@@ -136,6 +173,52 @@ def _stored_coefficients():
     return [float(c) for c in values]
   except (ValueError, TypeError):
     return []
+
+
+def coefficient_label(dc, i):
+  """Which coefficient parameter `i` of `dc` is, for a shift report.
+
+  The coefficients are independent scalars, so they are not in the block of the
+  Jacobian that carries the per-scatterer annotations and nothing else names
+  them. Without a name of their own a shift on one is reported as a shift on
+  whatever the annotations happen to run out at.
+  """
+  n = int(getattr(dc, 'n_terms', 0)) or 1
+  names = list(getattr(dc, 'group_names', None) or [])
+  g, k = divmod(int(i), n)
+  return 'DISP.%s.c%i' % (names[g] if g < len(names) else 'g%i' % (g + 1), k + 1)
+
+
+def refined_coefficients(dc=None):
+  """(labels, coefficients, s.u.) as the last refinement left them.
+
+  Read from the phil rather than from the reparametrisation, so that a caller
+  watching the coefficients move across a refinement -- the HAR loop's
+  convergence test -- can ask both before and after, when there is no
+  reparametrisation to ask. `dc` only supplies the group names; without it the
+  groups are numbered. The s.u. come back empty unless there is one per
+  coefficient, since a partial list cannot be matched up.
+  """
+  coefficients = _stored_coefficients()
+  try:
+    esds = [float(e) for e in
+            json.loads(OV.GetParam('snum.DispRadial.esds', '') or '[]')]
+  except (ValueError, TypeError):
+    esds = []
+  if len(esds) != len(coefficients):
+    esds = []
+  if dc is None:
+    dc = _PhilOnly(int(OV.GetParam('snum.DispRadial.n_terms', 2)))
+  return ([coefficient_label(dc, i) for i in range(len(coefficients))],
+          coefficients, esds)
+
+
+class _PhilOnly(object):
+  """Enough of a correction to name its coefficients, from the phil alone."""
+  group_names = None
+
+  def __init__(self, n_terms):
+    self.n_terms = n_terms
 
 
 def _wavelength():
@@ -334,19 +417,162 @@ def _smallest_R(dc, group, d_star_sq_lo, d_star_sq_hi, n=100):
   return min(values)
 
 
+def candidates():
+  """Element symbols -- atom labels in atom mode -- worth correcting at all.
+
+  What the GUI dropdown offers. Atoms with neither f' nor f'' are left out for
+  the same reason _assign_groups leaves them out: a group of those has no
+  gradient.
+  """
+  try:
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    scatterers = OlexCctbxAdapter().xray_structure().scatterers()
+  except Exception:
+    return []
+  atom_mode = str(OV.GetParam('snum.DispRadial.mode', 'element')) == 'atom'
+  keys = []
+  for sc in scatterers:
+    if not _has_anomalous_scattering(sc):
+      continue
+    key = sc.label if atom_mode else sc.scattering_type
+    if key not in keys:
+      keys.append(key)
+  return sorted(keys)
+
+
+def element_list():
+  """The dropdown's items, and its selection if it has none yet."""
+  keys = candidates()
+  if keys and OV.GetVar('disprad_el', None) not in keys:
+    OV.SetVar('disprad_el', keys[0])
+  return ';'.join(keys)
+
+
+def _selected():
+  """The groups the correction is on for, the empty selection spelt out.
+
+  An empty selection means every candidate, which is fine for the refinement
+  but not for a checkbox: taking one element out of "all of them" has to leave
+  the others named.
+  """
+  if not OV.GetParam('snum.DispRadial.enabled', False):
+    return []
+  return _split(OV.GetParam('snum.DispRadial.selection', '')) or candidates()
+
+
+def is_on(key):
+  """Whether the checkbox beside the dropdown is ticked."""
+  return str(str(key) in _selected())
+
+
+def toggle(key, state):
+  """Put this element in the correction, or take it out.
+
+  Goes through setup/remove rather than writing the phil, so that changing the
+  groups from the GUI does what changing them from the command line does --
+  including dropping coefficients that were refined for a different grouping.
+  """
+  key = str(key)
+  keys = _selected()
+  if str(state).lower() in ('true', '1', 'yes'):
+    if key not in keys:
+      keys.append(key)
+  elif key in keys:
+    keys.remove(key)
+  if not keys:
+    disp_radial_instance.remove()
+  elif str(OV.GetParam('snum.DispRadial.mode', 'element')) == 'atom':
+    disp_radial_instance.setup(atoms=','.join(keys))
+  else:
+    disp_radial_instance.setup(elements=','.join(keys))
+
+
+def set_terms(n):
+  """How many powers, from the dropdown.
+
+  Coefficients refined for a different number of terms are a different model,
+  so they go; the hash would reject them anyway and dashes say so plainly.
+  """
+  n = int(n)
+  if n < 1 or n > MAX_TERMS:
+    print('DispRadial: n must be between 1 and %i' % MAX_TERMS)
+    return ''
+  if n != int(OV.GetParam('snum.DispRadial.n_terms', 2)):
+    OV.SetParam('snum.DispRadial.n_terms', n)
+    OV.SetParam('snum.DispRadial.coefficients', '')
+    OV.SetParam('snum.DispRadial.coefficients_hash', '')
+    OV.SetParam('snum.DispRadial.esds', '')
+  return ''
+
+
+def set_refine(state):
+  """The refine/fix checkbox, through the macros so the s.u. follow."""
+  if str(state).lower() in ('true', '1', 'yes'):
+    disp_radial_instance.refine()
+  else:
+    disp_radial_instance.fix()
+  return ''
+
+
+def coefficient_table():
+  """The rows of the GUI panel's table: a group per row, a term per column.
+
+  Read from the phil rather than from a correction object, since the panel is
+  redrawn on every click and building one reads the reflections. A group whose
+  coefficients are not there yet -- set up but not yet refined -- gets dashes
+  rather than a table that is not shown at all.
+  """
+  n = int(OV.GetParam('snum.DispRadial.n_terms', 2))
+  names = _selected()
+  if not names:
+    return ('<tr><td>Off. Tick an element above to correct f\' and f\'\' of'
+            ' every atom of it.</td></tr>')
+  coefficients = _stored_coefficients()
+  esds = refined_coefficients()[2]
+  rows = ['<tr><td><b>Group</b></td>%s</tr>'
+          % ''.join('<td align="center"><b>c%i</b></td>' % (k + 1)
+                    for k in range(n))]
+  for g, name in enumerate(names):
+    cells = []
+    for k in range(n):
+      i = g*n + k
+      if i >= len(coefficients):
+        cells.append('&mdash;')
+      elif i < len(esds) and esds[i] > 0:
+        cells.append('%.5f(%.5f)' % (coefficients[i], esds[i]))
+      else:
+        cells.append('%.5f' % coefficients[i])
+    rows.append('<tr><td>%s</td>%s</tr>'
+                % (name, ''.join('<td align="center">%s</td>' % c
+                                 for c in cells)))
+  if not OV.GetParam('snum.DispRadial.refine', True):
+    rows.append('<tr><td colspan="%i"><i>held fixed &mdash; the correction'
+                ' still applies, it just refines nothing</i></td></tr>'
+                % (n + 1))
+  return '\n'.join(rows)
+
+
 class DispRadial(PT):
   def __init__(self):
+    super(DispRadial, self).__init__()
     self.p_name = p_name
-    # No GUI entry unless debugging: this is macro-only for now, and a tool
-    # button for something with no controls behind it is a promise the plugin
-    # does not keep. p_htm is what puts it in the tool index; the macros are
-    # registered either way.
-    self.p_htm = p_htm if OV.IsDebugging() else None
+    self.p_htm = p_htm
     self.p_img = p_img
     self.p_scope = p_scope
     self.p_path = p_path
+    # set here rather than in the phil: p_scope is DispRadial but the phil
+    # scope is snum.DispRadial, so setup_gui's GetParam fallback would look up
+    # a path that does not exist -- and it is not inside its try
+    self.p_location = 'tools'
+    self.p_before = 'images'
     self._load_phil()
     self.register_methods()
+    # deal_with_phil is deliberately not used: the parameters live under
+    # snum.DispRadial, which it cannot read into self.params, and _load_phil
+    # has already adopted them. The HAR loop imports this module whatever
+    # user.refinement.dispradial says, so the panel waits for the switch here.
+    if OV.GetParam('user.refinement.dispradial', False):
+      self.setup_gui()
 
   def _load_phil(self):
     phil_path = os.path.join(p_path, 'DispRadial.phil')
@@ -375,9 +601,24 @@ class DispRadial(PT):
     olex.registerMacro(self.print_current, "", False, "disprad")
     olex.registerMacro(self.plot, "", False, "disprad")
     olex.registerMacro(self.remove, "", False, "disprad")
+    # what the GUI panel calls; functions rather than macros because the html
+    # wants their return value
+    for f in (element_list, is_on, toggle, set_terms, set_refine,
+              coefficient_table):
+      OV.registerFunction(f, False, "disprad")
 
-  def setup(self, elements=None, atoms=None, n=None, basis=None):
+  def setup(self, *args, **kwds):
     """Turn the correction on for a set of elements or of atoms."""
+    try:
+      kwds = _named(args, kwds, _bare_is_atom)
+    except ValueError as e:
+      print(e)
+      return
+    elements, atoms = kwds.pop('elements', None), kwds.pop('atoms', None)
+    n, basis = kwds.pop('n', None), kwds.pop('basis', None)
+    if kwds:
+      print('DispRadial: no such option: %s' % ', '.join(sorted(kwds)))
+      return
     if elements and atoms:
       print('DispRadial: give elements or atoms, not both')
       return
@@ -387,6 +628,24 @@ class DispRadial(PT):
         print("DispRadial: basis must be cos_2theta or stol, got '%s'" % basis)
         return
       OV.SetParam('snum.DispRadial.basis', basis)
+    # Check the selection against the structure before anything is written.
+    # Setting up again clears the coefficients, so a selection that matches
+    # nothing -- a typo, a label that is Sn01 rather than Sn1, "setup plot"
+    # meant as "plot" -- would otherwise throw away a refined group and leave
+    # the correction enabled with nothing in it.
+    selection = _split(str(atoms or elements or ''))
+    if selection:
+      try:
+        from cctbx_olex_adapter import OlexCctbxAdapter
+        xs = OlexCctbxAdapter().xray_structure()
+      except Exception as e:
+        xs = None
+        print('DispRadial: no structure to check the selection against (%s),'
+              ' taking it as given' % e)
+      if xs is not None:
+        if _assign_groups(xs, 'atom' if atoms else 'element', selection)[1] == 0:
+          print('DispRadial: nothing set up, what was there is unchanged')
+          return
     if atoms:
       OV.SetParam('snum.DispRadial.mode', 'atom')
       OV.SetParam('snum.DispRadial.selection', str(atoms))
@@ -434,7 +693,7 @@ class DispRadial(PT):
       esds = []
     report(xs, dc, esds if len(esds) == dc.n_param else None)
 
-  def set(self, group=None, c=None, fix=None):
+  def set(self, *args, **kwds):
     """Put values of your own into one group, or into all of them.
 
     disprad.set group=Pd c=-1.8,2.0     one group, by element or atom label
@@ -444,6 +703,15 @@ class DispRadial(PT):
     Setting values does not by itself stop them being refined -- they may be a
     starting point rather than an answer. Add fix=True, or say disprad.fix.
     """
+    try:
+      kwds = _named(args, kwds)
+    except ValueError as e:
+      print(e)
+      return
+    group, c, fix = kwds.pop('group', None), kwds.pop('c', None), kwds.pop('fix', None)
+    if kwds:
+      print('DispRadial: no such option: %s' % ', '.join(sorted(kwds)))
+      return
     if c is None:
       print('DispRadial: give the coefficients, e.g. disprad.set group=Pd'
             ' c=-1.8,2.0')

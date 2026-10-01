@@ -458,6 +458,14 @@ class iterations_with_shift_analysis(normal_eqns_solving.iterations):
            max_shift_i >= r.fc_correction.grad_index and\
            max_shift_i < r.fc_correction.grad_index + r.fc_correction.n_param:
         self.max_shift_for = "EXTI/SWAT"
+      elif r.dispersion_radial is not None and r.dispersion_radial.grad and\
+           max_shift_i >= r.dispersion_radial.grad_index and\
+           max_shift_i < r.dispersion_radial.grad_index + r.dispersion_radial.n_param:
+        # last of the independent scalars, so without this branch its shifts
+        # fall through to the BASF fallback and are reported as a twin fraction
+        from DispRadial.disp_radial import coefficient_label
+        self.max_shift_for = coefficient_label(
+          r.dispersion_radial, max_shift_i - r.dispersion_radial.grad_index)
       else:
         self.max_shift_for = "BASF%s" %(max_shift_i - (J.n_cols - spc) + 1)
     else:

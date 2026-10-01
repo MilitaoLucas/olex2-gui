@@ -318,6 +318,8 @@ class initpy_funcs():
       return
 
   def DispRadial(self):
+    if not self.OV.GetParam('user.refinement.dispradial', False):
+      return
     try:
       self.olx.stopwatch.exec("import disp_radial")
     except Exception as e:

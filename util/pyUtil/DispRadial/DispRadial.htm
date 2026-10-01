@@ -1,8 +1,90 @@
-<!-- #include tool-h;gui/blocks/tool-h.htm;image=#image;onclick=;1; -->
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISPRAD_GROUPS';help_ext=DispRadial;1 -->
+  <td width="16%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=disprad@element",
+    "items=spy.disprad.element_list()",
+    "value=GetVar('disprad_el')",
+    "onchange=setvar('disprad_el', html.GetValue('~name~'))>>html.Update()")
+  $-
+  </td>
+  <td width="6%" align='right'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=disprad_on",
+    "checked=spy.disprad.is_on(GetVar('disprad_el'))",
+    "onclick=spy.disprad.toggle(GetVar('disprad_el'),html.GetState('~name~'))>>html.Update()")
+  $-
+  </td>
+  <td width="34%">correct this one</td>
+  <td width="22%" align='right'>Terms in R(u):</td>
+  <td width="16%">
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "name=disprad@terms",
+    "items=1;2;3;4",
+    "value=spy.GetParam('snum.DispRadial.n_terms')",
+    "onchange=spy.disprad.set_terms(html.GetValue('~name~'))>>html.Update()")
+  $-
+  </td>
+  <td width="6%"> </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISPRAD_BUTTONS';help_ext=DispRadial;1 -->
+  <td width="6%" align='right'>
+  $+
+    html.Snippet("gui/snippets/input-checkbox",
+    "name=disprad_refine",
+    "checked=spy.GetParam('snum.DispRadial.refine')",
+    "onclick=spy.disprad.set_refine(html.GetState('~name~'))>>html.Update()")
+  $-
+  </td>
+  <td width="24%">refine them</td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Dispersion Plot'",
+    "hint=the tabulated constants and the refined curves against sin(theta)/lambda",
+    "onclick=spy.disprad.plot",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="24%" align='center'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Report'",
+    "hint=the coefficients and what they do to R, in the console",
+    "onclick=spy.disprad.print_current",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="22%" align='center'>",
+    )
+  $-
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Off'",
+    "hint=switch the correction off and forget the coefficients",
+    "onclick=spy.disprad.remove>>html.Update()",
+    "bgcolor=GetVar(HtmlTableRowBgColour)",
+    "td1=<td width="24%" align='center'>",
+    )
+  $-
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISPRAD_TABLE';help_ext=DispRadial;1 -->
+<td>
+  <table width="100%" align='center' border="0" style="border-collapse: collapse" cellpadding="0" cellspacing="3" bgcolor="$GetVar(HtmlTableBgColour)">
+    $spy.disprad.coefficient_table()
+  </table>
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISPRAD_ABOUT';help_ext=DispRadial;1 -->
+<td>
 <font size='$GetVar(HtmlFontSizeControls)'>
-<p>
-A radial falloff shared by f' and f''.
-</p>
 <p>
 f' and f'' are stored as constants and enter Fc unchanged at every scattering
 angle, while f0 decays. This gives them a decay of their own, the same one for
@@ -13,49 +95,22 @@ both, refined with the structure:
 R(u) = 1 + c<sub>1</sub>u + c<sub>2</sub>u<sup>2</sup> + ...
 </p>
 <p>
-u is 1 &minus; cos 2&theta; by default, which is what the physics asks for, or
-sin(&theta;)/&lambda; with <b>basis=stol</b>. These are not just different
-units. Since cos 2&theta; = 1 &minus; 2&lambda;<sup>2</sup>s<sup>2</sup>, a
-polynomial in the first is exactly a polynomial of the same degree in
-s<sup>2</sup> &mdash; the <i>even</i> powers of s and only those &mdash;
-whereas powers of s span the odd ones too, and those are not polynomials in
-cos 2&theta; at all. Choosing cos 2&theta; restricts the model to the physical
-family rather than rewriting it, and it makes the correction turn on
-quadratically from forward scattering instead of linearly.
+u is 1 &minus; cos 2&theta;, which is what the physics asks for, or
+sin(&theta;)/&lambda; with <b>spy.disprad.setup basis=stol</b>. These are not
+just different units. Since cos 2&theta; = 1 &minus;
+2&lambda;<sup>2</sup>s<sup>2</sup>, a polynomial in the first is exactly a
+polynomial of the same degree in s<sup>2</sup> &mdash; the <i>even</i> powers
+of s and only those &mdash; whereas powers of s span the odd ones too, and
+those are not polynomials in cos 2&theta; at all. Choosing cos 2&theta;
+restricts the model to the physical family rather than rewriting it, and it
+makes the correction turn on quadratically from forward scattering instead of
+linearly.
 </p>
 <p>
 There is no constant term: scaling f' by a constant is the same as changing f',
 so it would be exactly degenerate. Both choices of u vanish at &theta; = 0, so
 R(0) = 1 and the tabulated values stand untouched at forward scattering, where
 they are by definition right.
-</p>
-<p>
-There are no GUI controls yet. It is driven from the command line:
-</p>
-<pre>
-  disprad.setup elements=Pd n=2
-  disprad.setup atoms=Pd1 n=1 basis=stol
-  disprad.print_current
-  disprad.plot
-  disprad.remove
-</pre>
-<p>
-Values of your own can be asserted rather than fitted. Held fixed the
-correction still multiplies f' and f'' &mdash; it shapes the model the R
-factors describe &mdash; it simply contributes no parameter to the least
-squares, and gets no uncertainty:
-</p>
-<pre>
-  disprad.set group=Pd c=-1.8,2.0 fix=True
-  disprad.set c=-1.8,2.0,-0.3,0.1        every coefficient, group-major
-  disprad.fix                            hold whatever is there now
-  disprad.refine                         let them go again
-</pre>
-<p>
-Values put there by hand stand until you change them; refined values are
-reused as a starting point only while they still match the model they came
-from. Note that fixing is all or nothing &mdash; there is no way yet to hold
-one group and refine another.
 </p>
 <p>
 The coefficients start at zero, where R is 1 and nothing has changed. They
@@ -66,13 +121,24 @@ held above 0.1 over the measured resolution range, since f' and f'' changing
 sign is not something the model should be allowed to do quietly.
 </p>
 <p>
-<b>disprad.plot</b> draws f' and f'' against sin(&theta;)/&lambda; over the
-measured resolution range: a flat line for each tabulated value and a curve for
-what the refinement made of it. How far a curve departs from its line is the
-size of the correction, and the further it goes the more likely it is to be
-absorbing model error rather than measuring dispersion.
+The dropdown here groups by element. One group per <i>atom</i>, values put in
+by hand, and holding one group while another refines are command line only:
 </p>
+<pre>
+  spy.disprad.setup atoms=Pd1 n=1
+  spy.disprad.set group=Pd c=-1.8,2.0 fix=True
+  spy.disprad.print_current
+</pre>
 <p>
-Twinned data is refused.
+Values put there by hand stand until you change them; refined values are
+reused as a starting point only while they still match the model they came
+from. Twinned data is refused.
 </p>
 </font>
+</td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+<!-- %Radial Dispersion% -->

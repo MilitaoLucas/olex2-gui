@@ -372,7 +372,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # reparametrisation as a parameter and to f_calc_modulus_squared as an
     # argument, and both have to get it or it silently does nothing.
     self.dispersion_radial = None
-    if OV.GetParam('snum.DispRadial.enabled', False):
+    if OV.GetParam('user.refinement.dispradial', False) and\
+       OV.GetParam('snum.DispRadial.enabled', False):
       try:
         from DispRadial.disp_radial import build_correction
         self.dispersion_radial = build_correction(self.xray_structure())

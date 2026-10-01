@@ -1543,6 +1543,13 @@ user
               change a structure already refining against a likelihood - \
               the method stays selected and stays visible, so nothing \
               silently switches target underneath it.
+    dispradial = False
+      .type = bool
+      .short_caption = Offer DispRadial
+      .help = Load DispRadial, the refinable radial falloff of f' and f'' \
+              (disprad.* macros and the Tools panel), and let refinement \
+              apply it. Off, a structure set up with it refines without the \
+              correction. Takes effect at the next start.
     refln_loop = False
       .type = bool
     use_openmp = False
