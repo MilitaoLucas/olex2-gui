@@ -473,6 +473,8 @@ def toggle(key, state):
   including dropping coefficients that were refined for a different grouping.
   """
   key = str(key)
+  if not key:
+    return
   keys = _selected()
   if str(state).lower() in ('true', '1', 'yes'):
     if key not in keys:

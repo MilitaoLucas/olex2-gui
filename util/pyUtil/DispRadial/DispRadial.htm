@@ -6,7 +6,7 @@
     html.Snippet("gui/snippets/input-combo",
     "name=disprad@element",
     "items=spy.disprad.element_list()",
-    "value=GetVar('disprad_el')",
+    "value=GetVar('disprad_el','')",
     "onchange=setvar('disprad_el', html.GetValue('~name~'))>>html.Update()")
   $-
   </td>
@@ -14,8 +14,8 @@
   $+
     html.Snippet("gui/snippets/input-checkbox",
     "name=disprad_on",
-    "checked=spy.disprad.is_on(GetVar('disprad_el'))",
-    "onclick=spy.disprad.toggle(GetVar('disprad_el'),html.GetState('~name~'))>>html.Update()")
+    "checked=spy.disprad.is_on(GetVar('disprad_el',''))",
+    "onclick=spy.disprad.toggle(GetVar('disprad_el',''),html.GetState('~name~'))>>html.Update()")
   $-
   </td>
   <td width="34%">correct this one</td>
@@ -124,11 +124,11 @@ sign is not something the model should be allowed to do quietly.
 The dropdown here groups by element. One group per <i>atom</i>, values put in
 by hand, and holding one group while another refines are command line only:
 </p>
-<pre>
-  spy.disprad.setup atoms=Pd1 n=1
-  spy.disprad.set group=Pd c=-1.8,2.0 fix=True
-  spy.disprad.print_current
-</pre>
+<p>
+&nbsp;&nbsp;<b>spy.disprad.setup atoms=Pd1 n=1</b><br>
+&nbsp;&nbsp;<b>spy.disprad.set group=Pd c=-1.8,2.0 fix=True</b><br>
+&nbsp;&nbsp;<b>spy.disprad.print_current</b>
+</p>
 <p>
 Values put there by hand stand until you change them; refined values are
 reused as a starting point only while they still match the model they came

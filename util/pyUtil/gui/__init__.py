@@ -399,6 +399,7 @@ def zipToOlexVFS(zip_path, base=None):
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
 def get_default_notification(txt="", txt_col='green_text'):
+  txt = txt or "" # callers pass a missing param straight through
   txt_col = OV.GetVar("gui.%s" %txt_col, '#ff0000')
   poly = ""
   _ = olx.xf.latt.IsPolymeric()
