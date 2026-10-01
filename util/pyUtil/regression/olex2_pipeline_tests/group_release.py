@@ -26,6 +26,8 @@ a skip is never mistaken for a pass.
 
   OLEX2_TEST_FULL          1 registers the full-tier cases as well
   OLEX2_TEST_CASES         comma-separated case names, default all
+  OLEX2_TEST_FLINT_SAMPLES  extra flint_<sample> cases beyond the four shipped
+                           and the eight carbon-free cod_<id> ones (group_flint.INORGANIC)
   OLEX2_TEST_SALTED_MODEL  directory holding the .salted model (read by
                            group_nsa2_matrix.t_enable)
   OLEX2_TEST_NCPUS, OLEX2_TEST_MEM, OLEX2_TEST_SAMPLE_DIR as for the matrix
@@ -665,10 +667,21 @@ CASES = [
   ("flint_epoxide",      "quick", group_flint.t_flint, {"sample": "epoxide"}),
   ("flint_water",        "quick", group_flint.t_flint, {"sample": "water"}),
   ("flint_malbac",       "quick", group_flint.t_flint, {"sample": "malbac"}),
+  ("flint_cod_1560875",  "quick", group_flint.t_flint, {"sample": "cod_1560875"}),
+  ("flint_cod_2241658",  "quick", group_flint.t_flint, {"sample": "cod_2241658"}),
+  ("flint_cod_2108240",  "quick", group_flint.t_flint, {"sample": "cod_2108240"}),
+  ("flint_cod_2013004",  "quick", group_flint.t_flint, {"sample": "cod_2013004"}),
+  ("flint_cod_2104335",  "quick", group_flint.t_flint, {"sample": "cod_2104335"}),
+  ("flint_cod_2208447",  "quick", group_flint.t_flint, {"sample": "cod_2208447"}),
+  ("flint_cod_2229150",  "quick", group_flint.t_flint, {"sample": "cod_2229150"}),
+  ("flint_cod_2108989",  "quick", group_flint.t_flint, {"sample": "cod_2108989"}),
   ("orca_epoxide",           "full",  c_orca, {}),
   ("orca_ecp_malbac",        "full",  c_orca_ecp, {}),
   ("orca_qmmm_epoxide",      "full",  c_orca_qmmm, {}),
 ]
+for _s in _env_list("OLEX2_TEST_FLINT_SAMPLES"):
+  CASES.append(("flint_%s" % _s.lower(), "quick", group_flint.t_flint,
+                {"sample": _s}))
 for _scheme in PARTITIONS:
   CASES.append(("part_%s_epoxide" % _scheme.lower(), "quick", c_partition,
                 {"scheme": _scheme}))
