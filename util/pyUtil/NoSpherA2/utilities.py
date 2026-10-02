@@ -625,6 +625,11 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
           break
         else:
           time.sleep(0.1)
+      # The last lines before an exit, often the error message itself, land
+      # after the final poll
+      x = stdout.read()
+      if x:
+        print(x, end='')
     finally:
       if occ_stdout:
         occ_stdout.close()
