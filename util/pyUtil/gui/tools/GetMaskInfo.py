@@ -192,11 +192,7 @@ def get_mask_info():
     electron = "%.0f" % round(electron, 0)
     _ = (volume, electron)
 
-    got_it = False
-    for accounted_for_entry in accounted_for:
-      if volume in accounted_for_entry:
-        got_it = True
-    if got_it:
+    if volume in accounted_for:
       continue
 
     multiplicity = 0
@@ -259,8 +255,9 @@ def get_mask_info():
         Z, N = get_sum_electrons_from_formula(ent)
         electrons_accounted_for += Z * user_number
         non_h_accounted_for += N * user_number
-      except:
-        electrons_accounted_for += 0
+      except (KeyError, ValueError, TypeError):
+        # unknown element / unparsable formula: contributes no electrons
+        pass
 
       if entity and entity != "?":
         _ = "%s %s" % (format_number(multiplicity * user_number / f), entity)
@@ -277,9 +274,6 @@ def get_mask_info():
 
     electrons_accounted_for = electrons_accounted_for * multiplicity
     non_h_accounted_for = non_h_accounted_for * multiplicity
-
-    if volume == "n/a":
-      return
 
     total_void_accounted_for_electrons += electrons_accounted_for
     eaf = electrons_accounted_for
@@ -304,8 +298,8 @@ def get_mask_info():
       v_over_e_html = "n/a"
     d['v_over_e'] = v_over_e_html
 
+    v_over_n_html = "n/a"
     if float(volume) != 0:
-      v_over_n_html = "n/a"
       if non_h_accounted_for != 0:
         v_over_n = float(volume) / non_h_accounted_for
         if v_over_n < 20:
@@ -340,7 +334,7 @@ def get_mask_info():
   #-- FINAL BLOCK ###############
 
   if content_disp_all_l:
-    content_disp_all = " and ".join([", ".join(content_disp_all_l[:-1]), content_disp_l[-1]]) if len(content_disp_all_l) > 1 else content_disp_all_l[0]
+    content_disp_all = " and ".join([", ".join(content_disp_all_l[:-1]), content_disp_all_l[-1]]) if len(content_disp_all_l) > 1 else content_disp_all_l[0]
     content_disp_all = re.sub(r"<.*?>", "", content_disp_all)
   d['content_disp_all'] = content_disp_all
 
@@ -362,12 +356,13 @@ def get_mask_info():
     ent = " ".join(re.findall(r'\d+|[A-Z][a-z]*', ent))
     ent = formula_cleaner(str(ent))
     try:
-      total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * user_number * number_of_symm_op
-    except:
-      total_electrons_accounted_for += 0
-    f = number_of_symm_op * Zprime
-    add_to_formula = _add_formula(add_to_formula, ent, multi / f * multiplicity)
-    add_to_moiety += "%s[%s], " % (format_number(multi / f * multiplicity), ent_disp)
+      total_electrons_accounted_for += get_sum_electrons_from_formula(ent)[0] * multi * number_of_symm_op
+    except (KeyError, ValueError, TypeError):
+      # unknown element / unparsable formula: contributes no electrons
+      pass
+    f_sym = number_of_symm_op * Zprime
+    add_to_formula = _add_formula(add_to_formula, ent, multi / f_sym * multiplicity)
+    add_to_moiety += "%s[%s], " % (format_number(multi / f_sym * multiplicity), ent_disp)
 
   total_formula = _add_formula(total_formula, add_to_formula, 1)
   add_to_moiety = add_to_moiety.rstrip(", ")
@@ -524,7 +519,7 @@ def get_sum_electrons_from_formula(f):
   Z = 0
   N = 0
   if not f:
-    return retVal
+    return Z, N
   f = f.split()
   for entry in f:
     element = entry.rstrip('0123456789')
