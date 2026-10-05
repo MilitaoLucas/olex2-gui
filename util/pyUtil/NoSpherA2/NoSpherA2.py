@@ -890,8 +890,6 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
   def setup_ptb_executables(self):
-    if not OV.IsDebugging():
-      return
     self.ptb_exe = self.setup_software("pTB", "ptb")
 
   def setup_discamb(self):
