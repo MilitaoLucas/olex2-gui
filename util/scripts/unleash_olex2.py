@@ -857,7 +857,7 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
       if zip_info.create_system == 3 and (src_mode & 0o170000):
         # source zip has full Unix attributes (type + perms, incl. symlinks): keep them
         zi.external_attr = zip_info.external_attr
-      elif zip_info.is_dir():
+      elif zip_info.filename.endswith('/')():
         zi.external_attr = (0o040755 << 16) | 0x10   # directory
       else:
         zi.external_attr = 0o100755 << 16            # regular file, rwxr-xr-x
