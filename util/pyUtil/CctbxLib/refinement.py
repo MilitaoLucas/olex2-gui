@@ -2550,10 +2550,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
         f_calc = f_calc.customized_copy(crystal_symmetry=fo2.crystal_symmetry())
         f_calc = f_calc.common_set(fo2)
-        if self.f_mask:
-          f_mask = self.f_mask.common_set(f_calc)
-          f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
         rescale = True
+      if self.f_mask:
+        f_mask = self.f_mask.common_set(f_calc)
+        f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
     elif self.hklf_code == 2:
       fo2, fc_sq = self.transfer_exti_scale_hklf2(
         None if not self.fc_correction.grad else self.fc_correction.value,
