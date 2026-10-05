@@ -852,7 +852,15 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
       zi = zipfile.ZipInfo(prefix + zip_info.filename)
       zi.date_time = zip_info.date_time
       zi.compress_type = zipfile.ZIP_DEFLATED
-      zi.external_attr = 0o775 << 16 # it is NEEDED on Linux and Mac
+      zi.create_system = 3  # Unix
+      src_mode = zip_info.external_attr >> 16
+      if zip_info.create_system == 3 and (src_mode & 0o170000):
+        # source zip has full Unix attributes (type + perms, incl. symlinks): keep them
+        zi.external_attr = zip_info.external_attr
+      elif zip_info.is_dir():
+        zi.external_attr = (0o040755 << 16) | 0x10   # directory
+      else:
+        zi.external_attr = 0o100755 << 16            # regular file, rwxr-xr-x
       dest_zip.writestr(zi, src_zip.read(zip_info.filename) )
     src_zip.close()
   if extra_files:
