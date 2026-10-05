@@ -335,8 +335,7 @@ def updateKey(module):
         module.action = 0
         return True
     except Exception as e:
-      msg = e.message
-      if "is expired" in e.message:
+      if "is expired" in str(e):
         msg = "The key has expired."
       print("Error while reloading '%s': %s" %(module.name, msg))
       return False

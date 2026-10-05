@@ -953,8 +953,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
             anomalous_flag=fo2.anomalous_flag()),
           data=dtw.data,
           sigmas=dtw.sigmas).set_observation_type(fo2)
-      fo2 = fo2.merge_equivalents(algorithm="shelx").array()\
-        .average_bijvoet_mates().map_to_asu()
+      fo2 = fo2.merge_equivalents(algorithm="shelx").array()
+      if not fc.anomalous_flag():
+        fo2 = fo2.average_bijvoet_mates()
+      fo2 = fo2.map_to_asu()
       fc = fc.common_set(fo2)
       if fc.size() != fo2.size():
         fo2 = fo2.common_set(fc)
