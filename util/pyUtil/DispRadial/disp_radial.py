@@ -527,8 +527,8 @@ def coefficient_table():
   n = int(OV.GetParam('snum.DispRadial.n_terms', 2))
   names = _selected()
   if not names:
-    return ('<tr><td>Off. Tick an element above to correct f\' and f\'\' of'
-            ' every atom of it.</td></tr>')
+    return ('<tr><td>Off. Pick an element and tick Correct to correct f\' and'
+            ' f\'\' of every atom of it.</td></tr>')
   coefficients = _stored_coefficients()
   esds = refined_coefficients()[2]
   rows = ['<tr><td><b>Group</b></td>%s</tr>'
@@ -548,7 +548,7 @@ def coefficient_table():
                 % (name, ''.join('<td align="center">%s</td>' % c
                                  for c in cells)))
   if not OV.GetParam('snum.DispRadial.refine', True):
-    rows.append('<tr><td colspan="%i"><i>held fixed &mdash; the correction'
+    rows.append('<tr><td colspan="%i"><i>Held fixed: the correction'
                 ' still applies, it just refines nothing</i></td></tr>'
                 % (n + 1))
   return '\n'.join(rows)
