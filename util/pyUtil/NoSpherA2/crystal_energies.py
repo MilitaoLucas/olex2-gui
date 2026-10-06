@@ -274,13 +274,18 @@ def _setup():
 
 
 def _style_images(ads):
-  """Symmetry-generated atoms on screen as balls (sph) or back to the default style (def), the asymmetric unit untouched.
+  """Symmetry-generated atoms on screen as balls (sph) or back to their saved style (def), the asymmetric unit untouched.
 
-  Not back to 'elp': that overwrote an ORTEP or other default style, which read as rotated ADPs."""
+  'ads -t' keeps the balls out of the saved style: that style is shared with the
+  asymmetric-unit atoms of the same element, so a saved 'sph' and a forced 'elp'
+  restore changed the user's ellipsoids for good."""
   olex.m("sel -u")
   olex.m("sel atoms where xatom.symm==1")  # the symm evaluator has == only
   olex.m("sel -i")
-  if not olex.m("ads %s sel" % ads) and ads == "def":
+  if ads == "sph":
+    if not olex.m("ads sph -t sel"):
+      olex.m("ads sph sel")  # binaries before 'ads -t'
+  elif not olex.m("ads def sel"):
     olex.m("ads elp sel")  # binaries before 'ads def'
   olex.m("sel -u")
   _state["styled"] = ads == "sph"
