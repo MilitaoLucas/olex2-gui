@@ -185,8 +185,10 @@ def _colour(E, kind):
 
 
 def _material(E, kind):
+  # front and back (flags 255): a rod cut open by the near clip plane shows its
+  # inside, and a front-only material leaves those back faces black
   c = _colour(E, kind)
-  return "85;%d;%d;4290822336;32" % (c, c)
+  return "255;%d;%d;%d;%d;4290822336;4290822336;32;32" % (c, c, c, c)
 
 
 def _ops_arrays(ops):
@@ -272,10 +274,14 @@ def _setup():
 
 
 def _style_images(ads):
-  """Symmetry-generated atoms on screen as balls (sph) or back to their ADPs (elp), the asymmetric unit untouched."""
+  """Symmetry-generated atoms on screen as balls (sph) or back to the default style (def), the asymmetric unit untouched.
+
+  Not back to 'elp': that overwrote an ORTEP or other default style, which read as rotated ADPs."""
   olex.m("sel -u")
-  olex.m("sel atoms where xatom.symm!=1")
-  olex.m("ads %s sel" % ads)
+  olex.m("sel atoms where xatom.symm==1")  # the symm evaluator has == only
+  olex.m("sel -i")
+  if not olex.m("ads %s sel" % ads) and ads == "def":
+    olex.m("ads elp sel")  # binaries before 'ads def'
   olex.m("sel -u")
   _state["styled"] = ads == "sph"
 
@@ -310,10 +316,9 @@ def crystal_energies_status():
 
 
 def crystal_energies_clear():
-  if _state["rods"]:
-    olex.m("kill ce_*")
+  olex.m("kill ce_*")  # always: rods left by a reloaded module or a lost state would stay on screen
   if _state.get("styled"):
-    _style_images("elp")
+    _style_images("def")
   _state["rods"] = 0
   _state["key"] = None
   _state["message"] = ""
@@ -347,9 +352,17 @@ def crystal_energies_draw(quiet=False, block=False):
   scale = max([abs(r[kind]) for r in rows] + [1e-6])  # radius relative to the whole table, one pair or all
   for i, (r, a, b) in enumerate(bars):
     name = "ce_%d" % (i + 1)
-    olx.SetMaterial("%s.Single cone" % name, _material(r[kind], kind))  # one argument each: the space in the name
     radius = _rod_radius[0] + (_rod_radius[1] - _rod_radius[0]) * abs(r[kind]) / scale
-    olex.m("line -n=%s -r=%.3f %.4f %.4f %.4f %.4f %.4f %.4f" % ((name, radius) + tuple(a) + tuple(b)))
+    line = "line -n=%s -r=%.3f %%s %.4f %.4f %.4f %.4f %.4f %.4f" % ((name, radius) + tuple(a) + tuple(b))
+    # -l (label text) is newer than -r; an Olex2 without it rejects the whole call, so fall back to the length label
+    if not (_state.get("line_l", True) and olex.m(line % ("-l=%.1f" % r[kind]))):
+      _state["line_l"] = False
+      olex.m(line % "")
+    # after the line: the collection must exist for SetMaterial to reach its primitives
+    olex.m("mask %s 7" % name)  # cone + both end disks
+    mat = _material(r[kind], kind)
+    for p in ("Single cone", "Top disk", "Bottom disk"):  # by name: the GUI's SetMaterial would store '*' as a material
+      olx.SetMaterial("%s.%s" % (name, p), mat)  # one argument each: the space in the name
   _state["rods"] = len(bars)
   _state["key"] = key
   _state["block"] = block
