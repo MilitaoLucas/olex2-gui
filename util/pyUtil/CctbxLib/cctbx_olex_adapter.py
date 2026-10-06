@@ -436,6 +436,7 @@ class OlexCctbxAdapter(object):
       return flex.complex_double(data)
 
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
+    one_h_function = with_dispersion_radial(self.xray_structure(), one_h_function)
     if not miller_set:
         miller_set_ = self.observations.unique_mapped_miller_set
     else:
@@ -3806,13 +3807,44 @@ def forget_cached_table():
 OV.registerFunction(forget_cached_table, False, "sfac")
 
 
+def with_dispersion_radial(xray_structure, one_h_function):
+  """ The F(calc) function with the refined radial f'/f'' falloff, if any.
+
+  A refinement builds its own linearisation with the correction in it. Every
+  other F(calc) -- residual maps, the fractal plot, Hooft, the statistics --
+  comes through here, and without this would use the constant f'/f''.
+  None means the spherical IAM; a table-based one is rebuilt on its own table.
+  Anything else (already corrected, wrapped, ED) is handed back untouched.
+  """
+  if not OV.GetParam('user.refinement.dispradial', False):
+    return one_h_function
+  if one_h_function is None:
+    contribution = None
+  elif getattr(one_h_function, 'disp_correction', 0) is None:
+    xray_structure = one_h_function.xray_structure
+    contribution = one_h_function.scatterer_contribution
+  else:
+    return one_h_function
+  try:
+    from DispRadial.disp_radial import build_correction
+    dc = build_correction(xray_structure, log=False)
+  except Exception as e:
+    print('DispRadial: F(calc) left uncorrected, %s' % e)
+    return one_h_function
+  if dc is None:
+    return one_h_function
+  from smtbx.structure_factors import direct
+  return direct.f_calc_modulus_squared(xray_structure,
+    scatterer_contribution=contribution, disp_correction=dc)
+
 def get_one_h_function(xray_structure, table_file_name):
   from smtbx.structure_factors import direct
   from smtbx_refinement_least_squares_ext import f_calc_function_default
   try:
-    return f_calc_function_default(direct.f_calc_modulus_squared(
-      xray_structure, scatterer_contribution=get_table_contribution(
-        xray_structure, table_file_name)))
+    return f_calc_function_default(with_dispersion_radial(xray_structure,
+      direct.f_calc_modulus_squared(
+        xray_structure, scatterer_contribution=get_table_contribution(
+          xray_structure, table_file_name))))
   except Exception as e:
     e_str = str(e)
     if "stoks.size() == scatterer" in e_str:
