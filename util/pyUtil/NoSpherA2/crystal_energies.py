@@ -359,8 +359,9 @@ def crystal_energies_draw(quiet=False, block=False):
     name = "ce_%d" % (i + 1)
     radius = _rod_radius[0] + (_rod_radius[1] - _rod_radius[0]) * abs(r[kind]) / scale
     line = "line -n=%s -r=%.3f %%s %.4f %.4f %.4f %.4f %.4f %.4f" % ((name, radius) + tuple(a) + tuple(b))
-    # -l (label text) is newer than -r; an Olex2 without it rejects the whole call, so fall back to the length label
-    if not (_state.get("line_l", True) and olex.m(line % ("-l=%.1f" % r[kind]))):
+    # bare -l hides the label, the energies are in the printed table; an Olex2 without -l rejects the
+    # whole call, so fall back to the length label
+    if not (_state.get("line_l", True) and olex.m(line % "-l")):
       _state["line_l"] = False
       olex.m(line % "")
     # after the line: the collection must exist for SetMaterial to reach its primitives
