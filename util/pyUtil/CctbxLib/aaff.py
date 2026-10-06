@@ -9,6 +9,8 @@ from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity, nsa2_check_tsc
 from tsc_scatterer_resync import ScattererResolutionError, read_scatterers, update_scatterers_in_file, resolve_scatterer_mapping
 import cctbx_controller as cctbx_controller
 
+# sources that can take over after a pTB pre-refinement (source names, leading spaces stripped)
+PTB_FOLLOW_UP = ("ORCA", "OCC", "pySCF", "Gaussian", "Psi4")
 
 def _table_identifies_by_id(table_file_name):
   """Does this table name its columns by scatterer id, or by label?"""
@@ -89,6 +91,25 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     HAR_log.write("\n")
     HAR_log.flush()
     max_cycles = int(nsa2_get_param('Max_HAR_Cycles'))
+    # pTB pre-refinement: the first n_pre cycles run pTB, then the selected source takes
+    # over. Those cycles come on top of Max_HAR_Cycles and never count as converged.
+    # PTB_PREREFINE_DONE (kept in the .ins header) names the source/functional pTB
+    # already preceded, so a later Test/Work click does not throw a better model back
+    # to pTB; a different source or functional gets its pre-refinement again.
+    n_pre = 0
+    qm_source = nsa2_get_param('source')
+    ptb_key = "%s/%s" % (source, nsa2_get_param('method'))
+    # Test/Work switch it on, so a source that cannot follow pTB just skips it silently
+    if update and nsa2_get_param('PTB_PREREFINE') and source.startswith(PTB_FOLLOW_UP):
+      from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+      if not nsp2.ptb_exe:
+        print("pTB pre-refinement ignored: no pTB executable found")
+      elif nsa2_get_param('PTB_PREREFINE_DONE') == ptb_key:
+        print("pTB pre-refinement skipped: already done before %s" % ptb_key)
+      else:
+        n_pre = max(1, int(nsa2_get_param('PTB_PREREFINE_CYCLES')))
+        max_cycles += n_pre
+        HAR_log.write("pTB pre-refinement: cycles 1-%d with pTB, then %s\n" % (n_pre, source))
     if update:
       if nsa2_get_param('h_aniso'):
         olx.Anis("$D", h=True)
@@ -111,12 +132,20 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         old_disp = refined_coefficients()[1]
       except Exception:
         old_disp = []
-      OV.SetVar('Run_number', run)
+      pre = run <= n_pre
+      # counted per source, so the follow-up does not try to read a guess pTB never wrote
+      OV.SetVar('Run_number', run if pre else run - n_pre)
       self.refinement_has_failed = []
       #Calculate Wavefunction
       try:
         from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
-        v = nsp2.launch()
+        if pre:
+          nsa2_set_param('source', "  pTB")
+        try:
+          v = nsp2.launch()
+        finally:
+          if pre:
+            nsa2_set_param('source', qm_source)
         if not v:
           print("Error during NoSpherA2! Abnormal Ending of program!")
           HAR_log.close()
@@ -515,6 +544,10 @@ all calculation parameters are properly recorded."""
       if not update:
         converged = True
         break
+      elif pre:
+        if run == n_pre:
+          nsa2_set_param('PTB_PREREFINE_DONE', ptb_key)
+        continue
       elif not Full_HAR:
         converged = True
         break
