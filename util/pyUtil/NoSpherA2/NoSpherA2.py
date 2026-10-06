@@ -2134,4 +2134,12 @@ def set_guru_mode(on=True):
   print("DispRadial and FLINT load at start-up: restart Olex2 for those.")
   olx.html.Update()
 OV.registerFunction(set_guru_mode, False, "NoSpherA2")
+
+def debug(on=True):
+  """spy.NoSpherA2.debug([false]): NoSpherA2.exe runs with -v, kept in this structure's header."""
+  on = str(on).strip().lower() not in ('false', '0', 'off', 'no')
+  nsa2_set_param('NoSpherA2_debug', on)
+  print("NoSpherA2 debug output %s for this structure" % ("on" if on else "off"))
+  olx.html.Update()
+OV.registerFunction(debug, False, "NoSpherA2")
 #print "OK."
