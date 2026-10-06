@@ -1,8 +1,8 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+<!-- #ignoreif not spy.NoSpherA2.has_density_source()
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=NoSpherA2-Properties-Details;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #ignoreif not spy.NoSpherA2.check_for_matching_wfn()
 <td width="13%" align='left'>
   <b>CPUs</b>
 </td>
@@ -81,7 +81,17 @@ $+
     "onuncheck=spy.nsa2_set_param('Property_ESP','False')"
     )
   $-
-<td width="20%" align='center'><font color='red'><b> Attention, ESP is slow!</b></font></td>
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=ESP_surface",
+    "label=ESP surface",
+    "checked=spy.nsa2_get_param('Property_ESP_surface')",
+    "oncheck=spy.nsa2_set_param('Property_ESP_surface','True')",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.nsa2_set_param('Property_ESP_surface','False')"
+    )
+  $-
  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -94,7 +104,7 @@ $+
     "checked=spy.nsa2_get_param('Property_MO')",
     "oncheck=spy.nsa2_set_param('Property_MO','True')>>html.Update()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "td1=<td align='center'>",
+    "td1=<td width='13%' align='left'>",
     "onuncheck=spy.nsa2_set_param('Property_MO','False')>>html.Update()"
     )
   $-
@@ -131,7 +141,7 @@ $+
 #ignoreif -->
 
 <!-- #ignoreif spy.nsa2_get_param('Property_MO')
-  <td width=30%> </td>
+  <td width='39%'> </td>
 #ignoreif -->
 
   $+
@@ -141,7 +151,7 @@ $+
     "checked=spy.nsa2_get_param('Property_ATOM')",
     "oncheck=spy.nsa2_set_param('Property_ATOM','True') >> html.Update()",
     "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "td1=<td align='center'>",
+    "td1=<td width='13%' align='left'>",
     "onuncheck=spy.nsa2_set_param('Property_ATOM','False') >> html.Update()"
     )
   $-
@@ -168,11 +178,65 @@ $+
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+<!-- #ignoreif not spy.NoSpherA2.has_density_source()
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  
-  <td width="13%" align="left"> <b>Radius /&Aring</b></td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Calculate",
+    "onclick=spy.NoSpherA2.calculate_cubes()",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td width='30%'>",
+    )
+  $-
+  <td width='1%'> </td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Hirshfeld surface",
+    "onclick=spy.NoSpherA2.hirshfeld_surface()",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td width='34%'>",
+    )
+  $-
+  <td width='1%'> </td>
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value=Rho + ESP surface",
+    "onclick=spy.nsa2_set_param('map.type','ESP surface') >> spy.NoSpherA2.change_map() >> html.Update()",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td width='34%'>",
+    )
+  $-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+<!-- #ignoreif spy.NoSpherA2.is_disordered()
+<!-- #ignoreif spy.NoSpherA2.has_density_source()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #ignoreif spy.NoSpherA2.source_is_discamb()
+<td width="100%" align="center"><b>No .wfn found!</b> (run NoSpherA2, or select a SALTED model for rho, ESP, Laplacian and ELI)</td>
+#ignoreif -->
+<!-- #ignoreif not spy.NoSpherA2.source_is_discamb()
+<td width="100%" align="center">Wavefunction properties not accessible</td>
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+#ignoreif -->
+<!-- #ignoreif not spy.NoSpherA2.is_disordered()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="100%" align="center">Wfn properties not accessible with disorder</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #ignoreif not spy.NoSpherA2.has_density_source()
+  <td width="13%" align="left"><b>Radius /&Aring</b></td>
   <td width="9%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
@@ -183,31 +247,12 @@ $+
       )
     $-
   </td>
-  <td width='1%'> </td>
-  $+
-    html.Snippet("gui/snippets/gui-link-button",
-    "value=Calculate",
-    "onclick=spy.NoSpherA2.calculate_cubes()",
-    "bgcolor=GetVar(HtmlTableFirstcolColour)",
-    "td1=<td width='15%'>",
-    )
-  $-
+  <td width="12%" align="center"><b>Res /&Aring</b></td>
 #ignoreif -->
-<!-- #ignoreif spy.NoSpherA2.is_disordered()
-<!-- #ignoreif spy.NoSpherA2.check_for_matching_wfn()
-<!-- #ignoreif spy.NoSpherA2.source_is_discamb()
-<td width="50%" align="center"><b>No .wfn found!</b> (run NoSpherA2 maybe?)</td>
+<!-- #ignoreif spy.NoSpherA2.has_density_source()
+  <td width="13%" align="left"><b>Res /&Aring</b></td>
 #ignoreif -->
-<!-- #ignoreif not spy.NoSpherA2.source_is_discamb()
-<td width="50%" align="center">Wavefunction properties not accessible</td>
-#ignoreif -->
-#ignoreif -->
-#ignoreif -->
-<!-- #ignoreif not spy.NoSpherA2.is_disordered()
-<td width="50%" align="center">Wfn properties not accessible with disorder</td>
-#ignoreif -->
-  <td width="10%" align="center"> <b>Res /&Aring</b></td>
-  <td width="10%" align='center'>
+  <td width="9%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_RESOLUTION_NoSpherA2",
@@ -217,8 +262,8 @@ $+
       )
     $-
   </td>
-  <td align='center' width="10%"><b>Plot</b></td>
-  <td width="21%">
+  <td width="8%" align="center"><b>Plot</b></td>
+  <td>
     $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_NoSpherA2_MAP_TYPE",
@@ -229,27 +274,26 @@ $+
       )
     $-
   </td>
-    
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #ignoreif strcmp(xgrid.Visible(), false)
-  <td width="15%" align="left"><b>Color Scale (Min/Max)</b></td>
+<!-- #ignoreif not spy.NoSpherA2.map_shown()
+  <td width="13%" align="left"><b>Color Scale</b></td>
 <!-- #ignoreif not spy.NoSpherA2.is_colored()
-  <td width="10%" align='center'>
+  <td width="12%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_SCALE_MIN",
       "value=spy.nsa2_get_param('map.scale_min')",
       "onchange=spy.nsa2_set_param('map.scale_min',html.GetValue(~name~))",
       "onchangealways=True",
+      "onleave=spy.NoSpherA2.change_map()",
       )
     $-
   </td>
   <td width="2%" align="center"><b>-</b></td>
-  <td width="10%" align='center'>
+  <td width="12%" align='center'>
     $+
       html.Snippet("gui/snippets/input-text",
       "name=SET_SNUM_CUBE_SCALE_MAX",
@@ -260,12 +304,12 @@ $+
       )
     $-
   </td>
-  <td width="22%" align="center"><b>Color Scheme</b></td>
-  <td width="17%">
+  <td width="16%" align="center"><b>Color Scheme</b></td>
+  <td width="25%">
     $+
       html.Snippet("gui/snippets/input-combo",
       "name=SET_SNUM_NoSpherA2_MAP_SCALE_NAME",
-      "items=BWR;BGR;RWB;RGB;",
+      "items=BWR;BGR;MYC;RWB;RGB;CYM;",
       "value=spy.nsa2_get_param('map.scale_name')",
       "onchange=spy.nsa2_set_param('map.scale_name',html.GetValue('~name~')) >> spy.NoSpherA2.change_map()",
       "onchangealways=True",
@@ -274,20 +318,86 @@ $+
   </td>
 #ignoreif -->
 <!-- #ignoreif spy.NoSpherA2.is_colored()
-  <td width='61%' align='center'>No Coloured Map selected</td>
+  <td width='67%' align='center'>No Coloured Map selected</td>
 #ignoreif -->
   $+
     html.Snippet("gui/snippets/gui-link-button",
     "value='Disable Map'",
-    "onclick=xgrid.Visible(False) >> html.Update()",
+    "onclick=spy.NoSpherA2.disable_map() >> html.Update()",
     "bgcolor=\$GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
     )
   $-
 #ignoreif -->
-<!-- #ignoreif strcmp(xgrid.Visible(), true)
-  <td width='20%'> </td>
+<!-- #ignoreif spy.NoSpherA2.map_shown()
+  <td width='100%'> </td>
 #ignoreif -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #ignoreif not spy.NoSpherA2.map_shown()
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-first-column.htm;help_ext=NoSpherA2 Properties;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<!-- #ignoreif not spy.NoSpherA2.alpha_applies()
+  <td width="13%" align="left"><b>Opacity</b></td>
+  <td width="57%" align='center'>
+    <input
+      align="right"
+      type="slider"
+      name="SET_SNUM_NoSpherA2_MAP_ALPHA_SLIDE"
+      width="100%"
+      height="18"
+      value="math.eval(spy.nsa2_get_param('map.alpha')*100)"
+      bgcolor="$GetVar(HtmlTableFirstcolColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      min="5"
+      max="100"
+      onchange="spy.nsa2_set_param('map.alpha',math.eval(html.GetValue(SET_SNUM_NoSpherA2_MAP_ALPHA_SLIDE)/100))
+      >>html.SetValue(SET_SNUM_NoSpherA2_MAP_ALPHA_VALUE,html.GetValue(SET_SNUM_NoSpherA2_MAP_ALPHA_SLIDE))
+      >>spy.NoSpherA2.change_map()"
+    >
+  </td>
+  <td width="10%" align='center'>
+    <input
+      type="text"
+      name="SET_SNUM_NoSpherA2_MAP_ALPHA_VALUE"
+      width="100%"
+      height="18"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      value="math.eval(spy.nsa2_get_param('map.alpha')*100)"
+      onreturn="spy.nsa2_set_param('map.alpha',math.eval(html.GetValue(~name~)/100))
+      >>html.SetValue(SET_SNUM_NoSpherA2_MAP_ALPHA_SLIDE,html.GetValue(~name~))
+      >>spy.NoSpherA2.change_map()"
+    >
+  </td>
+#ignoreif -->
+<!-- #ignoreif spy.NoSpherA2.alpha_applies()
+  <td width='80%'> </td>
+#ignoreif -->
+<!-- #ignoreif spy.NoSpherA2.map_hidden()
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Hide'",
+    "onclick=spy.NoSpherA2.hide_map() >> html.Update()",
+    "bgcolor=\$GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+#ignoreif -->
+<!-- #ignoreif not spy.NoSpherA2.map_hidden()
+  $+
+    html.Snippet("gui/snippets/gui-link-button",
+    "value='Show'",
+    "onclick=spy.NoSpherA2.hide_map(False) >> html.Update()",
+    "bgcolor=\$GetVar(HtmlTableRowBgColour)",
+    "td1=<td width='20%'>",
+    )
+  $-
+#ignoreif -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
 
 
 <!-- #ignoreif strcmp(xgrid.Visible(), false)
@@ -396,9 +506,9 @@ No map loaded!
       fgcolor="$GetVar(HtmlFontColour)"
       min="0"
       max="100"
-      onchange="spy.SetParam(snum.xgrid.scale,math.eval(html.GetValue(SNUM_XGRID_SCALE_SLIDE))/100)
-      >>html.SetValue(SNUM_XGRID_SCALE_VALUE,math.eval(spy.GetParam(snum.xgrid.scale)))
-      >>xgrid.scale(math.eval(html.GetValue(SNUM_XGRID_SCALE_SLIDE)/100))"
+      onchange="spy.SetParam(snum.xgrid.scale,math.eval(html.GetValue(SNUM_XGRID_SCALE_SLIDE)/$GetVar(map_slider_scale)))
+      >>html.SetValue(SNUM_XGRID_SCALE_VALUE,spy.GetParam(snum.xgrid.scale))
+      >>xgrid.scale(spy.GetParam(snum.xgrid.scale))"
     >
   </td>
   <td width="9%">
@@ -410,7 +520,7 @@ No map loaded!
       bgcolor="$GetVar(HtmlInputBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="spy.GetParam(snum.xgrid.scale)"
-      onreturn="xgrid.scale(math.eval(html.GetValue(~name~))) >> spy.SetParam(snum.xgrid.scale,html.GetValue(SNUM_XGRID_SCALE_VALUE)*100)"
+      onreturn="xgrid.scale(math.eval(html.GetValue(~name~))) >> spy.SetParam(snum.xgrid.scale,html.GetValue(SNUM_XGRID_SCALE_VALUE))"
     >
   </td>
 #ignoreif -->

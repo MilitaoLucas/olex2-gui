@@ -284,6 +284,8 @@ snum{
       .type = bool
     Property_ESP = False
       .type = bool
+    Property_ESP_surface = False
+      .type = bool
     Property_Lap = True
       .type = bool
     Property_RDG = True
@@ -292,16 +294,22 @@ snum{
       .type = bool
     Property_MO = False
       .type = bool
-    Property_MO_number = 0
+    Property_MO_number = 1
       .type = int
     Property_ATOM = False
       .type = bool
-    Property_ATOM_number = 0
+    Property_ATOM_number = 1
       .type = int
     Property_all_MOs = False
       .type = bool
     PTB_use_purify = False
       .type = bool
+    PTB_PREREFINE = False
+      .type = bool
+    PTB_PREREFINE_CYCLES = 1
+      .type = int
+    PTB_PREREFINE_DONE = ""
+      .type = str
     pySCF_PBC = False
       .type = bool
     pySCF_Damping = "0.6"
@@ -314,6 +322,10 @@ snum{
       .type = str
     CE_cutoff = 3.8
       .type = float
+    CE_kind = total
+      .type = str
+    CE_pair = all
+      .type = str
     source = "'Please Select'"
       .type = str
     temperature = 100
@@ -333,13 +345,15 @@ snum{
     make_fcf_only_l_limit = 20
       .type = int
     map{
+      alpha = "0.5"
+        .type = str
       min = 0.0
         .type = float
       max = 0.0
         .type = float
       radius = "1.1"
         .type = str
-      resolution = "0.1"
+      resolution = "0.05"
         .type = str
       scale_max = "0.01"
         .type = str
@@ -403,9 +417,6 @@ snum{
       end = 1.0
         .type = float
         .help = "Last lambda of the scan"
-      params = 0
-        .type = int
-        .help = "Number of refined parameters for the chi-square; 0 takes it from the last refinement"
       scf_preset = sloppy *normal tight very_tight
         .type = choice
       conv_preset = slow_conv *normal_conv fast_conv
@@ -415,9 +426,9 @@ snum{
       gaussian_halt = False
         .type = bool
         .help = "Stop the scan at the Gaussian-fit halting lambda (-xcw_gaussian_halt)"
-      strong_cutoff = 3.0
+      strong_cutoff = 2.0
         .type = float
-        .help = "-xcw_strong_cutoff"
+        .help = "Strong reflections for the halting statistic, in I/sigma(I); passed to -xcw_strong_cutoff as 2x for target F"
       incremental = False
         .type = bool
         .help = "Incremental Fock build (-xcw_incremental)"
@@ -433,15 +444,22 @@ snum{
       i_tensor_mb = 0
         .type = int
         .help = "Memory for the I tensor in MB (settings keyword i_tensor_mb); 0 leaves the default"
-      anom_disp_file = ""
-        .type = str
-        .help = "Anomalous dispersion table passed with -anom_disp; empty for none"
       selected_tscb = ""
         .type = str
         .help = "The NA2_<lambda>.tscb of the last run chosen in the Use combo"
       extra_settings = ""
         .type = str
         .help = "Further lines appended verbatim to the XCW settings file; separate several with ;"
+    }
+    BondAtlas{
+      analysis = "Full"
+        .type = str
+        .help = "What Run computes: Full (-fba), RGBI, QTAIM (with ELI-D) or NBO (with NRT)"
+      property = ""
+        .type = str
+        .help = "The per-bond value written onto the bonds after a run"
+      decimals = 2
+        .type = int
     }
   }
 }

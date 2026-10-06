@@ -3,8 +3,9 @@
 Experimental. The block (hybrid_GUI.make_XCW_GUI) is shown only with
 user.NoSpherA2.show_XCW. What it does:
 
-  Run XCW  writes olex2/XCW/<name>.cif, <name>.hkl and <name>_xcw_settings.txt
-           from the snum.NoSpherA2.XCW parameters and starts
+  Run XCW  writes olex2/XCW/<name>.cif, <name>.hkl, anom_disp.txt (f'/f''
+           of the model) and <name>_xcw_settings.txt from the
+           snum.NoSpherA2.XCW parameters and starts
            NoSpherA2 -do_XCW ... in the background, cwd = that folder
   Stop     kills the job
   status   the last lambda row of NoSpherA2.log while it runs, the recommended
@@ -12,9 +13,8 @@ user.NoSpherA2.show_XCW. What it does:
   Use      copies the chosen NA2_<lambda>.tscb next to the structure as
            <name>_xcw_<lambda>.tscb and makes it the tsc source
 
-Still to do: the parameter count is taken from the last refinement only when
-one has run (params = 0 in the phil); charge/multiplicity are the shared
-NoSpherA2 values; twin laws are not passed.
+Still to do: charge/multiplicity are the shared NoSpherA2 values; twin laws
+are not passed.
 """
 
 import glob
@@ -73,9 +73,7 @@ def _write_hkl(path):
 
 
 def _n_params():
-  n = int(_param("params", 0) or 0)
-  if n > 0:
-    return n
+  """The refined parameter count of the model, as the GUI status bar shows it."""
   try:
     from gui.tools import get_parameter_number, GetNParams
     n = int(get_parameter_number() or 0)
@@ -85,6 +83,22 @@ def _n_params():
   except Exception:
     n = 0
   return n
+
+
+def _write_anom_disp(path):
+  """f' f'' per element as Olex2 refines with them: the resonant table, SFAC overrides and refined DISP values
+  (cctbx_olex_adapter.xray_structure); NoSpherA2 -anom_disp reads 'symbol fp fdp' lines, one per element"""
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  values = {}
+  for sc in OlexCctbxAdapter().xray_structure().scatterers():
+    el = sc.scattering_type.rstrip("+-0123456789")
+    v = (sc.fp, sc.fdp)
+    if el in values and max(abs(a - b) for a, b in zip(values[el], v)) > 1e-4:
+      print("XCW: %s has several f'/f'' (DISP per atom), using %.4f %.4f" % ((el,) + values[el]))
+    values.setdefault(el, v)
+  with open(path, "w") as out:
+    for el, (fp, fdp) in sorted(values.items()):
+      out.write("%s %.6f %.6f\n" % (el, fp, fdp))
 
 
 def _write_settings(path, n_params):
@@ -121,19 +135,14 @@ def _args(folder, name, settings):
   exe = OV.GetVar("NoSpherA2")
   args = [exe, "-do_XCW", "-cif", name + ".cif", "-hkl", name + ".hkl", "-XCW_settings", settings,
           "-cpus", str(nsa2_get_param("ncpus")), "-mem", str(float(nsa2_get_param("mem")) * 1000), "-no_date",
-          "-charge", str(_charge()), "-mult", str(_mult())]
-  anom = _param("anom_disp_file")
-  if anom:
-    if not os.path.isabs(anom):
-      anom = os.path.join(OV.FilePath(), anom)
-    if os.path.isfile(anom):
-      shutil.copy(anom, os.path.join(folder, "anom_disp.txt"))
-      args += ["-anom_disp", "anom_disp.txt"]
-    else:
-      print("XCW: anomalous dispersion file %s not found, running without" % anom)
+          "-charge", str(_charge()), "-mult", str(_mult()), "-anom_disp", "anom_disp.txt"]
   if _param("gaussian_halt") == True:
     args.append("-xcw_gaussian_halt")
-  args += ["-xcw_strong_cutoff", str(_param("strong_cutoff", 3.0))]
+  # the GUI value is I/sigma(I); sigma(I) = 2 F sigma(F), so the same reflections are F/sigma(F) >= 2x for target F
+  cutoff = float(_param("strong_cutoff", 2.0))
+  if str(_param("target", "F")) == "F":
+    cutoff *= 2
+  args += ["-xcw_strong_cutoff", "%g" % cutoff]
   if _param("incremental") == True:
     args.append("-xcw_incremental")
   args += ["-xcw_int_precision", str(_param("int_precision", 1e-10))]
@@ -250,6 +259,7 @@ def xcw_run():
     olex.m("CifCreate_4NoSpherA2")
     shutil.move(os.path.join(OV.FilePath(), name + ".cif_NoSpherA2"), os.path.join(folder, name + ".cif"))
     _write_hkl(os.path.join(folder, name + ".hkl"))
+    _write_anom_disp(os.path.join(folder, "anom_disp.txt"))
     settings = name + "_xcw_settings.txt"
     _write_settings(os.path.join(folder, settings), n_params)
   except Exception as e:

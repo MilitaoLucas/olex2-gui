@@ -87,6 +87,89 @@ def _crystal_cluster(subunit_fn, cluster_fn, radius):
         f.write("%-2s %14.8f %14.8f %14.8f\n" % (e, x[0], x[1], x[2]))
   return n, len(blocks), el
 
+def _check_fragment(xyz_fn, charge=None, mult=None, parity=True, cover=True):
+  # the QM fragment is whatever was displayed: it must cover the model (every atom of the shown parts has a
+  # symmetry image in it; not asked of a deliberate part of it, cover=False), cut no bond to an atom outside it,
+  # and its electron count must allow the multiplicity
+  import numpy as np
+  import olex_core
+  from crystal_energies import _cell_matrix, _floats, _radius
+  lines = open(xyz_fn).read().splitlines()
+  n = int(lines[0])
+  el = [("H" if l.split()[0] in ("D", "T") else l.split()[0]) for l in lines[2:2 + n]]
+  X = np.array([[float(v) for v in l.split()[1:4]] for l in lines[2:2 + n]])
+  M = _cell_matrix(_floats(olx.xf.au.GetCell()))
+  F = X @ np.linalg.inv(M).T
+  ops = [np.array(m, dtype=float) for m in olex_core.SGInfo()["MatricesAll"]]
+  if not any(np.allclose(op, np.eye(3, 4)) for op in ops):
+    ops.insert(0, np.eye(3, 4))
+  lab, typ, part, A = [], [], [], []
+  for i in range(int(olx.xf.au.GetAtomCount())):
+    if olx.xf.au.IsAtomDeleted(i).lower() == "true" or olx.xf.au.GetAtomType(i) == "Q":
+      continue
+    lab.append(olx.xf.au.GetAtomlabel(i))
+    typ.append(olx.xf.au.GetAtomType(i))
+    part.append(int(olx.xf.au.GetAtomPart(i)))
+    A.append(_floats(olx.xf.au.GetAtomCrd(i)))
+  A = np.array(A)
+  # every crystal atom within 3 A of the fragment's bounding box: (position, asu index)
+  reach = 3.0 / (1.0 / np.linalg.norm(np.linalg.inv(M), axis=1))
+  lo, hi = F.min(axis=0) - reach, F.max(axis=0) + reach
+  P, src = [], []
+  for op in ops:
+    G = A @ op[:, :3].T + op[:, 3]
+    G -= np.floor(G)
+    for t in np.ndindex(*(np.ceil(hi) - np.floor(lo) + 1).astype(int)):
+      Q = G + np.floor(lo) + np.array(t)
+      keep = np.all((Q >= lo) & (Q <= hi), axis=1)
+      P.append(Q[keep] @ M.T)
+      src.extend(np.nonzero(keep)[0])
+  P, src = np.vstack(P), np.array(src)
+  D = np.linalg.norm(X[:, None, :] - P[None, :, :], axis=2)
+  present = D.min(axis=0) < 0.05
+  warnings = []
+  unmatched = [i for i in range(n) if D[i].min() >= 0.05]
+  if unmatched:
+    warnings.append("%d atoms of the fragment are not in the model: %s" % (len(unmatched), " ".join("%s(%d)" % (el[i], i + 1) for i in unmatched[:8])))
+  shown_parts = set(part[j] for j in set(src[present]))
+  covered = set(src[present])
+  missing = [lab[j] for j in range(len(lab)) if j not in covered and (part[j] == 0 or part[j] in shown_parts)]
+  if missing and cover:
+    warnings.append("%d model atoms have no symmetry image in the fragment: %s" % (len(missing), " ".join(missing[:12])))
+  rx = np.array([_radius(e) for e in el])
+  rp = np.array([_radius(typ[j]) for j in src])
+  cut = (D > 0.3) & (D < rx[:, None] + rp[None, :] + 0.4) & ~present[None, :]
+  if cut.any():
+    pairs = ["%s(%d)-%s" % (el[i], i + 1, lab[src[k]]) for i, k in zip(*np.nonzero(cut))]
+    warnings.append("%d bonds lead out of the fragment (grow it, or accept for a polymer): %s" % (len(pairs), " ".join(pairs[:8])))
+  # separate molecules in one wavefunction: a packed cluster, or a salt/solvate that wants PARTs or Hybrid
+  B = (np.linalg.norm(X[:, None, :] - X[None, :, :], axis=2) < rx[:, None] + rx[None, :] + 0.4)
+  comp, seen = 0, set()
+  for i in range(n):
+    if i in seen:
+      continue
+    comp, todo = comp + 1, [i]
+    while todo:
+      j = todo.pop()
+      if j not in seen:
+        seen.add(j)
+        todo.extend(np.nonzero(B[j])[0])
+  if comp > 1:
+    warnings.append("the fragment is %d separate molecules in one wavefunction (fuse a packed model; salts and solvates want PARTs or Hybrid)" % comp)
+  for w in warnings:
+    olx.Echo("Fragment check: " + w, m="warning")
+  if not parity:
+    return not warnings
+  charge = int(nsa2_get_param('charge') if charge is None else charge)
+  mult = int(nsa2_get_param('multiplicity') if mult is None else mult)
+  ne = sum(ELEMENTS_BY_SYMBOL.get(e, 0) for e in el) - charge
+  if (ne + mult) % 2 == 0:
+    msg = "the fragment has %d electrons with charge %d, multiplicity %d is impossible" % (ne, charge, mult)
+    olx.Echo("Fragment check: " + msg, m="error")
+    OV.SetVar('NoSpherA2-Error', "Multiplicity")
+    raise NameError(msg)
+  return not warnings
+
 def _find_basis_file(basis_dir, basis_name):
   """Return the path to a basis set file, matching case-insensitively."""
   direct = os.path.join(basis_dir, basis_name)
@@ -305,7 +388,7 @@ class wfn_Job(object):
       inp.write(f'dft_grid_min_angular = {min_angular}\n')
       inp.write(f'dft_grid_radial_precision = {radial_precision}\n')
     
-  def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None):
+  def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None, cover=True):
     if self.software == "ORCA":
       self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0" or self.software == "ORCA 6.1":
@@ -331,6 +414,13 @@ class wfn_Job(object):
         self.write_xyz_file(normalize_h_isotopes=True)
     else: 
       olx.Echo("Wavefunction software not recognized. Please select a valid software. No input file written.", m="error")
+      return
+    # the QM subunit of an embedding run is asu.xyz; the checked file is what the QM code will see
+    fn = os.path.join(self.full_dir, self.name) + ".xyz"
+    if self.software.startswith("ORCA") and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM'):
+      fn = os.path.join(self.full_dir, "asu") + ".xyz"
+    if os.path.exists(fn):
+      _check_fragment(fn, charge, mult, parity=self.software not in ("Thakkar IAM", "SALTED"), cover=cover)
 
   def write_elmodb_input(self,xyz):
     if xyz:
@@ -1936,8 +2026,9 @@ ener = cf.kernel()"""
       shutil.copy(self.name + ".wfn", os.path.join(self.full_dir, self.name + ".wfn"))
       copy = False
 
+    log_text = open(wfnlog).read() if os.path.isfile(wfnlog) else ""
     if softw == "ORCA 6.0" or softw == "ORCA 5.0" or softw == "fragHAR" or softw == "ORCA 6.1":
-      if '****ORCA TERMINATED NORMALLY****' in open(wfnlog).read():
+      if '****ORCA TERMINATED NORMALLY****' in log_text:
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ORCA")
@@ -1948,13 +2039,13 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('Orca did not terminate normally!')
     elif "Gaussian" in softw:
-      if 'Normal termination of Gaussian' in open(wfnlog).read():
+      if 'Normal termination of Gaussian' in log_text:
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"Gaussian")
         raise NameError('Gaussian did not terminate normally!')
     elif softw == "ELMOdb":
-      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in open(wfnlog).read():
+      if 'CONGRATULATIONS: THE ELMO-TRANSFERs ENDED GRACEFULLY!!!' in log_text:
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"ELMOdb")
@@ -1964,7 +2055,7 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
     elif softw == "pTB":
-      if 'cpu  time for all' in open(wfnlog).read():
+      if 'cpu  time for all' in log_text:
         pass
       else:
         OV.SetVar('NoSpherA2-Error',"pTB")
@@ -1979,6 +2070,11 @@ ener = cf.kernel()"""
       else:
         OV.SetVar('NoSpherA2-Error',"OCC")
         raise NameError('OCC did not generate an fchk file!')
+    # normal termination is not convergence: ORCA carries on with SCFConvForced false
+    # (pTB is not self-consistent, Gaussian aborts on its own, OCC is checked in utilities.cuqct_tsc)
+    if "ORCA" in softw and 'SCF NOT CONVERGED' in log_text:
+      OV.SetVar('NoSpherA2-Error', "SCF")
+      raise NameError('ORCA reports an unconverged SCF - see %s' % wfnlog)
     #embedding = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
     #if ("ECP" in basis_name and "orca" in args[0]) or ("orca" in args[0] and embedding):
     #  molden_args = []

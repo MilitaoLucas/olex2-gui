@@ -242,7 +242,7 @@ def integration_accuracy_combo():
   
 def relativistics_checkbox():
   return labeled_checkbox("NoSpherA2_Relativistics@refine",
-                         "Relativitics",
+                         "Relativistics",
                          "spy.nsa2_get_param(\'Relativistic\')",
                          "spy.nsa2_set_param(\'Relativistic\',\'True\')",
                          "spy.nsa2_set_param(\'Relativistic\',\'False\')",
@@ -466,6 +466,24 @@ def make_xtb_GUI():
   t += partitioning_scheme_line()
   return t
 
+def ptb_prerefine_line():
+  # pTB cycles before the selected QM source; the switch-over lives in CctbxLib/aaff.py
+  t = begin_new_line() + \
+    labeled_checkbox("NoSpherA2_ptb_prerefine@refine",
+                     "pTB pre-refine",
+                     "spy.nsa2_get_param('PTB_PREREFINE')",
+                     "spy.nsa2_set_param('PTB_PREREFINE', True) >> spy.nsa2_set_param('PTB_PREREFINE_DONE', '') >> html.Update()",
+                     "spy.nsa2_set_param('PTB_PREREFINE', False) >> html.Update()",
+                     width=20)
+  if nsa2_get_param('PTB_PREREFINE'):
+    t += labeled_spin("NoSpherA2_ptb_prerefine_cycles@refine",
+                      "pTB cycles",
+                      "spy.nsa2_get_param('PTB_PREREFINE_CYCLES')",
+                      "spy.nsa2_set_param('PTB_PREREFINE_CYCLES', html.GetValue('~name~'))",
+                      width_label=15, width_spinbox=8, min_value=1, max_value=100) + \
+      "<td width='57%'></td>"
+  return t + end_line()
+
 def make_ptb_GUI():
   # CPUs, Memory, Purification
   t = begin_new_line() + cpu_combo() + memory_text() + \
@@ -596,6 +614,8 @@ def make_OCC_GUI():
   t += begin_new_line("NoSpherA2_Options_3") + \
         integration_accuracy_combo() + \
         occ_df_basis_combo() + \
+        end_line() + \
+        begin_new_line("NoSpherA2_Options_3", "2") + \
         h_aniso_checkbox() + \
         no_afix_checkbox() + \
         end_line()
@@ -805,15 +825,18 @@ def make_tonto_GUI():
   
 def make_frag_HAR_GUI():
   # Basis Set, Method, CPUs, Memory
-  t = begin_new_line() + \
+  t = begin_new_line() + make_quick_button_gui() + end_line()
+  t += begin_new_line() + \
         basis_combo() + \
         labeled_checkbox("NoSpherA2_baseset_adv@refine",
                          "Adv.",
                          "spy.nsa2_get_param('basis_adv')",
                          "spy.nsa2_set_param('basis_adv', True) >> html.Update()",
                          "spy.nsa2_set_param('basis_adv', False) >> html.Update()",
-                         width=2) + \
+                         width=10) + \
         method_combo() + \
+        end_line() + \
+        begin_new_line("NoSpherA2_Options_1", "2") + \
         cpu_combo() + \
         memory_text() + \
         end_line()
@@ -888,25 +911,25 @@ def make_frag_HAR_GUI():
                       "Radius Tol.",
                       "spy.nsa2_get_param('frag_HAR.radius_tolerance')",
                       "spy.nsa2_set_param('frag_HAR.radius_tolerance', html.GetValue('~name~'))",
-                      width_label=8, width_textbox=9) + \
+                      width_label=14, width_textbox=9) + \
         labeled_checkbox("NoSpherA2_frag_HAR_test@refine",
                           "Test Fragments",
                           "spy.nsa2_get_param('frag_HAR.H_test')",
                           "spy.nsa2_set_param('frag_HAR.H_test', True)",
                           "spy.nsa2_set_param('frag_HAR.H_test', False)",
-                          width=1) + \
+                          width=21) + \
         labeled_checkbox("NoSpherA2_frag_HAR_H_Box_Ex@refine",
                           "H-bond",
                           "spy.nsa2_get_param('frag_HAR.H_box_ex')",
                           "spy.nsa2_set_param('frag_HAR.H_box_ex', True)",
                           "spy.nsa2_set_param('frag_HAR.H_box_ex', False)",
-                          width=1) + \
+                          width=12) + \
         labeled_checkbox("NoSpherA2_frag_HAR_min_H_bond@refine",
                           "Min. H-bond",
                           "spy.nsa2_get_param('frag_HAR.min_H_bond')",
                           "spy.nsa2_set_param('frag_HAR.min_H_bond', True)",
                           "spy.nsa2_set_param('frag_HAR.min_H_bond', False)",
-                          width=1) + \
+                          width=17) + \
         end_line()
   t += partitioning_scheme_line()
   return t
@@ -989,7 +1012,7 @@ def make_CE_GUI():
     return ""
   from crystal_energies import crystal_energies_status
   t = begin_new_line("CrystalEnergies") + \
-    "<td width='10%' align='left'><b>Energies</b></td>" + \
+    "<td width='13%' align='left'><b>Energies</b></td>" + \
     labeled_text("NoSpherA2_CE_cutoff@refine",
                  "Cutoff/&Aring;",
                  "spy.nsa2_get_param('CE_cutoff')",
@@ -1000,14 +1023,33 @@ def make_CE_GUI():
                   "spy.NoSpherA2.get_SALTED_model_locations()",
                   "spy.nsa2_get_param('selected_salted_model')",
                   "spy.nsa2_set_param('selected_salted_model', html.GetValue('~name~'))",
-                  width_label=7, width_combo=27) + \
-    button("NoSpherA2_CE_calc", "Calculate", "spy.NoSpherA2.crystal_energies_calculate()", width=11,
+                  width_label=7, width_combo=20) + \
+    button("NoSpherA2_CE_calc", "Calculate", "spy.NoSpherA2.crystal_energies_calculate()", width=13,
            hint="Predict every molecule with the SALTED model in the background and draw the pair energies as rods; cached until an atom moves") + \
-    button("NoSpherA2_CE_recalc", "Redo", "spy.NoSpherA2.crystal_energies_recalculate()", width=7,
+    button("NoSpherA2_CE_recalc", "Redo", "spy.NoSpherA2.crystal_energies_recalculate()", width=8,
            hint="Discard the cached energies of this geometry and calculate again") + \
-    button("NoSpherA2_CE_clear", "Clear", "spy.NoSpherA2.crystal_energies_clear() >> html.Update()", width=7,
+    button("NoSpherA2_CE_clear", "Clear", "spy.NoSpherA2.crystal_energies_clear() >> html.Update()", width=8,
            hint="Remove the rods") + \
     f"<td width='15%' align='center'><i>{crystal_energies_status()}</i></td>" + \
+  end_line() + \
+  begin_new_line("CrystalEnergies", scope="2") + \
+    "<td width='13%' align='left'><b>Framework</b></td>" + \
+    labeled_combo("NoSpherA2_CE_kind@refine",
+                  "Kind",
+                  "total;elst;pol;disp;rep;xc",
+                  "spy.nsa2_get_param('CE_kind')",
+                  "spy.nsa2_set_param('CE_kind', html.GetValue('~name~')) >> spy.NoSpherA2.crystal_energies_redraw()",
+                  width_label=6, width_combo=11) + \
+    labeled_combo("NoSpherA2_CE_pair@refine",
+                  "Pair",
+                  "spy.NoSpherA2.crystal_energies_pairs()",
+                  "spy.nsa2_get_param('CE_pair')",
+                  "spy.nsa2_set_param('CE_pair', html.GetValue('~name~')) >> spy.NoSpherA2.crystal_energies_redraw()",
+                  width_label=6, width_combo=14) + \
+    button("NoSpherA2_CE_visible", "Molecules on screen", "spy.NoSpherA2.crystal_energies_draw()", width=25,
+           hint="Rods of the selected energy kind for every contact of the molecules on screen (all cached pairs, or the one chosen); one colour per kind, radius proportional to the energy, repulsive pale") + \
+    button("NoSpherA2_CE_block", "Framework 3x3x3", "spy.NoSpherA2.crystal_energies_framework()", width=25,
+           hint="The energy framework of the 3x3x3 block of cells around the origin cell") + \
   end_line()
   return t
 
@@ -1039,56 +1081,66 @@ def make_XCW_GUI():
   if OV.GetParam('user.NoSpherA2.show_XCW') != True:
     return ""
   from xcw import xcw_status, xcw_tscb_list
-  # basis and fit target: the settings-file keywords basis_set, df_basis, f/f2, weighted, rhf/uhf
+  # label widths: about 1.3 % per character keeps every label on one line
+  # basis and reference: the settings-file keywords basis_set, df_basis, rhf/uhf
   t = begin_new_line("NoSpherA2_XCW", "1") + \
-      _xcw_combo("basis", "Basis Set", "basis_name", "spy.NoSpherA2.getBasisListStr()", 12, 18) + \
-      _xcw_text("df_basis", "DF Basis", "df_basis", 10, 12) + \
-      _xcw_combo("target", "Target", "target", "F;F2", 7, 7) + \
-      _xcw_checkbox("weighted", "weighted", "weighted", 8) + \
-      _xcw_combo("reference", "Ref.", "reference", "rhf;uhf", 6, 9) + \
+      _xcw_combo("basis", "Basis Set", "basis_name", "spy.NoSpherA2.getBasisListStr(NoSpherA2)", 13, 24) + \
+      _xcw_text("df_basis", "DF Basis", "df_basis", 13, 16) + \
+      _xcw_combo("reference", "Reference", "reference", "rhf;uhf", 14, 12) + \
       end_line()
-  # the lambda scan: start, step_size, end and the parameter count of the chi-square
+  # fit target (f/f2, weighted) and the electron count
   t += begin_new_line("NoSpherA2_XCW", "2") + \
-       _xcw_text("start", "&lambda; start", "start", 9, 11) + \
-       _xcw_text("step", "step", "step_size", 6, 11) + \
-       _xcw_text("end", "end", "end", 5, 11) + \
-       _xcw_text("params", "Params", "params", 9, 11) + \
+       _xcw_combo("target", "Target", "target", "F;F2", 10, 10) + \
+       _xcw_checkbox("weighted", "Weighted", "weighted", 13) + \
        charge_spin() + \
+       multiplicity_spin() + \
+       "<td width='23%'></td>" + \
        end_line()
-  # SCF presets and resources
+  # the lambda scan: start, step_size, end; the parameter count of the chi-square comes from the model
   t += begin_new_line("NoSpherA2_XCW", "3") + \
-       _xcw_combo("scf", "SCF", "scf_preset", "sloppy;normal;tight;very_tight", 5, 14) + \
-       _xcw_combo("conv", "Conv.", "conv_preset", "slow_conv;normal_conv;fast_conv", 7, 15) + \
-       _xcw_text("max_iter", "Max iter", "max_iter", 8, 8) + \
+       _xcw_text("start", "&lambda; Start", "start", 12, 14) + \
+       _xcw_text("step", "Step", "step_size", 8, 14) + \
+       _xcw_text("end", "End", "end", 7, 14) + \
+       "<td width='31%'></td>" + \
+       end_line()
+  # SCF presets
+  t += begin_new_line("NoSpherA2_XCW", "4") + \
+       _xcw_combo("scf", "SCF", "scf_preset", "sloppy;normal;tight;very_tight", 7, 19) + \
+       _xcw_combo("conv", "Convergence", "conv_preset", "slow_conv;normal_conv;fast_conv", 17, 22) + \
+       _xcw_text("max_iter", "Max Iter", "max_iter", 13, 10) + \
+       end_line()
+  # resources
+  t += begin_new_line("NoSpherA2_XCW", "5") + \
        labeled_combo("NoSpherA2_XCW_cpus@refine", "CPUs", "spy.NoSpherA2.getCPUListStr()",
                      "spy.nsa2_get_param('ncpus')",
                      "spy.nsa2_set_param('ncpus', html.GetValue('~name~'))",
-                     width_label=7, width_combo=9) + \
+                     width_label=8, width_combo=10) + \
        labeled_text("NoSpherA2_XCW_mem@refine", "Mem(Gb)",
                     "spy.nsa2_get_param('mem')",
                     "spy.nsa2_set_param('mem', html.GetValue('~name~'))",
-                    width_label=9, width_textbox=12) + \
+                    width_label=12, width_textbox=12) + \
+       _xcw_checkbox("use_gpu", "GPU", "use_gpu", 8) + \
+       _xcw_text("i_tensor_mb", "I Tensor MB", "i_tensor_mb", 16, 12) + \
+       "<td width='21%'></td>" + \
        end_line()
   # run options: the -xcw_* command line flags
-  t += begin_new_line("NoSpherA2_XCW", "4") + \
-       _xcw_checkbox("gaussian_halt", "Gaussian halt", "gaussian_halt", 12) + \
-       _xcw_text("strong_cutoff", "strong cutoff", "strong_cutoff", 12, 8) + \
-       _xcw_checkbox("incremental", "incremental", "incremental", 11) + \
-       _xcw_text("int_precision", "int. precision", "int_precision", 12, 10) + \
-       _xcw_checkbox("extrapolate", "extrapolate", "extrapolate", 11) + \
-       _xcw_checkbox("use_gpu", "GPU", "use_gpu", 6) + \
+  t += begin_new_line("NoSpherA2_XCW", "6") + \
+       _xcw_checkbox("gaussian_halt", "Gaussian Halt", "gaussian_halt", 19) + \
+       _xcw_checkbox("incremental", "Incremental", "incremental", 17) + \
+       _xcw_checkbox("extrapolate", "Extrapolate", "extrapolate", 17) + \
+       "<td width='44%'></td>" + \
        end_line()
-  t += begin_new_line("NoSpherA2_XCW", "5") + \
-       _xcw_text("i_tensor_mb", "I tensor MB", "i_tensor_mb", 12, 10) + \
-       _xcw_text("anom_disp", "Anom. disp. file", "anom_disp_file", 16, 36) + \
-       multiplicity_spin() + \
+  t += begin_new_line("NoSpherA2_XCW", "7") + \
+       _xcw_text("strong_cutoff", "Strong I/&sigma;", "strong_cutoff", 15, 12) + \
+       _xcw_text("int_precision", "Int. Precision", "int_precision", 19, 12) + \
+       "<td width='42%'></td>" + \
        end_line()
   # free text appended to the settings file, for keywords the GUI has no control for
-  t += begin_new_line("NoSpherA2_XCW", "6") + \
-       _xcw_text("extra", "Extra settings", "extra_settings", 14, 82) + \
+  t += begin_new_line("NoSpherA2_XCW", "8") + \
+       _xcw_text("extra", "Extra Settings", "extra_settings", 19, 75) + \
        end_line()
   # action row: run, stop, status and the table picker of the last run
-  t += begin_new_line("NoSpherA2_XCW", "7") + \
+  t += begin_new_line("NoSpherA2_XCW", "9") + \
        button("NoSpherA2_XCW_run", "Run XCW", "spy.NoSpherA2.xcw_run() >> html.Update()", width=12,
               hint="Write the settings file and start NoSpherA2 -do_XCW in the background") + \
        button("NoSpherA2_XCW_stop", "Stop", "spy.NoSpherA2.xcw_stop() >> html.Update()", width=8,

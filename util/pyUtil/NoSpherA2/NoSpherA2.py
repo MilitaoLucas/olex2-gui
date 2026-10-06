@@ -19,8 +19,9 @@ from PluginTools import PluginTools as PT
 # Local imports for NoSpherA2 functions
 from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
 from utilities import open  # code page independent, see utilities.open
+from utilities import dev_features
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI, ptb_prerefine_line
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 #including these two here to register functions, ignoring F401 for unused imports
@@ -28,6 +29,7 @@ import ELMO # noqa: F401
 import cubes_maps # noqa: F401
 import crystal_energies # noqa: F401
 import xcw # noqa: F401
+import bond_atlas # noqa: F401
 import xharpy
 import pyscf
 import psi4
@@ -1277,7 +1279,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     self.xtb_exe = self.setup_software("xTB", "xtb", True)
 
   def setup_occ_executables(self):
-    # OCC is compiled into NoSpherA2; it is offered only to users who ask for it
+    # OCC is compiled into NoSpherA2; listed and preselected unless user.NoSpherA2.show_OCC is switched off
     if OV.GetParam('user.NoSpherA2.show_OCC') != True:
       return
     if "OCC" in [x.strip() for x in self.softwares.split(";")]:   # called again from the GUI, keep one entry
@@ -1314,8 +1316,9 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           cleaned_list.append(cleaned_item)
     return ";".join(cleaned_list)
 
-  def getBasisListStr(self):
-    source = software()
+  def getBasisListStr(self, source=None):
+    # source: whose list, the selected one by default; XCW asks for NoSpherA2's own
+    source = source or software()
     if self.basis_list_str is None:
       return "No Basis Sets found!"
     if "OCC" in source:
@@ -1373,7 +1376,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     parts = OV.ListParts()
     if parts is not None:
       parts = list(parts)
-    if OV.IsDebugging():
+    if dev_features():
       if not parts:
         return self.softwares + ";  fragHAR;  SALTED;"
       elif len(parts) > 1:
@@ -2050,19 +2053,21 @@ def make_NSA2_GUI(method):
     return make_wfn_GUI()
   elif method == "Hybrid":
     return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
-  elif method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
-    return make_ORCA_GUI(is_orca_new())
+  # pTB pre-refinement is offered wherever aaff.PTB_FOLLOW_UP can take over from it
+  pre = ptb_prerefine_line() if NoSpherA2_instance.ptb_exe else ""
+  if method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
+    return make_ORCA_GUI(is_orca_new()) + pre
   elif method == "OCC" and OV.GetParam('user.NoSpherA2.show_OCC') == True:
-    return make_OCC_GUI()
+    return make_OCC_GUI() + pre
   elif method == "pySCF":
-    return make_pySCF_GUI()
+    return make_pySCF_GUI() + pre
   elif method == "xTB":
     return make_xtb_GUI()
   elif method == "XHARPy":
     return make_xHARPY_GUI()
   elif method == "pTB":
     return make_ptb_GUI()
-  elif method == "SALTED" and OV.IsDebugging():
+  elif method == "SALTED" and dev_features():
     return make_SALTED_GUI()
   elif method == "Tonto":
     return make_tonto_GUI()
@@ -2103,4 +2108,30 @@ OV.registerFunction(get_sources_string, False, "NoSpherA2")
 
 def get_NoSpherA2_instance():
   return NoSpherA2_instance
+
+# every switch that hides development work from users; dispradial and flint are read at start-up
+GURU_SWITCHES = ('user.NoSpherA2.guru_mode',        # SALTED, fragHAR, Hybrid sources; Bond Atlas without debug mode
+                 'user.NoSpherA2.show_partitioning',
+                 'user.NoSpherA2.show_broken_sym',
+                 'user.NoSpherA2.show_OCC',
+                 'user.NoSpherA2.show_CE',           # interaction energies and energy frameworks
+                 'user.NoSpherA2.show_XCW',
+                 'user.NoSpherA2.show_BondAtlas',
+                 'user.refinement.show_experimental',
+                 'user.refinement.dispradial',
+                 'user.solution.flint')
+
+def set_guru_mode(on=True):
+  """spy.NoSpherA2.set_guru_mode([false]): every development feature on (or off), saved in user.phil."""
+  on = str(on).strip().lower() not in ('false', '0', 'off', 'no')
+  for p in GURU_SWITCHES:
+    OV.SetParam(p, on)
+  from variableFunctions import SaveUserParams
+  SaveUserParams()
+  if on:
+    NoSpherA2_instance.setup_occ_executables()
+  print("Guru mode %s: %s" % ("on" if on else "off", ", ".join(p.split('.')[-1] for p in GURU_SWITCHES)))
+  print("DispRadial and FLINT load at start-up: restart Olex2 for those.")
+  olx.html.Update()
+OV.registerFunction(set_guru_mode, False, "NoSpherA2")
 #print "OK."

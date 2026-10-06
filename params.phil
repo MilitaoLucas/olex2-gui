@@ -2903,6 +2903,15 @@ user
       .type = bool
       .expert_level = 2
       .help = Show the experimental X-ray constrained wavefunction block
+    show_BondAtlas = False
+      .type = bool
+      .expert_level = 2
+      .help = Show the experimental bonding analysis block (also needs debug or guru mode)
+    guru_mode = False
+      .type = bool
+      .expert_level = 2
+      .help = Offer the development sources (SALTED, fragHAR, Hybrid) without debug mode - \
+              spy.NoSpherA2.set_guru_mode() sets it with every other development switch
   }
   Server{
     host=localhost

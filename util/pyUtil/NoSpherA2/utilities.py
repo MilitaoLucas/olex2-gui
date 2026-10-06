@@ -208,6 +208,30 @@ def scrub(cmd):
   olex.m(cmd)
   return log.endListen()
 
+def _hklf5_twin_laws(hkl_src):
+  """The rotation the HKLF5 macro fits for every negative batch of the file, each as
+  nine strings row-major; empty when the file has no batch numbers or no overlaps"""
+  laws, rows = [], None
+  try:
+    lines = scrub("HKLF5 -e '%s'" % hkl_src)
+  except Exception as e:
+    print("There is a problem with the HKLF5 file: %s" % e)
+    return laws
+  for line in lines:
+    if line.startswith("Twin rotation matrix for batch"):
+      rows = []
+      continue
+    parts = line.split()
+    if len(parts) == 3 and rows is not None:
+      try:
+        rows += [str(float(p)) for p in parts]
+      except ValueError:
+        continue
+      if len(rows) == 9:
+        laws.append(rows)
+        rows = None
+  return laws
+
 def write_merged_hkl():
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -354,27 +378,18 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
 
   olex_refinement_model = OV.GetRefinementModel(False)
 
+  # NoSpherA2 takes one -twin per law (row-major, h' = R h as on the TWIN card) and adds R h to the table
   if olex_refinement_model['hklf']['value'] >= 5:
-    try:
-      src = OV.HKLSrc()
-      cmd = "HKLF5 -e '%s'" %src
-      res = scrub(cmd)
-      if "HKLF5 file is expected" in " ".join(res):
-        pass
-      elif "negative batch numbers" in " ".join(res):
-        pass
-      else:
-        args.append("-twin")
-        for i in res[4].split() + res[6].split() + res[8].split():
-          args.append(str(float(i)))
-    except:
-      print("There is a problem with the HKLF5 file...")
+    laws = _hklf5_twin_laws(OV.HKLSrc())
+    if not laws:
+      olx.Echo("No twin law could be read off the HKLF 5 file - the table covers the first domain only", m="warning")
+    for law in laws:
+      args += ["-twin"] + law
   elif 'twin' in olex_refinement_model:
-    c = olex_refinement_model['twin']['matrix']
-    args.append("-twin")
-    for row in c:
-      for el in row:
-        args.append(str(float(el)))
+    from cctbx_olex_adapter import twin_laws_from_model
+    for law in twin_laws_from_model(olex_refinement_model['twin']):
+      m = law.as_double()  # cctbx orientation is the transpose of the card
+      args += ["-twin"] + [str(m[j * 3 + i]) for i in range(3) for j in range(3)]
   original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
   if original_hklsrc and OV.HKLSrc() != original_hklsrc:
     # A solvent mask is active: OV.HKLSrc() currently points at the temporary
@@ -565,6 +580,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   env = dict(os.environ)
   if soft == "OCC":
     env["OCC_DATA_PATH"] = os.path.join(os.path.dirname(NoSpherA2), "occ", "share")
+  print("NoSpherA2 command line: " + " ".join(args))
 
   p = None
   if sys.platform[:3] == 'win':
@@ -652,6 +668,10 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       if not occ_fchk_files:
         OV.SetVar('NoSpherA2-Error', "NoFchk")
         raise NameError('OCC run did not generate an fchk file during cuQCT call!')
+      # occ writes the fchk and the table from the last iteration even when the SCF failed
+      if os.path.exists(wfn_log_fn) and 'SCF did not converge' in open(wfn_log_fn).read():
+        OV.SetVar('NoSpherA2-Error', "SCF")
+        raise NameError('OCC reports an unconverged SCF - see %s' % wfn_log_fn)
       _copy_occ_fchk_outputs_to_workspace(occ_fchk_files, folder, name)
 
       tsc_candidates = [
@@ -780,6 +800,25 @@ def combine_tscs(match_phrase="_part_", no_check=False):
 
 OV.registerFunction(combine_tscs, False, 'NoSpherA2')
 
+def _write_part_xyz(fn, group):
+  # showp is a GUI macro; olex2c has none, and File then wrote every PART into every part's xyz
+  if OV.HasGUI():
+    olex.m("showp " + " ".join(group))
+    olx.File(fn, p=8)
+    olex.m("showp")
+    return
+  # ponytail: the asymmetric unit only - a grown model is exported by the GUI path alone
+  rows = []
+  for i in range(int(olx.xf.au.GetAtomCount())):
+    if olx.xf.au.IsAtomDeleted(i).lower() == "true" or olx.xf.au.GetAtomType(i) == "Q":
+      continue
+    if str(olx.xf.au.GetAtomPart(i)) not in group:
+      continue
+    x, y, z = [float(v) for v in olx.xf.au.Orthogonalise(olx.xf.au.GetAtomCrd(i)).replace(",", " ").split()]
+    rows.append("%s %10.4f%10.4f%10.4f" % (olx.xf.au.GetAtomType(i), x, y, z))
+  with open(fn, "w") as f:
+    f.write("%d\nExported from Olex2\n%s\n" % (len(rows), "\n".join(rows)))
+
 def deal_with_parts():
   parts = OV.ListParts()
   if not parts:
@@ -796,10 +835,7 @@ def deal_with_parts():
       if part == 0:
         continue
       groups.append(["0",str(part)])
-      olex.m("showp 0 %s" %part)
-      fn = "%s_part_%s.xyz" %(OV.ModelSrc(), part)
-      olx.File(fn,p=8)
-    olex.m("showp")
+      _write_part_xyz("%s_part_%s.xyz" %(OV.ModelSrc(), part), groups[-1])
     return list(parts), groups
   else:
     result = []
@@ -810,21 +846,15 @@ def deal_with_parts():
         longest = i
 
     for i in range(len(grouped_parts[longest])):
-      command = "showp 0"
       groups.append(["0"])
       result.append(i+1)
       for j in range(len(grouped_parts)):
         if i >= len(grouped_parts[j]):
-          command += " %d"%grouped_parts[j][0]
           groups[i].append(str(grouped_parts[j][0]))
         else:
-          command += " %d"%grouped_parts[j][i]
           groups[i].append(str(grouped_parts[j][i]))
-      olex.m(command)
-      fn = "%s_part_%s.xyz" %(OV.ModelSrc(), i+1)
-      olx.File(fn,p=8)
+      _write_part_xyz("%s_part_%s.xyz" %(OV.ModelSrc(), i+1), groups[i])
     # I will return only a simple sequence which maps onto the calculations to be done
-    olex.m("showp")
     return result, groups
 OV.registerFunction(deal_with_parts, False, 'NoSpherA2')
 
@@ -891,6 +921,10 @@ def read_disorder_groups():
       return None
   return result
 OV.registerFunction(read_disorder_groups, False, 'NoSpherA2')
+
+def dev_features():
+  # the experimental sources and blocks: debug mode, or spy.NoSpherA2.set_guru_mode()
+  return OV.IsDebugging() or OV.GetParam('user.NoSpherA2.guru_mode') == True
 
 def is_disordered():
   parts = OV.ListParts()
@@ -978,6 +1012,7 @@ def org_min():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(org_min, False, "NoSpherA2")
 
@@ -1001,6 +1036,7 @@ def org_small():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(org_small, False, "NoSpherA2")
 
@@ -1024,6 +1060,7 @@ def org_final():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',True)
+  nsa2_set_param('PTB_PREREFINE',False)
   olex.m("html.Update()")
 OV.registerFunction(org_final, False, "NoSpherA2")
 
@@ -1047,6 +1084,7 @@ def light_min():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(light_min, False, "NoSpherA2")
 
@@ -1070,6 +1108,7 @@ def light_small():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(light_small, False, "NoSpherA2")
 
@@ -1093,6 +1132,7 @@ def light_final():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',False)
   nsa2_set_param('full_HAR',True)
+  nsa2_set_param('PTB_PREREFINE',False)
   olex.m("html.Update()")
 OV.registerFunction(light_final, False, "NoSpherA2")
 
@@ -1116,6 +1156,7 @@ def heavy_min():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',True)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(heavy_min, False, "NoSpherA2")
 
@@ -1139,6 +1180,7 @@ def heavy_small():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',True)
   nsa2_set_param('full_HAR',False)
+  nsa2_set_param('PTB_PREREFINE',True)
   olex.m("html.Update()")
 OV.registerFunction(heavy_small, False, "NoSpherA2")
 
@@ -1162,6 +1204,7 @@ def heavy_final():
   nsa2_set_param('ORCA_Solvation',"Water")
   nsa2_set_param('Relativistic',True)
   nsa2_set_param('full_HAR',True)
+  nsa2_set_param('PTB_PREREFINE',False)
   olex.m("html.Update()")
 OV.registerFunction(heavy_final, False, "NoSpherA2")
 
@@ -1476,6 +1519,7 @@ def nsa2_model_fingerprint():
   try:
     fp['cell'] = ' '.join(str(olx.xf.au.GetCell()).replace(',', ' ').split())
     fp['hall'] = olx.xf.au.GetCellSymm("hall")
+    fp['wavelength'] = str(olx.xf.exptl.Radiation())
     hkl = OV.HKLSrc()
     fp['hkl'] = os.path.basename(hkl)
     fp['hkl_sha256'] = _nsa2_sha256(hkl)
