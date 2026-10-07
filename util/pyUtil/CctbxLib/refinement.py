@@ -319,7 +319,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
 
-    # NoMoRe constraint â€” built from snum params, same as any other constraint
+    # NoMoRe constraint — built from snum params, same as any other constraint
     self._nomore_constraint = None
     if OV.GetParam('snum.NoMoRe.enabled', False):
       try:
@@ -719,7 +719,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         olx.Echo("Did not find values for reflection (%s,%s,%s) in scattering table!"%(indices[0],indices[1],indices[2]), m="error")
         olx.Echo("Try recalculating the .tsc file!", m="error")
       else:
-        print("Refinement failed")
         import traceback
         traceback.print_exc()
         # any parameter index the error carries, named. cctbx reports these as
@@ -734,6 +733,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             self._dump_refinement_diagnostics(e_string)
           except Exception as de:
             print("could not dump diagnostics: %s" % de)
+        olx.Echo("Refinement failed", m="error")
       self.failure = True
     else:
       stopwatch.start("FFT")
@@ -1836,7 +1836,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       cif_block.add_loop(refln_loop.refln_loop)
       ## END Florian's new fcf iucr loop
-
+    if OV.IsEDData():
+      if OV.IsEDRefinement():
+        cif_block['_refine.diffraction_theory'] = "dynamical"
+        if self.reparametrisation.thickness:
+          cif_block['_refine_ls.sample_thickness'] = f"{self.reparametrisation.thickness.value:.4f}"
+        if self.reparametrisation.thickness.grad:
+          cif_block['_refine_ls.sample_thickness_su'] = f"{self.reparametrisation.thickness.su:.2f}"
+      else:
+        cif_block['_refine.diffraction_theory'] = "kinematical"
 
     if self.use_tsc and use_aspherical == True:
       import aaff

@@ -360,7 +360,7 @@ OV.registerFunction(EditCifInfo)
 
 
 class MergeCif(CifTools):
-  def __init__(self, edit=False, force_create=True, evaluate_conflicts=True):
+  def __init__(self, edit=False, merge_with = [], force_create=True, evaluate_conflicts=True):
     ext = OV.FileExt()
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
@@ -397,7 +397,6 @@ class MergeCif(CifTools):
       ECI.run()
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
-    merge_with = []
     for extra_cif in OV.GetCifMergeFilesList():
       if extra_cif:
         merge_with.append(extra_cif)

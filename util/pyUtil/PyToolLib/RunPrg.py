@@ -65,6 +65,7 @@ class RunPrg(ArgumentParser):
     self.Ralpha = 0
     self.Nqual = 0
     self.CFOM = 0
+    self.z_processed = False
     self.HasGUI = OV.HasGUI()
     self.make_unique_names = False
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
@@ -751,16 +752,51 @@ class RunRefinementPrg(RunPrg):
     OV.SetParam('snum.init.skip_routine', False)
     OV.SetParam('snum.current_process_diagnostics','refinement')
     if self.params.snum.refinement.cifmerge_after_refinement:
+      merge_with = []
       evt = olx.stopwatch.start_scope("CifMerge")
       try:
-        MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
+        z_fn = os.path.join(OV.StrDir(), "z-score.cif")
+        if os.path.exists(z_fn):
+          os.remove(z_fn)
+        if self.deal_with_Z_score():
+          Z = OV.GetHeaderParam("ED.z.value")
+          with open(z_fn, "w") as zf:
+            zf.write("_refine_ls.abs_structure_z-score %s" %Z)
+          merge_with.append(z_fn)
+      except Exception as e:
+        pass
+      try:
+        MergeCif(merge_with=merge_with, edit=False, force_create=False, evaluate_conflicts=False)
       except Exception as e:
         if debug:
           sys.stdout.formatExceptionInfo()
         print("Failed in CifMerge: '%s'" %str(e))
       evt.stop()
 
-  class  convergency_listener(object):
+  def deal_with_Z_score(self):
+    if self.z_processed:
+      return
+    self.z_processed = True
+    if not OV.IsEDData():  return False
+    if OV.GetACI().EDI.gui_compute_enantiomers_internal():
+      return True
+    else:
+      if debug:
+        print("Skipping Hooft parameter evaluation for ED data")
+      OV.SetParam('snum.refinement.hooft_str', "ED")
+      OV.SetParam('snum.refinement.flack_str', "ED")
+      # Only mark the panel as 'ED' while the Z-Score is still unknown.
+      # Once a dynamical (N-beam) run has determined it, keep showing it
+      # -- a later kinematic/plain refine must not wipe it back to "ED".
+      try:
+        z_known = float(OV.GetHeaderParam('ED.z.value', 0)) != 0
+      except (TypeError, ValueError):
+        z_known = False
+      if not z_known:
+        OV.SetHeaderParam('ED.z.value', "ED")
+      return False
+
+  class convergency_listener(object):
     done = False
     convergence_value = 1e3
     def __init__(self) -> None:
@@ -961,25 +997,7 @@ OV.registerFunction(run_auto_vss, False, 'runprg')
 def do_refine():
   rpg = RunRefinementPrg()
   if not rpg.terminate:
-    if OV.IsEDData():
-      if OV.GetACI().EDI.gui_compute_enantiomers_internal():
-        pass
-      else:
-        if debug:
-          print("Skipping Hooft parameter evaluation for ED data")
-        OV.SetParam('snum.refinement.hooft_str', "ED")
-        OV.SetParam('snum.refinement.flack_str', "ED")
-        # Only mark the panel as 'ED' while the Z-Score is still unknown.
-        # Once a dynamical (N-beam) run has determined it, keep showing it
-        # -- a later kinematic/plain refine must not wipe it back to "ED".
-        try:
-          z_known = float(OV.GetHeaderParam('ED.z.value', 0)) != 0
-        except (TypeError, ValueError):
-          z_known = False
-        if not z_known:
-          OV.SetHeaderParam('ED.z.value', "ED")
-        return
-    return
+    rpg.deal_with_Z_score()
 
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
