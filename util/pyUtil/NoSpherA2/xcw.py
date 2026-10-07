@@ -18,6 +18,7 @@ are not passed.
 """
 
 import glob
+import json
 import os
 import shutil
 import subprocess
@@ -54,6 +55,24 @@ def _charge():
 def _mult():
   """The shared NoSpherA2 multiplicity; 0 means 1 everywhere else in the package."""
   return int(nsa2_get_param("multiplicity") or 0) or 1
+
+
+def _executable():
+  exe = OV.GetVar("NoSpherA2")
+  if _param("basis_adv") == True:
+    root, extension = os.path.splitext(exe)
+    advanced = root + "_XCW" + extension
+    if os.path.isfile(advanced):
+      return advanced
+  return exe
+
+
+def xcw_basis_list():
+  from NoSpherA2 import get_NoSpherA2_instance
+  bases = get_NoSpherA2_instance().basis_list_str
+  if not bases:
+    raise RuntimeError("No basis sets found for XCW")
+  return bases
 
 
 def _write_hkl(path):
@@ -109,6 +128,25 @@ def _write_settings(path, n_params):
     "params %d" % n_params,
     "basis_set %s" % _param("basis_name", nsa2_get_param("basis_name")),
   ]
+  if _param("basis_adv") == True:
+    folder = os.path.dirname(os.path.abspath(path))
+    exe = _executable()
+    help_result = subprocess.run([exe, "-help"], cwd=folder, check=True,
+                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    if b"basis_overrides <file>" not in help_result.stdout:
+      raise RuntimeError("This NoSpherA2 executable does not support XCW advanced bases; install a build with basis_overrides support.")
+    from basis_set_api import get_basis_overrides_json
+    import olexex
+    from utilities import ELEMENTS_BY_SYMBOL
+    atoms = olexex.OlexRefinementModel()._atoms
+    present = {ELEMENTS_BY_SYMBOL[atom['type']] for atom in atoms}
+    data = get_basis_overrides_json(str(_param("basis_adv_string", "")), present)
+    filename = "xcw_basis_overrides.json"
+    with open(os.path.join(folder, filename), "w") as out:
+      json.dump(data, out, indent=2)
+      out.write("\n")
+    lines.append("basis_overrides %s" % filename)
   if _param("df_basis"):
     lines.append("df_basis %s" % _param("df_basis"))
   lines.append("max_iter %d" % int(_param("max_iter", 100)))
@@ -132,7 +170,7 @@ def _write_settings(path, n_params):
 
 
 def _args(folder, name, settings):
-  exe = OV.GetVar("NoSpherA2")
+  exe = _executable()
   args = [exe, "-do_XCW", "-cif", name + ".cif", "-hkl", name + ".hkl", "-XCW_settings", settings,
           "-cpus", str(nsa2_get_param("ncpus")), "-mem", str(float(nsa2_get_param("mem")) * 1000), "-no_date",
           "-charge", str(_charge()), "-mult", str(_mult()), "-anom_disp", "anom_disp.txt"]
@@ -263,7 +301,8 @@ def xcw_run():
     settings = name + "_xcw_settings.txt"
     _write_settings(os.path.join(folder, settings), n_params)
   except Exception as e:
-    print("XCW: could not prepare the input: %s: %s" % (type(e).__name__, e))
+    _state["message"] = "could not prepare the input: %s: %s" % (type(e).__name__, e)
+    print("XCW: %s" % _state["message"])
     sys.stderr.formatExceptionInfo()
     return
   args = _args(folder, name, settings)
@@ -324,5 +363,5 @@ def xcw_use_tscb():
   print("XCW: %s is now the tsc source" % target)
 
 
-for _f in (xcw_run, xcw_stop, xcw_status, xcw_finished, xcw_tscb_list, xcw_use_tscb):
+for _f in (xcw_run, xcw_stop, xcw_status, xcw_finished, xcw_tscb_list, xcw_use_tscb, xcw_basis_list):
   OV.registerFunction(_f, False, "NoSpherA2")

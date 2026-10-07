@@ -398,6 +398,12 @@ snum{
       basis_name = "def2-SVP"
         .type = str
         .help = "Orbital basis of the constrained wavefunction (settings keyword basis_set)"
+      basis_adv = False
+        .type = bool
+        .help = "Override orbital bases per element using BSE; requires a backend with basis_overrides support"
+      basis_adv_string = ""
+        .type = str
+        .help = "Element/BSE basis pairs, e.g. Pt SARC-DKH2; does not enable a DKH2 Hamiltonian"
       df_basis = ""
         .type = str
         .help = "Density-fitting auxiliary basis; empty leaves the NoSpherA2 default"

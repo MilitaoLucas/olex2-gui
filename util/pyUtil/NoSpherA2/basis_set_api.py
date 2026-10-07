@@ -1,12 +1,55 @@
 #!/usr/bin/env python3
 
 import os
+import json
+import re
+from urllib.parse import quote
 #import urllib.request
 #import urllib.parse
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
 from olexFunctions import OV
+
+
+def parse_basis_overrides(specification):
+    from utilities import ELEMENTS, ELEMENTS_BY_SYMBOL
+    tokens = [token for token in re.split(r"[,\.;:\s]+", specification.strip()) if token]
+    if not tokens or len(tokens) % 2:
+        raise ValueError("Basis specification must contain pairs: 'Element Basis', e.g. 'Pt SARC-DKH2'.")
+    overrides = {}
+    for index in range(0, len(tokens), 2):
+        element, basis = tokens[index:index + 2]
+        z = int(element) if element.isdigit() else ELEMENTS_BY_SYMBOL.get(element.capitalize())
+        if z not in ELEMENTS:
+            raise ValueError("Unknown element in basis specification: %s" % element)
+        if z in overrides:
+            raise ValueError("Duplicate basis override for %s" % ELEMENTS[z])
+        overrides[z] = basis
+    return overrides
+
+
+def get_basis_overrides_json(specification, present_elements):
+    from utilities import ELEMENTS
+    overrides = parse_basis_overrides(specification)
+    base_url = os.environ.get("BSE_API_URL", "https://www.basissetexchange.org").rstrip("/")
+    import HttpTools
+    elements = {}
+    for z, basis in overrides.items():
+        if z not in present_elements:
+            raise ValueError("Basis override element %s is not in the XCW model" % ELEMENTS[z])
+        url = "%s/api/basis/%s/format/json/?version=0&elements=%d" % (
+            base_url, quote(basis, safe=""), z)
+        with HttpTools.make_url_call(url, http_timeout=30) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        element = data.get("elements", {}).get(str(z))
+        if not element or not element.get("electron_shells"):
+            raise ValueError("BSE basis %s has no orbital shells for %s" % (basis, ELEMENTS[z]))
+        if element.get("ecp_electrons", 0) or element.get("ecp_potentials"):
+            raise ValueError("XCW requires an all-electron basis for %s, not %s" % (ELEMENTS[z], basis))
+        elements[str(z)] = element
+    return {"elements": elements}
+
 
 class GetBSEThread(ThreadEx):
     instance = None

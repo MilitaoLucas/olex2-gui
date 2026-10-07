@@ -1084,30 +1084,9 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
       basis = open(basis_set_fn,"r")
       inp.write("%basis\n")
       if nsa2_get_param("basis_adv"):
-        import re
         try:
             gto = nsa2_get_param("basis_adv_string")
-
-            # Split input string on any of these separators: , ; : . or whitespace
-            tokens = re.split(r"[,\.;:\s]+", gto.strip())
-            # Remove empty entries
-            tokens = [t for t in tokens if t]
-            print("Tokens:", tokens)
-
-            # Expect pairs: Element Basis Element Basis ...
-            if len(tokens) % 2 != 0:
-                raise ValueError("Basis specification must be given as pairs: 'Element Basis'.")
-
-            for i in range(0, len(tokens), 2):
-                el_token, basis_BSE = tokens[i], tokens[i+1]
-                print("Element token / basis:", el_token, basis_BSE)
-
-                # Normalize element token -> atomic number
-                try:
-                    Z = int(el_token)
-                except ValueError:
-                    Z = int(ELEMENTS_BY_SYMBOL[el_token])
-
+            for Z, basis_BSE in basis_set_api.parse_basis_overrides(gto).items():
                 # Fetch basis from BSE
                 gtoinp = BSE.get_BSE_Z_basis_source(Z, basis_BSE)
                 print("BSE input for Z =", Z, ":", gtoinp)

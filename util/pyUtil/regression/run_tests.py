@@ -2,8 +2,8 @@
 
 These use the stubs in dummy_olex_files, so they cover what can be tested
 without a program behind them - the file readers, the history, the run-program
-wrapper. Anything that needs a real structure, macro or refinement is in
-olex2_pipeline_tests, which runs inside olex2c instead.
+wrapper and the NoSpherA2 GUI callbacks. Anything that needs a real structure,
+macro or refinement is in olex2_pipeline_tests, which runs inside olex2c instead.
 
   python run_tests.py
 
@@ -24,7 +24,8 @@ import test_utils
 # working copy used to take the whole suite down at import - testSkins did
 # exactly that - and one missing test file should cost that file, not all of
 # them.
-_modules = ["testFileReaders", "testHistory", "testRunPrg", "testSkins"]
+_modules = ["testFileReaders", "testHistory", "testRunPrg", "testSkins",
+            "testNoSpherA2GUI", "testXCWBasis"]
 
 
 def TestSuite():

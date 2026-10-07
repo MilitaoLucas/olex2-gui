@@ -270,6 +270,19 @@ Experimental. X-ray constrained wavefunction (XCW) fitting: the wavefunction of 
 ## Basis Set
 The orbital basis of the SCF (the **basis\_set** keyword of the settings file), *DF Basis* an optional density-fitting auxiliary basis. *Target* chooses whether F or F<sup>2</sup> is fitted, *weighted* applies the &sigma; weights of the data, *Ref.* selects a restricted (rhf) or unrestricted (uhf) reference.
 
+The dropdown uses the same basis list as the NoSpherA2 options panel. The XCW selection is stored separately in **snum.NoSpherA2.XCW.basis_name**.
+
+### Advanced orbital bases (including SARC-DKH2)
+Enable **Adv. Basis** to enter element/BSE basis pairs, for example **Pt SARC-DKH2; O def2-TZVP**. Symbols or atomic numbers are accepted. Use the BSE name **SARC-DKH2**, not the ORCA-only spelling **SARC-DKH2-TZVP**. BSE defines this set for La-Rn and Ac-Lr; it does not cover light atoms.
+
+The main **Basis Set** remains the fallback for elements without an override. With advanced bases enabled, the dropdown is not filtered by every element of the model, since an override can supply a missing heavy element. Select a fallback supported by the XCW backend, such as **def2-SVP** or **STO-3G**. Overrides replace, rather than augment, the fallback shells of each named element. They are downloaded from Basis Set Exchange when **Run XCW** is pressed and written to **olex2/XCW/xcw_basis_overrides.json**. Invalid pairs, absent elements, ECP bases and failed downloads stop preparation with an error.
+
+XCW uses its own **snum.NoSpherA2.XCW.basis_adv** and **basis_adv_string**, independent of the HAR advanced-basis settings. A NoSpherA2 build with the **basis_overrides** settings keyword is required; older executables are rejected before downloading. The same assembled orbital basis is used for the SCF, atomic grids and output wavefunction.
+
+If **NoSpherA2_XCW.exe** (or **NoSpherA2_XCW** on Unix) is installed beside the normal executable, advanced XCW runs use that backend. Standard XCW and HAR continue to use the original executable. This allows a separately validated CPU build for advanced bases without replacing the existing GPU-enabled distribution.
+
+**SARC-DKH2 basis support does not enable a DKH2 Hamiltonian.** The present XCW backend still runs its non-relativistic Hartree-Fock Hamiltonian. Do not interpret such a run as a scalar-relativistic DKH2 calculation.
+
 ## Lambda scan
 *&lambda; start*, *step* and *end* define the scan; &lambda; = 0 is the unconstrained wavefunction. *Params* is the number of refined parameters of the crystallographic model, needed for the goodness of fit; 0 takes the count of the last refinement. *Charge* is the total charge of the molecule.
 

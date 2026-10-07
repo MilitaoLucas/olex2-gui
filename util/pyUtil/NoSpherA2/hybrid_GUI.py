@@ -1081,13 +1081,28 @@ def make_XCW_GUI():
   if OV.GetParam('user.NoSpherA2.show_XCW') != True:
     return ""
   from xcw import xcw_status, xcw_tscb_list
+  basis_items = ("spy.NoSpherA2.xcw_basis_list()" if nsa2_get_param('XCW.basis_adv') == True
+                 else "spy.NoSpherA2.getBasisListStr()")
   # label widths: about 1.3 % per character keeps every label on one line
   # basis and reference: the settings-file keywords basis_set, df_basis, rhf/uhf
   t = begin_new_line("NoSpherA2_XCW", "1") + \
-      _xcw_combo("basis", "Basis Set", "basis_name", "spy.NoSpherA2.getBasisListStr(NoSpherA2)", 13, 24) + \
+      _xcw_combo("basis", "Basis Set", "basis_name", basis_items, 13, 24) + \
       _xcw_text("df_basis", "DF Basis", "df_basis", 13, 16) + \
       _xcw_combo("reference", "Reference", "reference", "rhf;uhf", 14, 12) + \
       end_line()
+  t += begin_new_line("NoSpherA2_XCW", "basis") + \
+       labeled_checkbox("NoSpherA2_XCW_basis_adv@refine", "Adv. Basis",
+                        "spy.nsa2_get_param('XCW.basis_adv')",
+                        "spy.nsa2_set_param('XCW.basis_adv', True) >> html.Update()",
+                        "spy.nsa2_set_param('XCW.basis_adv', False) >> html.Update()",
+                        width=17)
+  if nsa2_get_param('XCW.basis_adv') == True:
+    t += _xcw_text("basis_adv_string", "Element / BSE Basis", "basis_adv_string", 25, 50)
+  t += end_line()
+  if nsa2_get_param('XCW.basis_adv') == True:
+    t += begin_new_line("NoSpherA2_XCW", "basis-note") + \
+         "<td><i>Basis functions only: non-relativistic SCF, no DKH2 Hamiltonian.</i></td>" + \
+         end_line()
   # fit target (f/f2, weighted) and the electron count
   t += begin_new_line("NoSpherA2_XCW", "2") + \
        _xcw_combo("target", "Target", "target", "F;F2", 10, 10) + \
