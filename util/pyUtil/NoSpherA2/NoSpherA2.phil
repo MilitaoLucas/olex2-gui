@@ -214,7 +214,7 @@ snum{
       .type = str
     multiplicity = 0
       .type = str
-    ORCA_USE_CRYSTAL_QMMM = False
+    ORCA_USE_CRYSTAL_QMMM = True
       .type = bool
     ORCA_USE_GBW = True
       .type = bool

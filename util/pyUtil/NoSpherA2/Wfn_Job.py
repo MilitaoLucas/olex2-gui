@@ -13,7 +13,7 @@ BSE = basis_set_api.GetBSEThread()
 import subprocess
 
 from olexFunctions import OV
-from variableFunctions import nsa2_get_param
+from variableFunctions import nsa2_get_param, nsa2_set_param
 from utilities import run_with_bitmap, software, is_orca_new, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request, ELEMENTS, ELEMENTS_BY_SYMBOL
 from utilities import open  # code page independent, see utilities.open
 
@@ -23,11 +23,14 @@ except Exception as e:
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 
-def _crystal_cluster(subunit_fn, cluster_fn, radius):
-  # cluster of identical, identically ordered copies of the displayed molecule (ORCA CRYSTAL-QMMM subunits), displayed copy first
+def _crystal_cluster(subunit_fn, cluster_fn, radius, ionic=False):
+  # cluster of identical, identically ordered copies of the displayed atoms (ORCA CRYSTAL-QMMM subunits), displayed copy first.
+  # The copies must tile the crystal, every atom site exactly once. With one molecule that is every distinct image; with
+  # several (a salt) whose sites have different symmetry, PPh4+ and UF6- on different -4 axes of I-4, an operation that
+  # fixes one ion moves the other, so only a subset of the operations may be used, and it is searched for below.
   import numpy as np
   import olex_core
-  from crystal_energies import _cell_matrix, _floats
+  from crystal_energies import _cell_matrix, _floats, _radius
   lines = open(subunit_fn).read().splitlines()
   n0 = int(lines[0])
   el = [("H" if l.split()[0] in ("D", "T") else l.split()[0]) for l in lines[2:2 + n0]]
@@ -36,12 +39,13 @@ def _crystal_cluster(subunit_fn, cluster_fn, radius):
   Minv = np.linalg.inv(M)
   spacing = 1.0 / np.linalg.norm(Minv, axis=1)
   ops = [np.array(m, dtype=float) for m in olex_core.SGInfo()["MatricesAll"]]
+  ops = [np.eye(3, 4)] + [op for op in ops if not np.allclose(op, np.eye(3, 4))]
   radius = float(radius)
 
   def overlap(P, Q):
     return np.min(np.linalg.norm(P[:, None, :] - Q[None, :, :], axis=2), axis=1) < 0.1
 
-  def images(X):
+  def images(X, ops=ops):
     # symmetry images of X with an atom within radius of X's centroid
     F = X @ Minv.T
     cent, fcent = X.mean(axis=0), F.mean(axis=0)
@@ -56,23 +60,78 @@ def _crystal_cluster(subunit_fn, cluster_fn, radius):
         if np.min(np.linalg.norm(P - cent, axis=1)) <= radius:
           yield P
 
-  # an image sharing some but not all atoms with X means X sits on a special position: its mates complete the subunit
-  while True:
-    for P in images(X):
-      hit = overlap(P, X)
-      if hit.any() and not hit.all():
-        X = np.vstack([X, P[~hit]])
-        el += [e for e, h in zip(el, hit) if not h]
+  # each molecule on its own: an image sharing some but not all of its atoms means it sits on a special position, and
+  # its mates complete it. Ions of the Ion type are single atoms and complete already.
+  r = np.array([_radius(e) for e in el])
+  bonded = np.linalg.norm(X[:, None, :] - X[None, :, :], axis=2) < r[:, None] + r[None, :] + 0.4
+  todo, mols = set(range(n0)), []
+  while todo:
+    mol, grow = [], [todo.pop()]
+    while grow:
+      i = grow.pop()
+      mol.append(i)
+      nb = [j for j in todo if bonded[i, j] and not ionic]
+      todo.difference_update(nb)
+      grow += nb
+    mols.append(sorted(mol))
+  Xs, els = [], []
+  for mol in mols:
+    Y, ey = X[mol], [el[i] for i in mol]
+    while True:
+      for P in images(Y):
+        hit = overlap(P, Y)
+        if hit.any() and not hit.all():
+          Y = np.vstack([Y, P[~hit]])
+          ey += [e for e, h in zip(ey, hit) if not h]
+          break
+      else:
         break
-    else:
-      break
-    if len(el) > 48 * n0:
-      raise RuntimeError("Embedding: the displayed atoms do not complete to a finite molecule - not a molecular crystal, use the Ion type")
+      if len(ey) > 48 * len(mol):
+        raise RuntimeError("Embedding: the displayed atoms around %s do not complete to a finite molecule - a polymer or network, which the Mol type cannot embed" % ey[0])
+    new = ~overlap(Y, np.vstack(Xs)) if Xs else np.ones(len(ey), bool)  # two displayed pieces of one molecule
+    Xs.append(Y[new])
+    els += [e for e, k in zip(ey, new) if k]
+  X, el = np.vstack(Xs), els
   n = len(el)
   if n > n0:
     print("Embedding: %d symmetry-generated atoms added to complete the QM subunit (%d atoms)" % (n - n0, n))
+
+  # one operation per copy, such that the copies hit every atom site of the crystal once: exact cover by
+  # backtracking, branching on the first site of atom 0 still free (its candidates are its site symmetry, <= 48)
+  # sites are numbered by distance, not by rounded coordinates, which split a site lying on a rounding boundary
+  # ponytail: each image is compared with every site found so far, O((ops*atoms)^2); a grid hash if Fd-3m salts get slow
+  F = X @ Minv.T
+  R, sites = np.zeros((0, 3)), []
+  for op in ops:
+    row = []
+    for g in F @ op[:, :3].T + op[:, 3]:
+      d = R - g
+      hit = np.flatnonzero(np.linalg.norm((d - np.round(d)) @ M.T, axis=1) < 0.1)
+      if len(hit):
+        row.append(int(hit[0]))
+      else:
+        row.append(len(R))
+        R = np.vstack([R, g])
+    sites.append(row)
+  usable = [k for k, row in enumerate(sites) if len(set(row)) == n]
+
+  def cover(chosen, used):
+    if len(used) == len(R):
+      return chosen
+    free = next((row[0] for row in sites if row[0] not in used), None)  # None: atom 0's orbit is used up, sites remain
+    for k in usable:
+      if sites[k][0] == free and used.isdisjoint(sites[k]):
+        found = cover(chosen + [k], used | set(sites[k]))
+        if found:
+          return found
+    return None
+
+  chosen = cover([0], set(sites[0]))
+  if chosen is None:
+    raise RuntimeError("Embedding: no set of symmetry copies of the displayed %d molecules tiles the crystal - display them in the ratio of the formula unit (e.g. two cations per dianion)" % len(mols))
+  print("Embedding: QM subunit copies from %d of %d symmetry operations" % (len(chosen), len(ops)))
   placed, blocks = X, [X]
-  for P in images(X):
+  for P in images(X, [ops[k] for k in chosen]):
     hit = overlap(P, placed)
     if hit.all():
       continue
@@ -388,14 +447,24 @@ class wfn_Job(object):
       inp.write(f'dft_grid_min_angular = {min_angular}\n')
       inp.write(f'dft_grid_radial_precision = {radial_precision}\n')
     
-  def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None, cover=True):
+  def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None, cover=True, embed=True):
+    # embedding is on by default, but builds its cluster from the whole displayed model: never for one PART of a
+    # disordered structure (no asu.xyz is written there, and the GUI hides the switch) nor when the caller says no
+    embedding = embed and self.software in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1") \
+                and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM') and not OV.ListParts()
     if self.software == "ORCA":
       self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0" or self.software == "ORCA 6.1":
-      embedding = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
       if embedding:
-        self.write_orca_crystal_input(xyz)
-      else:
+        try:
+          self.write_orca_crystal_input(xyz)
+        except RuntimeError as e:
+          # embedding is the default, so a structure it cannot cluster falls back to the gas phase instead of failing;
+          # the switch goes off so the CIF and the GUI do not claim an embedding that did not happen
+          print("%s\nEmbedding switched off, writing a gas-phase ORCA input" % e)
+          nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False)
+          embedding = False
+      if not embedding:
         self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "Gaussian03" or self.software == "Gaussian09" or self.software == "Gaussian16":
       self.write_gX_input(xyz, basis, method, relativistic, charge, mult, part)
@@ -417,7 +486,7 @@ class wfn_Job(object):
       return
     # the QM subunit of an embedding run is asu.xyz; the checked file is what the QM code will see
     fn = os.path.join(self.full_dir, self.name) + ".xyz"
-    if self.software.startswith("ORCA") and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM'):
+    if embedding:
       fn = os.path.join(self.full_dir, "asu") + ".xyz"
     if os.path.exists(fn):
       _check_fragment(fn, charge, mult, parity=self.software not in ("Thakkar IAM", "SALTED"), cover=cover)
@@ -701,8 +770,10 @@ class wfn_Job(object):
       olx.File(coordinates_fn1, p=10)
     coordinates_fn2 = os.path.join(self.full_dir, self.name) + ".xyz"
     radius = nsa2_get_param("ORCA_CRYSTAL_QMMM_RADIUS")
-    natoms, nsub, el_list = _crystal_cluster(coordinates_fn1, coordinates_fn2, radius)
+    qmmmtype = nsa2_get_param("ORCA_CRYSTAL_QMMM_TYPE")
+    natoms, nsub, el_list = _crystal_cluster(coordinates_fn1, coordinates_fn2, radius, ionic=(qmmmtype == "Ion"))
     print("Embedding: %d subunits of %d atoms within %s A" % (nsub, natoms, radius))
+    print("Embedding: please cite Landeros-Rivera & Kleemiss, J. Appl. Cryst. (2026) 59, 1467-1477, doi:10.1107/S160057672600717X")
     xyz2 = open(coordinates_fn2,"r")
     self.input_fn = os.path.join(self.full_dir, self.name) + ".inp"
     inp = open(self.input_fn,"w")
@@ -715,7 +786,6 @@ class wfn_Job(object):
     mem = nsa2_get_param('mem')
     mem_value = float(mem) * 1024 / int(ncpus)
     mem = "%maxcore " + str(mem_value)
-    qmmmtype = nsa2_get_param("ORCA_CRYSTAL_QMMM_TYPE")
     control = "! NoPop MiniPrint 3-21G "
     ECP = False
     if "ecp" in basis_name:

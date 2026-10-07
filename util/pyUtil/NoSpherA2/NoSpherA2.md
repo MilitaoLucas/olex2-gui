@@ -15,6 +15,9 @@ The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is 
 * Kleemiss et al., Chem. Sci., 2021, 12, 1675
 &nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER]
 
+* Landeros-Rivera & Kleemiss, J. Appl. Cryst. 2026, 59, 1467 (crystal embedding, see **Embed.** below)
+&nbsp; URL[https://doi.org/10.1107/S160057672600717X,PAPER]
+
 ## Hirshfeld Atom Refinement
 The term **Hirshfeld Atom Refinement** (HAR), which is the principle underlying NoSpherA2, refers to X-ray crystal structure refinement using atomic electron density fragments derived from so-called Hirshfeld partitioning of the quantum mechanically calculated electron density of the whole structure. There are three steps to this procedure:
 <ol>
@@ -152,6 +155,12 @@ Selects the mechanism by which the SCF calculation converges to the energy minim
 
 ## Dyn. Damp (For ORCA)
 This Option allows ORCA to dynamically change the damping factor between calculation steps. This option can help in tricky cases when the wavefunction does not want to converge normally or might allow to go with an option "one up", that is Easy instead of NormalConv in some cases, sicne the damping factor will "breathe".
+
+## Embed. (For ORCA 5 and newer)
+**On by default.** The QM molecule is calculated inside its crystal: the symmetry-equivalent molecules within **Embed. rad.** (default 12 &Aring;) are represented by ESP-derived point charges, which are updated self-consistently until they change by less than **Charge Conv.** **HF Layers** adds the nearest shells of neighbours as a HF/3-21G layer (multi-layer embedding). **Mol** is for molecular crystals; use **Ion** for ionic and network structures, where **ECP Layers** puts effective core potentials on the boundary. This approximates bulk effects, e.g. the polarisation in strong hydrogen bonds that otherwise makes X&ndash;H bonds come out too short, at a fraction of the cost of a periodic calculation. It replaces **Solvation**. Disordered structures (PART instructions) are always calculated without embedding. When using it, please cite:
+
+Landeros-Rivera, B. & Kleemiss, F. (2026). Application of electrostatic and multi-layer embedding in Hirshfeld atom refinements: a cost-effective approach for approximating bulk effects in crystalline environments. *J. Appl. Cryst.* **59**, 1467&ndash;1477.
+&nbsp; URL[https://doi.org/10.1107/S160057672600717X,PAPER]
 
 # NoSpherA2 Options Grouped Parts
 
