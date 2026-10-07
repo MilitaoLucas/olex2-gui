@@ -419,6 +419,10 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
         if not self.reflections.f_sq_obs.space_group().is_centric() and\
            self.reflections.f_sq_obs.anomalous_flag():
           f_mask = f_mask.generate_bijvoet_mates()
+        # should cover any unmerged dataset
+        if f_mask.space_group() != self.reflections.f_sq_obs.space_group() and\
+          self.reflections.f_sq_obs.space_group() == sgtbx.space_group("P 1"):
+          f_mask = f_mask.expand_to_p1()
         f_mask_cs = f_mask.common_set(f_obs_filtered)
         f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data()+f_mask_cs.data())
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
@@ -799,7 +803,7 @@ class fractal_dimension(OlexCctbxAdapter):
       r.yLegend = "df(phi)"
     else:
       r.xLegend = "rho /eA^(-3)"
-      r.yLegend = "df(rho)"      
+      r.yLegend = "df(rho)"
     return r
 
 class bijvoet_differences_NPP:
