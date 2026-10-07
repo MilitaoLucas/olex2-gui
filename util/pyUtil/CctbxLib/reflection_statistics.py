@@ -153,14 +153,7 @@ class item_vs_resolution(OlexCctbxAdapter):
       else:
         fo2, fc = self.get_fo_sq_fc()
       if OV.GetParam("snum.refinement.use_solvent_mask"):
-        from smtbx import masks
-        f_mask = self.load_mask()
-        if f_mask:
-          if not self.reflections.f_sq_obs.space_group().is_centric() and\
-             self.reflections.f_sq_obs.anomalous_flag():
-            f_mask = f_mask.generate_bijvoet_mates()
-          f_mask_cs = f_mask.common_set(fo2)
-          fc = fc.array(data=fc.data() + f_mask_cs.data())
+        unused, fc = self.mask_load_and_match(fo2, fc)
       scale_factor = OV.GetOSF()
       fo = fo2.f_sq_as_f()
       fo.setup_binner(n_bins=n_bins)
@@ -292,13 +285,7 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     self.info = fo2.info()
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       from smtbx import masks
-      f_mask = self.load_mask()
-      if f_mask:
-        if not self.reflections.f_sq_obs.space_group().is_centric() and\
-           self.reflections.f_sq_obs.anomalous_flag():
-          f_mask = f_mask.generate_bijvoet_mates()
-        f_mask_cs = f_mask.common_set(fo2)
-        fc = fc.array(data=fc.data() + f_mask_cs.data())
+      unused, fc = self.mask_load_and_match(fo2, fc)
     weights = self.compute_weights(fo2, fc)
     self.binned_data = fo2.scale_factor(
       fc, weights=weights, use_binning=True)
@@ -416,15 +403,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       f_mask = self.load_mask()
       if f_mask:
-        if not self.reflections.f_sq_obs.space_group().is_centric() and\
-           self.reflections.f_sq_obs.anomalous_flag():
-          f_mask = f_mask.generate_bijvoet_mates()
-        # should cover any unmerged dataset
-        if f_mask.space_group() != self.reflections.f_sq_obs.space_group() and\
-          self.reflections.f_sq_obs.space_group() == sgtbx.space_group("P 1"):
-          f_mask = f_mask.expand_to_p1()
-        f_mask_cs = f_mask.common_set(f_obs_filtered)
-        f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data()+f_mask_cs.data())
+        f_mask, f_calc_filtered = self.mask_match(f_mask, f_obs_filtered, f_calc_filtered)
         f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
         if f_calc_omitted != None and f_obs_omitted.size() > 0:
           f_mask_omit = f_mask.common_set(f_obs_omitted)
@@ -476,6 +455,8 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
     batch_numbers = None
     do_scale = True
     one_h_function = None
+    f_calc, f_calc_omitted = None, None
+    I_obs_omitted, I_calc_omitted = None, None
     if NoSpherA2:
       table_name = str(nsa2_get_param("file")).lstrip().rstrip()
       one_h_function = self.get_one_h_function(table_name)
@@ -490,22 +471,15 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
         assert batch_number <= flex.max(batch_numbers), "batch_number <= max(batch_numbers)"
         selection = (batch_numbers == batch_number)
         I_obs_filtered = I_obs.select(selection)
-        I_calc_filtered = f_calc.select(selection).as_amplitude_array().f_as_f_sq()
-        I_obs_omitted = None
-        I_calc_omitted = None
+        f_calc = f_calc.select(selection)
         batch_numbers = flex.int(I_obs_filtered.size(), int(batch_number))
       else:
-        I_obs_filtered, f_calc_filtered, batch_numbers = self.get_fo_sq_fc(
+        I_obs_filtered, f_calc, batch_numbers = self.get_fo_sq_fc(
           one_h_function=one_h_function,
           filtered=True,
           merge=False,
           return_scale_indices=True)
-        I_calc_filtered = f_calc_filtered.as_amplitude_array().f_as_f_sq()
-        I_obs_omitted = None
-        I_calc_omitted = None
     elif self.hklf_code == 5:
-      I_obs_filtered = None
-      I_calc_filtered = None
       if one_h_function is not None:
         I_obs, f_calc = self.get_fo_sq_fc(
           one_h_function=one_h_function,
@@ -514,8 +488,8 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
         I_obs, f_calc = self.get_fo_sq_fc(filtered=False)
       I_obs_filtered = I_obs.common_set(self.reflections.f_sq_obs_filtered)
       I_obs_omitted = I_obs.lone_set(I_obs_filtered)
-      I_calc_filtered = f_calc.common_set(self.reflections.f_sq_obs_filtered).as_amplitude_array().f_as_f_sq()
-      I_calc_omitted = f_calc.lone_set(I_calc_filtered).as_amplitude_aray().f_as_f_sq()
+      f_calc_ = f_calc.common_set(self.reflections.f_sq_obs_filtered)
+      f_calc_omitted, f_calc = f_calc.lone_set(f_calc_), f_calc_
     else:
       if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
         assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"
@@ -527,9 +501,6 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       else:
         I_obs_merged = self.reflections.f_sq_obs_merged
         I_obs_filtered = I_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
-      I_calc_merged = None
-      I_calc_filtered = None
-      I_calc_omitted = None
       if OV.IsEDRefinement():
         I_obs_all, I_calc_all = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=False)
         I_obs_filtered, I_calc_filtered = OV.GetACI().EDI.compute_Io_Ic(merge=False, skip_omitted=True)
@@ -539,38 +510,39 @@ class I_obs_vs_I_calc(OlexCctbxAdapter):
       else:
         if one_h_function is not None:
           try:
-            I_calc_merged = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function).as_amplitude_array().f_as_f_sq()
-            I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
-            I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
+            f_calc = self.f_calc(miller_set=I_obs_merged, one_h_function=one_h_function)
+            I_calc_filtered = I_calc_filtered.common_set(I_obs_filtered)
+            f_calc = f_calc.common_set(I_obs_filtered)
+            f_calc_omitted = f_calc.lone_set(I_calc_filtered)
           except:
-            junk, f_calc_temp = self.get_fo_sq_fc(one_h_function=one_h_function)
-            I_calc_merged = f_calc_temp.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
+            junk, f_calc = self.get_fo_sq_fc(one_h_function=one_h_function)
+            f_calc = f_calc.common_set(I_obs_filtered)
             print("WARNING! It was not possible to obtain all values of Ic values\n for the plot, so omitted values are skipped!")
             I_calc_omitted = None
         else:
-          I_calc_merged = self.f_calc(miller_set=I_obs_merged).as_amplitude_array().f_as_f_sq()
-          I_calc_filtered = I_calc_merged.common_set(I_obs_filtered)
-          I_calc_omitted = I_calc_merged.common_set(I_obs_merged).lone_set(I_calc_filtered)
+          f_calc = self.f_calc(miller_set=I_obs_merged)
+          f_calc_ = f_calc.common_set(I_obs_filtered)
+          f_calc_omitted, f_calc = f_calc.common_set(I_obs_merged).lone_set(f_calc_), f_calc_
         I_obs_omitted = I_obs_merged.lone_set(I_obs_filtered)
         I_obs_filtered = self.reflections.f_sq_obs_filtered
 
-    if OV.GetParam("snum.refinement.use_solvent_mask"):
-      f_mask = self.load_mask()
-      if f_mask:
-        if not self.reflections.f_sq_obs.space_group().is_centric() and\
-           self.reflections.f_sq_obs.anomalous_flag():
-          f_mask = f_mask.generate_bijvoet_mates()
-        I_mask_cs = f_mask.common_set(I_obs_filtered).as_amplitude_array().f_as_f_sq()
-        I_calc_filtered = I_calc_filtered.array(data=I_calc_filtered.data() + I_mask_cs.data())
-        if I_calc_omitted != None and I_obs_omitted.size() > 0:
-          I_mask_omit = f_mask.common_set(I_obs_omitted).as_amplitude_array().f_as_f_sq()
-          if I_mask_omit.data().size() < I_obs_omitted.data().size():
-            print("WARNING!\nMissing Information in the Mask about omitted reflections,\nomitted reflections will only display those where information\nabout the map is available!")
-            I_calc_omitted = I_calc_omitted.common_set(I_mask_omit)
-            I_calc_omitted = I_calc_omitted.array(I_calc_omitted.data() + I_mask_omit.data())
-            I_obs_omitted = I_obs_omitted.common_set(I_mask_omit)
-          else:
-            I_calc_omitted = I_calc_omitted.array(I_calc_omitted.data() + I_mask_omit.data())
+    if f_calc:
+      if OV.GetParam("snum.refinement.use_solvent_mask"):
+        f_mask = self.load_mask()
+        if f_mask:
+          f_mask, f_calc = self.mask_match(f_mask, I_obs_filtered, f_calc)
+          if f_calc_omitted != None and I_obs_omitted.size() > 0:
+            f_mask_omit = f_mask.common_set(I_obs_omitted)
+            if f_mask_omit.data().size() < I_obs_omitted.data().size():
+              print("WARNING!\nMissing Information in the Mask about omitted reflections,\nomitted reflections will only display those where information\nabout the map is available!")
+              f_calc_omitted = f_calc_omitted.common_set(f_mask_omit)
+              f_calc_omitted = I_calc_omitted.array(f_calc_omitted.data() + f_mask_omit.data())
+              I_obs_omitted = I_obs_omitted.common_set(f_calc_omitted)
+            f_calc_omitted = f_calc_omitted.array(f_calc_omitted.data() + f_mask_omit.data())
+      I_calc_filtered = f_calc.as_amplitude_array().f_as_f_sq()
+      if f_calc_omitted != None and I_obs_omitted.size() > 0:
+        I_calc_omitted = f_calc_omitted.as_amplitude_array().f_as_f_sq()
+
     Io = flex.abs(I_obs_filtered.data())
     Ic = flex.abs(I_calc_filtered.data())
     if do_scale:
@@ -626,15 +598,7 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
       f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      from smtbx import masks
-      f_mask = self.load_mask()
-      if f_mask:
-        if not self.reflections.f_sq_obs.space_group().is_centric() and\
-           self.reflections.f_sq_obs.anomalous_flag():
-          f_mask = f_mask.generate_bijvoet_mates()
-        f_mask_cs = f_mask.common_set(f_obs_filtered)
-        f_calc_filtered = f_calc_filtered.array(data=f_calc_filtered.data() + f_mask_cs.data())
-
+      unused, f_calc_filtered = self.mask_load_and_match(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(OV.GetOSF())
     if binning == True:
       assert n_bins is not None
@@ -689,15 +653,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     else:
       f_sq_obs, f_calc = self.get_fo_sq_fc()
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      from smtbx import masks
-      f_mask = self.load_mask()
-      if f_mask:
-        if not self.reflections.f_sq_obs.space_group().is_centric() and\
-           self.reflections.f_sq_obs.anomalous_flag():
-          f_mask = f_mask.generate_bijvoet_mates()
-        f_mask_cs = f_mask.common_set(f_sq_obs)
-        f_calc = f_calc.array(data=f_calc.data() + f_mask_cs.data())
-
+      unused, f_calc = self.mask_load_and_match(f_sq_obs, f_calc)
     f_obs = f_sq_obs.f_sq_as_f()
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:

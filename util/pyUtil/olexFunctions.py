@@ -1397,6 +1397,10 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     self.SetParam('snum.refinement.data', data)
     self.DelVar(olx.var_name_param_N)
 
+  def PrintStackTrace(self, force=False):
+    if force or self.IsDebugging():
+      sys.stderr.formatExceptionInfo()
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)

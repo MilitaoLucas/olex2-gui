@@ -1405,16 +1405,15 @@ class Graph(ArgumentParser):
           target = '(%.3f,%.3f)' %(xr, yr*scale)
         else:
           xl = self.metadata.get("x_label", "F calc")
+          reload_graph = ""
+          options = ""
           if xl == "I calc":
             graph_type = "Iobs_Icalc"
-            options = ""
             if OV.IsEDRefinement():
               href_str = "spy.ED.get_profile_plot"
-              reload_graph = ""
           else:
             graph_type = "fobs_fcalc"
             reload_graph = ">>spy.make_reflection_graph(%s)" % graph_type
-            options = ""
           idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
           target = '%s %s' %(href_str, idx)
           href = target + reload_graph
@@ -3551,7 +3550,8 @@ class item_vs_resolution_plot(Analysis):
     try:
       xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
     except Exception as err:
-      print(err)
+      OV.PrintStackTrace()
+      olx.Echo("Failed to create XY_Plot", m="exception")
       return
     if not xy_plot:
       return None
@@ -3965,7 +3965,9 @@ def makeReflectionGraphGui():
 
   if GuiGraphChooserComboExists:
     try:
-      value = OV.GetControlValue('SET_REFLECTION_STATISTICS')
+      #must call directly - managed controls do not 'exist', but maybe they should?
+      #correction: updated in the exe - managed controls *do* exist now disregarding of the GUI
+      value = olx.html.GetValue('SET_REFLECTION_STATISTICS')
     except:
       value = None
   if not value:

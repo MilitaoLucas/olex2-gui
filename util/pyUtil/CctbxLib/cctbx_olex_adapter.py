@@ -618,6 +618,24 @@ class OlexCctbxAdapter(object):
       indices=flex.miller_index(mask[0])).auto_anomalous()
     return miller.array(miller_set=miller_set, data=flex.complex_double(mask[1])).map_to_asu()
 
+  def mask_match(self, f_mask, Fobs, Fcalc):
+    """Returns, updated if required, f_mask, and Fcalc for the given mask"""
+    if not f_mask:  return Fcalc
+    # should cover any unmerged dataset
+    if f_mask.space_group() != self.reflections.f_sq_obs.space_group():
+      if Fobs.space_group() == sgtbx.space_group("P 1"):
+        f_mask = f_mask.expand_to_p1()
+      else:
+        raise Exception("Mask space group does not match the observations!")
+    elif not Fobs.space_group().is_centric() and Fobs.anomalous_flag():
+      f_mask = f_mask.generate_bijvoet_mates()
+    f_mask = f_mask.common_set(Fobs)
+    return (f_mask, None if not Fcalc else Fcalc.array(data=Fcalc.data()+f_mask.data()))
+
+  def mask_load_and_match(self, Fobs, Fcalc):
+    """Loads the mask and returns updated Fcalc"""
+    return self.mask_match(self.load_mask(), Fobs, Fcalc)
+
   # complete - detwins the whole index range rather than just measured refs, used in masking
   def get_fo_sq_fc(self, one_h_function=None, filtered=True, merge=True, complete=False,
                    return_scale_indices=False):
