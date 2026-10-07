@@ -8,6 +8,8 @@
     <item from="_diffrn_radiation_source" to="_diffrn_source">
     <item from="_publ_contact_*,_publ_contact_author_id_orcid" to="_audit_contact_*">
     <item from="_publ_author*" to="_audit_author*">
+    <item from="_refine_diff_potential_max" to="_refine_diff.potential_max">
+    
   >
   <sorting
     <pivots
