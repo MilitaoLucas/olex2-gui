@@ -170,9 +170,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     from smtbx.refinement import sigma_a
     if not sigma_a.is_available():
       raise RuntimeError(
-        "maximum-likelihood refinement needs the alpha/beta estimator from "
-        "mmtbx.max_lik, which this installation does not have. Switch "
-        "snum.refinement.ml.enabled off to refine by least squares.")
+        "maximum-likelihood refinement needs the alpha/beta estimator "
+        "mmtbx_max_lik_ext, which this Olex2's cctbx was built without. "
+        "Choose a least-squares refinement method instead.")
     # Said once per refinement, because the numbers Olex2 goes on to report are
     # least-squares statements and stay least-squares statements. The weight in
     # the normal matrix is the positive part of the curvature only, so
