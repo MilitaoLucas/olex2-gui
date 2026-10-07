@@ -51,6 +51,37 @@ if OV.HasGUI():
 
 silent = True
 
+class ReciprocalResolutionAxis(object):
+  """x-axis transform for plots against d-spacing.
+
+  cctbx resolution bins are shells of equal reciprocal-space volume, so the
+  bin centres are evenly spaced in d*^3 = 1/d^3 and bunch up at the
+  high-resolution end of a linear (or log) d axis. Points are placed at
+  1/d^power and the axis is labelled in d: power=3 spreads the bins evenly,
+  power=1 looks like a 2Theta plot.
+  """
+  nice_d = (0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0, 1.1, 1.2,
+            1.3, 1.4, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0,
+            15.0, 20.0, 30.0, 50.0)
+
+  def __init__(self, power=3):
+    self.power = power
+
+  def forward(self, d):
+    return 1.0/d**self.power
+
+  def ticks(self, min_u, max_u):
+    """(axis position, label) pairs, highest resolution first."""
+    rv = []
+    for d in self.nice_d:
+      u = self.forward(d)
+      if min_u <= u <= max_u:
+        if abs(round(d*10) - d*10) < 1e-6:
+          rv.append((u, "%.1f" %d))
+        else:
+          rv.append((u, "%.2f" %d))
+    return rv
+
 class Graph(ArgumentParser):
   def __init__(self, scale=4):
     super(Graph, self).__init__()
@@ -82,6 +113,7 @@ class Graph(ArgumentParser):
     self.auto_axes = True
     self.reverse_x = False
     self.reverse_y = False
+    self.x_transform = None
     self.draw_origin = False
     self.data = {}
     self.metadata = {}
@@ -470,7 +502,10 @@ class Graph(ArgumentParser):
       else:
         x1 = (y1-y_intercept)/slope
         x2 = (y2-y_intercept)/slope
-      if self.use_log:
+      if self.x_transform:
+        x1 = self.x_transform.forward(x1)
+        x2 = self.x_transform.forward(x2)
+      elif self.use_log:
         if x1 != 0:
           x1 = math.log(x1,self.use_log)
         if x2 != 0:
@@ -814,7 +849,12 @@ class Graph(ArgumentParser):
     max_x = max(max_xs)
     max_y = max(max_ys)
 
-    if not self.max_x:
+    if self.x_transform:
+      # transformed axis starts at d = infinity
+      self.min_x = 0.0
+      self.max_x = 1.05 * max(self.x_transform.forward(x)
+                              for dataset in self.data.values() for x in dataset.x)
+    elif not self.max_x:
       if self.use_log:
         if max_x != 0: self.max_x = math.log(max_x+.1*abs(max_x - min_x),log)
         else: self.max_x = math.log(0.0001,log)
@@ -831,7 +871,9 @@ class Graph(ArgumentParser):
     elif self.max_y < max_y + .05*abs(max_y - min_y):
       self.max_y = max_y + .05*abs(max_y - min_y)
 
-    if self.use_log:
+    if self.x_transform:
+      pass
+    elif self.use_log:
       if min_x != 0:
         min_x = math.log(min_x,log)
       if min_x != 0.0 and self.min_x == None:
@@ -1267,7 +1309,9 @@ class Graph(ArgumentParser):
 
     if sigmas is not None:
       for i, (xr, yr) in enumerate(xy_pairs):
-        if log:
+        if self.x_transform:
+          xr = self.x_transform.forward(xr)
+        elif log:
           xr = math.log(xr,log)
         x = x_constant + xr * scale_x
         y = y_constant + yr * scale_y
@@ -1305,9 +1349,12 @@ class Graph(ArgumentParser):
         msg = ""
         continue
 
-      if log:
-        xr = math.log(xr,self.use_log)
-      x = x_constant + xr * scale_x
+      xp = xr
+      if self.x_transform:
+        xp = self.x_transform.forward(xr)
+      elif log:
+        xp = math.log(xr,self.use_log)
+      x = x_constant + xp * scale_x
       y = y_constant + yr * scale_y
 
       if lt:
@@ -1355,10 +1402,7 @@ class Graph(ArgumentParser):
         if scale == None:
           scale = 1
         if indices is None:
-          if self.use_log:
-            target = '(%.3f,%.3f)' %(self.use_log**xr, yr*scale)
-          else:
-            target = '(%.3f,%.3f)' %(xr, yr*scale)
+          target = '(%.3f,%.3f)' %(xr, yr*scale)
         else:
           xl = self.metadata.get("x_label", "F calc")
           if xl == "I calc":
@@ -1667,14 +1711,20 @@ class Graph(ArgumentParser):
       x_axis.append(div_val)
 
     format_string = "%%.%if" %precision
-    for item in x_axis:
-      val = float(item)
-      if self.use_log:
-        _ = self.use_log**val
-      else:
-        _ = val
-      txt = format_string %_
+    if self.x_transform:
+      ticks = self.x_transform.ticks(min_x, max_x)
+    else:
+      ticks = []
+      for item in x_axis:
+        val = float(item)
+        if self.use_log:
+          ticks.append((val, format_string %(self.use_log**val)))
+        else:
+          ticks.append((val, format_string %val))
 
+    drawn = [] # (left, right) of labels written so far
+    gap = 4 * self.scale
+    for val, txt in ticks:
       wX, wY = get_text_size(self.draw, txt, font=self.font_small)
       y = self.graph_bottom + self.imX * 0.0025
 
@@ -1690,6 +1740,9 @@ class Graph(ArgumentParser):
              + ((0 - max_x) * scale_x)
              + (self.delta_x * scale_x))
       if (x+wX)  <= (self.graph_right) and x >= self.graph_left - wX/2:
+        if any(x < r + gap and x + wX > l - gap for l, r in drawn):
+          continue
+        drawn.append((x, x + wX))
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         x = int(x + wX/2)
         y = y - self.imY * 0.005
@@ -2599,13 +2652,11 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.TopRightTitle
-    self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
+    self.reverse_x = self.params.completeness.resolution_as == 'd_star_sq'
     self.auto_axes = False
     if self.params.completeness.resolution_as == "d_spacing":
-      self.use_log=10
+      self.x_transform = ReciprocalResolutionAxis()
       self.auto_axes=True
-    else:
-      self.use_log=0
     self.cctbx_completeness_statistics()
     self.draw_pairs(reverse_x=self.reverse_x)
     self.draw_fitlines()
@@ -3407,7 +3458,9 @@ class Fobs_over_Fcalc_plot(Analysis):
       indices=indices, metadata=metadata)
 
 
-    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    reverse_x = params.resolution_as == 'd_star_sq'
+    if params.resolution_as == "d_spacing":
+      self.x_transform = ReciprocalResolutionAxis()
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
     #self.plot_function("1")
@@ -3449,8 +3502,10 @@ class scale_factor_vs_resolution_plot(Analysis):
       xy_plot.x, xy_plot.y, metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
+    if params.resolution_as == "d_spacing":
+      self.x_transform = ReciprocalResolutionAxis()
     self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
-    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    reverse_x = params.resolution_as == 'd_star_sq'
     self.draw_pairs(reverse_x=reverse_x)
 
 class item_vs_resolution_plot(Analysis):
@@ -3490,7 +3545,7 @@ class item_vs_resolution_plot(Analysis):
     params = getattr(self.params, self.item)
 
     if params.resolution_as == "d_spacing":
-      self.use_log=10
+      self.x_transform = ReciprocalResolutionAxis()
       self.auto_axes=True
 
     try:
@@ -3582,7 +3637,7 @@ class item_vs_resolution_plot(Analysis):
       if iucr == 0.84:
         iucr = uctbx.d_star_sq_as_two_theta(uctbx.d_as_d_star_sq(iucr),float(olx.xf.exptl.Radiation()),deg=True)
 
-    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    reverse_x = params.resolution_as == 'd_star_sq'
     plot_reflection_count = False
     scale = None
     max_y = None
@@ -3831,6 +3886,8 @@ def makeReflectionGraphOptions(graph, name):
   options_gui = []
   i = 1
   for obj in graph.active_objects():
+    if obj.caption is None: # internal parameter, e.g. the graph title
+      continue
     i += 1
     data_type = obj.type.phil_type
     caption = obj.caption
