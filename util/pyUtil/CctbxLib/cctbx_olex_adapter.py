@@ -1123,7 +1123,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # shipped by the NoSpherA2 distribution zip (etc/ merges into Olex2's), not SVN
     model_path = os.path.join(OV.BaseDir(), "etc", "geometry_aid_%s.npz"
                               % (family or ("row2" if labels else "model")))
-    exe = os.path.join(OV.BaseDir(), "NoSpherA2.exe")
+    exe = os.path.join(OV.BaseDir(), "NoSpherA2"
+                       + (".exe" if sys.platform.startswith("win") else ""))
     if not (os.path.exists(model_path) and os.path.exists(exe)):
       # the release harness reads the density-only line as a failure; a
       # missing specialist model is the all-carbon pass, not a fallback
