@@ -319,7 +319,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
 
-    # NoMoRe constraint — built from snum params, same as any other constraint
+    # NoMoRe constraint - built from snum params, same as any other constraint
     self._nomore_constraint = None
     if OV.GetParam('snum.NoMoRe.enabled', False):
       try:
@@ -1667,7 +1667,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block['_diffrn_reflns_point_group_measured_fraction_full'] = fmt % completeness_full_a
       cif_block['_diffrn_reflns_point_group_measured_fraction_max'] = fmt % completeness_theta_max_a
 
-    cif_block['_diffrn_radiation_wavelength'] = "%.5f" %self.wavelength
+    wl_fmt = "%.4f" if OV.IsEDData() else "%.5f"
+    cif_block['_diffrn_radiation_wavelength'] = wl_fmt %self.wavelength
     cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
     if self.hklf_code == 5:
       cif_block['_diffrn_reflns_number'] = refinement_refs.size()
