@@ -69,6 +69,15 @@ def restrain(adp=True, geometry=True, damp=True, apply=True):
   damp = OV.get_bool_from_any(damp)
   apply = OV.get_bool_from_any(apply)
 
+  # AddIns works on an INS/RES model only. On a freshly opened mmCIF every line
+  # failed with "Wrong program state" - 883 of them on crambin, each echoing
+  # its instruction - and nothing was restrained. The first refinement turns
+  # the CIF into an .ins and reloads it, and on_polymer_loaded runs again then.
+  if apply and not OV.IsFileType('ires'):
+    olx.Echo("Protein restraints need an .ins model; the first refinement "
+             "writes one and adds them.", m="warning")
+    return None
+
   residues = _residues()
   if not residues:
     olx.Echo("No residues in this structure, so nothing to restrain.",

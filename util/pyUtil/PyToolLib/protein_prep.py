@@ -48,6 +48,21 @@ PEPTIDE_13 = (
 # geometry. Anything else without a table is reported rather than guessed at.
 NON_RESIDUE = frozenset(("HOH", "WAT", "DOD"))
 
+# ASP and GLU without the hydrogen that says which oxygen carries it. The
+# aa_geometry tables come from the protonated residues, C-O 1.185 to one oxygen
+# and 1.330 to the other. A deposited protein has no hydrogens, so nothing says
+# which is which, and at pH 7 neither is: crambin's E23 sat at 1.216 against a
+# 1.329 target. The deprotonated idealised residues (idealized_aa asp and glu,
+# the Engh & Huber values) give both oxygens the same targets.
+# {class: (acid H, carboxyl C, carbon before it, (O, O))}
+CARBOXYLATE = {
+  "ASP": ("HD2", "CG", "CB", ("OD1", "OD2")),
+  "GLU": ("HE2", "CD", "CG", ("OE1", "OE2")),
+}
+CARBOXYLATE_CO = 1.2494     # C-O
+CARBOXYLATE_XO = 2.3807     # carbon before the carboxyl C to O
+CARBOXYLATE_OO = 2.1958     # O-O
+
 
 class Residue(object):
   """One residue, reduced to what the restraint decisions need.
@@ -203,6 +218,24 @@ def is_hydrogen(name):
   return n.startswith("H") or n.startswith("D")
 
 
+def _carboxylate(r, bonds, angles):
+  """The tables for r, with a symmetric carboxylate unless its acid H is there.
+
+  Only a hydrogen named HD2/HE2 keeps the protonated targets, because that
+  name is what says which oxygen is the OH.
+  """
+  c = CARBOXYLATE.get(r.cls)
+  if c is None or c[0] in r.atoms:
+    return bonds, angles
+  _, cc, x, (o1, o2) = c
+  bonds, angles = dict(bonds), dict(angles)
+  for o in (o1, o2):
+    bonds[(cc, o)] = CARBOXYLATE_CO
+    angles[(x, o)] = CARBOXYLATE_XO
+  angles[(o1, o2)] = CARBOXYLATE_OO
+  return bonds, angles
+
+
 def plan_restraints(residues, adp=True, geometry=True, hydrogens=False,
                     isolated_adp=False):
   """Decide what this structure needs. Returns a Plan.
@@ -263,6 +296,7 @@ def plan_restraints(residues, adp=True, geometry=True, hydrogens=False,
       # one would be worse than leaving it free
       p.unknown_classes.add(r.cls)
       continue
+    bonds, angles = _carboxylate(r, bonds, angles)
     for (a, b), d in sorted(bonds.items()):
       if a in r.atoms and b in r.atoms:
         if not hydrogens and (is_hydrogen(a) or is_hydrogen(b)):
@@ -354,3 +388,14 @@ def as_shelx(plan, bond_sigma=0.02, angle_sigma=0.04,
     out.append("SIMU %.4f %.4f %.2f %s"
                % (simu_sigma, simu_sigma*2, simu_distance, " ".join(labels)))
   return out
+
+
+if __name__ == "__main__":
+  # carboxylate targets: symmetric without the acid H, protonated with it
+  names = ("N", "CA", "C", "O", "CB", "CG", "OD1", "OD2")
+  for extra, sym in (((), True), (("HD2",), False)):
+    atoms = dict((n, n) for n in names + extra)
+    p = plan_restraints([Residue(1, "A", "ASP", atoms)], hydrogens=False)
+    co = sorted(d for (d, a, b) in p.dfix if a == "CG_A:1" and b[0] == "O")
+    assert len(co) == 2 and (co[0] == co[1]) == sym, (extra, co)
+  print("ok")

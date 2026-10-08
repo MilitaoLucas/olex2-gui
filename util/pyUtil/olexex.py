@@ -2081,9 +2081,12 @@ def on_polymer_loaded():
         olx.Echo("  solvent mask on: without a bulk-solvent model the "
                  "low-angle residual ends up in the ADPs.")
     # Once per structure. Without restraints an anisotropic protein diverges
-    # in the first cycle, and the entry it came from carries none.
+    # in the first cycle, and the entry it came from carries none. Not while
+    # the model is still the mmCIF, where AddIns is refused: the refinement
+    # reloads it as an .ins, and that load comes back here.
     if (OV.GetParam('snum.auto_protein_restraints') and
-        not OV.GetParam('snum.protein_restraints_done')):
+        not OV.GetParam('snum.protein_restraints_done') and
+        OV.IsFileType('ires')):
       OV.SetParam('snum.protein_restraints_done', True)
       import ProteinRestraints
       ProteinRestraints.restrain()
