@@ -385,6 +385,11 @@ def _aspherical_run(sample, backend, source, folder):
   if not cycles:
     raise AssertionError("%s: deal_with_AAFF left no HAR log%s"
                          % (backend, _reason(said)))
+  # aaff writes this line only when the loop ends normally; an exception inside
+  # the loop leaves a log with cycles and no UNCONVERGED, which read as converged.
+  if "Refinement finished at" not in _har_log_text(folder):
+    raise AssertionError("%s: deal_with_AAFF stopped after %d cycle(s) without "
+                         "finishing its log%s" % (backend, cycles, _reason(said)))
   tsc = _tsc_beside(folder)
   if tsc is None:
     raise AssertionError("%s produced no tsc or tscb%s" % (backend, _reason(said)))

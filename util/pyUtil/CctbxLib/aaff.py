@@ -78,14 +78,22 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     else:
       HAR_log.write("{:^24.10f}".format(energy))
     HAR_log.write("{:>70}".format(" "))
-    r1_old = OV.GetParam('snum.refinement.last_R1')
-    wr2_old = OV.GetParam('snum.refinement.last_wR2')
-    if r1_old != "n/a" and r1_old is not None:
-      HAR_log.write("{:>6.2f}".format(float(r1_old) * 100))
+    # last_R1/wR2 also hold 'n/a', '' (read back as None) or 'Solution' after a
+    # solve; float() on those killed the loop after cycle 1. None = not known.
+    try:
+      r1_old = float(OV.GetParam('snum.refinement.last_R1'))
+    except (TypeError, ValueError):
+      r1_old = None
+    try:
+      wr2_old = float(OV.GetParam('snum.refinement.last_wR2'))
+    except (TypeError, ValueError):
+      wr2_old = None
+    if r1_old is not None:
+      HAR_log.write("{:>6.2f}".format(r1_old * 100))
     else:
       HAR_log.write("{:>6}".format("N/A"))
-    if wr2_old != "n/a" and wr2_old is not None:
-      HAR_log.write("{:>7.2f}".format(float(wr2_old) * 100))
+    if wr2_old is not None:
+      HAR_log.write("{:>7.2f}".format(wr2_old * 100))
     else:
       HAR_log.write("{:>7}".format("N/A"))
     HAR_log.write("\n")
@@ -556,7 +564,7 @@ all calculation parameters are properly recorded."""
         break
       elif run == max_cycles:
         break
-      elif r1_old != "n/a":
+      elif r1_old is not None:
         if (float(r.r1) > float(r1_old) + 0.1) and (run > 1):
           HAR_log.write("      !! R1 increased by more than 0.1, aborting before things explode !!\n")
           self.refinement_has_failed.append("Error: R1 is not behaving nicely! Stopping!")
