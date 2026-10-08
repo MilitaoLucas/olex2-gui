@@ -24,6 +24,7 @@ from decors import run_with_bitmap
 from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI, ptb_prerefine_line
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
+import basis_set_api
 #including these two here to register functions, ignoring F401 for unused imports
 import ELMO # noqa: F401
 import cubes_maps # noqa: F401
@@ -683,12 +684,20 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         and (wfn_code != "pTB")\
         and (wfn_code != "xTB"):
       ne, model = calculate_number_of_electrons()
+      # Elements with their own basis under Adv. Basis (ORCA, fragHAR) are not
+      # checked against the main basis; a heavy element without one still is.
+      overridden = set()
+      if nsa2_get_param('basis_adv') and ("ORCA" in wfn_code or wfn_code == "fragHAR"):
+        try:
+          overridden = set(basis_set_api.parse_basis_overrides(nsa2_get_param('basis_adv_string') or ''))
+        except ValueError:
+          pass  # a malformed string is reported when the ORCA input is written
       heavy = False
       for sc in model._atoms:
         if sc['type'] == 'Q':
           continue
         Z = ELEMENTS_BY_SYMBOL.get(sc['type'], 0)
-        if Z > 36:
+        if Z > 36 and Z not in overridden:
           heavy = True
       # During an HTML refresh the basis combo can briefly provide an empty
       # value.  For a heavy-atom structure recover the first compatible Jorge
