@@ -259,7 +259,8 @@ def _read_atom_basis(basis_fh, element, basis_name):
     if "keys=" in line:
       kl = line.split(" ")
       fmt = kl[kl.index("keys=") + 2]
-    if temp_atom.lower() in line.lower():
+    # Whole header token: a substring test lets "I:" hit "Li:" and "U:" hit "Cu:"
+    if line.split()[0].lower() == temp_atom.lower():
       break
   line_run = basis_fh.readline()
   if "{" in line_run:
@@ -299,6 +300,30 @@ def _write_atom_basis_orca(fh, element, shells):
     fh.write("    " + shell_type + "   " + str(len(primitives)) + "\n")
     for n, (exp, coeff) in enumerate(primitives):
       fh.write("  " + str(n + 1) + "   " + exp + "  " + coeff + "\n")
+  fh.write("end\n")
+
+
+def _write_orca_basis_block(fh, basis_dir, basis_name, elements):
+  """Write the %basis block: Adv. Basis overrides from BSE, the selected basis file for the remaining elements.
+
+  Shared by the plain and the Crystal-QMMM input, which once skipped the overrides (SARC on U was dropped)."""
+  elements = list(elements)
+  fh.write("%basis\n")
+  if nsa2_get_param("basis_adv"):
+    try:
+      for Z, basis_BSE in basis_set_api.parse_basis_overrides(nsa2_get_param("basis_adv_string")).items():
+        gtoinp = BSE.get_BSE_Z_basis_source(Z, basis_BSE)
+        print("BSE input for Z =", Z, ":", gtoinp)
+        for line in gtoinp:
+          fh.write(line)
+        fh.write("\n")
+        if ELEMENTS[Z] in elements:
+          elements.remove(ELEMENTS[Z])
+    except Exception as error:
+      olx.Echo("Error parsing basis string: %s" % error, m="error")
+  with open(_find_basis_file(basis_dir, basis_name), "r") as basis:
+    for element in elements:
+      _write_atom_basis_orca(fh, element, _read_atom_basis(basis, element, basis_name))
   fh.write("end\n")
 
 
@@ -842,16 +867,16 @@ class wfn_Job(object):
     inp.write("   end\nend\n")
     if mp2_block != "":
       inp.write(mp2_block+"\n")
+    # start charges per element only fit monatomic salts (NaCl); molecular ions like UF6- / PPh4+ get F -1, U 0, P 0,
+    # a subunit of -6 that ORCA neutralises by smearing +0.115 over every MM atom. Start neutral instead and let
+    # Conv_Charges replace them from cycle 2
+    q_sub = sum(known_charges.get(e, 0.0) for e in el_list)
+    if abs(q_sub - float(charge)) > 1e-6:
+      print("Embedding: element charges give a subunit charge of %+g, not %s: MM start charges set to 0" % (q_sub, charge))
+      known_charges = {}
     el_list = sorted(set(el_list))
     if not ECP:
-      basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
-      basis = open(basis_set_fn,"r")
-      inp.write("%basis\n")
-      for element in el_list:
-        shells = _read_atom_basis(basis, element, basis_name)
-        _write_atom_basis_orca(inp, element, shells)
-      basis.close()
-      inp.write("end\n")
+      _write_orca_basis_block(inp, self.parent.basis_dir, basis_name, el_list)
     conv = nsa2_get_param('ORCA_CRYSTAL_QMMM_CONV')
     hflayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_HF_LAYERS')
     ecplayer = nsa2_get_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS')
@@ -1080,35 +1105,7 @@ end"""%(float(conv),ecplayer,hflayer,params_filename))
     if mp2_block != "":
       inp.write(mp2_block+'\n')
     if not ECP:
-      basis_set_fn = _find_basis_file(self.parent.basis_dir, basis_name)
-      basis = open(basis_set_fn,"r")
-      inp.write("%basis\n")
-      if nsa2_get_param("basis_adv"):
-        try:
-            gto = nsa2_get_param("basis_adv_string")
-            for Z, basis_BSE in basis_set_api.parse_basis_overrides(gto).items():
-                # Fetch basis from BSE
-                gtoinp = BSE.get_BSE_Z_basis_source(Z, basis_BSE)
-                print("BSE input for Z =", Z, ":", gtoinp)
-
-                # Write to input
-                for line in gtoinp:
-                    inp.write(line)
-                inp.write("\n")
-
-                # Remove from atom list
-                elem_symbol = ELEMENTS[Z]
-                if elem_symbol in atom_list:
-                    atom_list.remove(elem_symbol)
-                    print(f"Removed {elem_symbol} from list, remaining: {atom_list}")
-
-        except Exception as error:
-            olx.Echo("Error parsing basis string: %s" % error, m="error")                   
-      for element in atom_list:
-        shells = _read_atom_basis(basis, element, basis_name)
-        _write_atom_basis_orca(inp, element, shells)
-      basis.close()
-      inp.write("end\n")
+      _write_orca_basis_block(inp, self.parent.basis_dir, basis_name, atom_list)
     Full_HAR = nsa2_get_param('full_HAR')
     run = None
     damping = nsa2_get_param('ORCA_DAMP')
