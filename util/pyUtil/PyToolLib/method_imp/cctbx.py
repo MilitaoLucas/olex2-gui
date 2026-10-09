@@ -287,6 +287,11 @@ class Method_cctbx_ChargeFlip(Method_solution):
         try:
           from refinement import FullMatrixRefine
           fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          # no .oxl per round: the next round overwrites it and the kill/anis
+          # below change the model after it anyway; rsa() in its chirality
+          # section is seconds a call on polymeric inorganics. Flack/Hooft
+          # come from run().
+          fmr.write_oxl = lambda cif_block=None: None
           OV.SetParam('snum.refinement.flack_str', "")
           fmr.run()
           fmr.log.close()
