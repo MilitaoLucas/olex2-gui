@@ -213,9 +213,11 @@ class initpy_funcs():
       import AC7
     except ImportError as err:
       # AC7 is distributed as version-specific bytecode.  Let a development
-      # runtime with a different Python minor version start without it, but do
-      # not mask unrelated AC7 import errors.
-      if "bad magic number" not in str(err):
+      # runtime with a different Python minor version, or an installation that
+      # does not ship AC7 at all, start without it, but do not mask unrelated
+      # AC7 import errors.  Re-raising here aborts initpy before RunPrg and
+      # leaves a half-initialised session.
+      if "bad magic number" not in str(err) and err.name != "AC7":
         raise
       self._ac7_unavailable_reason = str(err)
       # The refinement HTML always evaluates this AC7 predicate.  Register a
@@ -225,8 +227,11 @@ class initpy_funcs():
         return False
       import olex
       olex.registerFunction(isMEDEnabled, False, "ac")
-      print("AC7 is disabled: its bytecode is incompatible with Python %s.%s (%s)"
-        %(sys.version_info.major, sys.version_info.minor, err))
+      if "bad magic number" in str(err):
+        print("AC7 is disabled: its bytecode is incompatible with Python %s.%s (%s)"
+          %(sys.version_info.major, sys.version_info.minor, err))
+      else:
+        print("AC7 is disabled: it is not installed (%s)" %err)
     finally:
       self.olx.stopwatch.stop()
 
