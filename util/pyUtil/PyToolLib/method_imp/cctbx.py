@@ -5,6 +5,95 @@ import olx
 import olex
 import os
 
+def fill_from_map():
+  """ Carbon on the Fo-Fc peaks of the refined, re-typed model that sit at a
+  bond length from it: 1.25-1.65 A from a light atom, 1.8-2.6 A from one past
+  Ar (a donor on a metal). Sigma is the map's median absolute deviation, which
+  the missing atoms cannot inflate. The additions go through the tidy-up's own
+  refine, prune and re-typing. Returns the number added; never raises. """
+  try:
+    import numpy as np
+    from cctbx import maptbx
+    from cctbx.array_family import flex
+    from cctbx.eltbx import tiny_pse
+    from cctbx_olex_adapter import OlexCctbxSolve
+    sigma_cut = OV.GetParam('snum.solution.map_fill_sigma') or 7.0
+    s = OlexCctbxSolve()
+    xs = s.xray_structure()
+    fo = s.reflections.f_sq_obs_merged.average_bijvoet_mates().f_sq_as_f()
+    fo = fo.select(fo.data() > 0)
+    fc = xs.structure_factors(d_min=fo.d_min(), algorithm='fft').f_calc()
+    fo, fc = fo.common_sets(fc.average_bijvoet_mates() if fc.anomalous_flag() else fc)
+    afc = abs(fc).data()
+    k = flex.sum(fo.data()*afc)/flex.sum(afc*afc)
+    fft = fo.customized_copy(data=fo.data()/k - afc).phase_transfer(fc).fft_map(
+      symmetry_flags=maptbx.use_space_group_symmetry, resolution_factor=1/3.)
+    fft.apply_volume_scaling()
+    a = fft.real_map_unpadded().as_1d().as_numpy_array()
+    sig = 1.4826*float(np.median(np.abs(a - np.median(a))))
+    sc = [x for x in xs.scatterers() if x.scattering_type.strip() not in ('H', 'D', 'Q')]
+    if sig <= 0 or len(sc) < 4:
+      return 0
+    def z(t):
+      try:
+        return tiny_pse.table(t.strip().capitalize()).atomic_number()
+      except (RuntimeError, ValueError):
+        return 0
+    ops = list(xs.space_group().all_ops())
+    M = np.array(xs.unit_cell().orthogonalization_matrix()).reshape(3, 3).T
+    X = np.array([op*x.site for x in sc for op in ops], dtype=float)
+    H = np.array([z(x.scattering_type) for x in sc for op in ops])
+    # bond windows by the neighbour's row; a peak under 1.25 A (C=O, C#N, N-O)
+    # must be half as strong again, an unmodelled H sits at 0.8-1.0 A
+    # (100 COD cases: 91 of 282 missed atoms on 6-sigma peaks fell outside
+    # 1.25-1.65 A, at 1.1-1.25 A from C/N/O and 1.7-1.9 A from Si/P/Cl)
+    def bonded(d, zj, h):
+      if zj > 18:
+        return 1.8 <= d <= 2.6
+      if zj > 10:
+        return 1.45 <= d <= 2.1
+      return 1.25 <= d <= 1.65 or 1.1 <= d < 1.25 and h >= 1.5*sigma_cut*sig
+    pk = fft.peak_search(parameters=maptbx.peak_search_parameters(
+      peak_search_level=1, interpolate=True, min_distance_sym_equiv=0.7),
+      verify_symmetry=False).all(max_clusters=max(40, len(sc)))
+    def near(p, Y):
+      d = Y - p
+      d -= np.round(d)
+      d = np.sqrt(((d @ M)**2).sum(axis=1))
+      j = int(d.argmin())
+      return float(d[j]), j
+    # ponytail: at most a quarter of the model per round, strongest first, and
+    # never past 1.25x the 18 A^3-per-atom fill of the asymmetric unit
+    # (cod_7711810: 26 atoms where 20 belong, the fill took it to 34)
+    room = int(1.25*xs.unit_cell().volume()/len(ops)/18.0) - len(sc)
+    # a full cell still takes one peak half as strong again a round: the rule
+    # is 18 A^3 an atom, dense inorganics run under it (cod_2217672: N at 13 sigma)
+    new, cap = [], min(max(4, len(sc)//4), room) if room > 0 else 1
+    for p, h in zip(pk.sites(), pk.heights()):
+      if h < (sigma_cut if room > 0 else 1.5*sigma_cut)*sig or len(new) >= cap:
+        break
+      p = np.array(p)
+      d, j = near(p, X)
+      if not bonded(d, H[j], h):
+        continue
+      if new and near(p, np.array([op*q for q in new for op in ops]))[0] < 1.1:
+        continue
+      new.append(tuple(p))
+    if not new:
+      return 0
+    import re
+    used = [int(m.group(1)) for m in
+            (re.match(r"C(\d+)$", str(x.label)) for x in xs.scatterers()) if m]
+    nxt = max(used or [0]) + 1
+    names = [s.post_single_peak(p, 0, element="C", number=nxt + i)
+             for i, p in enumerate(new)]
+    print("Map fill added %d carbon(s) over %.1f sigma: %s"
+          % (len(new), sigma_cut, " ".join(n for n in names if n)))
+    return [n for n in names if n] or len(new)
+  except Exception as err:
+    print("Map fill did not run (%s: %s)" % (type(err).__name__, err))
+    return 0
+
 class Method_cctbx_refinement(Method_refinement):
   flack = None
   version = "(default)"
@@ -238,6 +327,87 @@ class Method_cctbx_ChargeFlip(Method_solution):
       RunPrgObject.please_tidy_solution = self.tidy_solution
 
   def tidy_solution(self):
+    """ `_tidy`, then again from each near-tied origin while R1 stays high.
+
+    A heavy atom on a pseudo-centre leaves several origins that cc and R1 of
+    the map cannot separate (cod_7023630, Np in P-1, chose the wrong one by
+    R1 0.249 against 0.253); only the completed light atoms tell them apart.
+    The model with the lowest R1 is kept.
+    """
+    self._tidy()
+    cut = OV.GetParam('snum.solution.origin_retry_r1')
+    cut = 0.05 if cut is None else float(cut)
+    tcut = OV.GetParam('snum.solution.tangent_retry_r1')
+    tcut = 0.15 if tcut is None else float(tcut)
+    solver = getattr(self, 'cctbx_solver', None)
+    alts = list(getattr(solver, 'origin_alternates', None) or []) if cut > 0 else []
+    tangent = tcut > 0 and getattr(solver, 'chosen_f_calc', None) is not None
+    if not alts and not tangent:
+      return
+    import shutil
+    res = '%s.res' % OV.FileName()
+    shutil.copyfile(res, res + '.pre')
+    def final_r1(k):
+      try:
+        from refinement import FullMatrixRefine
+        fmr = FullMatrixRefine(max_cycles=4, max_peaks=0)
+        fmr.run()
+        fmr.log.close()
+        r1 = None if fmr.failure else fmr.r1[0]
+      except Exception as err:
+        print("Could not refine origin %d: %s" % (k, err))
+        r1 = None
+      OV.File(res)
+      shutil.copyfile(res, res + '.o%d' % k)
+      return r1, res + '.o%d' % k
+    fmt = lambda r: "-" if r is None else "%.3f" % r
+    def attempt(k, fc, what):
+      try:
+        names = [str(olx.xf.au.GetAtomName(i))
+                 for i in range(int(olx.xf.au.GetAtomCount()))
+                 if olx.xf.au.IsAtomDeleted(i) != 'true']
+        if names:
+          olex.m("kill %s" % " ".join(names))
+        if not solver.placeSolution(fc):
+          return None
+        if OV.HasGUI():
+          olx.xf.EndUpdate()
+        olx.xf.SaveSolution(res)
+        olx.Atreap('"%s"' % res)
+        print("%s %d: completing it too (R1 %s so far)" % (what, k + 1, fmt(best[0])))
+        self._tidy()
+        r = final_r1(k)
+        print("%s %d ends at R1 %s" % (what, k + 1, fmt(r[0])))
+        return r
+      except Exception as err:
+        print("%s %d failed: %s" % (what, k + 1, err))
+    best, tried = final_r1(0), 0
+    def run(starts, what, k0):
+      nonlocal best, tried
+      for k, fc in enumerate(starts, k0):
+        if best[0] is not None and best[0] <= cut:
+          break
+        r, tried = attempt(k, fc, what), tried + 1
+        if r and r[0] is not None and (best[0] is None or r[0] < best[0]):
+          best = r
+    run(alts, "Origin", 1)
+    if tangent and (best[0] is None or best[0] > tcut):
+      # ponytail: 512 tangent starts cost 15-60 s, so only for what still fails
+      try:
+        starts = solver.tangentAlternates(skip=alts)
+      except Exception as err:
+        print("Tangent formula failed: %s" % err)
+        starts = []
+      run(starts, "Tangent start", len(alts) + 1)
+    if not tried:
+      shutil.copyfile(res + '.pre', res)
+      olex.m('reap "%s"' % res)
+      return
+    shutil.copyfile(best[1], res)
+    olex.m('reap "%s"' % res)
+    print("Kept origin %d, R1 %s" % (int(best[1].rsplit('.o', 1)[1]) + 1, fmt(best[0])))
+
+  def _tidy(self):
     """ Make the solution look like chemistry, then drop what will not refine.
 
     `compaq -a` gathers the fragments, then rounds of: refine `tidy_cycles`,
@@ -263,6 +433,13 @@ class Method_cctbx_ChargeFlip(Method_solution):
     # ponytail: off by default; on 45 COD entries the additions were all
     # pruned again, the misses were wrong-SG or noise-displaced, not absent
     complete = bool(OV.GetParam('snum.solution.complete_after_tidy'))
+    # rounds of fill_from_map once the types are settled
+    fills = OV.GetParam('snum.solution.map_fill_rounds')
+    fills = 5 if fills is None else int(fills)
+    fills0 = fills
+    # a fill is kept only if the next refinement brings R1 under this fraction
+    # of what it was; a carbon on a complete model barely moves it
+    gain = OV.GetParam('snum.solution.map_fill_gain') or 1.0
     anis_z = OV.GetParam('snum.solution.tidy_anis_z')
     anis_z = 10 if anis_z is None else int(anis_z)
     from cctbx.eltbx import tiny_pse
@@ -279,9 +456,20 @@ class Method_cctbx_ChargeFlip(Method_solution):
       return
     try:
       from cctbx_olex_adapter import OlexCctbxSolve
+      import shutil
+      # a prune that sends R1 up took real atoms (an over-typed heavy atom runs
+      # its U up like a noise peak), and the rounds after it strip the model:
+      # the model before it comes back and pruning drops to light atoms, then
+      # stops (cod_7706715: 80 atoms R1 0.13 -> 7 atoms R1 0.51)
+      res = '%s.res' % OV.FileName()
+      snap, mode, last, done, base, extra = None, 2, None, False, 0.0, False
+      keep, pending = set(), set()
       # ponytail: prune-only rounds do not count, the budget is for re-typing;
       # the first round never re-types, the noise is always still there
-      for p in range(3*passes):
+      # a map fill buys its own rounds; nothing else gets more than before
+      p, left = -1, 3*passes + 1
+      while left > 0:
+        p, left, r1 = p + 1, left - 1, None
         # ponytail: the refine macro spends 1.2 s a round on GUI, html and
         # files around 0.3 s of least squares; the engine is called directly
         try:
@@ -297,6 +485,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
           fmr.log.close()
           if fmr.failure:
             raise RuntimeError("refinement failed")
+          r1 = fmr.r1[0]
           # the macro's absolute-structure check, which a polar group needs
           flack = OV.GetParam('snum.refinement.flack_str') or ""
           hooft = getattr(fmr, 'hooft', None)
@@ -307,6 +496,57 @@ class Method_cctbx_ChargeFlip(Method_solution):
         except Exception as err:
           print("Direct refinement failed (%s), using the macro" % err)
           olex.m("refine %d" % cycles)
+        if last == "map fill" and snap and r1 is not None:
+          print("Map fill R1 %.4f -> %.4f" % (snap[0], r1))
+        if snap and r1 is not None and (r1 > snap[0] + max(0.03, 0.25*snap[0])
+                                        or last == "map fill" and r1 > gain*snap[0]):
+          # ponytail: a re-typing that moves many atoms is not converged after
+          # one round (cod_1557785: Ti 32 -> 8 was restored, pass 3 kept it and
+          # typed 26 more atoms right); it gets one more round before the check
+          if last == "re-typing" and not extra:
+            extra = True
+            continue
+          shutil.copyfile(snap[1], res)
+          olex.m('reap "%s"' % res)
+          print("The %s sent R1 %.3f -> %.3f; the model before it is restored"
+                % (last, snap[0], r1))
+          if last != "prune":
+            # a restored re-typing still gets its fills; it used to stop here
+            # first (36 of 170 cases, cand9 arm 5 Oct 2026)
+            if last == "re-typing" and fills > 0:
+              done, snap, left = True, None, max(left, 1)
+              continue
+            break
+          mode -= 1
+          print("Pruning %s" % ("light atoms only" if mode else "off"))
+          snap = None
+          continue
+        # a fill atom that took R1 down 3 % gets twice the U limit: the prune took
+        # C20 (U 0.088) five times over (cod_1559310, R1 0.132 -> 0.111), but a
+        # batch also carries noise at U 0.55 / 0.91 (cod_2207415, cod_8107302)
+        if last == "map fill" and snap and r1 is not None and r1 < 0.97*snap[0]:
+          keep |= pending
+        if done:
+          # the re-typing budget ran out with types still moving: the fill
+          # still runs, and gets one refine, prune and re-typing of its own
+          if fills > 0 and r1 is not None:
+            OV.File(res)
+            shutil.copyfile(res, res[:-4] + '.tidy.res')
+            snap = (r1, res[:-4] + '.tidy.res')
+            added = fill_from_map()
+            if added:
+              pending = set(added) if isinstance(added, list) else set()
+              fills, last, done, passes = fills - 1, "map fill", False, 1
+              left += 3
+              continue
+            fills = 0
+          OlexCctbxSolve().printDoubt()
+          break
+        snap = None
+        if r1 is not None:
+          OV.File(res)
+          shutil.copyfile(res, res[:-4] + '.tidy.res')
+          snap = (r1, res[:-4] + '.tidy.res')
         us = []
         for i in range(int(olx.xf.au.GetAtomCount())):
           if olx.xf.au.IsAtomDeleted(i) == 'true' or \
@@ -319,16 +559,21 @@ class Method_cctbx_ChargeFlip(Method_solution):
           except (TypeError, ValueError):
             pass
         us.sort()
-        median = us[len(us)//2][0] if us else 0.0
+        # the reference never falls: a prune takes the top of the U list, the
+        # median of the rest is lower and the next round took real carbon at
+        # 3x of it (0.033 -> 0.023 -> 0.016, a Gd among them)
+        median = base = max(base, us[len(us)//2][0] if us else 0.0)
         # carbon-free only: the threshold never drops under 0.06 there, since the
         # median collapses when a heavy atom is typed light; on organics the same
         # floor kept noise and cost 7 % more mistyped atoms (21 Sep 2026)
         floor = 0.0 if 'C' in [e.split(':')[0] for e in olx.xf.GetFormula('list').split(',')] else 0.02
-        doomed = [n for u, i, n, t in us if u > factor*max(median, floor)]
+        doomed = [n for u, i, n, t in us if u > factor*max(median, floor)*(2 if n in keep else 1)
+                  and (mode == 2 or mode == 1 and heavy_z(t) <= 8)]
         # ponytail: the heavy atoms go anisotropic once the noise is gone;
         # an isotropic Pd leaves a residual the light atoms then read
         heavy = sorted(set("$" + t for u, i, n, t in us if anis_z
                            and heavy_z(t) > anis_z))
+        last = "prune"
         if doomed:
           olex.m("kill %s" % " ".join(doomed))
           print("Pruned %d peak(s) whose U exceeded %.1fx the median U %.3f "
@@ -345,21 +590,78 @@ class Method_cctbx_ChargeFlip(Method_solution):
           continue
         # re-typed only once nothing was pruned: noise peaks typed carbon steal
         # scale from every real atom and read them all a Z too heavy
-        if not retype or not OlexCctbxSolve().reassignAfterCleanup():
+        # the fill waits for settled types, but prune and re-typing churn can
+        # spend the budget first: the last rounds give it its turn (cod_7233829)
+        if not retype or left <= 5 and fills == fills0 or not OlexCctbxSolve().reassignAfterCleanup():
           # ponytail: one completion once the types are settled; what it adds
           # goes through the same refine, prune and re-typing as the rest
+          added = fills > 0 and fill_from_map()
+          if added:
+            pending = set(added) if isinstance(added, list) else set()
+            fills, last, left = fills - 1, "map fill", left + 3
+            continue
           if not complete or not OlexCctbxSolve().completeModel():
             break
-          complete = False
+          complete, last = False, "completion"
           continue
         passes -= 1
+        last, extra = "re-typing", False
         # ponytail: the prunes leave fragments scattered again; a second
         # assembly after the re-typing joins what the first round could not
         olex.m("compaq -a")
-        if passes <= 0:
-          olex.m("refine %d" % cycles)
-          OlexCctbxSolve().printDoubt()
-          break
+        # the last re-typing is refined and checked like every other change
+        done = passes <= 0
+      # ponytail: the graph re-typer (cand11) has the last word on the types;
+      # what it renames is refined once and goes through the blown-U check
+      if retype and OlexCctbxSolve().gnnRetype():
+        try:
+          from refinement import FullMatrixRefine
+          fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          fmr.run()
+          fmr.log.close()
+        except Exception as err:
+          print("Refinement after the graph re-typing failed: %s" % err)
+      # a U that refined non-positive-definite (often on a special position)
+      # is written with fields of 10 and more, which SHELX reads as free
+      # variables (cod_4519371: O20 U22 38.1), as is a coordinate that ran
+      # away (cod_2020523: C9 at 10, 10, 20); such atoms go isotropic at the
+      # model median and are refined once more, and what is still blown goes
+      from cctbx import adptbx
+      def blown():
+        b = []
+        for i in range(int(olx.xf.au.GetAtomCount())):
+          if olx.xf.au.IsAtomDeleted(i) == 'true' or \
+             str(olx.xf.au.GetAtomType(i)) in ('Q', 'H'):
+            continue
+          u = [float(x) for x in str(olx.xf.au.GetAtomU(i)).split(',')]
+          x = [float(c) for c in str(olx.xf.au.GetAtomCrd(i)).split(',')]
+          if max(map(abs, x)) >= 5 or not 0 < u[0] < 1 or len(u) == 6 and (max(map(abs, u)) >= 1 or
+              not adptbx.is_positive_definite((u[0], u[1], u[2], u[5], u[4], u[3]))):
+            b.append((i, str(olx.xf.au.GetAtomName(i)), len(u) == 6))
+        return b
+      try:
+        bad = blown()
+      except Exception as err:
+        bad = []
+        print("Could not check the ADPs: %s" % err)
+      if bad:
+        for i, n, aniso in bad:
+          if aniso:
+            olex.m("isot %s" % n)
+          olx.xf.au.SetAtomU(i, "%.4f" % (base or 0.05))
+        print("Made %d atom(s) with a blown U isotropic: %s"
+              % (len(bad), " ".join(n for i, n, a in bad)))
+        try:
+          from refinement import FullMatrixRefine
+          fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          fmr.run()
+          fmr.log.close()
+        except Exception as err:
+          print("Refinement after the isotropic reset failed: %s" % err)
+        bad = blown()
+        if bad:
+          olex.m("kill %s" % " ".join(n for i, n, a in bad))
+          print("Removed %d atom(s) whose U is still blown" % len(bad))
       OV.File('%s.res' % OV.FileName())
       addsym = OV.GetParam('snum.solution.missed_symmetry_check')
       if addsym is None or addsym:

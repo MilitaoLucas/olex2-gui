@@ -1309,7 +1309,7 @@ programs
           .help = "How many random starts to try. Each is scored and the best "
                   "kept, instead of using whichever start happened to work. "
                   "1 restores the old single-run behaviour."
-        max_seconds = 120
+        max_seconds = 240
           .type = float
           .short_caption = Trial budget
           .help = "No new trial is started after this many seconds."

@@ -69,6 +69,22 @@ def twin_laws_from_model(twinning):
       twin_laws.append(law.multiply(inv))
   return twin_laws
 
+
+def same_structure(x, y, cut=0.9):
+  """ One structure if a half-cell shift or the inversion maps one on the other.
+  ponytail: every half shift counts, not only the group's own """
+  import itertools, math
+  a, b = x.common_sets(y)
+  h = a.indices().as_vec3_double()
+  n = (flex.sum(flex.abs(a.data())**2)*flex.sum(flex.abs(b.data())**2))**.5
+  for bb in (b.data(), flex.conj(b.data())):
+    for t in itertools.product((0, .5), repeat=3):
+      ph = flex.polar(flex.double(h.size(), 1.0),
+                      2*math.pi*h.dot(flex.vec3_double(h.size(), t)))
+      if flex.sum(flex.real(a.data()*flex.conj(bb)*ph)) > cut*n:
+        return True
+  return False
+
 class twin_domains:
   def __init__(self, twin_axis, space, twin_law, twin_fraction, angle, fom, hklf5):
     self.space = space
@@ -986,8 +1002,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       want_elements = bool(getattr(params, 'assign_elements', True))
     self.assign_elements_wanted = want_elements
 
+    self.origin_alternates, self.chosen_f_calc = [], None
     if n_trials > 1:
       f_calc = self.multiTrialSolution(f_obs, params, extra, n_trials, verbose)
+      self.chosen_f_calc = f_calc
+      try:
+        self.origin_alternates = self.nearTiedOrigins(f_obs, f_calc)
+      except Exception as e:
+        print("Could not look for other origins: %s" % e)
       if want_groups:
         self.solution_suggestions = self.suggestSpaceGroups(f_obs)
     else:
@@ -1010,7 +1032,110 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       f_calc = (solving.f_calc_solutions[0][0]
                 if solving.f_calc_solutions else None)
 
-    # play with the solutions
+    return self.placeSolution(f_calc)
+
+  def nearTiedOrigins(self, f_obs, f_calc, n=4, d_cc=0.01, d_r1=0.02):
+    """ Other origins of the P1 answer that score as well as the one chosen.
+
+    With a heavy atom on a pseudo-centre the symmetrisations differ only in the
+    light atoms, and cc and R1 cannot tell them apart: cod_7023630 (Np, P-1)
+    chose cc 0.9197 R1 0.249 over the true origin at cc 0.9190 R1 0.253, and 4
+    of 13 majority-missed structures did the same. Only completing the model
+    from each tells them apart, so these are kept for `tidy_solution`.
+    """
+    from smtbx.ab_initio import charge_flipping
+    res = getattr(self, 'multi_trial_result', None)
+    p1 = getattr(res, 'f_calc_in_p1', None)
+    if p1 is None or f_calc is None or res.r1 is None:
+      return []
+    same = same_structure
+    keep, out = charge_flipping.max_shift_refinements, []
+    charge_flipping.max_shift_refinements = n
+    try:
+      for fc, shift, cc in charge_flipping.f_calc_symmetrisations(f_obs, p1, 0.0):
+        fo, f = f_obs.common_sets(fc)
+        r1 = fo.r1_factor(f, scale_factor=fo.scale_factor(f))
+        if cc < res.cc_peak_height - d_cc or r1 > res.r1 + d_r1:
+          continue
+        if not same(f_calc, fc) and not any(same(o[0], fc) for o in out):
+          out.append((fc, cc, r1))
+    finally:
+      charge_flipping.max_shift_refinements = keep
+    for fc, cc, r1 in out:
+      print("Near-tied origin: cc %.4f R1 %.3f (chosen cc %.4f R1 %.3f)"
+            % (cc, r1, res.cc_peak_height, res.r1))
+    return [o[0] for o in out]
+
+  def tangentAlternates(self, skip=(), keep=3, n_trials=512, n_recycle=8):
+    """ Starts that charge flipping never reached, from the tangent formula.
+
+    Sigma-2 tangent refinement of the strong quasi-E from `n_trials` random
+    phase sets reached the true solution for 12 of 13 majority-missed
+    structures. The distinct solutions it converges to are completed by a few
+    rounds of peak recycling over all of f_obs and ranked by that R1; the best
+    `keep` that are not the chosen solution or in `skip` are returned.
+    """
+    import math, random
+    from cctbx import dmtbx
+    f_obs, chosen = self.solution_f_obs, getattr(self, 'chosen_f_calc', None)
+    if f_obs is None or chosen is None:
+      return []
+    f_obs = f_obs.select(f_obs.data() > 0)
+    nat = max(4, int(f_obs.unit_cell().volume()/f_obs.space_group().order_z()/18))
+    f_obs.setup_binner(auto_binning=True)
+    e = f_obs.quasi_normalize_structure_factors()
+    es = e.select(e.data() > 1.2)
+    es = es.select(flex.sort_permutation(es.data(), reverse=True)[:max(200, 12*nat)])
+    tg = dmtbx.triplet_generator(es, amplitudes=es.data(),
+      max_relations_per_reflection=0, sigma_2_only=True)
+    restr = [es.space_group().phase_restriction(h) for h in es.indices()]
+    snap = lambda ph: flex.double([r.nearest_valid_phase(p) if r.is_centric() else p
+                                   for r, p in zip(restr, ph)])
+    rnd, C = random.Random(1), []
+    for k in range(n_trials):
+      ph = snap(flex.double([rnd.uniform(-math.pi, math.pi) for i in range(es.size())]))
+      for c in range(40):
+        ph = snap(tg.apply_tangent_formula(amplitudes=es.data(), phases_rad=ph))
+      fc = es.phase_transfer(ph, deg=False)
+      for c in C:
+        if same_structure(c[0], fc, 0.8):
+          c[1] += 1
+          break
+      else:
+        C.append([fc, 1])
+    C.sort(key=lambda c: -c[1])
+    def recycle(fc, cycles=4):
+      # point atoms on the top peaks weighted by height, f_obs with the model
+      # phases, again; R1 of the last model
+      for c in range(cycles):
+        m = fc.fft_map(resolution_factor=1/3., symmetry_flags=maptbx.use_space_group_symmetry)
+        m.apply_sigma_scaling()
+        pk = m.peak_search(maptbx.peak_search_parameters(peak_search_level=1,
+          interpolate=True, min_distance_sym_equiv=0.7), verify_symmetry=False).all(max_clusters=nat)
+        hs = pk.heights()
+        top, med = max(hs), flex.median(hs)
+        sc = flex.xray_scatterer([xray.scatterer('C%d' % i, site=s, u=0.03,
+          occupancy=max(0.05, h/top)*(top/med if c else 1))
+          for i, (s, h) in enumerate(zip(pk.sites(), hs))])
+        f = xray.structure(crystal_symmetry=f_obs.crystal_symmetry(),
+          scatterers=sc).structure_factors(d_min=f_obs.d_min()).f_calc()
+        fo, ff = f_obs.common_sets(f)
+        r1 = fo.r1_factor(abs(ff), scale_factor=fo.scale_factor(ff))
+        fc = fo.phase_transfer(ff)
+      return r1, fc
+    out = []
+    for fc, n in C[:n_recycle]:
+      r1, fc = recycle(fc)
+      if not any(same_structure(o, fc) for o in [chosen] + list(skip)) \
+         and not any(same_structure(o[1], fc) for o in out):
+        out.append((r1, fc, n))
+    out.sort(key=lambda o: o[0])
+    print("Tangent formula: %d distinct of %d starts" % (len(C), n_trials))
+    for r1, fc, n in out[:keep]:
+      print("Tangent start: %d trials, recycled R1 %.3f" % (n, r1))
+    return [o[1] for o in out[:keep]]
+
+  def placeSolution(self, f_calc):
     if f_calc is not None:
       fft_map = f_calc.fft_map(
         symmetry_flags=maptbx.use_space_group_symmetry)
@@ -1724,10 +1849,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           scores[name], locked[name] = score, forced is not None
           final = changed.get(name, (now, now))[1]
           fin.append((top, final))
-          if dump:
-            rows.append(dict(name=name, now=now, final=final, z=z, u=u,
-                             u_med=u_med, nbs=nbs.get(name, []), top=top,
-                             site=list(sites[j])))
+          rows.append(dict(name=name, now=now, final=final, z=z, u=u,
+                           u_med=u_med, nbs=nbs.get(name, []), top=top,
+                           site=list(sites[j])))
           alt = [(e, p/tot) for e, p in sorted(score.items(), key=lambda ep: -ep[1])
                  if e != final and p/tot >= 0.1]
           if alt:
@@ -1790,10 +1914,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
             changed.pop(n, None)
           else:
             changed[n] = (current[n], e)
-          if dump:
-            for r in rows:
-              if r["name"] == n:
-                r["final"], r["count"] = e, True
+          for r in rows:
+            if r["name"] == n:
+              r["final"], r["count"] = e, True
         return moved
       try:
         nb = balance(changed)
@@ -1835,8 +1958,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
             continue
           nv += 1
           changed[name] = (current[name], best)
-          if dump:
-            rows[j]["veto"], rows[j]["final"] = top, best
+          rows[j]["veto"], rows[j]["final"] = top, best
         if nv:
           print("Label-aware veto changed %d type(s)" % nv)
       elif os.path.exists(full_path):
@@ -1859,11 +1981,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                 % (cons, n_iter))
       type(self).doubt = doubt
       def write_dump(new_labels):
+        for r in rows:
+          r["label"] = new_labels.get(r["name"], r["name"])
+        # the last round is what the graph re-typer reads (gnnRetype)
+        _SOLUTION_EVIDENCE["typing"] = dict(allowed=sorted(allowed), atoms=rows,
+                                            consistency=cons)
         if not dump:
           return
         import json
-        for r in rows:
-          r["label"] = new_labels.get(r["name"], r["name"])
         with open(os.path.join(OV.FilePath(), OV.FileName() + ".typing.log"),
                   "a") as f:
           f.write(json.dumps(dict(allowed=sorted(allowed), atoms=rows,
@@ -1901,6 +2026,68 @@ class OlexCctbxSolve(OlexCctbxAdapter):
             "unchanged" % (type(e).__name__, e))
       if OV.IsDebugging():
         traceback.print_exc()
+      return {}
+
+  def gnnRetype(self):
+    """ The graph re-typer's last word on the final model (typing_gnn.py with
+    etc/typing_gnn.npz): it reads the last re-typing round and the input
+    formula, and an atom whose averaged posterior beats the pipeline's call
+    by the margin is renamed to the new element. Off with
+    OLEX2_TYPING_GNN=0. Returns {label: (old, new)}; never raises.
+    """
+    path = os.path.join(OV.BaseDir(), "etc", "typing_gnn.npz")
+    T = _SOLUTION_EVIDENCE.get("typing")
+    if not T or not os.path.exists(path) or os.environ.get("OLEX2_TYPING_GNN") == "0":
+      return {}
+    try:
+      import re
+      import numpy as np
+      import olexex
+      import typing_gnn
+      self.olx_atoms, self._xray_structure = olexex.OlexRefinementModel(), None
+      xs = self.xray_structure()
+      sc = [s for s in xs.scatterers()
+            if s.scattering_type.strip() not in ("H", "D", "Q")]
+      if not sc:
+        return {}
+      F = {}
+      for part in str(olx.xf.GetFormula('list')).split(','):
+        e, n = part.split(':')
+        e = e.strip().capitalize()
+        F[e] = F.get(e, 0) + float(n)
+      ops = list(xs.space_group().all_ops())
+      changed = typing_gnn.retype(
+        path, T, F, [str(s.label) for s in sc],
+        np.array([s.site for s in sc], float),
+        np.array(xs.unit_cell().orthogonalization_matrix()).reshape(3, 3).T,
+        np.array([np.array(op.r().as_double()).reshape(3, 3) for op in ops]),
+        np.array([op.t().as_double() for op in ops]))
+      if os.environ.get("OLEX2_TYPING_DUMP"):
+        import json
+        with open(os.path.join(OV.FilePath(), OV.FileName() + ".gnn.log"),
+                  "a") as f:
+          f.write(json.dumps(dict(formula=F, changed=changed)) + "\n")
+      if not changed:
+        print("Graph re-typer: no type changed")
+        return {}
+      labels = [str(s.label) for s in xs.scatterers()]
+      groups = {}
+      for name, (old, new) in changed.items():
+        groups.setdefault(new, []).append(name)
+      for symbol, group in sorted(groups.items()):
+        n = max([int(m.group(1)) for m in
+                 (re.match(re.escape(symbol) + r"(\d+)", l, re.I)
+                  for l in labels) if m] + [0])
+        for name in sorted(group):
+          n += 1
+          olex.m("name %s %s%d" % (name, symbol, n))
+      print("Graph re-typer changed %d type(s): %s"
+            % (len(changed), ", ".join("%s %s->%s" % (n, o, w)
+                                       for n, (o, w) in sorted(changed.items()))))
+      return changed
+    except Exception as e:
+      print("Graph re-typer did not run (%s: %s); the types are unchanged"
+            % (type(e).__name__, e))
       return {}
 
   def multiTrialSolution(self, f_obs, params, extra, n_trials, verbose):
