@@ -9,6 +9,11 @@ pipeline's call by more than the margin (0.3, tuned on fold 7). Held out
 (folds 7-9): 1016 of 1628 mistyped-only structures fixed, 31 of 11787 clean
 ones broken. Plain numpy so it runs in Olex2's python; the features are
 typset.py / typset2.py and the edges graphs.py, line for line.
+
+cand14 (10 Oct 2026): after the network, coord() renames Na, K, Al and Se,
+which it cannot assign, from their coordination while the model holds fewer
+of the element than the formula's share (lev3.py: 20 structures fixed, none
+broken on the whole COD).
 """
 import math, itertools
 import numpy as np
@@ -112,6 +117,26 @@ def probs(W, X, fin, src, dst, dist):
     P = P + e / e.sum(1, keepdims=True)
   return P / int(W['n']), fc, CZ, K
 
+def coord(t, F, nb):
+  """ t = {label: element} after the network, F the formula, nb = {label:
+  [(neighbour, d)]}; returns {label: new element} """
+  tot = sum(v for k, v in F.items() if k != 'H') or 1
+  n, out = len(t), {}
+  short = lambda e: sum(1 for v in t.values() if v == e) < 0.75 * F.get(e, 0) / tot * n
+  for a, el in t.items():
+    ns = nb.get(a, [])
+    on = lambda lo, hi: sum(1 for b, x in ns if lo <= x <= hi and t.get(b) in ('O', 'N'))
+    dmin = min([x for _, x in ns] or [9])
+    if 'Na' in F and el in ('O', 'N', 'C') and dmin >= 2.0 and on(2.25, 2.65) >= 4 and short('Na'): out[a] = 'Na'
+    elif 'K' in F and el in ('O', 'N', 'C', 'P') and dmin >= 2.4 and on(2.6, 3.0) >= 5 and short('K'): out[a] = 'K'
+    elif 'Al' in F and el == 'Si':
+      o = sorted(x for b, x in ns if t.get(b) == 'O')[:4]
+      if len(o) == 4 and sum(o) / 4 > 1.69 and short('Al'): out[a] = 'Al'
+    elif 'Se' in F and el == 'S':
+      c = [x for b, x in ns if t.get(b) == 'C' and 1.6 <= x <= 2.1]
+      if c and sum(c) / len(c) > 1.86 and short('Se'): out[a] = 'Se'
+  return out
+
 def retype(path, T, F, labels, S, M, R, Tt, th=None):
   """ T = the last re-typing round {allowed, atoms (rows with label, final,
   z, u, ...), consistency}, F = the input formula {element: count};
@@ -137,4 +162,10 @@ def retype(path, T, F, labels, S, M, R, Tt, th=None):
   out = {}
   for j in np.where((arg != fc) & (arg != 0) & (arg != K - 1) & (marg > th))[0]:
     out[labels[idx[j]]] = (rows[j]['final'], GEO[arg[j] - 1])
+  t = dict((labels[k], out[labels[k]][1] if labels[k] in out else r['final']) for k, r in zip(idx, rows))
+  nb = {}
+  for a, b, x in zip(src, dst, dist):
+    nb.setdefault(labels[idx[b]], []).append((labels[idx[a]], x))
+  for l, w in coord(t, F, nb).items():
+    out[l] = (L[l]['final'], w)
   return out

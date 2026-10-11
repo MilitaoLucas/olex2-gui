@@ -1986,7 +1986,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         # the last round is what the graph re-typer reads (gnnRetype)
         _SOLUTION_EVIDENCE["typing"] = dict(allowed=sorted(allowed), atoms=rows,
                                             consistency=cons)
-        if not dump:
+        # a model restored after an undone map fill has no file path ('none')
+        if not dump or not os.path.isdir(OV.FilePath()):
           return
         import json
         with open(os.path.join(OV.FilePath(), OV.FileName() + ".typing.log"),
@@ -2062,7 +2063,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         np.array(xs.unit_cell().orthogonalization_matrix()).reshape(3, 3).T,
         np.array([np.array(op.r().as_double()).reshape(3, 3) for op in ops]),
         np.array([op.t().as_double() for op in ops]))
-      if os.environ.get("OLEX2_TYPING_DUMP"):
+      if os.environ.get("OLEX2_TYPING_DUMP") and os.path.isdir(OV.FilePath()):
         import json
         with open(os.path.join(OV.FilePath(), OV.FileName() + ".gnn.log"),
                   "a") as f:
