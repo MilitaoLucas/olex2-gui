@@ -327,6 +327,16 @@ class Method_cctbx_ChargeFlip(Method_solution):
       RunPrgObject.please_tidy_solution = self.tidy_solution
 
   def tidy_solution(self):
+    """ `_tidy_origins`, then `flint_levers.final_levers` (`final_levers`):
+    the final model pruned and completed, each change kept only when it passes
+    a significance test, the model as it was otherwise.
+    """
+    self._tidy_origins()
+    if OV.GetParam('snum.solution.final_levers') in (None, True):
+      from flint_levers import final_levers
+      final_levers()
+
+  def _tidy_origins(self):
     """ `_tidy`, then again from each near-tied origin while R1 stays high.
 
     A heavy atom on a pseudo-centre leaves several origins that cc and R1 of

@@ -217,6 +217,16 @@ routines requiring structure refinement
               "a supergroup is printed and added to the shortlist as a "
               "hint. Pseudo-symmetry triggers it on about 1 in 80 correct "
               "models, so it decides nothing by itself."
+    final_levers = True
+      .type = bool
+      .short_caption = Prune and complete the final model
+      .help = "FLINT only. Last step: every atom whose removal does not "
+              "worsen the fit significantly is dropped, then difference-map "
+              "peaks that improve it significantly are added within the "
+              "formula. Each change must also pass the Hamilton test at 1 % "
+              "after a full refinement and must not leave a blown ADP, or it "
+              "is undone. Whole COD: fully clean 84.90 to 85.98 %, about "
+              "1 s a structure. Twinned data are left alone."
     graphical_output = False
       .type = bool
     current_atomic_volume = None
