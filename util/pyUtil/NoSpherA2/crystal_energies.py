@@ -321,7 +321,10 @@ def crystal_energies_status():
 
 
 def crystal_energies_clear():
-  olex.m("kill ce_*")  # always: rods left by a reloaded module or a lost state would stay on screen
+  # always: rods left by a reloaded module or a lost state would stay on screen. kill tries atoms before objects,
+  # and "ce_*" was atom Ce in any residue: every refine deleted a Ce atom labelled Ce. A prefix longer than
+  # max_label_length (4) without '_' matches no atom
+  olex.m("kill cerods*")
   if _state.get("styled"):
     _style_images("def")
   _state["rods"] = 0
@@ -356,7 +359,7 @@ def crystal_energies_draw(quiet=False, block=False):
   bars = _bars([rows[i] for i in shown], cell, ops, centroids)
   scale = max([abs(r[kind]) for r in rows] + [1e-6])  # radius relative to the whole table, one pair or all
   for i, (r, a, b) in enumerate(bars):
-    name = "ce_%d" % (i + 1)
+    name = "cerods%d" % (i + 1)
     radius = _rod_radius[0] + (_rod_radius[1] - _rod_radius[0]) * abs(r[kind]) / scale
     line = "line -n=%s -r=%.3f %%s %.4f %.4f %.4f %.4f %.4f %.4f" % ((name, radius) + tuple(a) + tuple(b))
     # bare -l hides the label, the energies are in the printed table; an Olex2 without -l rejects the

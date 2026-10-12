@@ -10,7 +10,8 @@ user.NoSpherA2.show_BondAtlas in debug or guru mode. What it does:
   Show   reads the analysis output and writes the chosen value as a loose label:
          bond orders at the bond midpoint, critical-point and ELI-D bond values
          at a small ball on the point, charges and populations at the atom
-         (labels and spheres ba_*); Clear removes them
+         (labels and spheres bondatlas*, not ba_*: kill matches atoms first and
+         ba_* is atom Ba in any residue); Clear removes them
 
 Atoms are matched to the wavefunction by position in the xyz written next
 to it, which is the order every NoSpherA2 wavefunction job uses.
@@ -245,7 +246,7 @@ def ba_show():
     elif at is None:
       at = [(a + b) / 2 for a, b in zip(xyz[key[0]][1], xyz[key[1]][1])]
     if ball:
-      name = "ba_s%d" % _state["balls"]
+      name = "bondatlasS%d" % _state["balls"]
       olex.m("AddObject sphere %s 0 0.13 %f %f %f" % ((name,) + tuple(at)))  # wider than a bond stick
       c = _balls[ball]
       olx.SetMaterial(name + ".Object", "1109;%s,1;%s,1;0.8,0.8,0.8,1;32" % (c, c))
@@ -254,8 +255,8 @@ def ba_show():
       d = [a - m for a, m in zip(at, centre)]
       r = max(sum(x * x for x in d) ** 0.5, 1e-6)
       at = [a + 0.25 * x / r for a, x in zip(at, d)]
-    olx.AddLabel("ba_%d" % _state["labels"], *at, fmt % v)
-    olx.SetMaterial("ba_%d.Text" % _state["labels"], "2309;0.75,0,0.1,1;0.75,0,0.1,1")  # crimson, apart from atom labels
+    olx.AddLabel("bondatlasL%d" % _state["labels"], *at, fmt % v)
+    olx.SetMaterial("bondatlasL%d.Text" % _state["labels"], "2309;0.75,0,0.1,1;0.75,0,0.1,1")  # crimson, apart from atom labels
     _state["labels"] += 1
   print("BondAtlas: %s, %d values: %s" % (prop, len(values), _describe(prop)))
   olex.m('legend true "%s: %s"' % (prop, _describe(prop)))  # caption under the element keys
@@ -268,7 +269,7 @@ def ba_describe():
 
 def ba_clear():
   if _state["labels"] or _state["balls"]:
-    olex.m("kill ba_*")
+    olex.m("kill bondatlas*")
     olex.m('legend false ""')
   _state["labels"] = _state["balls"] = 0
 
