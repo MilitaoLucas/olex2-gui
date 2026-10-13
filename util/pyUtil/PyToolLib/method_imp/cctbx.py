@@ -411,10 +411,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
       run(starts, "Tangent start", len(alts) + 1)
     if not tried:
       shutil.copyfile(res + '.pre', res)
-      olex.m('reap "%s"' % res)
+      from flint_levers import reap; reap(res)
       return
     shutil.copyfile(best[1], res)
-    olex.m('reap "%s"' % res)
+    from flint_levers import reap; reap(res)
     print("Kept origin %d, R1 %s" % (int(best[1].rsplit('.o', 1)[1]) + 1, fmt(best[0])))
 
   def _tidy(self):
@@ -517,7 +517,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
             extra = True
             continue
           shutil.copyfile(snap[1], res)
-          olex.m('reap "%s"' % res)
+          from flint_levers import reap; reap(res)
           print("The %s sent R1 %.3f -> %.3f; the model before it is restored"
                 % (last, snap[0], r1))
           if last != "prune":

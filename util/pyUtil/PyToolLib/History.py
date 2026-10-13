@@ -766,7 +766,9 @@ def saveOriginals(originals: HistoryFiles):
     olx.Echo("%s Previous backups found!" %(duplicates), m="warning")
 
 def compressFile(filePath):
-  return zlib.compress(open(filePath, "rb").read(), 9)
+  # every new history deflates the whole hkl: level 9 takes 10x the time of
+  # level 6 for 0.3 % fewer bytes, and decompressFile reads either
+  return zlib.compress(open(filePath, "rb").read(), 6)
 
 def decompressFile(fileData):
   if not isinstance(fileData, (bytes, bytearray)):

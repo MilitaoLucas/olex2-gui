@@ -186,6 +186,15 @@ def add():
       olx.xf.au.SetAtomU(i, '%.4f' % u)
   return len(new)
 
+def reap(res):
+  """ the reap macro's model load without its hooks: history, the snum phil round trip, cif info and GUI cost ~0.7 s a
+  call (170 of 2,400 s on sp15); of them only what set_params_from_ires reads from the file reaches FLINT """
+  olx.Atreap('"%s"' % res)
+  olx.current_mask = None
+  from variableFunctions import set_params_from_ires
+  set_params_from_ires()
+  OV.SetParam('snum.refinement.use_solvent_mask', olx.Ins('ABIN') != 'n/a')
+
 def refine():
   """ 4 cycles of the engine as the tidy-up calls it; (S, n, p) or None """
   try:
@@ -245,11 +254,15 @@ def final_levers():
   orig, cur = res[:-4] + '.flint.res', res[:-4] + '.lever.res'
   def load(f):
     shutil.copyfile(f, res)
-    olex.m('reap "%s"' % res)
+    reap(res)
+    fresh[0] = f == cur
+  # each reap costs ~0.7 s of structure-load hooks: a lever that changed nothing leaves a model already reaped from cur,
+  # and the last lever with nothing kept is followed by load(orig) anyway
+  fresh = [False]
   kept = []
   try:
     shutil.copyfile(res, orig)
-    olex.m('reap "%s"' % res)
+    reap(res)
     ref = refine()
     ref = ref and refine()
     if ref:
@@ -259,27 +272,30 @@ def final_levers():
     for name, fn in (('pruned', prune), ('added', add)):
       if not ref:
         break
+      undo = (lambda: None) if name == 'added' and not kept else (lambda: load(cur))
       try:
         ch = fn()
       except Exception:
         print(traceback.format_exc())
-        load(cur)
+        undo()
         continue
       if not ch:
-        load(cur)
+        if not fresh[0]:
+          undo()
         continue
       r = refine()
       if r and accept(ref, r):
         OV.File(res)
         # a lever must not leave an unreadable file or a newly blown ADP (U > 1 A^2)
         if 'FV' in blown(res) or blown(res) - blown(cur):
-          load(cur)
+          undo()
           continue
         shutil.copyfile(res, cur)
+        fresh[0] = False
         ref = r
         kept.append('%s %d' % (name, abs(ch)))
       else:
-        load(cur)
+        undo()
   except Exception as err:
     print('Final levers failed: %s' % err)
     kept = []

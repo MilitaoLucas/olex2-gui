@@ -92,11 +92,16 @@ def normal_equation_class(*args, **kwds):
 
     def end_cycle(self):
       """ Report the cycle and hand the structure back to Olex2. """
-      self.show_cycle_summary(log=self.log)
+      # one summary for both streams: a second show_cycle_summary only redid
+      # the R factors and set the same parameters again
+      from io import StringIO
+      line = StringIO()
+      self.show_cycle_summary(log=line)
+      (sys.stdout if self.log is None else self.log).write(line.getvalue())
       self.show_sorted_shifts(max_items=10, log=self.log)
       self.restraints_manager.show_sorted(
         self.xray_structure, f=self.log)
-      self.show_cycle_summary()
+      sys.stdout.write(line.getvalue())
       self.feed_olex()
 
     def step_forward(self):

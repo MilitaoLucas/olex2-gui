@@ -893,7 +893,10 @@ def _geometry_model(path):
   except OSError:
     key = (path, None)
   if key not in _GEOMETRY_MODEL:
-    _GEOMETRY_MODEL.clear()
+    # one entry per file: one solve alternates the base, row-2 and full models,
+    # and clearing them all rebuilt one on 320 of 372 calls (47 s in 40 cases)
+    for k in [k for k in _GEOMETRY_MODEL if k[0] == path]:
+      del _GEOMETRY_MODEL[k]
     _GEOMETRY_MODEL[key] = geometry_aid.Model(path)
   return _GEOMETRY_MODEL[key]
 
@@ -1088,21 +1091,69 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     es = es.select(flex.sort_permutation(es.data(), reverse=True)[:max(200, 12*nat)])
     tg = dmtbx.triplet_generator(es, amplitudes=es.data(),
       max_relations_per_reflection=0, sigma_2_only=True)
-    restr = [es.space_group().phase_restriction(h) for h in es.indices()]
-    snap = lambda ph: flex.double([r.nearest_valid_phase(p) if r.is_centric() else p
-                                   for r, p in zip(restr, ph)])
+    # nearest_valid_phase of every reflection in one C++ call (acentric ones come back unchanged)
+    sg, idx = es.space_group(), es.indices()
+    snap = lambda ph: sg.nearest_valid_phases(idx, ph)
+    # same_structure(x, y, 0.8) without its per-pair setup: every start has es's
+    # indices, so common_sets is the identity (checked here) and the eight
+    # half-shift phase vectors are shared; the same floats, so the same answers
+    import itertools
+    pr = es.match_indices(es).pairs()
+    fast = list(pr.column(0)) == list(pr.column(1)) == list(range(es.size()))
+    h = es.indices().as_vec3_double()
+    PH = [flex.polar(flex.double(h.size(), 1.0),
+                     2*math.pi*h.dot(flex.vec3_double(h.size(), t)))
+          for t in itertools.product((0, .5), repeat=3)]
+    def same(x, y):
+      if not fast:
+        return same_structure(x[0], y[0], 0.8)
+      n = (x[3]*y[3])**.5
+      for cb in y[4]:
+        p = x[2]*cb
+        for ph in PH:
+          if flex.sum(flex.real(p*ph)) > 0.8*n:
+            return True
+      return False
+    if fast:
+      PHn = numpy.array([p.as_numpy_array() for p in PH]).T
+      D, nD = numpy.empty((n_trials, es.size()), complex), numpy.empty(n_trials)
     rnd, C = random.Random(1), []
     for k in range(n_trials):
       ph = snap(flex.double([rnd.uniform(-math.pi, math.pi) for i in range(es.size())]))
       for c in range(40):
-        ph = snap(tg.apply_tangent_formula(amplitudes=es.data(), phases_rad=ph))
-      fc = es.phase_transfer(ph, deg=False)
-      for c in C:
-        if same_structure(c[0], fc, 0.8):
-          c[1] += 1
+        nx = snap(tg.apply_tangent_formula(amplitudes=es.data(), phases_rad=ph))
+        # a bitwise fixed point stays one: the iterations left would return these floats
+        if numpy.array_equal(nx.as_numpy_array().view(numpy.uint64), ph.as_numpy_array().view(numpy.uint64)):
           break
+        ph = nx
+      fc = es.phase_transfer(ph, deg=False)
+      d = fc.data()
+      e = [fc, 1, d, flex.sum(flex.abs(d)**2), (flex.conj(d), flex.conj(flex.conj(d)))]
+      if not fast:
+        for c in C:
+          if same(c, e):
+            c[1] += 1
+            break
+        else:
+          C.append(e)
+        continue
+      # all clusters against e in one GEMM, the 16 sums of same() per row; a row within 1e-9 of the cut goes
+      # through same() itself, so the first match is the one the loop over C finds
+      K, dn, hit = len(C), d.as_numpy_array(), None
+      if K:
+        S = D[:K].dot(numpy.concatenate((dn.conj()[:, None]*PHn, dn[:, None]*PHn), axis=1)).real
+        n = numpy.sqrt(nD[:K]*e[3])
+        dif, tol = S - 0.8*n[:, None], 1e-9*n[:, None]
+        yes = (dif > tol).any(1)
+        for i in numpy.flatnonzero(yes | (abs(dif) <= tol).any(1)):
+          if yes[i] or same(C[i], e):
+            hit = i
+            break
+      if hit is None:
+        D[K], nD[K] = dn, e[3]
+        C.append(e)
       else:
-        C.append([fc, 1])
+        C[hit][1] += 1
     C.sort(key=lambda c: -c[1])
     def recycle(fc, cycles=4):
       # point atoms on the top peaks weighted by height, f_obs with the model
@@ -1124,7 +1175,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         fc = fo.phase_transfer(ff)
       return r1, fc
     out = []
-    for fc, n in C[:n_recycle]:
+    for c in C[:n_recycle]:
+      fc, n = c[0], c[1]
       r1, fc = recycle(fc)
       if not any(same_structure(o, fc) for o in [chosen] + list(skip)) \
          and not any(same_structure(o[1], fc) for o in out):
@@ -1216,7 +1268,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     return out
 
   def geometryProposals(self, unit_cell, space_group, sites, labels=None,
-                        family=None):
+                        family=None, wait=True):
     """ The classifier's ranked elements per site, from local geometry alone.
 
     Split out of `assignElementTypes` because the re-typing that happens after
@@ -1259,15 +1311,26 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
     built = assemble.assemble(unit_cell, space_group, sites)
     work = tempfile.mkdtemp(prefix="olex_elements_")
+    import shutil
+    # wait=False: NoSpherA2 is started and a function is returned that waits
+    # for it, so a second launch can run alongside instead of after it
+    if not wait:
+      finish = self._geometryTopK(work, exe, model_path, unit_cell, built,
+                                  sites, labels, family == "full", wait=False)
+      def done():
+        try:
+          return finish()
+        finally:
+          shutil.rmtree(work, ignore_errors=True)
+      return done
     try:
       return self._geometryTopK(work, exe, model_path, unit_cell, built, sites,
                                 labels, family == "full")
     finally:
-      import shutil
       shutil.rmtree(work, ignore_errors=True)
 
   def _geometryTopK(self, work, exe, model_path, unit_cell, built, sites,
-                    labels=None, metals=False):
+                    labels=None, metals=False, wait=True):
     import subprocess
     from smtbx.ab_initio import assemble
     xyz_path = os.path.join(work, "peaks.xyz")
@@ -1291,25 +1354,29 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     extra = ["-geometry_aid_cutoff", str(meta.get("soap_cutoff", 3.5))]
     if meta.get("center_weight", 1.0) != 1.0:
       extra += ["-geometry_aid_center_weight", str(meta["center_weight"])]
-    proc = subprocess.run(
+    proc = subprocess.Popen(
       [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"] + extra
       + (["-geometry_aid_metals"]
          if metals or any(l != "C" for l in labels) else []),
-      cwd=work, capture_output=True, text=True, creationflags=flags,
+      cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+      creationflags=flags,
       # ponytail: featomic spawns one rayon thread per core per call; on 48 cores
       # that is 0.35 s of a 0.64 s call, identical numbers with four
       env=dict(os.environ, RAYON_NUM_THREADS=os.environ.get("RAYON_NUM_THREADS", "4")))
-    if proc.returncode != 0:
-      tail = [x for x in ((proc.stderr or "") + "\n"
-                          + (proc.stdout or "")).splitlines() if x.strip()]
-      raise RuntimeError("NoSpherA2 exited %d: %s"
-                         % (proc.returncode, " | ".join(tail[-4:])
-                            or "no output"))
-    import numpy
-    values = numpy.load(os.path.join(work, "descriptor.npy"))
-    model = _geometry_model(model_path)
-    n = min(sites.size(), values.shape[0])
-    return model.top_k(values[:n], k=len(model.classes)), model
+    def finish():
+      stdout, stderr = proc.communicate()
+      if proc.returncode != 0:
+        tail = [x for x in ((stderr or "") + "\n"
+                            + (stdout or "")).splitlines() if x.strip()]
+        raise RuntimeError("NoSpherA2 exited %d: %s"
+                           % (proc.returncode, " | ".join(tail[-4:])
+                              or "no output"))
+      import numpy
+      values = numpy.load(os.path.join(work, "descriptor.npy"))
+      model = _geometry_model(model_path)
+      n = min(sites.size(), values.shape[0])
+      return model.top_k(values[:n], k=len(model.classes)), model
+    return finish() if wait else finish
 
   def assignElementTypes(self, f_calc, fft_map, sites):
     """ An element per peak: integrated density, then local geometry.
@@ -1725,19 +1792,24 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         us.append(u)
       if not names:
         return {}
-      got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
-      proposals = got[0] if got else []
       # ponytail: second pass for the row-2 atoms with the heavy atoms and
       # metals labelled as the density read them (nearest Z after the read
       # loop): a donor N next to a Cu and an O next to a Mo look alike with
       # everything blanked to carbon; every other element becomes the Zn
-      # stand-in, and heavy centres keep the all-carbon proposals
+      # stand-in, and heavy centres keep the all-carbon proposals. Its inputs
+      # are known before the all-carbon pass, so it is started first and the
+      # two NoSpherA2 processes run side by side
       dens = dict((str(s.label), s.scattering_type.strip().capitalize())
                   for s in work.scatterers())
       labels = [geometry_aid.specialist_label(dens.get(n, "C")) for n in names]
+      row2 = None
       if any(l != "C" for l in labels):
-        got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites,
-                                     labels)
+        row2 = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites,
+                                      labels, wait=False)
+      got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
+      proposals = got[0] if got else []
+      if row2 is not None:
+        got = row2()
         if got:
           for j, l in enumerate(labels):
             if l == "C" and j < len(got[0]) and j < len(proposals):
@@ -2264,6 +2336,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     try:
       from smtbx.ab_initio import composite
 
+      # f_obs is merged here, so `fusion_weight` gives R1 no vote and
+      # `rank_fusion` would hand back the shortlist's own order: the three
+      # solves could not change anything
+      if composite.fusion_weight(f_obs) <= 0:
+        return
       # The same cell-only estimate the peak search uses below. It reads the
       # unit cell and nothing else -- an atom count taken from the deposited
       # model is exactly the number a user does not have.

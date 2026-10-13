@@ -156,6 +156,25 @@ class phil_handler(index):
     if scope_name is not None:
       assert '.' not in scope_name # can only save top-level scopes
     assert not(file_name and out_stream)
+    if scope_name is not None and diff_only and len(sources) == 0:
+      # History nodes and the structure .phil save one scope's diff: fetch that
+      # scope alone the way fetch_diff of the root would, not every top-level
+      # scope only to keep one
+      for m in self.master_phil.master_active_objects():
+        if m.name == scope_name and m.is_scope and not m.multiple:
+          src = self.working_phil.get(path=scope_name, with_substitution=False,
+                                      alias_path=m.alias_path())
+          output_phil = m.fetch(sources=src.active_objects(), diff=True)
+          if len(output_phil.objects) == 0:
+            f = open(file_name, "w")
+            f.close()
+            return # diff is empty -> write empty file
+          if out_stream:
+            output_phil.show(out=out_stream)
+          else:
+            with open(file_name, "w", encoding="utf-8") as f:
+              output_phil.show(out=f)
+          return
     if len(sources) > 0:
       for source in sources:
         self.merge_phil(phil_object=source, overwrite_params=False,
@@ -270,17 +289,29 @@ class phil_handler(index):
         print("Error updating Phil", file=sys.stderr)
         sys.stderr.formatExceptionInfo()
 
+  # SetParam walked the master and working trees on every call (0.8 ms, 30k
+  # calls in a FLINT run); what a name resolves to changes only when a tree is
+  # replaced, which every reshaping path does, so it is cached per pair of roots
+  def _defs(self, name):
+    c = self.__dict__.get('_defs_cache')
+    if c is None or c[0] is not self.master_phil or c[1] is not self.working_phil:
+      c = self._defs_cache = (self.master_phil, self.working_phil, {})
+    d = c[2].get(name)
+    if d is None:
+      d = c[2][name] = (self.master_phil.get_without_substitution(name),
+                        self.working_phil.get_without_substitution(name))
+    return d
+
   def param_exists(self, name):
-    return len(self.master_phil.get_without_substitution(name)) > 0
+    return len(self._defs(name)[0]) > 0
 
   def update_single_param(self, name, value):
     new_phil_object = self.parse("%s=%s" %(name,value))
     wos = new_phil_object.get_without_substitution(name)
-    mwos = self.master_phil.get_without_substitution(name)
+    mwos, wdefs = self._defs(name)
     if not mwos:
       raise libtbx.phil.Sorry(f"Undefined keyword: {name}")
-    for master_defintion, working_definition in zip(
-          mwos, self.working_phil.get_without_substitution(name)):
+    for master_defintion, working_definition in zip(mwos, wdefs):
       assert working_definition.is_definition
       for new_definition in wos:
         if working_definition.name == new_definition.name:
