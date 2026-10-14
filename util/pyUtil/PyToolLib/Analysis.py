@@ -4236,9 +4236,11 @@ class HealthOfStructure():
       # HKLF2 requires BASF-aware detwinning/scaling before merging statistics.
       # HOS defaults to olex_core stats, so override here with adapter-based values.
       try:
-        from cctbx_olex_adapter import OlexCctbxAdapter
-        adapter = OlexCctbxAdapter()
-        if adapter.hklf_code == 2:
+        # the adapter's hklf_code is the model's (it only ever turns 5 into 4), so test that
+        # first and skip building a structure and reading the reflections for everything else
+        if OV.GetRefinementModel(False)['hklf']['value'] == 2:
+          from cctbx_olex_adapter import OlexCctbxAdapter
+          adapter = OlexCctbxAdapter()
           one_h_function = None
           if OV.IsNoSpherA2():
             table_name = str(nsa2_get_param("file")).lstrip().rstrip()
@@ -4935,10 +4937,7 @@ class HealthOfStructure():
       ##draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
 
 
-    _ = im.copy()
-    _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
-    _ = IT.add_whitespace(im, 'left', 4*scale, "#ffffff")
-    OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
+    # (a full-scale "<item>_large" copy was saved here; nothing reads it and its PNG encode was most of make_HOS)
 
     #if self.image_position != "last":
       #im = IT.add_whitespace(im, 'right', 4, bgcolour)

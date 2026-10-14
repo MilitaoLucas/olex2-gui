@@ -319,7 +319,7 @@ class OlexFunctions(guiFunctions.GuiFunctions):
       import ExternalPrgParameters
       if pname is None:
         pname = self.GetParam('snum.refinement.program')
-      prg = ExternalPrgParameters.defineExternalPrograms()[1].programs[pname]
+      prg = ExternalPrgParameters.get_program_dictionaries()[1].programs[pname]
       version = self.GetProgramVersionByName(pname)
       if pname.lower().startswith("shelx") or pname.lower().startswith('x'):
         pname = pname.upper()
