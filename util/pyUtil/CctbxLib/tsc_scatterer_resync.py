@@ -486,6 +486,8 @@ def _match_by_residue_triple(labels, model_labels, model_ids):
 _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM = 2.0
 # how near a symmetry image of the tabulated site an atom must be to count as moved there
 _MAX_SYMMETRY_MOVE_RESIDUAL_ANGSTROM = 0.5
+# beyond this an atom was moved by hand, not by a refinement, and is named
+_MANUAL_MOVE_ANGSTROM = 0.5
 
 
 def _move_candidates(space_group):
@@ -804,7 +806,8 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
 
 
 def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_scatterer_ids, unit_cell,
-                                                 max_shift_angstrom=_MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM):
+                                                 max_shift_angstrom=_MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM,
+                                                 labels=None):
   """Match each table column to the model atom it describes, by identity.
 
   Used once direct id lookup has failed, which it does after any refinement:
@@ -819,8 +822,18 @@ def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_sca
   line up and is silently wrong the rest of the time, and since the result is
   written back to the file, being wrong here corrupts the table permanently.
 
+  An atom moved by hand (Fit, a drag) can land nearer a neighbour's site than
+  twice its own shift, so columns are matched in rounds: a column takes its
+  nearest atom that no column has taken yet once that atom is the only free
+  one or half as far as the next, nearest first. The atoms that did not move
+  are all taken in the first round, which leaves a moved one as its column's
+  only candidate. The last free atom of an element and part takes the last
+  column of that kind however far it went. Anything still ambiguous is
+  refused.
+
   Returns file_to_model: for each column, the index of the model atom it
-  belongs to.
+  belongs to. Given the model's labels, the atoms that moved further than a
+  refinement shift are named, since their columns still describe the old site.
   """
   from cctbx.xray import ext
 
@@ -830,35 +843,61 @@ def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_sca
       f"model has {len(internal_scatterer_ids)})")
 
   model = [ext.scatterer_id_big(i) for i in internal_scatterer_ids]
-  file_to_model = []
-  for column, old_id in enumerate(read_scatterer_ids):
+  kinds = [(new.get_z(), new.get_data()) for new in model]
+  candidates, column_kind = [], []
+  for old_id in read_scatterer_ids:
     old = ext.scatterer_id_big(old_id)
-    best, best_d, next_d = None, None, None
-    for j, new in enumerate(model):
-      if old.get_z() != new.get_z() or old.get_data() != new.get_data():
+    kind = (old.get_z(), old.get_data())
+    candidates.append(sorted((unit_cell.mod_short_distance(old.get_crd(), model[j].get_crd()), j)
+                             for j in range(len(model)) if kinds[j] == kind))
+    column_kind.append(kind)
+
+  file_to_model, claimed = [None] * len(candidates), set()
+  while True:
+    picks = []
+    for column, cand in enumerate(candidates):
+      if file_to_model[column] is not None:
         continue
-      d = unit_cell.mod_short_distance(old.get_crd(), new.get_crd())
-      if best_d is None or d < best_d:
-        best, best_d, next_d = j, d, best_d
-      elif next_d is None or d < next_d:
-        next_d = d
-    if best is None or best_d > max_shift_angstrom:
+      free = [c for c in cand if c[1] not in claimed]
+      # a rival nearly as close means it cannot be told which atom this is, and
+      # guessing would put a whole column of contributions on the wrong atom
+      if free and free[0][0] <= max_shift_angstrom and (
+          len(free) == 1 or free[1][0] >= 2 * free[0][0]):
+        picks.append((free[0][0], column, free[0][1]))
+    taken = 0
+    for d, column, j in sorted(picks):
+      if j not in claimed:
+        file_to_model[column] = j
+        claimed.add(j)
+        taken += 1
+    if not taken:
+      break
+
+  left = [c for c, j in enumerate(file_to_model) if j is None]
+  for column in left:
+    kind = column_kind[column]
+    free = [j for j in range(len(model)) if j not in claimed and kinds[j] == kind]
+    if len(free) == 1 and sum(column_kind[c] == kind for c in left) == 1:
+      file_to_model[column] = free[0]
+      claimed.add(free[0])
+      continue
+    near = [d for d, j in candidates[column] if j not in claimed][:2]
+    if not near or near[0] > max_shift_angstrom:
       raise ScattererResolutionError(
         f"column {column}: no atom of the same element and part within "
         f"{max_shift_angstrom} A of where the table says it was; aborting "
         "without modifying the TSC/TSCB file")
-    # a rival nearly as close means it cannot be told which atom this is, and
-    # guessing would put a whole column of contributions on the wrong atom
-    if next_d is not None and next_d < 2 * best_d:
-      raise ScattererResolutionError(
-        f"column {column}: two atoms are comparably close ({best_d:.3f} A and "
-        f"{next_d:.3f} A); refusing to guess which one it is")
-    file_to_model.append(best)
-
-  if len(set(file_to_model)) != len(file_to_model):
     raise ScattererResolutionError(
-      "two table columns resolved to the same atom; the table does not "
-      "describe this model")
+      f"column {column}: two atoms are comparably close ({near[0]:.3f} A and "
+      f"{near[1]:.3f} A); refusing to guess which one it is")
+
+  if labels is not None:
+    moved = [(labels[j], d) for column, j in enumerate(file_to_model)
+             for d, k in candidates[column] if k == j and d > _MANUAL_MOVE_ANGSTROM]
+    if moved:
+      print("Moved since the table was made, columns follow them: %s. Their form "
+            "factors are still those of the old sites; recalculate the table if "
+            "the move was more than a nudge." % ", ".join("%s (%.2f A)" % m for m in moved))
   return file_to_model
 
 
@@ -890,7 +929,7 @@ def resolve_scatterer_mapping(file_entries, model_labels, internal_scatterer_ids
     # The ids no longer match exactly, which any refinement causes; match on
     # what survives a move instead.
     file_to_model = resolve_id_mapping_with_positional_fallback(
-      file_entries, internal_scatterer_ids, unit_cell)
+      file_entries, internal_scatterer_ids, unit_cell, labels=model_labels)
     internal_to_tsc = [None] * len(internal_scatterer_ids)
     for column, model_index in enumerate(file_to_model):
       internal_to_tsc[model_index] = column
