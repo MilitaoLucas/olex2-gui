@@ -182,6 +182,13 @@ def get_mask_info():
   content_disp_all_l = []
   content_disp_all = "No content!"
 
+  # set before the loop: when every void is below 15 A^3 the loop skips them all
+  # and the mask_output_based_on row still needs it
+  moiety = OV.get_cif_item('_chemical_formula_moiety', None)
+  if not moiety or "[]" in moiety or "[+ solvents]" in moiety:
+    moiety = olx.xf.latt.GetMoiety()
+  d['moiety'] = moiety
+
   for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
     multi_idx = []
     electrons_accounted_for = 0
@@ -209,10 +216,6 @@ def get_mask_info():
     accounted_for.setdefault(volume, [])
     accounted_for[volume].append(_[0])
 
-    moiety = OV.get_cif_item('_chemical_formula_moiety', None)
-    if not moiety or "[]" in moiety or "[+ solvents]" in moiety:
-      moiety = olx.xf.latt.GetMoiety()
-
     electron = float(electron) * multiplicity
     volume = float(volume) * multiplicity
 
@@ -228,7 +231,6 @@ def get_mask_info():
     d['volume'] = "%.0f" % float(volume)
     d['multiplicity'] = format_number(multiplicity)
     d['formula'] = get_rounded_formula(as_string_sep=" ")
-    d['moiety'] = moiety
     d['based_on'] = based_on
     d['based_on_display'] = based_on_display
 
