@@ -46,6 +46,7 @@ GROUPS = {
   "refine":    "group_refine",
   "nosphera2": "group_nosphera2",
   "nsa2_matrix": "group_nsa2_matrix",
+  "tsc_reorient": "group_tsc_reorient",
   "release":   "group_release",
 }
 DEFAULT = ("api,macros,model,instructions,restraints,geometry,symmetry,"

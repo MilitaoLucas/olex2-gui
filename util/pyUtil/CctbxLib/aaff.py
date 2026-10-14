@@ -6,7 +6,7 @@ from olexFunctions import OV
 from variableFunctions import nsa2_get_param, nsa2_set_param
 from RunPrg import RunPrg, RunRefinementPrg
 from NoSpherA2.utilities import nsa2_validate_tsc_file_integrity, nsa2_check_tsc_origin_known, write_precise_model_file, nsa2_refresh_file_hash, nsa2_flush_ins_header
-from tsc_scatterer_resync import ScattererResolutionError, read_scatterers, update_scatterers_in_file, resolve_scatterer_mapping
+from tsc_scatterer_resync import ScattererResolutionError, read_scatterers, update_scatterers_in_file, resolve_scatterer_mapping, reorient_moved_columns
 import cctbx_controller as cctbx_controller
 
 # sources that can take over after a pTB pre-refinement (source names, leading spaces stripped)
@@ -47,6 +47,67 @@ def get_unit_cell(model):
     from cctbx import uctbx
     cell = model._cell
     return uctbx.unit_cell((cell["a"][0], cell["b"][0], cell["c"][0], cell["alpha"][0], cell["beta"][0], cell["gamma"][0]))
+
+
+def _settle_riding_atoms():
+  """Put riding atoms where the refinement's own constraints place them.
+
+  A CH2's two H are placed on either side of a normal that is a cross product,
+  which an improper operation does not invert: after inv, or a move by a
+  mirror or centre, the refinement's first cycle swaps them. The table must be
+  matched to the sites they will refine at, not to the ones they jump from.
+  """
+  from refinement import FullMatrixRefine
+  fmr = FullMatrixRefine()
+  reparam = fmr.run(reparametrisation_only=True)
+  if reparam is None:
+    raise RuntimeError("the refinement could not be set up")
+  reparam.linearise()
+  reparam.store()
+  uc = reparam.structure.unit_cell()
+  for i, sc in enumerate(reparam.structure.scatterers()):
+    atom_id = fmr.olx_atoms.atom_ids[i]
+    old = [float(v) for v in olx.xf.au.GetAtomCrd(atom_id).split(',')]
+    if uc.distance(old, sc.site) > 1e-4:
+      olx.xf.au.SetAtomCrd(atom_id, *sc.site)
+
+
+def _rotate_table_for_moved_atoms(table_file_name, ids, labels, model):
+  """Atoms moved onto a symmetry image of the sites the table was made for get
+  their form factors rotated along (reorient_moved_columns); the ones that
+  cannot be are said in red, as they would otherwise end up spherical.
+  Returns True when the model was changed, so the caller reads it again."""
+  from cctbx import sgtbx
+  space_group = sgtbx.space_group(str(olx.xf.au.GetCellSymm("hall")))
+  done, refused, zeroed = reorient_moved_columns(
+    table_file_name, ids, get_unit_cell(model), space_group, write=False)
+  if done:
+    try:
+      _settle_riding_atoms()
+    except Exception as e:
+      print("Note: riding atoms were not placed before matching the table (%s)" % e)
+    model = OlexRefinementModel()
+    ids = get_current_scatter_ids(model)
+    labels = [atom["label"] for atom in model._atoms]
+    done, refused, zeroed = reorient_moved_columns(
+      table_file_name, ids, get_unit_cell(model), space_group)
+  name = os.path.basename(table_file_name)
+  by_op = {}
+  for index, xyz in done:
+    by_op.setdefault(xyz, []).append(labels[index])
+  for xyz, moved in by_op.items():
+    print("%d atom(s) were moved by %s since %s was made; their form factors were "
+          "rotated with them, no recalculation needed: %s"
+          % (len(moved), xyz, name, " ".join(moved)))
+  if zeroed:
+    print("  %d table values no reflection can reach were left at zero" % zeroed)
+  if done:
+    nsa2_refresh_file_hash(table_file_name, flush=False)
+  if refused:
+    olx.Echo("Atoms moved by symmetry, but %s lacks the reflections needed to rotate "
+             "their form factors: %s. Recalculate the table."
+             % (name, " ".join(labels[i] for i in refused)), m="error")
+  return bool(done)
 
 
 
@@ -224,12 +285,19 @@ Refinement aborted."""
           HAR_log.close()
           return False
 
-      # Which column of the table describes each atom. Nothing is written here:
-      # the table is brought up to date once, after the refinement, so that
-      # there is a single place that can put a column on the wrong atom.
+      # Which column of the table describes each atom. Nothing is written here
+      # but the columns of atoms moved onto a symmetry image of their site,
+      # which must be rotated before they are refined against; the ids are
+      # brought up to date once, after the refinement, so that there is a
+      # single place that can put a column on the wrong atom.
       try:
         internal_scatterer_ids = get_current_scatter_ids(old_model)
         model_labels = [atom["label"] for atom in old_model._atoms]
+        if _rotate_table_for_moved_atoms(table_file_name, internal_scatterer_ids,
+                                         model_labels, old_model):
+          old_model = OlexRefinementModel()
+          internal_scatterer_ids = get_current_scatter_ids(old_model)
+          model_labels = [atom["label"] for atom in old_model._atoms]
         file_entries = read_scatterers(table_file_name)
         internal_to_tsc = resolve_scatterer_mapping(
           file_entries, model_labels, internal_scatterer_ids, get_unit_cell(old_model))
@@ -242,6 +310,10 @@ Refinement aborted."""
           print("Note: could not compare the table header with the model: %s" % fp_error)
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")
+        olx.Echo("The table no longer fits the model: atoms were moved by more than "
+                 "a refinement shift and not onto a symmetry image of their sites "
+                 "(move, compaq, sgen -m and inv are rotated along). Recalculate the "
+                 "table, or undo the move.", m="error")
         raise e
       
       # get energy from wfn file

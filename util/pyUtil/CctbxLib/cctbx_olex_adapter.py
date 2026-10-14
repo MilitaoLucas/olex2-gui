@@ -4042,14 +4042,14 @@ def get_table_contribution(xray_structure, table_file_name):
 def _report_table_fallback(table_file_name, fallback, n_scatterers):
   """ Say, in the log, which atoms the table did not cover. """
   print("")
-  print("WARNING: %s covers %d of %d atoms." % (
-    _table_name_for_log(table_file_name), n_scatterers - len(fallback),
-    n_scatterers))
-  print("  These atoms are refined with spherical scattering factors"
-        " instead:")
+  olx.Echo("WARNING: %s covers %d of %d atoms; the others get spherical scattering"
+           " factors." % (_table_name_for_log(table_file_name),
+                          n_scatterers - len(fallback), n_scatterers), m="error")
   for i in range(0, len(fallback), 10):
     print("    " + " ".join(fallback[i:i + 10]))
-  print("  Re-run NoSpherA2 over the whole model to tabulate them all.")
+  print("  Atoms moved onto a symmetry image (move, compaq, inv) are rotated"
+        " along at the next refinement with this table; for anything else,"
+        " re-run NoSpherA2 over the whole model to tabulate them all.")
   print("")
 
 

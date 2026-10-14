@@ -484,6 +484,323 @@ def _match_by_residue_triple(labels, model_labels, model_ids):
 
 
 _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM = 2.0
+# how near a symmetry image of the tabulated site an atom must be to count as moved there
+_MAX_SYMMETRY_MOVE_RESIDUAL_ANGSTROM = 0.5
+
+
+def _move_candidates(space_group):
+  """(R, t, xyz) for every operation move, compaq, sgen -m or transform with a
+  group matrix can have applied; in a group without a centre also each one
+  composed with an inversion, which is what inv -f does. Identity first."""
+  import numpy as np
+  from cctbx import sgtbx
+  ops = list(space_group.all_ops())
+  if not space_group.is_centric():
+    inversion = sgtbx.rt_mx('-x,-y,-z')
+    ops += [inversion.multiply(op) for op in space_group.all_ops()]
+  out = []
+  for op in ops:
+    assert op.r().den() == 1, op.as_xyz()
+    out.append((np.array(op.r().num(), dtype=int).reshape(3, 3),
+                np.array(op.t().as_double()), op.mod_positive().as_xyz()))
+  return out
+
+
+def _symmetry_matches(olds, model, unit_cell, ops, tolerance, identity_tolerance):
+  """For each id in olds, (model index, op index) of the atom on a symmetry
+  image of its site, or None. The nearest image over all ops wins, so a group
+  operation beats a merely nearby identity match; failing that the identity
+  alone may reach identity_tolerance, as a refinement shift does. A different
+  atom of the same element and part nearly as close makes it ambiguous.
+
+  Numpy over chunks of columns: a stale protein table asks for every column
+  against every atom under every operation, which is 1e8 distances. The
+  nearest lattice image is taken componentwise, which is exact at these
+  distances for any cell that is not extremely oblique."""
+  import numpy as np
+  g = unit_cell.metrical_matrix()      # aa bb cc ab ac bc
+  metric = np.array([[g[0], g[3], g[4]], [g[3], g[1], g[5]], [g[4], g[5], g[2]]])
+  sites = np.array([m.get_crd() for m in model])
+  kind = np.array([(m.get_z(), m.get_data()) for m in model])
+  x = np.array([o.get_crd() for o in olds])
+  okind = np.array([(o.get_z(), o.get_data()) for o in olds])
+
+  def nearest_two(d2):
+    if d2.shape[1] < 2:
+      return np.zeros(len(d2), dtype=int), np.sqrt(d2[:, 0]), np.full(len(d2), np.inf)
+    two = np.argpartition(d2, 1, axis=1)[:, :2]
+    rows = np.arange(len(d2))
+    a, b = d2[rows, two[:, 0]], d2[rows, two[:, 1]]
+    first = np.where(a <= b, two[:, 0], two[:, 1])
+    return first, np.sqrt(np.minimum(a, b)), np.sqrt(np.maximum(a, b))
+
+  out = [None] * len(olds)
+  # only an atom of the same element and part can be a column's atom
+  for this_kind in set(map(tuple, okind)):
+    cand = np.flatnonzero((kind == this_kind).all(axis=1))
+    if not len(cand):
+      continue
+    s = sites[cand]
+
+    def d2_to(rows, rot, t):
+      dd = (x[rows].dot(rot.T) + t)[:, None, :] - s[None, :, :]
+      dd -= np.round(dd)
+      return (dd.dot(metric) * dd).sum(axis=2)
+
+    members = np.flatnonzero((okind == this_kind).all(axis=1))
+    for start in range(0, len(members), 256):
+      rows = members[start:start + 256]
+      identity = d2_to(rows, ops[0][0], ops[0][1])
+      j_id, d_id, r_id = nearest_two(identity)
+      # within a tenth of an angstrom of its own site and clear of any other atom:
+      # no image can be nearer without two atoms overlapping, so skip the search
+      plain = (d_id <= 0.1) & (r_id >= 2 * d_id)
+      for c in np.flatnonzero(plain):
+        out[rows[c]] = (int(cand[j_id[c]]), 0)
+      rest = np.flatnonzero(~plain)
+      if not len(rest):
+        continue
+      best, best_op = identity[rest], np.zeros((len(rest), len(cand)), dtype=int)
+      for k in range(1, len(ops)):
+        d2 = d2_to(rows[rest], ops[k][0], ops[k][1])
+        better = d2 < best
+        best = np.where(better, d2, best)
+        best_op[better] = k
+      j_sym, d_sym, r_sym = nearest_two(best)
+      for i, c in enumerate(rest):
+        if d_sym[i] <= tolerance and r_sym[i] >= 2 * d_sym[i]:
+          out[rows[c]] = (int(cand[j_sym[i]]), int(best_op[i, j_sym[i]]))
+        elif d_id[c] <= identity_tolerance and r_id[c] >= 2 * d_id[c]:
+          out[rows[c]] = (int(cand[j_id[c]]), 0)
+  return out
+
+
+class _HklIndex(object):
+  """Row of each Miller index in a table; -1 where the table has none."""
+  _B = 1 << 20
+
+  def __init__(self, hkl):
+    import numpy as np
+    keys = self._keys(hkl)
+    self.order = np.argsort(keys, kind='stable')
+    self.sorted = keys[self.order]
+
+  def _keys(self, hkl):
+    import numpy as np
+    h = np.asarray(hkl, dtype=np.int64) + self._B
+    return (h[:, 0] << 42) | (h[:, 1] << 21) | h[:, 2]
+
+  def find(self, hkl):
+    import numpy as np
+    keys = self._keys(hkl)
+    pos = np.searchsorted(self.sorted, keys)
+    pos[pos == len(self.sorted)] = 0
+    hit = self.sorted[pos] == keys
+    return np.where(hit, self.order[pos], -1)
+
+
+def _rotated_rows(index, hkl, rot, conjugate_ok):
+  """For each row h, the row holding h.R and whether its value has to be
+  conjugated (-h.R stored instead); -1 where neither is in the table.
+
+  The table is atom-centred: an atom moved by (R, t) has f_new(h) = f_old(h.R),
+  which is exactly what the structure factor already reads for that atom's
+  symmetry copy, so an expanded table holds every row a reachable h needs.
+  f(-k) = conj f(k) holds only without dispersion in the values (AD: TRUE).
+  """
+  import numpy as np
+  k = hkl.dot(rot)
+  rows = index.find(k)
+  conj = np.zeros(len(rows), dtype=bool)
+  if conjugate_ok:
+    miss = rows < 0
+    if miss.any():
+      alt = index.find(-k[miss])
+      conj[np.flatnonzero(miss)[alt >= 0]] = True
+      rows[miss] = alt
+  return rows, conj
+
+
+def _conjugate_token(token):
+  re_part, sep, im_part = token.partition(',')
+  if not sep:
+    return token
+  im_part = im_part[1:] if im_part.startswith('-') else '-' + im_part.lstrip('+')
+  return re_part + ',' + im_part
+
+
+def _tscb_layout(path):
+  """(offset of the id block, offset of the first row, row dtype, row count)."""
+  import numpy as np
+  with open(path, 'rb') as f:
+    header_length = int.from_bytes(f.read(4), byteorder='little')
+    header = f.read(header_length)
+    n_columns = int.from_bytes(f.read(4), byteorder='little')
+    width = _tscb_id_record_bytes(path, header, header_length, n_columns)
+    id_start = 4 + header_length + 4
+    f.seek(id_start + n_columns * width)
+    n_refl = int.from_bytes(f.read(4), byteorder='little', signed=True)
+    payload = f.tell()
+  row = np.dtype([('h', '<i4', (3,)), ('f', '<c16', (n_columns,))])
+  if os.path.getsize(path) != payload + n_refl * row.itemsize:
+    raise ScattererResolutionError(
+      "%s is not the size its own counts give; not rotating it" % os.path.basename(path))
+  return id_start, payload, row, n_refl
+
+
+def _tsc_rows(path):
+  with open(path, 'r') as f:
+    lines = f.read().split('\n')
+  start = next(i for i, l in enumerate(lines) if l.startswith('DATA:')) + 1
+  return lines[:start], [l.split() for l in lines[start:] if l.strip()]
+
+
+def _complete_rows(index, hkl, rotations, conjugate_ok):
+  """Rows whose whole orbit is in the table. Only these can ever be read:
+  the loader asserts every h.R_s (or -h.R_s) of a reflection it serves."""
+  import numpy as np
+  complete = np.ones(len(hkl), dtype=bool)
+  for rot in rotations:
+    k = hkl.dot(rot)
+    found = index.find(k) >= 0
+    if conjugate_ok:
+      found |= index.find(-k) >= 0
+    complete &= found
+  return complete
+
+
+def _reorient_tscb(path, rotated, new_ids):
+  import numpy as np
+  import shutil
+  id_start, payload, row, n_refl = _tscb_layout(path)
+  tmp = path + '.reorient.tmp'
+  shutil.copyfile(path, tmp)
+  try:
+    data = np.memmap(tmp, dtype=row, mode='r+', offset=payload, shape=(n_refl,))
+    for column, rows, conj in rotated:
+      old = np.array(data['f'][:, column])
+      new = np.zeros_like(old)
+      ok = rows >= 0
+      new[ok] = old[rows[ok]]
+      new[conj] = np.conj(new[conj])
+      data['f'][:, column] = new
+    data.flush()
+    del data
+    with open(tmp, 'r+b') as f:
+      f.seek(id_start)
+      for scat in new_ids:
+        f.write(scat.to_bytes())
+    shutil.copyfile(path, path + '.bak')
+    os.replace(tmp, path)
+  finally:
+    if os.path.exists(tmp):
+      os.remove(tmp)
+
+
+def _reorient_tsc(path, rotated, new_ids):
+  import shutil
+  head, rows = _tsc_rows(path)
+  head = ["SCATTERER_IDS: " + " ".join(s.to_hex_string() for s in new_ids)
+          if l.startswith('SCATTERER_IDS:') else l for l in head]
+  for column, src, conj in rotated:
+    old = [r[3 + column] for r in rows]
+    for i, r in enumerate(rows):
+      if src[i] < 0:
+        r[3 + column] = '0.00000000e+00,0.00000000e+00'
+      else:
+        r[3 + column] = _conjugate_token(old[src[i]]) if conj[i] else old[src[i]]
+  tmp = path + '.reorient.tmp'
+  with open(tmp, 'w') as f:
+    f.write('\n'.join(head) + '\n')
+    for r in rows:
+      f.write(' '.join(r) + '\n')
+  shutil.copyfile(path, path + '.bak')
+  os.replace(tmp, path)
+
+
+def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
+                           tolerance=_MAX_SYMMETRY_MOVE_RESIDUAL_ANGSTROM, write=True):
+  """Rotate the form factors of atoms that move, compaq, sgen -m, inv or
+  transform took to a symmetry-equivalent site, instead of recalculating.
+
+  A column's id records where its atom was when the table was made. An atom
+  now on a symmetry image (R, t) of that site has the density rotated by R, so
+  its column becomes f(h.R) row by row (see _rotated_rows) and takes the
+  atom's current id. A pure translation needs nothing: the values are
+  atom-centred. Label tables carry no positions and are left alone, and so is
+  a table any column of which then has no atom, in place or on an image. The
+  previous file is kept as <table>.bak.
+
+  Returns (rotated, refused, zeroed): [(model index, xyz)] of the columns
+  rotated; model indices of atoms that did move by symmetry but whose column
+  could not be rotated because a row the refinement can read has no h.R in
+  the table; and how many unreachable row values were set to zero. With
+  write=False the same answer is given and the file is not touched.
+  """
+  import numpy as np
+  entries = read_scatterers(tsc_file)
+  if not entries or isinstance(entries[0], str):
+    return [], [], 0
+  header = read_header_lines(tsc_file)
+  if not tsc_file.endswith('.tscb') and header.get('SYMM', '').lower() != 'expanded':
+    return [], [], 0
+  model_keys = dict((m.to_hex_string(), j) for j, m in enumerate(model_ids))
+  ops = _move_candidates(space_group)
+  # All or nothing: only a table every column of which then has its atom - in
+  # place, shifted as by a refinement, or on a symmetry image - is touched. An
+  # arbitrary rotation still puts the odd H near some image of some site, and
+  # rotating that one column would rewrite a table that fits nothing.
+  plan, claimed, pending = [], [], []
+  for column, old in enumerate(entries):
+    j = model_keys.get(old.to_hex_string())
+    if j is None:
+      pending.append(column)
+    else:
+      claimed.append(j)
+  matches = _symmetry_matches([entries[c] for c in pending], model_ids, unit_cell, ops,
+                              tolerance, _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM) if pending else []
+  for column, match in zip(pending, matches):
+    if match is None:
+      return [], [], 0
+    claimed.append(match[0])
+    if match[1] != 0:
+      plan.append((column, match[0], match[1]))
+  if not plan or len(set(claimed)) != len(claimed):
+    return [], [], 0
+
+  if tsc_file.endswith('.tscb'):
+    id_start, payload, row, n_refl = _tscb_layout(tsc_file)
+    hkl = np.array(np.memmap(tsc_file, dtype=row, mode='r', offset=payload,
+                             shape=(n_refl,))['h'], dtype=np.int64)
+  else:
+    hkl = np.array([r[:3] for r in _tsc_rows(tsc_file)[1]], dtype=np.int64)
+  index = _HklIndex(hkl)
+  # filling a missing h.R from -h.R is exact only without dispersion in the
+  # values; which rows the loader can read follows its own rule, which falls
+  # back on -h unless the table says AD: FALSE in a group without a centre
+  conjugate_ok = header.get('AD', '').upper() != 'TRUE'
+  loader_conjugates = not (header.get('AD', '').upper() == 'FALSE'
+                           and not space_group.is_centric())
+  rotations = [ops[k][0] for k in range(len(space_group.all_ops()))]
+  complete = _complete_rows(index, hkl, rotations, loader_conjugates)
+
+  rotated, done, refused, zeroed = [], [], [], 0
+  new_ids = list(entries)
+  for column, model_index, k in plan:
+    rows, conj = _rotated_rows(index, hkl, ops[k][0], conjugate_ok)
+    if (complete & (rows < 0)).any():
+      refused.append(model_index)
+      continue
+    rotated.append((column, rows, conj))
+    done.append((model_index, ops[k][2]))
+    new_ids[column] = model_ids[model_index]
+    zeroed += int((rows < 0).sum())
+  if rotated and write:
+    if tsc_file.endswith('.tscb'):
+      _reorient_tscb(tsc_file, rotated, new_ids)
+    else:
+      _reorient_tsc(tsc_file, rotated, new_ids)
+  return done, refused, zeroed
 
 
 def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_scatterer_ids, unit_cell,
