@@ -1,4 +1,5 @@
 import os, sys
+import array
 import olx
 import OlexVFS
 import time
@@ -579,13 +580,12 @@ class OlexCctbxAdapter(object):
         weighting = self.get_shelxl_weighting()
       if fc2_data is None:
         fc2_data = fc.as_intensity_array().data()
-      indices = fo2.indices()
-      fo2_d = fo2.data()
-      sigmas = fo2.sigmas()
-      weights = flex.double(fo2.size(), 1.0)
-      for i in range(fo2.size()):
-        weights[i] = weighting.compute(fo2_d[i], sigmas[i], fc2_data[i], indices[i], scale_factor)
-      return weights
+      # the double columns as python arrays: a flex element access per value
+      # costs as much as the weight itself; same values, bitwise
+      col = lambda a: array.array('d', bytes(a.copy_to_byte_str()))
+      compute = weighting.compute
+      return flex.double([compute(f, s, c, h, scale_factor) for f, s, c, h in
+        zip(col(fo2.data()), col(fo2.sigmas()), col(fc2_data), fo2.indices())])
     else:
       weighting = xray.weighting_schemes.shelx_weighting(*params,
         wavelength=self.wavelength)
@@ -2208,11 +2208,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       return not OV.FindValue('stop_current_process', False)
 
     # threads: the FFT releases the GIL, so trials run concurrently; the
-    # per-cycle plot and stop button then work per trial only with threads=1
+    # per-cycle plot and stop button then work per trial only with threads=1.
+    # Default: one per trial, up to the CPUs this process may use
+    # (process_cpu_count honours affinity and PYTHON_CPU_COUNT, Python 3.13+)
     n = int(getattr(params, 'threads', 0) or 0)
     if n <= 0:
+      cpus = getattr(os, 'process_cpu_count', os.cpu_count)() or 1
       n = int(os.environ.get('SMTBX_SOLVE_THREADS', 0) or 0) or \
-        max(1, (os.cpu_count() or 2) - 1)
+        max(1, min(n_trials, cpus))
     self.solution_threads = n
     OV.SetVar('stop_current_process', False)
     result = multi_trial.solve(
