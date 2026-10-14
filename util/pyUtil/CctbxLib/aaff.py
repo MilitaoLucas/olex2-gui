@@ -830,7 +830,7 @@ The following options were used:
         details_text += f"   CHARGE:         {param('charge')}\n"
         details_text += f"   MULTIPLICITY:   {param('multiplicity')}\n"
       is_orca = "ORCA" in software or "ORCA" in str(origin)
-      if is_orca and flag('ORCA_USE_CRYSTAL_QMMM'):
+      if is_orca and flag('ORCA_USE_CRYSTAL_QMMM') and not OV.ListParts():  # Wfn_Job does not embed disordered models
         details_text += f"   EMBEDDING:      {param('ORCA_CRYSTAL_QMMM_TYPE')}-Crystal-QMMM, {param('ORCA_CRYSTAL_QMMM_RADIUS')} A\n"
       elif is_orca:
         # only ORCA honours the solvation setting; the others ignore it and must not claim it
