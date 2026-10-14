@@ -702,13 +702,13 @@ class fractal_dimension(OlexCctbxAdapter):
     import olex
     self.info = OV.ModelSrc()
     map_type = "diff"
-    olex.m("spy.NoSpherA2.residual_map(%s)"%(str(resolution)))
+    olex.m("spy.NoSpherA2.residual_map(%s, False, False, True)"%(str(resolution)))  # binary .cubeb, NoSpherA2 loads it in ms
     print("Made residual density map\nAnalyzing...")
 
     NoSpherA2 = OV.GetVar("NoSpherA2")
     args = [NoSpherA2]
     args.append("-fractal")
-    args.append("%s_%s.cube"%(self.info,map_type))
+    args.append("%s_%s.cubeb"%(self.info,map_type))
     import subprocess
     startinfo = None
     if sys.platform[:3] == 'win':

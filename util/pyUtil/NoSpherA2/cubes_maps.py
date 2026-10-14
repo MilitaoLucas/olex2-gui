@@ -643,7 +643,7 @@ def _selection_wfn(mol):
   shutil.copy(mol, os.path.join(d, name + ".xyz"))  # the job keeps an existing xyz instead of exporting the model
   try:
     job = Wfn_Job.wfn_Job(NoSpherA2_instance, name, d, soft)
-    job.write_input(cover=False)  # ponytail: the model's charge and multiplicity; a selected ion of a salt needs its own
+    job.write_input(cover=False, embed=False)  # embedding would cluster the whole model, not the selection; ponytail: the model's charge and multiplicity; a selected ion of a salt needs its own
     job.run(copy=False)
   except Exception as e:
     print("Wavefunction of the selection failed, surface without ESP: %s" % e)
