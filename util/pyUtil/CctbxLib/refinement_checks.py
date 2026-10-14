@@ -12,25 +12,18 @@ class RefinementChecks(object):
     self.refinement_has_failed = []
 
   def check_PDF(self, force=False):
-    RM = OlexRefinementModel()
-    any_have_anh = False
-    label_list = []
-    for i, atom in enumerate(RM._atoms):
-      anh_adp = atom.get('anharmonic_adp')
-      if anh_adp == None:
-        continue
-      any_have_anh = True
-      label_list.append(atom['label'])
-    if any_have_anh == True:
-      if OV.HasGUI():
-        olex.m("PDF")
-      else:
-        olex.m("spy.NoSpherA2.PDF_map(0.1,1,true,true,true,true,false,false)")
+    # check only - no map render, that is what made this slow in the GUI; `PDF` draws it on demand
+    label_list = [sc.label for sc in self.cctbx.normal_eqns.xray_structure.scatterers() if sc.anharmonic_adp is not None]
+    if label_list:
+      from cubes_maps import PDF_map
+      PDF_map(0.1, 1, True, True, True, True, False, False)
       problem = OV.GetVar("Negative_PDF")
       Kuhs = OV.GetVar("Kuhs_Rule")
       err_list = []
       if problem == True:
         err_list.append("Negative PDF found")
+        if OV.HasGUI():  # show the offending map only when there is something to look at
+          olex.m("PDF")
         if force == True:
           print("Making all anharmonic atoms harmonic again!")
           for label in label_list:
@@ -122,6 +115,51 @@ class RefinementChecks(object):
     self.refinement_has_failed.append(
       "<font color='%s'><b>Not in .tsc, refined spherically: %s</b></font>"
       % (OV.GetParam('gui.red'), which))
+
+  def check_aspherical(self):
+    # things a HAR is expected to get right and a plain refine with a tsc silently does not
+    if not OV.IsNoSpherA2():
+      return
+    import os
+    from cctbx.eltbx import tiny_pse
+    z_of = lambda symbol: tiny_pse.table(str(symbol).capitalize()).atomic_number()
+    # etc/neutron.dist: "Z d" or "Z m1 m2 ... d", the same files NeutronHDist reads
+    neutron = {}
+    for fn in (os.path.join(olx.BaseDir(), "etc", "neutron.dist"), os.path.join(olx.app.SharedDir(), "etc", "neutron.dist")):
+      if not os.path.exists(fn):
+        continue
+      for line in open(fn):
+        toks = line.split('#')[0].split()
+        if len(toks) < 2:
+          continue
+        for m in (toks[1:-1] or ["*"]):
+          neutron[(int(toks[0]), m if m == "*" else int(m))] = float(toks[-1])
+    RM = OlexRefinementModel()
+    iam, other = [], []
+    for m, n, pivot, dependent, pivot_neighbours, d in RM.afix_iterator():
+      if n not in (3, 7):
+        continue
+      z = z_of(RM._atoms[pivot]['type'])
+      expected = neutron.get((z, m), neutron.get((z, "*")))
+      if expected is None:
+        continue
+      label = RM._atoms[pivot]['label']
+      if d <= 0:
+        iam.append(label)
+      elif abs(d - expected) > 0.03:
+        other.append("%s %.3f" % (label, d))
+    if iam:
+      self.refinement_has_failed.append("Riding H on %s at IAM default distances - run NeutronHDist or refine them" % ", ".join(iam))
+    if other:
+      self.refinement_has_failed.append("Riding H on %s at custom distances, not the neutron ones" % ", ".join(other))
+    if not OV.GetParam('snum.refinement.update_weight'):
+      self.refinement_has_failed.append("Weighting scheme is not updated - a spherical scheme fits aspherical Fc poorly")
+    try:
+      ratio = float(OV.GetParam('snum.refinement.data')) / float(OV.GetParam('snum.refinement.parameters'))
+      if ratio < 10:
+        self.refinement_has_failed.append("Only %.1f data per parameter - a HAR wants 10 or more" % ratio)
+    except (TypeError, ValueError, ZeroDivisionError):
+      pass
 
   def check_mu(self):
     try:

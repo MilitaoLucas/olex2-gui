@@ -745,6 +745,7 @@ class RunRefinementPrg(RunPrg):
       rc.check_mu() #This is the L-M mu!
       try:
         rc.check_table_coverage()
+        rc.check_aspherical()
       except Exception as e:
         print("Could not check .tsc coverage: %s" % e)
       evt.stop()
