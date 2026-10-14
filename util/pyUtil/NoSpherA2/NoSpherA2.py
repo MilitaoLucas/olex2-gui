@@ -1938,15 +1938,18 @@ OV.registerFunction(change_tsc_generator,False,'NoSpherA2')
 
 def set_default_cpu_and_mem():
   import math
-  import multiprocessing
   parallel = OV.GetVar("Parallel")
-  max_cpu = multiprocessing.cpu_count()
+  # CPUs this process may use (process_cpu_count honours affinity, Python 3.13+)
+  max_cpu = getattr(os, 'process_cpu_count', os.cpu_count)() or 1
   hyperthreading = nsa2_get_param('user.refinement.has_HT')
   if not hyperthreading:
     max_cpu /= 2
   current_cpus = nsa2_get_param('ncpus')
   update = False
-  if not parallel:
+  # "Parallel" only says MPI was found; NoSpherA2 itself is OpenMP, so only the
+  # MPI programs drop to one CPU without it (the same rule as getCPUListStr)
+  soft = software()
+  if not parallel and (soft == "Tonto" or "ORCA" in soft or soft == "fragHAR"):
     nsa2_set_param('ncpus',1)
     return
   if (max_cpu == 1):
@@ -1980,11 +1983,10 @@ def set_default_cpu_and_mem():
     ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
     mem_gib = math.floor(stat.ullAvailPhys / (1024**3))
   else:
-    import os
     mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')  # e.g. 4015976448
     mem_gib = mem_bytes/(1024.**3)  # e.g. 3.74
   tf_mem = math.floor(mem_gib/4*30)/10
-  tf_cpu = math.floor(max_cpu/4*3)
+  tf_cpu = max(1, math.floor(max_cpu/4*3))
   if not update:
     nsa2_set_param('ncpus',str(int(tf_cpu)))
   nsa2_set_param('mem', str(tf_mem))
