@@ -217,10 +217,65 @@ def flash_gui_control(control, wait=300):
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
+def _timage_key(img_txt, img_type):
+  # Everything make_timage reads for a plugin header: the gui phil (and gui.* values kept in
+  # structure_params), panel width, dpi scale, language encoding, Pillow, the drawing code and fonts.
+  # None (no caching) when a value has no stable text form.
+  import hashlib, PIL, PilTools, ImageTools, FontInstances
+  if not IT.dpi_scale:
+    IT.get_available_width() # what the first resize_image would do anyway
+  out = [img_txt, img_type, PIL.__version__, repr(PilTools.TI.width), repr(IT.dpi_scale),
+         repr(ImageTools.dpi_scaling), str(IT.gui_language_encoding)]
+  out += sorted("%s=%s" % kv for kv in olx.structure_params.items() if kv[0].startswith('gui'))
+  def walk(o):
+    if isinstance(o, list):
+      out.append('[%d' % len(o))
+      for x in o:
+        walk(x)
+    elif '__phil_name__' in getattr(o, '__dict__', ()):
+      for k in sorted(o.__dict__):
+        if not k.startswith('__phil_'):
+          out.append(k)
+          walk(o.__dict__[k])
+    elif isinstance(o, (int, float, str, tuple, type(None))):
+      out.append(repr(o))
+    else:
+      out.append(str(o)) # colour -> hex, Auto -> 'Auto'
+  walk(OV.GuiParams())
+  fonts = os.path.join(OV.BaseDir(), 'etc', 'gui', 'fonts')
+  for f in [PilTools.__file__, ImageTools.__file__, FontInstances.__file__, OlexVFS.__file__, __file__] +\
+           sorted(e.path for e in os.scandir(fonts)):
+    st = os.stat(f)
+    out.append('%s %d %d' % (f, st.st_mtime_ns, st.st_size))
+  s = '\n'.join(out)
+  if ' at 0x' in s:
+    return None
+  return hashlib.sha1(s.encode('utf-8', 'surrogatepass')).hexdigest()
+
 def make_single_gui_image(img_txt="", img_type='h2', force=False):
   import PilTools
   import OlexVFS
+  import marshal
   TI = PilTools.TI
+  # The six PNGs depend only on _timage_key's inputs, so a start where none changed reuses the last
+  # start's bytes (~0.15 s per header on a Cortex-A53). One file per header: a resize overwrites it.
+  cache = os.path.join(OV.DataDir(), 'gui_image_cache', '%s-%s.bin' % (img_type, img_txt.lower()))
+  key = None if force or TI.advertise_new else _timage_key(img_txt, img_type)
+  if key:
+    try:
+      with open(cache, 'rb') as f:
+        k, files = marshal.load(f)
+    except Exception:
+      k = None
+    if k == key:
+      # the TI state make_timage would have left behind and other TI methods read
+      TI.params = OV.GuiParams()
+      TI.scale = OV.GetParam('gui.internal_scale')
+      TI.highlight_colour = TI.params.html.highlight_colour.rgb
+      for name, data in files:
+        olex.writeImage(name, data, 0)
+      return
+  files = []
   states = ["on", "off", "highlight", "", "hover", "hoveron"]
   alias = img_type
   for state in states:
@@ -233,7 +288,15 @@ def make_single_gui_image(img_txt="", img_type='h2', force=False):
     if image is None:
       continue
     name = "%s-%s%s.png" % (img_type, img_txt.lower(), state)
-    OlexVFS.save_image_to_olex(image, name, 0)
+    files.append((name, OlexVFS.save_image_to_olex(image, name, 0)))
+  if key:
+    try:
+      os.makedirs(os.path.dirname(cache), exist_ok=True)
+      with open(cache + '.%d' % os.getpid(), 'wb') as f:
+        marshal.dump((key, files), f)
+      os.replace(cache + '.%d' % os.getpid(), cache)
+    except OSError:
+      pass
 
 def inject_into_tool(tool, t, where, befaf='before'):
   import OlexVFS
@@ -1132,19 +1195,18 @@ def deal_with_gui_phil(action):
   if action == 'load':
     #OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
-    olx.gui_phil_handler.reset_scope('gui')
+    skin_phils = []
     gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_name)
     if not os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_path = "%s/gui.params" % (OV.BaseDir())
     if os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
-      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+      skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
 
     if skin_extension:
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
-        gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
-        olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+        skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
+    olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
@@ -2581,13 +2643,45 @@ def get_news_image_src():
   img_path = "news/news-1.5"
   disk_image = os.path.join(OV.BaseDir(), "etc", "news", "news-1.5.png")
   if olex_fs.Exists(img_path):
-    d = time.time() - olex_fs.Timestamp(img_path)
-    days = d / (60 * 60 * 24)
-    if days > 7:
-      OlexVFS.write_to_olex(img_path + "_tmp", open(disk_image, 'br').read(), 2)
+    # resize when the panel width or the downloaded image changed; the old 7-day check on
+    # olex_fs.Timestamp always fired (22000+ days) and cost 0.26 s per UpdateHtml on a tablet
+    key = (olx.html.ClientWidth('self'), os.path.getmtime(disk_image))
+    if key != getattr(get_news_image_src, "key", None):
+      import marshal, PIL, PilTools, ImageTools
       olx.SetVar('olex2.news_img_link_url', "www.olexsys.org")
-      from PilTools import TI
-      TI.resize_news_image(vfs=True)
+      # the resized PNG depends only on these, so a start where none changed reuses the last
+      # start's bytes (0.23 s on a Cortex-A53)
+      if not IT.dpi_scale:
+        IT.get_available_width() # what resize_image would do anyway
+      name = 'news/news-%s' % OV.GetBaseTag()
+      out = [name, PIL.__version__, key[0], repr(OV.GetParam('gui.htmlpanelwidth_margin_adjust')),
+             repr(IT.dpi_scale), repr(ImageTools.dpi_scaling)]
+      for f in (disk_image, PilTools.__file__, ImageTools.__file__, OlexVFS.__file__):
+        st = os.stat(f)
+        out.append('%s %d %d' % (f, st.st_mtime_ns, st.st_size))
+      # a start sees two panel widths (layout, then final), so keep the last few
+      cache = os.path.join(OV.DataDir(), 'gui_image_cache', 'news.bin')
+      try:
+        with open(cache, 'rb') as f:
+          entries = [e for e in marshal.load(f) if isinstance(e, tuple) and len(e) == 2]
+      except Exception:
+        entries = []
+      data = next((d for k, d in entries if k == out), None)
+      if data is not None:
+        OlexVFS.write_to_olex(name, data, 2)
+      else:
+        OlexVFS.write_to_olex(img_path + "_tmp", open(disk_image, 'br').read(), 2)
+        PilTools.TI.resize_news_image(vfs=True)
+        data = OlexVFS.read_from_olex(name)
+        if data:
+          try:
+            os.makedirs(os.path.dirname(cache), exist_ok=True)
+            with open(cache + '.%d' % os.getpid(), 'wb') as f:
+              marshal.dump([(out, bytes(data))] + list(entries[:3]), f)
+            os.replace(cache + '.%d' % os.getpid(), cache)
+          except OSError:
+            pass
+      get_news_image_src.key = key
     return img_path
   else:
     return disk_image

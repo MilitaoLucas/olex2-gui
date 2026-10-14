@@ -120,6 +120,23 @@ def check_os():
     return "lin"
 
 
+gui_image_key = None
+
+def rebuild_stale_gui_images(skin):
+  # Images made on demand (h2 headers, buttons) persist in global.odb and are reused for as long as
+  # they exist, so rebuild them as a first run would when what they are drawn from changed since:
+  # width, dpi, gui phil, fonts, drawing code. Once per process; change_skin stores the key.
+  global gui_image_key
+  if gui_image_key is not None or not OV.HasGUI():
+    return
+  from gui.tools import _timage_key
+  IT.get_available_width()
+  gui_image_key = _timage_key('global.odb', '%s %s' % (IT.skin_width, IT.skin_width_table)) or ''
+  if getattr(olx, 'SkinUpdated', False): # a first run, rebuilding anyway
+    return
+  if OlexVFS.read_from_olex('gui_image_key.txt') != gui_image_key.encode():
+    skin.change_skin(OV.GetParam('gui.skin.name', 'default'), internal_change=True)
+
 def check_for_first_run():
   import olexex
   first_run = not os.path.exists("%s/global.odb" % OV.DataDir())
@@ -151,19 +168,18 @@ def deal_with_gui_phil(action):
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
-    olx.gui_phil_handler.reset_scope('gui')
+    skin_phils = []
     gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_name)
     if not os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_path = "%s/gui.params" % (OV.BaseDir())
     if os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
-      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+      skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
 
     if skin_extension:
       gui_skin_phil_path = "%s/etc/skins/%s.phil" % (OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
-        gui_skin_phil = open(gui_skin_phil_path, 'r', encoding="utf-8").read()
-        olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+        skin_phils.append(open(gui_skin_phil_path, 'r', encoding="utf-8").read())
+    olx.gui_phil_handler.reset_scope_and_update('gui', skin_phils)
   else:
     gui_phil_path = "%s/gui.phil" % (OV.DataDir())
     olx.gui_phil_handler.save_param_file(
@@ -281,6 +297,7 @@ class Skin():
     self.TI = PilTools.TI
     OV.registerFunction(self.change_skin)
     OV.registerFunction(self.adjust_font_size_for_ppi, True, 'gui.skin')
+    rebuild_stale_gui_images(self)
     # self.change()
 
   def change_skin(self, info, internal_change=False):
@@ -309,6 +326,8 @@ class Skin():
 
     olx.fs.Clear()
     OlexVFS.write_to_olex('logo1_txt.htm', " ", 2)
+    if gui_image_key:
+      OlexVFS.write_to_olex('gui_image_key.txt', gui_image_key, 2)
 
     if timing:
       t1 = time.time()

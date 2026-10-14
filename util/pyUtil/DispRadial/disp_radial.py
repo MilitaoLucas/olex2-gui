@@ -581,7 +581,6 @@ class DispRadial(PT):
     with open(phil_path, 'r', encoding='utf-8') as f:
       phil = f.read()
     olx.phil_handler.adopt_phil(phil_string=phil)
-    olx.phil_handler.rebuild_index()
 
   def register_methods(self):
     # OV.registerMacro has no namespace argument, so these go through olex

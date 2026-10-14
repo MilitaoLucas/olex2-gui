@@ -33,9 +33,11 @@ def copy_image(name_from, name_to):
 
 def save_image_to_olex(image, name, isPersistent=0):
   buf = io.BytesIO()
-  image.save(buf, format="PNG")
+  # GUI images live in memory and are decoded once: level 1 halves the encode time, pixels are the same
+  image.save(buf, format="PNG", compress_level=1)
   data = buf.getvalue()
   olex.writeImage(str(name), data, int(isPersistent))
+  return data
 
 def write_to_olex(filename, data, isPersistent=0):
   if isinstance(data, str):
