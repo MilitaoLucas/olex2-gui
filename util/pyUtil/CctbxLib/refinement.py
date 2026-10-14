@@ -749,7 +749,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       stopwatch.start("CIF")
       block_name = OV.FileName().replace(' ', '')
       cif = iotbx.cif.model.cif()
-      cif[block_name] = self.as_cif_block()
+      # full: write_oxl needs the atom loops and would otherwise build the block again
+      cif[block_name] = self.as_cif_block(full=True)
       stopwatch.start("Weights")
       # before the listing, which reports the recommended scheme
       new_weighting = self.weighting.optimise_parameters(
@@ -2254,7 +2255,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           id_found = False
           group_size = 0
           for r in variable[0]['references']:
-            if(ref['index'] != 4): #occupancy
+            if(r['index'] != 4 or 'var' not in r['relation']): #occupancy
               continue
             group_size += 1
             sc_id = r['id']
@@ -2275,8 +2276,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         weight = 1/math.pow(equation['sigma'],2)
         p = other_restraints.sump_proxy(i_seqs, coefficients, weight, equation['value'],
                                         labels, all_i_seqs, group_sizes)
-        sump_proxies.append(p)
-      if 'constraint' == OV.GetParam('snum.smtbx.sump'):
+        if i_seqs:
+          sump_proxies.append(p)
+      if sump_proxies.size() and 'constraint' == OV.GetParam('snum.smtbx.sump'):
         FvarNum = len(vars)
         idslist = []
         # Building matrix of equations

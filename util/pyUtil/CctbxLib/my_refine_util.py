@@ -126,9 +126,15 @@ class hydrogen_atom_constraints_customisation(object):
     excluded_sites = []
     neighbours = []
 
+    uc = reparametrisation.structure.unit_cell()
     for b in self.olx_atoms[i_pivot]['neighbours']:
       j, op = self.j_rt_mx_from_olx(b)
       if j in self.src.constrained_site_indices:
+        continue
+      # an EXYZ partner on a site already listed, or on the pivot itself, makes the H geometry 0/0 (NaN
+      # sites, 1555367, 4132805); SHELXL takes either partner, which is the same geometry
+      if any(uc.distance(op*scatterers[j].site, y) < 0.01
+             for y in self.pivot_neighbour_sites + (self.pivot_site,)):
         continue
       if scatterers[j].scattering_type in ('H', 'D'):
         continue

@@ -100,6 +100,19 @@ class hemihedral_twinning(object):
     return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
 
 
+def _lines_before_000(path):
+  """ Upper bound, counted in C, on the reflections read_hkl_arrays' line scan keeps: the
+  lines (blank ones too) before the first line whose first three fields are 0 0 0, where the
+  scan stops. Line ends as text-mode iteration splits them: \\n, \\r\\n or a bare \\r. """
+  import re
+  with open(path, 'rb') as f:
+    data = f.read()
+  m = re.search(rb'(?:^|[\r\n])[ \t]*0[ \t]+0[ \t]+0(?=[ \t\r\n]|$)', data)
+  if m:
+    data = data[:m.start() + (data[m.start():m.start() + 1] in (b'\r', b'\n'))]
+  n = data.count(b'\n') + data.count(b'\r') - data.count(b'\r\n')
+  return n + (data[-1:] not in (b'', b'\r', b'\n'))
+
 def read_hkl_arrays(cs, f_hklf_code, reflection_file):
   """ The hklf reader raises on the first line it cannot parse. 21 whole-COD hkl
   files carry a res or cif block after the data with no 0 0 0 line in front of
@@ -120,6 +133,8 @@ def read_hkl_arrays(cs, f_hklf_code, reflection_file):
     e = RuntimeError("%d reflection(s) read" % arrays[0].size())
   except Exception as ex:   # Sorry from any_reflection_file, RuntimeError from the parser
     e = ex
+  if arrays is not None and _lines_before_000(reflection_file) <= arrays[0].size() + 1:
+    return arrays   # the scan below cannot keep more lines than that, so it would return arrays too
   import tempfile
   kept = []
   with open(reflection_file, errors="replace") as f:
@@ -165,7 +180,9 @@ def apply_hklf_matrix(array, hklf_matrix, cs):
   entry) is dropped, as SHELXL drops it. The symmetry stays the ins's:
   change_basis also re-based the space group and threw on 0.5 entries and on a
   det-3 rhombohedral matrix, 28 whole-COD cases (1546007, 4345975; 24 Sep 2026). """
-  m = hklf_matrix.as_double()
+  # an entry written to a few decimals (0.333 for 1/3) is the fraction it stands for: snap to twelfths
+  m = [round(x * 12) / 12 if abs(round(x * 12) / 12 - x) < 5e-3 else x
+       for x in hklf_matrix.as_double()]
   keep = flex.bool()
   new = flex.miller_index()
   for h in array.indices():
