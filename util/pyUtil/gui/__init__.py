@@ -398,7 +398,7 @@ def zipToOlexVFS(zip_path, base=None):
     OlexVFS.write_to_olex(filename, fc)
 olex.registerFunction(zipToOlexVFS, False, "tools")
 
-def get_default_notification(txt="", txt_col='green_text'):
+def get_default_notification(txt="", txt_col='green_text', update=True):
   txt = txt or "" # callers pass a missing param straight through
   txt_col = OV.GetVar("gui.%s" %txt_col, '#ff0000')
   poly = ""
@@ -408,11 +408,10 @@ def get_default_notification(txt="", txt_col='green_text'):
   if txt == "__structure___loaded_":
     txt = "%s is loaded" %olx.FileName()
     prg = OV.GetParam("snum.solution.program")
-    if prg:
-      cl = OV.GetParam("snum.solution.%s.command_line" %prg)
+    cl = OV.GetParam("snum.solution.%s.command_line" %prg) if prg else None
     if cl:
       txt += ", <font color='red'>Warning: %s</font>" %cl
-  set_notification("%s%s;%s;%s" %(txt, poly, table_col,'#888888'))
+  set_notification("%s%s;%s;%s" %(txt, poly, table_col,'#888888'), update=update)
 
 #https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
 def strip_html_tags(html):
@@ -434,7 +433,8 @@ def strip_html_tags(html):
   s.feed(html)
   return s.get_data()
 
-def set_notification(string=None, fg = None):
+def set_notification(string=None, fg = None, update=True):
+  """ update=False only sets the var; the caller's own html.Update shows it """
   if not string:
     string = OV.GetVar('gui_notification')
   if not OV.HasGUI():
@@ -452,6 +452,8 @@ def set_notification(string=None, fg = None):
   string = f"<font color={fg}>{string} </font>"
 
   OV.SetVar('GuiNotification', string)
+  if not OV.get_bool_from_any(update):
+    return
   olx.Freeze(True)
   OV.UpdateHtml()
   olx.Freeze(False)

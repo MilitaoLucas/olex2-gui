@@ -678,36 +678,6 @@ class OlexRefinementModel(object):
   def getExpectedPeaks(self):
     return self.getExpectedPeaks_and_AtomsPresent()[0]
 
-def get_refine_ls_hydrogen_treatment():
-  afixes_present = []
-  afixes = {0:'refall',
-            1:'noref',
-            2:'refxyz',
-            3:'constr',
-            4:'constr',
-            5:'constr',
-            7:'constr',
-            8:'constr',
-            }
-  for atom  in OlexRefinementModel().atoms():
-    if atom['type'] == 'H':
-      afix = atom['afix']
-      n = int(afix[-1])
-      if len(afix) > 1:
-        m = int(afix[:-1])
-      else:
-        m = 0
-      if not afixes[n] in afixes_present:
-        afixes_present.append(afixes[n])
-  if len(afixes_present) == 0:
-    return 'undef'
-  elif len(afixes_present) == 1:
-    return afixes_present[0]
-  else:
-    return 'mixed'
-
-OV.registerFunction(get_refine_ls_hydrogen_treatment)
-
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
   SpyVar.MatchedFragments = {}
@@ -1012,7 +982,7 @@ def onRefinementMethodChange(prg_name, method):
     print("Please choose a valid method for the refinement program %s" %prg_name)
 OV.registerFunction(onRefinementMethodChange)
 
-def onSolutionProgramChange(prg_name, method=None, scope='snum'):
+def onSolutionProgramChange(prg_name, method=None, scope='snum', update=True):
   if prg_name == "Auto":
     OV.SetParam('%s.solution.method' %scope, 'Auto')
     return
@@ -1029,7 +999,7 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     cl = OV.GetParam("snum.solution.%s.command_line" %prg_name)
     if cl:
       cl = "<font color='red'>Warning: %s</font>" %cl
-    gui.get_default_notification(cl, txt_col="red_text")
+    gui.get_default_notification(cl, txt_col="red_text", update=update)
     onSolutionMethodChange(prg_name, method)
 
 def onSolutionMethodChange(prg_name, method):

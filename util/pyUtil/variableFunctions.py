@@ -540,7 +540,8 @@ def LoadStructureParams():
       refinementMethod = 'CGLS' # work-around for bug #26
     set_params_from_ires()
 
-  olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
+  # every structure load rebuilds the page right after (reap's html.Update)
+  olexex.onSolutionProgramChange(solutionPrg, solutionMethod, update=False)
   olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
 
 OV.registerFunction(LoadStructureParams)

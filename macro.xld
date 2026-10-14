@@ -63,8 +63,8 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd14 "spy.setAllMainToolbarTabButtons()">
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
-      <cmd16 "html.Update">
-      <cmd17 "spy.gui.get_default_notification(__structure___loaded_)">
+      <cmd16 "spy.gui.get_default_notification(__structure___loaded_,green_text,False)">
+      <cmd17 "html.Update">
       <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
     >
     <onabort
@@ -251,7 +251,7 @@
     >
     <cmd
       <cmd0 "xgrid.Visible(false)">
-      <cmd1 "spy.gui.maps.MapView(off)">
+      <cmd1 "spy.gui.maps.MapView(off,False)">
       <cmd2 "mode off">
       <cmd3 "user filepath()">
       <cmd4 "if not(spy.AnalyseRefinementSource()) then abort">

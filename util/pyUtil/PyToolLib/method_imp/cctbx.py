@@ -112,9 +112,8 @@ class Method_cctbx_refinement(Method_refinement):
     hide_nsff = OV.GetParam('user.refinement.hide_nsff')
     if not hide_nsff:
       html = f"olex2.refine using __spherical__ form factors "
+      # shown once by RunPrg.run, after the aspherical branch below has replaced it
       OV.SetVar('gui_notification', html)
-      import gui
-      gui.set_notification()
       use_aspherical = OV.IsNoSpherA2()
     else:
       self.table_file_name = os.path.join(OV.FilePath(), OV.FileName() + '.tsc')

@@ -521,7 +521,7 @@ class RunSolutionPrg(RunPrg):
 class RunRefinementPrg(RunPrg):
   running = None
 
-  def __init__(self):
+  def __init__(self, update_html=True):
     RunPrg.__init__(self)
     self.bitmap = 'refine'
     self.program, self.method = self.getProgramMethod('refine')
@@ -568,11 +568,11 @@ class RunRefinementPrg(RunPrg):
         gui.set_notification(open(rc_fn, "r").read())
     elif not OV.IsNoSpherA2():
       gui.get_default_notification(txt="Refinement finished",
-        txt_col='green_text')
+        txt_col='green_text', update=update_html)
     else:
       gui.get_default_notification(
         txt="Refinement finished    Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
-          txt_col='green_text')
+          txt_col='green_text', update=update_html)
 
   def reset_params(self):
     OV.SetParam('snum.refinement.hooft_str', "")
@@ -996,7 +996,8 @@ def run_auto_vss():
 OV.registerFunction(run_auto_vss, False, 'runprg')
 
 def do_refine():
-  rpg = RunRefinementPrg()
+  # the refine macro's closing html.Update shows the "finished" notification
+  rpg = RunRefinementPrg(update_html=False)
   if not rpg.terminate:
     rpg.deal_with_Z_score()
 

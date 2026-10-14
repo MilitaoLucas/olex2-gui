@@ -84,10 +84,11 @@ class MapUtil:
     self.deal_with_controls()
     olex.m('spy.OlexCctbxMasks(True, True)')
 
-  def MapView(self, onoff=None):
+  def MapView(self, onoff=None, update_html=True):
+    """update_html=False: the caller re-renders the panel itself (refine does, 0.3 s on an A53)"""
     img_bases = ['full-Electron_Density_Map', 'small-Map']
     if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
-      self.SetXgridView(True)
+      self.SetXgridView(True, update_html)
       return
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):
       # set calcvoid button to 'up' state
@@ -143,7 +144,7 @@ class MapUtil:
     self.SetXgridView(True)
 
 
-  def SetXgridView(self, update_controls=False):
+  def SetXgridView(self, update_controls=False, update_html=True):
     update_controls = OV.get_bool_from_any(update_controls)
     view = OV.GetParam("snum.xgrid.view")
     extended = OV.GetParam("snum.xgrid.extended")
@@ -166,7 +167,8 @@ class MapUtil:
     if update_controls or not _:
 
       self.deal_with_controls()
-      OV.UpdateHtml()
+      if OV.get_bool_from_any(update_html):
+        OV.UpdateHtml()
 
   def Round(self, value, digits):
     value = float(value)
