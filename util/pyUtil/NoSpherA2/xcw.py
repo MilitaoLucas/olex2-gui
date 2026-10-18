@@ -3,8 +3,9 @@
 Experimental. The block (hybrid_GUI.make_XCW_GUI) is shown only with
 user.NoSpherA2.show_XCW. What it does:
 
-  Run XCW  writes olex2/XCW/<name>.cif, <name>.hkl, anom_disp.txt (f'/f''
-           of the model) and <name>_xcw_settings.txt from the
+  Run XCW  writes olex2/XCW/<name>.cif (with the refinement's f'/f'' per
+           type and per atom), <name>.hkl, anom_disp.txt (the same per
+           element, for older NoSpherA2) and <name>_xcw_settings.txt from the
            snum.NoSpherA2.XCW parameters and starts
            NoSpherA2 -do_XCW ... in the background, cwd = that folder
   Stop     kills the job
@@ -104,9 +105,44 @@ def _n_params():
   return n
 
 
+def _append_dispersion(path):
+  """f' f'' as the refinement uses them (cctbx_olex_adapter.xray_structure: resonant table, SFAC overrides,
+  refined DISP per atom), appended to the CifCreate_4NoSpherA2 file. One _atom_type row per type; an atom whose
+  values differ from the first atom of its type gets an _atom_site_dispersion row, which NoSpherA2 applies to
+  that site alone (convenience.cpp read_CIF, density_source 4917b79b on)."""
+  import iotbx.cif
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  block = list(iotbx.cif.reader(file_path=path).model().values())[0]
+  if "_atom_type_symbol" in block:
+    raise RuntimeError("the CIF already has an _atom_type loop")
+  labels, types = block["_atom_site_label"], block["_atom_site_type_symbol"]
+  scatterers = OlexCctbxAdapter().xray_structure().scatterers()
+  if len(labels) != scatterers.size():
+    raise RuntimeError("%d atoms in the CIF against %d scatterers" % (len(labels), scatterers.size()))
+  per_type, per_site = {}, []
+  for label, t, sc in zip(labels, types, scatterers):
+    # the CIF label may carry a residue suffix (GetResiLabel), the scatterer has the plain name
+    if not label.lower().startswith(sc.label.lower()):
+      raise RuntimeError("CIF atom %s paired with scatterer %s" % (label, sc.label))
+    v = (sc.fp, sc.fdp)
+    if max(abs(a - b) for a, b in zip(per_type.setdefault(t, v), v)) > 1e-6:
+      per_site.append((label, v))
+  with open(path, "a") as out:
+    out.write("\nloop_\n  _atom_type_symbol\n  _atom_type_scat_dispersion_real\n"
+              "  _atom_type_scat_dispersion_imag\n")
+    for t, (fp, fdp) in sorted(per_type.items()):
+      out.write("  %s %.6f %.6f\n" % (t, fp, fdp))
+    if per_site:
+      out.write("\nloop_\n  _atom_site_dispersion_label\n  _atom_site_dispersion_real\n"
+                "  _atom_site_dispersion_imag\n")
+      for label, (fp, fdp) in per_site:
+        out.write("  %s %.6f %.6f\n" % (label, fp, fdp))
+
+
 def _write_anom_disp(path):
-  """f' f'' per element as Olex2 refines with them: the resonant table, SFAC overrides and refined DISP values
-  (cctbx_olex_adapter.xray_structure); NoSpherA2 -anom_disp reads 'symbol fp fdp' lines, one per element"""
+  """f' f'' per element for NoSpherA2 before density_source 4917b79b, which reads them only from -anom_disp
+  ('symbol fp fdp' lines); later builds ignore -anom_disp with a warning and use the CIF loops above.
+  Drop this and -anom_disp once the NoSpherA2 that Olex2 ships has 4917b79b."""
   from cctbx_olex_adapter import OlexCctbxAdapter
   values = {}
   for sc in OlexCctbxAdapter().xray_structure().scatterers():
@@ -296,6 +332,7 @@ def xcw_run():
   try:
     olex.m("CifCreate_4NoSpherA2")
     shutil.move(os.path.join(OV.FilePath(), name + ".cif_NoSpherA2"), os.path.join(folder, name + ".cif"))
+    _append_dispersion(os.path.join(folder, name + ".cif"))
     _write_hkl(os.path.join(folder, name + ".hkl"))
     _write_anom_disp(os.path.join(folder, "anom_disp.txt"))
     settings = name + "_xcw_settings.txt"
