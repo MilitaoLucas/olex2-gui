@@ -1342,6 +1342,15 @@ programs
                   "and B, I, P and Si are poor; the labels are a starting "
                   "point, not an answer. Falls back to the density call alone "
                   "when the geometry step is unavailable. Adds a second or two."
+        start_in_p1 = False
+          .type = bool
+          .short_caption = Start in P1
+          .help = "Ignore the space group that is set: solve in P1 and take "
+                  "the space-group suggestions from the solution map alone. "
+                  "For data whose Laue class or lattice may be wrong. Off by "
+                  "default: on 10,800 COD structures, where the given group "
+                  "is right, it gave 17.6 points fewer fully clean solutions, "
+                  "mostly from atom typing."
         weak_reflection_fraction = 0.2
           .type = float
           .short_caption = Weak reflection fraction

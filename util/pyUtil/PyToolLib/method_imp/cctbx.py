@@ -817,6 +817,9 @@ instructions {
       assign_elements = True
         .type = bool
         .caption = ASEL
+      start_in_p1 = False
+        .type = bool
+        .caption = P1ST
         }
     default=True
       .type=bool

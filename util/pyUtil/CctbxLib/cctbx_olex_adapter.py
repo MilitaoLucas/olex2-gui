@@ -962,6 +962,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     f_obs.show_summary()
 
     params = OV.Params().programs.solution.smtbx.cf
+    if (mode != "classic" and getattr(params, 'start_in_p1', False)
+        and f_obs.space_group().order_z() > 1):
+      f_obs = self.startInP1(f_obs)
     extra = group_args(
       max_attempts_to_get_phase_transition\
         = params.max_attempts_to_get_phase_transition,
@@ -1036,6 +1039,26 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                 if solving.f_calc_solutions else None)
 
     return self.placeSolution(f_calc)
+
+  def startInP1(self, f_obs):
+    """ Solve in P1 whatever group is set: the `start_in_p1` option.
+
+    For a group that may be wrong. The data are merged in P1 with Friedel
+    pairs only; a file holding one asymmetric unit (CIF-derived hkl) has no
+    sphere to merge, so it is expanded with the given group instead. The
+    space-group shortlist then comes from the solution map, not the Laue
+    class. Off by default: on 10,800 COD structures, where the given group is
+    right, it is 17.6 points worse fully clean, mostly in atom typing.
+    """
+    from cctbx import sgtbx
+    p1 = self.reflections.f_obs.customized_copy(
+      space_group_info=sgtbx.space_group_info("P 1"))
+    p1 = p1.as_non_anomalous_array().merge_equivalents().array()
+    if p1.completeness() < 0.6 * f_obs.completeness():
+      p1 = f_obs.expand_to_p1()
+    olex.m("ChangeSG P1")
+    print("Starting in P1: %d reflections" % p1.size())
+    return p1
 
   def nearTiedOrigins(self, f_obs, f_calc, n=4, d_cc=0.01, d_r1=0.02):
     """ Other origins of the P1 answer that score as well as the one chosen.
