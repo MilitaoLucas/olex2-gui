@@ -172,6 +172,13 @@ class initpy_funcs():
       __import__(module_name)
       self.olx.stopwatch.stop()
 
+    # Register the AC7 predicates the GUI depends on *before* deciding how AC7
+    # itself is loaded. The refinement settings page evaluates
+    # `spy.ac.isMEDEnabled()` in an `ignoreif`, unconditionally, so the name has
+    # to exist from startup whether AC7 loads now, loads later, or never loads
+    # at all. AC7 registers the real implementations over these when it arrives.
+    self._register_ac7_fallbacks()
+
     if os.environ.get("OLEX2_DEFER_AC7_IMPORTS"):
       import olex
       olex.registerFunction(self.import_ac7_deferred, False, "initpy")
@@ -220,13 +227,8 @@ class initpy_funcs():
       if "bad magic number" not in str(err) and err.name != "AC7":
         raise
       self._ac7_unavailable_reason = str(err)
-      # The refinement HTML always evaluates this AC7 predicate.  Register a
-      # false fallback so its ``ignoreif`` conditions remain valid when AC7 is
-      # intentionally unavailable in a different Python minor version.
-      def isMEDEnabled():
-        return False
-      import olex
-      olex.registerFunction(isMEDEnabled, False, "ac")
+      # The GUI predicates are registered unconditionally at startup by
+      # `_register_ac7_fallbacks`, so nothing has to be re-registered here.
       if "bad magic number" in str(err):
         print("AC7 is disabled: its bytecode is incompatible with Python %s.%s (%s)"
           %(sys.version_info.major, sys.version_info.minor, err))
@@ -234,6 +236,33 @@ class initpy_funcs():
         print("AC7 is disabled: it is not installed (%s)" %err)
     finally:
       self.olx.stopwatch.stop()
+
+  def _register_ac7_fallbacks(self):
+    """ Stand-ins for the AC7 predicates the GUI evaluates unconditionally.
+
+    `etc/gui/tools/refine-settings.htm` guards three blocks with
+    `#ignoreif not spy.ac.isMEDEnabled()`. An `ignoreif` cannot itself be
+    guarded, so the function has to exist before any page renders -- including
+    when AC7 is deferred and has not been imported yet, and when AC7 is not
+    installed at all.
+
+    Registered before the import is attempted, and harmless when AC7 does load:
+    AC7 registers the real implementation into the same namespace and wins.
+    """
+    if getattr(self, "_ac7_fallbacks_registered", False):
+      return
+    self._ac7_fallbacks_registered = True
+    try:
+      import olex
+
+      def isMEDEnabled():
+        return False
+
+      olex.registerFunction(isMEDEnabled, False, "ac")
+    except Exception as err:
+      # Never let a fallback registration stop startup -- it exists to make
+      # startup more robust, not less.
+      print("Could not register AC7 fallbacks: %s" % err)
 
   def _register_lazy_fragmentdb_proxies(self):
     if getattr(self, "_lazy_fragmentdb_registered", False):

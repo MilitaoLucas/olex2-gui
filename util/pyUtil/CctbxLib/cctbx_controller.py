@@ -1,6 +1,7 @@
 # cctbx_controller.py
 
 from my_refine_util import *
+import my_refine_util
 import math
 import os
 import sys
@@ -458,7 +459,7 @@ class create_cctbx_xray_structure(object):
       min_distance_sym_equiv=0.2)
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
-    u_star = shelx_adp_converter(builder.crystal_symmetry)
+    u_star = my_refine_util.shelx_adp_converter(builder.crystal_symmetry)
     for label, site, occupancy, u, anharmonic_u, uiso_owner, scattering_type, fixed_vars in atom_iter:
       behaviour_of_variable = [True]*12
       if fixed_vars is not None:

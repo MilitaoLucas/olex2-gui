@@ -476,9 +476,19 @@ all calculation parameters are properly recorded."""
         esds = jac_tr.transpose() * flex.double(cov_matrix)
         jac_tr = None
         annotations = self.cctbx.normal_eqns.reparametrisation.component_annotations
-      except:
+      except Exception as e:
         HAR_log.close()
-        print ("Could not obtain cctbx object and calculate ESDs!\n")
+        # The reason matters and used to be thrown away. A HAR decides it has
+        # converged from the largest shift over its esd, so it needs the
+        # covariance matrix every cycle - and conjugate gradients does not
+        # produce one unless it is told to close on a full build.
+        print("Could not obtain cctbx object and calculate ESDs!")
+        print("  %s" % str(e).strip())
+        if "objective-only" in str(e) or "cholesky.failure" in str(e):
+          print("  A HAR needs the standard uncertainties every cycle to know "
+                "whether it has converged. Switch them on in the refinement "
+                "settings (snum.refinement.cgls.standard_uncertainties) or "
+                "choose a method that forms the normal matrix.")
         return False
       from decors import run_with_bitmap
       @run_with_bitmap('Analyzing shifts', update_model_after=False)
@@ -680,10 +690,18 @@ all calculation parameters are properly recorded."""
       HAR_log.write("                   !!! WARNING: Unassigned Atom Types! !!!\n")
       self.refinement_has_failed.append("Unassigned Atom Types!")
   HAR_log.write("*" * 110 + "\n")
-  HAR_log.write("Residual density Max:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_peak')))
-  HAR_log.write("Residual density Min:{:+8.3f}\n".format(OV.GetParam('snum.refinement.max_hole')))
-  HAR_log.write("Residual density RMS:{:+8.3f}\n".format(OV.GetParam('snum.refinement.res_rms')))
-  HAR_log.write("Goodness of Fit:     {:8.4f}\n".format(OV.GetParam('snum.refinement.goof')))
+
+  def _stat(name, fmt):
+    # these come from the residual density analysis, which a run with no
+    # window has not necessarily done, and a missing one used to end the whole
+    # refinement in the log writer with a TypeError on None
+    v = OV.GetParam('snum.refinement.' + name)
+    return fmt.format(v) if v is not None else "n/a"
+
+  HAR_log.write("Residual density Max:%s\n" % _stat('max_peak', "{:+8.3f}"))
+  HAR_log.write("Residual density Min:%s\n" % _stat('max_hole', "{:+8.3f}"))
+  HAR_log.write("Residual density RMS:%s\n" % _stat('res_rms', "{:+8.3f}"))
+  HAR_log.write("Goodness of Fit:     %s\n" % _stat('goof', "{:8.4f}"))
   HAR_log.write("Refinement finished at: ")
   HAR_log.write(str(datetime.datetime.now()))
   HAR_log.write("\n")

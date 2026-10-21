@@ -989,7 +989,18 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     try:
         import AC7 as ac
         return ac.get_aci()
-    except:
+    except Exception as e:
+        # The bare `except: return None` this replaces hid *why* AC was
+        # unavailable, and every caller then failed later and elsewhere with
+        # "'NoneType' object has no attribute 'EDI'" -- a message that names
+        # neither the plugin nor the reason. Reported once per session so a
+        # repeated call in a refinement loop cannot flood the log.
+        if not self.GetVar("aci.failure_reported", False):
+          import traceback
+          print("GetACI: AC is unavailable -- %s: %s"
+                % (type(e).__name__, e))
+          traceback.print_exc()
+          self.SetVar("aci.failure_reported", True)
         return None
 
   def ListParts(self):

@@ -229,6 +229,46 @@ def _check_fragment(xyz_fn, charge=None, mult=None, parity=True, cover=True):
     raise NameError(msg)
   return not warnings
 
+def _numbers_in(text):
+  """Every token of text that parses as a float, in order."""
+  values = []
+  for token in text.split():
+    try:
+      values.append(float(token))
+    except ValueError:
+      pass
+  return values
+
+
+def check_ptb_wavefunction(log_text):
+  """Reject a pTB run that finished cleanly but produced no electrons.
+
+  pTB prints its timings and exits 0 even when a NaN has reached the orbital
+  energies. The Fermi smearing then returns zero occupations, printmos writes
+  them to the .xtb file, and NoSpherA2 partitions a density of no electrons:
+  every atom comes out carrying exactly its (ECP reduced) nuclear charge, and
+  the refinement diverges with nothing in any log naming the cause.
+  """
+  occupations = []
+  energies = []
+  for line in log_text.splitlines():
+    if "frontier MO occupations" in line:
+      occupations = _numbers_in(line.split(":", 1)[-1])
+    elif "level energies" in line:
+      energies = _numbers_in(line.split(":", 1)[-1])
+  nan_energies = any(e != e for e in energies) or "NaN" in "".join(
+    l for l in log_text.splitlines() if "level energies" in l)
+  no_electrons = bool(occupations) and not any(o > 0 for o in occupations)
+  if nan_energies or no_electrons:
+    print("-- pTB finished, but its wavefunction is empty:")
+    for line in log_text.splitlines():
+      if "frontier MO occupations" in line or "level energies" in line:
+        print("--   " + line.strip())
+    print("-- Refusing to build a .tsc from it. Please re-run the wavefunction.")
+    OV.SetVar('NoSpherA2-Error', "pTB")
+    raise NameError('pTB returned a wavefunction with zero MO occupations!')
+
+
 def _find_basis_file(basis_dir, basis_name):
   """Return the path to a basis set file, matching case-insensitively."""
   direct = os.path.join(basis_dir, basis_name)
@@ -2101,15 +2141,13 @@ ener = cf.kernel()"""
             print(line)
         raise NameError('ELMOdb did not terminate normally!')
     elif softw == "pTB":
-      if 'cpu  time for all' in log_text:
-        pass
-      else:
+      if 'cpu  time for all' not in log_text:
         OV.SetVar('NoSpherA2-Error',"pTB")
-        lines = open(wfnlog).readlines()
-        for line in lines:
+        for line in log_text.splitlines():
           if "Error" in line:
             print(line)
         raise NameError('pTB did not terminate normally!')
+      check_ptb_wavefunction(log_text)
     elif softw == "OCC":
       if os.path.isfile(os.path.join(self.full_dir, self.name + ".fchk")):
         pass

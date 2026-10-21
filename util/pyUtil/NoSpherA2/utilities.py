@@ -323,7 +323,18 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   args.append(NoSpherA2)
   args.append("-tsc_labels")
   if software() == "SALTED":
-    salted_model_dir = nsa2_get_param('selected_salted_model')
+    salted_model_dir = str(nsa2_get_param('selected_salted_model') or '').strip()
+    if not salted_model_dir:
+      # launch() normally catches this before reaching the calculator.  Keep
+      # this guard for direct calls to cuqct_tsc(), too, so no invalid command
+      # line containing an empty SALTED model path is launched.
+      message = ("No SALTED model is selected. Select a SALTED model in the "
+                 "SALTED settings before calculating the TSC file.")
+      print("Error: " + message)
+      if OV.HasGUI():
+        olx.Alert("SALTED model required", message, "O", False)
+      OV.SetVar('NoSpherA2-Error', "No SALTED model selected")
+      return False
     args.append("-SALTED")
     args.append(salted_model_dir)
   if hkl_file is not None:
@@ -339,12 +350,11 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     args.append(ncpus)
   if nsa2_get_param('NoSpherA2_debug'):
     args.append('-v')
-  if nsa2_get_param('NoSpherA2_ED'):
+  is_ED = bool(nsa2_get_param('NoSpherA2_ED'))
+  if not is_ED:
+    is_ED = float(olx.xf.exptl.Radiation()) < 0.1
+  if is_ED:
     args.append('-ED')
-  else:
-    wavelength = float(olx.xf.exptl.Radiation())
-    if wavelength < 0.1:
-      args.append("-ED")
   if (nsa2_get_param('becke_accuracy') != "Normal"):
     args.append('-acc')
     if (nsa2_get_param('becke_accuracy') == "Low"):
