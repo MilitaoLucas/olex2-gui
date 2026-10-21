@@ -25,7 +25,7 @@ import test_utils
 # exactly that - and one missing test file should cost that file, not all of
 # them.
 _modules = ["testFileReaders", "testHistory", "testRunPrg", "testSkins",
-            "testNoSpherA2GUI", "testXCWBasis"]
+            "testNoSpherA2GUI", "testXCWBasis", "testTscResync"]
 
 
 def TestSuite():

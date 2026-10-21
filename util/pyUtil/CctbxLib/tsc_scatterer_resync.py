@@ -464,20 +464,19 @@ def _match_by_residue_triple(labels, model_labels, model_ids):
   refinement then describes the wrong model with nothing to say so, which is
   why a partial or ambiguous match is refused rather than patched up.
   """
+  # atoms outside a residue (solvent, ions) carry the same label on both sides
   index = {}
   for label, atom_id in zip(model_labels, model_ids):
-    triple = _residue_triple(label)
-    if triple is None:
+    key = _residue_triple(label) or label.upper()
+    if key in index:
       return None
-    if triple in index:
-      return None
-    index[triple] = atom_id
+    index[key] = atom_id
   out = []
   for label in labels:
-    triple = _residue_triple(label)
-    if triple is None or triple not in index:
+    key = _residue_triple(label) or label.upper()
+    if key not in index:
       return None
-    out.append(index[triple])
+    out.append(index[key])
   print("Table labels are in the other residue naming order; matched all %d "
         "on chain, residue and atom" % len(out))
   return out
