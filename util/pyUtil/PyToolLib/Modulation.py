@@ -141,8 +141,8 @@ def _table_path():
 
 def _main_box_rows(box, d_min):
   """The m = 0 indices NoSpherA2 generates from -hkl_min_max and -dmin (generate_hkl): every h with
-  d* <= 1/(0.999 d_min) one of whose images h R, or -h R, lies in the box; one of each +- pair, first non-zero
-  index positive like calculator.table_indices."""
+  d* <= 1/(0.999 d_min) one of whose images h R, or -h R, lies in the box (box None: the whole sphere); one of each
+  +- pair, first non-zero index positive like calculator.table_indices."""
   uc = uctbx.unit_cell(_floats(olx.xf.au.GetCell()))
   d_keep = d_min * (1 - 1e-3)
   lim = [int(p / d_keep + 1e-4) for p in uc.parameters()[:3]]
@@ -150,29 +150,31 @@ def _main_box_rows(box, d_min):
   hh = np.array(np.meshgrid(*[np.arange(-k, k + 1) for k in lim], indexing="ij")).reshape(3, -1).T
   ds = (hh ** 2).dot(g[:3]) + 2 * (hh[:, 0] * hh[:, 1] * g[3] + hh[:, 0] * hh[:, 2] * g[4] + hh[:, 1] * hh[:, 2] * g[5])
   hh = hh[(ds <= 1 / d_keep ** 2) & np.any(hh != 0, axis=1)]
-  lo, hi = np.array(box[0]), np.array(box[1])
-  inside = lambda k: np.all((k >= lo) & (k <= hi), axis=1)
-  keep = np.zeros(len(hh), dtype=bool)
-  for op in _basic_group().all_ops():
-    k = hh.dot(np.array(op.r().as_double()).reshape(3, 3))
-    keep |= inside(k) | inside(-k)
-  hh = hh[keep]
+  if box is not None:
+    lo, hi = np.array(box[0]), np.array(box[1])
+    inside = lambda k: np.all((k >= lo) & (k <= hi), axis=1)
+    keep = np.zeros(len(hh), dtype=bool)
+    for op in _basic_group().all_ops():
+      k = hh.dot(np.array(op.r().as_double()).reshape(3, 3))
+      keep |= inside(k) | inside(-k)
+    hh = hh[keep]
   first = hh[np.arange(len(hh)), np.argmax(hh != 0, axis=1)]
   return np.unique(hh * np.sign(first)[:, None], axis=0)
 
 
-def satellite_request(box=None, d_min=None):
+def satellite_request(box=None, d_min=None, ed=False):
   """(index list, scale, table path, rows, main rows) for one NoSpherA2 call that makes both tables of a modulated
   structure: S = h + m q of every measured reflection and its images, plus the m = 0 set NoSpherA2 would generate
-  from the measured box and d_min (so the ordinary table can be cut out of it). None when this is not a modulated
-  structure."""
+  from the measured box and d_min (so the ordinary table can be cut out of it); under -ED that set is the sphere to
+  d_min/2 - 0.001 with no box. None when this is not a modulated structure."""
   if smod is None or not hasattr(smod, "TABLE_SCALE") or not store.get("q"):
     return None
   h, m, _, _ = _data()
   n = smod.TABLE_SCALE
   rows = smod.calculator(h, m).table_indices(_ssg())
-  if box is not None and d_min is not None:
-    rows = np.unique(np.vstack([rows, n * _main_box_rows(box, d_min)]), axis=0)
+  if d_min is not None and (box is not None or ed):
+    main = _main_box_rows(None, d_min / 2.0 - 0.001) if ed else _main_box_rows(box, d_min)
+    rows = np.unique(np.vstack([rows, n * main]), axis=0)
   path = os.path.join(OV.FilePath(), OV.FileName() + "_sat.hkl")
   np.savetxt(path, rows, fmt="%d")
   return path, n, _table_path(), len(rows), int(np.all(rows % n == 0, axis=1).sum())
@@ -188,6 +190,18 @@ def _table():
     raise RuntimeError("NoSpherA2 is on but %s does not exist: update the NoSpherA2 table with q set, or switch "
                        "NoSpherA2 off for IAM" % os.path.basename(_table_path()))
   return smod.form_factor_table(_table_path())
+
+
+def _calc_kw():
+  """(table, calculator keywords): the NoSpherA2 table when on, electron form factors for an electron wavelength;
+  keywords only when needed, so X-ray work keeps running on a cctbx bundle without them."""
+  tab = _table()
+  kw = {} if tab is None else {"table": tab}
+  if OV.IsEDData():
+    if "electron" not in getattr(smod, "RADIATIONS", ()):
+      raise RuntimeError("this cctbx bundle cannot refine modulated electron diffraction data")
+    kw["radiation"] = "electron"
+  return tab, kw
 
 
 def _shelx_labels(labels, types):
@@ -239,7 +253,7 @@ def open_mscif(path):
   from smtbx.modulation import mscif
   path = os.path.abspath(path)
   fcf = os.path.splitext(path)[0] + ".fcf"
-  xs, _ = mscif.read(path, fcf if os.path.exists(fcf) else None)
+  xs, d = mscif.read(path, fcf if os.path.exists(fcf) else None)
   rename = _shelx_labels([a.label for a in xs.atoms], [a.scattering_type for a in xs.atoms])
   sc = flex.xray_scatterer()
   for at in xs.atoms:
@@ -255,8 +269,10 @@ def open_mscif(path):
   if os.path.exists(ins) and "average structure from msCIF" not in open(ins).readline():
     raise RuntimeError("%s exists and was not written by spy.modulation.open_mscif; not overwriting it" % ins)
   with open(ins, "w") as f:
+    # the wavelength on CELL tells Olex2 (OV.IsEDData) and the modulation refinement that the data are electrons
     for line in writer.generator(structure, title="average structure from msCIF %s" % os.path.basename(path),
-                                 full_matrix_least_squares_cycles=0, sort_scatterers=False):
+                                 wavelength=(d or {}).get("wavelength"), full_matrix_least_squares_cycles=0,
+                                 sort_scatterers=False):
       f.write(line)
   olex.m("@reap '%s'" % ins)
   renamed = ["%s -> %s" % kv for kv in rename.items() if kv[0] != kv[1]]
@@ -466,13 +482,13 @@ def refine(cycles=10, harmonics=1, n_x4=32):
   """
   h, m, i_obs, sig = _data()
   ids, xs = _structure(harmonics)
-  tab = _table()
-  kw = {} if tab is None else {"table": tab}
+  tab, kw = _calc_kw()
   if store.get("scale") is None:
     _, fc, _ = smod.calculator(h[m == 0], m[m == 0], int(n_x4), **kw).compute(xs)
     xs.scale = float(np.sum(i_obs[m == 0] * fc) / max(np.sum(fc * fc), 1e-30))
-  print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s"
-        % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path)))
+  print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s%s"
+        % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path),
+           " (electrons, kinematical)" if "radiation" in kw else ""))
   hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4), **kw)
   for i, at in zip(ids, xs.atoms):
     olx.xf.au.SetAtomCrd(i, *at.site)
@@ -566,8 +582,7 @@ def de_wolff(label="", axis="", width=1.0, kind="obs", follow=False, path="", sh
   from PIL import Image, ImageDraw
   h, m, i_obs, sig = _data()
   _, xs = _structure()
-  tab = _table()
-  kw = {} if tab is None else {"table": tab}
+  _, kw = _calc_kw()
   _, fc, _ = smod.calculator(h, m, **kw).compute(xs)
   xs.scale = float(np.sum(i_obs * fc) / max(np.sum(fc * fc), 1e-30))
   abc = np.array(xs.unit_cell.parameters()[:3])
@@ -670,6 +685,8 @@ def _panel():
     txt += " R1 " + " ".join(store.get("r1").replace("m=", "").split()[1:])
   if OV.GetParam("snum.NoSpherA2.use_aspherical"):
     txt += " f: %s" % ("NoSpherA2" if os.path.exists(_table_path()) else "<font color='red'>no .tscm</font>")
+  if OV.IsEDData():
+    txt += " ED"
   txt += (" <a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
           " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
           " <a href='spy.modulation.de_wolff()'>de Wolff</a>")

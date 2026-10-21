@@ -321,10 +321,10 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   return _cuqct_tsc(wfn_file, cif, given, hkl_file, save_k_pts, read_k_pts, parts, None)
 
 
-def _joint_request(box, d_min):
+def _joint_request(box, d_min, ed):
   try:
     import Modulation
-    return Modulation.satellite_request(box, d_min)
+    return Modulation.satellite_request(box, d_min, ed)
   except Exception as e:
     print("modulation: no satellite table (%s)" % e)
     return None
@@ -505,10 +505,10 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   if d_min is not None:
     args.append("-dmin")
     args.append(str(d_min))
-  # twinned and electron data keep the ordinary call: smtbx.modulation refines neither
+  # twinned data keep the ordinary call: smtbx.modulation does not refine them
   req = None
-  if joint is not None and not is_ED and "-twin" not in args and d_min is not None:
-    req = _joint_request((hkl_min, hkl_max), d_min)
+  if joint is not None and "-twin" not in args and d_min is not None:
+    req = _joint_request((hkl_min, hkl_max), d_min, is_ED)
   if req:
     joint["req"] = req
     # rows (h k l) / scale: the satellites S = h + m q and the m = 0 box, read as they are; columns by scatterer id
