@@ -14,6 +14,8 @@ smtbx.modulation.
   spy.modulation.de_wolff([label, axis])   de Wolff section x_i - x4 of the superspace Fourier map (PNG)
 A JANA msCIF can be loaded too: spy.modulation.load(file.cif) takes q, its superspace operators and the
 displacive waves from it, and the hklm data from its refln loop or <name>.fcf.
+With NoSpherA2 on, updating its table with q set also writes <name>.tscm, the form factors at every S = h + m q
+from the same wavefunction (rigid-atom: the aspherical density moves with its atom); refine and de_wolff use it.
 """
 import math
 import os
@@ -131,6 +133,34 @@ def _data():
   if not path or not os.path.exists(path):
     raise RuntimeError("hklm file %r not found: spy.modulation.load(file) first" % path)
   return read_hklm(path)[:4]
+
+
+def _table_path():
+  return os.path.join(OV.FilePath(), OV.FileName() + ".tscm")
+
+
+def satellite_request():
+  """(index list, scale, table path, rows) for NoSpherA2's table at the satellites S = h + m q, None when this is
+  not a modulated structure. NoSpherA2 asks after writing the m = 0 table and runs the same wavefunction on it."""
+  if smod is None or not hasattr(smod, "TABLE_SCALE") or not store.get("q"):
+    return None
+  h, m, _, _ = _data()
+  rows = smod.calculator(h, m).table_indices(_ssg())
+  path = os.path.join(OV.FilePath(), OV.FileName() + "_sat.hkl")
+  np.savetxt(path, rows, fmt="%d")
+  return path, smod.TABLE_SCALE, _table_path(), len(rows)
+
+
+def _table():
+  """The NoSpherA2 satellite table when aspherical form factors are switched on, else None (IAM)."""
+  if not OV.GetParam("snum.NoSpherA2.use_aspherical"):
+    return None
+  if not hasattr(smod, "form_factor_table"):
+    raise RuntimeError("this cctbx bundle cannot read NoSpherA2 satellite tables; switch NoSpherA2 off for IAM")
+  if not os.path.exists(_table_path()):
+    raise RuntimeError("NoSpherA2 is on but %s does not exist: update the NoSpherA2 table with q set, or switch "
+                       "NoSpherA2 off for IAM" % os.path.basename(_table_path()))
+  return smod.form_factor_table(_table_path())
 
 
 def _shelx_labels(labels, types):
@@ -377,9 +407,11 @@ def _atoms(uc):
       v = _floats(w)
       nh = int(v[0])
       a, b = np.array(v[1:1 + 3 * nh]), np.array(v[1 + 3 * nh:1 + 6 * nh])
-    out.append((i, smod.modulated_atom(label, olx.xf.au.GetAtomType(i), _floats(olx.xf.au.GetAtomCrd(i)),
-                                      float(olx.xf.au.GetAtomUiso(i)), float(olx.xf.au.GetAtomOccu(i)),
-                                      nh, a, b, u_star=_u_star(i, uc))))
+    at = smod.modulated_atom(label, olx.xf.au.GetAtomType(i), _floats(olx.xf.au.GetAtomCrd(i)),
+                             float(olx.xf.au.GetAtomUiso(i)), float(olx.xf.au.GetAtomOccu(i)),
+                             nh, a, b, u_star=_u_star(i, uc))
+    at.part = int(olx.xf.au.GetAtomPart(i))   # picks between scatterer ids on one site in a NoSpherA2 table
+    out.append((i, at))
   return out
 
 
@@ -407,12 +439,14 @@ def refine(cycles=10, harmonics=1, n_x4=32):
   """
   h, m, i_obs, sig = _data()
   ids, xs = _structure(harmonics)
+  tab = _table()
+  kw = {} if tab is None else {"table": tab}
   if store.get("scale") is None:
-    _, fc, _ = smod.calculator(h[m == 0], m[m == 0], int(n_x4)).compute(xs)
+    _, fc, _ = smod.calculator(h[m == 0], m[m == 0], int(n_x4), **kw).compute(xs)
     xs.scale = float(np.sum(i_obs[m == 0] * fc) / max(np.sum(fc * fc), 1e-30))
-  print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s"
-        % (len(ids), int(harmonics), len(m), xs.ssg.label()))
-  hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4))
+  print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s"
+        % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path)))
+  hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4), **kw)
   for i, at in zip(ids, xs.atoms):
     olx.xf.au.SetAtomCrd(i, *at.site)
     if at.u_star is None:
@@ -505,7 +539,9 @@ def de_wolff(label="", axis="", width=1.0, kind="obs", follow=False, path="", sh
   from PIL import Image, ImageDraw
   h, m, i_obs, sig = _data()
   _, xs = _structure()
-  _, fc, _ = smod.calculator(h, m).compute(xs)
+  tab = _table()
+  kw = {} if tab is None else {"table": tab}
+  _, fc, _ = smod.calculator(h, m, **kw).compute(xs)
   xs.scale = float(np.sum(i_obs * fc) / max(np.sum(fc * fc), 1e-30))
   abc = np.array(xs.unit_cell.parameters()[:3])
   amp = {at.label: np.sqrt((at.a ** 2 + at.b ** 2).sum(axis=0)) * abc for at in xs.atoms}
@@ -513,7 +549,7 @@ def de_wolff(label="", axis="", width=1.0, kind="obs", follow=False, path="", sh
   label = label or max(heavy, key=lambda k: amp[k].max())
   ax = "xyz".index(axis) if axis else int(np.argmax(amp[label]))
   follow = follow in (True, "True", "true", "1")
-  s, x4, rho, curve = smod.de_wolff_section(xs, h, m, i_obs, label, ax, float(width), kind=kind, follow=follow)
+  s, x4, rho, curve = smod.de_wolff_section(xs, h, m, i_obs, label, ax, float(width), kind=kind, follow=follow, **kw)
   lo, hi = (np.percentile(rho, 1), rho.max()) if kind != "diff" else (-np.abs(rho).max(), np.abs(rho).max())
   v = np.clip((rho - lo) / max(hi - lo, 1e-30), 0, 1)
   if kind == "diff":   # blue - white - red
@@ -605,6 +641,8 @@ def _panel():
     pass
   if store.get("r1"):
     txt += " R1 " + " ".join(store.get("r1").replace("m=", "").split()[1:])
+  if OV.GetParam("snum.NoSpherA2.use_aspherical"):
+    txt += " f: %s" % ("NoSpherA2" if os.path.exists(_table_path()) else "<font color='red'>no .tscm</font>")
   txt += (" <a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
           " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
           " <a href='spy.modulation.de_wolff()'>de Wolff</a>")
