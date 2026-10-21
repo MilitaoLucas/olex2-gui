@@ -313,7 +313,7 @@ class RunPrg(ArgumentParser):
       if os.path.exists(f[0]) and not os.path.exists(f[1]):
         if f[0].lower().endswith(".hklm"):
           # external programs read three indices: hand them the main reflections
-          from smtbx.modulation import write_main_hkl
+          from hklm_util import write_main_hkl
           write_main_hkl(f[0], f[1])
         else:
           shutil.copyfile(f[0], f[1])

@@ -24,6 +24,7 @@ import olex
 import olx
 from olexFunctions import OV
 from misc.ins_header import OlxInsHeaderScope
+import hklm_util
 
 from cctbx import adptbx, sgtbx, uctbx
 try:
@@ -106,7 +107,7 @@ def read_hklm(path):
         q = np.array([first("_cell_wave_vector_" + a) for a in "xyz"])
       return (h, col(mkey).astype(int), col("_refln_F_squared_meas"), col("_refln_F_squared_sigma"), q)
     raise RuntimeError("no refln loop in %s" % path)
-  return smod.read_hklm(path) + (None,)
+  return hklm_util.read_hklm(path) + (None,)
 
 
 _MARK = "# hklm written by spy.modulation"
@@ -233,11 +234,23 @@ def load(path, qx=None, qy=None, qz=None, rename=None):
     raise RuntimeError("give q: spy.modulation.load(file, qx, qy, qz)")
   store.set("q", " ".join("%.6f" % v for v in q))
   store.set("hklm", hklm)
-  OV.HKLSrc(hklm)
+  src = hklm
+  if not native_hklm():
+    src = os.path.join(OV.FilePath(), OV.FileName() + "_m0.hkl")
+    hklm_util.write_main_hkl(hklm, src)
+    print("modulation: this Olex2 build cannot read .hklm, the HKL source is the main reflections in %s" % src)
+  OV.HKLSrc(src)
   counts = ", ".join("|m|=%d: %d" % (k, np.sum(np.abs(m) == k)) for k in sorted(set(np.abs(m))))
   print("modulation: %d reflections (%s), q = (%s); HKL source %s"
-        % (len(m), counts, " ".join("%.4f" % v for v in q), hklm))
+        % (len(m), counts, " ".join("%.4f" % v for v in q), src))
   _refresh()
+
+
+def native_hklm():
+  """True when this Olex2 reads .hklm itself (xlib from 21 Oct 2026, olx.HKLM exists). An older build must never see
+  one as HKL source: HKLSrc() renames a file it does not recognise to .hkl.fcf and THklFile reads a 4I4,2F8 line as
+  free-format h k l I sigma batch."""
+  return hasattr(olx, "HKLM")
 
 
 def set_q(qx=None, qy=None, qz=None):
@@ -268,7 +281,7 @@ def satellite_stats():
          olx.xf.au.GetCellSymm("hall"))
   if _stats_cache.get("key") != key:
     try:
-      h, m, i_obs, sig = smod.read_hklm(src)
+      h, m, i_obs, sig = hklm_util.read_hklm(src)
       value = smod.reflection_statistics(_ssg(), uctbx.unit_cell(_floats(olx.xf.au.GetCell())), h, m, i_obs, sig)
     except smod.IncompatibleQ as e:
       print("modulation: no satellite statistics - %s" % e)
@@ -559,7 +572,15 @@ def stop():
 
 
 def panel(html=True):
-  """The q line under the HOS, next to the TWIN law: q, the superspace group, R1 per |m| and the actions."""
+  """The q line under the HOS, next to the TWIN law: q, the superspace group, R1 per |m| and the actions. Never
+  raises: it is evaluated on every redraw of snum-info.htm."""
+  try:
+    return _panel()
+  except Exception:
+    return ""
+
+
+def _panel():
   q = store.get("q")
   green = OV.GetParam('gui.green_text').hexadecimal
   if not q:
@@ -597,5 +618,19 @@ def _refresh():
     pass
 
 
-for _f in (load, open_mscif, set_q, stats, candidates, choose, refine, wiggle, stop, movie, panel, de_wolff):
+def _needs_smtbx(f):
+  """A clear message instead of an AttributeError on None when this Olex2's cctbx bundle predates smtbx.modulation."""
+  def g(*args, **kwds):
+    if smod is None:
+      print("modulation: spy.modulation.%s needs smtbx.modulation (cctbx from 21 Oct 2026); this Olex2's cctbx "
+            "bundle is older" % f.__name__)
+      return None
+    return f(*args, **kwds)
+  g.__name__, g.__doc__ = f.__name__, f.__doc__
+  return g
+
+
+for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff):
+  olex.registerFunction(_needs_smtbx(_f), False, "modulation")
+for _f in (set_q, stop, panel):
   olex.registerFunction(_f, False, "modulation")

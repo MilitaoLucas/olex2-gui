@@ -4725,9 +4725,7 @@ class HealthOfStructure():
   def satellite_hos_row(self):
     """For an .hklm source a second row of boxes for the satellites (the row above then holds m = 0): d_min,
     I/sigma, Rint and completeness, graded like their main-reflection counterparts (spy.modulation.stats prints
-    them per |m|)."""
-    if not OV.HKLSrc().lower().endswith(".hklm"):
-      return ""
+    them per |m|); None from satellite_stats for every structure without hklm data and q."""
     try:
       import Modulation
       st = Modulation.satellite_stats()

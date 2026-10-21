@@ -127,7 +127,7 @@ def read_hkl_arrays(cs, f_hklf_code, reflection_file):
   if reflection_file.lower().endswith(".hklm"):
     # (3+1)D data: the 3D path takes the main reflections (m = 0), as Olex2's THklFile does
     import tempfile
-    from smtbx.modulation import write_main_hkl
+    from hklm_util import write_main_hkl   # numpy only: works with any cctbx bundle
     fd, tmp = tempfile.mkstemp(suffix=".hkl")
     os.close(fd)
     try:

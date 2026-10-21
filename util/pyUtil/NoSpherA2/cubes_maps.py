@@ -1807,7 +1807,7 @@ def Fcalc(non_spherical:bool = False, zero_adp:bool = True,
       if os.path.exists(hkl_src):
         if hkl_src.lower().endswith(".hklm"):
           # NoSpherA2 reads three indices: the main reflections of (3+1)D data
-          from smtbx.modulation import write_main_hkl
+          from hklm_util import write_main_hkl
           main = os.path.join(folder, os.path.splitext(os.path.basename(hkl_src))[0] + "_main.hkl")
           write_main_hkl(hkl_src, main)
           hkl_src = main
