@@ -92,6 +92,17 @@ $+
     "onuncheck=spy.nsa2_set_param('Property_ESP_surface','False')"
     )
   $-
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=Fukui",
+    "label=Fukui",
+    "checked=spy.nsa2_get_param('Property_Fukui')",
+    "oncheck=spy.nsa2_set_param('Property_Fukui','True')",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+    "td1=<td align='center'>",
+    "onuncheck=spy.nsa2_set_param('Property_Fukui','False')"
+    )
+  $-
  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>

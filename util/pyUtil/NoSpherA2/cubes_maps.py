@@ -335,9 +335,10 @@ def calculate_cubes():
   ATOM = nsa2_get_param('Property_ATOM')
   DEF = nsa2_get_param('Property_DEF')
   all_MOs = nsa2_get_param('Property_all_MOs')
-  if args[0] == "-xyz" and (Elf or RDG or MO or ATOM or DEF):  # orbital properties need a wavefunction
-    print("SALTED density: ELF, RDG, MOs, atomic and static deformation densities need a wavefunction, skipped")
-    Elf = RDG = MO = ATOM = DEF = False
+  Fukui = nsa2_get_param('Property_Fukui')
+  if args[0] == "-xyz" and (Elf or RDG or MO or ATOM or DEF or Fukui):  # orbital properties need a wavefunction
+    print("SALTED density: ELF, RDG, MOs, Fukui functions, atomic and static deformation densities need a wavefunction, skipped")
+    Elf = RDG = MO = ATOM = DEF = Fukui = False
   if Lap:
     args.append("-lap")
   if Eli:
@@ -356,6 +357,19 @@ def calculate_cubes():
     args.append("-HDEF")
   if DEF:
     args.append("-def")
+  if Fukui:
+    args.append("-fukui")
+    # The Fukui functions need the LUMO, so the wavefunction file has to carry
+    # virtual orbitals. A .gbw, .molden or .fchk does; a .wfx or .wfn written
+    # with only the occupied orbitals does not, and NoSpherA2 will then report
+    # that it found no frontier pair and skip. Warn here rather than let that
+    # look like a silent failure of the checkbox.
+    wfn_path = args[1]
+    if wfn_path.endswith((".wfn", ".wfx", ".ffn")):
+      print(f"Note: Fukui functions need virtual orbitals. '{os.path.basename(wfn_path)}' "
+            "may only store the occupied ones - if no Fukui maps appear, check "
+            "NoSpherA2_cube.log and re-run the wavefunction job so a .gbw or "
+            ".molden is available.")
   if MO:
     args.append("-MO")
     if all_MOs:
@@ -741,6 +755,14 @@ def get_map_types():
   if os.path.isfile(_p(name + "_rdg.cube", d)) and os.path.isfile(_p(name + "_signed_rho.cube", d)):
     list += "NCI;"
   # "Rho + ESP" / "Rho + ELI" still work via map.type, but are off the menu: the ESP and Hirshfeld surfaces replace them
+  if os.path.isfile(os.path.join(folder, name + "_fukui_plus.cube")):
+    list += "Fukui f+;"
+  if os.path.isfile(os.path.join(folder, name + "_fukui_minus.cube")):
+    list += "Fukui f-;"
+  if os.path.isfile(os.path.join(folder, name + "_fukui_zero.cube")):
+    list += "Fukui f0;"
+  if os.path.isfile(os.path.join(folder, name + "_dual_descriptor.cube")):
+    list += "Dual Descriptor;"
   from utilities import get_nmo, get_ncen
   nmo = get_nmo()
   if nmo != -1:
@@ -814,6 +836,18 @@ def change_map():
       nsa2_set_param('map.scale_min', "-0.05" if Type == "Rho + ESP" else "1.0")
       nsa2_set_param('map.scale_max', "0.05" if Type == "Rho + ESP" else "2.0")
     plot_cube(cubes[0], cubes[1], box=True)
+  elif Type == "Fukui f+":
+    plot_cube(name+"_fukui_plus.cube",None)
+  elif Type == "Fukui f-":
+    plot_cube(name+"_fukui_minus.cube",None)
+  elif Type == "Fukui f0":
+    plot_cube(name+"_fukui_zero.cube",None)
+  elif Type == "Dual Descriptor":
+    # Signed field: positive marks electrophilic regions (open to nucleophilic
+    # attack), negative nucleophilic ones. A diverging blue-white-red scale is
+    # what makes that readable, so force it the way NCI/Rho+ESP force theirs.
+    nsa2_set_param('map.scale_name', "BWR")
+    plot_cube(name+"_dual_descriptor.cube",None)
   elif Type == "fcfmc" or Type == "diff" or Type == "tomc" or Type == "fobs" or Type == "fcalc":
     OV.SetVar('map_slider_scale',-50)
     nsa2_set_param('snum.map.type',Type)
@@ -946,10 +980,28 @@ def plot_cube(name, color_cube, box=False):
     OV.SetVar('map_min',0)
     OV.SetVar('map_max',50)
     OV.SetVar('map_slider_scale', 100)
+  elif Type in ("Fukui f+", "Fukui f-", "Fukui f0", "Dual Descriptor"):
+    OV.SetVar('map_min',0)
+    OV.SetVar('map_max',50)
+    OV.SetVar('map_slider_scale',100)
   mi = float(data.min())
   ma = float(data.max())
   iso = DEFAULT_ISO.get(Type, (abs(mi) + abs(ma)) * 2 / 3)
-  nsa2_set_param('snum.xgrid.scale',"{:.3f}".format(iso))
+  if Type in ("Fukui f+", "Fukui f-", "Fukui f0", "Dual Descriptor"):
+    # The generic (|min|+|max|)*2/3 above assumes a roughly symmetric field, as
+    # an MO amplitude is. These are not.
+    #   f+, f-, f0 are non-negative, so min is 0 and the formula gives 2/3 of the
+    #   maximum - a surface right at the very top of the distribution, showing
+    #   almost nothing.
+    #   The dual descriptor is signed but strongly asymmetric: f- routinely peaks
+    #   several times higher than f+ because the LUMO is the more diffuse orbital
+    #   (on sucrose, -0.076 against +0.014). The formula then lands ABOVE the
+    #   positive maximum, so the electrophilic lobe silently never renders at all.
+    # Scale to the smaller of the two extremes so both signs are present.
+    extremes = [abs(v) for v in (mi, ma) if abs(v) > 0]
+    if extremes:
+      iso = 0.3 * min(extremes)
+  nsa2_set_param('snum.xgrid.scale',"{:.4f}".format(iso))
   if OV.HasGUI():
     olex_xgrid.SetMinMax(mi, ma)
     olex_xgrid.SetSurfaceScale(iso)
