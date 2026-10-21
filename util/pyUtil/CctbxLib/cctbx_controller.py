@@ -124,6 +124,17 @@ def read_hkl_arrays(cs, f_hklf_code, reflection_file):
       reflection_files=[reflection_file_reader.any_reflection_file(
         'hklf%s=%s' % (f_hklf_code, path), strict=False)])
     return server.get_miller_arrays(None)
+  if reflection_file.lower().endswith(".hklm"):
+    # (3+1)D data: the 3D path takes the main reflections (m = 0), as Olex2's THklFile does
+    import tempfile
+    from smtbx.modulation import write_main_hkl
+    fd, tmp = tempfile.mkstemp(suffix=".hkl")
+    os.close(fd)
+    try:
+      write_main_hkl(reflection_file, tmp)
+      return read(tmp)
+    finally:
+      os.remove(tmp)
   arrays = None
   try:
     arrays = read(reflection_file)

@@ -105,6 +105,9 @@ def do_init():
   stopwatch.start("import ProteinRestraints")
   import ProteinRestraints # import needed to register functions to olex
 
+  stopwatch.start("import Modulation")
+  import Modulation # registers spy.modulation.*
+
   stopwatch.start("from olexFunctions import OV")
   from olexFunctions import OV
   initpy.OV = OV

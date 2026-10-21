@@ -4710,6 +4710,8 @@ class HealthOfStructure():
 '''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
+    if self.scope == "hkl":
+      txt += self.satellite_hos_row()
     if self.scope == "hkl" and 'Completeness' in self.hkl_stats:
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
@@ -4719,6 +4721,35 @@ class HealthOfStructure():
     self.hos_text += txt
     OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())
 
+
+  def satellite_hos_row(self):
+    """For an .hklm source a second row of boxes for the satellites (the row above then holds m = 0): d_min,
+    I/sigma, Rint and completeness, graded like their main-reflection counterparts (spy.modulation.stats prints
+    them per |m|)."""
+    if not OV.HKLSrc().lower().endswith(".hklm"):
+      return ""
+    try:
+      import Modulation
+      st = Modulation.satellite_stats()
+    except Exception as err:
+      print("satellite statistics: %s" % err)
+      st = None
+    if not st or "sat" not in st:
+      return ""
+    s = st["sat"]
+    mmax = max(k for k in st if k != "sat")
+    boxes = (("SatMinD", "MinD", "Sat. |m|<=%d d" % mmax, s["d_min"], "%.3f" % s["d_min"]),
+             ("SatIOverSigma", "MeanIOverSigma", "Sat. I/sigma(I)", s["i_over_sigma"], "%.1f" % s["i_over_sigma"]),
+             ("SatRint", "Rint", "Sat. Rint", s["r_int"],
+              "n/a" if s["r_int"] is None else "%.2f%%" % (100 * s["r_int"])),
+             ("SatCompleteness", "Completeness", "Sat. complete", s["completeness"],
+              "n/a" if s["completeness"] is None else "%.1f" % (100 * s["completeness"])))
+    txt = "<table width='100%%' cellpadding='0' cellspacing='0'><tr>"
+    for item, graded_as, display, raw, shown in boxes:
+      colour = self.grey if raw is None else self.get_bg_colour(graded_as, raw)
+      txt += self.make_hos_images(item=item, colour=colour, display=display, value_raw=raw if raw is not None else "n/a",
+                                  value_display=shown, n=len(boxes))
+    return txt + "</tr></table>"
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
     width = self.width

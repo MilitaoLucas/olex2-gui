@@ -30,13 +30,14 @@ class HistoryFiles(object):
     self.res = None
     self.cif_od = None
     self.cif_od_ext = ".cif_od"
+    self.hkl_ext = ".hkl"
     self.files = []
     for f in files:
       if not os.path.exists(f):
         continue
       ext = os.path.splitext(f)[1].lower()
-      if ext ==".hkl":
-        self.hkl = f
+      if ext in (".hkl", ".hklm"):   # .hklm: (3+1)D data with an m index
+        self.hkl, self.hkl_ext = f, ext
       elif f.lower().endswith(tuple(e.lower() for e in manu_cif_exts)):
         self.cif_od = f
         self.cif_od_ext = [e for e in manu_cif_exts if f.lower().endswith(e.lower())][0]
@@ -172,9 +173,10 @@ class History(ArgumentParser):
       filename = OV.FileName()
       with zipfile.ZipFile(name, 'w') as zout:
         res = decompressFile(node.res).decode("utf-8").split("\n")
-        OV.update_HklSrc(res, filename+".hkl")
+        hkl_ext = getattr(node, "hkl_ext", ".hkl")
+        OV.update_HklSrc(res, filename+hkl_ext)
         zout.writestr(filename+".res", "\n".join(res), zipfile.ZIP_DEFLATED)
-        zout.writestr(filename+".hkl", decompressFile(tree.getHklData(node)), zipfile.ZIP_DEFLATED)
+        zout.writestr(filename+hkl_ext, decompressFile(tree.getHklData(node)), zipfile.ZIP_DEFLATED)
         try:
           if node.dyn is not None:
             zout.writestr(filename+"_dyn_.cif_cap", decompressFile(tree.getDynData(node)), zipfile.ZIP_DEFLATED)
@@ -197,11 +199,12 @@ class History(ArgumentParser):
       filename = OV.FileName()
       filepath = OV.FilePath()
       ffilename = os.path.join(filepath, filename)
+      hkl_ext = ".hklm" if OV.HKLSrc().lower().endswith(".hklm") else ".hkl"
       with zipfile.ZipFile(name, 'w') as zout:
         res_fn = ffilename + ".res"
         if os.path.exists(res_fn):
           res = [l.rstrip('\r\n') for l in open(res_fn, "r").readlines()]
-          OV.update_HklSrc(res, filename+".hkl")
+          OV.update_HklSrc(res, filename+hkl_ext)
           zout.writestr(filename+".res", '\n'.join(res), zipfile.ZIP_DEFLATED)
         try:
           zout.writestr("olex2/"+filename+".phil", get_snum_data(), zipfile.ZIP_DEFLATED)
@@ -212,7 +215,7 @@ class History(ArgumentParser):
           zout.write(metacif, "olex2/"+filename+".metacif", zipfile.ZIP_DEFLATED)
         hklSrc = OV.HKLSrc()
         if os.path.exists(hklSrc):
-          zout.write(hklSrc, filename + ".hkl", zipfile.ZIP_DEFLATED)
+          zout.write(hklSrc, filename + hkl_ext, zipfile.ZIP_DEFLATED)
         for e in file_exts:
           fn = ffilename + e
           if os.path.exists(fn):
@@ -263,6 +266,11 @@ class History(ArgumentParser):
     if not tree.isTheSameHklDigest(node, hklSrc):
       olx.Echo("Current HKL does not match the one from history - updating!", m='warning')
       hklFileData = decompressFile(tree.getHklData(node))
+      node_ext = getattr(node, "hkl_ext", ".hkl")
+      if os.path.splitext(hklSrc)[1].lower() != node_ext:
+        # 3 vs 4 indices: never write one format over a file of the other
+        hklSrc = os.path.splitext(hklSrc)[0] + node_ext
+        OV.HKLSrc(hklSrc)
       with open(hklSrc, 'wb') as wFile:
         wFile.write(hklFileData)
       try:
@@ -400,9 +408,10 @@ class Node(object):
     self.dyn = None
     self.cif_od = None
     self.cif_od_ext = ".cif_od"
+    self.hkl_ext = ".hkl"
 
     if files:
-      if files.hkl:     self.hkl = digestPath(files.hkl)
+      if files.hkl:     self.hkl, self.hkl_ext = digestPath(files.hkl), files.hkl_ext
       if files.dyn:     self.dyn = digestPath(files.dyn)
       if files.cif_od:  self.cif_od, self.cif_od_ext = digestPath(files.cif_od), files.cif_od_ext
 

@@ -286,6 +286,8 @@ class RunPrg(ArgumentParser):
     self.hkl_src = OV.HKLSrc()
     if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
+      if not os.path.exists(self.hkl_src) and os.path.exists(self.hkl_src + 'm'):
+        self.hkl_src += 'm'   # (3+1)D data only: <name>.hklm
       if os.path.exists(self.hkl_src):
         OV.HKLSrc(self.hkl_src)
         print("HKL Source Filename reset to default file!")
@@ -309,7 +311,12 @@ class RunPrg(ArgumentParser):
       os.path.join(self.tempPath, self.curr_file) + ".fab"))
     for f in files:
       if os.path.exists(f[0]) and not os.path.exists(f[1]):
-        shutil.copyfile(f[0], f[1])
+        if f[0].lower().endswith(".hklm"):
+          # external programs read three indices: hand them the main reflections
+          from smtbx.modulation import write_main_hkl
+          write_main_hkl(f[0], f[1])
+        else:
+          shutil.copyfile(f[0], f[1])
 
   def runAfterProcess(self):
     #olx.ShowWindow('info', True)
