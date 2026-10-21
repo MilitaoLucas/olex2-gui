@@ -26,6 +26,17 @@ import numpy as np
 import io
 import locale
 
+def ri_fit_args():
+  # NoSpherA2 knows "auto_aux" (ORCA AutoAux with its own beta table), not "auto" plus a beta
+  basis = nsa2_get_param('auxiliary_basis')
+  if basis in (None, "", "auto"):
+    basis = "auto_aux"
+  args = ["-RI_FIT", basis]
+  restraint = nsa2_get_param('RI_restraint')
+  if restraint and restraint != "Off":
+    args += ["-multipole_moments", restraint, str(nsa2_get_param('RI_restraint_lmax'))]
+  return args
+
 def open(file, mode="r", *args, **kwargs):
   """open() that does not depend on the machine's code page.
 
@@ -356,11 +367,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
     args.append(str(mode))
   if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
     if is_orca_new():
-      auxiliary_basis = nsa2_get_param('auxiliary_basis')
-      args.append("-RI_FIT")
-      args.append(auxiliary_basis)
-      if auxiliary_basis == "auto" or auxiliary_basis == "auto_aux":
-        args.append(nsa2_get_param('auxiliary_basis_beta'))
+      args += ri_fit_args()
       mem = float(nsa2_get_param('mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))

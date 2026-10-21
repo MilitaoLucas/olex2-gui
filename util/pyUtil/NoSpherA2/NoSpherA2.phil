@@ -8,7 +8,7 @@ snum{
       .type = str
     cmd = ""
       .type = str
-    auxilary_basis = "combo_basis_fit"
+    auxiliary_basis = "combo_basis_fit"
       .type = str
     basis_name = "def2-SVP"
       .type = str
@@ -376,6 +376,10 @@ snum{
       .type = int
     NoSpherA2_Partition = '*Hirshfeld' 'RI-Fit' 'TFVC' 'Becke' 'MBIS' 'EMBIS'
       .type = choice
+    RI_restraint = '*Off' 'Hirshfeld' 'TFVC' 'MBIS' 'EMBIS' 'Nuclear' 'Mulliken' 'Sanderson'
+      .type = choice
+    RI_restraint_lmax = 0
+      .type = int
     NoSpherA2_SF = True
       .type = bool
     NoSpherA2_debug = False

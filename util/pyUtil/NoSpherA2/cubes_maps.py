@@ -1769,11 +1769,8 @@ def Fcalc(non_spherical:bool = False, zero_adp:bool = True,
     
     if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
       if is_orca_new():
-        auxiliary_basis = nsa2_get_param('auxiliary_basis')
-        args.append("-ri_fit")
-        args.append(auxiliary_basis)
-        if auxiliary_basis == "auto" or auxiliary_basis == "auto_aux":
-          args.append(nsa2_get_param('auxiliary_basis_beta'))
+        from utilities import ri_fit_args
+        args += ri_fit_args()
         mem = float(nsa2_get_param('mem')) * 1000 #Mem in MB
         args.append("-mem")
         args.append(str(mem))

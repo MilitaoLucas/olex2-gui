@@ -304,17 +304,30 @@ def partitioning_scheme_line():
                           "spy.nsa2_get_param('auxiliary_basis')",
                           "spy.nsa2_set_param('auxiliary_basis', html.GetValue('~name~')) >> html.Update()",
                           width_label=18, width_combo=25)
-      if nsa2_get_param('auxiliary_basis') == "auto":
-          temp += labeled_text("NoSpherA2_custom_aux_basis@refine",
-                              "Beta",
-                              "spy.nsa2_get_param('auxiliary_basis_beta')",
-                              "spy.nsa2_set_param('auxiliary_basis_beta', html.GetValue('~name~'))",
-                              width_label=8, width_textbox=10)
-      else:
-        temp += "<td width='18%'></td>"
+      temp += "<td width='18%'></td>"
   else:
       temp += "<td width='43%'></td>"
   temp += end_line()
+  if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
+      restraint = nsa2_get_param('RI_restraint')
+      temp += begin_new_line("NoSpherA2_Options_RIFit", "2") + \
+              labeled_combo("NoSpherA2_RI_restraint@refine",
+                            "Restrain Density",
+                            "'Off;Hirshfeld;TFVC;MBIS;EMBIS;Nuclear;Mulliken;Sanderson'",
+                            "spy.nsa2_get_param('RI_restraint')",
+                            "spy.nsa2_set_param('RI_restraint', html.GetValue('~name~')) >> html.Update()",
+                            width_label=24, width_combo=16)
+      # Nuclear, Mulliken and Sanderson only restrain charges, NoSpherA2 ignores the order for them
+      if restraint in ("Hirshfeld", "TFVC", "MBIS", "EMBIS"):
+          temp += labeled_spin("NoSpherA2_RI_restraint_lmax@refine",
+                               "Max Multipole (l)",
+                               "spy.nsa2_get_param('RI_restraint_lmax')",
+                               "spy.nsa2_set_param('RI_restraint_lmax', html.GetValue('~name~'))",
+                               width_label=22, width_spinbox=8, min_value=0, max_value=8)
+          temp += "<td width='30%'></td>"
+      else:
+          temp += "<td width='60%'></td>"
+      temp += end_line()
   return temp
 
 def WSL_distro():
@@ -526,6 +539,13 @@ def make_SALTED_GUI():
     f"<td width='5%' align='left'>{htmlTools.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.Update()', 'on')}</td>" + \
   cpu_combo() + \
   end_line()
+  # H Aniso, No Afix, iterative and Update/Max cycles last, so the toggled control has room
+  t += begin_new_line("NoSpherA2_Options_2") + h_aniso_checkbox() + no_afix_checkbox() + iterative_checkbox()
+  if nsa2_get_param('full_HAR') == False:
+    t += update_tsc_button()
+  else:
+    t += cycles_spin()
+  t += end_line()
   return t
 
 def make_Thakkar_GUI():
