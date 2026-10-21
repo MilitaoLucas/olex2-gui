@@ -4023,29 +4023,138 @@ def _report_table_fingerprint(table_file_name):
           % (name, recorded.get('HKL'), now.get('hkl')))
 
 
+def _wanted_indices(crystal_symmetry):
+  """ The Miller indices any use of the table could ask for, or None to load all.
+
+  A .tscb is generated over the index BOX of the reflection file so that SHEL and
+  OMIT cannot invalidate it, and a box holds far more than the measurement inside
+  it -- 958,467 rows against 72,347 measured reflections for 1IEE.
+
+  What is reachable is NOT those 72,347. resolve_rows() in table_based.h walks
+  h * R for every rotation of the space group, so the rows a refinement can ask
+  for are the full ORBIT of each measured reflection, plus Friedel mates. For
+  1IEE in P 4(3) 2(1) 2 that is 551,943 rows of 958,467, and the table drops from
+  47.98 GB resident to 27.69 GB. Filtering to +-h alone keeps 7.5% and looks far
+  better, but it drops rows the refinement needs and the first cycle asserts.
+
+  The orbit expansion is done inside the reader, which has the space group; this
+  hands over the measured indices only.
+
+  This keys on the whole reflection FILE, not on the reflections a particular
+  refinement is using. SHEL and OMIT only ever REMOVE reflections, so anything
+  they leave is already in here and releasing a SHEL later cannot ask for a row
+  that was dropped; maps and statistics work from the same data.
+  """
+  # ON for a table NoSpherA2 generated, which is the case this exists for: those
+  # are written over the index BOX of the reflection file so that SHEL and OMIT
+  # cannot invalidate them, and a box holds far more than the measurement inside
+  # it. A table from anywhere else may have been built to fit its own reflection
+  # list exactly, in which case there is nothing to drop and no reason to risk it.
+  #
+  # OLEX2_TSC_NO_FILTER forces it off, OLEX2_TSC_FILTER forces it on, for
+  # comparing the two readers with a single binary.
+  if os.environ.get('OLEX2_TSC_NO_FILTER'):
+    return None
+  if not os.environ.get('OLEX2_TSC_FILTER'):
+    from variableFunctions import nsa2_get_param
+    source = str(nsa2_get_param('source', '') or '').strip()
+    if not source:
+      # not a NoSpherA2 table: leave it alone
+      return None
+
+  # TWINNING STANDS THE FILTER DOWN.
+  #
+  # A twinned refinement computes Fc once per twin component, and each component
+  # carries its OWN Miller index -- the twin-law image of the measured one, see
+  # cctbx::xray::observations::index_twin_component. That index goes through
+  # get_full() into resolve_rows(), which then needs its whole space-group orbit
+  # as well. None of those indices are in the reflection file, so keeping only
+  # what the file lists would drop them and the first cycle would assert exactly
+  # as an unclosed orbit does.
+  #
+  # Expanding over the twin laws too is the right fix and belongs beside the
+  # orbit expansion in the reader. Until that exists and has been tested against
+  # a twinned structure, a twinned refinement loads every row, as it always did.
+  try:
+    import olexex
+    model = olexex.OlexRefinementModel().model
+    if model.get('twin') is not None:
+      print("Twinned refinement: loading the whole table, the row filter does"
+            " not know the twin-law images yet.")
+      return None
+  except Exception:
+    # cannot tell -- assume twinned, which is the safe direction
+    return None
+  try:
+    from cctbx.array_family import flex
+    hkl_src = olx.HKLSrc()
+    if not hkl_src or not os.path.exists(hkl_src):
+      return None
+    wanted = flex.miller_index()
+    with open(hkl_src) as f:
+      for line in f:
+        if len(line) < 12:
+          continue
+        try:
+          h = (int(line[0:4]), int(line[4:8]), int(line[8:12]))
+        except ValueError:
+          continue
+        if h == (0, 0, 0):
+          break
+        wanted.append(h)
+    if wanted.size() == 0:
+      return None
+    # the solvent mask's set completion asks for the unmeasured indices inside the
+    # data's d_min as well (1EJG asserted on (75,2,-5)), so keep the complete set too
+    from cctbx import miller
+    wanted.extend(miller.set(crystal_symmetry, wanted, anomalous_flag=False)
+                  .complete_set().indices())
+    return wanted
+  except Exception as e:
+    # never let this stop a refinement: with no filter the table loads whole,
+    # which is what it always did
+    print("Could not work out which reflections to keep from the table (%s);"
+          " loading every row." % e)
+    return None
+
+
 def get_table_contribution(xray_structure, table_file_name):
   """ The tabulated table for this structure, read afresh only if it has to be.
   """
   from smtbx.structure_factors import direct
   check_table_readable(table_file_name)
   _report_table_provenance(table_file_name)
+  from cctbx.array_family import flex
+  wanted = _wanted_indices(xray_structure.crystal_symmetry())
   try:
     key = _table_cache_key(xray_structure, table_file_name)
   except OSError:
     key = None
+  if key is not None:
+    # the filter is part of what the cached table IS: one read for a given
+    # reflection file must not be handed to a session that loaded another, or
+    # get() would assert on a row that had been skipped
+    key = key + (wanted.size() if wanted is not None else -1,)
   if key is not None and _cached_table[0] == key:
     return _cached_table[1]
   # a table need not name every atom in the model. Rather than refuse it, the
   # atoms it misses get ordinary spherical form factors -- which is a weaker
   # model for those atoms, so it is reported rather than done quietly.
-  contribution = direct.ext.table_based_scatterer_contribution.\
-    build_with_fallback(
-      xray_structure.unit_cell(),
-      xray_structure.scatterers(),
-      table_file_name,
-      xray_structure.space_group(),
-      not xray_structure.space_group().is_origin_centric(),
-      xray_structure.scattering_type_registry())
+  build = direct.ext.table_based_scatterer_contribution.build_with_fallback
+  args = (xray_structure.unit_cell(),
+          xray_structure.scatterers(),
+          table_file_name,
+          xray_structure.space_group(),
+          not xray_structure.space_group().is_origin_centric(),
+          xray_structure.scattering_type_registry())
+  try:
+    contribution = build(*(args + (wanted if wanted is not None else flex.miller_index(),)))
+  except TypeError as e:
+    # a cctbx without the row filter (cctbx b7246a7da6, Aachen branch only so far)
+    # rejects the extra argument; it then loads the whole table, as it always did
+    if type(e).__name__ != 'ArgumentError':
+      raise
+    contribution = build(*args)
   scatterers = xray_structure.scatterers()
   fallback = [scatterers[i].label
               for i in contribution.scatterers_not_in_table()]
