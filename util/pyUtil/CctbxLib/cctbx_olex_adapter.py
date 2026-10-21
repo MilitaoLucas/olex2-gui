@@ -4091,17 +4091,24 @@ def _wanted_indices(crystal_symmetry):
     if not hkl_src or not os.path.exists(hkl_src):
       return None
     wanted = flex.miller_index()
-    with open(hkl_src) as f:
-      for line in f:
-        if len(line) < 12:
-          continue
-        try:
-          h = (int(line[0:4]), int(line[4:8]), int(line[8:12]))
-        except ValueError:
-          continue
-        if h == (0, 0, 0):
-          break
-        wanted.append(h)
+    if hkl_src.lower().endswith(".hklm"):
+      # (0,0,0,m) is an ordinary satellite there, not the end of the file; the refinement sees the m = 0 rows
+      import hklm_util
+      h, m, _, _ = hklm_util.read_hklm(hkl_src)
+      for hh in h[m == 0].tolist():
+        wanted.append(tuple(hh))
+    else:
+      with open(hkl_src) as f:
+        for line in f:
+          if len(line) < 12:
+            continue
+          try:
+            h = (int(line[0:4]), int(line[4:8]), int(line[8:12]))
+          except ValueError:
+            continue
+          if h == (0, 0, 0):
+            break
+          wanted.append(h)
     if wanted.size() == 0:
       return None
     # the solvent mask's set completion asks for the unmeasured indices inside the
