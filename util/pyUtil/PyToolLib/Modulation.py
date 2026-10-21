@@ -139,16 +139,43 @@ def _table_path():
   return os.path.join(OV.FilePath(), OV.FileName() + ".tscm")
 
 
-def satellite_request():
-  """(index list, scale, table path, rows) for NoSpherA2's table at the satellites S = h + m q, None when this is
-  not a modulated structure. NoSpherA2 asks after writing the m = 0 table and runs the same wavefunction on it."""
+def _main_box_rows(box, d_min):
+  """The m = 0 indices NoSpherA2 generates from -hkl_min_max and -dmin (generate_hkl): every h with
+  d* <= 1/(0.999 d_min) one of whose images h R, or -h R, lies in the box; one of each +- pair, first non-zero
+  index positive like calculator.table_indices."""
+  uc = uctbx.unit_cell(_floats(olx.xf.au.GetCell()))
+  d_keep = d_min * (1 - 1e-3)
+  lim = [int(p / d_keep + 1e-4) for p in uc.parameters()[:3]]
+  g = np.array(uc.reciprocal_metrical_matrix())
+  hh = np.array(np.meshgrid(*[np.arange(-k, k + 1) for k in lim], indexing="ij")).reshape(3, -1).T
+  ds = (hh ** 2).dot(g[:3]) + 2 * (hh[:, 0] * hh[:, 1] * g[3] + hh[:, 0] * hh[:, 2] * g[4] + hh[:, 1] * hh[:, 2] * g[5])
+  hh = hh[(ds <= 1 / d_keep ** 2) & np.any(hh != 0, axis=1)]
+  lo, hi = np.array(box[0]), np.array(box[1])
+  inside = lambda k: np.all((k >= lo) & (k <= hi), axis=1)
+  keep = np.zeros(len(hh), dtype=bool)
+  for op in _basic_group().all_ops():
+    k = hh.dot(np.array(op.r().as_double()).reshape(3, 3))
+    keep |= inside(k) | inside(-k)
+  hh = hh[keep]
+  first = hh[np.arange(len(hh)), np.argmax(hh != 0, axis=1)]
+  return np.unique(hh * np.sign(first)[:, None], axis=0)
+
+
+def satellite_request(box=None, d_min=None):
+  """(index list, scale, table path, rows, main rows) for one NoSpherA2 call that makes both tables of a modulated
+  structure: S = h + m q of every measured reflection and its images, plus the m = 0 set NoSpherA2 would generate
+  from the measured box and d_min (so the ordinary table can be cut out of it). None when this is not a modulated
+  structure."""
   if smod is None or not hasattr(smod, "TABLE_SCALE") or not store.get("q"):
     return None
   h, m, _, _ = _data()
+  n = smod.TABLE_SCALE
   rows = smod.calculator(h, m).table_indices(_ssg())
+  if box is not None and d_min is not None:
+    rows = np.unique(np.vstack([rows, n * _main_box_rows(box, d_min)]), axis=0)
   path = os.path.join(OV.FilePath(), OV.FileName() + "_sat.hkl")
   np.savetxt(path, rows, fmt="%d")
-  return path, smod.TABLE_SCALE, _table_path(), len(rows)
+  return path, n, _table_path(), len(rows), int(np.all(rows % n == 0, axis=1).sum())
 
 
 def _table():

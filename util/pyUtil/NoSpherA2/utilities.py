@@ -298,12 +298,59 @@ def _file_d_min():
     return None
 
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False, parts=None,
-              satellites=None):
+def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False, parts=None):
   """parts: the PART number of each wavefunction in wfn_file (Hybrid mode reads
   the per-part settings by that number; without it they are taken as 1..n).
-  satellites: (index list, scale) of a modulated structure in place of the measured box."""
-  groups_given = copy.deepcopy(groups)
+  A modulated structure (spy.modulation with q) gets one NoSpherA2 call for both tables, split into <name>.tscm and
+  the ordinary m = 0 table; if that call fails or does not hold every requested row (a NoSpherA2 without
+  -hkl_scale), the ordinary call runs instead and there is no satellite table."""
+  given = copy.deepcopy(groups)
+  joint = {}
+  try:
+    res = _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint)
+    if not joint or _split_joint(joint["req"]):
+      return res
+  except NameError:
+    if not joint or OV.GetVar('NoSpherA2-Error') == "Wfn-Interrupted":
+      raise
+  for f in ("experimental.tsc", "experimental.tscb"):
+    if os.path.exists(f):
+      os.remove(f)
+  print("modulation: the joint NoSpherA2 call did not work out (see %s.partitionlog_old); the ordinary m = 0 table "
+        "instead, no satellite table" % OV.ModelSrc())
+  return _cuqct_tsc(wfn_file, cif, given, hkl_file, save_k_pts, read_k_pts, parts, None)
+
+
+def _joint_request(box, d_min):
+  try:
+    import Modulation
+    return Modulation.satellite_request(box, d_min)
+  except Exception as e:
+    print("modulation: no satellite table (%s)" % e)
+    return None
+
+
+def _split_joint(req):
+  """<name>.tscm takes the whole table, experimental.tsc(b) its main rows as the ordinary m = 0 table; False when
+  the table does not hold exactly the requested rows."""
+  import hklm_util
+  out = "experimental.tscb" if os.path.exists("experimental.tscb") else "experimental.tsc"
+  if not os.path.exists(out):
+    return False
+  rows, main = hklm_util.split_tsc_main(out, req[1], out + ".m0")
+  if (rows, main) != (req[3], req[4]):
+    print("modulation: the table holds %d rows, %d of them main, of %d and %d requested" % (rows, main, req[3], req[4]))
+    os.remove(out + ".m0")
+    return False
+  os.replace(out, req[2])
+  os.replace(out + ".m0", out)
+  print("modulation: %s (%d rows) and the m = 0 table (%d rows) from one NoSpherA2 call"
+        % (os.path.basename(req[2]), rows, main))
+  return True
+
+
+def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint):
+  """The body of cuqct_tsc; joint receives the joint request when one is made (None: never make one)."""
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -458,15 +505,19 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   if d_min is not None:
     args.append("-dmin")
     args.append(str(d_min))
-  if satellites:
-    # rows (h k l) / scale, the satellites S = h + m q: NoSpherA2 reads them as they are; columns by scatterer id
+  # twinned and electron data keep the ordinary call: smtbx.modulation refines neither
+  req = None
+  if joint is not None and not is_ED and "-twin" not in args and d_min is not None:
+    req = _joint_request((hkl_min, hkl_max), d_min)
+  if req:
+    joint["req"] = req
+    # rows (h k l) / scale: the satellites S = h + m q and the m = 0 box, read as they are; columns by scatterer id
     args.remove("-tsc_labels")
     i = args.index("-hkl_min_max")
     del args[i:i + 7]
-    if "-dmin" in args:
-      i = args.index("-dmin")
-      del args[i:i + 2]
-    args += ["-hkl", satellites[0], "-hkl_scale", str(satellites[1])]
+    i = args.index("-dmin")
+    del args[i:i + 2]
+    args += ["-hkl", req[0], "-hkl_scale", str(req[1])]
   if isinstance(wfn_file, list):
     if isinstance(cif, list):
       args.append("-cmtc")
@@ -715,39 +766,9 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
         OV.SetVar('NoSpherA2-Error', "NoTsc")
         raise NameError('OCC run did not generate a .tsc/.tscb file during cuQCT call!')
     print("\n.tsc calculation ended!")
-    if satellites is None:
-      _modulation_table(wfn_file, cif, groups_given, parts)
   else:
     print ("\nERROR during tsc calculation!")
     raise NameError('NoSpherA2-Output not complete!\nPlease check the NoSpherA2.log/<name>.partitionlog file for details!')
-
-
-def _modulation_table(wfn_file, cif, groups, parts):
-  """A modulated structure (spy.modulation with q) also gets <name>.tscm, the same wavefunction at its satellites;
-  the m = 0 table, its log and what the caller moves afterwards stay as they were."""
-  try:
-    import Modulation
-    req = Modulation.satellite_request()
-  except Exception as e:
-    print("modulation: no satellite table (%s)" % e)
-    return
-  if not req:
-    return
-  log = OV.ModelSrc() + ".partitionlog"
-  keep = [f for f in ("experimental.tsc", "experimental.tscb", log) if os.path.exists(f)]
-  for f in keep:
-    os.replace(f, f + ".m0")
-  try:
-    cuqct_tsc(wfn_file, cif, groups, parts=parts, satellites=req[:2])
-    os.replace("experimental.tscb" if os.path.exists("experimental.tscb") else "experimental.tsc", req[2])
-    print("modulation: %s, %d satellite rows" % (os.path.basename(req[2]), req[3]))
-  except Exception as e:
-    print("modulation: the satellite table failed (%s, see %s_sat); the m = 0 table is not affected" % (e, log))
-  finally:
-    if os.path.exists(log):
-      os.replace(log, log + "_sat")
-    for f in keep:
-      os.replace(f + ".m0", f)
 
 def get_nmo():
   line = ""
