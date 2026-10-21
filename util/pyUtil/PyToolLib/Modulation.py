@@ -468,16 +468,16 @@ def _supercell_positions(xs, t, amplify, cells):
   """Cartesian positions and types of every atom image in the supercell at section t (own superspace argument)."""
   pos, types = [], []
   q = xs.q
+  lat = np.array(list(np.ndindex(*cells)), dtype=float)
   for op in xs.ssg.ops:
     for at in xs.atoms:
       xb = op.r.dot(at.site) + op.t
-      for L in np.ndindex(*cells):
-        xbl = xb - np.floor(xb) + np.array(L)
-        x4 = op.eps * (q.dot(xbl) + t - op.m.dot(at.site) - op.tau)
-        pos.append(xbl + amplify * op.r.dot(at.displacement(x4)[0]))
-        types.append(at.scattering_type)
+      xbl = xb - np.floor(xb) + lat
+      x4 = op.eps * (xbl.dot(q) + t - op.m.dot(at.site) - op.tau)
+      pos.append(xbl + amplify * at.displacement(x4).dot(op.r.T))
+      types += [at.scattering_type] * len(lat)
   orth = np.array(xs.unit_cell.orthogonalization_matrix()).reshape(3, 3)
-  return np.array(pos).dot(orth.T), types
+  return np.vstack(pos).dot(orth.T), types
 
 
 _colours = {"C": (90, 90, 90), "H": (230, 230, 230), "O": (220, 30, 30), "N": (40, 70, 230), "S": (230, 200, 40),
@@ -505,15 +505,15 @@ def movie(path="", frames=24, amplify=10, size=640, ms=80):
   u = orth[:, axes[0]] / np.linalg.norm(orth[:, axes[0]])
   w = np.cross(u, orth[:, view]); w /= np.linalg.norm(w)
   depth = np.cross(u, w)
-  proj = lambda p: np.array([p.dot(u), p.dot(w), p.dot(depth)])
-  pb = np.array([proj(p) for p in base])
+  view_m = np.array([u, w, depth]).T
+  pb = base.dot(view_m)
   lo, hi = pb[:, :2].min(axis=0) - 2, pb[:, :2].max(axis=0) + 2
   sc = (size - 20) / max(hi - lo)
   imgs = []
   for f in range(int(frames)):
     t = f / float(frames)
     p, _ = _supercell_positions(xs, t, float(amplify), cells)
-    pp = np.array([proj(v) for v in p])
+    pp = p.dot(view_m)
     xy = (pp[:, :2] - lo) * sc + 10 + (size - 20 - (hi - lo) * sc) / 2   # centred
     xy[:, 1] = size - xy[:, 1]
     img = Image.new("RGB", (size, size), (255, 255, 255))
