@@ -2141,24 +2141,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f.write(fcf_content)
 
   def setup_shared_parameters_constraints(self):
-    shared_adps = {}
     shared_sites = {}
     constraints = []
     sump_proxies = None
+    vars = self.olx_atoms.model['variables']['variables']
+    # EADP and a free variable on U (U = 21.0) both make U equal, and SHELXL
+    # applies them together. smtbx takes an atom in one shared_u only and drops
+    # the later one, so every group sharing an atom becomes one shared_u
+    # (4516820: EADP C1A C1B C1C, N1A..., C2A... and U = 21.0 on all nine is
+    # one common U, not three). Also joins chained EADPs (A B, then B C).
+    adp_groups = []
+    fvar_u = {}
+    for i, var in enumerate(vars):
+      refs = var['references']
+      if any(r['index'] == 4 and 'var' in r['relation'] for r in refs):
+        continue # mixes occupancy and U, rejected below
+      eadp = [r['id'] for r in refs if r['index'] == 5 and r['relation'] == "var"]
+      if len(eadp) > 1:
+        fvar_u[i] = eadp
     constraints_itr = self.olx_atoms.constraints_iterator()
     for constraint_type, kwds in constraints_itr:
       i_seqs = kwds["i_seqs"]
       if constraint_type == "adp":
-        skip = False
-        for i in i_seqs[1:]:
-          if i_seqs[0] in shared_adps:
-            skip = True
-            break
-          shared_adps[i] = i_seqs[0]
-        if skip:
-          print("Cyclic U constraint located for: %s" \
-            %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
-          continue
+        adp_groups.append(list(i_seqs))
       elif constraint_type == "site":
         skip = False
         for i in i_seqs[1:]:
@@ -2170,15 +2175,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print("Cyclic site constraint located for: %s" \
             %(self.olx_atoms.atoms()[i_seqs[0]]['label'],))
           continue
-    # merge constrains, adp
-    reverse_map = {}
-    for k,v in shared_adps.items():
-      if v not in reverse_map:
-        reverse_map[v] = set()
-      reverse_map[v].add(k)
-    for k,v in reverse_map.items():
-      current = adp.shared_u([k] + list(v))
-      constraints.append(current)
+    # merge constrains, adp; the first EADP atom stays the source of the U
+    owner = {}
+    for g in adp_groups + list(fvar_u.values()):
+      merged = {}
+      for i in g:
+        merged.update(dict.fromkeys(owner.get(i, [i])))
+      merged = list(merged)
+      for i in merged:
+        owner[i] = merged
+    shared_u_of = {}
+    for i, g in owner.items():
+      if i not in shared_u_of:
+        current = adp.shared_u(g)
+        constraints.append(current)
+        for j in g:
+          shared_u_of[j] = current
     # site
     reverse_map = {}
     for k,v in shared_sites.items():
@@ -2245,9 +2257,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           is_as_var = False
         self.shared_param_constraints.append((i, current, 1./scale, is_as_var))
       elif len(eadp) > 1:
-        current = adp.shared_u(eadp)
-        constraints.append(current)
-        self.shared_param_constraints.append((i, current, 1, True))
+        self.shared_param_constraints.append((i, shared_u_of[eadp[0]], 1, True))
 
     if(len(equations)>0):
       from cctbx import other_restraints

@@ -367,7 +367,8 @@ def normal_equation_class(*args, **kwds):
       for var in self.shared_param_constraints:
         # smtbx skips a constraint that conflicts with an earlier one (only a
         # ConflictingConstraintWarning), so it never gets a value; the FVAR
-        # keeps its input value (4516820: EADP plus a free variable on U)
+        # keeps its input value (e.g. a free variable on U of an atom that is
+        # also in a rotated/rotating ADP constraint)
         if not hasattr(var[1], 'value'):
           continue
         if var[3]:
