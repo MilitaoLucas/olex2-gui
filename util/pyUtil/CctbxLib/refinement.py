@@ -1550,7 +1550,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
             else:
               rt_mxs.append(sgtbx.rt_mx())
             seqs.append(atom[0])
-          angle_defs.append(crystal.dihedral_angle_def(seqs, rt_mxs))
+          # a dihedral is 4 atoms; SHELXL reads a longer CONF as the chain of
+          # its consecutive torsions (2238003: CONF C14..C19, 6 atoms, failed
+          # the 4-site covariance assert in cctbx.covariance)
+          for k in range(len(seqs) - 3):
+            angle_defs.append(crystal.dihedral_angle_def(seqs[k:k+4], rt_mxs[k:k+4]))
         max_d = 1.9
         max_angle = 170
         if all_conf:

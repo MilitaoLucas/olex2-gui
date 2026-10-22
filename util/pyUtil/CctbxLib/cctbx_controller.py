@@ -327,18 +327,21 @@ class reflections(object):
       return merging
 
   def _get_shel(self, omit, shel, wavelength):
-    _shel = shel
     two_theta = omit['2theta']
+    # at 2theta = 180 this is lambda/2, below which nothing can be measured, yet
+    # hkl files carry such rows: noise shells the authors' SHEL cuts (1561076,
+    # Cu, d down to 0.196) and junk lines (7244792: 0 -176 0 at d 0.052). HKLF 2
+    # has a wavelength per reflection, so no single limit there.
     d_min = uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
-    if _shel is None:
-      _shel = {'high' : -1, 'low': -1}
-      if two_theta != 180:
-        _shel['high'] = d_min
+    apply = two_theta != 180 or self.hklf_code != 2
+    if shel is None:
+      _shel = {'high' : d_min if apply else -1, 'low': -1}
     else:
+      _shel = dict(shel)
       if _shel['high'] > _shel['low']:
         _shel = {'high' : _shel['low'], 'low': _shel['high']}
       # SHELXL applies both, so the stricter high-resolution limit wins
-      if two_theta != 180:
+      if apply:
         _shel['high'] = max(_shel['high'], d_min)
     return _shel
 

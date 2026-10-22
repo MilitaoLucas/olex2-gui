@@ -326,10 +326,14 @@ class OlexCctbxAdapter(object):
         if OV.GetParam("snum.refinement.program").startswith("olex2.refine"):
           custom_gaussians = {}
           print("Custom gaussians will not be used for the refinement! Using 5-Gaussian Peng-1996")
+      # the resolution actually refined: SHEL/OMIT and lambda/2 cut the file's
+      # own d_min, which may be junk below the it1992 table's 0.25 A (1561076)
+      shel = self.reflections._get_shel(self.olx_atoms.model['omit'],
+        self.olx_atoms.model.get('shel', None), self.wavelength)
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
         table=str(table),
-        d_min=self.reflections.f_sq_obs.d_min())
+        d_min=max(self.reflections.f_sq_obs.d_min(), shel['high']))
     # init disp
     for i, disp in self.olx_atoms.disp_iterator():
       sc = self._xray_structure.scatterers()[i]

@@ -365,6 +365,11 @@ def normal_equation_class(*args, **kwds):
       OV.SetOSF(self.scale_factor())
       #update FVars
       for var in self.shared_param_constraints:
+        # smtbx skips a constraint that conflicts with an earlier one (only a
+        # ConflictingConstraintWarning), so it never gets a value; the FVAR
+        # keeps its input value (4516820: EADP plus a free variable on U)
+        if not hasattr(var[1], 'value'):
+          continue
         if var[3]:
           OV.SetFVar(var[0], var[1].value.value*var[2])
         else:
