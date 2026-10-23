@@ -1337,12 +1337,75 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = (), binary: bool = F
     print(f'Saved {map_name}-type map as {os.path.realpath(cube.name)}')
 
 
+def f_calc_no_dispersion(cctbx_adapter, miller_set, table_name=None):
+  """ F(calc) on miller_set without f' and f'': a map is an electron density.
+
+  A copy of the structure with fp = fdp = 0 (both evaluators add the
+  scatterers' fp/fdp on top of the spherical or tabulated form factor), with
+  the same extinction as get_fo_sq_fc applies. The DispRadial falloff only
+  scales f'/f'' and so drops out with them.
+  None if this cctbx cannot evaluate the table: the caller keeps the
+  dispersive arrays, as before this existed.
+  """
+  xs = cctbx_adapter.xray_structure().deep_copy_scatterers()
+  for sc in xs.scatterers():
+    sc.fp = 0
+    sc.fdp = 0
+  if not table_name:
+    # plain cctbx, as get_fo_sq_fc does it: works on master cctbx too
+    fc = miller_set.structure_factors_from_scatterers(xs, algorithm="direct").f_calc()
+  else:
+    try:
+      from cctbx_olex_adapter import get_table_contribution
+      one_h = direct.f_calc_modulus_squared(
+        xs, scatterer_contribution=get_table_contribution(xs, table_name))
+    except Exception as e:  # master cctbx has no scatterer_contribution keyword
+      print("Map keeps f'/f'': no table-based F(calc) in this cctbx (%s)" % e)
+      return None
+    evaluate_many = getattr(one_h, "evaluate_many", None)
+    if evaluate_many is not None:
+      data = evaluate_many(miller_set.indices())
+    else:  # master cctbx: one reflection at a time
+      data = flex.complex_double()
+      for mi in miller_set.indices():
+        one_h.evaluate(mi)
+        data.append(one_h.f_calc)
+    fc = miller_set.array(data=data)
+  if cctbx_adapter.exti is not None:
+    fc = fc.apply_shelxl_extinction_correction(cctbx_adapter.exti, cctbx_adapter.wavelength)
+  return fc
+
+def without_dispersion(cctbx_adapter, f_sq_obs, f_calc, f_mask=None, table_name=None):
+  """ Fo^2 and Fc with the anomalous dispersion taken out, for Fourier maps.
+
+  f_calc is the refinement's Fc (with dispersion, and with f_mask if given).
+  Fc is recomputed without f'/f''; Fo^2 has no such switch and is rescaled by
+  |Fc_nd/Fc|^2, sigmas alike (the XD convention). Bijvoet mates then agree up
+  to noise; the real part of the FFT averages them, so they are not merged.
+  """
+  fc = f_calc_no_dispersion(cctbx_adapter, f_calc, table_name)
+  if fc is None:
+    return f_sq_obs, f_calc
+  if f_mask:
+    fc = fc.array(data=fc.data() + f_mask.data())
+  old = flex.norm(f_calc.data())
+  new = flex.norm(fc.data())
+  zero = old == 0
+  old.set_selected(zero, 1)
+  new.set_selected(zero, 1)
+  r = new / old
+  sigmas = f_sq_obs.sigmas()
+  f_sq_obs = f_sq_obs.customized_copy(data=f_sq_obs.data() * r,
+                                      sigmas=None if sigmas is None else sigmas * r)
+  return f_sq_obs, fc
+
 def residual_map(resolution=0.1,return_map=False,print_peaks=False,binary=False):
   cctbx_adapter = OlexCctbxAdapter()
   xray_structure = cctbx_adapter.xray_structure()
   hklf_code = cctbx_adapter.hklf_code
   use_tsc = OV.IsNoSpherA2()
   one_h = None
+  table_name = None
   if use_tsc:
     table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
@@ -1380,6 +1443,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False,binary=False)
       f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
 
   if not OV.IsEDRefinement():
+    f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       f_mask = cctbx_adapter.load_mask()
       if not f_mask:
@@ -1391,6 +1455,7 @@ def residual_map(resolution=0.1,return_map=False,print_peaks=False,binary=False)
           f_mask = f_mask.generate_bijvoet_mates()
         f_mask = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+    f_sq_obs, f_calc = without_dispersion(cctbx_adapter, f_sq_obs, f_calc, f_mask, table_name)
     f_obs = f_sq_obs.f_sq_as_f()
     if hklf_code == 2:
       fc2_data = flex.norm(f_calc.data())
@@ -2043,6 +2108,7 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
   xray_structure = cctbx_adapter.xray_structure()
   use_tsc = OV.IsNoSpherA2()
   one_h = None
+  table_name = None
   if use_tsc:
     table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
@@ -2060,6 +2126,7 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
 
   if not OV.IsEDRefinement():
+    f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       f_mask = cctbx_adapter.load_mask()
       if not f_mask:
@@ -2071,6 +2138,7 @@ def diff_sig_map(resolution=0.1,return_map=False,print_peaks=False):
           f_mask = f_mask.generate_bijvoet_mates()
         f_mask = f_mask.common_set(f_sq_obs)
         f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
+    f_sq_obs, f_calc = without_dispersion(cctbx_adapter, f_sq_obs, f_calc, f_mask, table_name)
     f_obs = f_sq_obs.f_sq_as_f()
     k = OV.GetOSF()
     if k is None:
@@ -2690,6 +2758,8 @@ OV.registerFunction(PDF_map, False, "NoSpherA2")
 def tomc_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
+  table_name = None
+  f_mask = None
   if use_tsc == True:
     table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
@@ -2715,14 +2785,11 @@ def tomc_map(resolution=0.1, return_map=False, use_f000=False):
       if not f_sq_obs.space_group().is_centric() and f_sq_obs.anomalous_flag():
         f_mask = f_mask.generate_bijvoet_mates()
       f_mask = f_mask.common_set(f_sq_obs)
-      f_obs = f_sq_obs.f_sq_as_f()
       f_calc = f_calc.array(data=(f_calc.data() + f_mask.data()))
-      k = math.sqrt(OV.GetOSF())
-      f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
-  else:
-    f_obs = f_sq_obs.f_sq_as_f()
-    k = math.sqrt(OV.GetOSF())
-    f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
+  f_sq_obs, f_calc = without_dispersion(cctbx_adapter, f_sq_obs, f_calc, f_mask, table_name)
+  f_obs = f_sq_obs.f_sq_as_f()
+  k = math.sqrt(OV.GetOSF())
+  f_diff = f_obs.f_obs_minus_f_calc(2.0/k, f_calc)
 
   f_diff = f_diff.expand_to_p1()
   if OV.IsEDData():
@@ -2809,6 +2876,7 @@ OV.registerFunction(def_sig_map, False, "NoSpherA2")
 def obs_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
+  table_name = None
   if use_tsc == True:
     table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
@@ -2824,9 +2892,10 @@ def obs_map(resolution=0.1, return_map=False, use_f000=False):
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  f_sq_obs, f_calc = without_dispersion(cctbx_adapter, f_sq_obs, f_calc, table_name=table_name)
   f_obs = f_sq_obs.f_sq_as_f()
   k = math.sqrt(OV.GetOSF())
-  f_obs.apply_scaling(factor=1./k)
+  f_obs = f_obs.apply_scaling(factor=1./k)  # on the F(000) scale, which is absolute
   f_obs = f_obs.phase_transfer(f_calc)
   if OV.IsEDData():
     f_obs = f_obs.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
@@ -2848,6 +2917,7 @@ OV.registerFunction(obs_map, False, "NoSpherA2")
 def calc_map(resolution=0.1,return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
   use_tsc = OV.IsNoSpherA2()
+  table_name = None
   if use_tsc == True:
     table_name = str(nsa2_get_param("file"))
     print("Calculating Structure Factors from files...")
@@ -2863,6 +2933,7 @@ def calc_map(resolution=0.1,return_map=False, use_f000=False):
   else:
     print("Non NoSpherA2 map...")
     f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  f_calc = f_calc_no_dispersion(cctbx_adapter, f_calc, table_name) or f_calc
   if OV.IsEDData():
     f_calc = f_calc.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
@@ -2895,7 +2966,12 @@ def mask_map(resolution=0.1, return_map=False, use_f000=False):
   if OV.IsEDData():
     f_mask = f_mask.apply_scaling(factor=3.324943664)  # scales from A-2 to eA-1
   if use_f000 == True or use_f000 == "True":
-    f000 = float(olx.xf.GetF000())
+    # the masked region's own electron count, not the cell's F(000); a mask
+    # read back from the .fab carries none, so it is computed afresh
+    if getattr(olx.current_mask, "f_000_s", None) is None:
+      OlexCctbxMasks()
+    f000 = float(olx.current_mask.f_000_s)  # sum of the void counts, ED already scaled
+    print("Mask map F(000) = %.1f, the masked electrons" % f000)
     mask_map = f_mask.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
                               resolution_factor=1, grid_step=float(resolution),
                               f_000=f000).apply_volume_scaling()
