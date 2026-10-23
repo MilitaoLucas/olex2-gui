@@ -650,47 +650,59 @@ def stop():
 
 
 def panel(html=True):
-  """The q line under the HOS, next to the TWIN law: q, the superspace group, R1 per |m| and the actions. Never
-  raises: it is evaluated on every redraw of snum-info.htm."""
+  """The modulation block under the HOS: reflections per order, q, the superspace group, R1 per |m| and the
+  actions, in short lines of its own full-width table so it never widens the panel. Never raises: it is evaluated on
+  every redraw of snum-info.htm."""
   try:
-    return _panel()
+    lines = _panel()
   except Exception:
     return ""
+  if not lines:
+    return ""
+  return ("<table border='0' width='100%%' cellpadding='0' cellspacing='2' bgcolor='%s'><tr><td align='left'>%s"
+          "</td></tr></table>" % (OV.GetVar('HtmlTableBgColour', ''), "<br>".join(lines)))
+
+
+def _counts():
+  """'N main + M satellites (|m| = 1)' from olx.HKLM(), or '' without an .hklm source."""
+  try:
+    n = olx.HKLM()
+  except Exception:
+    n = ""
+  if not n:
+    return ""
+  main, sat, mmax = n.split(",")
+  orders = "|m| = 1" if mmax == "1" else "1 &lt;= |m| &lt;= %s" % mmax
+  return "%s main + %s satellites (%s)" % (main, sat, orders)
 
 
 def _panel():
   q = store.get("q")
   green = OV.GetParam('gui.green_text').hexadecimal
+  counts = _counts()
   if not q:
-    try:
-      n = olx.HKLM()
-    except Exception:
-      n = ""
-    if not n:
-      return ""
-    main, sat, mmax = n.split(",")
-    return ("<b><font color='%s'>hklm</font></b> %s+%s refl (|m|&lt;=%s) <a href='spy.modulation.set_q()'>set q</a>"
-            % (green, main, sat, mmax))
-  txt = "<b><font color='%s'>q [%s]</font></b>" % (green, ", ".join("%.4g" % v for v in _floats(q)))
+    if not counts:
+      return []
+    return ["<b><font color='%s'>hklm</font></b> %s <a href='spy.modulation.set_q()'>set q</a>" % (green, counts)]
+  first = "<b><font color='%s'>q [%s]</font></b>" % (green, ", ".join("%.4g" % v for v in _floats(q)))
   if store.get("group"):
-    txt += " %s" % store.get("group").split(" q=")[-1].split(")", 1)[-1].strip()
-  try:
-    n = olx.HKLM()
-    if n:
-      main, sat, mmax = n.split(",")
-      txt += " %s+%s refl (|m|&lt;=%s)" % (main, sat, mmax)
-  except Exception:
-    pass
+    first += " %s" % store.get("group").split(" q=")[-1].split(")", 1)[-1].strip()
+  lines = [first]
+  if counts:
+    lines.append(counts)
+  second = []
   if store.get("r1"):
-    txt += " R1 " + " ".join(store.get("r1").replace("m=", "").split()[1:])
+    second.append("R1 " + " ".join(store.get("r1").replace("m=", "").split()[1:]))
   if OV.GetParam("snum.NoSpherA2.use_aspherical"):
-    txt += " f: %s" % ("NoSpherA2" if os.path.exists(_table_path()) else "<font color='red'>no .tscm</font>")
+    second.append("f: %s" % ("NoSpherA2" if os.path.exists(_table_path()) else "<font color='red'>no .tscm</font>"))
   if OV.IsEDData():
-    txt += " ED"
-  txt += (" <a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
-          " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
-          " <a href='spy.modulation.de_wolff()'>de Wolff</a>")
-  return txt
+    second.append("ED")
+  if second:
+    lines.append(" ".join(second))
+  lines.append("<a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
+               " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
+               " <a href='spy.modulation.de_wolff()'>de Wolff</a>")
+  return lines
 
 
 def _refresh():
