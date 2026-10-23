@@ -965,6 +965,23 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     f_obs = merging.array()
     f_obs.show_summary()
 
+    # A screening or partial data set solves badly and should say so: under
+    # half complete both overall (to the 2nd-percentile d) and to 1.2 A flags
+    # 57 of 27,598 COD ids, 48 of them not fully clean (23 Oct 2026). Only
+    # prints; the solve is unchanged
+    if mode != "classic":
+      try:
+        d = sorted(f_obs.d_spacings().data())
+        d2 = d[int(0.02*len(d))]
+        c = f_obs.resolution_filter(d_min=d2).completeness()
+        c12 = f_obs.resolution_filter(d_min=max(d2, 1.2)).completeness()
+        if c < 0.5 and c12 < 0.5:
+          print("Warning: the data are %.0f %% complete (%.0f %% to 1.2 A); "
+                "this looks like a screening or partial data set, so expect a "
+                "poor or no solution" % (100*c, 100*c12))
+      except Exception:
+        pass
+
     params = OV.Params().programs.solution.smtbx.cf
     if (mode != "classic" and getattr(params, 'start_in_p1', False)
         and f_obs.space_group().order_z() > 1):
@@ -1292,6 +1309,13 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       symbol = part.split(':')[0].strip()
       if symbol:
         out.add(symbol.capitalize())
+    # Opt-in (add_n_o): N and O are allowed whenever C is declared, unless B
+    # is, where they would crowd out boron. A forgotten N costs 67 points of
+    # fully clean, but on by default it lost 0.60 [0.36, 0.84] points over
+    # 27,598 COD ids by placing N/O the formula rules out (23 Oct 2026)
+    if (getattr(OV.Params().programs.solution.smtbx.cf, 'add_n_o', False)
+        and "C" in out and "B" not in out):
+      out |= {"N", "O"}
     return out
 
   def geometryProposals(self, unit_cell, space_group, sites, labels=None,
@@ -3188,6 +3212,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     solvent_d_min = getattr(self.params, 'solvent_d_min', None) or None
     if solvent_d_min is not None:
       print("Solvent sought in data beyond %.1f A only" % solvent_d_min)
+    # each void's grid points, once: the mask is fixed through the iteration
+    void_points = [mask.mask.data == j+2 for j in range(mask.n_voids())]
+    void_isel = [s.iselection() for s in void_points]
     for i in range(max_cycles):
       coefficients = f_obs_minus_f_calc
       if solvent_d_min is not None:
@@ -3212,12 +3239,11 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         # read off the levelled map: before the level is restored every void
         # still carries its share of the missing F(000), and a void would then
         # be discarded for holding less than that share rather than nothing
-        selection = mask.mask.data == j+2
+        selection = void_points[j]
         if mask.exclude_void_flags[j]:
           masked_diff_map.set_selected(selection, 0)
           continue
-        diff_map_ = masked_diff_map.deep_copy().set_selected(~selection, 0)
-        electrons = flex.sum(diff_map_) * mask.fft_scale
+        electrons = flex.sum(masked_diff_map.select(void_isel[j])) * mask.fft_scale
         if electrons < 0:
           masked_diff_map.set_selected(selection, 0)
           mask.exclude_void_flags[j] = True

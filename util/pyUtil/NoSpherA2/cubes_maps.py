@@ -1328,12 +1328,18 @@ def write_map_to_cube(fft_map, map_name: str, size: tuple = (), binary: bool = F
       cube.write(f'\n{charge:5d} {charge:11.6f} {positions[i][0]:11.6f} '
                  f'{positions[i][1]:11.6f} {positions[i][2]:11.6f}')
     cube.write('\n')
-    for x in range(size[0]):
-      for y in range(size[1]):
-        slice_values = values[(x*size[1]+y)*size[2]:(x*size[1]+y+1)*size[2]]
-        for n in range(0, len(slice_values), 6):
-            chunk = slice_values[n:n + 6]
-            cube.write(''.join(f'{v:13.5e}' for v in chunk) + '\n')
+    # one %-format per block of z-lines instead of one f-string per value:
+    # same text (six to a line, a z-line never spans two)
+    if hasattr(values, "as_numpy_array"):
+      values = values.as_numpy_array()
+    rows = np.asarray(values, dtype=float).ravel()[:size[0] * size[1] * size[2]].reshape(-1, size[2])
+    row_fmt = ('%13.5e' * 6 + '\n') * (size[2] // 6)
+    if size[2] % 6:
+      row_fmt += '%13.5e' * (size[2] % 6) + '\n'
+    block = max(1, 200000 // size[2])
+    for i in range(0, rows.shape[0], block):
+      chunk = rows[i:i + block]
+      cube.write((row_fmt * chunk.shape[0]) % tuple(chunk.ravel().tolist()))
     print(f'Saved {map_name}-type map as {os.path.realpath(cube.name)}')
 
 
@@ -2952,7 +2958,13 @@ OV.registerFunction(calc_map, False, "NoSpherA2")
 
 def mask_map(resolution=0.1, return_map=False, use_f000=False):
   cctbx_adapter = OlexCctbxAdapter()
-  f_sq_obs, f_calc = cctbx_adapter.get_fo_sq_fc()
+  if cctbx_adapter.twin_components or cctbx_adapter.hklf_code == 5:
+    f_sq_obs = cctbx_adapter.get_fo_sq_fc()[0]  # the detwinned set
+  else:
+    # only the observed set is wanted: the direct F(calc) get_fo_sq_fc pays
+    # for is several seconds on a protein, for nothing
+    f_sq_obs = cctbx_adapter.reflections.f_sq_obs_filtered.merge_equivalents(
+      algorithm="shelx").array().map_to_asu()
   if OV.GetParam("snum.refinement.use_solvent_mask"):
     f_mask = cctbx_adapter.load_mask()
     if not f_mask:
