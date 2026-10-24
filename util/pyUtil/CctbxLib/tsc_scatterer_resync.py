@@ -859,9 +859,13 @@ def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_sca
         continue
       free = [c for c in cand if c[1] not in claimed]
       # a rival nearly as close means it cannot be told which atom this is, and
-      # guessing would put a whole column of contributions on the wrong atom
+      # guessing would put a whole column of contributions on the wrong atom.
+      # An EXYZ pair of one element (O/O2- in COD 2312749) has one id twice and
+      # is no rival to itself: its columns take its atoms in turn, round by round
+      rival = [c for c in free[1:]
+               if internal_scatterer_ids[c[1]] != internal_scatterer_ids[free[0][1]]] if free else []
       if free and free[0][0] <= max_shift_angstrom and (
-          len(free) == 1 or free[1][0] >= 2 * free[0][0]):
+          not rival or rival[0][0] >= 2 * free[0][0]):
         picks.append((free[0][0], column, free[0][1]))
     taken = 0
     for d, column, j in sorted(picks):
@@ -900,6 +904,21 @@ def resolve_id_mapping_with_positional_fallback(read_scatterer_ids, internal_sca
   return file_to_model
 
 
+def _columns_in_turn(entries, internal_scatterer_ids):
+  """The column of each atom by exact id. An EXYZ pair of one element has one
+  id twice, so each atom takes its own column in turn; index() put both on the
+  first (2312749: R1 0.0272 and 0.0302 every other round). Ids compare by
+  value but hash by identity, hence index() and not a dict."""
+  internal_to_tsc, taken = [], set()
+  for x in internal_scatterer_ids:
+    column = entries.index(x)
+    while column in taken:
+      column = entries.index(x, column + 1)
+    internal_to_tsc.append(column)
+    taken.add(column)
+  return internal_to_tsc
+
+
 def resolve_scatterer_mapping(file_entries, model_labels, internal_scatterer_ids, unit_cell):
   """Which table column describes each model atom.
 
@@ -920,10 +939,10 @@ def resolve_scatterer_mapping(file_entries, model_labels, internal_scatterer_ids
     # column order is not the model's, so pairing by position would put the
     # columns on the wrong atoms.
     ids = convert_labels_to_ids(file_entries, model_labels, internal_scatterer_ids)
-    return [ids.index(x) for x in internal_scatterer_ids]
+    return _columns_in_turn(ids, internal_scatterer_ids)
 
   try:
-    return [file_entries.index(x) for x in internal_scatterer_ids]
+    return _columns_in_turn(file_entries, internal_scatterer_ids)
   except ValueError:
     # The ids no longer match exactly, which any refinement causes; match on
     # what survives a move instead.
