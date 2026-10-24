@@ -2113,7 +2113,10 @@ def get_sources_string():
     for f in existing_wfns_raw.split(';'):
         existing_wfns += f"  {f};"
     sources = ";".join([PS, tsc_header, tsc_files_proc, calculator_header, calculators, wavefunction_files_header, existing_wfns])
-    return sources
+    # the page preprocessor pastes this into items="..." and the combo then evaluates it again:
+    # a '(' in a file name (IAM(FLAT).tscb) made that a call to 'Please' and emptied the list.
+    # Quoted, the second pass only strips the quotes.
+    return "'%s'" % sources
 OV.registerFunction(get_sources_string, False, "NoSpherA2")
 
 
