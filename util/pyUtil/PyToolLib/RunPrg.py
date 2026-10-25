@@ -750,6 +750,9 @@ class RunRefinementPrg(RunPrg):
       rc.check_disp()
       rc.check_occu()
       rc.check_mu() #This is the L-M mu!
+      # the switch existed in params.phil, but nothing read it
+      if OV.GetParam('snum.refinement.check_corr'):
+        rc.check_corr()
       try:
         rc.check_table_coverage()
         rc.check_aspherical()

@@ -503,8 +503,9 @@ class OlexCctbxAdapter(object):
            self.xray_structure().space_group() != miller_set_.space_group():
            #xs = xs.deep_copy()
            xs = xs.expand_to_p1()
-        fc = miller_set_.structure_factors_from_scatterers(
-          xs, algorithm=algorithm).f_calc()
+        # the mask, the residual maps and the fcf each want Fc for the same
+        # model, so the last ones computed are kept; see fc_store
+        fc = fc_store.f_calc(xs, miller_set_, algorithm)
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return fc
@@ -4331,3 +4332,121 @@ def calculate_brennan_mu():
 OV.registerFunction(calculate_brennan_mu, False, "disp")
 
 
+
+
+class _fc_store(object):
+  """ The last few spherical-atom Fc arrays, kept for the model they were
+  computed for.
+
+  The same F(calc) of the same model is asked for several times: by the solvent
+  mask before a refinement, by the residual maps, the fcf and the statistics
+  after it, and by the mask again at the start of the next run if the model
+  has not been touched in between. Each is a direct summation over reflections
+  x atoms x symmetry operations, which for a few hundred atoms is the largest
+  single cost of the mask stage (measured at 0.66 s for 300 atoms and 27,000
+  reflections).
+
+  Exact, never approximate: an array is reused only for a model identical in
+  every parameter that enters the direct sum - cell, symmetry, every
+  scatterer's type, site, ADP, occupancy, f' and f'', and the form factors of
+  the scattering type registry - and only for reflections it actually holds.
+  The values handed out are the ones that were computed, so a hit changes no
+  number anywhere; reflections not yet held are computed and added. Anything this does not fingerprint is simply not cached:
+  table-based (NoSpherA2) and radially corrected Fc, which go through
+  one_h_function, twinned sets, and anharmonic ADPs.
+  """
+
+  max_entries = 2
+
+  def __init__(self):
+    self.entries = []   # (key, f_calc), most recent first
+    self.hits = 0
+    self.misses = 0
+
+  @staticmethod
+  def key(xs, space_group, anomalous_flag, algorithm):
+    sc = xs.scatterers()
+    for s in sc:
+      if getattr(s, 'anharmonic_adp', None) is not None:
+        return None
+    reg = xs.scattering_type_registry()
+    gaussians = reg.unique_gaussians_as_list()
+    form_factors = []
+    for t, i in sorted(reg.type_index_pairs_as_dict().items()):
+      g = gaussians[i]
+      if g is None:
+        form_factors.append((t, None))
+      else:
+        form_factors.append((t, tuple(g.array_of_a()), tuple(g.array_of_b()),
+                             g.c()))
+    return (algorithm,
+            tuple(xs.unit_cell().parameters()),
+            xs.space_group().type().hall_symbol(),
+            space_group.type().hall_symbol(),
+            bool(anomalous_flag),
+            tuple(sc.extract_labels()),
+            tuple(sc.extract_scattering_types()),
+            tuple(xs.sites_frac().as_double()),
+            tuple(sc.extract_use_u_aniso()),
+            tuple(sc.extract_u_iso()),
+            tuple(sc.extract_u_star().as_double()),
+            tuple(sc.extract_occupancies()),
+            tuple(sc.extract_fps()),
+            tuple(sc.extract_fdps()),
+            tuple(form_factors))
+
+  def f_calc(self, xs, miller_set, algorithm):
+    """ Fc for miller_set, computing only the reflections not already held
+    for this model. Each reflection's Fc is an independent sum, so computing
+    it alone or among others gives the same number.
+    """
+    def compute(ms):
+      return ms.structure_factors_from_scatterers(
+        xs, algorithm=algorithm).f_calc()
+    try:
+      k = self.key(xs, miller_set.space_group(), miller_set.anomalous_flag(),
+                   algorithm)
+    except Exception:
+      k = None
+    if k is None:
+      return compute(miller_set)
+    held = None
+    for key, fc in self.entries:
+      if key == k:
+        held = fc
+        break
+    if held is None:
+      self.misses += 1
+      fc = compute(miller_set)
+      self._put(k, fc)
+      return fc
+    match = miller.match_indices(held.indices(), miller_set.indices())
+    missing = match.singles(1)
+    if missing.size():
+      # the FFT algorithm is not per reflection, so only direct is completed
+      if algorithm != "direct":
+        self.misses += 1
+        fc = compute(miller_set)
+        self._put(k, fc)
+        return fc
+      extra = compute(miller_set.select(missing))
+      held = held.concatenate(extra)
+      self._put(k, held)
+      match = miller.match_indices(held.indices(), miller_set.indices())
+    pairs = match.pairs()
+    data = flex.complex_double(miller_set.size())
+    data.set_selected(pairs.column(1), held.data().select(pairs.column(0)))
+    self.hits += 1
+    return miller_set.array(data=data)
+
+  def _put(self, k, fc):
+    # a copy: the array handed out on a miss belongs to the caller, who may
+    # scale it in place
+    fc = fc.deep_copy()
+    self.entries = [(k, fc)] + [e for e in self.entries if e[0] != k]
+    del self.entries[self.max_entries:]
+
+  def clear(self):
+    self.entries = []
+
+fc_store = _fc_store()

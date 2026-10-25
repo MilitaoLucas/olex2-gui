@@ -171,22 +171,20 @@ class RefinementChecks(object):
 
   def check_corr(self):
     try:
-      m_and_a = self.cctbx.normal_eqns.covariance_matrix_and_annotations()
+      from refinement import strong_correlations, riding_groups
+      # the refinement worked this out already; asking the normal equations
+      # again would multiply out the Jacobian a second time
+      m_and_a = getattr(self.cctbx, 'covariance_matrix_and_annotations', None)
+      if m_and_a is None:
+        m_and_a = self.cctbx.normal_eqns.covariance_matrix_and_annotations()
       annotations = m_and_a.annotations
-      n = len(annotations)
+      found, strong_corr_count, _ = strong_correlations(m_and_a.matrix, 0.75,
+        groups=riding_groups(self.cctbx.constraints,
+          self.cctbx.reparametrisation.structure.scatterers(), annotations))
 
-      # r_ij = cov_ij/sqrt(cov_ii cov_jj); np.corrcoef would correlate the rows
-      cov = m_and_a.matrix.matrix_packed_u_as_symmetric().as_numpy_array()
-      sd = np.sqrt(np.diag(cov))
-      sd[sd == 0] = np.inf
-      corrMat = cov / np.outer(sd, sd)
-      iu_nodiag = np.triu_indices(n, k=1)
-      strong_mask = np.abs(corrMat[iu_nodiag]) > 0.75
-      strong_corr_count = np.sum(strong_mask)
-
-      print(f"List of correlations > 0.75:\nThere are {strong_corr_count} strong correlations")
+      print(f"List of correlations > 0.75 (riding H and proxy U pairs left out):\nThere are {strong_corr_count} strong correlations")
       print("==================================")
-      for i,j,corr in zip(iu_nodiag[0][strong_mask], iu_nodiag[1][strong_mask], corrMat[iu_nodiag][strong_mask]):
+      for corr, i, j in sorted(found, key=lambda t: (t[1], t[2])):
           print(f" {annotations[i]:<10} v {annotations[j]:<10}: {corr:>6.3f}")
       print("==================================")
 
