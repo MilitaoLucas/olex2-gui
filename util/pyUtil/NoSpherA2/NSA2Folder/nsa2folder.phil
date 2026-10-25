@@ -1,0 +1,9 @@
+
+nsa2folder{
+  columns = 4
+    .type = int
+    .help = "Chips per row; each refinement starts a new row."
+  chip_height = 46
+    .type = int
+    .help = "Height of a chip in pixels."
+}

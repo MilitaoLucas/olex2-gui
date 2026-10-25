@@ -1,0 +1,30 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<!-- #include tool-row gui/blocks/tool-row.htm;name=NSA2Folder_1;1; -->
+  <td ALIGN='left' width='50%'>
+  $spy.nsa2folder.summary_html()
+  </td>
+  <td ALIGN='right' width='14%'><b>Cols&nbsp;</b></td>
+  <td ALIGN='left' width='12%'>
+  $+
+  html.Snippet("gui/snippets/input-combo",
+  "name=NSA2FOLDER_COLUMNS",
+  "items=1;2;3;4;5;6",
+  "value=spy.GetParam(nsa2folder.columns)",
+  "onchange=spy.nsa2folder.set_columns(html.GetValue(~name~))",
+  "readonly=False"
+  )
+  $-
+  </td>
+  <td ALIGN='right' width='24%'>
+    <a href="spy.nsa2folder.refresh()"><b>Refresh&nbsp;</b></a>
+    &nbsp;
+    <a href="spy.nsa2folder.open_history_folder()"><b>Folder&nbsp;</b></a>
+  </td>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+<!-- #include tool-row gui/blocks/tool-row.htm;name=NSA2Folder_2;1; -->
+  <td ALIGN='left' width='100%'>
+  $spy.nsa2folder.get_grid_html()
+  </td>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
