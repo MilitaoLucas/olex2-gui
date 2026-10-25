@@ -426,6 +426,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       kwds = {}
       ml_target = self.get_ml_target()
       if ml_target is not None:
+        # smtbx refuses twinning under a likelihood with a bare assert; say why
+        # here instead. EXTI and SWAT are fine.
+        if self.get_twin_fractions():
+          olx.Echo("%s cannot refine twinned data (TWIN, BASF or HKLF 5, an "
+            "inversion twin included): the likelihood is a distribution of one "
+            "amplitude, and twin components add as intensities. Use CGLS-J, "
+            "Gauss-Newton or Levenberg-Marquardt for this structure."
+            % ml_target.upper(), m="error")
+          self.failure = True
+          return
         kwds['ml_target'] = ml_target
       self.normal_equations_class = normal_equations_class_builder(
         n_parameters=self.reparametrisation.n_independents,
