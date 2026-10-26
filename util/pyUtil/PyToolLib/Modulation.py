@@ -684,12 +684,19 @@ def _panel():
     if not counts:
       return []
     return ["<b><font color='%s'>hklm</font></b> %s <a href='spy.modulation.set_q()'>set q</a>" % (green, counts)]
-  first = "<b><font color='%s'>q [%s]</font></b>" % (green, ", ".join("%.4g" % v for v in _floats(q)))
+  # q on the line of the actions; clicking it asks for a new q
+  lines = ["<a href='spy.modulation.set_q()'><b><font color='%s'>q [%s]</font></b></a>"
+           " <a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
+           " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
+           " <a href='spy.modulation.de_wolff()'>de Wolff</a>"
+           % (green, ", ".join("%.4g" % v for v in _floats(q)))]
+  info = []
   if store.get("group"):
-    first += " %s" % store.get("group").split(" q=")[-1].split(")", 1)[-1].strip()
-  lines = [first]
+    info.append(store.get("group").split(" q=")[-1].split(")", 1)[-1].strip())
   if counts:
-    lines.append(counts)
+    info.append(counts)
+  if info:
+    lines.append(" ".join(info))
   second = []
   if store.get("r1"):
     second.append("R1 " + " ".join(store.get("r1").replace("m=", "").split()[1:]))
@@ -699,9 +706,6 @@ def _panel():
     second.append("ED")
   if second:
     lines.append(" ".join(second))
-  lines.append("<a href='spy.modulation.candidates()'>SSG</a> <a href='spy.modulation.refine()'>Refine</a>"
-               " <a href='spy.modulation.wiggle()'>Wiggle</a> <a href='spy.modulation.movie()'>GIF</a>"
-               " <a href='spy.modulation.de_wolff()'>de Wolff</a>")
   return lines
 
 
