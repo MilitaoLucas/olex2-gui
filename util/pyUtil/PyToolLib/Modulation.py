@@ -72,6 +72,23 @@ class _Store(object):
 
 store = _Store()
 _last_ranking = []
+
+
+def reset():
+  """Forget q, the superspace group, the waves and the fit: a new solution starts from 3D. The hklm path stays."""
+  side = store._side()
+  keys = set(side) | {"q", "ops", "taus", "group", "scale", "r1"}
+  keys |= {"wave." + olx.xf.au.GetAtomName(i) for i in range(int(olx.xf.au.GetAtomCount()))}
+  keys.discard("hklm")
+  for k in keys:
+    try:
+      store.header.delete(k)
+    except Exception:
+      pass
+  if os.path.exists(store._path()):
+    with open(store._path(), "w") as f:
+      if side.get("hklm"):
+        f.write("hklm=%s\n" % side["hklm"])
 _stop = [False]
 
 
@@ -473,23 +490,96 @@ def _structure(harmonics=None):
   return [i for i, _ in ids_atoms], smod.modulated_structure(uc, _ssg(), [a for _, a in ids_atoms], scale)
 
 
+class _Average(object):
+  """olex2.refine's parametrisation of the 3D model (AFIX, EXYZ/EADP, rigid groups, fixed parameters) and its
+  restraints, for smod.refine(average=...). Riding atoms (AFIX m > 0) also ride on their pivot's waves."""
+
+  def __init__(self, ids, xs):
+    from refinement import FullMatrixRefine
+    self.fmr = FullMatrixRefine()
+    self.rep = self.fmr.run(reparametrisation_only=True)
+    if self.rep is None:
+      raise RuntimeError("olex2.refine could not set up the model")
+    self.rm = self.fmr.restraints_manager()
+    self.xs = xs
+    sc_of = {aid: k for k, aid in enumerate(self.fmr.olx_atoms.atom_ids)}
+    self.sc = [sc_of[i] for i in ids]
+    self.shift(np.zeros(self.rep.n_independents))   # riding atoms where the constraints put them
+    ours = {aid: k for k, aid in enumerate(ids)}
+    self.follow = {}
+    uc = xs.unit_cell
+    for m, n, pivot, dependent, _, _ in self.fmr.olx_atoms.afix_iterator():
+      if m == 0:  # ponytail: rigid groups keep their own waves; one shared wave set when it matters
+        continue
+      kp = ours.get(self.fmr.olx_atoms.atom_ids[pivot])
+      for dep in dependent:
+        k = ours.get(self.fmr.olx_atoms.atom_ids[dep])
+        if k is None or kp is None:
+          continue
+        d = xs.atoms[k].site - xs.atoms[kp].site
+        d -= np.round(d)
+        if uc.length(tuple(d)) < 1.6:   # else the pivot is a symmetry image: the wave stays free
+          self.follow[k] = (kp, float(xs.q.dot(d)))
+
+  def _jt(self):
+    jt = self.rep.jacobian_transpose_matching(self.rep.mapping_to_grad_fc_all)
+    return jt, jt.as_dense_matrix().as_numpy_array().T   # (n_grad_fc, n_independent)
+
+  def jacobian(self):
+    _, j = self._jt()
+    pm = self.rep.parameter_map()
+    rows = []
+    for k, at in zip(self.sc, self.xs.atoms):
+      e = pm[k]
+      for start, n in ((e.site, 3), (e.u_iso, 1) if at.u_star is None else (e.u_aniso, 6)):
+        rows.extend([j[start + i] if start >= 0 else np.zeros(j.shape[1]) for i in range(n)])
+    return np.array(rows)
+
+  def shift(self, x):
+    from scitbx.array_family import flex
+    self.rep.apply_shifts(flex.double(list(np.asarray(x, dtype=float))))
+    self.rep.linearise()
+    self.rep.store()
+    scs = self.rep.structure.scatterers()
+    for k, at in zip(self.sc, self.xs.atoms):
+      at.site = np.array(scs[k].site)
+      if at.u_star is None:
+        at.u_iso = scs[k].u_iso
+      else:
+        at.u_star = np.array(scs[k].u_star)
+
+  def restraints(self):
+    le = self.rm.build_linearised_eqns(self.rep.structure, self.rep.parameter_map())
+    if le.n_restraints() == 0:
+      return None
+    jt, _ = self._jt()
+    design = (le.design_matrix * jt.transpose()).as_dense_matrix().as_numpy_array()
+    return design, le.deltas.as_numpy_array(), le.weights.as_numpy_array()
+
+
 def refine(cycles=10, harmonics=1, n_x4=32):
   """Least squares on F^2 of all hklm data: average sites, Uiso/Uaniso, displacive waves and scale, under the
-  superspace site symmetry.
+  superspace site symmetry. The constraints and restraints of the 3D model (as olex2.refine sets them up) hold;
+  riding atoms take their pivot's waves.
 
   shortcut: displacive waves only from Olex2 (occupancy/ADP waves and crenels of an msCIF model are not
-  carried), no restraints, merging or extinction.
+  carried), no merging or extinction.
   """
   h, m, i_obs, sig = _data()
   ids, xs = _structure(harmonics)
   tab, kw = _calc_kw()
+  try:
+    avg = _Average(ids, xs)
+  except Exception as e:
+    avg = None
+    print("modulation: refining without the 3D constraints and restraints (%s)" % e)
   if store.get("scale") is None:
     _, fc, _ = smod.calculator(h[m == 0], m[m == 0], int(n_x4), **kw).compute(xs)
     xs.scale = float(np.sum(i_obs[m == 0] * fc) / max(np.sum(fc * fc), 1e-30))
   print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s%s"
         % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path),
            " (electrons, kinematical)" if "radiation" in kw else ""))
-  hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4), **kw)
+  hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4), average=avg, **kw)
   for i, at in zip(ids, xs.atoms):
     olx.xf.au.SetAtomCrd(i, *at.site)
     if at.u_star is None:

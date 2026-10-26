@@ -432,6 +432,11 @@ class RunSolutionPrg(RunPrg):
             return
     OV.SetParam('snum.refinement.data_parameter_ratio', 0)
     nsa2_set_param('use_aspherical', False)
+    try:  # q and the superspace group belong to the old model
+      import Modulation
+      Modulation.reset()
+    except Exception as e:
+      print("modulation reset: %s" % e)
     self.startRun()
     OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
