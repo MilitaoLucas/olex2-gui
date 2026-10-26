@@ -363,6 +363,15 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       shutil.rmtree(self.jobs_dir)
     print(" ... done!")
 
+  def _adopt_cuqct_output(self):
+    # NoSpherA2 writes experimental.tsc(b), and with -tshb (SALTED, RI fit) also the
+    # fitted densities, which olex2.refine evaluates at any reflection: those win
+    # only what this run wrote: a <name>.tshb left from an earlier run must not win
+    fresh = [ext for ext in (".tshb", ".tscb", ".tsc") if os.path.exists("experimental" + ext)]
+    for ext in fresh:
+      shutil.move("experimental" + ext, self.name + ext)
+    return self.set_tsc_file_with_metadata(self.name + (fresh[0] if fresh else ".tsc"))
+
   def set_tsc_file_with_metadata(self, filename, origin=None, record=True):
     """
     Set the NoSpherA2 file parameter and store metadata (hash and origin).
@@ -644,7 +653,7 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     self.name = olx.FileName()
     basis_name = nsa2_get_param('basis_name')
     basis = basis_name.lower() if isinstance(basis_name, str) else ''
-    update = not (".tsc" in wfn_code or ".tscb" in wfn_code)
+    update = not (".tsc" in wfn_code or ".tshb" in wfn_code)
     experimental_SF = nsa2_get_param('NoSpherA2_SF')
     
     #if not self._ensure_active_tscb_matches_model():
@@ -740,7 +749,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     has_backup_candidates = False
     f_time = None
     if not nsa2_get_param('no_backup'):
-      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn", ".xtb", ".tscb", ".tsc", ".wfnlog"]
+      backup_endings = [".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn", ".xtb", ".tscb", ".tshb", ".tsc", ".wfnlog"]
       for file in os.listdir(olx.FilePath()):
         full_file = os.path.join(olx.FilePath(), file)
         if any(file.endswith(x) for x in backup_endings):
@@ -751,7 +760,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         if file.endswith(".tsc"):
           tsc_exists = True
           f_time = os.path.getmtime(full_file)
-        if file.endswith(".tscb"):
+        if file.endswith((".tscb", ".tshb")):
           tsc_exists = True
           f_time = os.path.getmtime(full_file)
 
@@ -976,12 +985,19 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):
           shutil.move("experimental.tscb", self.name + ".tscb")
+        # the fitted densities themselves, when asked for (-tshb): olex2.refine
+        # evaluates them at any reflection, so they replace the table
+        use_tshb = os.path.exists("experimental.tshb") and not need_to_combine
+        if use_tshb:
+          shutil.move("experimental.tshb", self.name + ".tshb")
         # With a discambMATTS part still to be merged in, this table is an
         # intermediate: adopting it now would rewrite its label columns as
         # scatterer ids, and -merge then refuses it next to discamb's label
         # table ("mixed labels and IDs"). combine_tscs adopts the merged one.
         if not need_to_combine:
-          if os.path.exists(self.name + ".tscb"):
+          if use_tshb:
+            self.set_tsc_file_with_metadata(self.name + ".tshb")
+          elif os.path.exists(self.name + ".tscb"):
             self.set_tsc_file_with_metadata(self.name + ".tscb")
           else:
             self.set_tsc_file_with_metadata(self.name + ".tsc")
@@ -1085,26 +1101,14 @@ Please select one of the generators from the drop-down menu.""", "O", False)
             #hkl_fn = path_base + ".hkl"
             cif_fn = path_base + ".cif"
             cuqct_tsc(wfn_fn, cif_fn, groups)
-            if os.path.exists("experimental.tsc"):
-              shutil.move("experimental.tsc", self.name + ".tsc")
-            if os.path.exists("experimental.tscb"):
-              shutil.move("experimental.tscb", self.name + ".tscb")
-              self.set_tsc_file_with_metadata(self.name + ".tscb")
-            else:
-              self.set_tsc_file_with_metadata(self.name + ".tsc")
+            self._adopt_cuqct_output()
 
           elif wfn_code == "SALTED":
             path_base = os.path.join(self.jobs_dir, self.name)
             cif_fn = path_base + ".cif"
             wfn_fn = path_base + ".xyz"
             cuqct_tsc(wfn_fn, cif_fn, groups)
-            if os.path.exists("experimental.tsc"):
-              shutil.move("experimental.tsc", self.name + ".tsc")
-            if os.path.exists("experimental.tscb"):
-              shutil.move("experimental.tscb", self.name + ".tscb")
-              self.set_tsc_file_with_metadata(self.name + ".tscb")
-            else:
-              self.set_tsc_file_with_metadata(self.name + ".tsc")
+            self._adopt_cuqct_output()
 
         elif wfn_code != "Tonto":
           job = Job(self, self.name)
@@ -1923,7 +1927,7 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
     if not source_is_tsc() and _input != "Thakkar IAM":
       keep_valid_choice('method', get_functional_list(_input), "GFN2" if _input == "xTB" else "PBE")
       keep_valid_choice('basis_name', NoSpherA2_instance.getBasisListStr(), "def2-SVP")
-    if ".tsc" in _input:
+    if ".tsc" in _input or ".tshb" in _input:
       NoSpherA2_instance.set_tsc_file_with_metadata(_input, record=False)
     olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
     if _input != nsa2_get_param('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
@@ -2099,7 +2103,7 @@ OV.registerFunction(make_XCW_GUI, False, "NoSpherA2")
 def get_sources_string():
     PS = 'Please Select'
     tsc_header = " -- From .tsc file -- "
-    tsc_files_raw = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
+    tsc_files_raw = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb;tshb")
     tsc_files_proc = ""
     for f in tsc_files_raw.split(';'):
       if f == "":

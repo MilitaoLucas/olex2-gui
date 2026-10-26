@@ -179,6 +179,10 @@ def read_scatterers(tsc_file):
         tsc_file = os.fsdecode(tsc_file)
     if tsc_file.endswith('.tscb'):
         return read_scatterers_from_tscb(tsc_file)
+    elif tsc_file.endswith('.tshb'):
+        # densities, named by label: smtbx.structure_factors.direct.tshb
+        from smtbx.structure_factors.direct import tshb
+        return [a.label for a in tshb.read(tsc_file)[1]]
     else:
         return read_scatterers_from_tsc(tsc_file)
 
@@ -191,8 +195,9 @@ def read_header_lines(tsc_file):
     """
     if isinstance(tsc_file, bytes):
         tsc_file = os.fsdecode(tsc_file)
-    if tsc_file.endswith('.tscb'):
+    if tsc_file.endswith(('.tscb', '.tshb')):
         with open(tsc_file, 'rb') as f:
+            f.read(_binary_prefix(tsc_file))
             header_length = int.from_bytes(f.read(4), byteorder='little')
             raw = f.read(header_length).decode('utf-8', 'replace').split('\n')
     else:
@@ -226,8 +231,9 @@ def write_header_lines(tsc_file, lines):
         return
     import shutil
     tmp = tsc_file + '.header.tmp'
-    if tsc_file.endswith('.tscb'):
+    if tsc_file.endswith(('.tscb', '.tshb')):
         with open(tsc_file, 'rb') as f, open(tmp, 'wb') as g:
+            g.write(f.read(_binary_prefix(tsc_file)))
             header_length = int.from_bytes(f.read(4), byteorder='little')
             header = f.read(header_length)
             header = compose_header(header, _tscb_header_says_ids(header), lines)
@@ -247,6 +253,11 @@ def write_header_lines(tsc_file, lines):
                     g.write(line)
             shutil.copyfileobj(f, g)
     os.replace(tmp, tsc_file)
+
+
+def _binary_prefix(tsc_file):
+    # a .tshb puts "TSHB" and its version before the header length a .tscb starts with
+    return 8 if tsc_file.endswith('.tshb') else 0
 
 
 def _header_key(line):
@@ -397,6 +408,8 @@ def update_scatterers_in_file(tsc_file, scatterers, extra_header_lines=None):
     kind = 'labels' if isinstance(scatterers[0], str) else 'ids'
     print("Updating the %d scatterer %s in %s"
           % (len(scatterers), kind, os.path.basename(tsc_file)))
+    if tsc_file.endswith('.tshb'):
+        raise ScattererResolutionError(".tshb densities are named by atom label, not rewritten")
     if tsc_file.endswith('.tscb'):
         update_tscb_file(tsc_file, scatterers, extra_header_lines)
     else:

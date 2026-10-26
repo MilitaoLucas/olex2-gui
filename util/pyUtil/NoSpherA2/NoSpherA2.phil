@@ -382,6 +382,9 @@ snum{
       .type = choice
     RI_restraint_lmax = 0
       .type = int
+    use_tshb = True
+      .type = bool
+      .help = "With RI-Fit or SALTED, hand olex2.refine the fitted densities (.tshb) instead of a table of form factors"
     NoSpherA2_SF = True
       .type = bool
     NoSpherA2_debug = False

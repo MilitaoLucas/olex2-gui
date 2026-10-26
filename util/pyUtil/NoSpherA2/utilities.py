@@ -313,7 +313,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
   except NameError:
     if not joint or OV.GetVar('NoSpherA2-Error') == "Wfn-Interrupted":
       raise
-  for f in ("experimental.tsc", "experimental.tscb"):
+  for f in ("experimental.tsc", "experimental.tscb", "experimental.tshb"):
     if os.path.exists(f):
       os.remove(f)
   print("modulation: the joint NoSpherA2 call did not work out (see %s.partitionlog_old); the ordinary m = 0 table "
@@ -362,6 +362,10 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
     if OV.HasGUI():
       OV.UpdateHtml()
       olx.Refresh()
+  # a .tshb wins over the table it comes with, so one left by an earlier run that died must not be taken for this
+  # run's: a NoSpherA2 without -tshb (it ignores the option) or a partition that writes none falls back to the table
+  if os.path.exists("experimental.tshb"):
+    os.remove("experimental.tshb")
   ncpus = nsa2_get_param('ncpus')
   if os.path.isfile(os.path.join(folder, final_log_name)):
     shutil.move(os.path.join(folder, final_log_name), os.path.join(folder, final_log_name + "_old"))
@@ -384,6 +388,8 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
       return False
     args.append("-SALTED")
     args.append(salted_model_dir)
+    if nsa2_get_param('use_tshb'):
+      args.append("-tshb")
   if hkl_file is not None:
     if not os.path.exists(hkl_file):
       from cctbx_olex_adapter import OlexCctbxAdapter
@@ -432,6 +438,8 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
       mem = float(nsa2_get_param('mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))
+      if nsa2_get_param('use_tshb'):
+        args.append("-tshb")
     else:
       olx.Echo("RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!", m="warning")
       print("Performing refinement without RI fit!")
@@ -1358,7 +1366,7 @@ def calculate_number_of_electrons():
 
 def source_is_tsc():
   source = software()
-  if ".tsc" in source or ".tscb" in source:
+  if ".tsc" in source or ".tshb" in source:
     return True
   else:
     return False
@@ -1566,8 +1574,8 @@ def _nsa2_normalise_table_labels(path):
       update_scatterers_in_file, SOURCE_LABELS_KEY
     from aaff import get_current_scatter_ids
     labels = read_scatterers(path)
-    if not labels or not isinstance(labels[0], str):
-      return False
+    if not labels or not isinstance(labels[0], str) or path.endswith('.tshb'):
+      return False      # a .tshb is keyed by label by design
     model = olexex.OlexRefinementModel()
     ids = convert_labels_to_ids(labels, [atom["label"] for atom in model._atoms],
                                 get_current_scatter_ids(model))
@@ -1887,7 +1895,7 @@ def write_precise_model_file(model = None, cov_matrix = None, annotations = None
 OV.registerFunction(write_precise_model_file, False, "NoSpherA2")
 
 def get_tsc_file_dropdown_items():
-    res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb")
+    res = gui.GetFileListAsDropdownItems(OV.FilePath(), "tsc;tscb;tshb")
     t = res.split(";")
     if len(t[0]) == 0:
         # adopting the sentinel clears the hash and origin the previous

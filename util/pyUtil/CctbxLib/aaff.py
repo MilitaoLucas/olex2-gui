@@ -17,6 +17,8 @@ def _table_identifies_by_id(table_file_name):
   import struct
   try:
     with open(table_file_name, 'rb') as f:
+      if table_file_name.endswith('.tshb'):
+        return False      # densities named by label
       if table_file_name.endswith('.tscb'):
         head_len = struct.unpack('<i', f.read(4))[0]
         return b'SCATTERER_IDS' in f.read(head_len)
@@ -127,7 +129,7 @@ def deal_with_AAFF(self: RunRefinementPrg):
     HAR_log.write("{:3d}".format(run))
     energy = None
     source = str(nsa2_get_param('source')).lstrip()
-    update = ".tsc" not in source and ".tscb" not in source
+    update = ".tsc" not in source and ".tscb" not in source and ".tshb" not in source
     if "Please S" in source and update:
       olx.Alert("No tsc generator selected",\
 """Error: No generator for tsc files selected.
@@ -243,7 +245,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           wfn_file = file
         elif file.endswith(".gbw"):
           wfn_file = file
-        elif file.endswith(".tscb"):
+        elif file.endswith(".tscb") or file.endswith(".tshb"):
           tsc_exists = True
       if not tsc_exists:
         print("Error during NoSpherA2: No .tsc file found")
