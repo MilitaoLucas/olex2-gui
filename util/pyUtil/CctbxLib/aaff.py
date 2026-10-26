@@ -18,7 +18,9 @@ def _table_identifies_by_id(table_file_name):
   try:
     with open(table_file_name, 'rb') as f:
       if table_file_name.endswith('.tshb'):
-        return False      # densities named by label
+        from smtbx.structure_factors.direct import tshb
+        atoms = tshb.read(table_file_name)[1]      # version 4: keyed by id, as a .tscb
+        return bool(atoms) and atoms[0].key is not None
       if table_file_name.endswith('.tscb'):
         head_len = struct.unpack('<i', f.read(4))[0]
         return b'SCATTERER_IDS' in f.read(head_len)

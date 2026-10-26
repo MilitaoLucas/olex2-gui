@@ -353,8 +353,8 @@ def _split_joint(req):
 
 def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint, tshb=True):
   """The body of cuqct_tsc; joint receives the joint request when one is made (None: never make one)."""
-  # several wavefunctions make one combined table; an older NoSpherA2 overwrote one .tshb per part, missing atoms -> IAM
-  tshb = tshb and nsa2_get_param('use_tshb') and not (isinstance(wfn_file, list) and len(wfn_file) > 1)
+  # several wavefunctions (disorder parts) make one joint .tshb, as they make one table
+  tshb = tshb and nsa2_get_param('use_tshb')
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -517,6 +517,9 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   if d_min is not None:
     args.append("-dmin")
     args.append(str(d_min))
+  # a .tshb (and its table) is keyed by scatterer id: CIF residue labels (N_A:1) match no model label (A:N_1)
+  if "-tshb" in args:
+    args.remove("-tsc_labels")
   # twinned data keep the ordinary call: smtbx.modulation does not refine them
   req = None
   if joint is not None and "-twin" not in args and d_min is not None:
@@ -524,7 +527,8 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   if req:
     joint["req"] = req
     # rows (h k l) / scale: the satellites S = h + m q and the m = 0 box, read as they are; columns by scatterer id
-    args.remove("-tsc_labels")
+    if "-tsc_labels" in args:
+      args.remove("-tsc_labels")
     if "-tshb" in args:  # the split needs the table itself
       args.remove("-tshb")
     i = args.index("-hkl_min_max")

@@ -180,9 +180,14 @@ def read_scatterers(tsc_file):
     if tsc_file.endswith('.tscb'):
         return read_scatterers_from_tscb(tsc_file)
     elif tsc_file.endswith('.tshb'):
-        # densities, named by label: smtbx.structure_factors.direct.tshb
+        # densities: smtbx.structure_factors.direct.tshb. Version 4 keys every
+        # record by scatterer id, as a .tscb; older files by label
+        import io
         from smtbx.structure_factors.direct import tshb
-        return [a.label for a in tshb.read(tsc_file)[1]]
+        atoms = tshb.read(tsc_file)[1]
+        if atoms and atoms[0].key is not None:
+            return [read_binary_scatterers(io.BytesIO(a.key)) for a in atoms]
+        return [a.label for a in atoms]
     else:
         return read_scatterers_from_tsc(tsc_file)
 
@@ -400,6 +405,22 @@ def update_tscb_file(tscb_file, scatterers, extra_header_lines=None):
         # that arithmetic come out to no known width at all.
         f.truncate()
 
+def update_tshb_file(tshb_file, ids):
+    # the densities stay as they are; only each record's id key follows the atom.
+    # A label-keyed .tshb has nothing to update: a label does not go stale.
+    from smtbx.structure_factors.direct import tshb
+    header, atoms = tshb.read(tshb_file)
+    if not atoms or atoms[0].key is None or len(ids) != len(atoms) or isinstance(ids[0], str):
+        raise ScattererResolutionError(
+            "%s: %d ids for %d records; only an id-keyed .tshb takes new ids"
+            % (os.path.basename(tshb_file), len(ids), len(atoms)))
+    # write() puts FRAME and UNITS first itself
+    header = dict((k, v) for k, v in header.items() if k not in ("FRAME", "UNITS"))
+    atoms = [a._replace(key=bytes(i.to_bytes())) for a, i in zip(atoms, ids)]
+    tmp = tshb_file + ".tmp"
+    tshb.write(tmp, atoms, header)
+    os.replace(tmp, tshb_file)
+
 def update_scatterers_in_file(tsc_file, scatterers, extra_header_lines=None):
     # Rewriting the table is the one action here that can damage it, and when
     # it goes wrong nothing else says so: the file stays the right shape, the
@@ -409,8 +430,8 @@ def update_scatterers_in_file(tsc_file, scatterers, extra_header_lines=None):
     print("Updating the %d scatterer %s in %s"
           % (len(scatterers), kind, os.path.basename(tsc_file)))
     if tsc_file.endswith('.tshb'):
-        raise ScattererResolutionError(".tshb densities are named by atom label, not rewritten")
-    if tsc_file.endswith('.tscb'):
+        update_tshb_file(tsc_file, scatterers)
+    elif tsc_file.endswith('.tscb'):
         update_tscb_file(tsc_file, scatterers, extra_header_lines)
     else:
         update_tsc_file(tsc_file, scatterers, extra_header_lines)
@@ -753,7 +774,8 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
   """
   import numpy as np
   entries = read_scatterers(tsc_file)
-  if not entries or isinstance(entries[0], str):
+  # densities are not rows to permute; a .tshb moved by symmetry is recalculated
+  if not entries or isinstance(entries[0], str) or tsc_file.endswith('.tshb'):
     return [], [], 0
   header = read_header_lines(tsc_file)
   if not tsc_file.endswith('.tscb') and header.get('SYMM', '').lower() != 'expanded':
