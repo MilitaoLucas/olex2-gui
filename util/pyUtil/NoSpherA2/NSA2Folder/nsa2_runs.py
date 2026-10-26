@@ -25,8 +25,8 @@ import shutil
 HISTORY_DIR = os.path.join("olex2", "NoSpherA2_history")
 # the files NoSpherA2 archives (NoSpherA2.py, backup_endings)
 BACKUP_ENDINGS = (".wfn", ".wfx", ".molden", ".gbw", ".fchk", ".owf.fchk", ".ffn",
-                  ".xtb", ".tscb", ".tsc", ".wfnlog")
-TABLE_ENDINGS = (".tscb", ".tsc")
+                  ".xtb", ".tshb", ".tscb", ".tsc", ".wfnlog")
+TABLE_ENDINGS = (".tshb", ".tscb", ".tsc")
 WFN_ENDINGS = (".gbw", ".xtb", ".wfx", ".wfn", ".molden", ".fchk", ".owf.fchk", ".ffn")
 _STAMP = "%Y-%m-%d_%H-%M-%S"
 # runs further apart than this (seconds) belong to different refinements

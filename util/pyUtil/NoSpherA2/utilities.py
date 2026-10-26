@@ -298,16 +298,18 @@ def _file_d_min():
     return None
 
 @run_with_bitmap('Partitioning')
-def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False, parts=None):
+def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read_k_pts=False, parts=None, tshb=True):
   """parts: the PART number of each wavefunction in wfn_file (Hybrid mode reads
   the per-part settings by that number; without it they are taken as 1..n).
+  tshb: False when the table is merged with another afterwards, which a .tshb cannot be (NoSpherA2 writes a
+  .tshb instead of the table when asked).
   A modulated structure (spy.modulation with q) gets one NoSpherA2 call for both tables, split into <name>.tscm and
   the ordinary m = 0 table; if that call fails or does not hold every requested row (a NoSpherA2 without
   -hkl_scale), the ordinary call runs instead and there is no satellite table."""
   given = copy.deepcopy(groups)
   joint = {}
   try:
-    res = _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint)
+    res = _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint, tshb)
     if not joint or _split_joint(joint["req"]):
       return res
   except NameError:
@@ -318,7 +320,7 @@ def cuqct_tsc(wfn_file, cif, groups: list, hkl_file=None, save_k_pts=False, read
       os.remove(f)
   print("modulation: the joint NoSpherA2 call did not work out (see %s.partitionlog_old); the ordinary m = 0 table "
         "instead, no satellite table" % OV.ModelSrc())
-  return _cuqct_tsc(wfn_file, cif, given, hkl_file, save_k_pts, read_k_pts, parts, None)
+  return _cuqct_tsc(wfn_file, cif, given, hkl_file, save_k_pts, read_k_pts, parts, None, tshb)
 
 
 def _joint_request(box, d_min, ed):
@@ -349,8 +351,10 @@ def _split_joint(req):
   return True
 
 
-def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint):
+def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint, tshb=True):
   """The body of cuqct_tsc; joint receives the joint request when one is made (None: never make one)."""
+  # several wavefunctions make one combined table; an older NoSpherA2 overwrote one .tshb per part, missing atoms -> IAM
+  tshb = tshb and nsa2_get_param('use_tshb') and not (isinstance(wfn_file, list) and len(wfn_file) > 1)
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -388,7 +392,7 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
       return False
     args.append("-SALTED")
     args.append(salted_model_dir)
-    if nsa2_get_param('use_tshb'):
+    if tshb:
       args.append("-tshb")
   if hkl_file is not None:
     if not os.path.exists(hkl_file):
@@ -438,7 +442,7 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
       mem = float(nsa2_get_param('mem')) * 1000 #Mem in MB
       args.append("-mem")
       args.append(str(mem))
-      if nsa2_get_param('use_tshb'):
+      if tshb:
         args.append("-tshb")
     else:
       olx.Echo("RI-FIT currently only works with ORCA newer than Version 5.0! Please update your ORCA version!", m="warning")
@@ -521,6 +525,8 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
     joint["req"] = req
     # rows (h k l) / scale: the satellites S = h + m q and the m = 0 box, read as they are; columns by scatterer id
     args.remove("-tsc_labels")
+    if "-tshb" in args:  # the split needs the table itself
+      args.remove("-tshb")
     i = args.index("-hkl_min_max")
     del args[i:i + 7]
     i = args.index("-dmin")
@@ -768,6 +774,7 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
         os.path.join(folder, name + ".tscb"),
         os.path.join(folder, "experimental.tsc"),
         os.path.join(folder, "experimental.tscb"),
+        os.path.join(folder, "experimental.tshb"),
       ]
       has_tsc = any(os.path.exists(f) for f in tsc_candidates)
       if not has_tsc:

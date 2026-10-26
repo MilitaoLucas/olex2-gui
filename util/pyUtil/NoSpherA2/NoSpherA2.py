@@ -980,7 +980,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       if need_to_partition:
         cif_fn = os.path.join(self.jobs_dir, self.name + ".cif")
         #hkl_fn = os.path.join(self.jobs_dir, self.name + ".hkl")
-        cuqct_tsc(wfn_files, cif_fn, groups, parts=wfn_parts)
+        cuqct_tsc(wfn_files, cif_fn, groups, parts=wfn_parts, tshb=not need_to_combine)
         if os.path.exists("experimental.tsc"):
           shutil.move("experimental.tsc", self.name + ".tsc")
         if os.path.exists("experimental.tscb"):

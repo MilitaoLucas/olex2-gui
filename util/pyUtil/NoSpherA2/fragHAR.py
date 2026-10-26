@@ -1224,7 +1224,7 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
       raise NameError('Unsuccesfull Wavefunction Calculation during fragHAR in fragment %d!' % i)
   t3 = time.time()
   try:
-    cuqct_tsc(wfns, cifs, groups)
+    cuqct_tsc(wfns, cifs, groups, tshb=False)
   except:
     raise NameError('Unsuccesfull Partitioning during fragHAR"')
   try:
