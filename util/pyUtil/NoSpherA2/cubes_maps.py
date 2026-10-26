@@ -755,13 +755,13 @@ def get_map_types():
   if os.path.isfile(_p(name + "_rdg.cube", d)) and os.path.isfile(_p(name + "_signed_rho.cube", d)):
     list += "NCI;"
   # "Rho + ESP" / "Rho + ELI" still work via map.type, but are off the menu: the ESP and Hirshfeld surfaces replace them
-  if os.path.isfile(os.path.join(folder, name + "_fukui_plus.cube")):
+  if os.path.isfile(_p(name + "_fukui_plus.cube", d)):
     list += "Fukui f+;"
-  if os.path.isfile(os.path.join(folder, name + "_fukui_minus.cube")):
+  if os.path.isfile(_p(name + "_fukui_minus.cube", d)):
     list += "Fukui f-;"
-  if os.path.isfile(os.path.join(folder, name + "_fukui_zero.cube")):
+  if os.path.isfile(_p(name + "_fukui_zero.cube", d)):
     list += "Fukui f0;"
-  if os.path.isfile(os.path.join(folder, name + "_dual_descriptor.cube")):
+  if os.path.isfile(_p(name + "_dual_descriptor.cube", d)):
     list += "Dual Descriptor;"
   from utilities import get_nmo, get_ncen
   nmo = get_nmo()

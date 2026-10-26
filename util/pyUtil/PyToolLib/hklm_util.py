@@ -1,15 +1,15 @@
 """(3+1)D .hklm reflection files for the GUI side: h k l m I sigma [batch], fixed 4I4,2F8 or space separated, ended
-by 0 0 0 0 or the first line that is neither. Numpy only, so an .hklm source works with any cctbx bundle; the rules
-are those of Olex2's THklFile::LoadHklmFromStrings and smtbx.modulation.read_hklm.
+by 0 0 0 0; lines that are neither are headers before the data and skipped (and reported) after it. Numpy only,
+so an .hklm source works with any cctbx bundle; the rules are those of Olex2's THklFile::LoadHklmFromStrings and smtbx.modulation.read_hklm.
 """
 import numpy as np
 
 
 def read_hklm(path):
   """(h (N,3), m (N,), I, sigma)."""
-  rows = []
+  rows, bad = [], []
   with open(path, errors="replace") as f:
-    for line in f:
+    for n, line in enumerate(f, 1):
       line = line.rstrip("\r\n")
       try:
         if len(line) < 32:
@@ -17,15 +17,19 @@ def read_hklm(path):
         v = [int(line[i:i + 4]) for i in (0, 4, 8, 12)] + [float(line[16:24]), float(line[24:32])]
       except ValueError:
         t = line.split()
+        if not t:
+          continue
         try:
           v = [int(x) for x in t[:4]] + [float(t[4]), float(t[5])]
         except (ValueError, IndexError):
-          if rows:
-            break
-          continue   # header lines
+          if rows:   # before the data a header; after it skipped, not the end of the file
+            bad.append((n, line))
+          continue
       if not any(v[:4]):
         break
       rows.append(v)
+  if bad:
+    print("hklm: skipped %d unreadable line(s) in %s, the first is line %d: %r" % (len(bad), path, *bad[0]))
   a = np.array(rows, dtype=float).reshape(-1, 6)
   return a[:, :3].astype(int), a[:, 3].astype(int), a[:, 4], a[:, 5]
 

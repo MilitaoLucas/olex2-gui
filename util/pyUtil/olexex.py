@@ -828,7 +828,7 @@ def SetAtomicVolumeInSnumPhil(totalcount):
     OV.SetParam('snum.solution.current_atomic_volume',None)
 
 def GetHklFileList():
-  reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
+  reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc', 'hklm']
   g = OV.ListFiles(OV.FilePath(), ';'.join(reflection_file_extensions))
   g.sort()
   try:
