@@ -6,7 +6,18 @@ import numpy as np
 
 
 def read_hklm(path):
-  """(h (N,3), m (N,), I, sigma)."""
+  """(h (N,3), m (N,), I, sigma). smtbx.modulation's reader when the cctbx bundle has it (a regular file in one
+  numpy conversion, the same arrays); this copy otherwise, so an .hklm source still works with an older bundle."""
+  try:
+    from smtbx.modulation import read_hklm as smtbx_read_hklm
+  except ImportError:
+    smtbx_read_hklm = None
+  if smtbx_read_hklm is not None:
+    return smtbx_read_hklm(path)
+  return _read_hklm_here(path)
+
+
+def _read_hklm_here(path):
   rows, bad = [], []
   with open(path, errors="replace") as f:
     for n, line in enumerate(f, 1):

@@ -77,22 +77,42 @@ store = _Store()
 _last_ranking = []
 
 
+# what belongs to the data rather than to a model, and so outlives reset(): the hklm path, its q (the m index
+# means nothing without it) and the families the user holds fixed
+_KEEP_ACROSS_RESET = ("hklm", "q", "hold")
+
+
 def reset():
-  """Forget q, the superspace group, the waves and the fit: a new solution starts from 3D. The hklm path stays."""
+  """Forget the superspace group, the waves and the fit: a new solution starts from 3D. The hklm path and its q stay
+  (they describe the data, not the model), so the solve can rank the superspace groups of the group it finds."""
   side = store._side()
   keys = set(side) | {"q", "ops", "taus", "group", "scale", "r1"}
-  keys |= {"wave." + olx.xf.au.GetAtomName(i) for i in range(int(olx.xf.au.GetAtomCount()))}
-  keys.discard("hklm")
+  keys |= {pre + olx.xf.au.GetAtomName(i) for i in range(int(olx.xf.au.GetAtomCount())) for pre in ("wave.", "mwave.")}
+  kept = dict((k, store.get(k)) for k in _KEEP_ACROSS_RESET if store.get(k) not in (None, ""))
   for k in keys:
+    if k in kept:
+      continue
     try:
       store.header.delete(k)
     except Exception:
       pass
-  if os.path.exists(store._path()):
+  if os.path.exists(store._path()) or kept:
     with open(store._path(), "w") as f:
-      if side.get("hklm"):
-        f.write("hklm=%s\n" % side["hklm"])
+      for k in sorted(kept):
+        f.write("%s=%s\n" % (k, kept[k]))
   _clear_caches()
+
+
+def after_solve():
+  """After a structure solution (tidy_solution): rank the superspace groups of the group found when q is known,
+  else say how to give it. Returns True when candidates() ran."""
+  if store.get("q"):
+    candidates()
+    return True
+  if olx.HKLSrc().lower().endswith(".hklm"):
+    print("modulation: solved from the main reflections; give q (spy.modulation.set_q, or 'set q' under "
+          "the HOS) for the superspace groups and the modulated refinement")
+  return False
 _stop = [False]
 
 

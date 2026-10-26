@@ -779,11 +779,7 @@ class Method_cctbx_Flint(Method_cctbx_ChargeFlip):
     # modulated data (spy.modulation.load): rank the superspace groups of the group FLINT settled on
     try:
       import Modulation
-      if Modulation.store.get("q"):
-        Modulation.candidates()
-      elif olx.HKLSrc().lower().endswith(".hklm"):
-        print("modulation: solved from the main reflections; give q (spy.modulation.set_q, or 'set q' under "
-              "the HOS) for the superspace groups and the modulated refinement")
+      Modulation.after_solve()
     except Exception as e:
       print("modulation: superspace candidates skipped: %s" % e)
 
