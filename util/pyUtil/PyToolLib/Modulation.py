@@ -8,7 +8,10 @@ smtbx.modulation.
                                            reads .hklm natively (3D tools see m = 0, olx.HKLM() counts satellites)
   spy.modulation.candidates()              superspace groups of the current space group + q, ranked by absences
   spy.modulation.choose(n)                 take candidate n of the last ranking
-  spy.modulation.refine([cycles, harmonics])
+  spy.modulation.refine([cycles, harmonics])  also refines the occupancy/ADP waves, crenels, Legendre and
+                                           x-harmonic terms the model has (msCIF import or an earlier refine)
+  spy.modulation.hold([family, on])        hold one of those families fixed in refine: occ_waves, adp_waves,
+                                           crenel, legendre, xharm, u_xharm (no argument: list what is held)
   spy.modulation.wiggle() / stop()         animate the asymmetric unit in the viewer, section t = 0..1
   spy.modulation.movie([file])             GIF of a supercell along q, every symmetry copy on its own wave
   spy.modulation.de_wolff([label, axis])   de Wolff section x_i - x4 of the superspace Fourier map (PNG)
@@ -94,6 +97,75 @@ _stop = [False]
 
 def _floats(s):
   return [float(v) for v in str(s).replace(",", " ").split()]
+
+
+# the block families beyond the displacive waves, by their smtbx.modulation flag, and the atom attributes of each
+EXTRA_FAMILIES = (("occ_waves", ("occ_sin", "occ_cos")), ("adp_waves", ("u_sin", "u_cos")), ("crenel", ("crenel",)),
+                  ("legendre", ("legendre",)), ("xharm", ("xharm",)), ("u_xharm", ("u_xharm",)))
+_EXTRA_WIDTH = {"occ_sin": 1, "occ_cos": 1, "u_sin": 6, "u_cos": 6, "legendre": 3, "xharm": 3, "u_xharm": 6}
+
+
+def extras_text(at):
+  """The atom's waves other than the displacive ones as one store line, 'name v v ...; name ...'; '' if none.
+  The sawtooth is carried too (it is not refined)."""
+  parts = []
+  for name in ("occ_sin", "occ_cos", "u_sin", "u_cos", "legendre", "xharm", "u_xharm"):
+    v = np.asarray(getattr(at, name), dtype=float).ravel()
+    if v.size:
+      parts.append(name + " " + " ".join("%.10g" % x for x in v))
+  if getattr(at, "crenel", None):
+    parts.append("crenel %.10g %.10g" % tuple(at.crenel))
+  if getattr(at, "sawtooth", None) is not None:
+    a, c, w = at.sawtooth
+    parts.append("sawtooth " + " ".join("%.10g" % x for x in list(a) + [c, w]))
+  return "; ".join(parts)
+
+
+def apply_extras(at, text):
+  """Put the waves of an extras_text line onto a modulated_atom."""
+  for part in (text or "").split(";"):
+    t = part.split()
+    if not t:
+      continue
+    name, v = t[0], [float(x) for x in t[1:]]
+    if name in _EXTRA_WIDTH:
+      arr = np.array(v, dtype=float)
+      setattr(at, name, arr if _EXTRA_WIDTH[name] == 1 else arr.reshape(-1, _EXTRA_WIDTH[name]))
+    elif name == "crenel":
+      at.crenel = (v[0], v[1])
+    elif name == "sawtooth":
+      at.sawtooth = (np.array(v[:3]), v[3], v[4])
+  return at
+
+
+def _held():
+  return set((store.get("hold") or "").split())
+
+
+def refine_flags(atoms, held=()):
+  """smtbx.modulation flags for refine: each family on where some atom has it and it is not held. A family no atom
+  has is off either way (its blocks are empty), so a model with displacive waves only refines as before."""
+  flags = {}
+  for family, names in EXTRA_FAMILIES:
+    present = any(bool(at.crenel) if n == "crenel" else len(getattr(at, n)) for at in atoms for n in names)
+    flags[family] = bool(present) and family not in held
+  return flags
+
+
+def hold(family="", on=True):
+  """Hold a block family fixed in spy.modulation.refine (on=False frees it again); no family: list them."""
+  families = [f for f, _ in EXTRA_FAMILIES]
+  held = _held()
+  if family:
+    if family not in families:
+      print("modulation: hold takes one of %s" % ", ".join(families))
+      return
+    if str(on).lower() in ("false", "0", "no", "off"):
+      held.discard(family)
+    else:
+      held.add(family)
+    store.set("hold", " ".join(sorted(held)))
+  print("modulation: held in refine: %s" % (", ".join(sorted(held)) or "nothing"))
 
 
 def _q():
@@ -250,13 +322,11 @@ def _load_mscif(path, rename=None):
   for at in xs.atoms:
     store.set("wave." + rename.get(at.label, at.label), " ".join(["%d" % at.n_harmonics] + ["%.6f" % v for v in at.a.ravel()]
                                             + ["%.6f" % v for v in at.b.ravel()]))
-  extra = [n for n, at in (("occupancy waves", any(len(a.occ_sin) for a in xs.atoms)),
-                           ("ADP waves", any(len(a.u_sin) for a in xs.atoms)),
-                           ("crenels", any(a.crenel for a in xs.atoms)))
-           if at]
+    store.set("mwave." + rename.get(at.label, at.label), extras_text(at))
+  extra = [f for f, on in refine_flags(xs.atoms).items() if on]
   if extra:
-    print("modulation: the model also has %s; the movie shows them only through the displacive waves, and "
-          "spy.modulation.refine ignores them" % ", ".join(extra))
+    print("modulation: the model also has %s; spy.modulation.refine refines them (spy.modulation.hold to fix one), "
+          "the movie shows the displacive waves only" % ", ".join(extra))
   ok = np.isfinite(d["f_sq_meas"])
   return d["h"][ok], d["m"][ok], d["f_sq_meas"][ok], d["f_sq_sigma"][ok], xs.q
 
@@ -470,6 +540,7 @@ def _atoms(uc):
     at = smod.modulated_atom(label, olx.xf.au.GetAtomType(i), _floats(olx.xf.au.GetAtomCrd(i)),
                              float(olx.xf.au.GetAtomUiso(i)), float(olx.xf.au.GetAtomOccu(i)),
                              nh, a, b, u_star=_u_star(i, uc))
+    apply_extras(at, store.get("mwave." + label))
     at.part = int(olx.xf.au.GetAtomPart(i))   # picks between scatterer ids on one site in a NoSpherA2 table
     out.append((i, at))
   return out
@@ -559,11 +630,11 @@ class _Average(object):
 
 def refine(cycles=10, harmonics=1, n_x4=32):
   """Least squares on F^2 of all hklm data: average sites, Uiso/Uaniso, displacive waves and scale, under the
-  superspace site symmetry. The constraints and restraints of the 3D model (as olex2.refine sets them up) hold;
-  riding atoms take their pivot's waves.
+  superspace site symmetry; and whatever occupancy/ADP waves, crenels, Legendre and x-harmonic terms the model
+  carries (from an msCIF, kept in the store), unless held (spy.modulation.hold). The constraints and restraints of
+  the 3D model (as olex2.refine sets them up) hold; riding atoms take their pivot's waves.
 
-  shortcut: displacive waves only from Olex2 (occupancy/ADP waves and crenels of an msCIF model are not
-  carried), no merging or extinction.
+  shortcut: no merging or extinction.
   """
   h, m, i_obs, sig = _data()
   ids, xs = _structure(harmonics)
@@ -579,7 +650,11 @@ def refine(cycles=10, harmonics=1, n_x4=32):
   print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s%s"
         % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path),
            " (electrons, kinematical)" if "radiation" in kw else ""))
-  hist = smod.refine(xs, h, m, i_obs, sig, cycles=int(cycles), n_x4=int(n_x4), average=avg, **kw)
+  flags = refine_flags(xs.atoms, _held())
+  on = [f for f, v in flags.items() if v]
+  if on:
+    print("modulation: also refining %s" % ", ".join(on))
+  hist = smod.refine(xs, h, m, i_obs, sig, flags=flags, cycles=int(cycles), n_x4=int(n_x4), average=avg, **kw)
   for i, at in zip(ids, xs.atoms):
     olx.xf.au.SetAtomCrd(i, *at.site)
     if at.u_star is None:
@@ -589,6 +664,8 @@ def refine(cycles=10, harmonics=1, n_x4=32):
       olx.xf.au.SetAtomU(i, u[0], u[1], u[2], u[5], u[4], u[3])
     store.set("wave." + at.label, " ".join(["%d" % at.n_harmonics] + ["%.6f" % v for v in at.a.ravel()]
                                             + ["%.6f" % v for v in at.b.ravel()]))
+    if extras_text(at) or store.get("mwave." + at.label):
+      store.set("mwave." + at.label, extras_text(at))
   store.set("scale", "%.8g" % xs.scale)
   r = hist[-1]["R1"]
   store.set("r1", " ".join("%s:%.4f" % (k, v) for k, v in r.items()))
@@ -818,7 +895,7 @@ def _needs_smtbx(f):
   return g
 
 
-for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff):
+for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff, hold):
   olex.registerFunction(_needs_smtbx(_f), False, "modulation")
 for _f in (set_q, stop, panel):
   olex.registerFunction(_f, False, "modulation")
