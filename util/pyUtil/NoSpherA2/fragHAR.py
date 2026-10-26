@@ -1223,26 +1223,30 @@ def run_frag_HAR_wfn(input_res, input_cif, input_qS, wfn_object, part):
       print(e)
       raise NameError('Unsuccesfull Wavefunction Calculation during fragHAR in fragment %d!' % i)
   t3 = time.time()
+  # a <name>.tshb from an earlier run would otherwise sit next to this run's table and be taken for it
+  stale = wfn_object.name + ".tshb"
+  if os.path.exists(stale):
+    os.remove(stale)
   try:
-    cuqct_tsc(wfns, cifs, groups, tshb=False)
+    # the fragments' densities as one joint .tshb (first wins, as in the table) when use_tshb is set;
+    # cuqct_tsc reads the setting and passes -tshb for RI-Fit and SALTED
+    cuqct_tsc(wfns, cifs, groups, tshb=True)
   except:
     raise NameError('Unsuccesfull Partitioning during fragHAR"')
+  # what this run wrote, in the order _adopt_cuqct_output takes it: .tshb, .tscb, .tsc
+  produced = []
   try:
-    sucess = False
-    if os.path.exists("experimental.tsc"):
-      shutil.move("experimental.tsc", wfn_object.name + ".tsc")
-      sucess = True
-    if os.path.exists("experimental.tscb"):
-      shutil.move("experimental.tscb", wfn_object.name + ".tscb")
-      sucess = True
-    if sucess == False:
+    for ext in (".tshb", ".tscb", ".tsc"):
+      if os.path.exists("experimental" + ext):
+        shutil.move("experimental" + ext, wfn_object.name + ext)
+        produced.append(ext)
+    if not produced:
       raise RuntimeError
   except:
     print("Error trying to move the tsc file! Make sure the calculation worked!")
     return
   from utilities import nsa2_adopt_tsc_file, nsa2_settings_header
-  ext = ".tscb" if os.path.exists(wfn_object.name + ".tscb") else ".tsc"
-  nsa2_adopt_tsc_file(wfn_object.name + ext, "fragHAR", settings=nsa2_settings_header("fragHAR"))
+  nsa2_adopt_tsc_file(wfn_object.name + produced[0], "fragHAR", settings=nsa2_settings_header("fragHAR"))
   t4 = time.time()
   print("Timing of fragHAR:")
   print("-- " + "{:8.3f}".format(t2-t1) + " for fragmentation")

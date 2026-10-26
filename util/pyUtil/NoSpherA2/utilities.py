@@ -351,10 +351,31 @@ def _split_joint(req):
   return True
 
 
+_tshb_ok = {}
+def tshb_supported():
+  """True when NoSpherA2 and cctbx both take a joint (id-keyed, version 4) .tshb. An older NoSpherA2 ignores -tshb
+  and writes the table keyed by id because -tsc_labels was dropped; an older cctbx cannot read the file. Asked once
+  per NoSpherA2 executable."""
+  exe = OV.GetVar("NoSpherA2")
+  if exe not in _tshb_ok:
+    ok = False
+    try:
+      from smtbx.structure_factors.direct import tshb
+      if hasattr(tshb, "scatterer_id"):
+        out = subprocess.run([exe, "-h"], capture_output=True, text=True, timeout=30).stdout
+        ok = "-mtc/-cmtc parts" in out
+    except Exception:
+      pass
+    if not ok:
+      print("NoSpherA2 or cctbx without joint .tshb support: the table is written instead")
+    _tshb_ok[exe] = ok
+  return _tshb_ok[exe]
+
+
 def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, joint, tshb=True):
   """The body of cuqct_tsc; joint receives the joint request when one is made (None: never make one)."""
   # several wavefunctions (disorder parts) make one joint .tshb, as they make one table
-  tshb = tshb and nsa2_get_param('use_tshb')
+  tshb = tshb and nsa2_get_param('use_tshb') and tshb_supported()
   basis_name = nsa2_get_param('basis_name')
   folder = OV.FilePath()
   name = OV.ModelSrc()

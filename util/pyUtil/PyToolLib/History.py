@@ -195,7 +195,7 @@ class History(ArgumentParser):
         if node.lst is not None:
           zout.writestr(filename+".lst", decompressFile(node.lst), zipfile.ZIP_DEFLATED)
     else:
-      file_exts = [".cif", ".fcf", "_dyn_.cif_cap", ".lst", ".log", ".tsc", ".tscb"] + list(manu_cif_exts)
+      file_exts = [".cif", ".fcf", "_dyn_.cif_cap", ".lst", ".log", ".tsc", ".tscb", ".tshb"] + list(manu_cif_exts)
       filename = OV.FileName()
       filepath = OV.FilePath()
       ffilename = os.path.join(filepath, filename)
