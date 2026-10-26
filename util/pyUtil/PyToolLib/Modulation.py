@@ -92,7 +92,28 @@ def reset():
     with open(store._path(), "w") as f:
       if side.get("hklm"):
         f.write("hklm=%s\n" % side["hklm"])
+  _clear_caches()
 _stop = [False]
+
+
+def _file_key(path):
+  """What identifies a data file's contents for the caches here: path, size and mtime in ns."""
+  st = os.stat(path)
+  return (os.path.abspath(path), st.st_size, st.st_mtime_ns)
+
+
+# Caches, each keyed on everything its value depends on and emptied by reset():
+#   _data_cache     the hklm data: keyed on the file (path, size, mtime)
+#   _ranking_cache  candidates()' ranked list: keyed on the basic group (Hall), q, the data file and the tau
+#                   values, so a FLINT solve that lands on the same group with the same q and data reuses it
+#   _stats_cache    satellite_stats: keyed on the file, q, taus, ops, cell and Hall symbol
+_data_cache, _ranking_cache = {}, {}
+
+
+def _clear_caches():
+  _data_cache.clear()
+  _ranking_cache.clear()
+  _stats_cache.clear()
 
 
 def _floats(s):
@@ -221,7 +242,10 @@ def _data():
   path = store.get("hklm")
   if not path or not os.path.exists(path):
     raise RuntimeError("hklm file %r not found: spy.modulation.load(file) first" % path)
-  return read_hklm(path)[:4]
+  key = _file_key(path)
+  if _data_cache.get("key") != key:
+    _data_cache.update(key=key, value=read_hklm(path)[:4])
+  return _data_cache["value"]
 
 
 def _table_path():
@@ -437,7 +461,7 @@ def satellite_stats():
   src = store.get("hklm") or olx.HKLSrc()
   if smod is None or not src or not src.lower().endswith(".hklm") or not os.path.exists(src) or not store.get("q"):
     return None
-  key = (src, os.path.getmtime(src), store.get("q"), store.get("taus"), store.get("ops"), olx.xf.au.GetCell(),
+  key = (_file_key(src), store.get("q"), store.get("taus"), store.get("ops"), olx.xf.au.GetCell(),
          olx.xf.au.GetCellSymm("hall"))
   if _stats_cache.get("key") != key:
     try:
@@ -487,16 +511,21 @@ def candidates(apply=True):
   """Rank the superspace groups the current space group allows with q by satellite absences; store the best."""
   q = _q()
   sg = _basic_group()
-  try:
-    cands = smod.candidate_superspace_groups(sg, q)
-  except smod.IncompatibleQ as e:
-    sub = smod.compatible_subgroup(sg, q)
-    print("modulation: %s\n  the largest subgroup compatible with q is %s; change the space group to it"
-          % (e, sub.info().symbol_and_number()))
-    return
-  h, m, i_obs, sig = _data()
+  path = store.get("hklm")
+  key = (olx.xf.au.GetCellSymm("hall"), tuple(q), _file_key(path) if path and os.path.exists(path) else path,
+         (0.0, 0.5))
+  if _ranking_cache.get("key") != key:
+    try:
+      cands = smod.candidate_superspace_groups(sg, q)
+    except smod.IncompatibleQ as e:
+      sub = smod.compatible_subgroup(sg, q)
+      print("modulation: %s\n  the largest subgroup compatible with q is %s; change the space group to it"
+            % (e, sub.info().symbol_and_number()))
+      return
+    h, m, i_obs, sig = _data()
+    _ranking_cache.update(key=key, value=smod.rank_by_absences(cands, h, m, i_obs, sig))
   del _last_ranking[:]
-  _last_ranking.extend(smod.rank_by_absences(cands, h, m, i_obs, sig))
+  _last_ranking.extend(_ranking_cache["value"])
   print("modulation: superspace groups of %s with q, best first" % sg.info().symbol_and_number())
   print("   #  violations  predicted absences  group")
   for k, (v, n, g) in enumerate(_last_ranking):
