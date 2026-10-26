@@ -261,7 +261,10 @@ class History(ArgumentParser):
       print("Failed to revert SNUM PHIL")
 
     original_sg = olex.f("sg()")
-    olex.m("reap '%s' -no_save=true" %resFile)
+    #new syntax
+    #olex.run(True, "reap", resFile, no_save=True)
+    #compatibility syntax
+    olex.f_ex("reap", True, [resFile], {"no_save": True})
     hklSrc = OV.HKLSrc()
     if not tree.isTheSameHklDigest(node, hklSrc):
       olx.Echo("Current HKL does not match the one from history - updating!", m='warning')
