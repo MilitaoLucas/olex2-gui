@@ -1163,7 +1163,8 @@ def make_XCW_GUI():
        _xcw_checkbox("gaussian_halt", "Gaussian Halt", "gaussian_halt", 19) + \
        _xcw_checkbox("incremental", "Incremental", "incremental", 17) + \
        _xcw_checkbox("extrapolate", "Extrapolate", "extrapolate", 17) + \
-       "<td width='44%'></td>" + \
+       _xcw_checkbox("tshb", ".tshb", "tshb", 12) + \
+       _xcw_combo("partition", "Partition", "partition", "hirshfeld;becke;ri", 14, 18) + \
        end_line()
   t += begin_new_line("NoSpherA2_XCW", "7") + \
        _xcw_text("strong_cutoff", "Strong I/&sigma;", "strong_cutoff", 15, 12) + \
@@ -1185,7 +1186,7 @@ def make_XCW_GUI():
   if tscbs:
     t += _xcw_combo("tscb", "Table", "selected_tscb", tscbs, 8, 24) + \
          button("NoSpherA2_XCW_use", "Use", "spy.NoSpherA2.xcw_use_tscb() >> html.Update()", width=8,
-                hint="Copy the chosen NA2_<lambda>.tscb next to the structure and make it the tsc source")
+                hint="Copy the chosen NA2_<lambda>.tscb/.tshb next to the structure and make it the tsc source")
   else:
     t += "<td width='40%'></td>"
   t += end_line()

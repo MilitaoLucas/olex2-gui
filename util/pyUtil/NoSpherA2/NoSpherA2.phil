@@ -456,6 +456,12 @@ snum{
       use_gpu = False
         .type = bool
         .help = "Let NoSpherA2 use a GPU when the build has one; off passes -no_gpu"
+      partition = *hirshfeld becke ri
+        .type = choice
+        .help = "How XCW shares the density among the atoms: grid Hirshfeld or Becke weights, or ri (-xcw_partition ri, an RI fit in the refine tab's aux basis restrained by its multipole setting)"
+      tshb = False
+        .type = bool
+        .help = "Each step writes an RI fit of its density as NA2_<lambda>.tshb instead of its table (-tshb, with the RI-fit aux basis and multipole restraints)"
       i_tensor_mb = 0
         .type = int
         .help = "Memory for the I tensor in MB (settings keyword i_tensor_mb); 0 leaves the default"

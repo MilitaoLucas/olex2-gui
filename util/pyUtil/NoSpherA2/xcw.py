@@ -11,8 +11,14 @@ user.NoSpherA2.show_XCW. What it does:
   Stop     kills the job
   status   the last lambda row of NoSpherA2.log while it runs, the recommended
            halting lambda when it finished
-  Use      copies the chosen NA2_<lambda>.tscb next to the structure as
-           <name>_xcw_<lambda>.tscb and makes it the tsc source
+  Use      copies the chosen NA2_<lambda>.tscb (or .tshb) next to the structure
+           as <name>_xcw_<lambda>.tscb (.tshb) and makes it the tsc source
+  .tshb    each step writes an RI fit of its density (-tshb with the RI-fit
+           aux basis and multipole restraints of the refine tab) instead of its
+           table; the fit is another partition, F differs at the 1e-2 level
+  Partition  hirshfeld/becke grid weights, or ri (-xcw_partition ri, the
+           refine tab's aux basis + multipole restraint, which also offers
+           TFVC/MBIS/EMBIS targets)
 
 Still to do: charge/multiplicity are the shared NoSpherA2 values; twin laws
 are not passed.
@@ -224,6 +230,18 @@ def _args(folder, name, settings):
     args.append("-no_xcw_extrapolate")
   if _param("use_gpu") != True:
     args.append("-no_gpu")
+  from utilities import ri_fit_args, tshb_supported
+  # ponytail: tfvc/mbis/embis grid XCW give R1 ~0.57 (the weights see no density) until the next NoSpherA2 round
+  partition = str(_param("partition", "hirshfeld"))
+  if partition == "becke":
+    args.append("-becke")
+  tshb = _param("tshb") == True and tshb_supported()
+  if partition == "ri" or tshb:
+    args += ri_fit_args()
+  if partition == "ri":
+    args += ["-xcw_partition", "ri"]
+  if tshb:
+    args.append("-tshb")
   return args
 
 
@@ -304,8 +322,8 @@ def xcw_status():
 
 
 def xcw_tscb_list():
-  """The NA2_<lambda>.tscb files of the last run as combo items, newest run only."""
-  files = sorted(glob.glob(os.path.join(_job_dir(), "NA2_*.tscb")))
+  """The NA2_<lambda>.tscb/.tshb files of the last run as combo items, newest run only."""
+  files = sorted(glob.glob(os.path.join(_job_dir(), "NA2_*.tscb")) + glob.glob(os.path.join(_job_dir(), "NA2_*.tshb")))
   return ";".join(os.path.basename(f) for f in files)
 
 
@@ -391,8 +409,8 @@ def xcw_use_tscb():
   if not os.path.isfile(src):
     print("XCW: %s not found" % src)
     return
-  lam = os.path.splitext(chosen)[0].replace("NA2_", "")
-  target = "%s_xcw_%s.tscb" % (_name(), lam)
+  lam, ext = os.path.splitext(chosen)
+  target = "%s_xcw_%s%s" % (_name(), lam.replace("NA2_", ""), ext)
   shutil.copy(src, os.path.join(OV.FilePath(), target))
   nsa2_set_param("source", target)
   reset_unused_generator_flags(target)
