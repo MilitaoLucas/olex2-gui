@@ -677,14 +677,20 @@ class _Average(object):
     return design, le.deltas.as_numpy_array(), le.weights.as_numpy_array()
 
 
-def refine(cycles=10, harmonics=1, n_x4=32):
+def refine(cycles=10, harmonics=1, n_x4="auto"):
   """Least squares on F^2 of all hklm data: average sites, Uiso/Uaniso, displacive waves and scale, under the
   superspace site symmetry; and whatever occupancy/ADP waves, crenels, Legendre and x-harmonic terms the model
   carries (from an msCIF, kept in the store), unless held (spy.modulation.hold). The constraints and restraints of
   the 3D model (as olex2.refine sets them up) hold; riding atoms take their pivot's waves.
 
+  n_x4: x4 nodes per atom, or "auto" (smtbx.modulation.auto_n_x4; the default).
+
   shortcut: no merging or extinction.
   """
+  if str(n_x4) != "auto":
+    n_x4 = int(n_x4)
+  elif not hasattr(smod, "auto_n_x4"):
+    n_x4 = 32     # a cctbx bundle from before n_x4 = "auto"
   h, m, i_obs, sig = _data()
   ids, xs = _structure(harmonics)
   tab, kw = _calc_kw()
@@ -694,7 +700,7 @@ def refine(cycles=10, harmonics=1, n_x4=32):
     avg = None
     print("modulation: refining without the 3D constraints and restraints (%s)" % e)
   if store.get("scale") is None:
-    _, fc, _ = smod.calculator(h[m == 0], m[m == 0], int(n_x4), **kw).compute(xs)
+    _, fc, _ = smod.calculator(h[m == 0], m[m == 0], n_x4, **kw).compute(xs)
     xs.scale = float(np.sum(i_obs[m == 0] * fc) / max(np.sum(fc * fc), 1e-30))
   print("modulation: refining %d atoms, %d harmonic(s), %d reflections in %s, form factors %s%s"
         % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path),
@@ -703,7 +709,7 @@ def refine(cycles=10, harmonics=1, n_x4=32):
   on = [f for f, v in flags.items() if v]
   if on:
     print("modulation: also refining %s" % ", ".join(on))
-  hist = smod.refine(xs, h, m, i_obs, sig, flags=flags, cycles=int(cycles), n_x4=int(n_x4), average=avg, **kw)
+  hist = smod.refine(xs, h, m, i_obs, sig, flags=flags, cycles=int(cycles), n_x4=n_x4, average=avg, **kw)
   for i, at in zip(ids, xs.atoms):
     olx.xf.au.SetAtomCrd(i, *at.site)
     if at.u_star is None:
@@ -721,6 +727,21 @@ def refine(cycles=10, harmonics=1, n_x4=32):
   olx.xf.EndUpdate()
   _refresh()
   return hist
+
+
+def write_mscif(path=""):
+  """The current model as a JANA-style msCIF (smtbx.modulation.mscif.write): cell, q, the superspace group,
+  atoms with their waves, crenels, Legendre and x-harmonic terms, and the hklm data with F^2calc (current scale,
+  form factors as refine uses them). Default <name>_modulated.cif next to the structure."""
+  from smtbx.modulation import mscif
+  h, m, i_obs, sig = _data()
+  _, xs = _structure()
+  tab, kw = _calc_kw()
+  path = path or os.path.join(OV.FilePath(), OV.FileName() + "_modulated.cif")
+  mscif.write(xs, path, h, m, f_sq_meas=i_obs, f_sq_sigma=sig, name=OV.FileName() or "olex2", table=tab,
+              radiation=kw.get("radiation", "xray"))
+  print("modulation: wrote %s (%d atoms, %d reflections)" % (path, len(xs.atoms), len(m)))
+  return path
 
 
 def _supercell_positions(xs, t, amplify, cells):
@@ -944,7 +965,7 @@ def _needs_smtbx(f):
   return g
 
 
-for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff, hold):
+for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff, hold, write_mscif):
   olex.registerFunction(_needs_smtbx(_f), False, "modulation")
 for _f in (set_q, stop, panel):
   olex.registerFunction(_f, False, "modulation")
