@@ -456,9 +456,9 @@ snum{
       use_gpu = False
         .type = bool
         .help = "Let NoSpherA2 use a GPU when the build has one; off passes -no_gpu"
-      partition = *hirshfeld becke ri
+      partition = *hirshfeld becke tfvc mbis embis ri
         .type = choice
-        .help = "How XCW shares the density among the atoms: grid Hirshfeld or Becke weights, or ri (-xcw_partition ri, an RI fit in the refine tab's aux basis restrained by its multipole setting)"
+        .help = "How XCW shares the density among the atoms: grid Hirshfeld, Becke, TFVC, MBIS or EMBIS weights (TFVC/MBIS/EMBIS refit to the running density, needs NoSpherA2 33fa9685), or ri (-xcw_partition ri, an RI fit in the refine tab's aux basis restrained by its multipole setting)"
       tshb = False
         .type = bool
         .help = "Each step writes an RI fit of its density as NA2_<lambda>.tshb instead of its table (-tshb, with the RI-fit aux basis and multipole restraints)"

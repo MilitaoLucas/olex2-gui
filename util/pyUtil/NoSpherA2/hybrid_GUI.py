@@ -1164,7 +1164,7 @@ def make_XCW_GUI():
        _xcw_checkbox("incremental", "Incremental", "incremental", 17) + \
        _xcw_checkbox("extrapolate", "Extrapolate", "extrapolate", 17) + \
        _xcw_checkbox("tshb", ".tshb", "tshb", 12) + \
-       _xcw_combo("partition", "Partition", "partition", "hirshfeld;becke;ri", 14, 18) + \
+       _xcw_combo("partition", "Partition", "partition", "hirshfeld;becke;tfvc;mbis;embis;ri", 14, 18) + \
        end_line()
   t += begin_new_line("NoSpherA2_XCW", "7") + \
        _xcw_text("strong_cutoff", "Strong I/&sigma;", "strong_cutoff", 15, 12) + \

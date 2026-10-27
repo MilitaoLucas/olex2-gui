@@ -16,7 +16,8 @@ user.NoSpherA2.show_XCW. What it does:
   .tshb    each step writes an RI fit of its density (-tshb with the RI-fit
            aux basis and multipole restraints of the refine tab) instead of its
            table; the fit is another partition, F differs at the 1e-2 level
-  Partition  hirshfeld/becke grid weights, or ri (-xcw_partition ri, the
+  Partition  hirshfeld/becke/tfvc/mbis/embis grid weights (the last three
+           follow the running density; tfvc and embis cost 2-4x), or ri (-xcw_partition ri, the
            refine tab's aux basis + multipole restraint, which also offers
            TFVC/MBIS/EMBIS targets)
 
@@ -231,10 +232,9 @@ def _args(folder, name, settings):
   if _param("use_gpu") != True:
     args.append("-no_gpu")
   from utilities import ri_fit_args, tshb_supported
-  # ponytail: tfvc/mbis/embis grid XCW give R1 ~0.57 (the weights see no density) until the next NoSpherA2 round
   partition = str(_param("partition", "hirshfeld"))
-  if partition == "becke":
-    args.append("-becke")
+  if partition in ("becke", "tfvc", "mbis", "embis"):
+    args.append("-" + partition)
   tshb = _param("tshb") == True and tshb_supported()
   if partition == "ri" or tshb:
     args += ri_fit_args()
