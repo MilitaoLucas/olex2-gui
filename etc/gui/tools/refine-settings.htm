@@ -463,6 +463,12 @@ $-
 <!-- ================================= -->
 </table>
 
+<!-- modulated structures: only with an .hklm HKL source, see Modulation.py -->
+<!-- #ignoreif not spy.modulation.show()
+<table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<!-- #include h3-Modulation gui\tools\refine-modulation.htm;gui\blocks\tool-h3-off.htm;image=h3-Modulation;colspan=1;onclick=;2; -->
+</table>
+#ignoreif -->
 
 <table border="0" width="$GetVar(HtmlTableWidth)" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=1;onclick=;2; -->

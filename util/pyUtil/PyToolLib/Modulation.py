@@ -483,6 +483,12 @@ def set_q(qx=None, qy=None, qz=None):
     if not txt:
       return
     qx, qy, qz = _floats(txt)[:3]
+  elif qy is None:     # one "qx qy qz" string, the q box of the refine-settings block
+    v = _floats(qx)
+    if len(v) != 3:
+      print("modulation: q needs three numbers")
+      return
+    qx, qy, qz = v
   store.set("q", " ".join("%.6f" % float(v) for v in (qx, qy, qz)))
   src = olx.HKLSrc()
   if src.lower().endswith(".hklm"):
@@ -972,6 +978,77 @@ def _panel():
   return lines
 
 
+def show():
+  """Whether refine-settings.htm draws the Modulation block: an .hklm file is the HKL source. Only olx.HKLM(): it
+  returns at once for any other source, while olx.HKLSrc() loads the reflections on every page refresh."""
+  try:
+    return native_hklm() and bool(olx.HKLM())
+  except Exception:
+    return False
+
+
+def value(key):
+  """A store value for an html input; group labels like P2/m(a0g)0s must not reach the page as literals, Olex2
+  would take them for a function call."""
+  return store.get(key) or ""
+
+
+def gui():
+  """The Modulation block of refine-settings.htm (drawn only when show()): q, superspace group, refine settings,
+  held families, the actions and the values (counts, R1 per |m|, form factors). Never raises, like panel()."""
+  try:
+    return _gui()
+  except Exception as e:
+    return "<tr><td>modulation: %s</td></tr>" % e
+
+
+def _gui():
+  from hybrid_GUI import begin_new_line, end_line, button, labeled_text, labeled_combo, labeled_checkbox
+  upd = " >> html.Update()"
+  q = store.get("q")
+  t = begin_new_line("Modulation", "q") + \
+      labeled_text("MOD_Q@refine", "q", "spy.modulation.value(q)",
+                   "spy.modulation.set_q(html.GetValue('~name~'))", 5, 30) + \
+      button("MOD_SSG", "SSG", "spy.modulation.candidates()" + upd, 10,
+             "Rank the superspace groups of the space group with q by satellite absences, take the best")
+  if _last_ranking:
+    items = ";".join("%s<-%d" % (g.label(), k) for k, (_, _, g) in enumerate(_last_ranking))
+    t += labeled_combo("MOD_GROUP@refine", "Group", items, "spy.modulation.value(group)",
+                       "spy.modulation.choose(html.GetValue('~name~'))" + upd, 10, 45)
+  else:
+    t += "<td width='55%%' align='left'>%s</td>" % (store.get("group") or "<i>no superspace group yet</i>")
+  t += end_line()
+  t += begin_new_line("Modulation", "refine") + \
+       labeled_text("MOD_CYCLES@refine", "Cycles", "GetVar(modulation_cycles,10)",
+                    "SetVar(modulation_cycles,html.GetValue('~name~'))", 10, 8) + \
+       labeled_text("MOD_HARMONICS@refine", "Harmonics", "GetVar(modulation_harmonics,1)",
+                    "SetVar(modulation_harmonics,html.GetValue('~name~'))", 14, 8) + \
+       labeled_text("MOD_NX4@refine", "x4 nodes", "GetVar(modulation_n_x4,auto)",
+                    "SetVar(modulation_n_x4,html.GetValue('~name~'))", 13, 10) + \
+       button("MOD_REFINE", "Refine", "spy.modulation.refine(GetVar(modulation_cycles,10),"
+              "GetVar(modulation_harmonics,1),GetVar(modulation_n_x4,auto))" + upd, 15,
+              "Least squares on F^2 of all hklm data: average structure, waves and scale") + \
+       "<td width='22%'></td>" + end_line()
+  held = _held()
+  t += begin_new_line("Modulation", "hold") + "<td width='9%'><b>Hold</b></td>"
+  for f, _ in EXTRA_FAMILIES:
+    t += labeled_checkbox("MOD_HOLD_%s@refine" % f, f, "true" if f in held else "false",
+                          "spy.modulation.hold(%s,True)" % f, "spy.modulation.hold(%s,False)" % f, 13)
+  t += end_line()
+  t += begin_new_line("Modulation", "view") + \
+       button("MOD_WIGGLE", "Wiggle", "spy.modulation.wiggle()", 16, "Animate the model through t = 0..1") + \
+       button("MOD_STOP", "Stop", "spy.modulation.stop()", 16, "Stop the wiggle") + \
+       button("MOD_GIF", "GIF", "spy.modulation.movie()", 16, "GIF of a supercell along q") + \
+       button("MOD_DEWOLFF", "de Wolff", "spy.modulation.de_wolff()", 16, "de Wolff section x_i - x4 (PNG)") + \
+       button("MOD_MSCIF", "msCIF", "spy.modulation.write_mscif()", 16, "Write <name>_modulated.cif") + \
+       button("MOD_STATS", "Stats", "spy.modulation.stats()", 16, "I/sigma, R_int, completeness per |m|") + \
+       end_line()
+  info = _panel()[1:] if q else [_counts()]
+  if info:
+    t += begin_new_line("Modulation", "info") + "<td align='left'>%s</td>" % "<br>".join(info) + end_line()
+  return t
+
+
 def _refresh():
   try:
     olx.html.Update()
@@ -993,5 +1070,5 @@ def _needs_smtbx(f):
 
 for _f in (load, open_mscif, stats, candidates, choose, refine, wiggle, movie, de_wolff, hold, write_mscif):
   olex.registerFunction(_needs_smtbx(_f), False, "modulation")
-for _f in (set_q, stop, panel):
+for _f in (set_q, stop, panel, show, value, gui):
   olex.registerFunction(_f, False, "modulation")
