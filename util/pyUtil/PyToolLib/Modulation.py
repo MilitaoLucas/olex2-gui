@@ -86,7 +86,7 @@ def reset():
   """Forget the superspace group, the waves and the fit: a new solution starts from 3D. The hklm path and its q stay
   (they describe the data, not the model), so the solve can rank the superspace groups of the group it finds."""
   side = store._side()
-  keys = set(side) | {"q", "ops", "taus", "group", "scale", "r1"}
+  keys = set(side) | {"q", "ops", "taus", "group", "scale", "r1", "commensurate"}
   keys |= {pre + olx.xf.au.GetAtomName(i) for i in range(int(olx.xf.au.GetAtomCount())) for pre in ("wave.", "mwave.")}
   kept = dict((k, store.get(k)) for k in _KEEP_ACROSS_RESET if store.get(k) not in (None, ""))
   for k in keys:
@@ -215,7 +215,20 @@ def _q():
   q = store.get("q")
   if not q:
     raise RuntimeError("no q vector: spy.modulation.load(file, qx, qy, qz) first")
-  return np.array(_floats(q))
+  q = np.array(_floats(q))
+  sec = _commensurate()
+  if sec is not None:
+    q = np.round(q * sec[1]) / sec[1]     # commensurate: q exactly r / N (the store keeps 6 decimals)
+  return q
+
+
+def _commensurate():
+  """(t0, N) when the loaded msCIF is a commensurate JANA refinement (store "commensurate"), else None."""
+  v = store.get("commensurate")
+  if not v:
+    return None
+  t0, n = v.split()
+  return float(t0), int(n)
 
 
 def read_hklm(path):
@@ -362,6 +375,11 @@ def _load_mscif(path, rename=None):
   if d is None:
     raise RuntimeError("%s has no refln loop with m (and no %s)" % (path, fcf))
   store.set("ops", "|".join(op.xyz for op in xs.ssg.generators))
+  sec = d.get("commensurate")
+  store.set("commensurate", "%.6f %d" % sec if sec else "")
+  if sec:
+    print("modulation: commensurate refinement in JANA, section t0 = %.4f, N = %d: refine uses that section "
+          "(crenel centres and widths stay fixed)" % sec)
   store.set("group", xs.ssg.label())
   for at in xs.atoms:
     store.set("wave." + rename.get(at.label, at.label), " ".join(["%d" % at.n_harmonics] + ["%.6f" % v for v in at.a.ravel()]
@@ -425,6 +443,7 @@ def load(path, qx=None, qy=None, qz=None, rename=None):
     _write_hklm(hklm, h, m, i_obs, sig, path)
   else:
     store.set("ops", "")
+    store.set("commensurate", "")     # plain hklm data: the model is incommensurate unless an msCIF says so
     h, m, i_obs, sig, q_file = read_hklm(path)
     if not path.lower().endswith(".hklm"):
       # Olex2 recognises the four-index format by the extension
@@ -706,6 +725,13 @@ def refine(cycles=10, harmonics=1, n_x4="auto"):
         % (len(ids), int(harmonics), len(m), xs.ssg.label(), "IAM" if tab is None else os.path.basename(tab.path),
            " (electrons, kinematical)" if "radiation" in kw else ""))
   flags = refine_flags(xs.atoms, _held())
+  sec = _commensurate()
+  if sec is not None:
+    if hasattr(smod, "commensurate_section"):
+      kw["commensurate"] = sec
+      flags["crenel"] = False     # a finite sum has no gradient with respect to the crenel
+    else:
+      print("modulation: this cctbx bundle has no commensurate sections; refining the incommensurate model")
   on = [f for f, v in flags.items() if v]
   if on:
     print("modulation: also refining %s" % ", ".join(on))
