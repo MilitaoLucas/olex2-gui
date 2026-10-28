@@ -844,7 +844,15 @@
   >
 >
 
-</ help="Add command to the ins file"
+</ help="Add command to the ins file" comment="new syntax v.1"
+  <body
+    <args>
+    <cmd <cmd1 "addins %*">>
+  >
+>
+
+</ help="Add command to the ins file" version="0"
+   comment="old syntax v.0, will override newer for older versions"
   <body
     <args
       <arg1 name="name" def="">
@@ -852,10 +860,8 @@
       <arg3 name="name" def="">
       <arg4 name="name" def="">
       <arg5 name="name" def="">
-        >
-    <cmd
-      <cmd1 "addins %1 %2 %3 %4 %5">
     >
+    <cmd  <cmd1 "addins %1 %2 %3 %4 %5">>
   >
 >
 
