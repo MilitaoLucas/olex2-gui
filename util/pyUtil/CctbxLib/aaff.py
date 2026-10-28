@@ -12,6 +12,17 @@ import cctbx_controller as cctbx_controller
 # sources that can take over after a pTB pre-refinement (source names, leading spaces stripped)
 PTB_FOLLOW_UP = ("ORCA", "OCC", "pySCF", "Gaussian", "Psi4")
 
+def _hybrid_ptb_parts():
+  """{PART: software as stored} for the Hybrid parts a pTB pre-refinement can stand in for"""
+  found = {}
+  for p in OV.ListParts() or []:
+    if p == 0:
+      continue
+    s = str(nsa2_get_param('Hybrid.software_Part%d' % p) or '')
+    if s.strip().startswith(PTB_FOLLOW_UP):
+      found[p] = s
+  return found
+
 def _table_identifies_by_id(table_file_name):
   """Does this table name its columns by scatterer id, or by label?"""
   import struct
@@ -116,6 +127,20 @@ def _rotate_table_for_moved_atoms(table_file_name, ids, labels, model):
 
 
 def deal_with_AAFF(self: RunRefinementPrg):
+  # the calculation log entry is closed however the run ends, including the early returns below
+  from NoSpherA2 import calc_log
+  result = None
+  try:
+    result = _deal_with_AAFF(self)
+    return result
+  except Exception as e:
+    calc_log.close_refinement(e)
+    raise
+  finally:
+    calc_log.close_refinement()
+
+def _deal_with_AAFF(self: RunRefinementPrg):
+  from NoSpherA2 import calc_log
   HAR_log = None
   try:
     from cctbx import adptbx
@@ -166,23 +191,34 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     max_cycles = int(nsa2_get_param('Max_HAR_Cycles'))
     # pTB pre-refinement: the first n_pre cycles run pTB, then the selected source takes
     # over. Those cycles come on top of Max_HAR_Cycles and never count as converged.
-    # PTB_PREREFINE_DONE (kept in the .ins header) names the source/functional pTB
-    # already preceded, so a later Test/Work click does not throw a better model back
-    # to pTB; a different source or functional gets its pre-refinement again.
+    # PTB_PREREFINE_DONE (kept in the .ins header) says what pTB already preceded; once it
+    # is set, pTB runs again only after the checkbox is ticked anew, which clears it, so a
+    # Test/Work click or a new source never throws a better model back to pTB.
     n_pre = 0
+    pre_failed = False
     qm_source = nsa2_get_param('source')
-    ptb_key = "%s/%s" % (source, nsa2_get_param('method'))
-    # Test/Work switch it on, so a source that cannot follow pTB just skips it silently
-    if update and nsa2_get_param('PTB_PREREFINE') and source.startswith(PTB_FOLLOW_UP):
+    # in Hybrid mode pTB stands in for the QM parts only; DISCAMB/Thakkar/SALTED parts keep their own
+    hybrid_parts = _hybrid_ptb_parts() if source == "Hybrid" else {}
+    ptb_key = "Hybrid (%s)" % ", ".join("PART %d %s" % (p, s.strip()) for p, s in sorted(hybrid_parts.items())) \
+              if source == "Hybrid" else "%s/%s" % (source, nsa2_get_param('method'))
+    prerefine_note = "off"
+    # Test/Work switch it on, so a source that cannot follow pTB just skips it silently.
+    # Without a refinement there is nothing to pre-refine, and the pTB table would be all that is left.
+    if update and nsa2_get_param('PTB_PREREFINE') and nsa2_get_param('run_refine') and (source.startswith(PTB_FOLLOW_UP) or hybrid_parts):
       from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
+      done = str(nsa2_get_param('PTB_PREREFINE_DONE') or '').strip()
       if not nsp2.ptb_exe:
         print("pTB pre-refinement ignored: no pTB executable found")
-      elif nsa2_get_param('PTB_PREREFINE_DONE') == ptb_key:
-        print("pTB pre-refinement skipped: already done before %s" % ptb_key)
+        prerefine_note = "ignored, no pTB executable"
+      elif done:
+        print("pTB pre-refinement skipped: already done (%s); tick 'pTB pre-refine' again to repeat it" % done)
+        prerefine_note = "skipped, already done (%s)" % done
       else:
         n_pre = max(1, int(nsa2_get_param('PTB_PREREFINE_CYCLES')))
         max_cycles += n_pre
         HAR_log.write("pTB pre-refinement: cycles 1-%d with pTB, then %s\n" % (n_pre, source))
+        prerefine_note = "cycles 1-%d with pTB, then %s" % (n_pre, source)
+    calc_log.begin_refinement(source, prerefine_note, Full_HAR and update, max_cycles - n_pre, n_pre)
     if update:
       if nsa2_get_param('h_aniso'):
         olx.Anis("$D", h=True)
@@ -194,6 +230,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
         olex.m("NeutronHDist")
     while not converged:
       run += 1
+      calc_log.cycle_start(run <= n_pre)
       HAR_log.write("{:3d}".format(run))
       old_model = OlexRefinementModel()
       # the f'/f'' radial coefficients are refined parameters as well, but they
@@ -212,13 +249,18 @@ Please select one of the generators from the drop-down menu.""", "O", False)
       #Calculate Wavefunction
       try:
         from NoSpherA2.NoSpherA2 import NoSpherA2_instance as nsp2
-        if pre:
+        if pre and hybrid_parts:
+          for p in hybrid_parts:
+            nsa2_set_param('Hybrid.software_Part%d' % p, "  pTB")
+        elif pre:
           nsa2_set_param('source', "  pTB")
         try:
           v = nsp2.launch()
         finally:
           if pre:
             nsa2_set_param('source', qm_source)
+            for p, s in hybrid_parts.items():
+              nsa2_set_param('Hybrid.software_Part%d' % p, s)
         if not v:
           print("Error during NoSpherA2! Abnormal Ending of program!")
           HAR_log.close()
@@ -399,6 +441,7 @@ all calculation parameters are properly recorded."""
             print("An Atom was not found in the .tsc file!\nHave you renamed some and not recalcualted the tsc file?")
           return
       else:
+        calc_log.cycle_end(run, pre, "pTB" if pre else qm_source.strip())
         break
       new_model=OlexRefinementModel()
       
@@ -635,12 +678,21 @@ all calculation parameters are properly recorded."""
           raise e
       r = results()
       analyze_shifts(r)
+      calc_log.cycle_end(run, pre, "pTB" if pre else qm_source.strip(), r)
       if not update:
         converged = True
         break
       elif pre:
+        # the same guard as the cycles after it, against the R1 the run started from
+        if r1_old is not None and float(r.r1) > float(r1_old) + 0.1:
+          HAR_log.write("      !! R1 increased by more than 0.1 during the pTB pre-refinement, aborting !!\n")
+          self.refinement_has_failed.append("Error: R1 rose by more than 0.1 during the pTB pre-refinement! Stopping!")
+          pre_failed = True
+          # from the worse model the guard would not fire again: repeating it takes a new tick
+          nsa2_set_param('PTB_PREREFINE', False)
+          break
         if run == n_pre:
-          nsa2_set_param('PTB_PREREFINE_DONE', ptb_key)
+          nsa2_set_param('PTB_PREREFINE_DONE', "%d pTB cycle%s before %s" % (n_pre, "" if n_pre == 1 else "s", ptb_key))
         continue
       elif not Full_HAR:
         converged = True
@@ -668,7 +720,8 @@ all calculation parameters are properly recorded."""
   # here. Otherwise the next session reads the new table against the old hash.
   nsa2_flush_ins_header()
   #nsa2_set_param('Calculate', False)
-  nsa2_set_param('source', "  " + nsa2_get_param('file'))
+  # a pTB table must not become the source the user goes on with
+  nsa2_set_param('source', qm_source if pre_failed else "  " + nsa2_get_param('file'))
   ext_name = "h3-NoSpherA2-extras"
   if OV.IsHtmlItem(ext_name):
     olex.m(f"html.ItemState {ext_name} 2")
@@ -706,6 +759,7 @@ all calculation parameters are properly recorded."""
   HAR_log.write("Residual density Min:%s\n" % _stat('max_hole', "{:+8.3f}"))
   HAR_log.write("Residual density RMS:%s\n" % _stat('res_rms', "{:+8.3f}"))
   HAR_log.write("Goodness of Fit:     %s\n" % _stat('goof', "{:8.4f}"))
+  calc_log.end_refinement(converged, Full_HAR and update, self.refinement_has_failed)
   HAR_log.write("Refinement finished at: ")
   HAR_log.write(str(datetime.datetime.now()))
   HAR_log.write("\n")
@@ -864,6 +918,33 @@ The following options were used:
       if software == "Tonto":
         details_text += f"   CLUSTER RADIUS: {param('cluster_radius')}\n"
         details_text += f"   CLUSTER GROW:   {param('cluster_grow')}\n"
+    # the model this table was computed for came out of pTB refinement cycles (pre-refine checkbox or pTB as the
+    # source): claimed when the calculation log shows that only this table's level of theory refined after the last
+    # pTB cycle; without a log, from what the table records (PTB_PREREFINE_DONE, pre-refine checkbox only)
+    pre_done = str(param('PTB_PREREFINE_DONE') or '').strip()
+    hybrid = dict((k, v) for k, v in (recorded or {}).items() if k.startswith('HYBRID.'))
+    if software == "Hybrid":
+      parts = sorted((int(k.split('_PART')[1]), str(v).strip()) for k, v in hybrid.items() if k.startswith('HYBRID.SOFTWARE_PART'))
+      target = "Hybrid (%s)" % ", ".join("PART %d %s" % p for p in parts)
+    else:
+      target = "%s/%s" % (software, param('method'))
+    n = m = None
+    try:
+      from NoSpherA2 import calc_log
+      if not software or software == "pTB":
+        pass
+      elif calc_log.has_log():
+        n, m = calc_log.ptb_before_level(software, param('method'), param('basis_name'), hybrid) or (None, None)
+      elif pre_done.split(" ", 1)[0].isdigit() and " before " in pre_done:
+        done_target = pre_done.split(" before ", 1)[1]
+        if done_target == target or (software == "Hybrid" and done_target.startswith("Hybrid (")):
+          n, target = int(pre_done.split(" ", 1)[0]), done_target
+    except Exception as e:
+      print("pTB pre-refinement not checked for the CIF: %s" % e)
+    if n:
+      then = ", followed by only 1 refinement cycle with the final form factors" if m == 1 else ""
+      details_text += "   PRE-REFINEMENT: %d pTB %s before %s%s (pTB: S. Grimme, M. Mueller, A. Hansen, J. Chem. Phys. 2023, 158, 124111);" \
+                      " final form factors from the software above\n" % (n, "cycle" if n == 1 else "cycles", target, then)
     # the date the table was made, not the date its file was last copied
     f_date = param('date') if recorded is not None else ''
     if not f_date:

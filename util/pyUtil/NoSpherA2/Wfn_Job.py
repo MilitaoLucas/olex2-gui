@@ -23,6 +23,12 @@ except Exception as e:
   p_path = os.path.dirname(os.path.abspath("__file__"))
 
 
+def _part_charge_mult(part):
+  # xTB and pTB take charge and multiplicity on the command line; a Hybrid part has its own
+  if part and software() == "Hybrid" and str(nsa2_get_param("Hybrid.charge_Part%d" % part)).strip() not in ('', 'None'):
+    return int(nsa2_get_param("Hybrid.charge_Part%d" % part)), int(nsa2_get_param("Hybrid.multiplicity_Part%d" % part))
+  return int(nsa2_get_param("charge")), int(nsa2_get_param("multiplicity"))
+
 def _crystal_cluster(subunit_fn, cluster_fn, radius, ionic=False):
   # cluster of identical, identically ordered copies of the displayed atoms (ORCA CRYSTAL-QMMM subunits), displayed copy first.
   # The copies must tile the crystal, every atom site exactly once. With one molecule that is every distinct image; with
@@ -514,9 +520,12 @@ class wfn_Job(object):
     
   def write_input(self, xyz=True, basis=None, method=None, relativistic=None, charge=None, mult=None, strategy=None, conv=None, part=None, damp=None, cover=True, embed=True):
     # embedding is on by default, but builds its cluster from the whole displayed model: never for one PART of a
-    # disordered structure (no asu.xyz is written there, and the GUI hides the switch) nor when the caller says no
+    # disordered structure (no asu.xyz is written there, and the GUI hides the switch) nor when the caller says no;
+    # a disordered structure gets the switch turned off so the header and CIF do not claim an embedding
+    if OV.ListParts() and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM'):
+      nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False)
     embedding = embed and self.software in ("ORCA 5.0", "ORCA 6.0", "ORCA 6.1") \
-                and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM') and not OV.ListParts()
+                and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
     if self.software == "ORCA":
       self.write_orca_input(xyz, basis, method, relativistic, charge, mult, strategy, conv, part)
     elif self.software == "ORCA 5.0" or self.software == "ORCA 6.0" or self.software == "ORCA 6.1":
@@ -1906,17 +1915,15 @@ ener = cf.kernel()"""
         args.append(str(temperature))
         args.append("--molden")
         args.append(self.name+".xyz")
-        charge = nsa2_get_param("charge")
+        charge, mult = _part_charge_mult(part)
         args.append("--chrg")
         args.append(str(charge))
-        mult = nsa2_get_param("multiplicity")
         if mult != 1:
           args.append("--uhf")
           args.append(str(int(mult)-1))
       elif softw == "pTB":
         method = nsa2_get_param('method')
-        charge = nsa2_get_param("charge")
-        mult = nsa2_get_param("multiplicity")
+        charge, mult = _part_charge_mult(part)
         #base = os.path.dirname(self.parent.ptb_exe)
         args.append(self.parent.ptb_exe)
         args.append(self.name+".xyz")

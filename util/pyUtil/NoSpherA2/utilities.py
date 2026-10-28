@@ -1629,7 +1629,7 @@ _NSA2_RECORDED = (
   'ORCA_USE_CRYSTAL_QMMM', 'ORCA_CRYSTAL_QMMM_TYPE', 'ORCA_CRYSTAL_QMMM_RADIUS',
   'ORCA_SCF_Conv', 'ORCA_SCF_Strategy', 'pySCF_Damping', 'DIIS',
   'cluster_radius', 'cluster_grow', 'selected_salted_model',
-  'Thakkar_Cations', 'Thakkar_Anions')
+  'Thakkar_Cations', 'Thakkar_Anions', 'PTB_PREREFINE_DONE')
 _NSA2_HYBRID_PART = ('software', 'method', 'basis_name', 'Relativistic', 'charge', 'multiplicity')
 _NSA2_PREFIX = 'NSA2_'
 

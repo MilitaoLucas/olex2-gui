@@ -47,6 +47,7 @@ GROUPS = {
   "nosphera2": "group_nosphera2",
   "nsa2_matrix": "group_nsa2_matrix",
   "tsc_reorient": "group_tsc_reorient",
+  "ptb_prerefine": "group_ptb_prerefine",
   "release":   "group_release",
 }
 DEFAULT = ("api,macros,model,instructions,restraints,geometry,symmetry,"

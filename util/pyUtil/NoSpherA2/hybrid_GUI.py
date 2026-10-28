@@ -480,15 +480,18 @@ def make_xtb_GUI():
   return t
 
 def ptb_prerefine_line():
-  # pTB cycles before the selected QM source; the switch-over lives in CctbxLib/aaff.py
+  # pTB cycles before the selected QM source; the switch-over lives in CctbxLib/aaff.py.
+  # Ticked means pTB runs on the next refinement: once done it shows unticked, and only a new tick repeats it.
+  done = bool(str(nsa2_get_param('PTB_PREREFINE_DONE') or '').strip())
+  armed = bool(nsa2_get_param('PTB_PREREFINE')) and not done
   t = begin_new_line() + \
     labeled_checkbox("NoSpherA2_ptb_prerefine@refine",
-                     "pTB pre-refine",
-                     "spy.nsa2_get_param('PTB_PREREFINE')",
+                     "pTB pre-refine (done)" if done else "pTB pre-refine",
+                     "true" if armed else "false",
                      "spy.nsa2_set_param('PTB_PREREFINE', True) >> spy.nsa2_set_param('PTB_PREREFINE_DONE', '') >> html.Update()",
                      "spy.nsa2_set_param('PTB_PREREFINE', False) >> html.Update()",
                      width=20)
-  if nsa2_get_param('PTB_PREREFINE'):
+  if armed:
     t += labeled_spin("NoSpherA2_ptb_prerefine_cycles@refine",
                       "pTB cycles",
                       "spy.nsa2_get_param('PTB_PREREFINE_CYCLES')",
@@ -687,7 +690,8 @@ def make_ORCA_GUI(new_ORCA = True):
         no_afix_checkbox() + \
         end_line()
   # ORCA specific options: SCF Thresh., SCF Strategy, Solvation (not with embedding)
-  embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
+  # Wfn_Job never embeds a disordered structure, and its Embed. switch is hidden there, so it must not hide Solvation
+  embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM') and not is_disordered()
   t += begin_new_line("NoSpherA2 Extras") + \
         labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
                       "SCF Thresh.",

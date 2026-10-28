@@ -647,6 +647,21 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
       self._sync_active_tscb_for_renamed_labels(labels_before)
 
   def launch(self) -> bool:
+    # timed for olex2/<name>_calculation_log.txt; a launch outside a refinement is an entry of its own
+    from NoSpherA2 import calc_log
+    source = str(software())
+    t0 = time.time()
+    ok = False
+    try:
+      ok = self._launch()
+      return ok
+    finally:
+      try:
+        calc_log.table_done(source, ok, time.time() - t0)
+      except Exception as e:
+        print("Calculation log: %s" % e)
+
+  def _launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
     wfn_code = software()
     self.wfn_code = wfn_code
@@ -2066,10 +2081,11 @@ def make_NSA2_GUI(method):
     return "No GUI for .tsc source."
   elif ".gbw" in method or ".fchk" in method or ".wfn" in method or ".molden" in method or ".wfx" in method or ".ffn" in method or ".xtb" in method:
     return make_wfn_GUI()
-  elif method == "Hybrid":
-    return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares())
   # pTB pre-refinement is offered wherever aaff.PTB_FOLLOW_UP can take over from it
   pre = ptb_prerefine_line() if NoSpherA2_instance.ptb_exe else ""
+  if method == "Hybrid":
+    from aaff import _hybrid_ptb_parts
+    return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares()) + (pre if _hybrid_ptb_parts() else "")
   if method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
     return make_ORCA_GUI(is_orca_new()) + pre
   elif method == "OCC" and OV.GetParam('user.NoSpherA2.show_OCC') == True:

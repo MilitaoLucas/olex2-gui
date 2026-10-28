@@ -83,6 +83,12 @@ direct methods, SHELXD dual space.
 and require the aspherical R1 to have *changed* and not to be worse. DiscaMB
 runs every time; the quantum backends are behind `OLEX2_TEST_FULL`.
 
+**ptb_prerefine** (not in the default set, about 4 minutes, needs pTB) - the
+pTB pre-refine checkbox on sucrose with OCC r2SCAN/6-31G as the follow-up: pTB
+then OCC, skipped on a repeat once done, the R1 guard, no pTB in a table-only
+run, and the `PRE-REFINEMENT:` line of the CIF read from the calculation log
+(claimed after pre-refine or pTB as the source, dropped after a basis change).
+
 The sample is sucrose, deliberately: it is neutral and closed shell, which is
 what the charge 0 and multiplicity 1 the tests set actually describe. The
 sample named `water` is a Mn complex, and its SCF diverged within five cycles
