@@ -259,21 +259,21 @@ def t_prerefine(suite):
   _expect(line, "1 pTB cycle before %s/r2SCAN" % occ.strip())
   if "followed by only 1" in line:
     raise AssertionError("still says only 1 cycle followed after two: %r" % line)
-  # another basis is another level of theory: the claim goes
+  # another basis is another level of theory, but the model still went through pTB: the line stays, once
   nsa2_set_param('source', occ)
   nsa2_set_param('basis_name', '3-21G')
   _run(folder, "OCC 3-21G run")
-  line = _pre_line()
-  if line is not None:
-    raise AssertionError("claimed after a basis change: %r" % line)
-  return "pTB -> OCC, skipped on repeat, claim dropped after 3-21G"
+  _expect(_pre_line(), "1 pTB cycle before %s/r2SCAN" % occ.strip())
+  if _cif()[1].count(PRE_LINE) != 1:
+    raise AssertionError("PRE-REFINEMENT not exactly once in _refine_special_details: %r" % _cif()[1])
+  return "pTB -> OCC, skipped on repeat, claim kept once after 3-21G"
 
 
 def t_guard(suite):
   folder, occ, ptb = _occ(suite)
   _arm(2)
-  # a starting R1 of -0.1 makes any pTB R1 count as 0.1 worse
-  OV.SetParam('snum.refinement.last_R1', -0.1)
+  # a starting R1 of 0.001 makes any pTB R1 a rise of more than 10 %
+  OV.SetParam('snum.refinement.last_R1', 0.001)
   said = _refine_capturing()
   block = _last_run(folder)
   if "STOPPED by the R1 guard" not in block:

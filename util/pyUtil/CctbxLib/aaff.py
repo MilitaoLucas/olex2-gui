@@ -683,10 +683,10 @@ all calculation parameters are properly recorded."""
         converged = True
         break
       elif pre:
-        # the same guard as the cycles after it, against the R1 the run started from
-        if r1_old is not None and float(r.r1) > float(r1_old) + 0.1:
-          HAR_log.write("      !! R1 increased by more than 0.1 during the pTB pre-refinement, aborting !!\n")
-          self.refinement_has_failed.append("Error: R1 rose by more than 0.1 during the pTB pre-refinement! Stopping!")
+        # relative to the R1 the run started from: a 10 % rise (3 % -> 3.3 %) does not go on to the QM source
+        if r1_old is not None and r1_old > 0 and float(r.r1) >= 1.1 * float(r1_old):
+          HAR_log.write("      !! R1 rose by 10 % or more of its start value during the pTB pre-refinement, aborting !!\n")
+          self.refinement_has_failed.append("Error: R1 rose by 10 % or more during the pTB pre-refinement! Stopping!")
           pre_failed = True
           # from the worse model the guard would not fire again: repeating it takes a new tick
           nsa2_set_param('PTB_PREREFINE', False)
@@ -920,7 +920,7 @@ The following options were used:
         details_text += f"   CLUSTER GROW:   {param('cluster_grow')}\n"
     # the model this table was computed for came out of pTB refinement cycles (pre-refine checkbox or pTB as the
     # source): claimed when the calculation log shows that only this table's level of theory refined after the last
-    # pTB cycle; without a log, from what the table records (PTB_PREREFINE_DONE, pre-refine checkbox only)
+    # pTB cycle; otherwise from the last such claim, which PTB_PREREFINE_DONE keeps in the header (and every table records)
     pre_done = str(param('PTB_PREREFINE_DONE') or '').strip()
     hybrid = dict((k, v) for k, v in (recorded or {}).items() if k.startswith('HYBRID.'))
     if software == "Hybrid":
@@ -933,12 +933,16 @@ The following options were used:
       from NoSpherA2 import calc_log
       if not software or software == "pTB":
         pass
-      elif calc_log.has_log():
-        n, m = calc_log.ptb_before_level(software, param('method'), param('basis_name'), hybrid) or (None, None)
-      elif pre_done.split(" ", 1)[0].isdigit() and " before " in pre_done:
-        done_target = pre_done.split(" before ", 1)[1]
-        if done_target == target or (software == "Hybrid" and done_target.startswith("Hybrid (")):
-          n, target = int(pre_done.split(" ", 1)[0]), done_target
+      else:
+        if calc_log.has_log():
+          n, m = calc_log.ptb_before_level(software, param('method'), param('basis_name'), hybrid) or (None, None)
+        if n:
+          # kept in the header, so the line stays after a later change of level; a repeat replaces it, never adds one
+          claim = "%d pTB cycle%s before %s" % (n, "" if n == 1 else "s", target)
+          if str(nsa2_get_param('PTB_PREREFINE_DONE') or '').strip() != claim:
+            nsa2_set_param('PTB_PREREFINE_DONE', claim)
+        elif pre_done.split(" ", 1)[0].isdigit() and " before " in pre_done:
+          n, target = int(pre_done.split(" ", 1)[0]), pre_done.split(" before ", 1)[1]
     except Exception as e:
       print("pTB pre-refinement not checked for the CIF: %s" % e)
     if n:
