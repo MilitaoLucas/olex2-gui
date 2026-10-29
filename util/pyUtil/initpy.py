@@ -1,5 +1,9 @@
 # initpy.py
 import os, sys, time
+# MSVC's OpenMP runtime (vcomp, loaded with cctbx) keeps its workers spinning
+# after every parallel region and slows the serial work after it; set before
+# cctbx loads, PASSIVE lets them sleep. setdefault keeps a value already set.
+os.environ.setdefault('OMP_WAIT_POLICY', 'PASSIVE')
 import olex
 
 def do_init():
