@@ -20,6 +20,10 @@ user.NoSpherA2.show_XCW. What it does:
            follow the running density; tfvc and embis cost 2-4x), or ri (-xcw_partition ri, the
            refine tab's aux basis + multipole restraint, which also offers
            TFVC/MBIS/EMBIS targets)
+  grown    a grown model (molecule on a special position) goes as <name>.xyz
+           with -xyz and the keyword grown; NoSpherA2 fits the whole cluster
+  EXTI     Olex2's EXTI goes as 'extinction shelx <EXTI>' + the wavelength and
+           is refined on in the fit
 
 Still to do: charge/multiplicity are the shared NoSpherA2 values; twin laws
 are not passed.
@@ -163,14 +167,39 @@ def _write_anom_disp(path):
       out.write("%s %.6f %.6f\n" % (el, fp, fdp))
 
 
+def _grown():
+  return olx.xf.latt.IsGrown() == 'true'
+
+
+def _write_grown_xyz(path):
+  """The grown model as Olex2 shows it; NoSpherA2 matches it against the CIF's asymmetric unit
+  (cell::grow_asym_atoms) and fits the whole cluster. Q peaks are dropped from the file, not killed:
+  Kill $Q (as in Wfn_Job.write_xyz_file) collapses the grown model back to the asymmetric unit."""
+  olx.File(path, p=10)
+  with open(path) as f:
+    lines = f.read().splitlines()
+  atoms = [l for l in lines[2:] if l.split() and l.split()[0] != "Q"]
+  with open(path, "w") as f:
+    f.write("\n".join([str(len(atoms)), lines[1]] + atoms) + "\n")
+
+
 def _write_settings(path, n_params):
   """The settings file NoSpherA2 reads with -XCW_settings (XCW.cpp), one keyword per line."""
+  from cctbx_olex_adapter import OlexCctbxAdapter
+  adapter = OlexCctbxAdapter()
+  if adapter.exti is not None:
+    n_params -= 1  # Olex2 counts EXTI, NoSpherA2's n_params() adds the refined coefficient itself
   lines = [
     str(_param("scf_preset", "normal")),
     str(_param("conv_preset", "normal_conv")),
     "params %d" % n_params,
     "basis_set %s" % _param("basis_name", nsa2_get_param("basis_name")),
   ]
+  if _grown():
+    lines.append("grown")
+  if adapter.exti is not None:
+    # SHELX EXTI on the same 0.001 lambda^3 / sin 2theta scale, refined on from Olex2's value
+    lines += ["extinction shelx %.8g" % adapter.exti, "wavelength %.6f" % adapter.wavelength]
   if _param("basis_adv") == True:
     folder = os.path.dirname(os.path.abspath(path))
     exe = _executable()
@@ -217,6 +246,8 @@ def _args(folder, name, settings):
   args = [exe, "-do_XCW", "-cif", name + ".cif", "-hkl", name + ".hkl", "-XCW_settings", settings,
           "-cpus", str(nsa2_get_param("ncpus")), "-mem", str(float(nsa2_get_param("mem")) * 1000), "-no_date",
           "-charge", str(_charge()), "-mult", str(_mult()), "-anom_disp", "anom_disp.txt"]
+  if _grown():
+    args += ["-xyz", name + ".xyz"]
   if _param("gaussian_halt") == True:
     args.append("-xcw_gaussian_halt")
   # the GUI value is I/sigma(I); sigma(I) = 2 F sigma(F), so the same reflections are F/sigma(F) >= 2x for target F
@@ -353,6 +384,8 @@ def xcw_run():
     _append_dispersion(os.path.join(folder, name + ".cif"))
     _write_hkl(os.path.join(folder, name + ".hkl"))
     _write_anom_disp(os.path.join(folder, "anom_disp.txt"))
+    if _grown():
+      _write_grown_xyz(os.path.join(folder, name + ".xyz"))
     settings = name + "_xcw_settings.txt"
     _write_settings(os.path.join(folder, settings), n_params)
   except Exception as e:
