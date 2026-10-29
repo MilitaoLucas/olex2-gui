@@ -244,6 +244,24 @@ def _hklf5_twin_laws(hkl_src):
         rows = None
   return laws
 
+def twin_law_args():
+  """One -twin per law of the current model (row-major, h' = R h as on the TWIN card); NoSpherA2 adds R h
+  to the table. HKLF 5 laws come off the hkl file, else from the TWIN card. Shared by the tsc and XCW routes"""
+  args = []
+  model = OV.GetRefinementModel(False)
+  if model['hklf']['value'] >= 5:
+    laws = _hklf5_twin_laws(OV.HKLSrc())
+    if not laws:
+      olx.Echo("No twin law could be read off the HKLF 5 file - the table covers the first domain only", m="warning")
+    for law in laws:
+      args += ["-twin"] + law
+  elif 'twin' in model:
+    from cctbx_olex_adapter import twin_laws_from_model
+    for law in twin_laws_from_model(model['twin']):
+      m = law.as_double()  # cctbx orientation is the transpose of the card
+      args += ["-twin"] + [str(m[j * 3 + i]) for i in range(3) for j in range(3)]
+  return args
+
 def write_merged_hkl():
   folder = OV.FilePath()
   name = OV.ModelSrc()
@@ -477,20 +495,7 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   elif nsa2_get_param('NoSpherA2_Partition') == "EMBIS":
     args.append("-EMBIS")
 
-  olex_refinement_model = OV.GetRefinementModel(False)
-
-  # NoSpherA2 takes one -twin per law (row-major, h' = R h as on the TWIN card) and adds R h to the table
-  if olex_refinement_model['hklf']['value'] >= 5:
-    laws = _hklf5_twin_laws(OV.HKLSrc())
-    if not laws:
-      olx.Echo("No twin law could be read off the HKLF 5 file - the table covers the first domain only", m="warning")
-    for law in laws:
-      args += ["-twin"] + law
-  elif 'twin' in olex_refinement_model:
-    from cctbx_olex_adapter import twin_laws_from_model
-    for law in twin_laws_from_model(olex_refinement_model['twin']):
-      m = law.as_double()  # cctbx orientation is the transpose of the card
-      args += ["-twin"] + [str(m[j * 3 + i]) for i in range(3) for j in range(3)]
+  args += twin_law_args()
   original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
   if original_hklsrc and OV.HKLSrc() != original_hklsrc:
     # A solvent mask is active: OV.HKLSrc() currently points at the temporary

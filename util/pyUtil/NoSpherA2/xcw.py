@@ -24,9 +24,13 @@ user.NoSpherA2.show_XCW. What it does:
            with -xyz and the keyword grown; NoSpherA2 fits the whole cluster
   EXTI     Olex2's EXTI goes as 'extinction shelx <EXTI>' + the wavelength and
            is refined on in the fit
+  TWIN     the twin laws go as -twin (utilities.twin_law_args, as on the tsc
+           route), so the table also covers R h for every measured h; the fit
+           itself stays on the measured reflections and ignores BASF (an
+           inversion twin only changes the anomalous terms, a merohedral-twin
+           fit is approximate)
 
-Still to do: charge/multiplicity are the shared NoSpherA2 values; twin laws
-are not passed.
+Still to do: charge/multiplicity are the shared NoSpherA2 values.
 """
 
 import glob
@@ -262,7 +266,13 @@ def _args(folder, name, settings):
     args.append("-no_xcw_extrapolate")
   if _param("use_gpu") != True:
     args.append("-no_gpu")
-  from utilities import ri_fit_args, tshb_supported
+  from utilities import ri_fit_args, tshb_supported, twin_law_args
+  # the twin mates only widen the written table; the fit stays on the measured reflections and ignores BASF
+  twin = twin_law_args()
+  if twin:
+    args += twin
+    print("XCW: twin laws passed for the table only - the fit ignores BASF (exact for an inversion twin "
+          "apart from the anomalous terms, approximate for a merohedral twin)")
   partition = str(_param("partition", "hirshfeld"))
   if partition in ("becke", "tfvc", "mbis", "embis"):
     args.append("-" + partition)
