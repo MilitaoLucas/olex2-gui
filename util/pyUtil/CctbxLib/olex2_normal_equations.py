@@ -99,8 +99,9 @@ def normal_equation_class(*args, **kwds):
       self.show_cycle_summary(log=line)
       (sys.stdout if self.log is None else self.log).write(line.getvalue())
       self.show_sorted_shifts(max_items=10, log=self.log)
+      # the worst 10 of each type; the .oxl lists every restraint once, at the end
       self.restraints_manager.show_sorted(
-        self.xray_structure, f=self.log)
+        self.xray_structure, f=self.log, max_items=10)
       sys.stdout.write(line.getvalue())
       self.feed_olex()
 
@@ -669,6 +670,9 @@ class scipy_iterations(iterations_with_shift_analysis,
   # to age, and the value which reaches the CIF is the one from the cycle where
   # the refinement has settled anyway.
   su_refresh_interval = 5
+  # do() resets these; an L.S. 0 never calls it but still asks for the s.u.
+  cached_su = None
+  cached_su_cycle = 0
 
   def do(self):
     self.p_cycle_start = None
@@ -676,6 +680,14 @@ class scipy_iterations(iterations_with_shift_analysis,
     self.cached_su_cycle = 0
     self.non_linear_ls.actual.begin_cycle()
     minimisers.crystallographic_scipy_iterations.do(self)
+    if self.n_iterations:
+      # Each cycle opens the next as it ends and none follows the last, so the
+      # shift analysis after the run would measure an empty cycle and say 0.
+      # Report the last cycle that ran, as Gauss-Newton does, against s.u. from
+      # the final build (refinement.py solves it for the covariance anyway).
+      (self.p_cycle_start,
+       self.non_linear_ls.actual.xray_structure_pre_cycle) = self.last_cycle_start
+      self.cached_su = None
 
   def standard_uncertainties(self):
     if (self.cached_su is None
@@ -709,11 +721,17 @@ class scipy_iterations(iterations_with_shift_analysis,
     return shifts
 
   def on_iteration_completion(self):
+    normal_eqns = self.non_linear_ls.actual
+    if self.p_cycle_start is None:
+      # the first cycle starts where the minimiser does, at p = 0
+      self.p_cycle_start = flex.double(self.p_model.size(), 0)
+    # where this cycle began, for do() to report against if it is the last
+    self.last_cycle_start = (self.p_cycle_start,
+                             normal_eqns.xray_structure_pre_cycle)
     # What gets reported and handed back to Olex2 must be the point the
     # minimiser accepted, not whichever trial point it last happened to try.
     # This usually costs nothing, the two being the same point.
     self.build_at(self.p_accepted)
-    normal_eqns = self.non_linear_ls.actual
     # end_cycle reports the cycle, which may or may not solve the normal
     # equations for fresh s.u.; standard_uncertainties invalidates the
     # evaluation itself on the cycles where it does
@@ -755,6 +773,9 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
     self.mu = self.tau*flex.max(a.matrix_packed_u_diagonal())
     while self.n_iterations < self.n_max_iterations:
       self.reset_shifts()
+      # fetched afresh each cycle: an OpenMP build (use_openmp) hands out new
+      # storage, and the array held from before the loop would be damped instead
+      a = self.non_linear_ls.normal_matrix_packed_u()
       a.matrix_packed_u_diagonal_add_in_place(self.mu)
       objective = self.non_linear_ls.objective()
       g = -self.non_linear_ls.opposite_of_gradient()
@@ -770,6 +791,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       objective_new = self.non_linear_ls.objective()
       actual_decrease = objective - objective_new
       rho = actual_decrease/expected_decrease
+      rejected = False
       if rho > 0:
         if self.has_gradient_converged_to_zero(): break
         self.mu *= max(1/3, 1 - (2*rho - 1)**3)
@@ -779,6 +801,7 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
       else:
         if self.mu < 1e16:
           self.non_linear_ls.step_backward()
+          rejected = True
           self.mu *= nu
           nu *= 2
           if OV.IsDebugging():
@@ -788,6 +811,10 @@ class levenberg_marquardt_iterations(iterations_with_shift_analysis):
         elif OV.IsDebugging():
           print("Mu is too big, skip increase")
       self.non_linear_ls.build_up()
+      if rejected:
+        # step_forward fed Olex2 the trial point just undone; fed again after
+        # the rebuild so that the OSF is the restored point's, not the trial's
+        self.non_linear_ls.feed_olex()
     # get proper s.u.
     self.non_linear_ls.build_up()
     self.non_linear_ls.on_completion()

@@ -30,6 +30,8 @@ the deposited statistics record: about 0.02 A on bonds and 0.04 A on 1,3
 distances. A structure at 3 A wants tighter ones than a structure at 0.9 A.
 """
 
+import re
+
 import aa_geometry
 
 BACKBONE = ("N", "CA", "C", "O")
@@ -390,7 +392,56 @@ def as_shelx(plan, bond_sigma=0.02, angle_sigma=0.04,
   return out
 
 
+_RESTRAINTS = ("DFIX", "DANG", "SADI", "RIGU", "SIMU", "ISOR", "DELU", "FLAT",
+               "CHIV", "NCSY")
+_OLD_REF = re.compile(r"\b([A-Za-z][A-Za-z0-9']*)_(\d+)\b")
+
+
+def qualify_refs(lines):
+  """Restraint lines from before r7746 with their refs chain-qualified.
+
+  protein_prep used to write C_12; Olex2 V2 files residue 12 under its chain
+  and drops the bare ref ("Could not locate"), so every restraint vanishes and
+  the refinement explodes. The chain comes from the file's own RESI lines; a
+  number that two chains share cannot be told apart and is refused rather
+  than guessed.
+  """
+  chains = {}
+  for l in lines:
+    t = l.split()
+    if t and t[0].upper() == "RESI":
+      for tok in t[1:]:
+        c, _, n = tok.rpartition(":")
+        if n.isdigit():
+          chains.setdefault(int(n), set()).add(c)
+
+  def fix(m):
+    owners = chains.get(int(m.group(2)), set())
+    if len(owners) > 1:
+      raise ValueError("residue %s is in chains %s; cannot qualify %s"
+                       % (m.group(2), "/".join(sorted(owners)), m.group(0)))
+    c = next(iter(owners), "")
+    return "%s_%s:%s" % (m.group(1), c, m.group(2)) if c else m.group(0)
+
+  return [_OLD_REF.sub(fix, l) if l.split()[:1]
+          and l.split()[0].upper().startswith(_RESTRAINTS) else l
+          for l in lines]
+
+
 if __name__ == "__main__":
+  old = ["RESI ALA A:12", "RESI GLY B:13", "RESI HOH 14",
+         "DFIX 1.52 0.02 CA_12 C_12", "SADI 0.02 N_13 CA_13 O_14 H1_14",
+         "C_12 1 0.1 0.2 0.3 11 0.02", "DANG 2.4 0.04 CA_A:12 N_13"]
+  new = qualify_refs(old)
+  assert new[3] == "DFIX 1.52 0.02 CA_A:12 C_A:12", new[3]
+  assert new[4] == "SADI 0.02 N_B:13 CA_B:13 O_14 H1_14", new[4]
+  assert new[5] == old[5] and new[6] == "DANG 2.4 0.04 CA_A:12 N_B:13"
+  try:
+    qualify_refs(["RESI ALA A:5", "RESI ALA B:5", "DFIX 1.5 CA_5 C_5"])
+    raise AssertionError("shared residue number not refused")
+  except ValueError:
+    pass
+
   # carboxylate targets: symmetric without the acid H, protonated with it
   names = ("N", "CA", "C", "O", "CB", "CG", "OD1", "OD2")
   for extra, sym in (((), True), (("HD2",), False)):

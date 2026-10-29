@@ -1612,7 +1612,9 @@ def _nsa2_normalise_table_labels(path):
     from aaff import get_current_scatter_ids
     labels = read_scatterers(path)
     if not labels or not isinstance(labels[0], str) or path.endswith('.tshb'):
-      return False      # a .tshb is keyed by label by design
+      # a label-keyed .tshb (version 1-3, or another program's) stays so:
+      # update_tshb_file rewrites only the ids of an id-keyed one
+      return False
     model = olexex.OlexRefinementModel()
     ids = convert_labels_to_ids(labels, [atom["label"] for atom in model._atoms],
                                 get_current_scatter_ids(model))

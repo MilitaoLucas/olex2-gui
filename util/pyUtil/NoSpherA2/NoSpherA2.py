@@ -364,9 +364,9 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     print(" ... done!")
 
   def _adopt_cuqct_output(self):
-    # NoSpherA2 writes experimental.tsc(b), and with -tshb (SALTED, RI fit) also the
-    # fitted densities, which olex2.refine evaluates at any reflection: those win
-    # only what this run wrote: a <name>.tshb left from an earlier run must not win
+    # NoSpherA2 writes experimental.tsc(b), or with -tshb (SALTED, RI fit) the
+    # fitted densities instead, which olex2.refine evaluates at any reflection.
+    # Only what this run wrote: a <name>.tshb left from an earlier run must not win
     fresh = [ext for ext in (".tshb", ".tscb", ".tsc") if os.path.exists("experimental" + ext)]
     for ext in fresh:
       shutil.move("experimental" + ext, self.name + ext)

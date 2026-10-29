@@ -48,7 +48,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     'Gauss-Newton': olex2_normal_equations.naive_iterations_with_damping_and_shift_limit,
     #'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations,
     'Levenberg-Marquardt': olex2_normal_equations.levenberg_marquardt_iterations,
-    'NSFF': normal_eqns_solving.levenberg_marquardt_iterations,
     'FullCG': olex2_normal_equations.scipy_iterations,
     'L-BFGS-B': olex2_normal_equations.scipy_iterations,
     'Newton-CG': olex2_normal_equations.scipy_iterations,
@@ -494,10 +493,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     method = OV.GetParam('snum.refinement.method')
     iterations_class = FullMatrixRefine.solvers.get(method)
     if iterations_class == None:
-      method = FullMatrixRefine.solvers_default_method
-      iterations_class = FullMatrixRefine.solvers.get(method)
       print("WARNING: unsupported method: '%s' is replaced by '%s'"\
         %(method, FullMatrixRefine.solvers_default_method))
+      method = FullMatrixRefine.solvers_default_method
+      iterations_class = FullMatrixRefine.solvers.get(method)
     assert iterations_class is not None
     if fcf_only:
       self.max_cycles = 0
@@ -1169,32 +1168,45 @@ class FullMatrixRefine(OlexCctbxAdapter):
     an inversion twin fraction x from x = 0, every other parameter free:
       x = (g.W.r - c.N^-1.b) / d,  u(x)^2 = GoF^2 / d,  d = g.W.g - c.N^-1.c,
     where r = Fo^2 - k Ic, g = k (Ic(-h) - Ic(h)) is the derivative in x with
-    the scale projected out, c = J^T W g, b = J^T W r (zero at convergence)
+    the scale projected out, c = J^T W g, b = J^T W r of data and restraints
+(zero at convergence)
     and N the refinement's own normal matrix. This equals one Gauss-Newton
     cycle of TWIN/BASF started at x = 0.
     Three passes over the reflections, as ne.fc_sq predates the last shift:
     Ic(h) and the weights for the model as it stands, Ic(-h) as an inversion
-    twin at x = 1, and c from pseudo-observations Fo^2 + lam g.
+    twin at x = 1, and c from pseudo-observations Fo^2 + lam g. Only O(n)
+    sums are read, so no pass forms a normal matrix.
     """
     ne = self.normal_eqns
     if self.twin_fractions or self.twin_components or getattr(ne, 'ml_target', None) is not None:
       raise RuntimeError("only for untwinned least squares")
     fo = ne.observations.fo_sq
     n = self.reparametrisation.n_independents
-    acc_t = next(c for c in type(ne).__mro__
-      if c.__name__.startswith('non_linear_ls_with_separable_scale_factor'))
     def build(obs, weighting, objective_only):
-      acc = acc_t(n, True, type(ne).accumulator_buffer_bytes(n, ne.max_memory))
+      # the O(n) accumulator smtbx cgls uses; it has no OpenMP path
+      acc = least_squares.separable_scale_factor_summary(n, flex.int(), flex.int())
       b = least_squares.build_normal_equations(acc, obs, ne.mask_data(),
         weighting, ne.scale_factor(), ne.one_h_linearisation,
         self.reparametrisation.jacobian_transpose_matching_grad_fc(),
         self.reparametrisation.fc_correction or xray.dummy_fc_correction(),
-        objective_only, ne.may_parallelise, ne.use_openmp, ne.max_memory)
+        objective_only, ne.may_parallelise, False, ne.max_memory)
       return acc, b
     acc, b = build(ne.observations, ne.weighting_scheme, False)
-    ic, w, k = flex.double(b.observables()), b.weights(), acc.optimal_scale_factor()
-    br = (acc.reduced_problem().step_equations().right_hand_side()*acc.sum_w_yo_sq()).as_numpy_array()
-    inv = xray.twin_component(sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)), 1.0, False)
+    ic, w, k = flex.double(b.observables()), b.weights(), acc.scale_factor()
+    br = (acc.right_hand_side()*acc.sum_w_yo_sq()).as_numpy_array()
+    if ne.restraints_manager is not None:
+      # br is the data's J^T W r alone, which at convergence only balances the
+      # restraint gradient; the step in x with the restraints on needs the sum.
+      # The equations and weights build_up adds, as sparse products
+      le = ne.restraints_manager.build_linearised_eqns(
+        ne.xray_structure, self.reparametrisation.parameter_map())
+      if le.n_restraints():
+        wd = le.weights*le.deltas*(
+          ne.restraints_normalisation_factor*ne.restraints_weight_scale)
+        jt = self.reparametrisation.jacobian_transpose_matching(
+          self.reparametrisation.mapping_to_grad_fc_all)
+        br -= ne.sum_w_yo_sq()*(jt*(le.design_matrix.transpose()*wd)).as_numpy_array()
+    inv =xray.twin_component(sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)), 1.0, False)
     g = k*(flex.double(build(fo.as_xray_observations(twin_components=(inv,)),
       least_squares.sigma_weighting(), True)[1].observables()) - ic)
     wic = w*ic
@@ -1205,8 +1217,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     acc = build(fo.customized_copy(data=fo.data() + lam*g, sigmas=sigmas)
       .as_xray_observations(), least_squares.sigma_weighting(), False)[0]
     # finalise() leaves the reduced gradient k* J^T W r / sum(w yo^2)
-    c = (acc.reduced_problem().step_equations().right_hand_side()
-      * (acc.sum_w_yo_sq()*k/(lam*acc.optimal_scale_factor()))).as_numpy_array()
+    c = (acc.right_hand_side()
+      * (acc.sum_w_yo_sq()*k/(lam*acc.scale_factor()))).as_numpy_array()
     cov = ne.covariance_matrix(normalised_by_goof=False)\
       .matrix_packed_u_as_symmetric().as_numpy_array()
     d = flex.sum(w*g*g) - c.dot(cov.dot(c))

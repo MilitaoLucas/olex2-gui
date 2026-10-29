@@ -357,8 +357,9 @@ Refinement aborted."""
         print("Error: Scatterer IDs in the current model do not match those in the TSC/TSCB file.")
         print("Please ensure that the TSC/TSCB file corresponds to the current model.")
         olx.Echo("The table no longer fits the model: atoms were moved by more than "
-                 "a refinement shift and not onto a symmetry image of their sites "
-                 "(move, compaq, sgen -m and inv are rotated along). Recalculate the "
+                 "a refinement shift and not onto a symmetry image of their sites. "
+                 "Moves by move, compaq, sgen -m and inv are rotated along only when "
+                 "every other atom is still where the table has it. Recalculate the "
                  "table, or undo the move.", m="error")
         raise e
       

@@ -753,6 +753,122 @@ def _reorient_tsc(path, rotated, new_ids):
   os.replace(tmp, path)
 
 
+def _real_spherical_harmonics(lmax, u):
+  """real_spherical_harmonics of harmonic_expansion.h at the unit vectors u
+  (n x 3): column l*l + l + m holds Y_lm, the same convention and order."""
+  import numpy as np
+  x, y, z = u[:, 0], u[:, 1], u[:, 2]
+  rho = np.sqrt(x*x + y*y)
+  pole = rho == 0
+  safe = np.where(pole, 1., rho)
+  cp, sp = np.where(pole, 1., x/safe), np.where(pole, 0., y/safe)
+  cm, sm = [np.ones_like(x)], [np.zeros_like(x)]
+  for m in range(1, lmax + 1):
+    cm.append(cm[m - 1]*cp - sm[m - 1]*sp)
+    sm.append(sm[m - 1]*cp + cm[m - 1]*sp)
+  p = {(0, 0): np.ones_like(x)}
+  for m in range(1, lmax + 1):
+    p[m, m] = -(2*m - 1)*rho*p[m - 1, m - 1]
+  for m in range(lmax):
+    p[m + 1, m] = (2*m + 1)*z*p[m, m]
+  for m in range(lmax + 1):
+    for l in range(m + 2, lmax + 1):
+      p[l, m] = ((2*l - 1)*z*p[l - 1, m] - (l + m - 1)*p[l - 2, m])/(l - m)
+  out = np.empty((len(x), (lmax + 1)**2))
+  for l in range(lmax + 1):
+    n = np.sqrt((2*l + 1)/(4*np.pi))
+    out[:, l*l + l] = n*p[l, 0]
+    for m in range(1, l + 1):
+      n /= np.sqrt((l + m)*(l - m + 1))
+      a = np.sqrt(2.)*(-1 if m % 2 else 1)*n*p[l, m]
+      out[:, l*l + l + m] = a*cm[m]
+      out[:, l*l + l - m] = a*sm[m]
+  return out
+
+
+def _rotate_tshb_shells(shells, q):
+  """rotate_shells of harmonic_expansion.h: the shells of rho(r) rewritten for
+  rho(Q^-1 r), Q orthogonal, so that the form factor at h becomes the old one
+  at h.R. c'_m = int Y_m(u) sum_n c_n Y_n(Q^T u) du, by Gauss-Legendre in
+  cos theta (l + 1 points) times 2l + 1 equal steps in phi, exact for the
+  degree 2l of the integrand; an improper Q needs no special case. One matrix
+  per l serves every shell of that l."""
+  import numpy as np
+  matrices, out = {}, []
+  for sh in shells:
+    l = sh.l
+    if l == 0:
+      out.append(sh)
+      continue
+    if l not in matrices:
+      ct, w = np.polynomial.legendre.leggauss(l + 1)
+      phi = 2*np.pi*np.arange(2*l + 1)/(2*l + 1)
+      st = np.sqrt(np.maximum(0., 1 - ct*ct))
+      u = np.stack([np.outer(st, np.cos(phi)).ravel(), np.outer(st, np.sin(phi)).ravel(),
+                    np.repeat(ct, 2*l + 1)], axis=1)
+      v = u.dot(q)                                    # Q^T u, row by row
+      v /= np.linalg.norm(v, axis=1)[:, None]
+      block = slice(l*l, (l + 1)**2)
+      yu = _real_spherical_harmonics(l, u)[:, block]
+      yv = _real_spherical_harmonics(l, v)[:, block]
+      weight = np.repeat(w, 2*l + 1)*2*np.pi/(2*l + 1)
+      matrices[l] = (yu*weight[:, None]).T.dot(yv)
+    out.append(sh._replace(c=[float(x) for x in matrices[l].dot(sh.c)]))
+  return out
+
+
+def _reorient_tshb(path, plan, model_ids, unit_cell, ops):
+  """The records of plan rotated with their atoms and keyed by the atoms'
+  current ids, as _reorient_tscb does for columns. Rotated here and written,
+  not left to the C++ reader: it rotates a record it finds on an image only in
+  memory, and once the ids are brought up to date after the refinement the
+  next load finds the record by id and no longer rotates it."""
+  import numpy as np
+  import shutil
+  from smtbx.structure_factors.direct import tshb
+  header, atoms = tshb.read(path)
+  o = np.array(unit_cell.orthogonalization_matrix()).reshape(3, 3)
+  f = np.array(unit_cell.fractionalization_matrix()).reshape(3, 3)
+  for column, model_index, k in plan:
+    shells = atoms[column].shells
+    if (ops[k][0] != np.eye(3, dtype=int)).any():
+      shells = _rotate_tshb_shells(shells, o.dot(ops[k][0]).dot(f))
+    atoms[column] = atoms[column]._replace(
+      shells=shells, key=bytes(model_ids[model_index].to_bytes()))
+  # write() puts FRAME and UNITS first itself
+  header = dict((k, v) for k, v in header.items() if k not in ("FRAME", "UNITS"))
+  tmp = path + '.reorient.tmp'
+  try:
+    tshb.write(tmp, atoms, header)
+    shutil.copyfile(path, path + '.bak')
+    os.replace(tmp, path)
+  finally:
+    if os.path.exists(tmp):
+      os.remove(tmp)
+
+
+def _refuse_partial_tshb_move(path, plan, unmatched, ops):
+  """Some records of a .tshb are on a rotated symmetry image of their sites,
+  but not every record has an atom. Refused rather than left to the matching
+  after it: the C++ reader would rotate the moved records for this load only,
+  and the ids written after the refinement would make every later load read
+  them unrotated, with nothing to say so."""
+  import numpy as np
+  moved = [column for column, _, k in plan if (ops[k][0] != np.eye(3, dtype=int)).any()]
+  if not moved:
+    return
+  from smtbx.structure_factors.direct import tshb
+  labels = [a.label for a in tshb.read(path)[1]]
+  who = ("no atom, in place or on a symmetry image, matches %s"
+         % " ".join(labels[c] for c in unmatched)) if unmatched else \
+        "two records claim the same atom"
+  raise ScattererResolutionError(
+    "%s: the densities of %s would have to be rotated onto a symmetry image of "
+    "their sites, but %s. A .tshb is rotated along only when every record has "
+    "its atom; recalculate the densities, or undo the move."
+    % (os.path.basename(path), " ".join(labels[c] for c in moved), who))
+
+
 def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
                            tolerance=_MAX_SYMMETRY_MOVE_RESIDUAL_ANGSTROM, write=True):
   """Rotate the form factors of atoms that move, compaq, sgen -m, inv or
@@ -764,7 +880,10 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
   atom's current id. A pure translation needs nothing: the values are
   atom-centred. Label tables carry no positions and are left alone, and so is
   a table any column of which then has no atom, in place or on an image. The
-  previous file is kept as <table>.bak.
+  previous file is kept as <table>.bak. An id-keyed .tshb is matched the same
+  way and its moved records' shells are rotated by Q = O R O^-1, as the C++
+  reader rotates them in memory; a .tshb in which a record on a rotated image
+  meets one with no atom is refused (ScattererResolutionError).
 
   Returns (rotated, refused, zeroed): [(model index, xyz)] of the columns
   rotated; model indices of atoms that did move by symmetry but whose column
@@ -774,11 +893,12 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
   """
   import numpy as np
   entries = read_scatterers(tsc_file)
-  # densities are not rows to permute; a .tshb moved by symmetry is recalculated
-  if not entries or isinstance(entries[0], str) or tsc_file.endswith('.tshb'):
+  if not entries or isinstance(entries[0], str):
     return [], [], 0
+  is_tshb = tsc_file.endswith('.tshb')
   header = read_header_lines(tsc_file)
-  if not tsc_file.endswith('.tscb') and header.get('SYMM', '').lower() != 'expanded':
+  if not is_tshb and not tsc_file.endswith('.tscb') \
+      and header.get('SYMM', '').lower() != 'expanded':
     return [], [], 0
   model_keys = dict((m.to_hex_string(), j) for j, m in enumerate(model_ids))
   ops = _move_candidates(space_group)
@@ -795,14 +915,25 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
       claimed.append(j)
   matches = _symmetry_matches([entries[c] for c in pending], model_ids, unit_cell, ops,
                               tolerance, _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM) if pending else []
+  unmatched = []
   for column, match in zip(pending, matches):
     if match is None:
-      return [], [], 0
+      unmatched.append(column)
+      continue
     claimed.append(match[0])
     if match[1] != 0:
       plan.append((column, match[0], match[1]))
-  if not plan or len(set(claimed)) != len(claimed):
+  if unmatched or len(set(claimed)) != len(claimed):
+    if is_tshb:
+      _refuse_partial_tshb_move(tsc_file, plan, unmatched, ops)
     return [], [], 0
+  if not plan:
+    return [], [], 0
+  if is_tshb:
+    # densities, not rows: every rotation can be done, nothing is zeroed
+    if write:
+      _reorient_tshb(tsc_file, plan, model_ids, unit_cell, ops)
+    return [(model_index, ops[k][2]) for column, model_index, k in plan], [], 0
 
   if tsc_file.endswith('.tscb'):
     id_start, payload, row, n_refl = _tscb_layout(tsc_file)

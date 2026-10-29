@@ -479,8 +479,7 @@ class OlexCctbxAdapter(object):
         fc = twin_set.array(
           data=evaluate_one_h_many(one_h_function, twin_set.indices()))
       else:
-        fc = twin_set.structure_factors_from_scatterers(
-          self.xray_structure(), algorithm=algorithm).f_calc()
+        fc = f_calc_from_scatterers(twin_set, self.xray_structure(), algorithm)
       if twin_data:
         assert len(twin_sets) == 1
         value = twin_component.value
@@ -2713,6 +2712,56 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         return None
     return None
 
+# ponytail: the renderer's cartoon_auto_residues default, which Python cannot
+# read; a user who changes that option does not move this gate
+mask_fft_min_residues = 30
+
+
+def _residue_count():
+  try:
+    import olex_core
+    return sum(1 for r in olex_core.GetRefinementModel(False)['aunit']['residues']
+               if r.get('number') is not None)
+  except Exception:
+    return 0
+
+
+def mask_f_calc_algorithm(xray_structure):
+  """'fft' if snum.masks.f_calc_algorithm asks for it and the solvent mask's
+  F_calc is the plain spherical-atom sum, else 'direct'. auto asks for it at
+  the size where the renderer switches to the cartoon: FFT only paid off on
+  proteins. NoSpherA2 tables and a DispRadial correction ignore the
+  algorithm, and cctbx's FFT sampling has no Gram-Charlier terms, which the
+  direct sum has."""
+  # SetParam stores 'auto' as libtbx.Auto, whose str is 'Auto'
+  choice = str(OV.GetParam('snum.masks.f_calc_algorithm', 'auto')).lower()
+  if choice == 'auto':
+    choice = 'fft' if _residue_count() >= mask_fft_min_residues else 'direct'
+  if choice != 'fft':
+    return 'direct'
+  if (OV.IsNoSpherA2() or
+      with_dispersion_radial(xray_structure, None) is not None):
+    return 'direct'
+  if any(sc.anharmonic_adp is not None for sc in xray_structure.scatterers()):
+    return 'direct'
+  print("Solvent mask F_calc by FFT")
+  return 'fft'
+
+
+# cctbx's FFT defaults leave about 0.5% error in F_calc, which took 1.2 of the
+# 4.5 electrons out of each void of COD 2240021 and 1 of 22 out of a void of
+# 2015005 with its solvent removed; with these it is 1e-4 to 1e-3 and both
+# counts match direct to 0.1 electron
+fft_accuracy = dict(grid_resolution_factor=1/4., quality_factor=1000,
+                    wing_cutoff=1e-5, exp_table_one_over_step_size=0)
+
+
+def f_calc_from_scatterers(miller_set, xray_structure, algorithm):
+  kw = fft_accuracy if algorithm == 'fft' else {}
+  return miller_set.structure_factors_from_scatterers(
+    xray_structure, algorithm=algorithm, **kw).f_calc()
+
+
 class OlexCctbxFlipSolvent(OlexCctbxAdapter):
   """Recover the solvent density by charge flipping inside the region.
 
@@ -2756,8 +2805,7 @@ class OlexCctbxFlipSolvent(OlexCctbxAdapter):
       region = (m.mask.data.as_1d() >= 2).as_double()
       region.reshape(m.mask.data.accessor())
       f_obs = fo_sq.f_sq_as_f()
-      f_calc = fo_sq.structure_factors_from_scatterers(
-        xray_structure=xs, algorithm="direct").f_calc()
+      f_calc = f_calc_from_scatterers(fo_sq, xs, mask_f_calc_algorithm(xs))
       fft_scale = xs.unit_cell().volume()/region.size()
 
       n_cycles = int(getattr(self.params, 'flip_cycles', 12))
@@ -2881,8 +2929,7 @@ class OlexCctbxFlatSolvent(OlexCctbxAdapter):
       self.region = region
 
       f_obs = fo_sq.f_sq_as_f()
-      f_calc = fo_sq.structure_factors_from_scatterers(
-        xray_structure=xs, algorithm="direct").f_calc()
+      f_calc = f_calc_from_scatterers(fo_sq, xs, mask_f_calc_algorithm(xs))
       f_solv = fo_sq.set().structure_factors_from_map(map=region)
       f_solv = f_solv.data()*self.region_scale
       ss = fo_sq.sin_theta_over_lambda_sq().data()
@@ -3139,6 +3186,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       one_h = direct.f_calc_modulus_squared(
         xray_structure, scatterer_contribution=get_table_contribution(
           xray_structure, table_name))
+    algorithm = mask_f_calc_algorithm(mask.xray_structure)
     #if self.hklf_code >= 5 or self.twin_components:
     if self.hklf_code >= 5:
       mask.use_set_completion = False
@@ -3150,7 +3198,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         anomalous_flag=fo2.anomalous_flag())\
           .unique_under_symmetry().map_to_asu()
       fc = self.f_calc(miller_set, self.exti is not None, True, False,
-                      one_h_function=one_h, twin_data=False)
+                      one_h_function=one_h, twin_data=False,
+                      algorithm=algorithm)
       obs = fo2.as_xray_observations(
         scale_indices=self.reflections.batch_numbers_array.data(),
         twin_fractions=self.twin_fractions,
@@ -3178,7 +3227,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
       mask.fo2, mask.f_calc = fo2, fc
     else:
-      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h)
+      mask.f_calc = self.f_calc(f_calc_set, one_h_function=one_h,
+                                algorithm=algorithm)
       mask.scale_factor = None
 
     f_obs = mask.f_obs()
@@ -4354,6 +4404,12 @@ class _fc_store(object):
   number anywhere; reflections not yet held are computed and added. Anything this does not fingerprint is simply not cached:
   table-based (NoSpherA2) and radially corrected Fc, which go through
   one_h_function, twinned sets, and anharmonic ADPs.
+
+  That is for direct. With fft (only the solvent mask asks for it, always for
+  the same set), a request for a subset of a held set is served from that set,
+  whose FFT grid can be finer, so it can differ from a fresh FFT on the subset
+  at the 1e-6 level (measured 0 to 3.8e-6). A missing reflection makes fft
+  recompute the whole set.
   """
 
   max_entries = 2
@@ -4398,11 +4454,11 @@ class _fc_store(object):
   def f_calc(self, xs, miller_set, algorithm):
     """ Fc for miller_set, computing only the reflections not already held
     for this model. Each reflection's Fc is an independent sum, so computing
-    it alone or among others gives the same number.
+    it alone or among others gives the same number. For direct only: fft is
+    not per reflection, see the class docstring.
     """
     def compute(ms):
-      return ms.structure_factors_from_scatterers(
-        xs, algorithm=algorithm).f_calc()
+      return f_calc_from_scatterers(ms, xs, algorithm)
     try:
       k = self.key(xs, miller_set.space_group(), miller_set.anomalous_flag(),
                    algorithm)
