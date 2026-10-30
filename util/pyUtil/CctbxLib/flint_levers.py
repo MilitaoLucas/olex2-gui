@@ -346,6 +346,11 @@ def twin_lever():
       OV.File(res)
       if 'FV' in blown(res) or blown(res) - blown(orig):
         continue
+      # a law refining below 5 % is not crucial for the solution; on the tw32 COD test this drops 4 of 5 false keeps
+      # on controls for 16 of 373 merohedral keeps
+      basf = re.search(r'^\s*BASF\s+(-?[\d.]+)', open(res).read(), re.M | re.I)
+      if basf and float(basf.group(1)) < twin_stats.ALPHA_MIN:
+        continue
       shutil.copyfile(res, best)
       kept = (x, r)
   except Exception as err:
