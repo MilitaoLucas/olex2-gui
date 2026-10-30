@@ -66,8 +66,11 @@ class RefinementChecks(object):
       for sc, fp, fdp in refined_disp:
         e = str(sc.element_symbol())
         table = []
+        from cctbx_olex_adapter import resonant_table
         for t in tables:
-          table.append(t.table(e))
+          t = resonant_table(t, e)
+          if t is not None:
+            table.append(t)
         fp_min_max = [135.0, 0.0]
         fdp_min_max = [135.0, 0.0]
         fp_average = 0.0
@@ -78,8 +81,8 @@ class RefinementChecks(object):
           fdp_average += temp.fdp()
           fp_min_max = [min(fp_min_max[0], temp.fp()), max(fp_min_max[1], temp.fp())]
           fdp_min_max = [min(fdp_min_max[0], temp.fdp()), max(fdp_min_max[1], temp.fdp())]
-        fp_average /= len(tables)
-        fdp_average /= len(tables)
+        fp_average /= len(table)
+        fdp_average /= len(table)
         fpdiff = (fp_min_max[1] - fp_min_max[0])
         fdpdiff = (fdp_min_max[1] - fdp_min_max[0])
         if fp_average + 2 * fpdiff < fp or fp_average - 2 * fpdiff > fp:

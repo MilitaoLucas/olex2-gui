@@ -280,6 +280,8 @@ class OlexCctbxAdapter(object):
               custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
             else:
               custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+          if not null_disp and resonant_table in ("sasaki", "henke"):
+            brennan_for_untabulated(custom_fp_fdps, resonant_table, self.wavelength)
         else:
           try:
             from brennan import brennan
@@ -307,6 +309,8 @@ class OlexCctbxAdapter(object):
                 custom_fp_fdps.setdefault(sc.scattering_type, (0.0, 0.0))
               else:
                 custom_fp_fdps.setdefault(sc.scattering_type, (sc.fp, sc.fdp))
+            if not null_disp:
+              brennan_for_untabulated(custom_fp_fdps, resonant_table, self.wavelength)
       if sfac is not None:
         from cctbx import eltbx
         for element, sfac_dict in sfac.items():
@@ -3564,6 +3568,37 @@ def generate_sf_table():
 
 OV.registerFunction(generate_sf_table, False, "test")
 
+def resonant_table(tables, e):
+  """tables.table(e), or None when e is not tabulated there. Sasaki and Henke
+  stop at U and their lookup settles for a one-letter prefix, so Np got N's
+  f'/f'', Pu P's and Cf/Cm C's (Florian Meurer, 30 Oct 2026). Brennan & Cowan
+  look up exactly and carry H..Lr."""
+  try:
+    t = tables.table(e)
+  except ValueError:
+    return None
+  if not hasattr(t, 'label'):
+    return t
+  el = lambda s: ''.join(c for c in s if c.isalpha()).lower()
+  return t if el(t.label()) == el(e) else None
+
+def brennan_for_untabulated(fp_fdps, table_name, wavelength):
+  """Replaces the prefix-match f'/f'' that set_inelastic_form_factors gave the
+  types table_name lacks with Brennan & Cowan."""
+  import importlib
+  from brennan import brennan
+  tables = importlib.import_module("cctbx.eltbx." + table_name)
+  for t in fp_fdps:
+    if resonant_table(tables, t) is not None:
+      continue
+    el = ''.join(c for c in t if c.isalpha())
+    try:
+      fp_fdps[t] = tuple(brennan().at_angstrom(wavelength, el))
+      print("%s is not in the %s table, using Brennan & Cowan f'/f''" % (t, table_name))
+    except Exception:
+      fp_fdps[t] = (0.0, 0.0)
+      print("No f'/f'' for %s" % t)
+
 def generate_DISP(table_name_, wavelength=None, elements=None):
   import olx
   import olexex
@@ -3627,12 +3662,18 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     print("Invalid table name %s, resetting to Brennan & Cowan" % table_name_)
     from brennan import brennan
     tables = brennan()
+  def lookup(tables, e):
+    table = resonant_table(tables, e)
+    if table is None:
+      from brennan import brennan
+      print("%s is not in the %s table, using Brennan & Cowan f'/f''" % (e, table_name))
+      table = brennan().table(''.join(c for c in e if c.isalpha()))
+    return table.at_angstrom(wavelength)
   try:
     for e in elements:
       e = str(e)
       try:
-        table = tables.table(e)
-        f = table.at_angstrom(wavelength)
+        f = lookup(tables, e)
         #m_table = attc.get_table(nist_elements.atomic_number(e))
         rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
       except ValueError:
@@ -3642,11 +3683,11 @@ def generate_DISP(table_name_, wavelength=None, elements=None):
     tables = sasaki
     rv = []
     print("ERROR: Previous table failed! Switching to Sasaki!")
+    table_name = "sasaki"
     for e in elements:
       e = str(e)
       try:
-        table = tables.table(e)
-        f = table.at_angstrom(wavelength)
+        f = lookup(tables, e)
         #m_table = attc.get_table(nist_elements.atomic_number(e))
         rv.append(e + ',' + ','.join((str(f.fp()), str(f.fdp()))))
       except ValueError:
@@ -3699,21 +3740,25 @@ def make_DISP_Table():
   empty_data = """
   <b>There may be no Disp data or an error occured.</b>
   """
+  def tab_row(name, tables, with_mu):
+    t = resonant_table(tables, e)
+    if t is None:
+      return row([name + " (not tabulated)"])
+    f = t.at_angstrom(wavelength)
+    if with_mu:
+      return row([name, f.fp(), f.fdp(), tables_B.convert_fdp_to_mu(wavelength, f.fdp(), e)])
+    return row([name, f.fp(), f.fdp()])
   try:
     table_B = tables_B.table(e)
-    table_H = tables_H.table(e)
     wavelength = olx.xf.exptl.Radiation()
     wavelength = float(wavelength)
     try:
       f_B = table_B.at_angstrom(wavelength)
-      f_H = table_H.at_angstrom(wavelength)
 
-      table.append(row(["Henke", f_H.fp(), f_H.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_H.fdp(), e)]))
+      table.append(tab_row("Henke", tables_H, True))
       table.append(row(["Brennan & Cowan", f_B.fp(), f_B.fdp(), f_B.mu]))
       if e != 'H':
-        table_S = tables_S.table(e)
-        f_S = table_S.at_angstrom(wavelength)
-        table.append(row(["Sasaki", f_S.fp(), f_S.fdp(), tables_B.convert_fdp_to_mu(wavelength, f_S.fdp(), e)]))
+        table.append(tab_row("Sasaki", tables_S, True))
       else:
         table.append(row(["Sasaki", 0, 0, tables_B.convert_fdp_to_mu(wavelength, 0, element)]))
       for entry in refined_disp:
@@ -3721,14 +3766,10 @@ def make_DISP_Table():
           table.append(row([entry[0] + " Refined", entry[1], entry[2], tables_B.convert_fdp_to_mu(wavelength, entry[2], e)], 'orange', 'white'))
     except:
       print(f"Error getting value of Brennan & Cowan for {e}")
-      f_H = table_H.at_angstrom(wavelength)
-
-      table.append(row(["Henke", f_H.fp(), f_H.fdp()]))
+      table.append(tab_row("Henke", tables_H, False))
       table.append(row(["Brennan & Cowan"]))
       if e != 'H':
-        table_S = tables_S.table(e)
-        f_S = table_S.at_angstrom(wavelength)
-        table.append(row(["Sasaki", f_S.fp(), f_S.fdp()]))
+        table.append(tab_row("Sasaki", tables_S, False))
       else:
         table.append(row(["Sasaki", 0, 0]))
       for entry in refined_disp:
