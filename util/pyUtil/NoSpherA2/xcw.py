@@ -4,8 +4,8 @@ Experimental. The block (hybrid_GUI.make_XCW_GUI) is shown only with
 user.NoSpherA2.show_XCW. What it does:
 
   Run XCW  writes olex2/XCW/<name>.cif (with the refinement's f'/f'' per
-           type and per atom), <name>.hkl, anom_disp.txt (the same per
-           element, for older NoSpherA2) and <name>_xcw_settings.txt from the
+           type and per atom and the Gram-Charlier C/D of anharmonic atoms),
+           <name>.hkl and <name>_xcw_settings.txt from the
            snum.NoSpherA2.XCW parameters and starts
            NoSpherA2 -do_XCW ... in the background, cwd = that folder
   Stop     kills the job
@@ -120,21 +120,26 @@ def _n_params():
   return n
 
 
-def _append_dispersion(path):
-  """f' f'' as the refinement uses them (cctbx_olex_adapter.xray_structure: resonant table, SFAC overrides,
-  refined DISP per atom), appended to the CifCreate_4NoSpherA2 file. One _atom_type row per type; an atom whose
-  values differ from the first atom of its type gets an _atom_site_dispersion row, which NoSpherA2 applies to
-  that site alone (convenience.cpp read_CIF, density_source 4917b79b on)."""
+def _append_model(path):
+  """What CifCreate_4NoSpherA2 leaves out of the model, appended to its file and read by NoSpherA2 read_CIF.
+  f' f'' as the refinement uses them (cctbx_olex_adapter.xray_structure: resonant table, SFAC overrides,
+  refined DISP per atom): one _atom_type row per type; an atom whose values differ from the first atom of its
+  type gets an _atom_site_dispersion row, which NoSpherA2 applies to that site alone (density_source 4917b79b on).
+  Gram-Charlier C (and D) of anharmonic atoms as cctbx.xray.structure.as_cif_block writes them: the
+  dimensionless CIF coefficients, which NoSpherA2 set_DW applies on top of U."""
   import iotbx.cif
+  from cctbx.sgtbx import rank_3_tensor_constraints as t3c, rank_4_tensor_constraints as t4c
+  from scitbx.array_family import flex
   from cctbx_olex_adapter import OlexCctbxAdapter
   block = list(iotbx.cif.reader(file_path=path).model().values())[0]
-  if "_atom_type_symbol" in block:
-    raise RuntimeError("the CIF already has an _atom_type loop")
+  for tag in ("_atom_type_symbol", "_atom_site_anharm_GC_C_label"):
+    if tag in block:
+      raise RuntimeError("the CIF already has %s" % tag)
   labels, types = block["_atom_site_label"], block["_atom_site_type_symbol"]
   scatterers = OlexCctbxAdapter().xray_structure().scatterers()
   if len(labels) != scatterers.size():
     raise RuntimeError("%d atoms in the CIF against %d scatterers" % (len(labels), scatterers.size()))
-  per_type, per_site = {}, []
+  per_type, per_site, anharm = {}, [], []
   for label, t, sc in zip(labels, types, scatterers):
     # the CIF label may carry a residue suffix (GetResiLabel), the scatterer has the plain name
     if not label.lower().startswith(sc.label.lower()):
@@ -142,7 +147,18 @@ def _append_dispersion(path):
     v = (sc.fp, sc.fdp)
     if max(abs(a - b) for a, b in zip(per_type.setdefault(t, v), v)) > 1e-6:
       per_site.append((label, v))
+    if sc.anharmonic_adp:
+      anharm.append((label, list(sc.anharmonic_adp.data())))
   with open(path, "a") as out:
+    # data() is C (10) then D (15) for order 4, in the order of the tensor_constraints indices
+    for tag, idx, sl in (("C", t3c.indices(), slice(0, 10)), ("D", t4c.indices(), slice(10, 25))):
+      rows = [(label, d[sl]) for label, d in anharm if len(d) > sl.start]
+      if rows:
+        out.write("\nloop_\n  _atom_site_anharm_GC_%s_label\n" % tag)
+        for ijk in flex.rows(idx):
+          out.write("  _atom_site_anharm_GC_%s_%s\n" % (tag, "".join(str(j + 1) for j in ijk)))
+        for label, d in rows:
+          out.write("  %s %s\n" % (label, " ".join("%.10g" % x for x in d)))
     out.write("\nloop_\n  _atom_type_symbol\n  _atom_type_scat_dispersion_real\n"
               "  _atom_type_scat_dispersion_imag\n")
     for t, (fp, fdp) in sorted(per_type.items()):
@@ -152,23 +168,6 @@ def _append_dispersion(path):
                 "  _atom_site_dispersion_imag\n")
       for label, (fp, fdp) in per_site:
         out.write("  %s %.6f %.6f\n" % (label, fp, fdp))
-
-
-def _write_anom_disp(path):
-  """f' f'' per element for NoSpherA2 before density_source 4917b79b, which reads them only from -anom_disp
-  ('symbol fp fdp' lines); later builds ignore -anom_disp with a warning and use the CIF loops above.
-  Drop this and -anom_disp once the NoSpherA2 that Olex2 ships has 4917b79b."""
-  from cctbx_olex_adapter import OlexCctbxAdapter
-  values = {}
-  for sc in OlexCctbxAdapter().xray_structure().scatterers():
-    el = sc.scattering_type.rstrip("+-0123456789")
-    v = (sc.fp, sc.fdp)
-    if el in values and max(abs(a - b) for a, b in zip(values[el], v)) > 1e-4:
-      print("XCW: %s has several f'/f'' (DISP per atom), using %.4f %.4f" % ((el,) + values[el]))
-    values.setdefault(el, v)
-  with open(path, "w") as out:
-    for el, (fp, fdp) in sorted(values.items()):
-      out.write("%s %.6f %.6f\n" % (el, fp, fdp))
 
 
 def _grown():
@@ -249,7 +248,7 @@ def _args(folder, name, settings):
   exe = _executable()
   args = [exe, "-do_XCW", "-cif", name + ".cif", "-hkl", name + ".hkl", "-XCW_settings", settings,
           "-cpus", str(nsa2_get_param("ncpus")), "-mem", str(float(nsa2_get_param("mem")) * 1000), "-no_date",
-          "-charge", str(_charge()), "-mult", str(_mult()), "-anom_disp", "anom_disp.txt"]
+          "-charge", str(_charge()), "-mult", str(_mult())]
   if _grown():
     args += ["-xyz", name + ".xyz"]
   if _param("gaussian_halt") == True:
@@ -391,9 +390,8 @@ def xcw_run():
   try:
     olex.m("CifCreate_4NoSpherA2")
     shutil.move(os.path.join(OV.FilePath(), name + ".cif_NoSpherA2"), os.path.join(folder, name + ".cif"))
-    _append_dispersion(os.path.join(folder, name + ".cif"))
+    _append_model(os.path.join(folder, name + ".cif"))
     _write_hkl(os.path.join(folder, name + ".hkl"))
-    _write_anom_disp(os.path.join(folder, "anom_disp.txt"))
     if _grown():
       _write_grown_xyz(os.path.join(folder, name + ".xyz"))
     settings = name + "_xcw_settings.txt"
