@@ -981,6 +981,13 @@ class OlexCctbxSolve(OlexCctbxAdapter):
                 "poor or no solution" % (100*c, 100*c12))
       except Exception:
         pass
+      # Intensity-only twin check (twin_stats). Only prints; FLINT still
+      # solves in the group it was given
+      try:
+        import twin_stats
+        self.twin_check = twin_stats.intensity_twin_check(f_obs)
+      except Exception as e:
+        print("Twin check failed: %s" % e)
 
     params = OV.Params().programs.solution.smtbx.cf
     if (mode != "classic" and getattr(params, 'start_in_p1', False)

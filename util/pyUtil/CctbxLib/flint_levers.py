@@ -306,3 +306,61 @@ def final_levers():
   for f in (orig, cur):
     if os.path.exists(f):
       os.remove(f)
+
+def twin_lever():
+  """ the intensity-only twin check (twin_stats) on the final model's data, in its final group: each law it reports
+  (rho >= 4/sqrt(pairs), alpha >= ALPHA_MIN) is tried as TWIN + BASF and the best kept when it passes Hamilton at 1 %
+  (one parameter) without a newly blown ADP; never raises, and leaves <name>.res as it was otherwise """
+  res = os.path.abspath('%s.res' % OV.FileName())
+  if not os.path.exists(res) or re.search(r'^\s*(TWIN|HKLF\s+5)', open(res).read(), re.M | re.I):
+    return
+  orig, best = res[:-4] + '.twin0.res', res[:-4] + '.twin1.res'
+  def load(f):
+    shutil.copyfile(f, res)
+    reap(res)
+  kept = None
+  try:
+    import io, twin_stats
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    tc = twin_stats.intensity_twin_check(OlexCctbxAdapter().reflections.f_sq_obs_filtered, log=io.StringIO())
+    # ponytail: single merohedral laws, best 3 by alpha; TWIN N > 2, reticular and non-merohedral laws are not tried
+    # rho alone also fires on pseudo-symmetry (cod_2241658, beta 90.3: rho 0.36, H 0, L clean) and Hamilton then
+    # lets BASF soak up the error of a poor model, so a law also needs the L-test or Britton/H to call it a twin
+    l_twin = any(v.startswith('L-test') for v in tc['verdict'])
+    cand = sorted((x for x in tc['laws'] if x['rho'] is not None and x['rho'] >= 4/math.sqrt(x['pairs'])
+                   and x['alpha'] >= twin_stats.ALPHA_MIN
+                   and (l_twin or (x['alpha_h'] or 0) >= twin_stats.ALPHA_MIN)), key=lambda x: -x['alpha'])[:3]
+    if not cand:
+      return
+    shutil.copyfile(res, orig)
+    reap(res)
+    ref = refine()
+    for x in cand if ref else ():
+      load(orig)
+      OV.DelIns('BASF')
+      OV.AddIns('BASF %.3f' % min(max(x['alpha'], 0.05), 0.5))
+      OV.AddIns('TWIN %s' % ' '.join('%d' % v for v in x['twin']))
+      r = refine()
+      if not r or not accept(ref, r) or (kept and r[0] >= kept[1][0]):
+        continue
+      OV.File(res)
+      if 'FV' in blown(res) or blown(res) - blown(orig):
+        continue
+      shutil.copyfile(res, best)
+      kept = (x, r)
+  except Exception as err:
+    print('Twin lever failed: %s' % err)
+    kept = None
+  if os.path.exists(orig):
+    if kept:
+      load(best)
+      x = kept[0]
+      print('Twin lever kept (Hamilton at 1 %%): TWIN %s (%s), alpha %.2f from intensities%s' % (
+        ' '.join('%d' % v for v in x['twin']), x['law'], x['alpha'],
+        '; it acts as symmetry, so check the Laue group' if x['alpha'] >= twin_stats.ALPHA_SYMMETRY
+        and not any(v.startswith('L-test') for v in tc['verdict']) else ''))
+    else:
+      load(orig)
+  for f in (orig, best):
+    if os.path.exists(f):
+      os.remove(f)

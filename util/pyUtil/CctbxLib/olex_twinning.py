@@ -60,7 +60,6 @@ import smtbx.utils
 import numpy
 import itertools
 import operator
-import fractions
 from cctbx_olex_adapter import OlexCctbxAdapter
 
 
@@ -98,10 +97,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
       write_twinning_result_to_disk(html)
       OV.UpdateHtml()
-      return
+      return False
     if "_twin" in OV.HKLSrc():
       print("It looks like your hklf file is already an hklf 5 format file") #this just checks for _twin and not for it actually being hklf5
-      return
+      return False
     self.fofc=self.get_fo_sq_fc()
   
     print(">> Searching for Twin Laws <<")
@@ -114,7 +113,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.filename = olx.FileName()
   
     #class-wide variable initialisation
-    self.hklfile=OV.HKLSrc().rsplit('\\',1)[-1].rstrip(".hkl")
+    # splitext, not rstrip(".hkl"): rstrip eats any trailing h/k/l/. ("mol_k.hkl" -> "mol_")
+    self.hklfile=os.path.splitext(ntpath.basename(OV.HKLSrc()))[0]
     self.model=self.xray_structure()
   
     hkl_sel_num=50
@@ -154,6 +154,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.bad_fo=numpy.copy(f_obs[rank[:hkl_sel_num]])
     self.bad_hkl=hkl_sel
     self.bad_weights=numpy.copy(weights[rank[:hkl_sel_num]])
+    return True
   def update_threshold(self,threshold):
     self.cartesian_threshold=threshold
     self.relative_threshold=self.cartesian_threshold/self.cartesian_threshold_multiplier
@@ -179,7 +180,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
   
   
   def get_details(self):
-    self.setup()
+    if not self.setup():
+      return
     print("Orthog:")
     print(self.recip_orth)
     print("Bad Hkl")
@@ -190,8 +192,16 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def run(self, personal=0):
     
-    self.setup()
+    if not self.setup():
+      return
     r_list=[]
+    # model-free evidence first: the L-test and per-law fractions say whether
+    # a law below is twinning or symmetry the group lacks
+    try:
+      import twin_stats
+      twin_stats.intensity_twin_check(self.reflections.f_sq_obs_filtered)
+    except Exception as e:
+      print("Twin check failed: %s" % e)
 
     if personal==0:
       twin_laws=self.find_twin_laws()
@@ -201,6 +211,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       twin_laws=self.find_SS_twin_laws()
     else:
       print("Invalid parameter passed, personal=", personal)
+      return
 
     ordered_twins=sorted(twin_laws,key=lambda x: x.rbasf[1], reverse=False)
     ordered_twins=self.purge_duplicates(ordered_twins)
@@ -948,7 +959,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         continue
       # looking where is the overlap
       #diff = numpy.sum(numpy.abs(hkl_new[i] - rounded_hkl_new[i]))
-      diff = numpy.linalg.norm(numpy.dot(self.recip_orth(hkl_new[i] - rounded_hkl_new[i])))
+      diff = numpy.linalg.norm(numpy.dot(self.recip_orth,(hkl_new[i] - rounded_hkl_new[i])))
 
       if(diff<threshold): #threshold prior default is 0.1
         # adding contribution from overlap
@@ -1033,7 +1044,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       if abs(batch)==component_base:
         if not (numpy.any(numpy.abs(self.closest_points(hkl_new)-hkl_new)>0.1)):
           #diff = numpy.sum(numpy.abs(self.closest_points(hkl_new)-hkl_new))
-          diff = numpy.linalg.norm(numpy.dot(self.recip_orth(self.closest_points(hkl_new)-hkl_new)))
+          diff = numpy.linalg.norm(numpy.dot(self.recip_orth,(self.closest_points(hkl_new)-hkl_new)))
           if diff<self.cartesian_threshold:
             hkl_file_new+=[(hkl_new_rounded[0],hkl_new_rounded[1],hkl_new_rounded[2],fo,sig,-new_component)]
         hkl_file_new+=[(h,k,l,fo,sig,1)]
@@ -1126,7 +1137,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     asu_indexes=numpy.array(miller_set.indices())
     asu_unique=numpy.unique(asu_indexes,axis=0)
     for i in range(asu_unique.shape[0]):
-      if all(asu_unique[i]==[0,0,0]) or fractions.gcd(asu_unique[i][0],fractions.gcd(asu_unique[i][1],asu_unique[i][2]))!=1:
+      if all(asu_unique[i]==[0,0,0]) or math.gcd(int(asu_unique[i][0]),math.gcd(int(asu_unique[i][1]),int(asu_unique[i][2])))!=1:
         continue
       yield asu_unique[i]
 
@@ -2063,24 +2074,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     z=z**0.5
     return z
 
-  def test_law(self,twin_law,threshold):
-    new_hkl=numpy.dot(twin_law,self.bad_hkl)
-    #if self.sufficient_overlaps(new_hkl,threshold)==0:
-      #return None
-    fom=self.find_fom()
-    if fom<threshold:
-      twin_law.fom=fom
-    else:
-      return None
-    #if self.basf_estimate_short(twin_law)[0]==0:
-      #return None
-    basf=self.basf_estimate(twin_law)
-    if basf[0]==0:
-      return None
-    else:
-      twin_law.rbasf=basf
-      return twin_law
-
 def format_twin_string_from_law(twin_law):
   twin_str_l = []
   twin_str = "Could not get twin string"
@@ -2111,8 +2104,7 @@ def get_twinning_result_filename():
   import ntpath
   import os
 
-  _ = ntpath.basename(OV.HKLSrc())
-  _ = _.rstrip(".hkl")
+  _ = os.path.splitext(ntpath.basename(OV.HKLSrc()))[0]
   if "_twin" in _:
     _ = _.split("_twin")[0]
   _ = os.path.join(OV.StrDir(), _ + "_twinning.html")
@@ -2134,15 +2126,15 @@ def on_twin_image_click(run_number):
       #im = law.get('law_image')
       #OlexVFS.save_image_to_olex(im, "IMG_LAW%s"%number)
 
+  law_d = twin_laws_d[int(run_number)]
+  twin_law = numpy.array(law_d['matrix'])
+  twin_law_rnd = numpy.rint(twin_law)
+  twin_law_disp = format_twin_string_from_law(twin_law)
   try:
-    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
-    twin_law_rnd = numpy.rint(twin_law)
-    twin_law_disp_rnd = format_twin_string_from_law(twin_law_rnd)
-    twin_law_disp = format_twin_string_from_law(twin_law)
-    basf = float(twin_laws_d[int(run_number)]['BASF'])
-    hklf5name = twin_laws_d[int(run_number)].get('hklf5name', None)
-  except:
-    twin_law = numpy.array(twin_laws_d[int(run_number)]['matrix'])
+    basf = float(law_d['BASF'])
+  except (KeyError, TypeError, ValueError):
+    basf = 0.5
+  hklf5name = law_d.get('hklf5name', None)
 
 
   if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
@@ -2154,7 +2146,7 @@ def on_twin_image_click(run_number):
     OV.DelIns("BASF")
     OV.AddIns("BASF %f" % basf)
     if not hklf5name:
-      hklf5name = "%s_twin%02d.hkl" % (OV.HKLSrc().rsplit('\\', 1)[-1].rstrip(".hkl"), int(run_number))
+      hklf5name = "%s_twin%02d.hkl" % (os.path.splitext(ntpath.basename(OV.HKLSrc()))[0], int(run_number))
     _ = os.path.join(OV.FilePath(), hklf5name)
     OV.HKLSrc(_)
   else:
@@ -2164,7 +2156,7 @@ def on_twin_image_click(run_number):
     olx.HKLF(0)
     OV.DelIns("BASF")
     OV.AddIns("BASF %f"%basf)
-    OV.AddIns("TWIN %s" % twin_law_disp_rnd)
+    OV.AddIns("TWIN %s" % format_twin_string_from_law(twin_law_rnd))
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 

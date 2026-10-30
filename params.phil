@@ -227,6 +227,15 @@ routines requiring structure refinement
               "after a full refinement and must not leave a blown ADP, or it "
               "is undone. Whole COD: fully clean 84.90 to 85.98 %, about "
               "1 s a structure. Twinned data are left alone."
+    twin_lever = True
+      .type = bool
+      .short_caption = Try the twin laws the intensities suggest
+      .help = "FLINT only. After the final levers, the intensity-only twin "
+              "check is rerun on the final model's data; each merohedral law "
+              "it reports is tried as TWIN + BASF, and the best is kept when "
+              "it passes the Hamilton test at 1 % without a blown ADP. "
+              "cod_4132806: R1 0.213 to 0.065, BASF 0.483 as published. "
+              "Under a second when a law is found, nothing otherwise."
     graphical_output = False
       .type = bool
     current_atomic_volume = None

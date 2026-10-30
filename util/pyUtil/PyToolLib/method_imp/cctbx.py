@@ -334,6 +334,13 @@ class Method_cctbx_ChargeFlip(Method_solution):
     if OV.GetParam('snum.solution.final_levers') in (None, True):
       from flint_levers import final_levers
       final_levers()
+    # after the levers, which leave a twinned model alone
+    if OV.GetParam('snum.solution.twin_lever') in (None, True):
+      try:
+        from flint_levers import twin_lever
+        twin_lever()
+      except Exception as err:
+        print('Twin lever failed: %s' % err)
 
   def _tidy_origins(self):
     """ `_tidy`, then again from each near-tied origin while R1 stays high.
