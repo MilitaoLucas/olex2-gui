@@ -236,6 +236,23 @@ routines requiring structure refinement
               "it passes the Hamilton test at 1 % without a blown ADP. "
               "cod_4132806: R1 0.213 to 0.065, BASF 0.483 as published. "
               "Under a second when a law is found, nothing otherwise."
+    remember_seeds = True
+      .type = bool
+      .short_caption = Fresh random starts on every solve
+      .help = "FLINT only. The seeds already tried on a structure are noted "
+              "in <name>.flint_seeds in its .olex folder, so solving again "
+              "starts from new random phases instead of repeating the same "
+              "trials. The seed of the last acceptable model is noted too "
+              "and tried first, next to the new ones. Off: seeds 1..n every "
+              "time, reproducible. Delete the file to start over."
+    retry_r1 = 0.15
+      .type = float
+      .short_caption = Solve again above this final R1
+      .help = "FLINT only. A final model with R1 (Fo2 > 2 sigma) above this, "
+              "or with a blown ADP, is solved once more from fresh seeds "
+              "with the other weak-reflection fraction, and the lower-R1 "
+              "model of the two is kept. An acceptable first model costs "
+              "nothing. 0 turns it off."
     graphical_output = False
       .type = bool
     current_atomic_volume = None
