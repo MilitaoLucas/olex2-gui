@@ -1042,6 +1042,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
     self.origin_alternates, self.chosen_f_calc = [], None
     if n_trials > 1:
+      # kept for the retry round (`Method_cctbx_Flint._retry`)
+      self.solve_args = (f_obs, params, extra, n_trials, verbose)
       f_calc = self.multiTrialSolution(f_obs, params, extra, n_trials, verbose)
       self.chosen_f_calc = f_calc
       try:
@@ -2225,7 +2227,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
             % (type(e).__name__, e))
       return {}
 
-  def multiTrialSolution(self, f_obs, params, extra, n_trials, verbose):
+  def multiTrialSolution(self, f_obs, params, extra, n_trials, verbose,
+                         overrides=None):
     """ Charge flipping from several random starts, keeping the best.
 
     The solving iterator already restarts itself when an attempt fails, but
@@ -2281,44 +2284,95 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     self.solution_threads = n
     OV.SetVar('stop_current_process', False)
     # Seeds already tried on this structure are remembered in its .olex folder,
-    # so solving again starts from fresh random phases instead of repeating the
-    # same eight trials (31 Oct 2026). The first run on a structure, and every
-    # benchmark case, still uses seeds 1..n_trials. All solves of one run share
-    # the base read here; delete the file to start over at seed 1.
+    # <name>.flint_seeds, so solving again starts from fresh random phases
+    # instead of repeating the same eight trials (31 Oct 2026). Line 1 is the
+    # next unused seed; a 'keep <seed> <setting>=<value> ...' line is the seed
+    # of the last acceptable model (`keepSeed`) with the settings of the round
+    # it won in (a fallback round's differ), tried again first under those
+    # settings, which the fresh seeds of that round share. The first run on a
+    # structure, and every benchmark case, still uses seeds 1..n_trials.
+    # snum.solution.remember_seeds = False: seeds 1..n_trials every time.
+    # Delete the file to start over at seed 1.
     seed_fn = os.path.join(OV.StrDir(), OV.FileName() + ".flint_seeds")
+    remember = OV.GetParam('snum.solution.remember_seeds') in (None, True)
+    memo = []
+    if remember:
+      try:
+        memo = open(seed_fn).read().split()
+      except OSError:
+        pass
+    keep = None
+    if len(memo) >= 3 and memo[1] == 'keep':
+      try:
+        import ast
+        keep = (int(memo[2]), dict((k, ast.literal_eval(v)) for k, v in
+                                   (kv.split('=', 1) for kv in memo[3:])))
+      except (ValueError, SyntaxError):
+        pass
     if getattr(self, 'first_seed', None) is None:
       try:
-        self.first_seed = max(1, int(open(seed_fn).read().split()[0]))
-      except (OSError, ValueError, IndexError):
+        self.first_seed = max(1, int(memo[0]))
+      except (ValueError, IndexError):
         self.first_seed = 1
     if self.first_seed > 1:
       print("Seeds before %d were tried on this structure; starting at %d "
             "(delete %s to start over)"
             % (self.first_seed, self.first_seed, os.path.basename(seed_fn)))
-    result = multi_trial.solve(
-      f_obs,
-      n_trials=n_trials,
+    kw = dict(
       weak_reflection_fraction=getattr(params, 'weak_reflection_fraction', 0.3),
       normalisations_for=getattr(extra, 'normalisations_for', None),
       max_solving_iterations=extra.max_solving_iterations,
-      max_seconds=getattr(params, 'max_seconds', None),
+      max_seconds=getattr(params, 'max_seconds', None))
+    supplied = []
+    if keep and not overrides and keep[0] < self.first_seed:
+      # without the settings it won with, its phases are not reproduced
+      kw.update(keep[1])
+      print("Trying seed %d first: it gave an acceptable model before" % keep[0])
+      supplied = [multi_trial.phases_from_seed(keep[0])]
+    kw.update(overrides or {})
+    self.solve_wrf = float(kw['weak_reflection_fraction'])
+    result = multi_trial.solve(
+      f_obs,
+      n_trials=n_trials,
       loop=(olex_loop if n == 1 else sectioned_loop),
       callback=progress,
       stop=lambda: OV.FindValue('stop_current_process', False),
       n_threads=n,
       first_seed=self.first_seed,
+      initial_phases_list=supplied,
       verbose=verbose,
-      out=log)
+      out=log, **kw)
+    if supplied and result.trials:
+      # multi_trial labels a supplied start with first_seed, which the first
+      # random trial also carries; trials[0] is the supplied one
+      won = (result.trials[0].r1 is not None and result.trials[0].r1 == result.r1
+             and result.trials[0].cc_peak_height == result.cc_peak_height)
+      result.trials[0].seed = keep[0]
+      if won:
+        result.best_seed = keep[0]
+    # the settings the winner ran with, for keepSeed: a fallback round is
+    # multi_trial's `fallbacks` entry over this call's settings, and its seeds
+    # follow on from the previous round's trials (supplied ones counted)
+    import inspect
+    rnd, start = {}, self.first_seed + n_trials + len(supplied)
+    for f in inspect.signature(multi_trial.solve).parameters['fallbacks'].default:
+      if result.best_seed is None or result.best_seed < start:
+        break
+      rnd = dict(f)
+      start += rnd.pop('n_trials', n_trials)
+    won_kw = dict(kw, **rnd)
+    self.keep_settings = dict(
+      (k, won_kw[k]) for k in ('weak_reflection_fraction', 'normalisations_for',
+                               'd_min', 'min_cc_peak_height',
+                               'max_solving_iterations')
+      if k in won_kw and (won_kw[k] is None or isinstance(won_kw[k], (int, float))))
     used = [t.seed for t in result.trials if getattr(t, 'seed', None)]
-    try:
-      prev = int(open(seed_fn).read().split()[0])
-    except (OSError, ValueError, IndexError):
-      prev = 1
-    nxt = max([prev] + [u + 1 for u in used])
-    if nxt > prev:
+    nxt = max([self.first_seed] + [u + 1 for u in used])
+    self.next_seed = nxt
+    if remember and (not memo or nxt > self.first_seed):
       try:
         with open(seed_fn, "w") as f:
-          f.write("%d\n" % nxt)
+          f.write("%d\n" % nxt + (" ".join(memo[1:]) + "\n" if keep else ""))
       except OSError as e:
         print("Could not write %s: %s" % (seed_fn, e))
     summary = StringIO()
@@ -2327,7 +2381,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     path = os.path.join(OV.FilePath(), OV.FileName() + ".solve")
     try:
       import time
-      with open(path, "w") as f:
+      # a retry round (`overrides`) appends to the first round's log
+      with open(path, "a" if overrides else "w") as f:
+        if overrides:
+          f.write("\n#### retry with %s ####\n" % ", ".join(
+            "%s=%s" % kv for kv in sorted(overrides.items())))
         f.write("FLINT %s: %d trial(s) on %d thread(s), %s, %s\n"
                 % (OV.FileName(), n_trials, n, olx.xf.au.GetCell(),
                    time.strftime("%Y-%m-%d %H:%M")))
@@ -2352,6 +2410,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # alone said -- which is what a symmetry search has to be given.
     self.multi_trial_result = result
     return result.f_calc
+
+  def keepSeed(self):
+    """ Note the seed of the solution just accepted in <name>.flint_seeds, with
+    the settings of the round it won in, so the next solve of this structure
+    tries it again first (see multiTrialSolution). """
+    seed = getattr(getattr(self, 'multi_trial_result', None), 'best_seed', None)
+    if not seed or OV.GetParam('snum.solution.remember_seeds') is False:
+      return
+    seed_fn = os.path.join(OV.StrDir(), OV.FileName() + ".flint_seeds")
+    try:
+      with open(seed_fn, "w") as f:
+        f.write("%d\nkeep %d %s\n" % (self.next_seed, seed, " ".join(
+          "%s=%r" % kv for kv in sorted(self.keep_settings.items()))))
+    except (OSError, AttributeError) as e:
+      print("Could not note seed %d in %s: %s" % (seed, seed_fn, e))
 
   def suggestSpaceGroups(self, f_obs, n_suggestions=3):
     """ A short ranked list of candidate space groups for the P1 solution.

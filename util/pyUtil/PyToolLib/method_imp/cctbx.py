@@ -783,12 +783,86 @@ class Method_cctbx_Flint(Method_cctbx_ChargeFlip):
 
   def tidy_solution(self):
     super().tidy_solution()
+    try:
+      self._retry()
+    except Exception as e:
+      print("Retry skipped: %s" % e)
     # modulated data (spy.modulation.load): rank the superspace groups of the group FLINT settled on
     try:
       import Modulation
       Modulation.after_solve()
     except Exception as e:
       print("modulation: superspace candidates skipped: %s" % e)
+
+  def _retry(self):
+    """ The final model judged: R1 (Fo^2 > 2 sigma) at most
+    snum.solution.retry_r1 and no blown ADP is acceptable, and its seed is
+    noted for the next solve (`keepSeed`). Otherwise the structure is solved
+    once more from fresh seeds with the other weak-reflection fraction (0.3
+    for 0.2; the two lose different structures), tidied the same way, and the
+    lower-R1 model of the two kept. retry_r1 = 0 turns the retry off; an
+    acceptable model never reaches it, so it costs nothing there (31 Oct 2026).
+    """
+    import shutil
+    from flint_levers import model_r1, blown, reap
+    solver = getattr(self, 'cctbx_solver', None)
+    if getattr(solver, 'solve_args', None) is None:
+      return
+    cut = OV.GetParam('snum.solution.retry_r1')
+    cut = 0.15 if cut is None else float(cut)
+    res = os.path.abspath('%s.res' % OV.FileName())
+    def judge():
+      r = model_r1()
+      return r, r is not None and r <= cut and not blown(res)
+    r0, ok = judge()
+    if ok:
+      solver.keepSeed()
+      return
+    if cut <= 0 or OV.FindValue('stop_current_process', False):
+      return
+    f_obs, params, extra, n_trials, verbose = solver.solve_args
+    wrf = 0.2 if abs(solver.solve_wrf - 0.3) < 1e-6 else 0.3
+    print("Final R1 %s is over %.2f: solving again from fresh seeds with "
+          "weak_reflection_fraction %.1f"
+          % ("-" if r0 is None else "%.3f" % r0, cut, wrf))
+    shutil.copyfile(res, res + '.r0')
+    solver.first_seed = solver.next_seed
+    fc = solver.multiTrialSolution(f_obs, params, extra, n_trials, verbose,
+                                   overrides=dict(weak_reflection_fraction=wrf))
+    r1 = None
+    try:
+      if fc is not None:
+        solver.chosen_f_calc = fc
+        try:
+          solver.origin_alternates = solver.nearTiedOrigins(f_obs, fc)
+        except Exception:
+          solver.origin_alternates = []
+        names = [str(olx.xf.au.GetAtomName(i))
+                 for i in range(int(olx.xf.au.GetAtomCount()))
+                 if olx.xf.au.IsAtomDeleted(i) != 'true']
+        if names:
+          olex.m("kill %s" % " ".join(names))
+        if solver.placeSolution(fc):
+          if OV.HasGUI():
+            olx.xf.EndUpdate()
+          olx.xf.SaveSolution(res)
+          olx.Atreap('"%s"' % res)
+          Method_cctbx_ChargeFlip.tidy_solution(self)
+          r1, ok = judge()
+    except Exception as err:
+      # the first model is put back below
+      print("Retry failed: %s" % err)
+      r1 = None
+    if r1 is not None and (r0 is None or r1 < r0):
+      print("Retry kept: R1 %.3f against %s" % (r1, "-" if r0 is None else "%.3f" % r0))
+      if ok:
+        solver.keepSeed()
+    else:
+      print("Retry gave R1 %s; the first model is kept"
+            % ("-" if r1 is None else "%.3f" % r1))
+      shutil.copyfile(res + '.r0', res)
+      reap(res)
+    os.remove(res + '.r0')
 
 
 flint_phil = phil_interface.parse("""

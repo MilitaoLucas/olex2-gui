@@ -245,6 +245,19 @@ def blown(res):
         out.add(p[0])
   return out
 
+def model_r1():
+  """ R1 on Fo^2 > 2 sigma of the loaded model as it stands, not refined, so asking leaves the model alone; None when it
+  cannot be computed """
+  try:
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    fo2, fc = OlexCctbxAdapter().get_fo_sq_fc()
+    sel = fo2.data() > 2*fo2.sigmas()
+    fo, fc = fo2.select(sel).f_sq_as_f(), fc.select(sel)
+    return fo.r1_factor(fc, scale_factor=fo.scale_factor(fc))
+  except Exception as err:
+    print('R1 of the final model failed: %s' % err)
+    return None
+
 def final_levers():
   """ prune, then add, on the model in <name>.res; never raises, and leaves that file as it was unless a change held """
   # absolute: after a relative reap OV.FilePath() is 'none', and a refinement with MORE -n fails writing <path>/<name>.npy
