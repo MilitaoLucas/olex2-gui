@@ -660,32 +660,28 @@ class ExtractCifInfo(CifTools):
       })
 
     self.update_manageable()
-    use_aspherical = OV.IsNoSpherA2()
-    if use_aspherical:
-      NoSpherA2_ref = """Kleemiss, F., Dolomanov, O.V., Bodensteiner, M., Peyerimhoff, N., Midgley, L.,
-Bourhis, L.J., Genoni, A., Malaspina, L.A., Jayatilaka, D., Spencer, J.L.,
-White, F., Grundkoetter-Stock, B., Steinhauer, S., Lentz, D., Puschmann, H.,
-Grabowsky, S. (2021), Chem. Sci., 12, 1675-1692."""
-      full_references.append(NoSpherA2_ref)
-      # the program that made the wavefunction is part of the refinement method, so it is cited with it
-      try:
-        from NoSpherA2.utilities import nsa2_generator_citation
-        citation = nsa2_generator_citation()
-      except Exception:
-        citation = None
-      if citation:
-        name, ref = citation
-        computing = str(self.cif_block.get('_computing_structure_refinement', '') or '').strip()
-        if name.split()[0] not in computing:
-          self.update_cif_block({
-            '_computing_structure_refinement': "%s; %s" % (computing, name) if computing else name}, force=True)
-        full_references.append(ref)
-    if 'current_cif' in locals():
-      disp_refine = "_atom_site_dispersion_real" in current_cif
-      if disp_refine:
-        disp_ref = """Meurer, F., Dolomanov, O.V., Hennig, C., Peyerimhoff, N., Kleemiss, F.,
+    # NoSpherA2's method and generator references: added while used, dropped from the CIF once not
+    try:
+      from NoSpherA2.cif_references import nsa2_cif_references, is_managed, computing_with
+      nsa2_refs, nsa2_markers, citation, generators = nsa2_cif_references(OV.IsNoSpherA2())
+    except Exception as error:
+      print("Note: the NoSpherA2 references were not updated (%s)." % error)
+      nsa2_refs, nsa2_markers, citation, generators = [], [], None, []
+      is_managed = lambda ref, markers: False
+    full_references += nsa2_refs
+    # the program that made the wavefunction is part of the refinement method, so it is cited with it
+    if citation:
+      full_references.append(citation[1])
+    if generators:
+      computing = str(self.cif_block.get('_computing_structure_refinement', '') or '').strip()
+      new = computing_with(computing, citation[0] if citation else None, generators)
+      if new != computing:
+        self.update_cif_block({'_computing_structure_refinement': new}, force=True)
+    disp_refine = 'current_cif' in locals() and "_atom_site_dispersion_real" in current_cif
+    if disp_refine:
+      disp_ref = """Meurer, F., Dolomanov, O.V., Hennig, C., Peyerimhoff, N., Kleemiss, F.,
 Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
-        full_references.append(disp_ref)
+      full_references.append(disp_ref)
     # merge references
     full_references = [x for x in set(full_references)] #make unique
     current_refs = self.cif_block.get('_publ_section_references', '')
@@ -693,13 +689,15 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
     full_references_set =\
      set([''.join(x.replace('\r', '').split()) for x in full_references])\
       | ExternalPrgParameters.get_managed_reference_set()
+    def keep(ref):
+      ref_t = ''.join(ref.replace('\r', '').split())
+      if ref_t not in full_references_set and not is_managed(ref_t, nsa2_markers):
+        full_references.append(ref)
+        full_references_set.add(ref_t)
     for l in current_refs.split('\n'):
       if not l.strip():
         if ref:
-          ref_t = ''.join(ref.replace('\r', '').split())
-          if ref_t not in full_references_set:
-            full_references.append(ref)
-            full_references_set.add(ref_t)
+          keep(ref)
           ref = ""
       else:
         if ref:
@@ -707,18 +705,12 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
         else:
           ref = l
     if ref:
-      ref_t = ''.join(ref.replace('\r', '').split())
-      if ref_t not in full_references_set:
-        full_references.append(ref)
-        full_references_set.add(ref_t)
+      keep(ref)
 
     # clean up if has been inserted previosly but also if added by the user
     # through CifMerge or by hand...
-    for x in full_references:
-      if "1675-1692" in x and "2021" in x and not use_aspherical:
-        full_references.remove(x)
-      elif "604-609" in x and "2022" in x and not disp_refine:
-        full_references.remove(x)
+    if not disp_refine:
+      full_references = [x for x in full_references if not ("604-609" in x and "2022" in x)]
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)

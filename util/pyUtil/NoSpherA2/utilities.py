@@ -1636,7 +1636,10 @@ _NSA2_RECORDED = (
   'ORCA_USE_CRYSTAL_QMMM', 'ORCA_CRYSTAL_QMMM_TYPE', 'ORCA_CRYSTAL_QMMM_RADIUS',
   'ORCA_SCF_Conv', 'ORCA_SCF_Strategy', 'pySCF_Damping', 'DIIS',
   'cluster_radius', 'cluster_grow', 'selected_salted_model',
-  'Thakkar_Cations', 'Thakkar_Anions', 'PTB_PREREFINE_DONE')
+  'Thakkar_Cations', 'Thakkar_Anions', 'PTB_PREREFINE_DONE',
+  'NoSpherA2_Partition', 'RI_restraint')
+# what an XCW table was made with (cif_references.py cites by them)
+_NSA2_XCW_RECORDED = ('XCW.partition', 'XCW.tshb')
 _NSA2_HYBRID_PART = ('software', 'method', 'basis_name', 'Relativistic', 'charge', 'multiplicity')
 _NSA2_PREFIX = 'NSA2_'
 
@@ -1659,7 +1662,7 @@ def nsa2_model_fingerprint():
 def nsa2_settings_header(origin):
   """the NSA2_<key>: value header lines describing what made a table: settings, versions, model fingerprint"""
   vals = {'origin': origin, 'date': time.strftime('%Y-%m-%d_%H-%M-%S')}
-  for key in _NSA2_RECORDED:
+  for key in _NSA2_RECORDED + (_NSA2_XCW_RECORDED if origin == "XCW" else ()):
     vals[key] = nsa2_get_param(key)
   if str(vals['source']).strip() == "Hybrid":
     for part in OV.ListParts() or []:
