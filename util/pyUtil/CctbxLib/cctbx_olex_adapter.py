@@ -2280,6 +2280,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         max(1, min(n_trials, cpus))
     self.solution_threads = n
     OV.SetVar('stop_current_process', False)
+    # Seeds already tried on this structure are remembered in its .olex folder,
+    # so solving again starts from fresh random phases instead of repeating the
+    # same eight trials (31 Oct 2026). The first run on a structure, and every
+    # benchmark case, still uses seeds 1..n_trials. All solves of one run share
+    # the base read here; delete the file to start over at seed 1.
+    seed_fn = os.path.join(OV.StrDir(), OV.FileName() + ".flint_seeds")
+    if getattr(self, 'first_seed', None) is None:
+      try:
+        self.first_seed = max(1, int(open(seed_fn).read().split()[0]))
+      except (OSError, ValueError, IndexError):
+        self.first_seed = 1
+    if self.first_seed > 1:
+      print("Seeds before %d were tried on this structure; starting at %d "
+            "(delete %s to start over)"
+            % (self.first_seed, self.first_seed, os.path.basename(seed_fn)))
     result = multi_trial.solve(
       f_obs,
       n_trials=n_trials,
@@ -2291,8 +2306,21 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       callback=progress,
       stop=lambda: OV.FindValue('stop_current_process', False),
       n_threads=n,
+      first_seed=self.first_seed,
       verbose=verbose,
       out=log)
+    used = [t.seed for t in result.trials if getattr(t, 'seed', None)]
+    try:
+      prev = int(open(seed_fn).read().split()[0])
+    except (OSError, ValueError, IndexError):
+      prev = 1
+    nxt = max([prev] + [u + 1 for u in used])
+    if nxt > prev:
+      try:
+        with open(seed_fn, "w") as f:
+          f.write("%d\n" % nxt)
+      except OSError as e:
+        print("Could not write %s: %s" % (seed_fn, e))
     summary = StringIO()
     multi_trial.show(result, out=summary)
     verdict = summary.getvalue().strip().splitlines()[-1]
@@ -2306,6 +2334,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         f.write("space group %s, %d reflections, max %d solving iterations\n"
                 % (olx.xf.au.GetCellSymm("hall"), f_obs.size(),
                    extra.max_solving_iterations))
+        if used:
+          f.write("seeds %d-%d (next run starts at %d, see %s)\n"
+                  % (min(used), max(used), nxt,
+                     os.path.basename(seed_fn)))
         f.write("one attempt per trial, so a trial's 'it won't solve!' is "
                 "that trial only; the ranking is by R, then correlation\n")
         f.write(marker.strip() + " summary\n" + summary.getvalue())
