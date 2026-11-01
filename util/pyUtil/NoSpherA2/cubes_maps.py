@@ -29,7 +29,7 @@ if OV.HasGUI():
   import olex_xgrid
 
 #import NoSpherA2
-from utilities import is_disordered, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request
+from utilities import is_disordered, is_pause_break_pressed, terminate_process_tree, consume_interrupt_request, nos_failure
 from utilities import open  # code page independent, see utilities.open
 #import Wfn_Job
 from decors import run_with_bitmap
@@ -258,7 +258,7 @@ def _run_nsa2(args, wait=False, cwd=None, on_tick=None):
       time.sleep(0.2)
       rc = p.poll()
     if rc is not None and rc != 0:
-      print(f"NoSpherA2 exited with code {rc}.")
+      print(nos_failure(rc) or f"NoSpherA2 exited with code {rc}.")
       try:
         with open(cube_log, "r", encoding="utf-8", errors="replace") as lf:
           content = lf.read().strip()
@@ -2010,10 +2010,12 @@ def Fcalc(non_spherical:bool = False, zero_adp:bool = True,
           OV.SetVar('NoSpherA2-Error',"NoSpherA2-Output not found!")
           raise NameError('NoSpherA2-Output not found!')
       else:
-        print("process ended before the output file was found")
+        why = nos_failure(p.returncode) or "NoSpherA2 ended unexpectedly (exit code %s)!" % p.returncode
+        print("process ended before the output file was found: " + why)
         launch_log.flush()
-        OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
-        raise NameError('NoSpherA2 ended unexpectedly!')
+        olx.Echo(why, m="error")
+        OV.SetVar('NoSpherA2-Error', why)
+        raise NameError(why)
     launch_log.close()
     with open(out_fn_abs, "r", encoding="utf-8", errors="replace") as stdout:
       while p.poll() is None:
@@ -2033,8 +2035,9 @@ def Fcalc(non_spherical:bool = False, zero_adp:bool = True,
     with open(launch_log_abs, "a") as launch_log_done:
       launch_log_done.write("returncode: %s\n" % return_code)
     if return_code not in (0, None):
-      OV.SetVar('NoSpherA2-Error', "NoSpherA2 exited with code %s" % return_code)
-      raise NameError('NoSpherA2 exited with code %s' % return_code)
+      why = nos_failure(return_code) or "NoSpherA2 exited with code %s" % return_code
+      OV.SetVar('NoSpherA2-Error', why)
+      raise NameError(why)
   
     print("\n.tsc calculation ended!")
     

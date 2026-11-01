@@ -427,8 +427,9 @@ def crystal_energies_finished():
   _state["thread"] = None
   try:
     if not crystal_energies_draw(quiet=True):
-      _state["message"] = "failed, see NoSpherA2_CE.log"
-      print("Crystal energies: NoSpherA2 wrote no table, see the log in %s" % _folder)
+      why = _state.get("why")
+      _state["message"] = why or "failed, see NoSpherA2_CE.log"
+      print("Crystal energies: %s" % (why or "NoSpherA2 wrote no table, see the log in %s" % _folder))
   except Exception:
     sys.stderr.formatExceptionInfo()
   olex.m("html.Update")
@@ -452,7 +453,9 @@ class _Runner(threading.Thread):
         startinfo.wShowWindow = SW_HIDE
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
       with open(os.path.join(self.folder, "NoSpherA2_CE.log"), "w") as log:
-        subprocess.call(self.args, cwd=self.folder, stdout=log, stderr=subprocess.STDOUT, startupinfo=startinfo, creationflags=flags)
+        rc = subprocess.call(self.args, cwd=self.folder, stdout=log, stderr=subprocess.STDOUT, startupinfo=startinfo, creationflags=flags)
+      from utilities import nos_failure
+      _state["why"] = nos_failure(rc)
     except Exception:
       sys.stderr.formatExceptionInfo()
     finally:

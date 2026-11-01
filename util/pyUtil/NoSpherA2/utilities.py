@@ -369,6 +369,39 @@ def _split_joint(req):
   return True
 
 
+# Exit codes of a NoSpherA2 that could not run on this machine: Popen.returncode is the unsigned NTSTATUS on Windows
+# and minus the signal on POSIX. 86 is NoSpherA2's own start-up check of the instruction set it was built for
+# (NoSpherA2 app/isa_check.c); an illegal instruction without it is the same mismatch, or rarely a trap in the code.
+_NOS_ISA = ("was built for newer CPU instructions (AVX/AVX2) than this computer has. Use the SSE4.2 build of the "
+            "NoSpherA2 download for Olex2, or build NoSpherA2 on this machine")
+_NOS_EXIT = {
+  86: _NOS_ISA,
+  0xC000001D: "stopped on an instruction this CPU does not have: it most likely " + _NOS_ISA,
+  -4: "stopped on an instruction this CPU does not have: it most likely " + _NOS_ISA,
+  0xC0000135: "could not start: a DLL it needs is missing (Visual C++ redistributable, OpenMP or CUDA runtime)",
+  0xC0000139: "could not start: a DLL next to it or on PATH is the wrong version (entry point not found)",
+  0xC0000142: "could not start: a DLL it needs failed to initialise",
+  0xC000007B: "could not start: the exe or one of its DLLs is for another architecture (32/64 bit, x64/ARM64)",
+  127: "could not start: a shared library is missing or too old (run it with -h in a terminal to see which)",
+  0xC0000005: "crashed (access violation)",
+  -11: "crashed (segmentation fault)",
+  0xC00000FD: "crashed (stack overflow)",
+  0xC0000409: "crashed (fast fail)",
+  -6: "aborted (on macOS also a missing library: 'Library not loaded')",
+  -7: "crashed (bus error)",
+  -9: "was killed, usually for running out of memory",
+}
+
+def nos_failure(rc):
+  """A sentence on why NoSpherA2 stopped with exit code rc; None for 0, a running process and a plain error exit,
+  whose own message is in its log."""
+  why = _NOS_EXIT.get(rc)
+  if why is None:
+    return None
+  return ("NoSpherA2 %s (exit code %s). If that does not help, send this message and the NoSpherA2 log to "
+          "florian@olexsys.org" % (why, hex(rc) if rc > 0xFFFF else rc))
+
+
 _tshb_ok = {}
 def tshb_supported():
   """True when NoSpherA2 and cctbx both take a joint (id-keyed, version 4) .tshb. An older NoSpherA2 ignores -tshb
@@ -707,6 +740,10 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
     env["OCC_DATA_PATH"] = os.path.join(os.path.dirname(NoSpherA2), "occ", "share")
   print("NoSpherA2 command line: " + " ".join(args))
 
+  out_fn = "NoSpherA2.log"
+  # one left by an earlier run (or by the -h of tshb_supported) would be streamed and judged as this run's
+  if os.path.exists(out_fn):
+    os.remove(out_fn)
   p = None
   if sys.platform[:3] == 'win':
     startinfo = subprocess.STARTUPINFO()
@@ -717,7 +754,6 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   else:
     p = subprocess.Popen(args, env=env)
 
-  out_fn = "NoSpherA2.log"
   occ_log_fn = "NoSpherA2_OCC.log"
   wfn_log_fn = name + ".wfnlog"
 
@@ -740,9 +776,11 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
         OV.SetVar('NoSpherA2-Error',"NoSpherA2-Output not found!")
         raise NameError('NoSpherA2-Output not found!')
     else:
-      print("process ended before the output file was found")
-      OV.SetVar('NoSpherA2-Error',"NoSpherA2 ended unexpectedly!")
-      raise NameError('NoSpherA2 ended unexpectedly!')
+      why = nos_failure(p.returncode) or "NoSpherA2 ended unexpectedly (exit code %s)!" % p.returncode
+      print("process ended before the output file was found: " + why)
+      olx.Echo(why, m="error")
+      OV.SetVar('NoSpherA2-Error', why)
+      raise NameError(why)
   with open(out_fn, "r") as stdout:
     occ_stdout = None
     if os.path.exists(occ_log_fn):
@@ -782,6 +820,12 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   shutil.move(out_fn, final_log_name)
   if os.path.exists(occ_log_fn):
     shutil.move(occ_log_fn, wfn_log_fn)
+  # a crash after "Writing tsc file..." would otherwise pass as success with a cut table
+  why = nos_failure(p.returncode)
+  if why:
+    olx.Echo(why, m="error")
+    OV.SetVar('NoSpherA2-Error', why)
+    raise NameError(why)
   with open(final_log_name, "r") as f:
     lines = f.readlines()
     if "Writing tsc file...  ... done!\n" in lines or "Writing tsc file...\n" in lines:
@@ -904,6 +948,10 @@ def combine_tscs(match_phrase="_part_", no_check=False):
         string = decoder.decode(c)
         sys.stdout.write(string)
         sys.stdout.flush()
+  why = nos_failure(p.returncode)
+  if why:
+    olx.Echo(why, m="error")
+    return False
 
   if os.path.exists("combined.tsc"):
     tsc_dst = sfc_name + "_total.tsc"
@@ -2033,6 +2081,10 @@ def calc_polarizabilities(efield = 0.005, resolution = 0.1, radius = 2.5):
         string = decoder.decode(c)
         stdout.write(string)
         stdout.flush()
+  why = nos_failure(p.returncode)
+  if why:
+    olx.Echo(why, m="error")
+    return
 
   NSA2_log = "NoSpherA2.log"
   if os.path.exists(NSA2_log):

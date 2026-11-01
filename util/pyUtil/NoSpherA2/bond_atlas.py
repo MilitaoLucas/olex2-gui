@@ -137,7 +137,8 @@ class _Runner(threading.Thread):
             break
           _state["message"] = "running " + args[0].lstrip("-")
           rc = self._run([_exe()] + cpus + args, log)
-      _state["message"] = "" if rc == 0 else "NoSpherA2 exited with %d, see BondAtlas_console.log" % rc
+      from utilities import nos_failure
+      _state["message"] = "" if rc == 0 else nos_failure(rc) or "NoSpherA2 exited with %d, see BondAtlas_console.log" % rc
     except Exception:
       sys.stderr.formatExceptionInfo()
       _state["message"] = "failed to start NoSpherA2"
