@@ -156,6 +156,9 @@ def t_follows_path(label, exe, gets, setup):
                            % (label, label))
   finally:
     os.environ["PATH"] = saved_path
+    # fn() also sets the resolved exe (xtb_exe ...); a failure above left it
+    # empty, and every later case that runs the program would fail with it
+    fn()
     nsp2.softwares = saved_soft
   return "off PATH -> %s, back on -> offered" % ("Get " + label if gets
                                                  else "not offered")

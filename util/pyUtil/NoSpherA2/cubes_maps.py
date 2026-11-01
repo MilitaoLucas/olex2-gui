@@ -462,6 +462,19 @@ FRAG_SURFACES = set(HS_COLUMNS) | {"Intermolecular NCI"}
 def _surface_obj(Type, d=None):
   return _p(SURFACE_OBJS[Type].replace("%s", OV.ModelSrc()), d or (_frag_dir() if Type in FRAG_SURFACES else None))
 
+def _add_surface(obj, **kw):
+  # an olx macro returns 0 when it fails; an Olex2 whose AddObject poly has no s/t/f options and reads no obj
+  # (release builds before Oct 2026) refuses it, so say once where the mesh is instead of drawing nothing quietly
+  if _state.get("no_poly"):
+    return False
+  if olx.AddObject("poly", "nsa2_surface", 0, obj, s=0.529177, **kw) != 0:
+    return True
+  if not _state.get("no_poly"):
+    _state["no_poly"] = True
+    print("This Olex2 cannot draw NoSpherA2 surfaces (AddObject poly reads no .obj); update Olex2, or open %s "
+          "in a mesh viewer" % obj)
+  return False
+
 def _hs_values(Type):
   # the per-face column of a Hirshfeld type, None when the table (older NoSpherA2) or the column is missing;
   # the intermolecular NCI has sign(l2)rho per face in the .dat next to its obj
@@ -484,7 +497,7 @@ def _preview_surface(obj):
   if _state.get("hidden") or not os.path.isfile(obj):
     return
   olex_xgrid.SetVisible(False)
-  olx.AddObject("poly", "nsa2_surface", 0, obj, s=0.529177, t=_alpha())
+  _add_surface(obj, t=_alpha())
   olx.Refresh()
 
 def _stage1_ticker(obj):
@@ -504,8 +517,8 @@ def _show_surface(Type):
   olex_xgrid.SetVisible(False)  # one thing on screen: the surface replaces the map and vice versa
   values = _hs_values(Type)
   if values is None:
-    olx.AddObject("poly", "nsa2_surface", 0, _surface_obj(Type), s=0.529177, t=_alpha())
-    olx.Visible("nsa2_surface", "true")  # Kill only hides it, and AddObject reuses a hidden one by name
+    if _add_surface(_surface_obj(Type), t=_alpha()):
+      olx.Visible("nsa2_surface", "true")  # Kill only hides it, and AddObject reuses a hidden one by name
     _legend(False)
     return
   if _state.get("type") != Type:
@@ -532,9 +545,9 @@ def _show_surface(Type):
     _state["type"] = Type
   colours = _p("nsa2_surface_colours.txt")
   np.savetxt(colours, _colors(values) & 0xFFFFFF, fmt="%d")
-  olx.AddObject("poly", "nsa2_surface", 0, _surface_obj(Type), s=0.529177, f=colours, t=_alpha())
-  olx.Visible("nsa2_surface", "true")
-  _legend()
+  if _add_surface(_surface_obj(Type), f=colours, t=_alpha()):
+    olx.Visible("nsa2_surface", "true")
+    _legend()
 
 def map_shown():
   # the map controls apply to a visible grid, to a surface, and to either of them while hidden - it is loaded

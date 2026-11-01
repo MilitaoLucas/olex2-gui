@@ -76,14 +76,17 @@ def defineExternalPrograms():
   # `Charge Flipping`, so that method keeps behaving exactly as it always has
   # for existing users, scripts and the other developers' workflows. Opt-in
   # (user.solution.flint) until the smtbx.ab_initio modules it runs on
-  # are in every shipped cctbx.
+  # are in every shipped cctbx. Probe multi_trial, not the package: a master
+  # cctbx has smtbx.ab_initio (charge_flipping) but none of FLINT's modules.
   flint = None
   if OV.GetParam('user.solution.flint', False):
     try:
-      import smtbx.ab_initio  # noqa: F401
+      import smtbx.ab_initio.multi_trial  # noqa: F401
       flint = Method_cctbx_Flint(flint_phil)
     except ImportError:
-      print("user.solution.flint is set but this cctbx has no smtbx.ab_initio")
+      print("user.solution.flint is set but this cctbx has no "
+            "smtbx.ab_initio.multi_trial; FLINT needs a newer cctbx, "
+            "Charge Flipping still works")
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods

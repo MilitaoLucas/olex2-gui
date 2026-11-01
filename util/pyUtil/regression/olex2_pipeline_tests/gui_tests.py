@@ -330,7 +330,8 @@ def c_gui_sources(suite):
   finally:
     nsa2_set_param('source', old)
     OV.UpdateHtml()
-  return "sources=%s distinct_panels=%d errors=0" % (",".join(done), len(dumps))
+  # sorted: the combo order follows which program setup finished first
+  return "sources=%s distinct_panels=%d errors=0" % (",".join(sorted(done)), len(dumps))
 
 
 def c_gui_log_clean(suite):
@@ -339,7 +340,11 @@ def c_gui_log_clean(suite):
   collapsed). The golden holds the known ones, so a new kind is a diff;
   the goal is log_errors=0."""
   _need_gui()
-  kinds = sorted(set(re.sub(r"\d+", "<n>", e)[:70] for e in log_errors(0)))
+  errors = log_errors(0)
+  import cubes_maps
+  if cubes_maps._state.get("no_poly"):  # an older Olex2 refused AddObject poly once; cubes_maps said why
+    errors = [e for e in errors if "'AddObject' failed: Wrong option" not in e]
+  kinds = sorted(set(re.sub(r"\d+", "<n>", e)[:70] for e in errors))
   return "log_errors=%d %s" % (len(kinds), " | ".join(kinds))
 
 

@@ -512,6 +512,12 @@ class Method_cctbx_ChargeFlip(Method_solution):
         except Exception as err:
           print("Direct refinement failed (%s), using the macro" % err)
           olex.m("refine %d" % cycles)
+          # the macro runs the same least squares, so a step that left an ADP
+          # past the Debye-Waller limit fails there too; without an R1 the check
+          # below never restored it and every later round failed on the same
+          # atom (cod_2208447: As11 -> Se, R1 0.099 -> 2e9, then arg_limit)
+          if snap:
+            r1 = float('inf')
         if last == "map fill" and snap and r1 is not None:
           print("Map fill R1 %.4f -> %.4f" % (snap[0], r1))
         if snap and r1 is not None and (r1 > snap[0] + max(0.03, 0.25*snap[0])

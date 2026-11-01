@@ -1257,7 +1257,7 @@ Please select one of the generators from the drop-down menu.""", "O", False)
     if name and exe_path:
         if name not in self.softwares:
             self.softwares = f"{self.softwares};  {name}" if self.softwares else "  " + name
-    elif get and exe_path is None:
+    elif get and not exe_path:  # olx.file.Which returns "" when nothing is found
         # If the executable is not found, add the "Get" to the software list
         if "  Get " + name not in self.softwares:
             self.softwares = f"{self.softwares};  Get {name}"

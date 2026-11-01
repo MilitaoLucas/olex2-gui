@@ -55,8 +55,9 @@ def _triple(s):
 
 def _metric():
   """The cell metric tensor, from the cell Olex2 reports."""
-  a, b, c = (float(olx.Cell(x)) for x in "abc")
-  al, be, ga = (math.radians(float(olx.Cell(x))) for x in ("alpha", "beta", "gamma"))
+  # not olx.Cell: in the GUI that is the unit-cell display toggle and returns 0
+  a, b, c, al, be, ga = (float(x) for x in str(olx.xf.au.GetCell()).split(","))
+  al, be, ga = math.radians(al), math.radians(be), math.radians(ga)
   return [
     [a * a, a * b * math.cos(ga), a * c * math.cos(be)],
     [a * b * math.cos(ga), b * b, b * c * math.cos(al)],

@@ -721,7 +721,9 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
   occ_log_fn = "NoSpherA2_OCC.log"
   wfn_log_fn = name + ".wfnlog"
 
-  tries = 0
+  # 2 s was too short on a loaded machine: NoSpherA2 had not written its log
+  # yet and was left running while the refinement failed (as in cubes_maps)
+  start_time = time.monotonic()
   while not os.path.exists(out_fn):
     if OV.GetVar("stop_current_process") or is_pause_break_pressed():
       print("Partitioning aborted by INTERRUPT before log creation!")
@@ -732,10 +734,8 @@ def _cuqct_tsc(wfn_file, cif, groups, hkl_file, save_k_pts, read_k_pts, parts, j
       raise NameError('NoSpherA2/partitioning aborted by user.')
     if p.poll() is None:
       time.sleep(0.2)
-      tries += 1
-      if tries >= 10:
-        if "python" in args[2] and tries <=10:
-          continue
+      if time.monotonic() - start_time >= 120:
+        terminate_process_tree(p)
         olx.Echo("Failed to locate the output file", m="error")
         OV.SetVar('NoSpherA2-Error',"NoSpherA2-Output not found!")
         raise NameError('NoSpherA2-Output not found!')

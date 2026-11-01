@@ -81,6 +81,8 @@ def t_acta(suite):
   OV.SetParam('snum.refinement.method', 'Gauss-Newton')
   OV.SetParam('snum.refinement.max_cycles', 2)
   macro("AddIns ACTA")
+  # output_fcf writes nothing without a LIST, and the sample has none
+  macro("AddIns LIST 4")
   clear_r1()
   macro("spy.refine.do_refine")
 
@@ -161,6 +163,9 @@ def t_reports_refinement(suite):
   OV.SetParam('snum.refinement.program', 'olex2.refine')
   OV.SetParam('snum.refinement.method', 'Gauss-Newton')
   OV.SetParam('snum.refinement.max_cycles', 2)
+  # the refinement writes its cif only with ACTA, which the sample does not
+  # carry (the GUI adds it from user.auto_insert_user_ins when set there)
+  macro("AddIns ACTA")
   clear_r1()
   macro("spy.refine.do_refine")
   r1 = r1_of_last_refinement()

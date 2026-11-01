@@ -64,7 +64,8 @@ def _atoms():
 
 
 def _cell():
-  return [float(olx.Cell(x)) for x in ("a", "b", "c", "alpha", "beta", "gamma")]
+  # not olx.Cell: in the GUI that is the unit-cell display toggle and returns 0
+  return [float(x) for x in str(olx.xf.au.GetCell()).split(",")]
 
 
 def t_round_trip(suite, ext):

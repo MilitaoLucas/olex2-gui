@@ -396,11 +396,15 @@ def _wavefunctions(folder):
   return found
 
 
+# .tshb: what SALTED/RI-fit/XCW write instead of a .tscb when the cctbx reads it (tshb.scatterer_id)
+TABLE_EXT = (".tsc", ".tscb", ".tshb")
+
+
 def _all_tables(folder):
   found = set()
   for root, dirs, files in os.walk(folder):
     for f in files:
-      if f.lower().endswith((".tsc", ".tscb")):
+      if f.lower().endswith(TABLE_EXT):
         found.add(os.path.join(root, f))
   return found
 
@@ -409,7 +413,7 @@ def _per_part_tables(folder):
   found = set()
   for root, dirs, files in os.walk(folder):
     for f in files:
-      if "_part_" in f.lower() and f.lower().endswith((".tsc", ".tscb")):
+      if "_part_" in f.lower() and f.lower().endswith(TABLE_EXT):
         found.add(os.path.join(root, f))
   return found
 
@@ -418,7 +422,7 @@ def _tsc_beside(folder):
   newest, newest_t = None, -1
   for root, dirs, files in os.walk(folder):
     for f in files:
-      if f.lower().endswith((".tsc", ".tscb")):
+      if f.lower().endswith(TABLE_EXT):
         p = os.path.join(root, f)
         t = os.path.getmtime(p)
         if t > newest_t:

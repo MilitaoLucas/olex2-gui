@@ -72,9 +72,9 @@ def register(suite):
 def _method():
   """The FLINT method, registered for this session."""
   try:
-    import smtbx.ab_initio  # noqa: F401
+    import smtbx.ab_initio.multi_trial  # noqa: F401  (master cctbx has the package, not FLINT's modules)
   except ImportError:
-    raise SkipTest("this cctbx has no smtbx.ab_initio")
+    raise SkipTest("this cctbx has no smtbx.ab_initio.multi_trial")
   import ExternalPrgParameters as EPP
   OV.SetParam('user.solution.flint', True)
   EPP.SPD, EPP.RPD = EPP.defineExternalPrograms()
@@ -149,10 +149,15 @@ def t_flint(suite, sample):
   # a headless run in the message box.
   ask = OV.GetParam('user.alert_solve_anyway')
   OV.SetParam('user.alert_solve_anyway', 'N')
+  # seeds 1..n every run: the .flint_seeds memo of an earlier run would start
+  # at a later seed and make the result depend on the run history
+  remember = OV.GetParam('snum.solution.remember_seeds')
+  OV.SetParam('snum.solution.remember_seeds', False)
   try:
     text = _refine_capturing("spy.RunSolutionPrg()")
   finally:
     OV.SetParam('user.alert_solve_anyway', ask)
+    OV.SetParam('snum.solution.remember_seeds', remember)
 
   if "No solution found" in text or atom_count() == 0:
     raise AssertionError("FLINT found no solution for %s" % sample)

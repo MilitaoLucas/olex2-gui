@@ -259,7 +259,12 @@ def ba_show():
     olx.SetMaterial("bondatlasL%d.Text" % _state["labels"], "2309;0.75,0,0.1,1;0.75,0,0.1,1")  # crimson, apart from atom labels
     _state["labels"] += 1
   print("BondAtlas: %s, %d values: %s" % (prop, len(values), _describe(prop)))
-  olex.m('legend true "%s: %s"' % (prop, _describe(prop)))  # caption under the element keys
+  # caption under the element keys; an Olex2 whose Legend takes no caption (before Oct 2026) refuses it with 0,
+  # so it gets the keys alone from then on, and the refusal is logged once
+  if _state.get("caption", True):
+    _state["caption"] = olex.m('legend true "%s: %s"' % (prop, _describe(prop))) != 0
+  if not _state["caption"]:
+    olex.m("legend true")
 
 
 def ba_describe():

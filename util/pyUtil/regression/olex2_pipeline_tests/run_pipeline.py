@@ -92,6 +92,10 @@ def main():
 
   suite = Suite()
   t0 = time.time()
+  # the GUI asks "solve this again?" before every solve of a loaded model,
+  # and a message box blocks the run; restored below
+  ask = pipeline_tests.OV.GetParam('user.alert_solve_anyway')
+  pipeline_tests.OV.SetParam('user.alert_solve_anyway', 'N')
   try:
     for name in wanted:
       mod_name = GROUPS.get(name)
@@ -106,8 +110,15 @@ def main():
         suite.results.append(Result(name, "import", Result.FAIL, str(e)))
         print("FAIL  %-10s import  %s" % (name, e))
         continue
-      mod.register(suite)
+      try:
+        mod.register(suite)
+      except pipeline_tests.SkipTest as e:
+        # a group that fetches its sample while registering (macros: sucrose)
+        # skips the rest of itself, not the rest of the run
+        suite.results.append(Result(name, "register", Result.SKIP, str(e)))
+        print("SKIP  %-10s register  %s" % (name, e))
   finally:
+    pipeline_tests.OV.SetParam('user.alert_solve_anyway', ask)
     # the release gate reads this file; a crash half-way must still leave
     # one, without the END line that says the run completed
     _write_release_log(suite, os.environ.get("OLEX2_TEST_RELEASE_LOG"),

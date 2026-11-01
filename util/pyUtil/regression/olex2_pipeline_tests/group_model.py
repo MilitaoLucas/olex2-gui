@@ -211,7 +211,8 @@ def t_name(suite):
     raise SkipTest("Name is a GUI macro and is not exported to olex2c")
   folder = _sucrose(suite)
   label = _first("C")
-  new = "Zz1"
+  # a label has to start with an element symbol - SetLabel throws on "Zz1"
+  new = "C99"
   macro("name %s %s" % (label, new))
   if new.lower() not in [l.lower() for l in _labels()]:
     raise AssertionError("name %s %s did not take" % (label, new))

@@ -610,6 +610,45 @@ def _symmetry_matches(olds, model, unit_cell, ops, tolerance, identity_tolerance
   return out
 
 
+def _follow_neighbours(olds, matches, model, unit_cell, ops, tolerance, reach=2.0):
+  """An atom close to the symmetry element of the operation that moved its
+  molecule matches its own site as well as its image, and the identity wins on
+  distance: C12 of sucrose at y = 0.248 lands 0.03 A from where it was under
+  the x,-y+1/2,z of inv -f in P2(1), yet its density was mirrored with the rest.
+  Such a column takes the operation most of its neighbours within reach (old
+  sites) moved by, when its image under that operation is the same atom."""
+  import numpy as np
+  used = set(m[1] for m in matches if m is not None and m[1] != 0)
+  if not used:
+    return matches
+  g = unit_cell.metrical_matrix()
+  metric = np.array([[g[0], g[3], g[4]], [g[3], g[1], g[5]], [g[4], g[5], g[2]]])
+  x = np.array([o.get_crd() for o in olds])
+  sites = np.array([m.get_crd() for m in model])
+
+  def dist(a, b):
+    dd = a - b
+    dd -= np.round(dd)
+    return np.sqrt((dd.dot(metric) * dd).sum(axis=-1))
+
+  out = list(matches)
+  for c, m in enumerate(matches):
+    if m is None or m[1] != 0:
+      continue
+    alts = [k for k in used
+            if dist(x[c].dot(ops[k][0].T) + ops[k][1], sites[m[0]]) <= tolerance]
+    if not alts:
+      continue
+    votes = {}
+    for n in np.flatnonzero(dist(x, x[c]) <= reach):
+      if n != c and matches[n] is not None:
+        votes[matches[n][1]] = votes.get(matches[n][1], 0) + 1
+    k = max(votes, key=votes.get) if votes else 0
+    if k in alts:
+      out[c] = (m[0], k)
+  return out
+
+
 class _HklIndex(object):
   """Row of each Miller index in a table; -1 where the table has none."""
   _B = 1 << 20
@@ -915,6 +954,8 @@ def reorient_moved_columns(tsc_file, model_ids, unit_cell, space_group,
       claimed.append(j)
   matches = _symmetry_matches([entries[c] for c in pending], model_ids, unit_cell, ops,
                               tolerance, _MAX_POSITIONAL_RESYNC_SHIFT_ANGSTROM) if pending else []
+  matches = _follow_neighbours([entries[c] for c in pending], matches, model_ids,
+                               unit_cell, ops, tolerance)
   unmatched = []
   for column, match in zip(pending, matches):
     if match is None:

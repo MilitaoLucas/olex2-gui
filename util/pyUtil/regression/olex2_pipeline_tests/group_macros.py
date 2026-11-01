@@ -39,7 +39,8 @@ def t_load(model):
 
 
 def t_cell():
-  a = float(olx.Cell('a'))
+  # not olx.Cell: in the GUI that is the unit-cell display toggle and returns 0
+  a = float(str(olx.xf.au.GetCell()).split(",")[0])
   v = float(olx.xf.au.GetCellVolume())
   sg = space_group()
   if a <= 0 or v <= 0:

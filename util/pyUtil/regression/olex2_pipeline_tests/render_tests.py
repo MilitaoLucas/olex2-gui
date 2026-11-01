@@ -134,6 +134,8 @@ def c_render_hirshfeld(suite):
   bare = render("hirshfeld_bare", VIEWS[0][1])  # the model alone, same camera
   with _params(**{"map.resolution": GRID}):
     cubes_maps.hirshfeld_surface("Hirshfeld d_norm")
+    if cubes_maps._state.get("no_poly"):  # an Olex2 without AddObject poly s/t/f said so in the log
+      raise SkipTest("this Olex2 cannot draw NoSpherA2 surfaces")
     values = cubes_maps._hs_values("Hirshfeld d_norm")
     if values is None or not len(values):
       raise AssertionError("the run left no Hirshfeld_surface.dat with a d_norm column")
@@ -158,6 +160,8 @@ def c_render_esp_surface(suite):
   bare = render("esp_surface_bare", VIEWS[0][1])
   with _params(**{"map.type": "ESP surface", "map.resolution": GRID}):
     cubes_maps.change_map()
+    if cubes_maps._state.get("no_poly"):  # an Olex2 without AddObject poly s/t/f said so in the log
+      raise SkipTest("this Olex2 cannot draw NoSpherA2 surfaces")
     obj = cubes_maps._surface_obj("ESP surface")
     if not os.path.isfile(obj):
       raise AssertionError("no %s written" % os.path.basename(obj))
