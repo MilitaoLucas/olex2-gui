@@ -244,6 +244,14 @@ class CifTools(ArgumentParser):
         self.cif_block[key] = value # overwrite these for now
 
   def sort_publication_info(self):
+    # people stays None until init_userDictionaries runs (headless olex2c never runs it): leave the
+    # author items '?' rather than abort the caller (a COD batch refinement died here on load)
+    people = userDictionaries.people
+    if people is None:
+      find_id = lambda *a: None
+      info = lambda ID, what: '?'
+    else:
+      find_id, info = people.findPersonId, people.getPersonInfo
     publ_author_names = OV.GetParam('snum.metacif.publ_author_names')
     if publ_author_names is not None and publ_author_names not in ('?', ''):
       names = publ_author_names.split(';')
@@ -252,10 +260,10 @@ class CifTools(ArgumentParser):
           header=('_publ_author_name', '_publ_author_email', '_publ_author_address'))
         for name in names:
           if name != '?':
-            ID = userDictionaries.people.findPersonId(name)
+            ID = find_id(name)
             if ID != None:
-              email = userDictionaries.people.getPersonInfo(ID,'email')
-              address = userDictionaries.people.getPersonInfo(ID,'address')
+              email = info(ID,'email')
+              address = info(ID,'address')
               cif_loop.add_row((unicode_to_cif(name), email, unicode_to_cif(address)))
             else:
               cif_loop.add_row((name, "?", "?"))
@@ -266,17 +274,17 @@ class CifTools(ArgumentParser):
     if publ_contact_author_name is not None and publ_contact_author_name != '?':
       if '_publ_contact_author_name' in self.cif_block:
         del self.cif_block['_publ_contact_author_name'] # hack to make things in the right order
-      ID = userDictionaries.people.findPersonId(publ_contact_author_name,
+      ID = find_id(publ_contact_author_name,
         OV.get_cif_item('_publ_contact_author_name', None))
       self.cif_block['_publ_contact_author_name'] = publ_contact_author_name
       self.cif_block['_publ_contact_author_email'] \
-        = userDictionaries.people.getPersonInfo(ID,'email')
+        = info(ID,'email')
       self.cif_block['_publ_contact_author_phone'] \
-        = userDictionaries.people.getPersonInfo(ID,'phone')
+        = info(ID,'phone')
       self.cif_block['_publ_contact_author_address'] \
-        = userDictionaries.people.getPersonInfo(ID,'address')
+        = info(ID,'address')
       self.cif_block['_publ_contact_author_id_orcid'] \
-        = userDictionaries.people.getPersonInfo(ID,'orcid_id')
+        = info(ID,'orcid_id')
 
 class SaveCifInfo(CifTools):
   def __init__(self):
