@@ -100,6 +100,7 @@ class twin_domains:
 class OlexCctbxAdapter(object):
   def __init__(self, do_filter=True):
     import olexex
+    t_init = time.perf_counter()
     if OV.HasGUI():
       sys.stdout.refresh = True
     self._xray_structure = None
@@ -191,7 +192,17 @@ class OlexCctbxAdapter(object):
     self.swat = self.olx_atoms.model.get('swat', None)
     self.initialise_reflections(doFilter=do_filter)
     from connectivity_table import connectivity_table
-    self.connectivity_table = connectivity_table(self.xray_structure(), self.olx_atoms)
+    xs = self.xray_structure()
+    if self._c33_lazy_ct:
+      # c33: solve-side adapters never read it (no restraints are built), and
+      # cctbx.py makes ~45 of them per case; built on first use from the same
+      # two objects the eager call would have used
+      self._c33_ct_args = (xs, self.olx_atoms)
+    else:
+      self.connectivity_table = connectivity_table(xs, self.olx_atoms)
+    _c33_stat("init", t_init, cls=type(self).__name__)
+
+  _c33_lazy_ct = False
 
   def __del__(self):
     #sys.stdout.refresh = False
@@ -879,6 +890,83 @@ _SOLUTION_EVIDENCE = {}
 
 
 _GEOMETRY_MODEL = {}
+_C33_REC = {}  # refinedElectronCounts: key -> (data object, (eo, ec))
+
+
+# c33: per-stage timings for the speed review, one JSON line per event, only
+# when FLINT_C33_STATS names a file; never read back, so output-neutral
+_C33_STATS = os.environ.get("FLINT_C33_STATS")
+
+
+def _c33_stat(ev, t0, **kw):
+  if not _C33_STATS:
+    return
+  import json
+  kw.update(ev=ev, dt=round(time.perf_counter() - t0, 4), pid=os.getpid())
+  try:
+    with open(_C33_STATS, "a") as f:
+      f.write(json.dumps(kw) + "\n")
+  except Exception:
+    pass
+
+
+def _reap(done):
+  """ Wait for a NoSpherA2 launch whose answer is no longer wanted (and remove
+  its directory), so a speculative launch never outlives its caller. """
+  if done is not None:
+    try:
+      done()
+    except Exception:
+      pass
+
+
+_NSA2_DLL = []
+
+
+def _nsa2_dll():
+  """ c36: NoSpherA2 as a DLL inside Olex2, loaded once per session, instead
+  of a 75 MB process per geometry call.
+
+  The launch was 0.4-0.6 s of a 0.05 s descriptor and FLINT makes ~7 per
+  structure, 37 % of the wall on median COD ids (c35 profile, 31 Oct). The
+  DLL (nosphera2_run, NoSpherA2 b94dbf69 or later; the 20 Sep DLL predates
+  4e21f9b5 and is 4x slower than the exe) gives byte-identical descriptor.npy
+  on 80/80 farm cases. `-calc_featomic_descriptors <list>` writes next to the
+  xyz and `-out` names the log, so nothing depends on Olex2's cwd.
+
+  Shipped by the NoSpherA2 distribution zip next to the exe in <BaseDir>,
+  never by SVN; its tbb/omp runtimes sit beside it ($ORIGIN/@loader_path
+  rpath, DLL folder on Windows). FLINT_NSA2_DLL overrides the path, "0"
+  switches it off. Missing or unloadable -> None and the exe is launched as
+  before. """
+  if not _NSA2_DLL:
+    h = None
+    p = os.environ.get("FLINT_NSA2_DLL") or os.path.join(OV.BaseDir(),
+      {"win32": "NoSpherA2.dll", "darwin": "libNoSpherA2.dylib"}.get(
+        sys.platform, "libNoSpherA2.so"))
+    if p != "0" and os.path.exists(p):
+      try:
+        import ctypes, threading
+        # Linux: its statically linked deps must not bind to same-named
+        # symbols Olex2 already loaded (the Pi cctbx crash, 7 Oct); macOS
+        # two-level namespaces and Windows DLLs isolate them already
+        mode = ctypes.DEFAULT_MODE
+        if sys.platform.startswith("linux"):
+          mode = os.RTLD_LOCAL | os.RTLD_DEEPBIND
+        h = ctypes.CDLL(os.path.abspath(p), mode=mode)
+        h.nosphera2_run.argtypes = [ctypes.c_int,
+                                    ctypes.POINTER(ctypes.c_char_p)]
+        h.nosphera2_run.restype = ctypes.c_int
+        # ponytail: one call at a time, run_app owns cout and process-wide
+        # state; calls are 0.05 s, so the second speculative one just queues
+        h.olex_lock = threading.Lock()
+        # rayon reads it once, at its first pool; the exe got the same value
+        os.environ.setdefault("RAYON_NUM_THREADS", "4")
+      except Exception as e:
+        print("NoSpherA2 DLL not usable (%s); launching NoSpherA2.exe" % e)
+        h = None
+    _NSA2_DLL.append(h)
+  return _NSA2_DLL[0]
 
 
 def _geometry_model(path):
@@ -924,9 +1012,21 @@ def _name_density_evidence(index, name):
 
 
 class OlexCctbxSolve(OlexCctbxAdapter):
+  _c33_lazy_ct = True
+
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
     self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks
+
+  def __getattr__(self, name):
+    # only reached when normal lookup fails: the lazy connectivity table
+    if name == "connectivity_table" and "_c33_ct_args" in self.__dict__:
+      from connectivity_table import connectivity_table
+      self.connectivity_table = connectivity_table(
+        *self.__dict__.pop("_c33_ct_args"))
+      return self.connectivity_table
+    raise AttributeError("'%s' object has no attribute '%s'"
+                         % (type(self).__name__, name))
 
   def runChargeFlippingSolution(self, verbose="highly", solving_interval=60,
                                 mode="classic"):
@@ -1379,19 +1479,34 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # wait=False: NoSpherA2 is started and a function is returned that waits
     # for it, so a second launch can run alongside instead of after it
     if not wait:
-      finish = self._geometryTopK(work, exe, model_path, unit_cell, built,
-                                  sites, labels, family == "full", wait=False)
+      try:
+        finish = self._geometryTopK(work, exe, model_path, unit_cell, built,
+                                    sites, labels, family == "full", wait=False)
+      except Exception:
+        shutil.rmtree(work, ignore_errors=True)
+        raise
+      t0, res = time.perf_counter(), []
+      # idempotent: a second call returns the first answer, so a caller can
+      # reap it on an error path without knowing whether it was consumed
       def done():
-        try:
-          return finish()
-        finally:
-          shutil.rmtree(work, ignore_errors=True)
+        if not res:
+          try:
+            t1 = time.perf_counter()
+            res.append(finish())
+            _c33_stat("nsa2", t0, wait=round(time.perf_counter() - t1, 4),
+                      family=family or ("row2" if labels else "model"))
+          finally:
+            shutil.rmtree(work, ignore_errors=True)
+        return res[0]
       return done
+    t0 = time.perf_counter()
     try:
       return self._geometryTopK(work, exe, model_path, unit_cell, built, sites,
                                 labels, family == "full")
     finally:
       shutil.rmtree(work, ignore_errors=True)
+      _c33_stat("nsa2", t0, wait=round(time.perf_counter() - t0, 4),
+                family=family or ("row2" if labels else "model"))
 
   def _geometryTopK(self, work, exe, model_path, unit_cell, built, sites,
                     labels=None, metals=False, wait=True):
@@ -1400,8 +1515,13 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     xyz_path = os.path.join(work, "peaks.xyz")
     n = built.sites.size()
     labels = (list(labels) + ["C"]*n)[:n] if labels else ["C"]*n
+    xyz_text = assemble.as_xyz(unit_cell, built.sites, labels, title="peaks")
     with open(xyz_path, "w") as f:
-      f.write(assemble.as_xyz(unit_cell, built.sites, labels, title="peaks"))
+      f.write(xyz_text)
+    if _C33_STATS:
+      import hashlib
+      _c33_stat("nsa2_key", time.perf_counter(), n=n, metals=bool(metals),
+                key=hashlib.md5((model_path + xyz_text).encode()).hexdigest())
     # **No console window, and capture what it says.** This runs from the GUI,
     # and `check_call` pops a black console box on Windows for as long as
     # NoSpherA2 takes. Same idiom as `gui/help.convert_md_to_html_pandoc`.
@@ -1418,25 +1538,88 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     extra = ["-geometry_aid_cutoff", str(meta.get("soap_cutoff", 3.5))]
     if meta.get("center_weight", 1.0) != 1.0:
       extra += ["-geometry_aid_center_weight", str(meta["center_weight"])]
-    proc = subprocess.Popen(
-      [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"] + extra
-      + (["-geometry_aid_metals"]
-         if metals or any(l != "C" for l in labels) else []),
-      cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-      creationflags=flags,
-      # ponytail: featomic spawns one rayon thread per core per call; on 48 cores
-      # that is 0.35 s of a 0.64 s call, identical numbers with four
-      env=dict(os.environ, RAYON_NUM_THREADS=os.environ.get("RAYON_NUM_THREADS", "4")))
+    if metals or any(l != "C" for l in labels):
+      extra += ["-geometry_aid_metals"]
+    dll = _nsa2_dll()
+    if dll is not None:
+      list_path = os.path.join(work, "list.txt")
+      with open(list_path, "w") as f:
+        f.write(xyz_path + "\n")
+      # narrow argv is read in the ANSI code page by std::filesystem::path
+      enc = "mbcs" if os.name == "nt" else "utf-8"
+      argv = [x.encode(enc) for x in
+              ["NoSpherA2", "-out", os.path.join(work, "NoSpherA2.log"),
+               "-calc_featomic_descriptors", list_path] + extra]
+    def launch(use_dll=dll is not None):
+      if use_dll:
+        import ctypes
+        with dll.olex_lock:   # ctypes drops the GIL for the call
+          return dll.nosphera2_run(len(argv), (ctypes.c_char_p*len(argv))(*argv))
+      return subprocess.Popen(
+        [exe, "-wfn", xyz_path, "-calc_featomic_descriptor"] + extra,
+        cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        creationflags=flags,
+        # ponytail: featomic spawns one rayon thread per core per call; on 48 cores
+        # that is 0.35 s of a 0.64 s call, identical numbers with four
+        env=dict(os.environ, RAYON_NUM_THREADS=os.environ.get("RAYON_NUM_THREADS", "4")))
+    box = {}
+    if wait:
+      box["proc"] = launch()
+    else:
+      # c33: Popen alone is ~0.3 s here (CreateProcess on a 75 MB exe, outside
+      # the GIL), so a launch whose answer is not needed yet is started from a
+      # thread; a launch error is raised by finish(), where the caller waits
+      import threading
+      def start():
+        try:
+          box["proc"] = launch()
+        except BaseException as e:
+          box["err"] = e
+      th = threading.Thread(target=start, daemon=True)
+      th.start()
     def finish():
-      stdout, stderr = proc.communicate()
-      if proc.returncode != 0:
-        tail = [x for x in ((stderr or "") + "\n"
-                            + (stdout or "")).splitlines() if x.strip()]
-        raise RuntimeError("NoSpherA2 exited %d: %s"
-                           % (proc.returncode, " | ".join(tail[-4:])
-                              or "no output"))
+      if not wait:
+        th.join()
+        if "err" in box:
+          raise box["err"]
+      proc = box["proc"]
       import numpy
-      values = numpy.load(os.path.join(work, "descriptor.npy"))
+      if dll is not None and proc != 0:
+        # a failed DLL call is retried once with the exe, whose own error
+        # (if it fails too) is the one raised
+        try:
+          with open(os.path.join(work, "NoSpherA2.log"), errors="replace") as f:
+            tail = [x for x in f.read().splitlines() if x.strip()]
+        except OSError:
+          tail = []
+        print("NoSpherA2 DLL returned %d (%s); launching NoSpherA2.exe"
+              % (proc, " | ".join(tail[-2:]) or "no output"))
+        proc = launch(use_dll=False)
+      if not isinstance(proc, subprocess.Popen):
+        out = xyz_path + ".npy"
+        if os.environ.get("FLINT_NSA2_PARITY"):
+          # smoke only: the exe on the same xyz, bytes compared
+          t = time.perf_counter()
+          subprocess.run([exe, "-wfn", xyz_path, "-calc_featomic_descriptor"]
+                         + extra, cwd=work, capture_output=True,
+                         creationflags=flags)
+          try:
+            same = (open(out, "rb").read() == open(os.path.join(
+              work, "descriptor.npy"), "rb").read())
+          except OSError:
+            same = False
+          _c33_stat("nsa2_parity", t, same=same)
+          print("NSA2 parity %s" % ("same" if same else "MISMATCH"))
+        values = numpy.load(out)
+      else:
+        stdout, stderr = proc.communicate()
+        if proc.returncode != 0:
+          tail = [x for x in ((stderr or "") + "\n"
+                              + (stdout or "")).splitlines() if x.strip()]
+          raise RuntimeError("NoSpherA2 exited %d: %s"
+                             % (proc.returncode, " | ".join(tail[-4:])
+                                or "no output"))
+        values = numpy.load(os.path.join(work, "descriptor.npy"))
       model = _geometry_model(model_path)
       n = min(sites.size(), values.shape[0])
       return model.top_k(values[:n], k=len(model.classes)), model
@@ -1503,6 +1686,15 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # prune (which skips H) and rides along to the end as an atom called "H".
     allowed -= set(("H", "D"))
 
+    # c33: the geometry half reads only the sites, so NoSpherA2 is started
+    # before the density half and runs alongside it; same inputs, same answer,
+    # and a launch error is raised where the blocking call used to raise it
+    geo, geo_err = None, None
+    try:
+      geo = self.geometryProposals(f_calc.unit_cell(), f_calc.space_group(),
+                                   sites, wait=False)
+    except Exception as e:
+      geo_err = e
     try:
       densities = element_assignment.integrated_densities(fft_map, sites)
       assigned = element_assignment.assign(f_calc.unit_cell(), sites,
@@ -1522,8 +1714,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       # half be replayed after cleanup without ever touching a map again.
       _remember_density_evidence(densities, sites, allowed)
 
-      got = self.geometryProposals(f_calc.unit_cell(), f_calc.space_group(),
-                                   sites)
+      if geo_err is not None:
+        raise geo_err
+      got = geo() if geo is not None else None
       if got is None:
         return by_density
       proposals, model = got
@@ -1563,6 +1756,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       # hard-codes older SOAP hyperparameters and emits 16,500 features where
       # every trained model expects 42,042, so it refuses -- correctly, since a
       # descriptor of the wrong length would give confident nonsense.
+      _reap(geo)
       names = locals().get("by_density")
       if names:
         print("Geometry step unavailable (%s: %s); using the density call only"
@@ -1587,21 +1781,50 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     from cctbx.array_family import flex
     from cctbx.eltbx import tiny_pse
     from smtbx.ab_initio import element_assignment
-    f_obs = self.reflections.f_sq_obs_merged.average_bijvoet_mates().f_sq_as_f()
-    f_calc = f_obs.structure_factors_from_scatterers(xray_structure=xs).f_calc()
-    fc = flex.abs(f_calc.data())
-    k = flex.sum(f_obs.data()*fc)/flex.sum(fc*fc)
-    gridding = maptbx.crystal_gridding(
-      unit_cell=xs.unit_cell(), space_group_info=xs.space_group_info(),
-      d_min=f_obs.d_min(), resolution_factor=1/3.,
-      symmetry_flags=maptbx.use_space_group_symmetry)
-    radii = element_assignment.site_radii(xs)
-    def integrate(data):
-      m = miller.fft_map(gridding, miller.array(miller_set=f_calc, data=data))
-      m.apply_volume_scaling()
-      return element_assignment.integrated_densities(m, xs.sites_frac(), radii)
-    eo = integrate(flex.polar(f_obs.data()/k, flex.arg(f_calc.data())))
-    ec = integrate(f_calc.data())
+    t0 = time.perf_counter()
+    if _C33_STATS:
+      import hashlib
+      _c33_stat("rec_key", t0, key=hashlib.md5(repr((
+        list(xs.scattering_types()), list(xs.sites_frac()),
+        list(xs.extract_u_iso_or_u_equiv()), list(xs.scatterers().extract_occupancies()),
+        id(self.reflections.f_sq_obs_merged))).encode()).hexdigest())
+    f_sq = self.reflections.f_sq_obs_merged
+    # c33: the two integrations are a pure function of the data and of what
+    # the structure factors read from xs; a lever that re-asks for an
+    # unchanged model (6 % of calls) gets the stored pair. The data object is
+    # held in the entry, so its id cannot be reused while the entry lives.
+    reg = xs.scattering_type_registry()
+    key = repr((id(f_sq), xs.unit_cell().parameters(),
+                xs.space_group().type().hall_symbol(),
+                [(s.scattering_type, s.site, s.u_iso, s.u_star,
+                  s.flags.use_u_iso(), s.flags.use_u_aniso(), s.occupancy,
+                  s.fp, s.fdp) for s in xs.scatterers()],
+                sorted((t, None if g is None else
+                        (tuple(g.array_of_a()), tuple(g.array_of_b()),
+                         g.c(), g.use_c()))
+                       for t, g in reg.as_type_gaussian_dict().items())))
+    hit = _C33_REC.get(key)
+    if hit is not None and hit[0] is f_sq:
+      eo, ec = hit[1]
+    else:
+      f_obs = f_sq.average_bijvoet_mates().f_sq_as_f()
+      f_calc = f_obs.structure_factors_from_scatterers(xray_structure=xs).f_calc()
+      fc = flex.abs(f_calc.data())
+      k = flex.sum(f_obs.data()*fc)/flex.sum(fc*fc)
+      gridding = maptbx.crystal_gridding(
+        unit_cell=xs.unit_cell(), space_group_info=xs.space_group_info(),
+        d_min=f_obs.d_min(), resolution_factor=1/3.,
+        symmetry_flags=maptbx.use_space_group_symmetry)
+      radii = element_assignment.site_radii(xs)
+      def integrate(data):
+        m = miller.fft_map(gridding, miller.array(miller_set=f_calc, data=data))
+        m.apply_volume_scaling()
+        return element_assignment.integrated_densities(m, xs.sites_frac(), radii)
+      eo = integrate(flex.polar(f_obs.data()/k, flex.arg(f_calc.data())))
+      ec = integrate(f_calc.data())
+      if len(_C33_REC) >= 16:
+        _C33_REC.clear()
+      _C33_REC[key] = (f_sq, (eo, ec))
     ratio = [o/c if c > 0 else None for o, c in zip(eo, ec)]
     # ponytail: the median over the low-U half only; noise peaks (high U, no
     # density) sit low and would drag the median under the real atoms
@@ -1653,6 +1876,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       except (RuntimeError, ValueError):
         z = 0
       out.append(z*r/norm if r is not None and z > 0 else None)
+    _c33_stat("rec", t0)
     return out
 
   def solutionPeaks(self, fft_map):
@@ -1812,6 +2036,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     allowed = set(_SOLUTION_EVIDENCE.get("allowed") or self.expectedElements())
     # a hydrogen is never what a peak with too little density is
     allowed -= set(("H", "D"))
+    spec = None
     try:
       # ponytail: the missing hydrogens sit inside the 0.7 A read of their
       # parent (a CH3 carbon reads 0.5 over, an O 0.4 under once the median
@@ -1822,6 +2047,16 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       xs = self.xray_structure()
       if xs.scatterers().size() == 0:
         return {}
+      # c33: the all-carbon descriptor below needs only the heavy sites, which
+      # are fixed from here on; NoSpherA2 is started now and runs alongside the
+      # density reads. Used only when every heavy site survives into `sites`
+      # (the same input, so the same answer), else reaped and relaunched
+      try:
+        xs0 = xs.select(~(xs.scattering_types() == "H"))
+        spec = self.geometryProposals(xs0.unit_cell(), xs0.space_group(),
+                                      xs0.sites_frac(), wait=False)
+      except Exception:
+        spec = None
       z_of = [(e, tiny_pse.table(e).atomic_number()) for e in sorted(allowed)]
       # ponytail: a mistyped atom mis-reads its correction (1.6x over a Z away,
       # under once its U has collapsed), so it is re-typed to the nearest Z and
@@ -1855,6 +2090,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         z_est.append(z)
         us.append(u)
       if not names:
+        _reap(spec)
         return {}
       # ponytail: second pass for the row-2 atoms with the heavy atoms and
       # metals labelled as the density read them (nearest Z after the read
@@ -1870,7 +2106,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       if any(l != "C" for l in labels):
         row2 = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites,
                                       labels, wait=False)
-      got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
+      if spec is not None and len(names) == xs.scatterers().size():
+        got = spec()
+      else:
+        _reap(spec)
+        got = self.geometryProposals(xs.unit_cell(), xs.space_group(), sites)
       proposals = got[0] if got else []
       if row2 is not None:
         got = row2()
@@ -2159,6 +2399,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       return changed
     except Exception as e:
       import traceback
+      _reap(spec)
       print("Re-typing after cleanup did not run (%s: %s); the labels are "
             "unchanged" % (type(e).__name__, e))
       if OV.IsDebugging():
@@ -2474,7 +2715,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       print("Space-group suggestions unavailable: %s" % e)
       return None
     suggestion.cc_peak_height = result.cc_peak_height
-    self._rerankByRefinedR1(f_obs, suggestion, result)
+    # c33 (FLINT_C33_SGRERANK, default 1): skipped. The only caller hands in
+    # f_obs merged by runChargeFlippingSolution, so `fusion_weight` is 0 and
+    # the re-rank returns before solving anything -- it cannot change the
+    # pick, it only pays for a set() over every Miller index. 0 = c32 path
+    t0 = time.perf_counter()
+    if os.environ.get("FLINT_C33_SGRERANK", "1") == "0":
+      self._rerankByRefinedR1(f_obs, suggestion, result)
+    _c33_stat("sgrerank", t0)
     space_group_suggest.show(suggestion)
     return suggestion
 

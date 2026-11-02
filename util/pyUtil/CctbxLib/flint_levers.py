@@ -101,22 +101,28 @@ def nextlabel(used, e):
   used[e] = used.get(e, 0) + 1
   return '%s%d' % (e, used[e])
 
-def prune():
-  L, out = LL(), []
+def prune(L=None, frac=1.0):
+  L, out = L or LL(), []
   s2 = L.S0/L.nu
   for i, x in enumerate(L.xs.scatterers()):
     if x.scattering_type in ('H', 'D'):
       continue
     b = 9 if x.flags.use_u_aniso() else 4
-    if (L.S(L.fc - L.fj(i)) - L.S0)/b/s2 < crit(b):
-      out.append(x.label)
+    f = (L.S(L.fc - L.fj(i)) - L.S0)/b/s2
+    if f < crit(b):
+      out.append((f, x.label))
+  # c38: the cheapest share of the batch, by single-atom F; a dead atom (U 1.0) costs ~0
+  out = [n for f, n in sorted(out)[:int(math.ceil(len(out)*frac))]]
+  if out:
+    print('Final prune %.2f: %s' % (frac, ' '.join(out[:16]) + (' ...' if len(out) > 16 else '')))
   if out:
     olex.m('kill %s' % ' '.join(out))
     olex.m('compaq -q')
   return -len(out)
 
-def add():
-  L = LL()
+def add(L=None):
+  """ L: an LL of the current model, which add() changes; built here when None """
+  L = L or LL()
   xs, F = L.xs, formula()
   els = sorted(F) or ['C', 'N', 'O']
   ops = list(xs.space_group().all_ops())
@@ -195,11 +201,11 @@ def reap(res):
   set_params_from_ires()
   OV.SetParam('snum.refinement.use_solvent_mask', olx.Ins('ABIN') != 'n/a')
 
-def refine():
+def refine(cycles=4):
   """ 4 cycles of the engine as the tidy-up calls it; (S, n, p) or None """
   try:
     from refinement import FullMatrixRefine
-    fmr = FullMatrixRefine(max_cycles=4, max_peaks=0)
+    fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
     fmr.write_oxl = lambda cif_block=None: None
     fmr.run()
     fmr.log.close()
@@ -245,6 +251,27 @@ def blown(res):
         out.add(p[0])
   return out
 
+def isot_bad():
+  """ non-positive-definite or |U| >= 1 anisotropic atoms of the loaded model go isotropic at the median U; their names """
+  from cctbx import adptbx
+  us, bad = [], []
+  for i in range(int(olx.xf.au.GetAtomCount())):
+    if olx.xf.au.IsAtomDeleted(i) == 'true' or str(olx.xf.au.GetAtomType(i)) in ('Q', 'H'):
+      continue
+    u = [float(x) for x in str(olx.xf.au.GetAtomU(i)).split(',')]
+    if len(u) == 6 and (max(map(abs, u)) >= 1 or
+                        not adptbx.is_positive_definite((u[0], u[1], u[2], u[5], u[4], u[3]))):
+      bad.append((i, str(olx.xf.au.GetAtomName(i))))
+    elif len(u) == 1:
+      us.append(u[0])
+  med = sorted(us)[len(us)//2] if us else 0.05
+  for i, n in bad:
+    olex.m('isot %s' % n)
+    olx.xf.au.SetAtomU(i, '%.4f' % med)
+  if bad:
+    print('Final levers: %d atom(s) with a non-positive-definite U made isotropic: %s' % (len(bad), ' '.join(n for i, n in bad)))
+  return [n for i, n in bad]
+
 def model_r1():
   """ R1 on Fo^2 > 2 sigma of the loaded model as it stands, not refined, so asking leaves the model alone; None when it
   cannot be computed """
@@ -276,39 +303,83 @@ def final_levers():
   try:
     shutil.copyfile(res, orig)
     reap(res)
-    ref = refine()
-    ref = ref and refine()
+    if os.environ.get('FLINT_C33_LEVREF', '1') != '0':
+      # c33: one 8-cycle run instead of two 4-cycle ones; a refine costs ~0.3 s of model rebuild, map, CIF block and
+      # covariance on top of its least squares, which the second run paid again for cycles the first could have done
+      ref = refine(8)
+    else:
+      ref = refine()
+      ref = ref and refine()
+    if not ref and os.environ.get('FLINT_C38_ISOT', '1') != '0':
+      fixed = isot_bad()
+      if fixed:
+        ref = refine(8)
+        if ref:
+          kept.append('isotropic %d' % len(fixed))
     if ref:
       OV.File(res)
       shutil.copyfile(res, cur)
       load(cur)
-    for name, fn in (('pruned', prune), ('added', add)):
+    same = None
+    # c38: a rejected batch prune is retried with the cheapest half, then quarter; none once one held or none is left
+    step = os.environ.get('FLINT_C38_PRUNESTEP', '1') != '0'
+    tries = [('pruned', prune)] + ([('pruned', lambda L: prune(L, 0.5)), ('pruned', lambda L: prune(L, 0.25))]
+                                   if step else []) + [('added', add)]
+    pdone = [False]
+    for name, fn in tries:
       if not ref:
         break
+      if name == 'pruned' and pdone[0]:
+        continue
       undo = (lambda: None) if name == 'added' and not kept else (lambda: load(cur))
       try:
-        ch = fn()
+        # c33: prune only reads its LL; when it removed nothing and the model was not reloaded, add gets that one
+        # instead of building the same arrays again (bit for bit: same model, same data, ~0.02-0.3 s)
+        L, same = same or LL(), None
+        ch = fn(L)
       except Exception:
         print(traceback.format_exc())
         undo()
         continue
       if not ch:
+        pdone[0] = pdone[0] or name == 'pruned'
         if not fresh[0]:
           undo()
+        else:
+          same = L
         continue
       r = refine()
       if r and accept(ref, r):
         OV.File(res)
         # a lever must not leave an unreadable file or a newly blown ADP (U > 1 A^2)
-        if 'FV' in blown(res) or blown(res) - blown(cur):
+        b = blown(res)
+        if 'FV' in b or b - blown(cur):
           undo()
           continue
         shutil.copyfile(res, cur)
         fresh[0] = False
         ref = r
         kept.append('%s %d' % (name, abs(ch)))
+        pdone[0] = pdone[0] or name == 'pruned'
       else:
+        print('Final %s %d rejected by Hamilton' % (name, abs(ch)))
         undo()
+    cut = float(os.environ.get('FLINT_C38_UCUT', '0.5') or 0)
+    if ref and cut > 0 and os.path.exists(cur):
+      dead = [m.group(1) for m in re.finditer(r'(?m)^([A-Za-z]{1,2}\d\w*)\s+\d+(?:\s+-?[\d.]+){4}\s+([\d.]+)\s*$',
+                                                open(cur, errors='replace').read())
+              if float(m.group(2)) >= cut and not re.match(r'(?i)[HD]\d', m.group(1))]
+      if dead:
+        load(cur)
+        olex.m('kill %s' % ' '.join(dead))
+        olex.m('compaq -q')
+        print('Final U cut: %d atom(s) at Uiso >= %.2f removed: %s' % (len(dead), cut, ' '.join(dead)))
+        if refine():
+          OV.File(res)
+          shutil.copyfile(res, cur)
+          kept.append('U-cut %d' % len(dead))
+        else:
+          load(cur)
   except Exception as err:
     print('Final levers failed: %s' % err)
     kept = []

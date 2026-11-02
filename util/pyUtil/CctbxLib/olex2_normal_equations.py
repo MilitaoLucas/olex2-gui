@@ -393,12 +393,26 @@ def normal_equation_class(*args, **kwds):
           olx.xf.rm.UpdateCR('olex2.constraint.rotating_adp', i, r.scale.value,
             r.alpha.value*180/math.pi, r.beta.value*180/math.pi, r.gamma.value*180/math.pi)
       self.complete_update()
-      olx.xf.EndUpdate()
-      if OV.HasGUI():
-        olx.Refresh()
+      # c33: headless refinements defer EndUpdate (TLattice::Init) to the end
+      # of the run - nothing reads the lattice between cycles, the setters
+      # above touch only the AU and RM. See refinementWrapper.do.
+      if self.defer_end_update:
+        self._end_update_pending = True
+      else:
+        olx.xf.EndUpdate()
+        if OV.HasGUI():
+          olx.Refresh()
       if OV.isInterruptSet():
         self.iterations_object.n_iterations = self.iterations_object.n_max_iterations
         self.iterations_object.interrupted = True
+    defer_end_update = False
+    _end_update_pending = False
+
+    def flush_olex(self):
+      if self._end_update_pending:
+        self._end_update_pending = False
+        olx.xf.EndUpdate()
+
     # interface functions - do not delete
     def complete_update(self):
       pass

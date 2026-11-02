@@ -15,7 +15,7 @@ which it cannot assign, from their coordination while the model holds fewer
 of the element than the formula's share (lev3.py: 20 structures fixed, none
 broken on the whole COD).
 """
-import math, itertools
+import math, itertools, os
 import numpy as np
 
 EL = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni',
@@ -137,13 +137,36 @@ def coord(t, F, nb):
       if c and sum(c) / len(c) > 1.86 and short('Se'): out[a] = 'Se'
   return out
 
+_WEIGHTS = {}
+
+def weights(path):
+  """ The networks' arrays, read once per Olex2 session (c33, 30 Oct 2026).
+  An NpzFile inflates an array from the zip on every W[key]; _net reads each
+  weight once per call, so every retype paid a full 7.7 MB inflate (~0.05 s)
+  and FLINT calls it once per tidy-up, retries included, in one process that
+  serves a whole batch of structures. Same arrays, so the posteriors are bit
+  for bit those of np.load. Keyed on mtime and size as well: a retrained
+  model dropped in mid-session is read again. """
+  try:
+    st = os.stat(path)
+    key = (path, st.st_mtime_ns, st.st_size)
+  except OSError:
+    key = (path, None, None)
+  W = _WEIGHTS.get(key)
+  if W is None:
+    with np.load(path) as z:
+      W = dict((k, z[k]) for k in z.files)
+    _WEIGHTS.clear()
+    _WEIGHTS[key] = W
+  return W
+
 def retype(path, T, F, labels, S, M, R, Tt, th=None):
   """ T = the last re-typing round {allowed, atoms (rows with label, final,
   z, u, ...), consistency}, F = the input formula {element: count};
   labels / S the model's non-H atoms and fractional sites, M the
   orthogonalisation matrix (row vector convention), R / Tt the space group's
   rotations and translations. Returns {label: (old, new)}. """
-  W = np.load(path)
+  W = weights(path)
   th = float(W['th']) if th is None else th
   L = dict((a['label'], a) for a in T['atoms'])
   zs = [a['z'] for a in T['atoms'] if a['final'] == 'C']

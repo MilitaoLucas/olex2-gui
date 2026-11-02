@@ -41,6 +41,10 @@ from my_refine_util import hydrogen_atom_constraints_customisation
 
 debug = OV.IsDebugging()
 
+def _c33_flag(name):
+  """FLINT_C33_<ITEM> switches, on unless set to 0 (0 = c32 behaviour)."""
+  return os.environ.get(name, '1') != '0'
+
 
 class FullMatrixRefine(OlexCctbxAdapter):
   solvers = {
@@ -2665,7 +2669,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return temp
 
   def post_peaks(self, fft_map, max_peaks=5):
-
+    # max_peaks=0 still leaves one Q1 (the loop adds before it checks the
+    # count). Do not "fix" that: FLINT's tidy loop and final levers see the
+    # Q1, and dropping it lost 2 of 46 clean dev cases (c33, 30 Oct 2026)
+    # for ~10 ms a refinement.
     ####
     if False:
       import olex_xgrid
@@ -3257,8 +3264,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.parent = parent
         parent.cycles = self
         normal_eqs.iterations_object = self
+        # set before super().__init__: scitbx runs do() inside __init__, and
+        # self.non_linear_ls is a journaled wrapper around normal_eqs
+        self._c33_ne = normal_eqs
         super(iterations_class, self).__init__(normal_eqs, *args, **kwds)
       def do(self):
+        # c33: one TLattice::Init per headless refinement instead of one per
+        # cycle (FLINT_C33_ENDUPDATE=0 restores the per-cycle EndUpdate)
+        ne = self._c33_ne
+        defer = (_c33_flag('FLINT_C33_ENDUPDATE') and not OV.HasGUI()
+                 and not getattr(self.parent, 'ed_refinement', None)
+                 and hasattr(ne, 'flush_olex'))
+        if not defer:
+          return self._c33_do()
+        ne.defer_end_update = True
+        try:
+          self._c33_do()
+        finally:
+          ne.defer_end_update = False
+          ne.flush_olex()
+      def _c33_do(self):
         objective_only = len(self.parent.reparametrisation.mapping_to_grad_fc_all) == 0
         if objective_only and self.n_max_iterations != 0:
           olx.Echo("Nothing to refine, performing L.S. 0", m="warning")

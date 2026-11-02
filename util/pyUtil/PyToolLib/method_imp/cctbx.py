@@ -17,7 +17,7 @@ def fill_from_map():
     from cctbx.array_family import flex
     from cctbx.eltbx import tiny_pse
     from cctbx_olex_adapter import OlexCctbxSolve
-    sigma_cut = OV.GetParam('snum.solution.map_fill_sigma') or 7.0
+    sigma_cut = OV.GetParam('snum.solution.map_fill_sigma') or 5.5
     s = OlexCctbxSolve()
     xs = s.xray_structure()
     fo = s.reflections.f_sq_obs_merged.average_bijvoet_mates().f_sq_as_f()
@@ -49,9 +49,9 @@ def fill_from_map():
     # 1.25-1.65 A, at 1.1-1.25 A from C/N/O and 1.7-1.9 A from Si/P/Cl)
     def bonded(d, zj, h):
       if zj > 18:
-        return 1.8 <= d <= 2.6
+        return 1.6 <= d <= 2.7
       if zj > 10:
-        return 1.45 <= d <= 2.1
+        return 1.35 <= d <= 2.1
       return 1.25 <= d <= 1.65 or 1.1 <= d < 1.25 and h >= 1.5*sigma_cut*sig
     pk = fft.peak_search(parameters=maptbx.peak_search_parameters(
       peak_search_level=1, interpolate=True, min_distance_sym_equiv=0.7),
@@ -367,6 +367,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
       try:
         from refinement import FullMatrixRefine
         fmr = FullMatrixRefine(max_cycles=4, max_peaks=0)
+        # no .oxl: only R1 and the .res are read here (rsa() in it, as in _tidy)
+        fmr.write_oxl = lambda cif_block=None: None
         fmr.run()
         fmr.log.close()
         r1 = None if fmr.failure else fmr.r1[0]
@@ -377,6 +379,23 @@ class Method_cctbx_ChargeFlip(Method_solution):
       shutil.copyfile(res, res + '.o%d' % k)
       return r1, res + '.o%d' % k
     fmt = lambda r: "-" if r is None else "%.3f" % r
+    # c33 FLINT_C33_RETRYSCREEN (0 = c32): a retry whose first refine (round 0
+    # of its _tidy) is over `ratio` x max(origin 1's first refine, best final
+    # R1 so far) stops there. In the c32 logs no winner of timing32 (29) is
+    # over 1.27; on lane F (2142 retry cases) 1.5 skips 3970 of 6075 retries
+    # and drops 3 winners of clean cases, 2.0 skips 1478 and drops one
+    # (cod_4128566, a tangent start that crawls 0.62 -> 0.16 over 25 rounds)
+    o0 = getattr(self, '_tidy_r0', None)
+    # ponytail: the flag value is the ratio, "1" the default; a phil param once kept
+    flag = os.environ.get('FLINT_C33_RETRYSCREEN', '1').strip()
+    try:
+      ratio = 2.0 if flag in ('', '1') else float(flag)
+    except ValueError:
+      ratio = 2.0
+    screen = None
+    if ratio > 0:
+      screen = lambda r1: (r1 is None or o0 is None or best[0] is None
+                           or r1 <= ratio*max(o0, best[0]))
     def attempt(k, fc, what):
       try:
         names = [str(olx.xf.au.GetAtomName(i))
@@ -391,7 +410,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
         olx.xf.SaveSolution(res)
         olx.Atreap('"%s"' % res)
         print("%s %d: completing it too (R1 %s so far)" % (what, k + 1, fmt(best[0])))
-        self._tidy()
+        if self._tidy(screen) is False:
+          print("%s %d: screened out, first refine R1 %s against %s" % (
+            what, k + 1, fmt(self._tidy_r0), fmt(max(o0, best[0]))))
+          return None
         r = final_r1(k)
         print("%s %d ends at R1 %s" % (what, k + 1, fmt(r[0])))
         return r
@@ -423,7 +445,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     from flint_levers import reap; reap(res)
     print("Kept origin %d, R1 %s" % (int(best[1].rsplit('.o', 1)[1]) + 1, fmt(best[0])))
 
-  def _tidy(self):
+  def _tidy(self, screen=None):
     """ Make the solution look like chemistry, then drop what will not refine.
 
     `compaq -a` gathers the fragments, then rounds of: refine `tidy_cycles`,
@@ -439,6 +461,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     solution. With `complete_after_tidy` the difference map is asked once for
     what is missing (`completeModel`) once the types are settled.
     """
+    self._tidy_r0 = None
     factor = OV.GetParam('snum.solution.tidy_uiso_factor') or 3.0
     cycles = OV.GetParam('snum.solution.tidy_cycles')
     cycles = 4 if cycles is None else int(cycles)
@@ -518,6 +541,11 @@ class Method_cctbx_ChargeFlip(Method_solution):
           # atom (cod_2208447: As11 -> Se, R1 0.099 -> 2e9, then arg_limit)
           if snap:
             r1 = float('inf')
+        if p == 0:
+          # the first refine: `_tidy_origins` screens a retry on it
+          self._tidy_r0 = r1
+          if screen is not None and not screen(r1):
+            return False
         if last == "map fill" and snap and r1 is not None:
           print("Map fill R1 %.4f -> %.4f" % (snap[0], r1))
         if snap and r1 is not None and (r1 > snap[0] + max(0.03, 0.25*snap[0])
@@ -639,6 +667,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
         try:
           from refinement import FullMatrixRefine
           fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          # c33 item 9: no .oxl listing (and its rsa()) on a solve-path refine
+          fmr.write_oxl = lambda cif_block=None: None
           fmr.run()
           fmr.log.close()
         except Exception as err:
@@ -676,6 +706,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
         try:
           from refinement import FullMatrixRefine
           fmr = FullMatrixRefine(max_cycles=cycles, max_peaks=0)
+          fmr.write_oxl = lambda cif_block=None: None  # c33 item 9, as above
           fmr.run()
           fmr.log.close()
         except Exception as err:
