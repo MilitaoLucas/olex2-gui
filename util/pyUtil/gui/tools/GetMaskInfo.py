@@ -75,11 +75,7 @@ def get_mask_info():
   global current_sNum
   current_sNum = OV.ModelSrc().replace(" ", "")
 
-  prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
-  if prg == "Platon":
-    base = "platon_squeeze"
-  else:
-    base = "smtbx_masks"
+  base = _get_mask_base()
 #  change_hklsrc_according_to_mask_prg(prg)
 
   d = {}
@@ -418,11 +414,15 @@ def get_mask_info():
 
   template_value = get_template('mask_special_detail_default', path=template_path, force=debug) % d
   template_value = template_value.strip()
+  stored_special_details = (mask_special_details or "").strip()
   if mask_special_details:
     if "[]" in mask_special_details:
       mask_special_details = template_value
 
-  if mask_special_details == "?" or not mask_special_details or mask_info_has_updated:
+  # The special details must always reflect the current masking information:
+  # regenerate them if the void contents were just edited.
+  contents_updated = mask_info_has_updated
+  if mask_special_details == "?" or not mask_special_details or contents_updated:
     mask_special_details = template_value
     mask_info_has_updated = False
   if mask_special_details == template_value:
@@ -437,11 +437,13 @@ def get_mask_info():
       #mask_special_details = ""
   if mask_special_details:
     mask_special_details = mask_special_details.strip().lstrip('"').rstrip('"').replace("\r", " ")
-  if mask_info_has_updated:
-    olx.cif_model[current_sNum]['_%s_special_details' % base] = mask_special_details
-    update_sqf_file(current_sNum, '_%s_special_details' % base)
   if mask_special_details is None:
     mask_special_details = ''
+  # persist whenever the generated text differs from what is stored, so the
+  # sqf/CIF never keeps stale (or "?") special details
+  if (contents_updated or mask_special_details == template_value) and mask_special_details != stored_special_details:
+    olx.cif_model[current_sNum]['_%s_special_details' % base] = mask_special_details
+    update_sqf_file(current_sNum, '_%s_special_details' % base)
   d['mask_special_details'] = mask_special_details
   d['mask_special_details_vn'] = mask_special_details_vn
   d['ADD_TO_MASK_FORMULA_BG'] = OV.GetVar('ADD_TO_MASK_FORMULA_BG')
@@ -614,10 +616,9 @@ def update_metacif(sNum, file_name):
 
 def get_sqf_name(base=None):
   import time
-  prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
   HKLSrc_base = os.path.splitext(OV.HKLSrc())[0]
   sqfs = []
-  if prg == "Platon":
+  if _prg_is_platon():
     sqfs.append(f"{HKLSrc_base}_sqd.sqf")
     sqfs.append(f"{HKLSrc_base}_sq.sqf")
   else:
@@ -657,8 +658,9 @@ def update_sqf_file(current_sNum, scope, scope2=None):
   if os.path.exists(sqf_file):
     with open(sqf_file, 'r') as original:
       data = original.read()
-    with open(sqf_file, 'w') as modified:
-      modified.write("data_%s\n" % OV.ModelSrc() + data)
+    if not data.startswith("data_"):
+      with open(sqf_file, 'w') as modified:
+        modified.write("data_%s\n" % current_sNum + data)
     with open(sqf_file, 'r') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
@@ -669,28 +671,26 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
     with open(sqf_file, 'w') as f:
       print(cif_block, file=f)
-    CifInfo.MergeCif()
+    # force_create=False: never let a merge trigger a refinement here (MergeCif
+    # runs 'refine' when the cif is missing/older than the .res and
+    # user.cif.autorefine_if_no_cif_for_cifmerge is set)
+    CifInfo.MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
+
+
+def _prg_is_platon():
+  prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
+  return str(prg).lower() == "platon"
 
 
 def _get_mask_base():
-  if OV.IsControl('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG'):
-    base = OV.GetControlValue('SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT_PRG')
-    if "platon" in base.lower():
-      base = "platon_squeeze"
-    elif "olex2" in base.lower():
-      base = "smtbx_masks"
-  else:
-    if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
-      base = "platon_squeeze"
-    else:
-      base = "smtbx_masks"
-  return base
+  # single source of truth for the CIF data-name prefix of the active masking program
+  return "platon_squeeze" if _prg_is_platon() else "smtbx_masks"
 
 
 def add_mask_content(i, which):
   global mask_info_has_updated
   global current_sNum
-  current_sNum = OV.ModelSrc()
+  current_sNum = OV.ModelSrc().replace(" ", "")
 
   base = _get_mask_base()
 
@@ -699,13 +699,9 @@ def add_mask_content(i, which):
     i_l = [str(i)]
   else:
     i_l = i.split(":")
-  current_sNum = OV.ModelSrc()
   contents = olx.cif_model[current_sNum].get('_%s_void_%s' % (base, which))
-  if not contents:
-    if is_CIF:
-      contents = olx.Cif('_%s_void_nr' % base).split(",")
-    else:
-      contents = olx.cif_model[current_sNum].get('_%s_void_%s' % (base, which))
+  if not contents and is_CIF:
+    contents = olx.Cif('_%s_void_%s' % (base, which)).split(",")
   if not contents:
     return return_note(note="No void has been found.", col=gui_orange)
 
@@ -884,10 +880,9 @@ def escape_param_names(name):
 
 
 def get_hkl_base(path):
+  # strip the extension and any PLATON suffix (_sq / _sqd)
   base, ext = os.path.splitext(path)
-  if '_sq' in base:
-    base = base[::-1].replace('_qs'[::-1], '', 1)[::-1]
-  return base
+  return re.sub(r"_sqd?$", "", base)
 
 
 def change_hklsrc_according_to_mask_prg(prg, where='internal'):
@@ -902,7 +897,7 @@ def change_hklsrc_according_to_mask_prg(prg, where='internal'):
       shutil.move(src, dst)
       tidy_l = ["_sqd.hkl", "_sq.hkl"] #,  "_sqd.ins", "_sq.ins", "_pl.spf"]
       for f in tidy_l:
-        if os.path.exists(f):
+        if os.path.exists(hkl_base + f):
           os.remove(hkl_base + f)
     else:
       if where == "internal":
@@ -939,8 +934,8 @@ def change_based_on_button_states():
 
 def get_masking_method():
   prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
-  method = "smbtx"
-  if prg == "Platon":
+  method = "smtbx"
+  if _prg_is_platon():
     method = "SQUEEZE"
   return method
 
