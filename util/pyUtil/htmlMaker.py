@@ -118,6 +118,8 @@ class GeneratedGuiMaker(object):
        'multiline': 'multiline'
        }
     )
+    import twin_details
+    list += twin_details.gui_fields()
     return htmlTools.makeHtmlTable(list)
 
   def crystalMetadataHtmlMaker(self):

@@ -403,6 +403,16 @@ class MergeCif(CifTools):
     if ext and ext.lower() != "cif":
       ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
       ECI.run()
+      # describe a TWIN law in _twin_special_details unless the user has
+      # written something there (twin_details.update_metacif)
+      try:
+        import twin_details
+        twin_details.update_metacif()
+      except Exception as e:
+        import sys
+        print("Could not describe the twin law for the CIF: %s" % e)
+        if hasattr(sys, '_wing_debugger'):
+          raise
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     for extra_cif in OV.GetCifMergeFilesList():
