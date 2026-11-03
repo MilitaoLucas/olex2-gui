@@ -699,36 +699,25 @@ class fractal_dimension(OlexCctbxAdapter):
                parent = None,
                resolution=0.1,
                stepsize=0.01):
-    import olex
+    import olex, os
     self.info = OV.ModelSrc()
     map_type = "diff"
+    stem = "%s_%s" % (self.info, map_type)
+    plot = stem + ".cube_fractal_plot"  # NoSpherA2 names it after the map, .cube or .cubeb alike
+    if os.path.exists(plot):
+      os.remove(plot)  # a plot left by an earlier run would pass as this one's
     olex.m("spy.NoSpherA2.residual_map(%s, False, False, True)"%(str(resolution)))  # binary .cubeb, NoSpherA2 loads it in ms
     print("Made residual density map\nAnalyzing...")
+    self._run_fractal(stem + ".cubeb")
+    if not os.path.exists(plot):
+      # NoSpherA2 older than 21 Sep 2026 cannot read .cubeb and writes no plot; the text .cube works with every version
+      print("NoSpherA2 wrote no fractal plot from the .cubeb (older than 21 Sep 2026?), retrying with a text .cube")
+      olex.m("spy.NoSpherA2.residual_map(%s, False, False, False)"%(str(resolution)))
+      self._run_fractal(stem + ".cube")
+    if not os.path.exists(plot):
+      raise RuntimeError("NoSpherA2 -fractal wrote no %s, see its output above" % plot)
 
-    NoSpherA2 = OV.GetVar("NoSpherA2")
-    args = [NoSpherA2]
-    args.append("-fractal")
-    args.append("%s_%s.cubeb"%(self.info,map_type))
-    import subprocess
-    startinfo = None
-    if sys.platform[:3] == 'win':
-      startinfo = subprocess.STARTUPINFO()
-      startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-      startinfo.wShowWindow = subprocess.SW_HIDE
-    if startinfo == None:
-      with subprocess.Popen(args, stdout=subprocess.PIPE) as p:
-        for c in iter(lambda: p.stdout.read(1), b''):
-          string = c.decode()
-          sys.stdout.write(string)
-          sys.stdout.flush()
-    else:
-      with subprocess.Popen(args, stdout=subprocess.PIPE, startupinfo=startinfo) as p:
-        for c in iter(lambda: p.stdout.read(1), b''):
-          string = c.decode()
-          sys.stdout.write(string)
-          sys.stdout.flush()
-
-    with open("%s_%s.cube_fractal_plot" % (self.info, map_type), 'r') as file:
+    with open(plot, 'r') as file:
       lines = file.readlines()
     info = lines[0].split()
     steps = int(info[0])
@@ -744,6 +733,18 @@ class fractal_dimension(OlexCctbxAdapter):
       self.x[i],self.y[i] = float(temp[0]),float(temp[1])
 
     print("Done!\nFractal Dimension plot according to K. Meindl and J. Henn (2008), Acta Cryst. A64, 404-418.")
+
+  def _run_fractal(self, map_file):
+    import subprocess, sys
+    startinfo = None
+    if sys.platform[:3] == 'win':
+      startinfo = subprocess.STARTUPINFO()
+      startinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+      startinfo.wShowWindow = subprocess.SW_HIDE
+    with subprocess.Popen([OV.GetVar("NoSpherA2"), "-fractal", map_file], stdout=subprocess.PIPE, startupinfo=startinfo) as p:
+      for c in iter(lambda: p.stdout.read(1), b''):
+        sys.stdout.write(c.decode())
+        sys.stdout.flush()
 
   def xy_plot_info(self):
     r = empty()
