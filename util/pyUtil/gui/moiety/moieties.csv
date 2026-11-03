@@ -1,0 +1,45 @@
+dcm;C H2 Cl2
+dichloromethane;C H2 Cl2
+pentane;C5 H12
+hexane;C6 H14
+heptane;C7 H16
+water;H2 O
+H2O;H2 O
+methanol;C H4 O
+meoh;C H4 O
+ethanol;C2 H6 O
+etoh;C2 H6 O
+hexane;C6 H14
+dmf;C3 H7 N O
+toluene;C7 H8
+chloroform;C H Cl3
+acetonitrile;C2 H3 N
+mecn;C2 H3 N
+ether;C4 H10 O
+et2o;C4 H10 O
+etoac;C4 H8 O2
+ethylacetate;C4 H8 O2
+diethylether;C4 H10 O
+pyridine;C5 H5 N
+py;C5 H5 N
+acetone;C3 H6 O
+tma;C4 H12 N
+tetramethylammonium;C4 H12 N
+dma;C2 H8 N
+dimethylammonium;C2 H8 N
+benzene;C6 H6
+pmi;C7 H13 N2
+dabco;C6 H14 N2
+thf;C4 H8 O
+isopropanol;C3 H8 O
+dioxane;C4 H8 O2
+1,4-dioxane;C4 H8 O2
+1,2-dichloroethane;C2H4Cl2
+dichloroethane;C2 H4 Cl2
+def; C5 H11 N O 
+diethylformamide; C5 H11 N O 
+dmso; C2 H6 S O
+dimethylsulfoxide; C2 H6 S O
+
+# Anions
+triflate;C F3 O3 S

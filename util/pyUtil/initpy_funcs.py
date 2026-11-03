@@ -413,6 +413,7 @@ class initpy_funcs():
       self.olx.stopwatch.exec("from gui.maps import *")
       self.olx.stopwatch.exec("from gui.images import *")
       self.olx.stopwatch.exec("from gui.db import *")
+      self.olx.stopwatch.exec("import gui.moiety")
       if os.environ.get("OLEX2_DEFER_HEAVY_GUI_IMPORTS"):
         self._register_heavy_gui_proxies()
         import olex
