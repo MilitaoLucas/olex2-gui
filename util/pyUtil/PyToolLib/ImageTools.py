@@ -47,10 +47,14 @@ else:
 # self.params.red.rgb = self.params.red.rgb
 
 # Compatibility function for text size to allow newer Pillow versions to work with older Olex versions
+# NB: Pillow<10 textsize()/getsize() measured from the drawing origin (0, 0),
+# i.e. (bbox right, bbox bottom) -- the height includes the space above the
+# glyphs and is constant for a given font.  bbox[3] - bbox[1] is the ink height
+# only, which varies with the text and shifts vertically centred lettering.
 def get_text_size_old(draw, text, font):
   if hasattr(draw, 'textbbox'):
     bbox = draw.textbbox((0, 0), text, font=font)
-    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+    return bbox[2], bbox[3]
   else:
     return draw.textsize(text, font=font)
 
@@ -61,12 +65,12 @@ def get_text_size(draw, text, font):
   if font is not None:
     bbox = text_bbox(text=text, font=font)
     if bbox is not None:
-      return bbox[2] - bbox[0], bbox[3] - bbox[1]
+      return bbox[2], bbox[3]
   # draw.textbbox — available in Pillow >= 8.0.0 (replaces textsize)
   if hasattr(draw, 'textbbox'):
     try:
       bbox = draw.textbbox((0, 0), text, font=font)
-      return bbox[2] - bbox[0], bbox[3] - bbox[1]
+      return bbox[2], bbox[3]
     except Exception:
       pass
   # draw.textsize — removed in Pillow 10.0.0; keep as last resort for older installs
@@ -843,9 +847,10 @@ class ImageTools(FontInstances):
       }
     self.font_peculiarities.setdefault("DefaultFont", self.font_peculiarities["Signika"])
 
-  def sys_top_adjust(self, top, scale=1): ##PY39
-    if sys.version_info.major == 3 and sys.version_info.minor <= 8:
-      top += round(top * (0.02 * scale))
+  def sys_top_adjust(self, top, scale=1):
+    # Formerly applied only on Python <= 3.8 (as a stand-in for the Pillow
+    # version); the release builds always use it, so apply it unconditionally.
+    top += round(top * (0.02 * scale))
     return top
 
   def get_text_modifications(self):
@@ -1094,11 +1099,11 @@ class ImageTools(FontInstances):
     if not font:
       font = self.registerFontInstance(font_name, font_size)
     wX, wY = get_text_size(sizedraw_dummy_draw, txt, font=font)
-    try:
+    # font.getoffset() was removed in Pillow 10; the bbox top is the same value
+    if hasattr(font, 'getbbox'):
+      offset = font.getbbox(str(txt))[1]
+    else:
       offset = font.getoffset(txt)[1]
-    except Exception as e:
-      #print e
-      offset = 0
     return wX, wY, offset
 
   def get_font(self, font_name=None, font_size=None):
@@ -1829,9 +1834,9 @@ def text_bbox(font: ImageFont.FreeTypeFont, text: str):
     if hasattr(font, "getlength"):
       width = font.getlength(text)
       ascent, descent = font.getmetrics()
-      # bounding box left, top, right, bottom in pixels relative to baseline:
-      # we approximate top as -ascent and bottom as descent
-      return (0, -ascent, int(width), descent)
+      # bounding box left, top, right, bottom relative to the drawing origin
+      # (top-left, anchor 'la'): bottom approximated as the full line height
+      return (0, 0, int(width), ascent + descent)
   except Exception:
     pass
 
