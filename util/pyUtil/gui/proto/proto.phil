@@ -1,12 +1,31 @@
 proto{
+  library = DataDir()/gui/proto/proto.sqlite
+    .type = str
+    .help = "The structure library: 'proto add' writes here, and it is \
+             always searched. Created (empty) on first use."
+  extra_dbs = ""
+    .type = str
+    .help = "';'-separated further proto databases that are searched too, \
+             but never written to (e.g. BaseDir()/util/pyUtil/AC7/sponge/sponge.sqlite)."
+  length_tolerance = 3
+    .type = float
+    .help = "Cell match: maximum relative difference of the cell lengths, in %."
+  angle_tolerance = 3
+    .type = float
+    .help = "Cell match: maximum difference of the cell angles, in degrees."
   db_location = DataDir()
     .type = str
+    .help = "AC7 (sponge) only: folder of the database used by find_in_proto."
   db_name = sponge.sqlite
     .type = str
+    .help = "AC7 (sponge) only: file name of the database used by find_in_proto."
   tolerance = 10
     .type = int
+    .help = "AC7 (sponge) only: volume tolerance in % for find_in_proto."
   class = ""
     .type = str
+    .help = "AC7 (sponge) only: class filter for find_in_proto."
   sg = ""
    .type = str
+    .help = "AC7 (sponge) only: space group filter for find_in_proto."
 }
