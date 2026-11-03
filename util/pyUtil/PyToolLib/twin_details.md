@@ -1,4 +1,4 @@
-# twin_details — `_twin_special_details` from the twin law
+# twin_details -- `_twin_special_details` from the twin law
 
 Status (2026-10-01): **working in Olex2**, confirmed by the user for a TWIN
 structure and an HKLF 5 structure (GUI field, metacif and CIF).
@@ -15,7 +15,7 @@ the CIF item `_twin_special_details`, e.g.
     rotated by 179.9\% around [0.10 0.00 -0.99] (reciprocal) or
     [0.00 0.00 -1.00] (direct).
 
-(`\%` is the CIF code for the degree sign — the metacif takes ASCII only.)
+(`\%` is the CIF code for the degree sign -- the metacif takes ASCII only.)
 This is the same form data-reduction software (CrysAlisPro, CELL_NOW)
 uses. Previously the item only reached reports when a user or another
 program had put it into the CIF; ReportPlus prints it among the special
@@ -33,9 +33,9 @@ details whenever it is present.
 
 **ReportPlus replaces htmlMaker's Diffraction generator** when it is
 installed (it re-registers `diffractionMetadataHtmlMaker`; the section is
-`etc/gui/metadata-h3.htm` → `$spy.#nameMetadataHtmlMaker()`). So the field
+`etc/gui/metadata-h3.htm` -> `$spy.#nameMetadataHtmlMaker()`). So the field
 has to be added in both. `util/pyUtil/RPAC7d/RPAC.py` is a synced copy of
-ReportPlus and gets the change at its next sync — not edited directly.
+ReportPlus and gets the change at its next sync -- not edited directly.
 
 ## Where it appears
 
@@ -45,7 +45,7 @@ ReportPlus and gets the change at its next sync — not edited directly.
   user's and is never regenerated.
 - **Metacif / CIF**: `MergeCif` (runs after every refinement by default,
   `snum.refinement.cifmerge_after_refinement`) fills the metacif item; the
-  Olex2 core's CifMerge writes it into the CIF — *after the
+  Olex2 core's CifMerge writes it into the CIF -- *after the
   `_twin_individual_*` loop, near the end of the file*, not among the other
   special details at the top.
 
@@ -57,7 +57,7 @@ structure is no longer twinned. User-written text is never touched.
 ## How it works
 
 **Input.** TWIN and HKLF are read from Olex2's refinement model
-(`OV.GetRefinementModel(False)['twin' / 'hklf']`, `twinning_from_model`) —
+(`OV.GetRefinementModel(False)['twin' / 'hklf']`, `twinning_from_model`) --
 *not* `olx.Ins('TWIN')`, which does not return them (the first version used
 it, and nothing appeared). Cell from `olx.xf.au.GetCell()`.
 
@@ -67,12 +67,12 @@ it, and nothing appeared). Cell from `olx.xf.au.GetCell()`.
 B = A^-T, R = B M B^-1 is the law in Cartesian space; for a
 pseudo-merohedral twin it isn't exactly orthogonal, so the nearest rotation
 (polar decomposition) is used. Angle from the trace; axis from the
-antisymmetric part (or the largest column of R + I near 180°), given in
+antisymmetric part (or the largest column of R + I near 180 deg), given in
 reciprocal (A^T x) and direct (A^-1 x) coordinates, normalised, first
-non-zero component positive. Also handled: improper laws ("…, combined
-with inversion" — meaningful for TWIN, e.g. with anomalous data), N > 2
-components (M^(k-1)), TWIN −N ("also present as its inversion partner").
-Pure inversion twins are skipped — olex2.refine already writes "Refined as
+non-zero component positive. Also handled: improper laws ("..., combined
+with inversion" -- meaningful for TWIN, e.g. with anomalous data), N > 2
+components (M^(k-1)), TWIN -N ("also present as its inversion partner").
+Pure inversion twins are skipped -- olex2.refine already writes "Refined as
 an inversion twin".
 
 **HKLF 5** (`overlap_groups`, `fit_laws`, `describe_hklf5`). Overlapping
@@ -87,34 +87,34 @@ gives a pair (h1, hk). Programs list the other component's indices as
 
 The HKLF matrix (`HKLF 5 s r11..r33`) is applied to all indices first.
 Laue operators come from cctbx (`laue_ops_for`, Laue group of the current
-space group) and are always closed under −1 (`with_friedel`): cctbx's
-`group.smx()` omits the inversion unless `with_inversion=True` — without
-it a real law came out "…, combined with inversion" (fixed 2026-10-01).
+space group) and are always closed under -1 (`with_friedel`): cctbx's
+`group.smx()` omits the inversion unless `with_inversion=True` -- without
+it a real law came out "..., combined with inversion" (fixed 2026-10-01).
 
 Description (`canonical_law`): among the equivalent laws g M, a twofold
-(within 0.5°) if there is one — the usual way to state a (pseudo-)merohedral
-law — otherwise the proper rotation with the smallest angle. The fitted
-law is approximate (indices are rounded in the file), so e.g. 179.9°
-is real, not a formatting issue. ~1–2 s per file, cached until the file
+(within 0.5 deg) if there is one -- the usual way to state a (pseudo-)merohedral
+law -- otherwise the proper rotation with the smallest angle. The fitted
+law is approximate (indices are rounded in the file), so e.g. 179.9 deg
+is real, not a formatting issue. ~1-2 s per file, cached until the file
 changes.
 
 Not reported (message printed, item left alone):
 - rms index residual > `MAX_RMS` (0.5): no single law fits;
 - a law equivalent to a symmetry operator of the crystal (< `MIN_ANGLE`,
-  0.5°) — this is what a **small-angle non-merohedral twin** (e.g. "rotated
-  by 2.24°" from CrysAlisPro) looks like: only reflections whose indices
+  0.5 deg) -- this is what a **small-angle non-merohedral twin** (e.g. "rotated
+  by 2.24 deg" from CrysAlisPro) looks like: only reflections whose indices
   coincide overlap, so the indices carry no angle. That angle comes from
   the orientation matrices of data reduction and cannot be derived here.
 
 ## Testing
 
 From `util/pyUtil/PyToolLib`: `python -m unittest test_twin_details` (17).
-Covers the str1878Pbca TWIN case, a 2.2444° rotation recovered from its
-matrix, twofolds, inversion / improper / N = 3 / TWIN −N, the refinement-
+Covers the str1878Pbca TWIN case, a 2.2444 deg rotation recovered from its
+matrix, twofolds, inversion / improper / N = 3 / TWIN -N, the refinement-
 model reader, HKLF 5 parsing, an exact merohedral law given as random
 equivalents (must match the TWIN text), a non-merohedral twofold from
 rounded indices, the HKLF matrix, unrelated data and small-angle twins
-(must give nothing), the twofold preference, and Laue operators without −1.
+(must give nothing), the twofold preference, and Laue operators without -1.
 
 Real data was used during development (not in the repository).
 (`str1878Pbca_pl.res`, TWIN; `*.olex2_hklf5.hkl`, HKLF 5).
@@ -131,4 +131,4 @@ the bundled sources (`cctbx/cctbx_sources`: `r().num()`/`r().den()`,
 - Optionally also include the refined fractions (`_twin_individual_*`) in
   the sentence.
 - The GUI label `%Twin Special Details%` has no entry in the (unmaintained)
-  language dictionary — fine in English.
+  language dictionary -- fine in English.

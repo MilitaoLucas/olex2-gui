@@ -186,7 +186,7 @@ FORMULA_CHARGES: dict[str, int] = {
 # Confidence: 'element_guess'
 
 ELEMENT_CHARGES: dict[str, list[int]] = {
-    # Transition metals — ambiguous, list most common first
+    # Transition metals -- ambiguous, list most common first
     'Fe':  [+3, +2],
     'Co':  [+2, +3],
     'Ni':  [+2],
@@ -248,93 +248,93 @@ NEUTRAL_FORMULAE: set[str] = {
 # ---------------------------------------------------------------------------
 
 def _canonical(f: MoietyFragment) -> str:
-    """Return the canonical formula string for lookup."""
-    return f.formula_string
+  """Return the canonical formula string for lookup."""
+  return f.formula_string
 
 
 def _lookup_exact(f: MoietyFragment) -> Optional[int]:
-    """Exact formula match in FORMULA_CHARGES or NEUTRAL_FORMULAE."""
-    key = _canonical(f)
-    if key in NEUTRAL_FORMULAE:
-        return 0
-    return FORMULA_CHARGES.get(key, None)
+  """Exact formula match in FORMULA_CHARGES or NEUTRAL_FORMULAE."""
+  key = _canonical(f)
+  if key in NEUTRAL_FORMULAE:
+    return 0
+  return FORMULA_CHARGES.get(key, None)
 
 
 def _lookup_element(f: MoietyFragment) -> Optional[int]:
-    """
-    Single bare element with known common oxidation state.
-    Returns the *most common* charge as a best guess.
-    Confidence will be 'element_guess' to flag ambiguity.
-    """
-    if len(f.elements) == 1:
-        sym = next(iter(f.elements))
-        charges = ELEMENT_CHARGES.get(sym)
-        if charges:
-            return charges[0]
-    return None
+  """
+  Single bare element with known common oxidation state.
+  Returns the *most common* charge as a best guess.
+  Confidence will be 'element_guess' to flag ambiguity.
+  """
+  if len(f.elements) == 1:
+    sym = next(iter(f.elements))
+    charges = ELEMENT_CHARGES.get(sym)
+    if charges:
+      return charges[0]
+  return None
 
 
 def _element_guess_is_ambiguous(f: MoietyFragment) -> bool:
-    """True if the element has multiple common oxidation states."""
-    if len(f.elements) == 1:
-        sym = next(iter(f.elements))
-        charges = ELEMENT_CHARGES.get(sym, [])
-        return len(charges) > 1
-    return False
+  """True if the element has multiple common oxidation states."""
+  if len(f.elements) == 1:
+    sym = next(iter(f.elements))
+    charges = ELEMENT_CHARGES.get(sym, [])
+    return len(charges) > 1
+  return False
 
 
 def as_number(x):
-    """int if x is whole, else a float (3 decimals) -- for charge sums."""
-    x = Fraction(x).limit_denominator(1000)
-    return int(x) if x.denominator == 1 else round(float(x), 3)
+  """int if x is whole, else a float (3 decimals) -- for charge sums."""
+  x = Fraction(x).limit_denominator(1000)
+  return int(x) if x.denominator == 1 else round(float(x), 3)
 
 
 def _charge_balance(fragments: list[MoietyFragment]):
-    """
-    Sum of count * charge for all fragments with known charge. Uses count,
-    not multiplicity: with Z' > 1 a fragment can be present 0.5 or 1.5 times.
-    """
-    return as_number(sum(
-        f.count * f.charge
-        for f in fragments
-        if f.charge is not None
-    ))
+  """
+  Sum of count * charge for all fragments with known charge. Uses count,
+  not multiplicity: with Z' > 1 a fragment can be present 0.5 or 1.5 times.
+  """
+  return as_number(sum(
+      f.count * f.charge
+      for f in fragments
+      if f.charge is not None
+  ))
 
 
 def _solve_unknown(fragments: list[MoietyFragment]) -> list[MoietyFragment]:
-    """
-    If exactly one fragment has unknown charge, solve from balance.
-    Modifies in place, returns same list.
+  """
+  If exactly one fragment has unknown charge, solve from balance.
+  Modifies in place, returns same list.
 
-    Guard: only solve if at least one other fragment has a known NON-ZERO
-    charge. Without that constraint, balance trivially gives q=0 for any
-    single unknown -- which is not a real inference, just a vacuous truth.
-    A single-fragment formula with no other constraints must remain None.
-    """
-    unknowns = [f for f in fragments if f.charge is None]
-    if len(unknowns) != 1:
-        return fragments
-
-    # Check that balance is actually constrained by something non-trivial
-    known_nonzero = any(
-        f.charge is not None and f.charge != 0
-        for f in fragments
-    )
-    if not known_nonzero:
-        # All other fragments are neutral (or there are none) --
-        # balance would give q=0 but that's not a real inference
-        return fragments
-
-    unknown = unknowns[0]
-    known_sum = _charge_balance(fragments)
-    # unknown.count * q + known_sum = 0
-    if unknown.count == 0:
-        return fragments
-    q = Fraction(-known_sum).limit_denominator(1000) / unknown.count
-    if q.denominator == 1:
-        unknown.charge = int(q)
-        unknown.charge_confidence = 'balance'
+  Guard: only solve if at least one other fragment has a known NON-ZERO
+  charge. Without that constraint, balance trivially gives q=0 for any
+  single unknown -- which is not a real inference, just a vacuous truth.
+  A single-fragment formula with no other constraints must remain None.
+  """
+  unknowns = [f for f in fragments if f.charge is None]
+  if len(unknowns) != 1:
     return fragments
+
+  # Check that balance is actually constrained by something non-trivial
+  known_nonzero = any(
+      f.charge is not None and f.charge != 0
+      for f in fragments
+  )
+  if not known_nonzero:
+    # All other fragments are neutral (or there are none) --
+    # balance would give q=0 but that's not a real inference
+    return fragments
+
+  unknown = unknowns[0]
+  known_sum = _charge_balance(fragments)
+  # unknown.count * q + known_sum = 0
+  if unknown.count == 0:
+    return fragments
+  q = Fraction(-known_sum).limit_denominator(1000) / unknown.count
+  if q.denominator == 1:
+    unknown.charge = int(q)
+    unknown.charge_confidence = 'balance'
+  return fragments
 
 
 # Elements that indicate ionic context is plausible
@@ -356,115 +356,115 @@ _ALWAYS_IONIC = {'F','Cl','Br','I','O','S','Se','Te','N3'}
 
 
 def _has_ionic_context(fragments):
-    """
-    Return True if the fragment list contains at least one metal or known
-    ionic species. Without ionic context, balance inference is not meaningful
-    for unknown fragments.
+  """
+  Return True if the fragment list contains at least one metal or known
+  ionic species. Without ionic context, balance inference is not meaningful
+  for unknown fragments.
 
-    Rules:
-    - Metals are recognised anywhere in a fragment (bare or coordinated)
-    - Simple ionic species (halides, oxide, etc.) only count as ionic context
-      when they appear as bare single-element fragments, not when embedded
-      in organic molecules (O in sucrose is not oxide O2-)
-    - Known charged formulae in the lookup table also count
-    """
-    for f in fragments:
-        if len(f.elements) == 1:
-            sym = next(iter(f.elements))
-            # Bare single element: check both metals and ionic species
-            if sym in _METALS or sym in _ALWAYS_IONIC:
-                return True
-        else:
-            # Multi-element fragment: only metals indicate ionic context
-            for sym in f.elements:
-                if sym in _METALS:
-                    return True
-        # Known charged formula in lookup table
-        key = f.formula_string
-        if key in FORMULA_CHARGES and FORMULA_CHARGES[key] != 0:
-            return True
-        # Charged fragment the user has vouched for
-        if f.charge and f.charge_confidence in ('user', 'user_lookup'):
-            return True
-    return False
+  Rules:
+  - Metals are recognised anywhere in a fragment (bare or coordinated)
+  - Simple ionic species (halides, oxide, etc.) only count as ionic context
+    when they appear as bare single-element fragments, not when embedded
+    in organic molecules (O in sucrose is not oxide O2-)
+  - Known charged formulae in the lookup table also count
+  """
+  for f in fragments:
+    if len(f.elements) == 1:
+      sym = next(iter(f.elements))
+      # Bare single element: check both metals and ionic species
+      if sym in _METALS or sym in _ALWAYS_IONIC:
+        return True
+    else:
+      # Multi-element fragment: only metals indicate ionic context
+      for sym in f.elements:
+        if sym in _METALS:
+          return True
+    # Known charged formula in lookup table
+    key = f.formula_string
+    if key in FORMULA_CHARGES and FORMULA_CHARGES[key] != 0:
+      return True
+    # Charged fragment the user has vouched for
+    if f.charge and f.charge_confidence in ('user', 'user_lookup'):
+      return True
+  return False
 
 
 def infer_charges(fragments: list[MoietyFragment],
                   user_lookup: dict = None) -> list[MoietyFragment]:
-    """
-    Run charge inference on a list of MoietyFragments.
-    Modifies fragments in place (charge, charge_confidence).
-    Returns the same list.
+  """
+  Run charge inference on a list of MoietyFragments.
+  Modifies fragments in place (charge, charge_confidence).
+  Returns the same list.
 
-    Inference order:
-      1. Already has a charge (parsed from string) — leave it
-      2. User lookup table ({formula_string: charge}, see user_db.py)
-      3. Exact formula lookup
-      4. Single-element lookup (with ambiguity flag)
-      5. Charge balance (if exactly one unknown remains AND ionic context exists)
-      6. If no ionic context at all — assume neutral for unknowns
-      7. Give up — leave as None for user
+  Inference order:
+    1. Already has a charge (parsed from string) -- leave it
+    2. User lookup table ({formula_string: charge}, see user_db.py)
+    3. Exact formula lookup
+    4. Single-element lookup (with ambiguity flag)
+    5. Charge balance (if exactly one unknown remains AND ionic context exists)
+    6. If no ionic context at all -- assume neutral for unknowns
+    7. Give up -- leave as None for user
 
-    Note: without a metal or known ion present, unknown fragments are assumed
-    neutral ('assumed_neutral') rather than left as None, since purely organic
-    structures are almost always neutral.
-    """
+  Note: without a metal or known ion present, unknown fragments are assumed
+  neutral ('assumed_neutral') rather than left as None, since purely organic
+  structures are almost always neutral.
+  """
+  for f in fragments:
+    if f.charge is not None:
+      # Already known (parsed from input string)
+      if f.charge_confidence == 'unknown':
+        f.charge_confidence = 'parsed'
+      continue
+
+    if user_lookup and f.formula_string in user_lookup:
+      f.charge = user_lookup[f.formula_string]
+      f.charge_confidence = 'user_lookup'
+      continue
+
+    charge = _lookup_exact(f)
+    if charge is not None:
+      f.charge = charge
+      f.charge_confidence = 'lookup'
+      continue
+
+    charge = _lookup_element(f)
+    if charge is not None:
+      f.charge = charge
+      f.charge_confidence = (
+          'element_ambiguous' if _element_guess_is_ambiguous(f)
+          else 'element_guess'
+      )
+      continue
+
+    # Leave as None -- may be resolved by balance below
+
+  # One final pass: solve by balance if exactly one unknown
+  _solve_unknown(fragments)
+
+  # If no ionic context, assume remaining unknowns are neutral
+  if not _has_ionic_context(fragments):
     for f in fragments:
-        if f.charge is not None:
-            # Already known (parsed from input string)
-            if f.charge_confidence == 'unknown':
-                f.charge_confidence = 'parsed'
-            continue
+      if f.charge is None:
+        f.charge = 0
+        f.charge_confidence = 'assumed_neutral'
 
-        if user_lookup and f.formula_string in user_lookup:
-            f.charge = user_lookup[f.formula_string]
-            f.charge_confidence = 'user_lookup'
-            continue
-
-        charge = _lookup_exact(f)
-        if charge is not None:
-            f.charge = charge
-            f.charge_confidence = 'lookup'
-            continue
-
-        charge = _lookup_element(f)
-        if charge is not None:
-            f.charge = charge
-            f.charge_confidence = (
-                'element_ambiguous' if _element_guess_is_ambiguous(f)
-                else 'element_guess'
-            )
-            continue
-
-        # Leave as None — may be resolved by balance below
-
-    # One final pass: solve by balance if exactly one unknown
-    _solve_unknown(fragments)
-
-    # If no ionic context, assume remaining unknowns are neutral
-    if not _has_ionic_context(fragments):
-        for f in fragments:
-            if f.charge is None:
-                f.charge = 0
-                f.charge_confidence = 'assumed_neutral'
-
-    return fragments
+  return fragments
 
 
 def balance_summary(fragments: list[MoietyFragment]) -> dict:
-    """
-    Return a summary dict for console/GUI display:
-      known_sum   : sum of (mult * charge) for known fragments
-      n_unknown   : number of fragments with charge still None
-      balanced    : True if known_sum == 0 and n_unknown == 0
-    """
-    known_sum = _charge_balance(fragments)
-    n_unknown = sum(1 for f in fragments if f.charge is None)
-    return {
-        'known_sum': known_sum,
-        'n_unknown': n_unknown,
-        'balanced': known_sum == 0 and n_unknown == 0,
-    }
+  """
+  Return a summary dict for console/GUI display:
+    known_sum   : sum of (mult * charge) for known fragments
+    n_unknown   : number of fragments with charge still None
+    balanced    : True if known_sum == 0 and n_unknown == 0
+  """
+  known_sum = _charge_balance(fragments)
+  n_unknown = sum(1 for f in fragments if f.charge is None)
+  return {
+      'known_sum': known_sum,
+      'n_unknown': n_unknown,
+      'balanced': known_sum == 0 and n_unknown == 0,
+  }
 
 
 # ---------------------------------------------------------------------------
@@ -474,14 +474,14 @@ def balance_summary(fragments: list[MoietyFragment]) -> dict:
 # ---------------------------------------------------------------------------
 
 def _normalise_key(formula_str: str) -> str:
-    from .parser import _parse_element_string, _element_order
-    elements, _ = _parse_element_string(formula_str)
-    int_elements = {sym: int(v) for sym, v in elements.items()}
-    parts = []
-    for sym in _element_order(int_elements):
-        count = int_elements[sym]
-        parts.append(sym if count == 1 else f"{sym}{count}")
-    return ' '.join(parts)
+  from .parser import _parse_element_string, _element_order
+  elements, _ = _parse_element_string(formula_str)
+  int_elements = {sym: int(v) for sym, v in elements.items()}
+  parts = []
+  for sym in _element_order(int_elements):
+    count = int_elements[sym]
+    parts.append(sym if count == 1 else f"{sym}{count}")
+  return ' '.join(parts)
 
 
 FORMULA_CHARGES = {_normalise_key(k): v for k, v in FORMULA_CHARGES.items()}
@@ -520,41 +520,41 @@ _UNAMBIGUOUS_IONS = {
 
 
 def check_reasonableness(fragments):
-    """
-    Check fragments for chemical reasonableness after charge inference.
-    Sets charge_confidence = 'balance_suspect' and adds a
-    charge_suspect_reason attribute where problems are found.
+  """
+  Check fragments for chemical reasonableness after charge inference.
+  Sets charge_confidence = 'balance_suspect' and adds a
+  charge_suspect_reason attribute where problems are found.
 
-    Checks performed:
-      1. Unambiguous ions solved by balance with wrong charge
-         -> flag the ion AND the ambiguous metal fragments
-      2. (Future: bond-distance-based metal oxidation state check)
+  Checks performed:
+    1. Unambiguous ions solved by balance with wrong charge
+       -> flag the ion AND the ambiguous metal fragments
+    2. (Future: bond-distance-based metal oxidation state check)
 
-    Returns the same list.
-    """
-    for f in fragments:
-        if f.charge_confidence != 'balance':
-            continue
-        key = f.formula_string
-        expected = _UNAMBIGUOUS_IONS.get(key)
-        if expected is not None and f.charge != expected:
-            f.charge_confidence = 'balance_suspect'
-            f.charge_suspect_reason = (
-                f"balance gives {f.charge:+d} but {key} is always "
-                f"{expected:+d} -- the metal oxidation state is likely wrong"
-            )
-            # Flag ambiguous metal fragments as the likely culprit
-            for other in fragments:
-                if other is f:
-                    continue
-                if other.charge_confidence in ('element_ambiguous', 'element_guess'):
-                    other.charge_confidence = 'element_ambiguous'
-                    other.charge_suspect_reason = getattr(
-                        other, 'charge_suspect_reason',
-                        f"metal charge may be wrong (see {key} above)"
-                    )
+  Returns the same list.
+  """
+  for f in fragments:
+    if f.charge_confidence != 'balance':
+      continue
+    key = f.formula_string
+    expected = _UNAMBIGUOUS_IONS.get(key)
+    if expected is not None and f.charge != expected:
+      f.charge_confidence = 'balance_suspect'
+      f.charge_suspect_reason = (
+          f"balance gives {f.charge:+d} but {key} is always "
+          f"{expected:+d} -- the metal oxidation state is likely wrong"
+      )
+      # Flag ambiguous metal fragments as the likely culprit
+      for other in fragments:
+        if other is f:
+          continue
+        if other.charge_confidence in ('element_ambiguous', 'element_guess'):
+          other.charge_confidence = 'element_ambiguous'
+          other.charge_suspect_reason = getattr(
+              other, 'charge_suspect_reason',
+              f"metal charge may be wrong (see {key} above)"
+          )
 
-    return fragments
+  return fragments
 
 
 # ---------------------------------------------------------------------------
@@ -562,77 +562,77 @@ def check_reasonableness(fragments):
 # ---------------------------------------------------------------------------
 
 def suggest_mixed_valence(fragments, target_charge):
-    """
-    For ambiguous metal fragments where the current charge assignment
-    doesn't balance, suggest alternative oxidation state combinations
-    that would bring the total closer to target_charge.
+  """
+  For ambiguous metal fragments where the current charge assignment
+  doesn't balance, suggest alternative oxidation state combinations
+  that would bring the total closer to target_charge.
 
-    fragments     : list[MoietyFragment] — the full fragment list
-    target_charge : the charge the metal fragments need to sum to
-                    (i.e. -known_nonmetal_sum)
+  fragments     : list[MoietyFragment] -- the full fragment list
+  target_charge : the charge the metal fragments need to sum to
+                  (i.e. -known_nonmetal_sum)
 
-    Returns a list of suggestion strings, or [] if nothing useful found.
-    """
-    # Collect ambiguous metal fragments
-    ambiguous = [
-        f for f in fragments
-        if f.charge_confidence in ('element_ambiguous', 'element_guess')
-        and len(f.elements) == 1
-    ]
-    if not ambiguous:
-        return []
+  Returns a list of suggestion strings, or [] if nothing useful found.
+  """
+  # Collect ambiguous metal fragments
+  ambiguous = [
+      f for f in fragments
+      if f.charge_confidence in ('element_ambiguous', 'element_guess')
+      and len(f.elements) == 1
+  ]
+  if not ambiguous:
+    return []
 
-    suggestions = []
+  suggestions = []
 
-    for f in ambiguous:
-        sym = next(iter(f.elements))
-        candidates = ELEMENT_CHARGES.get(sym, [])
-        if len(candidates) < 2:
+  for f in ambiguous:
+    sym = next(iter(f.elements))
+    candidates = ELEMENT_CHARGES.get(sym, [])
+    if len(candidates) < 2:
+      continue
+    n = f.multiplicity
+
+    # Try all combinations of oxidation states for n atoms of this metal
+    # that sum to target_charge contribution from this metal
+    # (simple case: all same oxidation state)
+    for q in candidates:
+      if q != f.charge:
+        total = q * n
+        suggestions.append(
+            f"  - All {n}x {sym} as {q:+d}: "
+            f"{n}({sym} {abs(q)}{'+-'[q<0]})"
+            f"  [contribution: {total:+d}]"
+        )
+
+    # Mixed valence: try pairs of oxidation states (only if n >= 2)
+    if n >= 2 and len(candidates) >= 2:
+      for i, q1 in enumerate(candidates):
+        for q2 in candidates[i+1:]:
+          # n1*q1 + n2*q2 = target_charge, n1+n2 = n
+          # n1*q1 + (n-n1)*q2 = target_charge
+          # n1*(q1-q2) = target_charge - n*q2
+          denom = q1 - q2
+          if denom == 0:
             continue
-        n = f.multiplicity
+          num = target_charge - n * q2
+          if num % denom != 0:
+            continue
+          n1 = num // denom
+          n2 = n - n1
+          if n1 <= 0 or n2 <= 0:
+            continue
+          total = n1 * q1 + n2 * q2
+          suggestion = f"  - Mixed valence: "
+          parts = []
+          if n1 == 1:
+            parts.append(f"({sym} {abs(q1)}{'+-'[q1<0]})")
+          else:
+            parts.append(f"{n1}({sym} {abs(q1)}{'+-'[q1<0]})")
+          if n2 == 1:
+            parts.append(f"({sym} {abs(q2)}{'+-'[q2<0]})")
+          else:
+            parts.append(f"{n2}({sym} {abs(q2)}{'+-'[q2<0]})")
+          suggestion += ", ".join(parts)
+          suggestion += f"  [contribution: {total:+d}]"
+          suggestions.append(suggestion)
 
-        # Try all combinations of oxidation states for n atoms of this metal
-        # that sum to target_charge contribution from this metal
-        # (simple case: all same oxidation state)
-        for q in candidates:
-            if q != f.charge:
-                total = q * n
-                suggestions.append(
-                    f"  - All {n}x {sym} as {q:+d}: "
-                    f"{n}({sym} {abs(q)}{'+-'[q<0]})"
-                    f"  [contribution: {total:+d}]"
-                )
-
-        # Mixed valence: try pairs of oxidation states (only if n >= 2)
-        if n >= 2 and len(candidates) >= 2:
-            for i, q1 in enumerate(candidates):
-                for q2 in candidates[i+1:]:
-                    # n1*q1 + n2*q2 = target_charge, n1+n2 = n
-                    # n1*q1 + (n-n1)*q2 = target_charge
-                    # n1*(q1-q2) = target_charge - n*q2
-                    denom = q1 - q2
-                    if denom == 0:
-                        continue
-                    num = target_charge - n * q2
-                    if num % denom != 0:
-                        continue
-                    n1 = num // denom
-                    n2 = n - n1
-                    if n1 <= 0 or n2 <= 0:
-                        continue
-                    total = n1 * q1 + n2 * q2
-                    suggestion = f"  - Mixed valence: "
-                    parts = []
-                    if n1 == 1:
-                        parts.append(f"({sym} {abs(q1)}{'+-'[q1<0]})")
-                    else:
-                        parts.append(f"{n1}({sym} {abs(q1)}{'+-'[q1<0]})")
-                    if n2 == 1:
-                        parts.append(f"({sym} {abs(q2)}{'+-'[q2<0]})")
-                    else:
-                        parts.append(f"{n2}({sym} {abs(q2)}{'+-'[q2<0]})")
-                    suggestion += ", ".join(parts)
-                    suggestion += f"  [contribution: {total:+d}]"
-                    suggestions.append(suggestion)
-
-    return suggestions
+  return suggestions

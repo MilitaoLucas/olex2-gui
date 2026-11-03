@@ -5,24 +5,24 @@ Set up 2026-10-01; replaces the startup walk over all `.md` files, the
 
 ## Writing help
 
-- Help lives in files named **`*.help.md`** — next to the code they
+- Help lives in files named **`*.help.md`** -- next to the code they
   describe (e.g. `gui/moiety/moiety.help.md`) or in the central tree
   `gui/help/gui/EN/<tab>/`. Plain `.md` files (READMEs, notes) are never help.
 - Each top-level heading is one entry. Its **ID** is the heading in upper
-  case with spaces as underscores: `# Moiety Formula` → `MOIETY_FORMULA`.
+  case with spaces as underscores: `# Moiety Formula` -> `MOIETY_FORMULA`.
   Sub-headings (`##`) belong to the entry.
 - The 'i' button of tool `h3-xyz` shows entry `XYZ`; any other button:
   `$spy.MakeHoverButton('btn-info@Name',"spy.make_help_box -name='Name' -popout='False'")`
-  shows `NAME` (`-` → `_`).
-- **IDs must be unique** across all help files — the build reports
+  shows `NAME` (`-` -> `_`).
+- **IDs must be unique** across all help files -- the build reports
   duplicates (the later file wins). `# Moiety` already exists (Sorting),
   hence `# Moiety Formula`.
 - **Images** sit next to the help file (e.g. an `images/` folder beside it)
-  and are referenced relatively: `![0.5 caption](images/x.png)` — the
+  and are referenced relatively: `![0.5 caption](images/x.png)` -- the
   optional leading number is the width as a fraction of the help box.
   Fallback: `gui/help/images/`.
 - **Inline code is a command**: `` `refine 4` `` becomes a button that runs
-  it (sized to its text). Don't use inline code for anything else — CIF
+  it (sized to its text). Don't use inline code for anything else -- CIF
   items, values, paths: use bold or italics.
 - **Plugins**: tool names are often generic (Settings, Collections). Pass
   the plugin's scope to the 'i' button (`scope=reportplus` in the
@@ -36,10 +36,10 @@ Set up 2026-10-01; replaces the startup walk over all `.md` files, the
   text, not markdown (old format, still used).
 
 - **Generated, numbered rows** (e.g. ReportPlus additional items,
-  `help_ext=...Images_%(n)s`): one entry without the number covers them —
-  `…_IMAGES_3` falls back to `…_IMAGES`.
+  `help_ext=...Images_%(n)s`): one entry without the number covers them --
+  `..._IMAGES_3` falls back to `..._IMAGES`.
 - **Legacy help files**: help written before this convention in plain
-  `.md` files (AC7, ACED, FragmentDB, NoSpherA2, DrawPlus, SISYPHOS, …) is
+  `.md` files (AC7, ACED, FragmentDB, NoSpherA2, DrawPlus, SISYPHOS, ...) is
   listed in `LEGACY_HELP_FILES` in `help_index.py` and compiled like
   `*.help.md`. Rename a file to `*.help.md` and drop it from the list.
 - **Which buttons have no help?**
@@ -51,7 +51,7 @@ Set up 2026-10-01; replaces the startup walk over all `.md` files, the
 
 | | |
 |---|---|
-| `help_index.py` | compiler: `*.help.md` → `help_index.json` (plain Python) |
+| `help_index.py` | compiler: `*.help.md` -> `help_index.json` (plain Python) |
 | `help_index.json` | the compiled help, shipped with Olex2 |
 | `__init__.py` | `GetHelp`: lookup, help box |
 | `test_help_index.py` | tests: `python -m unittest test_help_index` (here) |
@@ -72,7 +72,7 @@ Set up 2026-10-01; replaces the startup walk over all `.md` files, the
   rewrites `help_index.json` when writable). Without a shipped index the
   help is compiled in memory on the first click.
 - Compatibility: `gui.help.gh.git_help(quick, specific)` (ACED, the
-  *Recompile* link) — a help file is recompiled; a folder has *all* its
+  *Recompile* link) -- a help file is recompiled; a folder has *all* its
   `.md` files added as help (explicit request).
 
 ## Shipping a new help file
