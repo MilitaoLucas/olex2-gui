@@ -30,8 +30,6 @@ WIKIPEDIA :: <zimg src='help_root/images/wikipedia_w.png' height='14'> Wikipedia
 DOLLAR :: $
 
 
-<code>(.*?)</code> :: $+ html.Snippet(GetVar(default_link),"value=\1","hint=\1","onclick=\1","flat=True",td1=, td2=, "fgcolor=#ffffff","bgcolor=GetVar(gui.action_colour)")
-
 >> :: &#013;-
 
 l\[(.*?)\] :: TUT \1

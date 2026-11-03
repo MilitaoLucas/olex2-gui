@@ -169,7 +169,6 @@ external_files = {
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
-  'help.zip': ('olex-update', 'action:extract', 'action:delete'),
   'sample_data.zip': ('olex-update', 'action:extract', 'action:delete'),
   'FragmentDB.zip':('olex-update', 'action:extract', 'action:delete'), #HP 13/02/19
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -193,7 +192,6 @@ portable_zip_files = {
   'acidb.zip',
   'documentation.zip',
   'textures.zip',
-  'help.zip',
   'sample_data.zip',
   'FragmentDB.zip', #HP 13/02/19
 }
@@ -579,6 +577,15 @@ except Exception as err:
     print("ERROR: %s" % err)
     parser.print_help()
     #sys.exit(1)
+
+# help: compile the *.help.md files into gui/help/help_index.json, which
+# ships (svn property olex-update) instead of the old help.zip
+help_index_script = os.path.join(working_directory, 'util', 'pyUtil', 'gui', 'help', 'help_index.py')
+if os.path.exists(help_index_script):
+  import subprocess
+  if subprocess.call([sys.executable, help_index_script, working_directory]) != 0:
+    print("ERROR: building the help index failed")
+    sys.exit(1)
 
 # gather files and put them in different groups
 top_files = filter_out_directories(

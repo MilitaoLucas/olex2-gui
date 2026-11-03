@@ -7,7 +7,6 @@ debug = OV.IsDebugging()
 have_help = True
 from htmlTools import *
 
-import pickle as pickle
 
 import olex
 import olx
@@ -28,19 +27,24 @@ except Exception as err:
   print("markdown2 imported through imp.")
 
 from PluginTools import VFSDependent
+from . import help_index
 
 
 class GetHelp(VFSDependent):
+  """
+  The help behind the 'i' buttons. Help comes from *.help.md files
+  (help_index.py), compiled into gui/help/help_index.json at release time.
+  Nothing is read at startup: the index is loaded on the first lookup, plus
+  help shipped by plugins / modules (PluginLib, DataDir()/modules), which is
+  compiled on demand and cached in DataDir() until those files change.
+  In development (debug or developer mode) a help file that changed since
+  it was indexed is recompiled when one of its entries is shown.
+  """
 
   def load_ressources(self):
     p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "images")
     if os.path.exists(p):
       gui.helpImagesToOlexVFS(p, base="images")
-    else:
-      p = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help", "help.zip")
-      if os.path.exists(p):
-        gui.zipToOlexVFS(p)
-
 
   def __init__(self):
     super(GetHelp, self).__init__()
@@ -51,20 +55,169 @@ class GetHelp(VFSDependent):
     if language == "German":
       self.language = "DE"
 
-    olex.registerFunction(self.get_help, False, "gui")
     olex.registerFunction(self.get_help_item, False, "gui")
     self.load_ressources()
     ws = olx.GetWindowSize('gl').split(',')
     self.box_width = int(int(ws[2]) * OV.GetParam('gui.help.width_fraction') - 40)
     self.p_path = p_path
     self.get_templates()
-    self.all_help_d = {}
-    self.all_help_d_file = os.path.join(OV.DataDir(), 'all_help_d.pickle')
     self.help_root = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
+    self._index = None          # {'entries': {ID: {'html', 'src'}}, 'files': {src: mtime}}
     OV.registerFunction(self.git_help, True, "githelp")
+    OV.registerFunction(self.rebuild, False, "help")
     OV.registerMacro(self.make_help_box, '''name-Name of the Box&;popout-True/False&;
-    type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&'''
+    type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&;scope-plugin scope: <SCOPE>_<NAME> is looked up first&'''
                      )
+
+  # -------------------------------------------------------------------------
+  # Index
+  # -------------------------------------------------------------------------
+
+  def _developing(self):
+    return debug or OV.IsDeveloping()
+
+  def _extra_roots(self):
+    """Folders whose own *.help.md are compiled on demand (plugins, modules)."""
+    return [os.path.join(OV.BaseDir(), "util", "pyUtil", "PluginLib"),
+            os.path.join(OV.DataDir(), "modules")]
+
+  def _extra_cache_path(self):
+    return os.path.join(OV.DataDir(), 'help_extra_index.json')
+
+  def _load_index(self):
+    """Shipped index + plugin/module help; built on the first lookup."""
+    if self._index is not None:
+      return self._index
+    base = OV.BaseDir()
+    index = help_index.read_index(os.path.join(self.p_path, help_index.INDEX_NAME))
+    if index is None:
+      # no (current) index shipped -- e.g. a development checkout
+      index, dups = help_index.build_index(base)
+      for hid, a, b in dups:
+        print("Help: duplicate ID %s in %s and %s" % (hid, a, b))
+    entries, files = index['entries'], index['files']
+
+    # plugins / modules: their *.help.md, recompiled only when changed
+    extra = help_index.read_index(self._extra_cache_path()) or {'entries': {}, 'files': {}}
+    found = []
+    for root in self._extra_roots():
+      if os.path.isdir(root):
+        found += help_index.find_help_files(root) + help_index.legacy_help_files(base, root)
+    found_rel = {os.path.relpath(p, base).replace(os.sep, '/'): p for p in found}
+    stale = [p for rel, p in found_rel.items()
+             if rel not in files and extra['files'].get(rel) != os.path.getmtime(p)]
+    gone = [rel for rel in extra['files'] if rel not in found_rel]
+    if stale or gone:
+      for rel in gone:
+        extra['files'].pop(rel, None)
+        for hid in [k for k, v in extra['entries'].items() if v['src'] == rel]:
+          del extra['entries'][hid]
+      help_index.build(stale, base, extra['entries'], extra['files'])
+      extra['version'] = help_index.INDEX_VERSION
+      try:
+        help_index.write_index(extra, self._extra_cache_path())
+      except OSError as err:
+        print("Help: could not cache plugin help: %s" % err)
+    for hid, e in extra['entries'].items():
+      entries.setdefault(hid, e)        # core help wins over plugin help
+    files.update(extra['files'])
+    self._index = {'entries': entries, 'files': files}
+    return self._index
+
+  def _refresh_if_changed(self, entry):
+    """Development: recompile the entry's help file if it changed."""
+    files = self._index['files']
+    path = os.path.join(OV.BaseDir(), entry['src'])
+    try:
+      mtime = os.path.getmtime(path)
+    except OSError:
+      return
+    if files.get(entry['src']) != mtime:
+      help_index.build([path], OV.BaseDir(), self._index['entries'], files)
+
+  def lookup(self, help_id):
+    """HTML for a help ID ready for display, or None."""
+    index = self._load_index()
+    entry = index['entries'].get(help_id)
+    if entry is None:
+      # rows generated at run time are numbered (ReportPlus:
+      # ...ADDITIONAL_IMAGES_3): one entry without the number covers them
+      m = re.match(r'^(.*)_\d+$', help_id)
+      if m:
+        help_id = m.group(1)
+        entry = index['entries'].get(help_id)
+    if entry is None:
+      return None
+    if self._developing():
+      self._refresh_if_changed(entry)
+      entry = index['entries'].get(help_id)
+      if entry is None:
+        return None
+    return self._display_html(entry)
+
+  def _display_html(self, entry):
+    html = re.sub(r'\{\{HELPIMG\|([^|]*)\|([^|]*)\|([^}]*)\}\}', self._image_html, entry['html'])
+    html = self.format_html(html)
+    if self._developing():
+      md_file = os.path.join(OV.BaseDir(), entry['src'])
+      try:
+        html = (gui.tools.TemplateProvider.get_template('edit_help') % md_file +
+                gui.tools.TemplateProvider.get_template('compile_help') % md_file + html)
+      except Exception as err:
+        print("Help: no edit/compile links: %s" % err)
+    return html
+
+  def _image_html(self, m):
+    rel, frac, alt = m.group(1), m.group(2), m.group(3)
+    img_src = os.path.join(OV.BaseDir(), rel)
+    if not os.path.exists(img_src):
+      img_src = os.path.join(self.help_root, 'images', os.path.basename(rel))
+      if not os.path.exists(img_src):
+        img_src = os.path.join(self.help_root, 'images', '404.png')
+    try:
+      width = int(int(self.box_width) * float(frac))
+    except ValueError:
+      width = int(self.box_width)
+    d = {'full_match': m.group(0), 'src': rel, 'alt': alt, 'width': width, 'img_src': img_src}
+    return gui.tools.TemplateProvider.get_template('help_image_html') % d
+
+  def rebuild(self, write=True):
+    """
+    spy.help.rebuild() -- recompile all help (development; also picks up
+    new *.help.md files) and, if possible, write help_index.json.
+    """
+    index, dups = help_index.build_index(OV.BaseDir())
+    for hid, a, b in dups:
+      print("Help: duplicate ID %s in %s and %s" % (hid, a, b))
+    if write in (True, 'True', 'true'):
+      try:
+        help_index.write_index(index, os.path.join(self.p_path, help_index.INDEX_NAME))
+      except OSError as err:
+        print("Help: could not write the help index: %s" % err)
+    self._index = None
+    try:
+      os.remove(self._extra_cache_path())
+    except FileNotFoundError:
+      pass
+    self._load_index()
+    print("Help: %i entries" % len(self._index['entries']))
+
+  def git_help(self, quick=True, specific=False, force=False):
+    """
+    Compatibility (ACED, the 'Recompile' link): specific = a help file ->
+    recompile it; specific = a folder -> add all its .md files as help.
+    """
+    index = self._load_index()
+    if not specific:
+      self.rebuild()
+      return
+    if os.path.isfile(specific):
+      paths = [specific]
+    else:
+      paths = help_index.find_help_files(specific, all_md=True)
+    help_index.build(paths, OV.BaseDir(), index['entries'], index['files'])
+
+  # -------------------------------------------------------------------------
 
   def convert_md_to_html_pandoc(self, md_input):
     import subprocess
@@ -84,9 +237,9 @@ class GetHelp(VFSDependent):
     return gh.format_html(markdown2.markdown(md_input, extras=["fenced-code-blocks"]))
 
   def get_help_item(self, help_id):
-    help_id = help_id.replace(" ", "_")
-    help_id = help_id.upper()
-    return olx.GetVar(help_id, "No Help Here!")
+    help_id = help_id.replace(" ", "_").upper()
+    html = self.lookup(help_id)
+    return html if html is not None else olx.GetVar(help_id, "No Help Here!")
 
   def make_call(self, url):
     import HttpTools
@@ -96,55 +249,21 @@ class GetHelp(VFSDependent):
       return None
     return res
 
-  def get_latest_help_file(self, which):
-    url = OV.GetParam('olex2.samples.url') + r"/%s" % which + ".htm"
-    _ = self.make_call(url)
-    if _ is None:
-      return ""
-    cont = _.read()
-    return cont
-
   def get_templates(self):
     gui.tools.TemplateProvider.get_all_templates(path=self.p_path, mask="*.html")
 
-  def get_help(self, quick=True):
-
-    if self.all_help_d:
-      self.get_help_from_text_file()
-      with open(self.all_help_d_file, 'wb') as pickle_file:
-        pickle.dump(self.all_help_d, pickle_file)
-
-  def get_help_from_text_file(self):
-    language = 'EN'
-    help_file_n = 'HELP_%s.htm' % language
-    builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help', 'gui')
-    base = os.path.join(OV.BaseDir(), "util", "pyUtil", "gui", "help")
-    rFile = self.get_latest_help_file('HELP_%s' % language)
-    self.all_help = os.path.join(OV.DataDir(), help_file_n)
-
-    if rFile:
-      with open(self.all_help, 'wb') as wFile:
-        wFile.write(rFile)
-    else:
-      if not os.path.exists(self.all_help):
-        self.all_help = os.path.join(builtin_help_location, help_file_n)
-      rFile = gui.file_open(path=self.all_help, base=base)
-      if not rFile:
-        return
-
-    help_l = rFile.split("<h1>")
-    for help in help_l:
-      help = help.strip()
-      if not help:
-        continue
-      if "</h1>" not in help:
-        continue
-      var = help.split("</h1>")[0].strip()
-      help = help.split("</h1>")[1].strip()
-#      olex_core.SetVar(var, help)
-      self.all_help_d[var] = help
-      if debug:
-        print("  - %s" % var)
+  @staticmethod
+  def _code_button(m):
+    """
+    <code>cmd</code> -> a button that runs cmd, as wide as its text. The
+    link snippet defaults to width=100%: without a width the buttons were
+    full width in running text and collapsed to zero width in some cells.
+    """
+    cmd = m.group(1).replace('"', "'")
+    width = 7 * len(cmd) + 16
+    return ('$+ html.Snippet(GetVar(default_link),"value=%s","hint=%s","onclick=%s",'
+            '"width=%i","fit=false","flat=True","fgcolor=#ffffff",'
+            '"bgcolor=GetVar(gui.action_colour)")$-' % (cmd, cmd, cmd, width))
 
   def format_html(self, txt):
     while "\n" in txt:
@@ -152,222 +271,28 @@ class GetHelp(VFSDependent):
     regex_source = os.path.join(self.p_path, "regex_format_help.txt")
     if os.path.exists(regex_source):
       txt = gui.tools.run_regular_expressions(txt, regex_source, base=self.p_path)
+    # inline code = a runnable command (help convention); done here, after
+    # the regex rules (one of which also produces <code>), rather than in
+    # regex_format_help.txt, so the button gets a width fitting its text
+    txt = re.sub(r'<code>(.*?)</code>', self._code_button, txt)
     txt = txt.replace("help_root", self.help_root)
     gui_link = os.path.join(p_path, 'gui-link')
     txt = txt.replace("GetVar(gui_link)", gui_link)
     return txt
 
-  def _initialise_all_help_d(self):
-    if olexex.check_for_recent_update():
-      if os.path.exists(self.all_help_d_file):
-        os.remove(self.all_help_d_file)
-    if not self.all_help_d:
-      if os.path.exists(self.all_help_d_file):
-        with open(self.all_help_d_file, 'rb') as rFile:
-          self.all_help_d = pickle.load(rFile)
-      else:
-        self.all_help_d.setdefault("paths", [])
-        #self.get_help()
-        _ = os.path.join(OV.BaseDir(), "util", "pyUtil")
-        self.git_help(specific=_, force=True)
-        _ = os.path.join(OV.DataDir(), "modules")
-        self.git_help(specific=_, force=True)
-
-  def git_help(self, quick=True, specific=False, force=False):
-    if specific:
-      self.source_dir = os.path.dirname(specific)
-      self.all_help = ""
-    else:
-      builtin_help_location = os.path.join(OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help')
-      self.all_help = os.path.join(builtin_help_location, 'gui', 'HELP_EN.htm')
-      if not hasattr(self, 'source_dir'):
-        self.source_dir = specific
-
-      try:
-        copy_files = ("githelp_templates.html", "tutorials_templates.html")
-        for cp_file in copy_files:
-          copy_from = os.path.join(self.p_path, cp_file)
-          copy_to = os.path.join(builtin_help_location, cp_file)
-          copyfile(copy_from, copy_to)
-      except:
-        print("Can not copy files; most probably Olex2 was not started in Admin Mode")
-
-      if "false" in repr(quick).lower():
-        quick = False
-      if quick:
-        try:
-          if os.path.exists(self.help_pickle_file):
-            self.help = pickle.load(open(self.help_pickle_file, 'r'))
-            for item in self.help:
-              OV.SetVar(item, self.help[item])
-          return
-        except:
-          "Something went wrong with pickling the help file"
-
-      if os.path.exists(self.all_help):
-        print("Deleting builtin help at %s" % self.all_help)
-        try:
-          os.remove(self.all_help)
-        except Exception as err:
-          print("Can not remove self.all_help: %s" % err)
-
-    matches = get_md_files_by_folder(self.source_dir)
-
-    if debug:
-      print("==================")
-      print("Building help text")
-      print("==================")
-
-    for fPath in matches:
-      if not matches[fPath]:
-        continue
-      _ = fPath
-      if fPath == ".":
-        _ = ""
-      srcDir = os.path.join(self.source_dir, _)
-      if srcDir not in self.all_help_d['paths']:
-        force = True
-      help_done_marker_file = os.path.join(srcDir, "help_done.txt")
-
-      if debug:
-        print(f"Help for: {srcDir}")
-      if os.path.exists(help_done_marker_file):
-        os.remove(help_done_marker_file)
-      for fFile in matches[fPath]:
-        md_file = os.path.join(srcDir, fFile)
-        with open(md_file, encoding="utf8", errors='ignore') as f:
-          fc = f.read()
-
-        self.parse_help(fc, srcDir, md_file)
-
-      self.all_help_d['paths'].append(srcDir)
-      #try:
-        #wFile = open(help_done_marker_file, 'w')
-        #wFile.close()
-      #except:
-        #t = f'''
-        #==========================================================================
-        #The help system tried to write a file, but this file could not be written:\n
-        #{os.path.exists(help_done_marker_file)}\n
-        #Please restart Olex2 in Admin mode.
-        #==========================================================================
-        #'''
-        #print(t)
-
-    with open(self.all_help_d_file, 'wb') as pickle_file:
-      pickle.dump(self.all_help_d, pickle_file)
-
-  def parse_help(self, fc, fDir, md_file):
-    fc = fc.replace("####", "@@@@")
-    fc = fc.replace("###", "@@@")
-    fc = fc.replace("##", "@@")
-    l = fc.split("\n#")
-    self.help_type = ""
-    target_marker = "-target\n"
-    help_marker = "-help\n"
-    info_marker = "-info\n"
-    for item in l:
-      if not item:
-        continue
-      item = item.strip()
-      try:
-        var = item.split("\n")[0].lstrip("#").strip().replace(" ", "_").upper()
-        val = "\n".join(item.split("\n")[1:])
-      except:
-        var = md_path
-        val = item
-      if target_marker in item:
-        self.help_type = 'target'
-        help = item.split(target_marker)[1].strip()
-
-      else:
-        self.help_type = 'help'
-        val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
-        html = markdown2.markdown(val, extras=["wiki-tables", "fenced-code-blocks"])
-        if "img" in html:
-          regex = r'(<img[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]+)"[^>]*>)'
-          matches = re.findall(regex, html)
-          results = []
-          for full_match, src, alt in matches:
-            width = 1
-            if " " in alt:
-              try:
-                width = float(alt.split(" ")[0])
-                alt = " ".join(alt.split(" ")[1:])
-              except:
-                pass
-            results.append({
-              'full_match': full_match,
-              'src': src,
-              'alt': alt,
-              'width': width,
-            })
-          for result in results:
-            img_src = os.path.join(fDir, result['src'])
-            if not os.path.exists(img_src):
-              img_src = os.path.join(self.help_root, 'images', result['src'])
-              if not os.path.exists(img_src):
-                img_src = os.path.join(self.help_root, 'images', '404.png')
-
-            result.setdefault('img_src', img_src)
-            width = int(int(self.box_width) * width)
-            result['width'] = width
-            help_image_html = gui.tools.TemplateProvider.get_template('help_image_html') % result
-            html = html.replace(f"{result['full_match']}", help_image_html)
-
-        html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
-        help = gh.format_html(html)
-
-      help = help.strip().replace("<p>", "").replace("</p>", "")
-      help = help.replace("<zimg", "<zimg")
-      help = help.replace("<table><tbody><tr><td>", "<table width='100%%'><tbody><tr><td width='25%%'>")
-
-      if self.all_help:
-        try:
-          wFile = open(self.all_help, 'ab')
-          var_dis = "\n\n<h1>" + var + "</h1>\n"
-          wFile.write(var_dis)
-          wFile.write(help)
-          wFile.close()
-        except Exception as err:
-          print("-->> " + var + "--" + repr(err))
-          try:
-            wFile.write(repr(help))
-            wFile.close()
-          except:
-            pass
-
-      if debug and self.help_type == 'help':
-        p = p_path
-        gui.tools.TemplateProvider.get_template(template_file='githelp_templates.html', base=p, path=p, mask="*.html")
-        edit_help = gui.tools.TemplateProvider.get_template(name='edit_help', path=p) % md_file
-        compile_help = gui.tools.TemplateProvider.get_template('compile_help') % md_file
-        help = edit_help + compile_help + help
-
-      OV.SetVar(var, help)
-      self.all_help_d[var] = help
-
-      if debug:
-        print("  - %s" % var)
-        #_ = OV.GetVar('last_help_box')
-        #if _:
-          #import gui
-          #gui.help.make_help_box(name=_)
-          #OV.SetVar('last_help_box', "")
-
-  def make_help_box(self, d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None):
+  def make_help_box(self, d={}, name={}, helpTxt=None, popout=False, box_type='help', toolName=None, scope=None):
     OV.SetVar('last_help_box', name)
     name = getGenericSwitchName(name).replace("h3-", "")
     _ = ""
     md_box = True
-    if helpTxt == '#helpTxt':
-      id = name.upper().replace("-", "_")
-      try:
-        _ = self.all_help_d.get(name.upper().replace("-", "_"))
-        if _:
-          md_box = True
-      except:
-        pass
+    help_id = name.upper().replace("-", "_").replace(" ", "_")
+    # a plugin's tool names are often generic (ReportPlus: Settings,
+    # Collections): its scope picks e.g. REPORTPLUS_SETTINGS first. An unset
+    # scope arrives as the unsubstituted placeholder '#scope'.
+    if scope and not str(scope).startswith('#'):
+      _ = self.lookup("%s_%s" % (str(scope).upper(), help_id))
+    if not _ and helpTxt == '#helpTxt':
+      _ = self.lookup(help_id)
 
     if not _:
       if helpTxt and os.path.exists(helpTxt):
@@ -377,8 +302,7 @@ class GetHelp(VFSDependent):
         _ = olx.GetVar(helpTxt, helpTxt)
 
       elif not helpTxt or helpTxt == "#helpTxt":
-        _ = olx.GetVar(name, None)
-        _ = olx.GetVar(name.upper().replace("-", "_"), None)
+        _ = self.lookup(help_id) or olx.GetVar(help_id, None)
 
     helpTxt = _
 
@@ -732,7 +656,6 @@ def get_md_files_by_folder(root_folder):
   return md_files_dict
 
 gh = GetHelp()
-gh._initialise_all_help_d()
 
 if have_help:
   AutoDemoTemp()
