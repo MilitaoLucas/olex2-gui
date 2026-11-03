@@ -545,6 +545,11 @@ try:
     for t in toks:
       platforms[t] = True
 
+  # the build below rewrites this tracked file: start each release from the
+  # committed version, so the update cannot conflict with the last build
+  help_index_json = os.path.join(working_directory, 'util', 'pyUtil', 'gui', 'help', 'help_index.json')
+  if os.path.exists(help_index_json):
+    client.revert(help_index_json)
   if option.update_file:
     filepath = option.update_file
     print('Updating %s only...' %filepath)
