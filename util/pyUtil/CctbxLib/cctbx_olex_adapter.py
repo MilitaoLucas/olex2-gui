@@ -452,6 +452,17 @@ class OlexCctbxAdapter(object):
     if verbose:
       self.reflections.show_summary()
 
+  def mask_fo_sq(self):
+    # OMIT/SHEL applied: an OMITted beamstop reflection (Fo ~ 0 against a
+    # large Fc) otherwise dominates the void difference density, and the
+    # mask then ruins the other low-angle reflections (231103_zzj_mof_kong:
+    # R1 2.61 % unmasked, 3.32 % masked, 2.05 % masked on filtered data).
+    # HKLF 5 keeps the merged set, its filtered set is per measurement.
+    r = self.reflections
+    fo_sq = r.f_sq_obs_merged if self.hklf_code >= 5 or r.f_sq_obs_filtered is None\
+      else r.f_sq_obs_filtered
+    return fo_sq.average_bijvoet_mates()
+
   def f_calc(self, miller_set,
              apply_extinction_correction=True,
              apply_twin_law=True,
@@ -3149,7 +3160,7 @@ class OlexCctbxFlipSolvent(OlexCctbxAdapter):
     try:
       self.params = OV.Params().snum.masks
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
+      fo_sq = self.mask_fo_sq()
 
       m = masks.mask(xs, fo_sq)
       m.compute(
@@ -3262,7 +3273,7 @@ class OlexCctbxFlatSolvent(OlexCctbxAdapter):
     try:
       self.params = OV.Params().snum.masks
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
+      fo_sq = self.mask_fo_sq()
 
       m = masks.mask(xs, fo_sq)
       # macromolecular geometry, not the difference-map mask's: probe 1.1
@@ -3384,7 +3395,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           # we need to reinitialise reflections
           self.initialise_reflections()
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
+      fo_sq = self.mask_fo_sq()
       use_set_completion = OV.GetParam('snum.masks.use_set_completion')
       mask = masks.mask(xs, fo_sq, use_set_completion=use_set_completion)
       # set before compute() so structure_factors sees it; getattr because the
