@@ -179,6 +179,10 @@ class RefinementChecks(object):
       # the refinement worked this out already; asking the normal equations
       # again would multiply out the Jacobian a second time
       m_and_a = getattr(self.cctbx, 'covariance_matrix_and_annotations', None)
+      if m_and_a is None and getattr(self.cctbx, 'objective_only', False):
+        # nothing was refined (e.g. ED with all but thickness fixed): no matrix
+        print("No refined parameters, no correlations to list")
+        return
       if m_and_a is None:
         m_and_a = self.cctbx.normal_eqns.covariance_matrix_and_annotations()
       annotations = m_and_a.annotations
