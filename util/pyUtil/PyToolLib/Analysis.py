@@ -4966,7 +4966,11 @@ class HealthOfStructure():
       ##draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
 
 
-    # (a full-scale "<item>_large" copy was saved here; nothing reads it and its PNG encode was most of make_HOS)
+    # The reports embed the full-scale "<item>_large" copy: ReportPlus/RPAC copy hooft_str_large to
+    # flack_str_image, and their image loader tries <item>_large first.  Its PNG encode is most of
+    # make_HOS, so only make it for them; they are the only callers that pass a supplied_cif.
+    if self.supplied_cif:
+      OlexVFS.save_image_to_olex(IT.add_whitespace(im, 'left', 4*scale, "#ffffff"), "%s_large" %item, 0)
 
     #if self.image_position != "last":
       #im = IT.add_whitespace(im, 'right', 4, bgcolour)
