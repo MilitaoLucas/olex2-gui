@@ -655,6 +655,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           dlen -= dr.n_param
         if self.reparametrisation.thickness and self.reparametrisation.thickness.grad:
           dlen -= 1
+          self.reparametrisation.thickness.su = math.sqrt(diag[dlen])
         if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
           if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
             su = math.sqrt(diag[dlen-1])
