@@ -17,7 +17,7 @@ from variableFunctions import nsa2_get_param, nsa2_set_param
 from PluginTools import PluginTools as PT
 
 # Local imports for NoSpherA2 functions
-from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL
+from utilities import calculate_number_of_electrons, deal_with_parts, is_disordered, cuqct_tsc, combine_tscs, is_orca_new, source_is_tsc, software, reset_unused_generator_flags, nsa2_refresh_file_hash, ELEMENTS, ELEMENTS_BY_SYMBOL, consume_interrupt_request
 from utilities import open  # code page independent, see utilities.open
 from utilities import dev_features
 from decors import run_with_bitmap
@@ -663,6 +663,10 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
 
   def _launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
+    # a Break / Ctrl+# / Stop from before this job is still set (nothing was running to consume it) and the first
+    # wait loop killed NoSpherA2 on it: "Partitioning aborted by INTERRUPT before log creation!"
+    OV.SetVar("stop_current_process", False)
+    consume_interrupt_request(0)
     wfn_code = software()
     self.wfn_code = wfn_code
     self.name = olx.FileName()
