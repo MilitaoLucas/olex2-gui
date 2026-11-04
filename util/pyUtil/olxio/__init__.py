@@ -59,7 +59,12 @@ class StreamRedirection:
     import inspect
     import tokenize
     from olexFunctions import OV
-    traceback.print_exc()
+    try:
+      traceback.print_exc()
+    except Exception as err:
+      # An encrypted module has no source: its loader raises SyntaxError when
+      # the traceback asks for source lines. Report the error without them.
+      sys.stderr.write('%s (no traceback: %s)\n' % (repr(sys.exc_info()[1]), err))
     tb = sys.exc_info()[2]
     if OV.HasGUI() and OV.IsMainThread():
       olex.m("Cursor")

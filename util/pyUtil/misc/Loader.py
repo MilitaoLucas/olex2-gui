@@ -532,16 +532,15 @@ def getAvailableModules_():
       md = "%s%s%s" %(m_dir, os.sep, m.folder_name)
       if os.path.exists(md):
         rd = "%s%srelease" %(md, os.sep)
-        d = 0
+        d = ""
         if os.path.exists(rd):
           try:
             d = open(rd, 'r').read().strip()
           except:
             pass
-        if m.folder_name in failed_modules:
-          if "expired" in failed_modules[m.folder_name]:
-            m.action = 3 #reinstall
-        elif d < m.release_date:
+        if m.folder_name in failed_modules and "expired" in failed_modules[m.folder_name]:
+          m.action = 3 #reinstall
+        elif d < m.release_date: # also after a failed start: a new release may fix it
           m.action = 2
       elif os.path.exists(md + ".rollback.zip"):
         m.action = 5
