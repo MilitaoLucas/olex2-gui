@@ -735,7 +735,26 @@ class fractal_dimension(OlexCctbxAdapter):
     print("Done!\nFractal Dimension plot according to K. Meindl and J. Henn (2008), Acta Cryst. A64, 404-418.")
 
   def _run_fractal(self, map_file):
-    import subprocess, sys
+    import os, subprocess, sys
+    # a quick check, so run it in the NoSpherA2 library Olex2 already holds (FLINT's) instead of a 75 MB process;
+    # the exe stays the fallback when the library is missing or the call fails
+    from cctbx_olex_adapter import _nsa2_dll
+    dll = _nsa2_dll()
+    if dll is not None:
+      import ctypes
+      log = os.path.abspath(map_file) + ".log"
+      enc = "mbcs" if os.name == "nt" else "utf-8"  # narrow argv is read in the ANSI code page on Windows
+      argv = [x.encode(enc) for x in ["NoSpherA2", "-out", log, "-fractal", os.path.abspath(map_file)]]
+      with dll.olex_lock:
+        rc = dll.nosphera2_run(len(argv), (ctypes.c_char_p*len(argv))(*argv))
+      if rc == 0:
+        return  # the log is the banner and citations; the result is the plot, read by the caller
+      try:
+        with open(log, errors="replace") as f:
+          tail = [x for x in f.read().splitlines() if x.strip()]
+      except OSError:
+        tail = []
+      print("NoSpherA2 library returned %d (%s); launching NoSpherA2.exe" % (rc, " | ".join(tail[-2:]) or "no output"))
     startinfo = None
     if sys.platform[:3] == 'win':
       startinfo = subprocess.STARTUPINFO()
