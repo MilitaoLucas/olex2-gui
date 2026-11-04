@@ -5,6 +5,25 @@ import olx
 import olex
 import os
 
+def weak_fill_atoms(names):
+  """ The labels among names (the fill atoms of the last batch) whose Uiso is
+  over 0.25 A^2. A whole-COD gate (c42u, 4 Nov 2026) solved 174 more and lost
+  94 against no cut; an F test on each atom's own share of the fit separated
+  nothing (median F 180 real vs 54 spurious) where Uiso did (0.045 vs 0.18).
+  Returns [] on any error. """
+  try:
+    from cctbx_olex_adapter import OlexCctbxSolve
+    xs = OlexCctbxSolve().xray_structure()
+    low = set(n.upper() for n in names)
+    out = [x.label for x in xs.scatterers()
+           if x.label.upper() in low and x.u_iso_or_equiv(xs.unit_cell()) > 0.25]
+    if out:
+      print("Map fill: %d atom(s) dropped on Uiso > 0.25: %s" % (len(out), " ".join(out)))
+    return out
+  except Exception as err:
+    print("Map fill Uiso check did not run (%s: %s)" % (type(err).__name__, err))
+    return []
+
 def fill_from_map():
   """ Carbon on the Fo-Fc peaks of the refined, re-typed model that sit at a
   bond length from it: 1.25-1.65 A from a light atom, 1.8-2.6 A from one past
@@ -574,6 +593,13 @@ class Method_cctbx_ChargeFlip(Method_solution):
         # a fill atom that took R1 down 3 % gets twice the U limit: the prune took
         # C20 (U 0.088) five times over (cod_1559310, R1 0.132 -> 0.111), but a
         # batch also carries noise at U 0.55 / 0.91 (cod_2207415, cod_8107302)
+        # the batch passed on R1; its diffuse atoms go before they are kept
+        if last == "map fill" and snap and pending and r1 is not None:
+          weak = weak_fill_atoms(pending)
+          if weak:
+            olex.m("kill %s" % " ".join(weak))
+            olex.m("compaq -q")
+            pending -= set(weak)
         if last == "map fill" and snap and r1 is not None and r1 < 0.97*snap[0]:
           keep |= pending
         if done:
