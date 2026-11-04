@@ -415,6 +415,7 @@ class initpy_funcs():
       self.olx.stopwatch.exec("from gui.db import *")
       self.olx.stopwatch.exec("import gui.moiety")
       self.olx.stopwatch.exec("import gui.proto")
+      self.olx.stopwatch.exec("import gui.symdisorder")
       if os.environ.get("OLEX2_DEFER_HEAVY_GUI_IMPORTS"):
         self._register_heavy_gui_proxies()
         import olex
