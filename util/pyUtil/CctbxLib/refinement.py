@@ -1874,8 +1874,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_block['_refine.diffraction_theory'] = "dynamical"
         if self.reparametrisation.thickness:
           cif_block['_refine_ls.sample_thickness'] = f"{self.reparametrisation.thickness.value:.4f}"
-        if self.reparametrisation.thickness.grad:
-          cif_block['_refine_ls.sample_thickness_su'] = f"{self.reparametrisation.thickness.su:.2f}"
+        # su is only set once it is taken from the covariance diagonal: not when no uncertainties
+        # were computed or the thickness was not in the final matrix
+        thickness_su = getattr(self.reparametrisation.thickness, 'su', None)
+        if thickness_su is not None:
+          cif_block['_refine_ls.sample_thickness_su'] = f"{thickness_su:.2f}"
       else:
         cif_block['_refine.diffraction_theory'] = "kinematical"
 

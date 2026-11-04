@@ -25,6 +25,15 @@ from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
+# the paper to cite for a dynamical (N-Beam) ED refinement
+ED_NBEAM_DOI = "10.1107/S1600576726009064"
+ED_NBEAM_REFERENCE = """Dolomanov, O.V., Pr\\'ochniak, G., Ste\\'c, P., Meyer, M., Puschmann, H. (2026),
+J. Appl. Cryst., 59, doi:%s.""" % ED_NBEAM_DOI
+
+def is_ed_nbeam_reference(ref):
+  """ by authors, so that the form with page numbers replaces this one; 'ochniak' takes the unaccented Prochniak too """
+  return "Dolomanov" in ref and "ochniak" in ref
+
 import time
 global now
 now = time.time()
@@ -729,6 +738,10 @@ Puschmann, H., Bodensteiner, M. (2022), IUCrJ, 9, 604-609."""
     # through CifMerge or by hand...
     if not disp_refine:
       full_references = [x for x in full_references if not ("604-609" in x and "2022" in x)]
+    # the N-Beam paper: present while the refinement is dynamical, in the current wording
+    full_references = [x for x in full_references if not is_ed_nbeam_reference(x)]
+    if OV.IsEDRefinement():
+      full_references.append(ED_NBEAM_REFERENCE)
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)

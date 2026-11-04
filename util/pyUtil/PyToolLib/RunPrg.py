@@ -21,7 +21,8 @@ white = "#ffffff"
 black = "#000000"
 table = OV.GetVar('HtmlTableFirstcolColour')
 import ExternalPrgParameters
-from CifInfo import MergeCif
+from CifInfo import MergeCif, ED_NBEAM_DOI
+NOSPHERA2_DOI = "10.1039/D0SC05526C"
 import time
 import shutil
 # The listeners expect a function
@@ -530,6 +531,19 @@ class RunSolutionPrg(RunPrg):
       if m:
         self.solution_has_failed.append(m[0].strip())
 
+def citation_notice():
+  """ The papers this refinement should cite, each name a link to its DOI; '' if none """
+  papers = []
+  if OV.IsNoSpherA2():
+    papers.append(("NoSpherA2", NOSPHERA2_DOI))
+  if OV.IsEDRefinement():
+    papers.append(("N-Beam", ED_NBEAM_DOI))
+  if not papers:
+    return ""
+  return "Please cite our " + " and ".join(
+    "<a href='shell https://doi.org/%s'>%s paper</a>" % (doi, name) for name, doi in papers)
+
+
 class RunRefinementPrg(RunPrg):
   running = None
 
@@ -572,19 +586,23 @@ class RunRefinementPrg(RunPrg):
       msg = " | ".join(notes)
       if warning_counter == len(self.refinement_has_failed):
         fg = orange
+      # these notes are mostly advice on a refinement that did finish: that still gets cited
+      if not any(n == "Refinement failed" or n.startswith("Error") for n in self.refinement_has_failed):
+        cite = citation_notice()
+        if cite:
+          msg += " | " + cite
       string =  "%s;%s;%s" % (msg, bg, fg)
       gui.set_notification(string, fg=fg)
     elif self.IsClientMode():
       rc_fn = os.path.join(OV.StrDir(), "refinement.check")
       if os.path.exists(rc_fn):
         gui.set_notification(open(rc_fn, "r").read())
-    elif not OV.IsNoSpherA2():
-      gui.get_default_notification(txt="Refinement finished",
-        txt_col='green_text', update=update_html)
     else:
-      gui.get_default_notification(
-        txt="Refinement finished    Please Cite NoSpherA2: DOI 10.1039/D0SC05526C",
-          txt_col='green_text', update=update_html)
+      txt = "Refinement finished"
+      cite = citation_notice()
+      if cite:
+        txt += "    " + cite
+      gui.get_default_notification(txt=txt, txt_col='green_text', update=update_html)
 
   def reset_params(self):
     OV.SetParam('snum.refinement.hooft_str', "")
@@ -618,6 +636,9 @@ class RunRefinementPrg(RunPrg):
     self.reset_params()
     use_aspherical = OV.IsNoSpherA2() and not self.IsClientMode()
     result = True
+    crashed = False
+    # shared between runs and only set once the program starts: not to be read from the last one
+    self.method.failure = False
     try:
       if use_aspherical:
         make_fcf_only = nsa2_get_param('make_fcf_only')
@@ -634,6 +655,7 @@ class RunRefinementPrg(RunPrg):
           self.setupFiles()
         except Exception as err:
           sys.stderr.formatExceptionInfo()
+          crashed = True
           self.endRun()
           return False
         if self.terminate:
@@ -645,11 +667,15 @@ class RunRefinementPrg(RunPrg):
     except Exception as err:
       sys.stderr.formatExceptionInfo()
       self.terminate = True
+      crashed = True
     finally:
       if not result:
         self.terminate = True
         if use_aspherical:
           self.refinement_has_failed.append("Error during NoSpherA2")
+      # stopping a refinement on purpose fails the method too, but that is not a failure to report
+      elif crashed or (self.method.failure and not getattr(getattr(self, 'cctbx', None), 'interrupted', False)):
+        self.refinement_has_failed.append("Refinement failed")
       # remove res if failed but only for remote run
       RunRefinementPrg.running = None
 

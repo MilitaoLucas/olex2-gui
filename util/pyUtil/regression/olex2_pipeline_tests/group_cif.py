@@ -31,6 +31,7 @@ def register(suite):
             t_acta, suite)
   suite.run("cif", "CifMerge keeps the cif readable", t_merge, suite)
   suite.run("cif", "the cif reports the refinement", t_reports_refinement, suite)
+  suite.run("cif", "an N-Beam refinement cites its paper", t_ed_nbeam_citation, suite)
 
 
 def _sucrose(suite):
@@ -194,3 +195,79 @@ def _value(text, key):
       except ValueError:
         return None
   return None
+
+
+def t_ed_nbeam_citation(suite):
+  """The N-Beam paper: in the CIF while dynamical, and a link in the notification.
+
+  The state is forced, because a real N-Beam refinement needs the licensed
+  plugin and ED data; what is tested is what follows from that state.
+  """
+  import CifInfo
+  import RunPrg
+  folder = _sucrose(suite)
+  doi = CifInfo.ED_NBEAM_DOI
+  def references():
+    CifInfo.ExtractCifInfo(run=True)
+    return OV.get_cif_item('_publ_section_references', '')
+  is_ed, run, base_run = OV.IsEDRefinement, RunPrg.RunRefinementPrg.run, RunPrg.RunPrg.run
+  try:
+    OV.IsEDRefinement = lambda: False
+    if doi in references():
+      raise AssertionError("a kinematic refinement cites the N-Beam paper")
+    OV.IsEDRefinement = lambda: True
+    refs = references()
+    if refs.count(doi) != 1:
+      raise AssertionError("expected the N-Beam paper once in: %s" % refs)
+    if "Pr\\'ochniak" not in refs:
+      raise AssertionError("the author's accent is lost: %s" % refs)
+    # an entry typed otherwise (say without the accent, with pages) gives way to the current text
+    OV.set_cif_item('_publ_section_references', refs.replace(
+      "doi:%s" % doi, "1-12").replace("Pr\\'ochniak", "Prochniak"))
+    refs = references()
+    if refs.count("ochniak") != 1 or doi not in refs or "Pr\\'ochniak" not in refs:
+      raise AssertionError("the old entry was not replaced: %s" % refs)
+    OV.IsEDRefinement = lambda: False
+    if "ochniak" in references():
+      raise AssertionError("the N-Beam paper stayed after going kinematic")
+
+    OV.IsEDRefinement = lambda: True
+    RunPrg.RunRefinementPrg.run = lambda self: None
+    RunPrg.RunRefinementPrg()
+    with open(os.path.join(OV.StrDir(), "refinement.check")) as f:
+      note = f.read()
+    if "Please cite our <a href='shell https://doi.org/%s'>N-Beam paper</a>" % doi not in note:
+      raise AssertionError("no link to the paper in the notification: %s" % note)
+    OV.IsEDRefinement = lambda: False
+    RunPrg.RunRefinementPrg()
+    with open(os.path.join(OV.StrDir(), "refinement.check")) as f:
+      note = f.read()
+    if doi in note:
+      raise AssertionError("a kinematic refinement's notification cites the paper: %s" % note)
+
+    # advice on a refinement that finished keeps the citation; an error does not get one
+    OV.IsEDRefinement = lambda: True
+    for failed_note, cited in (("Warning: advice", True), ("Error: stopped", False)):
+      RunPrg.RunRefinementPrg.run = lambda self: self.refinement_has_failed.append(failed_note)
+      RunPrg.RunRefinementPrg()
+      with open(os.path.join(OV.StrDir(), "refinement.check")) as f:
+        note = f.read()
+      if (failed_note not in note) or (("N-Beam paper" in note) != cited):
+        raise AssertionError("with the note '%s' the notification reads: %s" % (failed_note, note))
+
+    # a crash is a failure in the notification, not "finished" with a citation
+    RunPrg.RunRefinementPrg.run = run
+    def crash(self):
+      raise RuntimeError("crash for the test")
+    RunPrg.RunPrg.run = crash
+    RunPrg.RunRefinementPrg()
+    with open(os.path.join(OV.StrDir(), "refinement.check")) as f:
+      note = f.read()
+    if "Refinement failed" not in note or "cite" in note:
+      raise AssertionError("a crashed refinement's notification: %s" % note)
+  finally:
+    OV.IsEDRefinement = is_ed
+    RunPrg.RunRefinementPrg.run = run
+    RunPrg.RunPrg.run = base_run
+    references()
+  return "added, replaced, dropped; notification links %s" % doi

@@ -152,15 +152,16 @@ class RefinementChecks(object):
       elif abs(d - expected) > 0.03:
         other.append("%s %.3f" % (label, d))
     if iam:
-      self.refinement_has_failed.append("Riding H on %s at IAM default distances - run NeutronHDist or refine them" % ", ".join(iam))
+      self.refinement_has_failed.append("Warning: Riding H on %s at IAM default distances - run NeutronHDist or refine them" % ", ".join(iam))
     if other:
-      self.refinement_has_failed.append("Riding H on %s at custom distances, not the neutron ones" % ", ".join(other))
-    if not OV.GetParam('snum.refinement.update_weight'):
-      self.refinement_has_failed.append("Weighting scheme is not updated - a spherical scheme fits aspherical Fc poorly")
+      self.refinement_has_failed.append("Warning: Riding H on %s at custom distances, not the neutron ones" % ", ".join(other))
+    # a dynamical refinement turns the update off itself (refinement.py), so there is nothing to act on
+    if not OV.GetParam('snum.refinement.update_weight') and not OV.IsEDRefinement():
+      self.refinement_has_failed.append("Warning: Weighting scheme is not updated - a spherical scheme fits aspherical Fc poorly")
     try:
       ratio = float(OV.GetParam('snum.refinement.data')) / float(OV.GetParam('snum.refinement.parameters'))
       if ratio < 10:
-        self.refinement_has_failed.append("Only %.1f data per parameter - a HAR wants 10 or more" % ratio)
+        self.refinement_has_failed.append("Warning: Only %.1f data per parameter - a HAR wants 10 or more" % ratio)
     except (TypeError, ValueError, ZeroDivisionError):
       pass
 
