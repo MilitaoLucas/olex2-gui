@@ -1412,6 +1412,33 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     if force or self.IsDebugging():
       sys.stderr.formatExceptionInfo()
 
+  def ReadCIFCellWavelength(self, cif_block):
+    "Returns a, a_su, .... gamma, gamma_su, wavelength"
+    import re
+    _CIF_NUM = re.compile(r"^([+-]?(?:\d+\.?\d*|\.\d+))(?:\((\d+)\))?(?:[eE]([+-]?\d+))?$")
+    def split_cif_value(s): # by Calude
+      """'10.2(2)' -> (10.2, 0.2); '10(2)' -> (10.0, 2.0); '10.2' -> (10.2, None)"""
+      s = s.strip().strip("'\"")
+      if s in ("?", "."):                      # unknown / not applicable
+        return None, None
+      m = _CIF_NUM.match(s)
+      if not m:
+        raise ValueError(f"Not a CIF number: {s!r}")
+      mantissa, su, exp = m.groups()
+      exp = int(exp) if exp else 0
+      value = float(f"{mantissa}e{exp}")
+      if su is None:
+        return value, 0
+      decimals = len(mantissa.split(".")[1]) if "." in mantissa else 0
+      return value, float(f"{su}e{exp - decimals}")
+    rv = []
+    for t in ("a", "b", "c"):
+      rv.append(split_cif_value(cif_block[f"_cell_length_{t}"]))
+    for t in ("alpha", "beta", "gamma"):
+      rv.append(split_cif_value(cif_block[f"_cell_angle_{t}"]))
+    rv.append(float(cif_block['_diffrn_radiation_wavelength']))
+    return rv
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
