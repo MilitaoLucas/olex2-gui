@@ -117,9 +117,9 @@ class MultipleDataset:
       html += '''
     $+
       html.Snippet(GetVar(default_link),
-      'value=%s', # double quotes for the file name
+      "value=%s",
       "name=%s",
-      "onclick=%s",
+      'onclick=%s', # double quotes for the file
       "bgcolor=%s",
       "fgcolor=%s",
       )
