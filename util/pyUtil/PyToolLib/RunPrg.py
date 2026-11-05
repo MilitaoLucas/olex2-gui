@@ -990,7 +990,7 @@ def AnalyseRefinementSource():
   hkl_file_name = olx.file.ChangeExt(file_name, 'hkl')
   if olx.IsFileType('cif') == 'true':
     if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
-      olex.m('reap "%s"' %ins_file_name)
+      OV.Reap(ins_file_name)
       hkl_file_name = os.path.join(os.getcwd(), hkl_file_name)
       if os.path.exists(hkl_file_name):
         olx.HKLSrc(hkl_file_name)

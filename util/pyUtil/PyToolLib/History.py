@@ -264,7 +264,7 @@ class History(ArgumentParser):
     #new syntax
     #olex.run(True, "reap", resFile, no_save=True)
     #compatibility syntax
-    olex.f_ex("reap", True, [resFile], {"no_save": True})
+    OV.Reap(resFile, no_save=True)
     hklSrc = OV.HKLSrc()
     if not tree.isTheSameHklDigest(node, hklSrc):
       olx.Echo("Current HKL does not match the one from history - updating!", m='warning')

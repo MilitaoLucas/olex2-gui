@@ -585,18 +585,12 @@ class OlexFunctions(guiFunctions.GuiFunctions):
     except:
       pass
 
-  def Reap(self, path):
-    if path.startswith("'") or path.startswith('"'):
-      pass
-    else:
-      path = '"%s"' %path
-    olex.m('reap %s' %path)
+  def Reap(self, path, **kwds):
+    #return olex.run(True, "reap", path, kwds)
+    return olex.f_ex("reap", True, [path], kwds)
 
   def AtReap(self, path):
-    path = path.strip("'")
-    path = path.strip('"')
-    path = '"%s"' %path
-    olex.m('@reap %s' %path)
+    olx.Atreap(path)
     if self.HasGUI():
       olex.m('spy.run_skin sNumTitle')
       self.UpdateHtml()

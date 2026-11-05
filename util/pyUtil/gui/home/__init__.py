@@ -105,12 +105,12 @@ class MultipleDataset:
             fg = '#ffffff'
             display = "*LOAD RES*"
         else:
-          action = 'reap \'%s#%s\'' % (self.cif_name, index)
+          action = 'reap "%s#%s"' % (self.cif_name, index)
           highlight = OV.GetParam('gui.green')
           fg = '#ffffff'
           display = "CIF %s" % display
       else:
-        action = 'reap \'%s#%s\'' % (self.cif_name, index)
+        action = 'reap "%s#%s"' % (self.cif_name, index)
         highlight = olx.GetVar('linkButton.bgcolor')
       name = name.replace("(", "_").replace(")", "_")
       display = display.replace("(", "_").replace(")", "_").replace("_0m_a", ".").replace("_auto", ".")

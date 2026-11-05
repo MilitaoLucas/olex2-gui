@@ -546,8 +546,8 @@ def LoadStructureParams():
 
 OV.registerFunction(LoadStructureParams)
 
-def SaveStructureParams(no_save='false'):
-  if OV.FileName() != 'none' and no_save != 'true':
+def SaveStructureParams(no_save=False):
+  if OV.FileName() != 'none' and not OV.get_bool_from_any(no_save):
     structure_phil_file = os.path.join(OV.StrDir(), OV.ModelSrc()) + ".phil"
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
