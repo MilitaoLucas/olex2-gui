@@ -20,12 +20,16 @@ class UsersDB:
     OV.SetControlLabel(self.ctrl("message"), txt)
 
   def Manage(self):
-    w, h = 650, 650
+    w, h = 760, 760
     x, y = gui.GetBoxPosition(w, h)
-    path = "%s/etc/gui/tools/users-db.htm" % (olx.BaseDir())
-    path = os.path.join(olx.BaseDir(), "etc", "gui", "tools", "users-db.htm")
-    olx.Popup(self.pop_name, path, s=True, b="tc", t="Manage users and sites",
+    # built in the style of the Help window (form.py), written to OlexFS;
+    # it replaces etc/gui/tools/users-db.htm
+    from . import form
+    page = "%s.htm" % self.pop_name
+    OV.write_to_olex(page, form.users_page())
+    olx.Popup(self.pop_name, page, s=True, b="tc", t="Manage users and sites",
            w=w, h=h, x=x, y=y)
+    OV.SetPopBorder(self.pop_name, 0)
     self.setSite(None)
     self.setPerson(None)
     self.setMessage()

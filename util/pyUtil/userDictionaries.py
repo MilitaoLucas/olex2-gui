@@ -314,7 +314,9 @@ class Persons:
 
   def findPersonId(self, name, email=None):
     if email:
-      sql = "SELECT * FROM person WHERE email = '%s'" %(parts[i], parts[j])
+      # by email: one person only, matched like the login does (gui.login.logic)
+      from gui.login import logic
+      return logic.find_user(DBConnection().conn, email)[0]
     else:
       if ',' in name:
         parts = [x.strip(' ')for x in name.split(',')]

@@ -1427,6 +1427,7 @@ user
     .type = str
   email = ""
     .type = str
+    .help = Your email address: it identifies you in the people database (the operator of your structures).
   reference = ""
     .type = str
   def_style_scene_src_dir = BaseDir()/etc/styles/
