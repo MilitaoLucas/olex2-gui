@@ -481,12 +481,33 @@ t:exti_gui{
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
         oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
-        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>spy.gui.tools.set_exti_aniso_gui(false)>>delins EXTI"
       >
     </td>
 
     <td width='22%'>
       <b>$spy.gui.tools.refine_extinction()<b>
+    </td>
+}
+
+t:exti_aniso_gui{
+    <td width='5%' align='right'>
+      <b>aniso </b>
+    </td>
+
+    <td width='4%'>
+      <input
+        type='checkbox'
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
+        name='SNUM_REFINEMENT_EXTI_ANISO'
+        checked="spy.gui.tools.exti_aniso_on()"
+        oncheck="spy.gui.tools.set_exti_aniso_gui(true)"
+        onuncheck="spy.gui.tools.set_exti_aniso_gui(false)"
+      >
+    </td>
+
+    <td width='30%'>
+      $spy.gui.tools.exti_aniso_str()
     </td>
 }
 

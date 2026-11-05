@@ -345,7 +345,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       msg_l = len(msg)
       #if self.exti is not None and not OV.GetACI().EDI.get_stored_param_bool("refinement.refine.exti"):
       if self.exti is not None and not OV.GetHeaderParamBool('ED.refinement.refine.exti'):
-        self.exti = None
+        self.exti = self.exti_aniso = None
         msg +=", ignoring EXTI"
       if self.swat is not None:
         self.swat = None
@@ -356,7 +356,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.fc_correction.expression = ''
       #disable weights auto-update
       OV.SetParam('snum.refinement.update_weight', False)
-    if self.exti is not None:
+    if self.exti_aniso is not None:
+      self.fc_correction = xray.shelx_aniso_extinction_correction(
+        self.xray_structure().unit_cell(), self.wavelength, self.exti_aniso)
+      self.fc_correction.grad = True
+      self.fc_correction.expression = r'Fc^*^=kFc[1+0.001x(h)Fc^2^\l^3^/sin(2\q)]^-1/4^,' \
+        r' x(h)=[tr(X)-u^T^Xu]/2, u the unit scattering vector (anisotropic)'
+    elif self.exti is not None:
       self.fc_correction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, self.exti)
       self.fc_correction.grad = True
@@ -661,6 +667,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
             su = math.sqrt(diag[dlen-1])
             OV.SetExtinction(self.reparametrisation.fc_correction.value, su)
             dlen -= 1
+          elif isinstance(self.reparametrisation.fc_correction, COA.exti_aniso_correction):
+            # EXTI shows tr(X)/3, whose variance takes the covariances of the diagonal too
+            k = dlen-6
+            cov = self.twin_covariance_matrix.matrix_packed_u_as_symmetric()
+            su_mean = math.sqrt(max(0, sum(cov[(k+i, k+j)] for i in range(3) for j in range(3))))/3
+            COA.set_exti_aniso(self.reparametrisation.fc_correction.values,
+              [math.sqrt(diag[k+i]) for i in range(6)], su_mean)
+            dlen -= 6
           elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
             e_g = math.sqrt(diag[dlen-2])
             e_U = math.sqrt(diag[dlen-1])
@@ -1757,7 +1771,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     if self.reparametrisation.fc_correction.expression:
       cif_block['_refine_ls_extinction_expression'] = self.reparametrisation.fc_correction.expression
-      if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
+      if isinstance(self.reparametrisation.fc_correction,
+          (xray.shelx_extinction_correction, COA.exti_aniso_correction)):
         cif_block['_refine_ls_extinction_coef'] = olx.xf.rm.Exti()
       elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
         cif_block['_refine_ls_extinction_coef'] = fmt % self.reparametrisation.fc_correction.g +\
@@ -1931,7 +1946,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   #moves EXTI and scales from Fc_sq to Fo_sq
   def  transfer_exti_scale_hklf2(self, exti, wavelengths, fo_sq, fc_sq):
-    if exti:
+    # exti is x, or x(h) per reflection for the anisotropic EXTI
+    if isinstance(exti, flex.double) or exti:
       uc = fc_sq.unit_cell()
       sin_t_sq = uc.d_star_sq(fc_sq.indices()) * flex.pow(wavelengths, 2) * 0.25
       sin_2t = 2*flex.pow(flex.abs(sin_t_sq*(1-sin_t_sq)), 0.5)
@@ -2033,13 +2049,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if (self.exti is not None or self.swat is not None) and\
           type(self.fc_correction) is not xray.dummy_fc_correction:
         if self.exti is not None:
+          exti = self.fc_correction.value if self.exti_aniso is None else \
+            self.exti_x(fc_sq, self.fc_correction.values)
           if self.hklf_code == 2:
             fo_sq, fc_sq = self.transfer_exti_scale_hklf2(
-              self.fc_correction.value, self.normal_eqns.observations.wavelengths,
+              exti, self.normal_eqns.observations.wavelengths,
                 fo_sq, fc_sq)
           else:
             fo_sq, fc_sq = self.transfer_exti(
-              self.fc_correction.value, self.wavelength, fo_sq, fc_sq,
+              exti, self.wavelength, fo_sq, fc_sq,
               do_scale=False)
         # elif self.swat is not None: # swat should not be transferred...
         #   #fo_sq, fc_sq = self.transfer_swat(self.swat[0], self.swat[1], fo_sq, fc_sq)
@@ -2607,11 +2625,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
         f_mask = self.f_mask.common_set(f_calc)
         f_calc = f_calc.array(data=f_calc.data()+f_mask.data())
     elif self.hklf_code == 2:
+      fc_sq = self.normal_eqns.f_calc.as_intensity_array()
+      exti = None
+      if self.fc_correction.grad:
+        exti = self.fc_correction.value if self.exti_aniso is None else \
+          self.exti_x(fc_sq, self.fc_correction.values)
       fo2, fc_sq = self.transfer_exti_scale_hklf2(
-        None if not self.fc_correction.grad else self.fc_correction.value,
-        self.normal_eqns.observations.wavelengths,
-        self.normal_eqns.observations.fo_sq,
-        self.normal_eqns.f_calc.as_intensity_array())
+        exti, self.normal_eqns.observations.wavelengths,
+        self.normal_eqns.observations.fo_sq, fc_sq)
       fo2 = fo2.customized_copy(space_group_info=sgtbx.space_group_info(self.space_group))
       fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
       f_calc = self.f_calc(fo2, apply_extinction_correction=False, twin_data=False)

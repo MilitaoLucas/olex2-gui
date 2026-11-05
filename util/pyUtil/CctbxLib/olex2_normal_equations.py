@@ -382,6 +382,9 @@ def normal_equation_class(*args, **kwds):
       if self.reparametrisation.fc_correction and self.reparametrisation.fc_correction.grad:
         if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
           OV.SetExtinction(self.reparametrisation.fc_correction.value)
+        elif isinstance(self.reparametrisation.fc_correction, getattr(xray, 'shelx_aniso_extinction_correction', ())):
+          from cctbx_olex_adapter import set_exti_aniso
+          set_exti_aniso(self.reparametrisation.fc_correction.values)
         elif isinstance(self.reparametrisation.fc_correction, xray.shelx_SWAT_correction):
           OV.SetSWAT(self.reparametrisation.fc_correction.g,
             self.reparametrisation.fc_correction.U)

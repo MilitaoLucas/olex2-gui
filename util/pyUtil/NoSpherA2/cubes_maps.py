@@ -1391,7 +1391,7 @@ def f_calc_no_dispersion(cctbx_adapter, miller_set, table_name=None):
         data.append(one_h.f_calc)
     fc = miller_set.array(data=data)
   if cctbx_adapter.exti is not None:
-    fc = fc.apply_shelxl_extinction_correction(cctbx_adapter.exti, cctbx_adapter.wavelength)
+    fc = fc.apply_shelxl_extinction_correction(cctbx_adapter.exti_x(fc), cctbx_adapter.wavelength)
   return fc
 
 def without_dispersion(cctbx_adapter, f_sq_obs, f_calc, f_mask=None, table_name=None):

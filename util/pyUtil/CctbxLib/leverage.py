@@ -139,6 +139,8 @@ def parameter_labels(self, n_params):
   if self.reparametrisation.fc_correction is not None and self.reparametrisation.fc_correction.grad:
     if isinstance(self.reparametrisation.fc_correction, xray.shelx_extinction_correction):
       annotations_1.append("EXTI")
+    elif isinstance(self.reparametrisation.fc_correction, getattr(xray, 'shelx_aniso_extinction_correction', ())):
+      annotations_1 += ["EXTI.X%s" % c for c in ("11", "22", "33", "12", "13", "23")]
     else:
       annotations_1.append("SWAT.U")
       annotations_1.append("SWAT.G")

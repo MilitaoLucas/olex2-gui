@@ -1068,6 +1068,10 @@ def make_exti_swat_gui():
     exti = olx.xf.rm.Exti()
     if exti and exti != "n/a":
       html = gui.tools.TemplateProvider.get_template('exti_gui', force=debug)
+      from NoSpherA2.utilities import dev_features
+      from cctbx_olex_adapter import exti_aniso_correction
+      if dev_features() and exti_aniso_correction:
+        html += gui.tools.TemplateProvider.get_template('exti_aniso_gui', force=debug)
     else:
       swat = olx.xf.rm.SWAT()
       if swat and swat != "n/a":
@@ -1077,6 +1081,37 @@ def make_exti_swat_gui():
   return html
 
 OV.registerFunction(make_exti_swat_gui, True, "gui.tools")
+
+def exti_aniso_on():
+  return bool(OV.GetHeaderParam('exti.aniso'))
+
+OV.registerFunction(exti_aniso_on, True, "gui.tools")
+
+def set_exti_aniso_gui(on):
+  # the tensor starts from X = EXTI*I, the isotropic model; EXTI keeps tr(X)/3
+  if str(on).lower() == 'true':
+    from cctbx_olex_adapter import set_exti_aniso
+    x = float(olx.xf.rm.Exti().split('(')[0])
+    set_exti_aniso((x, x, x, 0, 0, 0))
+  else:
+    OV.ClearHeaderParam('exti.aniso')
+    OV.ClearHeaderParam('exti.aniso_su')
+
+OV.registerFunction(set_exti_aniso_gui, True, "gui.tools")
+
+def exti_aniso_str():
+  values = OV.GetHeaderParam('exti.aniso')
+  if not values:
+    return ''
+  values = [float(x) for x in values.split(',')]
+  sus = OV.GetHeaderParam('exti.aniso_su')
+  if not sus:
+    return ' '.join('X%s %.3g' % (n, v) for n, v in zip(('11', '22', '33'), values))
+  from libtbx.utils import format_float_with_standard_uncertainty as fmt
+  sus = [float(x) for x in sus.split(',')]
+  return ' '.join('X%s %s' % (n, fmt(v, s)) for n, v, s in zip(('11', '22', '33'), values, sus))
+
+OV.registerFunction(exti_aniso_str, True, "gui.tools")
 
 def refine_swat():
   retVal = ""

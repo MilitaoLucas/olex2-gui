@@ -47,6 +47,34 @@ import operator
 import fractions
 
 
+# Anisotropic EXTI (debug only): the tensor X11 X22 X33 X12 X13 X23 of cctbx's
+# shelx_aniso_extinction_correction lives in the ins header, EXTI carries its
+# mean tr(X)/3, so switching it off falls back to the isotropic equivalent.
+# An older or upstream cctbx lacks the class: () never matches isinstance and
+# the tensor is ignored, so the refinement runs the isotropic EXTI
+exti_aniso_correction = getattr(xray, 'shelx_aniso_extinction_correction', ())
+
+def get_exti_aniso():
+  v = OV.GetHeaderParam('exti.aniso')
+  if not v or not exti_aniso_correction:
+    return None
+  return tuple(float(x) for x in v.split(','))
+
+def set_exti_aniso(values, sus=None, su_mean=None):
+  OV.SetHeaderParam('exti.aniso', ','.join('%.8g' % x for x in values))
+  if sus is not None:
+    OV.SetHeaderParam('exti.aniso_su', ','.join('%.2g' % x for x in sus))
+  if su_mean is None:
+    OV.SetExtinction(sum(values[:3])/3)
+  else:
+    OV.SetExtinction(sum(values[:3])/3, su_mean)
+
+def exti_aniso_x(unit_cell, indices, X):
+  """ x(h) = sum_p a_p X_p over the unit scattering vector u, as the C++ """
+  u1, u2, u3 = unit_cell.reciprocal_space_vector(indices).each_normalize().parts()
+  return 0.5*(X[0]*(1-u1*u1) + X[1]*(1-u2*u2) + X[2]*(1-u3*u3)) \
+    - X[3]*u1*u2 - X[4]*u1*u3 - X[5]*u2*u3
+
 def rt_mx_from_olx(olx_input):
   from libtbx.utils import flat_list
   return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
@@ -189,6 +217,7 @@ class OlexCctbxAdapter(object):
         self.hklf5_as_hklf4 = True
 
     self.exti = self.olx_atoms.model.get('exti', None)
+    self.exti_aniso = get_exti_aniso() if self.exti is not None else None
     self.swat = self.olx_atoms.model.get('swat', None)
     self.initialise_reflections(doFilter=do_filter)
     from connectivity_table import connectivity_table
@@ -532,8 +561,16 @@ class OlexCctbxAdapter(object):
         # model, so the last ones computed are kept; see fc_store
         fc = fc_store.f_calc(xs, miller_set_, algorithm)
     if apply_extinction_correction and self.exti is not None:
-      fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
+      fc = fc.apply_shelxl_extinction_correction(self.exti_x(fc), self.wavelength)
     return fc
+
+  def exti_x(self, ma, values=None):
+    """ The EXTI x for every reflection of ma: the scalar, or x(h) of the
+    anisotropic tensor (values, else the one read at start) when that is on.
+    """
+    if self.exti_aniso is None:
+      return self.exti
+    return exti_aniso_x(ma.unit_cell(), ma.indices(), values or self.exti_aniso)
 
   def get_one_h_function(self, table_file_name):
     return get_one_h_function(self.xray_structure(), table_file_name)
