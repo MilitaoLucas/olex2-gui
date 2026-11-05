@@ -1550,7 +1550,8 @@ class Graph(ArgumentParser):
 
       y = round(y,1)
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
-        top_left = (x,y)
+        # tick is at y + wY/2; centre the visible digits (ink) on it
+        top_left = (x, y - self._ink_top(txt)/2)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
@@ -1574,6 +1575,17 @@ class Graph(ArgumentParser):
     draw.text((x, y), txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2 + (3 * self.scale)), int(self.graph_top +wY/2)))
+
+  def _ink_top(self, txt):
+    """Blank space between the text origin and the top of the glyphs (font_small).
+
+    get_text_size() returns the bottom of the ink as height, so centring a
+    label on wY/2 leaves it this much / 2 too low.
+    """
+    bbox = IT.text_bbox(font=self.font_small, text=str(txt))
+    if not bbox:
+      return 0
+    return bbox[1]
 
   def calc_extra_width(self, y_min,y_max, label):
     delta_y = y_max - y_min
@@ -1661,7 +1673,8 @@ class Graph(ArgumentParser):
         new = Image.new('RGB', size, self.pageColour)
         draw = ImageDraw.Draw(new)
         draw.text((0,0),txt,font=self.font_small, fill=self.axislabelColour)
-        self.im.paste(new, (int(x),int(y)))
+        # tick level is y + wY/2; centre the visible digits (ink) on it
+        self.im.paste(new, (int(x), int(y - self._ink_top(txt)/2)))
         #CURRENTLY TICKS ON SECOND AXIS ARE DISABLED... cant get them working...
         #x = self.graph_right
         #y = y + int(wY/2)

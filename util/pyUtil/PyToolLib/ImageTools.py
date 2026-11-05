@@ -1673,48 +1673,7 @@ class ImageTools(FontInstances):
   from PIL import ImageFont
   def text_bbox(self, font: ImageFont.FreeTypeFont, text: str):
     """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
-    # 1) Pillow's getbbox (newer versions)
-    try:
-      bbox = font.getbbox(text)
-      if bbox is not None:
-        return bbox
-    except AttributeError:
-      pass
-    except Exception:
-      # some versions may raise for certain inputs; ignore and try fallback
-      pass
-
-    # 2) Pillow's getlength + font metrics to build bbox if available
-    try:
-      # getlength gives advance width for the string (Pillow >= 8+)
-      if hasattr(font, "getlength"):
-        width = font.getlength(text)
-        ascent, descent = font.getmetrics()
-        # bounding box left, top, right, bottom in pixels relative to baseline:
-        # we approximate top as -ascent and bottom as descent
-        return (0, -ascent, int(width), descent)
-    except Exception:
-      pass
-
-    # 3) getmask fallback (works broadly, returns pixel bbox)
-    try:
-      mask = font.getmask(text)
-      bbox = mask.getbbox()  # may be None for empty strings or whitespace
-      if bbox:
-        return bbox
-    except Exception:
-      pass
-
-    # 4) conservative fallback using getsize (older API)
-    try:
-      w, h = font.getsize(text)
-      ascent, descent = font.getmetrics()
-      # approximate top as 0, bottom as h (not perfect but deterministic)
-      return (0, 0, w, h)
-    except Exception:
-      pass
-
-    return None
+    return text_bbox(font=font, text=text)
 
   def text_advance(font: ImageFont.FreeTypeFont, text: str):
     """Return the horizontal advance width (float or int)."""
@@ -1817,47 +1776,43 @@ OV.registerFunction(IT.trim_image, False, 'it')
 
 def text_bbox(font: ImageFont.FreeTypeFont, text: str):
   """Return bbox (left, top, right, bottom) for text, or None if it cannot be determined."""
-  # 1) Pillow's getbbox (newer versions)
-  try:
-    bbox = font.getbbox(text)
-    if bbox is not None:
-      return bbox
-  except AttributeError:
-    pass
-  except Exception:
-    # some versions may raise for certain inputs; ignore and try fallback
-    pass
+  # All branches return coordinates relative to the draw.text() origin
+  # (top-left, anchor 'la'), so text drawn at (0, 0) ends at (right, bottom).
+  #
+  # 1) Pillow >= 8.0: getbbox
+  if hasattr(font, "getbbox"):
+    try:
+      bbox = font.getbbox(text)
+      if bbox is not None:
+        return bbox
+    except Exception as ex:
+      print("text_bbox: getbbox failed for %r: %s" % (text, ex))
 
-  # 2) Pillow's getlength + font metrics to build bbox if available
-  try:
-    # getlength gives advance width for the string (Pillow >= 8+)
-    if hasattr(font, "getlength"):
+  # 2) Pillow < 8.0 (Olex2 still runs on Python 3.8 / Pillow 7.1.2):
+  #    getsize already includes the offset of the ink from the origin, i.e.
+  #    it returns (right, bottom) -- exactly what textsize() used to return.
+  if hasattr(font, "getsize"):
+    try:
+      w, h = font.getsize(text)
+      left = top = 0
+      if hasattr(font, "getoffset"):
+        left, top = font.getoffset(text)
+      return (left, top, w, h)
+    except Exception as ex:
+      print("text_bbox: getsize failed for %r: %s" % (text, ex))
+
+  # 3) Advance width + line metrics
+  if hasattr(font, "getlength"):
+    try:
       width = font.getlength(text)
       ascent, descent = font.getmetrics()
-      # bounding box left, top, right, bottom relative to the drawing origin
-      # (top-left, anchor 'la'): bottom approximated as the full line height
       return (0, 0, int(width), ascent + descent)
-  except Exception:
-    pass
+    except Exception as ex:
+      print("text_bbox: getlength failed for %r: %s" % (text, ex))
 
-  # 3) getmask fallback (works broadly, returns pixel bbox)
-  try:
-    mask = font.getmask(text)
-    bbox = mask.getbbox()  # may be None for empty strings or whitespace
-    if bbox:
-      return bbox
-  except Exception:
-    pass
-
-  # 4) conservative fallback using getsize (older API)
-  try:
-    w, h = font.getsize(text)
-    ascent, descent = font.getmetrics()
-    # approximate top as 0, bottom as h (not perfect but deterministic)
-    return (0, 0, w, h)
-  except Exception:
-    pass
-
+  # NB: font.getmask(text).getbbox() is deliberately NOT used: it returns
+  # the ink box relative to the ink itself (offset dropped), which makes all
+  # text measure too short and shifts / clips anything positioned with it.
   return None
 
 def text_advance(font: ImageFont.FreeTypeFont, text: str):
