@@ -53,8 +53,8 @@ def build_candidates(fragments, raw_connected=None, masked_frags=None,
   their formula differs from it.
   """
   from .parser import format_moiety_string_with_mask, same_moiety
-  from .charges import (balance_summary, suggest_mixed_valence, total_charge_text,
-                        copy_charges, ELEMENT_CHARGES)
+  from .charges import (balance_summary, best_guess, suggest_mixed_valence,
+                        total_charge_text, copy_charges, ELEMENT_CHARGES)
   import copy, re
 
   candidates = []
@@ -69,41 +69,7 @@ def build_candidates(fragments, raw_connected=None, masked_frags=None,
   mv = suggest_mixed_valence(fragments, target_metal)
 
   # --- Candidate 1: best guess (mixed-valence applied if available) ---
-  best = copy.deepcopy(fragments)
-  ambig = [f for f in best
-           if f.charge_confidence in ('element_ambiguous', 'element_guess')
-           and len(f.elements) == 1]
-
-  if len(ambig) == 1 and mv:
-    mv_suggestions = [s for s in mv if 'Mixed valence' in s]
-    top = mv_suggestions[0] if mv_suggestions else mv[0]
-    f = ambig[0]
-    if mv_suggestions:
-      # Split into two rows
-      parts_str = top.split('[contribution')[0].replace('- Mixed valence: ', '').strip()
-      split_frags = []
-      for part in parts_str.split(', '):
-        part = part.strip()
-        pm = re.match(r'(\d+)?\(?(\w+)\s+([+-]?\d+)([+-])\)?', part)
-        if pm:
-          n_part = int(pm.group(1)) if pm.group(1) else 1
-          q = int(pm.group(3)) * (1 if pm.group(4) == '+' else -1)
-          new_f = copy.deepcopy(f)
-          new_f.multiplicity = n_part
-          new_f.charge = q
-          new_f.charge_confidence = 'balance'
-          split_frags.append(new_f)
-      if split_frags:
-        idx = best.index(f)
-        best[idx:idx+1] = split_frags
-    else:
-      m = re.search(r'contribution: ([+-]\d+)', top)
-      if m:
-        contribution = int(m.group(1))
-        n = f.multiplicity
-        if n > 0 and contribution % n == 0:
-          f.charge = contribution // n
-          f.charge_confidence = 'balance'
+  best = best_guess(fragments)
 
   b = balance_summary(best)
   best_formula = format_moiety_string_with_mask(best, masked_frags or [], unknown_masked)

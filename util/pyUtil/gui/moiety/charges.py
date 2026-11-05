@@ -2,7 +2,7 @@
 gui/moiety/charges.py
 
 Charge inference for moiety fragments, via:
-  1. Exact formula lookup  (common ions, solvents, ligands)
+  1. Exact formula lookup  (common ions, solvents, ligands, metal-centred ions)
   2. Single-element metal  (element -> most likely charge(s))
   3. Charge balance        (solve for one unknown if all others known)
   4. Remaining unknowns    (left as None for user to assign in GUI)
@@ -17,6 +17,8 @@ symbol and count but spaces between tokens) -- e.g. 'H2 O', 'C2 O4', 'P F6'.
 """
 
 from __future__ import annotations
+import copy
+import re
 from fractions import Fraction
 from typing import Optional
 from .parser import MoietyFragment
@@ -179,6 +181,100 @@ FORMULA_CHARGES: dict[str, int] = {
     'Yb':               +3,
     'Lu':               +3,
 
+    # --- Metal-centred ions and molecules ---
+    # connectivity.py keeps these whole when it separates the metals, see METAL_IONS.
+    # Chromate, molybdate, tungstate, PtCl4, SnCl6 and SbF6 are listed above.
+    # Formulae with more than one common charge are in ION_CHARGES below.
+
+    # Tetrahedral oxoanions
+    'V O4':             -3,   # orthovanadate, V(V)
+    'Nb O4':            -3,   # orthoniobate, Nb(V)
+    'Ta O4':            -3,   # orthotantalate, Ta(V)
+    'Tc O4':            -1,   # pertechnetate, Tc(VII)
+    'Re O4':            -1,   # perrhenate, Re(VII)
+    'Fe O4':            -2,   # ferrate, Fe(VI)
+    'Os O4':             0,   # osmium tetroxide, Os(VIII)
+    'H Cr O4':          -1,   # hydrogenchromate
+    'H V O4':           -2,   # hydrogenvanadate
+    'H2 V O4':          -1,   # dihydrogenvanadate
+
+    # Corner-sharing tetrahedra
+    'Cr2 O7':           -2,   # dichromate
+    'Cr3 O10':          -2,   # trichromate
+    'Cr4 O13':          -2,   # tetrachromate
+    'Mo2 O7':           -2,   # dimolybdate
+    'W2 O7':            -2,   # ditungstate
+    'V2 O7':            -4,   # pyrovanadate
+
+    # Oxo tetrahedra with another ligand
+    'Cr O3 Cl':         -1,   # chlorochromate
+    'Cr O3 F':          -1,   # fluorochromate
+    'Cr O2 Cl2':         0,   # chromyl chloride
+    'Os O3 N':          -1,   # osmiamate
+
+    # Tetrathio- and tetraselenometallates, and mixed oxothio ones
+    'V S4':             -3,
+    'Nb S4':            -3,
+    'Ta S4':            -3,
+    'Mo S4':            -2,
+    'W S4':             -2,
+    'Re S4':            -1,
+    'V Se4':            -3,
+    'Nb Se4':           -3,
+    'Ta Se4':           -3,
+    'Mo Se4':           -2,
+    'W Se4':            -2,
+    'Mo O S3':          -2,
+    'Mo O2 S2':         -2,
+    'Mo O3 S':          -2,
+    'W O S3':           -2,
+    'W O2 S2':          -2,
+    'W O3 S':           -2,
+    'V O S3':           -3,
+    'V O2 S2':          -3,
+    'V O3 S':           -3,
+    'Re O3 S':          -1,
+
+    # Tetrahalometallates, tetrahedral or flattened
+    'Mn Cl4':           -2,
+    'Mn Br4':           -2,
+    'Mn I4':            -2,
+    'Co Cl4':           -2,
+    'Co Br4':           -2,
+    'Co I4':            -2,
+    'Ni Cl4':           -2,
+    'Ni Br4':           -2,
+    'Cu Cl4':           -2,
+    'Cu Br4':           -2,
+    'Zn Cl4':           -2,
+    'Zn Br4':           -2,
+    'Zn I4':            -2,
+    'Cd Cl4':           -2,
+    'Cd Br4':           -2,
+    'Cd I4':            -2,
+    'Hg Cl4':           -2,
+    'Hg Br4':           -2,
+    'Hg I4':            -2,
+    'V Cl4':            -1,   # V(III)
+    'Ti Cl4':            0,   # molecular, Ti(IV)
+    'Ti Br4':            0,
+
+    # Square-planar tetrahalometallates
+    'Pd Cl4':           -2,
+    'Pd Br4':           -2,
+    'Pt Br4':           -2,
+    'Au Cl4':           -1,
+    'Au Br4':           -1,
+
+}
+
+# Metal-centred formulae with more than one common charge, most common first.
+# The charge balance decides if it can; otherwise the first one, flagged ambiguous.
+ION_CHARGES: dict[str, list[int]] = {
+    'Mn O4':  [-1, -2, -3],   # permanganate, manganate, hypomanganate
+    'Ru O4':  [-1, -2, 0],    # perruthenate, ruthenate, ruthenium tetroxide
+    'Fe Cl4': [-1, -2],       # Fe(III), Fe(II)
+    'Fe Br4': [-1, -2],       # Fe(III), Fe(II)
 }
 
 # Single bare element -> list of likely charges, most common first
@@ -402,8 +498,10 @@ def infer_charges(fragments: list[MoietyFragment],
     3. Exact formula lookup
     4. Single-element lookup (with ambiguity flag)
     5. Charge balance (if exactly one unknown remains AND ionic context exists)
-    6. If no ionic context at all -- assume neutral for unknowns
-    7. Give up -- leave as None for user
+    6. Ions with several common charges: the most common, flagged ambiguous,
+       which may leave one unknown for the balance
+    7. If no ionic context at all -- assume neutral for unknowns
+    8. Give up -- leave as None for user
 
   Note: without a metal or known ion present, unknown fragments are assumed
   neutral ('assumed_neutral') rather than left as None, since purely organic
@@ -440,6 +538,19 @@ def infer_charges(fragments: list[MoietyFragment],
 
   # One final pass: solve by balance if exactly one unknown
   _solve_unknown(fragments)
+
+  ions = [f for f in fragments if f.formula_string in ION_CHARGES]
+  if any(f.charge is None for f in ions):
+    for f in ions:
+      if f.charge is None:
+        f.charge = ION_CHARGES[f.formula_string][0]
+        f.charge_confidence = 'element_ambiguous'
+    _solve_unknown(fragments)
+  for f in ions:
+    if f.charge_confidence == 'balance' and f.charge not in ION_CHARGES[f.formula_string]:
+      f.charge_confidence = 'balance_suspect'
+      f.charge_suspect_reason = (
+          f"balance gives {f.charge:+d}, which is not a known charge of {f.formula_string}")
 
   # If no ionic context, assume remaining unknowns are neutral
   if not _has_ionic_context(fragments):
@@ -488,6 +599,55 @@ def copy_charges(target: list[MoietyFragment], source: list[MoietyFragment]) -> 
         f.charge_suspect_reason = reason
 
 
+def best_guess(fragments: list[MoietyFragment]) -> list[MoietyFragment]:
+  """
+  A copy of the fragments with the most likely charges. A lone ambiguous metal
+  gets another oxidation state only if the charges do not balance as they are
+  and it makes them balance; mixed valence is preferred over a uniform state.
+  """
+  best = copy.deepcopy(fragments)
+  target = -sum(
+      f.count * f.charge for f in best
+      if f.charge is not None
+      and f.charge_confidence not in ('element_ambiguous', 'element_guess', 'unknown'))
+  ambiguous = [f for f in best
+               if f.charge_confidence in ('element_ambiguous', 'element_guess')
+               and len(f.elements) == 1]
+  current = balance_summary(best)
+  if len(ambiguous) != 1 or current['balanced'] or current['n_unknown']:
+    return best
+
+  def contribution(line):
+    m = re.search(r'contribution: ([+-]\d+)', line)
+    return int(m.group(1)) if m else None
+
+  # the suggestions also list the states that do not balance
+  suggestions = suggest_mixed_valence(best, target)
+  mixed = [s for s in suggestions if 'Mixed valence' in s]
+  uniform = [s for s in suggestions if 'Mixed valence' not in s and contribution(s) == target]
+  f = ambiguous[0]
+  if mixed:
+    parts = mixed[0].split('[contribution')[0].replace('- Mixed valence: ', '').strip()
+    split_frags = []
+    for part in parts.split(', '):
+      pm = re.match(r'(\d+)?\(?(\w+)\s+([+-]?\d+)([+-])\)?', part.strip())
+      if pm:
+        new_f = copy.deepcopy(f)
+        new_f.multiplicity = int(pm.group(1)) if pm.group(1) else 1
+        new_f.charge = int(pm.group(3)) * (1 if pm.group(4) == '+' else -1)
+        new_f.charge_confidence = 'balance'
+        split_frags.append(new_f)
+    if split_frags:
+      i = best.index(f)
+      best[i:i+1] = split_frags
+  elif uniform:
+    n = f.multiplicity
+    if n > 0 and contribution(uniform[0]) % n == 0:
+      f.charge = contribution(uniform[0]) // n
+      f.charge_confidence = 'balance'
+  return best
+
+
 def total_charge_text(fragments: list[MoietyFragment]) -> str:
   """Total charge of the fragments: '-6', '0', or '-6 + ?' with unknown charges."""
   known = as_number(_charge_balance(fragments))
@@ -516,6 +676,16 @@ def _normalise_key(formula_str: str) -> str:
 
 FORMULA_CHARGES = {_normalise_key(k): v for k, v in FORMULA_CHARGES.items()}
 NEUTRAL_FORMULAE = {_normalise_key(k) for k in NEUTRAL_FORMULAE}
+ION_CHARGES = {_normalise_key(k): v for k, v in ION_CHARGES.items()}
+
+
+def _is_metal_ion(key: str) -> bool:
+  symbols = [''.join(c for c in token if c.isalpha()) for token in key.split()]
+  return len(symbols) > 1 and any(s in _METALS for s in symbols)
+
+
+# What connectivity.py keeps whole when it separates the metals
+METAL_IONS = frozenset(k for k in (*FORMULA_CHARGES, *ION_CHARGES) if _is_metal_ion(k))
 
 
 # ---------------------------------------------------------------------------

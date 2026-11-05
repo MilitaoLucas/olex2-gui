@@ -386,7 +386,7 @@ def test_conn_free_partial_occupancy_kept():
   atoms = [_atom('Cl1', 'Cl', (0.3, 0.3, 0.3), [], occu=0.5),
            _atom('C1', 'C', (0.1, 0.1, 0.1), [])]
   raw = disconnected_moiety(find_pieces(atoms, _p1bar()))
-  assert 'Cl0.5' in raw and parse_moiety_string(raw)
+  assert '0.5(Cl)' in raw and parse_moiety_string(raw)
 
 def test_displayed_counts_what_is_shown():
   from .connectivity import find_pieces, displayed_moiety, _IDENTITY
@@ -488,6 +488,232 @@ def test_copy_charges_leaves_the_rest_unknown():
   target[0].charge = 5
   copy_charges(target, source)
   assert target[0].charge == 5
+
+# Metal-centred ions: kept whole when the metals are separated
+
+_PNMA = [
+    (((1, 0, 0), (0, 1, 0), (0, 0, 1)), (0, 0, 0)),
+    (((-1, 0, 0), (0, -1, 0), (0, 0, 1)), (0.5, 0, 0.5)),
+    (((-1, 0, 0), (0, 1, 0), (0, 0, -1)), (0, 0.5, 0)),
+    (((1, 0, 0), (0, -1, 0), (0, 0, -1)), (0.5, 0.5, 0.5)),
+    (((-1, 0, 0), (0, -1, 0), (0, 0, -1)), (0, 0, 0)),
+    (((1, 0, 0), (0, 1, 0), (0, 0, -1)), (0.5, 0, 0.5)),
+    (((1, 0, 0), (0, -1, 0), (0, 0, 1)), (0, 0.5, 0)),
+    (((-1, 0, 0), (0, 1, 0), (0, 0, 1)), (0.5, 0.5, 0.5)),
+]
+_MIRROR = _PNMA[6]
+
+def _pnma():
+  from .connectivity import make_op
+  return [make_op(*op) for op in _PNMA]
+
+def _chromate(cr_bonds=None):
+  """Mo_CDK2: Cr, O1 and O3 on a mirror plane, O2 general, O1 touching a Cu."""
+  return [
+      _atom('Cu1', 'Cu', (0.36828, 0.25, 0.744115), [2], occu=0.5),
+      _atom('Cr1', 'Cr', (0.622238, -0.25, 0.735117),
+            cr_bonds or [2, 4, 3, (3, _MIRROR)], occu=0.5),
+      _atom('O1', 'O', (0.5099, -0.25, 0.794775), [0, 1], occu=0.5),
+      _atom('O2', 'O', (0.621502, -0.064528, 0.674197), [1, (1, _MIRROR)]),
+      _atom('O3', 'O', (0.735473, -0.25, 0.793694), [1], occu=0.5),
+  ]
+
+def test_chromate_stays_whole_on_a_mirror_plane():
+  from .connectivity import find_pieces, disconnected_moiety
+  raw = disconnected_moiety(find_pieces(_chromate(), _pnma()))
+  assert sorted(raw.split(', ')) == ['Cr O4', 'Cu'], raw
+
+def test_chromate_without_its_symmetry_bond_listed():
+  """The site symmetry of the metal completes the ion, whatever bonds are listed."""
+  from .connectivity import find_pieces, disconnected_moiety
+  raw = disconnected_moiety(find_pieces(_chromate([2, 3, 4]), _pnma()))
+  assert sorted(raw.split(', ')) == ['Cr O4', 'Cu'], raw
+
+def test_bonds_listed_at_one_end_only():
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = _chromate()
+  for a in atoms[2:]:
+    a['neighbours'] = []
+  atoms[0]['neighbours'] = []
+  raw = disconnected_moiety(find_pieces(atoms, _pnma()))
+  assert sorted(raw.split(', ')) == ['Cr O4', 'Cu'], raw
+
+def test_chromate_structure_end_to_end():
+  """The structure that started this: everything balances, nothing is ambiguous."""
+  from .tab import build_candidates
+  frags = infer('Cu, H2 O, 2(C3 H10 N2), Cr O4')
+  by_formula = {f.formula_string: f for f in frags}
+  assert by_formula['Cr O4'].charge == -2 and by_formula['Cr O4'].charge_confidence == 'lookup'
+  assert by_formula['C3 H10 N2'].charge == 0
+  best = build_candidates(frags, 'C6 H22 Cu N4 O, Cr O4')[0]
+  assert best['balanced']
+  assert best['formula'] == '(Cu 2+), H2 O, 2(C3 H10 N2), (Cr O4 2-)', best['formula']
+
+def test_displayed_chromate_counts_its_symmetry_copy():
+  from .connectivity import find_pieces, displayed_moiety
+  atoms = _chromate()
+  pieces = find_pieces(atoms, _pnma())
+  shown = ['Cu1', 'Cr1', 'O1', 'O2', 'O2_$1', 'O3']
+  assert sorted(displayed_moiety(pieces, atoms, shown, _pnma()).split(', ')) == ['Cr O4', 'Cu']
+
+def test_dichromate_bridged_on_an_inversion_centre():
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = [
+      _atom('Cr1', 'Cr', (0.2, 0.1, 0.1), [1, 2, 3, 4]),
+      _atom('O1', 'O', (0.0, 0.0, 0.0), [0, (0, _INV)], occu=0.5),
+      _atom('O2', 'O', (0.3, 0.1, 0.1), [0]),
+      _atom('O3', 'O', (0.2, 0.2, 0.1), [0]),
+      _atom('O4', 'O', (0.2, 0.1, 0.2), [0]),
+  ]
+  assert disconnected_moiety(find_pieces(atoms, _p1bar())) == 'Cr2 O7'
+
+def test_hydrogenchromate_keeps_its_h():
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = [
+      _atom('Cr1', 'Cr', (0.2, 0.1, 0.1), [1, 2, 3, 4]),
+      _atom('O1', 'O', (0.3, 0.1, 0.1), [0, 5]),
+      _atom('O2', 'O', (0.2, 0.2, 0.1), [0]),
+      _atom('O3', 'O', (0.2, 0.1, 0.2), [0]),
+      _atom('O4', 'O', (0.1, 0.1, 0.1), [0]),
+      _atom('H1', 'H', (0.35, 0.1, 0.1), [1]),
+  ]
+  assert disconnected_moiety(find_pieces(atoms, _p1bar())) == 'H Cr O4'
+
+def _metal_with_four(ligand, extra=None):
+  atoms = [_atom('M1', 'Co', (0.2, 0.2, 0.2), [1, 2, 3, 4])]
+  atoms += [_atom(f'X{i}', ligand, (0.2 + i / 20, 0.3, 0.3), [0]) for i in range(1, 5)]
+  return atoms
+
+def test_tetrahalometallate_stays_whole():
+  from .connectivity import find_pieces, disconnected_moiety
+  assert disconnected_moiety(find_pieces(_metal_with_four('Cl'), _p1bar())) == 'Cl4 Co'
+  assert infer('Cl4 Co')[0].charge == -2
+
+def test_metal_with_another_ligand_is_no_ion():
+  """One O carries a carbon: a carboxylate, so no MO4 unit, whatever the count."""
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = _metal_with_four('O')
+  atoms[0]['type'] = 'Cr'
+  atoms[1]['neighbours'] = [(0, atoms[0]['neighbours'][0][1]), (5, atoms[0]['neighbours'][0][1])]
+  atoms.append(_atom('C1', 'C', (0.5, 0.5, 0.5), [1]))
+  raw = disconnected_moiety(find_pieces(atoms, _p1bar()))
+  assert 'Cr O4' not in raw and 'Cr' in raw.split(', '), raw
+
+def test_oxo_count_not_tabulated_stays_split():
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = _metal_with_four('O')[:4]
+  atoms[0]['type'] = 'Cr'
+  atoms[0]['neighbours'] = atoms[0]['neighbours'][:3]
+  raw = disconnected_moiety(find_pieces(atoms, _p1bar()))
+  assert sorted(raw.split(', ')) == ['3(O)', 'Cr'], raw
+
+def test_polymer_with_shared_halides_is_no_ion():
+  """A CuCl2 chain: the formula is what decides, and CuCl2 is no known ion."""
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = [
+      _atom('Cu1', 'Cu', (0.0, 0.0, 0.0), [1, (1, _INV)], occu=0.5),
+      _atom('Cl1', 'Cl', (0.2, 0.2, 0.2), [0, (0, _INV)]),
+  ]
+  raw = disconnected_moiety(find_pieces(atoms, _p1bar()))
+  assert sorted(raw.split(', ')) == ['2(Cl)', 'Cu'], raw
+
+def test_table_of_metal_ions():
+  from .charges import METAL_IONS, ION_CHARGES, _normalise_key
+  for key in ('Cr O4', 'Mo O4', 'W O4', 'V O4', 'Mn O4', 'Re O4', 'Tc O4', 'Fe O4', 'Ru O4',
+              'Os O4', 'Cr2 O7', 'Mo S4', 'Co Cl4', 'Fe Cl4', 'Zn Cl4', 'Cr O3 Cl', 'Os O3 N'):
+    assert _normalise_key(key) in METAL_IONS, key
+  # none of these is an ion to keep whole
+  for key in ('H2 O', 'Cl O4', 'S O4', 'P O4', 'Cu', 'Na', 'C2 O4'):
+    assert key not in METAL_IONS, key
+  assert 'Mn O4' in ION_CHARGES
+
+def test_best_guess_keeps_oxidation_state_that_balances():
+  from .tab import build_candidates
+  for raw, expected in (('Cu, S O4', '(Cu 2+), (O4 S 2-)'),
+                        ('Fe, 3(Cl)', '(Fe 3+), 3(Cl 1-)')):
+    best = build_candidates(infer(raw), raw)[0]
+    assert best['balanced'] and best['formula'] == expected, best['formula']
+
+def test_best_guess_changes_oxidation_state_only_to_one_that_balances():
+  from .tab import build_candidates
+  for raw, expected in (('Fe, 2(Cl)', '(Fe 2+), 2(Cl 1-)'),
+                        ('Cu, Cl', '(Cu 1+), (Cl 1-)')):
+    best = build_candidates(infer(raw), raw)[0]
+    assert best['balanced'] and best['formula'] == expected, best['formula']
+  # nothing fits: stays at the most common state, and says so
+  best = build_candidates(infer('Cu, 7(Cl)'), 'Cu, 7(Cl)')[0]
+  assert not best['balanced'] and '(Cu 2+)' in best['formula']
+
+def test_ion_with_several_charges_follows_the_balance():
+  assert infer('K, Mn O4')[1].charge == -1
+  assert infer('2(K), Mn O4')[1].charge == -2
+  assert infer('3(K), Mn O4')[1].charge == -3
+  assert infer('2(K), Cl4 Fe')[1].charge == -2
+  assert infer('2(K), Cl4 Fe')[1].charge_confidence == 'balance'
+
+def test_ion_with_several_charges_first_guess_then_balance():
+  frags = infer('C8 H20 N, Mn O4')
+  assert frags[1].charge == -1 and frags[1].charge_confidence == 'element_ambiguous'
+  assert frags[0].charge == 1 and frags[0].charge_confidence == 'balance'
+
+def test_ion_with_impossible_balance_is_suspect():
+  frags = infer('5(K), Mn O4')
+  assert frags[1].charge == -5 and frags[1].charge_confidence == 'balance_suspect'
+
+# Part-occupied water
+
+def _two_waters(occu1=0.35, occu2=0.15):
+  """Two water sites on a mirror plane in Pnma, with their H as in mo_CDK2."""
+  atoms = [_atom('Cu1', 'Cu', (0.36828, 0.25, 0.744115), [], occu=0.5)]
+  for name, x, occu in (('4', 0.157, occu1), ('5', 0.589, occu2)):
+    n = len(atoms)
+    atoms += [
+        _atom(f'O{name}', 'O', (x, 0.25, 0.725), [n + 1, n + 2, (n + 1, _MIRROR), (n + 2, _MIRROR)], occu=occu),
+        _atom(f'H{name}a', 'H', (x + 0.03, 0.34, 0.75), [n, (n, _MIRROR)], occu=occu),
+        _atom(f'H{name}b', 'H', (x + 0.03, 0.16, 0.75), [n, (n, _MIRROR)], occu=occu),
+    ]
+  return atoms
+
+def test_water_on_two_part_occupied_sites_adds_up():
+  from .connectivity import find_pieces, disconnected_moiety
+  raw = disconnected_moiety(find_pieces(_two_waters(), _pnma()))
+  assert sorted(raw.split(', ')) == ['Cu', 'H2 O'], raw
+
+def test_water_sites_not_adding_up_to_one_keep_their_total():
+  """0.68 stays 0.68, and does not scale the formula to make it a whole number."""
+  from .connectivity import find_pieces, disconnected_moiety
+  raw = disconnected_moiety(find_pieces(_two_waters(0.2, 0.14), _pnma()))
+  assert sorted(raw.split(', ')) == ['0.68(H2 O)', 'Cu'], raw
+  water = next(f for f in infer(raw) if f.formula_string == 'H2 O')
+  assert water.charge == 0 and water.charge_confidence == 'lookup'
+  assert repr(water) == '0.68(H2 O)'
+
+def test_displayed_water_adds_up_too():
+  from .connectivity import find_pieces, displayed_moiety
+  atoms = _two_waters()
+  shown = ['Cu1', 'O4', 'H4a', 'H4b', 'O5', 'H5a', 'H5b']
+  shown += [n + '_$1' for n in ('H4a', 'H4b', 'H5a', 'H5b')]
+  raw = displayed_moiety(find_pieces(atoms, _pnma()), atoms, shown, _pnma())
+  assert sorted(raw.split(', ')) == ['Cu', 'H2 O'], raw
+
+def test_part_occupied_ion_is_still_the_ion():
+  from .connectivity import find_pieces, disconnected_moiety
+  atoms = _metal_with_four('Cl')
+  for a in atoms:
+    a['occu'] = 0.5
+  assert disconnected_moiety(find_pieces(atoms, _p1bar())) == '0.5(Cl4 Co)'
+
+def test_best_guess_is_the_same_in_console_and_tab():
+  import ast, os
+  from .charges import best_guess
+  frags = infer('Cu, H2 O, 2(C3 H10 N2), Cr O4')
+  assert next(f for f in best_guess(frags) if f.formula_string == 'Cu').charge == 2
+  here = os.path.dirname(os.path.abspath(__file__))
+  for name in ('__init__.py', 'tab.py'):
+    tree = ast.parse(open(os.path.join(here, name)).read())
+    called = {n.func.id for n in ast.walk(tree)
+              if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)}
+    assert 'best_guess' in called, name
 
 def test_displayed_bad_names_refused():
   from .connectivity import find_pieces, displayed_moiety

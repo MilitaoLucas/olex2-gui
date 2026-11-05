@@ -5,6 +5,8 @@ The **moiety formula** (_chemical_formula_moiety) lists the chemically distinct 
 
 This tool works it out from the model: it splits the structure into fragments, infers a charge for each one and checks that the charges balance.
 
+Metals are separated from their ligands to do this, with one exception: a metal with only single-atom ligands whose formula is a known ion stays whole, for example chromate *(Cr O4 2-)*, permanganate, tetrathiomolybdate or tetrachlorocobaltate. Such a unit may be bonded to another metal as well; it still counts as the ion.
+
 ## The table
 The drop-down at the top selects the formula (see *Suggested moiety formulae*). The table then lists every fragment:
 
@@ -21,7 +23,7 @@ Below the fragments, the **balance equation** adds up the charges, first per fra
 - **user lookup** -- a charge you entered for this formula earlier (see *Your own charges*)
 - **user** -- a charge you entered for this structure
 - **balance** -- the only unknown charge, worked out so that everything adds up to 0
-- **element** / **ambiguous!** -- a lone element (often a metal) with its most common oxidation state; *ambiguous* means other states are common too -- check it
+- **element** / **ambiguous!** -- a lone element (often a metal) with its most common oxidation state, or an ion such as Mn O4 with its most common charge; *ambiguous* means other values are common too -- check it
 - **assumed neutral** -- no metal or ion in the structure, so the fragment is taken as neutral
 - **SUSPECT** -- balance gives a charge that is chemically unlikely for this fragment; usually a metal's oxidation state is wrong
 - **???** -- no charge could be worked out: enter it yourself

@@ -24,7 +24,7 @@ Typical usage
 from .parser import (parse_moiety_string, format_moiety_string, format_moiety_string_with_mask,
                      same_moiety, MoietyFragment)
 from .charges import (infer_charges, balance_summary, check_reasonableness, suggest_mixed_valence,
-                      as_number, total_charge_text, copy_charges)
+                      as_number, total_charge_text, copy_charges, best_guess)
 from . import connectivity
 from . import user_db
 
@@ -727,70 +727,10 @@ def _report(force_input=False):
   masked_frags, unknown_masked = _build_masked_frags()
 
   # ------------------------------------------------------------------
-  # Best-guess formula: apply top mixed-valence suggestion if it helps
+  # Best-guess formula
   # ------------------------------------------------------------------
 
-  # Try to find the single best metal assignment
-  best_fragments = list(fragments)  # shallow copy for best-guess
-  metal_current = sum(
-      f.count * (f.charge or 0) for f in best_fragments
-      if f.charge_confidence in ('element_ambiguous', 'element_guess')
-  )
-  nonmetal_known = sum(
-      f.count * (f.charge or 0) for f in best_fragments
-      if f.charge_confidence not in ('element_ambiguous', 'element_guess', 'unknown')
-      and f.charge is not None
-  )
-  target_metal = -nonmetal_known
-
-  import copy
-  best_fragments = copy.deepcopy(fragments)
-  mv = suggest_mixed_valence(best_fragments, target_metal)
-
-  import re as _re
-  # Apply the top suggestion to best_fragments so the balance line and
-  # proposed formula reflect the best metal guess.
-  ambig_metals = [f for f in best_fragments
-                 if f.charge_confidence in ('element_ambiguous', 'element_guess')
-                 and len(f.elements) == 1]
-  if len(ambig_metals) == 1 and mv:
-    # Prefer mixed-valence suggestion over uniform
-    mv_suggestions = [s for s in mv if 'Mixed valence' in s]
-    top = mv_suggestions[0] if mv_suggestions else mv[0]
-    f = ambig_metals[0]
-    sym = next(iter(f.elements))
-
-    if mv_suggestions:
-      # Mixed valence: split the fragment into two rows
-      # Parse e.g. "(Cu 2+), 2(Cu 1+)  [contribution: +4]"
-      # Extract individual parts before [contribution]
-      parts_str = top.split('[contribution')[0].replace('- Mixed valence: ','').strip()
-      # Parse each part: optional N then (SYM Q+/-)
-      split_frags = []
-      for part in parts_str.split(', '):
-        part = part.strip()
-        pm = _re.match(r'(\d+)?\(?(\w+)\s+([+-]?\d+)([+-])\)?', part)
-        if pm:
-          n_part = int(pm.group(1)) if pm.group(1) else 1
-          q = int(pm.group(3)) * (1 if pm.group(4)=='+' else -1)
-          new_f = copy.deepcopy(f)
-          new_f.multiplicity = n_part
-          new_f.charge = q
-          new_f.charge_confidence = 'balance'
-          split_frags.append(new_f)
-      if split_frags:
-        # Replace the original fragment with the split ones
-        idx = best_fragments.index(f)
-        best_fragments[idx:idx+1] = split_frags
-    else:
-      # Uniform: all same oxidation state
-      m = _re.search(r'contribution: ([+-]\d+)', top)
-      if m:
-        contribution = int(m.group(1))
-        n = f.multiplicity
-        if n > 0 and contribution % n == 0:
-          f.charge = contribution // n
-          f.charge_confidence = 'balance'
+  best_fragments = best_guess(fragments)
 
   # Build balance equation line
   print()

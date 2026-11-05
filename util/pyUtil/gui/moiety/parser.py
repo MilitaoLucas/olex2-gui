@@ -158,6 +158,25 @@ def _lcm(a: int, b: int) -> int:
   return a * b // gcd(a, b)
 
 
+def split_occupancy(counts: dict):
+  """
+  Counts of a part-occupied species as (whole counts, occupancy): H1.4 O0.7 is
+  0.7 of H2 O. None if no such split is there, which is what uneven disorder
+  gives (C2 H6 O0.7), or if every element is present at least once: C4.004 H8 is
+  noise on whole counts and C3.5 H4 is half a molecule on a special position.
+  """
+  values = {sym: float(v) for sym, v in counts.items()}
+  smallest = min(values.values(), default=0)
+  if not 0 < smallest < 1:
+    return None
+  for divisor in range(1, 5):
+    occupancy = smallest / divisor
+    whole = {sym: round(v / occupancy) for sym, v in values.items()}
+    if all(abs(v / occupancy - whole[sym]) < 0.02 for sym, v in values.items()):
+      return whole, occupancy
+  return None
+
+
 def _refactorise(
     multiplicity: Fraction,
     elements: dict[str, Fraction],
@@ -196,6 +215,15 @@ def _refactorise(
   # (e.g. C4.004 from partial occupancy), not chemically meaningful
   # fractions (1/2, 1/3, 1/4). Round element counts to nearest integer instead.
   if k > 12:
+    split = split_occupancy(elements)
+    if split:
+      return MoietyFragment(
+          multiplicity=1,
+          elements=split[0],
+          _raw=raw,
+          _had_fractions=True,
+          _occupancy=float(mult_frac) * split[1],
+      )
     new_elements = {sym: max(1, round(float(v))) if float(v) >= 0.5 else None
                     for sym, v in elements.items()}
     # Drop elements that rounded to zero
@@ -228,6 +256,11 @@ def _refactorise(
     new_elements[sym] = int(scaled)
 
   new_mult = mult_frac / k
+  if had_fractions and new_mult.denominator != 1:
+    # H1.4 O0.7 scaled to whole numbers is 0.1(H14 O7), but it is 0.7(H2 O)
+    common = reduce(gcd, new_elements.values())
+    new_elements = {sym: n // common for sym, n in new_elements.items()}
+    new_mult *= common
   if new_mult.denominator != 1 or new_mult <= 0:
     # The multiplicity is genuinely fractional and irreducible --
     # e.g. 0.679(H2 O) or 3.186(H2 O): measured partial occupancy.

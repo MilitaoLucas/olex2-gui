@@ -143,6 +143,20 @@ def test_fractional_outer_multiplicity():
   assert abs(f._occupancy - 0.679) < 0.001
   assert '0.679' in repr(f)   # exact value preserved
 
+def test_part_occupied_water_in_element_counts():
+  """What the model gives for one water site: 0.7(H2 O), not 0.1(H14 O7)."""
+  for raw, occupancy in (("H1.4 O0.7", 0.7), ("H0.6 O0.3", 0.3), ("H0.68 O0.34", 0.34)):
+    frags = parse_moiety_string(raw)
+    assert frags[0].elements == {'H': 2, 'O': 1}, raw
+    assert abs(frags[0]._occupancy - occupancy) < 0.001, raw
+
+def test_stated_formula_with_fractional_multiplicity_kept():
+  """A formula written as such is not reduced: C2 H4 O2 is not C H2 O."""
+  assert parse_moiety_string("0.5(C2 H4 O2)")[0].elements == {'C': 2, 'H': 4, 'O': 2}
+
+def test_noise_on_whole_counts_not_taken_for_occupancy():
+  assert parse_moiety_string("C4.004 H8")[0].elements == {'C': 4, 'H': 8}
+
 def test_partial_occupancy_dcm():
   """0.5(C H2 Cl2) -- half-occupancy DCM."""
   frags = parse_moiety_string("0.5(C H2 Cl2)")
