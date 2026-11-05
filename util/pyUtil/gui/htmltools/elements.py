@@ -48,7 +48,13 @@ _DARK_DEFAULTS = {
     'green':       '#88cc88',
     'amber':       '#ffcc66',
     'red':         '#ff6666',
+    'charge_pos':  '#bd2010',
+    'charge_neg':  '#0080ff',
 }
+
+
+TABLE_FRAME = '#ababab'   # the frame lines of the Solvent Mask table
+CHARGE_COLUMNS = 5        # columns of charge_rows()
 
 
 def _hex(value) -> str:
@@ -62,7 +68,7 @@ def get_colors() -> dict:
   """
   Return Olex2 colour scheme as a plain dict.
   Keys: bg, font, table_bg, highlight, link, font_name,
-        error, secondary, green, amber, red.
+        error, secondary, green, amber, red, charge_pos, charge_neg.
   Falls back to dark theme defaults outside Olex2.
   """
   try:
@@ -80,6 +86,8 @@ def get_colors() -> dict:
         'green':     _hex(OV.GetParam('gui.green',       _DARK_DEFAULTS['green'])),
         'amber':     _hex(OV.GetParam('gui.orange',      _DARK_DEFAULTS['amber'])),
         'red':       _hex(OV.GetParam('gui.red',         _DARK_DEFAULTS['red'])),
+        'charge_pos': _hex(OV.GetParam('gui.dark_red',   _DARK_DEFAULTS['charge_pos'])),
+        'charge_neg': _hex(OV.GetParam('gui.blue',       _DARK_DEFAULTS['charge_neg'])),
     }
   except Exception:
     return dict(_DARK_DEFAULTS)
@@ -100,6 +108,23 @@ def tool_row(content: str, colspan: int = 3) -> str:
   )
 
 
+def tool_row_help(content: str, help_ext: str, name: str = '',
+                  colspan: int = 3) -> str:
+  """
+  A tool_row() with the info button in the first column, where every other
+  Olex2 tool has it. help_ext is the name of the help entry.
+  """
+  name = name or help_ext.replace('-', '_').upper() + '_ROW'
+  return (
+      f"<!-- #include tool-row-help gui/blocks/tool-row-help.htm;"
+      f"name='{name}';help_ext={help_ext};1; -->\n"
+      f"<td colspan={colspan}>\n"
+      f"{content}\n"
+      f"</td>\n"
+      f"<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->\n"
+  )
+
+
 def tool_row_two_col(left: str, right: str,
                      left_width: str = '30%',
                      right_width: str = '70%') -> str:
@@ -112,12 +137,14 @@ def tool_row_two_col(left: str, right: str,
   )
 
 
-def section_header(title: str, colors: dict = None) -> str:
+def section_title(title: str) -> str:
+  """Bold heading text in the default GUI colour."""
+  return f"<font size='3'><b>{title}&nbsp;</b></font>"
+
+
+def section_header(title: str) -> str:
   """A bold section header row."""
-  c = colors or get_colors()
-  return tool_row(
-      f"<font color='{c['highlight']}' size='3'><b>{title}</b></font>"
-  )
+  return tool_row(section_title(title))
 
 
 def divider() -> str:
@@ -151,7 +178,7 @@ def _font_wrap(content: str) -> str:
 
 def text_input(name: str, value_expr: str, onchange: str,
                width: str = '100%', readonly: bool = False,
-               on_commit: bool = False) -> str:
+               on_commit: bool = False, height: str = '') -> str:
   """
   Single-line text input.
 
@@ -159,6 +186,8 @@ def text_input(name: str, value_expr: str, onchange: str,
   onchange   : spy call string, e.g. "spy.foo.set_val(html.GetValue(~name~))"
   on_commit  : if True, run `onchange` only when the entry is confirmed
                (Enter or leaving the box) instead of on every keystroke
+  height     : optional height, a number or an expression such as
+               math.eval(GetVar('HtmlComboHeight')*0.8)
   """
   ro = 'readonly' if readonly else ''
   if on_commit:
@@ -167,6 +196,7 @@ def text_input(name: str, value_expr: str, onchange: str,
     events = f"onchange='{onchange}'"
   return _font_wrap(dedent(f"""
         <input type='text' name='{name}' width='{width}'
+               {f'height="{height}"' if height else ''}
                value='{value_expr}'
                {events}
                {ro}>
@@ -279,6 +309,24 @@ def action_button(name: str, label: str, onclick: str,
     """).strip()
 
 
+def go_button(name: str, label: str, onclick: str, td_width: str) -> str:
+  """
+  A green button like Go in QuickImages, right-aligned in a table cell of its
+  own: unlike the other controls here, this includes the <td>.
+  """
+  return dedent(f"""
+        $+
+        html.Snippet(GetVar(default_link),
+          "name={name}",
+          "value={label}",
+          "onclick={onclick}",
+          "bgcolor=GetVar(gui.green)",
+          "fgcolor=#ffffff",
+          "td1=<td width='{td_width}' align='right'>")
+        $-
+    """).strip()
+
+
 def hover_button(icon: str, onclick: str) -> str:
   """Small hover/icon button, e.g. for reload or info."""
   return f"$spy.MakeHoverButton('{icon}','{onclick}')"
@@ -339,10 +387,44 @@ def signed(n) -> str:
   return f"{n:+g}" if n else '0'
 
 
-def charge_table(rows: list[dict], colors: dict = None,
-                 edit_spy: str = None) -> str:
+def framed_table(rows: str) -> str:
+  """A table with thin frame lines between its cells, as in the Solvent Mask output."""
+  return (
+      f"<table bgcolor='{TABLE_FRAME}' border='0' cellspacing='1' cellpadding='2' width='100%'>\n"
+      f"{rows}\n"
+      f"</table>"
+  )
+
+
+def span_row(content: str, colors: dict, colspan: int) -> str:
+  """A framed_table() row with one cell across all columns."""
+  return f"<tr bgcolor='{colors['table_bg']}'><td colspan='{colspan}'>{content}</td></tr>"
+
+
+def side_by_side(left: str, right: str, left_width: str) -> str:
+  """Two cells inside a span_row(), whose widths the table columns do not limit."""
+  return (
+      f"<table border='0' width='100%' cellpadding='1' cellspacing='1'><tr>"
+      f"<td width='{left_width}' valign='center'>{left}</td>"
+      f"<td valign='center'>{right}</td>"
+      f"</tr></table>"
+  )
+
+
+def text_and_button(text: str, button: str) -> str:
+  """Text next to a go_button(), inside a span_row()."""
+  return (
+      f"<table border='0' width='100%' cellpadding='1' cellspacing='1'><tr>"
+      f"<td valign='center'>{text}</td>"
+      f"{button}"
+      f"</tr></table>"
+  )
+
+
+def charge_rows(rows: list[dict], colors: dict = None,
+                edit_spy: str = None) -> str:
   """
-  Specialised table for charge inference display.
+  The header and fragment rows of the charge table, for a framed_table().
 
   Each row dict:
       mult        : int multiplicity (1 = blank)
@@ -351,7 +433,8 @@ def charge_table(rows: list[dict], colors: dict = None,
       confidence  : str confidence key
       warn        : str optional warning suffix
 
-  Columns: n, Formula, Total (n x charge), Charge, Confidence.
+  Columns: n, Formula, Total (n x charge), Charge, Confidence; there are
+  CHARGE_COLUMNS of them.
 
   edit_spy : optional spy function name, e.g. 'spy.gui.moiety.set_charge'.
              When given, each charge cell is a (narrow) text input that
@@ -398,7 +481,13 @@ def charge_table(rows: list[dict], colors: dict = None,
       'user_lookup':      'user lookup',
   }
 
-  table_rows = []
+  bg = c['table_bg']
+  headers = ['n', 'Formula', 'Total', 'Charge', 'Confidence']
+  widths = ['6%', '39%', '12%', '13%', '30%']
+  html = [f"<tr bgcolor='{bg}'>" + ''.join(
+      f"<td align='center' valign='middle' width='{w}'><b>{h}</b></td>"
+      for h, w in zip(headers, widths)) + "</tr>"]
+
   for i, r in enumerate(rows):
     mult = str(r['mult']) if r['mult'] > 1 else ''
     formula = r['formula']
@@ -419,7 +508,8 @@ def charge_table(rows: list[dict], colors: dict = None,
       charge_str = text_input(
           name, charge_text(charge),
           f'{edit_spy}({i},html.GetValue({name}))>>html.update()',
-          width='30', on_commit=True)
+          width='30', on_commit=True,
+          height="math.eval(GetVar('HtmlComboHeight')*0.8)")
 
     conf_color = _conf_color.get(conf, c['font'])
     conf_label = _conf_label.get(conf, conf)
@@ -432,76 +522,83 @@ def charge_table(rows: list[dict], colors: dict = None,
 
     warn_cell = colored(small(f' \u2190 {warn}'), c['amber']) if warn else ''
 
-    table_rows.append([
+    cells = [
         colored(mult, c['secondary']),
         formula_cell,
         total_str,
         charge_str,
         conf_cell + warn_cell,
-    ])
+    ]
+    html.append(f"<tr bgcolor='{bg}'>" + ''.join(
+        f"<td align='center' valign='middle'>{cell}</td>" for cell in cells) + "</tr>")
 
-  return table(
-      table_rows,
-      headers=['n', 'Formula', 'Total', 'Charge', 'Confidence'],
-      col_widths=['5%', '40%', '12%', '13%', '30%'],
-      colors=c,
-  )
+  return '\n'.join(html)
+
+
+def _charge_colour(n, c: dict) -> str:
+  """Positive charges dark red, negative blue, zero the default colour."""
+  if n > 0:
+    return c['charge_pos']
+  return c['charge_neg'] if n < 0 else c['font']
 
 
 def balance_equation(frags: list[dict], colors: dict = None) -> str:
   """
-  Render a balance equation like:
-    (Co 3+)  +  C8H14N4O4 ?  +  C5H5N 0  +  C3H7 ?
-       +3    +       ?        +      0     +    ?    = +3 + ? from 2 unknowns
+  Render the charge balance on one line, first per fragment, then the
+  charges alone, e.g.
+    2(K) +1 + H2 O 0 + C4 H4 O6 -2 = +2 + 0 - 2 = 0
+
+  Positive charges are dark red, negative ones blue. A single fragment
+  has no sum to show, so it skips the middle part.
 
   Each frag dict: mult, formula, charge (int or None). mult may be
   fractional (e.g. 1.5(H3 O) when Z' > 1).
   """
   c = colors or get_colors()
-  parts_top = []
-  parts_bot = []
+  grey = c['secondary']
+  unknown = colored('?', c['amber'])
 
-  for f in frags:
+  by_fragment = []
+  by_charge = []
+  for i, f in enumerate(frags):
     sym = f['formula']
     mult = f['mult']
     if mult != 1:
       sym = f"{mult:g}({sym})"
 
     charge = f.get('charge')
+    # a normal space before each operator lets a long line wrap there
+    lead = f" {colored('+', grey)}&nbsp;" if i else ''
     if charge is None:
-      charge_str = colored('?', c['red'])
-      total_str  = colored('?', c['red'])
+      by_fragment.append(f"{lead}{sym}&nbsp;{unknown}")
+      by_charge.append(f"{lead}{unknown}")
+      continue
+
+    by_fragment.append(f"{lead}{sym}&nbsp;{colored(signed(charge), _charge_colour(charge, c))}")
+    total = round(mult * charge, 3)
+    colour = _charge_colour(total, c)
+    if not i:
+      by_charge.append(colored(signed(total), colour))
+    elif total < 0:
+      by_charge.append(" " + colored(f"-&nbsp;{-total:g}", colour))
     else:
-      charge_str = colored(signed(charge), c['green'] if charge == 0 else c['font'])
-      total = round(mult * charge, 3)
-      total_str = colored(signed(total), c['green'] if total == 0 else c['font'])
-
-    parts_top.append(f"{sym} {charge_str}")
-    parts_bot.append(total_str)
-
-  sep = f"&nbsp;<font color='{c['secondary']}'>+</font>&nbsp;"
-  top_line = sep.join(parts_top)
-  bot_line = sep.join(parts_bot)
+      by_charge.append(lead + colored(f"{total:g}", colour))
 
   known = round(sum(f['mult'] * f['charge'] for f in frags
                     if f.get('charge') is not None), 3)
   n_unk = sum(1 for f in frags if f.get('charge') is None)
 
   if n_unk == 0 and known == 0:
-    result = colored('= 0 \u2713', c['green'])
+    result = colored('=&nbsp;0&nbsp;\u2713', c['green'])
   elif n_unk > 0:
-    sign = '+' if known > 0 else ''
-    result = colored(f"= {sign}{known:g} + ? from {n_unk} unknown(s)", c['amber'])
+    result = colored(f"=&nbsp;{signed(known)} + ? from {n_unk} unknown(s)", c['amber'])
   else:
-    sign = '+' if known > 0 else ''
-    result = colored(f"= {sign}{known:g} \u2717", c['red'])
+    result = colored(f"=&nbsp;{signed(known)}&nbsp;\u2717", c['red'])
 
-  return (
-      f"<table width='100%' border='0' cellpadding='2'>"
-      f"<tr><td>{top_line}&nbsp;&nbsp;{result}</td></tr>"
-      f"<tr><td><font color='{c['secondary']}'><small>{bot_line}</small></font></td></tr>"
-      f"</table>"
-  )
+  line = ''.join(by_fragment)
+  if len(frags) > 1:
+    line += f" {colored('=', grey)}&nbsp;" + ''.join(by_charge)
+  return f"{line} {result}"
 
 
 # ---------------------------------------------------------------------------

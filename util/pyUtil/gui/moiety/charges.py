@@ -467,6 +467,36 @@ def balance_summary(fragments: list[MoietyFragment]) -> dict:
   }
 
 
+def copy_charges(target: list[MoietyFragment], source: list[MoietyFragment]) -> None:
+  """
+  Give target fragments the charge already determined for the same formula in
+  source, wherever it came from. Nothing is inferred here: above all no balance,
+  which would force the total to 0. A charge already set stays. The rest stay
+  unknown: formulae not in source (part of a fragment), and those with more than
+  one charge in source (mixed valence: which atom is which is not known).
+  """
+  by_formula = {}
+  for f in source:
+    by_formula.setdefault(f.formula_string, []).append(f)
+  for f in target:
+    same = by_formula.get(f.formula_string, [])
+    if f.charge is None and same and len({s.charge for s in same}) == 1:
+      f.charge = same[0].charge
+      f.charge_confidence = same[0].charge_confidence
+      reason = getattr(same[0], 'charge_suspect_reason', '')
+      if reason:
+        f.charge_suspect_reason = reason
+
+
+def total_charge_text(fragments: list[MoietyFragment]) -> str:
+  """Total charge of the fragments: '-6', '0', or '-6 + ?' with unknown charges."""
+  known = as_number(_charge_balance(fragments))
+  text = f"{known:+g}" if known else '0'
+  if any(f.charge is None for f in fragments):
+    return f"{text} + ?"
+  return text
+
+
 # ---------------------------------------------------------------------------
 # Normalise lookup table keys at import time
 # Keys above are written in human-readable order for clarity.

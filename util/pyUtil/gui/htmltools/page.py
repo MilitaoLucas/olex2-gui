@@ -132,7 +132,7 @@ class PageBuilder:
   Usage:
       pb = PageBuilder()
       pb.add(he.section_header('Charge Inference'))
-      pb.add(he.tool_row(he.charge_table(rows)))
+      pb.add(he.tool_row(he.framed_table(he.charge_rows(rows))))
       pb.add(he.tool_row(he.dropdown(...)))
       pb.add(he.tool_row(he.action_button(...)))
       pb.write('moiety-content.htm')

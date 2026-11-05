@@ -337,6 +337,21 @@ def parse_moiety_string(s: Optional[str]) -> list[MoietyFragment]:
   return fragments
 
 
+def same_moiety(a: str, b: str) -> bool:
+  """
+  True if two moiety strings list the same units, in whatever order and
+  whatever the common multiple ('2(K), C2 O4' and '4(K), 2(C2 O4)' are the same).
+  """
+  def normal(s):
+    units = []
+    for token in s.split(', '):
+      m = re.fullmatch(r'(\d+)\((.*)\)', token)
+      units.append((int(m.group(1)), f"({m.group(2)})") if m else (1, token))
+    common = reduce(gcd, (n for n, _ in units), 0) or 1
+    return sorted((n // common, unit.strip('()')) for n, unit in units)
+  return normal(a) == normal(b)
+
+
 def format_moiety_string(fragments: list[MoietyFragment]) -> str:
   """
   Format a list of MoietyFragments back to an IUCr-compliant moiety string.

@@ -21,8 +21,11 @@ Typical usage
     spy.gui.moiety.report()
 """
 
-from .parser import parse_moiety_string, format_moiety_string, format_moiety_string_with_mask, MoietyFragment
-from .charges import infer_charges, balance_summary, check_reasonableness, suggest_mixed_valence, as_number
+from .parser import (parse_moiety_string, format_moiety_string, format_moiety_string_with_mask,
+                     same_moiety, MoietyFragment)
+from .charges import (infer_charges, balance_summary, check_reasonableness, suggest_mixed_valence,
+                      as_number, total_charge_text, copy_charges)
+from . import connectivity
 from . import user_db
 
 __all__ = [
@@ -101,6 +104,8 @@ _current_fragments = []   # list[MoietyFragment]
 _current_proposed = ''      # last proposed formula string
 _current_needs_input = False  # whether apply() should prompt
 _current_connected = ''     # last connected formula -- cache key
+_current_grown = None       # last grown moiety string -- cache key
+_current_grown_file = None  # model file time when last reported while grown -- cache key
 
 
 # ---------------------------------------------------------------------------
@@ -304,31 +309,85 @@ def _get_mask_info():
 # Core workflow
 # ---------------------------------------------------------------------------
 
+def _read_model():
+  """
+  Read the asymmetric unit from the refinement model, without changing it.
+  Returns (atoms, pieces, group_ops); see connectivity.py.
+  """
+  import olx
+  from olexFunctions import OV
+  atoms = connectivity.atoms_from_model(OV.GetRefinementModel(True))
+  group_ops = None
+  try:
+    from cctbx import sgtbx
+    group = sgtbx.space_group_info(symbol=f"Hall: {olx.xf.au.GetCellSymm('hall')}").group()
+    group_ops = []
+    for op in group:
+      r = op.r().as_double()
+      group_ops.append(connectivity.make_op((r[0:3], r[3:6], r[6:9]), op.t().as_double()))
+  except Exception as e:
+    print(f"[moiety] Could not read the space group, special positions may be off: {e}")
+  return atoms, connectivity.find_pieces(atoms, group_ops), group_ops
+
+
 def _get_raw_moiety():
   """
-  Get moiety strings from Olex2 using both disconnected and connected metal bonds.
+  Returns (raw_disconnected, raw_connected), both without changing anything:
+  no CONN instruction is issued, so the connectivity stays as the user has it.
 
-  Returns (raw_disconnected, raw_connected).
+  Disconnected: metals as separate fragments, worked out from the bonds in the
+  refinement model -- used for charge inference, since we need to see metal and
+  ligands separately.
 
-  Disconnected (conn $M 0): metals appear as separate fragments -- used for
-  charge inference, since we need to see metal and ligands separately.
-
-  Connected (conn $M default): chemically correct whole-molecule fragments --
-  used for the reported formula.
-
-  Note: conn $M resets to Olex2 defaults. If the user has set a custom metal
-  connectivity, that will be lost. This is an acceptable trade-off since
-  custom connectivity is rarely used in practice.
+  Connected: the structure as it stands -- used for the reported formula.
   """
   try:
     import olx
-    olx.Conn('$M', '0')                    # disconnect all metals
-    raw_disconnected = olx.xf.latt.GetMoiety()
-    olx.Conn('$M')                           # restore defaults
     raw_connected = olx.xf.latt.GetMoiety()
-    return raw_disconnected, raw_connected
-  except Exception:
+  except Exception as e:
+    print(f"[moiety] Could not read the moiety: {e}")
     return None, None
+  try:
+    _, pieces, _ = _read_model()
+    return connectivity.disconnected_moiety(pieces) or raw_connected, raw_connected
+  except Exception as e:
+    print(f"[moiety] Could not separate the metals, using the connected formula: {e}")
+    return raw_connected, raw_connected
+
+
+def _get_grown_moiety():
+  """
+  Moiety string of the grown structure as it is displayed, metals separate as
+  for the charge inference. None if the structure is not grown. Only reads:
+  the displayed atoms come from the lattice, which is what grow adds to.
+  """
+  try:
+    import olx
+  except ImportError:
+    return None
+
+  try:
+    if str(olx.xf.latt.IsGrown()).lower() != 'true':
+      return None
+    names = []
+    for i in range(int(olx.xf.latt.GetFragmentCount())):
+      names += str(olx.xf.latt.GetFragmentAtoms(i)).split(',')
+    atoms, pieces, group_ops = _read_model()
+    return connectivity.displayed_moiety(pieces, atoms, names, group_ops) or None
+  except Exception as e:
+    print(f"[moiety] Could not evaluate the grown structure: {e}")
+    return None
+
+
+def _parse_with_user_charges(raw):
+  """Parse a moiety string and set the charges typed into the tab this session."""
+  from .tab import _user_charges
+  fragments = parse_moiety_string(raw)
+  for f in fragments:
+    if f.formula_string in _user_charges:
+      f.charge = _user_charges[f.formula_string]
+      f.charge_confidence = 'user'
+  return fragments
 
 
 def _load_and_infer():
@@ -339,7 +398,7 @@ def _load_and_infer():
   global _current_fragments, _current_proposed, _current_needs_input, _current_connected
   raw_disconnected, raw_connected = _get_raw_moiety()
 
-  fragments = parse_moiety_string(raw_disconnected)
+  fragments = _parse_with_user_charges(raw_disconnected)
   infer_charges(fragments, user_db.load())
   check_reasonableness(fragments)
   _current_fragments = fragments
@@ -431,6 +490,45 @@ def _build_masked_frags():
 # Console report
 # ---------------------------------------------------------------------------
 
+def _print_balance(fragments):
+  """Print the two-line charge balance of a fragment list to the console."""
+  parts = []
+  for f in fragments:
+    sym = f.formula_string
+    if f.multiplicity > 1:
+      sym = f"{f.multiplicity}({sym})"
+    if f.charge is not None:
+      parts.append(f"{sym} {_signed(f.charge)}")
+    else:
+      parts.append(f"{sym} ?")
+  total_known = as_number(sum(f.count * (f.charge or 0) for f in fragments
+                              if f.charge is not None))
+  n_still_unknown = sum(1 for f in fragments if f.charge is None)
+  balance_str = "0  [OK]" if (total_known == 0 and n_still_unknown == 0) else (
+      f"{_signed(total_known)} + ? from {n_still_unknown} unknown(s)" if n_still_unknown
+      else f"{_signed(total_known)}  [!!]"
+  )
+  print("  " + "  +  ".join(parts))
+  charges = []
+  for f in fragments:
+    if f.charge is not None:
+      total = as_number(f.count * f.charge)
+      charges.append(_signed(total))
+    else:
+      charges.append("?")
+  print("  " + "  +  ".join(charges) + f"  =  {balance_str}")
+
+
+def _model_file_time():
+  """Time of the model file: it changes with each refinement."""
+  import os
+  try:
+    return os.path.getmtime(OV.FileFull())
+  except (OSError, TypeError, AttributeError) as e:
+    print(f"[moiety] Could not read the time of the model file: {e}")
+    return None
+
+
 def _report(force_input=False):
   force_input = str(force_input).lower() in ('true', '1', 'yes')
   """
@@ -447,9 +545,18 @@ def _report(force_input=False):
     """
   # Cache check: if the connected formula hasn't changed, the structure
   # hasn't changed -- leave the tab state intact and exit silently.
+  global _current_grown, _current_grown_file
   _, raw_connected_check = _get_raw_moiety()
-  if raw_connected_check and raw_connected_check == _current_connected and not force_input:
+  grown_raw = _get_grown_moiety()
+  # While grown, report again after a refinement: the last report is otherwise
+  # far up the console, above the refinement output.
+  grown_file = _model_file_time() if grown_raw else None
+  if (raw_connected_check and raw_connected_check == _current_connected
+      and grown_raw == _current_grown and grown_file == _current_grown_file
+      and not force_input):
     return
+  _current_grown = grown_raw
+  _current_grown_file = grown_file
 
   fragments, raw_disconnected, raw_connected = _load_and_infer()
 
@@ -689,31 +796,7 @@ def _report(force_input=False):
   print()
   print("  --- Charge balance ---")
   print()
-  parts = []
-  for f in best_fragments:
-    sym = f.formula_string
-    if f.multiplicity > 1:
-      sym = f"{f.multiplicity}({sym})"
-    if f.charge is not None:
-      parts.append(f"{sym} {_signed(f.charge)}")
-    else:
-      parts.append(f"{sym} ?")
-  total_known = as_number(sum(f.count * (f.charge or 0) for f in best_fragments
-                              if f.charge is not None))
-  n_still_unknown = sum(1 for f in best_fragments if f.charge is None)
-  balance_str = "0  [OK]" if (total_known == 0 and n_still_unknown == 0) else (
-      f"{_signed(total_known)} + ? from {n_still_unknown} unknown(s)" if n_still_unknown
-      else f"{_signed(total_known)}  [!!]"
-  )
-  print("  " + "  +  ".join(parts))
-  charges = []
-  for f in best_fragments:
-    if f.charge is not None:
-      total = as_number(f.count * f.charge)
-      charges.append(_signed(total))
-    else:
-      charges.append("?")
-  print("  " + "  +  ".join(charges) + f"  =  {balance_str}")
+  _print_balance(best_fragments)
   print()
 
   # Build proposed formula using best_fragments (best metal guess, unknowns as None)
@@ -727,6 +810,20 @@ def _report(force_input=False):
     print("  Connected formula (no charges, for reference):")
     print("  ", raw_connected)
   print()
+
+  # The grown structure, if the formula it gives is a different one
+  if grown_raw:
+    grown = _parse_with_user_charges(grown_raw)
+    copy_charges(grown, best_fragments)
+    grown_formula = format_moiety_string_with_mask(grown, masked_frags, unknown_masked)
+    if not same_moiety(grown_formula, proposed):
+      print("  --- Grown structure as displayed ---")
+      print()
+      _print_balance(grown)
+      print()
+      print("  ", grown_formula)
+      print(f"   [Charge: {total_charge_text(grown)}]")
+      print()
 
   # Decide whether user input is needed
   needs_input = (

@@ -5,8 +5,8 @@ The **moiety formula** (_chemical_formula_moiety) lists the chemically distinct 
 
 This tool works it out from the model: it splits the structure into fragments, infers a charge for each one and checks that the charges balance.
 
-## Working
-The table lists every fragment:
+## The table
+The drop-down at the top selects the formula (see *Suggested moiety formulae*). The table then lists every fragment:
 
 - **n** -- how many times the fragment occurs
 - **Formula** -- the fragment's formula (a partial occupancy is shown in brackets)
@@ -14,7 +14,7 @@ The table lists every fragment:
 - **Charge** -- the charge of one fragment, editable (see below)
 - **Confidence** -- where the charge came from
 
-Below the table, the **balance equation** adds up the charges; for a sensible formula the total is 0.
+Below the fragments, the **balance equation** adds up the charges, first per fragment and then the charges alone, with positive charges in red and negative ones in blue; for a sensible formula the total is 0.
 
 ## Confidence
 - **lookup** -- a known ion or molecule (built-in table)
@@ -29,7 +29,7 @@ Below the table, the **balance equation** adds up the charges; for a sensible fo
 ## Editing charges
 Every charge is an input box. Type a charge -- **2+**, **+2**, **2-**, **-1** or **0** -- and press **Enter** or leave the box: the fragment's confidence becomes *user* and the balance, the suggested formulae and **Apply to CIF** are updated. If one unknown charge is left, it is worked out from the balance.
 
-Type **?** (or clear the box) to go back to the inferred charge. **Clear user-supplied charges** (below the table) undoes all charges entered for this structure.
+Type **?** (or clear the box) to go back to the inferred charge. **Clear user-supplied charges** (below the balance equation) undoes all charges entered for this structure.
 
 ## Your own charges
 Charges you enter for multi-atom fragments are remembered in the file *user_charges.csv* (in DataDir()/gui/moiety) and used again for the same formula in later structures, shown as **user lookup**. Single elements are never remembered -- a metal's oxidation state belongs to one structure, not to the element. Typing **?** for a *user lookup* charge removes it from the file.
@@ -39,6 +39,7 @@ The drop-down offers:
 
 - **Best guess** -- the charges in the table, with mixed valence if that is what balances
 - **All nx M as +q** -- every ambiguous metal in one oxidation state
+- **Grown structure as displayed** -- the formula of what is on the screen, when the structure is grown and this gives a different formula. It uses the charges determined for the fragments, including any you typed in; a fragment that is only partly displayed shows **?**. The total charge of the displayed structure follows the formula. Whichever entry is selected, this formula and charge are shown below the formula in the tab. They are also printed in the console below the proposed formula, again after each refinement. A structure grown after the tab was drawn appears the next time the tab is redrawn, for example on closing and opening Finishing
 - **No charges** -- the formula as it stands, without charges
 
 **Apply to CIF** writes the selected formula to _chemical_formula_moiety. Contents of masked solvent regions (from the solvent mask or SQUEEZE) are included in the formula when they could be identified.

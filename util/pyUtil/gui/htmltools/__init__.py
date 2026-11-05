@@ -20,7 +20,7 @@ Quick start
     colors = he.get_colors()
 
     pb = page.PageBuilder()
-    pb.add(he.section_header('My Section', colors))
+    pb.add(he.section_header('My Section'))
     pb.add(he.tool_row(
         he.dropdown('mysel',
                     items_expr='spy.mymod.get_items()',
