@@ -119,11 +119,11 @@ class MultipleDataset:
       html.Snippet(GetVar(default_link),
       "value=%s",
       "name=%s",
-      'onclick=%s', # double quotes for the file
+      "onclick=%s",
       "bgcolor=%s",
       "fgcolor=%s",
       )
-    $-''' % (display, name, action, highlight, fg)
+    $-''' % (display, name, action.replace('"', "&quot;"), highlight, fg)
 
     html += "</tr></table>"
     OlexVFS.write_to_olex("multicif.htm", html)
