@@ -28,9 +28,17 @@
 "html": "The value of the Flack parameter <em>x</em> and Hooft parameter <em>y</em> are given here for chiral structures. For a correctly determined absolute structure, both are close to 0. If they are close to 1, it may be necessary to invert the structure with '<c>inv -f</c>'. Select from the drop-down menu the method used to determine the absolute structure (most commonly <strong>Anomalous dispersion</strong>).",
 "src": "util/pyUtil/gui/help/gui/EN/work/report.help.md"
 },
+"ACED": {
+"html": "",
+"src": "util/pyUtil/ACEDd/ACED.md"
+},
 "ADD_FOG": {
 "html": "An artificial \"fog\" can be applied to the display by clicking the <strong>Add Fog</strong> button. This may be helpful, for example, to emphasise the 3D nature of the structure or to highlight its front-facing portion. The <strong>Front</strong> and <strong>Back</strong> sliders govern the thickness of the \"fog\". Click <strong>Clear Fog</strong> to remove the fog from the display.",
 "src": "util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md"
+},
+"ADJUSTMENT": {
+"html": "<h2>Adjustment / eV</h2>\n\nThis setting is only for synchrotron users who know an offset between the enery / wavelength in their headers and the exact energy / wavelength of their experiment. Leave this empty if you measured on an in-house difffractometer or you don't care about minute differences in the wavelength.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
 },
 "AFIX": {
 "html": "<em>AFIX</em> instructions are for placing hydrogen atoms in idealized (riding) positions in a structure.\n\n<h2>Syntax of the AFIX command</h2>\n\nUsage: <strong>AFIX mn d[number] sof[11] U[10.08]</strong>\n<br>\n<br>\nFrom the ShelX manual:<br>\n\"AFIX applies constraints and/or generates idealized coordinates for all atoms until the next AFIX instruction is read. The digits mn of the AFIX code control two logically quite separate operations. m refers to geometrical operations which are performed before the first refinement cycle (hydrogen atoms are idealized before every cycle), and n sets up constraints which are applied throughout the least-squares refinement. n is always a single digit; m may be two, one or zero digits (the last corresponds to m = 0).\" <br>\n<br>\nFor more details, refer to the URL[https://shelx.uni-goettingen.de/shelxl_html.php, ShelX Manual].\n\n<h2>Number drop-down menus</h2>\n\nIn this row, the first two drop-down menus <em>after</em> the constraint menu refer to m and n, respectively, in the <em>AFIX</em> command.\n\n<h2>clear</h2>\n\nSelect any atom(s) to which an <em>AFIX</em> command has been applied. Clicking <strong>clear</strong> will remove the <em>AFIX</em> command.\n\n<h2>de</h2>\n\nClick <strong>de</strong> to enter a mode in which all <em>AFIX</em> instructions being applied to the structure are displayed. Also in this mode, the <em>AFIX</em> command currently specified in this tool tab can be applied to individual atoms by clicking on them.\n\n<h2>go</h2>\n\nClick <strong>go</strong> to apply the <em>AFIX</em> command currently specified in this tool tab.",
@@ -40,6 +48,10 @@
 "html": "<h2>View and Plane</h2>\n\nClicking on one of these links will orient and centre the structure within the display window, which can be useful before creating images. <strong>View</strong> centres and orients a structure on the screen using an algorithm involving the calculation of the structure's principal axes of inertia. <strong>Plane</strong> calculates a mean plane through the entire structure, orients the structure on the screen perpendicular to this plane, and centres the structure on the screen. Neither of these methods changes the zoom level. Typing '<c>mpln -r<c>' displays the mean plane and prints its equation in the output window. To delete the plane, click on it and press '<c>Delete</c>'.\n<br>\n<br>\n\nA couple of other helpful line commands for realigning the structure on the screen are:\n\n<table>\n<tbody>\n<tr><td><code>center</code></td><td>Centres the structure without changing orientation or zoom level</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><code>compaq -a</code></td><td>Also centres the structure without changing orientation but does resize the structure to fit within the display area.</td></tr>\n</tbody>\n</table>\n\n<h2>Lock</h2>\n\nWhen working with images, it is sometimes helpful to lock out certain mouse functions to avoid accidentally changing the orientation or zoom. The zoom, rotation, and translation functions may be individually locked by ticking the appropriate box. For example, if only the <strong>Translation</strong> box is ticked, the structure will remain in a fixed location on the screen, but it will still be possible to rotate it or to zoom in and out. All three functions may be locked simultaneously by ticking the <strong>Lock all</strong> box.",
 "src": "util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md"
 },
+"ANALYSE_GROUPS": {
+"html": "<h2>Analyse Groups Button</h2>\n\n<h3>Combine Stats</h3>\n\n<h3>Plot x-limit</h3>",
+"src": "util/pyUtil/ACED/ACED.md"
+},
 "ANALYSE_INTERACTIONS": {
 "html": "Analyse non-bonding interactions in a structure.\n\n<h2>&pi;-&pi; Interactions</h2>\n\nSearches for &pi;-&pi; interactions in the structure; if any are found, the relevant geometric parameters (e.g., the distance between the centroids of adjacent aromatic rings) are printed in the output window.\n\n<h2>Hydrogen Bonds</h2>\n\nFinds and displays any hydrogen bonds in the structure. The equivalent line command is '<c>htab -g</c>'. In both cases, a table is printed in the output window.\n<br>\n<br>\n\nAnother useful command for analysing nonbonding interactions is '<c>htab -t</c>'. For example, '<c>htab -t=Br,I</c>' would cause any Br---I halogen bonds in the structure to be displayed.",
 "src": "util/pyUtil/gui/help/gui/EN/view/geometry.help.md"
@@ -47,6 +59,10 @@
 "ANIMATE": {
 "html": "<h2>Auto Rotation</h2>\n\nTicking a box in this tool tab continuously rotates the structure on the screen about the specified axis. A structure can be rotated simultaneously about more than one axis, and the speed of rotation can be set using the slider bar.\n<br>\n<br>\n\nClicking on <em>a</em>, <em>b</em>, or <em>c</em> resets the view to look down the chosen axis.",
 "src": "util/pyUtil/gui/help/gui/EN/view/rotate.help.md"
+},
+"ANIMATION": {
+"html": "This is a fairly simple-minded system for generating frames that can be made into a movie.\n\n<h2>Animation</h2>\n\nAnimation the second.",
+"src": "util/pyUtil/PluginLib/plugin-DrawPlus/drawplus.md"
 },
 "ANIS-TARGET": {
 "html": "Make selected atoms anisotropic. If no atoms are selected, all atoms will be transformed.",
@@ -88,6 +104,14 @@
 "html": "Display basis vectors",
 "src": "util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md"
 },
+"BEAM_AND_GROUP_SELECTION": {
+"html": "++\n\nThe correct selection of beams and groups is very important for dynamical refinement.\n\n++",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"BEAM_SELECTION": {
+"html": "When performing an N-Beam refinement, the most relevant diffraction 'beams' must be selected. Olex2  automatically does this for you, but some parameters used during this selection process can be influenced—some from the GUI, others only by setting their values using the advanced settings options.\n\n<h2>Number of Beams</h2>\n\nThis is the maximum number of beams to be considered. There are conditions on a beam's acceptability, and it is possible that fewer than N beams will actually be chosen.\n\n<h2>Integration Points</h2>\n\nThe number of integration points that will be used when integrating the intensity.\n\n<h2>Weight</h2>\n\nThe relative weight is given to any one beam. Currently, there are two different ways of choosing the weights.\n\n<h3>||F||/||Sg||+</h3>\n\n<h3>Sg</h3>\n\n<h2>Float</h2>\n\nThe normal to the group plane is calculated specifically for each beam",
+"src": "util/pyUtil/ACED/ACED.md"
+},
 "BITMAP_ATOM_LABEL_FONTS": {
 "html": "Note: This section pertains to user-defined atom labels created in the <strong>Images</strong> tool tab above, <em>not</em> to atom names generated during refinement or defined using the <strong>Naming</strong> tool tab under <strong>Refine</strong>.\n<br>\n<br>\n\nSet the fonts for atom labels and bond labels here. Click the <strong>Atom Label Font (Olex2)</strong> link to change the settings of the default Olex2 font used for atom labels. To use a system-supplied font such as Courier or Arial for labels instead of the built-in Olex2 font, click the adjacent <strong>(System Font)</strong> link and select the desired font from the menu that appears. Similarly, click <strong>Bond Label Font (Olex2)</strong> to change the settings of the default Olex2 font used for bond labels, and on its adjacent <strong>(System Font)</strong> link to use a system-supplied fonts for bond labels.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/images.help.md"
@@ -127,6 +151,10 @@
 "CALCULATE_VOIDS": {
 "html": "Calculates the voids and channels in the structure, if present. This calculation uses the Olex2 internal libraries. For further information, type '<c>help calcvoid</c>' or click the button below.\n\n<table>\n<tbody>\n<tr><td><code>help calcvoid</code></td><td>Help entry for the '<c>calcvoid</c>' command.</td></tr>\n</tbody>\n</table>\n\n<h2>Resolution/&Aring;</h2>\n\nSpecify the resolution of the void map here, in &Aring;.\n\n<h2>Distance/&Aring;</h2>\n\nSpecify any additional distance (in &Aring;) from the van der Waals surface at which the void space is to be calculated.\n\n<h2>Precise</h2>\n\nTick this box for a more precise calculation of the voids in the structure.\n\n<h2>Show/Hide Void</h2>\n\nToggles the display of the voids on the screen. A list of voids (if any) in the structure is also printed in the graphics window. When the <strong>Extended</strong> option at the top of this tool tab is checked, the voids are displayed in a 3 x 3 x 3 stack of adjacent unit cells, which can be helpful in visualizing void shapes.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/maps.help.md"
+},
+"CAP": {
+"html": "Here, all the scripts that produce useful output for <strong>CrysAlisPro</strong> are listed.\n\n<h2>Output</h2>\n\nThe folder to which any resulting output should be written to.\n\n<h2>Script</h2>\n\nThe script to run.",
+"src": "util/pyUtil/AC7d/AC.md"
 },
 "CELL-TARGET": {
 "html": "Draw unit cell",
@@ -256,6 +284,10 @@
 "html": "Tools for dealing with disordered structures",
 "src": "util/pyUtil/gui/help/gui/EN/work/toolbox_work.help.md"
 },
+"DISP": {
+"html": "If you have more than one position for one of the Elements given, you can choose if they should have the same DISP value (constrained) or an individual one for each site.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
+},
 "DISTANCES_AND_ANGLES": {
 "html": "<h2>Distances and Angles</h2>\n\nDisplays the interatomic distance (for two selected atoms), the angle (for three selected atoms) or the torsion angle and tetrahedron volume (for four selected atoms) in the output window.\n\nNote: For accurate e.s.d. values to be displayed for these parameters, a refinement must first be carried out with the <strong>Refine and Save e.s.d. Info</strong> button.\n\n<h2>Refine and Save e.s.d. Info</h2>\n\nCarries out a refinement to save the information needed to display accurate e.s.d. information for parameters such as bond lengths and bond angles.",
 "src": "util/pyUtil/gui/help/gui/EN/view/geometry.help.md"
@@ -279,6 +311,42 @@
 "EDIT_REFLECTIONS": {
 "html": "It is also possible to omit a particular reflection (e.g., because it was obscured by the beam stop). To do so, click the <strong>Edit Reflections</strong> link to open a file listing all the bad reflections. Adding a \"-\" symbol (minus sign) in front of a particular reflection moves it to the bottom of the hkl file (after the \"0 0 0\" instruction), which instructs the refinement program to ignore it. Replacing the \"-\" symbol in front of an omitted reflection in this file with a \"+\" symbol will again include the reflection in the next refinement cycle.",
 "src": "util/pyUtil/gui/help/gui/EN/info/bad_reflections.help.md"
+},
+"ED_DYNAMICAL_DATA": {
+"html": "++\n\nThis area contains information and tools regarding the dynamical data.\n\n++",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"ED_DYNAMICAL_REFINEMENT_SETTINGS": {
+"html": "The basic parameters of ED refinement.\n\n<h2>Method</h2>\n\nThere are various refinement methods available for ED data. Some are highly experimental.\n\n<h3>Kinematical</h3>\n\nThis is a ''standard refinement', where the kinematical approximation is assumed to hold. There is no difference to any other refinement here - except that ED form factors are automatically set.\n\n<h3>N-Beam</h3>\n\nThis is a dynamical refinement, where the number of beams that are considered can be set. The dynamical effects are taken better into account the higher the number of beams. But this comes at a cost: refinement cycles can be become very slow. In practice, setting this variable to 20 means is usually a good choice for many ED structures. The 2-beam versio here uses the implementation as described in as in Acta Cryst. (2013). A69, 171–188.\n\n<h3>N-Beam-diff</h3>\n\nThis is a numerical differentiation method to benchmark analytical derivatives. 2-Beam version here uses 2x2 matrix to compute Bloch waves.\n\n<h3>Full</h3>\n\nUse the Virtual Frame approach\n\n<h3>Full-diff</h3>\n\nUse the Virtual Frame approach with numerical differentiation\n\n<h2>Matrix</h2>\n\nA choise of the matrix to use as described in  As in Acta Cryst. (2015). A71, 235–244 and Acta Cryst. (2013). A69, 171–188\n\n<h2>Threads</h2>\n\nThe number of the computer's cores that should be used for the refinement\n\n<h2>Beams</h2>\n\nThe number of beams that will be considered.\n\n<h2>Use Sg</h2>\n\nThe given \"value\" represent Sg that should be used to sort beams that go into the Bloch-wave matrix. Otherwise ||Fc||/(Sg + value) is used.\n\n<h2>SysAbs</h2>\n\nAllow systematic absentces in the Bloch-wave matrix\n\n<h2>Float</h2>\n\nUpdate Ug matrix every integration step",
+"src": "util/pyUtil/ACEDd/ACED.md"
+},
+"ED_GROUPS": {
+"html": "Groups",
+"src": "util/pyUtil/ACED/ACED.md"
+},
+"ED_MODEL": {
+"html": "In an ED refinement, it is sometimes a good idea to keep the co-ordindates and/or the Uiso values fixed. These tick-boxes provided a quick way to free (i.e. refine) or fix these. For example, if the aim is to figure out which is the correct enantiomers in a chiral material, it is best to load a good kinematical refinement and then to 'refine'\n\n<h2>Stereochemistry</h2>\n\nA quick test to determine the absolute stereochemstry of the structure by refining the current enantiomer with 20 beams, inverting the structure, and refining again. The structure with the lower R factor is the correct enantiomer. Two CIF files will be made (original.cif and inverted.cif). The original structure will not be touched in the process and will be loaded again at the end of the test. \n\n<h2>ED</h2>\n\nElectron Diffraction",
+"src": "util/pyUtil/ACEDd/ACED.md"
+},
+"ED_REFINEMENT_METHOD": {
+"html": "++\nThere are two distinct refinement methods available for ED data: kinematical and dynamical. Our implementation of dynamical refinement is called N-Beam.\n++\n\n<h2>Kinematical</h2>\n\nThis is a standard refinement, where the kinematical approximation is assumed to hold. There is no difference to any other refinement here - except that ED form factors are automatically set. The idea is to take your model as far as you can with the kinematic approximation. In particular, it is a good idea to make sure that your atom naming has been finalized.\n\n<h2>N-Beam</h2>\n\nThis is a dynamical refinement, where the number of beams considered can be set. The higher the number of beams, the better the dynamical effects are accounted for. But this comes at a cost: refinement cycles can become very slow. In practice, setting this variable to 20 is usually a good choice for many ED structures. The 2-beam version here uses the implementation as described in Acta Cryst. (2013). A69, 171–188. Our paper describing the full N-beam method is currently in preparation (12/25).\n\n<h3>Auto Stereochem</h3>\n\nIf you are refining a chiral structure, then it is important to be sure that the correct hand of the model is being refined. Electron diffraction is a powerful method for determining the correct hand, and this determination can be quantified using the Z-score measure. In order to keep that in line with your refinement, this value should be automatically calculated after every refinement  and having this box ticked ensures that this will happen.\n\n<h3>Independent EDT</h3>\n\nThis will refine the EDT first, and then the refinement will proceed as requested.\n\n<h3>Reset all</h3>\n\nThis will reset any and all information about the dynamic refinement. The current model will be used as is and set up for kinematic refinement.\n\n<h3>Beam Selection</h3>\n\n++\nWhen performing an N-Beam refinement, the most relevant diffraction beams must be selected. Olex2  automatically does this for you, but some parameters used during this selection process can be set in the GUI, while others can only be set using the advanced settings options.\n++\n\n<h2>Number of Beams</h2>\n\nThis is the maximum number of beams to be considered. There are conditions on a beams acceptability, and it is possible that fewer than N beams will actually be chosen. Using 10 beams to start is a good place to begin  and this can then be extended to include more beams for better accuracy. However, the time penalty is very large, and this must be carefully weighed against the benefit. Often, 15 beams are enough.\n\n<h2>Integration Points</h2>\n\nThe number of integration points used when integrating the intensity. Again, there is a time penalty here, but this is not so large.\n\nIn going from five beams to 40, the time taken for the extraction of the dynamical hkl roughly doubles, while the minimum R values and maximum Z values are reached at about 20 points.\n\n0.4 Click to enlarge!\n\n<h2>Weight</h2>\n\nWe found that ||Fc|| / Sg to be a good criterion that prioritizes beams with higher excitation error but greater intensity over weaker beams closer to the diffraction condition.\n\n<h2>Float</h2>\n\nThe normal to the group plane is calculated specifically for each beam. This will take longer per calculation, but the results will be much better. The default is on  but if speed is of the essence, it may be a good idea to disable this.",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"ED_SCALES": {
+"html": "++\n\nAll current groups, along with their current scales, are displayed here. The Group Number is a link that allows for the inspection of this group.\n\n++\n\n<h2>Analyse Groups</h2>\n\nThis brings up the window where all groups are evaluated, and the six worst reflections in each group are listed. The reflections can be visualized (either as the whole group or as individual reflections).\n\n<h2>Combined</h2>\n\nThe overall worst reflections will be shown, regardless of which group they are in.\n\n<h2>x-limit</h2>\n\nSet the limit on the x-axis (to the left and right of 0) for the reflection plots.\n\nReplot Last\n\nThis will replot the last plot without recalculating anything  this is useful if the limits need to be changed.",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"ED_SETTINGS": {
+"html": "++\nThese are the general settings for refining Electron Density (ED) data. Kinematical refinement is the same as a standard refinement, where dynamical effects are ignored. On datasets processed with licensed versions of CrysAlisPro (Rigaku), a dynamical refinement (N-Beam) can be performed in Olex2.\n++",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"ED_TESTING": {
+"html": "++\n\nA series of tools to test and graph various ED refinement properties\n\n++",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"ED_TESTS": {
+"html": "<h2>Tests</h2>\n\n<h3>n-beams</h3>\n\nIterates through the number of beams\n\n<h3>points</h3>\n\nIterates through the number of integration points\n\n<h3>EDT</h3>\n\nIterates through the EDT values  this is really useful!\n\n<h3>Weight</h3>\n\nIterates through the weight parameter thats used in the beam selection\n\n<h3>profSpan</h3>\n\nIterates through the profile span.\n\n<h3>profTh</h3>\n\nIterates through the profile threshold\n\n<h3>WGHT</h3>\n\nIterates through the crystallographic Weighting scheme\n\n<h3>iterate</h3>\n\nJust iterate!\n\n<h2>Start</h2>\n\nThe starting value of the item to be tested\n\n<h2>Increment</h2>\n\nThe amount of the item to be tested will be increased in each iteration.\n\n<h2>Iterations</h2>\n\nThe number of iterations to carry out\n\n<h2>Testing Notes</h2>\n\nA line of notes to appear on the graphs\n\n<h2>Include in Graphs</h2>\n\nItems to include in the Graph (especially for re-drawing them)",
+"src": "util/pyUtil/ACED7d/ACED.md"
 },
 "ELECTRON_DENSITY": {
 "html": "This tool tab is for displaying various electron density maps. The specific parameter to be mapped is selected from the <strong>Map</strong> drop-down menu.\n\n<h2>Map</h2>\n\nSelect from the drop-down menu the type of map to display.\n\n<h3>diff</h3>\n\nWill display the difference map, Fobs-Fcalc. Make sure to select <strong>surface</strong>, <strong>wire</strong>, or <strong>points</strong> from the <strong>View</strong> drop-down menu under the <strong>Maps</strong> tool tab (accessed through <strong>Map Settings</strong> in this tool tab) for this map to be displayed correctly. The corresponding line command is '<c>CalcFourier -diff -r=0.1 -m</c>' or simply '<c>CTRL+M</c>'. This is an extremely important tool for checking the validity of a model. Red regions of the map represent areas of missing electron density and green regions represent areas of excess electron density.\n\n<h3>fcalc</h3>\n\nWill display a map of the calculated electron density (Fcalc).\n\n<h3>2Fo-Fc</h3>\n\nWill display the map of 2Fobs-Fcalc.\n\n<h3>fobs</h3>\n\nWill display a map of the observed or experimentally measured electron density (Fobs).\n\n<h3>fcfmc</h3>\n\nWill display the FCF Fc-Fc map.\n\n<h2>Source</h2>\n\nSelect from this drop-down menu a data source to be used in constructing the map.\n\n<h2>Res/&Aring;</h2>\n\nType in the desired resolution (in &Aring;) for the map.\n\n<h2>Mask</h2>\n\nIf the <strong>Mask</strong> box is ticked, all electron density features (peaks or holes) near the structure on the screen will be displayed. If the box is left unticked, only electron density features within the unit cell will be displayed.\n\n<h2>Show/Hide Map</h2>\n\nToggles the display of the map on the screen.",
@@ -304,9 +372,17 @@
 "html": "Elemental analysis, molar mass and simulated mass spectrum.\n\n<h2>Elemental Analysis: CHN</h2>\n\nClick this button to calculate the expected values of a CHN analysis from the structure model. The molar mass (molecular weight) in g/mol and a full elemental analysis are also provided. The equivalent line command is '<c>calcCHN</c>'.\n\n<h2>Calculate Molecular Isotope Pattern: Mass Spec</h2>\n\nCalculates a simulated molecular isotope pattern for the structure using the natural abundances of all isotopes. Equivalent to typing '<c>calcms</c>' at the command prompt.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/chemical_tools.help.md"
 },
+"ELEMENTS": {
+"html": "Decide which Elements the Anomalous Dispersion values should be refined for.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
+},
 "ENABLE_NETWORK": {
 "html": "If this box is not ticked, Olex2 will not communicate with the internet at all, except for checking for updates on startup.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
+},
+"ENERGY_AND_WAVELENGTH_SOURCES": {
+"html": "Here you can set up, where SISYPHOS will search for alternative wavelengths for your experiments. You can choose the file header with format NAME_ENERGY or if you already have an .ins file containing this information (has to have same name as the data block) you can also use this instead.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
 },
 "EXCLUDE_HKL": {
 "html": "Conditions for specific groups of reflections to be excluded can be set here.\n\n<h2>Standard Mode (OR)</h2>\n\nWhen the <strong>Exclude:</strong> link is clicked, all reflections satisfying the specified conditions on <em>h</em>, <em>k</em>, OR <em>l</em> will be omitted from the next refinement cycle.\n\n<h2>AND Mode</h2>\n\nWhen the <strong>AND</strong> box is ticked, the conditions specified for <em>h</em>, <em>k</em>, AND <em>l</em> must be fulfilled for a reflection to be omitted from the refinement when the <strong>Exclude:</strong> link is clicked.\n\n<h2>Reset</h2>\n\nClicking the <strong>Reset</strong> link clears all currently set exclusion conditions on <em>h</em>, <em>k</em>, and <em>l</em>.",
@@ -348,6 +424,14 @@
 "html": "Click <strong>Select a folder</strong> to choose the parent folder containing data files for all structures. A tree view of all subfolders will appear here, simplifying browsing for structures in the future.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/folder views.help.md"
 },
+"FRAGMENTDB_PLUGIN": {
+"html": "",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
+"FRAGMENT_CHOOSER": {
+"html": "<h2>Selection</h2>\n\nClicking on one of the list names selects a new fragment.\n\n<h2>Searching</h2>\n\nDo an unsharp search with a partial name and <strong>hit enter key</strong>. \nFor example a search for cf3 finds all the fragments containing cf3 in their \nname and similar.  \n\nThe search results in a shortened drop down menue.\n\n<h2>Reset</h2>\n\nThe reset button restores the full fragment list after a search.\n\n<h2>User Defined Database</h2>\n\nThe main database is write protected, but you can add and change as many \nfragments you like. They will be stored in a separate database in <br />\n<a href=\"shell DataDir()/db\">Datadir()/db/user-fragment-database.sqlite</a>. \nThe user database will never be overwritten by plugin updates! <br />\nFragments created or changed by the user will get a *user* at the end of their names.",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
 "FRAGMENT_LIBRARY": {
 "html": "Clicking this link opens Ilia Guzei's <em>Idealized Molecular Geometry Library</em> (IMGL) in your default internet browser. Fragments contained in this library can be copied and pasted straight from the web site into Olex2. Simply copy the desired fragment atomic coordinates, including the <em>FRAG</em> and <em>FEND</em> lines, from the IMGL web site and paste them directly into the command line to insert the fragment into the structure. Detailed, step-by-step instructions, with examples, for this process are found in <strong>Ilia Guzei's Manual</strong> linked on the Olex2 <strong>Home</strong> tab. For more information on the <em>FRAG</em> command, consult the URL[https://shelx.uni-goettingen.de/shelxl_html.php, ShelX Manual].\n\nNote: No constraints, restraints, or occupancies will be applied to the pasted fragment! These will have to be entered separately.\n\n<h2>Pasted fragments</h2>\n\nThe inserted fragments will appear in a slightly greenish colour on the screen while in the matching mode. Fragments can be matched to electron density peaks by first clicking on an atom in the imported fragment and then on the corresponding Q-peak, then repeating the process with other atom/Q pairs until the fragment is in the desired position and orientation.\n\n<h2>Exit matching mode</h2>\n\nPress '<c>Esc</c>' repeatedly, click the <strong>Esc</strong> link in the orange mode box, or type '<c>mode off</c>' to exit the matching mode.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/disorder.help.md"
@@ -367,6 +451,10 @@
 "GRAPHICAL_OBJECTS": {
 "html": "Several of tools are provided here to enhance the visualisation of a structure.\n\n<h2>Cell</h2>\n\nToggles the display of the unit cell on or off.\n\nNote: If the structure is not contained within the displayed unit cell, type '<c>move</c>' to relocate it within the cell.\n\n<h2>Base</h2>\n\nToggles the display of basis vectors.\n\n<h2>Box Function 1</h2>\n\nToggles the display of a translucent box of the same size and shape as the unit cell. The box can be moved and rotated independent of the structure or the unit cell.\n\n<h2>Box Function 2</h2>\n\nSelect two or more atoms. Clicking this button will toggle the display of a rectangular parallelepiped enclosing those atoms. This box can also be rotated and moved independent of the structure or the unit cell.",
 "src": "util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md"
+},
+"GROUPS": {
+"html": "",
+"src": "util/pyUtil/ACED/ACED.md"
 },
 "GROW": {
 "html": "<h2>Growing</h2>\n\n<em>Growing</em> here is used as a general term for adding atoms to the existing model on the screen in some systematic way, e.g., by adding symmetry-equivalent atoms to visualize an entire molecule when the asymmetric unit shows only part of the molecule because <em>Z</em>' &lt; 1 for the structure.\n\n<h3>Grow All</h3>\n\n<table>\n<tbody>\n<tr><td><code>grow</code></td><td>Generates all \"missing\" connected symmetry-equivalent atoms. This will usually suffice to expand an asymmetric unit to show a complete molecule.</td></tr>\n</tbody>\n</table>\n\n<h3>Shells</h3>\n\n<table>\n<tbody>\n<tr><td><code>grow -s</code></td><td>This adds atoms in concentric shells outward from the structure currently displayed on the screen.</td></tr>\n</tbody>\n</table>\n\n<h3>Complete</h3>\n\n<table>\n<tbody>\n<tr><td><code>grow -w</code></td><td>Generates all missing symmetry-equivalent atoms of an already grown structure, whether bound to the main fragment or not. Thus, this command will display symmetry-equivalent solvent molecules and counter-ions not generated by a plain '<c>grow</c>' command.</td></tr>\n</tbody>\n</table>\n\n<h3>Asymmetric Unit</h3>\n\n<table>\n<tbody>\n<tr><td><code>fuse</code></td><td>Removes all symmetry-equivalent atoms and displays the asymmetric unit. This is one of the most important line commands in Olex2.</td></tr>\n</tbody>\n</table>\n\n<h3>Complete shown growing bonds</h3>\n\n<table>\n<tbody>\n<tr><td><code>grow -b</code></td><td>Shows growable \"bonds\" in a growing mode (see <strong>Mode Grow</strong> below). Click on any of these bonds to grow the structure.</td></tr>\n</tbody>\n</table>\n\n<h2>Mode Grow</h2>\n\n<table>\n<tbody>\n<tr><td><code>mode grow</code></td><td>Similar to '<c>grow</c>', but now the '<c>grow</c>' command will be executed only when an object is clicked. Upon entering a growing mode, growable \"bonds\" will sprout from atoms satisfying the chosen growing conditions.</td></tr>\n</tbody>\n</table>\n\nThere are various modifiers for this command:\n\n<h3>Short Contacts</h3>\n\n<table>\n<tbody>\n<tr><td><code>mode grow -s</code></td><td>Shows growable \"bonds\" to atoms involved in \"short interactions\" (e.g., hydrogen bonds) with the currently displayed structure.</td></tr>\n</tbody>\n</table>\n\n<h3>Selection</h3>\n\n<table>\n<tbody>\n<tr><td><code>mode grow -r</code></td><td>Shows growable \"bonds\" to other occurrences of the currently selected atoms.</td></tr>\n</tbody>\n</table>\n\n<h3>Van der Waals Radii</h3>\n\n<table>\n<tbody>\n<tr><td><code>mode grow -v 2.0</code></td><td>Shows growable \"bonds\" to other occurrences of the currently selected atoms that are at most 2.0 &Aring; away from the selected atom.</td></tr>\n</tbody>\n</table>\n\n<h3>Move</h3>\n\n<table>\n<tbody>\n<tr><td><code>mode grow -a</code></td><td>When a growable \"bond\" is clicked, the symmetry-equivalent atom is moved to the new position. This is very useful when trying to assemble a meaningful asymmetric unit for extended structures (polymers).</td></tr>\n</tbody>\n</table>\n\n<h3>Shells</h3>\n\n<table>\n<tbody>\n<tr><td><code>mode grow shells</code></td><td>Shows growable \"bonds\" that can be clicked to grow the structure outward in concentric shells.</td></tr>\n</tbody>\n</table>\n\n<h2>Assemble</h2>\n\nStrictly speaking, this tool does not belong to the <strong>Grow</strong> family of tools, but it is frequently used together with the growing tools. It is used to rearrange components of the asymmetric unit for a more compact or chemically sensible display of the model, often after a '<c>grow</c>' operation.\n\n<h3>Broken Fragments</h3>\n\n<table>\n<tbody>\n<tr><td><code>compaq -a</code></td><td>Sometimes, parts of a model may become \"broken\" - parts that should be bonded are shown as separate fragments. This tool will bring them back together.</td></tr>\n</tbody>\n</table>\n\n<h3>Atom-to-Atom</h3>\n\n<table>\n<tbody>\n<tr><td><code>compaq -c</code></td><td>Similar to the <strong>Broken Fragments</strong> tool, but using a different reassembly algorithm.</td></tr>\n</tbody>\n</table>\n\n<h3>Metal Last</h3>\n\n<table>\n<tbody>\n<tr><td><code>compaq -m</code></td><td>In this tool, metal ions are first taken out of the reassembly process (which is very useful when trying to assemble a ligand!), after which they are placed at the shortest possible distance to the other atoms in the structure.</td></tr>\n</tbody>\n</table>\n\n<h3>Peaks</h3>\n\n<table>\n<tbody>\n<tr><td><code>compaq -q</code></td><td>This moves all electron density peaks as close to existing atoms as possible.</td></tr>\n</tbody>\n</table>",
@@ -456,9 +544,17 @@
 "html": "Creates a series of bitmap images of the structure rotating about the <em>x</em>, <em>y</em>, or <em>z</em> axis.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/images.help.md"
 },
+"INCLUDE_IN_GRAPHS": {
+"html": "",
+"src": "util/pyUtil/ACED/ACED.md"
+},
 "INFO_BAR": {
 "html": "<table>\n<tbody>\n<tr><td><code>showwindow info</code></td><td>If selected, more information on a structure is shown in a narrow bar along the top of the display area.</td></tr>\n</tbody>\n</table>",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
+},
+"INPUTS": {
+"html": "<h2>Set working dir</h2>\n\nHere you can show the program the location of your measured data. SISYPHOS will look for any .hkl that is in any subfolder here, except for output folders of SISYPHOS.\n\n<h2>Set solution ins</h2>\n\nHere you can give a starting model in form of an .ins file. Further filetypes such as .cif and .res will be implemented in the future. The model WILL be refined for every dataset, so this is really just the starting point.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
 },
 "ISOR": {
 "html": "Usage: <strong>ISOR s[0.1] st[0.2] atomnames</strong>\n<br>\n<br>\n\nRestrains the Uij components of the named atoms to isotropic values within &plusmn; <strong>s</strong> (&plusmn; <strong>st</strong> for terminal or isolated atoms). This restrained atoms will have approximately spherical ADPs. Useful for preventing atoms from having grossly misshapen ADPs or becoming non-positive definite (NPD), but not to be used indiscriminately.\n<br>\n<br>\n\n<strong>Example:</strong> &nbsp; <em>ISOR C5 C6</em><br>\nThis will restrain the ADPs of atoms C5 and C6 to appear approximately spherical.",
@@ -560,6 +656,10 @@
 "html": "Olex2 searches the working folder for sources of metadata such as diffractometer information and data collection parameters, for incorporation into the final CIF file created for the structure after refinement is complete. Such details are normally recorded during the diffraction experiment in a .CIF_OD file. If no files containing metadata are found, Olex2 prints out a brief message to that effect.",
 "src": "util/pyUtil/gui/help/gui/EN/work/report.help.md"
 },
+"MODES": {
+"html": "<h2>Use NoSpherA2</h2>\n\nDecide if you want to use NoSpherA2 to perform a non-spherical atomic formfactor calculation. Further details see NoSpherA2 (* Kleemiss et al., Chem. Sci., 2021, 12, 1675\n&nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER] ).\n\n<h2>Benchmark mode</h2>\n\nThis mode is can be used to test e.g. the optimal settings for HAR for your structure. You have to prepare a benchmarkfile, which contains the settings for NoSpherA2 using the ORCA5 quantum chemical software. Each line in the benchmark file will create a new model, with the calculation taking semi-colon seperated keywords (keyword:setting;next<em>keyword:nextsetting) for the calculation. Optional keywords are: \"basis</em>name\",\"method\",\n                  \"ncpus\", \"mem\", \"charge\",\n                  \"multiplicity\", \"full<em>HAR\",\n                  \"Max</em>HAR<em>Cycles\",\"becke</em>accuracy\",\n                  \"Relativistic\", \"h<em>aniso\",\n                  \"h</em>afix\",\n                  \"cluster<em>radius\", \"DIIS\",\n                  \"cluster</em>grow\", \"ORCA<em>SCF</em>Conv\",\n                  \"ORCA<em>SCF</em>Strategy\", \"ORCA<em>Solvation\", \"ORCA</em>DAMP\"\n                  and \"pySCF_Damping\".\n\n<h2>DISP refinement</h2>\n\nDecide if you want to refine anomalous dispersion parameters for a present element / position. Further details see DISP Refinement (* Meurer et al., IUCrJ, 2022, 9\n&nbsp; URL[https://journals.iucr.org/m/issues/2022/05/00/lt5050/,PAPER]).\n\n<h2>Update weight</h2>\n\nThis is a switch to automatically update the weights used.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
+},
 "MODULES_UPDATE": {
 "html": "If updates to extension modules are availabe, a pop-up box will appear whenever Olex2 is started. This can be switched off here.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
@@ -644,6 +744,10 @@
 "html": "Olex2 can read many different crystallographic file formats. The most common way of starting work on a crystal structure is to open a .ins file. Typically, a .hkl file of the same filename as the would have been created by the data processing software at the same time as the .ins file. These two files are all that need to be in the data folder to get started.\n\n<h2>Navigate</h2>\n\nNavigate to a file by clicking on the <strong>Open</strong> link under the Start tool, or by using <strong>File &gt; Open</strong> from the menu bar at the top of Olex2.\n\n<h2>Drag and Drop</h2>\n\nAlternatively, drag and drop any recognised file into Olex2. This file will then be opened, and the current directory will be set to the one where the file was dragged from.\n\n<h2>Command Line</h2>\n\n<table>\n<tbody>\n<tr><td><code>reap</code></td><td>The <strong>reap</strong> command opens a file via the file browser. This command can also be followed by a filename: <strong>reap sucrose.ins</strong>, for example.</td></tr>\n</tbody>\n</table>",
 "src": "util/pyUtil/gui/help/gui/EN/home/start.help.md"
 },
+"OTHER_ED_ITEMS": {
+"html": "Matrix\n\nA choice of the matrix to use as described in Acta Cryst. (2015). A71, 235-244 and Acta Cryst. (2013). A69, 171-188\n\nThreads\n\nThe number of the computers cores that should be used for the refinement\n\nBeams\n\nThe number of beams that will be considered.\n\nUse Sg\n\nThe given value represents Sg, which should be used to sort beams that go into the Bloch-wave matrix. Otherwise ||Fc||/(Sg + value) is used.\n\nSysAbs\n\nAllow systematic absences in the Bloch-wave matrix\n\nFloat\n\nUpdate the Ug matrix every integration step.",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
 "PACKING": {
 "html": "This tool tab provides methods of visualizing the 3D packing of a structure.",
 "src": "util/pyUtil/gui/help/gui/EN/view/symmetry_generation.help.md"
@@ -672,6 +776,10 @@
 "html": "Sliding scales for Q peak and atom selection",
 "src": "util/pyUtil/gui/help/gui/EN/work/toolbox_work.help.md"
 },
+"PICTURE": {
+"html": "Displays a picture of the fragment. <br />\nClick on the picture to display a magnified version of the picture. <br />\nUser defined fragments only have pictures if the user provided one.\n\n<h2>Fit!</h2>\n\nThe button <b>Fit!</b> starts the fit of the Fragment into the structure. \n\n<h2>Edit</h2>\n\nEdit the currenty selected or create new fragments.\n\n<h2>Editor Options</h2>\n\n<h3>Change Picture</h3>\n\nSelect a picture for the fragment. Use at least 600dpi pictures.\n\n<h3>Drawstyle</h3>\n\nSave a style file for chemdraw to draw molecular pictures that look \nthe same as the predefined.\n\n<h3>Name</h3>\n\nName of the fragment\n\n<h3>Unit cell</h3>\n\nCell parameters of the structure, where the fragment comes from. \nUse 1 1 1 90 90 90 for cartesian coordinates. The cell constants and the \ncoordinates are converted into Cartesian coordinates during the adding to \nthe database.\n\n<h3>Use selected atoms</h3>\n\nUses the selected atoms for the Atoms field and creates a picture from the \nfragment.\n\n<h3>Atoms</h3>\n\ninsert atoms here like O2  8  1.3984  -0.3778   0.4922. You can also \ndirectly copy atoms from SHELX files or copy coordiinates from Avogadro. \nURL[http://avogadro.cc/, http://avogadro.cc]\n\n<h3>Restraints</h3>\n\nType any SHELX compatible restraint here (except SAME). \nThe length of a line is unlimited.\n\n<h3>Residue</h3>\n\nDefine the residue class of the fragment (up to four characters, the first has to be a letter).",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
 "PLATON": {
 "html": "Select a ~Platon~ routine to run from the menu at right. The ~Platon~ software has to be installed and the PATH environment variable properly set for these routines to work. The <strong>Pton</strong> button will show at the top of the Olex2 GUI if ~Platon~ has been correctly installed. See <strong>Ilia Guzei's Manual</strong> linked in the <strong>Home</strong> tab for detailed instructions on installing ~Platon~ for Olex2. For instructions on how to use a specific ~Platon~ routine, please refer to the URL[http://www.platonsoft.nl/platon/pl000000.html, Platon web page].",
 "src": "util/pyUtil/gui/help/gui/EN/tools/platon.help.md"
@@ -683,6 +791,22 @@
 "POVRAY_IMAGES": {
 "html": "It is possible to export a structure in the popular POVRAY format as a 3D object. POVRAY is capable of generating sophisticated images with rendered shadows and backgrounds, as well as 3D animations, but this requires in-depth knowledge of POVRAY techniques. There are no options here, as Olex2 merely creates a .pov image file for further elaboration with POVRAY tools.\n\n<table>\n<tbody>\n<tr><td><code>pictPR filename.pov</code></td><td>Saves the POVRAY output file 'filename.pov'.</td></tr>\n</tbody>\n</table>",
 "src": "util/pyUtil/gui/help/gui/EN/tools/images.help.md"
+},
+"PROFILE_SETTINGS": {
+"html": "++ When calculating the beam profile, the <strong>profile span</strong> determins how far to the left and right of 0 the profile should be evaluated and the <strong>profile threshold</strong> determines at what percentage of the maximum value the profile integration should stop\n++",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"PROPERIES": {
+"html": "Define <strong>PART</strong>, free variables (<strong>FVAR</strong>) and the <strong>occupancy</strong> here. \n\nA free variable of 3 and an occupancy of 1 means 31.0 in SHELXL notation. \n-31.0 On the other hand is set with a free variable of -3. The corresponding free\nvariable is assigned automatically. <br />\nAll parameters will be displayed simultaneously through atomic labels.",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
+"PROPERIES_2": {
+"html": "<h2>Use a residue</h2>\n\nDisable or enable putting the fitted fragment into a residue. \nThe residue class has to start with a letter and can be up to four <br />\ncharacters. Usually, the class provided by the database is sufficient.\n\n<h2>Invert</h2>\n\nInverts the coordinates of the fragment. Useful to fit the inverted geometry <br />\nof the fragment.\n\n<h2>Calculate DFIX</h2>\n\nThe supplied fragment normally has predefined restraints like \nSADI, FLAT and others. <br />\n<em>DFIX</em> Generates DFIX/DANG restraints from the geometry of the fragment and \nreplaces the predefined restraints.",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
+"PROPERIES_3": {
+"html": "<h2>Replace Mode</h2>\n\nIf enabled, all atoms inside PART 0 lying in a radius of 1.22 A around the \natoms of the fitted fragment will be deleted. This is particular useful to \nreplace atoms of a disordered structure just solved using SHELXT. <br />\nIt will not delete atoms in different PARTs than PART 0. \n\n<h2>No Restraints</h2>\n\nNo restraints will be applied to the fitting fragment.\n\n<h2>Rigid group</h2>\n\nKeeps the fitted fragment rigid during refinement.\n\n<h2>Revert Fit</h2>\n\nGoes back in the history just before the last fragment fit.",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
 },
 "PR_ROW_1": {
 "html": "Click the <strong>Go!</strong> button to create a POVRAY image in the current working folder.",
@@ -816,6 +940,78 @@
 "html": "Generate a report",
 "src": "util/pyUtil/gui/help/gui/EN/work/refine.help.md"
 },
+"REPORTPLUS_ADDITIONAL_IMAGES": {
+"html": "A picture in the report.\n\n<ul>\n<li>The first two buttons belong together: one <strong>loads</strong> the view saved for this picture, the other <strong>saves</strong> the current view (model, orientation, style) and makes the picture from it — so the picture can be made again later in exactly the same way.</li>\n<li><strong>The box</strong> — the picture file (png, jpg, bmp, ps, eps) from the structure's folder.</li>\n<li><strong>Width</strong> — how wide the picture is on the page: 1/4 to <em>Full</em>.</li>\n<li>The tick box includes the item in the report; the buttons at the end move the item up or down, edit or delete it.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_ADDITIONAL_IMAGES_HEADER": {
+"html": "<strong>Additional items</strong> are extra pictures and texts that go into the report after the standard sections — e.g. a hydrogen-bonding picture, a packing diagram or a paragraph of your own. Each one is a row below this one.\n\n<ul>\n<li><strong>Auto</strong> — generate the pictures chosen under <em>Settings &gt; Auto Generate</em> (hydrogen bonds, π-π interactions, packing) and add them as items.</li>\n<li><strong>Image</strong> — add a row for a picture.</li>\n<li><strong>Text</strong> — add a row for a text file.</li>\n<li><strong>Word</strong> — add a row for a Word document whose content goes into the report.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_ADDITIONAL_TEXT": {
+"html": "A text, Word document or template in the report.\n\n<ul>\n<li><strong>The box</strong> — the file: a text file (txt, tex), a Word document (docx, doc, rtf) or one of the <em>Manual Templates</em> of ReportPlus.</li>\n<li>The tick box includes the item in the report; the buttons at the end move the item up or down, edit or delete it.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTIONS": {
+"html": "A <strong>collection</strong> is a set of structures that are reported together — e.g. all the structures of one paper — with a combined table of crystal data, and the full report of each structure.\n\nCollections live in <strong>collection folders</strong> inside the collections root folder (set once, the first time).",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTIONS_1": {
+"html": "<ul>\n<li><strong>Introduction</strong> — write the introduction of the collection report.</li>\n<li><strong>Explore the folder</strong> — open the current collection folder.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTIONS_2": {
+"html": "<ul>\n<li><strong>Left box</strong> — the collection folder. Pick one, or type a new name to make a new folder.</li>\n<li><strong>Right box</strong> — the collection in that folder. Pick one, or type a new name to make a new collection.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTIONS_4": {
+"html": "The structures in the current collection. Click a name to open that structure: green ones have a CIF, red ones don't yet (refine the structure first); the structure that is loaded is shown in orange. Beside each structure, choose the image used for it in the report.\n\nTo add structures: <strong>Add current structure to this collection</strong>, or <strong>Add all from this CIF</strong> when a CIF with several structures is loaded.",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTIONS_I": {
+"html": "ReportPlus needs a folder where it keeps your collections. Use the suggested <strong>DataDir()/Collections</strong> folder, or browse for a folder of your own (e.g. a shared or backed-up location).",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_COLLECTION_REPORT": {
+"html": "<ul>\n<li><strong>Combined Table Only</strong> — the collection report contains only the combined crystal-data table of all structures, without the individual reports.</li>\n<li><strong>Make report for current collection</strong> — make the report of the whole collection in the format chosen above.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_GENERATED_REPORTS": {
+"html": "<strong>ReportPlus</strong> writes a complete structure report — crystal data, experimental details, tables, images, quality indicators — straight from the CIF of the loaded structure. The report is generated from scratch every time, so it always matches the current CIF.\n\n<ul>\n<li><strong>Template</strong> — the layout of the report. <em>default</em> is built in; your own templates appear here too (see <em>Settings</em>).</li>\n<li><strong>Format</strong> — <strong>rtf</strong> (Word, LibreOffice), <strong>rtf+docx</strong> or <strong>rtf+pdf</strong> (an extra converted copy), or <strong>htm</strong> (a web page).</li>\n<li><strong>Logo</strong> — the branding at the top of the report.</li>\n<li><strong>Go!</strong> — make the report for the current structure and open it.</li>\n</ul>\n\nThe report is written next to the structure, in a <em>Report</em> folder. What goes into it is chosen in the rows below.",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_IMAGE": {
+"html": "The picture of the structure shown at the top of the report.\n\n<ul>\n<li><strong>Image</strong> — <em>Auto</em> makes a picture of the current view; or pick an image file (png, jpg, bmp, ps, eps) from the structure's folder.</li>\n<li><strong>Grow</strong> / <strong>View</strong> — meant to grow the structure / set a standard view before the <em>Auto</em> picture is taken; not active in this version.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_REPORT_INCLUDES": {
+"html": "<ul>\n<li><strong>Tables: All</strong> — the full set of tables (coordinates, displacement parameters, bonds, angles, …).</li>\n<li><strong>Selected</strong> — the shorter selection of tables the template asks for.</li>\n<li><strong>Crystal images</strong> — include pictures of the crystal on the diffractometer, taken during data collection; give how many pictures, and in how many rows.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_REPORT_INCLUDES_2": {
+"html": "<ul>\n<li><strong>Qual. Indicators</strong> — the quality indicators of the data and refinement (R values, completeness, …) as coloured graphics.</li>\n<li><strong>Data Plots</strong> — the diagnostic plots of the data (e.g. Wilson plot, completeness, intensities against resolution).</li>\n<li><strong>Stats</strong> — the reflection statistics table.</li>\n<li><strong>CheckCif</strong> — include the checkCIF report (shown when PLATON is installed).</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_SETTINGS": {
+"html": "Settings of the ReportPlus plugin, and access to your own templates.",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_SETTINGS_1": {
+"html": "<ul>\n<li><strong>Edit Settings</strong> — edit all ReportPlus settings; they are saved when you close the editor.</li>\n<li><strong>Open Module Location</strong> — open the folder of the ReportPlus plugin.</li>\n<li><strong>Open Customisation Root</strong> — open the folder for your own templates and logos. Templates and logos you put there appear under <strong>Template</strong> and <strong>Logo</strong>.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_SETTINGS_2": {
+"html": "<ul>\n<li><strong>Bond columns</strong> / <strong>Angle columns</strong> — how many columns the bond and angle tables have (1–3; more columns make long tables shorter).</li>\n<li><strong>Hide Noshow</strong> — leave out values that are missing, instead of showing an empty or <em>?</em> entry.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_SETTINGS_AUTO_GENERATE": {
+"html": "What the <strong>Auto</strong> button under <em>Add Additional Items</em> generates:\n\n<ul>\n<li><strong>HTAB</strong> — a picture of the hydrogen bonds</li>\n<li><strong>π-π</strong> — a picture of the π-π interactions</li>\n<li><strong>pack</strong> — a packing picture</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
+"REPORTPLUS_WATERMARK": {
+"html": "<ul>\n<li><strong>Paper size</strong> — A4 or US Letter.</li>\n<li><strong>Watermark</strong> — print <em>Draft</em>, <em>Preliminary</em>, <em>Confidential</em> or <em>Final</em> across the pages (or none). You can also type your own text.</li>\n<li><strong>Introduction</strong> / <strong>Notes</strong> — write an introduction or notes for this structure; they go into the report.</li>\n<li><strong>Missing Items</strong> — list the CIF items the report needs but that are missing or still <em>?</em> — fill them in (Work &gt; Report) before the final report.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md"
+},
 "REPORT_SETTINGS_1": {
 "html": "This is a collection of tools to create (a) a report about the structure in HTML format, and (b) a CIF file for the structure.\n<br>\n<br>\n\nChoose the report name (the default name is the same as the name of the current file open in Olex2) and select from the drop-down menu the image to be included in the report. The drop-down menu shows all image files in the working folder for the structure. Once the other report settings below have been selected, click <strong>HTML Report</strong> to create a report as a .HTML file in the working folder for the structure.",
 "src": "util/pyUtil/gui/help/gui/EN/work/report.help.md"
@@ -832,9 +1028,57 @@
 "html": "All hidden alerts will be reset.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
 },
+"RESOLUTION": {
+"html": "<h2>Resolution / Angstroms</h2>\n\nHere you can apply a general cutoff in d-spacing for all of your datasets.",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
+},
+"RESULTS": {
+"html": "This table shows the list of the most disagreeable restraints (in case there are some). <br />\nA click on the respective line opens the editor window to adjust the restraints values. <br />\nThe long list shows ALL restraints and the short list only the most disargreeable ones. <br />\nThe error of a parameter should generally not be higher than 3sigma. A higher \nvalue means that the assumption of the target value originating from \ngeneral observations is not met. The reason for this can be either, for \nexample, a distorted molecular geometry like a bend aromatic ring or \nsystematic errors in the data. <br />\nDisagreeable restraints will be highlighted in yellow if the error is above \n2.5sigma. They will be highlighted in red if the error is above 3.5sigma.",
+"src": "util/pyUtil/FragmentDB/fragmentdb.md"
+},
 "RIGU": {
 "html": "Usage: <strong>RIGU s1[0.004] s2[0.004] atomnames</strong>\n<br>\n<br>\n\nApplies enhanced \"rigid-bond\" (see <strong>DELU</strong> above) restraints to bonds between adjacent atoms and to 1,3 distances with e.s.d.'s <strong>s1</strong> and <strong>s2</strong>, respectively.\n<br>\n<br>\n\n<strong>Example:</strong> &nbsp; <em>RIGU C1 Cl1 Cl2</em><br>\nApplies enhanced rigid-bond restraints to a dichloromethane molecule.",
 "src": "util/pyUtil/gui/help/gui/EN/tools/shelx_compatible_restraints.help.md"
+},
+"RODFOLDER_1": {
+"html": "<strong>RODFolder</strong> shows a folder of data collections as a grid of coloured <em>chips</em> — one chip per collection, and below it one chip per structure of the selected collection — so you can see at a glance which data sets and structures are good and open any of them with one click.\n\nThe <strong>Collections folder</strong> holds one sub-folder per data collection, each with its own <strong>struct</strong> folder (the usual CrysAlisPro layout). A collection may also hold several experiments, each with its own struct folder (<em>collection/exp_639/struct</em>, <em>collection/exp_640/struct</em>, …): its structures are then shown together.\n\nAny other folder works too: if it holds no <strong>struct</strong> folder and no CrysAlisPro experiment anywhere (for example a set of deposited structures, <em>MOF-1/MOF-1.cif</em>, <em>MOF-2/MOF-2.cif</em>, …), RODFolder shows <strong>one chip per CIF file</strong> in the whole tree, coloured the same way. Click a chip to open that structure (the file chosen under <strong>Open</strong>).\n\nWhen the sub-folders of such a folder group the CIFs (<em>1-MOFs/MOF-AT1.cif</em>, … and <em>2-Guests/G-1/G-1.cif</em>, …), there is first <strong>one chip per sub-folder</strong>, as for collections, coloured by its best CIF: click one to see its CIFs below — or click <strong>all combined</strong> underneath to see the CIFs of all of them together.\n\n<ul>\n<li><strong>Choose…</strong> — pick the collections folder</li>\n<li><strong>Refresh</strong> — scan the folder again (after new collections or structures have been added). RODFolder remembers the folders and what it read from the files, so switching <em>Colour by</em>, <em>Sort</em>, <em>Cols</em>, <em>Value only</em> or the folder shown is quick; a changed file is read again by itself, and the loaded structure's chip follows its refinements, but new folders only show up after <strong>Refresh</strong>.</li>\n<li><strong>PNG…</strong> — save the chips as a picture. Every grid of the panel is drawn as it is shown, at twice the size by default and without the disable strips. A header gives the criterion, the folder, the counts and the date, followed by a key to the colours. Under <em>Settings</em>, <em>rodfolder.export</em> sets the scale and a wider grid. From the command line: <em>spy.rodfolder.export_png(C:/path/chips.png)</em>.</li>\n</ul>\n\n<h2>Colours</h2>\n\nEach chip is coloured by the criterion chosen under <strong>Colour by</strong>, using the same grades as Olex2's own refinement indicators: dark green (best), light green, orange, red (worst). A grey chip has no value for the criterion yet. The structure that is currently loaded is outlined in the highlight colour.",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_2": {
+"html": "<ul>\n<li><strong>Colour by</strong> — what the chips are coloured by:\n\n<ul>\n<li><strong>Rint</strong>, <strong>Resolution</strong> and <strong>Completeness</strong> — properties of the data (from the hkl / data reduction)</li>\n<li><strong>R1</strong> and <strong>Peak</strong> (the largest residual peak, e/Å³) — properties of the refined structure (res, ins or cif)</li>\n<li><strong>ED structures</strong>, from the header ACED writes into the <em>.res</em>:</li>\n<li><strong>EDT</strong> — the refined crystal thickness of an N-beam refinement, in Å. It is neither good nor bad, so the chips are shaded from light (thinnest) to dark (thickest). A collection chip shows the median.</li>\n<li><strong>Zscore</strong> — the Z-score of the enantiomer determination. Larger is better, and below 3 is doubtful: dark green from 10, light green from 5, orange from 3, red below.</li>\n<li><strong>Stereo</strong> — the absolute stereochemistry found (R or S of the atom it names). A collection with both is shown as <em>R/S</em>.</li>\n<li><strong>Mask</strong> — whether a solvent mask was used (yes / no), from the mask or SQUEEZE loop in the <em>.cif</em> or <em>ABIN</em> in the <em>.res</em>. A collection with both is shown as <em>mixed</em>.</li>\n</ul>\n\nFor EDT, Stereo and Mask there is no \"best\": selecting a collection opens its structure with the best R1.</li>\n<li><strong>Sort</strong> — the order of the chips: <strong>Quality</strong> (by the <em>Colour by</em> criterion, best first, grey chips after), <strong>Name</strong> (alphanumerically: MOF-2 before MOF-10) or <strong>CCDC</strong> (by the CCDC deposition number in the CIF; chips without one follow, by name). Disabled chips always come last.</li>\n<li><strong>Open</strong> — which file a structure chip opens when clicked: <strong>res</strong>, <strong>cif</strong> or <strong>ins</strong>. If that file isn't there, the next one is used (res, cif, ins); a folder with none of them opens in CrysAlisPro. A chip of a CIF file (a folder that is not a ROD folder) opens the res / ins of the same name next to it — or of the name of the CIF's data block.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_3": {
+"html": "<ul>\n<li><strong>Cols</strong> — chips per row; the chips are sized to fill the width of the panel. Pick a number or type one (up to 48): with more than 8 columns the chips are small squares without a name and without the disable strip — hover over one to see its name and value, click it to open it. With <strong>Value only</strong> they show the value, rounded (R1, Rint, completeness in whole percent; resolution and peak to one decimal, <em>.8</em>), as long as the chips are big enough to read it. A disabled chip is enabled again by clicking it (shown with <strong>Show disabled</strong> on); to disable chips, use 8 columns or fewer.</li>\n<li><strong>Value only</strong> — the chips show only the value of the <em>Colour by</em> criterion, in a larger font (the size that fits a grid of 6 columns, also for fewer columns), instead of the folder name: compact when there are many chips, e.g. dozens of grains. R1, Rint and the completeness are shown in percent (<em>6.1</em> for 0.061), the resolution in Å, the largest residual peak in e/Å³. The name is shown when you hover over a chip. Under <em>Settings</em>, <em>rodfolder.value</em> sets the number of decimals (1) and whether a % sign is shown.</li>\n<li><strong>Show disabled</strong> — show disabled folders (hatched) in the grid; when off, they are hidden</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_4": {
+"html": "<strong>Collections</strong> — one chip per data collection in the collections folder. Click a chip to select the collection: its structures appear in the grid below, and its <strong>best structure</strong> (by the <em>Colour by</em> criterion) is opened — unless a structure of that collection is already loaded, which is then kept. A collection without a <strong>struct</strong> folder opens in CrysAlisPro instead.\n\nThe narrow strip on the right edge of a chip <strong>disables</strong> the folder (click again to enable it): disabled folders are shown hatched, or hidden with <strong>Show disabled</strong> off. Use it for collections you don't want to see — test runs, failed crystals.",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_5": {
+"html": "<strong>Structures</strong> — one chip per structure folder of the selected collection. Working and copy folders (<em>olex2</em>, <em>tmp</em>, <em>best_res</em>, <em>Enantiomers</em>, <em>template</em>, and the <em>grains</em> of a structure, which have their own section) are not listed. Click a chip to open the structure (the file chosen under <strong>Open</strong>); the structure that is loaded is outlined.\n\nAs in the collections grid, the strip on the right edge of a chip disables / enables the folder.\n\nA folder without a <em>.cif</em> (refined without ACTA) is coloured from its <em>.res</em> (R1 of the last refinement) and its <em>.cif_od</em> (Rint, Resolution).",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_6": {
+"html": "<strong>Grains</strong> — shown for a structure of the selected collection that has per-grain refinements (for a merged experiment, the <em>Source experiments</em> chips show them instead): one chip per grain (crystal) refined against the structure's model, coloured by the same criterion as the other chips. Grey chips are not refined yet. Click a chip to open that grain's refinement; the strip on the right edge disables / enables it.\n\nThe grain refinements are made with the command <strong>spy.grains</strong> while the merged structure is open: <em>spy.grains()</em> lists the source experiments of the merged experiment and checks their data, <em>spy.grains(3644)</em> sets up and opens the refinement of experiment exp_3644. They live in the structure's own <em>grains</em> folder, never in the source experiment's folder.\n\nA structure that is <strong>not merged</strong> works the same way: its grains are the <strong>other experiments of its collection</strong> (separate crystals of the same compound), each refined against its <strong>own data</strong> — the newest <em>.cif_od</em> with an <em>.hkl</em> of the same name in that experiment's folder. <em>spy.grains(all)</em> evaluates them all. The frame data for the N-beam refinement (<em>_dyn.cif_cap</em>, <em>_dyn.cif_pets</em>) are copied along.\n\n<strong>spy.grains</strong> always uses the model of the <strong>loaded</strong> structure. It must be a structure of the collection selected in the top grid; otherwise it stops and says so. Open the structure you want as the model first (click its chip), then run it.\n\n<strong>Evaluate grains</strong> — <em>spy.grains(used)</em> sets up every grain used for the merged data (from the newest merge group), refines each one (N-beam, EDT only) and, for a chiral structure, determines the enantiomer; <em>spy.grains(all)</em> does the same for every source experiment, so grains that were not chosen can be compared. Meant as a starting point: grains that are already refined (a <em>.res</em> with an R1) are skipped; grains set up but without a result are refined again, from their own <em>.ins</em>. When the N-beam refinement leaves no result (e.g. it stops with <em>ACED is not enabled</em>), the grain is refined <strong>kinematically</strong> instead, starting again from the model as it was set up (<em>exp_NNNN.ins.orig</em>): R factors and a <em>.res</em>, but no Z-score. The summary lists those grains as <em>kinematic only</em>; <em>spy.grains(3644,True)</em> sets one up again for a new N-beam attempt. Chips of grains not used for the merged data are labelled <em>(not used)</em>.\n\n<strong>Choosing the method</strong> — <em>spy.grains(all,kinematical)</em> or <em>spy.grains(all,dynamical)</em> (also <em>used</em>, and short: <em>kin</em>, <em>dyn</em>) refines with that method only, with no fallback: a grain left without a result by a dynamical refinement is reported as failed. Each grain starts again from the model as it was set up. Grains already refined with that method are skipped; those refined the other way are refined again. For example, <em>spy.grains(all,dynamical)</em> redoes the grains that were refined kinematically while ACED was not available. <em>spy.grains(3644,dynamical)</em> does the same for one grain, setting it up first if needed. <em>spy.grains()</em> shows how each grain was refined.",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_EXTRAS": {
+"html": "Extra tools for the RODFolder plugin itself.",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_HISTORY": {
+"html": "<ul>\n<li><strong>History</strong> — folders you have used before, most recent first. Pick one to make it the collections folder again; folders that no longer exist are dropped from the list.</li>\n<li><strong>Auto-Root</strong> — when the structure you load lives in a folder below a <strong>struct</strong> folder, RODFolder points the grid at the collections folder above it, selects that collection and opens the panel. A structure inside the collections folder you have chosen only selects its collection; the folder stays.</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_SOURCES": {
+"html": "<strong>Source experiments</strong> — shown when the selected collection is a <strong>merged</strong> ED experiment (it has <em>expinfo/merged.ini</em>): one chip per experiment merged into it (<em>exp_3616</em>, <em>exp_3644</em>, …), in the order of <em>merged.ini</em>, coloured from that experiment's own <em>.cif_od</em> (Rint, Resolution). Coloured by R1, a chip shows the R1 of that grain's refinement of the open structure (grey while it is not refined). Experiments not used for the merged data are labelled <em>(not used)</em>.\n\nClick a chip with the merged structure open: if that grain is already refined, its refinement is opened; otherwise it is set up as with <em>spy.grains(3644)</em>. The source experiment's own folder is never touched.",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
+},
+"RODFOLDER_TOOLS": {
+"html": "<ul>\n<li><strong>Reload Plugin</strong> — reload RODFolder (after changing its code or settings files)</li>\n<li><strong>Open Folder</strong> — open the plugin's folder</li>\n<li><strong>Settings</strong> — edit all RODFolder settings, including the chip size, font and spacing, and how much of the panel width the grid uses; they are saved and the grid is refreshed when you close the editor</li>\n</ul>",
+"src": "util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md"
 },
 "ROTATE": {
 "html": "Using these tools, a structure on the screen can be rotated in a more fine-grained and repeatable way than with the mouse.\n\n<h2>Rotate about the <em>x</em>, <em>y</em>, or <em>z</em> axis</h2>\n\nEnter the degrees of rotation into a <strong>Rotate</strong> box and click on one of the buttons on either side of the box to rotate the structure once in the negative or positive direction. Selecting <em>x</em> rotates the structure from bottom to top on the screen, <em>y</em> rotates from left to right and <em>z</em> rotates within the plane of the screen. \n<br>\n<br>\n\nUsing the '<c>rota</c>' line command, even finer rotations by fractions of degrees are possible. Use '1' to stand for <em>x</em>, '2' for <em>y</em>, and '3' for <em>z</em> in the '<c>rota</c>' command, e.g.,\n\n<table>\n<tbody>\n<tr><td><code>rota  1  13.4</code></td><td>Rotate the structure around the <em>x</em> axis by 13.4&deg;.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><code>rota  2  -10.2</code></td><td>Rotate the structure around the <em>y</em> axis by -10.2&deg;.</td></tr>\n</tbody>\n</table>",
@@ -855,6 +1099,14 @@
 "SAVE_VIEW": {
 "html": "If checked, drawing settings such as styles and backgrounds will be saved with the structure. This is somewhat experimental; if things go wrong, it may be necessary to reload the chosen style for that particular structure.\n<br>\n<br>\n\nWhen this box is <strong>not</strong> checked, then a structure will be loaded with the same style as the previous structure.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
+},
+"SCALES": {
+"html": "",
+"src": "util/pyUtil/ACED/ACED.md"
+},
+"SCRIPTS": {
+"html": "Run scripts outside of AC7! Some of the building blocks that make up AutoChem can be run as 'standalone' tools. Select what you want to run from the dropbdown box and press 'Go'!",
+"src": "util/pyUtil/AC7d/AC.md"
 },
 "SELECT-ATOMS-HELP": {
 "html": "",
@@ -976,6 +1228,10 @@
 "html": "On startup, Olex2 will open the tab selected from this drop-down menu. This takes effect the next time Olex2 is restarted.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
 },
+"STEREOCHEMSISTRY": {
+"html": "++\nIn most chiral ED structures, the absolute stereochemistry can be determined. The two enantiomers interact differently with electrons, leading to different diffraction intensities. Dynamical refinement of each isomer, in turn, will give rise to lower R factors for the correct isomer. Whether the difference is statistically significant is expressed as the Z-Score URL[https://en.wikipedia.org/wiki/Standard_score,WIKIPEDIA], URL[https://youtu.be/3jC2CVqSkgc,PAPER]\n++\n\n<h2>Chiral Atoms</h2>\n\nEnantiomers of molecules are commonly designated using the R/S or L/D descriptors. This becomes tricky when a structure has more than one chiral centre. For a particular naming scheme for a structure, Olex2 will always return the same list of chiral centres with the command RSA. We use this here to distinguish enantiomers by providing the chirality (R/S) of the first atom in that list. For the tyrosine example structure, the C8 atom is in the S configuration. Initially, this box is grey, and after running the Z-score test, it will turn green (correct isomer) or red (incorrect isomer).\n\n<h2>Invert Button</h2>\n\nThis is equivalent to the command inv -f, which forcibly inverts the structure.\n\n<h2>Stereochem</h2>\n\nA quick test to determine the absolute stereochemistry of the structure by calculating the R factors for the current enantiomer dynamically, inverting the structure, and calculating the R factors for the inverted structure. The structure with the lower R factor is the correct enantiomer.\n\nTwo CIF files will be made (original.cif and inverted.cif). The original structure will not be altered during the process and will be reloaded at the end of the test. These structures can be accessed in the subfolder Enantiomers  and also by clicking on the blue ? mark symbol.\n\n<h2>Img</h2>\n\nDiagnostics images are generated during the determination of the absolute stereochemistry. These are not actually written to disk if this tick-box is not ticked (default). You may need to install Matplotlib before this works (Olex2 will prompt you to do so when required). This tickbox is a bit of a safety net!\n\n<h2>Refine</h2>\n\nIf this box is ticked, both structures will be refined using the general settings provided. This process can take a long time.\n\n<ul>\n<li>CYC: The number of times the refinement will be repeated</li>\n<li>Via K: The structure will not only be inverted, but it will also be refined kinematically first</li>\n</ul>\n\nNOTE: We dont see this feature as very useful, but it remains to be seen; therefore, we have included it here.\n\n<h2>Update Scales</h2>\n\nPress this button to manually update the scales.\n\n<h2>Auto update Scales</h2>\n\nIf this box is ticked, the scales will be automatically updated after each refinement.\n\n<h2>Reset Scales</h2>\n\nThis will reset all scales.",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
 "STEREO_VIEW": {
 "html": "Depending on the hardware available, there are four options for obtaining a stereo view of a structure. There is also an option for viewing a structure in 3D without any special hardware at all. Click <strong>Normal View</strong> to return to the original 2D view on the screen in all cases. See the Olex2 <strong>3D View tutorial</strong> for more information, or search 3D viewing techniques online.\n\n<h2>Stereo (Colour)</h2>\n\nThis mode is for viewing a structure using red/cyan 3D glasses. It results in a 3D structure displayed in grayscale (for colours matching those of the glasses). The 3D image is created by rendering two spatially separated projections.\n\n<h2>Stereo (Anaglyph)</h2>\n\nThis mode is a different method for viewing a structure with red/cyan 3D glasses, and produces colour 3D images.\n\n<h2>Stereo (Hardware)</h2>\n\nRequires special hardware (3D monitor and accompanying 3D glasses) to view the 3D image.\n\n<h2>Stereo (Interlaced)</h2>\n\nAs with <strong>Stereo (Hardware)</strong>, this mode requires special hardware for viewing.\n\n<h2>Normal View</h2>\n\nReturns to the normal 2D display mode.\n\n<h2>Viewing a structure in 3D without special equipment</h2>\n\nIt is possible to generate a 3D image that can be viewed using the \"cross-eyed\" method of the popular \"Magic Eye\" books, using no special equipment. Type '<c>gl.stereo(cross)</c>' to generate the image. For best results, first resize the entire Olex2 window until the graphics display clearly shows both structures side by side within about a 10 cm x 10 cm square. Cross the eyes (or relax their focus as if staring off into the distance) to view the structure in 3D. The 3D image can be rotated, zoomed, and moved as usual.",
 "src": "util/pyUtil/gui/help/gui/EN/view/stereo_view.help.md"
@@ -983,6 +1239,10 @@
 "SWAP_HTML_PANEL": {
 "html": "Clicking this button switches the position of the GUI between the right and left sides of the Olex2 window.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
+},
+"SYMMETRY_DISORDER_DISPLAY": {
+"html": "For pictures of structures in which a group is disordered by symmetry, for example a ring lying across a mirror plane. There is then only one set of atoms in the asymmetric unit, with no PARTs to choose from, and growing the structure shows every orientation at once. These two tools show one complete metal centre, and separate one consistent orientation from the other, so that it can be drawn differently.\n\nThey change what is displayed, not the model: nothing here affects the refinement.\n\n<h2>Making a picture</h2>\n\n<ol>\n<li>Click <strong>Complete Complex</strong>.</li>\n<li>Click any atom of a disordered group, in the orientation you want to keep.</li>\n<li>Click <strong>Group Other Orientation</strong>.</li>\n</ol>\n\nThe other orientation now has its own look, from the material of the group <em>dp1</em>.\n\n<h2>Complete Complex</h2>\n\nShows one metal with all of its ligands whole, and no other metal, however the structure was grown before: bridging rings are complete on the far side, and the metal beyond them is left out. It uses the selected metal, or else the first one in the asymmetric unit.\n\nOlex2 first returns to the asymmetric unit (<em>fuse</em>), and then generates just the atoms needed.\n\n<h2>Group Other Orientation</h2>\n\nSelect exactly one atom of a disordered group. The orientation of that atom stays as it is. The other orientation goes into the group <em>dp1</em>, together with its bonds. Everything else, including the atoms shared by both orientations, is left as it was.\n\nTo keep the other orientation instead, reload the structure and select one of its atoms.\n\n<h2>Which atoms belong together</h2>\n\nCopies of the same atom that are too close without being bonded (H...H under 1.5 A, other atoms under 1.75 A) cannot be present together, while bonded atoms belong together. Where neighbouring groups touch in this way, for example through their hydrogen atoms, choosing an orientation for one group decides the others too, so one selected atom is enough.\n\n<h2>If it does not work</h2>\n\n<table>\n<tbody>\n<tr><td><strong>Select exactly one atom</strong></td><td>Selecting a bond also counts as more than one atom.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><strong>Not part of the disorder</strong></td><td>The selected atom has no clashing copies. Select an atom of the disordered group.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><strong>Independent sets</strong></td><td>Some groups do not touch, so one atom cannot decide them all. Click <strong>Complete Complex</strong> first.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><strong>Contacts contradict each other</strong></td><td>No split without a clash exists for this structure at these distances.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><strong>Selection check failed</strong></td><td>Most likely <em>dp1</em> exists already: reload the structure and try again.</td></tr>\n</tbody>\n</table>\n\n<table>\n<tbody>\n<tr><td><strong>Atoms outside this complex</strong></td><td>Atoms of the asymmetric unit that do not belong to this metal stay visible after <strong>Complete Complex</strong>.</td></tr>\n</tbody>\n</table>",
+"src": "util/pyUtil/gui/symdisorder/symdisorder.help.md"
 },
 "SYMMETRY_TOOLS": {
 "html": "This tool tab features a set of buttons for changing the appearance/location of the asymmetric unit; expanding (\"growing\") a structure on the screen; viewing the basis vectors and unit cell; and other similar tasks.",
@@ -1003,6 +1263,14 @@
 "SYMMETRY_TOOLS_4": {
 "html": "These two important commands contract and expand the extent of the structure displayed on the screen.\n\n<h2>Fuse</h2>\n\n<table>\n<tbody>\n<tr><td><code>fuse</code></td><td>Display the asymmetric unit of the structure only. All symmetry-generated atoms will be removed. This is a command of fundamental importance.</td></tr>\n</tbody>\n</table>\n\n<h2>Grow All</h2>\n\n<table>\n<tbody>\n<tr><td><code>grow</code></td><td>All symmetry-equivalent atoms required to show the \"complete\" structure will be displayed. In the case of polymeric structures, this is somewhat arbitrary, and more clearly defined '<c>grow</c>' commands may need to be issued to display the structure as desired. See the <strong>Growing</strong> tool tab help for more options.</td></tr>\n</tbody>\n</table>",
 "src": "util/pyUtil/gui/help/gui/EN/view/symmetry_generation.help.md"
+},
+"TESTING_ED": {
+"html": "<h2>Testing</h2>\n\nThink of this field as a label. The test run will be saved under this name for later use. If you leave a full stop here, the run will be saved, but overwritten for your next run.\n\nI chose something like N=10<em>P=10 for the name, to denote that the test was done with 10 beams and 10 integration points. Olex2 2 will append the nature of the test after the run, so your label will become something like EDT(Z)</em>N=10_P=10. Everything to do with this test will end up in the subfolder Testing in a folder of the same name as your label.\n\n<h2>Test Z/R</h2>\n\nDo you want to just evaluate the R values, or also calculate the Z scores (for chiral structures)?\n\n<h2>Go Button</h2>\n\nStart the run. If a run of the same name already exists, it will prompt you to append to that run or overwrite the existing one (a backup will be made).\n\n<h2>Plot Button</h2>\n\nThis will plot the information from the run shown in Testing using the graphs ticked in the Include line (where applicable).\n\n<h2>STOP Button</h2>\n\nThis will create an empty stop.txt file in the directory of your structure, if possible. You may want to have a terminal window open in that directory, from which you can create that stop file more easily (I use the git command line, and then touch stop.txt).",
+"src": "util/pyUtil/ACED7d/ACED.md"
+},
+"TESTING_NOTES": {
+"html": "",
+"src": "util/pyUtil/ACED/ACED.md"
 },
 "TIDY-TARGET": {
 "html": "Tidy up your structure. Only recommended in early stages of refinement!",
@@ -1027,6 +1295,14 @@
 "TOOLTIPS": {
 "html": "If selected, tooltips will be shown when hovering over items in the GUI.",
 "src": "util/pyUtil/gui/help/gui/EN/home/settings.help.md"
+},
+"TOP-UP,_GROUP,_SCALES": {
+"html": "The correct selection of beams and groups is very important for dynamical refinement.\n\n<h2>Beam Selection</h2>\n\n<h3>MaxSg</h3>\n\nThe maximum distance a beam may be located to either side of the Ewald sphere. \n(This setting is not available on the GUI since it is set automatically)\n\n<h3>MaxG</h3>\n\nThe maximum resolution of the data to take into account\n(This setting is not available on the GUI since it is set automatically)\n\n<h3>Top-up d</h3>\n\nDepending on the number and nature of <em>observed</em> reflections, the dynamic calculations may require the inclusion of <em>unobserved</em> reflections. This parameter sets up to which resolution (in A^-1) values for these unobserved reflections should be calculated.\n\n<h3>Top-up Sg</h3>\n\nDepending on the number and nature of <em>observed</em> reflections, the dynamic calculations may require the inclusion of <em>unabsorved</em> reflections. This parameter sets the maximum distance to the Ewald Sphere of reflections to be included in the calucation of unobserved reflections.\n\n<h2>Group Selection</h2>\n\n<h3>Method</h3>\n\n<h3>Width</h3>",
+"src": "util/pyUtil/ACED/ACED.md"
+},
+"TOP_UP_|_GROUP_|_SCALES": {
+"html": "<h2>Top-up</h2>\n\nThe resolution up to which missing reflections will be topped-up, with a maximum of the given resolution of the experiment, regardless of the value entered here.\n\n<h2>Group Width</h2>\n\nScales are calculated based on grouped diffraction images. The width of these groups (in degrees) can be set here. The wider the scale, the fewer groups will be used in the evaluation. The default of 3 degrees usually leads to around 30 groups, which is adequate, and there is no reason to change this width.\n\n<h2>Scales</h2>\n\nScales are usually updated automatically (if the Auto update tick-box is ticked) at the suitable points in the refinement process. They can be manually updated (for example, when some parameter values are changed). The scales can also be reset altogether.\n\nThe maximum resolution of the data to take into account\n(This setting is not available on the GUI since it is set automatically.)",
+"src": "util/pyUtil/ACED7d/ACED.md"
 },
 "TUTORIALS-TARGET": {
 "html": "A few interactive self-paced tutorials to get started with Olex2",
@@ -1060,53 +1336,68 @@
 "html": "<h2>Weight</h2>\n\n<table>\n<tbody>\n<tr><td><code>weight</code></td><td>A weighting scheme should be applied to the diffraction data once the model is nearly finished and all atoms have settled into their respective positions.</td></tr>\n</tbody>\n</table>\n\nAll refinement programs will suggest a suitable weighting scheme. Clicking on the coloured numbers on this line applies the suggested weighting scheme to the data. By ticking the <strong>Weight</strong> box, Olex2 will automatically update the weights to the suggested values after each refinement cycle. (In practice, this reduces to simply ticking the <strong>Weight</strong> box after the model has settled and running additional cycles of refinement until the numbers in the <strong>Weight</strong> boxes turn green.)\n\n<h2>Extinction Correction</h2>\n\nExtinction is a physical phenomenon affecting the intensity of reflections and can result in certain reflections being systematically absent under certain conditions during the diffraction experiment. The <strong>EXTI</strong> parameter is designed to account for the intensity changes associated with extinction. The method used is a compromise to account for both primary and secondary extinction. In general, this correction should not be included in refinement until all of the non-hydrogen atoms have been located. Depending on the structural problem, either the <strong>EXTI</strong> or the <strong>SWAT</strong> box (see below) can be ticked, but not both. (In practice, first click on the <strong>percent sign</strong> next to R1 at top to display the Fobs vs Fcalc graph, and if it shows visible downward curvature at high Fcalc, tick the <strong>EXTI</strong> tickbox and run additional cycles of refinement until convergence is reached.)\n\n<h2>SWAT</h2>\n\nThis is a method for dealing with diffuse solvent regions (usually water in macromolecular structures), by introducing two refinable parameters, <em>g</em> and <em>U</em>. Either <strong>EXTI</strong> or <strong>SWAT</strong> can be used, depending on the nature of the structural problem, but not both at once.\n\n<h2>ACTA</h2>\n\nFrom the drop-down menu, select <strong>No ACTA</strong> to omit writing a CIF file, <strong>ACTA NOHKL</strong> to write a CIF file without an embedded hkl file, and <strong>ACTA</strong> to write a CIF file with an embedded hkl file. It is recommended always to use the <strong>ACTA</strong> option.",
 "src": "util/pyUtil/gui/help/gui/EN/work/refine.help.md"
 },
+"WELCOME_TO_SISYPHOS": {
+"html": "<code>&lt;font color='red'&gt;</code><strong>THIS MODULE IS IN DEVELOPMENT, ATM YOU CANNOT STOP A RUNNING PROCEDURE OTHER THAN KILLING OLEX2</strong><code>&lt;/font&gt;</code>\n<code>&lt;br&gt;</code>\n<code>&lt;br&gt;</code>\n\nThis tool is meant to provide means of serially refine multiple models against multiple datasets of the same structure.\nIn other words, it solves Sisyphos dilemma for you, repeating the same task for the same structure over and over again.\nIt can be used for finding out which crystal was the best out of many (looking at synchrotron users!), or for benchmarking theoretical calculations.\n\n<br>\n\nNoSpherA2 (* Kleemiss et al., Chem. Sci., 2021, 12, 1675\n&nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER] ) is implemented and can be used in this procedure.\n\n<br>\n<br>\n\nAnomalous dispersion refinement (* Meurer et al., IUCrJ, 2022, 9\n&nbsp; URL[https://journals.iucr.org/m/issues/2022/05/00/lt5050/,PAPER]) can be also used, especially when in the vicinity of absorption edges (see Anomalous Dispersion in Info tab).",
+"src": "util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md"
+},
 "ZOOM": {
 "html": "This slider enables zooming in or out on the structure displayed on the screen. The zoom can also be adjusted by holding down the right mouse button and moving the mouse. Click the <strong>Reset</strong> link or type '<c>gl.zoom</c>' at the command prompt to return to a normal zoom level.",
 "src": "util/pyUtil/gui/help/gui/EN/view/rotate.help.md"
 }
 },
 "files": {
-"util/pyUtil/NoSpherA2/NoSpherA2.md": 1791384895.957492,
-"util/pyUtil/NoSpherA2/harp.md": 1742657660.421663,
-"util/pyUtil/gui/help/gui/EN/home/changelog.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/home/extension_modules.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/home/settings.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/home/start.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/home/tutorials.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/bad_reflections.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/electron_density_peaks.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/recent_files.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/refinement_indicators.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/reflection_statistics.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/info/reflection_statistics_summary.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/HARt.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/Olex2_restraints_and_constraints.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/chemical_tools.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/disorder.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/folder views.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/hydrogen_atoms.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/images.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/maps.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/overlay.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/platon.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/shelx_compatible_constraints.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/shelx_compatible_restraints.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/tools/twinning.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/view/geometry.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/view/rotate.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/view/stereo_view.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/view/symmetry_generation.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/draw.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/history.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/naming.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/refine.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/report.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/select.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/solve.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/sorting.help.md": 1793706630.130633,
-"util/pyUtil/gui/help/gui/EN/work/toolbox_work.help.md": 1793706630.130633,
-"util/pyUtil/gui/moiety/moiety.help.md": 1793709919.497732
+"util/pyUtil/AC7/AC.md": 1787850114.4238942,
+"util/pyUtil/AC7d/AC.md": 1787850114.4238942,
+"util/pyUtil/ACED/ACED.md": 1790861329.4589064,
+"util/pyUtil/ACED7d/ACED.md": 1765445194.0242157,
+"util/pyUtil/ACEDd/ACED.md": 1739967420.9023597,
+"util/pyUtil/FragmentDB/fragmentdb.md": 1759503030.0,
+"util/pyUtil/NoSpherA2/NoSpherA2.md": 1791400044.5854714,
+"util/pyUtil/NoSpherA2/harp.md": 1764011326.0,
+"util/pyUtil/PluginLib/plugin-DrawPlus/drawplus.md": 1571229661.0,
+"util/pyUtil/PluginLib/plugin-RODFolder/rodfolder.help.md": 1791991261.0,
+"util/pyUtil/PluginLib/plugin-ReportPlus/reportplus.help.md": 1790850252.7712529,
+"util/pyUtil/PluginLib/plugin-SISYPHOS/sisyphos.md": 1739628094.0,
+"util/pyUtil/gui/help/gui/EN/home/changelog.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/home/extension_modules.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/home/settings.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/home/start.help.md": 1787899907.9829745,
+"util/pyUtil/gui/help/gui/EN/home/tutorials.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/bad_reflections.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/electron_density_peaks.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/recent_files.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/refinement_indicators.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/reflection_statistics.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/info/reflection_statistics_summary.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/HARt.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/Olex2_restraints_and_constraints.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/chemical_tools.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/disorder.help.md": 1793791987.9704597,
+"util/pyUtil/gui/help/gui/EN/tools/folder views.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/hydrogen_atoms.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/images.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/maps.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/overlay.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/platon.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/shelx_compatible_constraints.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/shelx_compatible_restraints.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/tools/twinning.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/view/geometry.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/view/quick_drawing_styles.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/view/rotate.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/view/stereo_view.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/view/symmetry_generation.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/draw.help.md": 1758801919.471371,
+"util/pyUtil/gui/help/gui/EN/work/history.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/naming.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/refine.help.md": 1789750264.0,
+"util/pyUtil/gui/help/gui/EN/work/report.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/select.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/solve.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/sorting.help.md": 1738335300.0,
+"util/pyUtil/gui/help/gui/EN/work/toolbox_work.help.md": 1738335300.0,
+"util/pyUtil/gui/moiety/moiety.help.md": 1793709919.497732,
+"util/pyUtil/gui/symdisorder/symdisorder.help.md": 1793791987.8908455
 },
 "version": 1
 }
