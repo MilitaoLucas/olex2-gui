@@ -23,7 +23,15 @@ user.NoSpherA2.show_XCW. What it does:
   grown    a grown model (molecule on a special position) goes as <name>.xyz
            with -xyz and the keyword grown; NoSpherA2 fits the whole cluster
   EXTI     Olex2's EXTI goes as 'extinction shelx <EXTI>' + the wavelength and
-           is refined on in the fit
+           is refined on in the fit; the anisotropic one as
+           'extinction shelx aniso <X11 X22 X33 X12 X13 X23>'
+  Weight   sigma (default) writes nothing; shelx / shelx_opt write Olex2's WGHT
+           as 'weight shelx a b' (fixed) or 'weight shelx_opt a b' (re-optimised
+           after each lambda step); unit, stl (a = WGHT a), chebyshev_opt 3 and
+           robust (Tukey on sigma) as named; refinement maps Olex2's
+           snum.refinement.weighting_scheme (default/shelx, new_shelx, sigma,
+           unity, stl), anything else falls back to sigma with a notice. All on
+           top of the classical or weighted target
   TWIN     the twin laws go as -twin (utilities.twin_law_args, as on the tsc
            route), so the table also covers R h for every measured h; the fit
            itself stays on the measured reflections and ignores BASF (an
@@ -81,6 +89,14 @@ def _executable():
     if os.path.isfile(advanced):
       return advanced
   return exe
+
+
+def _help_has(text, folder):
+  """Whether the executable's -help mentions text: how an older build that lacks a feature is told apart."""
+  result = subprocess.run([_executable(), "-help"], cwd=folder, check=True,
+                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+  return text in result.stdout
 
 
 def xcw_basis_list():
@@ -191,7 +207,8 @@ def _write_settings(path, n_params):
   from cctbx_olex_adapter import OlexCctbxAdapter
   adapter = OlexCctbxAdapter()
   if adapter.exti is not None:
-    n_params -= 1  # Olex2 counts EXTI, NoSpherA2's n_params() adds the refined coefficient itself
+    # Olex2 counts EXTI, NoSpherA2's n_params() adds the refined coefficients itself
+    n_params -= 1 if adapter.exti_aniso is None else 6
   lines = [
     str(_param("scf_preset", "normal")),
     str(_param("conv_preset", "normal_conv")),
@@ -202,14 +219,17 @@ def _write_settings(path, n_params):
     lines.append("grown")
   if adapter.exti is not None:
     # SHELX EXTI on the same 0.001 lambda^3 / sin 2theta scale, refined on from Olex2's value
-    lines += ["extinction shelx %.8g" % adapter.exti, "wavelength %.6f" % adapter.wavelength]
+    # the anisotropic one starts from Olex2's tensor, X11 X22 X33 X12 X13 X23
+    # an older NoSpherA2 keeps only the last of six numbers, so it gets aniso from tr(X)/3
+    start = "%.8g" % adapter.exti
+    if adapter.exti_aniso is not None:
+      start = "aniso " + (" ".join("%.8g" % x for x in adapter.exti_aniso) if _help_has(b"X11 X22 X33 X12 X13 X23", os.path.dirname(os.path.abspath(path)))
+                          else "%.8g" % (sum(adapter.exti_aniso[:3])/3))
+    lines += ["extinction shelx " + start,
+              "wavelength %.6f" % adapter.wavelength]
   if _param("basis_adv") == True:
     folder = os.path.dirname(os.path.abspath(path))
-    exe = _executable()
-    help_result = subprocess.run([exe, "-help"], cwd=folder, check=True,
-                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    if b"basis_overrides <file>" not in help_result.stdout:
+    if not _help_has(b"basis_overrides <file>", folder):
       raise RuntimeError("This NoSpherA2 executable does not support XCW advanced bases; install a build with basis_overrides support.")
     from basis_set_api import get_basis_overrides_json
     import olexex
@@ -228,6 +248,24 @@ def _write_settings(path, n_params):
   lines.append(str(_param("target", "F")))
   if _param("weighted") == True:
     lines.append("weighted")
+  weight = str(_param("weight", "sigma"))
+  if weight == "refinement":
+    # Olex2's own scheme, read as refinement.py reads it; new_shelx = WGHT optimised = shelx_opt
+    scheme = str(OV.GetParam("snum.refinement.weighting_scheme", "default"))
+    weight = {"default": "shelx", "shelx": "shelx", "new_shelx": "shelx_opt", "sigma": "sigma", "unity": "unit",
+              "unit": "unit", "stl": "stl", "sin_theta_over_lambda": "stl"}.get(scheme)
+    if weight is None:
+      print("XCW: weighting scheme '%s' has no XCW counterpart, using sigma" % scheme)
+      weight = "sigma"
+  if weight != "sigma":
+    # Olex2's WGHT a b (missing ones as in get_shelxl_weighting: a 0.1, b 0); shelx keeps them fixed,
+    # shelx_opt starts from them and re-optimises after every lambda step; stl takes a as its exponent,
+    # as Olex2's get_sin_theta_over_lambda_weighting does. Every scheme sits on top of either target.
+    wght = list(adapter.olx_atoms.model['weight'])
+    a, b = (wght + [0.1, 0.0][len(wght):])[:2]
+    lines.append({"shelx": "weight shelx %.8g %.8g" % (a, b), "shelx_opt": "weight shelx_opt %.8g %.8g" % (a, b),
+                  "unit": "weight unit", "stl": "weight stl %.8g" % a, "chebyshev_opt": "weight chebyshev_opt 3",
+                  "robust": "weight robust sigma"}[weight])
   lines.append("charge %d" % _charge())
   lines.append("mult %d" % _mult())
   lines.append(str(_param("reference", "rhf")))
