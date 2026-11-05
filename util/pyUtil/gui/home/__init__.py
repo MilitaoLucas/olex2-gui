@@ -96,11 +96,11 @@ class MultipleDataset:
         if is_CIF:
           reapfile = os.path.join(olx.FilePath(), olx.xf.DataName(current)) + ".res"
           if not os.path.exists(reapfile):
-            action = "export>>reap '%s'" % reapfile
+            action = 'export>>reap "%s"' % reapfile
             display = "*EXP/LOAD*"
             highlight = olx.GetVar('HtmlHighlightColour')
           else:
-            action = "reap '%s'" % reapfile
+            action = 'reap "%s"' % reapfile
             highlight = olx.GetVar('gui.blue')
             fg = '#ffffff'
             display = "*LOAD RES*"
@@ -117,7 +117,7 @@ class MultipleDataset:
       html += '''
     $+
       html.Snippet(GetVar(default_link),
-      "value=%s",
+      'value=%s', # double quotes for the file name
       "name=%s",
       "onclick=%s",
       "bgcolor=%s",
