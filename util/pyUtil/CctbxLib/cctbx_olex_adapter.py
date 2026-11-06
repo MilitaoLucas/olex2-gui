@@ -2440,6 +2440,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           new_labels[name] = "%s%d" % (symbol, n)
           olex.m("name %s %s%d" % (name, symbol, n))
       write_dump(new_labels)
+      # the solve loop's keep set is keyed by label and follows these
+      type(self).renamed = new_labels
       print("Re-typed %d atoms after cleanup; %d label(s) changed: %s"
             % (len(names), len(changed),
                ", ".join("%s %s->%s" % (n, o, w)

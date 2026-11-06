@@ -83,8 +83,11 @@ def fill_from_map():
       return float(d[j]), j
     # ponytail: at most a quarter of the model per round, strongest first, and
     # never past 1.25x the 18 A^3-per-atom fill of the asymmetric unit
-    # (cod_7711810: 26 atoms where 20 belong, the fill took it to 34)
-    room = int(1.25*xs.unit_cell().volume()/len(ops)/18.0) - len(sc)
+    # (cod_7711810: 26 atoms where 20 belong, the fill took it to 34). A site
+    # counts occupancy x multiplicity: atoms on special positions or half
+    # occupied no longer use up the room of whole ones (c50, +58 of 3,287)
+    filled = sum(x.occupancy*x.multiplicity() for x in sc)*18.0
+    room = int((1.25*xs.unit_cell().volume() - filled)/len(ops)/18.0)
     # a full cell still takes one peak half as strong again a round: the rule
     # is 18 A^3 an atom, dense inorganics run under it (cod_2217672: N at 13 sigma)
     new, cap = [], min(max(4, len(sc)//4), room) if room > 0 else 1
@@ -682,6 +685,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
           continue
         passes -= 1
         last, extra = "re-typing", False
+        # a re-typed fill atom keeps its doubled U allowance under its new label
+        ren = getattr(OlexCctbxSolve, "renamed", None) or {}
+        keep = set(ren.get(n, n) for n in keep)
+        OlexCctbxSolve.renamed = {}
         # ponytail: the prunes leave fragments scattered again; a second
         # assembly after the re-typing joins what the first round could not
         olex.m("compaq -a")
