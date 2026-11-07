@@ -1,5 +1,4 @@
 import os
-import shutil
 import sys
 try:
   import pickle as pickle # faster C reimplementation of pickle module
@@ -7,15 +6,10 @@ except ImportError:
   import pickle # fall back on Python version
 import olex
 import olx
-import userDictionaries
-import ExternalPrgParameters
 from olexFunctions import OV
 from io import StringIO
 
 import phil_interface
-
-import iotbx.phil
-import libtbx.phil.command_line
 
 def getOlex2VersionInfo():
   txt = 'Olex2, OlexSys Ltd (compiled %s)' %OV.GetCompilationInfo()
@@ -221,6 +215,10 @@ def nsa2_get_param(key, default=None):
       OV.SetHeaderParam(header_key, v)
     else:
       _nsa2_clear_header_param_if_present(header_key)
+    if v is None and _nsa2_get_type(key) == 'bool':
+      # snum.NoSpherA2 not registered yet (start-up HTML built before the plugin
+      # loads): None reaches #ignoreif as '' and Olex2 drops the whole block
+      return bool(default)
     return _nsa2_cast_value(key, v)
 
   v = OV.GetParam(key, default)
@@ -461,6 +459,7 @@ def set_params_from_ires():
     OV.SetParam('snum.refinement.max_cycles', cycles.split()[0])
 
 def LoadStructureParams():
+  import ExternalPrgParameters
   import olexex
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
