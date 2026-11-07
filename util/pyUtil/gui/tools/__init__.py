@@ -1104,14 +1104,32 @@ def exti_aniso_str():
   if not values:
     return ''
   values = [float(x) for x in values.split(',')]
+  names = ('11', '22', '33', '12', '13', '23')  # order of set_exti_aniso
   sus = OV.GetHeaderParam('exti.aniso_su')
   if not sus:
-    return ' '.join('X%s %.3g' % (n, v) for n, v in zip(('11', '22', '33'), values))
+    return ' '.join('X%s %.3g' % (n, v) for n, v in zip(names, values))
   from libtbx.utils import format_float_with_standard_uncertainty as fmt
   sus = [float(x) for x in sus.split(',')]
-  return ' '.join('X%s %s' % (n, fmt(v, s)) for n, v, s in zip(('11', '22', '33'), values, sus))
+  return ' '.join('X%s %s' % (n, fmt(v, s)) for n, v, s in zip(names, values, sus))
 
 OV.registerFunction(exti_aniso_str, True, "gui.tools")
+
+def exti_aniso_row():
+  # the tensor on a second line under EXTI: in the weight/EXTI/ACTA row it
+  # pushed the row past 100 % and squeezed the weight buttons flat
+  if OV.IsEDRefinement() or olx.xf.rm.Exti() in ('', 'n/a'):
+    return ''
+  from NoSpherA2.utilities import dev_features
+  txt = exti_aniso_str()
+  if not txt or not dev_features():
+    return ''
+  # a table of its own: a colspan cell in the first line's table widened the
+  # Weight column; no bgcolor, the first line shows the panel colour.
+  # row_table_off closes the </tr></table> opened here
+  return ("</tr></table><table width='100%%' cellpadding='0' cellspacing='2'><tr>"
+          "<td align='left'>X(EXTI): %s</td>" % txt)
+
+OV.registerFunction(exti_aniso_row, True, "gui.tools")
 
 def refine_swat():
   retVal = ""

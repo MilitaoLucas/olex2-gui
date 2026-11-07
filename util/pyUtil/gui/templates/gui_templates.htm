@@ -317,7 +317,7 @@ t:weight_total{
     <td width='4%%' align='left'>
       BUTTON
     </td>
-    <td width='10%%' align='left'>
+    <td width='20%%' align='left'>
       TEMPLATE
     </td>
     }
@@ -397,8 +397,8 @@ t:EDT_gui{
         bgcolor="GetVar('HtmlTableGroupBgColour')"
         name="EDT@ED"
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
-        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
-        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI>>html.update"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI>>html.update"
       >
     </td>
 
@@ -480,12 +480,12 @@ t:exti_gui{
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
-        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
-        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>spy.gui.tools.set_exti_aniso_gui(false)>>delins EXTI"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI>>html.update"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>spy.gui.tools.set_exti_aniso_gui(false)>>delins EXTI>>html.update"
       >
     </td>
 
-    <td width='22%'>
+    <td width='12%'>
       <b>$spy.gui.tools.refine_extinction()<b>
     </td>
 }
@@ -501,13 +501,9 @@ t:exti_aniso_gui{
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_EXTI_ANISO'
         checked="spy.gui.tools.exti_aniso_on()"
-        oncheck="spy.gui.tools.set_exti_aniso_gui(true)"
-        onuncheck="spy.gui.tools.set_exti_aniso_gui(false)"
+        oncheck="spy.gui.tools.set_exti_aniso_gui(true)>>html.update"
+        onuncheck="spy.gui.tools.set_exti_aniso_gui(false)>>html.update"
       >
-    </td>
-
-    <td width='30%'>
-      $spy.gui.tools.exti_aniso_str()
     </td>
 }
 
@@ -522,8 +518,8 @@ t:swat_gui{
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
-        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
-        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT"
+        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1>>html.update"
+        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT>>html.update"
       >
     </td>
 
@@ -543,8 +539,8 @@ t:exti_or_swat_gui{
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_EXTI'
         checked="not(strcmp(xf.rm.Exti(),'n/a'))"
-        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI"
-        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI"
+        oncheck="spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI>>html.update"
+        onuncheck="spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI>>html.update"
       >
     </td>
 
@@ -558,8 +554,8 @@ t:exti_or_swat_gui{
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name='SNUM_REFINEMENT_SWAT'
         checked="not(strcmp(xf.rm.Swat(),'n/a'))"
-        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1"
-        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT"
+        oncheck="spy.SetParam(snum.refinement.refine_swat,3)>>addins SWAT 1 1>>html.update"
+        onuncheck="spy.SetParam(snum.refinement.refine_swat,0)>>delins SWAT>>html.update"
       >
     </td>
 }
