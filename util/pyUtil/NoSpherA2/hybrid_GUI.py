@@ -4,13 +4,16 @@ from olexFunctions import OV
 from variableFunctions import nsa2_get_param
 from utilities import make_quick_button_gui, is_disordered
 
-def begin_new_line(help_label="NoSpherA2_Options_1", scope="1"):
+def begin_new_line(help_label="NoSpherA2_Options", scope="1", grid=False):
+  # the help ID is help_label (a top-level heading of NoSpherA2.help.md); no -helpTxt,
+  # which make_help_box would show verbatim instead of looking the ID up
+  grid_mark = ' Xgrid="1"' if grid else ''
   return f'''<tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
   <td valign='top' width="$GetVar(HtmlTableFirstcolWidth)" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  {htmlTools.MakeHoverButton(f'btn-info@{help_label}{scope}',f"spy.make_help_box -name='{help_label}' -popout='False' -helpTxt='Options'")}
+  {htmlTools.MakeHoverButton(f'btn-info@{help_label}{scope}',f"spy.make_help_box -name='{help_label}' -popout='False'")}
   </td>
   <td colspan="1">
-    <table border="0" width="100%" cellpadding="1" cellspacing="1" Xbgcolor="#ffaaaa">
+    <table border="0" width="100%" cellpadding="1" cellspacing="1" Xbgcolor="#ffaaaa"{grid_mark}>
       <tr Xbgcolor="#aaffaa">'''
 
 def end_line():
@@ -57,13 +60,13 @@ def labeled_combo(name,label,items,value,onchange,width_label=20, width_combo=30
     {input_combo(name,items,value,onchange)}
   </td>'''
 
-def checkbox(name,label,checked,oncheck,onuncheck):
+def checkbox(name,label,checked,oncheck,onuncheck,bgcolor="GetVar(HtmlTableRowBgColour)"):
   return f'''<font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
       height="GetVar('HtmlInputHeight')"
       fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar(HtmlTableRowBgColour)"
+      bgcolor="{bgcolor}"
       name="{name}"
       label="{label} "
       checked="{checked}"
@@ -165,871 +168,609 @@ def button(name,label,onclick,width=20,hint=""):
     </font>
   </td>'''
 
-def method_combo():
-  return labeled_combo("NoSpherA2_method@refine",                                          
-                      "Method",
-                      "spy.NoSpherA2.get_functional_list()",
-                      "spy.nsa2_get_param(\'method\')",
-                      "spy.nsa2_set_param(\'method\',html.GetValue(\'~name~\'))",
-                      width_label=11, width_combo=17)
+# ---------------------------------------------------------------------------
+# Layout of the NoSpherA2 Options rows: a common grid with group boxes.
+#
+# Every row is its own table (one row per help button), so controls only line
+# up across rows if every row uses the same column widths. The grid has four
+# columns, each a bold label cell and a control cell; GRID_COLS gives their
+# widths in % of the row.
+#
+# A row holds cells, and a cell occupies one or more whole columns:
+#   g_field        label + control (span > 1 widens the control)
+#   g_check        checkbox with its label, filling the whole column(s)
+#   g_check_field  checkbox label + control (e.g. Embed [Mol])
+#   g_button / g_text / g_raw / g_empty
+#   g_group        a titled box (the style of the ED panels) spanning columns,
+#                  whose own rows of cells sit on the same columns
+# grid_row() places the cells left to right and pads the rest of the row, so
+# a column that is absent in one row leaves the following ones in place.
+# Keep labels short: a label longer than its cell wraps and breaks the row.
+#
+# Each row has one 'i' button; its help_label is a top-level heading of
+# NoSpherA2.help.md ("NoSpherA2_Wavefunction" -> "# NoSpherA2 Wavefunction").
+# ---------------------------------------------------------------------------
 
-def basis_combo():
-  return labeled_combo("NoSpherA2_basis@refine",
-                      "Basis Set",
-                      "spy.NoSpherA2.getBasisListStr()",
-                      "spy.nsa2_get_param(\'basis_name\')",
-                      "spy.nsa2_set_param(\'basis_name\',html.GetValue(\'~name~\')) >> html.Update()",
-                      width_label=12, width_combo=19)
+GRID_COLS = ((11, 16), (11, 15), (10, 12), (12, 13))
+# a full-width group box whose rows hold at most three columns of cells uses
+# three wider columns instead (so its combo boxes show their text)
+GRID_COLS_3 = ((11, 22), (11, 22), (11, 23))
+# empty space before every column but the first, in the units of GRID_COLS
+GRID_GAP = 3
 
-def cpu_combo():
-  return labeled_combo("NoSpherA2_cpus@refine",
-                      "CPUs",
-                      "spy.NoSpherA2.getCPUListStr()",
-                      "spy.nsa2_get_param(\'ncpus\')",
-                      "spy.nsa2_set_param(\'ncpus\', html.GetValue(\'~name~\'))",
-                      width_label=8, width_combo=10)
+class _Frame:
+  """Grid columns [first, first + n) of cols laid over a table that is 100%
+  wide: the integer % widths of their gap, label and control cells. The cell
+  edges are rounded, not the widths, so the widths of a row add up to 100."""
+  def __init__(self, first=0, n=None, bgcolor="GetVar(HtmlTableRowBgColour)", cols=GRID_COLS):
+    self.grid = cols
+    self.first = first
+    self.bgcolor = bgcolor
+    cols = cols[first:] if n is None else cols[first:first + n]
+    self.n = len(cols)
+    edges, acc = [], 0
+    for i, (l, c) in enumerate(cols):
+      if i:
+        acc += GRID_GAP
+      edges.append(acc)   # label start
+      acc += l
+      edges.append(acc)   # control start
+      acc += c
+      edges.append(acc)   # column end
+    self.edges = [int(round(100 * e / float(acc))) for e in edges]
 
-def memory_text():
-  return labeled_text("NosPherA2_Memory",
-                      "Mem(Gb)",
-                      "spy.nsa2_get_param('mem')",
-                      "spy.nsa2_set_param('mem', html.GetValue('~name~'))",
-                      width_label=10, width_textbox=20)
-  
+  def gap(self, col):
+    return self.edges[3 * col] - self.edges[3 * col - 1] if col else 0
+
+  def label(self, col):
+    return self.edges[3 * col + 1] - self.edges[3 * col]
+
+  def span(self, col, span):
+    """From the label of col to the end of col + span - 1, gaps included."""
+    return self.edges[3 * (col + span - 1) + 2] - self.edges[3 * col]
+
+def _bold(label):
+  return f"<b>{label}&nbsp;</b>"
+
+def _cells_html(cells, frame, context):
+  """The <td>s of one row of cells on frame, padded to its full width."""
+  col = 0
+  html = []
+  for span, render in cells:
+    if col + span > frame.n:
+      # a layout bug of the caller: render it anyway (the row wraps) but say so
+      print("NoSpherA2 GUI: row '%s' has more than %d grid columns" % (context, frame.n))
+      span = frame.n - col
+      if span <= 0:
+        break
+    if col:
+      html.append(f'''
+  <td width="{frame.gap(col)}%"></td>''')
+    html.append(render(frame, col, span))
+    col += span
+  if col < frame.n:
+    html.append(f'''
+  <td width="{frame.gap(col) + frame.span(col, frame.n - col)}%"></td>''')
+  return "".join(html)
+
+def g_field(label, control, span=1):
+  def render(frame, col, span):
+    width_label = frame.label(col)
+    return f'''
+  <td width="{width_label}%" align="left">{_bold(label)}</td>
+  <td width="{frame.span(col, span) - width_label}%" align="left">{control}</td>'''
+  return (span, render)
+
+def _check_inline(name, label, checked, oncheck, onuncheck, bgcolor):
+  return f'''<table border="0" cellpadding="0" cellspacing="0"><tr>
+    <td>{checkbox(name, label, checked, oncheck, onuncheck, bgcolor)}</td>
+    <td align="left">{_bold(label)}</td>
+  </tr></table>'''
+
+def g_check(name, label, checked, oncheck, onuncheck, span=1):
+  return (span, lambda frame, col, span: f'''
+  <td width="{frame.span(col, span)}%" align="left">{_check_inline(name, label, checked, oncheck, onuncheck, frame.bgcolor)}</td>''')
+
+def g_check_field(name, label, checked, oncheck, onuncheck, control, span=1):
+  def render(frame, col, span):
+    width_label = frame.label(col)
+    return f'''
+  <td width="{width_label}%" align="left">{_check_inline(name, label, checked, oncheck, onuncheck, frame.bgcolor)}</td>
+  <td width="{frame.span(col, span) - width_label}%" align="left">{control}</td>'''
+  return (span, render)
+
+def g_button(name, label, onclick, span=1, hint=""):
+  return (span, lambda frame, col, span: f'''
+  <td width="{frame.span(col, span)}%" align="center">{button_input(name, label, onclick, hint)}</td>''')
+
+def g_text(text, span=1, bold=True, align="left"):
+  content = _bold(text) if bold else text
+  return (span, lambda frame, col, span: f'''
+  <td width="{frame.span(col, span)}%" align="{align}">{content}</td>''')
+
+def g_raw(html, span=1, align="left"):
+  return (span, lambda frame, col, span: f'''
+  <td width="{frame.span(col, span)}%" align="{align}">{html}</td>''')
+
+def g_empty(span=1):
+  return (span, lambda frame, col, span: f'''
+  <td width="{frame.span(col, span)}%"></td>''')
+
+def g_group(title, rows, span=4, cols=None):
+  """A titled box over `span` grid columns; rows is a list of rows of cells,
+  laid out on the same grid columns as the rows outside the box. A box over
+  the whole grid whose rows need at most three columns gets GRID_COLS_3;
+  cols=4 keeps the four columns (boxes that should line up with each other)."""
+  rows = [cells for cells in rows if cells]
+  needed = max([sum(s for s, _ in cells) for cells in rows] or [0])
+  def render(frame, col, span):
+    bgcolor = "GetVar(HtmlTableGroupBgColour)"
+    if cols is None and frame.grid is GRID_COLS and span == len(GRID_COLS) and needed <= 3:
+      inner = _Frame(0, None, bgcolor, GRID_COLS_3)
+    else:
+      inner = _Frame(frame.first + col, span, bgcolor, frame.grid)
+    body = "".join(f'''
+      <tr><td>
+        <table Xgrid="1" border="0" width="100%" cellpadding="1" cellspacing="0"><tr>{_cells_html(cells, inner, title)}
+        </tr></table>
+      </td></tr>''' for cells in rows if cells)
+    return f'''
+  <td width="{frame.span(col, span)}%" valign="top">
+    <table border="0" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableGroupBgColour)">
+      <tr><td bgcolor="$GetVar(HtmlTableGroupHeaderColour)">{_bold(title)}</td></tr>{body}
+    </table>
+  </td>'''
+  return (span, render)
+
+def grid_row(cells, help_label="NoSpherA2_Options", scope="1"):
+  """One NoSpherA2 Options row: the help button and the cells on the common grid."""
+  return begin_new_line(help_label, scope, grid=True) + _cells_html(cells, _Frame(), help_label) + end_line()
+
+# bare controls, for the grid cells
+
+def spinbox(name, value, onchange, min_value=0, max_value=1000):
+  return f'''<input
+      type='spin'
+      width='100%'
+      height="GetVar('HtmlInputHeight')"
+      max='{max_value}'
+      min='{min_value}'
+      bgcolor='GetVar(HtmlInputBgColour)'
+      name="{name}"
+      value="{value}"
+      onchange="{onchange}"
+    >'''
+
+def button_input(name, label, onclick, hint=""):
+  return f'''<font size="$GetVar('HtmlFontSizeControls')">
+      <b>
+        <input
+          type="button"
+          name="{name}"
+          value="{label}"
+          width="100%"
+          height="GetVar(HtmlComboHeight)"
+          onclick="{onclick}"
+          bgcolor="GetVar(HtmlTableRowBgColour)"
+          fgcolor="GetVar(linkButton.fgcolor)"
+          fit="false"
+          flat="GetVar(linkButton.flat)"
+          hint="{hint}"
+          disabled="false"
+          custom="GetVar(custom_button)"
+        >
+      </b>
+    </font>'''
+
+def _param_combo(name, items, key, update=False):
+  onchange = f"spy.nsa2_set_param('{key}', html.GetValue('~name~'))"
+  if update:
+    onchange += " >> html.Update()"
+  return input_combo(name, items, f"spy.nsa2_get_param('{key}')", onchange)
+
+def _param_text(name, key, update=False):
+  onchange = f"spy.nsa2_set_param('{key}', html.GetValue('~name~'))"
+  if update:
+    onchange += " >> html.Update()"
+  return textbox(name, f"spy.nsa2_get_param('{key}')", onchange)
+
+def _param_spin(name, key, min_value, max_value):
+  return spinbox(name, f"spy.nsa2_get_param('{key}')",
+                 f"spy.nsa2_set_param('{key}', html.GetValue('~name~'))", min_value, max_value)
+
+def _param_check(name, label, key, update=False, span=1):
+  tail = " >> html.Update()" if update else ""
+  return g_check(name, label, f"spy.nsa2_get_param('{key}')",
+                 f"spy.nsa2_set_param('{key}', True){tail}",
+                 f"spy.nsa2_set_param('{key}', False){tail}", span=span)
+
+# item lists
+
+SCF_THRESHOLDS = "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'"
+SCF_STRATEGIES = "'EasyConv;NormalConv;SlowConv;VerySlowConv'"
+ORCA_SOLVENTS = "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene'"
+ORCA_SOLVENTS_CUSTOM = ORCA_SOLVENTS[:-1] + ";Custom'"
+PYSCF_SOLVENTS = "'Vacuum;Water;Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene'"
+ELMO_BASIS_SETS = "'6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'"
+
+# the common cells
+
+def method_cell():
+  return g_field("Method", _param_combo("NoSpherA2_method@refine", "spy.NoSpherA2.get_functional_list()", "method"))
+
+def basis_cell():
+  return g_field("Basis", _param_combo("NoSpherA2_basis@refine", "spy.NoSpherA2.getBasisListStr()", "basis_name", update=True))
+
+def cpu_cell():
+  return g_field("CPUs", _param_combo("NoSpherA2_cpus@refine", "spy.NoSpherA2.getCPUListStr()", "ncpus"))
+
+def memory_cell():
+  return g_field("Mem/GB", _param_text("NosPherA2_Memory", "mem"))
+
+def charge_cell():
+  return g_field("Charge", _param_spin("NoSpherA2_Charge@refine", "charge", -1000, 1000))
+
+def multiplicity_cell():
+  return g_field("Mult.", _param_spin("NoSpherA2_Multiplicity@refine", "multiplicity", 1, 200))
+
+def update_tsc_cell():
+  return g_button("Update_TSC", "Update .tsc", "spy.NoSpherA2.launch() >> html.Update()",
+                  hint="Generate new .tsc file with current settings")
+
+def iterative_cells():
+  """Iterative checkbox, then Update .tsc (one-off) or the cycle limit (iterative): two columns."""
+  cells = [g_check("NoSpherA2_Iterative@refine", "Iterative",
+                   "spy.nsa2_get_param('full_HAR')",
+                   "spy.nsa2_set_param('full_HAR','True')>>html.Update()",
+                   "spy.nsa2_set_param('full_HAR','False')>>html.Update()")]
+  if nsa2_get_param('full_HAR') == True:
+    cells.append(g_field("Cycles", _param_spin("NoSpherA2_Max_HAR_Cycles@refine", "Max_HAR_Cycles", 1, 100)))
+  else:
+    cells.append(update_tsc_cell())
+  return cells
+
+def relativistics_cell():
+  return _param_check("NoSpherA2_Relativistics@refine", "Relativistic", "Relativistic")
+
+def adv_basis_cells(update=True, adv=None):
+  """Adv. Basis checkbox and, when ticked, the per-element basis string: one row."""
+  if adv is None:
+    adv = nsa2_get_param('basis_adv') == True
+  cells = [_param_check("NoSpherA2_baseset_adv@refine", "Adv. Basis", "basis_adv", update=True)]
+  if adv:
+    cells.append(g_field("Elements", _param_text("NoSpherA2_Basis_Set_Extra@refine", "basis_adv_string", update=update), span=2))
+  return cells
+
+def ptb_prerefine_cells():
+  # pTB cycles before the selected QM source; the switch-over lives in CctbxLib/aaff.py.
+  # Ticked means pTB runs on the next refinement: once done it shows unticked, and only a new tick repeats it.
+  done = bool(str(nsa2_get_param('PTB_PREREFINE_DONE') or '').strip())
+  armed = bool(nsa2_get_param('PTB_PREREFINE')) and not done
+  cells = [g_check("NoSpherA2_ptb_prerefine@refine",
+                   "pTB pre-refine (done)" if done else "pTB pre-refine",
+                   "true" if armed else "false",
+                   "spy.nsa2_set_param('PTB_PREREFINE', True) >> spy.nsa2_set_param('PTB_PREREFINE_DONE', '') >> html.Update()",
+                   "spy.nsa2_set_param('PTB_PREREFINE', False) >> html.Update()",
+                   span=2 if done else 1)]
+  if armed:
+    cells.append(g_field("Cycles", _param_spin("NoSpherA2_ptb_prerefine_cycles@refine", "PTB_PREREFINE_CYCLES", 1, 100)))
+  return cells
+
+# the common rows
+
+def wavefunction_row(rows, title="Wavefunction", integration=True):
+  """The level of theory (3 columns) and the integration grid of NoSpherA2 (last column)."""
+  if not integration:
+    return grid_row([g_group(title, rows, span=4)], "NoSpherA2_Wavefunction")
+  grid = g_field("Grid", input_combo("NoSpherA2_becke_accuracy@refine", "'Low;Normal;High;Max'",
+                                     "spy.nsa2_get_param('becke_accuracy')",
+                                     "spy.nsa2_set_param('becke_accuracy', html.GetValue('~name~'))"))
+  return grid_row([g_group(title, rows, span=3), g_group("Integration", [[grid]], span=1)],
+                  "NoSpherA2_Wavefunction")
+
+def molecule_resources_row(molecule_rows=None, resource_rows=None):
+  """Charge and multiplicity of the molecule | CPUs and memory of the job."""
+  if molecule_rows is None:
+    molecule_rows = [[charge_cell(), multiplicity_cell()]]
+  if resource_rows is None:
+    resource_rows = [[cpu_cell(), memory_cell()]]
+  return grid_row([g_group("Molecule", molecule_rows, span=2), g_group("Resources", resource_rows, span=2)],
+                  "NoSpherA2_Molecule_and_Resources")
+
+def refinement_row(iterative=True, ptb=False, model=True):
+  """The HAR cycle (one-off .tsc or iterative, pTB first) | the model (H aniso, no AFIX)."""
+  har = [iterative_cells() if iterative else [g_empty(), update_tsc_cell()]]
+  if ptb:
+    har.append(ptb_prerefine_cells())
+  cells = [g_group("HAR", har, span=2)]
+  if model:
+    cells.append(g_group("Model", [[_param_check("NoSpherA2_H_Aniso@refine", "H Aniso", "h_aniso"),
+                                    _param_check("NoSpherA2_Afix_remove@refine", "No Afix", "h_afix")]], span=2))
+  return grid_row(cells, "NoSpherA2_Refinement")
+
+def orca_scf_row(damping=False):
+  cells = [g_field("Thresh.", _param_combo("NoSpherA2_ORCA_SCF_Conv@refine", SCF_THRESHOLDS, "ORCA_SCF_Conv")),
+           g_field("Strategy", _param_combo("NoSpherA2_ORCA_SCF_Strategy@refine", SCF_STRATEGIES, "ORCA_SCF_Strategy"))]
+  if damping:
+    cells.append(_param_check("NoSpherA2_ORCA_damp@refine", "Damping", "ORCA_DAMP"))
+  return grid_row([g_group("SCF Convergence", [cells])], "NoSpherA2_SCF")
+
+def custom_solvent_cells():
+  return [g_empty(),
+          g_field("Epsilon", _param_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine", "ORCA_Solvation_CPCM_epsilon")),
+          g_field("Refr. n", _param_text("NoSpherA2_ORCA_Solvation_Custom_refractive@refine", "ORCA_Solvation_CPCM_refrac")),
+          g_field("Probe r", _param_text("NoSpherA2_ORCA_Solvation_Custom_probe@refine", "ORCA_Solvation_CPCM_rsolv"))]
+
+def orca_environment_row(embedding=False):
+  """Solvation, or (new ORCA, ordered structure) the crystal embedding that replaces it."""
+  embed = embedding and nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')
+  solvent = g_field("Solvent", _param_combo("NoSpherA2_ORCA_Solvation@refine", ORCA_SOLVENTS_CUSTOM, "ORCA_Solvation", update=True), span=2)
+  first = []
+  if embedding:
+    embed_type = _param_combo("NoSpherA2_ORCA_embedding_type@refine", "Mol;Ion", "ORCA_CRYSTAL_QMMM_TYPE", update=True) if embed else ""
+    first.append(g_check_field("NoSpherA2_ORCA_embedding@refine", "Embed",
+                               "spy.nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')",
+                               "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', True) >> html.Update()",
+                               "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False) >> html.Update()",
+                               embed_type))
+  else:
+    first.append(g_empty())
+  rows = [first]
+  if embed:
+    first += [g_field("Radius", _param_text("NoSpherA2_ORCA_embedding_radius@refine", "ORCA_CRYSTAL_QMMM_RADIUS")),
+              g_field("Conv.", _param_text("NoSpherA2_ORCA_convergence@refine", "ORCA_CRYSTAL_QMMM_CONV")),
+              g_field("HF lay.", _param_spin("NoSpherA2_ORCA_HF_Layers@refine", "ORCA_CRYSTAL_QMMM_HF_LAYERS", 0, 100))]
+    if nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE') == "Ion":
+      rows.append([g_empty(), g_empty(), g_empty(),
+                   g_field("ECP lay.", _param_spin("NoSpherA2_ORCA_ECP_Layers@refine", "ORCA_CRYSTAL_QMMM_ECP_LAYERS", 0, 100))])
+  else:
+    first.append(solvent)
+    if nsa2_get_param('ORCA_Solvation') == "Custom":
+      rows.append(custom_solvent_cells())
+  return grid_row([g_group("Crystal Environment", rows)], "NoSpherA2_Environment")
+
+def disorder_row():
+  return grid_row([g_group("Disorder", [[g_field("Groups", _param_text("NoSpherA2_grouped_parts@refine", "Disorder_Groups"), span=4)]])],
+                  "NoSpherA2_Disorder")
+
+def disorder_groups_text():
+  return disorder_row() if is_disordered() else ""
+
+def wsl_distro_cell(span=2):
+  return g_field("WSL", _param_combo("NoSpherA2_WSL_distro@refine", "spy.NoSpherA2.get_distro_list()", "distro"), span)
+
+def partitioning_scheme_line():
+  if OV.GetParam('user.NoSpherA2.show_partitioning') != True:
+    return ""
+  ri_fit = nsa2_get_param('NoSpherA2_Partition') == "RI-Fit"
+  rows = [[g_field("Scheme", _param_combo("NoSpherA2_partitioning_scheme@refine",
+                                           "'Hirshfeld;RI-Fit;TFVC;Becke;MBIS;EMBIS'",
+                                           "NoSpherA2_Partition", update=True))]]
+  if ri_fit:
+    rows[0].append(g_field("Aux.", _param_combo("NoSpherA2_Aux_basis@refine",
+                                                 "auto;combo_basis_fit;def2_universal_jkfit;def2_universal_jfit;def2_svp_rifit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit",
+                                                 "auxiliary_basis", update=True), span=2))
+    restrain = [g_field("Restrain", _param_combo("NoSpherA2_RI_restraint@refine",
+                                                  "'Off;Hirshfeld;TFVC;MBIS;EMBIS;Nuclear;Mulliken;Sanderson'",
+                                                  "RI_restraint", update=True))]
+    # Nuclear, Mulliken and Sanderson only restrain charges, NoSpherA2 ignores the order for them
+    if nsa2_get_param('RI_restraint') in ("Hirshfeld", "TFVC", "MBIS", "EMBIS"):
+      restrain.append(g_field("Max l", _param_spin("NoSpherA2_RI_restraint_lmax@refine", "RI_restraint_lmax", 0, 8)))
+    rows.append(restrain)
+  return grid_row([g_group("Partitioning", rows)], "NoSpherA2_Partitioning")
+
+def quick_buttons_row():
+  return begin_new_line("NoSpherA2_Quick_Buttons") + make_quick_button_gui() + end_line()
+
+# old-style helpers still used by the XCW block
+
 def charge_spin():
   return labeled_spin("NoSpherA2_Charge@refine",
                       "Charge",
                       "spy.nsa2_get_param(\'charge\')",
                       "spy.nsa2_set_param(\'charge\',html.GetValue(\'~name~\'))",
                       width_label=11, width_spinbox=9, min_value=-1000, max_value=1000)
-  
+
 def multiplicity_spin():
   return labeled_spin("NoSpherA2_Multiplicity@refine",
                       "Multiplicity",
                       "spy.nsa2_get_param(\'multiplicity\')",
                       "spy.nsa2_set_param(\'multiplicity\',html.GetValue(\'~name~\'))",
                       width_label=14, width_spinbox=9, min_value=1, max_value=200)
-  
-def iterative_checkbox():
-  return labeled_checkbox("NoSpherA2_Iterative@refine",
-                         "Iterative",
-                         "spy.nsa2_get_param(\'full_HAR\')",
-                         "spy.nsa2_set_param(\'full_HAR\',\'True\')>>html.Update()",
-                         "spy.nsa2_set_param(\'full_HAR\',\'False\')>>html.Update()",
-                         width=15)
 
-def cycles_spin():
-  return labeled_spin("NoSpherA2_Max_HAR_Cycles@refine",
-                      "Max Cycles",
-                      "spy.nsa2_get_param(\'Max_HAR_Cycles\')",
-                      "spy.nsa2_set_param(\'Max_HAR_Cycles\',html.GetValue(\'~name~\'))",
-                      width_label=17, width_spinbox=8, min_value=1, max_value=100)
-  
-def update_tsc_button():
-  return button("Update_TSC",
-                "Update .tsc",
-                "spy.NoSpherA2.launch() >> html.Update()",
-                width=10,
-                hint="Generate new .tsc file with current settings")
+# the per-program blocks
 
-def integration_accuracy_combo():
-  return labeled_combo("NoSpherA2_becke_accuracy@refine",
-                        "Integr. Accuracy",
-                        "'Low;Normal;High;Max'",
-                        "spy.nsa2_get_param(\'becke_accuracy\')",
-                        "spy.nsa2_set_param(\'becke_accuracy\', html.GetValue(\'~name~\'))",
-                        width_label=19, width_combo=15)
-  
-def relativistics_checkbox():
-  return labeled_checkbox("NoSpherA2_Relativistics@refine",
-                         "Relativistics",
-                         "spy.nsa2_get_param(\'Relativistic\')",
-                         "spy.nsa2_set_param(\'Relativistic\',\'True\')",
-                         "spy.nsa2_set_param(\'Relativistic\',\'False\')",
-                         width=18)
-
-def h_aniso_checkbox():
-  return labeled_checkbox("NoSpherA2_H_Aniso@refine",
-                         "H Aniso",
-                         "spy.nsa2_get_param(\'h_aniso\')",
-                         "spy.nsa2_set_param(\'h_aniso\',\'True\')",
-                         "spy.nsa2_set_param(\'h_aniso\',\'False\')",
-                         width=18)
-  
-def no_afix_checkbox():
-  return labeled_checkbox("NoSpherA2_Afix_remove@refine",
-                         "No Afix",
-                         "spy.nsa2_get_param(\'h_afix\')",
-                         "spy.nsa2_set_param(\'h_afix\',\'True\')",
-                         "spy.nsa2_set_param(\'h_afix\',\'False\')",
-                         width=20)
-
-def disorder_groups_text():
-  return begin_new_line("NoSpherA2_Options_Grouped_Parts") + labeled_text("NoSpherA2_grouped_parts@refine",
-                      "Grouped Parts",
-                      "spy.nsa2_get_param('Disorder_Groups')",
-                      "spy.nsa2_set_param('Disorder_Groups', html.GetValue('~name~'))",
-                      width_label=20, width_textbox=20) + end_line()
-
-def pyscf_damping():
-  return labeled_combo("NoSpherA2_Hybrid_pySCF_Damping@refine",
-                      "Damping",
-                      "'0.6;0.7;0.85;0.93'",
-                      "spy.nsa2_get_param('Hybrid.pySCF_Damping')",
-                      "spy.nsa2_set_param('Hybrid.pySCF_Damping', html.GetValue('~name~'))",
-                      width_label=15, width_combo=20)
-
-def pyscf_solvation():
-  return labeled_combo("NoSpherA2_ORCA_Solvation@refine",
-                      "Solvation",
-                      "'Vacuum;Water;Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;2-BromoPropane;2-Butanol;2-ChloroButane;2-Heptanone;2-Hexanone;2-MethoxyEthanol;2-Methyl-1-Propanol;2-Methyl-2-Propanol;2-MethylPentane;2-MethylPyridine;2-NitroPropane;2-Octanone;2-Pentanone;2-Propanol;2-Propen-1-ol;3-MethylPyridine;3-Pentanone;4-Heptanone;4-Methyl-2-Pentanone;4-MethylPyridine;5-Nonanone;AceticAcid;AcetoPhenone;a-ChloroToluene;Anisole;Benzaldehyde;BenzoNitrile;BenzylAlcohol;BromoBenzene;BromoEthane;Bromoform;Butanal;ButanoicAcid;Butanone;ButanoNitrile;ButylAmine;ButylEthanoate;CarbonDiSulfide;Cis-1,2-DiMethylCycloHexane;Cis-Decalin;CycloHexanone;CycloPentane;CycloPentanol;CycloPentanone;Decalin-mixture;DiBromomEthane;DiButylEther;DiEthylAmine;DiEthylSulfide;DiIodoMethane;DiIsoPropylEther;DiMethylDiSulfide;DiPhenylEther;DiPropylAmine;e-1,2-DiChloroEthene;e-2-Pentene;EthaneThiol;EthylBenzene;EthylEthanoate;EthylMethanoate;EthylPhenylEther;FluoroBenzene;Formamide;FormicAcid;HexanoicAcid;IodoBenzene;IodoEthane;IodoMethane;IsoPropylBenzene;m-Cresol;Mesitylene;MethylBenzoate;MethylButanoate;MethylCycloHexane;MethylEthanoate;MethylMethanoate;MethylPropanoate;m-Xylene;n-ButylBenzene;n-Decane;n-Dodecane;n-Hexadecane;n-Hexane;NitroBenzene;NitroEthane;n-MethylAniline;n-MethylFormamide-mixture;n,n-DiMethylAcetamide;n,n-DiMethylFormamide;n-Nonane;n-Octane;n-Pentadecane;n-Pentane;n-Undecane;o-ChloroToluene;o-Cresol;o-DiChloroBenzene;o-NitroToluene;o-Xylene;Pentanal;PentanoicAcid;PentylAmine;PentylEthanoate;PerFluoroBenzene;p-IsoPropylToluene;Propanal;PropanoicAcid;PropanoNitrile;PropylAmine;PropylEthanoate;p-Xylene;Pyridine;sec-ButylBenzene;tert-ButylBenzene;TetraChloroEthene;TetraHydroThiophene-s,s-dioxide;Tetralin;Thiophene;Thiophenol;trans-Decalin;TriButylPhosphate;TriChloroEthene;TriEthylAmine;Xylene-mixture;z-1,2-DiChloroEthene'",
-                      "spy.nsa2_get_param('ORCA_Solvation')",
-                      "spy.nsa2_set_param('ORCA_Solvation', html.GetValue('~name~'))",
-                      width_label=13, width_combo=30)
-  
-def partitioning_scheme_line():
-  if OV.GetParam('user.NoSpherA2.show_partitioning') != True:
-    return ""
-  temp = begin_new_line("NoSpherA2_Options_RIFit") + \
-          labeled_combo("NoSpherA2_partitioning_scheme@refine",
-                        "Partitioning Scheme",
-                        "'Hirshfeld;RI-Fit;TFVC;Becke;MBIS;EMBIS'",
-                        "spy.nsa2_get_param('NoSpherA2_Partition')",
-                        "spy.nsa2_set_param('NoSpherA2_Partition', html.GetValue('~name~')) >> html.Update()",
-                        width_label=24, width_combo=16)
-  if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
-      temp += labeled_combo("NoSpherA2_Aux_basis@refine",
-                          "Auxiliary Basis",
-                          "auto;combo_basis_fit;def2_universal_jkfit;def2_universal_jfit;def2_svp_rifit;hgbsp3_7;def2_qzvppd_rifit;tzvp_jkfit;cc-pvqz-jkfit",
-                          "spy.nsa2_get_param('auxiliary_basis')",
-                          "spy.nsa2_set_param('auxiliary_basis', html.GetValue('~name~')) >> html.Update()",
-                          width_label=18, width_combo=25)
-      temp += "<td width='18%'></td>"
-  else:
-      temp += "<td width='43%'></td>"
-  temp += end_line()
-  if nsa2_get_param('NoSpherA2_Partition') == "RI-Fit":
-      restraint = nsa2_get_param('RI_restraint')
-      temp += begin_new_line("NoSpherA2_Options_RIFit", "2") + \
-              labeled_combo("NoSpherA2_RI_restraint@refine",
-                            "Restrain Density",
-                            "'Off;Hirshfeld;TFVC;MBIS;EMBIS;Nuclear;Mulliken;Sanderson'",
-                            "spy.nsa2_get_param('RI_restraint')",
-                            "spy.nsa2_set_param('RI_restraint', html.GetValue('~name~')) >> html.Update()",
-                            width_label=24, width_combo=16)
-      # Nuclear, Mulliken and Sanderson only restrain charges, NoSpherA2 ignores the order for them
-      if restraint in ("Hirshfeld", "TFVC", "MBIS", "EMBIS"):
-          temp += labeled_spin("NoSpherA2_RI_restraint_lmax@refine",
-                               "Max Multipole (l)",
-                               "spy.nsa2_get_param('RI_restraint_lmax')",
-                               "spy.nsa2_set_param('RI_restraint_lmax', html.GetValue('~name~'))",
-                               width_label=22, width_spinbox=8, min_value=0, max_value=8)
-          temp += "<td width='30%'></td>"
-      else:
-          temp += "<td width='60%'></td>"
-      temp += end_line()
-  return temp
-
-def WSL_distro():
-  return labeled_combo("NoSpherA2_WSL_distro@refine",
-                      "WSL Distro",
-                      "spy.NoSpherA2.get_distro_list()",
-                      "spy.nsa2_get_param('distro')",
-                      "spy.nsa2_set_param('distro', html.GetValue('~name~'))",
-                      width_label=15, width_combo=30)
-
-def make_hybrid_GUI(softwares_list_string):
+def make_hybrid_GUI(softwares_list_string, ptb=False):
   parts = OV.ListParts()
   if parts != None:
     parts = list(parts)
   if len(parts) <= 1:
-    return begin_new_line() + "Hybrid is not possible with less than two parts!" + end_line()
-  t = begin_new_line() + \
-      cpu_combo() + \
-      memory_text() + \
-      iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == True:
-    t += cycles_spin()
-  else:
-    t += update_tsc_button()
-
-  t += end_line() + begin_new_line("NoSpherA2_Options_3") + integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line() + partitioning_scheme_line()
+    return grid_row([g_text("Hybrid is not possible with less than two parts!", span=4, bold=False)], "NoSpherA2_Hybrid")
+  grid = g_field("Grid", input_combo("NoSpherA2_becke_accuracy@refine", "'Low;Normal;High;Max'",
+                                     "spy.nsa2_get_param('becke_accuracy')",
+                                     "spy.nsa2_set_param('becke_accuracy', html.GetValue('~name~'))"))
+  t = grid_row([g_group("Integration", [[grid]], span=2), g_group("Resources", [[cpu_cell(), memory_cell()]], span=2)],
+               "NoSpherA2_Molecule_and_Resources")
+  t += refinement_row(ptb=ptb)
+  t += partitioning_scheme_line()
+  discamb = "  " + str(OV.GetParam('user.NoSpherA2.discamb_exe'))
   for i in parts:
     if i == 0:
       continue
-    t += begin_new_line() + "<td width='63%' align='center'>" + "<b>Part %d</b></td>"%i
-    softwares_list = "Please Select" + str(softwares_list_string).replace("Hybrid;","")
-    t += labeled_combo(
-      "NoSpherA2_software_Part%d@refine"%(i+1),
-      "Software",
-      softwares_list,
-      "spy.nsa2_get_param(\'Hybrid.software_Part%d\')"%i, 
-      "spy.nsa2_set_param(\'Hybrid.software_Part%d\',html.GetValue(\'~name~\'))>>html.Update()"%i)
-    selected_software = nsa2_get_param('Hybrid.software_Part%d'%i)
-    t += end_line() + begin_new_line("NoSpherA2_Options_2")
-    if selected_software != "  " + str(OV.GetParam('user.NoSpherA2.discamb_exe')):
-      if selected_software != "ELMOdb":
-        t += labeled_combo(
-          "NoSpherA2_basis_Part%d@refine"%i,
-          "Basis Set",
-          "spy.NoSpherA2.getBasisListStr()", 
-          "spy.nsa2_get_param(\'Hybrid.basis_name_Part%d\')"%i,
-          "spy.nsa2_set_param(\'Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
-          13, 20)
-        t += labeled_combo(
-          "NoSpherA2_method_Part%d@refine"%i, 
-          "Method",
-          "spy.NoSpherA2.get_functional_list(spy.nsa2_get_param(\'Hybrid.software_Part%d\'))"%i, 
-          "spy.nsa2_get_param(\'Hybrid.method_Part%d\')"%i,
-          "spy.nsa2_set_param(\'Hybrid.method_Part%d\',html.GetValue(\'~name~\'))"%i,
-          11, 20)
-        t += labeled_checkbox("NoSpherA2_ORCA_Relativistics_PART%d@refine"%i, 
-                      "Relativitics", 
-                      "spy.nsa2_get_param(\'Hybrid.Relativistic_Part%d\')"%i, 
-                      "spy.nsa2_set_param(\'Hybrid.Relativistic_Part%d\',\'True\')"%i, 
-                      "spy.nsa2_set_param(\'Hybrid.Relativistic_Part%d\',\'False\')"%i)        
-        t += end_line() + \
-             begin_new_line() + \
-             labeled_spin("SET_CHARGE_PART%d@refine"%i,
-                                                          "Charge",
-                      "spy.nsa2_get_param(\'Hybrid.charge_Part%d\')"%i,
-                      "spy.nsa2_set_param(\'Hybrid.charge_Part%d\',html.GetValue(\'~name~\'))"%i,
-                      width_label=13, width_spinbox=8, min_value=-1000, max_value=1000) + \
-             labeled_spin("SET_MULTIPLICITY_PART%d@refine"%i,
-                      "Multiplicity",
-                      "spy.nsa2_get_param(\'Hybrid.multiplicity_Part%d\')"%i,
-                      "spy.nsa2_set_param(\'Hybrid.multiplicity_Part%d\',html.GetValue(\'~name~\'))"%i,
-                      width_label=16, width_spinbox=8, min_value=1, max_value=200)
-        if "ORCA" in selected_software:
-          t += end_line() + begin_new_line() + \
-               labeled_combo("NoSpherA2_ORCA_SCF_Conv_Part%d@refine"%i,
-                             "SCF Thresh.",
-                           "\'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF\'",
-                           "spy.nsa2_get_param(\'Hybrid.ORCA_SCF_Conv_Part%d\')"%i,
-                           "spy.nsa2_set_param(\'Hybrid.ORCA_SCF_Conv_Part%d', html.GetValue(\'~name~\'))"%i,
-                           17, 20)
-          t += labeled_combo("NoSpherA2_ORCA_SCF_Strategy_Part%d@refine"%i,
-                             "SCF Strategy",
-                           "\'EasyConv;NormalConv;SlowConv;VerySlowConv\'",
-                           "spy.nsa2_get_param(\'Hybrid.ORCA_SCF_Strategy_Part%d\')"%i,
-                           "spy.nsa2_set_param(\'Hybrid.ORCA_SCF_Strategy_Part%d\', html.GetValue(\'~name~\'))"%i,
-                           17, 20)
-          t += labeled_combo("NoSpherA2_ORCA_Solvation@refine",
-                             "Solvation",
-                           "\'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene\'",
-                           "spy.nsa2_get_param(\'ORCA_Solvation\')",
-                           "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
-                           13, 20)
-        elif "pySCF" in selected_software:
-          t += end_line() + begin_new_line() + \
-               labeled_combo("NoSpherA2_Hybrid_pySCF_Damping_Part%d@refine"%i,
-                             "Damping",
-                           "\'0.6;0.7;0.85;0.93\'",
-                           "spy.nsa2_get_param(\'Hybrid.pySCF_Damping_Part%d\')"%i,
-                           "spy.nsa2_set_param(\'Hybrid.pySCF_Damping_Part%d\', html.GetValue(\'~name~\'))"%i,
-                           10, 10) + \
-               labeled_combo("NoSpherA2_pyscf_Solvation@refine",
-                           "Solvation",
-                           "'Vacuum;Water; Acetonitrile;Methanol;Ethanol;IsoQuinoline;Quinoline;Chloroform;DiethylEther;Dichloromethane;DiChloroEthane;CarbonTetraChloride;Benzene;Toluene;ChloroBenzene;NitroMethane;Heptane;CycloHexane;Aniline;Acetone;TetraHydroFuran;DiMethylSulfoxide;Argon;Krypton;Xenon;n-Octanol;1,1,1-TriChloroEthane;1,1,2-TriChloroEthane;1,2,4-TriMethylBenzene;1,2-DiBromoEthane;1,2-EthaneDiol;1,4-Dioxane;1-Bromo-2-MethylPropane;1-BromoOctane;1-BromoPentane;1-BromoPropane;1-Butanol;1-ChloroHexane;1-ChloroPentane;1-ChloroPropane;1-Decanol;1-FluoroOctane;1-Heptanol;1-Hexanol;1-Hexene;1-Hexyne;1-IodoButane;1-IodoHexaDecane;1-IodoPentane;1-IodoPropane;1-NitroPropane;1-Nonanol;1-Pentanol;1-Pentene;1-Propanol;2,2,2-TriFluoroEthanol;2,2,4-TriMethylPentane;2,4-DiMethylPentane;2,4-DiMethylPyridine;2,6-DiMethylPyridine;",
-                           "spy.nsa2_get_param(\'ORCA_Solvation\')",
-                           "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
-                           13, 30)
-      else:
-        #HAVE TO FINISCH ELMO LATER
-        t += labeled_combo(
-          "NoSpherA2_basis_Part%d@refine"%i,
-          "Basis Set",
-          "'6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'", 
-          "spy.nsa2_get_param(\'Hybrid.basis_name_Part%d\')"%i,
-          "spy.nsa2_set_param(\'Hybrid.basis_name_Part%d\',html.GetValue(\'~name~\'))"%i,
-          13, 20)
-      
-      t += end_line()
+    softwares_list = "Please Select" + str(softwares_list_string).replace("Hybrid;", "")
+    rows = [[g_field("Program", input_combo("NoSpherA2_software_Part%d@refine" % (i + 1), softwares_list,
+                                            "spy.nsa2_get_param('Hybrid.software_Part%d')" % i,
+                                            "spy.nsa2_set_param('Hybrid.software_Part%d',html.GetValue('~name~'))>>html.Update()" % i),
+                     span=2)]]
+    selected_software = nsa2_get_param('Hybrid.software_Part%d' % i)
+    if selected_software == discamb:
+      rows.append([g_text("So far no further options for discambMATT", span=4, bold=False)])
+    elif selected_software == "ELMOdb":
+      # HAVE TO FINISH ELMO LATER
+      rows.append([g_field("Basis", _param_combo("NoSpherA2_basis_Part%d@refine" % i, ELMO_BASIS_SETS, "Hybrid.basis_name_Part%d" % i))])
     else:
-      t += "<td align='center'><b>So far no further options for discambMATT</b></td>" + end_line()
-  
+      rows.append([g_field("Basis", _param_combo("NoSpherA2_basis_Part%d@refine" % i, "spy.NoSpherA2.getBasisListStr()", "Hybrid.basis_name_Part%d" % i)),
+                   g_field("Method", _param_combo("NoSpherA2_method_Part%d@refine" % i,
+                                                  "spy.NoSpherA2.get_functional_list(spy.nsa2_get_param('Hybrid.software_Part%d'))" % i,
+                                                  "Hybrid.method_Part%d" % i)),
+                   _param_check("NoSpherA2_ORCA_Relativistics_PART%d@refine" % i, "Relativistic", "Hybrid.Relativistic_Part%d" % i)])
+      rows.append([g_field("Charge", _param_spin("SET_CHARGE_PART%d@refine" % i, "Hybrid.charge_Part%d" % i, -1000, 1000)),
+                   g_field("Mult.", _param_spin("SET_MULTIPLICITY_PART%d@refine" % i, "Hybrid.multiplicity_Part%d" % i, 1, 200))])
+      if "ORCA" in selected_software:
+        rows.append([g_field("SCF", _param_combo("NoSpherA2_ORCA_SCF_Conv_Part%d@refine" % i, SCF_THRESHOLDS, "Hybrid.ORCA_SCF_Conv_Part%d" % i)),
+                     g_field("Strategy", _param_combo("NoSpherA2_ORCA_SCF_Strategy_Part%d@refine" % i, SCF_STRATEGIES, "Hybrid.ORCA_SCF_Strategy_Part%d" % i)),
+                     g_field("Solvent", _param_combo("NoSpherA2_ORCA_Solvation@refine", ORCA_SOLVENTS, "ORCA_Solvation"), span=2)])
+      elif "pySCF" in selected_software:
+        rows.append([g_field("Damping", _param_combo("NoSpherA2_Hybrid_pySCF_Damping_Part%d@refine" % i, "'0.6;0.7;0.85;0.93'", "Hybrid.pySCF_Damping_Part%d" % i)),
+                     g_field("Solvent", _param_combo("NoSpherA2_pyscf_Solvation@refine", PYSCF_SOLVENTS, "ORCA_Solvation"), span=3)])
+    t += grid_row([g_group("Part %d" % i, rows, cols=4)], "NoSpherA2_Hybrid", str(i))
   return t
 
 def make_xtb_GUI():
-  # Method, CPUs, Memory
-  t = begin_new_line() + method_combo() + cpu_combo() + memory_text() + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        labeled_text("NoSpherA2_xtb_temp@refine",
-                      "Temp. (K)",
-                      "spy.nsa2_get_param('temperature')",
-                      "spy.nsa2_set_param('temperature', html.GetValue('~name~'))",
-                      width_label=15, width_textbox=9) + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
+  t = wavefunction_row([[method_cell(), g_field("Temp./K", _param_text("NoSpherA2_xtb_temp@refine", "temperature"))]])
+  t += molecule_resources_row()
+  t += refinement_row()
   t += partitioning_scheme_line()
   return t
 
-def ptb_prerefine_line():
-  # pTB cycles before the selected QM source; the switch-over lives in CctbxLib/aaff.py.
-  # Ticked means pTB runs on the next refinement: once done it shows unticked, and only a new tick repeats it.
-  done = bool(str(nsa2_get_param('PTB_PREREFINE_DONE') or '').strip())
-  armed = bool(nsa2_get_param('PTB_PREREFINE')) and not done
-  t = begin_new_line() + \
-    labeled_checkbox("NoSpherA2_ptb_prerefine@refine",
-                     "pTB pre-refine (done)" if done else "pTB pre-refine",
-                     "true" if armed else "false",
-                     "spy.nsa2_set_param('PTB_PREREFINE', True) >> spy.nsa2_set_param('PTB_PREREFINE_DONE', '') >> html.Update()",
-                     "spy.nsa2_set_param('PTB_PREREFINE', False) >> html.Update()",
-                     width=20)
-  if armed:
-    t += labeled_spin("NoSpherA2_ptb_prerefine_cycles@refine",
-                      "pTB cycles",
-                      "spy.nsa2_get_param('PTB_PREREFINE_CYCLES')",
-                      "spy.nsa2_set_param('PTB_PREREFINE_CYCLES', html.GetValue('~name~'))",
-                      width_label=15, width_spinbox=8, min_value=1, max_value=100) + \
-      "<td width='57%'></td>"
-  return t + end_line()
-
 def make_ptb_GUI():
-  # CPUs, Memory, Purification
-  t = begin_new_line() + cpu_combo() + memory_text() + \
-    labeled_checkbox("NoSpherA2_purification@refine",
-                     "Purify",
-                     "spy.nsa2_get_param('PTB_use_purify')",
-                     "spy.nsa2_set_param('PTB_use_purify', True) >> html.Update()",
-                     "spy.nsa2_set_param('PTB_use_purify', False) >> html.Update()",
-                     width=2) +\
-    end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
-  iterative = nsa2_get_param('full_HAR')
-  if iterative == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  if is_disordered():
-    t += disorder_groups_text()
+  t = wavefunction_row([[_param_check("NoSpherA2_purification@refine", "Purify", "PTB_use_purify", update=True)]])
+  t += molecule_resources_row()
+  t += refinement_row()
+  t += disorder_groups_text()
   t += partitioning_scheme_line()
   return t
 
 def make_SALTED_GUI():
-  #Model, add, delete buttons & CPUs
-  t = begin_new_line() + \
-    labeled_combo("NoSpherA2_SALTED_model@refine",
-                  "Model",
-                  "spy.NoSpherA2.get_SALTED_model_locations()",
-                  "spy.nsa2_get_param('selected_salted_model')",
-                  "spy.nsa2_set_param('selected_salted_model', html.GetValue('~name~'))",
-                  width_label=10, width_combo=50) + \
-    f"<td width='5%' align='left'>{htmlTools.MakeHoverButton('toolbar-open','spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >> html.Update()', 'on')}</td>" + \
-    f"<td width='5%' align='left'>{htmlTools.MakeHoverButton('toolbar-delete','spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.Update()', 'on')}</td>" + \
-  cpu_combo() + \
-  end_line()
-  # H Aniso, No Afix, iterative and Update/Max cycles last, so the toggled control has room
-  t += begin_new_line("NoSpherA2_Options_2") + h_aniso_checkbox() + no_afix_checkbox() + iterative_checkbox()
-  if nsa2_get_param('full_HAR') == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
+  buttons = htmlTools.MakeHoverButton('toolbar-open', 'spy.NoSpherA2.appendDir(user.NoSpherA2.salted_models_list) >> html.Update()', 'on') + \
+            "&nbsp;" + \
+            htmlTools.MakeHoverButton('toolbar-delete', 'spy.NoSpherA2.removeDir(user.NoSpherA2.salted_models_list, html.GetValue(NoSpherA2_SALTED_model@refine)) >> html.Update()', 'on')
+  t = grid_row([g_group("SALTED Model", [[g_field("Model", _param_combo("NoSpherA2_SALTED_model@refine", "spy.NoSpherA2.get_SALTED_model_locations()", "selected_salted_model"), span=2),
+                                          g_raw(buttons)]], span=3),
+                g_group("Resources", [[cpu_cell()]], span=1)],
+               "NoSpherA2_Wavefunction")
+  t += refinement_row()
   return t
 
 def make_Thakkar_GUI():
-  # Cations & Anions, update button
-  return begin_new_line() + \
-    labeled_text("NoSpherA2_Thakkar_cations@refine",
-                  "Cations",
-                  "spy.nsa2_get_param('Thakkar_Cations')",
-                  "spy.nsa2_set_param('Thakkar_Cations', html.GetValue('~name~'))",
-                  width_label=15, width_textbox=25) + \
-    labeled_text("NoSpherA2_Thakkar_anions@refine",
-                  "Anions",
-                  "spy.nsa2_get_param('Thakkar_Anions')",
-                  "spy.nsa2_set_param('Thakkar_Anions', html.GetValue('~name~'))",
-                  width_label=15, width_textbox=25) + \
-    button("Update_Thakkar_Model",
-            "Update Model",
-            "spy.NoSpherA2.launch() >> html.Update()",
-            width=20,
-            hint="Generate new Thakkar model with current settings") + end_line()
+  return grid_row([g_group("Thakkar IAM", [[
+                     g_field("Cations", _param_text("NoSpherA2_Thakkar_cations@refine", "Thakkar_Cations")),
+                     g_field("Anions", _param_text("NoSpherA2_Thakkar_anions@refine", "Thakkar_Anions")),
+                     g_empty(),
+                     g_button("Update_Thakkar_Model", "Update Model", "spy.NoSpherA2.launch() >> html.Update()",
+                              hint="Generate new Thakkar model with current settings")]])],
+                  "NoSpherA2_Thakkar")
 
 def make_ELMOdb_GUI():
-  # Basis Set, CPUs, Memory
-  t = begin_new_line() + \
-    labeled_combo("NoSpherA2_basis@refine",
-                  "Basis Set",
-                  "'6-31G;6-31G**;6-311G;6-311G**;cc-pVDZ;extrabasis'",
-                  "spy.nsa2_get_param('basis_name')",
-                  "spy.nsa2_set_param('basis_name', html.GetValue('~name~'))",
-                  width_label=15, width_combo=50) + \
-      cpu_combo() + memory_text() + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + charge_spin() + multiplicity_spin() + iterative_checkbox()
-  iterative = nsa2_get_param('full_HAR')
-  if iterative == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") +integration_accuracy_combo() + h_aniso_checkbox() + no_afix_checkbox() + end_line()
+  t = wavefunction_row([[g_field("Basis", _param_combo("NoSpherA2_basis@refine", ELMO_BASIS_SETS, "basis_name"))]])
+  t += molecule_resources_row()
+  t += refinement_row()
   # ELMO specific options
   t += "<!-- #include ELMO_specific ../util/pyUtil/NoSpherA2/ELMO_specific.htm;help_ext=NoSpherA2 Extras;1; -->" + \
-        partitioning_scheme_line()
+       partitioning_scheme_line()
   return t
 
 def make_wfn_GUI():
-  return begin_new_line() + \
-      cpu_combo() + \
-      memory_text() + \
-      update_tsc_button()+ \
-      end_line() + \
-      begin_new_line() + \
-      integration_accuracy_combo() + \
-      h_aniso_checkbox() + \
-      no_afix_checkbox() + \
-      end_line() + \
-      partitioning_scheme_line()
+  grid = g_field("Grid", input_combo("NoSpherA2_becke_accuracy@refine", "'Low;Normal;High;Max'",
+                                     "spy.nsa2_get_param('becke_accuracy')",
+                                     "spy.nsa2_set_param('becke_accuracy', html.GetValue('~name~'))"))
+  return grid_row([g_group("Integration", [[grid]], span=2), g_group("Resources", [[cpu_cell(), memory_cell()]], span=2)],
+                  "NoSpherA2_Molecule_and_Resources") + \
+         refinement_row(iterative=False) + \
+         partitioning_scheme_line()
 
-def occ_df_basis_combo():
-  return labeled_combo("NoSpherA2_OCC_DF_Basis@refine",
-                      "DF Basis",
-                      "'def2_universal_jkfit;cc-pvtz-jkfit;cc-pvqz-jkfit'",
-                      "spy.nsa2_get_param('OCC_df_basis')",
-                      "spy.nsa2_set_param('OCC_df_basis', html.GetValue('~name~'))",
-                      width_label=13, width_combo=27)
-
-def make_OCC_GUI():
-  t = begin_new_line() + make_quick_button_gui() + end_line()
-  t += begin_new_line() + \
-        basis_combo() + \
-        method_combo() + \
-        cpu_combo() + \
-        memory_text() + \
-        end_line()
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        occ_df_basis_combo() + \
-        end_line() + \
-        begin_new_line("NoSpherA2_Options_3", "2") + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  if is_disordered():
-    t += disorder_groups_text()
+def make_OCC_GUI(ptb=False):
+  t = quick_buttons_row()
+  t += wavefunction_row([[basis_cell(), method_cell()],
+                         [g_field("DF Basis", _param_combo("NoSpherA2_OCC_DF_Basis@refine",
+                                                           "'def2_universal_jkfit;cc-pvtz-jkfit;cc-pvqz-jkfit'",
+                                                           "OCC_df_basis"), span=2)]])
+  t += molecule_resources_row()
+  t += refinement_row(ptb=ptb)
+  t += disorder_groups_text()
   t += partitioning_scheme_line()
   return t
 
-def make_ORCA_GUI(new_ORCA = True):
-  # Quick buttons
-  t = begin_new_line() + make_quick_button_gui() + end_line()
-  # Basis Set, Method, CPUs, Memory
-  t += begin_new_line() + \
-        basis_combo() + \
-        method_combo() + \
-        cpu_combo() + \
-        memory_text() + \
-        end_line()
-  adv = nsa2_get_param('basis_adv')
-  if adv == True:
-    t += begin_new_line() + \
-          labeled_text("NoSpherA2_Basis_Set_Extra@refine",
-                       "Adv. Basis Set",
-                       "spy.nsa2_get_param('basis_adv_string')",
-                       "spy.nsa2_set_param('basis_adv_string', html.GetValue('~name~')) >> html.Update()",
-                       width_label=15, width_textbox=50) + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        labeled_checkbox("NoSpherA2_baseset_adv@refine",
-                         "Adv.",
-                         "spy.nsa2_get_param('basis_adv')",
-                         "spy.nsa2_set_param('basis_adv', True) >> html.Update()",
-                         "spy.nsa2_set_param('basis_adv', False) >> html.Update()",
-                         width=2) + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, Relativistics, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        relativistics_checkbox() + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  # ORCA specific options: SCF Thresh., SCF Strategy, Solvation (not with embedding)
+def make_ORCA_GUI(new_ORCA = True, ptb=False):
   # Wfn_Job never embeds a disordered structure, and its Embed. switch is hidden there, so it must not hide Solvation
-  embed = nsa2_get_param('ORCA_USE_CRYSTAL_QMMM') and not is_disordered()
-  t += begin_new_line("NoSpherA2 Extras") + \
-        labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
-                      "SCF Thresh.",
-                      "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
-                      "spy.nsa2_get_param(\'ORCA_SCF_Conv\')",
-                      "spy.nsa2_set_param(\'ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
-                      width_label=17, width_combo=20) + \
-        labeled_combo("NoSpherA2_ORCA_SCF_Strategy@refine",
-                      "SCF Strategy",
-                      "'EasyConv;NormalConv;SlowConv;VerySlowConv'",
-                      "spy.nsa2_get_param(\'ORCA_SCF_Strategy\')",
-                      "spy.nsa2_set_param(\'ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
-                      width_label=17, width_combo=20)
-  if not embed:
-    t += labeled_combo("NoSpherA2_ORCA_Solvation@refine",
-                      "Solvation",
-                      "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
-                      "spy.nsa2_get_param(\'ORCA_Solvation\')",
-                      "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\')) >> html.Update()",
-                      width_label=13, width_combo=30)
-  t += end_line()
-  custom_solvation = nsa2_get_param('ORCA_Solvation')
-  if custom_solvation == "Custom" and not embed:
-    t += begin_new_line() + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine",
-                       "Epsilon",
-                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_epsilon')",
-                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
-                       width_label=15, width_textbox=20) + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_refractive@refine",
-                       "Refractive Index",
-                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_refrac')",
-                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
-                       width_label=15, width_textbox=20) + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_probe@refine",
-                      "Probe Radius (A)",
-                      "spy.nsa2_get_param('ORCA_Solvation_CPCM_rsolv')",
-                      "spy.nsa2_set_param('ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
-                      width_label=15, width_textbox=20) + \
-          end_line()
-  if is_disordered():
-    t += disorder_groups_text()
-  elif new_ORCA:
-    t += begin_new_line() + \
-         labeled_checkbox("NoSpherA2_ORCA_damp@refine",
-                          "Damp.",
-                          "spy.nsa2_get_param('ORCA_DAMP')",
-                          "spy.nsa2_set_param('ORCA_DAMP', True)",
-                          "spy.nsa2_set_param('ORCA_DAMP', False)",
-                          width=8) + \
-         labeled_checkbox("NoSpherA2_ORCA_embedding@refine",
-                          "Embed.",
-                          "spy.nsa2_get_param('ORCA_USE_CRYSTAL_QMMM')",
-                          "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', True) >> html.Update()",
-                          "spy.nsa2_set_param('ORCA_USE_CRYSTAL_QMMM', False) >> html.Update()",
-                          width=10)
-    show_bs = nsa2_get_param('user.NoSpherA2.show_broken_sym')
-    if show_bs:
-        t += labeled_checkbox("NoSpherA2_ORCA_use_brok_sym@refine",
-                          "Broken Symmetry",
-                          "spy.nsa2_get_param('ORCA_use_broken_sym')",
-                          "spy.nsa2_set_param('ORCA_use_broken_sym', True) >> html.Update()",
-                          "spy.nsa2_set_param('ORCA_use_broken_sym', False) >> html.Update()",
-                          width=15)
-    brok_sym = nsa2_get_param('ORCA_use_broken_sym')
-    if embed:
-      t += standalone_combo("NoSpherA2_ORCA_embedding_type@refine",
-                            "Mol;Ion",
-                            "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')",
-                            "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_TYPE', html.GetValue('~name~')) >> html.Update()",
-                            width=11) + \
-           labeled_text("NoSpherA2_ORCA_embedding_radius@refine",
-                        "Embed. rad.",
-                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_RADIUS')",
-                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_RADIUS', html.GetValue('~name~'))",
-                        width_label=11, width_textbox=8) + \
-           labeled_text("NoSpherA2_ORCA_convergence@refine",
-                        "Charge Conv.",
-                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_CONV')",
-                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_CONV', html.GetValue('~name~'))",
-                        width_label=11, width_textbox=8) + \
-           labeled_spin("NoSpherA2_ORCA_HF_Layers@refine",
-                        "HF Layers",
-                        "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_HF_LAYERS')",
-                        "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_HF_LAYERS', html.GetValue('~name~'))",
-                        width_label=11, width_spinbox=8, min_value=0, max_value=100)
-      ion = nsa2_get_param('ORCA_CRYSTAL_QMMM_TYPE')
-      if ion == "Ion":
-        t += labeled_spin("NoSpherA2_ORCA_ECP_Layers@refine",
-                          "ECP Layers",
-                          "spy.nsa2_get_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS')",
-                          "spy.nsa2_set_param('ORCA_CRYSTAL_QMMM_ECP_LAYERS', html.GetValue('~name~'))",
-                          width_label=11, width_spinbox=8, min_value=0, max_value=100)
-    if brok_sym:
-      t += end_line() + begin_new_line() + labeled_text("NoSpherA2_ORCA_brok_sym_atoms@refine",
-                            "Broken Sym. Atoms",
-                            "spy.nsa2_get_param('ORCA_Broken_sym_atoms')",
-                            "spy.nsa2_set_param('ORCA_Broken_sym_atoms', html.GetValue('~name~'))",
-                            width_label=20, width_textbox=10) + \
-           labeled_text("NoSpherA2_ORCA_brok_sym_spins@refine",
-                            "Broken Sym. Spin",
-                            "spy.nsa2_get_param('ORCA_Broken_sym_spin')",
-                            "spy.nsa2_set_param('ORCA_Broken_sym_spin', html.GetValue('~name~'))",
-                            width_label=20, width_textbox=10)
-    t += end_line()
+  disordered = is_disordered()
+  t = quick_buttons_row()
+  t += wavefunction_row([[basis_cell(), method_cell(), relativistics_cell()], adv_basis_cells()])
+  molecule = [[charge_cell(), multiplicity_cell()]]
+  if new_ORCA and not disordered and nsa2_get_param('user.NoSpherA2.show_broken_sym'):
+    molecule.append([_param_check("NoSpherA2_ORCA_use_brok_sym@refine", "Broken Symmetry", "ORCA_use_broken_sym", update=True, span=2)])
+    if nsa2_get_param('ORCA_use_broken_sym'):
+      molecule.append([g_field("Atoms", _param_text("NoSpherA2_ORCA_brok_sym_atoms@refine", "ORCA_Broken_sym_atoms")),
+                       g_field("Spin", _param_text("NoSpherA2_ORCA_brok_sym_spins@refine", "ORCA_Broken_sym_spin"))])
+  t += molecule_resources_row(molecule)
+  t += orca_scf_row(damping=new_ORCA and not disordered)
+  t += orca_environment_row(embedding=new_ORCA and not disordered)
+  t += refinement_row(ptb=ptb)
+  t += disorder_groups_text()
   t += partitioning_scheme_line()
   return t
 
 def make_tonto_GUI():
-  # Basis Set, Method, CPUs, Memory
-  t = begin_new_line() + \
-        basis_combo() + \
-        method_combo() + \
-        cpu_combo() + \
-        memory_text() + \
-        end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        relativistics_checkbox() + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  t += begin_new_line("NoSpherA2 Extras") + \
-        labeled_text("NoSpherA2_tonto_cluster_radius@refine",
-                      "Cluster r",
-                      "spy.nsa2_get_param('cluster_radius')",
-                      "spy.nsa2_set_param('cluster_radius', html.GetValue('~name~'))",
-                      width_label=13, width_textbox=6) + \
-        labeled_combo("NoSpherA2_tonto_DIIS@refine",
-                      "DIIS Conv.",
-                      "'0.1;0.01;0.001;0.0001;0.00001'",
-                      "spy.nsa2_get_param('DIIS')",
-                      "spy.nsa2_set_param('DIIS', html.GetValue('~name~'))",
-                      width_label=16, width_combo=20) + \
-        labeled_checkbox("NoSpherA2_tonto_cluster_grow@refine",
-                         "Complete Cluster",
-                         "spy.nsa2_get_param('cluster_grow')",
-                         "spy.nsa2_set_param('cluster_grow', True)",
-                         "spy.nsa2_set_param('cluster_grow', False)",
-                         width=5) + end_line()
-  t += partitioning_scheme_line()
-  return t
-  
-def make_frag_HAR_GUI():
-  # Basis Set, Method, CPUs, Memory
-  t = begin_new_line() + make_quick_button_gui() + end_line()
-  t += begin_new_line() + \
-        basis_combo() + \
-        labeled_checkbox("NoSpherA2_baseset_adv@refine",
-                         "Adv.",
-                         "spy.nsa2_get_param('basis_adv')",
-                         "spy.nsa2_set_param('basis_adv', True) >> html.Update()",
-                         "spy.nsa2_set_param('basis_adv', False) >> html.Update()",
-                         width=10) + \
-        method_combo() + \
-        end_line() + \
-        begin_new_line("NoSpherA2_Options_1", "2") + \
-        cpu_combo() + \
-        memory_text() + \
-        end_line()
-  adv = OV.GetParam('user.NoSpherA2.basis_adv')
-  if adv == True:
-    t += begin_new_line() + \
-          labeled_text("NoSpherA2_Basis_Set_Extra@refine",
-                       "Adv. Basis Set",
-                       "spy.nsa2_get_param('basis_adv_string')",
-                       "spy.nsa2_set_param('basis_adv_string', html.GetValue('~name~'))",
-                       width_label=15, width_textbox=50) + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, Relativistics, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        relativistics_checkbox() + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  # ORCA specific options: SCF Thresh., SCF Strategy, Solvation
-  t += begin_new_line("NoSpherA2 Extras") + \
-        labeled_combo("NoSpherA2_ORCA_SCF_Conv@refine",
-                      "SCF Thresh.",
-                      "'NoSpherA2SCF;SloppySCF;LooseSCF;NormalSCF;StrongSCF;TightSCF;VeryTightSCF;ExtremeSCF'",
-                      "spy.nsa2_get_param(\'ORCA_SCF_Conv\')",
-                      "spy.nsa2_set_param(\'ORCA_SCF_Conv\', html.GetValue(\'~name~\'))",
-                      width_label=17, width_combo=20) + \
-        labeled_combo("NoSpherA2_ORCA_SCF_Strategy@refine",
-                      "SCF Strategy",
-                      "'EasyConv;NormalConv;SlowConv;VerySlowConv'",
-                      "spy.nsa2_get_param(\'ORCA_SCF_Strategy\')",
-                      "spy.nsa2_set_param(\'ORCA_SCF_Strategy\', html.GetValue(\'~name~\'))",
-                      width_label=17, width_combo=20) + \
-        labeled_combo("NoSpherA2_ORCA_Solvation@refine",
-                      "Solvation",
-                      "'Vacuum;Water;Acetone;Acetonitrile;Ammonia;Benzene;CCl4;CH2CL2;Chloroform;Cyclohexane;DMF;DMSO;Ethanol;Hexane;Methanol;Octanol;Pyridine;THF;Toluene;Custom'",
-                      "spy.nsa2_get_param(\'ORCA_Solvation\')",
-                      "spy.nsa2_set_param(\'ORCA_Solvation\', html.GetValue(\'~name~\'))",
-                      width_label=13, width_combo=30) + \
-        end_line()
-  custom_solvation = nsa2_get_param('ORCA_Solvation')
-  if custom_solvation == "Custom":
-    t += begin_new_line() + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_epsilon@refine",
-                       "Epsilon",
-                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_epsilon')",
-                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_epsilon', html.GetValue('~name~'))",
-                       width_label=15, width_textbox=20) + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_refractive@refine",
-                       "Refractive Index",
-                       "spy.nsa2_get_param('ORCA_Solvation_CPCM_refrac')",
-                       "spy.nsa2_set_param('ORCA_Solvation_CPCM_refrac', html.GetValue('~name~'))",
-                       width_label=15, width_textbox=20) + \
-          labeled_text("NoSpherA2_ORCA_Solvation_Custom_probe@refine",
-                      "Probe Radius (A)",
-                      "spy.nsa2_get_param('ORCA_Solvation_CPCM_rsolv')",
-                      "spy.nsa2_set_param('ORCA_Solvation_CPCM_rsolv', html.GetValue('~name~'))",
-                      width_label=15, width_textbox=20) + \
-          end_line()
-  t += begin_new_line() + \
-        labeled_text("NoSpherA2_frag_HAR_radius_tol@refine",
-                      "Radius Tol.",
-                      "spy.nsa2_get_param('frag_HAR.radius_tolerance')",
-                      "spy.nsa2_set_param('frag_HAR.radius_tolerance', html.GetValue('~name~'))",
-                      width_label=14, width_textbox=9) + \
-        labeled_checkbox("NoSpherA2_frag_HAR_test@refine",
-                          "Test Fragments",
-                          "spy.nsa2_get_param('frag_HAR.H_test')",
-                          "spy.nsa2_set_param('frag_HAR.H_test', True)",
-                          "spy.nsa2_set_param('frag_HAR.H_test', False)",
-                          width=21) + \
-        labeled_checkbox("NoSpherA2_frag_HAR_H_Box_Ex@refine",
-                          "H-bond",
-                          "spy.nsa2_get_param('frag_HAR.H_box_ex')",
-                          "spy.nsa2_set_param('frag_HAR.H_box_ex', True)",
-                          "spy.nsa2_set_param('frag_HAR.H_box_ex', False)",
-                          width=12) + \
-        labeled_checkbox("NoSpherA2_frag_HAR_min_H_bond@refine",
-                          "Min. H-bond",
-                          "spy.nsa2_get_param('frag_HAR.min_H_bond')",
-                          "spy.nsa2_set_param('frag_HAR.min_H_bond', True)",
-                          "spy.nsa2_set_param('frag_HAR.min_H_bond', False)",
-                          width=17) + \
-        end_line()
+  t = wavefunction_row([[basis_cell(), method_cell(), relativistics_cell()]])
+  t += molecule_resources_row()
+  t += grid_row([g_group("SCF Convergence", [[g_field("DIIS", _param_combo("NoSpherA2_tonto_DIIS@refine", "'0.1;0.01;0.001;0.0001;0.00001'", "DIIS"))]], span=1),
+                 g_group("Crystal Environment", [[g_field("Cluster r", _param_text("NoSpherA2_tonto_cluster_radius@refine", "cluster_radius")),
+                                                  _param_check("NoSpherA2_tonto_cluster_grow@refine", "Complete Cluster", "cluster_grow", span=2)]], span=3)],
+                "NoSpherA2_Environment")
+  t += refinement_row()
   t += partitioning_scheme_line()
   return t
 
-def make_pySCF_GUI():
-  # Method, CPUs, Memory
-  t = begin_new_line() + basis_combo() + method_combo() + cpu_combo() + memory_text() + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line("NoSpherA2_Options_2") + \
-        charge_spin() + \
-        multiplicity_spin() + \
-        iterative_checkbox() + \
-        end_line()
-  full_har = nsa2_get_param('full_HAR')
-  if full_har == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line()
-  # Integration Accuracy, H Aniso, No Afix
-  t += begin_new_line("NoSpherA2_Options_3") + \
-        integration_accuracy_combo() + \
-        h_aniso_checkbox() + \
-        no_afix_checkbox() + \
-        end_line()
-  t +=  pyscf_damping()+ \
-        pyscf_solvation() + \
-        WSL_distro() + end_line()
-  if is_disordered():
-    t += disorder_groups_text()
+def make_frag_HAR_GUI():
+  t = quick_buttons_row()
+  t += wavefunction_row([[basis_cell(), method_cell(), relativistics_cell()],
+                         adv_basis_cells(update=False, adv=OV.GetParam('user.NoSpherA2.basis_adv') == True)])
+  t += molecule_resources_row()
+  t += orca_scf_row()
+  t += orca_environment_row()
+  t += grid_row([g_group("Fragments", [[
+                   g_field("Rad. tol.", _param_text("NoSpherA2_frag_HAR_radius_tol@refine", "frag_HAR.radius_tolerance")),
+                   _param_check("NoSpherA2_frag_HAR_test@refine", "Test Frags.", "frag_HAR.H_test"),
+                   _param_check("NoSpherA2_frag_HAR_H_Box_Ex@refine", "H-bond", "frag_HAR.H_box_ex"),
+                   _param_check("NoSpherA2_frag_HAR_min_H_bond@refine", "Min. H-bond", "frag_HAR.min_H_bond")]])],
+                "NoSpherA2_Fragments")
+  t += refinement_row()
+  t += partitioning_scheme_line()
+  return t
+
+def make_pySCF_GUI(ptb=False):
+  t = wavefunction_row([[basis_cell(), method_cell()]])
+  t += molecule_resources_row(resource_rows=[[cpu_cell(), memory_cell()], [wsl_distro_cell()]])
+  t += grid_row([g_group("SCF Convergence", [[g_field("Damping", _param_combo("NoSpherA2_Hybrid_pySCF_Damping@refine", "'0.6;0.7;0.85;0.93'", "pySCF_Damping"))]], span=1),
+                 g_group("Crystal Environment", [[g_field("Solvent", _param_combo("NoSpherA2_ORCA_Solvation@refine", PYSCF_SOLVENTS, "ORCA_Solvation"), span=3)]], span=3)],
+                "NoSpherA2_Environment")
+  t += refinement_row(ptb=ptb)
+  t += disorder_groups_text()
   t += partitioning_scheme_line()
   return t
 
 def make_discambMATT_GUI():
-  t = begin_new_line() + \
-    iterative_checkbox()
-  iterative = nsa2_get_param('full_HAR')
-  if iterative == False:
-    t += update_tsc_button()
-  else:
-    t += cycles_spin()
-  t += end_line() + begin_new_line("NoSpherA2_Options_3") + h_aniso_checkbox() + no_afix_checkbox() + end_line()
-  if is_disordered():
-    t += disorder_groups_text()
-  return t
+  return refinement_row() + disorder_groups_text()
 
 def make_xHARPY_GUI():
-  # Method, CPUs, Memory
-  t = begin_new_line() + method_combo() + \
-    labeled_text("NoSpherA2_xHARPY_grid_spacing",
-                 "Grid spacing (Ang)",
-                 "spy.nsa2_get_param('xharpy.grid_spacing')",
-                 "spy.nsa2_set_param('xharpy.grid_spacing', html.GetValue('~name~'))",
-                 width_label=15, width_textbox=12) + \
-    cpu_combo() + memory_text() + end_line()
-  # Charge, Multiplicity, iterative and Update/Max cycles
-  t += begin_new_line() + labeled_text("NoSpherA2_xHARPY_k_points1",
-                                       "K-point grid",
-                                        "spy.nsa2_get_param('xharpy.k_points1')",
-                                        "spy.nsa2_set_param('xharpy.k_points1', html.GetValue('~name~'))",
-                                        width_label=15, width_textbox=12) + \
-    standalone_text("NoSpherA2_xHARPY_k_points2",
-             "spy.nsa2_get_param('xharpy.k_points2')",
-             "spy.nsa2_set_param('xharpy.k_points2', html.GetValue('~name~'))", 12) + \
-    standalone_text("NoSpherA2_xHARPY_k_points3",
-             "spy.nsa2_get_param('xharpy.k_points3')",
-             "spy.nsa2_set_param('xharpy.k_points3', html.GetValue('~name~'))", 12) + \
-    labeled_checkbox("NoSpherA2_xHARPY_center_gamma",
-                     "Center Gamma",
-                     "spy.nsa2_get_param('xharpy.k_points_centre_gamma')",
-                     "spy.nsa2_set_param('xharpy.k_points_centre_gamma', True)",
-                     "spy.nsa2_set_param('xharpy.k_points_centre_gamma', False)",
-                      width=10) + \
-    end_line()
-  t += begin_new_line() + WSL_distro() + update_tsc_button() + end_line()
+  k_boxes = "".join(
+    "<td width='33%'>" + textbox("NoSpherA2_xHARPY_k_points%d" % k, "spy.nsa2_get_param('xharpy.k_points%d')" % k,
+                                 "spy.nsa2_set_param('xharpy.k_points%d', html.GetValue('~name~'))" % k) + "</td>"
+    for k in (1, 2, 3))
+  k_table = f"<table border='0' width='100%' cellpadding='0' cellspacing='1'><tr>{k_boxes}</tr></table>"
+  t = wavefunction_row([[method_cell(),
+                         g_field("Spacing", textbox("NoSpherA2_xHARPY_grid_spacing", "spy.nsa2_get_param('xharpy.grid_spacing')",
+                                                    "spy.nsa2_set_param('xharpy.grid_spacing', html.GetValue('~name~'))"))],
+                        [g_field("k-points", k_table, span=2),
+                         g_check("NoSpherA2_xHARPY_center_gamma", "Center Gamma",
+                                 "spy.nsa2_get_param('xharpy.k_points_centre_gamma')",
+                                 "spy.nsa2_set_param('xharpy.k_points_centre_gamma', True)",
+                                 "spy.nsa2_set_param('xharpy.k_points_centre_gamma', False)", span=2)]],
+                       title="Periodic Wavefunction", integration=False)
+  t += grid_row([g_group("Resources", [[wsl_distro_cell(), cpu_cell(), memory_cell()]])], "NoSpherA2_Molecule_and_Resources")
+  t += refinement_row(iterative=False, model=False)
   return t
+
 
 def make_CE_GUI():
   if OV.GetParam('user.NoSpherA2.show_CE') != True:

@@ -54,7 +54,6 @@ LEGACY_HELP_FILES = (
   'ACEDd/ACED.md',
   'ACED7d/ACED.md',
   'FragmentDB/fragmentdb.md',
-  'NoSpherA2/NoSpherA2.md',
   'NoSpherA2/harp.md',
   'PluginLib/plugin-DrawPlus/drawplus.md',
   'PluginLib/plugin-SISYPHOS/sisyphos.md',

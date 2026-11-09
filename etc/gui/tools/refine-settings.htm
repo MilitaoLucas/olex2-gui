@@ -156,7 +156,7 @@ $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- ==================================== SOLVENT MASKING INTERFACE BEGIN == -->
-<!-- One row: Use Mask | program | Update Mask | Occ. | solvent r | trunc. (shrink r for Flat).
+<!-- One row: Mask | program | Update Mask | Occ. | solvent r | trunc. (shrink r for Flat).
      Every cell has an explicit width and the labels are kept short, the sum stays
      below 100%: unsized cells once pushed the truncation input off the panel.
      Each <ignore> holds complete cells only and the row is closed exactly once,
@@ -167,7 +167,7 @@ $-
       $+
         html.Snippet("gui/snippets/input-checkbox-td",
         "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
-        "label=Use Mask ",
+        "label=Mask ",
         "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
         "onclick=spy.SetMasking(html.GetState(~name~))>>html.update()",
         "bgcolor=GetVar(HtmlTableFirstcolColour)",

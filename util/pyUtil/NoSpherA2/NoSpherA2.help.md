@@ -15,7 +15,7 @@ The acronym NoSpherA2 stands for Non-Spherical Atoms in Olex2. When this box is 
 * Kleemiss et al., Chem. Sci., 2021, 12, 1675
 &nbsp; URL[https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc05526c,PAPER]
 
-* Landeros-Rivera & Kleemiss, J. Appl. Cryst. 2026, 59, 1467 (crystal embedding, see **Embed.** below)
+* Landeros-Rivera & Kleemiss, J. Appl. Cryst. 2026, 59, 1467 (crystal embedding, see **Embed** in **NoSpherA2 Environment**)
 &nbsp; URL[https://doi.org/10.1107/S160057672600717X,PAPER]
 
 ## Hirshfeld Atom Refinement
@@ -70,19 +70,28 @@ This button is used when working on a structure with NoSpherA2; with these setti
 When all settings are finalized, a final NoSpherA2 job is run by clicking this button. The final job can take a long time, since it is generally run with a large basis set and continues until everything is completely settled.
 
 # NoSpherA2 Options
-All the settings required for the calculation of the .tsc file are found under this tool tab.
+All the settings for calculating the .tsc file are found under this tool tab. They depend on the program chosen as **Source of .tsc**, and are grouped by what they belong to; each row has its own help button:
+
+- **Wavefunction** - the level of theory (basis set, method, relativistics) and, next to it, the **Integration** grid of NoSpherA2.
+- **Molecule** and **Resources** - charge and multiplicity of the calculated molecule; CPUs and memory of the job.
+- **SCF Convergence** - how the wavefunction calculation converges (ORCA).
+- **Crystal Environment** - solvation model or crystal embedding, which mimic the surroundings of the molecule.
+- **HAR** and **Model** - the refinement cycle (one-off or iterative) and the refinement model (H atoms, AFIX).
+- **Disorder** - only for structures with PART instructions.
 
 ## Experimental features
 Some parts of the NoSpherA2 interface are hidden by default and switched on per user. Each has its own flag in the **user.NoSpherA2** scope, set from the console with **spy.SetParam('user.NoSpherA2.&lt;flag&gt;', True)** followed by **html.Update()**, or in your user phil file:
 
 - **show\_OCC** - offers **OCC**, the wavefunction code compiled into NoSpherA2, in the source list.
+- **show\_partitioning** - shows the **Partitioning** row (the partitioning scheme of the density).
+- **show\_broken\_sym** - shows the **Broken Symmetry** switch in the **Molecule** box (ORCA).
 - **show\_CE** - shows the **Energies** row (SALTED interaction energies) in NoSpherA2 Properties.
 - **show\_XCW** - shows the **NoSpherA2 XCW** block for X-ray constrained wavefunction fitting (see below).
 
 The SALTED source is a development feature and appears only in debug mode (**olex2.debug**).
 
-
-# NoSpherA2 Options 1
+# NoSpherA2 Wavefunction
+The level of theory of the wavefunction calculation and the integration grid used to partition its density. Which controls appear depends on the program.
 
 ## Basis
 This specifies a basis set to be used for calculating the theoretical electron density and wavefunction. The basis sets in this drop-down menu are arranged in approximte order of size from small (top) to large (bottom). Smaller basis sets will yield rapid but approximate results, whereas calculations with the larger bases will be slower but more accurate. The default basis set is **def2-SVP**. The small basis **STO-3G** is recommended only for test purposes.
@@ -98,73 +107,103 @@ The **x2c-** basis sets are useful, as they are defined up to Rn without any ECP
 ## Method
 The default quantum mechanical method for the calculation of the theoretical wavefunction/electron density is **Hartee-Fock**. The density functional theory method **B3LYP** may be superior in some cases (especially for the treatment of hydrogen atoms), but tends to be unstable in Tonto in some cases. Both can be used in ORCA without such problems.
 
-## CPUs
-This specifies the number of CPUs to use during the wavefunction calculation. It is usually a good idea *not* to use *all* of them -- unless the computer is not used for anything else while it runs NoSpherA2! One CPU is needed for copying files and other such overhead tasks, so make sure one is available for these purposes. Olex2 will be locked during the calculation to prevent file inconsistencies. Also note: It is not recommended to run NoSpherA2 jobs in a Dropbox folder ... they tend to misbehave.
+## Relativistic
+Use the DKH2 relativistic Hamiltonian (important when heavy elements are present in the structure). This option should only be used with **x2c-** family of basis sets, but for them it is highly recommended.
 
-## Memory
-The maximum memory that NoSpherA2 is allowed to use is entered here. This **must not** exceed the capabilities of the computer. If ORCA is used, the memory needs per core are calculated automatically; this input is the **total** memory used in the NoSpherA2 computations.
+## Adv. Basis (ORCA, fragHAR)
+Ticking this shows the **Elements** field, where a basis set can be given per element instead of one basis for the whole molecule.
 
-# NoSpherA2 Options 2
+## Integration: Grid
+Select the level of accuracy to be used for the integration of electron density (the integration grid of NoSpherA2). This affects the time needed for calculating .tsc files. **Normal** should generally be sufficient. **Max** is mainly for benchmarking and testing purposes; if you have high symmetry or very heavy elements and high resolution data it might improve results. **Low** can be used if the number of electrons after integration is still correct, and will usually suffice for organic molecules. However, always check that the number of electrons is correct in the log files!
+
+## Program specific
+- **Temp./K** (xTB) - the electronic temperature passed to xTB.
+- **Purify** (pTB) - runs pTB with its **-purify** option.
+- **DF Basis** (OCC) - the auxiliary basis for the density fitting.
+- **SALTED Model** (SALTED) - the model directory used to predict the density; the buttons add a model directory to the list or remove the selected one.
+- **Periodic Wavefunction** (XHARPy) - **Spacing** of the real-space grid in &Aring;, the three **k-points** along a, b and c, and whether the k-point grid is **Center Gamma** (centred on the &Gamma; point).
+
+# NoSpherA2 Molecule and Resources
+The **Molecule** box describes the molecule (or ion) whose wavefunction is calculated; the **Resources** box what the calculation may use of the computer.
 
 ## Charge
 The charge on the molecule or ion used in the wavefunction calculation. This **must** be properly assigned.
 
-## Multiplicity
+## Mult.
 The multiplicity (2*S*+1) of the wavefunction, where *S* is the total spin angular momentum quantum number of the configuration. It is important to assign this multiplicity correctly. A closed-shell species, i.e., a molecule or ion with no unpaired electrons, has *S* = 0, for a multiplicity of 1. Most organic molecules in their ground states fall into this category. However, a species with one unpaired electron (*S* = 1/2) will have a multiplicity of 2, a species with two unpaired electrons (*S* = 1/2 + 1/2 = 1) will have a multiplicity of 3, and so forth. It can be seen from the formula that the multiplicity has to be at least 1.
 
-## Iterative
-Check this box to continue full cycles of alternating wavefunction and least squares refinement calculations until final convergence is achieved. Convergence criteria are as defined in the options. This is a time-consuming option! If using ORCA, however, the last calculated wavefunction is used as the initial guess for the next calculation, which saves a lot of time in the consecutive steps.
+## Broken Symmetry (ORCA, experimental)
+Calculates a broken-symmetry wavefunction. **Atoms** lists the atoms whose spins are flipped and **Spin** the spin of the high-spin state. Shown only with **show\_broken\_sym** (see **NoSpherA2 Options**).
 
-## Max Cycles
-This defines a criterion for the NoSpherA2 process to halt if convergence is not achieved. In such cases, it may be necessary to use restraints or constraints, better parameters, resolution cutoffs or other improvements to the model to achieve convergence.
+## CPUs
+This specifies the number of CPUs to use during the wavefunction calculation. It is usually a good idea *not* to use *all* of them -- unless the computer is not used for anything else while it runs NoSpherA2! One CPU is needed for copying files and other such overhead tasks, so make sure one is available for these purposes. Olex2 will be locked during the calculation to prevent file inconsistencies. Also note: It is not recommended to run NoSpherA2 jobs in a Dropbox folder ... they tend to misbehave.
 
-## Update .tsc & .wfn
-Clicking this button will only generate a new **.tsc** and **.wfn** file, without running a least squares refinement. This is useful after a converged model has been found, to get the most up-to-date wavefunction for property plotting or to test things before submitting a more time-consuming calculation.
+## Mem/GB
+The maximum memory (in GB) that NoSpherA2 is allowed to use is entered here. This **must not** exceed the capabilities of the computer. If ORCA is used, the memory needs per core are calculated automatically; this input is the **total** memory used in the NoSpherA2 computations.
 
-# NoSpherA2 Options 3
+## WSL (pySCF, XHARPy)
+The WSL distribution (Windows Subsystem for Linux) in which pySCF or XHARPy is run on Windows.
 
-## Integr. Accuracy
-Select the level of accuracy to be used for the integration of electron density. This affects the time needed for calculating .tsc files. **Normal** should generally be sufficient. **Extreme** is mainly for benchmarking and testing purposes; if you have high symmetry or very heavy elements and high resolution data it might improve results. **Low** can be used if the number of electrons after integration is still correct, and will usually suffice for organic molecules. However, always check that the number of electrons is correct in the log files!
+# NoSpherA2 SCF
+How the self-consistent field (SCF) calculation of the wavefunction converges in ORCA.
 
-## Use Relativistics
-Use the DKH2 relativistic Hamiltonian (important when heavy elements are present in the structure). This option should only be used with **x2c-** family of basis sets, but for them it is highly recommended.
+## Thresh.
+This option sets the convergence criterion for the SCF wavefunction calculation in ORCA. Use **NormalSCF** for default calculations, and **Tight** or **Very Tight** for very precise high-level calculations. **Extreme** is basically the numerical limit of the computer; its use is strongly discouraged, as this convergence criterion is practically unreachable except for tiny systems (<3 atoms).
 
-## H Aniso
-Refine hydrogen atoms anisotropically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
-
-## No AFIX
-Remove any AFIX constraints from the current model. Use with caution, but highly useful for starting from the independent atom model.
-
-## DISP
-Add a DISP instruction to your .ins file based on Sasaki tables of anomalous scattering factors as implemented in Olex2. DISP instructions are needed for correct maps and refinements in case of uncommon X-ray wavelengths (e.g., synchrotron radiation).
-
-## Cluster *r* (For Tonto)
-If Tonto is used for wavefunction calculations a cluster of **explicit charges** calculated in a self-consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius *r* beyond which no charges are included.
-
-## Complete Cluster (For Tonto)
-For refinement of molecular structures, this switch will try to complete molecular fragments for the charges calculation (see **Cluster r** above) based on reasonable interatomic distances. If the structure being refined is a network compound whose molecular boundary cannot be simply defined, i.e., there is no way to grow the structure without having dangling bonds, this procedure will fail when the computer runs out of memory. Therefore, this option is highly recommended for molecular crystals but must be turned off for network compounds.
-
-## DIIS Conv. (For Tonto)
-This option defines the convergence criterion for the wavefunction calculations. A lower value will cause the calculations to finish faster but will also drastically increase the likelihood of generating unreasonable wavefunctions, especially with complicated structures.
-
-## SCF Conv. Thresh. (For ORCA)
-This option sets the convergence criterion for the self-consistent field (SCF) wavefunction calculation in ORCA. Use **NormalSCF** for default calculations, and **Tight** or **Very Tight** for very precise high-level calculations. **Extreme** is basically the numerical limit of the computer; its use is strongly discouraged, as this convergence criterion is practically unreachable except for tiny systems (<3 atoms).
-
-## SCF Conv. Strategy (For ORCA)
+## Strategy
 Selects the mechanism by which the SCF calculation converges to the energy minimum. Refers to the step size used in applying calculated gradients to the wavefunction.
 
-## Dyn. Damp (For ORCA)
-This Option allows ORCA to dynamically change the damping factor between calculation steps. This option can help in tricky cases when the wavefunction does not want to converge normally or might allow to go with an option "one up", that is Easy instead of NormalConv in some cases, sicne the damping factor will "breathe".
+## Damping (ORCA 5 and newer)
+This Option allows ORCA to dynamically change the damping factor between calculation steps. This option can help in tricky cases when the wavefunction does not want to converge normally or might allow to go with an option "one up", that is Easy instead of NormalConv in some cases, since the damping factor will "breathe".
 
-## Embed. (For ORCA 5 and newer)
-**On by default.** The QM molecule is calculated inside its crystal: the symmetry-equivalent molecules within **Embed. rad.** (default 12 &Aring;) are represented by ESP-derived point charges, which are updated self-consistently until they change by less than **Charge Conv.** **HF Layers** adds the nearest shells of neighbours as a HF/3-21G layer (multi-layer embedding). **Mol** is for molecular crystals; use **Ion** for ionic and network structures, where **ECP Layers** puts effective core potentials on the boundary. This approximates bulk effects, e.g. the polarisation in strong hydrogen bonds that otherwise makes X&ndash;H bonds come out too short, at a fraction of the cost of a periodic calculation. It replaces **Solvation**. Disordered structures (PART instructions) are always calculated without embedding. When using it, please cite:
+# NoSpherA2 Environment
+A molecule in a crystal is surrounded by its neighbours, which polarise its electron density. The **Crystal Environment** box chooses how this is mimicked: by a solvent model, by embedding the molecule in point charges of its crystal (ORCA), or by a cluster of charges (Tonto).
+
+## Solvent
+A continuum solvation model (CPCM) around the molecule. **Vacuum** switches it off. With **Custom** (ORCA), give the dielectric constant (**Epsilon**), the refractive index (**Refr. n**) and the probe radius in &Aring; (**Probe r**) of the medium.
+
+## Embed (ORCA 5 and newer)
+**On by default.** The QM molecule is calculated inside its crystal: the symmetry-equivalent molecules within **Radius** (default 12 &Aring;) are represented by ESP-derived point charges, which are updated self-consistently until they change by less than **Conv.** **HF lay.** adds the nearest shells of neighbours as a HF/3-21G layer (multi-layer embedding). **Mol** is for molecular crystals; use **Ion** for ionic and network structures, where **ECP lay.** puts effective core potentials on the boundary. This approximates bulk effects, e.g. the polarisation in strong hydrogen bonds that otherwise makes X&ndash;H bonds come out too short, at a fraction of the cost of a periodic calculation. It replaces **Solvent**. Disordered structures (PART instructions) are always calculated without embedding. When using it, please cite:
 
 Landeros-Rivera, B. & Kleemiss, F. (2026). Application of electrostatic and multi-layer embedding in Hirshfeld atom refinements: a cost-effective approach for approximating bulk effects in crystalline environments. *J. Appl. Cryst.* **59**, 1467&ndash;1477.
 &nbsp; URL[https://doi.org/10.1107/S160057672600717X,PAPER]
 
-# NoSpherA2 Options Grouped Parts
+## Cluster *r* (Tonto)
+If Tonto is used for wavefunction calculations a cluster of **explicit charges** calculated in a self-consistent procedure is used to mimic the crystal field for the wavefunction calculation. This option defines the radius *r* beyond which no charges are included.
 
-## Grouped Parts (for disordered structures with PART instructions)
+## Complete Cluster (Tonto)
+For refinement of molecular structures, this switch will try to complete molecular fragments for the charges calculation (see **Cluster r** above) based on reasonable interatomic distances. If the structure being refined is a network compound whose molecular boundary cannot be simply defined, i.e., there is no way to grow the structure without having dangling bonds, this procedure will fail when the computer runs out of memory. Therefore, this option is highly recommended for molecular crystals but must be turned off for network compounds.
+
+## SCF Convergence: DIIS (Tonto)
+This option defines the convergence criterion for the wavefunction calculations. A lower value will cause the calculations to finish faster but will also drastically increase the likelihood of generating unreasonable wavefunctions, especially with complicated structures.
+
+## SCF Convergence: Damping (pySCF)
+The damping factor of the pySCF SCF iterations; a larger value damps more strongly, which can help a calculation that does not converge.
+
+# NoSpherA2 Refinement
+The **HAR** box sets up the refinement cycle, the **Model** box what is refined.
+
+## Iterative
+Check this box to continue full cycles of alternating wavefunction and least squares refinement calculations until final convergence is achieved. Convergence criteria are as defined in the options. This is a time-consuming option! If using ORCA, however, the last calculated wavefunction is used as the initial guess for the next calculation, which saves a lot of time in the consecutive steps.
+
+## Cycles
+With **Iterative**, this defines a criterion for the NoSpherA2 process to halt if convergence is not achieved. In such cases, it may be necessary to use restraints or constraints, better parameters, resolution cutoffs or other improvements to the model to achieve convergence.
+
+## Update .tsc
+Without **Iterative**, clicking this button will only generate a new **.tsc** and **.wfn** file, without running a least squares refinement. This is useful after a converged model has been found, to get the most up-to-date wavefunction for property plotting or to test things before submitting a more time-consuming calculation.
+
+## pTB pre-refine
+Runs the first refinement cycles (**Cycles**) with the fast pTB method before the selected program takes over, so that the expensive calculation starts from a model that has already moved most of the way. Ticked means pTB runs on the next refinement; once done the box shows **(done)** unticked, and only a new tick repeats it.
+
+## H Aniso
+Refine hydrogen atoms anisotropically. Make sure they are not restricted by AFIX commands to obtain reasonable results.
+
+## No Afix
+Remove any AFIX constraints from the current model. Use with caution, but highly useful for starting from the independent atom model.
+
+# NoSpherA2 Disorder
+
+## Groups (for disordered structures with PART instructions)
 If the structure model contains disorder, it is necessary to specify which disordered atoms form a *group* in the wavefunction calculations. A group in this sense refers to PARTs, that resemble the same functional space. For example, consider disorder resulting from a sodium ion and two other singly charged ions in a certain position in the structure - these form a group. Let's say PARTs 1, 2 and 3 describe the three possibilities of this disorder. These different PARTs do not interact with one another in this molecular structure. Now suppose that at a second position in this structure there is a carboxylate in a disordered state consisting in turn of two PARTs, of which one (PART 4) interacts with these disordered ions, but the second (PART 5) does not.
 <br>
 Note: Groups are specified using the following syntax: 1-4,9,10;5-7;8 would mean Group1=[1,2,3,4,9,10], Group2=[5,6,7], and Group3=[8]).
@@ -184,6 +223,21 @@ In this example, interactions between PARTs 1 and 2 would be unphysical, each PA
 <br>
 <br>
 <font color='red'>**IMPORTANT: Superposition of two atoms with partial occupancy freely refined without assignment to PARTs will lead to SEVERE problems during the wavefunction calculation, as this will involves two overlapping atoms. In such cases, the SCF wavefunction calculation will most probably fail, but in any case, it will NEVER give reasonable results!**</font>
+
+# NoSpherA2 Partitioning
+Experimental, shown with **show\_partitioning** (see **NoSpherA2 Options**). **Scheme** chooses how the molecular density is divided into atoms: **Hirshfeld** is the default of HAR. With **RI-Fit** the density is fitted in an auxiliary basis (**Aux.**), and **Restrain** can restrain the fitted atomic densities to another partitioning, up to multipole order **Max l** (charges only for Nuclear, Mulliken and Sanderson).
+
+# NoSpherA2 Fragments
+Options of fragment HAR (fragHAR), which calculates the wavefunction of the structure in capped fragments. **Rad. tol.** is the tolerance in &Aring; added to the sum of covalent radii when bonded neighbours are searched for the caps. **Test Frags.** tests the fragments that are built, **H-bond** includes hydrogen-bonded neighbours in the caps and **Min. H-bond** keeps only the minimal set of them.
+
+# NoSpherA2 Hybrid
+With **Hybrid**, each PART of a disordered structure gets its own wavefunction calculation; the box of each part chooses its **Program** and the level of theory, charge and multiplicity of that part, as described in **NoSpherA2 Wavefunction** and **NoSpherA2 Molecule and Resources**.
+
+# NoSpherA2 Thakkar
+The Thakkar independent atom model uses spherical atomic densities. **Cations** and **Anions** list the elements to be treated as ions (passed to NoSpherA2 as -Cations and -Anions); **Update Model** writes a new .tsc file with these settings.
+
+# NoSpherA2 Extras
+Additional settings of the selected program. For **ELMOdb**: **Tailor made residues** defines residues that are not in the ELMO database.
 
 # NoSpherA2 Properties
 The utilities in this tool tab are for plotting and visualizing the results of NoSpherA2. A calculated wavefunction must be present in the main work folder for the structure (all calculated .wfn files are stored within the olex2 folder). Select the desired resolution of the grid to be calculated and the properties to be evaluated, then click **Calculate** to start the background generation of grids. When done the calculated maps will become available from the **Plot** drop-down menu. Choose *wire* from the **View** drop-down menu and select the desired map from the **Plot** menu. It may be necessary to drag the **Level** slider to view the map.

@@ -314,8 +314,7 @@ def c_gui_sources(suite):
     for src in sources:
       at = log_size()
       change_tsc_generator(src)
-      # its "html.itemstate h3-NoSpherA2-extras 2 1" toggles the block, so
-      # open it again for the picture
+      # change_tsc_generator leaves the block open; make sure for the picture
       olx.html.ItemState("h3-NoSpherA2-extras", "1")
       OV.UpdateHtml()
       slug = re.sub(r"[^A-Za-z0-9]+", "_", src.strip()).strip("_")

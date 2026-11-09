@@ -21,7 +21,7 @@ from utilities import calculate_number_of_electrons, deal_with_parts, is_disorde
 from utilities import open  # code page independent, see utilities.open
 from utilities import dev_features
 from decors import run_with_bitmap
-from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI, ptb_prerefine_line
+from hybrid_GUI import make_hybrid_GUI, make_discambMATT_GUI, make_OCC_GUI, make_ORCA_GUI, make_xHARPY_GUI, make_pySCF_GUI, make_frag_HAR_GUI, make_ptb_GUI, make_ELMOdb_GUI, make_xtb_GUI, make_SALTED_GUI, make_Thakkar_GUI, make_tonto_GUI, make_wfn_GUI, make_CE_GUI, make_XCW_GUI
 from wsl_conda import WSLAdapter, CondaAdapter
 import Wfn_Job
 import basis_set_api
@@ -89,6 +89,7 @@ class NoSpherA2(PT):
     self.WSLAdapter = None
     self.jobs_dir = os.path.join("olex2","Wfn_job")
     self.history_dir = os.path.join("olex2","NoSpherA2_history")
+    self._archived = []   # (history copy, original) moved by the current _launch
     self._labels_before_naming_mode = None
     self._suspend_name_log_sync = False
     self.xharpy_adapter = None
@@ -652,14 +653,34 @@ export PREFIX_LOCATION="${HOME}/.micromamba" &&"""
     source = str(software())
     t0 = time.time()
     ok = False
+    self._archived = []
     try:
       ok = self._launch()
       return ok
     finally:
+      if not ok:
+        self._restore_archived()
       try:
         calc_log.table_done(source, ok, time.time() - t0)
       except Exception as e:
         print("Calculation log: %s" % e)
+
+  def _restore_archived(self):
+    """A run that failed leaves the structure without the table it refines with:
+    _launch moved it to the history first. Copy back what it moved (the history
+    keeps its copy), unless the run has already written that file anew."""
+    restored = []
+    for src, dst in getattr(self, '_archived', []):
+      if os.path.exists(dst) or not os.path.exists(src):
+        continue
+      try:
+        shutil.copy2(src, dst)
+        restored.append(os.path.basename(dst))
+      except OSError as e:
+        print("NoSpherA2: could not restore %s from the history: %s" % (dst, e))
+    if restored:
+      print("NoSpherA2 failed: restored the previous %s from %s"
+            % (", ".join(restored), os.path.dirname(getattr(self, '_archived')[0][0])))
 
   def _launch(self) -> bool:
     OV.SetVar('NoSpherA2-Error',"None")
@@ -794,7 +815,10 @@ Please select one of the generators from the drop-down menu.""", "O", False)
           os.mkdir(timestamp_dir)
         for file in os.listdir('.'):
           if any(file.endswith(x) for x in backup_endings):
-            shutil.move(os.path.join(olx.FilePath(),file),os.path.join(timestamp_dir,file))
+            dst = os.path.join(timestamp_dir, file)
+            shutil.move(os.path.join(olx.FilePath(),file), dst)
+            # launch() copies it back if this run fails
+            self._archived.append((dst, os.path.join(olx.FilePath(), file)))
 
     parts = OV.ListParts()
     if parts is not None:
@@ -1948,7 +1972,10 @@ For example using 'wsl --install' in a PowerShell prompt.""", "O", False)
       keep_valid_choice('basis_name', NoSpherA2_instance.getBasisListStr(), "def2-SVP")
     if ".tsc" in _input or ".tshb" in _input:
       NoSpherA2_instance.set_tsc_file_with_metadata(_input, record=False)
-    olex.m("html.itemstate h3-NoSpherA2-extras 2 1") # This is a hack to force the update of the GUI without doing all of html
+    # closing and opening rebuilds just this block (not all of html) and leaves
+    # NoSpherA2 Options open, since a new source mostly wants its settings checked
+    OV.SetItemState("h3-NoSpherA2-extras 2")
+    OV.SetItemState("h3-NoSpherA2-extras 1")
     if _input != nsa2_get_param('user.NoSpherA2.discamb_exe') and _input != "Thakkar IAM":
       ne, model = calculate_number_of_electrons()
       mult = int(nsa2_get_param('multiplicity'))
@@ -2086,16 +2113,17 @@ def make_NSA2_GUI(method):
   elif ".gbw" in method or ".fchk" in method or ".wfn" in method or ".molden" in method or ".wfx" in method or ".ffn" in method or ".xtb" in method:
     return make_wfn_GUI()
   # pTB pre-refinement is offered wherever aaff.PTB_FOLLOW_UP can take over from it
-  pre = ptb_prerefine_line() if NoSpherA2_instance.ptb_exe else ""
+  # (its checkbox sits in the HAR box of the Refinement row)
+  ptb = bool(NoSpherA2_instance.ptb_exe)
   if method == "Hybrid":
     from aaff import _hybrid_ptb_parts
-    return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares()) + (pre if _hybrid_ptb_parts() else "")
+    return make_hybrid_GUI(NoSpherA2_instance.getwfn_softwares(), ptb=ptb and bool(_hybrid_ptb_parts()))
   if method == "ORCA 5.0" or method == "ORCA 6.0" or method == "ORCA 6.1" or method == "ORCA":
-    return make_ORCA_GUI(is_orca_new()) + pre
+    return make_ORCA_GUI(is_orca_new(), ptb=ptb)
   elif method == "OCC" and OV.GetParam('user.NoSpherA2.show_OCC') == True:
-    return make_OCC_GUI() + pre
+    return make_OCC_GUI(ptb=ptb)
   elif method == "pySCF":
-    return make_pySCF_GUI() + pre
+    return make_pySCF_GUI(ptb=ptb)
   elif method == "xTB":
     return make_xtb_GUI()
   elif method == "XHARPy":
