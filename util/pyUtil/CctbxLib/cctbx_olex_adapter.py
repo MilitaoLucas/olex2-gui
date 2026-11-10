@@ -820,15 +820,8 @@ class OlexCctbxAdapter(object):
     return self.is_inversion_twin_ex()[0]
 
 def write_fab(f_mask, fab_path=None):
-  import shutil
-  import gui
   if not fab_path:
     fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
-  if os.path.exists(fab_path):
-    ## if there is already a fab file of this name, but it doesn't originate from the current masking program, then get it out of the way and make a backup.
-    prg = OV.GetParam('snum.refinement.recompute_mask_before_refinement_prg', "Olex2")
-    lines = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
-
   with open(fab_path, "w") as f:
     for i,h in enumerate(f_mask.indices()):
       line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)

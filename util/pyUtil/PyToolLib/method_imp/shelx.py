@@ -125,10 +125,14 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
       prg = OV.GetParam("snum.refinement.recompute_mask_before_refinement_prg")
       method = gui.tools.GetMaskInfo.get_masking_method()
-      lines, fab_path, fab_origin = gui.tools.GetMaskInfo.get_and_check_mask_origin()
-      if not lines and not OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
-        print ("The existing solvent mask does not match your masking program")
-        return True
+      fab_path = os.path.splitext(OV.HKLSrc())[0] + ".fab"
+      if not OV.GetParam('snum.refinement.recompute_mask_before_refinement'):
+        ## only an existing .fab that will be reused needs to match the masking program;
+        ## with recompute on it is replaced below, so checking it would only mislead
+        lines, _, _ = gui.tools.GetMaskInfo.get_and_check_mask_origin(fab_path, prg)
+        if not lines:
+          print ("The existing solvent mask does not match your masking program")
+          return True
       f_mask = None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
