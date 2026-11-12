@@ -17,8 +17,8 @@ t:set_pA_or_pB{
   selback
   sel atom bonds -a
   sel atoms -u
-  name collection _p%(part)s
-  sel collection _p%(part)s
+  name collection %(coll)s
+  sel collection %(coll)s
   SetMaterial Sel.* %(mat)s
   sel -a
   sel -u
@@ -29,8 +29,8 @@ t:set_part_colour_cmds{
 sel part %(part)s
 sel atom bonds -a
 sel atoms -u
-name collection _p%(part)s
-sel collection _p%(part)s
+name collection %(coll)s
+sel collection %(coll)s
 SetMaterial Sel.* %(mat)s
 labels -p
 sel -u
@@ -70,13 +70,13 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="%(part)s@%(scope)s"
+  name="%(control)s@%(scope)s"
   value="0|%(part)s"
   width="100%%"
   height="GetVar('HtmlInputHeight')"
   onclick="freeze true>>spy.gui.disorder.set_part_display(%(parts)s,%(part)s) >> freeze false >> focus"
   bgcolor="%(bg_colour)s"
-  fgcolor="GetVar('linkButton.fgcolor')"
+  fgcolor="%(fg_colour)s"
   custom="#custom"
 ></b>
 </font>

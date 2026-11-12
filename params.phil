@@ -1565,6 +1565,9 @@ user
       .type = bool
     colour = True
       .type = bool
+    palette = contrast
+      .type = str
+      .help = PART colours: a palette in gui/disorder/palette.py (contrast, blues, greens, warm, berry, earth)
   }
 
   solution{

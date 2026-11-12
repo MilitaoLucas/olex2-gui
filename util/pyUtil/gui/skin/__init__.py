@@ -90,9 +90,13 @@ def SetMaterials():
   olx.SetMaterial("XGrid.+Surface", OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface", OV.GetParam('gui.xgrid.negative_surface_material'))
  
-  materials = ['_p1', '_p2', '_p3', '_p4', '_p5', '_p5', '_pC', 'dp1']
-  for material in materials:
-    olx.SetMaterial(material, OV.GetParam(f'gui.materials.{material}'))
+  # PART collections, from gui/disorder/palette.py
+  from gui.disorder import palette, part_material
+  for part in range(1, 7):
+    olx.SetMaterial(palette.collection(part), part_material(part))
+  # the common part (gui.disorder.set_pC) is PART -1
+  olx.SetMaterial('_pC', part_material(-1))
+  olx.SetMaterial('dp1', OV.GetParam('gui.materials.dp1'))
 
   olex.m("gl.lm.ClearColor(%s)" % OV.GetParam('gui.skin.clearcolor'))
   olex.m("SetFont Default %s" % OV.GetParam('gui.console_font'))
@@ -101,7 +105,6 @@ def SetMaterials():
   olex.m("lines %s" % OV.GetParam('gui.lines_of_cmd_text'))
 
   OV.SetParam('gui.skin.materials_have_been_set', True)
-  print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
 
 
 def load_user_gui_phil():

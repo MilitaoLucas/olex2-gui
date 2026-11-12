@@ -234,11 +234,68 @@ This is a selection of tools for displaying selected PARTs in the structure. The
 <br>
 <br>
 
-If the **Sel** box is ticked when **0|1** or **0|2** is clicked, atoms in PART 1 or PART 2, respectively, will be selected in the display. If the **Unique** box is ticked, a list of unique atoms in the structure will be printed in the display output. Atoms will be marked with the parameter selected in the drop-down menu: **Occupancy** will indicate the occupancy of any partially occupied sites as a decimal number, **Chem Occ.** will display the chemical occupancy of each partially occupied site, **Link-Code** will display the link code for atoms whose occupancies are linked in ShelX format, **PART No** will show any non-zero PART numbers of atoms, and **Labels** will display atom labels.
+There is one **0&#124;n** button for every PART in the structure: the positive PARTs first, then the negative ones (special positions), e.g. **0&#124;1**, **0&#124;2**, **0&#124;-1**. Clicking one shows PART 0 together with that PART.
+<br>
+<br>
+
+If the **Sel** box is ticked when a **0&#124;n** button is clicked, the atoms in that PART will be selected in the display. If **Col** is ticked, every PART is drawn in its own colour, and the buttons show the same colours (see **PART Colours**). If the **Unique** box is ticked, a list of unique atoms in the structure will be printed in the display output. Atoms will be marked with the parameter selected in the drop-down menu: **Occupancy** will indicate the occupancy of any partially occupied sites as a decimal number, **Chem Occ.** will display the chemical occupancy of each partially occupied site, **Link-Code** will display the link code for atoms whose occupancies are linked in ShelX format, **PART No** will show any non-zero PART numbers of atoms, and **Labels** will display atom labels.
 <br>
 <br>
 
 The use of the **UP** arrow key to repeat recently issued commands is particularly useful here!
+<br>
+<br>
+
+If the structure uses more PARTs than it needs (e.g. 1/2, 3/4, 5/6 for disorders that never touch), the **Sanitise** button next to the free variables can renumber them; see the help for the free variables row.
+
+## PART Colours
+With **Col** ticked, each PART gets its own colour, in the 3D view and on its **0&#124;n** button. Every PART number has a colour, including PARTs above 6 and negative PARTs. The colours come from a *palette*; the choice is kept between sessions. Click one to define the colour palette:
+
+| `spy.part_palette contrast` | **Contrast** (the default): every pair of PARTs in a different colour family: 1/2 cerulean and amber, 3/4 jade and raspberry, 5/6 violet and teal, 7/8 terracotta and pistachio; negative PARTs in darker, quieter colours (plum, olive, forest, orchid). Best when there are many PARTs. |
+
+| `spy.part_palette blues` | **Blues**, tone in tone: each pair is one blue, dark and light; the next pair a neighbouring blue (sky, indigo, teal). |
+
+| `spy.part_palette greens` | **Greens**, tone in tone: jade, moss, mint, olive. |
+
+| `spy.part_palette warm` | **Warm**, tone in tone: terracotta, amber, coral, ochre. |
+
+| `spy.part_palette berry` | **Berry**, tone in tone: raspberry, plum, rose, violet. |
+
+| `spy.part_palette earth` | **Earth**, tone in tone and quiet: sand, sage, clay, olive. Good for figures that will be printed. |
+<br>
+<br>
+
+All palettes follow the same rules:
+- The two PARTs of a pair (1/2, 3/4, ...) differ in lightness as well as in colour, so they can also be told apart in grey print and by colour-blind viewers.
+- No PART looks like the atoms around it: carbon grey, hydrogen white, nitrogen blue, oxygen red.
+- A negative PART never looks like the positive PART of the same number.
+<br>
+<br>
+
+The tone-in-tone palettes are calm and look good in figures, but their pairs are deliberately alike, so they suit structures with one or two pairs of PARTs. With more PARTs, use **Contrast**.
+
+
+# Free Variables
+This row lists the free variables of the model (**FVAR** in ShelX): **2:** is the second free variable, and so on (the first is the overall scale factor). A free variable usually ties the occupancies of the two PARTs of a disorder together, so that they add up to 1: atoms in one PART refer to it as '21' (occupancy = FV 2), atoms in the other as '-21' (occupancy = 1 - FV 2).
+
+## Sanitise
+A **Sanitise** button appears when the model can be tidied: when free variables have the same value, when one is the complement of another (e.g. 0.8 and 0.2: only the order of the PARTs differs), or when PARTs other than 1/2 are in use. The current model is first written to the file and kept as a backup in the structure's **olex2** folder (*name*_before_sanitise_1.res, then _2 ...), then two windows follow.
+<br>
+<br>
+
+**Free variables.** Variables that agree within 0.03 are shown as a group, each with its value and where it is used (residue, PARTs, number of atoms). Tick the ones that should become one variable; the lowest ticked number is kept, and a complement swaps the sign of its references ('81' becomes '-21'). Variables used by no atom are removed, and the rest renumbered. To merge a group as two separate pairs, tick one pair, then press **Sanitise** again for the other.
+<br>
+<br>
+
+Similar values do not prove that two disorders are linked: merging says that they move together, which R1 cannot tell. Merge only where it makes chemical sense, e.g. untick variables that belong to different molecules if those disorders are independent.
+<br>
+<br>
+
+**PARTs.** Every disorder pair is offered PART 1/2 (the PART with the positive reference becomes 1). Two pairs can only share PART numbers if their atoms would not bond to each other, since atoms bond within the same PART; where they would, the pair keeps or gets the next free numbers, 3/4, and the window says why. Untick any pair to leave it as it is. **Leave PARTs** keeps the free variable changes without renumbering.
+<br>
+<br>
+
+Left alone: PART 0, negative PARTs, PARTs with fixed occupancies, PARTs named in *BIND*, and free variables used outside occupancies (in coordinates, U values, *DFIX*, *SUMP* ...). After **Sanitise**, refine.
 
 
 # Fit and Split Group

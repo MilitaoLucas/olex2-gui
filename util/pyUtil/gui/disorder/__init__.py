@@ -10,6 +10,8 @@ Public API (registered with Olex2 as spy.gui.disorder.*)
 ---------------------------------------------------------
     get_existing_fvar_dropdown_items()
     set_part_colour([part])
+    set_palette(name)
+    part_material(part)
     set_pC()
     set_pA_or_pB(part)
     set_mode_fit()
@@ -30,6 +32,7 @@ Back-compat registrations under spy.gui.*
 
 from __future__ import annotations
 from ._core import _parse_atom_table
+from . import palette
 
 
 # All GUI templating goes through the one shared mechanism in
@@ -115,6 +118,53 @@ def _get_controls() -> tuple[str, str, str]:
   return val_parts, val_fvars, val_restraints
 
 
+def _use_palette() -> None:
+  """Follow user.parts.palette, which the user may have changed."""
+  from olexFunctions import OV
+  palette.use(OV.GetParam('user.parts.palette', 'contrast'))
+
+
+def part_material(part) -> str:
+  """The Olex2 material of a PART, from the palette."""
+  _use_palette()
+  return palette.material(int(part))
+
+
+def part_button_colours(part) -> tuple[str, str]:
+  """(background, text) of a PART's button."""
+  _use_palette()
+  part = int(part)
+  return palette.html(part), palette.text_colour(part)
+
+
+def set_palette(name: str = '') -> None:
+  """spy.gui.disorder.set_palette(name): colour the PARTs with another palette
+  (contrast, blues, greens, warm, berry, earth); kept in user.parts.palette."""
+  from olexFunctions import OV
+  import olex
+  name = str(name).strip().lower()
+  if name not in palette.PALETTES:
+    print("Palettes: %s" % ', '.join(
+      '%s (%s)' % (n, palette.DESCRIPTIONS[n]) for n in palette.PALETTES))
+    return
+  OV.SetParam('user.parts.palette', name)
+  olex.m('spy.SaveUserParams()')
+  print("PART palette: %s" % name)
+  if OV.GetParam('user.parts.colour') and OV.ListParts():
+    set_part_colour()
+  OV.UpdateHtml()
+
+
+def part_palette(name: str = '') -> None:
+  """Macro 'spy.part_palette <name>': set_palette for the help buttons."""
+  set_palette(name)
+
+
+def _part_dict(part) -> dict:
+  part = int(part)
+  return {'part': part, 'coll': palette.collection(part), 'mat': part_material(part)}
+
+
 def set_part_colour(part=None) -> None:
   """
     Set colours for disorder parts.
@@ -128,17 +178,15 @@ def set_part_colour(part=None) -> None:
     return
   try:
     import olex
-    if not part:
+    if part in (None, ''):
       olex.m('sp')
-      parts = OV.ListParts()
+      parts = OV.ListParts() or ()
       olex.m('freeze true')
-      for p in parts:
-        d = {'part': p, 'mat': OV.GetParam(f'gui.materials._p{p}')}
-        OV.runCommands(cmds=(get_template('set_part_colour_cmds') % d).split('\n'))
+      for p in palette.order(parts):
+        OV.runCommands(cmds=(get_template('set_part_colour_cmds') % _part_dict(p)).split('\n'))
       olex.m('freeze false')
     else:
-      d = {'part': part, 'mat': OV.GetParam(f'gui.materials._p{part}')}
-      OV.runCommands(cmds=(get_template('set_part_colour_cmds') % d).split('\n'))
+      OV.runCommands(cmds=(get_template('set_part_colour_cmds') % _part_dict(part)).split('\n'))
   except Exception as e:
     print(f"[disorder] set_part_colour failed: {e}")
 
@@ -181,8 +229,7 @@ def set_pA_or_pB(part: str) -> None:
       p = val_parts.split('/')[idx].strip()
     else:
       p = '1' if part == 'A' else '2'
-    d['part'] = p
-    d['mat']  = OV.GetParam(f'gui.materials._p{p}')
+    d.update(_part_dict(p))
 
         # FVAR assignment
     if val_fvars != 'auto':
@@ -458,25 +505,23 @@ def make_disorder_quicktools(scope: str = 'main',
     parts = set(olexex.OlexRefinementModel().disorder_parts())
     parts_display = ''
 
-    for item in sorted(parts):
+    for item in palette.order(parts):
       if item == 0:
         continue
-      bg_colour = None
       if OV.GetParam('user.parts.colour'):
-        try:
-          mat = OV.GetParam(f'gui.materials._p{item}')
-          bg_colour = get_html_colour_from_material(mat)
-        except Exception:
-          pass
-      if not bg_colour:
+        bg_colour, fg_colour = part_button_colours(item)
+      else:
         bg_colour = OV.GetVar('linkButton.bgcolor')
+        fg_colour = OV.GetVar('linkButton.fgcolor')
 
       d = {
         'part':         item,
         'parts':        item,
+        'control':      palette.control(item),
         'scope':        scope,
         'show_options': show_options,
         'bg_colour':    bg_colour,
+        'fg_colour':    fg_colour,
       }
       parts_display += get_template('part_0_and_n') % d
 
@@ -519,6 +564,10 @@ try:
     # Modelling
   OV.registerFunction(get_existing_fvar_dropdown_items, False, 'gui.disorder')
   OV.registerFunction(set_part_colour,                  False, 'gui.disorder')
+  OV.registerFunction(part_material,                    False, 'gui.disorder')
+  OV.registerFunction(set_palette,                      False, 'gui.disorder')
+    # also as the macro 'spy.part_palette blues': help buttons cannot hold '()'
+  OV.registerMacro(part_palette, '')
   OV.registerFunction(set_pC,                           False, 'gui.disorder')
   OV.registerFunction(set_pA_or_pB,                     False, 'gui.disorder')
   OV.registerFunction(set_mode_fit,                     False, 'gui.disorder')

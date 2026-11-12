@@ -195,56 +195,148 @@ def mangle_fdb_data(tabledata):
     new_l.append(l[0:-1] + [_[0]] + [" ".join(_[1:])])
   return new_l
 
+def _fvar_values():
+  """{SHELXL number: value} of the free variables; olx counts the scale as 0."""
+  values = {}
+  i = 1
+  while True:
+    v = OV.GetFVar(i)
+    if v is None:
+      return values
+    values[i + 1] = v
+    i += 1
+
+
+FVAR_POP = 'sanitise-fvars'
+FVAR_PAGE = 'sanitise-fvars.htm'
+_dialog = {'ticked': None, 'names': ()}
+
+
+def sanitise_FVARs_close(go):
+  """The buttons of the dialogs: note the ticks while the controls still exist."""
+  _dialog['ticked'] = None
+  if str(go).lower() == 'true':
+    _dialog['ticked'] = set(
+      n for n in _dialog['names']
+      if str(OV.GetControlState('%s.%s' % (FVAR_POP, n))).lower() == 'true')
+  olx.html.EndModal(FVAR_POP, 1)
+
+OV.registerFunction(sanitise_FVARs_close, False, "gui")
+
+
+def _ask(title, html, names, height):
+  """Show a dialog; the names of the ticked controls, or None if it was declined."""
+  _dialog.update(ticked=None, names=names)
+  OV.write_to_olex(FVAR_PAGE, html)
+  w, h = 720, min(800, height)
+  x, y = gui.GetBoxPosition(w, h)
+  olx.Popup(FVAR_POP, FVAR_PAGE, s=True, b='tc', t=title, w=w, h=h, x=x, y=y)
+  OV.ShowModal(FVAR_POP)
+  return _dialog['ticked']
+
+
+def _ask_which_fvars(text):
+  """The free variable dialog; the numbers ticked, or None if cancelled."""
+  from . import fvar_sanitise as fs
+  from gui.db import form, style
+  found, unused, _ = fs.choices(text)
+  numbers = [n for keep, others in found for n in [keep] + [o for o, _ in others]]
+  names = dict((fs.tick_name(n), n) for n in numbers)
+  ticked = _ask('Sanitise free variables', fs.page(text, form, style.current()), list(names),
+                300 + 34 * len(numbers) + 60 * len(found) + (70 if unused else 0))
+  return None if ticked is None else set(names[t] for t in ticked)
+
+
+def _ask_which_parts(text, plan):
+  """The PART dialog; the unit keys to leave alone, or None if declined."""
+  from . import part_sanitise as ps
+  from gui.db import form, style
+  rows = ps.changing(plan)
+  names = dict((ps.tick_name(r.unit), ps.key(r.unit)) for r in rows)
+  ticked = _ask('Sanitise PARTs', ps.page(text, form, style.current()), list(names),
+                260 + 34 * len(rows))
+  return None if ticked is None else set(k for t, k in names.items() if t not in ticked)
+
+
+def _fvar_backup_name():
+  """A new file in the structure's olex2 folder: a second pass must not replace the first."""
+  folder = os.path.join(olx.FilePath(), 'olex2')
+  os.makedirs(folder, exist_ok=True)
+  n = 1
+  while True:
+    name = os.path.join(folder, '%s_before_sanitise_%d.%s' % (olx.FileName(), n, olx.FileExt()))
+    if not os.path.exists(name):
+      return name
+    n += 1
+
+
 def sanitise_FVARs():
-  ## These templates are in util/pyUtil/gui/templates/gui_templates.txt
-  import gui
-  get_template = gui.tools.TemplateProvider.get_template
-  fvars = []
-  try:
-    for i in range(1, 20):
-      fvars.append((i, olx.xf.rm.FVar(i)))
-  except:
-    pass
-  if fvars:
-    print(fvars)
-
-    from itertools import combinations
-
-  #data = [
-      #(1, '0.40938'),
-      #(2, '0.99331'),
-      #(3, '0.39198'),
-      #(4, '0.85966'),
-      #(5, '0.19862'),
-      #(6, '0.19863'),
-      #(7, '0.12247'),
-      #(8, '0.07617')
-  #]
-
-  data = fvars
-  tol = 0.03
-  
-  pairs = []
-  
-  for (id1, v1), (id2, v2) in combinations(data, 2):
-    v1 = float(v1)
-    v2 = float(v2)
-  
-    if abs(v1 - v2) <= tol:
-      pairs.append((id1, id2, "same"))
-      d = {"id1":id1 + 1, "id2":id2 + 1}
-      cmds = get_template('sanitise_FVARs', force=debug) % d
-      OV.runCommands(cmds=cmds.split("\n"))
-
-    elif abs(v1 - (1 - v2)) <= tol:
-      pairs.append((id1, id2, "complement"))
-  
-  for p in pairs:
-    print(p)
+  """Merge the free variables, then renumber the PARTs, as the user ticks;
+  see fvar_sanitise and part_sanitise."""
+  import shutil
+  from . import fvar_sanitise, part_sanitise
+  path = olx.FileFull()
+  if olx.FileExt().lower() not in ('res', 'ins'):
+    print("Free variables can only be tidied in a .res or .ins file")
+    return
+  olx.File(path)  # the model as it is now, with any changes since the last refinement
+  with open(path, 'r', encoding='utf-8', errors='surrogateescape', newline='') as f:
+    text = f.read()
+  new, changes = text, []
+  if fvar_sanitise.plan(text) is not None:
+    ticked = _ask_which_fvars(text)
+    if ticked is None:
+      return
+    plan = fvar_sanitise.plan(text, include=ticked)
+    if plan is not None:
+      new = fvar_sanitise.apply(text, plan)
+      changes += fvar_sanitise.describe(plan)
+  # after the merge: a complement swaps which part of a pair is the positive one
+  plan = part_sanitise.plan(new)
+  if plan is not None:
+    leave = _ask_which_parts(new, plan)
+    if leave is not None:
+      plan = part_sanitise.plan(new, exclude=leave)
+      if plan is not None:
+        new = part_sanitise.apply(new, plan)
+        changes += part_sanitise.describe(plan)
+  if new == text:
+    print("Free variables and PARTs are unchanged")
+    return
+  backup = _fvar_backup_name()
+  shutil.copyfile(path, backup)
+  with open(path, 'w', encoding='utf-8', errors='surrogateescape', newline='') as f:
+    f.write(new)
+  OV.AtReap(path)
+  print("\n".join(changes))
+  print("Model changed: please refine. The previous model is in %s" % backup)
 
 OV.registerFunction(sanitise_FVARs, False, "gui")
 
+_parts_cache = {'key': None, 'value': False}
+
+
+def _parts_could_change():
+  """For the button: are PARTs beyond 1/2 in use?  Runs at every panel update, so
+  the answer is kept until the file changes."""
+  from . import part_sanitise
+  try:
+    if olx.FileExt().lower() not in ('res', 'ins'):
+      return False
+    path = olx.FileFull()
+    key = (path, os.path.getmtime(path))
+    if key != _parts_cache['key']:
+      with open(path, 'r', encoding='utf-8', errors='surrogateescape', newline='') as f:
+        _parts_cache.update(key=key, value=part_sanitise.could_change(f.read()))
+    return _parts_cache['value']
+  except (OSError, ValueError, IndexError) as err:
+    print("Could not check the PARTs: %s" % err)
+    if hasattr(sys, '_wing_debugger'):
+      raise
+    return False
+
 def make_fvar_table(*kwds):
+  from . import fvar_sanitise
   fvar_table: str = ""
   header = """
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_NSFF' width='100%'>
@@ -253,15 +345,16 @@ def make_fvar_table(*kwds):
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->"""
   footer = """<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->"""
   filling = """<td width="10%" align="left"><b>FVAR:</b></td><td align="left">| """
-  fvars = []
-  try:
-    for i in range(1, 20):
-      fvars.append(olx.xf.rm.FVar(i))
-  except:
-    pass
-  for i, var in enumerate(fvars):
-    filling += """<b>""" + "%d:</b> %s </b>| " % (i + 2, round(float(var), 3))
-  #filling += "<a href=spy.gui.sanitise_fvars()>Sanitise</a></td>"
+  values = _fvar_values()
+  for number, value in sorted(values.items()):
+    filling += "<b>%d:</b> %s | " % (number, round(value, 3))
+  filling += "</td>"
+  if fvar_sanitise.groups(values) or _parts_could_change():
+    filling += ('<td align="right" width="15%"><input type="button" name="SANITISE_FVARS" '
+                'value="Sanitise" width="70" height="$GetVar(HtmlComboHeight)" '
+                'bgcolor="$GetVar(linkButton.bgcolor)" fgcolor="$GetVar(linkButton.fgcolor)" '
+                'flat="true" hint="Free variables that match, or PARTs that could be 1/2" '
+                'onclick="spy.gui.sanitise_FVARs()"></td>')
   fvar_table = header + filling + footer
   return fvar_table
 
